@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,16 +33,20 @@ import static org.hamcrest.Matchers.*;
 
 /**
  * Unit tests that serve as regression tests for the bugs described in SPR-6888
- * and SPR-9413.
+ * and SPR-9413 and SPR-10906.
  *
  * @author Chris Beams
  * @author Sam Brannen
+ * @author Samuel Teixeira
  */
 public class ClassPathResourceTests {
 
-	private static final String PACKAGE_PATH = "org/springframework/core/io";
+	private static final String PACKAGE_PATH = "/org/springframework/core/io";
+	private static final String PREFIX = "classpath:";
 	private static final String NONEXISTENT_RESOURCE_NAME = "nonexistent.xml";
 	private static final String FQ_RESOURCE_PATH = PACKAGE_PATH + '/' + NONEXISTENT_RESOURCE_NAME;
+	private static final String FQ_RESOURCE_PATH_PREFIX = PREFIX + '/' + PACKAGE_PATH
+								+ '/' + NONEXISTENT_RESOURCE_NAME;
 
 	/**
 	 * Absolute path version of {@link #FQ_RESOURCE_PATH}.
@@ -103,6 +107,12 @@ public class ClassPathResourceTests {
 	public void getDescriptionWithClassLiteralConstructor() {
 		assertDescriptionContainsExpectedPath(new ClassPathResource(NONEXISTENT_RESOURCE_NAME, this.getClass()),
 			FQ_RESOURCE_PATH);
+	}
+
+	@Test
+	public void getDescriptionWithClassLiteralConstructorWithPrefix() {
+		assertDescriptionContainsExpectedPath(new ClassPathResource(NONEXISTENT_RESOURCE_NAME, this.getClass()),
+				FQ_RESOURCE_PATH_PREFIX);
 	}
 
 	@Test
