@@ -23,15 +23,6 @@ configure(allprojects) { project ->
 	apply plugin: "test-source-set-dependencies"
 	apply from: "${gradleScriptDir}/ide.gradle"
 
-	compileJava {
-		sourceCompatibility=1.6
-		targetCompatibility=1.6
-	}
-	compileTestJava {
-		sourceCompatibility=1.8
-		targetCompatibility=1.8
-	}
-
 	[compileJava, compileTestJava]*.options*.compilerArgs = [
 		"-Xlint:serial",
 		"-Xlint:varargs",
@@ -52,6 +43,17 @@ configure(allprojects) { project ->
 		"-Xlint:-deprecation", // TODO enable and fix warnings
 		"-Xlint:-unchecked"    // TODO enable and fix warnings
 	]
+
+	compileJava {
+		sourceCompatibility=1.6
+		targetCompatibility=1.6
+	}
+
+	compileTestJava {
+		sourceCompatibility=1.8
+		targetCompatibility=1.8
+		compileTestJava.options.compilerArgs += "-parameters"
+	}
 
 	sourceSets.test.resources.srcDirs = ["src/test/resources", "src/test/java"]
 
