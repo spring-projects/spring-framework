@@ -41,20 +41,20 @@ import java.lang.annotation.Target;
  * {@code @Bean} methods and {@link Import @Import} annotations associated with that class
  * will be subject to the conditions.
  *
- * <p>NOTE: {@code @Conditional} annotations are not inherited, any conditions from
- * super-classes or from overridden methods are not considered.
+ * <p>NOTE: {@code @Conditional} annotations are not inherited; any conditions from
+ * superclasses or from overridden methods are not being considered.
  *
  * @author Phillip Webb
  * @since 4.0
  * @see Condition
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE, ElementType.METHOD })
+@Target({ElementType.TYPE, ElementType.METHOD})
 public @interface Conditional {
 
 	/**
-	 * All {@link Condition}s that must {@linkplain Condition#matches match} in order for
-	 * the component to be registered.
+	 * All {@link Condition}s that must {@linkplain Condition#matches match}
+	 * in order for the component to be registered.
 	 */
 	Class<? extends Condition>[] value();
 

@@ -16,10 +16,8 @@
 
 package org.springframework.context.annotation;
 
-import org.jruby.internal.runtime.methods.MethodMethod;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.core.type.AnnotatedTypeMetadata;
-import org.springframework.core.type.AnnotationMetadata;
 
 /**
  * A single {@code condition} that must be {@linkplain #matches matched} in order
@@ -45,10 +43,10 @@ public interface Condition {
 	/**
 	 * Determine if the condition matches.
 	 * @param context the condition context
-	 * @param metadata meta-data of the {@link AnnotationMetadata class} or
-	 *        {@link MethodMethod method} being checked.
+	 * @param metadata metadata of the {@link org.springframework.core.type.AnnotationMetadata class}
+	 * or {@link org.springframework.core.type.MethodMetadata method} being checked.
 	 * @return {@code true} if the condition matches and the component can be registered
-	 *         or {@code false} to veto registration.
+	 * or {@code false} to veto registration.
 	 */
 	boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata);
 
