@@ -50,8 +50,8 @@ configure(allprojects) { project ->
 	}
 
 	compileTestJava {
-		sourceCompatibility=1.8
-		targetCompatibility=1.8
+		sourceCompatibility=1.6
+		targetCompatibility=1.6
 		compileTestJava.options.compilerArgs += "-parameters"
 	}
 
@@ -270,6 +270,10 @@ project('spring-lang-groovy') {
         testCompile project(':spring-test')
     }
     compileJava.enabled=false
+	compileGroovy {
+        sourceCompatibility=1.6
+        targetCompatibility=1.6
+	}
     sourceSets {
         main {
             groovy {
