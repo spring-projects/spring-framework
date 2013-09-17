@@ -124,7 +124,7 @@ public class DefaultBeanConfiguration extends GroovyObjectSupport implements Bea
             }
             // singleton property
             else if(SINGLETON.equals(property)) {
-                bd.setScope(Boolean.TRUE.equals(newValue) ? "singleton" : "prototype");
+                bd.setScope(Boolean.TRUE.equals(newValue) ? BeanDefinition.SCOPE_SINGLETON : BeanDefinition.SCOPE_PROTOTYPE);
             }
             else if(wrapper.isWritableProperty(property)) {
 
