@@ -47,6 +47,7 @@ public class DefaultBeanConfiguration extends GroovyObjectSupport implements Bea
     private static final String PARENT = "parent";
     private static final String BY_TYPE = "byType";
     private static final String BY_CONSTRUCTOR = "constructor";
+    private static final String SINGLETON = "singleton";
     private static final List DYNAMIC_PROPS = new ArrayList(){ {
 		add(AUTOWIRE);
 		add(CONSTRUCTOR_ARGS);
@@ -120,6 +121,10 @@ public class DefaultBeanConfiguration extends GroovyObjectSupport implements Bea
             else if(INIT_METHOD.equals(property)) {
                 if(newValue != null)
                     bd.setInitMethodName(newValue.toString());
+            }
+            // singleton property
+            else if(SINGLETON.equals(property)) {
+                bd.setScope(Boolean.TRUE.equals(newValue) ? "singleton" : "prototype");
             }
             else if(wrapper.isWritableProperty(property)) {
 
