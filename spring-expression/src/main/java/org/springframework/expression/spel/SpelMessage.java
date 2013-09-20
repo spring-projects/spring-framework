@@ -66,7 +66,7 @@ public enum SpelMessage {
 	INSTANCEOF_OPERATOR_NEEDS_CLASS_OPERAND(Kind.ERROR, 1028, "The operator 'instanceof' needs the right operand to be a class, not a ''{0}''"), //
 	EXCEPTION_DURING_METHOD_INVOCATION(Kind.ERROR, 1029, "A problem occurred when trying to execute method ''{0}'' on object of type ''{1}'': ''{2}''"), //
 	OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES(Kind.ERROR, 1030, "The operator ''{0}'' is not supported between objects of type ''{1}'' and ''{2}''"), //
-	PROBLEM_LOCATING_METHOD(Kind.ERROR, 1031, "Problem locating method {0} cannot on type {1}"),
+	PROBLEM_LOCATING_METHOD(Kind.ERROR, 1031, "Problem locating method {0} on type {1}"),
 	SETVALUE_NOT_SUPPORTED(	Kind.ERROR, 1032, "setValue(ExpressionState, Object) not supported for ''{0}''"), //
 	MULTIPLE_POSSIBLE_METHODS(Kind.ERROR, 1033, "Method call of ''{0}'' is ambiguous, supported type conversions allow multiple variants to match"), //
 	EXCEPTION_DURING_PROPERTY_WRITE(Kind.ERROR, 1034, "A problem occurred whilst attempting to set the property ''{0}'': {1}"), //
