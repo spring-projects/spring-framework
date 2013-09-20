@@ -45,13 +45,13 @@ configure(allprojects) { project ->
 	]
 
 	compileJava {
-		sourceCompatibility=1.6
-		targetCompatibility=1.6
+		sourceCompatibility=1.7
+		targetCompatibility=1.7
 	}
 
 	compileTestJava {
-		sourceCompatibility=1.6
-		targetCompatibility=1.6
+		sourceCompatibility=1.7
+		targetCompatibility=1.7
 		compileTestJava.options.compilerArgs += "-parameters"
 	}
 
@@ -271,8 +271,8 @@ project('spring-lang-groovy') {
     }
     compileJava.enabled=false
 	compileGroovy {
-        sourceCompatibility=1.6
-        targetCompatibility=1.6
+        sourceCompatibility=1.7
+        targetCompatibility=1.7
 	}
     sourceSets {
         main {
@@ -432,8 +432,8 @@ project("spring-oxm") {
     compileTestJava {
 		// necessary to avoid java.lang.VerifyError on jibx compilation
 		// see http://jira.codehaus.org/browse/JIBX-465
-		sourceCompatibility=1.6
-		targetCompatibility=1.6
+		sourceCompatibility=1.7
+		targetCompatibility=1.7
 	}
 
 	dependencies {
