@@ -18,6 +18,7 @@ package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.activation.FileTypeMap;
@@ -78,13 +79,32 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	private static final boolean jafPresent =
 			ClassUtils.isPresent("javax.activation.FileTypeMap", ResourceHttpRequestHandler.class.getClassLoader());
 
+	private static final String CONTENT_ENCODING = "Content-Encoding";
+
 	private List<Resource> locations;
 
-
+	private List<ResourceResolver> resourceResolvers = new ArrayList<ResourceResolver>();
+	
+	private List<ResourceTransformer> resourceTransformers = new ArrayList<ResourceTransformer>();
+	
+	private ResourceResolverChain resolverChain;
+	
 	public ResourceHttpRequestHandler() {
 		super(METHOD_GET, METHOD_HEAD);
 	}
 
+	public List<Resource> getLocations() {
+		return this.locations;
+	}
+	
+	public List<ResourceResolver> getResourceResolvers() {
+		return this.resourceResolvers;
+	}
+	
+	public List<ResourceTransformer> getResourceTransformers() {
+		return this.resourceTransformers;
+	}
+	
 	/**
 	 * Set a {@code List} of {@code Resource} paths to use as sources
 	 * for serving static resources.
@@ -93,12 +113,21 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		Assert.notEmpty(locations, "Locations list must not be empty");
 		this.locations = locations;
 	}
+	
+	public void setResourceResolvers(List<ResourceResolver> resourceResolvers) {
+		this.resourceResolvers = resourceResolvers;
+	}
+	
+	public void setResourceTransformers(List<ResourceTransformer> resourceTransformers) {
+		this.resourceTransformers = resourceTransformers;
+	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (logger.isWarnEnabled() && CollectionUtils.isEmpty(this.locations)) {
 			logger.warn("Locations list is empty. No resources will be served");
 		}
+		this.resolverChain = new DefaultResourceResolverChain(this.resourceResolvers, this.resourceTransformers);
 	}
 
 	/**
@@ -155,7 +184,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		writeContent(response, resource);
 	}
 
-	protected Resource getResource(HttpServletRequest request) {
+	protected Resource getResource(HttpServletRequest request) throws IOException{
 		String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
 		if (path == null) {
 			throw new IllegalStateException("Required request attribute '" +
@@ -169,27 +198,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 			return null;
 		}
 
-		for (Resource location : this.locations) {
-			try {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Trying relative path [" + path + "] against base location: " + location);
-				}
-				Resource resource = location.createRelative(path);
-				if (resource.exists() && resource.isReadable()) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Found matching resource: " + resource);
-					}
-					return resource;
-				}
-				else if (logger.isTraceEnabled()) {
-					logger.trace("Relative resource doesn't exist or isn't readable: " + resource);
-				}
-			}
-			catch (IOException ex) {
-				logger.debug("Failed to create relative resource - trying next resource location", ex);
-			}
-		}
-		return null;
+		return resolverChain.resolveAndTransform(request, path, locations);
 	}
 
 	/**
@@ -240,6 +249,10 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 
 		if (mediaType != null) {
 			response.setContentType(mediaType.toString());
+		}
+		
+		if (resource instanceof EncodedResource) {
+			response.setHeader(CONTENT_ENCODING, ((EncodedResource) resource).getEncoding());
 		}
 	}
 
@@ -297,5 +310,5 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 			return (StringUtils.hasText(mediaType) ? MediaType.parseMediaType(mediaType) : null);
 		}
 	}
-
-}
+	
+ }
