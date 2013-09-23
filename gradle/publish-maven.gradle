@@ -46,6 +46,10 @@ def customizePom(pom, gradleProject) {
 					email = "jhoeller@vmware.com"
 				}
 			}
+			issueManagement {
+				system = "Jira"
+				url = "https://jira.springsource.org/browse/SPR"
+			}
 		}
 	}
 }
