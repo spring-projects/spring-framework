@@ -66,8 +66,10 @@ configure(allprojects) { project ->
 	}
 
 	repositories {
-		maven { url "http://repo.springsource.org/libs-release" }
-		maven { url "http://maven.springframework.org/milestone" }  // for AspectJ 1.8.0.M1
+		maven { url "http://repo.spring.io/libs-release" }
+		maven { url "http://repo.spring.io/milestone" }  // for AspectJ 1.8.0.M1
+		maven { url "https://repository.apache.org/content/repositories/releases" } // tomcat 8 RC3
+		maven { url "https://repository.apache.org/content/repositories/snapshots" } // tomcat-websocket-* snapshots
 	}
 
 	dependencies {
@@ -371,12 +373,6 @@ project("spring-messaging") {
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:8.0.0-RC3")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-logging-juli:8.0.0-RC3")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
-}
-
-	repositories {
-		maven { url "https://repository.apache.org/content/repositories/snapshots" } // tomcat-websocket-* snapshots
-		maven { url "https://repository.apache.org/content/repositories/orgapachetomcat-080" } // tomcat 8 RC3
-		maven { url 'http://repo.springsource.org/libs-milestone' } // reactor
 	}
 }
 
@@ -564,12 +560,6 @@ project("spring-websocket") {
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:8.0.0-RC3")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("log4j:log4j:1.2.17")
-	}
-
-	repositories {
-		maven { url "https://repository.apache.org/content/repositories/snapshots" } // tomcat-websocket-* snapshots
-		maven { url "https://repository.apache.org/content/repositories/orgapachetomcat-080" } // tomcat 8 RC3
-		maven { url "https://maven.java.net/content/repositories/releases" } //  javax.websocket, tyrus
 	}
 }
 
