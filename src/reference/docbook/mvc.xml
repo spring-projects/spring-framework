@@ -4267,7 +4267,7 @@ public class SimpleController {
         response for example when providing a REST API. You can prepare a
         <classname>ModelAndView</classname> and
         render error content through view resolution -- i.e. by configuring a
-        <classname>ContentNeogitatingViewResolver</classname>,
+        <classname>ContentNegotiatingViewResolver</classname>,
         <classname>MappingJacksonJsonView</classname>, and so on. However, you
         may prefer to use <interfacename>@ExceptionHandler</interfacename>
         methods instead.</para>
