@@ -44,6 +44,8 @@ public interface CacheableService<T> {
 
 	T key(Object arg1, Object arg2);
 
+	T varArgsKey(Object... args);
+
 	T name(Object arg1);
 
 	T nullValue(Object arg1);

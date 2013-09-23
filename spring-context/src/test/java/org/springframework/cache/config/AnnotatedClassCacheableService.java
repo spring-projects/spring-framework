@@ -90,6 +90,12 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 	}
 
 	@Override
+	@Cacheable(value = "default")
+	public Object varArgsKey(Object... args) {
+		return counter.getAndIncrement();
+	}
+
+	@Override
 	@Cacheable(value = "default", key = "#root.methodName + #root.caches[0].name")
 	public Object name(Object arg1) {
 		return counter.getAndIncrement();

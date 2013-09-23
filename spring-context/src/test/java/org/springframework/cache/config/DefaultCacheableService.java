@@ -92,6 +92,12 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	}
 
 	@Override
+	@Cacheable(value = "default")
+	public Long varArgsKey(Object... args) {
+		return counter.getAndIncrement();
+	}
+
+	@Override
 	@Cacheable(value = "default", key = "#root.methodName")
 	public Long name(Object arg1) {
 		return counter.getAndIncrement();

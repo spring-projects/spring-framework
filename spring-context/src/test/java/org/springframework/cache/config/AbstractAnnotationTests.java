@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2013 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -210,6 +210,19 @@ public abstract class AbstractAnnotationTests {
 
 		assertNotSame(r3, r4);
 	}
+
+	public void testVarArgsKey(CacheableService<?> service) throws Exception {
+		Object r1 = service.varArgsKey(1, 2, 3);
+		Object r2 = service.varArgsKey(1, 2, 3);
+
+		assertSame(r1, r2);
+
+		Object r3 = service.varArgsKey(1, 2, 3);
+		Object r4 = service.varArgsKey(1, 2);
+
+		assertNotSame(r3, r4);
+	}
+
 
 	public void testNullValue(CacheableService<?> service) throws Exception {
 		Object key = new Object();
@@ -476,6 +489,11 @@ public abstract class AbstractAnnotationTests {
 	@Test
 	public void testKeyExpression() throws Exception {
 		testKeyExpression(cs);
+	}
+
+	@Test
+	public void testVarArgsKey() throws Exception {
+		testVarArgsKey(cs);
 	}
 
 	@Test

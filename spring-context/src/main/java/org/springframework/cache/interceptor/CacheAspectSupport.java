@@ -25,7 +25,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.Cache;
@@ -349,13 +348,25 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 		private final Collection<Cache> caches;
 
-		public CacheOperationContext(CacheOperation operation, Method method, Object[] args, Object target, Class<?> targetClass) {
+		public CacheOperationContext(CacheOperation operation, Method method,
+				Object[] args, Object target, Class<?> targetClass) {
 			this.operation = operation;
 			this.method = method;
-			this.args = args;
+			this.args = extractArgs(method, args);
 			this.target = target;
 			this.targetClass = targetClass;
 			this.caches = CacheAspectSupport.this.getCaches(operation);
+		}
+
+		private Object[] extractArgs(Method method, Object[] args) {
+			if (!method.isVarArgs()) {
+				return args;
+			}
+			Object[] varArgs = (Object[]) args[args.length - 1];
+			Object[] combinedArgs = new Object[args.length - 1 + varArgs.length];
+			System.arraycopy(args, 0, combinedArgs, 0, args.length - 1);
+			System.arraycopy(varArgs, 0, combinedArgs, args.length - 1, varArgs.length);
+			return combinedArgs;
 		}
 
 		protected boolean isConditionPassing(Object result) {
