@@ -24,7 +24,7 @@ import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.tomcat.util.descriptor.web.ApplicationListener;
-import org.apache.tomcat.websocket.server.WsListener;
+import org.apache.tomcat.websocket.server.WsContextListener;
 import org.springframework.util.SocketUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -38,7 +38,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 public class TomcatWebSocketTestServer implements WebSocketTestServer {
 
 	private static final ApplicationListener WS_APPLICATION_LISTENER =
-			new ApplicationListener(WsListener.class.getName(), false);
+			new ApplicationListener(WsContextListener.class.getName(), false);
 
 	private final Tomcat tomcatServer;
 
