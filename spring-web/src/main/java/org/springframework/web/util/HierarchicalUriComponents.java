@@ -182,7 +182,13 @@ final class HierarchicalUriComponents extends UriComponents {
 		}
 		String encodedScheme = encodeUriComponent(this.getScheme(), encoding, Type.SCHEME);
 		String encodedUserInfo = encodeUriComponent(this.userInfo, encoding, Type.USER_INFO);
-		String encodedHost = encodeUriComponent(this.host, encoding, Type.HOST);
+		String encodedHost;
+		if(StringUtils.hasLength(this.host) && this.host.startsWith("[")) {
+			encodedHost = encodeUriComponent(this.host, encoding, Type.HOST_IPV6);
+		} else {
+			encodedHost = encodeUriComponent(this.host, encoding, Type.HOST);
+		}
+
 		PathComponent encodedPath = this.path.encode(encoding);
 		MultiValueMap<String, String> encodedQueryParams =
 				new LinkedMultiValueMap<String, String>(this.queryParams.size());
@@ -466,6 +472,12 @@ final class HierarchicalUriComponents extends UriComponents {
 			@Override
 			public boolean isAllowed(int c) {
 				return isUnreserved(c) || isSubDelimiter(c);
+			}
+		},
+		HOST_IPV6 {
+			@Override
+			public boolean isAllowed(int c) {
+				return isUnreserved(c) || isSubDelimiter(c) || '[' == c || ']' == c || ':' == c;
 			}
 		},
 		PORT {
