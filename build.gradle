@@ -70,6 +70,7 @@ configure(allprojects) { project ->
 		maven { url "http://repo.spring.io/milestone" }  // for AspectJ 1.8.0.M1
 		maven { url "https://repository.apache.org/content/repositories/releases" } // tomcat 8 RC3
 		maven { url "https://repository.apache.org/content/repositories/snapshots" } // tomcat-websocket-* snapshots
+		maven { url "https://maven.java.net/content/repositories/releases" } //  javax.websocket, tyrus
 	}
 
 	dependencies {
