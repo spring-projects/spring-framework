@@ -4245,6 +4245,12 @@ public class SimpleController {
               </row>
 
               <row>
+                <entry><classname>NoHandlerFoundException</classname></entry>
+
+                <entry>404 (Not Found)</entry>
+              </row>
+
+              <row>
                 <entry><classname>NoSuchRequestHandlingMethodException</classname></entry>
 
                 <entry>404 (Not Found)</entry>

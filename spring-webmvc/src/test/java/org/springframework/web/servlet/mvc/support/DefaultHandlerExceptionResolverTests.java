@@ -26,6 +26,7 @@ import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.ConversionNotSupportedException;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.MethodParameter;
@@ -43,6 +44,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 
 /** @author Arjen Poutsma */
@@ -169,6 +171,18 @@ public class DefaultHandlerExceptionResolverTests {
 		assertNotNull("No ModelAndView returned", mav);
 		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
 		assertEquals("Invalid status code", 400, response.getStatus());
+	}
+
+	@Test
+	public void handleNoHandlerFoundException() throws Exception {
+		ServletServerHttpRequest req = new ServletServerHttpRequest(
+				new MockHttpServletRequest("GET","/resource"));
+		NoHandlerFoundException ex = new NoHandlerFoundException(req.getMethod().name(),
+				req.getServletRequest().getRequestURI(),req.getHeaders());
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+		assertNotNull("No ModelAndView returned", mav);
+		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
+		assertEquals("Invalid status code", 404, response.getStatus());
 	}
 
 	@Test

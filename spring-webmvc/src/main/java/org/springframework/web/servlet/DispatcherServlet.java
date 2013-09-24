@@ -45,6 +45,7 @@ import org.springframework.context.i18n.LocaleContext;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -277,6 +278,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	/** Perform cleanup of request attributes after include request? */
 	private boolean cleanupAfterInclude = true;
 
+	/** Throw a NoHandlerFoundException if no Handler was found to process this request? **/
+	private boolean throwExceptionIfNoHandlerFound = false;
+
 	/** MultipartResolver used by this servlet */
 	private MultipartResolver multipartResolver;
 
@@ -406,6 +410,24 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	public void setDetectAllViewResolvers(boolean detectAllViewResolvers) {
 		this.detectAllViewResolvers = detectAllViewResolvers;
+	}
+
+	/**
+	 * Set whether to throw a NoHandlerFoundException when no Handler was found for this request.
+	 * This exception will be later caught by HandlerExceptionResolvers and/or
+	 * ExceptionHandlers.
+	 *
+	 * <p>Depending on your configuration and servlet mapping, the request could be handled
+	 * by the {@link org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler}
+	 * then forwarded to the default servlet; the NoHandlerFoundException would never be
+	 * thrown in that case.
+	 *
+	 * <p>Default is "false", meaning the DispatcherServlet sends a NOT_FOUND error
+	 * using an HTTPServletResponse.
+	 * @since 4.0
+	 */
+	public void setThrowExceptionIfNoHandlerFound(boolean throwExceptionIfNoHandlerFound) {
+		this.throwExceptionIfNoHandlerFound = throwExceptionIfNoHandlerFound;
 	}
 
 	/**
@@ -1097,7 +1119,13 @@ public class DispatcherServlet extends FrameworkServlet {
 			pageNotFoundLogger.warn("No mapping found for HTTP request with URI [" + requestUri +
 					"] in DispatcherServlet with name '" + getServletName() + "'");
 		}
-		response.sendError(HttpServletResponse.SC_NOT_FOUND);
+		if(throwExceptionIfNoHandlerFound) {
+			ServletServerHttpRequest req = new ServletServerHttpRequest(request);
+			throw new NoHandlerFoundException(req.getMethod().name(),
+					req.getServletRequest().getRequestURI(),req.getHeaders());
+		} else {
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+		}
 	}
 
 	/**
