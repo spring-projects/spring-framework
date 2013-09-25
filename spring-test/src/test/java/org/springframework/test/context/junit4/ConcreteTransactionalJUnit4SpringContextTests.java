@@ -16,31 +16,28 @@
 
 package org.springframework.test.context.junit4;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
-import static org.springframework.test.transaction.TransactionTestUtils.inTransaction;
-
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.tests.sample.beans.Employee;
-import org.springframework.tests.sample.beans.Pet;
+
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.BadSqlGrammarException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.test.jdbc.SimpleJdbcTestUtils;
+import org.springframework.tests.sample.beans.Employee;
+import org.springframework.tests.sample.beans.Pet;
+
+import static org.junit.Assert.*;
+import static org.springframework.test.transaction.TransactionTestUtils.*;
 
 /**
  * Combined integration test for {@link AbstractJUnit4SpringContextTests} and
@@ -87,7 +84,7 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 		try {
 			simpleJdbcTemplate.update("CREATE TABLE person (name VARCHAR(20) NOT NULL, PRIMARY KEY(name))");
 		}
-		catch (final BadSqlGrammarException bsge) {
+		catch (DataAccessException dae) {
 			/* ignore */
 		}
 	}
