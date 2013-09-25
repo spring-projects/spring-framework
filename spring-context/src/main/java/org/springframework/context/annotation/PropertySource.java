@@ -165,5 +165,12 @@ public @interface PropertySource {
 	 * property source, and in the order declared.
 	 */
 	String[] value();
+	
+	/**
+	 * Indicate the failure to find the property resource should be ignored.
+	 * <p>"true" is appropriate if the properties file is completely optional.
+	 * Default is "false".
+	 */
+	boolean ignoreResourceNotFound() default false;
 
 }

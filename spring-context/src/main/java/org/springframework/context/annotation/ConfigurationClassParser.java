@@ -56,6 +56,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.core.type.AnnotationMetadata;
@@ -305,26 +306,32 @@ class ConfigurationClassParser {
 	private void processPropertySource(AnnotationAttributes propertySource) throws IOException {
 		String name = propertySource.getString("name");
 		String[] locations = propertySource.getStringArray("value");
+		boolean ignoreResourceNotFound = propertySource.getBoolean("ignoreResourceNotFound");
 		int nLocations = locations.length;
 		if (nLocations == 0) {
 			throw new IllegalArgumentException("At least one @PropertySource(value) location is required");
 		}
+		List<String> locationList = new ArrayList<String>();
 		for (int i = 0; i < nLocations; i++) {
 			locations[i] = this.environment.resolveRequiredPlaceholders(locations[i]);
+			Resource resource = this.resourceLoader.getResource(locations[i]);
+			if(resource.exists() || !ignoreResourceNotFound) {
+				locationList.add(locations[i]);
+			}
 		}
 		ClassLoader classLoader = this.resourceLoader.getClassLoader();
 		if (!StringUtils.hasText(name)) {
-			for (String location : locations) {
+			for (String location : locationList) {
 				this.propertySources.push(new ResourcePropertySource(location, classLoader));
 			}
 		}
 		else {
-			if (nLocations == 1) {
-				this.propertySources.push(new ResourcePropertySource(name, locations[0], classLoader));
+			if (locationList.size() == 1) {
+				this.propertySources.push(new ResourcePropertySource(name, locationList.get(0), classLoader));
 			}
 			else {
 				CompositePropertySource ps = new CompositePropertySource(name);
-				for (String location : locations) {
+				for (String location : locationList) {
 					ps.addPropertySource(new ResourcePropertySource(location, classLoader));
 				}
 				this.propertySources.push(ps);
