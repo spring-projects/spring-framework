@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.junit4;
 
-import org.springframework.jdbc.BadSqlGrammarException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,7 +51,7 @@ public abstract class AbstractTransactionalSpringRunnerTests {
 		try {
 			simpleJdbcTemplate.update("CREATE TABLE person (name VARCHAR(20) NOT NULL, PRIMARY KEY(name))");
 		}
-		catch (BadSqlGrammarException bsge) {
+		catch (DataAccessException dae) {
 			// ignore
 		}
 	}

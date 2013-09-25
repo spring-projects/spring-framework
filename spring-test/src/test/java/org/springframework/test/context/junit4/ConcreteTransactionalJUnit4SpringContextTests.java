@@ -34,7 +34,7 @@ import org.springframework.tests.sample.beans.Pet;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.BadSqlGrammarException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.transaction.AfterTransaction;
@@ -87,7 +87,7 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 		try {
 			jdbcTemplate.update("CREATE TABLE person (name VARCHAR(20) NOT NULL, PRIMARY KEY(name))");
 		}
-		catch (final BadSqlGrammarException bsge) {
+		catch (DataAccessException dae) {
 			/* ignore */
 		}
 	}
@@ -135,7 +135,7 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	public final void verifyApplicationContext() {
 		assertInTransaction(false);
 		assertNotNull("The application context should have been set due to ApplicationContextAware semantics.",
-			super.applicationContext);
+				super.applicationContext);
 	}
 
 	@Test
@@ -143,7 +143,7 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	public final void verifyBeanInitialized() {
 		assertInTransaction(false);
 		assertTrue("This test bean should have been initialized due to InitializingBean semantics.",
-			this.beanInitialized);
+				this.beanInitialized);
 	}
 
 	@Test
@@ -188,14 +188,14 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	@BeforeTransaction
 	public void beforeTransaction() {
 		assertEquals("Verifying the number of rows in the person table before a transactional test method.", 1,
-			countRowsInPersonTable(super.jdbcTemplate));
+				countRowsInPersonTable(super.jdbcTemplate));
 		assertEquals("Adding yoda", 1, addPerson(super.jdbcTemplate, YODA));
 	}
 
 	@Before
 	public void setUp() throws Exception {
 		assertEquals("Verifying the number of rows in the person table before a test method.",
-			(inTransaction() ? 2 : 1), countRowsInPersonTable(super.jdbcTemplate));
+				(inTransaction() ? 2 : 1), countRowsInPersonTable(super.jdbcTemplate));
 	}
 
 	@Test
@@ -204,20 +204,20 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 		assertEquals("Adding jane", 1, addPerson(super.jdbcTemplate, JANE));
 		assertEquals("Adding sue", 1, addPerson(super.jdbcTemplate, SUE));
 		assertEquals("Verifying the number of rows in the person table in modifyTestDataWithinTransaction().", 4,
-			countRowsInPersonTable(super.jdbcTemplate));
+				countRowsInPersonTable(super.jdbcTemplate));
 	}
 
 	@After
 	public void tearDown() throws Exception {
 		assertEquals("Verifying the number of rows in the person table after a test method.",
-			(inTransaction() ? 4 : 1), countRowsInPersonTable(super.jdbcTemplate));
+				(inTransaction() ? 4 : 1), countRowsInPersonTable(super.jdbcTemplate));
 	}
 
 	@AfterTransaction
 	public void afterTransaction() {
 		assertEquals("Deleting yoda", 1, deletePerson(super.jdbcTemplate, YODA));
 		assertEquals("Verifying the number of rows in the person table after a transactional test method.", 1,
-			countRowsInPersonTable(super.jdbcTemplate));
+				countRowsInPersonTable(super.jdbcTemplate));
 	}
 
 
