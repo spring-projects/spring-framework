@@ -28,7 +28,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.SpringAsmInfo;
 import org.springframework.asm.Type;
@@ -122,7 +121,13 @@ final class RecursiveAnnotationArrayVisitor extends AbstractRecursiveAnnotationV
 			newValue = ObjectUtils.addObjectToArray((Object[]) existingValue, newValue);
 		}
 		else {
-			Object[] newArray = (Object[]) Array.newInstance(newValue.getClass(), 1);
+			Class<?> arrayClass = newValue.getClass();
+			if(Enum.class.isAssignableFrom(arrayClass)) {
+				while(arrayClass.getSuperclass() != null && !arrayClass.isEnum()) {
+					arrayClass = arrayClass.getSuperclass();
+				}
+			}
+			Object[] newArray = (Object[]) Array.newInstance(arrayClass, 1);
 			newArray[0] = newValue;
 			newValue = newArray;
 		}
