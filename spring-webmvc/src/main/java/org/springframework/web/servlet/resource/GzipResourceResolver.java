@@ -32,104 +32,111 @@ import org.springframework.core.io.Resource;
 
 
 /**
- * 
+ * A {@link ResourceResolver} that lets the next resolver in the chain locate a Resource
+ * and then attempts to find a variation of that Resource with ".gz" extension. This
+ * resolver will only get involved if the client has indicated it supports gzipped
+ * responses through the "Accept-Encoding" header.
+ *
  * @author Jeremy Grelle
+ * @author Rossen Stoyanchev
+ * @since 4.0
  */
 public class GzipResourceResolver extends AbstractResourceResolver {
 
-	private final Log logger = LogFactory.getLog(getClass());
-	
+	private static final Log logger = LogFactory.getLog(GzipResourceResolver.class);
+
+
 	@Override
 	protected Resource resolveInternal(HttpServletRequest request, String path,
-			List<Resource> locations, ResourceResolverChain chain, Resource resolved) {
-		
-		if (!isGzipAccepted(request) || resolved == null) {
-			return resolved;
+			List<Resource> locations, ResourceResolverChain chain, Resource resource) {
+
+		if ((resource == null) || !isGzipAccepted(request)) {
+			return resource;
 		}
-		
+
 		try {
-			Resource gzipped = new GzippedResource(resolved);
+			Resource gzipped = new GzippedResource(resource);
 			if (gzipped.exists()) {
 				return gzipped;
 			}
-		} catch (IOException e) {
-			this.logger.trace("Error occurred locating gzipped resource", e);
 		}
-		return resolved;
+		catch (IOException e) {
+			logger.trace("No gzipped resource for " + resource.getFilename(), e);
+		}
+
+		return resource;
 	}
 
-	/**
-	 * @param request 
-	 * @return
-	 */
 	private boolean isGzipAccepted(HttpServletRequest request) {
-		String val = request.getHeader("Accept-Encoding");
-		return val != null && val.toLowerCase().contains("gzip");
+		String value = request.getHeader("Accept-Encoding");
+		return ((value != null) && value.toLowerCase().contains("gzip"));
 	}
-	
+
+
 	private static final class GzippedResource extends AbstractResource implements EncodedResource {
 
 		private final Resource original;
-		
+
 		private final Resource gzipped;
-		
+
+
 		public GzippedResource(Resource original) throws IOException {
 			this.original = original;
-			this.gzipped = original.createRelative(original.getFilename()+".gz");
+			this.gzipped = original.createRelative(original.getFilename() + ".gz");
 		}
 
+
 		public InputStream getInputStream() throws IOException {
-			return gzipped.getInputStream();
+			return this.gzipped.getInputStream();
 		}
 
 		public boolean exists() {
-			return gzipped.exists();
+			return this.gzipped.exists();
 		}
 
 		public boolean isReadable() {
-			return gzipped.isReadable();
+			return this.gzipped.isReadable();
 		}
 
 		public boolean isOpen() {
-			return gzipped.isOpen();
+			return this.gzipped.isOpen();
 		}
 
 		public URL getURL() throws IOException {
-			return gzipped.getURL();
+			return this.gzipped.getURL();
 		}
 
 		public URI getURI() throws IOException {
-			return gzipped.getURI();
+			return this.gzipped.getURI();
 		}
 
 		public File getFile() throws IOException {
-			return gzipped.getFile();
+			return this.gzipped.getFile();
 		}
 
 		public long contentLength() throws IOException {
-			return gzipped.contentLength();
+			return this.gzipped.contentLength();
 		}
 
 		public long lastModified() throws IOException {
-			return gzipped.lastModified();
+			return this.gzipped.lastModified();
 		}
 
 		public Resource createRelative(String relativePath) throws IOException {
-			return gzipped.createRelative(relativePath);
+			return this.gzipped.createRelative(relativePath);
 		}
 
 		public String getFilename() {
-			return original.getFilename();
+			return this.original.getFilename();
 		}
 
 		public String getDescription() {
-			return gzipped.getDescription();
+			return this.gzipped.getDescription();
 		}
 
-		public String getEncoding() {
+		public String getContentEncoding() {
 			return "gzip";
 		}
-
-	}	
+	}
 
 }

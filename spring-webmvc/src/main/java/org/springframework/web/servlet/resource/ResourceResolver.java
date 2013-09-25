@@ -24,13 +24,15 @@ import org.springframework.core.io.Resource;
 
 
 /**
- * 
+ *
  * @author Jeremy Grelle
+ * @since 4.0
  */
 public interface ResourceResolver {
 
-		public Resource resolve(HttpServletRequest request, String path, List<Resource> locations, ResourceResolverChain chain);
-		
+		public Resource resolve(HttpServletRequest request, String requestPath,
+				List<Resource> locations, ResourceResolverChain chain);
+
 		public String resolveUrl(String resourcePath, List<Resource> locations,
 				ResourceResolverChain chain);
 }

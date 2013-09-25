@@ -22,28 +22,28 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
 
 
 /**
- * 
+ *
+ *
  * @author Jeremy Grelle
+ * @author Rossen Stoyanchev
+ * @since 4.0
  */
-public class DefaultResourceResolverChain implements ResourceResolverChain{
-	
-	private static final ResourceResolver DEFAULT_RESOLVER = new PathMappingResourceResolver();
-	
+class DefaultResourceResolverChain implements ResourceResolverChain {
+
 	private final List<ResourceResolver> resolvers;
-	
+
 	private List<ResourceTransformer> transformers = new ArrayList<ResourceTransformer>();
-	
+
+
 	public DefaultResourceResolverChain(List<ResourceResolver> resolvers, List<ResourceTransformer> transformers) {
-		this.resolvers = resolvers;
-		this.resolvers.add(DEFAULT_RESOLVER);
-		this.transformers = transformers;
+		this.resolvers = (resolvers != null) ? resolvers : new ArrayList<ResourceResolver>();
+		this.transformers = (transformers != null) ? transformers : new ArrayList<ResourceTransformer>();
 	}
+
 
 	@Override
 	public ResourceResolver next(ResourceResolver current) {
@@ -51,61 +51,25 @@ public class DefaultResourceResolverChain implements ResourceResolverChain{
 	}
 
 	@Override
-	public Resource resolveAndTransform(HttpServletRequest request, String path,
-			List<Resource> locations) throws IOException{
-		Resource resolved = this.resolvers.get(0).resolve(request, path, locations, this);
-		return resolved != null ? applyTransformers(request, resolved) : resolved;
+	public Resource resolveAndTransform(HttpServletRequest request, String path, List<Resource> locations)
+			throws IOException {
+
+		Resource resource = this.resolvers.get(0).resolve(request, path, locations, this);
+		return resource != null ? applyTransformers(request, resource) : resource;
 	}
-	
+
 	@Override
 	public String resolveUrl(String resourcePath, List<Resource> locations) {
 		return this.resolvers.get(0).resolveUrl(resourcePath, locations, this);
 	}
-	
-	protected Resource applyTransformers(HttpServletRequest request, Resource resource) throws IOException{
-		for (ResourceTransformer transformer : transformers) {
+
+	private Resource applyTransformers(HttpServletRequest request, Resource resource) throws IOException {
+		for (ResourceTransformer transformer : this.transformers) {
 			if (transformer.handles(request, resource)) {
 				return applyTransformers(request, transformer.transform(resource));
 			}
 		}
 		return resource;
 	}
-	
-	private static class PathMappingResourceResolver implements ResourceResolver {
-		
-		private static final Log logger = LogFactory.getLog(PathMappingResourceResolver.class);
-		
-		@Override
-		public Resource resolve(HttpServletRequest request, String path, List<Resource> locations, ResourceResolverChain chain) {
-			for (Resource location : locations) {
-				try {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Trying relative path [" + path + "] against base location: " + location);
-					}
-					Resource resource = location.createRelative(path);
-					if (resource.exists() && resource.isReadable()) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Found matching resource: " + resource);
-						}
-						return resource;
-					}
-					else if (logger.isTraceEnabled()) {
-						logger.trace("Relative resource doesn't exist or isn't readable: " + resource);
-					}
-				}
-				catch (IOException ex) {
-					logger.debug("Failed to create relative resource - trying next resource location", ex);
-				}
-			}
-			return null;
-		}
 
-		@Override
-		public String resolveUrl(String resourcePath, List<Resource> locations, ResourceResolverChain chain) {
-			if (resolve(null, resourcePath, locations, chain) != null) {
-				return resourcePath;
-			}
-			return null;
-		}
-	}
 }

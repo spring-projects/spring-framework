@@ -34,23 +34,24 @@ import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 
 
 /**
- * 
+ *
  * @author Jeremy Grelle
+ * @since 4.0
  */
 public class ResourceUrlMapper implements BeanPostProcessor, ApplicationListener<ContextRefreshedEvent>{
 
 	private final Map<String, ResourceHttpRequestHandler> handlers = new LinkedHashMap<String, ResourceHttpRequestHandler>();
-	
+
 	private final List<SimpleUrlHandlerMapping> mappings = new ArrayList<SimpleUrlHandlerMapping>();
-	
+
 	private final PathMatcher matcher = new AntPathMatcher();
-	
+
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName)
 			throws BeansException {
 		return bean;
 	}
-	
+
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName)
 			throws BeansException {
@@ -65,7 +66,7 @@ public class ResourceUrlMapper implements BeanPostProcessor, ApplicationListener
 		}
 		return bean;
 	}
-	
+
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		OrderComparator.sort(this.mappings);
@@ -76,7 +77,7 @@ public class ResourceUrlMapper implements BeanPostProcessor, ApplicationListener
 			}
 		}
 	}
-	
+
 	public String getUrlForResource(String resourcePath) {
 		for (Entry<String, ResourceHttpRequestHandler> mapping : this.handlers.entrySet()) {
 			if (matcher.match(mapping.getKey(), resourcePath)) {

@@ -27,15 +27,17 @@ import org.springframework.util.StringUtils;
 
 
 /**
- * 
+ *
  * @author Jeremy Grelle
+ * @since 4.0
  */
 public class LessResourceTransformer implements ResourceTransformer {
 
 	private static final String LESS_EXT = "less";
-	
+
 	private final LessCompiler compiler = new LessCompiler();
-	
+
+
 	@Override
 	public Resource transform(Resource original) throws IOException {
 		TransformedResource transformed;
@@ -43,18 +45,18 @@ public class LessResourceTransformer implements ResourceTransformer {
 			String content = "";
 			if (original instanceof TransformedResource) {
 				content = ((TransformedResource) original).getContentAsString();
-			} else {
-				content = compiler.compile(original.getFile());
 			}
-			transformed = new TransformedResource(original.getFilename()
-				.replace("."+LESS_EXT, ""), content.getBytes("UTF-8"), original.lastModified());
+			else {
+				content = this.compiler.compile(original.getFile());
+			}
+			transformed = new TransformedResource(original.getFilename().replace(
+					"." + LESS_EXT, ""), content.getBytes("UTF-8"), original.lastModified());
 		}
-		catch (LessException le) {
+		catch (LessException ex) {
 			//TODO - Nicely print out the compilation error
-			le.printStackTrace();
+			ex.printStackTrace();
 			return null;
 		}
-		
 		return transformed;
 	}
 

@@ -31,8 +31,9 @@ import org.springframework.web.util.UrlPathHelper;
 
 
 /**
- * 
+ *
  * @author Jeremy Grelle
+ * @since 4.0
  */
 public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 
@@ -44,7 +45,7 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 		filterChain.doFilter(request, new ResourceUrlResponseWrapper(request, response));
 	}
-	
+
 	@Override
 	protected void initFilterBean() throws ServletException {
 		WebApplicationContext appContext = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
@@ -52,14 +53,14 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 	}
 
 	private class ResourceUrlResponseWrapper extends HttpServletResponseWrapper {
-		
+
 		private final UrlPathHelper pathHelper = new UrlPathHelper();
-		
+
 		private String pathPrefix;
-		
+
 		private ResourceUrlResponseWrapper(HttpServletRequest request, HttpServletResponse wrapped) {
 			super(wrapped);
-			
+
 			this.pathPrefix = pathHelper.getContextPath(request);
 			String servletPath = pathHelper.getServletPath(request);
 			String appPath = pathHelper.getPathWithinApplication(request);

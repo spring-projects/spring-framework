@@ -28,33 +28,34 @@ import static org.junit.Assert.*;
 
 
 /**
- * 
+ *
  * @author Jeremy Grelle
  */
 public class ExtensionMappingResourceResolverTests {
 
 	private ResourceResolverChain resolver;
-	
+
 	private List<Resource> locations;
-	
+
 	@Before
 	public void setUp() {
 		List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
 		resolvers.add(new ExtensionMappingResourceResolver());
+		resolvers.add(new PathResourceResolver());
 		resolver = new DefaultResourceResolverChain(resolvers,  new ArrayList<ResourceTransformer>());
 		locations = new ArrayList<Resource>();
 		locations.add(new ClassPathResource("test/", getClass()));
 		locations.add(new ClassPathResource("testalternatepath/", getClass()));
 	}
-	
+
 	@Test
 	public void resolveLessResource() throws Exception {
-		String resourceId = "zoo.css"; 
-		Resource resource = new ClassPathResource("test/"+resourceId+".less", getClass());
+		String resourceId = "zoo.css";
+		Resource resource = new ClassPathResource("test/" + resourceId + ".less", getClass());
 		Resource resolved = resolver.resolveAndTransform(null, resourceId, locations);
 		assertEquals(resource, resolved);
 	}
-	
+
 	@Test
 	public void resolveLessUrl() {
 		String resourceId = "zoo.css";

@@ -24,20 +24,21 @@ import org.springframework.core.io.ByteArrayResource;
 
 
 /**
- * 
+ *
  * @author Jeremy Grelle
+ * @since 4.0
  */
 public class TransformedResource extends ByteArrayResource {
 
 	private final String filename;
 	private final long lastModified;
-	
+
 	public TransformedResource(String filename, byte[] transformedContent) {
 		super(transformedContent);
 		this.filename = filename;
 		this.lastModified = new Date().getTime();
 	}
-	
+
 	public TransformedResource(String filename, byte[] transformedContent, long lastModified) {
 		super(transformedContent);
 		this.filename = filename;
@@ -48,7 +49,7 @@ public class TransformedResource extends ByteArrayResource {
 	public String getFilename() {
 		return this.filename;
 	}
-	
+
 	@Override
 	public long lastModified() throws IOException {
 		return this.lastModified;
@@ -64,5 +65,5 @@ public class TransformedResource extends ByteArrayResource {
 			return "";
 		}
 	}
-	
+
 }

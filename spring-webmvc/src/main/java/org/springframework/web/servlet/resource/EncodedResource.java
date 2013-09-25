@@ -20,10 +20,12 @@ import org.springframework.core.io.Resource;
 
 
 /**
- * 
+ *
  * @author Jeremy Grelle
+ * @since 4.0
  */
 public interface EncodedResource extends Resource {
 
-	public String getEncoding();
+	public String getContentEncoding();
+
 }

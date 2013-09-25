@@ -26,14 +26,15 @@ import org.springframework.core.io.Resource;
 
 
 /**
- * 
+ *
  * @author Jeremy Grelle
+ * @since 4.0
  */
 public interface ResourceResolverChain {
 
 	public Resource resolveAndTransform(HttpServletRequest request, String path, List<Resource> locations)
 			throws IOException;
-	
+
 	public ResourceResolver next(ResourceResolver current);
 
 	public String resolveUrl(String resourcePath, List<Resource> locations);

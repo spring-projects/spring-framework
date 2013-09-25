@@ -32,85 +32,85 @@ import org.springframework.util.StringUtils;
 
 
 /**
- * 
+ *
  * @author Jeremy Grelle
+ * @since 4.0
  */
-public class FingerprintingResourceResolver extends AbstractResourceResolver {
+public class FingerprintResourceResolver extends AbstractResourceResolver {
 
-	private final Log logger = LogFactory.getLog(getClass());
-	
+	private static final Log logger = LogFactory.getLog(FingerprintResourceResolver.class);
+
 	private Pattern pattern = Pattern.compile("-(\\S*)\\.");
-	
+
+
 	@Override
 	protected Resource resolveInternal(HttpServletRequest request, String path, List<Resource> locations,
 			ResourceResolverChain chain, Resource resolved) {
-		//First try the resolved full path, in case resource has been written that way to disk at build-time
-		//or the resource is requested without fingerprint
+
+		// First try the resolved full path, in case resource has been written that way to disk at build-time
+		// or the resource is requested without fingerprint
 		if (resolved != null) {
 			return resolved;
 		}
-		
-		//Now try extracting and matching the hash for dev mode
+
+		// Now try extracting and matching the hash for dev mode
 		String hash = extractHash(path);
-		String simplePath = !StringUtils.isEmpty(hash) ? StringUtils.delete(path, "-" + hash) : path;
+		if (StringUtils.isEmpty(hash)) {
+			return null;
+		}
+
+		String simplePath = StringUtils.delete(path, "-" + hash);
 		Resource baseResource = chain.next(this).resolve(request, simplePath, locations, chain);
-		
-		if (StringUtils.isEmpty(hash) || baseResource == null) {
+		if (baseResource == null) {
+			logger.debug("Failed to find resource after removing fingerprint: " + simplePath);
+			return null;
+		}
+
+		String candidateHash = calculateHash(baseResource);
+		if (candidateHash.equals(hash)) {
+			logger.debug("Fingerprint match succeeded.");
 			return baseResource;
 		}
-		
-		String candidateHash = calculateHash(baseResource);
-		
-		if (candidateHash.equals(hash)) {
-			this.logger.debug("Fingerprint match succeeded.");
-			return baseResource;
-		} else {
-			this.logger.debug("Potential resource found, but fingerprint doesn't match.");
+		else {
+			logger.debug("Potential resource found, but fingerprint doesn't match.");
 			return null;
 		}
 	}
-	
-	@Override
-	public String resolveUrl(String resourcePath, List<Resource> locations,
-			ResourceResolverChain chain) {
-		//TODO - Consider caching here for better efficiency
-		String baseUrl = chain.next(this).resolveUrl(resourcePath, locations, chain);
-		if (StringUtils.hasText(baseUrl)) {
-			Resource original = chain.next(this).resolve(null, resourcePath, locations, chain);
-			String hash = calculateHash(original);
-			return StringUtils.stripFilenameExtension(baseUrl) + "-" + hash + "." + StringUtils.getFilenameExtension(baseUrl);
+
+	private String extractHash(String path) {
+		Matcher matcher = this.pattern.matcher(path);
+		if (matcher.find()) {
+			logger.debug("Found fingerprint in path: " + matcher.group(1));
+			String match = matcher.group(1);
+			return match.contains("-") ? match.substring(match.lastIndexOf("-") + 1) : match;
 		}
-		return baseUrl;
+		else {
+			return "";
+		}
 	}
 
-	/**
-	 * @param candidate
-	 * @return
-	 */
 	private String calculateHash(Resource resource) {
 		try {
 			byte[] content = FileCopyUtils.copyToByteArray(resource.getInputStream());
 			return DigestUtils.md5DigestAsHex(content);
 		}
 		catch (IOException e) {
-			this.logger.error("Failed to calculate hash on resource " + resource.toString());
+			logger.error("Failed to calculate hash on resource " + resource.toString());
 			return "";
 		}
 	}
 
-	/**
-	 * @param path
-	 * @return
-	 */
-	private String extractHash(String path) {
-		Matcher matcher = pattern.matcher(path);
-		if (matcher.find()) {
-			this.logger.debug("Found fingerprint in path: " + matcher.group(1));
-			String match = matcher.group(1);
-			return match.contains("-") ? match.substring(match.lastIndexOf("-") + 1) : match;
-		} else {
-			return "";
+	@Override
+	public String resolveUrl(String resourcePath, List<Resource> locations, ResourceResolverChain chain) {
+		// TODO - Consider caching here for better efficiency
+		String baseUrl = chain.next(this).resolveUrl(resourcePath, locations, chain);
+		if (StringUtils.hasText(baseUrl)) {
+			Resource original = chain.next(this).resolve(null, resourcePath, locations, chain);
+			String hash = calculateHash(original);
+			return StringUtils.stripFilenameExtension(baseUrl)
+					+ "-" + hash + "." + StringUtils.getFilenameExtension(baseUrl);
 		}
+		return baseUrl;
 	}
 
 }

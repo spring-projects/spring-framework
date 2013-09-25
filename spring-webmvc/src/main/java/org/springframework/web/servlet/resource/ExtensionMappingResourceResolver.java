@@ -30,63 +30,68 @@ import org.springframework.util.StringUtils;
 
 
 /**
- * 
+ *
  * @author Jeremy Grelle
+ * @since 4.0
  */
 public class ExtensionMappingResourceResolver extends AbstractResourceResolver {
-	
-	private final Log logger = LogFactory.getLog(getClass());
-	
+
+	private static final Log logger = LogFactory.getLog(ExtensionMappingResourceResolver.class);
+
 	private final boolean compareTimeStamp;
-	
+
+
 	public ExtensionMappingResourceResolver() {
 		this.compareTimeStamp = false;
 	}
-	
+
 	public ExtensionMappingResourceResolver(boolean compareTimeStamp) {
 		this.compareTimeStamp = compareTimeStamp;
 	}
-	
+
+
 	@Override
 	protected Resource resolveInternal(HttpServletRequest request, String path,
-			List<Resource> locations, ResourceResolverChain chain, Resource resolved) {
-		if (resolved != null && !compareTimeStamp) {
-			return resolved;
+			List<Resource> locations, ResourceResolverChain chain, Resource resource) {
+
+		if ((resource != null) && !this.compareTimeStamp) {
+			return resource;
 		}
-		
+
 		for (Resource location : locations) {
 			String baseFilename = StringUtils.getFilename(path);
-			
 			try {
 				Resource basePath = location.createRelative(StringUtils.delete(path, baseFilename));
 				if (basePath.getFile().isDirectory()) {
-					for (String fileName : basePath.getFile().list(new ExtensionFilter(baseFilename))) {
+					for (String fileName : basePath.getFile().list(new ExtensionFilenameFilter(baseFilename))) {
 						//Always use the first match
 						Resource matched = basePath.createRelative(fileName);
-						if (resolved == null || matched.lastModified() > resolved.lastModified()) {
+						if ((resource == null) || (matched.lastModified() > resource.lastModified())) {
 							return matched;
-						} else {
-							return resolved;
+						}
+						else {
+							return resource;
 						}
 					}
 				}
 			}
 			catch (IOException e) {
-				this.logger.trace("Error occurred locating resource based on file extension mapping", e);
+				logger.trace("Error occurred locating resource based on file extension mapping", e);
 			}
-			
 		}
-		return resolved;
+
+		return resource;
 	}
-	
+
 	@Override
 	public String resolveUrl(String resourcePath, List<Resource> locations,
 			ResourceResolverChain chain) {
+
 		String resolved = super.resolveUrl(resourcePath, locations, chain);
 		if (StringUtils.hasText(resolved)) {
 			return resolved;
 		}
-		
+
 		Resource mappedResource = resolveInternal(null, resourcePath, locations, chain, null);
 		if (mappedResource != null) {
 			return resourcePath;
@@ -95,23 +100,26 @@ public class ExtensionMappingResourceResolver extends AbstractResourceResolver {
 	}
 
 
+	private static final class ExtensionFilenameFilter implements FilenameFilter {
 
-	private static final class ExtensionFilter implements FilenameFilter{
+		private final String filename;
 
-		private final String baseFilename;
-		private final String baseExtension;
-		private final int baseExtLen;
-		
-		
-		public ExtensionFilter(String baseFilename) {
-			this.baseFilename = baseFilename;
-			this.baseExtension = "." + StringUtils.getFilenameExtension(baseFilename);
-			this.baseExtLen = this.baseExtension.length();
+		private final String extension;
+
+		private final int extensionLength;
+
+
+		public ExtensionFilenameFilter(String filename) {
+			this.filename = filename;
+			this.extension = "." + StringUtils.getFilenameExtension(filename);
+			this.extensionLength = this.extension.length();
 		}
-		
+
 		@Override
-		public boolean accept(File dir, String name) {
-			return name.contains(baseExtension) && baseFilename.equals(name.substring(0, name.lastIndexOf(baseExtension) + this.baseExtLen));  
+		public boolean accept(File directory, String name) {
+			return (name.contains(this.extension)
+					&& this.filename.equals(name.substring(0, name.lastIndexOf(this.extension) + this.extensionLength)));
 		}
 	}
+
 }

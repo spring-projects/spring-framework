@@ -24,14 +24,14 @@ import org.springframework.core.io.Resource;
 
 
 /**
- * More than meets the eye.
- * 
+ *
  * @author Jeremy Grelle
+ * @since 4.0
  */
 public interface ResourceTransformer {
 
 	public Resource transform(Resource original) throws IOException;
-	
+
 	public boolean handles(HttpServletRequest request, Resource original);
-	
+
 }

@@ -35,15 +35,15 @@ import static org.junit.Assert.*;
 
 
 /**
- * 
+ *
  * @author Jeremy Grelle
  */
 public class GzipResourceResolverTests {
 
 	private ResourceResolverChain resolver;
-	
+
 	private List<Resource> locations;
-	
+
 	@BeforeClass
 	public static void createGzippedResources() throws IOException {
 		Resource location = new ClassPathResource("test/", GzipResourceResolverTests.class);
@@ -51,32 +51,33 @@ public class GzipResourceResolverTests {
 		Resource gzJsFile = jsFile.createRelative("foo.js.gz");
 		Resource fingerPrintedFile = new FileSystemResource(location.createRelative("foo-e36d2e05253c6c7085a91522ce43a0b4.css").getFile());
 		Resource gzFingerPrintedFile = fingerPrintedFile.createRelative("foo-e36d2e05253c6c7085a91522ce43a0b4.css.gz");
-		
+
 		if (gzJsFile.getFile().createNewFile()) {
 			GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(gzJsFile.getFile()));
 			FileCopyUtils.copy(jsFile.getInputStream(), out);
 		}
-		
+
 		if (gzFingerPrintedFile.getFile().createNewFile()) {
 			GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(gzFingerPrintedFile.getFile()));
 			FileCopyUtils.copy(fingerPrintedFile.getInputStream(), out);
 		}
-		
+
 		assertTrue(gzJsFile.exists());
 		assertTrue(gzFingerPrintedFile.exists());
 	}
-	
+
 	@Before
 	public void setUp() {
 		List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
 		resolvers.add(new GzipResourceResolver());
-		resolvers.add(new FingerprintingResourceResolver());
+		resolvers.add(new FingerprintResourceResolver());
+		resolvers.add(new PathResourceResolver());
 		resolver = new DefaultResourceResolverChain(resolvers, new ArrayList<ResourceTransformer>());
 		locations = new ArrayList<Resource>();
 		locations.add(new ClassPathResource("test/", getClass()));
 		locations.add(new ClassPathResource("testalternatepath/", getClass()));
 	}
-	
+
 	@Test
 	public void resolveGzippedFile() throws IOException {
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -85,11 +86,13 @@ public class GzipResourceResolverTests {
 		String gzFile = file+".gz";
 		Resource resource = new ClassPathResource("test/"+gzFile, getClass());
 		Resource resolved = resolver.resolveAndTransform(request, file, locations);
+
 		assertEquals(resource.getDescription(), resolved.getDescription());
 		assertEquals(new ClassPathResource("test/"+file).getFilename(), resolved.getFilename());
-		assertTrue("Expected " + resolved + " to be of type " + EncodedResource.class, resolved instanceof EncodedResource);
+		assertTrue("Expected " + resolved + " to be of type " + EncodedResource.class,
+				resolved instanceof EncodedResource);
 	}
-	
+
 	@Test
 	public void resolveFingerprintedGzippedFile() throws IOException {
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -98,8 +101,10 @@ public class GzipResourceResolverTests {
 		String gzFile = file+".gz";
 		Resource resource = new ClassPathResource("test/"+gzFile, getClass());
 		Resource resolved = resolver.resolveAndTransform(request, file, locations);
+
 		assertEquals(resource.getDescription(), resolved.getDescription());
 		assertEquals(new ClassPathResource("test/"+file).getFilename(), resolved.getFilename());
-		assertTrue("Expected " + resolved + " to be of type " + EncodedResource.class, resolved instanceof EncodedResource);
+		assertTrue("Expected " + resolved + " to be of type " + EncodedResource.class,
+				resolved instanceof EncodedResource);
 	}
 }

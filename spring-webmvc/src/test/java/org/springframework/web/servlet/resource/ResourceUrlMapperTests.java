@@ -31,66 +31,68 @@ import static org.junit.Assert.*;
 
 
 /**
- * 
+ *
  * @author Jeremy Grelle
  */
 public class ResourceUrlMapperTests {
 
 	ResourceHttpRequestHandler handler;
-	
+
 	SimpleUrlHandlerMapping mapping;
-	
+
 	ResourceUrlMapper mapper;
-	
+
 	@Before
 	public void setUp() {
 		List<Resource> resourcePaths = new ArrayList<Resource>();
 		resourcePaths.add(new ClassPathResource("test/", getClass()));
 		resourcePaths.add(new ClassPathResource("testalternatepath/", getClass()));
-		
+
 		Map<String, ResourceHttpRequestHandler> urlMap = new HashMap<String, ResourceHttpRequestHandler>();
 		handler = new ResourceHttpRequestHandler();
 		handler.setLocations(resourcePaths);
 		urlMap.put("/resources/**", handler);
-		
+
 		mapping = new SimpleUrlHandlerMapping();
 		mapping.setUrlMap(urlMap);
 	}
-	
+
 	private void resetMapper() {
 		mapper = new ResourceUrlMapper();
 		mapper.postProcessAfterInitialization(mapping, "resourceMapping");
 		mapper.onApplicationEvent(null);
 	}
-	
+
 	@Test
 	public void getStaticResourceUrl() {
 		resetMapper();
-		
+
 		String url = mapper.getUrlForResource("/resources/foo.css");
 		assertEquals("/resources/foo.css", url);
 	}
-	
+
 	@Test
 	public void getFingerprintedResourceUrl() {
 		List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
-		resolvers.add(new FingerprintingResourceResolver());
+		resolvers.add(new FingerprintResourceResolver());
+		resolvers.add(new PathResourceResolver());
 		handler.setResourceResolvers(resolvers);
 		resetMapper();
-		
+
 		String url = mapper.getUrlForResource("/resources/foo.css");
 		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);
 	}
-	
+
 	@Test
 	public void getExtensionMappedResourceUrl() {
 		List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
 		resolvers.add(new ExtensionMappingResourceResolver());
+		resolvers.add(new PathResourceResolver());
 		handler.setResourceResolvers(resolvers);
 		resetMapper();
-		
+
 		String url = mapper.getUrlForResource("/resources/zoo.css");
 		assertEquals("/resources/zoo.css", url);
 	}
-	
+
 }

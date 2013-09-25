@@ -84,27 +84,18 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	private List<Resource> locations;
 
 	private List<ResourceResolver> resourceResolvers = new ArrayList<ResourceResolver>();
-	
-	private List<ResourceTransformer> resourceTransformers = new ArrayList<ResourceTransformer>();
-	
+
+	private List<ResourceTransformer> resourceTransformers;
+
 	private ResourceResolverChain resolverChain;
-	
+
+
 	public ResourceHttpRequestHandler() {
 		super(METHOD_GET, METHOD_HEAD);
+		this.resourceResolvers.add(new PathResourceResolver());
 	}
 
-	public List<Resource> getLocations() {
-		return this.locations;
-	}
-	
-	public List<ResourceResolver> getResourceResolvers() {
-		return this.resourceResolvers;
-	}
-	
-	public List<ResourceTransformer> getResourceTransformers() {
-		return this.resourceTransformers;
-	}
-	
+
 	/**
 	 * Set a {@code List} of {@code Resource} paths to use as sources
 	 * for serving static resources.
@@ -113,14 +104,33 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		Assert.notEmpty(locations, "Locations list must not be empty");
 		this.locations = locations;
 	}
-	
+
+	public List<Resource> getLocations() {
+		return this.locations;
+	}
+
+	/**
+	 * Configure the list of {@link ResourceResolver}s to use.
+	 * <p>
+	 * By default {@link PathResourceResolver} is configured. If using this property, it
+	 * is recommended to add {@link PathResourceResolver} as the last resolver.
+	 */
 	public void setResourceResolvers(List<ResourceResolver> resourceResolvers) {
 		this.resourceResolvers = resourceResolvers;
 	}
-	
+
+	public List<ResourceResolver> getResourceResolvers() {
+		return this.resourceResolvers;
+	}
+
 	public void setResourceTransformers(List<ResourceTransformer> resourceTransformers) {
 		this.resourceTransformers = resourceTransformers;
 	}
+
+	public List<ResourceTransformer> getResourceTransformers() {
+		return this.resourceTransformers;
+	}
+
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
@@ -198,7 +208,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 			return null;
 		}
 
-		return resolverChain.resolveAndTransform(request, path, locations);
+		return this.resolverChain.resolveAndTransform(request, path, this.locations);
 	}
 
 	/**
@@ -250,9 +260,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		if (mediaType != null) {
 			response.setContentType(mediaType.toString());
 		}
-		
+
 		if (resource instanceof EncodedResource) {
-			response.setHeader(CONTENT_ENCODING, ((EncodedResource) resource).getEncoding());
+			response.setHeader(CONTENT_ENCODING, ((EncodedResource) resource).getContentEncoding());
 		}
 	}
 
@@ -310,5 +320,5 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 			return (StringUtils.hasText(mediaType) ? MediaType.parseMediaType(mediaType) : null);
 		}
 	}
-	
+
  }

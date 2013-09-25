@@ -24,26 +24,26 @@ import org.springframework.core.io.Resource;
 
 
 /**
- * 
+ *
  * @author Jeremy Grelle
+ * @since 4.0
  */
 public abstract class AbstractResourceResolver implements ResourceResolver {
 
+
 	@Override
-	public final Resource resolve(HttpServletRequest request, String path,
+	public final Resource resolve(HttpServletRequest request, String requestPath,
 			List<Resource> locations, ResourceResolverChain chain) {
-		
-		Resource candidate = chain.next(this).resolve(request, path, locations, chain);
-		
-		return resolveInternal(request, path, locations, chain, candidate);
+
+		Resource resource = chain.next(this).resolve(request, requestPath, locations, chain);
+		return resolveInternal(request, requestPath, locations, chain, resource);
 	}
-	
+
 	protected abstract Resource resolveInternal(HttpServletRequest request, String path,
 			List<Resource> locations, ResourceResolverChain chain, Resource resolved);
 
 	@Override
-	public String resolveUrl(String resourcePath, List<Resource> locations,
-			ResourceResolverChain chain) {
+	public String resolveUrl(String resourcePath, List<Resource> locations, ResourceResolverChain chain) {
 		return chain.next(this).resolveUrl(resourcePath, locations, chain);
 	}
 
