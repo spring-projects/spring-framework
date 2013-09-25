@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,6 @@ public class SQLStateSQLExceptionTranslator extends AbstractFallbackSQLException
 		BAD_SQL_GRAMMAR_CODES.add("37");	// Syntax error dynamic SQL
 		BAD_SQL_GRAMMAR_CODES.add("42");	// General SQL syntax error
 		BAD_SQL_GRAMMAR_CODES.add("65");	// Oracle: unknown identifier
-		BAD_SQL_GRAMMAR_CODES.add("S0");	// MySQL uses this - from ODBC error codes?
 
 		DATA_INTEGRITY_VIOLATION_CODES.add("01");	// Data truncation
 		DATA_INTEGRITY_VIOLATION_CODES.add("02");	// No data found
