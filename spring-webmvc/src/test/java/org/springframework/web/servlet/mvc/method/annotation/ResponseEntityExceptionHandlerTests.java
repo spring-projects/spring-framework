@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.validation.BindException;
@@ -52,6 +53,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
@@ -181,6 +183,15 @@ public class ResponseEntityExceptionHandlerTests {
 	@Test
 	public void bindException() {
 		Exception ex = new BindException(new Object(), "name");
+		testException(ex);
+	}
+
+	@Test
+	public void noHandlerFoundException() {
+		ServletServerHttpRequest req = new ServletServerHttpRequest(
+				new MockHttpServletRequest("GET","/resource"));
+		Exception ex = new NoHandlerFoundException(req.getMethod().toString(),
+				req.getServletRequest().getRequestURI(),req.getHeaders());
 		testException(ex);
 	}
 

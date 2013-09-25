@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 
@@ -146,6 +147,9 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			}
 			else if (ex instanceof BindException) {
 				return handleBindException((BindException) ex, request, response, handler);
+			}
+			else if (ex instanceof NoHandlerFoundException) {
+				return handleNoHandlerFoundException((NoHandlerFoundException) ex, request, response, handler);
 			}
 		}
 		catch (Exception handlerException) {
@@ -413,6 +417,26 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	protected ModelAndView handleBindException(BindException ex, HttpServletRequest request,
 			HttpServletResponse response, Object handler) throws IOException {
 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+		return new ModelAndView();
+	}
+
+	/**
+	 * Handle the case where no handler was found during the dispatch.
+	 * <p>The default sends an HTTP 404 error, and returns
+	 * an empty {@code ModelAndView}. Alternatively, a fallback view could be chosen,
+	 * or the NoHandlerFoundException could be rethrown as-is.
+	 * @param ex the NoHandlerFoundException to be handled
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param handler the executed handler, or {@code null} if none chosen
+	 * at the time of the exception (for example, if multipart resolution failed)
+	 * @return an empty ModelAndView indicating the exception was handled
+	 * @throws IOException potentially thrown from response.sendError()
+	 * @since 4.0
+	 */
+	protected ModelAndView handleNoHandlerFoundException(NoHandlerFoundException ex, HttpServletRequest request,
+	                                           HttpServletResponse response, Object handler) throws IOException {
+		response.sendError(HttpServletResponse.SC_NOT_FOUND);
 		return new ModelAndView();
 	}
 

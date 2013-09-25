@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 
 /**
@@ -102,7 +103,8 @@ public abstract class ResponseEntityExceptionHandler {
 			HttpMessageNotWritableException.class,
 			MethodArgumentNotValidException.class,
 			MissingServletRequestPartException.class,
-			BindException.class
+			BindException.class,
+			NoHandlerFoundException.class
 		})
 	public final ResponseEntity<Object> handleException(Exception ex, WebRequest request) {
 
@@ -159,6 +161,10 @@ public abstract class ResponseEntityExceptionHandler {
 		else if (ex instanceof BindException) {
 			HttpStatus status = HttpStatus.BAD_REQUEST;
 			return handleBindException((BindException) ex, headers, status, request);
+		}
+		else if (ex instanceof NoHandlerFoundException) {
+			HttpStatus status = HttpStatus.NOT_FOUND;
+			return handleNoHandlerFoundException((NoHandlerFoundException) ex, headers, status, request);
 		}
 		else {
 			logger.warn("Unknown exception type: " + ex.getClass().getName());
@@ -394,6 +400,22 @@ public abstract class ResponseEntityExceptionHandler {
 	 */
 	protected ResponseEntity<Object> handleBindException(BindException ex, HttpHeaders headers,
 			HttpStatus status, WebRequest request) {
+
+		return handleExceptionInternal(ex, null, headers, status, request);
+	}
+
+	/**
+	 * Customize the response for NoHandlerFoundException.
+	 * This method delegates to {@link #handleExceptionInternal(Exception, Object, HttpHeaders, HttpStatus, WebRequest)}.
+	 * @param ex the exception
+	 * @param headers the headers to be written to the response
+	 * @param status the selected response status
+	 * @param request the current request
+	 * @return a {@code ResponseEntity} instance
+	 * @since 4.0
+	 */
+	protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException ex, HttpHeaders headers,
+	                                                     HttpStatus status, WebRequest request) {
 
 		return handleExceptionInternal(ex, null, headers, status, request);
 	}
