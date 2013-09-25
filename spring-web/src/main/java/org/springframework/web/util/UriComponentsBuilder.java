@@ -64,11 +64,11 @@ public class UriComponentsBuilder {
 
 	private static final String USERINFO_PATTERN = "([^@/]*)";
 
-	private static final String HOST_IPv4_PATTERN = "[^\\[/?#:]*";
+	private static final String HOST_IPV4_PATTERN = "[^\\[/?#:]*";
 
 	private static final String HOST_IPV6_PATTERN = "\\[[\\p{XDigit}\\:\\.]*[%\\p{Alnum}]*\\]";
 
-	private static final String HOST_PATTERN = "("+HOST_IPV6_PATTERN + "|" + HOST_IPv4_PATTERN + ")";
+	private static final String HOST_PATTERN = "(" + HOST_IPV6_PATTERN + "|" + HOST_IPV4_PATTERN + ")";
 
 	private static final String PORT_PATTERN = "(\\d*)";
 
