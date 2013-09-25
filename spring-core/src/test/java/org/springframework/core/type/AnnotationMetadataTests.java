@@ -98,7 +98,7 @@ public class AnnotationMetadataTests {
 		assertThat(metadata.hasAnnotation(Component.class.getName()), is(true));
 		assertThat(metadata.hasAnnotation(Scope.class.getName()), is(true));
 		assertThat(metadata.hasAnnotation(SpecialAttr.class.getName()), is(true));
-		assertThat(metadata.getAnnotationTypes().size(), is(5));
+		assertThat(metadata.getAnnotationTypes().size(), is(6));
 		assertThat(metadata.getAnnotationTypes().contains(Component.class.getName()), is(true));
 		assertThat(metadata.getAnnotationTypes().contains(Scope.class.getName()), is(true));
 		assertThat(metadata.getAnnotationTypes().contains(SpecialAttr.class.getName()), is(true));
@@ -247,6 +247,20 @@ public class AnnotationMetadataTests {
 	public @interface MetaMetaAnnotation {
 	}
 
+	@Target(ElementType.TYPE)
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface EnumSubclasses {
+		SubclassEnum[] value();
+	}
+
+	// SPR-10914
+	public static enum SubclassEnum {
+		FOO {
+		},
+		BAR {
+		};
+	}
+
 	@Component("myName")
 	@Scope("myScope")
 	@SpecialAttr(clazz = String.class, state = Thread.State.NEW,
@@ -258,6 +272,7 @@ public class AnnotationMetadataTests {
 	@SuppressWarnings({"serial", "unused"})
 	@DirectAnnotation("direct")
 	@MetaMetaAnnotation
+	@EnumSubclasses({ SubclassEnum.FOO, SubclassEnum.BAR })
 	private static class AnnotatedComponent implements Serializable {
 
 		@TestAutowired
