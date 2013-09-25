@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,12 +71,34 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implement
 	 * @return whether to invoke the advice method for the given return value
 	 */
 	private boolean shouldInvokeOnReturnValueOf(Method method, Object returnValue) {
-		Class type = getDiscoveredReturningType();
+		Class<?> type = getDiscoveredReturningType();
 		Type genericType = getDiscoveredReturningGenericType();
-		// If we aren't dealing with a raw type, check if  generic parameters are assignable.
-		return (ClassUtils.isAssignableValue(type, returnValue) &&
+		// If we aren't dealing with a raw type, check if generic parameters are assignable.
+		return (matchesReturnValue(type, method, returnValue) &&
 				(genericType == null || genericType == type ||
 						TypeUtils.isAssignable(genericType, method.getGenericReturnType())));
+	}
+
+	/**
+	 * Following AspectJ semantics, if a return value is null (or return type is void),
+	 * then the return type of target method should be used to determine whether advice
+	 * is invoked or not. Also, even if the return type is void, if the type of argument
+	 * declared in the advice method is Object, then the advice must still get invoked.
+	 * @param type the type of argument declared in advice method
+	 * @param method the advice method
+	 * @param returnValue the return value of the target method
+	 * @return whether to invoke the advice method for the given return value and type
+	 */
+	private boolean matchesReturnValue(Class<?> type, Method method, Object returnValue) {
+		if (returnValue != null) {
+			return ClassUtils.isAssignableValue(type, returnValue);
+		}
+		else if (type.equals(Object.class) && method.getReturnType().equals(void.class)) {
+			return true;
+		}
+		else{
+			return ClassUtils.isAssignable(type, method.getReturnType());
+		}
 	}
 
 }
