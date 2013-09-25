@@ -25,9 +25,7 @@ import java.net.URISyntaxException;
 
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -45,20 +43,38 @@ public class UriComponentsTests {
 
 	@Test
 	public void toUriEncoded() throws URISyntaxException {
-		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/hotel list/Z\u00fcrich").build();
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(
+				"http://example.com/hotel list/Z\u00fcrich").build();
+		assertEquals(new URI("http://example.com/hotel%20list/Z%C3%BCrich"), uriComponents.encode().toUri());
+	}
+
+	@Test
+	public void toUriNotEncoded() throws URISyntaxException {
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(
+				"http://example.com/hotel list/Z\u00fcrich").build();
+		assertEquals(new URI("http://example.com/hotel%20list/Z\u00fcrich"), uriComponents.toUri());
+	}
+
+	@Test
+	public void toUriAlreadyEncoded() throws URISyntaxException {
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(
+				"http://example.com/hotel%20list/Z%C3%BCrich").build(true);
 		UriComponents encoded = uriComponents.encode();
 		assertEquals(new URI("http://example.com/hotel%20list/Z%C3%BCrich"), encoded.toUri());
 	}
 
 	@Test
-	public void toUriNotEncoded() throws URISyntaxException {
-		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/hotel list/Z\u00fcrich").build();
-		assertEquals(new URI("http://example.com/hotel%20list/Z\u00fcrich"), uriComponents.toUri());
+	public void toUriWithIpv6HostAlreadyEncoded() throws URISyntaxException {
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(
+				"http://[1abc:2abc:3abc::5ABC:6abc]:8080/hotel%20list/Z%C3%BCrich").build(true);
+		UriComponents encoded = uriComponents.encode();
+		assertEquals(new URI("http://[1abc:2abc:3abc::5ABC:6abc]:8080/hotel%20list/Z%C3%BCrich"), encoded.toUri());
 	}
 
 	@Test
 	public void expand() {
-		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com").path("/{foo} {bar}").build();
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(
+				"http://example.com").path("/{foo} {bar}").build();
 		uriComponents = uriComponents.expand("1 2", "3 4");
 		assertEquals("/1 2 3 4", uriComponents.getPath());
 		assertEquals("http://example.com/1 2 3 4", uriComponents.toUriString());

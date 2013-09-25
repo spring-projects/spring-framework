@@ -254,7 +254,7 @@ public abstract class UriUtils {
 	 */
 	public static String encodeHost(String host, String encoding) throws UnsupportedEncodingException {
 		return HierarchicalUriComponents
-				.encodeUriComponent(host, encoding, HierarchicalUriComponents.Type.HOST);
+				.encodeUriComponent(host, encoding, HierarchicalUriComponents.Type.HOST_IPV4);
 	}
 
 	/**
