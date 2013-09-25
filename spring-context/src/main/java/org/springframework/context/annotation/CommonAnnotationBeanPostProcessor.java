@@ -473,10 +473,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 		public LookupElement(Member member, PropertyDescriptor pd) {
 			super(member, pd);
-			initAnnotation((AnnotatedElement) member);
 		}
-
-		protected abstract void initAnnotation(AnnotatedElement ae);
 
 		/**
 		 * Return the resource name for the lookup.
@@ -512,14 +509,11 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 */
 	private class ResourceElement extends LookupElement {
 
-		protected boolean shareable = true;
+		protected final boolean shareable;
 
 		public ResourceElement(Member member, PropertyDescriptor pd) {
 			super(member, pd);
-		}
-
-		@Override
-		protected void initAnnotation(AnnotatedElement ae) {
+			AnnotatedElement ae = (AnnotatedElement) member;
 			Resource resource = ae.getAnnotation(Resource.class);
 			String resourceName = resource.name();
 			Class<?> resourceType = resource.type();
@@ -559,16 +553,13 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 */
 	private class WebServiceRefElement extends LookupElement {
 
-		private Class<?> elementType;
+		private final Class<?> elementType;
 
-		private String wsdlLocation;
+		private final String wsdlLocation;
 
 		public WebServiceRefElement(Member member, PropertyDescriptor pd) {
 			super(member, pd);
-		}
-
-		@Override
-		protected void initAnnotation(AnnotatedElement ae) {
+			AnnotatedElement ae = (AnnotatedElement) member;
 			WebServiceRef resource = ae.getAnnotation(WebServiceRef.class);
 			String resourceName = resource.name();
 			Class<?> resourceType = resource.type();
@@ -648,14 +639,11 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 */
 	private class EjbRefElement extends LookupElement {
 
-		private String beanName;
+		private final String beanName;
 
 		public EjbRefElement(Member member, PropertyDescriptor pd) {
 			super(member, pd);
-		}
-
-		@Override
-		protected void initAnnotation(AnnotatedElement ae) {
+			AnnotatedElement ae = (AnnotatedElement) member;
 			EJB resource = ae.getAnnotation(EJB.class);
 			String resourceBeanName = resource.beanName();
 			String resourceName = resource.name();
