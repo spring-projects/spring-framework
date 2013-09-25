@@ -100,7 +100,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.xml.StaxUtils;
 
 /**
- * Implementation of the {@code Marshaller} interface for JAXB 2.0.
+ * Implementation of the {@code GenericMarshaller} interface for JAXB 2.1/2.2,
+ * as included in JDK 6 update 4+ and Java 7/8.
  *
  * <p>The typical usage will be to set either the "contextPath" or the "classesToBeBound"
  * property on this bean, possibly customize the marshaller and unmarshaller by setting

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,9 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link org.aopalliance.intercept.MethodInterceptor} for accessing a specific
- * port of a JAX-WS service. Compatible with JAX-WS 2.1 and 2.2.
+ * {@link org.aopalliance.intercept.MethodInterceptor} for accessing a
+ * specific port of a JAX-WS service. Compatible with JAX-WS 2.1 and 2.2,
+ * as included in JDK 6 update 4+ and Java 7/8.
  *
  * <p>Uses either {@link LocalJaxWsServiceFactory}'s facilities underneath,
  * or takes an explicit reference to an existing JAX-WS Service instance
@@ -262,7 +263,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	/**
 	 * Specify WebServiceFeature objects (e.g. as inner bean definitions)
 	 * to apply to JAX-WS port stub creation.
-	 * <p>Note: This mechanism requires a fully JAX-WS 2.1 compliant provider.
+	 * @since 4.0
 	 * @see Service#getPort(Class, javax.xml.ws.WebServiceFeature...)
 	 * @see #setServiceFeatures
 	 */
