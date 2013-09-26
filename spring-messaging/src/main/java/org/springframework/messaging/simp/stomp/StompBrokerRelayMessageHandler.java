@@ -438,7 +438,12 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 		public void setDisconnected() {
 			this.readyConnection.set(null);
-			this.connection = null;
+
+			TcpConnection<Message<byte[]>, Message<byte[]>> localConnection = this.connection;
+			if (localConnection != null) {
+				localConnection.close();
+				this.connection = null;
+			}
 		}
 
 		@Override
@@ -499,7 +504,10 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 					@Override
 					public void run() {
-						stompConnection.connection.send(MessageBuilder.withPayload(heartbeatPayload).build());
+						TcpConnection<Message<byte[]>, Message<byte[]>> connection = stompConnection.connection;
+						if (connection != null) {
+							connection.send(MessageBuilder.withPayload(heartbeatPayload).build());
+						}
 					}
 
 				});
