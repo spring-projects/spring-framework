@@ -77,7 +77,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 
 	private int streamBytesLimit = 128 * 1024;
 
-	private boolean sessionCookieEnabled = false;
+	private boolean sessionCookieNeeded = true;
 
 	private long heartbeatTime = 25 * 1000;
 
@@ -188,22 +188,35 @@ public abstract class AbstractSockJsService implements SockJsService {
 	}
 
 	/**
-	 * Some load balancers do sticky sessions, but only if there is a "JSESSIONID"
-	 * cookie. Even if it is set to a dummy value, it doesn't matter since
-	 * session information is added by the load balancer.
-	 *
-	 * <p>The default value is "false" since Java servers set the session cookie.
+	 * The SockJS protocol requires a server to respond to an initial "/info" request from
+	 * clients with a "cookie_needed" boolean property that indicates whether the use of a
+	 * JSESSIONID cookie is required for the application to function correctly, e.g. for
+	 * load balancing or in Java Servlet containers for the use of an HTTP session.
+	 * <p>
+	 * This is especially important for IE 8,9 that support XDomainRequest -- a modified
+	 * AJAX/XHR -- that can do requests across domains but does not send any cookies. In
+	 * those cases, the SockJS client prefers the "iframe-htmlfile" transport over
+	 * "xdr-streaming" in order to be able to send cookies.
+	 * <p>
+	 * The SockJS protocol also expects a SockJS service to echo back the JSESSIONID
+	 * cookie when this property is set to true. However, when running in a Servlet
+	 * container this is not necessary since the container takes care of it.
+	 * <p>
+	 * The default value is "true" to maximize the chance for applications to work
+	 * correctly in IE 8,9 with support for cookies (and the JSESSIONID cookie in
+	 * particular). However, an application can choose to set this to "false" if
+	 * the use of cookies (and HTTP session) is not required.
 	 */
-	public void setDummySessionCookieEnabled(boolean sessionCookieEnabled) {
-		this.sessionCookieEnabled = sessionCookieEnabled;
+	public void setSessionCookieNeeded(boolean sessionCookieNeeded) {
+		this.sessionCookieNeeded = sessionCookieNeeded;
 	}
 
 	/**
-	 * Whether setting JSESSIONID cookie is necessary.
-	 * @see #setDummySessionCookieEnabled(boolean)
+	 * Whether JSESSIONID cookie is required for the application to function. For
+	 * more detail see {@link #setSessionCookieNeeded(boolean)}.
 	 */
-	public boolean isDummySessionCookieEnabled() {
-		return this.sessionCookieEnabled;
+	public boolean isSessionCookieNeeded() {
+		return this.sessionCookieNeeded;
 	}
 
 	/**
@@ -506,7 +519,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 				addCorsHeaders(request, response);
 				addNoCacheHeaders(response);
 
-				String content = String.format(INFO_CONTENT, random.nextInt(), isDummySessionCookieEnabled(), isWebSocketEnabled());
+				String content = String.format(INFO_CONTENT, random.nextInt(), isSessionCookieNeeded(), isWebSocketEnabled());
 				response.getBody().write(content.getBytes());
 			}
 			else if (HttpMethod.OPTIONS.equals(request.getMethod())) {

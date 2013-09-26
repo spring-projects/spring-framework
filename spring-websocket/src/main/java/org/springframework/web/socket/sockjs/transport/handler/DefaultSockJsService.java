@@ -29,7 +29,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
@@ -306,11 +305,6 @@ public class DefaultSockJsService extends AbstractSockJsService {
 				addNoCacheHeaders(response);
 			}
 
-			if (transportType.sendsSessionCookie() && isDummySessionCookieEnabled()) {
-				String cookieValue = getJsessionIdCookieValue(request.getHeaders());
-				response.getHeaders().set("Set-Cookie", "JSESSIONID=" + cookieValue + ";path=/");
-			}
-
 			if (transportType.supportsCors()) {
 				addCorsHeaders(request, response);
 			}
@@ -384,20 +378,6 @@ public class DefaultSockJsService extends AbstractSockJsService {
 				}
 			}
 		}, getDisconnectDelay());
-	}
-
-	private String getJsessionIdCookieValue(HttpHeaders headers) {
-		List<String> rawCookies = headers.get("Cookie");
-		if (!CollectionUtils.isEmpty(rawCookies)) {
-			for (String rawCookie : rawCookies) {
-				if (rawCookie.startsWith("JSESSIONID=")) {
-					int start = "JSESSIONID=".length();
-					int end = rawCookie.indexOf(';');
-					return (end != -1) ? rawCookie.substring(start, end) : rawCookie.substring(start);
-				}
-			}
-		}
-		return "dummy";
 	}
 
 

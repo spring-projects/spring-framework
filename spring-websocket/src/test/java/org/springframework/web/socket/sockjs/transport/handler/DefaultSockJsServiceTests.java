@@ -152,40 +152,6 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	}
 
 	@Test
-	public void dummySessionCookieEnabled() throws Exception {
-
-		setRequest("POST", sessionUrlPrefix + "xhr");
-		this.service.setDummySessionCookieEnabled(true);
-		this.service.handleRequest(this.request, this.response, this.wsHandler);
-		this.response.flush();
-
-		assertEquals(200, this.servletResponse.getStatus());
-		assertEquals("JSESSIONID=dummy;path=/", this.servletResponse.getHeader("Set-Cookie"));
-	}
-
-	@Test
-	public void dummySessionCookieDisabled() throws Exception {
-
-		setRequest("POST", sessionUrlPrefix + "xhr");
-		this.service.setDummySessionCookieEnabled(false);
-		this.service.handleTransportRequest(this.request, this.response, this.wsHandler, sessionId, "xhr");
-
-		assertEquals(200, this.servletResponse.getStatus());
-		assertNull(this.servletResponse.getHeader("Set-Cookie"));
-	}
-
-	@Test
-	public void dummySessionCookieReuseRequestCookieValue() throws Exception {
-
-		setRequest("POST", sessionUrlPrefix + "xhr");
-		this.servletRequest.addHeader("Cookie", "JSESSIONID=123456789");
-		this.service.handleTransportRequest(this.request, this.response, this.wsHandler, sessionId, "xhr");
-
-		assertEquals(200, this.servletResponse.getStatus());
-		assertNull(this.servletResponse.getHeader("Set-Cookie"));
-	}
-
-	@Test
 	public void handleTransportRequestNoSuitableHandler() throws Exception {
 
 		setRequest("POST", sessionUrlPrefix + "eventsource");

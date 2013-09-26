@@ -44,7 +44,7 @@ public class SockJsServiceRegistration {
 
 	private Integer streamBytesLimit;
 
-	private Boolean sessionCookieEnabled;
+	private Boolean sessionCookieNeeded;
 
 	private Long heartbeatTime;
 
@@ -105,14 +105,23 @@ public class SockJsServiceRegistration {
 	}
 
 	/**
-	 * Some load balancers do sticky sessions, but only if there is a "JSESSIONID"
-	 * cookie. Even if it is set to a dummy value, it doesn't matter since
-	 * session information is added by the load balancer.
-	 *
-	 * <p>The default value is "false" since Java servers set the session cookie.
+	 * The SockJS protocol requires a server to respond to the initial "/info" request
+	 * from clients with a "cookie_needed" boolean property that indicates whether the use
+	 * of a JSESSIONID cookie is required for the application to function correctly, e.g.
+	 * for load balancing or in Java Servlet containers for the use of an HTTP session.
+	 * <p>
+	 * This is especially important for IE 8,9 that support XDomainRequest -- a modified
+	 * AJAX/XHR -- that can do requests across domains but does not send any cookies. In
+	 * those cases, the SockJS client prefers the "iframe-htmlfile" transport over
+	 * "xdr-streaming" in order to be able to send cookies.
+	 * <p>
+	 * The default value is "true" to maximize the chance for applications to work
+	 * correctly in IE 8,9 with support for cookies (and the JSESSIONID cookie in
+	 * particular). However, an application can choose to set this to "false" if the use
+	 * of cookies (and HTTP session) is not required.
 	 */
-	public SockJsServiceRegistration setDummySessionCookieEnabled(boolean sessionCookieEnabled) {
-		this.sessionCookieEnabled = sessionCookieEnabled;
+	public SockJsServiceRegistration setSessionCookieNeeded(boolean sessionCookieNeeded) {
+		this.sessionCookieNeeded = sessionCookieNeeded;
 		return this;
 	}
 
@@ -201,8 +210,8 @@ public class SockJsServiceRegistration {
 		if (this.streamBytesLimit != null) {
 			service.setStreamBytesLimit(this.streamBytesLimit);
 		}
-		if (this.sessionCookieEnabled != null) {
-			service.setDummySessionCookieEnabled(this.sessionCookieEnabled);
+		if (this.sessionCookieNeeded != null) {
+			service.setSessionCookieNeeded(this.sessionCookieNeeded);
 		}
 		if (this.heartbeatTime != null) {
 			service.setHeartbeatTime(this.heartbeatTime);
