@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.springframework.core.type.filter.TypeFilter;
  * always registered, meaning that any attempt to disable them at the
  * {@code @ComponentScan} level would be ignored.
  *
- * <p>See @{@link Configuration} Javadoc for usage examples.
+ * <p>See @{@link Configuration}'s javadoc for usage examples.
  *
  * @author Chris Beams
  * @since 3.1
@@ -139,24 +139,18 @@ public @interface ComponentScan {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({})
 	@interface Filter {
+
 		/**
-		 * The type of filter to use.
-		 * <p>Note that the filter types available are limited to those that may
-		 * be expressed as a {@code Class} in the {@link #value()} attribute. This is
-		 * in contrast to {@code <context:component-scan/>}, which allows for
-		 * expression-based (i.e., string-based) filters such as AspectJ pointcuts.
-		 * These filter types are intentionally not supported here, and not available
-		 * in the {@link FilterType} enum.
-		 * @see FilterType
+		 * The type of filter to use. Default is {@link FilterType#ANNOTATION}.
 		 */
 		FilterType type() default FilterType.ANNOTATION;
 
 		/**
 		 * The class or classes to use as the filter. In the case of
-		 * {@link FilterType#ANNOTATION}, the class will be the annotation itself. In the
-		 * case of {@link FilterType#ASSIGNABLE_TYPE}, the class will be the type that
-		 * detected components should be assignable to. And in the case of
-		 * {@link FilterType#CUSTOM}, the class will be an implementation of
+		 * {@link FilterType#ANNOTATION}, the class will be the annotation itself.
+		 * In the case of {@link FilterType#ASSIGNABLE_TYPE}, the class will be the
+		 * type that detected components should be assignable to. And in the case
+		 * of {@link FilterType#CUSTOM}, the class will be an implementation of
 		 * {@link TypeFilter}.
 		 * <p>When multiple classes are specified, OR logic is applied, e.g. "include
 		 * types annotated with {@code @Foo} OR {@code @Bar}".

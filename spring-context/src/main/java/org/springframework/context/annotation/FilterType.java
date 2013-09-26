@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,6 @@
  */
 
 package org.springframework.context.annotation;
-
-import org.springframework.core.type.filter.AssignableTypeFilter;
-
 
 /**
  * Enumeration of the type filters that may be used in conjunction with
@@ -42,12 +39,12 @@ public enum FilterType {
 
 	/**
 	 * Filter candidates assignable to a given type.
-	 * @see AssignableTypeFilter
+	 * @see org.springframework.core.type.filter.AssignableTypeFilter
 	 */
 	ASSIGNABLE_TYPE,
 
 	/** Filter candidates using a given custom
-	 * {@link org.springframework.core.type.filter.TypeFilter} implementation
+	 * {@link org.springframework.core.type.filter.TypeFilter} implementation.
 	 */
 	CUSTOM
 
