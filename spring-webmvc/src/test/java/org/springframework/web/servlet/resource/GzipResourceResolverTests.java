@@ -72,7 +72,7 @@ public class GzipResourceResolverTests {
 		resolvers.add(new GzipResourceResolver());
 		resolvers.add(new FingerprintResourceResolver());
 		resolvers.add(new PathResourceResolver());
-		resolver = new DefaultResourceResolverChain(resolvers, new ArrayList<ResourceTransformer>());
+		resolver = new DefaultResourceResolverChain(resolvers);
 		locations = new ArrayList<Resource>();
 		locations.add(new ClassPathResource("test/", getClass()));
 		locations.add(new ClassPathResource("testalternatepath/", getClass()));
@@ -85,7 +85,7 @@ public class GzipResourceResolverTests {
 		String file = "js/foo.js";
 		String gzFile = file+".gz";
 		Resource resource = new ClassPathResource("test/"+gzFile, getClass());
-		Resource resolved = resolver.resolveAndTransform(request, file, locations);
+		Resource resolved = resolver.resolveResource(request, file, locations);
 
 		assertEquals(resource.getDescription(), resolved.getDescription());
 		assertEquals(new ClassPathResource("test/"+file).getFilename(), resolved.getFilename());
@@ -100,7 +100,7 @@ public class GzipResourceResolverTests {
 		String file = "foo-e36d2e05253c6c7085a91522ce43a0b4.css";
 		String gzFile = file+".gz";
 		Resource resource = new ClassPathResource("test/"+gzFile, getClass());
-		Resource resolved = resolver.resolveAndTransform(request, file, locations);
+		Resource resolved = resolver.resolveResource(request, file, locations);
 
 		assertEquals(resource.getDescription(), resolved.getDescription());
 		assertEquals(new ClassPathResource("test/"+file).getFilename(), resolved.getFilename());

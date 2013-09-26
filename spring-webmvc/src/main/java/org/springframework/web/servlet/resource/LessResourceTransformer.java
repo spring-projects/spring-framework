@@ -61,7 +61,7 @@ public class LessResourceTransformer implements ResourceTransformer {
 	}
 
 	@Override
-	public boolean handles(HttpServletRequest request, Resource original) {
+	public boolean willTransform(HttpServletRequest request, Resource original) {
 		return LESS_EXT.equals(StringUtils.getFilenameExtension(original.getFilename()));
 	}
 

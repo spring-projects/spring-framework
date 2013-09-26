@@ -48,7 +48,7 @@ public class FingerprintResourceResolverTests {
 		List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
 		resolvers.add(resolver);
 		resolvers.add(new PathResourceResolver());
-		chain = new DefaultResourceResolverChain(resolvers, new ArrayList<ResourceTransformer>());
+		chain = new DefaultResourceResolverChain(resolvers);
 		locations = new ArrayList<Resource>();
 		locations.add(new ClassPathResource("test/", getClass()));
 		locations.add(new ClassPathResource("testalternatepath/", getClass()));
@@ -59,7 +59,7 @@ public class FingerprintResourceResolverTests {
 	public void resolveWithoutHash() throws Exception {
 		String file = "bar.css";
 		Resource expected = new ClassPathResource("test/" + file, getClass());
-		Resource actual = chain.resolveAndTransform(null, file, locations);
+		Resource actual = chain.resolveResource(null, file, locations);
 
 		assertEquals(expected, actual);
 	}
@@ -67,14 +67,14 @@ public class FingerprintResourceResolverTests {
 	@Test
 	public void resolveWithHashNoMatch() throws Exception {
 		String file = "bogus-e36d2e05253c6c7085a91522ce43a0b4.css";
-		assertNull(chain.resolveAndTransform(null, file, locations));
+		assertNull(chain.resolveResource(null, file, locations));
 	}
 
 	@Test
 	public void resolveStaticFingerprintedResource() throws Exception {
 		String file = "foo-e36d2e05253c6c7085a91522ce43a0b4.css";
 		Resource expected = new ClassPathResource("test/"+file, getClass());
-		Resource actual = chain.resolveAndTransform(null, file, locations);
+		Resource actual = chain.resolveResource(null, file, locations);
 
 		assertEquals(expected, actual);
 	}
@@ -84,7 +84,7 @@ public class FingerprintResourceResolverTests {
 		Resource expected = new ClassPathResource("test/bar.css", getClass());
 		String hash = DigestUtils.md5DigestAsHex(FileCopyUtils.copyToByteArray(expected.getInputStream()));
 		String path = "/bar-" + hash + ".css";
-		Resource actual = chain.resolveAndTransform(null, path, locations);
+		Resource actual = chain.resolveResource(null, path, locations);
 
 		assertEquals(expected, actual);
 	}
@@ -94,7 +94,7 @@ public class FingerprintResourceResolverTests {
 		Resource expected = new ClassPathResource("test/bar.min.css", getClass());
 		String hash = DigestUtils.md5DigestAsHex(FileCopyUtils.copyToByteArray(expected.getInputStream()));
 		String path = "/bar.min-" + hash + ".css";
-		Resource actual = chain.resolveAndTransform(null, path, locations);
+		Resource actual = chain.resolveResource(null, path, locations);
 
 		assertEquals(expected, actual);
 	}
@@ -104,7 +104,7 @@ public class FingerprintResourceResolverTests {
 		Resource expected = new ClassPathResource("test/foo-bar/foo-bar.css", getClass());
 		String hash = DigestUtils.md5DigestAsHex(FileCopyUtils.copyToByteArray(expected.getInputStream()));
 		String path = "/foo-bar/foo-bar-" + hash + ".css";
-		Resource actual = chain.resolveAndTransform(null, path, locations);
+		Resource actual = chain.resolveResource(null, path, locations);
 
 		assertEquals(expected, actual);
 	}

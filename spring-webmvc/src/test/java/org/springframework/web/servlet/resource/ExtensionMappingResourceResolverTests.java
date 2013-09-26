@@ -40,9 +40,9 @@ public class ExtensionMappingResourceResolverTests {
 	@Before
 	public void setUp() {
 		List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
-		resolvers.add(new ExtensionMappingResourceResolver());
+		resolvers.add(new PathExtensionResourceResolver());
 		resolvers.add(new PathResourceResolver());
-		resolver = new DefaultResourceResolverChain(resolvers,  new ArrayList<ResourceTransformer>());
+		resolver = new DefaultResourceResolverChain(resolvers);
 		locations = new ArrayList<Resource>();
 		locations.add(new ClassPathResource("test/", getClass()));
 		locations.add(new ClassPathResource("testalternatepath/", getClass()));
@@ -52,7 +52,7 @@ public class ExtensionMappingResourceResolverTests {
 	public void resolveLessResource() throws Exception {
 		String resourceId = "zoo.css";
 		Resource resource = new ClassPathResource("test/" + resourceId + ".less", getClass());
-		Resource resolved = resolver.resolveAndTransform(null, resourceId, locations);
+		Resource resolved = resolver.resolveResource(null, resourceId, locations);
 		assertEquals(resource, resolved);
 	}
 
@@ -60,6 +60,6 @@ public class ExtensionMappingResourceResolverTests {
 	public void resolveLessUrl() {
 		String resourceId = "zoo.css";
 		String url = "zoo.css";
-		assertEquals(url, resolver.resolveUrl(resourceId, locations));
+		assertEquals(url, resolver.resolveUrlPath(resourceId, locations));
 	}
 }

@@ -24,15 +24,40 @@ import org.springframework.core.io.Resource;
 
 
 /**
+ * A strategy for two way resolution of URL paths to actual {@link Resource}s located
+ * from one or more configured locations.
  *
  * @author Jeremy Grelle
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
 public interface ResourceResolver {
 
-		public Resource resolve(HttpServletRequest request, String requestPath,
-				List<Resource> locations, ResourceResolverChain chain);
+	/**
+	 * Resolve the URL path of an incoming request to an actual {@link Resource}.
+	 *
+	 * @param request the current request
+	 * @param requestPath the portion of the request path to use
+	 * @param locations the configured locations where to look up resources
+	 * @param chain the chain with remaining resolvers to delegate to
+	 *
+	 * @return the resolved {@link Resource} or {@code null} if this resolver could not
+	 *         resolve the resource
+	 */
+	Resource resolveResource(HttpServletRequest request, String requestPath,
+			List<Resource> locations, ResourceResolverChain chain);
 
-		public String resolveUrl(String resourcePath, List<Resource> locations,
-				ResourceResolverChain chain);
+	/**
+	 * Resolve the given resource path to a URL path. This is useful when rendering URL
+	 * links to clients to determine the actual URL to use.
+	 *
+	 * @param resourcePath the resource path
+	 * @param locations the configured locations where to look up resources
+	 * @param chain the chain with remaining resolvers to delegate to
+	 *
+	 * @return the resolved URL path or {@code null} if this resolver could not resolve
+	 *         the given resource path
+	 */
+	String resolveUrlPath(String resourcePath, List<Resource> locations, ResourceResolverChain chain);
+
 }

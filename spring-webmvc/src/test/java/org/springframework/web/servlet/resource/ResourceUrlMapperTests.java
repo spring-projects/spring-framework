@@ -86,7 +86,7 @@ public class ResourceUrlMapperTests {
 	@Test
 	public void getExtensionMappedResourceUrl() {
 		List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
-		resolvers.add(new ExtensionMappingResourceResolver());
+		resolvers.add(new PathExtensionResourceResolver());
 		resolvers.add(new PathResourceResolver());
 		handler.setResourceResolvers(resolvers);
 		resetMapper();

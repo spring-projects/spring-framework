@@ -85,9 +85,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 
 	private List<ResourceResolver> resourceResolvers = new ArrayList<ResourceResolver>();
 
-	private List<ResourceTransformer> resourceTransformers;
-
-	private ResourceResolverChain resolverChain;
+	private List<ResourceTransformer> resourceTransformers = new ArrayList<ResourceTransformer>();
 
 
 	public ResourceHttpRequestHandler() {
@@ -123,21 +121,19 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		return this.resourceResolvers;
 	}
 
-	public void setResourceTransformers(List<ResourceTransformer> resourceTransformers) {
-		this.resourceTransformers = resourceTransformers;
+	public void setResourceTransformers(List<ResourceTransformer> transformers) {
+		this.resourceTransformers = (transformers != null) ? transformers : new ArrayList<ResourceTransformer>();
 	}
 
 	public List<ResourceTransformer> getResourceTransformers() {
 		return this.resourceTransformers;
 	}
 
-
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (logger.isWarnEnabled() && CollectionUtils.isEmpty(this.locations)) {
 			logger.warn("Locations list is empty. No resources will be served");
 		}
-		this.resolverChain = new DefaultResourceResolverChain(this.resourceResolvers, this.resourceTransformers);
 	}
 
 	/**
@@ -208,7 +204,19 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 			return null;
 		}
 
-		return this.resolverChain.resolveAndTransform(request, path, this.locations);
+		ResourceResolverChain chain = new DefaultResourceResolverChain(this.resourceResolvers);
+		Resource resource = chain.resolveResource(request, path, this.locations);
+
+		return (resource != null) ? applyTransformers(request, resource) : null;
+	}
+
+	private Resource applyTransformers(HttpServletRequest request, Resource resource) throws IOException {
+		for (ResourceTransformer transformer : this.resourceTransformers) {
+			if (transformer.willTransform(request, resource)) {
+				return applyTransformers(request, transformer.transform(resource));
+			}
+		}
+		return resource;
 	}
 
 	/**

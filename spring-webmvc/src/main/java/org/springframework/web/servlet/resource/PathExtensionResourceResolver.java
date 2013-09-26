@@ -32,36 +32,38 @@ import org.springframework.util.StringUtils;
 /**
  *
  * @author Jeremy Grelle
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class ExtensionMappingResourceResolver extends AbstractResourceResolver {
+public class PathExtensionResourceResolver implements ResourceResolver {
 
-	private static final Log logger = LogFactory.getLog(ExtensionMappingResourceResolver.class);
+	private static final Log logger = LogFactory.getLog(PathExtensionResourceResolver.class);
 
 	private final boolean compareTimeStamp;
 
 
-	public ExtensionMappingResourceResolver() {
+	public PathExtensionResourceResolver() {
 		this.compareTimeStamp = false;
 	}
 
-	public ExtensionMappingResourceResolver(boolean compareTimeStamp) {
+	public PathExtensionResourceResolver(boolean compareTimeStamp) {
 		this.compareTimeStamp = compareTimeStamp;
 	}
 
 
 	@Override
-	protected Resource resolveInternal(HttpServletRequest request, String path,
-			List<Resource> locations, ResourceResolverChain chain, Resource resource) {
+	public Resource resolveResource(HttpServletRequest request, String requestPath,
+			List<Resource> locations, ResourceResolverChain chain) {
 
+		Resource resource = chain.resolveResource(request, requestPath, locations);
 		if ((resource != null) && !this.compareTimeStamp) {
 			return resource;
 		}
 
 		for (Resource location : locations) {
-			String baseFilename = StringUtils.getFilename(path);
+			String baseFilename = StringUtils.getFilename(requestPath);
 			try {
-				Resource basePath = location.createRelative(StringUtils.delete(path, baseFilename));
+				Resource basePath = location.createRelative(StringUtils.delete(requestPath, baseFilename));
 				if (basePath.getFile().isDirectory()) {
 					for (String fileName : basePath.getFile().list(new ExtensionFilenameFilter(baseFilename))) {
 						//Always use the first match
@@ -84,15 +86,15 @@ public class ExtensionMappingResourceResolver extends AbstractResourceResolver {
 	}
 
 	@Override
-	public String resolveUrl(String resourcePath, List<Resource> locations,
+	public String resolveUrlPath(String resourcePath, List<Resource> locations,
 			ResourceResolverChain chain) {
 
-		String resolved = super.resolveUrl(resourcePath, locations, chain);
+		String resolved = chain.resolveUrlPath(resourcePath, locations);
 		if (StringUtils.hasText(resolved)) {
 			return resolved;
 		}
 
-		Resource mappedResource = resolveInternal(null, resourcePath, locations, chain, null);
+		Resource mappedResource = resolveResource(null, resourcePath, locations, chain);
 		if (mappedResource != null) {
 			return resourcePath;
 		}

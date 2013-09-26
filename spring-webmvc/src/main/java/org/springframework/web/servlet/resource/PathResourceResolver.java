@@ -28,7 +28,7 @@ import org.springframework.core.io.Resource;
 
 /**
  * A simple path-based {@link ResourceResolver} that appends the request path to each
- * configured Resource location and checks if such a Resource exists.
+ * configured Resource location and checks if such a resource exists.
  *
  * @author Jeremy Grelle
  * @author Rossen Stoyanchev
@@ -40,13 +40,18 @@ public class PathResourceResolver implements ResourceResolver {
 
 
 	@Override
-	public Resource resolve(HttpServletRequest request, String requestPath, List<Resource> locations,
-			ResourceResolverChain chain) {
+	public Resource resolveResource(HttpServletRequest request,
+			String requestPath, List<Resource> locations, ResourceResolverChain chain) {
 
-		return resolveInternal(requestPath, locations);
+		return getResource(requestPath, locations);
 	}
 
-	private Resource resolveInternal(String path, List<Resource> locations) {
+	@Override
+	public String resolveUrlPath(String resourcePath, List<Resource> locations, ResourceResolverChain chain) {
+		return (getResource(resourcePath, locations) != null) ? resourcePath : null;
+	}
+
+	private Resource getResource(String path, List<Resource> locations) {
 		for (Resource location : locations) {
 			try {
 				if (logger.isDebugEnabled()) {
@@ -66,14 +71,6 @@ public class PathResourceResolver implements ResourceResolver {
 			catch (IOException ex) {
 				logger.debug("Failed to create relative resource - trying next resource location", ex);
 			}
-		}
-		return null;
-	}
-
-	@Override
-	public String resolveUrl(String resourcePath, List<Resource> locations, ResourceResolverChain chain) {
-		if (resolveInternal(resourcePath, locations) != null) {
-			return resourcePath;
 		}
 		return null;
 	}

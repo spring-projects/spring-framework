@@ -24,14 +24,30 @@ import org.springframework.core.io.Resource;
 
 
 /**
+ * A strategy for transforming a resource.
  *
  * @author Jeremy Grelle
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
 public interface ResourceTransformer {
 
-	public Resource transform(Resource original) throws IOException;
+	/**
+	 * Whether this transformer can transform the given resource.
+	 *
+	 * @param request the context request
+	 * @param resource the candidate resource to transform
+	 */
+	boolean willTransform(HttpServletRequest request, Resource resource);
 
-	public boolean handles(HttpServletRequest request, Resource original);
+	/**
+	 * Transform the given resource and return a new resource.
+	 *
+	 * @param resource the resource to transform
+	 * @return the transformed resource, never {@code null}
+	 *
+	 * @throws IOException if the transformation fails
+	 */
+	Resource transform(Resource resource) throws IOException;
 
 }

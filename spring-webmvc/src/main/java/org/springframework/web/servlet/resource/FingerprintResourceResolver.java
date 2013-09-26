@@ -34,9 +34,10 @@ import org.springframework.util.StringUtils;
 /**
  *
  * @author Jeremy Grelle
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class FingerprintResourceResolver extends AbstractResourceResolver {
+public class FingerprintResourceResolver implements ResourceResolver {
 
 	private static final Log logger = LogFactory.getLog(FingerprintResourceResolver.class);
 
@@ -44,23 +45,25 @@ public class FingerprintResourceResolver extends AbstractResourceResolver {
 
 
 	@Override
-	protected Resource resolveInternal(HttpServletRequest request, String path, List<Resource> locations,
-			ResourceResolverChain chain, Resource resolved) {
+	public Resource resolveResource(HttpServletRequest request, String requestPath,
+			List<Resource> locations, ResourceResolverChain chain) {
 
 		// First try the resolved full path, in case resource has been written that way to disk at build-time
 		// or the resource is requested without fingerprint
+
+		Resource resolved = chain.resolveResource(request, requestPath, locations);
 		if (resolved != null) {
 			return resolved;
 		}
 
 		// Now try extracting and matching the hash for dev mode
-		String hash = extractHash(path);
+		String hash = extractHash(requestPath);
 		if (StringUtils.isEmpty(hash)) {
 			return null;
 		}
 
-		String simplePath = StringUtils.delete(path, "-" + hash);
-		Resource baseResource = chain.next(this).resolve(request, simplePath, locations, chain);
+		String simplePath = StringUtils.delete(requestPath, "-" + hash);
+		Resource baseResource = chain.resolveResource(request, simplePath, locations);
 		if (baseResource == null) {
 			logger.debug("Failed to find resource after removing fingerprint: " + simplePath);
 			return null;
@@ -101,11 +104,11 @@ public class FingerprintResourceResolver extends AbstractResourceResolver {
 	}
 
 	@Override
-	public String resolveUrl(String resourcePath, List<Resource> locations, ResourceResolverChain chain) {
+	public String resolveUrlPath(String resourcePath, List<Resource> locations, ResourceResolverChain chain) {
 		// TODO - Consider caching here for better efficiency
-		String baseUrl = chain.next(this).resolveUrl(resourcePath, locations, chain);
+		String baseUrl = chain.resolveUrlPath(resourcePath, locations);
 		if (StringUtils.hasText(baseUrl)) {
-			Resource original = chain.next(this).resolve(null, resourcePath, locations, chain);
+			Resource original = chain.resolveResource(null, resourcePath, locations);
 			String hash = calculateHash(original);
 			return StringUtils.stripFilenameExtension(baseUrl)
 					+ "-" + hash + "." + StringUtils.getFilenameExtension(baseUrl);

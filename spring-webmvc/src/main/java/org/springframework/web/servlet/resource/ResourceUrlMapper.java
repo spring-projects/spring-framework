@@ -84,8 +84,9 @@ public class ResourceUrlMapper implements BeanPostProcessor, ApplicationListener
 				ResourceHttpRequestHandler handler = mapping.getValue();
 				String nestedPath = matcher.extractPathWithinPattern(mapping.getKey(), resourcePath);
 				String prefix = resourcePath.replace(nestedPath, "");
-				String url = new DefaultResourceResolverChain(handler.getResourceResolvers(), handler.
-						getResourceTransformers()).resolveUrl(nestedPath, handler.getLocations());
+				List<ResourceResolver> resolvers = handler.getResourceResolvers();
+				DefaultResourceResolverChain chain = new DefaultResourceResolverChain(resolvers);
+				String url = chain.resolveUrlPath(nestedPath, handler.getLocations());
 				if (url != null) {
 					return prefix + url;
 				}

@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.resource;
 
-import java.io.IOException;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,18 +23,38 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.core.io.Resource;
 
 
-
 /**
+ * A contract for invoking a chain of {@link ResourceResolver}s. Each resolver is passed a
+ * reference to the chain allowing it delegate to the remaining resolvers.
  *
  * @author Jeremy Grelle
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
 public interface ResourceResolverChain {
 
-	public Resource resolveAndTransform(HttpServletRequest request, String path, List<Resource> locations)
-			throws IOException;
+	/**
+	 * Resolve the URL path of an incoming request to an actual {@link Resource}.
+	 *
+	 * @param request the current request
+	 * @param requestPath the portion of the request path to use
+	 * @param locations the configured locations where to look up resources
+	 *
+	 * @return the resolved {@link Resource} or {@code null} if this resolver could not
+	 *         resolve the resource
+	 */
+	Resource resolveResource(HttpServletRequest request, String requestPath, List<Resource> locations);
 
-	public ResourceResolver next(ResourceResolver current);
+	/**
+	 * Resolve the given resource path to a URL path. This is useful when rendering URL
+	 * links to clients to determine the actual URL to use.
+	 *
+	 * @param resourcePath the resource path
+	 * @param locations the configured locations where to look up resources
+	 *
+	 * @return the resolved URL path or {@code null} if this resolver could not resolve
+	 *         the given resource path
+	 */
+	String resolveUrlPath(String resourcePath, List<Resource> locations);
 
-	public String resolveUrl(String resourcePath, List<Resource> locations);
 }

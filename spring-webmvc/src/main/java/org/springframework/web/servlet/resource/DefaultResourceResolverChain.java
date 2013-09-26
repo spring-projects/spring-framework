@@ -16,13 +16,15 @@
 
 package org.springframework.web.servlet.resource;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
+import org.springframework.util.Assert;
 
 
 /**
@@ -34,42 +36,78 @@ import org.springframework.core.io.Resource;
  */
 class DefaultResourceResolverChain implements ResourceResolverChain {
 
-	private final List<ResourceResolver> resolvers;
+	private static Log logger = LogFactory.getLog(DefaultResourceResolverChain.class);
 
-	private List<ResourceTransformer> transformers = new ArrayList<ResourceTransformer>();
+	private final List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
+
+	private int index = -1;
 
 
-	public DefaultResourceResolverChain(List<ResourceResolver> resolvers, List<ResourceTransformer> transformers) {
-		this.resolvers = (resolvers != null) ? resolvers : new ArrayList<ResourceResolver>();
-		this.transformers = (transformers != null) ? transformers : new ArrayList<ResourceTransformer>();
+	public DefaultResourceResolverChain(List<ResourceResolver> resolvers) {
+		this.resolvers.addAll((resolvers != null) ? resolvers : new ArrayList<ResourceResolver>());
 	}
 
 
 	@Override
-	public ResourceResolver next(ResourceResolver current) {
-		return this.resolvers.get(this.resolvers.indexOf(current) + 1);
-	}
-
-	@Override
-	public Resource resolveAndTransform(HttpServletRequest request, String path, List<Resource> locations)
-			throws IOException {
-
-		Resource resource = this.resolvers.get(0).resolve(request, path, locations, this);
-		return resource != null ? applyTransformers(request, resource) : resource;
-	}
-
-	@Override
-	public String resolveUrl(String resourcePath, List<Resource> locations) {
-		return this.resolvers.get(0).resolveUrl(resourcePath, locations, this);
-	}
-
-	private Resource applyTransformers(HttpServletRequest request, Resource resource) throws IOException {
-		for (ResourceTransformer transformer : this.transformers) {
-			if (transformer.handles(request, resource)) {
-				return applyTransformers(request, transformer.transform(resource));
-			}
+	public Resource resolveResource(HttpServletRequest request, String requestPath, List<Resource> locations) {
+		ResourceResolver resolver = getNextResolver();
+		if (resolver == null) {
+			return null;
 		}
-		return resource;
+		try {
+			logBefore(resolver);
+			Resource resource = resolver.resolveResource(request, requestPath, locations, this);
+			logAfter(resolver, resource);
+			return resource;
+		}
+		finally {
+			this.index--;
+		}
+	}
+
+	@Override
+	public String resolveUrlPath(String resourcePath, List<Resource> locations) {
+		ResourceResolver resolver = getNextResolver();
+		if (resolver == null) {
+			return null;
+		}
+		try {
+			logBefore(resolver);
+			String urlPath = resolver.resolveUrlPath(resourcePath, locations, this);
+			logAfter(resolver, urlPath);
+			return urlPath;
+		}
+		finally {
+			this.index--;
+		}
+	}
+
+	private ResourceResolver getNextResolver() {
+
+		Assert.state(this.index <= this.resolvers.size(),
+				"Current index exceeds the number of configured ResourceResolver's");
+
+		if (this.index == (this.resolvers.size() - 1)) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("No more ResourceResolver's to delegate to, returning null");
+			}
+			return null;
+		}
+
+		this.index++;
+		return this.resolvers.get(this.index);
+	}
+
+	private void logBefore(ResourceResolver resolver) {
+		if (logger.isTraceEnabled()) {
+			logger.trace("Calling " + resolver.getClass().getName() + " at index [" + this.index + "]");
+		}
+	}
+
+	private void logAfter(ResourceResolver resolver, Object result) {
+		if (logger.isTraceEnabled()) {
+			logger.trace(resolver.getClass().getName() + " returned " + result);
+		}
 	}
 
 }

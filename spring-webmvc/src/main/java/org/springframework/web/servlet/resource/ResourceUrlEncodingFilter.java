@@ -39,10 +39,11 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 
 	private ResourceUrlMapper mapper;
 
+
 	@Override
-	protected void doFilterInternal(HttpServletRequest request,
-			HttpServletResponse response, FilterChain filterChain)
-			throws ServletException, IOException {
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+			FilterChain filterChain) throws ServletException, IOException {
+
 		filterChain.doFilter(request, new ResourceUrlResponseWrapper(request, response));
 	}
 
@@ -51,6 +52,7 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 		WebApplicationContext appContext = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
 		this.mapper = appContext.getBean(ResourceUrlMapper.class);
 	}
+
 
 	private class ResourceUrlResponseWrapper extends HttpServletResponseWrapper {
 
