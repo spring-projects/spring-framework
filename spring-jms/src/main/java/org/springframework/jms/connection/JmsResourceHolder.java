@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.jms.connection;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,8 +31,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.transaction.support.ResourceHolderSupport;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * JMS resource holder, wrapping a JMS Connection and a JMS Session.
@@ -183,7 +186,26 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 			catch (TransactionInProgressException ex) {
 				// Ignore -> can only happen in case of a JTA transaction.
 			}
-			// Let IllegalStateException through: It might point out an unexpectedly closed session.
+			catch (javax.jms.IllegalStateException ex) {
+				if (this.connectionFactory != null) {
+					try {
+						Method getDataSourceMethod = this.connectionFactory.getClass().getMethod("getDataSource");
+						Object ds = ReflectionUtils.invokeMethod(getDataSourceMethod, this.connectionFactory);
+						if (ds != null && TransactionSynchronizationManager.hasResource(ds)) {
+							// IllegalStateException from sharing the underlying JDBC Connection
+							// which typically gets committed first, e.g. with Oracle AQ --> ignore
+							return;
+						}
+					}
+					catch (Throwable ex2) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("No working getDataSource method found on ConnectionFactory: " + ex2);
+						}
+						// No working getDataSource method - cannot perform DataSource transaction check
+					}
+				}
+				throw ex;
+			}
 		}
 	}
 
