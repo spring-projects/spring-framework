@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -30,7 +31,9 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.filter.AbstractTypeHierarchyTraversingFilter;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.core.type.filter.AspectJTypeFilter;
 import org.springframework.core.type.filter.AssignableTypeFilter;
+import org.springframework.core.type.filter.RegexPatternTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -40,6 +43,7 @@ import org.springframework.util.StringUtils;
  * Parser for the @{@link ComponentScan} annotation.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  * @see ClassPathBeanDefinitionScanner#scan(String...)
  * @see ComponentScanBeanDefinitionParser
@@ -138,25 +142,37 @@ class ComponentScanAnnotationParser {
 			switch (filterType) {
 				case ANNOTATION:
 					Assert.isAssignable(Annotation.class, filterClass,
-							"An error occured when processing a @ComponentScan " +
-							"ANNOTATION type filter: ");
+							"An error occured while processing a @ComponentScan ANNOTATION type filter: ");
 					@SuppressWarnings("unchecked")
-					Class<Annotation> annoClass = (Class<Annotation>)filterClass;
-					typeFilters.add(new AnnotationTypeFilter(annoClass));
+					Class<Annotation> annotationType = (Class<Annotation>) filterClass;
+					typeFilters.add(new AnnotationTypeFilter(annotationType));
 					break;
 				case ASSIGNABLE_TYPE:
 					typeFilters.add(new AssignableTypeFilter(filterClass));
 					break;
 				case CUSTOM:
 					Assert.isAssignable(TypeFilter.class, filterClass,
-							"An error occured when processing a @ComponentScan " +
-							"CUSTOM type filter: ");
+							"An error occured while processing a @ComponentScan CUSTOM type filter: ");
 					typeFilters.add(BeanUtils.instantiateClass(filterClass, TypeFilter.class));
 					break;
 				default:
-					throw new IllegalArgumentException("unknown filter type " + filterType);
+					throw new IllegalArgumentException("Filter type not supported with Class value: " + filterType);
 			}
 		}
+
+		for (String expression : filterAttributes.getStringArray("pattern")) {
+			switch (filterType) {
+				case ASPECTJ:
+					typeFilters.add(new AspectJTypeFilter(expression, this.resourceLoader.getClassLoader()));
+					break;
+				case REGEX:
+					typeFilters.add(new RegexPatternTypeFilter(Pattern.compile(expression)));
+					break;
+				default:
+					throw new IllegalArgumentException("Filter type not supported with String pattern: " + filterType);
+			}
+		}
+
 		return typeFilters;
 	}
 

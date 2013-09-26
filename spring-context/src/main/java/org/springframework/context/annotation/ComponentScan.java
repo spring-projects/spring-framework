@@ -42,9 +42,10 @@ import org.springframework.core.type.filter.TypeFilter;
  * always registered, meaning that any attempt to disable them at the
  * {@code @ComponentScan} level would be ignored.
  *
- * <p>See @{@link Configuration} Javadoc for usage examples.
+ * <p>See @{@link Configuration}'s javadoc for usage examples.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  * @see Configuration
  */
@@ -139,31 +140,33 @@ public @interface ComponentScan {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({})
 	@interface Filter {
+
 		/**
 		 * The type of filter to use.
-		 * <p>Note that the filter types available are limited to those that may
-		 * be expressed as a {@code Class} in the {@link #value()} attribute. This is
-		 * in contrast to {@code <context:component-scan/>}, which allows for
-		 * expression-based (i.e., string-based) filters such as AspectJ pointcuts.
-		 * These filter types are intentionally not supported here, and not available
-		 * in the {@link FilterType} enum.
-		 * @see FilterType
 		 */
 		FilterType type() default FilterType.ANNOTATION;
 
 		/**
 		 * The class or classes to use as the filter. In the case of
-		 * {@link FilterType#ANNOTATION}, the class will be the annotation itself. In the
-		 * case of {@link FilterType#ASSIGNABLE_TYPE}, the class will be the type that
-		 * detected components should be assignable to. And in the case of
-		 * {@link FilterType#CUSTOM}, the class will be an implementation of
+		 * {@link FilterType#ANNOTATION}, the class will be the annotation itself.
+		 * In the case of {@link FilterType#ASSIGNABLE_TYPE}, the class will be the
+		 * type that detected components should be assignable to. And in the case
+		 * of {@link FilterType#CUSTOM}, the class will be an implementation of
 		 * {@link TypeFilter}.
 		 * <p>When multiple classes are specified, OR logic is applied, e.g. "include
 		 * types annotated with {@code @Foo} OR {@code @Bar}".
 		 * <p>Specifying zero classes is permitted but will have no effect on component
 		 * scanning.
 		 */
-		Class<?>[] value();
+		Class<?>[] value() default {};
+
+		/**
+		 * The String pattern (or patterns) to use for the filter, as an alternative to
+		 * specifying a Class {@link #value()}. In the case of {@link FilterType#ASPECTJ},
+		 * this is an AspectJ type pattern expression; in case of {@link FilterType#REGEX},
+		 * a regex pattern for the fully-qualified class names to match.
+		 */
+		String[] pattern() default {};
 	}
 
 }

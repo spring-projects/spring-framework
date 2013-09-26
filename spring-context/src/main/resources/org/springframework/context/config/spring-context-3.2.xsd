@@ -8,8 +8,8 @@
 		elementFormDefault="qualified"
 		attributeFormDefault="unqualified">
 
-	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-3.2.xsd" />
-	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-3.2.xsd" />
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-3.2.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-3.2.xsd"/>
 
 	<xsd:annotation>
 		<xsd:documentation><![CDATA[
@@ -109,7 +109,7 @@
 			<xsd:appinfo>
 				<tool:annotation>
 					<tool:exports
-						type="org.springframework.context.support.PropertySourcesPlaceholderConfigurer" />
+						type="org.springframework.context.support.PropertySourcesPlaceholderConfigurer"/>
 				</tool:annotation>
 			</xsd:appinfo>
 		</xsd:annotation>
@@ -161,13 +161,13 @@
 			<xsd:appinfo>
 				<tool:annotation>
 					<tool:exports
-						type="org.springframework.beans.factory.config.PropertyOverrideConfigurer" />
+						type="org.springframework.beans.factory.config.PropertyOverrideConfigurer"/>
 				</tool:annotation>
 			</xsd:appinfo>
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:complexContent>
-				<xsd:extension base="propertyPlaceholder" />
+				<xsd:extension base="propertyPlaceholder"/>
 			</xsd:complexContent>
 		</xsd:complexType>
 	</xsd:element>
@@ -275,9 +275,8 @@
 					]]></xsd:documentation>
 					<xsd:appinfo>
 						<tool:annotation>
-							<tool:expected-type type="java.lang.Class" />
-							<tool:assignable-to
-								type="org.springframework.beans.factory.support.BeanNameGenerator" />
+							<tool:expected-type type="java.lang.Class"/>
+							<tool:assignable-to type="org.springframework.beans.factory.support.BeanNameGenerator"/>
 						</tool:annotation>
 					</xsd:appinfo>
 				</xsd:annotation>
@@ -290,9 +289,8 @@
 					]]></xsd:documentation>
 					<xsd:appinfo>
 						<tool:annotation>
-							<tool:expected-type type="java.lang.Class" />
-							<tool:assignable-to
-								type="org.springframework.context.annotation.ScopeMetadataResolver" />
+							<tool:expected-type type="java.lang.Class"/>
+							<tool:assignable-to type="org.springframework.context.annotation.ScopeMetadataResolver"/>
 						</tool:annotation>
 					</xsd:appinfo>
 				</xsd:annotation>
@@ -306,9 +304,9 @@
 				</xsd:annotation>
 				<xsd:simpleType>
 					<xsd:restriction base="xsd:string">
-						<xsd:enumeration value="no" />
-						<xsd:enumeration value="interfaces" />
-						<xsd:enumeration value="targetClass" />
+						<xsd:enumeration value="no"/>
+						<xsd:enumeration value="interfaces"/>
+						<xsd:enumeration value="targetClass"/>
 					</xsd:restriction>
 				</xsd:simpleType>
 			</xsd:attribute>
@@ -344,8 +342,7 @@
 			]]></xsd:documentation>
 			<xsd:appinfo>
 				<tool:annotation>
-					<tool:exports
-						type="org.springframework.instrument.classloading.LoadTimeWeaver" />
+					<tool:exports type="org.springframework.instrument.classloading.LoadTimeWeaver"/>
 				</tool:annotation>
 			</xsd:appinfo>
 		</xsd:annotation>
@@ -357,9 +354,8 @@
 					]]></xsd:documentation>
 					<xsd:appinfo>
 						<tool:annotation>
-							<tool:expected-type type="java.lang.Class" />
-							<tool:assignable-to
-								type="org.springframework.instrument.classloading.LoadTimeWeaver" />
+							<tool:expected-type type="java.lang.Class"/>
+							<tool:assignable-to type="org.springframework.instrument.classloading.LoadTimeWeaver"/>
 						</tool:annotation>
 					</xsd:appinfo>
 				</xsd:annotation>
@@ -407,7 +403,7 @@
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:simpleType>
-			<xsd:restriction base="xsd:string" />
+			<xsd:restriction base="xsd:string"/>
 		</xsd:simpleType>
 	</xsd:element>
 
@@ -423,8 +419,7 @@
 			]]></xsd:documentation>
 			<xsd:appinfo>
 				<tool:annotation>
-					<tool:exports
-						type="org.springframework.jmx.export.annotation.AnnotationMBeanExporter" />
+					<tool:exports type="org.springframework.jmx.export.annotation.AnnotationMBeanExporter"/>
 				</tool:annotation>
 			</xsd:appinfo>
 		</xsd:annotation>
@@ -457,9 +452,9 @@
 				</xsd:annotation>
 				<xsd:simpleType>
 					<xsd:restriction base="xsd:NMTOKEN">
-						<xsd:enumeration value="failOnExisting" />
-						<xsd:enumeration value="ignoreExisting" />
-						<xsd:enumeration value="replaceExisting" />
+						<xsd:enumeration value="failOnExisting"/>
+						<xsd:enumeration value="ignoreExisting"/>
+						<xsd:enumeration value="replaceExisting"/>
 					</xsd:restriction>
 				</xsd:simpleType>
 			</xsd:attribute>
@@ -478,7 +473,7 @@
 			]]></xsd:documentation>
 			<xsd:appinfo>
 				<tool:annotation>
-					<tool:exports type="javax.management.MBeanServer" />
+					<tool:exports type="javax.management.MBeanServer"/>
 				</tool:annotation>
 			</xsd:appinfo>
 		</xsd:annotation>
@@ -505,8 +500,8 @@
 
     "annotation" indicates an annotation to be present at the type level in target components;
     "assignable" indicates a class (or interface) that the target components are assignable to (extend/implement);
-    "aspectj" indicates an AspectJ type expression to be matched by the target components;
-    "regex" indicates a regex expression to be matched by the target components' class names;
+    "aspectj" indicates an AspectJ type pattern expression to be matched by the target components;
+    "regex" indicates a regex pattern to be matched by the target components' class names;
     "custom" indicates a custom implementation of the org.springframework.core.type.TypeFilter interface.
 
     Note: This attribute will not be inherited by child bean definitions.
@@ -515,11 +510,11 @@
 			</xsd:annotation>
 			<xsd:simpleType>
 				<xsd:restriction base="xsd:string">
-					<xsd:enumeration value="annotation" />
-					<xsd:enumeration value="assignable" />
-					<xsd:enumeration value="aspectj" />
-					<xsd:enumeration value="regex" />
-					<xsd:enumeration value="custom" />
+					<xsd:enumeration value="annotation"/>
+					<xsd:enumeration value="assignable"/>
+					<xsd:enumeration value="aspectj"/>
+					<xsd:enumeration value="regex"/>
+					<xsd:enumeration value="custom"/>
 				</xsd:restriction>
 			</xsd:simpleType>
 		</xsd:attribute>
