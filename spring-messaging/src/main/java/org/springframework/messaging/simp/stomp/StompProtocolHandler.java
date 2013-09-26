@@ -17,6 +17,7 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.security.Principal;
 import java.util.Arrays;
@@ -63,10 +64,13 @@ public class StompProtocolHandler implements SubProtocolHandler {
 
 	private final Log logger = LogFactory.getLog(StompProtocolHandler.class);
 
-	private final StompMessageConverter stompMessageConverter = new StompMessageConverter();
+	private final StompDecoder stompDecoder = new StompDecoder();
+
+	private final StompEncoder stompEncoder = new StompEncoder();
 
 	private MutableUserQueueSuffixResolver queueSuffixResolver = new SimpleUserQueueSuffixResolver();
 
+	private volatile boolean handleConnect = false;
 
 	/**
 	 * Configure a resolver to use to maintain queue suffixes for user
@@ -81,6 +85,29 @@ public class StompProtocolHandler implements SubProtocolHandler {
 	 */
 	public MutableUserQueueSuffixResolver getUserQueueSuffixResolver() {
 		return this.queueSuffixResolver;
+	}
+
+	/**
+	 * Configures the handling of CONNECT frames. When {@code true}, CONNECT
+	 * frames will be handled by this handler, and a CONNECTED response will be
+	 * sent. When {@code false}, CONNECT frames will be forwarded for
+	 * handling by another component.
+	 *
+	 * @param handleConnect {@code true} if connect frames should be handled
+	 * by this handler, {@code false} otherwise.
+	 */
+	public void setHandleConnect(boolean handleConnect) {
+		this.handleConnect = handleConnect;
+	}
+
+	/**
+	 * Returns whether or not this handler will handle CONNECT frames.
+	 *
+	 * @return Returns {@code true} if this handler will handle CONNECT frames,
+	 * otherwise {@code false}.
+	 */
+	public boolean willHandleConnect() {
+		return this.handleConnect;
 	}
 
 	@Override
@@ -98,7 +125,8 @@ public class StompProtocolHandler implements SubProtocolHandler {
 		try {
 			Assert.isInstanceOf(TextMessage.class,  webSocketMessage);
 			String payload = ((TextMessage)webSocketMessage).getPayload();
-			message = this.stompMessageConverter.toMessage(payload);
+			ByteBuffer byteBuffer = ByteBuffer.wrap(payload.getBytes(Charset.forName("UTF-8")));
+			message = this.stompDecoder.decode(byteBuffer);
 		}
 		catch (Throwable error) {
 			logger.error("Failed to parse STOMP frame, WebSocket message payload: ", error);
@@ -117,31 +145,38 @@ public class StompProtocolHandler implements SubProtocolHandler {
 
 			message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
 
-			if (SimpMessageType.CONNECT.equals(headers.getMessageType())) {
+			if (this.handleConnect && SimpMessageType.CONNECT.equals(headers.getMessageType())) {
 				handleConnect(session, message);
 			}
-
-			outputChannel.send(message);
+			else {
+				outputChannel.send(message);
+			}
 		}
 		catch (Throwable t) {
 			logger.error("Terminating STOMP session due to failure to send message: ", t);
 			sendErrorMessage(session, t);
 		}
-
 	}
 
 	/**
 	 * Handle STOMP messages going back out to WebSocket clients.
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void handleMessageToClient(WebSocketSession session, Message<?> message) {
 
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-		headers.setCommandIfNotSet(StompCommand.MESSAGE);
+		if (headers.getCommand() == null && SimpMessageType.MESSAGE == headers.getMessageType()) {
+			headers.setCommandIfNotSet(StompCommand.MESSAGE);
+		}
 
-		if (StompCommand.CONNECTED.equals(headers.getCommand())) {
-			// Ignore for now since we already sent it
-			return;
+		if (headers.getCommand() == StompCommand.CONNECTED) {
+			if (this.handleConnect) {
+				// Ignore since we already sent it
+				return;
+			} else {
+				augmentConnectedHeaders(headers, session);
+			}
 		}
 
 		if (StompCommand.MESSAGE.equals(headers.getCommand()) && (headers.getSubscriptionId() == null)) {
@@ -156,7 +191,7 @@ public class StompProtocolHandler implements SubProtocolHandler {
 
 		try {
 			message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
-			byte[] bytes = this.stompMessageConverter.fromMessage(message);
+			byte[] bytes = this.stompEncoder.encode((Message<byte[]>)message);
 			session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
 		}
 		catch (Throwable t) {
@@ -193,30 +228,36 @@ public class StompProtocolHandler implements SubProtocolHandler {
 		}
 		connectedHeaders.setHeartbeat(0,0);
 
+		augmentConnectedHeaders(connectedHeaders, session);
+
+		// TODO: security
+
+		Message<byte[]> connectedMessage = MessageBuilder.withPayloadAndHeaders(new byte[0], connectedHeaders).build();
+		String payload = new String(this.stompEncoder.encode(connectedMessage), Charset.forName("UTF-8"));
+		session.sendMessage(new TextMessage(payload));
+	}
+
+	private void augmentConnectedHeaders(StompHeaderAccessor headers, WebSocketSession session) {
 		Principal principal = session.getPrincipal();
 		if (principal != null) {
-			connectedHeaders.setNativeHeader(CONNECTED_USER_HEADER, principal.getName());
-			connectedHeaders.setNativeHeader(QUEUE_SUFFIX_HEADER, session.getId());
+			headers.setNativeHeader(CONNECTED_USER_HEADER, principal.getName());
+			headers.setNativeHeader(QUEUE_SUFFIX_HEADER, session.getId());
 
 			if (this.queueSuffixResolver != null) {
 				String suffix = session.getId();
 				this.queueSuffixResolver.addQueueSuffix(principal.getName(), session.getId(), suffix);
 			}
 		}
-
-		Message<?> connectedMessage = MessageBuilder.withPayloadAndHeaders(new byte[0], connectedHeaders).build();
-		byte[] bytes = this.stompMessageConverter.fromMessage(connectedMessage);
-		session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
 	}
 
 	protected void sendErrorMessage(WebSocketSession session, Throwable error) {
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.ERROR);
 		headers.setMessage(error.getMessage());
-		Message<?> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
-		byte[] bytes = this.stompMessageConverter.fromMessage(message);
+		Message<byte[]> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
+		String payload = new String(this.stompEncoder.encode(message), Charset.forName("UTF-8"));
 		try {
-			session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
+			session.sendMessage(new TextMessage(payload));
 		}
 		catch (Throwable t) {
 			// ignore

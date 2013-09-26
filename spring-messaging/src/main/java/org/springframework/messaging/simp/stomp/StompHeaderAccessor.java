@@ -82,6 +82,8 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 
 	public static final String STOMP_HEARTBEAT_HEADER = "heart-beat";
 
+	private static final long[] DEFAULT_HEARTBEAT = new long[] {0, 0};
+
 
 	// Other header names
 
@@ -185,7 +187,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 			result.put(STOMP_CONTENT_TYPE_HEADER, Arrays.asList(contentType.toString()));
 		}
 
-		if (getCommand().requiresSubscriptionId()) {
+		if (getCommand() != null && getCommand().requiresSubscriptionId()) {
 			String subscriptionId = getSubscriptionId();
 			if (subscriptionId != null) {
 				String name = StompCommand.MESSAGE.equals(getCommand()) ? STOMP_SUBSCRIPTION_HEADER : STOMP_ID_HEADER;
@@ -252,7 +254,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	public long[] getHeartbeat() {
 		String rawValue = getFirstNativeHeader(STOMP_HEARTBEAT_HEADER);
 		if (!StringUtils.hasText(rawValue)) {
-			return null;
+			return Arrays.copyOf(DEFAULT_HEARTBEAT, 2);
 		}
 		String[] rawValues = StringUtils.commaDelimitedListToStringArray(rawValue);
 		return new long[] { Long.valueOf(rawValues[0]), Long.valueOf(rawValues[1])};

@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.simp.stomp;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -60,7 +61,33 @@ public class StompProtocolHandlerTests {
 	}
 
 	@Test
-	public void handleConnect() {
+	public void connectedResponseIsSentWhenHandlingConnect() {
+		this.stompHandler.setHandleConnect(true);
+
+		TextMessage textMessage = StompTextMessageBuilder.create(StompCommand.CONNECT).headers(
+				"login:guest", "passcode:guest", "accept-version:1.1,1.0", "heart-beat:10000,10000").build();
+
+		this.stompHandler.handleMessageFromClient(this.session, textMessage, this.channel);
+
+		verifyNoMoreInteractions(this.channel);
+
+		// Check CONNECTED reply
+
+		assertEquals(1, this.session.getSentMessages().size());
+		textMessage = (TextMessage) this.session.getSentMessages().get(0);
+		Message<?> message = new StompDecoder().decode(ByteBuffer.wrap(textMessage.getPayload().getBytes()));
+		StompHeaderAccessor replyHeaders = StompHeaderAccessor.wrap(message);
+
+		assertEquals(StompCommand.CONNECTED, replyHeaders.getCommand());
+		assertEquals("1.1", replyHeaders.getVersion());
+		assertArrayEquals(new long[] {0, 0}, replyHeaders.getHeartbeat());
+		assertEquals("joe", replyHeaders.getNativeHeader("user-name").get(0));
+		assertEquals("s1", replyHeaders.getNativeHeader("queue-suffix").get(0));
+	}
+
+	@Test
+	public void connectIsForwardedWhenNotHandlingConnect() {
+		this.stompHandler.setHandleConnect(false);
 
 		TextMessage textMessage = StompTextMessageBuilder.create(StompCommand.CONNECT).headers(
 				"login:guest", "passcode:guest", "accept-version:1.1,1.0", "heart-beat:10000,10000").build();
@@ -80,18 +107,7 @@ public class StompProtocolHandlerTests {
 		assertArrayEquals(new long[] {10000, 10000}, headers.getHeartbeat());
 		assertEquals(new HashSet<>(Arrays.asList("1.1","1.0")), headers.getAcceptVersion());
 
-		// Check CONNECTED reply
-
-		assertEquals(1, this.session.getSentMessages().size());
-		textMessage = (TextMessage) this.session.getSentMessages().get(0);
-		Message<?> message = new StompMessageConverter().toMessage(textMessage.getPayload());
-		StompHeaderAccessor replyHeaders = StompHeaderAccessor.wrap(message);
-
-		assertEquals(StompCommand.CONNECTED, replyHeaders.getCommand());
-		assertEquals("1.1", replyHeaders.getVersion());
-		assertArrayEquals(new long[] {0, 0}, replyHeaders.getHeartbeat());
-		assertEquals("joe", replyHeaders.getNativeHeader("user-name").get(0));
-		assertEquals("s1", replyHeaders.getNativeHeader("queue-suffix").get(0));
+		assertEquals(0, this.session.getSentMessages().size());
 	}
 
 }
