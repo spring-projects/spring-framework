@@ -160,8 +160,7 @@
 			]]></xsd:documentation>
 			<xsd:appinfo>
 				<tool:annotation>
-					<tool:exports
-						type="org.springframework.beans.factory.config.PropertyOverrideConfigurer"/>
+					<tool:exports type="org.springframework.beans.factory.config.PropertyOverrideConfigurer"/>
 				</tool:annotation>
 			</xsd:appinfo>
 		</xsd:annotation>
@@ -394,9 +393,7 @@
 
 	<xsd:element name="spring-configured">
 		<xsd:annotation>
-			<xsd:documentation
-				source="java:org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect">
-				<![CDATA[
+			<xsd:documentation source="java:org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect"><![CDATA[
 	Signals the current application context to apply dependency injection
 	to non-managed classes that are instantiated outside of the Spring bean
 	factory (typically classes annotated with the @Configurable annotation).
@@ -409,8 +406,7 @@
 
 	<xsd:element name="mbean-export">
 		<xsd:annotation>
-			<xsd:documentation
-				source="java:org.springframework.jmx.export.annotation.AnnotationMBeanExporter"><![CDATA[
+			<xsd:documentation source="java:org.springframework.jmx.export.annotation.AnnotationMBeanExporter"><![CDATA[
 	Activates default exporting of MBeans by detecting standard MBeans in the Spring
 	context as well as @ManagedResource annotations on Spring-defined beans.
 
@@ -463,8 +459,7 @@
 
 	<xsd:element name="mbean-server">
 		<xsd:annotation>
-			<xsd:documentation
-				source="java:org.springframework.jmx.support.MBeanServerFactoryBean"><![CDATA[
+			<xsd:documentation source="java:org.springframework.jmx.support.MBeanServerFactoryBean"><![CDATA[
 	Exposes a default MBeanServer for the current platform.
 	Autodetects WebLogic 9+, WebSphere 6.1+ and the JDK 1.5+ platform MBeanServer.
 
