@@ -41,7 +41,7 @@ import static org.hamcrest.Matchers.*;
  */
 public class ClassPathResourceTests {
 
-	private static final String PACKAGE_PATH = "/org/springframework/core/io";
+	private static final String PACKAGE_PATH = "org/springframework/core/io";
 	private static final String PREFIX = "classpath:";
 	private static final String NONEXISTENT_RESOURCE_NAME = "nonexistent.xml";
 	private static final String FQ_RESOURCE_PATH = PACKAGE_PATH + '/' + NONEXISTENT_RESOURCE_NAME;
