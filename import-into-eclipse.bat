@@ -17,7 +17,7 @@ echo been tested against STS %STS_TEST_VERSION%), but at the minimum you will
 echo need Eclipse + AJDT.
 echo.
 echo If you need to download and install STS, please do that now by
-echo visiting http://springsource.org/downloads/sts
+echo visiting http://spring.io/tools/sts/all 
 echo.
 echo Otherwise, press enter and we'll begin.
 
