@@ -32,9 +32,6 @@ import org.springframework.util.Assert;
 
 import reactor.core.Environment;
 import reactor.core.composable.Composable;
-import reactor.core.composable.Deferred;
-import reactor.core.composable.Promise;
-import reactor.core.composable.spec.DeferredPromiseSpec;
 import reactor.function.Consumer;
 import reactor.tcp.Reconnect;
 import reactor.tcp.TcpClient;
@@ -357,7 +354,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			forwardInternal(tcpConnection, message);
 		}
 
-		private boolean forwardInternal(
+		private void forwardInternal(
 				TcpConnection<Message<byte[]>, Message<byte[]>> tcpConnection, Message<?> message) {
 
 			Assert.isInstanceOf(byte[].class, message.getPayload(), "Message's payload must be a byte[]");
@@ -374,31 +371,14 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				this.stompConnection.setDisconnected();
 			}
 
-			final Deferred<Boolean, Promise<Boolean>> deferred = new DeferredPromiseSpec<Boolean>().get();
 			tcpConnection.send(byteMessage, new Consumer<Boolean>() {
 				@Override
 				public void accept(Boolean success) {
-					deferred.accept(success);
-				}
-			});
-
-			Boolean success = null;
-			try {
-				success = deferred.compose().await();
-				if (success == null) {
-					handleTcpClientFailure("Timed out waiting for message to be forwarded to the broker", null);
-				}
-				else if (!success) {
-					if (command != StompCommand.DISCONNECT) {
+					if ((success == null || !success) && command != StompCommand.DISCONNECT) {
 						handleTcpClientFailure("Failed to forward message to the broker", null);
 					}
 				}
-			}
-			catch (InterruptedException ex) {
-				Thread.currentThread().interrupt();
-				handleTcpClientFailure("Interrupted while forwarding message to the broker", ex);
-			}
-			return (success != null) ? success : false;
+			});
 		}
 	}
 
@@ -499,9 +479,9 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 					@Override
 					public void run() {
-						TcpConnection<Message<byte[]>, Message<byte[]>> connection = stompConnection.connection;
+						TcpConnection<Message<byte[]>, Message<byte[]>> connection = stompConnection.getReadyConnection();
 						if (connection != null) {
-							connection.send(MessageBuilder.withPayload(heartbeatPayload).build());
+							forward(MessageBuilder.withPayload(heartbeatPayload).build());
 						}
 					}
 
