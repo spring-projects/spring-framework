@@ -30,6 +30,8 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
 
+import static org.junit.Assert.*;
+
 import static org.mockito.Mockito.*;
 
 
@@ -111,6 +113,24 @@ public class SimpleBrokerMessageHandlerTests {
 		assertCapturedMessage(sess2, "sub3", "/bar");
 	}
 
+	@Test
+	public void connect() {
+
+		String sess1 = "sess1";
+
+		this.messageHandler.start();
+
+		Message<String> connectMessage = createConnectMessage(sess1);
+		this.messageHandler.handleMessage(connectMessage);
+
+		verify(this.clientChannel, times(1)).send(this.messageCaptor.capture());
+		Message<?> connectAckMessage = this.messageCaptor.getValue();
+
+		SimpMessageHeaderAccessor connectAckHeaders = SimpMessageHeaderAccessor.wrap(connectAckMessage);
+		assertEquals(connectMessage, connectAckHeaders.getHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER));
+		assertEquals(sess1, connectAckHeaders.getSessionId());
+	}
+
 
 	protected Message<String> createSubscriptionMessage(String sessionId, String subcriptionId, String destination) {
 
@@ -120,6 +140,13 @@ public class SimpleBrokerMessageHandlerTests {
 		headers.setSessionId(sessionId);
 
 		return MessageBuilder.withPayload("").copyHeaders(headers.toMap()).build();
+	}
+
+	protected Message<String> createConnectMessage(String sessionId) {
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT);
+		headers.setSessionId(sessionId);
+
+		return MessageBuilder.withPayloadAndHeaders("", headers).build();
 	}
 
 	protected Message<String> createMessage(String destination, String payload) {

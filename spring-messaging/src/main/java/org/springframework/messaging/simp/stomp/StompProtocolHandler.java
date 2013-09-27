@@ -70,8 +70,6 @@ public class StompProtocolHandler implements SubProtocolHandler {
 
 	private MutableUserQueueSuffixResolver queueSuffixResolver = new SimpleUserQueueSuffixResolver();
 
-	private volatile boolean handleConnect = false;
-
 	/**
 	 * Configure a resolver to use to maintain queue suffixes for user
 	 * @see {@link org.springframework.messaging.simp.handler.UserDestinationMessageHandler}
@@ -85,29 +83,6 @@ public class StompProtocolHandler implements SubProtocolHandler {
 	 */
 	public MutableUserQueueSuffixResolver getUserQueueSuffixResolver() {
 		return this.queueSuffixResolver;
-	}
-
-	/**
-	 * Configures the handling of CONNECT frames. When {@code true}, CONNECT
-	 * frames will be handled by this handler, and a CONNECTED response will be
-	 * sent. When {@code false}, CONNECT frames will be forwarded for
-	 * handling by another component.
-	 *
-	 * @param handleConnect {@code true} if connect frames should be handled
-	 * by this handler, {@code false} otherwise.
-	 */
-	public void setHandleConnect(boolean handleConnect) {
-		this.handleConnect = handleConnect;
-	}
-
-	/**
-	 * Returns whether or not this handler will handle CONNECT frames.
-	 *
-	 * @return Returns {@code true} if this handler will handle CONNECT frames,
-	 * otherwise {@code false}.
-	 */
-	public boolean willHandleConnect() {
-		return this.handleConnect;
 	}
 
 	@Override
@@ -144,13 +119,7 @@ public class StompProtocolHandler implements SubProtocolHandler {
 			headers.setUser(session.getPrincipal());
 
 			message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
-
-			if (this.handleConnect && SimpMessageType.CONNECT.equals(headers.getMessageType())) {
-				handleConnect(session, message);
-			}
-			else {
-				outputChannel.send(message);
-			}
+			outputChannel.send(message);
 		}
 		catch (Throwable t) {
 			logger.error("Terminating STOMP session due to failure to send message: ", t);
@@ -170,13 +139,15 @@ public class StompProtocolHandler implements SubProtocolHandler {
 			headers.setCommandIfNotSet(StompCommand.MESSAGE);
 		}
 
+		if (headers.getMessageType() == SimpMessageType.CONNECT_ACK) {
+			StompHeaderAccessor connectedHeaders = StompHeaderAccessor.create(StompCommand.CONNECTED);
+			connectedHeaders.setVersion(getVersion(headers));
+			connectedHeaders.setHeartbeat(0, 0);
+			headers = connectedHeaders;
+		}
+
 		if (headers.getCommand() == StompCommand.CONNECTED) {
-			if (this.handleConnect) {
-				// Ignore since we already sent it
-				return;
-			} else {
-				augmentConnectedHeaders(headers, session);
-			}
+			augmentConnectedHeaders(headers, session);
 		}
 
 		if (StompCommand.MESSAGE.equals(headers.getCommand()) && (headers.getSubscriptionId() == null)) {
@@ -206,35 +177,6 @@ public class StompProtocolHandler implements SubProtocolHandler {
 				}
 			}
 		}
-	}
-
-	protected void handleConnect(WebSocketSession session, Message<?> message) throws IOException {
-
-		StompHeaderAccessor connectHeaders = StompHeaderAccessor.wrap(message);
-		StompHeaderAccessor connectedHeaders = StompHeaderAccessor.create(StompCommand.CONNECTED);
-
-		Set<String> acceptVersions = connectHeaders.getAcceptVersion();
-		if (acceptVersions.contains("1.2")) {
-			connectedHeaders.setVersion("1.2");
-		}
-		else if (acceptVersions.contains("1.1")) {
-			connectedHeaders.setVersion("1.1");
-		}
-		else if (acceptVersions.isEmpty()) {
-			// 1.0
-		}
-		else {
-			throw new StompConversionException("Unsupported version '" + acceptVersions + "'");
-		}
-		connectedHeaders.setHeartbeat(0,0);
-
-		augmentConnectedHeaders(connectedHeaders, session);
-
-		// TODO: security
-
-		Message<byte[]> connectedMessage = MessageBuilder.withPayloadAndHeaders(new byte[0], connectedHeaders).build();
-		String payload = new String(this.stompEncoder.encode(connectedMessage), Charset.forName("UTF-8"));
-		session.sendMessage(new TextMessage(payload));
 	}
 
 	private void augmentConnectedHeaders(StompHeaderAccessor headers, WebSocketSession session) {
@@ -285,6 +227,26 @@ public class StompProtocolHandler implements SubProtocolHandler {
 		headers.setSessionId(session.getId());
 		Message<?> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
 		outputChannel.send(message);
+	}
+
+	private String getVersion(StompHeaderAccessor connectAckHeaders) {
+		Message<?> connectMessage =
+				(Message<?>) connectAckHeaders.getHeader(StompHeaderAccessor.CONNECT_MESSAGE_HEADER);
+		StompHeaderAccessor connectHeaders = StompHeaderAccessor.wrap(connectMessage);
+
+		Set<String> acceptVersions = connectHeaders.getAcceptVersion();
+		if (acceptVersions.contains("1.2")) {
+			return "1.2";
+		}
+		else if (acceptVersions.contains("1.1")) {
+			return "1.1";
+		}
+		else if (acceptVersions.isEmpty()) {
+			return null;
+		}
+		else {
+			throw new StompConversionException("Unsupported version '" + acceptVersions + "'");
+		}
 	}
 
 }

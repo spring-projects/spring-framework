@@ -54,8 +54,7 @@ public class ServletStompEndpointRegistry implements StompEndpointRegistry {
 
 
 	public ServletStompEndpointRegistry(WebSocketHandler webSocketHandler,
-			MutableUserQueueSuffixResolver userQueueSuffixResolver, TaskScheduler defaultSockJsTaskScheduler,
-			boolean handleConnect) {
+			MutableUserQueueSuffixResolver userQueueSuffixResolver, TaskScheduler defaultSockJsTaskScheduler) {
 
 		Assert.notNull(webSocketHandler);
 		Assert.notNull(userQueueSuffixResolver);
@@ -64,7 +63,6 @@ public class ServletStompEndpointRegistry implements StompEndpointRegistry {
 		this.subProtocolWebSocketHandler = findSubProtocolWebSocketHandler(webSocketHandler);
 		this.stompHandler = new StompProtocolHandler();
 		this.stompHandler.setUserQueueSuffixResolver(userQueueSuffixResolver);
-		this.stompHandler.setHandleConnect(handleConnect);
 		this.sockJsScheduler = defaultSockJsTaskScheduler;
 	}
 
