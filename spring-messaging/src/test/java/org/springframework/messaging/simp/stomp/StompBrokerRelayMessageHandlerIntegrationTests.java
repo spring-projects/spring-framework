@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.simp.BrokerAvailabilityEvent;
@@ -141,6 +142,12 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		this.relay.handleMessage(connect.message);
 		this.responseHandler.awaitAndAssert();
+	}
+
+	@Test(expected=MessageDeliveryException.class)
+	public void messageDeliverExceptionIfSystemSessionForwardFails() throws Exception {
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.MESSAGE);
+		this.relay.handleMessage(MessageBuilder.withPayloadAndHeaders("test", headers).build());
 	}
 
 	@Test
