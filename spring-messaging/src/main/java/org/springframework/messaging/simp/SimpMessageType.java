@@ -28,6 +28,8 @@ public enum SimpMessageType {
 
 	CONNECT,
 
+	CONNECT_ACK,
+
 	MESSAGE,
 
 	SUBSCRIBE,

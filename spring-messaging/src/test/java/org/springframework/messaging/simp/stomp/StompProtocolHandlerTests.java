@@ -26,6 +26,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.support.TestPrincipal;
 import org.springframework.web.socket.support.TestWebSocketSession;
@@ -61,20 +64,25 @@ public class StompProtocolHandlerTests {
 	}
 
 	@Test
-	public void connectedResponseIsSentWhenHandlingConnect() {
-		this.stompHandler.setHandleConnect(true);
+	public void connectedResponseIsSentWhenConnectAckIsToBeSentToClient() {
+		StompHeaderAccessor connectHeaders = StompHeaderAccessor.create(StompCommand.CONNECT);
+		connectHeaders.setHeartbeat(10000, 10000);
+		connectHeaders.setNativeHeader(StompHeaderAccessor.STOMP_ACCEPT_VERSION_HEADER, "1.0,1.1");
 
-		TextMessage textMessage = StompTextMessageBuilder.create(StompCommand.CONNECT).headers(
-				"login:guest", "passcode:guest", "accept-version:1.1,1.0", "heart-beat:10000,10000").build();
+		Message<?> connectMessage = MessageBuilder.withPayloadAndHeaders(new byte[0], connectHeaders).build();
 
-		this.stompHandler.handleMessageFromClient(this.session, textMessage, this.channel);
+		SimpMessageHeaderAccessor connectAckHeaders = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
+		connectAckHeaders.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, connectMessage);
+
+		Message<byte[]> connectAck = MessageBuilder.withPayloadAndHeaders(new byte[0], connectAckHeaders).build();
+		this.stompHandler.handleMessageToClient(this.session, connectAck);
 
 		verifyNoMoreInteractions(this.channel);
 
 		// Check CONNECTED reply
 
 		assertEquals(1, this.session.getSentMessages().size());
-		textMessage = (TextMessage) this.session.getSentMessages().get(0);
+		TextMessage textMessage = (TextMessage) this.session.getSentMessages().get(0);
 		Message<?> message = new StompDecoder().decode(ByteBuffer.wrap(textMessage.getPayload().getBytes()));
 		StompHeaderAccessor replyHeaders = StompHeaderAccessor.wrap(message);
 
@@ -86,8 +94,7 @@ public class StompProtocolHandlerTests {
 	}
 
 	@Test
-	public void connectIsForwardedWhenNotHandlingConnect() {
-		this.stompHandler.setHandleConnect(false);
+	public void messagesAreAugmentedAndForwarded() {
 
 		TextMessage textMessage = StompTextMessageBuilder.create(StompCommand.CONNECT).headers(
 				"login:guest", "passcode:guest", "accept-version:1.1,1.0", "heart-beat:10000,10000").build();

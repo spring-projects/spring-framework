@@ -57,9 +57,8 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 
 	@Bean
 	public HandlerMapping brokerWebSocketHandlerMapping() {
-		boolean brokerRelayConfigured = getMessageBrokerConfigurer().getStompBrokerRelay() != null;
 		ServletStompEndpointRegistry registry = new ServletStompEndpointRegistry(subProtocolWebSocketHandler(),
-				userQueueSuffixResolver(), brokerDefaultSockJsTaskScheduler(), !brokerRelayConfigured);
+				userQueueSuffixResolver(), brokerDefaultSockJsTaskScheduler());
 
 		registerStompEndpoints(registry);
 		AbstractHandlerMapping hm = registry.getHandlerMapping();
