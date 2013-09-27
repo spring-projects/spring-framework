@@ -305,7 +305,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 		private void readStompFrame(Message<byte[]> message) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Reading message " + message);
+				logger.trace("Reading message for sessionId=" + sessionId + ", " + message);
 			}
 
 			StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
