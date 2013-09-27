@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.handler.AbstractBrokerMessageHandler;
@@ -205,34 +206,29 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			return;
 		}
 
-		try {
-			if (SimpMessageType.CONNECT.equals(messageType)) {
-				message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
-				StompRelaySession session = new StompRelaySession(sessionId);
-				this.relaySessions.put(sessionId, session);
-				session.connect(message);
-			}
-			else if (SimpMessageType.DISCONNECT.equals(messageType)) {
-				StompRelaySession session = this.relaySessions.remove(sessionId);
-				if (session == null) {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Session already removed, sessionId=" + sessionId);
-					}
-					return;
-				}
-				session.forward(message);
-			}
-			else {
-				StompRelaySession session = this.relaySessions.get(sessionId);
-				if (session == null) {
-					logger.warn("Session id=" + sessionId + " not found. Ignoring message: " + message);
-					return;
-				}
-				session.forward(message);
-			}
+		if (SimpMessageType.CONNECT.equals(messageType)) {
+			message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
+			StompRelaySession session = new StompRelaySession(sessionId);
+			this.relaySessions.put(sessionId, session);
+			session.connect(message);
 		}
-		catch (Throwable t) {
-			logger.error("Failed to handle message " + message, t);
+		else if (SimpMessageType.DISCONNECT.equals(messageType)) {
+			StompRelaySession session = this.relaySessions.remove(sessionId);
+			if (session == null) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Session already removed, sessionId=" + sessionId);
+				}
+				return;
+			}
+			session.forward(message);
+		}
+		else {
+			StompRelaySession session = this.relaySessions.get(sessionId);
+			if (session == null) {
+				logger.warn("Session id=" + sessionId + " not found. Ignoring message: " + message);
+				return;
+			}
+			session.forward(message);
 		}
 	}
 
@@ -323,7 +319,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			publishBrokerAvailableEvent();
 		}
 
-		private void handleTcpClientFailure(String message, Throwable ex) {
+		protected void handleTcpClientFailure(String message, Throwable ex) {
 			if (logger.isErrorEnabled()) {
 				logger.error(message + ", sessionId=" + this.sessionId, ex);
 			}
@@ -348,13 +344,21 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			messageChannel.send(message);
 		}
 
-		public void forward(Message<?> message) {
+		private void forward(Message<?> message) {
 			TcpConnection<Message<byte[]>, Message<byte[]>> tcpConnection = this.stompConnection.getReadyConnection();
 			if (tcpConnection == null) {
-				logger.warn("Connection to STOMP broker is not active, discarding message: " + message);
-				return;
+				logger.warn("Connection to STOMP broker is not active");
+				handleForwardFailure(message);
 			}
-			forwardInternal(tcpConnection, message);
+			else if (!forwardInternal(tcpConnection, message)) {
+				handleForwardFailure(message);
+			}
+		}
+
+		protected void handleForwardFailure(Message<?> message) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Failed to forward message to the broker. message=" + message);
+			}
 		}
 
 		private boolean forwardInternal(
@@ -491,32 +495,40 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 		@Override
 		protected void connected(StompHeaderAccessor headers, final StompConnection stompConnection) {
-			long brokerReceiveInterval = headers.getHeartbeat()[1];
 
-			if (HEARTBEAT_SEND_INTERVAL > 0 && brokerReceiveInterval > 0) {
+			long brokerReceiveInterval = headers.getHeartbeat()[1];
+			if ((HEARTBEAT_SEND_INTERVAL > 0) && (brokerReceiveInterval > 0)) {
 				long interval = Math.max(HEARTBEAT_SEND_INTERVAL,  brokerReceiveInterval);
 				stompConnection.connection.on().writeIdle(interval, new Runnable() {
 
 					@Override
 					public void run() {
-						TcpConnection<Message<byte[]>, Message<byte[]>> connection = stompConnection.connection;
-						if (connection != null) {
-							connection.send(MessageBuilder.withPayload(heartbeatPayload).build());
+						TcpConnection<Message<byte[]>, Message<byte[]>> tcpConn = stompConnection.connection;
+						if (tcpConn != null) {
+							tcpConn.send(MessageBuilder.withPayload(heartbeatPayload).build(),
+								new Consumer<Boolean>() {
+									@Override
+									public void accept(Boolean t) {
+										handleTcpClientFailure("Failed to send heartbeat to the broker", null);
+									}
+								});
 						}
 					}
-
 				});
 			}
 
 			long brokerSendInterval = headers.getHeartbeat()[0];
 			if (HEARTBEAT_RECEIVE_INTERVAL > 0 && brokerSendInterval > 0) {
-				final long interval =
-						Math.max(HEARTBEAT_RECEIVE_INTERVAL, brokerSendInterval) * HEARTBEAT_RECEIVE_MULTIPLIER;
+				final long interval = Math.max(HEARTBEAT_RECEIVE_INTERVAL, brokerSendInterval)
+						* HEARTBEAT_RECEIVE_MULTIPLIER;
 				stompConnection.connection.on().readIdle(interval,  new Runnable() {
+
 					@Override
 					public void run() {
 						String message = "Broker hearbeat missed: connection idle for more than " + interval + "ms";
-						logger.warn(message);
+						if (logger.isWarnEnabled()) {
+							logger.warn(message);
+						}
 						disconnected(message);
 					}
 				});
@@ -536,6 +548,12 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			else {
 				// Ignore
 			}
+		}
+
+		@Override
+		protected void handleForwardFailure(Message<?> message) {
+			super.handleForwardFailure(message);
+			throw new MessageDeliveryException(message);
 		}
 	}
 
