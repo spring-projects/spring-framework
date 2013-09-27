@@ -29,6 +29,7 @@ import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver;
 import org.springframework.instrument.classloading.glassfish.GlassFishLoadTimeWeaver;
 import org.springframework.instrument.classloading.jboss.JBossLoadTimeWeaver;
+import org.springframework.instrument.classloading.tomcat.TomcatLoadTimeWeaver;
 import org.springframework.instrument.classloading.weblogic.WebLogicLoadTimeWeaver;
 import org.springframework.instrument.classloading.websphere.WebSphereLoadTimeWeaver;
 
@@ -40,13 +41,11 @@ import org.springframework.instrument.classloading.websphere.WebSphereLoadTimeWe
  * "{@code loadTimeWeaver}"; the most convenient way to achieve this is
  * Spring's {@code &lt;context:load-time-weaver&gt;} XML tag.
  *
- * <p>This class implements a runtime environment check for obtaining
- * the appropriate weaver implementation: As of Spring 3.1, it detects
- * Oracle WebLogic 10, GlassFish 3, JBoss AS 5, 6 and 7, IBM WebSphere 7 and 8,
+ * <p>This class implements a runtime environment check for obtaining the
+ * appropriate weaver implementation: As of Spring 4.0, it detects Oracle WebLogic 10,
+ * GlassFish 3, Tomcat 6, 7 and 8, JBoss AS 5, 6 and 7, IBM WebSphere 7 and 8,
  * {@link InstrumentationSavingAgent Spring's VM agent}, and any {@link ClassLoader}
- * supported by Spring's {@link ReflectiveLoadTimeWeaver} (for example the
- * {@link org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader}
- * for Tomcat 6 and 7).
+ * supported by Spring's {@link ReflectiveLoadTimeWeaver}.
  *
  * @author Juergen Hoeller
  * @author Ramnivas Laddad
@@ -111,8 +110,11 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 			if (name.startsWith("weblogic")) {
 				return new WebLogicLoadTimeWeaver(classLoader);
 			}
-			else if (name.startsWith("com.sun.enterprise") || name.startsWith("org.glassfish")) {
+			else if (name.startsWith("org.glassfish")) {
 				return new GlassFishLoadTimeWeaver(classLoader);
+			}
+			else if (name.startsWith("org.apache.catalina")) {
+				return new TomcatLoadTimeWeaver(classLoader);
 			}
 			else if (name.startsWith("org.jboss")) {
 				return new JBossLoadTimeWeaver(classLoader);

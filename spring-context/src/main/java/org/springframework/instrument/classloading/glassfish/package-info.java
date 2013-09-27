@@ -1,7 +1,7 @@
 
 /**
  *
- * Support for class instrumentation on GlassFish / Sun Application Server.
+ * Support for class instrumentation on GlassFish.
  *
  */
 package org.springframework.instrument.classloading.glassfish;
