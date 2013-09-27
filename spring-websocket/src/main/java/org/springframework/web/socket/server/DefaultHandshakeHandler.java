@@ -62,6 +62,9 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 	private static final boolean glassFishWsPresent = ClassUtils.isPresent(
 			"org.glassfish.tyrus.servlet.TyrusHttpUpgradeHandler", HandshakeHandler.class.getClassLoader());
 
+	private static final boolean glassFish40WsPresent = ClassUtils.isPresent(
+			"org.glassfish.tyrus.server.TyrusEndpoint", HandshakeHandler.class.getClassLoader());
+
 
 	private final RequestUpgradeStrategy requestUpgradeStrategy;
 
@@ -88,7 +91,12 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 			className = "org.springframework.web.socket.server.support.JettyRequestUpgradeStrategy";
 		}
 		else if (glassFishWsPresent) {
-			className = "org.springframework.web.socket.server.support.GlassFishRequestUpgradeStrategy";
+			if (glassFish40WsPresent) {
+				className = "org.springframework.web.socket.server.support.GlassFish40RequestUpgradeStrategy";
+			}
+			else {
+				className = "org.springframework.web.socket.server.support.GlassFishRequestUpgradeStrategy";
+			}
 		}
 		else {
 			throw new IllegalStateException("No suitable " + RequestUpgradeStrategy.class.getSimpleName());
