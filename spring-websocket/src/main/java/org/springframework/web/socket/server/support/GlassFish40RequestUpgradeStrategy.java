@@ -16,24 +16,35 @@
 
 package org.springframework.web.socket.server.support;
 
+import java.lang.reflect.Constructor;
+
 import org.glassfish.tyrus.core.EndpointWrapper;
-import org.glassfish.tyrus.core.TyrusEndpoint;
+import org.glassfish.tyrus.spi.SPIEndpoint;
 import org.glassfish.tyrus.websockets.WebSocketApplication;
+import org.springframework.util.ClassUtils;
 
 
 /**
  * Extension of the {@link AbstractGlassFishRequestUpgradeStrategy} that provides support
- * for GlassFish 4.0.1 and beyond.
+ * for only GlassFish 4.0.
  *
  * @author Rossen Stoyanchev
  * @author Michael Irwin
  * @since 4.0
  */
-public class GlassFishRequestUpgradeStrategy extends AbstractGlassFishRequestUpgradeStrategy {
+public class GlassFish40RequestUpgradeStrategy extends AbstractGlassFishRequestUpgradeStrategy {
 
-	@Override
+
 	protected WebSocketApplication createTyrusEndpoint(EndpointWrapper endpoint) {
-		return new TyrusEndpoint(endpoint);
+		try {
+			String name = "org.glassfish.tyrus.server.TyrusEndpoint";
+			Class<?> clazz = ClassUtils.forName(name, this.getClass().getClassLoader());
+			Constructor<?> constructor = clazz.getConstructor(SPIEndpoint.class);
+			return (WebSocketApplication) constructor.newInstance(endpoint);
+		}
+		catch (ReflectiveOperationException exception) {
+			throw new RuntimeException(exception);
+		}
 	}
 
 }
