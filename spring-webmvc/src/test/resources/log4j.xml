@@ -19,10 +19,6 @@
 		<level value="debug" />
 	</logger>
 
-	<logger name="org.springframework.web.servlet.resource">
-		<level value="trace" />
-	</logger>
-
 	<!-- Root Logger -->
 	<root>
 		<priority value="warn" />
