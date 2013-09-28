@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.resource;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,41 +34,42 @@ import static org.junit.Assert.*;
 /**
  *
  * @author Jeremy Grelle
+ * @author Rossen Stoyanchev
  */
-public class ResourceUrlMapperTests {
+public class ResourceUrlGeneratorTests {
 
 	ResourceHttpRequestHandler handler;
 
 	SimpleUrlHandlerMapping mapping;
 
-	ResourceUrlMapper mapper;
+	ResourceUrlGenerator generator;
+
 
 	@Before
 	public void setUp() {
-		List<Resource> resourcePaths = new ArrayList<Resource>();
-		resourcePaths.add(new ClassPathResource("test/", getClass()));
-		resourcePaths.add(new ClassPathResource("testalternatepath/", getClass()));
+		List<Resource> locations = new ArrayList<Resource>();
+		locations.add(new ClassPathResource("test/", getClass()));
+		locations.add(new ClassPathResource("testalternatepath/", getClass()));
 
 		Map<String, ResourceHttpRequestHandler> urlMap = new HashMap<String, ResourceHttpRequestHandler>();
 		handler = new ResourceHttpRequestHandler();
-		handler.setLocations(resourcePaths);
+		handler.setLocations(locations);
 		urlMap.put("/resources/**", handler);
 
 		mapping = new SimpleUrlHandlerMapping();
 		mapping.setUrlMap(urlMap);
 	}
 
-	private void resetMapper() {
-		mapper = new ResourceUrlMapper();
-		mapper.postProcessAfterInitialization(mapping, "resourceMapping");
-		mapper.onApplicationEvent(null);
+	private void initGenerator() {
+		generator = new ResourceUrlGenerator();
+		generator.setResourceHandlerMappings(Collections.singletonList(this.mapping));
 	}
 
 	@Test
 	public void getStaticResourceUrl() {
-		resetMapper();
+		initGenerator();
 
-		String url = mapper.getUrlForResource("/resources/foo.css");
+		String url = generator.getResourceUrl("/resources/foo.css");
 		assertEquals("/resources/foo.css", url);
 	}
 
@@ -77,9 +79,9 @@ public class ResourceUrlMapperTests {
 		resolvers.add(new FingerprintResourceResolver());
 		resolvers.add(new PathResourceResolver());
 		handler.setResourceResolvers(resolvers);
-		resetMapper();
+		initGenerator();
 
-		String url = mapper.getUrlForResource("/resources/foo.css");
+		String url = generator.getResourceUrl("/resources/foo.css");
 		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);
 	}
 
@@ -89,9 +91,9 @@ public class ResourceUrlMapperTests {
 		resolvers.add(new PathExtensionResourceResolver());
 		resolvers.add(new PathResourceResolver());
 		handler.setResourceResolvers(resolvers);
-		resetMapper();
+		initGenerator();
 
-		String url = mapper.getUrlForResource("/resources/zoo.css");
+		String url = generator.getResourceUrl("/resources/zoo.css");
 		assertEquals("/resources/zoo.css", url);
 	}
 

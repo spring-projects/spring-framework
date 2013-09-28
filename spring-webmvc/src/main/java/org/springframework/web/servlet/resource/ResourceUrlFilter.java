@@ -17,6 +17,9 @@
 package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -31,13 +34,17 @@ import org.springframework.web.util.UrlPathHelper;
 
 
 /**
+ * A filter that wraps the {@link HttpServletResponse} and overrides its
+ * {@link HttpServletResponse#encodeURL(String) encodeURL} method in order to generate
+ * resource URL links via {@link ResourceUrlGenerator}.
  *
  * @author Jeremy Grelle
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
+public class ResourceUrlFilter extends OncePerRequestFilter {
 
-	private ResourceUrlMapper mapper;
+	private Set<ResourceUrlGenerator> resourceUrlGenerators;
 
 
 	@Override
@@ -49,8 +56,10 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 
 	@Override
 	protected void initFilterBean() throws ServletException {
-		WebApplicationContext appContext = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
-		this.mapper = appContext.getBean(ResourceUrlMapper.class);
+		WebApplicationContext cxt = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
+		Map<String, ResourceUrlGenerator> beans = cxt.getBeansOfType(ResourceUrlGenerator.class);
+		this.resourceUrlGenerators = new LinkedHashSet<ResourceUrlGenerator>();
+		this.resourceUrlGenerators.addAll(beans.values());
 	}
 
 
@@ -60,35 +69,30 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 
 		private String pathPrefix;
 
+
 		private ResourceUrlResponseWrapper(HttpServletRequest request, HttpServletResponse wrapped) {
 			super(wrapped);
-
-			this.pathPrefix = pathHelper.getContextPath(request);
-			String servletPath = pathHelper.getServletPath(request);
-			String appPath = pathHelper.getPathWithinApplication(request);
-			//This accounts for the behavior when servlet is mapped to "/"
-			if (!servletPath.equals(appPath)) {
-				this.pathPrefix += pathHelper.getServletPath(request);
-			}
+			String requestUri = this.pathHelper.getRequestUri(request);
+			String lookupPath = this.pathHelper.getLookupPathForRequest(request);
+			this.pathPrefix = requestUri.replace(lookupPath, "");
 		}
 
 		@Override
 		public String encodeURL(String url) {
-			if(url.startsWith(pathPrefix)) {
-				String relativeUrl = url.replaceFirst(pathPrefix, "");
+			if(url.startsWith(this.pathPrefix)) {
+				String relativeUrl = url.replaceFirst(this.pathPrefix, "");
 				if (!relativeUrl.startsWith("/")) {
 					relativeUrl = "/" + relativeUrl;
 				}
-				if (mapper.isResourceUrl(relativeUrl)) {
-					String resourceUrl = mapper.getUrlForResource(relativeUrl);
+				for (ResourceUrlGenerator generator : resourceUrlGenerators) {
+					String resourceUrl = generator.getResourceUrl(relativeUrl);
 					if (resourceUrl != null) {
-						return resourceUrl;
+						return super.encodeURL(this.pathPrefix + resourceUrl);
 					}
 				}
 			}
 			return super.encodeURL(url);
 		}
-
 	}
 
 }
