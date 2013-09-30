@@ -134,14 +134,20 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 		}
 
 		@Override
-		protected void writePrelude() throws IOException {
-
+		protected void afterRequestUpdated() {
 			// we already validated the parameter above..
 			String callback = getCallbackParam(getRequest());
 
 			String html = String.format(PARTIAL_HTML_CONTENT, callback);
-			getResponse().getBody().write(html.getBytes("UTF-8"));
-			getResponse().flush();
+
+			try {
+				getResponse().getBody().write(html.getBytes("UTF-8"));
+				getResponse().flush();
+			}
+			catch (IOException e) {
+				tryCloseWithSockJsTransportError(e, CloseStatus.SERVER_ERROR);
+				throw new SockJsTransportFailureException("Failed to write HTML content", getId(), e);
+			}
 		}
 	}
 

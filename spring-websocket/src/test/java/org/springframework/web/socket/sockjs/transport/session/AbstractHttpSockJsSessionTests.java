@@ -78,7 +78,7 @@ public class AbstractHttpSockJsSessionTests extends BaseAbstractSockJsSessionTes
 	@Test
 	public void setInitialRequest() throws Exception {
 
-		this.session.setInitialRequest(this.request, this.response, this.frameFormat);
+		this.session.handleInitialRequest(this.request, this.response, this.frameFormat);
 
 		assertTrue(this.session.hasRequest());
 		assertTrue(this.session.hasResponse());
@@ -93,7 +93,7 @@ public class AbstractHttpSockJsSessionTests extends BaseAbstractSockJsSessionTes
 	public void setLongPollingRequest() throws Exception {
 
 		this.session.getMessageCache().add("x");
-		this.session.setLongPollingRequest(this.request, this.response, this.frameFormat);
+		this.session.startLongPollingRequest(this.request, this.response, this.frameFormat);
 
 		assertTrue(this.session.hasRequest());
 		assertTrue(this.session.hasResponse());
@@ -111,7 +111,7 @@ public class AbstractHttpSockJsSessionTests extends BaseAbstractSockJsSessionTes
 		this.session.delegateConnectionClosed(CloseStatus.NORMAL);
 		assertClosed();
 
-		this.session.setLongPollingRequest(this.request, this.response, this.frameFormat);
+		this.session.startLongPollingRequest(this.request, this.response, this.frameFormat);
 
 		assertEquals("c[3000,\"Go away!\"]", this.servletResponse.getContentAsString());
 		assertFalse(this.servletRequest.isAsyncStarted());

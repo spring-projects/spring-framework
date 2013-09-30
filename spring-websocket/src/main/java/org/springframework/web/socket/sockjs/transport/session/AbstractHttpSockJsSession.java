@@ -134,7 +134,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		return this.acceptedProtocol;
 	}
 
-	public synchronized void setInitialRequest(ServerHttpRequest request, ServerHttpResponse response,
+	public synchronized void handleInitialRequest(ServerHttpRequest request, ServerHttpResponse response,
 			FrameFormat frameFormat) throws SockJsException {
 
 		udpateRequest(request, response, frameFormat);
@@ -164,15 +164,10 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	protected void writePrelude() throws IOException {
 	}
 
-	public synchronized void setLongPollingRequest(ServerHttpRequest request, ServerHttpResponse response,
-			FrameFormat frameFormat) throws SockJsException {
+	public synchronized void startLongPollingRequest(ServerHttpRequest request,
+			ServerHttpResponse response, FrameFormat frameFormat) throws SockJsException {
 
 		udpateRequest(request, response, frameFormat);
-		if (isClosed()) {
-			logger.debug("Connection already closed (but not removed yet)");
-			writeFrame(SockJsFrame.closeFrameGoAway());
-			return;
-		}
 		try {
 			this.asyncRequestControl.start(-1);
 			scheduleHeartbeat();
@@ -184,7 +179,8 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		}
 	}
 
-	private void udpateRequest(ServerHttpRequest request, ServerHttpResponse response, FrameFormat frameFormat) {
+	private void udpateRequest(ServerHttpRequest request, ServerHttpResponse response,
+			FrameFormat frameFormat) {
 		Assert.notNull(request, "expected request");
 		Assert.notNull(response, "expected response");
 		Assert.notNull(frameFormat, "expected frameFormat");
@@ -192,8 +188,11 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		this.response = response;
 		this.asyncRequestControl = request.getAsyncRequestControl(response);
 		this.frameFormat = frameFormat;
+		afterRequestUpdated();
 	}
 
+	protected void afterRequestUpdated() {
+	}
 
 	@Override
 	public synchronized boolean isActive() {

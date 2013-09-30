@@ -46,14 +46,14 @@ public class StreamingSockJsSession extends AbstractHttpSockJsSession {
 
 
 	@Override
-	public synchronized void setInitialRequest(ServerHttpRequest request, ServerHttpResponse response,
+	public synchronized void handleInitialRequest(ServerHttpRequest request, ServerHttpResponse response,
 			FrameFormat frameFormat) throws SockJsException {
 
-		super.setInitialRequest(request, response, frameFormat);
+		super.handleInitialRequest(request, response, frameFormat);
 
 		// the WebSocketHandler delegate may have closed the session
 		if (!isClosed()) {
-			super.setLongPollingRequest(request, response, frameFormat);
+			super.startLongPollingRequest(request, response, frameFormat);
 		}
 	}
 
