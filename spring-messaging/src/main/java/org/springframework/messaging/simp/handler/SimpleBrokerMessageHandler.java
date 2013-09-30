@@ -33,6 +33,8 @@ import org.springframework.util.MultiValueMap;
  */
 public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
+	private static final byte[] EMPTY_PAYLOAD = new byte[0];
+
 	private final MessageChannel messageChannel;
 
 	private SubscriptionRegistry subscriptionRegistry = new DefaultSubscriptionRegistry();
@@ -96,8 +98,17 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 			sendMessageToSubscribers(headers.getDestination(), message);
 		}
 		else if (SimpMessageType.DISCONNECT.equals(messageType)) {
-			String sessionId = SimpMessageHeaderAccessor.wrap(message).getSessionId();
+			String sessionId = headers.getSessionId();
 			this.subscriptionRegistry.unregisterAllSubscriptions(sessionId);
+		} else if (SimpMessageType.CONNECT.equals(messageType)) {
+			String sessionId = headers.getSessionId();
+			SimpMessageHeaderAccessor connectAckHeaders =
+					SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
+			connectAckHeaders.setSessionId(sessionId);
+			connectAckHeaders.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, message);
+			Message<byte[]> connectAck =
+					MessageBuilder.withPayloadAndHeaders(EMPTY_PAYLOAD, connectAckHeaders).build();
+			this.messageChannel.send(connectAck);
 		}
 	}
 

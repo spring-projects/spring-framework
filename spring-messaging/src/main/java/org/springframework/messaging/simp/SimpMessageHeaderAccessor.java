@@ -41,6 +41,8 @@ import org.springframework.util.Assert;
  */
 public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
+	public static final String CONNECT_MESSAGE_HEADER = "connectMessage";
+
 	public static final String DESTINATION_HEADER = "destination";
 
 	public static final String MESSAGE_TYPE_HEADER = "messageType";
