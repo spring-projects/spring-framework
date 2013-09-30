@@ -86,6 +86,7 @@ import org.springframework.util.StringUtils;
  * @author Chris Beams
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Thomas Darimont
  * @since 3.0
  * @see ConfigurationClassBeanDefinitionReader
  */
@@ -265,7 +266,16 @@ class ConfigurationClassParser {
 			configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
 		}
 
-		// process superclass, if any
+        //process interfaces, if any
+        try {
+            for(SourceClass ifaceSourceClass : sourceClass.getInterfaces()){
+                doProcessConfigurationClass(configClass, ifaceSourceClass);
+            }
+        } catch (ClassNotFoundException ex) {
+            throw new IllegalStateException(ex);
+        }
+
+        // process superclass, if any
 		if (sourceClass.getMetadata().hasSuperClass()) {
 			String superclass = sourceClass.getMetadata().getSuperClassName();
 			if (!this.knownSuperclasses.containsKey(superclass)) {
@@ -717,6 +727,19 @@ class ConfigurationClassParser {
 			}
 			return asSourceClass(((MetadataReader) this.source).getClassMetadata().getSuperClassName());
 		}
+
+        public SourceClass[] getInterfaces() throws IOException, ClassNotFoundException {
+            if(this.source instanceof Class<?>){
+                Class[] ifaces = ((Class<?>)this.source).getInterfaces();
+                SourceClass[] ifaceSourceClasses = new SourceClass[ifaces.length];
+                for(int i =0; i < ifaces.length;i++){
+                    ifaceSourceClasses[i] = asSourceClass(ifaces[i]);
+                }
+                return ifaceSourceClasses;
+            }
+
+            return new SourceClass[0];
+        }
 
 		public Set<SourceClass> getAnnotations() throws IOException, ClassNotFoundException {
 			Set<SourceClass> annotations = new LinkedHashSet<SourceClass>();

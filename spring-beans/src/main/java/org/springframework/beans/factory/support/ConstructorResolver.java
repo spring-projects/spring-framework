@@ -64,12 +64,18 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @author Mark Fisher
  * @author Costin Leau
+ * @author Thomas Darimont
  * @since 2.0
  * @see #autowireConstructor
  * @see #instantiateUsingFactoryMethod
  * @see AbstractAutowireCapableBeanFactory
  */
 class ConstructorResolver {
+
+    /*
+     * Guard for Java 8+ specific functionality, like testing for default methods.
+     */
+    private static final boolean JDK8_OR_LATER = ClassUtils.isPresent("java.util.function.Function", ConstructorResolver.class.getClassLoader());
 
 	private static final String CONSTRUCTOR_PROPERTIES_CLASS_NAME = "java.beans.ConstructorProperties";
 
@@ -405,14 +411,12 @@ class ConstructorResolver {
 				rawCandidates = AccessController.doPrivileged(new PrivilegedAction<Method[]>() {
 					@Override
 					public Method[] run() {
-						return (mbd.isNonPublicAccessAllowed() ?
-								ReflectionUtils.getAllDeclaredMethods(factoryClazz) : factoryClazz.getMethods());
+						return getRawCandidateMethods(mbd.isNonPublicAccessAllowed(), factoryClazz);
 					}
 				});
 			}
 			else {
-				rawCandidates = (mbd.isNonPublicAccessAllowed() ?
-						ReflectionUtils.getAllDeclaredMethods(factoryClazz) : factoryClazz.getMethods());
+				rawCandidates = getRawCandidateMethods(mbd.isNonPublicAccessAllowed(), factoryClazz);
 			}
 
 			List<Method> candidateSet = new ArrayList<Method>();
@@ -664,7 +668,7 @@ class ConstructorResolver {
 
 		ArgumentsHolder args = new ArgumentsHolder(paramTypes.length);
 		Set<ConstructorArgumentValues.ValueHolder> usedValueHolders =
-				new HashSet<ConstructorArgumentValues.ValueHolder>(paramTypes.length);
+				new HashSet<ValueHolder>(paramTypes.length);
 		Set<String> autowiredBeanNames = new LinkedHashSet<String>(4);
 
 		for (int paramIndex = 0; paramIndex < paramTypes.length; paramIndex++) {
@@ -870,6 +874,49 @@ class ConstructorResolver {
 			}
 		}
 	}
+
+    private static Method[] getRawCandidateMethods(boolean isNonPublicAccessAllowed, Class<?> factoryClazz){
+
+        Method[] initialRawCandidateMethods = isNonPublicAccessAllowed ?
+                ReflectionUtils.getAllDeclaredMethods(factoryClazz) : factoryClazz.getMethods();
+
+        List<Method> candidates = new ArrayList<Method>();
+        candidates.addAll(Arrays.asList(initialRawCandidateMethods));
+
+        if(JDK8_OR_LATER){
+            Method[] additionRawCandidates = factoryClazz.getMethods();
+            for(Method rawCandidate : additionRawCandidates){
+                if(DefaultMethodPredicate.INSTANCE.isDefault(rawCandidate)){
+                    candidates.add(rawCandidate);
+                }
+            }
+        }
+
+        return candidates.toArray(new Method[candidates.size()]);
+    }
+
+
+    /**
+     * Allows to test whether a given {@link java.lang.reflect.Method} is a Java 8 default {@code Method}.
+     */
+    static enum DefaultMethodPredicate {
+
+        INSTANCE;
+
+        private static final Method IS_DEFAULT_METHOD;
+        static{
+            IS_DEFAULT_METHOD = ReflectionUtils.findMethod(Method.class,"isDefault");
+        }
+
+        /**
+         * @param method
+         * @return
+         *          true if the given method is a Java 8 default method, false otherwise.
+         */
+        public boolean isDefault(Method method){
+            return IS_DEFAULT_METHOD != null ? (Boolean)ReflectionUtils.invokeMethod(IS_DEFAULT_METHOD,method) : false;
+        }
+    }
 
 
 	/**
