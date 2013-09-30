@@ -368,15 +368,11 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 			@SuppressWarnings("unchecked")
 			Message<byte[]> byteMessage = (Message<byte[]>) message;
-
 			if (logger.isTraceEnabled()) {
 				logger.trace("Forwarding to STOMP broker, message: " + message);
 			}
 
 			StompCommand command = StompHeaderAccessor.wrap(message).getCommand();
-			if (command == StompCommand.DISCONNECT) {
-				this.stompConnection.setDisconnected();
-			}
 
 			final Deferred<Boolean, Promise<Boolean>> deferred = new DeferredPromiseSpec<Boolean>().get();
 			tcpConnection.send(byteMessage, new Consumer<Boolean>() {
@@ -393,8 +389,11 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 					handleTcpClientFailure("Timed out waiting for message to be forwarded to the broker", null);
 				}
 				else if (!success) {
-					if (command != StompCommand.DISCONNECT) {
-						handleTcpClientFailure("Failed to forward message to the broker", null);
+					handleTcpClientFailure("Failed to forward message to the broker", null);
+				}
+				else {
+					if (command == StompCommand.DISCONNECT) {
+						this.stompConnection.setDisconnected();
 					}
 				}
 			}
@@ -508,8 +507,10 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 							tcpConn.send(MessageBuilder.withPayload(heartbeatPayload).build(),
 								new Consumer<Boolean>() {
 									@Override
-									public void accept(Boolean t) {
-										handleTcpClientFailure("Failed to send heartbeat to the broker", null);
+									public void accept(Boolean result) {
+										if (!result) {
+											handleTcpClientFailure("Failed to send heartbeat to the broker", null);
+										}
 									}
 								});
 						}
@@ -542,7 +543,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
 			if (StompCommand.ERROR.equals(headers.getCommand())) {
 				if (logger.isErrorEnabled()) {
-					logger.error("System session received ERROR frame from broker: " + message);
+					logger.error("STOMP ERROR frame on system session: " + message);
 				}
 			}
 			else {

@@ -128,6 +128,20 @@ public class StompProtocolHandler implements SubProtocolHandler {
 		}
 	}
 
+	protected void sendErrorMessage(WebSocketSession session, Throwable error) {
+
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.ERROR);
+		headers.setMessage(error.getMessage());
+		Message<byte[]> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
+		String payload = new String(this.stompEncoder.encode(message), Charset.forName("UTF-8"));
+		try {
+			session.sendMessage(new TextMessage(payload));
+		}
+		catch (Throwable t) {
+			// ignore
+		}
+	}
+
 	/**
 	 * Handle STOMP messages going back out to WebSocket clients.
 	 */
@@ -143,7 +157,7 @@ public class StompProtocolHandler implements SubProtocolHandler {
 		if (headers.getMessageType() == SimpMessageType.CONNECT_ACK) {
 			StompHeaderAccessor connectedHeaders = StompHeaderAccessor.create(StompCommand.CONNECTED);
 			connectedHeaders.setVersion(getVersion(headers));
-			connectedHeaders.setHeartbeat(0, 0);
+			connectedHeaders.setHeartbeat(0, 0); // no heart-beat support with simple broker
 			headers = connectedHeaders;
 		}
 
@@ -180,6 +194,41 @@ public class StompProtocolHandler implements SubProtocolHandler {
 		}
 	}
 
+	private String getVersion(StompHeaderAccessor connectAckHeaders) {
+
+		String name = StompHeaderAccessor.CONNECT_MESSAGE_HEADER;
+		Message<?> connectMessage = (Message<?>) connectAckHeaders.getHeader(name);
+		StompHeaderAccessor connectHeaders = StompHeaderAccessor.wrap(connectMessage);
+		Assert.notNull(connectMessage, "CONNECT_ACK does not contain original CONNECT " + connectAckHeaders);
+
+		Set<String> acceptVersions = connectHeaders.getAcceptVersion();
+		if (acceptVersions.contains("1.2")) {
+			return "1.2";
+		}
+		else if (acceptVersions.contains("1.1")) {
+			return "1.1";
+		}
+		else if (acceptVersions.isEmpty()) {
+			return null;
+		}
+		else {
+			throw new StompConversionException("Unsupported version '" + acceptVersions + "'");
+		}
+	}
+
+	private void augmentConnectedHeaders(StompHeaderAccessor headers, WebSocketSession session) {
+		Principal principal = session.getPrincipal();
+		if (principal != null) {
+			headers.setNativeHeader(CONNECTED_USER_HEADER, principal.getName());
+			headers.setNativeHeader(QUEUE_SUFFIX_HEADER, session.getId());
+
+			if (this.queueSuffixResolver != null) {
+				String suffix = session.getId();
+				this.queueSuffixResolver.addQueueSuffix(principal.getName(), session.getId(), suffix);
+			}
+		}
+	}
+
 	@Override
 	public String resolveSessionId(Message<?> message) {
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
@@ -203,50 +252,4 @@ public class StompProtocolHandler implements SubProtocolHandler {
 		outputChannel.send(message);
 	}
 
-	protected void sendErrorMessage(WebSocketSession session, Throwable error) {
-
-		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.ERROR);
-		headers.setMessage(error.getMessage());
-		Message<byte[]> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
-		String payload = new String(this.stompEncoder.encode(message), Charset.forName("UTF-8"));
-		try {
-			session.sendMessage(new TextMessage(payload));
-		}
-		catch (Throwable t) {
-			// ignore
-		}
-	}
-
-	private void augmentConnectedHeaders(StompHeaderAccessor headers, WebSocketSession session) {
-		Principal principal = session.getPrincipal();
-		if (principal != null) {
-			headers.setNativeHeader(CONNECTED_USER_HEADER, principal.getName());
-			headers.setNativeHeader(QUEUE_SUFFIX_HEADER, session.getId());
-
-			if (this.queueSuffixResolver != null) {
-				String suffix = session.getId();
-				this.queueSuffixResolver.addQueueSuffix(principal.getName(), session.getId(), suffix);
-			}
-		}
-	}
-
-	private String getVersion(StompHeaderAccessor connectAckHeaders) {
-		Message<?> connectMessage =
-				(Message<?>) connectAckHeaders.getHeader(StompHeaderAccessor.CONNECT_MESSAGE_HEADER);
-		StompHeaderAccessor connectHeaders = StompHeaderAccessor.wrap(connectMessage);
-
-		Set<String> acceptVersions = connectHeaders.getAcceptVersion();
-		if (acceptVersions.contains("1.2")) {
-			return "1.2";
-		}
-		else if (acceptVersions.contains("1.1")) {
-			return "1.1";
-		}
-		else if (acceptVersions.isEmpty()) {
-			return null;
-		}
-		else {
-			throw new StompConversionException("Unsupported version '" + acceptVersions + "'");
-		}
-	}
 }

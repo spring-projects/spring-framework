@@ -100,14 +100,13 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		else if (SimpMessageType.DISCONNECT.equals(messageType)) {
 			String sessionId = headers.getSessionId();
 			this.subscriptionRegistry.unregisterAllSubscriptions(sessionId);
-		} else if (SimpMessageType.CONNECT.equals(messageType)) {
-			String sessionId = headers.getSessionId();
-			SimpMessageHeaderAccessor connectAckHeaders =
-					SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
-			connectAckHeaders.setSessionId(sessionId);
-			connectAckHeaders.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, message);
-			Message<byte[]> connectAck =
-					MessageBuilder.withPayloadAndHeaders(EMPTY_PAYLOAD, connectAckHeaders).build();
+		}
+		else if (SimpMessageType.CONNECT.equals(messageType)) {
+			SimpMessageHeaderAccessor replyHeaders = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
+			replyHeaders.setSessionId(headers.getSessionId());
+			replyHeaders.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, message);
+
+			Message<byte[]> connectAck = MessageBuilder.withPayloadAndHeaders(EMPTY_PAYLOAD, replyHeaders).build();
 			this.messageChannel.send(connectAck);
 		}
 	}
