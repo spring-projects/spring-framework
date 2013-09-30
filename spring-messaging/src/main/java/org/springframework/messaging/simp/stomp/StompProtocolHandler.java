@@ -50,7 +50,7 @@ public class StompProtocolHandler implements SubProtocolHandler {
 
 	/**
 	 * The name of the header set on the CONNECTED frame indicating the name of the user
-	 * connected authenticated on the WebSocket session.
+	 * authenticated on the WebSocket session.
 	 */
 	public static final String CONNECTED_USER_HEADER = "user-name";
 
@@ -69,6 +69,7 @@ public class StompProtocolHandler implements SubProtocolHandler {
 	private final StompEncoder stompEncoder = new StompEncoder();
 
 	private MutableUserQueueSuffixResolver queueSuffixResolver = new SimpleUserQueueSuffixResolver();
+
 
 	/**
 	 * Configure a resolver to use to maintain queue suffixes for user
@@ -179,33 +180,6 @@ public class StompProtocolHandler implements SubProtocolHandler {
 		}
 	}
 
-	private void augmentConnectedHeaders(StompHeaderAccessor headers, WebSocketSession session) {
-		Principal principal = session.getPrincipal();
-		if (principal != null) {
-			headers.setNativeHeader(CONNECTED_USER_HEADER, principal.getName());
-			headers.setNativeHeader(QUEUE_SUFFIX_HEADER, session.getId());
-
-			if (this.queueSuffixResolver != null) {
-				String suffix = session.getId();
-				this.queueSuffixResolver.addQueueSuffix(principal.getName(), session.getId(), suffix);
-			}
-		}
-	}
-
-	protected void sendErrorMessage(WebSocketSession session, Throwable error) {
-
-		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.ERROR);
-		headers.setMessage(error.getMessage());
-		Message<byte[]> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
-		String payload = new String(this.stompEncoder.encode(message), Charset.forName("UTF-8"));
-		try {
-			session.sendMessage(new TextMessage(payload));
-		}
-		catch (Throwable t) {
-			// ignore
-		}
-	}
-
 	@Override
 	public String resolveSessionId(Message<?> message) {
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
@@ -229,6 +203,33 @@ public class StompProtocolHandler implements SubProtocolHandler {
 		outputChannel.send(message);
 	}
 
+	protected void sendErrorMessage(WebSocketSession session, Throwable error) {
+
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.ERROR);
+		headers.setMessage(error.getMessage());
+		Message<byte[]> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
+		String payload = new String(this.stompEncoder.encode(message), Charset.forName("UTF-8"));
+		try {
+			session.sendMessage(new TextMessage(payload));
+		}
+		catch (Throwable t) {
+			// ignore
+		}
+	}
+
+	private void augmentConnectedHeaders(StompHeaderAccessor headers, WebSocketSession session) {
+		Principal principal = session.getPrincipal();
+		if (principal != null) {
+			headers.setNativeHeader(CONNECTED_USER_HEADER, principal.getName());
+			headers.setNativeHeader(QUEUE_SUFFIX_HEADER, session.getId());
+
+			if (this.queueSuffixResolver != null) {
+				String suffix = session.getId();
+				this.queueSuffixResolver.addQueueSuffix(principal.getName(), session.getId(), suffix);
+			}
+		}
+	}
+
 	private String getVersion(StompHeaderAccessor connectAckHeaders) {
 		Message<?> connectMessage =
 				(Message<?>) connectAckHeaders.getHeader(StompHeaderAccessor.CONNECT_MESSAGE_HEADER);
@@ -248,5 +249,4 @@ public class StompProtocolHandler implements SubProtocolHandler {
 			throw new StompConversionException("Unsupported version '" + acceptVersions + "'");
 		}
 	}
-
 }
