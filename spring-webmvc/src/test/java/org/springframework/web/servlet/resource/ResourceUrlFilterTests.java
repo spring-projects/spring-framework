@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.resource;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -26,7 +25,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.test.MockFilterChain;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -36,7 +34,6 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
-import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 
 import static org.junit.Assert.*;
 
@@ -120,6 +117,7 @@ public class ResourceUrlFilterTests {
 	@Configuration
 	static class WebConfig extends WebMvcConfigurationSupport {
 
+
 		@Override
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
 
@@ -130,14 +128,6 @@ public class ResourceUrlFilterTests {
 			registry.addResourceHandler("/resources/**")
 				.addResourceLocations("classpath:org/springframework/web/servlet/resource/test/")
 				.setResourceResolvers(resourceResolvers);
-		}
-
-		@Bean
-		public ResourceUrlGenerator resourceUrlGenerator() {
-			ResourceUrlGenerator generator = new ResourceUrlGenerator();
-			SimpleUrlHandlerMapping handlerMapping = (SimpleUrlHandlerMapping) resourceHandlerMapping();
-			generator.setResourceHandlerMappings(Collections.singletonList(handlerMapping));
-			return generator;
 		}
 	}
 
