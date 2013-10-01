@@ -113,6 +113,17 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 		assertSame(this.handler, this.service.handler);
 	}
 
+	// SPR-10923
+
+	@Test
+	public void getSockJsPathWithPartlyMatchingServletPath() throws Exception {
+
+		this.service.setValidSockJsPrefixes("/snake");
+		handleRequest("GET", "/snakedemo/snake/info", HttpStatus.OK);
+
+		assertTrue(this.servletResponse.getContentAsString().startsWith("{\"entropy\":"));
+	}
+
 	@Test
 	public void validateRequest() throws Exception {
 
@@ -146,7 +157,7 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 
 		String body = this.servletResponse.getContentAsString();
 		assertEquals("{\"entropy\"", body.substring(0, body.indexOf(':')));
-		assertEquals(",\"origins\":[\"*:*\"],\"cookie_needed\":false,\"websocket\":true}",
+		assertEquals(",\"origins\":[\"*:*\"],\"cookie_needed\":true,\"websocket\":true}",
 				body.substring(body.indexOf(',')));
 
 		this.service.setSessionCookieNeeded(false);

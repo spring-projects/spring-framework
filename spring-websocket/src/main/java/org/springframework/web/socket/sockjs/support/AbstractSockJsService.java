@@ -374,7 +374,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 		// Try SockJS prefix hints
 		if (!this.validSockJsPrefixes.isEmpty()) {
 			for (String prefix : this.validSockJsPrefixes) {
-				int index = path.indexOf(prefix);
+				int index = path.lastIndexOf(prefix);
 				if (index != -1) {
 					this.knownSockJsPrefixes.add(path.substring(0, index + prefix.length()));
 					return path.substring(index + prefix.length());
