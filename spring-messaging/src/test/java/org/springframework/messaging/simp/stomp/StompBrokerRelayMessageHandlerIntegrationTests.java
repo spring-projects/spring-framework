@@ -78,10 +78,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		this.eventPublisher = new ExpectationMatchingEventPublisher();
 
-		this.relay = new StompBrokerRelayMessageHandler(this.responseChannel, Arrays.asList("/queue/", "/topic/"));
-		this.relay.setRelayPort(port);
-		this.relay.setApplicationEventPublisher(this.eventPublisher);
-		this.relay.start();
+		createAndStartRelay();
 	}
 
 	private void createAndStartBroker() throws Exception {
@@ -90,6 +87,16 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		this.activeMQBroker.setStartAsync(false);
 		this.activeMQBroker.setDeleteAllMessagesOnStartup(true);
 		this.activeMQBroker.start();
+	}
+
+	private void createAndStartRelay() throws InterruptedException {
+		this.relay = new StompBrokerRelayMessageHandler(this.responseChannel, Arrays.asList("/queue/", "/topic/"));
+		this.relay.setRelayPort(port);
+		this.relay.setApplicationEventPublisher(this.eventPublisher);
+
+		this.eventPublisher.expect(true);
+		this.relay.start();
+		this.eventPublisher.awaitAndAssert();
 	}
 
 	@After
@@ -146,8 +153,9 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 	@Test(expected=MessageDeliveryException.class)
 	public void messageDeliverExceptionIfSystemSessionForwardFails() throws Exception {
+		stopBrokerAndAwait();
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
-		this.relay.handleMessage(MessageBuilder.withPayloadAndHeaders("test", headers).build());
+		this.relay.handleMessage(MessageBuilder.withPayloadAndHeaders("test".getBytes(), headers).build());
 	}
 
 	@Test
@@ -169,11 +177,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 	}
 
 	@Test
-	public void brokerAvailabilityEvents() throws Exception {
-
-		this.eventPublisher.expect(true);
-		this.eventPublisher.awaitAndAssert();
-
+	public void brokerAvailabilityEventWhenStopped() throws Exception {
 		this.eventPublisher.expect(false);
 		stopBrokerAndAwait();
 		this.eventPublisher.awaitAndAssert();
@@ -203,7 +207,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		this.responseHandler.awaitAndAssert();
 
-		this.eventPublisher.expect(true, false);
+		this.eventPublisher.expect(false);
 		this.eventPublisher.awaitAndAssert();
 
 		this.eventPublisher.expect(true);

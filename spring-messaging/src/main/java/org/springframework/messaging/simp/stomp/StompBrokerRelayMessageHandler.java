@@ -166,6 +166,9 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	@Override
 	protected void stopInternal() {
+		for (StompRelaySession session: this.relaySessions.values()) {
+			session.disconnect();
+		}
 		try {
 			this.tcpClient.close().await();
 		}
@@ -268,6 +271,10 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			});
 		}
 
+		public void disconnect() {
+			this.stompConnection.setDisconnected();
+		}
+
 		protected Composable<TcpConnection<Message<byte[]>, Message<byte[]>>> initConnection() {
 			return tcpClient.open();
 		}
@@ -315,7 +322,6 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 		protected void connected(StompHeaderAccessor headers, StompConnection stompConnection) {
 			this.stompConnection.setReady();
-			publishBrokerAvailableEvent();
 		}
 
 		protected void handleTcpClientFailure(String message, Throwable ex) {
@@ -328,7 +334,6 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		protected void disconnected(String errorMessage) {
 			this.stompConnection.setDisconnected();
 			sendError(errorMessage);
-			publishBrokerUnavailableEvent();
 		}
 
 		private void sendError(String errorText) {
@@ -535,6 +540,13 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			}
 
 			super.connected(headers, stompConnection);
+			publishBrokerAvailableEvent();
+		}
+
+		@Override
+		protected void disconnected(String errorMessage) {
+			super.disconnected(errorMessage);
+			publishBrokerUnavailableEvent();
 		}
 
 		@Override
