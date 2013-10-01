@@ -18,11 +18,13 @@ package org.springframework.web.servlet.resource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.springframework.core.io.Resource;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
-import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 
 
 /**
@@ -34,39 +36,38 @@ import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
  *
  * @author Rossen Stoyanchev
  * @since 4.0
+ * @see ResourceUrlFilter
  */
 public class ResourceUrlGenerator {
 
-	private final List<ResourceMapping> resourceMappings = new ArrayList<ResourceMapping>();
+	private final List<ResourceMapping> resourceMappings;
 
 
 	/**
-	 * Configure this instance with the handler mappings used to serve resources. It is
-	 * expected that the handler mapping URL map contains handlers of type
-	 * {@link ResourceHttpRequestHandler}.
+	 * Create an instance with a Map of resource handlers.
 	 *
-	 * @param handlerMappings resource handler mappings
+	 * @param handlerMap
 	 */
-	public void setResourceHandlerMappings(List<SimpleUrlHandlerMapping> handlerMappings) {
-		this.resourceMappings.clear();
-		if (handlerMappings == null) {
-			return;
-		}
-		for (SimpleUrlHandlerMapping handlerMapping : handlerMappings) {
-			PathMatcher pathMatcher = handlerMapping.getPathMatcher();
+	public ResourceUrlGenerator(Map<String, ?> handlerMap) {
+		Assert.notNull(handlerMap, "handlerMap is required");
+		this.resourceMappings = initResourceMappings(handlerMap);
+	}
 
-			for(Entry<String, ?> entry : handlerMapping.getUrlMap().entrySet()) {
-				Object value = entry.getValue();
-				if (value instanceof ResourceHttpRequestHandler) {
-					ResourceHttpRequestHandler handler = (ResourceHttpRequestHandler) value;
+	private static List<ResourceMapping> initResourceMappings(Map<String, ?> handlerMap) {
+		PathMatcher pathMatcher = new AntPathMatcher();
+		List<ResourceMapping> result = new ArrayList<ResourceMapping>();
+		for(Entry<String, ?> entry : handlerMap.entrySet()) {
+			Object value = entry.getValue();
+			if (value instanceof ResourceHttpRequestHandler) {
+				ResourceHttpRequestHandler handler = (ResourceHttpRequestHandler) value;
 
-					String pattern = entry.getKey();
-					List<ResourceResolver> resolvers = handler.getResourceResolvers();
-					List<Resource> locations = handler.getLocations();
-					this.resourceMappings.add(new ResourceMapping(pattern, pathMatcher, resolvers, locations));
-				}
+				String pattern = entry.getKey();
+				List<ResourceResolver> resolvers = handler.getResourceResolvers();
+				List<Resource> locations = handler.getLocations();
+				result.add(new ResourceMapping(pattern, pathMatcher, resolvers, locations));
 			}
 		}
+		return result;
 	}
 
 	/**

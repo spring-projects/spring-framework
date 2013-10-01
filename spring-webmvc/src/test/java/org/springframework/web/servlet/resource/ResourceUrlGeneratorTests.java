@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.resource;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +25,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 
 import static org.junit.Assert.*;
 
@@ -38,9 +36,9 @@ import static org.junit.Assert.*;
  */
 public class ResourceUrlGeneratorTests {
 
-	ResourceHttpRequestHandler handler;
+	private ResourceHttpRequestHandler handler;
 
-	SimpleUrlHandlerMapping mapping;
+	private Map<String, ResourceHttpRequestHandler> handlerMap;
 
 	ResourceUrlGenerator generator;
 
@@ -51,18 +49,15 @@ public class ResourceUrlGeneratorTests {
 		locations.add(new ClassPathResource("test/", getClass()));
 		locations.add(new ClassPathResource("testalternatepath/", getClass()));
 
-		Map<String, ResourceHttpRequestHandler> urlMap = new HashMap<String, ResourceHttpRequestHandler>();
-		handler = new ResourceHttpRequestHandler();
-		handler.setLocations(locations);
-		urlMap.put("/resources/**", handler);
+		this.handler = new ResourceHttpRequestHandler();
+		this.handler.setLocations(locations);
 
-		mapping = new SimpleUrlHandlerMapping();
-		mapping.setUrlMap(urlMap);
+		this.handlerMap = new HashMap<String, ResourceHttpRequestHandler>();
+		this.handlerMap.put("/resources/**", handler);
 	}
 
 	private void initGenerator() {
-		generator = new ResourceUrlGenerator();
-		generator.setResourceHandlerMappings(Collections.singletonList(this.mapping));
+		this.generator = new ResourceUrlGenerator(handlerMap);
 	}
 
 	@Test
