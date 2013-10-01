@@ -26,8 +26,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -66,6 +65,8 @@ import org.springframework.web.socket.sockjs.SockJsService;
  */
 public abstract class AbstractSockJsService implements SockJsService {
 
+	private static final int MAX_KNOWN_SOCKJS_PREFIX_COUNT = 100;
+
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private static final long ONE_YEAR = TimeUnit.DAYS.toSeconds(365);
@@ -91,7 +92,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 
 	private final List<String> validSockJsPrefixes = new ArrayList<String>();
 
-	private final Set<String> knownSockJsPrefixes = new CopyOnWriteArraySet<String>();
+	private final List<String> knownSockJsPrefixes = new CopyOnWriteArrayList<String>();
 
 
 	public AbstractSockJsService(TaskScheduler scheduler) {
@@ -376,7 +377,6 @@ public abstract class AbstractSockJsService implements SockJsService {
 			for (String prefix : this.validSockJsPrefixes) {
 				int index = path.lastIndexOf(prefix);
 				if (index != -1) {
-					this.knownSockJsPrefixes.add(path.substring(0, index + prefix.length()));
 					return path.substring(index + prefix.length());
 				}
 			}
@@ -385,7 +385,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 
 		// Try SockJS info request
 		if (path.endsWith("/info")) {
-			this.knownSockJsPrefixes.add(path.substring(0, path.length() - "/info".length()));
+			addKnownSockJsPrefix(path.substring(0, path.length() - "/info".length()));
 			return "/info";
 		}
 
@@ -412,11 +412,21 @@ public abstract class AbstractSockJsService implements SockJsService {
 		String lastSegment = pathNoSlash.substring(pathNoSlash.lastIndexOf('/') + 1);
 
 		if (!isValidTransportType(lastSegment) && !lastSegment.startsWith("iframe")) {
-			this.knownSockJsPrefixes.add(path);
+			addKnownSockJsPrefix(path);
 			return "";
 		}
 
 		return null;
+	}
+
+	private void addKnownSockJsPrefix(String path) {
+		if (this.knownSockJsPrefixes.size() > MAX_KNOWN_SOCKJS_PREFIX_COUNT) {
+			String removed = this.knownSockJsPrefixes.remove(0);
+			if (logger.isWarnEnabled()) {
+				logger.warn("MAX_KNOWN_SOCKJS_PREFIX_COUNT reached, removed prefix " + removed);
+			}
+		}
+		this.knownSockJsPrefixes.add(path);
 	}
 
 	/**
