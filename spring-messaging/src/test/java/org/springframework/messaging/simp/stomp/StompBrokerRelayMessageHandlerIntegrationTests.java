@@ -146,7 +146,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 	@Test(expected=MessageDeliveryException.class)
 	public void messageDeliverExceptionIfSystemSessionForwardFails() throws Exception {
-		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.MESSAGE);
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
 		this.relay.handleMessage(MessageBuilder.withPayloadAndHeaders("test", headers).build());
 	}
 

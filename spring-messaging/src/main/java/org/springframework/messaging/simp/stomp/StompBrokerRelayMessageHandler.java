@@ -192,8 +192,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		if (SimpMessageType.MESSAGE.equals(messageType)) {
 			sessionId = (sessionId == null) ? SystemStompRelaySession.ID : sessionId;
 			headers.setSessionId(sessionId);
-			command = (command == null) ? StompCommand.SEND : command;
-			headers.setCommandIfNotSet(command);
+			headers.updateStompCommandAsClientMessage();
 			message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
 		}
 

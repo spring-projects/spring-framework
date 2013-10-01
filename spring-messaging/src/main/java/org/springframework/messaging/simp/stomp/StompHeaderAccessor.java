@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -218,9 +219,29 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		return toNativeHeaderMap();
 	}
 
-	public void setCommandIfNotSet(StompCommand command) {
+	public void updateStompCommandAsClientMessage() {
+
+		Assert.state(SimpMessageType.MESSAGE.equals(getMessageType()),
+				"Unexpected message type " + getMessage());
+
 		if (getCommand() == null) {
-			setHeader(COMMAND_HEADER, command);
+			setHeader(COMMAND_HEADER, StompCommand.SEND);
+		}
+		else if (!getCommand().equals(StompCommand.SEND)) {
+			throw new IllegalStateException("Unexpected STOMP command " + getCommand());
+		}
+	}
+
+	public void updateStompCommandAsServerMessage() {
+
+		Assert.state(SimpMessageType.MESSAGE.equals(getMessageType()),
+				"Unexpected message type " + getMessage());
+
+		if ((getCommand() == null) || getCommand().equals(StompCommand.SEND)) {
+			setHeader(COMMAND_HEADER, StompCommand.MESSAGE);
+		}
+		else if (!getCommand().equals(StompCommand.MESSAGE)) {
+			throw new IllegalStateException("Unexpected STOMP command " + getCommand());
 		}
 	}
 

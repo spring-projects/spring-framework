@@ -150,15 +150,15 @@ public class StompProtocolHandler implements SubProtocolHandler {
 	public void handleMessageToClient(WebSocketSession session, Message<?> message) {
 
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-		if (headers.getCommand() == null && SimpMessageType.MESSAGE == headers.getMessageType()) {
-			headers.setCommandIfNotSet(StompCommand.MESSAGE);
-		}
 
 		if (headers.getMessageType() == SimpMessageType.CONNECT_ACK) {
 			StompHeaderAccessor connectedHeaders = StompHeaderAccessor.create(StompCommand.CONNECTED);
 			connectedHeaders.setVersion(getVersion(headers));
 			connectedHeaders.setHeartbeat(0, 0); // no heart-beat support with simple broker
 			headers = connectedHeaders;
+		}
+		else if (SimpMessageType.MESSAGE.equals(headers.getMessageType())) {
+			headers.updateStompCommandAsServerMessage();
 		}
 
 		if (headers.getCommand() == StompCommand.CONNECTED) {

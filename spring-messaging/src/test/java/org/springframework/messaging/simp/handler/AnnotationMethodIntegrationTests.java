@@ -80,7 +80,7 @@ public class AnnotationMethodIntegrationTests extends AbstractWebSocketIntegrati
 
 
 	@Test
-	public void simpleController() throws Exception {
+	public void sendMessageToController() throws Exception {
 
 		TextMessage message = create(StompCommand.SEND).headers("destination:/app/simple").build();
 		WebSocketSession session = doHandshake(new TestClientWebSocketHandler(0, message), "/ws").get();
@@ -95,10 +95,10 @@ public class AnnotationMethodIntegrationTests extends AbstractWebSocketIntegrati
 	}
 
 	@Test
-	public void incrementController() throws Exception {
+	public void sendMessageToControllerAndReceiveReplyViaTopic() throws Exception {
 
 		TextMessage message1 = create(StompCommand.SUBSCRIBE).headers(
-				"id:subs1", "destination:/topic/increment").body("5").build();
+				"id:subs1", "destination:/topic/increment").build();
 
 		TextMessage message2 = create(StompCommand.SEND).headers(
 				"destination:/app/topic/increment").body("5").build();
@@ -108,6 +108,28 @@ public class AnnotationMethodIntegrationTests extends AbstractWebSocketIntegrati
 
 		try {
 			assertTrue(clientHandler.latch.await(2, TimeUnit.SECONDS));
+		}
+		finally {
+			session.close();
+		}
+	}
+
+	// SPR-10930
+
+	@Test
+	public void sendMessageToBrokerAndReceiveReplyViaTopic() throws Exception {
+
+		TextMessage message1 = create(StompCommand.SUBSCRIBE).headers("id:subs1", "destination:/topic/foo").build();
+		TextMessage message2 = create(StompCommand.SEND).headers("destination:/topic/foo").body("5").build();
+
+		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(1, message1, message2);
+		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
+
+		try {
+			assertTrue(clientHandler.latch.await(2, TimeUnit.SECONDS));
+
+			String payload = clientHandler.actual.get(0).getPayload();
+			assertTrue("Expected STOMP Command=MESSAGE, got " + payload, payload.startsWith("MESSAGE\n"));
 		}
 		finally {
 			session.close();
