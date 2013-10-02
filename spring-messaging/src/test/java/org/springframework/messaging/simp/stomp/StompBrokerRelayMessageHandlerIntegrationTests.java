@@ -90,9 +90,12 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 	}
 
 	private void createAndStartRelay() throws InterruptedException {
-		this.relay = new StompBrokerRelayMessageHandler(this.responseChannel, Arrays.asList("/queue/", "/topic/"));
+		this.relay = new StompBrokerRelayMessageHandler(
+				this.responseChannel, Arrays.asList("/queue/", "/topic/"));
 		this.relay.setRelayPort(port);
 		this.relay.setApplicationEventPublisher(this.eventPublisher);
+		this.relay.setSystemHeartbeatReceiveInterval(0);
+		this.relay.setSystemHeartbeatSendInterval(0);
 
 		this.eventPublisher.expect(true);
 		this.relay.start();
