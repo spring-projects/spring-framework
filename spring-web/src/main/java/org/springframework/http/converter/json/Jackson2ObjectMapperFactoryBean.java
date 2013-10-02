@@ -18,8 +18,10 @@ package org.springframework.http.converter.json;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.FatalBeanException;
@@ -35,6 +37,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -95,8 +98,22 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
  * &lt;/bean>
  * </pre>
  *
+ * In case you want to configure Jackson's {@link ObjectMapper} with a {@link Module}, you
+ * can register Modules using {@link #setModules(java.util.List)}
+ *
+ * <pre class="code">
+ * &lt;bean class="org.springframework.web.context.support.Jackson2ObjectMapperFactoryBean">
+ *   &lt;property name="modules"&gt;
+ *     &lt;list&gt;
+ *       &lt;bean class="org.example.jackson.module.MySampleModule"/&gt;
+ *     &lt;/list&gt;
+ *   &lt;/property&gt;
+ * &lt;/bean>
+ * </pre>
+ *
  * @author <a href="mailto:dmitry.katsubo@gmail.com">Dmitry Katsubo</a>
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 3.2
  */
 public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper>, InitializingBean {
@@ -104,6 +121,8 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	private ObjectMapper objectMapper;
 
 	private Map<Object, Boolean> features = new HashMap<Object, Boolean>();
+
+	private List<Module> modules = new ArrayList<Module>();
 
 	private DateFormat dateFormat;
 
@@ -258,6 +277,18 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 		this.serializationInclusion = serializationInclusion;
 	}
 
+	/**
+	 * Sets the list of modules to be registered with {@link ObjectMapper}.
+	 * @param modules
+	 * @see com.fasterxml.jackson.databind.Module
+	 * @since 4.0
+	 */
+	public void setModules(List<Module> modules) {
+		if(modules != null) {
+			this.modules.addAll(modules);
+		}
+	}
+
 	@Override
 	public void afterPropertiesSet() {
 		if (this.objectMapper == null) {
@@ -285,6 +316,10 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 		if (this.serializationInclusion != null) {
 			this.objectMapper.setSerializationInclusion(this.serializationInclusion);
+		}
+
+		if(!this.modules.isEmpty()) {
+			this.objectMapper.registerModules(this.modules);
 		}
 	}
 
