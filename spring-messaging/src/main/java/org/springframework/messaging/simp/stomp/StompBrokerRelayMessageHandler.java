@@ -67,6 +67,10 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	private String systemPasscode = "guest";
 
+	private long systemHeartbeatSendInterval = 10000;
+
+	private long systemHeartbeatReceiveInterval = 10000;
+
 	private Environment environment;
 
 	private TcpClient<Message<byte[]>, Message<byte[]>> tcpClient;
@@ -116,7 +120,42 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 	/**
-	 * Set the login for a "system" TCP connection used to send messages to the STOMP
+	 * Set the interval, in milliseconds, at which the "system" relay session will,
+	 * in the absence of any other data being sent, send a heartbeat to the STOMP broker.
+	 * A value of zero will prevent heartbeats from being sent to the broker.
+	 */
+	public void setSystemHeartbeatSendInterval(long systemHeartbeatSendInterval) {
+		this.systemHeartbeatSendInterval = systemHeartbeatSendInterval;
+	}
+
+	/**
+	 * @return The interval, in milliseconds, at which the "system" relay session will
+	 * send heartbeats to the STOMP broker.
+	 */
+	public long getSystemHeartbeatSendInterval() {
+		return this.systemHeartbeatSendInterval;
+	}
+
+	/**
+	 * Set the maximum interval, in milliseconds, at which the "system" relay session
+	 * expects, in the absence of any other data, to receive a heartbeat from the STOMP
+	 * broker. A value of zero will configure the relay session to expect not to receive
+	 * heartbeats from the broker.
+	 */
+	public void setSystemHeartbeatReceiveInterval(long heartbeatReceiveInterval) {
+		this.systemHeartbeatReceiveInterval = heartbeatReceiveInterval;
+	}
+
+	/**
+	 * @return The interval, in milliseconds, at which the "system" relay session expects
+	 * to receive heartbeats from the STOMP broker.
+	 */
+	public long getSystemHeartbeatReceiveInterval() {
+		return this.systemHeartbeatReceiveInterval;
+	}
+
+	/**
+	 * Set the login for the "system" relay session used to send messages to the STOMP
 	 * broker without having a client session (e.g. REST/HTTP request handling method).
 	 */
 	public void setSystemLogin(String systemLogin) {
@@ -125,14 +164,14 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 	/**
-	 * @return the login for a shared, "system" connection to the STOMP message broker.
+	 * @return the login used by the "system" relay session to connect to the STOMP broker
 	 */
 	public String getSystemLogin() {
 		return this.systemLogin;
 	}
 
 	/**
-	 * Set the passcode for a "system" TCP connection used to send messages to the STOMP
+	 * Set the passcode for the "system" relay session used to send messages to the STOMP
 	 * broker without having a client session (e.g. REST/HTTP request handling method).
 	 */
 	public void setSystemPasscode(String systemPasscode) {
@@ -140,7 +179,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 	/**
-	 * @return the passcode for a shared, "system" connection to the STOMP message broker.
+	 * @return the passcode used by the "system" relay session to connect to the STOMP broker
 	 */
 	public String getSystemPasscode() {
 		return this.systemPasscode;
@@ -458,10 +497,6 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 		private static final long HEARTBEAT_RECEIVE_MULTIPLIER = 3;
 
-		private static final long HEARTBEAT_SEND_INTERVAL = 10000;
-
-		private static final long HEARTBEAT_RECEIVE_INTERVAL = 10000;
-
 		public static final String ID = "stompRelaySystemSessionId";
 
 		private final byte[] heartbeatPayload = new byte[] {'\n'};
@@ -476,7 +511,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			headers.setAcceptVersion("1.1,1.2");
 			headers.setLogin(systemLogin);
 			headers.setPasscode(systemPasscode);
-			headers.setHeartbeat(HEARTBEAT_SEND_INTERVAL, HEARTBEAT_RECEIVE_INTERVAL);
+			headers.setHeartbeat(systemHeartbeatSendInterval, systemHeartbeatReceiveInterval);
 			Message<?> connectMessage = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
 			super.connect(connectMessage);
 		}
@@ -500,8 +535,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		protected void connected(StompHeaderAccessor headers, final StompConnection stompConnection) {
 
 			long brokerReceiveInterval = headers.getHeartbeat()[1];
-			if ((HEARTBEAT_SEND_INTERVAL > 0) && (brokerReceiveInterval > 0)) {
-				long interval = Math.max(HEARTBEAT_SEND_INTERVAL,  brokerReceiveInterval);
+			if ((systemHeartbeatSendInterval > 0) && (brokerReceiveInterval > 0)) {
+				long interval = Math.max(systemHeartbeatSendInterval,  brokerReceiveInterval);
 				stompConnection.connection.on().writeIdle(interval, new Runnable() {
 
 					@Override
@@ -523,8 +558,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			}
 
 			long brokerSendInterval = headers.getHeartbeat()[0];
-			if (HEARTBEAT_RECEIVE_INTERVAL > 0 && brokerSendInterval > 0) {
-				final long interval = Math.max(HEARTBEAT_RECEIVE_INTERVAL, brokerSendInterval)
+			if (systemHeartbeatReceiveInterval > 0 && brokerSendInterval > 0) {
+				final long interval = Math.max(systemHeartbeatReceiveInterval, brokerSendInterval)
 						* HEARTBEAT_RECEIVE_MULTIPLIER;
 				stompConnection.connection.on().readIdle(interval,  new Runnable() {
 

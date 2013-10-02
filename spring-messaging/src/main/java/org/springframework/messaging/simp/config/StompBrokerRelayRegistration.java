@@ -37,6 +37,10 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 
 	private String applicationPasscode = "guest";
 
+	private long systemHeartbeatSendInterval = 10000;
+
+	private long systemHeartbeatReceiveInterval = 10000;
+
 	private boolean autoStartup = true;
 
 
@@ -63,7 +67,7 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 	}
 
 	/**
-	 * Set the login for a "system" TCP connection used to send messages to the STOMP
+	 * Set the login for the "system" relay session used to send messages to the STOMP
 	 * broker without having a client session (e.g. REST/HTTP request handling method).
 	 */
 	public StompBrokerRelayRegistration setApplicationLogin(String login) {
@@ -73,12 +77,33 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 	}
 
 	/**
-	 * Set the passcode for a "system" TCP connection used to send messages to the STOMP
+	 * Set the passcode for the "system" relay session used to send messages to the STOMP
 	 * broker without having a client session (e.g. REST/HTTP request handling method).
 	 */
 	public StompBrokerRelayRegistration setApplicationPasscode(String passcode) {
 		Assert.hasText(passcode, "applicationPasscode must not be empty");
 		this.applicationPasscode = passcode;
+		return this;
+	}
+
+	/**
+	 * Set the interval, in milliseconds, at which the "system" relay session will,
+	 * in the absence of any other data being sent, send a heartbeat to the STOMP broker.
+	 * A value of zero will prevent heartbeats from being sent to the broker.
+	 */
+	public StompBrokerRelayRegistration setSystemHeartbeatSendInterval(long systemHeartbeatSendInterval) {
+		this.systemHeartbeatSendInterval = systemHeartbeatSendInterval;
+		return this;
+	}
+
+	/**
+	 * Set the maximum interval, in milliseconds, at which the "system" relay session
+	 * expects, in the absence of any other data, to receive a heartbeat from the STOMP
+	 * broker. A value of zero will configure the relay session to expect not to receive
+	 * heartbeats from the broker.
+	 */
+	public StompBrokerRelayRegistration setSystemHeartbeatReceiveInterval(long heartbeatReceiveInterval) {
+		this.systemHeartbeatReceiveInterval = heartbeatReceiveInterval;
 		return this;
 	}
 
@@ -101,6 +126,8 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 		handler.setRelayPort(this.relayPort);
 		handler.setSystemLogin(this.applicationLogin);
 		handler.setSystemPasscode(this.applicationPasscode);
+		handler.setSystemHeartbeatSendInterval(this.systemHeartbeatSendInterval);
+		handler.setSystemHeartbeatReceiveInterval(this.systemHeartbeatReceiveInterval);
 		handler.setAutoStartup(this.autoStartup);
 		return handler;
 	}
