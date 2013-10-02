@@ -22,18 +22,19 @@ import java.util.List;
 
 import org.junit.Test;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
 
 import reactor.function.Consumer;
 import reactor.function.Function;
 import reactor.io.Buffer;
-
 import static org.junit.Assert.*;
 
 
 /**
+ * Test fixture for {@link StompCodec}.
  *
- * @author awilkinson
+ * @author Andy Wilkinson
  */
 public class StompCodecTests {
 
@@ -149,6 +150,24 @@ public class StompCodecTests {
 		assertEquals(2, messages.size());
 		assertEquals(StompCommand.SEND, StompHeaderAccessor.wrap(messages.get(0)).getCommand());
 		assertEquals(StompCommand.DISCONNECT, StompHeaderAccessor.wrap(messages.get(1)).getCommand());
+	}
+
+	@Test
+	public void decodeHeartbeat() {
+		String frame = "\n";
+
+		Buffer buffer = Buffer.wrap(frame);
+
+		final List<Message<byte[]>> messages = new ArrayList<Message<byte[]>>();
+		new StompCodec().decoder(new Consumer<Message<byte[]>>() {
+			@Override
+			public void accept(Message<byte[]> message) {
+				messages.add(message);
+			}
+		}).apply(buffer);
+
+		assertEquals(1, messages.size());
+		assertEquals(SimpMessageType.HEARTBEAT, StompHeaderAccessor.wrap(messages.get(0)).getMessageType());
 	}
 
 	@Test

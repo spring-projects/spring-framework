@@ -37,6 +37,7 @@ import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.simp.BrokerAvailabilityEvent;
+import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.channel.ExecutorSubscribableChannel;
 import org.springframework.util.Assert;
@@ -301,7 +302,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		@Override
 		public void handleMessage(Message<?> message) throws MessagingException {
-			if (StompHeaderAccessor.wrap(message).getCommand() != null) {
+			if (StompHeaderAccessor.wrap(message).getMessageType() != SimpMessageType.HEARTBEAT) {
 				synchronized(this.monitor) {
 					for (MessageExchange exch : this.expected) {
 						if (exch.matchMessage(message)) {
