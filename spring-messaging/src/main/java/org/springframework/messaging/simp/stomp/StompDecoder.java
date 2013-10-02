@@ -23,6 +23,7 @@ import java.nio.charset.Charset;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -50,26 +51,28 @@ public class StompDecoder {
 	 */
 	public Message<byte[]> decode(ByteBuffer buffer) {
 		skipLeadingEol(buffer);
+
+		Message<byte[]> decodedMessage;
+
 		String command = readCommand(buffer);
+
 		if (command.length() > 0) {
 			MultiValueMap<String, String> headers = readHeaders(buffer);
 			byte[] payload = readPayload(buffer, headers);
 
-			Message<byte[]> decodedMessage = MessageBuilder.withPayloadAndHeaders(payload,
+			decodedMessage = MessageBuilder.withPayloadAndHeaders(payload,
 					StompHeaderAccessor.create(StompCommand.valueOf(command), headers)).build();
-
-			if (logger.isTraceEnabled()) {
-				logger.trace("Decoded " + decodedMessage);
-			}
-
-			return decodedMessage;
 		}
 		else {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Decoded heartbeat");
-			}
-			return MessageBuilder.withPayload(HEARTBEAT_PAYLOAD).build();
+			decodedMessage = MessageBuilder.withPayloadAndHeaders(HEARTBEAT_PAYLOAD,
+					StompHeaderAccessor.create(SimpMessageType.HEARTBEAT)).build();
 		}
+
+		if (logger.isTraceEnabled()) {
+			logger.trace("Decoded " + decodedMessage);
+		}
+
+		return decodedMessage;
 
 	}
 

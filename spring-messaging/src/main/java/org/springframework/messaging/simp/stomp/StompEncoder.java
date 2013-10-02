@@ -26,6 +26,7 @@ import java.util.Map.Entry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.simp.SimpMessageType;
 
 /**
  * An encoder for STOMP frames
@@ -78,7 +79,7 @@ public final class StompEncoder  {
 	}
 
 	private boolean isHeartbeat(StompHeaderAccessor headers) {
-		return headers.getCommand() == null;
+		return headers.getMessageType() == SimpMessageType.HEARTBEAT;
 	}
 
 	private void writeCommand(StompHeaderAccessor headers, DataOutputStream output) throws IOException {
