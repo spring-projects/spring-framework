@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.http.converter.json;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -33,6 +34,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.cfg.DeserializerFactoryConfig;
@@ -40,6 +42,7 @@ import com.fasterxml.jackson.databind.cfg.SerializerFactoryConfig;
 import com.fasterxml.jackson.databind.deser.BasicDeserializerFactory;
 import com.fasterxml.jackson.databind.deser.std.DateDeserializers.DateDeserializer;
 import com.fasterxml.jackson.databind.introspect.NopAnnotationIntrospector;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.BasicSerializerFactory;
 import com.fasterxml.jackson.databind.ser.Serializers;
 import com.fasterxml.jackson.databind.ser.std.NumberSerializers.NumberSerializer;
@@ -52,6 +55,7 @@ import static org.junit.Assert.*;
  * Test cases for {@link Jackson2ObjectMapperFactoryBean} class.
  *
  * @author <a href="mailto:dmitry.katsubo@gmail.com">Dmitry Katsubo</a>
+ * @author Brian Clozel
  */
 public class Jackson2ObjectMapperFactoryBeanTests {
 
@@ -149,6 +153,20 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 
 		assertEquals(dateFormat, this.factory.getObject().getSerializationConfig().getDateFormat());
 		assertEquals(dateFormat, this.factory.getObject().getDeserializationConfig().getDateFormat());
+	}
+
+	@Test
+	public void testSetModules() {
+		JsonSerializer serializer1 = new NumberSerializer();
+		SimpleModule module = new SimpleModule();
+		module.addSerializer(Boolean.class,serializer1);
+
+		this.factory.setModules(Arrays.asList(new Module[]{module}));
+		this.factory.afterPropertiesSet();
+		ObjectMapper objectMapper = this.factory.getObject();
+
+		Serializers serializers = getSerializerFactoryConfig(objectMapper).serializers().iterator().next();
+		assertTrue(serializers.findSerializer(null, SimpleType.construct(Boolean.class), null) == serializer1);
 	}
 
 	@Test
