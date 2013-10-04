@@ -50,7 +50,9 @@ import org.springframework.web.servlet.view.AbstractView;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 3.0
+ * @deprecated Please migrate to {@link MappingJackson2JsonView} for Jackson 2.x.
  */
+@Deprecated
 public class MappingJacksonJsonView extends AbstractView {
 
 	/**

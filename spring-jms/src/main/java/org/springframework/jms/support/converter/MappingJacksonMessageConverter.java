@@ -43,12 +43,15 @@ import org.springframework.util.ClassUtils;
  * Converts from a {@link TextMessage} or {@link BytesMessage} to an object.
  *
  * <p><b>NOTE:</b> Requires Jackson 1.8 or higher, as of Spring 4.0.
+ * At the same time, we strongly recommend a migration to Jackson 2.x!
  *
  * @author Mark Pollack
  * @author Dave Syer
  * @author Juergen Hoeller
  * @since 3.1
+ * @deprecated Please migrate to {@link MappingJackson2MessageConverter} for Jackson 2.x.
  */
+@Deprecated
 public class MappingJacksonMessageConverter implements MessageConverter, BeanClassLoaderAware {
 
 	/**

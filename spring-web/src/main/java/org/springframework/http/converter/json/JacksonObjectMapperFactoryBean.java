@@ -80,11 +80,14 @@ import org.springframework.beans.factory.InitializingBean;
  * </pre>
  *
  * <p><b>NOTE:</b> Requires Jackson 1.8 or higher, as of Spring 4.0.
+ * At the same time, we strongly recommend a migration to Jackson 2.x!
  *
  * @author <a href="mailto:dmitry.katsubo@gmail.com">Dmitry Katsubo</a>
  * @author Rossen Stoyanchev
  * @since 3.2
+ * @deprecated Please migrate to {@link Jackson2ObjectMapperFactoryBean} for Jackson 2.x.
  */
+@Deprecated
 public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>, InitializingBean {
 
 	private ObjectMapper objectMapper;

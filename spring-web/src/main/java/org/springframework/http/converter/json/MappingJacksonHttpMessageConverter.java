@@ -26,6 +26,7 @@ import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.type.JavaType;
+
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -45,11 +46,14 @@ import org.springframework.util.Assert;
  * {@link #setSupportedMediaTypes supportedMediaTypes} property.
  *
  * <p><b>NOTE:</b> Requires Jackson 1.8 or higher, as of Spring 4.0.
+ * At the same time, we strongly recommend a migration to Jackson 2.x!
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 3.0
+ * @deprecated Please migrate to {@link MappingJackson2HttpMessageConverter} for Jackson 2.x.
  */
+@Deprecated
 public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConverter<Object>
 		implements GenericHttpMessageConverter<Object> {
 
