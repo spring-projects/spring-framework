@@ -17,7 +17,6 @@
 package org.springframework.web.socket.adapter;
 
 import java.nio.ByteBuffer;
-
 import javax.websocket.DecodeException;
 import javax.websocket.Decoder;
 import javax.websocket.EncodeException;
@@ -28,13 +27,14 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.core.convert.support.ByteBufferConverter;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -188,8 +188,7 @@ public class ConvertingEncoderDecoderSupportTests {
 
 		@Bean
 		public ConversionService webSocketConversionService() {
-			GenericConversionService conversionService = new GenericConversionService();
-			conversionService.addConverter(new ByteBufferConverter(conversionService));
+			GenericConversionService conversionService = new DefaultConversionService();
 			conversionService.addConverter(new MyTypeToStringConverter());
 			conversionService.addConverter(new MyTypeToBytesConverter());
 			conversionService.addConverter(new StringToMyTypeConverter());

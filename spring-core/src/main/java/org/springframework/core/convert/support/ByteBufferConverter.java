@@ -30,8 +30,9 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
  * any type that the {@link ConversionService} support via {@code byte[]}.
  *
  * @author Phillip Webb
+ * @since 4.0
  */
-public class ByteBufferConverter implements ConditionalGenericConverter {
+final class ByteBufferConverter implements ConditionalGenericConverter {
 
 	private static final TypeDescriptor BYTE_BUFFER_TYPE = TypeDescriptor.valueOf(ByteBuffer.class);
 
