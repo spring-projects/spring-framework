@@ -1,0 +1,847 @@
+
+= JMS (Java Message Service)
+
+== Introduction
+
+Spring provides a JMS integration framework that simplifies the use of the JMS API much like Spring's integration does for the JDBC API.
+
+JMS can be roughly divided into two areas of functionality, namely the production and consumption of messages.
+The [class]`JmsTemplate` class is used for message production and synchronous message reception.
+For asynchronous reception similar to Java EE's message-driven bean style, Spring provides a number of message listener containers that are used to create Message-Driven POJOs (MDPs).
+
+The package `org.springframework.jms.core` provides the core functionality for using JMS. It contains JMS template classes that simplify the use of the JMS by handling the creation and release of resources, much like the [class]`JdbcTemplate` does for JDBC. The design principle common to Spring template classes is to provide helper methods to perform common operations and for more sophisticated usage, delegate the essence of the processing task to user implemented callback interfaces.
+The JMS template follows the same design.
+The classes offer various convenience methods for the sending of messages, consuming a message synchronously, and exposing the JMS session and message producer to the user.
+
+The package `org.springframework.jms.support` provides [class]`JMSException` translation functionality.
+The translation converts the checked [class]`JMSException` hierarchy to a mirrored hierarchy of unchecked exceptions.
+If there are any provider specific subclasses of the checked [class]`javax.jms.JMSException`, this exception is wrapped in the unchecked [class]`UncategorizedJmsException`.
+
+The package `org.springframework.jms.support.converter` provides a [interface]`MessageConverter` abstraction to convert between Java objects and JMS messages.
+
+The package `org.springframework.jms.support.destination` provides various strategies for managing JMS destinations, such as providing a service locator for destinations stored in JNDI.
+
+Finally, the package `org.springframework.jms.connection` provides an implementation of the [class]`ConnectionFactory` suitable for use in standalone applications.
+It also contains an implementation of Spring's [interface]`PlatformTransactionManager` for JMS (the cunningly named [class]`JmsTransactionManager`).
+This allows for seamless integration of JMS as a transactional resource into Spring's transaction management mechanisms.
+
+== Using Spring JMS
+
+=== [class]`JmsTemplate`
+
+The [class]`JmsTemplate` class is the central class in the JMS core package.
+It simplifies the use of JMS since it handles the creation and release of resources when sending or synchronously receiving messages.
+
+Code that uses the [class]`JmsTemplate` only needs to implement callback interfaces giving them a clearly defined high level contract.
+The [class]`MessageCreator` callback interface creates a message given a [interface]`Session` provided by the calling code in [class]`JmsTemplate`.
+In order to allow for more complex usage of the JMS API, the callback [class]`SessionCallback` provides the user with the JMS session and the callback [class]`ProducerCallback` exposes a [interface]`Session` and [interface]`MessageProducer` pair.
+
+The JMS API exposes two types of send methods, one that takes delivery mode, priority, and time-to-live as Quality of Service (QOS) parameters and one that takes no QOS parameters which uses default values.
+Since there are many send methods in [class]`JmsTemplate`, the setting of the QOS parameters have been exposed as bean properties to avoid duplication in the number of send methods.
+Similarly, the timeout value for synchronous receive calls is set using the property [class]`setReceiveTimeout`.
+
+Some JMS providers allow the setting of default QOS values administratively through the configuration of the ConnectionFactory.
+This has the effect that a call to [class]`MessageProducer`'s send method [method]`send(Destination destination, Message message)` will use different QOS default values than those specified in the JMS specification.
+In order to provide consistent management of QOS values, the [class]`JmsTemplate` must therefore be specifically enabled to use its own QOS values by setting the boolean property  to `true`.
+
+NOTE: Instances of the [class]`JmsTemplate` class are _thread-safe once configured_.
+This is important because it means that you can configure a single instance of a [class]`JmsTemplate` and then safely inject this _shared_ reference into multiple collaborators.
+To be clear, the [class]`JmsTemplate` is stateful, in that it maintains a reference to a [interface]`ConnectionFactory`, but this state is _not_ conversational state.
+
+=== Connections
+
+The [class]`JmsTemplate` requires a reference to a [class]`ConnectionFactory`.
+The [class]`ConnectionFactory` is part of the JMS specification and serves as the entry point for working with JMS. It is used by the client application as a factory to create connections with the JMS provider and encapsulates various configuration parameters, many of which are vendor specific such as SSL configuration options.
+
+When using JMS inside an EJB, the vendor provides implementations of the JMS interfaces so that they can participate in declarative transaction management and perform pooling of connections and sessions.
+In order to use this implementation, Java EE containers typically require that you declare a JMS connection factory as a  inside the EJB or servlet deployment descriptors.
+To ensure the use of these features with the [class]`JmsTemplate` inside an EJB, the client application should ensure that it references the managed implementation of the [class]`ConnectionFactory`.
+
+==== Caching Messaging Resources
+
+The standard API involves creating many intermediate objects.
+To send a message the following 'API' walk is performed
+
+[source]
+----
+ConnectionFactory->Connection->Session->MessageProducer->send
+----
+
+Between the ConnectionFactory and the Send operation there are three intermediate objects that are created and destroyed.
+To optimise the resource usage and increase performance two implementations of IConnectionFactory are provided.
+
+==== SingleConnectionFactory
+
+Spring provides an implementation of the [class]`ConnectionFactory` interface, [class]`SingleConnectionFactory`, that will return the same [class]`Connection` on all [method]`createConnection()` calls and ignore calls to [method]`close()`.
+This is useful for testing and standalone environments so that the same connection can be used for multiple [class]`JmsTemplate` calls that may span any number of transactions.
+[class]`SingleConnectionFactory` takes a reference to a standard [class]`ConnectionFactory` that would typically come from JNDI.
+
+==== CachingConnectionFactory
+
+The [class]`CachingConnectionFactory` extends the functionality of [class]`SingleConnectionFactory` and adds the caching of Sessions, MessageProducers, and MessageConsumers.
+The initial cache size is set to 1, use the property  to increase the number of cached sessions.
+Note that the number of actual cached sessions will be more than that number as sessions are cached based on their acknowledgment mode, so there can be up to 4 cached session instances when  is set to one, one for each AcknowledgementMode.
+MessageProducers and MessageConsumers are cached within their owning session and also take into account the unique properties of the producers and consumers when caching.
+MessageProducers are cached based on their destination.
+MessageConsumers are cached based on a key composed of the destination, selector, noLocal delivery flag, and the durable subscription name (if creating durable consumers).
+
+=== Destination Management
+
+Destinations, like ConnectionFactories, are JMS administered objects that can be stored and retrieved in JNDI. When configuring a Spring application context you can use the JNDI factory class [class]`JndiObjectFactoryBean` / `<jee:jndi-lookup>` to perform dependency injection on your object's references to JMS destinations.
+However, often this strategy is cumbersome if there are a large number of destinations in the application or if there are advanced destination management features unique to the JMS provider.
+Examples of such advanced destination management would be the creation of dynamic destinations or support for a hierarchical namespace of destinations.
+The [class]`JmsTemplate` delegates the resolution of a destination name to a JMS destination object to an implementation of the interface [class]`DestinationResolver`.
+[class]`DynamicDestinationResolver` is the default implementation used by [class]`JmsTemplate` and accommodates resolving dynamic destinations.
+A [class]`JndiDestinationResolver` is also provided that acts as a service locator for destinations contained in JNDI and optionally falls back to the behavior contained in [class]`DynamicDestinationResolver`.
+
+Quite often the destinations used in a JMS application are only known at runtime and therefore cannot be administratively created when the application is deployed.
+This is often because there is shared application logic between interacting system components that create destinations at runtime according to a well-known naming convention.
+Even though the creation of dynamic destinations is not part of the JMS specification, most vendors have provided this functionality.
+Dynamic destinations are created with a name defined by the user which differentiates them from temporary destinations and are often not registered in JNDI. The API used to create dynamic destinations varies from provider to provider since the properties associated with the destination are vendor specific.
+However, a simple implementation choice that is sometimes made by vendors is to disregard the warnings in the JMS specification and to use the [class]`TopicSession` method [method]`createTopic(String topicName)` or the [class]`QueueSession` method [method]`createQueue(String queueName)` to create a new destination with default destination properties.
+Depending on the vendor implementation, [class]`DynamicDestinationResolver` may then also create a physical destination instead of only resolving one.
+
+The boolean property  is used to configure the [class]`JmsTemplate` with knowledge of what JMS domain is being used.
+By default the value of this property is false, indicating that the point-to-point domain, Queues, will be used.
+This property used by [class]`JmsTemplate` determines the behavior of dynamic destination resolution via implementations of the [interface]`DestinationResolver` interface.
+
+You can also configure the [class]`JmsTemplate` with a default destination via the property .
+The default destination will be used with send and receive operations that do not refer to a specific destination.
+
+=== Message Listener Containers
+
+One of the most common uses of JMS messages in the EJB world is to drive message-driven beans (MDBs).
+Spring offers a solution to create message-driven POJOs (MDPs) in a way that does not tie a user to an EJB container.
+(See <<jms-asynchronousMessageReception>> for detailed coverage of Spring's MDP support.)
+
+A message listener container is used to receive messages from a JMS message queue and drive the MessageListener that is injected into it.
+The listener container is responsible for all threading of message reception and dispatches into the listener for processing.
+A message listener container is the intermediary between an MDP and a messaging provider, and takes care of registering to receive messages, participating in transactions, resource acquisition and release, exception conversion and suchlike.
+This allows you as an application developer to write the (possibly complex) business logic associated with receiving a message (and possibly responding to it), and delegates boilerplate JMS infrastructure concerns to the framework.
+
+There are two standard JMS message listener containers packaged with Spring, each with its specialised feature set.
+
+==== SimpleMessageListenerContainer
+
+This message listener container is the simpler of the two standard flavors.
+It creates a fixed number of JMS sessions and consumers at startup, registers the listener using the standard JMS [method]`MessageConsumer.setMessageListener()` method, and leaves it up the JMS provider to perform listener callbacks.
+This variant does not allow for dynamic adaption to runtime demands or for participation in externally managed transactions.
+Compatibility-wise, it stays very close to the spirit of the standalone JMS specification - but is generally not compatible with Java EE's JMS restrictions.
+
+==== DefaultMessageListenerContainer
+
+This message listener container is the one used in most cases.
+In contrast to [class]`SimpleMessageListenerContainer`, this container variant does allow for dynamic adaption to runtime demands and is able to participate in externally managed transactions.
+Each received message is registered with an XA transaction when configured with a [class]`JtaTransactionManager`; so processing may take advantage of XA transaction semantics.
+This listener container strikes a good balance between low requirements on the JMS provider, advanced functionality such as transaction participation, and compatibility with Java EE environments.
+
+=== Transaction management
+
+Spring provides a [class]`JmsTransactionManager` that manages transactions for a single JMS [class]`ConnectionFactory`.
+This allows JMS applications to leverage the managed transaction features of Spring as described in <<transaction>>.
+The [class]`JmsTransactionManager` performs local resource transactions, binding a JMS Connection/Session pair from the specified [class]`ConnectionFactory` to the thread.
+[class]`JmsTemplate` automatically detects such transactional resources and operates on them accordingly.
+
+In a Java EE environment, the [class]`ConnectionFactory` will pool Connections and Sessions, so those resources are efficiently reused across transactions.
+In a standalone environment, using Spring's [class]`SingleConnectionFactory` will result in a shared JMS [class]`Connection`, with each transaction having its own independent [class]`Session`.
+Alternatively, consider the use of a provider-specific pooling adapter such as ActiveMQ's [class]`PooledConnectionFactory` class.
+
+[class]`JmsTemplate` can also be used with the [class]`JtaTransactionManager` and an XA-capable JMS [class]`ConnectionFactory` for performing distributed transactions.
+Note that this requires the use of a JTA transaction manager as well as a properly XA-configured ConnectionFactory! (Check your Java EE server's / JMS provider's documentation.)
+
+Reusing code across a managed and unmanaged transactional environment can be confusing when using the JMS API to create a [class]`Session` from a [class]`Connection`.
+This is because the JMS API has only one factory method to create a [class]`Session` and it requires values for the transaction and acknowledgement modes.
+In a managed environment, setting these values is the responsibility of the environment's transactional infrastructure, so these values are ignored by the vendor's wrapper to the JMS Connection.
+When using the [class]`JmsTemplate` in an unmanaged environment you can specify these values through the use of the properties `sessionTransacted` and `sessionAcknowledgeMode`.
+When using a [class]`PlatformTransactionManager` with [class]`JmsTemplate`, the template will always be given a transactional JMS [class]`Session`.
+
+== Sending a [interface]`Message`
+
+The [class]`JmsTemplate` contains many convenience methods to send a message.
+There are send methods that specify the destination using a [class]`javax.jms.Destination` object and those that specify the destination using a string for use in a JNDI lookup.
+The send method that takes no destination argument uses the default destination.
+Here is an example that sends a message to a queue using the 1.0.2 implementation.
+
+[source,java]
+----
+import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.Queue;
+import javax.jms.Session;
+
+import org.springframework.jms.core.MessageCreator;
+import org.springframework.jms.core.JmsTemplate;
+
+public class JmsQueueSender {
+
+    private JmsTemplate jmsTemplate;
+    private Queue queue;
+
+    public void setConnectionFactory(ConnectionFactory cf) {
+        this.jmsTemplate = new JmsTemplate(cf);
+    }
+
+    public void setQueue(Queue queue) {
+        this.queue = queue;
+    }
+
+    public void simpleSend() {
+        this.jmsTemplate.send(this.queue, new MessageCreator() {
+            public Message createMessage(Session session) throws JMSException {
+              return session.createTextMessage("hello queue world");
+            }
+        });
+    }
+}
+----
+
+This example uses the [class]`MessageCreator` callback to create a text message from the supplied [class]`Session` object.
+The [class]`JmsTemplate` is constructed by passing a reference to a [class]`ConnectionFactory`.
+As an alternative, a zero argument constructor and  is provided and can be used for constructing the instance in JavaBean style (using a BeanFactory or plain Java code).
+Alternatively, consider deriving from Spring's [class]`JmsGatewaySupport` convenience base class, which provides pre-built bean properties for JMS configuration.
+
+The method [method]`send(String destinationName, MessageCreator
+    creator)` lets you send a message using the string name of the destination.
+If these names are registered in JNDI, you should set the  property of the template to an instance of [class]`JndiDestinationResolver`.
+
+If you created the [class]`JmsTemplate` and specified a default destination, the [method]`send(MessageCreator c)` sends a message to that destination.
+
+=== Using Message Converters
+
+In order to facilitate the sending of domain model objects, the [class]`JmsTemplate` has various send methods that take a Java object as an argument for a message's data content.
+The overloaded methods [method]`convertAndSend()` and [method]`receiveAndConvert()` in [class]`JmsTemplate` delegate the conversion process to an instance of the `MessageConverter` interface.
+This interface defines a simple contract to convert between Java objects and JMS messages.
+The default implementation [class]`SimpleMessageConverter` supports conversion between [class]`String` and [class]`TextMessage`, [class]`byte[]` and [class]`BytesMesssage`, and [class]`java.util.Map` and [class]`MapMessage`.
+By using the converter, you and your application code can focus on the business object that is being sent or received via JMS and not be concerned with the details of how it is represented as a JMS message.
+
+The sandbox currently includes a [class]`MapMessageConverter` which uses reflection to convert between a JavaBean and a [class]`MapMessage`.
+Other popular implementation choices you might implement yourself are Converters that use an existing XML marshalling package, such as JAXB, Castor, XMLBeans, or XStream, to create a [interface]`TextMessage` representing the object.
+
+To accommodate the setting of a message's properties, headers, and body that can not be generically encapsulated inside a converter class, the [interface]`MessagePostProcessor` interface gives you access to the message after it has been converted, but before it is sent.
+The example below demonstrates how to modify a message header and a property after a [interface]`java.util.Map` is converted to a message.
+
+[source,java]
+----
+public void sendWithConversion() {
+    Map map = new HashMap();
+    map.put("Name", "Mark");
+    map.put("Age", new Integer(47));
+    jmsTemplate.convertAndSend("testQueue", map, new MessagePostProcessor() {
+        public Message postProcessMessage(Message message) throws JMSException {
+            message.setIntProperty("AccountID", 1234);
+            message.setJMSCorrelationID("123-00001");
+            return message;
+        }
+    });
+}
+----
+
+This results in a message of the form:
+
+[source]
+----
+MapMessage={
+    Header={
+        ... standard headers ...
+        CorrelationID={123-00001}
+    }
+    Properties={
+        AccountID={Integer:1234}
+    }
+    Fields={
+        Name={String:Mark}
+        Age={Integer:47}
+    }
+}
+----
+
+=== [interface]`SessionCallback` and [interface]`ProducerCallback`
+
+While the send operations cover many common usage scenarios, there are cases when you want to perform multiple operations on a JMS [interface]`Session` or [interface]`MessageProducer`.
+The [interface]`SessionCallback` and [interface]`ProducerCallback` expose the JMS [interface]`Session` and [interface]`Session` / [interface]`MessageProducer` pair respectively.
+The [method]`execute()` methods on [class]`JmsTemplate` execute these callback methods.
+
+== Receiving a message
+
+=== Synchronous Reception
+
+While JMS is typically associated with asynchronous processing, it is possible to consume messages synchronously.
+The overloaded [method]`receive(..)` methods provide this functionality.
+During a synchronous receive, the calling thread blocks until a message becomes available.
+This can be a dangerous operation since the calling thread can potentially be blocked indefinitely.
+The property  specifies how long the receiver should wait before giving up waiting for a message.
+
+=== Asynchronous Reception - Message-Driven POJOs
+
+In a fashion similar to a Message-Driven Bean (MDB) in the EJB world, the Message-Driven POJO (MDP) acts as a receiver for JMS messages.
+The one restriction (but see also below for the discussion of the [class]`MessageListenerAdapter` class) on an MDP is that it must implement the [interface]`javax.jms.MessageListener` interface.
+Please also be aware that in the case where your POJO will be receiving messages on multiple threads, it is important to ensure that your implementation is thread-safe.
+
+Below is a simple implementation of an MDP:
+
+[source,java]
+----
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.TextMessage;
+
+public class ExampleListener implements MessageListener {
+
+    public void onMessage(Message message) {
+        if (message instanceof TextMessage) {
+            try {
+                System.out.println(((TextMessage) message).getText());
+            }
+            catch (JMSException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+        else {
+            throw new IllegalArgumentException("Message must be of type TextMessage");
+        }
+    }
+}
+----
+
+Once you've implemented your [interface]`MessageListener`, it's time to create a message listener container.
+
+Find below an example of how to define and configure one of the message listener containers that ships with Spring (in this case the [class]`DefaultMessageListenerContainer`).
+
+[source,xml]
+----
+<!-- this is the Message Driven POJO (MDP) -->
+<bean id="messageListener" class="jmsexample.ExampleListener" />
+
+<!-- and this is the message listener container -->
+<bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+    <property name="connectionFactory" ref="connectionFactory"/>
+    <property name="destination" ref="destination"/>
+    <property name="messageListener" ref="messageListener" />
+</bean>
+----
+
+Please refer to the Spring Javadoc of the various message listener containers for a full description of the features supported by each implementation.
+
+=== The [interface]`SessionAwareMessageListener` interface
+
+The [interface]`SessionAwareMessageListener` interface is a Spring-specific interface that provides a similar contract to the JMS [interface]`MessageListener` interface, but also provides the message handling method with access to the JMS [interface]`Session` from which the [interface]`Message` was received.
+
+[source,java]
+----
+package org.springframework.jms.listener;
+
+public interface SessionAwareMessageListener {
+
+    void onMessage(Message message, Session session) throws JMSException;
+}
+----
+
+You can choose to have your MDPs implement this interface (in preference to the standard JMS [interface]`MessageListener` interface) if you want your MDPs to be able to respond to any received messages (using the [interface]`Session` supplied in the `onMessage(Message, Session)` method).
+All of the message listener container implementations that ship with Spring have support for MDPs that implement either the [interface]`MessageListener` or [interface]`SessionAwareMessageListener` interface.
+Classes that implement the [interface]`SessionAwareMessageListener` come with the caveat that they are then tied to Spring through the interface.
+The choice of whether or not to use it is left entirely up to you as an application developer or architect.
+
+Please note that the `'onMessage(..)'` method of the [interface]`SessionAwareMessageListener` interface throws [class]`JMSException`.
+In contrast to the standard JMS [interface]`MessageListener` interface, when using the [interface]`SessionAwareMessageListener` interface, it is the responsibility of the client code to handle any exceptions thrown.
+
+=== The [class]`MessageListenerAdapter`
+
+The [class]`MessageListenerAdapter` class is the final component in Spring's asynchronous messaging support: in a nutshell, it allows you to expose almost _any_ class as a MDP (there are of course some constraints).
+
+Consider the following interface definition.
+Notice that although the interface extends neither the [interface]`MessageListener` nor [interface]`SessionAwareMessageListener` interfaces, it can still be used as a MDP via the use of the [class]`MessageListenerAdapter` class.
+Notice also how the various message handling methods are strongly typed according to the _contents_ of the various [interface]`Message` types that they can receive and handle.
+
+[source,java]
+----
+public interface MessageDelegate {
+
+    void handleMessage(String message);
+
+    void handleMessage(Map message);
+
+    void handleMessage(byte[] message);
+
+    void handleMessage(Serializable message);
+}
+----
+
+[source,java]
+----
+public class DefaultMessageDelegate implements MessageDelegate {
+    // implementation elided for clarity...
+}
+----
+
+In particular, note how the above implementation of the [interface]`MessageDelegate` interface (the above [class]`DefaultMessageDelegate` class) has _no_ JMS dependencies at all.
+It truly is a POJO that we will make into an MDP via the following configuration.
+
+[source,xml]
+----
+<!-- this is the Message Driven POJO (MDP) -->
+<bean id="messageListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
+    <constructor-arg>
+        <bean class="jmsexample.DefaultMessageDelegate"/>
+    </constructor-arg>
+</bean>
+
+<!-- and this is the message listener container... -->
+<bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+    <property name="connectionFactory" ref="connectionFactory"/>
+    <property name="destination" ref="destination"/>
+    <property name="messageListener" ref="messageListener" />
+</bean>
+----
+
+Below is an example of another MDP that can only handle the receiving of JMS [interface]`TextMessage` messages.
+Notice how the message handling method is actually called `'receive'` (the name of the message handling method in a [class]`MessageListenerAdapter` defaults to `'handleMessage'`), but it is configurable (as you will see below).
+Notice also how the `'receive(..)'` method is strongly typed to receive and respond only to JMS [interface]`TextMessage` messages.
+
+[source,java]
+----
+public interface TextMessageDelegate {
+
+    void receive(TextMessage message);
+}
+----
+
+[source,java]
+----
+public class DefaultTextMessageDelegate implements TextMessageDelegate {
+    // implementation elided for clarity...
+}
+----
+
+The configuration of the attendant [class]`MessageListenerAdapter` would look like this:
+
+[source,xml]
+----
+<bean id="messageListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
+    <constructor-arg>
+        <bean class="jmsexample.DefaultTextMessageDelegate"/>
+    </constructor-arg>
+    <property name="defaultListenerMethod" value="receive"/>
+    <!-- we don't want automatic message context extraction -->
+    <property name="messageConverter">
+        <null/>
+    </property>
+</bean>
+----
+
+Please note that if the above `'messageListener'` receives a JMS [interface]`Message` of a type other than [interface]`TextMessage`, an [class]`IllegalStateException` will be thrown (and subsequently swallowed).
+Another of the capabilities of the [class]`MessageListenerAdapter` class is the ability to automatically send back a response [interface]`Message` if a handler method returns a non-void value.
+Consider the interface and class:
+
+[source,java]
+----
+public interface ResponsiveTextMessageDelegate {
+
+    // notice the return type...
+    String receive(TextMessage message);
+}
+----
+
+[source,java]
+----
+public class DefaultResponsiveTextMessageDelegate implements ResponsiveTextMessageDelegate {
+    // implementation elided for clarity...
+}
+----
+
+If the above [class]`DefaultResponsiveTextMessageDelegate` is used in conjunction with a [class]`MessageListenerAdapter` then any non-null value that is returned from the execution of the `'receive(..)'` method will (in the default configuration) be converted into a [interface]`TextMessage`.
+The resulting [interface]`TextMessage` will then be sent to the [interface]`Destination` (if one exists) defined in the JMS Reply-To property of the original [interface]`Message`, or the default [interface]`Destination` set on the [class]`MessageListenerAdapter` (if one has been configured); if no [interface]`Destination` is found then an [class]`InvalidDestinationException` will be thrown (and please note that this exception _will
+      not_ be swallowed and _will_ propagate up the call stack).
+
+=== Processing messages within transactions
+
+Invoking a message listener within a transaction only requires reconfiguration of the listener container.
+
+Local resource transactions can simply be activated through the `sessionTransacted` flag on the listener container definition.
+Each message listener invocation will then operate within an active JMS transaction, with message reception rolled back in case of listener execution failure.
+Sending a response message (via [interface]`SessionAwareMessageListener`) will be part of the same local transaction, but any other resource operations (such as database access) will operate independently.
+This usually requires duplicate message detection in the listener implementation, covering the case where database processing has committed but message processing failed to commit.
+
+[source,xml]
+----
+<bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+    <property name="connectionFactory" ref="connectionFactory"/>
+    <property name="destination" ref="destination"/>
+    <property name="messageListener" ref="messageListener"/>
+    <property name="sessionTransacted" value="true"/>
+</bean>
+----
+
+For participating in an externally managed transaction, you will need to configure a transaction manager and use a listener container which supports externally managed transactions: typically [class]`DefaultMessageListenerContainer`.
+
+To configure a message listener container for XA transaction participation, you'll want to configure a [class]`JtaTransactionManager` (which, by default, delegates to the Java EE server's transaction subsystem).
+Note that the underlying JMS ConnectionFactory needs to be XA-capable and properly registered with your JTA transaction coordinator! (Check your Java EE server's configuration of JNDI resources.) This allows message reception as well as e.g.
+database access to be part of the same transaction (with unified commit semantics, at the expense of XA transaction log overhead).
+
+[source,xml]
+----
+<bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>
+----
+
+Then you just need to add it to our earlier container configuration.
+The container will take care of the rest.
+
+[source,xml]
+----
+<bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+    <property name="connectionFactory" ref="connectionFactory"/>
+    <property name="destination" ref="destination"/>
+    <property name="messageListener" ref="messageListener"/>
+    <property name="transactionManager" ref="transactionManager"/>
+</bean>
+----
+
+== Support for JCA Message Endpoints
+
+Beginning with version 2.5, Spring also provides support for a JCA-based [interface]`MessageListener` container.
+The [class]`JmsMessageEndpointManager` will attempt to automatically determine the [interface]`ActivationSpec` class name from the provider's [interface]`ResourceAdapter` class name.
+Therefore, it is typically possible to just provide Spring's generic [class]`JmsActivationSpecConfig` as shown in the following example.
+
+[source,xml]
+----
+<bean class="org.springframework.jms.listener.endpoint.JmsMessageEndpointManager">
+    <property name="resourceAdapter" ref="resourceAdapter"/>
+    <property name="activationSpecConfig">
+        <bean class="org.springframework.jms.listener.endpoint.JmsActivationSpecConfig">
+            <property name="destinationName" value="myQueue"/>
+        </bean>
+    </property>
+    <property name="messageListener" ref="myMessageListener"/>
+</bean>
+----
+
+Alternatively, you may set up a [class]`JmsMessageEndpointManager` with a given [interface]`ActivationSpec` object.
+The [interface]`ActivationSpec` object may also come from a JNDI lookup (using `<jee:jndi-lookup>`).
+
+[source,xml]
+----
+<bean class="org.springframework.jms.listener.endpoint.JmsMessageEndpointManager">
+    <property name="resourceAdapter" ref="resourceAdapter"/>
+    <property name="activationSpec">
+        <bean class="org.apache.activemq.ra.ActiveMQActivationSpec">
+            <property name="destination" value="myQueue"/>
+            <property name="destinationType" value="javax.jms.Queue"/>
+        </bean>
+    </property>
+    <property name="messageListener" ref="myMessageListener"/>
+</bean>
+----
+
+Using Spring's [class]`ResourceAdapterFactoryBean`, the target [interface]`ResourceAdapter` may be configured locally as depicted in the following example.
+
+[source,xml]
+----
+<bean id="resourceAdapter" class="org.springframework.jca.support.ResourceAdapterFactoryBean">
+    <property name="resourceAdapter">
+        <bean class="org.apache.activemq.ra.ActiveMQResourceAdapter">
+            <property name="serverUrl" value="tcp://localhost:61616"/>
+        </bean>
+    </property>
+    <property name="workManager">
+        <bean class="org.springframework.jca.work.SimpleTaskWorkManager"/>
+    </property>
+</bean>
+----
+
+The specified [interface]`WorkManager` may also point to an environment-specific thread pool - typically through [class]`SimpleTaskWorkManager's` "asyncTaskExecutor" property.
+Consider defining a shared thread pool for all your [interface]`ResourceAdapter` instances if you happen to use multiple adapters.
+
+In some environments (e.g.
+WebLogic 9 or above), the entire [interface]`ResourceAdapter` object may be obtained from JNDI instead (using `<jee:jndi-lookup>`).
+The Spring-based message listeners can then interact with the server-hosted [interface]`ResourceAdapter`, also using the server's built-in [interface]`WorkManager`.
+
+Please consult the JavaDoc for [class]`JmsMessageEndpointManager`, [class]`JmsActivationSpecConfig`, and [class]`ResourceAdapterFactoryBean` for more details.
+
+Spring also provides a generic JCA message endpoint manager which is not tied to JMS: [class]`org.springframework.jca.endpoint.GenericMessageEndpointManager`.
+This component allows for using any message listener type (e.g.
+a CCI MessageListener) and any provider-specific ActivationSpec object.
+Check out your JCA provider's documentation to find out about the actual capabilities of your connector, and consult [class]`GenericMessageEndpointManager`'s JavaDoc for the Spring-specific configuration details.
+
+NOTE: JCA-based message endpoint management is very analogous to EJB 2.1 Message-Driven Beans; it uses the same underlying resource provider contract.
+Like with EJB 2.1 MDBs, any message listener interface supported by your JCA provider can be used in the Spring context as well.
+Spring nevertheless provides explicit 'convenience' support for JMS, simply because JMS is the most common endpoint API used with the JCA endpoint management contract.
+
+== JMS Namespace Support
+
+Spring 2.5 introduces an XML namespace for simplifying JMS configuration.
+To use the JMS namespace elements you will need to reference the JMS schema:
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jms="http://www.springframework.org/schema/jms"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd">
+
+<!-- <bean/> definitions here -->
+
+</beans>
+----
+
+The namespace consists of two top-level elements: `<listener-container/>` and `<jca-listener-container/>` both of which may contain one or more `<listener/>` child elements.
+Here is an example of a basic configuration for two listeners.
+
+[source,xml]
+----
+<jms:listener-container>
+
+    <jms:listener destination="queue.orders" ref="orderService" method="placeOrder"/>
+
+    <jms:listener destination="queue.confirmations" ref="confirmationLogger" method="log"/>
+
+</jms:listener-container>
+----
+
+The example above is equivalent to creating two distinct listener container bean definitions and two distinct [class]`MessageListenerAdapter` bean definitions as demonstrated in <<jms-receiving-async-message-listener-adapter>>.
+In addition to the attributes shown above, the `listener` element may contain several optional ones.
+The following table describes all available attributes:
+
+.Attributes of the JMS `<listener>` element
+[cols="1,1", options="header"]
+|===
+| Attribute
+| Description
+| A bean name for the hosting listener container. If
+            not specified, a bean name will be automatically
+            generated.
+
+| destination (required)
+| The destination name for this listener, resolved
+            through the DestinationResolver
+            strategy.
+
+| ref (required)
+| The bean name of the handler object.
+
+| The name of the handler method to invoke. If the
+            ref points to a
+            MessageListener or Spring
+            SessionAwareMessageListener, this
+            attribute may be omitted.
+
+| The name of the default response destination to send
+            response messages to. This will be applied in case of a request
+            message that does not carry a "JMSReplyTo" field. The type of this
+            destination will be determined by the listener-container's
+            "destination-type" attribute. Note: This only applies to a
+            listener method with a return value, for which each result object
+            will be converted into a response message.
+
+| The name of the durable subscription, if
+            any.
+
+| An optional message selector for this
+            listener.
+|===
+
+The `<listener-container/>` element also accepts several optional attributes.
+This allows for customization of the various strategies (for example,  and ) as well as basic JMS settings and resource references.
+Using these attributes, it is possible to define highly-customized listener containers while still benefiting from the convenience of the namespace.
+
+[source,xml]
+----
+<jms:listener-container connection-factory="myConnectionFactory"
+                        task-executor="myTaskExecutor"
+                        destination-resolver="myDestinationResolver"
+                        transaction-manager="myTransactionManager"
+                        concurrency="10">
+
+    <jms:listener destination="queue.orders" ref="orderService" method="placeOrder"/>
+
+    <jms:listener destination="queue.confirmations" ref="confirmationLogger" method="log"/>
+
+</jms:listener-container>
+----
+
+The following table describes all available attributes.
+Consult the class-level Javadoc of the [class]`AbstractMessageListenerContainer` and its concrete subclasses for more details on the individual properties.
+The Javadoc also provides a discussion of transaction choices and message redelivery scenarios.
+
+.Attributes of the JMS `<listener-container>` element
+[cols="1,1", options="header"]
+|===
+| Attribute
+| Description
+| The type of this listener container. Available
+            options are: default,
+            simple, default102, or
+            simple102 (the default value is
+            'default').
+
+| A custom listener container implementation class
+            as fully qualified class name. Default is Spring's standard
+            DefaultMessageListenerContainer or
+            SimpleMessageListenerContainer,
+            according to the "container-type" attribute.
+
+| A reference to the JMS
+            ConnectionFactory bean (the default
+            bean name is
+            'connectionFactory').
+
+| A reference to the Spring
+            TaskExecutor for the JMS listener
+            invokers.
+
+| A reference to the
+            DestinationResolver strategy for
+            resolving JMS
+            Destinations.
+
+| A reference to the
+            MessageConverter strategy for
+            converting JMS Messages to listener method arguments. Default is a
+            SimpleMessageConverter.
+
+| A reference to an
+            ErrorHandler strategy for handling
+            any uncaught Exceptions that may occur during the execution of the
+            MessageListener.
+
+| The JMS destination type for this listener:
+            queue, topic or
+            durableTopic. The default is
+            queue.
+
+| The JMS client id for this listener container. Needs
+            to be specified when using durable subscriptions.
+
+| The cache level for JMS resources:
+            none, connection,
+            session, consumer or
+            auto. By default (auto), the
+            cache level will effectively be "consumer", unless an external
+            transaction manager has been specified - in which case the
+            effective default will be none (assuming
+            Java EE-style transaction management where the given
+            ConnectionFactory is an XA-aware pool).
+
+| The native JMS acknowledge mode:
+            auto, client,
+            dups-ok or transacted. A
+            value of transacted activates a locally
+            transacted Session. As an
+            alternative, specify the transaction-manager
+            attribute described below. Default is
+            auto.
+
+| A reference to an external
+            PlatformTransactionManager
+            (typically an XA-based transaction coordinator, e.g. Spring's
+            JtaTransactionManager). If not specified,
+            native acknowledging will be used (see "acknowledge"
+            attribute).
+
+| The number of concurrent sessions/consumers to start
+            for each listener. Can either be a simple number indicating the
+            maximum number (e.g. "5") or a range indicating the lower as well
+            as the upper limit (e.g. "3-5"). Note that a specified minimum is
+            just a hint and might be ignored at runtime. Default is 1; keep
+            concurrency limited to 1 in case of a topic listener or if queue
+            ordering is important; consider raising it for general
+            queues.
+
+| The maximum number of messages to load into a single
+            session. Note that raising this number might lead to starvation of
+            concurrent consumers!
+
+| The timeout to use for receive calls (in milliseconds).
+			The default is 1000 ms (1 sec); -1
+			indicates no timeout at all.
+
+| Specify the interval between recovery attempts, in
+            milliseconds. The default is 5000 ms, that is,
+            5 seconds.
+
+| The lifecycle phase within which this container should
+            start and stop. The lower the value the earlier this container will
+            start and the later it will stop. The default is
+            Integer.MAX_VALUE meaning the container will start
+            as late as possible and stop as soon as possible.
+|===
+
+Configuring a JCA-based listener container with the "jms" schema support is very similar.
+
+[source,xml]
+----
+<jms:jca-listener-container resource-adapter="myResourceAdapter"
+                            destination-resolver="myDestinationResolver"
+                            transaction-manager="myTransactionManager"
+                            concurrency="10">
+
+    <jms:listener destination="queue.orders" ref="myMessageListener"/>
+
+</jms:jca-listener-container>
+----
+
+The available configuration options for the JCA variant are described in the following table:
+
+.Attributes of the JMS `<jca-listener-container/>` element
+[cols="1,1", options="header"]
+|===
+| Attribute
+| Description
+| A reference to the JCA
+            ResourceAdapter bean (the default
+            bean name is 'resourceAdapter').
+
+| A reference to the
+            JmsActivationSpecFactory. The
+            default is to autodetect the JMS provider and its
+            ActivationSpec class (see
+            DefaultJmsActivationSpecFactory)
+
+| A reference to the
+            DestinationResolver strategy for
+            resolving JMS Destinations.
+            
+
+| A reference to the
+            MessageConverter strategy for
+            converting JMS Messages to listener method arguments. Default is a
+            SimpleMessageConverter.
+
+| The JMS destination type for this listener:
+            queue, topic or
+            durableTopic. The default is
+            queue.
+
+| The JMS client id for this listener container. Needs
+            to be specified when using durable subscriptions.
+
+| The native JMS acknowledge mode:
+            auto, client,
+            dups-ok or transacted. A
+            value of transacted activates a locally
+            transacted Session. As an
+            alternative, specify the transaction-manager
+            attribute described below. Default is
+            auto.
+
+| A reference to a Spring
+            JtaTransactionManager or a
+            javax.transaction.TransactionManager
+            for kicking off an XA transaction for each incoming message. If
+            not specified, native acknowledging will be used (see the
+            "acknowledge" attribute).
+
+| The number of concurrent sessions/consumers to start
+            for each listener. Can either be a simple number indicating the
+            maximum number (e.g. "5") or a range indicating the lower as well
+            as the upper limit (e.g. "3-5"). Note that a specified minimum is
+            just a hint and will typically be ignored at runtime when using a
+            JCA listener container. Default is 1.
+
+| The maximum number of messages to load into a single
+            session. Note that raising this number might lead to starvation of
+            concurrent consumers!
+|===

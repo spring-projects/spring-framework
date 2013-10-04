@@ -1,0 +1,98 @@
+
+= DAO support
+
+== Introduction
+
+The Data Access Object (DAO) support in Spring is aimed at making it easy to work with data access technologies like JDBC, Hibernate, JPA or JDO in a consistent way.
+This allows one to switch between the aforementioned persistence technologies fairly easily and it also allows one to code without worrying about catching exceptions that are specific to each technology.
+
+== Consistent exception hierarchy
+
+Spring provides a convenient translation from technology-specific exceptions like [class]`SQLException` to its own exception class hierarchy with the [class]`DataAccessException` as the root exception.
+These exceptions wrap the original exception so there is never any risk that one might lose any information as to what might have gone wrong.
+
+In addition to JDBC exceptions, Spring can also wrap Hibernate-specific exceptions, converting them from proprietary, checked exceptions (in the case of versions of Hibernate prior to Hibernate 3.0), to a set of focused runtime exceptions (the same is true for JDO and JPA exceptions).
+This allows one to handle most persistence exceptions, which are non-recoverable, only in the appropriate layers, without having annoying boilerplate catch-and-throw blocks and exception declarations in one's DAOs.
+(One can still trap and handle exceptions anywhere one needs to though.) As mentioned above, JDBC exceptions (including database-specific dialects) are also converted to the same hierarchy, meaning that one can perform some operations with JDBC within a consistent programming model.
+
+The above holds true for the various template classes in Springs support for various ORM frameworks.
+If one uses the interceptor-based classes then the application must care about handling [class]`HibernateExceptions` and [class]`JDOExceptions` itself, preferably via delegating to [class]`SessionFactoryUtils`' [method]`convertHibernateAccessException(..)` or [method]`convertJdoAccessException()` methods respectively.
+These methods convert the exceptions to ones that are compatible with the exceptions in the `org.springframework.dao` exception hierarchy.
+As [class]`JDOExceptions` are unchecked, they can simply get thrown too, sacrificing generic DAO abstraction in terms of exceptions though.
+
+The exception hierarchy that Spring provides can be seen below.
+(Please note that the class hierarchy detailed in the image shows only a subset of the entire [class]`DataAccessException` hierarchy.)
+
+== Annotations used for configuring DAO or Repository classes
+
+The best way to guarantee that your Data Access Objects (DAOs) or repositories provide exception translation is to use the [interface]`@Repository` annotation.
+This annotation also allows the component scanning support to find and configure your DAOs and repositories without having to provide XML configuration entries for them.
+
+[source,java]
+----
+@Repository
+public class SomeMovieFinder implements MovieFinder {
+
+    // ...
+
+}
+----
+
+Any DAO or repository implementation will need to access to a persistence resource, depending on the persistence technology used; for example, a JDBC-based repository will need access to a JDBC [interface]`DataSource`; a JPA-based repository will need access to an [interface]`EntityManager`.
+The easiest way to accomplish this is to have this resource dependency injected using one of the [interface]`@Autowired,`, [interface]`@Inject`, [interface]`@Resource` or [interface]`@PersistenceContext` annotations.
+Here is an example for a JPA repository:
+
+[source,java]
+----
+@Repository
+public class JpaMovieFinder implements MovieFinder {
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    // ...
+
+}
+----
+
+If you are using the classic Hibernate APIs than you can inject the SessionFactory:
+
+[source,java]
+----
+@Repository
+public class HibernateMovieFinder implements MovieFinder {
+
+    private SessionFactory sessionFactory;
+
+    @Autowired
+    public void setSessionFactory(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
+
+    // ...
+
+}
+----
+
+Last example we will show here is for typical JDBC support.
+You would have the [class]`DataSource` injected into an initialization method where you would create a [class]`JdbcTemplate` and other data access support classes like [class]`SimpleJdbcCall` etc using this [class]`DataSource`.
+
+[source,java]
+----
+@Repository
+public class JdbcMovieFinder implements MovieFinder {
+
+    private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    public void init(DataSource dataSource) {
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
+
+    // ...
+
+}
+----
+
+NOTE: Please see the specific coverage of each persistence technology for details on how to configure the application context to take advantage of these annotations.
+

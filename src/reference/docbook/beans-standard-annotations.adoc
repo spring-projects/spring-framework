@@ -1,0 +1,145 @@
+
+= Using JSR 330 Standard Annotations
+
+Starting with Spring 3.0, Spring offers support for JSR-330 standard annotations (Dependency Injection).
+Those annotations are scanned in the same way as the Spring annotations.
+You just need to have the relevant jars in your classpath.
+
+
+[NOTE]
+====
+ If you are using Maven, the [interface]`javax.inject` artifact is available in the standard Maven repository (<<,http://repo1.maven.org/maven2/javax/inject/javax.inject/1/>>).
+You can add the following dependency to your file pom.xml: 
+
+[source,xml]
+----
+
+<dependency>
+    <groupId>javax.inject</groupId>
+    <artifactId>javax.inject</artifactId>
+    <version>1</version>
+</dependency>
+----
+====
+
+== Dependency Injection with [interface]`@Inject` and [interface]`@Named`
+
+Instead of [interface]`@Autowired`, [interface]`@javax.inject.Inject` may be used as follows:  
+[source,java]
+----
+import javax.inject.Inject;
+
+public class SimpleMovieLister {
+
+  private MovieFinder movieFinder;
+
+  @Inject
+  public void setMovieFinder(MovieFinder movieFinder) {
+      this.movieFinder = movieFinder;
+  }
+  // ...
+}
+---- 
+
+As with [interface]`@Autowired`, it is possible to use [interface]`@Inject` at the class-level, field-level, method-level and constructor-argument level.
+ If you would like to use a qualified name for the dependency that should be injected, you should use the [interface]`@Named` annotation as follows:  
+[source,java]
+----
+import javax.inject.Inject;
+import javax.inject.Named;
+
+public class SimpleMovieLister {
+
+  private MovieFinder movieFinder;
+
+  @Inject
+  public void setMovieFinder(@Named("main") MovieFinder movieFinder) {
+      this.movieFinder = movieFinder;
+  }
+  // ...
+}
+----  
+
+== [interface]`@Named`: a standard equivalent to the [interface]`@Component` annotation
+
+ Instead of [interface]`@Component`, [interface]`@javax.inject.Named` may be used as follows: 
+[source,java]
+----
+import javax.inject.Inject;
+import javax.inject.Named;
+
+@Named("movieListener")
+public class SimpleMovieLister {
+
+  private MovieFinder movieFinder;
+
+  @Inject
+  public void setMovieFinder(MovieFinder movieFinder) {
+      this.movieFinder = movieFinder;
+  }
+  // ...
+}
+---- 
+
+ It is very common to use [interface]`@Component` without specifying a name for the component.
+[interface]`@Named` can be used in a similar fashion:  
+[source,java]
+----
+import javax.inject.Inject;
+import javax.inject.Named;
+
+@Named
+public class SimpleMovieLister {
+
+  private MovieFinder movieFinder;
+
+  @Inject
+  public void setMovieFinder(MovieFinder movieFinder) {
+      this.movieFinder = movieFinder;
+  }
+  // ...
+}
+---- 
+
+ When using [interface]`@Named`, it is possible to use component-scanning in the exact same way as when using Spring annotations:  
+[source,xml]
+----
+<beans>
+    <context:component-scan base-package="org.example"/>
+</beans>
+---- 
+
+== Limitations of the standard approach
+
+When working with standard annotations, it is important to know that some significant features are not available as shown in the table below:
+
+
+
+.Spring annotations vs. standard annotations
+[cols="1,1,1", options="header"]
+|===
+| Spring
+| javax.inject.*
+| javax.inject restrictions / comments
+
+
+| 
+                    
+                        The JSR-330 default scope is like Spring's prototype.
+                        However, in order to keep it consistent with Spring's general defaults,
+                        a JSR-330 bean declared in the Spring container is a
+                        singleton by default. In order to use a
+                        scope other than singleton, you should use Spring's
+                        @Scope annotation.
+                    
+                    
+                        javax.inject also provides a
+                        @Scope annotation.
+                        Nevertheless, this one is only intended to be used for creating your own annotations.
+                    
+                
+
+
+
+
+|=== 

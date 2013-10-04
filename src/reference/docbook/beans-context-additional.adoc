@@ -1,0 +1,436 @@
+
+= Additional Capabilities of the [interface]`ApplicationContext`
+
+As was discussed in the chapter introduction, the `org.springframework.beans.factory` package provides basic functionality for managing and manipulating beans, including in a programmatic way.
+The `org.springframework.context` package adds the <<,[interface]`ApplicationContext`>> interface, which extends the [interface]`BeanFactory` interface, in addition to extending other interfaces to provide additional functionality in a more _application framework-oriented style_.
+Many people use the [interface]`ApplicationContext` in a completely declarative fashion, not even creating it programmatically, but instead relying on support classes such as [class]`ContextLoader` to automatically instantiate an [interface]`ApplicationContext` as part of the normal startup process of a J2EE web application.
+
+To enhance [interface]`BeanFactory` functionality in a more framework-oriented style the context package also provides the following functionality:
+
+* _Access to messages in i18n-style_, through the [interface]`MessageSource` interface.
+* _Access to resources_, such as URLs and files, through the [interface]`ResourceLoader` interface.
+* _Event publication_ to beans implementing the [interface]`ApplicationListener` interface, through the use of the [interface]`ApplicationEventPublisher` interface.
+* _Loading of multiple (hierarchical) contexts_, allowing each to be focused on one particular layer, such as the web layer of an application, through the [interface]`HierarchicalBeanFactory` interface.
+
+== Internationalization using [interface]`MessageSource`
+
+The [interface]`ApplicationContext` interface extends an interface called [interface]`MessageSource`, and therefore provides internationalization (i18n) functionality.
+Spring also provides the interface [class]`HierarchicalMessageSource`, which can resolve messages hierarchically.
+Together these interfaces provide the foundation upon which Spring effects message resolution.
+The methods defined on these interfaces include:
+
+* [method]`String getMessage(String code, Object[] args, String
+            default, Locale loc)`: The basic method used to retrieve a message from the [interface]`MessageSource`.
+  When no message is found for the specified locale, the default message is used.
+  Any arguments passed in become replacement values, using the [interface]`MessageFormat` functionality provided by the standard library.
+* [method]`String getMessage(String code, Object[] args, Locale
+            loc)`: Essentially the same as the previous method, but with one difference: no default message can be specified; if the message cannot be found, a [class]`NoSuchMessageException` is thrown.
+* [method]`String getMessage(MessageSourceResolvable resolvable,
+            Locale locale)`: All properties used in the preceding methods are also wrapped in a class named [interface]`MessageSourceResolvable`, which you can use with this method.
+
+When an [interface]`ApplicationContext` is loaded, it automatically searches for a [interface]`MessageSource` bean defined in the context.
+The bean must have the name `messageSource`.
+If such a bean is found, all calls to the preceding methods are delegated to the message source.
+If no message source is found, the [interface]`ApplicationContext` attempts to find a parent containing a bean with the same name.
+If it does, it uses that bean as the [interface]`MessageSource`.
+If the [interface]`ApplicationContext` cannot find any source for messages, an empty [class]`DelegatingMessageSource` is instantiated in order to be able to accept calls to the methods defined above.
+
+Spring provides two [interface]`MessageSource` implementations, [class]`ResourceBundleMessageSource` and [class]`StaticMessageSource`.
+Both implement [interface]`HierarchicalMessageSource` in order to do nested messaging.
+The [class]`StaticMessageSource` is rarely used but provides programmatic ways to add messages to the source.
+The [class]`ResourceBundleMessageSource` is shown in the following example:
+
+[source,xml]
+----
+<beans>
+<bean id="messageSource"
+      class="org.springframework.context.support.ResourceBundleMessageSource">
+  <property name="basenames">
+    <list>
+      <value>format</value>
+      <value>exceptions</value>
+      <value>windows</value>
+    </list>
+  </property>
+</bean>
+</beans>
+----
+
+In the example it is assumed you have three resource bundles defined in your classpath called `format`, `exceptions` and `windows`.
+Any request to resolve a message will be handled in the JDK standard way of resolving messages through ResourceBundles.
+For the purposes of the example, assume the contents of two of the above resource bundle files are...
+
+[source,java]
+----
+# in format.properties
+message=Alligators rock!
+----
+
+[source,java]
+----
+# in exceptions.properties
+argument.required=The '{0}' argument is required.
+----
+
+A program to execute the [class]`MessageSource` functionality is shown in the next example.
+Remember that all [class]`ApplicationContext` implementations are also [class]`MessageSource` implementations and so can be cast to the [class]`MessageSource` interface.
+
+[source,java]
+----
+public static void main(String[] args) {
+  MessageSource resources = new ClassPathXmlApplicationContext("beans.xml");
+  String message = resources.getMessage("message", null, "Default", null);
+  System.out.println(message);
+}
+----
+
+The resulting output from the above program will be...
+
+[source]
+----
+Alligators rock!
+----
+
+So to summarize, the [class]`MessageSource` is defined in a file called `beans.xml`, which exists at the root of your classpath.
+The `messageSource` bean definition refers to a number of resource bundles through its `basenames` property.
+The three files that are passed in the list to the `basenames` property exist as files at the root of your classpath and are called `format.properties`, `exceptions.properties`, and `windows.properties` respectively.
+
+The next example shows arguments passed to the message lookup; these arguments will be converted into Strings and inserted into placeholders in the lookup message.
+
+[source,xml]
+----
+<beans>
+
+  <!-- this MessageSource is being used in a web application -->
+  <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+      <property name="basename" value="exceptions"/>
+  </bean>
+
+  <!-- lets inject the above MessageSource into this POJO -->
+  <bean id="example" class="com.foo.Example">
+      <property name="messages" ref="messageSource"/>
+  </bean>
+
+</beans>
+----
+
+[source,java]
+----
+public class Example {
+
+  private MessageSource messages;
+
+  public void setMessages(MessageSource messages) {
+      this.messages = messages;
+  }
+
+  public void execute() {
+      String message = this.messages.getMessage("argument.required",
+          new Object [] {"userDao"}, "Required", null);
+      System.out.println(message);
+  }
+
+}
+----
+
+The resulting output from the invocation of the [method]`execute()` method will be...
+
+[source]
+----
+The userDao argument is required.
+----
+
+With regard to internationalization (i18n), Spring's various [class]`MessageResource` implementations follow the same locale resolution and fallback rules as the standard JDK [class]`ResourceBundle`.
+In short, and continuing with the example `messageSource` defined previously, if you want to resolve messages against the British (en-GB) locale, you would create files called `format_en_GB.properties`, `exceptions_en_GB.properties`, and `windows_en_GB.properties` respectively.
+
+Typically, locale resolution is managed by the surrounding environment of the application.
+In this example, the locale against which (British) messages will be resolved is specified manually.
+
+[source]
+----
+# in exceptions_en_GB.properties
+argument.required=Ebagum lad, the '{0}' argument is required, I say, required.
+----
+
+[source,java]
+----
+public static void main(final String[] args) {
+  MessageSource resources = new ClassPathXmlApplicationContext("beans.xml");
+  String message = resources.getMessage("argument.required",
+      new Object [] {"userDao"}, "Required", Locale.UK);
+  System.out.println(message);
+}
+----
+
+The resulting output from the running of the above program will be...
+
+[source]
+----
+Ebagum lad, the 'userDao' argument is required, I say, required.
+----
+
+You can also use the [class]`MessageSourceAware` interface to acquire a reference to any [class]`MessageSource` that has been defined.
+Any bean that is defined in an [class]`ApplicationContext` that implements the [class]`MessageSourceAware` interface is injected with the application context's [class]`MessageSource` when the bean is created and configured.
+
+NOTE: _As an alternative to
+        [class]`ResourceBundleMessageSource`, Spring provides a
+        [class]`ReloadableResourceBundleMessageSource` class. This
+        variant supports the same bundle file format but is more flexible than
+        the standard JDK based
+        [class]`ResourceBundleMessageSource`
+        implementation._ In particular, it allows for reading files from any Spring resource location (not just from the classpath) and supports hot reloading of bundle property files (while efficiently caching them in between).
+Check out the [class]`ReloadableResourceBundleMessageSource` javadoc for details.
+
+== Standard and Custom Events
+
+Event handling in the [interface]`ApplicationContext` is provided through the [class]`ApplicationEvent` class and [interface]`ApplicationListener` interface.
+If a bean that implements the [interface]`ApplicationListener` interface is deployed into the context, every time an [class]`ApplicationEvent` gets published to the [interface]`ApplicationContext`, that bean is notified.
+Essentially, this is the standard _Observer_ design pattern.
+Spring provides the following standard events:
+
+.Built-in Events
+[cols="1,1", options="header"]
+|===
+| Event
+| Explanation
+| ContextRefreshedEvent
+| Published when the
+              ApplicationContext is initialized
+              or refreshed, for example, using the
+              refresh() method on the
+              ConfigurableApplicationContext
+              interface. "Initialized" here means that all beans are loaded,
+              post-processor beans are detected and activated, singletons are
+              pre-instantiated, and the
+              ApplicationContext object is ready
+              for use. As long as the context has not been closed, a refresh can
+              be triggered multiple times, provided that the chosen
+              ApplicationContext actually
+              supports such "hot" refreshes. For example,
+              XmlWebApplicationContext supports hot
+              refreshes, but GenericApplicationContext
+              does not.
+
+| ContextStartedEvent
+| Published when the
+              ApplicationContext is started,
+              using the start() method on the
+              ConfigurableApplicationContext
+              interface. "Started" here means that all
+              Lifecycle beans receive an explicit
+              start signal. Typically this signal is used to restart beans after
+              an explicit stop, but it may also be used to start components that
+              have not been configured for autostart , for example, components
+              that have not already started on initialization.
+
+| ContextStoppedEvent
+| Published when the
+              ApplicationContext is stopped,
+              using the stop() method on the
+              ConfigurableApplicationContext
+              interface. "Stopped" here means that all
+              Lifecycle beans receive an explicit
+              stop signal. A stopped context may be restarted through a
+              start() call.
+
+| ContextClosedEvent
+| Published when the
+              ApplicationContext is closed, using
+              the close() method on the
+              ConfigurableApplicationContext
+              interface. "Closed" here means that all singleton beans are
+              destroyed. A closed context reaches its end of life; it cannot be
+              refreshed or restarted.
+
+| RequestHandledEvent
+| A web-specific event telling all beans that an HTTP request
+              has been serviced. This event is published
+              after the request is complete. This event is
+              only applicable to web applications using Spring's
+              DispatcherServlet.
+|===
+
+You can also create and publish your own custom events.
+This example demonstrates a simple class that extends Spring's [class]`ApplicationEvent` base class:
+
+[source,java]
+----
+public class BlackListEvent extends ApplicationEvent {
+  private final String address;
+  private final String test;
+
+  public BlackListEvent(Object source, String address, String test) {
+      super(source);
+      this.address = address;
+      this.test = test;
+  }
+
+  // accessor and other methods...
+}
+----
+
+To publish a custom [class]`ApplicationEvent`, call the [method]`publishEvent()` method on an [interface]`ApplicationEventPublisher`.
+Typically this is done by creating a class that implements [interface]`ApplicationEventPublisherAware` and registering it as a Spring bean.
+The following example demonstrates such a class:
+
+[source,java]
+----
+public class EmailService implements ApplicationEventPublisherAware {
+
+  private List<String> blackList;
+  private ApplicationEventPublisher publisher;
+
+  public void setBlackList(List<String> blackList) {
+      this.blackList = blackList;
+  }
+
+  public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
+      this.publisher = publisher;
+  }
+
+  public void sendEmail(String address, String text) {
+      if (blackList.contains(address)) {
+          BlackListEvent event = new BlackListEvent(this, address, text);
+          publisher.publishEvent(event);
+          return;
+      }
+      // send email...
+  }
+}
+----
+
+At configuration time, the Spring container will detect that [class]`EmailService` implements [interface]`ApplicationEventPublisherAware` and will automatically call [method]`setApplicationEventPublisher()`.
+In reality, the parameter passed in will be the Spring container itself; you're simply interacting with the application context via its [interface]`ApplicationEventPublisher` interface.
+
+To receive the custom [class]`ApplicationEvent`, create a class that implements [interface]`ApplicationListener` and register it as a Spring bean.
+The following example demonstrates such a class:
+
+[source,java]
+----
+public class BlackListNotifier implements ApplicationListener<BlackListEvent> {
+
+  private String notificationAddress;
+
+  public void setNotificationAddress(String notificationAddress) {
+      this.notificationAddress = notificationAddress;
+  }
+
+  public void onApplicationEvent(BlackListEvent event) {
+        // notify appropriate parties via notificationAddress...
+  }
+}
+----
+
+Notice that [interface]`ApplicationListener` is generically parameterized with the type of your custom event, [class]`BlackListEvent`.
+This means that the [method]`onApplicationEvent()` method can remain type-safe, avoiding any need for downcasting.
+You may register as many event listeners as you wish, but note that by default event listeners receive events synchronously.
+This means the [method]`publishEvent()` method blocks until all listeners have finished processing the event.
+One advantage of this synchronous and single-threaded approach is that when a listener receives an event, it operates inside the transaction context of the publisher if a transaction context is available.
+If another strategy for event publication becomes necessary, refer to the JavaDoc for Spring's [interface]`ApplicationEventMulticaster` interface.
+
+The following example shows the bean definitions used to register and configure each of the classes above:
+
+[source,xml]
+----
+<bean id="emailService" class="example.EmailService">
+  <property name="blackList">
+      <list>
+          <value>known.spammer@example.org</value>
+          <value>known.hacker@example.org</value>
+          <value>john.doe@example.org</value>
+      </list>
+  </property>
+</bean>
+
+<bean id="blackListNotifier" class="example.BlackListNotifier">
+  <property name="notificationAddress" value="blacklist@example.org"/>
+</bean>
+----
+
+Putting it all together, when the [method]`sendEmail()` method of the `emailService` bean is called, if there are any emails that should be blacklisted, a custom event of type [class]`BlackListEvent` is published.
+The `blackListNotifier` bean is registered as an [interface]`ApplicationListener` and thus receives the [class]`BlackListEvent`, at which point it can notify appropriate parties.
+
+NOTE: Spring's eventing mechanism is designed for simple communication between Spring beans within the same application context.
+However, for more sophisticated enterprise integration needs, the separately-maintained <<,Spring
+        Integration>> project provides complete support for building lightweight, <<,pattern-oriented>>, event-driven architectures that build upon the well-known Spring programming model.
+
+== Convenient access to low-level resources
+
+For optimal usage and understanding of application contexts, users should generally familiarize themselves with Spring's [interface]`Resource` abstraction, as described in the chapter <<resources>>.
+
+An application context is a [interface]`ResourceLoader`, which can be used to load [interface]`Resource`s.
+A [interface]`Resource` is essentially a more feature rich version of the JDK class `java.net.URL`, in fact, the implementations of the [interface]`Resource` wrap an instance of `java.net.URL` where appropriate.
+A [interface]`Resource` can obtain low-level resources from almost any location in a transparent fashion, including from the classpath, a filesystem location, anywhere describable with a standard URL, and some other variations.
+If the resource location string is a simple path without any special prefixes, where those resources come from is specific and appropriate to the actual application context type.
+
+You can configure a bean deployed into the application context to implement the special callback interface, [interface]`ResourceLoaderAware`, to be automatically called back at initialization time with the application context itself passed in as the [interface]`ResourceLoader`.
+You can also expose properties of type [interface]`Resource`, to be used to access static resources; they will be injected into it like any other properties.
+You can specify those [interface]`Resource` properties as simple String paths, and rely on a special JavaBean [interface]`PropertyEditor` that is automatically registered by the context, to convert those text strings to actual [interface]`Resource` objects when the bean is deployed.
+
+The location path or paths supplied to an [interface]`ApplicationContext` constructor are actually resource strings, and in simple form are treated appropriately to the specific context implementation.
+[class]`ClassPathXmlApplicationContext` treats a simple location path as a classpath location.
+You can also use location paths (resource strings) with special prefixes to force loading of definitions from the classpath or a URL, regardless of the actual context type.
+
+== Convenient [interface]`ApplicationContext` instantiation for web applications
+
+You can create [interface]`ApplicationContext` instances declaratively by using, for example, a [class]`ContextLoader`.
+Of course you can also create [interface]`ApplicationContext` instances programmatically by using one of the [interface]`ApplicationContext` implementations.
+
+The [class]`ContextLoader` mechanism comes in two flavors: the [class]`ContextLoaderListener` and the [class]`ContextLoaderServlet`.
+They have the same functionality but differ in that the listener version is not reliable in Servlet 2.3 containers.
+In the Servlet 2.4 specification, Servlet context listeners must execute immediately after the Servlet context for the web application is created and is available to service the first request (and also when the Servlet context is about to be shut down).
+As such a Servlet context listener is an ideal place to initialize the Spring [interface]`ApplicationContext`.
+All things being equal, you should probably prefer [class]`ContextLoaderListener`; for more information on compatibility, have a look at the Javadoc for the [class]`ContextLoaderServlet`.
+
+You can register an [interface]`ApplicationContext` using the [class]`ContextLoaderListener` as follows:
+
+[source,xml]
+----
+<context-param>
+<param-name>contextConfigLocation</param-name>
+<param-value>/WEB-INF/daoContext.xml /WEB-INF/applicationContext.xml</param-value>
+</context-param>
+
+<listener>
+<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+</listener>
+
+<!-- or use the ContextLoaderServlet instead of the above listener
+<servlet>
+<servlet-name>context</servlet-name>
+<servlet-class>org.springframework.web.context.ContextLoaderServlet</servlet-class>
+<load-on-startup>1</load-on-startup>
+</servlet>
+-->
+----
+
+The listener inspects the `contextConfigLocation` parameter.
+If the parameter does not exist, the listener uses `/WEB-INF/applicationContext.xml` as a default.
+When the parameter _does_ exist, the listener separates the String by using predefined delimiters (comma, semicolon and whitespace) and uses the values as locations where application contexts will be searched.
+Ant-style path patterns are supported as well.
+Examples are `/WEB-INF/*Context.xml` for all files with names ending with "Context.xml", residing in the "WEB-INF" directory, and `/WEB-INF/**/*Context.xml`, for all such files in any subdirectory of "WEB-INF".
+
+You can use [class]`ContextLoaderServlet` instead of [class]`ContextLoaderListener`.
+The Servlet uses the `contextConfigLocation` parameter just as the listener does.
+
+== Deploying a Spring ApplicationContext as a J2EE RAR file
+
+In Spring 2.5 and later, it is possible to deploy a Spring ApplicationContext as a RAR file, encapsulating the context and all of its required bean classes and library JARs in a J2EE RAR deployment unit.
+This is the equivalent of bootstrapping a standalone ApplicationContext, just hosted in J2EE environment, being able to access the J2EE servers facilities.
+RAR deployment is a more natural alternative to scenario of deploying a headless WAR file, in effect, a WAR file without any HTTP entry points that is used only for bootstrapping a Spring ApplicationContext in a J2EE environment.
+
+RAR deployment is ideal for application contexts that do not need HTTP entry points but rather consist only of message endpoints and scheduled jobs.
+Beans in such a context can use application server resources such as the JTA transaction manager and JNDI-bound JDBC DataSources and JMS ConnectionFactory instances, and may also register with the platform's JMX server - all through Spring's standard transaction management and JNDI and JMX support facilities.
+Application components can also interact with the application server's JCA WorkManager through Spring's [interface]`TaskExecutor` abstraction.
+
+Check out the JavaDoc of the <<,SpringContextResourceAdapter>> class for the configuration details involved in RAR deployment.
+
+_For a simple deployment of a Spring ApplicationContext as a
+      J2EE RAR file:_ package all application classes into a RAR file, which is a standard JAR file with a different file extension.
+Add all required library JARs into the root of the RAR archive.
+Add a "META-INF/ra.xml" deployment descriptor (as shown in [class]`SpringContextResourceAdapter`s JavaDoc) and the corresponding Spring XML bean definition file(s) (typically "META-INF/applicationContext.xml"), and drop the resulting RAR file into your application server's deployment directory.
+
+NOTE: Such RAR deployment units are usually self-contained; they do not expose components to the outside world, not even to other modules of the same application.
+Interaction with a RAR-based ApplicationContext usually occurs through JMS destinations that it shares with other modules.
+A RAR-based ApplicationContext may also, for example, schedule some jobs, reacting to new files in the file system (or the like).
+If it needs to allow synchronous access from the outside, it could for example export RMI endpoints, which of course may be used by other application modules on the same machine.

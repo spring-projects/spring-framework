@@ -1,0 +1,27 @@
+
+:numbered!:
+
+[appendix]
+= Migrating to Spring Framework 3.1
+
+In this appendix we discuss what users will want to know when upgrading to Spring Framework 3.1.
+For a general overview of features, please see <<new-in-3.1>>
+
+== Component scanning against the "org" base package
+
+Spring Framework 3.1 introduces a number of `@Configuration` classes such as `org.springframework.cache.annotation.ProxyCachingConfiguration
+    ` and `org.springframework.scheduling.annotation.ProxyAsyncConfiguration`.
+Because `@Configuration` is ultimately meta-annotated with Spring's `@Component` annotation, these classes will inadvertently be scanned and processed by the container for any component-scanning directive against the unqualified "org" package, e.g.: 
+[source,xml]
+----
+
+        <context:component-scan base-package="org"/>
+---- Therefore, in order to avoid errors like the one reported in <<,SPR-9843>>, any such directives should be updated to at least one more level of qualification e.g.: 
+[source,xml]
+----
+
+      <context:component-scan base-package="org.xyz"/>
+---- Alternatively, an `exclude-filter` may be used.
+See <<beans-scanning-filters,`context:component-scan`>> documentation for details.
+
+:numbered:

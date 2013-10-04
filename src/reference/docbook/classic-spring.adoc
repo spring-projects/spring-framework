@@ -1,0 +1,315 @@
+
+:numbered!:
+
+[appendix]
+= Classic Spring Usage
+
+This appendix discusses some classic Spring usage patterns as a reference for developers maintaining legacy Spring applications.
+These usage patterns no longer reflect the recommended way of using these features and the current recommended usage is covered in the respective sections of the reference manual.
+
+== Classic ORM usage
+
+This section documents the classic usage patterns that you might encounter in a legacy Spring application.
+For the currently recommended usage patterns, please refer to the <<orm>> chapter.
+
+=== Hibernate
+
+For the currently recommended usage patterns for Hibernate see <<orm-hibernate>>
+
+==== The [class]`HibernateTemplate`
+
+The basic programming model for templating looks as follows, for methods that can be part of any custom data access object or business service.
+There are no restrictions on the implementation of the surrounding object at all, it just needs to provide a Hibernate [interface]`SessionFactory`.
+It can get the latter from anywhere, but preferably as bean reference from a Spring IoC container - via a simple [method]`setSessionFactory(..)` bean property setter.
+The following snippets show a DAO definition in a Spring container, referencing the above defined [interface]`SessionFactory`, and an example for a DAO method implementation.
+
+[source,xml]
+----
+<beans>
+
+  <bean id="myProductDao" class="product.ProductDaoImpl">
+    <property name="sessionFactory" ref="mySessionFactory"/>
+  </bean>
+
+</beans>
+----
+
+[source,java]
+----
+public class ProductDaoImpl implements ProductDao {
+
+    private HibernateTemplate hibernateTemplate;
+
+    public void setSessionFactory(SessionFactory sessionFactory) {
+        this.hibernateTemplate = new HibernateTemplate(sessionFactory);
+    }
+
+    public Collection loadProductsByCategory(String category) throws DataAccessException {
+        return this.hibernateTemplate.find("from test.Product product where product.category=?", category);
+    }
+}
+----
+
+The [class]`HibernateTemplate` class provides many methods that mirror the methods exposed on the Hibernate [interface]`Session` interface, in addition to a number of convenience methods such as the one shown above.
+If you need access to the [interface]`Session` to invoke methods that are not exposed on the [class]`HibernateTemplate`, you can always drop down to a callback-based approach like so.
+
+[source,java]
+----
+public class ProductDaoImpl implements ProductDao {
+
+    private HibernateTemplate hibernateTemplate;
+
+    public void setSessionFactory(SessionFactory sessionFactory) {
+        this.hibernateTemplate = new HibernateTemplate(sessionFactory);
+    }
+
+    public Collection loadProductsByCategory(final String category) throws DataAccessException {
+        return this.hibernateTemplate.execute(new HibernateCallback() {
+
+            public Object doInHibernate(Session session) {
+                Criteria criteria = session.createCriteria(Product.class);
+                criteria.add(Expression.eq("category", category));
+                criteria.setMaxResults(6);
+                return criteria.list();
+            }
+        };
+    }
+}
+----
+
+A callback implementation effectively can be used for any Hibernate data access.
+[class]`HibernateTemplate` will ensure that [interface]`Session` instances are properly opened and closed, and automatically participate in transactions.
+The template instances are thread-safe and reusable, they can thus be kept as instance variables of the surrounding class.
+For simple single step actions like a single find, load, saveOrUpdate, or delete call, [class]`HibernateTemplate` offers alternative convenience methods that can replace such one line callback implementations.
+Furthermore, Spring provides a convenient [class]`HibernateDaoSupport` base class that provides a [method]`setSessionFactory(..)` method for receiving a [interface]`SessionFactory`, and [method]`getSessionFactory()` and [method]`getHibernateTemplate()`for use by subclasses.
+In combination, this allows for very simple DAO implementations for typical requirements:
+
+[source,java]
+----
+public class ProductDaoImpl extends HibernateDaoSupport implements ProductDao {
+
+    public Collection loadProductsByCategory(String category) throws DataAccessException {
+        return this.getHibernateTemplate().find(
+            "from test.Product product where product.category=?", category);
+    }
+}
+----
+
+==== Implementing Spring-based DAOs without callbacks
+
+As alternative to using Spring's [class]`HibernateTemplate` to implement DAOs, data access code can also be written in a more traditional fashion, without wrapping the Hibernate access code in a callback, while still respecting and participating in Spring's generic [class]`DataAccessException` hierarchy.
+The [class]`HibernateDaoSupport` base class offers methods to access the current transactional [interface]`Session` and to convert exceptions in such a scenario; similar methods are also available as static helpers on the [class]`SessionFactoryUtils` class.
+Note that such code will usually pass '`false`' as the value of the [method]`getSession(..)` methods '`allowCreate`' argument, to enforce running within a transaction (which avoids the need to close the returned [interface]`Session`, as its lifecycle is managed by the transaction).
+
+[source,java]
+----
+public class HibernateProductDao extends HibernateDaoSupport implements ProductDao {
+
+    public Collection loadProductsByCategory(String category) throws DataAccessException, MyException {
+        Session session = getSession(false);
+        try {
+            Query query = session.createQuery("from test.Product product where product.category=?");
+            query.setString(0, category);
+            List result = query.list();
+            if (result == null) {
+                throw new MyException("No search results.");
+            }
+            return result;
+        }
+        catch (HibernateException ex) {
+            throw convertHibernateAccessException(ex);
+        }
+    }
+}
+----
+
+The advantage of such direct Hibernate access code is that it allows _any_ checked application exception to be thrown within the data access code; contrast this to the [class]`HibernateTemplate` class which is restricted to throwing only unchecked exceptions within the callback.
+Note that you can often defer the corresponding checks and the throwing of application exceptions to after the callback, which still allows working with [class]`HibernateTemplate`.
+In general, the [class]`HibernateTemplate` class' convenience methods are simpler and more convenient for many scenarios.
+
+=== JDO
+
+For the currently recommended usage patterns for JDO see <<orm-jdo>>
+
+==== [class]`JdoTemplate` and [class]`JdoDaoSupport`
+
+Each JDO-based DAO will then receive the [interface]`PersistenceManagerFactory` through dependency injection.
+Such a DAO could be coded against plain JDO API, working with the given [interface]`PersistenceManagerFactory`, but will usually rather be used with the Spring Framework's [class]`JdoTemplate`:
+
+[source,xml]
+----
+<beans>
+
+  <bean id="myProductDao" class="product.ProductDaoImpl">
+    <property name="persistenceManagerFactory" ref="myPmf"/>
+  </bean>
+
+</beans>
+----
+
+[source,java]
+----
+public class ProductDaoImpl implements ProductDao {
+
+    private JdoTemplate jdoTemplate;
+
+    public void setPersistenceManagerFactory(PersistenceManagerFactory pmf) {
+        this.jdoTemplate = new JdoTemplate(pmf);
+    }
+
+    public Collection loadProductsByCategory(final String category) throws DataAccessException {
+        return (Collection) this.jdoTemplate.execute(new JdoCallback() {
+            public Object doInJdo(PersistenceManager pm) throws JDOException {
+                Query query = pm.newQuery(Product.class, "category = pCategory");
+                query.declareParameters("String pCategory");
+                List result = query.execute(category);
+                // do some further stuff with the result list
+                return result;
+            }
+        });
+    }
+}
+----
+
+A callback implementation can effectively be used for any JDO data access.
+[class]`JdoTemplate` will ensure that [class]`PersistenceManager`s are properly opened and closed, and automatically participate in transactions.
+The template instances are thread-safe and reusable, they can thus be kept as instance variables of the surrounding class.
+For simple single-step actions such as a single `find`, `load`, `makePersistent`, or `delete` call, [class]`JdoTemplate` offers alternative convenience methods that can replace such one line callback implementations.
+Furthermore, Spring provides a convenient [class]`JdoDaoSupport` base class that provides a `setPersistenceManagerFactory(..)` method for receiving a [class]`PersistenceManagerFactory`, and [method]`getPersistenceManagerFactory()` and [method]`getJdoTemplate()` for use by subclasses.
+In combination, this allows for very simple DAO implementations for typical requirements:
+
+[source,java]
+----
+public class ProductDaoImpl extends JdoDaoSupport implements ProductDao {
+
+    public Collection loadProductsByCategory(String category) throws DataAccessException {
+        return getJdoTemplate().find(
+            Product.class, "category = pCategory", "String category", new Object[] {category});
+    }
+}
+----
+
+As alternative to working with Spring's [class]`JdoTemplate`, you can also code Spring-based DAOs at the JDO API level, explicitly opening and closing a [interface]`PersistenceManager`.
+As elaborated in the corresponding Hibernate section, the main advantage of this approach is that your data access code is able to throw checked exceptions.
+[class]`JdoDaoSupport` offers a variety of support methods for this scenario, for fetching and releasing a transactional [interface]`PersistenceManager` as well as for converting exceptions.
+
+=== JPA
+
+For the currently recommended usage patterns for JPA see <<orm-jpa>>
+
+==== [class]`JpaTemplate` and [class]`JpaDaoSupport`
+
+Each JPA-based DAO will then receive a [interface]`EntityManagerFactory` via dependency injection.
+Such a DAO can be coded against plain JPA and work with the given [interface]`EntityManagerFactory` or through Spring's [class]`JpaTemplate`:
+
+[source,xml]
+----
+<beans>
+
+  <bean id="myProductDao" class="product.ProductDaoImpl">
+    <property name="entityManagerFactory" ref="myEmf"/>
+  </bean>
+
+</beans>
+----
+
+[source,java]
+----
+public class JpaProductDao implements ProductDao {
+
+    private JpaTemplate jpaTemplate;
+
+    public void setEntityManagerFactory(EntityManagerFactory emf) {
+        this.jpaTemplate = new JpaTemplate(emf);
+    }
+
+    public Collection loadProductsByCategory(final String category) throws DataAccessException {
+        return (Collection) this.jpaTemplate.execute(new JpaCallback() {
+            public Object doInJpa(EntityManager em) throws PersistenceException {
+                Query query = em.createQuery("from Product as p where p.category = :category");
+                query.setParameter("category", category);
+                List result = query.getResultList();
+                // do some further processing with the result list
+                return result;
+            }
+        });
+    }
+}
+----
+
+The [interface]`JpaCallback` implementation allows any type of JPA data access.
+The [class]`JpaTemplate` will ensure that [interface]`EntityManager`s are properly opened and closed and automatically participate in transactions.
+Moreover, the [class]`JpaTemplate` properly handles exceptions, making sure resources are cleaned up and the appropriate transactions rolled back.
+The template instances are thread-safe and reusable and they can be kept as instance variable of the enclosing class.
+Note that [class]`JpaTemplate` offers single-step actions such as find, load, merge, etc along with alternative convenience methods that can replace one line callback implementations.
+
+Furthermore, Spring provides a convenient [class]`JpaDaoSupport` base class that provides the `get/setEntityManagerFactory` and [method]`getJpaTemplate()` to be used by subclasses:
+
+[source,java]
+----
+public class ProductDaoImpl extends JpaDaoSupport implements ProductDao {
+
+    public Collection loadProductsByCategory(String category) throws DataAccessException {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("category", category);
+        return getJpaTemplate().findByNamedParams("from Product as p where p.category = :category", params);
+    }
+}
+----
+
+Besides working with Spring's [class]`JpaTemplate`, one can also code Spring-based DAOs against the JPA, doing one's own explicit [interface]`EntityManager` handling.
+As also elaborated in the corresponding Hibernate section, the main advantage of this approach is that your data access code is able to throw checked exceptions.
+[class]`JpaDaoSupport` offers a variety of support methods for this scenario, for retrieving and releasing a transaction [interface]`EntityManager`, as well as for converting exceptions.
+
+_JpaTemplate mainly exists as a sibling of JdoTemplate
+        and HibernateTemplate, offering the same style for people used to
+        it._
+
+== Classic Spring MVC
+
+...
+
+== JMS Usage
+
+One of the benefits of Spring's JMS support is to shield the user from differences between the JMS 1.0.2 and 1.1 APIs.
+(For a description of the differences between the two APIs see sidebar on Domain Unification).
+Since it is now common to encounter only the JMS 1.1 API the use of classes that are based on the JMS 1.0.2 API has been deprecated in Spring 3.0.
+This section describes Spring JMS support for the JMS 1.0.2 deprecated classes.
+
+
+.Domain Unification
+****
+There are two major releases of the JMS specification, 1.0.2 and 1.1.
+
+JMS 1.0.2 defined two types of messaging domains, point-to-point (Queues) and publish/subscribe (Topics).
+The 1.0.2 API reflected these two messaging domains by providing a parallel class hierarchy for each domain.
+As a result, a client application became domain specific in its use of the JMS API. JMS 1.1 introduced the concept of domain unification that minimized both the functional differences and client API differences between the two domains.
+As an example of a functional difference that was removed, if you use a JMS 1.1 provider you can transactionally consume a message from one domain and produce a message on the other using the same [interface]`Session`.
+
+NOTE: The JMS 1.1 specification was released in April 2002 and incorporated as part of J2EE 1.4 in November 2003.
+As a result, common J2EE 1.3 application servers which are still in widespread use (such as BEA WebLogic 8.1 and IBM WebSphere 5.1) are based on JMS 1.0.2.
+****
+
+=== JmsTemplate
+
+Located in the package `org.springframework.jms.core` the class [class]`JmsTemplate102` provides all of the features of the [class]`JmsTemplate` described the JMS chapter, but is based on the JMS 1.0.2 API instead of the JMS 1.1 API. As a consequence, if you are using JmsTemplate102 you need to set the boolean property  to configure the [class]`JmsTemplate` with knowledge of what JMS domain is being used.
+By default the value of this property is false, indicating that the point-to-point domain, Queues, will be used.
+
+=== Asynchronous Message Reception 
+
+<<jms-receiving-async-message-listener-adapter,MessageListenerAdapter's>> are used in conjunction with Spring's <<jms-mdp,message
+      listener containers>> to support asynchronous message reception by exposing almost any class as a Message-driven POJO. If you are using the JMS 1.0.2 API, you will want to use the 1.0.2 specific classes such as [class]`MessageListenerAdapter102`, [class]`SimpleMessageListenerContainer102`, and [class]`DefaultMessageListenerContainer102`.
+These classes provide the same functionality as the JMS 1.1 based counterparts but rely only on the JMS 1.0.2 API. 
+
+=== Connections
+
+The [class]`ConnectionFactory` interface is part of the JMS specification and serves as the entry point for working with JMS. Spring provides an implementation of the [class]`ConnectionFactory` interface, [class]`SingleConnectionFactory102`, based on the JMS 1.0.2 API that will return the same [class]`Connection` on all [method]`createConnection()` calls and ignore calls to [method]`close()`.
+You will need to set the boolean property  to indicate which messaging domain is used as [class]`SingleConnectionFactory102` will always explicitly differentiate between a [class]`javax.jms.QueueConnection` and a [class]`javax.jmsTopicConnection`.
+
+=== Transaction Management
+
+In a JMS 1.0.2 environment the class [class]`JmsTransactionManager102` provides support for managing JMS transactions for a single Connection Factory.
+Please refer to the reference documentation on <<jms-tx,JMS Transaction
+      Management>> for more information on this functionality.
+
+:numbered:

@@ -1,0 +1,176 @@
+
+= New Features and Enhancements in Spring Framework 3.1
+
+This is a list of new features for Spring Framework 3.1.
+A number of features do not have dedicated reference documentation but do have complete Javadoc.
+In such cases, fully-qualified class names are given.
+See also <<migration-3.1>> 
+
+== Cache Abstraction
+
+* <<cache>>
+* <<,
+          Cache Abstraction>> (SpringSource team blog)
+
+== Bean Definition Profiles
+
+* <<,
+          XML profiles>> (SpringSource Team Blog)
+* <<,
+          Introducing @Profile>> (SpringSource Team Blog)
+* See org.springframework.context.annotation.Configuration Javadoc
+* See org.springframework.context.annotation.Profile Javadoc
+
+== Environment Abstraction
+
+* <<,
+          Environment Abstraction>> (SpringSource Team Blog)
+* See org.springframework.core.env.Environment Javadoc
+
+== PropertySource Abstraction
+
+* <<,
+          Unified Property Management>> (SpringSource Team Blog)
+* See org.springframework.core.env.Environment Javadoc
+* See org.springframework.core.env.PropertySource Javadoc
+* See org.springframework.context.annotation.PropertySource Javadoc
+
+== Code equivalents for Spring's XML namespaces
+
+Code-based equivalents to popular Spring XML namespace elements <context:component-scan/>, <tx:annotation-driven/> and <mvc:annotation-driven> have been developed, most in the form of [interface]`@Enable` annotations.
+These are designed for use in conjunction with Spring's [interface]`@Configuration` classes, which were introduced in Spring Framework 3.0.
+
+* See org.springframework.context.annotation.Configuration Javadoc
+* See org.springframework.context.annotation.ComponentScan Javadoc
+* See org.springframework.transaction.annotation.EnableTransactionManagement Javadoc
+* See org.springframework.cache.annotation.EnableCaching Javadoc
+* See org.springframework.web.servlet.config.annotation.EnableWebMvc Javadoc
+* See org.springframework.scheduling.annotation.EnableScheduling Javadoc
+* See org.springframework.scheduling.annotation.EnableAsync Javadoc
+* See org.springframework.context.annotation.EnableAspectJAutoProxy Javadoc
+* See org.springframework.context.annotation.EnableLoadTimeWeaving Javadoc
+* See org.springframework.beans.factory.aspectj.EnableSpringConfigured Javadoc
+
+== Support for Hibernate 4.x
+
+* See Javadoc for classes within the new org.springframework.orm.hibernate4 package
+
+== TestContext framework support for @Configuration classes and bean definition profiles
+
+The [interface]`@ContextConfiguration` annotation now supports supplying [interface]`@Configuration` classes for configuring the Spring [class]`TestContext`.
+In addition, a new [interface]`@ActiveProfiles` annotation has been introduced to support declarative configuration of active bean definition profiles in [interface]`ApplicationContext` integration tests.
+
+* <<,Spring
+          3.1 M2: Testing with @Configuration Classes and Profiles>> (SpringSource Team Blog)
+* See <<testcontext-framework>>
+* See <<testcontext-ctx-management-javaconfig>> and [interface]`org.springframework.test.context.ContextConfiguration` Javadoc
+* See [interface]`org.springframework.test.context.ActiveProfiles` Javadoc
+* See [interface]`org.springframework.test.context.SmartContextLoader` Javadoc
+* See [interface]`org.springframework.test.context.support.DelegatingSmartContextLoader` Javadoc
+* See [interface]`org.springframework.test.context.support.AnnotationConfigContextLoader` Javadoc
+
+== c: namespace for more concise constructor injection
+
+* <<beans-c-namespace>>
+
+== Support for injection against non-standard JavaBeans setters
+
+Prior to Spring Framework 3.1, in order to inject against a property method it had to conform strictly to JavaBeans property signature rules, namely that any 'setter' method must be void-returning.
+It is now possible in Spring XML to specify setter methods that return any object type.
+This is useful when considering designing APIs for method-chaining, where setter methods return a reference to 'this'.
+
+== Support for Servlet 3 code-based configuration of Servlet Container
+
+The new [interface]`WebApplicationInitializer` builds atop Servlet 3.0's [interface]`ServletContainerInitializer` support to provide a programmatic alternative to the traditional web.xml.
+
+* See org.springframework.web.WebApplicationInitializer Javadoc
+* <<,Diff from Spring's
+          Greenhouse reference application>> demonstrating migration from web.xml to [interface]`WebApplicationInitializer`
+
+== Support for Servlet 3 MultipartResolver
+
+* See org.springframework.web.multipart.support.StandardServletMultipartResolver Javadoc
+
+== JPA EntityManagerFactory bootstrapping without persistence.xml
+
+In standard JPA, persistence units get defined through `META-INF/persistence.xml` files in specific jar files which will in turn get searched for `@Entity` classes.
+In many cases, persistence.xml does not contain more than a unit name and relies on defaults and/or external setup for all other concerns (such as the DataSource to use, etc).
+For that reason, Spring Framework 3.1 provides an alternative: [class]`LocalContainerEntityManagerFactoryBean` accepts a 'packagesToScan' property, specifying base packages to scan for `@Entity` classes.
+This is analogous to [class]`AnnotationSessionFactoryBean`'s property of the same name for native Hibernate setup, and also to Spring's component-scan feature for regular Spring beans.
+Effectively, this allows for XML-free JPA setup at the mere expense of specifying a base package for entity scanning: a particularly fine match for Spring applications which rely on component scanning for Spring beans as well, possibly even bootstrapped using a code-based Servlet 3.0 initializer.
+
+== New HandlerMethod-based Support Classes For Annotated Controller Processing
+
+Spring Framework 3.1 introduces a new set of support classes for processing requests with annotated controllers:
+
+* [class]`RequestMappingHandlerMapping`
+* [class]`RequestMappingHandlerAdapter`
+* [class]`ExceptionHandlerExceptionResolver`
+
+These classes are a replacement for the existing:
+
+* [class]`DefaultAnnotationHandlerMapping`
+* [class]`AnnotationMethodHandlerAdapter`
+* [class]`AnnotationMethodHandlerExceptionResolver`
+
+The new classes were developed in response to many requests to make annotation controller support classes more customizable and open for extension.
+Whereas previously you could configure a custom annotated controller method argument resolver, with the new support classes you can customize the processing for any supported method argument or return value type.
+
+* See org.springframework.web.method.support.HandlerMethodArgumentResolver Javadoc
+* See org.springframework.web.method.support.HandlerMethodReturnValueHandler Javadoc
+
+A second notable difference is the introduction of a [class]`HandlerMethod` abstraction to represent an [interface]`@RequestMapping` method.
+This abstraction is used throughout by the new support classes as the `handler` instance.
+For example a [class]`HandlerInterceptor` can cast the `handler` from [class]`Object` to [class]`HandlerMethod` and get access to the target controller method, its annotations, etc.
+
+The new classes are enabled by default by the MVC namespace and by Java-based configuration via [interface]`@EnableWebMvc`.
+The existing classes will continue to be available but use of the new classes is recommended going forward.
+
+See <<mvc-ann-requestmapping-31-vs-30>> for additional details and a list of features not available with the new support classes.
+
+== "consumes" and "produces" conditions in [interface]`@RequestMapping`
+
+Improved support for specifying media types consumed by a method through the `'Content-Type'` header as well as for producible types specified through the `'Accept'` header.
+See <<mvc-ann-requestmapping-consumes>> and <<mvc-ann-requestmapping-produces>>
+
+== Flash Attributes and [interface]`RedirectAttributes`
+
+Flash attributes can now be stored in a [class]`FlashMap` and saved in the HTTP session to survive a redirect.
+For an overview of the general support for flash attributes in Spring MVC see <<mvc-flash-attributes>>.
+
+In annotated controllers, an [interface]`@RequestMapping` method can add flash attributes by declaring a method argument of type [interface]`RedirectAttributes`.
+This method argument can now also be used to get precise control over the attributes used in a redirect scenario.
+See <<mvc-ann-redirect-attributes>> for more details.
+
+== URI Template Variable Enhancements
+
+URI template variables from the current request are used in more places: 
+
+* URI template variables are used in addition to request parameters when binding a request to [interface]`@ModelAttribute` method arguments.
+* @PathVariable method argument values are merged into the model before rendering, except in views that generate content in an automated fashion such as JSON serialization or XML marshalling.
+* A redirect string can contain placeholders for URI variables (e.g.
+  `"redirect:/blog/{year}/{month}"`).
+  When expanding the placeholders, URI template variables from the current request are automatically considered.
+* An [interface]`@ModelAttribute` method argument can be instantiated from a URI template variable provided there is a registered Converter or PropertyEditor to convert from a String to the target object type.
+
+== [interface]`@Valid` On [interface]`@RequestBody` Controller Method Arguments
+
+An [interface]`@RequestBody` method argument can be annotated with [interface]`@Valid` to invoke automatic validation similar to the support for [interface]`@ModelAttribute` method arguments.
+A resulting [class]`MethodArgumentNotValidException` is handled in the [class]`DefaultHandlerExceptionResolver` and results in a `400` response code.
+
+== [interface]`@RequestPart` Annotation On Controller Method Arguments
+
+This new annotation provides access to the content of a "multipart/form-data" request part.
+See <<mvc-multipart-forms-non-browsers>> and <<mvc-multipart>>.
+
+== [class]`UriComponentsBuilder` and [class]`UriComponents`
+
+A new [class]`UriComponents` class has been added, which is an immutable container of URI components providing access to all contained URI components.
+A new [class]`UriComponentsBuilder` class is also provided to help create [class]`UriComponents` instances.
+Together the two classes give fine-grained control over all aspects of preparing a URI including construction, expansion from URI template variables, and encoding.
+
+In most cases the new classes can be used as a more flexible alternative to the existing [class]`UriTemplate` especially since [class]`UriTemplate` relies on those same classes internally.
+
+
+A [class]`ServletUriComponentsBuilder` sub-class provides static factory methods to copy information from a Servlet request.
+See <<mvc-construct-encode-uri>>.

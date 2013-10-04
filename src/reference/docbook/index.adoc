@@ -1,0 +1,189 @@
+= Spring Framework Reference Documentation
+:author: Rod Johnson, Juergen Hoeller
+
+Spring Security is a powerful and highly customizable authentication and access-control framework. It is the de-facto standard for securing Spring-based applications.
+
+[[spring-introduction]]
+= Overview of Spring Framework
+The Spring Framework is a lightweight solution and a potential one-stop-shop for building your enterprise-ready applications. However, Spring is modular, allowing you to use only those parts that you need, without having to bring in the rest. You can use the IoC container, with Struts on top, but you can also use only the <<orm-hibernate,Hibernate integration code>> or the <<jdbc-introduction,JDBC abstraction layer>>. The Spring Framework supports declarative transaction management, remote access to your logic through RMI or web services, and various options for persisting your data. It offers a full-featured <<mvc-introduction,MVC framework>>, and enables you to integrate <<aop-introduction,AOP>> transparently into your software.
+
+Spring is designed to be non-intrusive, meaning that your domain logic code generally has no dependencies on the framework itself. In your integration layer (such as the data access layer), some dependencies on the data access technology and the Spring libraries will exist. However, it should be easy to isolate these dependencies from the rest of your code base.
+
+This document is a reference guide to Spring Framework features. If you have any requests, comments, or questions on this document, please post them on the user mailing list or on the support forums at null[].
+
+include::overview.adoc[]
+
+
+[[spring-whats-new]]
+= What's New in Spring 3
+include::new-in-3.0.adoc[]
+
+include::new-in-3.1.adoc[]
+
+include::new-in-3.2.adoc[]
+
+
+[[spring-core]]
+= Core Technologies
+This part of the reference documentation covers all of those technologies that are absolutely integral to the Spring Framework.
+
+Foremost amongst these is the Spring Framework's Inversion of Control (IoC) container. A thorough treatment of the Spring Framework's IoC container is closely followed by comprehensive coverage of Spring's Aspect-Oriented Programming (AOP) technologies. The Spring Framework has its own AOP framework, which is conceptually easy to understand, and which successfully addresses the 80% sweet spot of AOP requirements in Java enterprise programming.
+
+Coverage of Spring's integration with AspectJ (currently the richest - in terms of features - and certainly most mature AOP implementation in the Java enterprise space) is also provided.
+
+Finally, the adoption of the test-driven-development (TDD) approach to software development is certainly advocated by the Spring team, and so coverage of Spring's support for integration testing is covered (alongside best practices for unit testing). The Spring team has found that the correct use of IoC certainly does make both unit and integration testing easier (in that the presence of setter methods and appropriate constructors on classes makes them easier to wire together in a test without having to set up service locator registries and suchlike)... the chapter dedicated solely to testing will hopefully convince you of this as well.
+
+
+* <<beans>>
+
+* <<resources>>
+
+* <<validation>>
+
+* <<expressions>>
+
+* <<aop>>
+
+* <<aop-api>>
+
+* <<testing>>
+
+
+
+include::beans.adoc[]
+
+include::resources.adoc[]
+
+include::validation.adoc[]
+
+include::expressions.adoc[]
+
+include::aop.adoc[]
+
+include::aop-api.adoc[]
+
+include::testing.adoc[]
+
+
+[[spring-data-tier]]
+= Data Access
+This part of the reference documentation is concerned with data access and the interaction between the data access layer and the business or service layer.
+
+Spring's comprehensive transaction management support is covered in some detail, followed by thorough coverage of the various data access frameworks and technologies that the Spring Framework integrates with.
+
+
+* <<transaction>>
+
+* <<dao>>
+
+* <<jdbc>>
+
+* <<orm>>
+
+* <<oxm>>
+
+
+
+include::transaction.adoc[]
+
+include::dao.adoc[]
+
+include::jdbc.adoc[]
+
+include::orm.adoc[]
+
+include::oxm.adoc[]
+
+
+[[spring-web]]
+= The Web
+This part of the reference documentation covers the Spring Framework's support for the presentation tier (and specifically web-based presentation tiers).
+
+The Spring Framework's own web framework, <<mvc,Spring Web MVC>>, is covered in the first couple of chapters. A number of the remaining chapters in this part of the reference documentation are concerned with the Spring Framework's integration with other web technologies, such as <<struts,Struts>> and <<jsf,JSF>> (to name but two).
+
+This section concludes with coverage of Spring's MVC <<portlet,portlet framework>>.
+
+
+* <<mvc>>
+
+* <<view>>
+
+* <<web-integration>>
+
+* <<portlet>>
+
+
+
+include::mvc.adoc[]
+
+include::view.adoc[]
+
+include::web-integration.adoc[]
+
+include::portlet.adoc[]
+
+
+[[spring-integration]]
+= Integration
+This part of the reference documentation covers the Spring Framework's integration with a number of Java EE (and related) technologies.
+
+
+* <<remoting>>
+
+* <<ejb>>
+
+* <<jms>>
+
+* <<jmx>>
+
+* <<cci>>
+
+* <<mail>>
+
+* <<scheduling>>
+
+* <<dynamic-language>>
+
+* <<cache>>
+
+
+
+include::remoting.adoc[]
+
+include::ejb.adoc[]
+
+include::jms.adoc[]
+
+include::jmx.adoc[]
+
+include::cci.adoc[]
+
+include::mail.adoc[]
+
+include::scheduling.adoc[]
+
+include::dynamic-languages.adoc[]
+
+include::cache.adoc[]
+
+
+[[spring-appendices]]
+= Appendices
+include::classic-spring.adoc[]
+
+include::classic-aop-spring.adoc[]
+
+include::migration-3.1.adoc[]
+
+include::migration-3.2.adoc[]
+
+include::xsd-configuration.adoc[]
+
+include::xml-custom.adoc[]
+
+include::spring.tld.adoc[]
+
+include::spring-form.tld.adoc[]
+
+
+

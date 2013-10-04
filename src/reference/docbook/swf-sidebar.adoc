@@ -1,0 +1,13 @@
+
+.Spring Web Flow
+****
+Spring Web Flow (SWF) aims to be the best solution for the management of web application page flow.
+
+SWF integrates with existing frameworks like Spring MVC, Struts, and JSF, in both servlet and portlet environments.
+If you have a business process (or processes) that would benefit from a conversational model as opposed to a purely request model, then SWF may be the solution.
+
+SWF allows you to capture logical page flows as self-contained modules that are reusable in different situations, and as such is ideal for building web application modules that guide the user through controlled navigations that drive business processes.
+
+For more information about SWF, consult the <<,Spring Web Flow website>>.
+
+****
