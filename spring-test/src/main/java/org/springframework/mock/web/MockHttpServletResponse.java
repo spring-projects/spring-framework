@@ -533,13 +533,17 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void setStatus(int status) {
-		this.status = status;
+		if(!this.isCommitted()) {
+			this.status = status;
+		}
 	}
 
 	@Override
 	public void setStatus(int status, String errorMessage) {
-		this.status = status;
-		this.errorMessage = errorMessage;
+		if(!this.isCommitted()) {
+			this.status = status;
+			this.errorMessage = errorMessage;
+		}
 	}
 
 	@Override
