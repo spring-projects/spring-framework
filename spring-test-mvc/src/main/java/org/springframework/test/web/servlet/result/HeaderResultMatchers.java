@@ -70,6 +70,20 @@ public class HeaderResultMatchers {
 	}
 
 	/**
+	 * Assert that the named response header does not exist.
+	 * @since 4.0
+	 */
+	public ResultMatcher doesNotExist(final String name) {
+		return new ResultMatcher() {
+
+			@Override
+			public void match(MvcResult result) {
+				assertTrue("Response header " + name, !result.getResponse().containsHeader(name));
+			}
+		};
+	}
+
+	/**
 	 * Assert the primary value of the named response header as a {@code long}.
 	 *
 	 * <p>The {@link ResultMatcher} returned by this method throws an {@link AssertionError}

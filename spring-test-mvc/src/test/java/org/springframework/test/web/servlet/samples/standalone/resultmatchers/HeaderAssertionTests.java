@@ -110,6 +110,22 @@ public class HeaderAssertionTests {
 		}
 	}
 
+	// SPR-10771
+
+	@Test
+	public void doesNotExist() throws Exception {
+		this.mockMvc.perform(get("/persons/1"))
+				.andExpect(header().doesNotExist("X-Custom-Header"));
+	}
+
+	// SPR-10771
+
+	@Test(expected = AssertionError.class)
+	public void doesNotExistFail() throws Exception {
+		this.mockMvc.perform(get("/persons/1"))
+				.andExpect(header().doesNotExist(LAST_MODIFIED));
+	}
+
 	@Test
 	public void stringWithIncorrectResponseHeaderValue() throws Exception {
 		long unexpected = currentTime + 1;
