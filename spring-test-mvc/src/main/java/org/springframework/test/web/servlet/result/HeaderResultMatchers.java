@@ -16,13 +16,12 @@
 
 package org.springframework.test.web.servlet.result;
 
-import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
-import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
-
 import org.hamcrest.Matcher;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
+
+import static org.springframework.test.util.AssertionErrors.*;
+import static org.springframework.test.util.MatcherAssertionErrors.*;
 
 /**
  * Factory for response header assertions. An instance of this
@@ -65,6 +64,20 @@ public class HeaderResultMatchers {
 			@Override
 			public void match(MvcResult result) {
 				assertEquals("Response header " + name, value, result.getResponse().getHeader(name));
+			}
+		};
+	}
+
+	/**
+	 * Assert that the named response header does not exist.
+	 * @since 4.0
+	 */
+	public ResultMatcher doesNotExist(final String name) {
+		return new ResultMatcher() {
+
+			@Override
+			public void match(MvcResult result) {
+				assertTrue("Response should not contain header " + name, !result.getResponse().containsHeader(name));
 			}
 		};
 	}

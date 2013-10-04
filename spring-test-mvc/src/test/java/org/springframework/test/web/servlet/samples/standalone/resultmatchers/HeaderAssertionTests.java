@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 /**
  * Examples of expectations on response header values.
- * 
+ *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  */
@@ -108,6 +108,22 @@ public class HeaderAssertionTests {
 			}
 			assertEquals("Response does not contain header " + LAST_MODIFIED, e.getMessage());
 		}
+	}
+
+	// SPR-10771
+
+	@Test
+	public void doesNotExist() throws Exception {
+		this.mockMvc.perform(get("/persons/1"))
+				.andExpect(header().doesNotExist("X-Custom-Header"));
+	}
+
+	// SPR-10771
+
+	@Test(expected = AssertionError.class)
+	public void doesNotExistFail() throws Exception {
+		this.mockMvc.perform(get("/persons/1"))
+				.andExpect(header().doesNotExist(LAST_MODIFIED));
 	}
 
 	@Test
