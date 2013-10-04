@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.servlet.view.velocity;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -408,12 +409,11 @@ public class VelocityView extends AbstractTemplateView {
 
 		// Expose locale-aware DateTool/NumberTool attributes.
 		if (this.dateToolAttribute != null || this.numberToolAttribute != null) {
-			Locale locale = RequestContextUtils.getLocale(request);
 			if (this.dateToolAttribute != null) {
-				velocityContext.put(this.dateToolAttribute, new LocaleAwareDateTool(locale));
+				velocityContext.put(this.dateToolAttribute, new LocaleAwareDateTool(request));
 			}
 			if (this.numberToolAttribute != null) {
-				velocityContext.put(this.numberToolAttribute, new LocaleAwareNumberTool(locale));
+				velocityContext.put(this.numberToolAttribute, new LocaleAwareNumberTool(request));
 			}
 		}
 	}
@@ -528,41 +528,48 @@ public class VelocityView extends AbstractTemplateView {
 
 
 	/**
-	 * Subclass of DateTool from Velocity Tools, using a passed-in Locale
-	 * (usually the RequestContext Locale) instead of the default Locale.N
+	 * Subclass of DateTool from Velocity Tools, using a Spring-resolved
+	 * Locale and TimeZone instead of the default Locale.
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocale
+	 * @see org.springframework.web.servlet.support.RequestContextUtils#getTimeZone
 	 */
 	private static class LocaleAwareDateTool extends DateTool {
 
-		private final Locale locale;
+		private final HttpServletRequest request;
 
-		private LocaleAwareDateTool(Locale locale) {
-			this.locale = locale;
+		public LocaleAwareDateTool(HttpServletRequest request) {
+			this.request = request;
 		}
 
 		@Override
 		public Locale getLocale() {
-			return this.locale;
+			return RequestContextUtils.getLocale(this.request);
+		}
+
+		@Override
+		public TimeZone getTimeZone() {
+			TimeZone timeZone = RequestContextUtils.getTimeZone(this.request);
+			return (timeZone != null ? timeZone : super.getTimeZone());
 		}
 	}
 
 
 	/**
-	 * Subclass of NumberTool from Velocity Tools, using a passed-in Locale
-	 * (usually the RequestContext Locale) instead of the default Locale.
+	 * Subclass of NumberTool from Velocity Tools, using a Spring-resolved
+	 * Locale instead of the default Locale.
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocale
 	 */
 	private static class LocaleAwareNumberTool extends NumberTool {
 
-		private final Locale locale;
+		private final HttpServletRequest request;
 
-		private LocaleAwareNumberTool(Locale locale) {
-			this.locale = locale;
+		public LocaleAwareNumberTool(HttpServletRequest request) {
+			this.request = request;
 		}
 
 		@Override
 		public Locale getLocale() {
-			return this.locale;
+			return RequestContextUtils.getLocale(this.request);
 		}
 	}
 

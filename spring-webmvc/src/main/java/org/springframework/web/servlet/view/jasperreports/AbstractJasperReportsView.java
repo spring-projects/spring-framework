@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,10 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TimeZone;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
@@ -580,14 +582,19 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 */
 	protected void exposeLocalizationContext(Map<String, Object> model, HttpServletRequest request) {
 		RequestContext rc = new RequestContext(request, getServletContext());
+		Locale locale = rc.getLocale();
 		if (!model.containsKey(JRParameter.REPORT_LOCALE)) {
-			model.put(JRParameter.REPORT_LOCALE, rc.getLocale());
+			model.put(JRParameter.REPORT_LOCALE, locale);
+		}
+		TimeZone timeZone = rc.getTimeZone();
+		if (timeZone != null && !model.containsKey(JRParameter.REPORT_TIME_ZONE)) {
+			model.put(JRParameter.REPORT_TIME_ZONE, timeZone);
 		}
 		JasperReport report = getReport();
 		if ((report == null || report.getResourceBundle() == null) &&
 				!model.containsKey(JRParameter.REPORT_RESOURCE_BUNDLE)) {
 			model.put(JRParameter.REPORT_RESOURCE_BUNDLE,
-					new MessageSourceResourceBundle(rc.getMessageSource(), rc.getLocale()));
+					new MessageSourceResourceBundle(rc.getMessageSource(), locale));
 		}
 	}
 

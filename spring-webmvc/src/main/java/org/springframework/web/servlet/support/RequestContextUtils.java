@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,13 @@ package org.springframework.web.servlet.support;
 
 import java.util.Locale;
 import java.util.Map;
-
+import java.util.TimeZone;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.context.i18n.LocaleContext;
+import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.web.context.WebApplicationContext;
@@ -30,6 +32,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.FlashMapManager;
+import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ThemeResolver;
 
@@ -98,23 +101,51 @@ public abstract class RequestContextUtils {
 	}
 
 	/**
-	 * Retrieves the current locale from the given request,
-	 * using the LocaleResolver bound to the request by the DispatcherServlet
+	 * Retrieve the current locale from the given request, using the
+	 * LocaleResolver bound to the request by the DispatcherServlet
 	 * (if available), falling back to the request's accept-header Locale.
+	 * <p>This method serves as a straightforward alternative to the standard
+	 * Servlet {@link javax.servlet.http.HttpServletRequest#getLocale()} method,
+	 * falling back to the latter if no more specific locale has been found.
+	 * <p>Consider using {@link org.springframework.context.i18n.LocaleContextHolder#getLocale()}
+	 * which will normally be populated with the same Locale.
 	 * @param request current HTTP request
-	 * @return the current locale, either from the LocaleResolver or from
-	 * the plain request
+	 * @return the current locale for the given request, either from the
+	 * LocaleResolver or from the plain request itself
 	 * @see #getLocaleResolver
-	 * @see javax.servlet.http.HttpServletRequest#getLocale()
+	 * @see org.springframework.context.i18n.LocaleContextHolder#getLocale()
 	 */
 	public static Locale getLocale(HttpServletRequest request) {
 		LocaleResolver localeResolver = getLocaleResolver(request);
-		if (localeResolver != null) {
-			return localeResolver.resolveLocale(request);
+		return (localeResolver != null ? localeResolver.resolveLocale(request) : request.getLocale());
+	}
+
+	/**
+	 * Retrieve the current time zone from the given request, using the
+	 * TimeZoneAwareLocaleResolver bound to the request by the DispatcherServlet
+	 * (if available), falling back to the system's default time zone.
+	 * <p>Note: This method returns {@code null} if no specific time zone can be
+	 * resolved for the given request. This is in contrast to {@link #getLocale}
+	 * where there is always the request's accept-header locale to fall back to.
+	 * <p>Consider using {@link org.springframework.context.i18n.LocaleContextHolder#getTimeZone()}
+	 * which will normally be populated with the same TimeZone: That method only
+	 * differs in terms of its fallback to the system time zone if the LocaleResolver
+	 * hasn't provided provided a specific time zone (instead of this method's {@code null}).
+	 * @param request current HTTP request
+	 * @return the current time zone for the given request, either from the
+	 * TimeZoneAwareLocaleResolver or {@code null} if none associated
+	 * @see #getLocaleResolver
+	 * @see org.springframework.context.i18n.LocaleContextHolder#getTimeZone()
+	 */
+	public static TimeZone getTimeZone(HttpServletRequest request) {
+		LocaleResolver localeResolver = getLocaleResolver(request);
+		if (localeResolver instanceof LocaleContextResolver) {
+			LocaleContext localeContext = ((LocaleContextResolver) localeResolver).resolveLocaleContext(request);
+			if (localeContext instanceof TimeZoneAwareLocaleContext) {
+				return ((TimeZoneAwareLocaleContext) localeContext).getTimeZone();
+			}
 		}
-		else {
-			return request.getLocale();
-		}
+		return null;
 	}
 
 	/**

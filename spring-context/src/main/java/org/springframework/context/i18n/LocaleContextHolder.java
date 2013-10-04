@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.context.i18n;
 
 import java.util.Locale;
+import java.util.TimeZone;
 
 import org.springframework.core.NamedInheritableThreadLocal;
 import org.springframework.core.NamedThreadLocal;
@@ -59,7 +60,11 @@ public abstract class LocaleContextHolder {
 	/**
 	 * Associate the given LocaleContext with the current thread,
 	 * <i>not</i> exposing it as inheritable for child threads.
+	 * <p>The given LocaleContext may be a {@link TimeZoneAwareLocaleContext},
+	 * containing a locale with associated time zone information.
 	 * @param localeContext the current LocaleContext
+	 * @see SimpleLocaleContext
+	 * @see SimpleTimeZoneAwareLocaleContext
 	 */
 	public static void setLocaleContext(LocaleContext localeContext) {
 		setLocaleContext(localeContext, false);
@@ -67,10 +72,14 @@ public abstract class LocaleContextHolder {
 
 	/**
 	 * Associate the given LocaleContext with the current thread.
+	 * <p>The given LocaleContext may be a {@link TimeZoneAwareLocaleContext},
+	 * containing a locale with associated time zone information.
 	 * @param localeContext the current LocaleContext,
 	 * or {@code null} to reset the thread-bound context
 	 * @param inheritable whether to expose the LocaleContext as inheritable
 	 * for child threads (using an {@link InheritableThreadLocal})
+	 * @see SimpleLocaleContext
+	 * @see SimpleTimeZoneAwareLocaleContext
 	 */
 	public static void setLocaleContext(LocaleContext localeContext, boolean inheritable) {
 		if (localeContext == null) {
@@ -128,7 +137,13 @@ public abstract class LocaleContextHolder {
 
 	/**
 	 * Return the Locale associated with the current thread, if any,
-	 * or the system default Locale else.
+	 * or the system default Locale else. This is effectively a
+	 * replacement for {@link java.util.Locale#getDefault()},
+	 * able to optionally respect a user-level Locale setting.
+	 * <p>Note: This method has a fallback to the system default Locale.
+	 * If you'd like to check for the raw LocaleContext content
+	 * (which may indicate no specific locale through {@code null}, use
+	 * {@link #getLocaleContext()} and call {@link LocaleContext#getLocale()}
 	 * @return the current Locale, or the system default Locale if no
 	 * specific Locale has been associated with the current thread
 	 * @see LocaleContext#getLocale()
@@ -136,7 +151,39 @@ public abstract class LocaleContextHolder {
 	 */
 	public static Locale getLocale() {
 		LocaleContext localeContext = getLocaleContext();
-		return (localeContext != null ? localeContext.getLocale() : Locale.getDefault());
+		if (localeContext != null) {
+			Locale locale = localeContext.getLocale();
+			if (locale != null) {
+				return locale;
+			}
+		}
+		return Locale.getDefault();
+	}
+
+	/**
+	 * Return the TimeZone associated with the current thread, if any,
+	 * or the system default TimeZone else. This is effectively a
+	 * replacement for {@link java.util.TimeZone#getDefault()},
+	 * able to optionally respect a user-level TimeZone setting.
+	 * <p>Note: This method has a fallback to the system default Locale.
+	 * If you'd like to check for the raw LocaleContext content
+	 * (which may indicate no specific time zone through {@code null}, use
+	 * {@link #getLocaleContext()} and call {@link TimeZoneAwareLocaleContext#getTimeZone()}
+	 * after downcasting to {@link TimeZoneAwareLocaleContext}.
+	 * @return the current TimeZone, or the system default TimeZone if no
+	 * specific TimeZone has been associated with the current thread
+	 * @see TimeZoneAwareLocaleContext#getTimeZone()
+	 * @see java.util.TimeZone#getDefault()
+	 */
+	public static TimeZone getTimeZone() {
+		LocaleContext localeContext = getLocaleContext();
+		if (localeContext instanceof TimeZoneAwareLocaleContext) {
+			TimeZone timeZone = ((TimeZoneAwareLocaleContext) localeContext).getTimeZone();
+			if (timeZone != null) {
+				return timeZone;
+			}
+		}
+		return TimeZone.getDefault();
 	}
 
 }

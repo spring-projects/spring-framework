@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TimeZone;
 import java.util.TreeSet;
 
 /**
@@ -674,10 +675,11 @@ public abstract class StringUtils {
 	/**
 	 * Parse the given {@code localeString} value into a {@link Locale}.
 	 * <p>This is the inverse operation of {@link Locale#toString Locale's toString}.
-	 * @param localeString the locale string, following {@code Locale's}
+	 * @param localeString the locale String, following {@code Locale's}
 	 * {@code toString()} format ("en", "en_UK", etc);
 	 * also accepts spaces as separators, as an alternative to underscores
 	 * @return a corresponding {@code Locale} instance
+	 * @throws IllegalArgumentException in case of an invalid locale specification
 	 */
 	public static Locale parseLocaleString(String localeString) {
 		String[] parts = tokenizeToStringArray(localeString, "_ ", false, false);
@@ -717,6 +719,22 @@ public abstract class StringUtils {
 	 */
 	public static String toLanguageTag(Locale locale) {
 		return locale.getLanguage() + (hasText(locale.getCountry()) ? "-" + locale.getCountry() : "");
+	}
+
+	/**
+	 * Parse the given {@code timeZoneString} value into a {@link TimeZone}.
+	 * @param timeZoneString the time zone String, following {@link TimeZone#getTimeZone(String)}
+	 * but throwing {@link IllegalArgumentException} in case of an invalid time zone specification
+	 * @return a corresponding {@link TimeZone} instance
+	 * @throws IllegalArgumentException in case of an invalid time zone specification
+	 */
+	public static TimeZone parseTimeZoneString(String timeZoneString) {
+		TimeZone timeZone = TimeZone.getTimeZone(timeZoneString);
+		if ("GMT".equals(timeZone.getID()) && !timeZoneString.startsWith("GMT")) {
+			// We don't want that GMT fallback...
+			throw new IllegalArgumentException("Invalid time zone specification '" + timeZoneString + "'");
+		}
+		return timeZone;
 	}
 
 

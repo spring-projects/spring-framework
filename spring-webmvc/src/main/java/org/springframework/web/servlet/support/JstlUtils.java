@@ -18,7 +18,7 @@ package org.springframework.web.servlet.support;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
-
+import java.util.TimeZone;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -80,6 +80,10 @@ public abstract class JstlUtils {
 	public static void exposeLocalizationContext(HttpServletRequest request, MessageSource messageSource) {
 		Locale jstlLocale = RequestContextUtils.getLocale(request);
 		Config.set(request, Config.FMT_LOCALE, jstlLocale);
+		TimeZone timeZone = RequestContextUtils.getTimeZone(request);
+		if (timeZone != null) {
+			Config.set(request, Config.FMT_TIME_ZONE, timeZone);
+		}
 		if (messageSource != null) {
 			LocalizationContext jstlContext = new SpringLocalizationContext(messageSource, request);
 			Config.set(request, Config.FMT_LOCALIZATION_CONTEXT, jstlContext);
@@ -95,6 +99,10 @@ public abstract class JstlUtils {
 	 */
 	public static void exposeLocalizationContext(RequestContext requestContext) {
 		Config.set(requestContext.getRequest(), Config.FMT_LOCALE, requestContext.getLocale());
+		TimeZone timeZone = requestContext.getTimeZone();
+		if (timeZone != null) {
+			Config.set(requestContext.getRequest(), Config.FMT_TIME_ZONE, timeZone);
+		}
 		MessageSource messageSource = getJstlAwareMessageSource(
 				requestContext.getServletContext(), requestContext.getMessageSource());
 		LocalizationContext jstlContext = new SpringLocalizationContext(messageSource, requestContext.getRequest());

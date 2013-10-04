@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -60,6 +61,7 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.mvc.ParameterizableViewController;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
+import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.theme.SessionThemeResolver;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
@@ -402,21 +404,6 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			if (!(request instanceof MultipartHttpServletRequest)) {
 				throw new ServletException("Not in a MultipartHttpServletRequest");
 			}
-			if (!(RequestContextUtils.getLocaleResolver(request) instanceof SessionLocaleResolver)) {
-				throw new ServletException("Incorrect LocaleResolver");
-			}
-			if (!Locale.CANADA.equals(RequestContextUtils.getLocale(request))) {
-				throw new ServletException("Incorrect Locale");
-			}
-			if (!Locale.CANADA.equals(LocaleContextHolder.getLocale())) {
-				throw new ServletException("Incorrect Locale");
-			}
-			if (!(RequestContextUtils.getThemeResolver(request) instanceof SessionThemeResolver)) {
-				throw new ServletException("Incorrect ThemeResolver");
-			}
-			if (!"theme".equals(RequestContextUtils.getThemeResolver(request).resolveThemeName(request))) {
-				throw new ServletException("Incorrect theme name");
-			}
 			if (request.getParameter("fail") != null) {
 				throw new ModelAndViewDefiningException(new ModelAndView("failed1"));
 			}
@@ -428,6 +415,45 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			}
 			if (request.getParameter("exception") != null) {
 				throw new RuntimeException("servlet");
+			}
+			if (!(RequestContextUtils.getLocaleResolver(request) instanceof SessionLocaleResolver)) {
+				throw new ServletException("Incorrect LocaleResolver");
+			}
+			if (!Locale.CANADA.equals(RequestContextUtils.getLocale(request))) {
+				throw new ServletException("Incorrect Locale");
+			}
+			if (!Locale.CANADA.equals(LocaleContextHolder.getLocale())) {
+				throw new ServletException("Incorrect Locale");
+			}
+			if (RequestContextUtils.getTimeZone(request) != null) {
+				throw new ServletException("Incorrect TimeZone");
+			}
+			if (!TimeZone.getDefault().equals(LocaleContextHolder.getTimeZone())) {
+				throw new ServletException("Incorrect TimeZone");
+			}
+			if (!(RequestContextUtils.getThemeResolver(request) instanceof SessionThemeResolver)) {
+				throw new ServletException("Incorrect ThemeResolver");
+			}
+			if (!"theme".equals(RequestContextUtils.getThemeResolver(request).resolveThemeName(request))) {
+				throw new ServletException("Incorrect theme name");
+			}
+			RequestContext rc = new RequestContext(request);
+			rc.changeLocale(Locale.US, TimeZone.getTimeZone("GMT+1"));
+			rc.changeTheme("theme2");
+			if (!Locale.US.equals(RequestContextUtils.getLocale(request))) {
+				throw new ServletException("Incorrect Locale");
+			}
+			if (!Locale.US.equals(LocaleContextHolder.getLocale())) {
+				throw new ServletException("Incorrect Locale");
+			}
+			if (!TimeZone.getTimeZone("GMT+1").equals(RequestContextUtils.getTimeZone(request))) {
+				throw new ServletException("Incorrect TimeZone");
+			}
+			if (!TimeZone.getTimeZone("GMT+1").equals(LocaleContextHolder.getTimeZone())) {
+				throw new ServletException("Incorrect TimeZone");
+			}
+			if (!"theme2".equals(RequestContextUtils.getThemeResolver(request).resolveThemeName(request))) {
+				throw new ServletException("Incorrect theme name");
 			}
 		}
 

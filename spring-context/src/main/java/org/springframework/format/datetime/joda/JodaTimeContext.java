@@ -16,9 +16,15 @@
 
 package org.springframework.format.datetime.joda;
 
+import java.util.TimeZone;
+
 import org.joda.time.Chronology;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormatter;
+
+import org.springframework.context.i18n.LocaleContext;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
 
 /**
  * A context that holds user-specific Joda-Time settings such as the user's
@@ -53,6 +59,11 @@ public class JodaTimeContext {
 
 	/**
 	 * Set the user's time zone.
+	 * <p>Alternatively, set a {@link TimeZoneAwareLocaleContext} on
+	 * {@link LocaleContextHolder}. This context class will fall back to
+	 * checking the locale context if no setting has been provided here.
+	 * @see org.springframework.context.i18n.LocaleContextHolder#getTimeZone()
+	 * @see org.springframework.context.i18n.LocaleContextHolder#setLocaleContext
 	 */
 	public void setTimeZone(DateTimeZone timeZone) {
 		this.timeZone = timeZone;
@@ -79,6 +90,15 @@ public class JodaTimeContext {
 		}
 		if (this.timeZone != null) {
 			formatter = formatter.withZone(this.timeZone);
+		}
+		else {
+			LocaleContext localeContext = LocaleContextHolder.getLocaleContext();
+			if (localeContext instanceof TimeZoneAwareLocaleContext) {
+				TimeZone timeZone = ((TimeZoneAwareLocaleContext) localeContext).getTimeZone();
+				if (timeZone != null) {
+					formatter = formatter.withZone(DateTimeZone.forTimeZone(timeZone));
+				}
+			}
 		}
 		return formatter;
 	}

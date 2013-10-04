@@ -14,34 +14,29 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.propertyeditors;
+package org.springframework.core.convert.support;
 
-import java.beans.PropertyEditorSupport;
+import java.time.ZoneId;
 import java.util.TimeZone;
 
-import org.springframework.util.StringUtils;
+import org.springframework.core.convert.converter.Converter;
 
 /**
- * Editor for {@code java.util.TimeZone}, translating timezone IDs into
- * {@code TimeZone} objects. Exposes the {@code TimeZone} ID as a text
- * representation.
+ * Simple Converter from Java 8's {@link java.time.ZoneId} to {@link java.util.TimeZone}.
+ *
+ * <p>Note that Spring's default ConversionService setup understands the 'of' convention that
+ * the JSR-310 {@code java.time} package consistently uses. That convention is implemented
+ * reflectively in {@link ObjectToObjectConverter}, not in specific JSR-310 converters.
  *
  * @author Juergen Hoeller
- * @since 3.0
- * @see java.util.TimeZone
- * @see ZoneIdEditor
+ * @since 4.0
+ * @see TimeZoneToZoneIdConverter
  */
-public class TimeZoneEditor extends PropertyEditorSupport {
+class ZoneIdToTimeZoneConverter implements Converter<ZoneId, TimeZone> {
 
 	@Override
-	public void setAsText(String text) throws IllegalArgumentException {
-		setValue(StringUtils.parseTimeZoneString(text));
-	}
-
-	@Override
-	public String getAsText() {
-		TimeZone value = (TimeZone) getValue();
-		return (value != null ? value.getID() : "");
+	public TimeZone convert(ZoneId source) {
+		return TimeZone.getTimeZone(source);
 	}
 
 }

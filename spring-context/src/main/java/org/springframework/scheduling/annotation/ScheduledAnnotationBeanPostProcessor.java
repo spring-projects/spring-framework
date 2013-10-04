@@ -42,6 +42,7 @@ import org.springframework.scheduling.support.ScheduledMethodRunnable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.MethodCallback;
+import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -192,11 +193,7 @@ public class ScheduledAnnotationBeanPostProcessor
 				}
 				TimeZone timeZone;
 				if (!"".equals(zone)) {
-					timeZone = TimeZone.getTimeZone(zone);
-					// Check for that silly TimeZone fallback...
-					if ("GMT".equals(timeZone.getID()) && !zone.startsWith("GMT")) {
-						throw new IllegalArgumentException("Invalid time zone id '" + zone + "'");
-					}
+					timeZone = StringUtils.parseTimeZoneString(zone);
 				}
 				else {
 					timeZone = TimeZone.getDefault();
