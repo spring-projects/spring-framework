@@ -22,7 +22,6 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestWrapper;
@@ -199,7 +198,6 @@ public abstract class WebUtils {
 		if (servletContext == null) {
 			return null;
 		}
-		Assert.notNull(servletContext, "ServletContext must not be null");
 		String param = servletContext.getInitParameter(HTML_ESCAPE_CONTEXT_PARAM);
 		return (StringUtils.hasText(param)? Boolean.valueOf(param) : null);
 	}
