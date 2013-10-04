@@ -221,4 +221,22 @@ public class MockHttpServletResponseTests {
 		assertEquals(redirectUrl, response.getRedirectedUrl());
 	}
 
+	// SPR-10414
+
+	@Test
+	public void modifyStatusAfterSendError() throws IOException {
+		response.sendError(HttpServletResponse.SC_NOT_FOUND);
+		response.setStatus(HttpServletResponse.SC_OK);
+		assertEquals(response.getStatus(),HttpServletResponse.SC_NOT_FOUND);
+	}
+
+	// SPR-10414
+
+	@Test
+	public void modifyStatusMessageAfterSendError() throws IOException {
+		response.sendError(HttpServletResponse.SC_NOT_FOUND);
+		response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"Server Error");
+		assertEquals(response.getStatus(),HttpServletResponse.SC_NOT_FOUND);
+	}
+
 }
