@@ -325,7 +325,7 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 
 		try {
 			headers.setDestination(lookupPath);
-			message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
+			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
 
 			Object returnValue = invocableHandlerMethod.invoke(message);
 

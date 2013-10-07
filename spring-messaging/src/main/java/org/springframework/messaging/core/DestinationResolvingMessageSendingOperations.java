@@ -27,9 +27,9 @@ public interface DestinationResolvingMessageSendingOperations<D> extends Message
 
 	<P> void send(String destinationName, Message<P> message) throws MessagingException;
 
-	<T> void convertAndSend(String destinationName, T message) throws MessagingException;
+	<T> void convertAndSend(String destinationName, T payload) throws MessagingException;
 
-	<T> void convertAndSend(String destinationName, T message, MessagePostProcessor postProcessor)
+	<T> void convertAndSend(String destinationName, T payload, MessagePostProcessor postProcessor)
 			throws MessagingException;
 
 }

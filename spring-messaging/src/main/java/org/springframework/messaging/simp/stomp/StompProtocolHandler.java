@@ -119,7 +119,7 @@ public class StompProtocolHandler implements SubProtocolHandler {
 			headers.setSessionId(session.getId());
 			headers.setUser(session.getPrincipal());
 
-			message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
+			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
 			outputChannel.send(message);
 		}
 		catch (Throwable t) {
@@ -132,7 +132,7 @@ public class StompProtocolHandler implements SubProtocolHandler {
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.ERROR);
 		headers.setMessage(error.getMessage());
-		Message<byte[]> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
+		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 		String payload = new String(this.stompEncoder.encode(message), Charset.forName("UTF-8"));
 		try {
 			session.sendMessage(new TextMessage(payload));
@@ -176,7 +176,7 @@ public class StompProtocolHandler implements SubProtocolHandler {
 		}
 
 		try {
-			message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
+			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
 			byte[] bytes = this.stompEncoder.encode((Message<byte[]>)message);
 			session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
 		}
@@ -248,7 +248,7 @@ public class StompProtocolHandler implements SubProtocolHandler {
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		headers.setSessionId(session.getId());
-		Message<?> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 		outputChannel.send(message);
 	}
 

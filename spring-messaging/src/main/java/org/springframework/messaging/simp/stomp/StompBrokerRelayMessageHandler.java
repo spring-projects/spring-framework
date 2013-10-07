@@ -239,7 +239,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			sessionId = (sessionId == null) ? SystemStompRelaySession.ID : sessionId;
 			headers.setSessionId(sessionId);
 			headers.updateStompCommandAsClientMessage();
-			message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
+			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
 		}
 
 		if (sessionId == null) {
@@ -252,7 +252,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 
 		if (SimpMessageType.CONNECT.equals(messageType)) {
-			message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
+			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
 			StompRelaySession session = new StompRelaySession(sessionId);
 			this.relaySessions.put(sessionId, session);
 			session.connect(message);
@@ -359,7 +359,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			}
 
 			headers.setSessionId(this.sessionId);
-			message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
+			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
 			sendMessageToClient(message);
 		}
 
@@ -383,7 +383,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.ERROR);
 			headers.setSessionId(this.sessionId);
 			headers.setMessage(errorText);
-			Message<?> errorMessage = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
+			Message<?> errorMessage = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 			sendMessageToClient(errorMessage);
 		}
 
@@ -516,7 +516,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			headers.setLogin(systemLogin);
 			headers.setPasscode(systemPasscode);
 			headers.setHeartbeat(systemHeartbeatSendInterval, systemHeartbeatReceiveInterval);
-			Message<?> connectMessage = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
+			Message<?> connectMessage = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 			super.connect(connectMessage);
 		}
 

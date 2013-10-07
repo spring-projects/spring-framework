@@ -131,8 +131,6 @@ public class ChannelInterceptorTests {
 
 		private AtomicInteger counter = new AtomicInteger();
 
-		private String foo;
-
 		@Override
 		public Message<?> preSend(Message<?> message, MessageChannel channel) {
 			assertNotNull(message);

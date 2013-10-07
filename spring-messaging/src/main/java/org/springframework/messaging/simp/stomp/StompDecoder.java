@@ -60,11 +60,11 @@ public class StompDecoder {
 			MultiValueMap<String, String> headers = readHeaders(buffer);
 			byte[] payload = readPayload(buffer, headers);
 
-			decodedMessage = MessageBuilder.withPayloadAndHeaders(payload,
+			decodedMessage = MessageBuilder.withPayload(payload).setHeaders(
 					StompHeaderAccessor.create(StompCommand.valueOf(command), headers)).build();
 		}
 		else {
-			decodedMessage = MessageBuilder.withPayloadAndHeaders(HEARTBEAT_PAYLOAD,
+			decodedMessage = MessageBuilder.withPayload(HEARTBEAT_PAYLOAD).setHeaders(
 					StompHeaderAccessor.create(SimpMessageType.HEARTBEAT)).build();
 		}
 

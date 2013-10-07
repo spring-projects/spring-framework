@@ -28,6 +28,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import reactor.function.Consumer;
 import reactor.function.Function;
 import reactor.io.Buffer;
+
 import static org.junit.Assert.*;
 
 
@@ -174,7 +175,7 @@ public class StompCodecTests {
 	public void encodeFrameWithNoHeadersAndNoBody() {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 
-		Message<byte[]> frame = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
+		Message<byte[]> frame = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 
 		assertEquals("DISCONNECT\n\n\0", new StompCodec().encoder().apply(frame).asString());
 	}
@@ -185,7 +186,7 @@ public class StompCodecTests {
 		headers.setAcceptVersion("1.2");
 		headers.setHost("github.org");
 
-		Message<byte[]> frame = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
+		Message<byte[]> frame = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 
 		String frameString = new StompCodec().encoder().apply(frame).asString();
 
@@ -198,7 +199,7 @@ public class StompCodecTests {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		headers.addNativeHeader("a:\r\n\\b",  "alpha:bravo\r\n\\");
 
-		Message<byte[]> frame = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
+		Message<byte[]> frame = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 
 		assertEquals("DISCONNECT\na\\c\\r\\n\\\\b:alpha\\cbravo\\r\\n\\\\\n\n\0", new StompCodec().encoder().apply(frame).asString());
 	}
@@ -208,7 +209,7 @@ public class StompCodecTests {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
 		headers.addNativeHeader("a", "alpha");
 
-		Message<byte[]> frame = MessageBuilder.withPayloadAndHeaders("Message body".getBytes(), headers).build();
+		Message<byte[]> frame = MessageBuilder.withPayload("Message body".getBytes()).setHeaders(headers).build();
 
 		assertEquals("SEND\na:alpha\ncontent-length:12\n\nMessage body\0", new StompCodec().encoder().apply(frame).asString());
 	}

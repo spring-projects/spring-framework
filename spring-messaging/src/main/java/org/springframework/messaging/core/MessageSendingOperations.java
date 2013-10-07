@@ -29,12 +29,12 @@ public interface MessageSendingOperations<D> {
 
 	<P> void send(D destination, Message<P> message) throws MessagingException;
 
-	<T> void convertAndSend(T message) throws MessagingException;
+	<T> void convertAndSend(T payload) throws MessagingException;
 
-	<T> void convertAndSend(D destination, T message) throws MessagingException;
+	<T> void convertAndSend(D destination, T payload) throws MessagingException;
 
-	<T> void convertAndSend(T message, MessagePostProcessor postProcessor) throws MessagingException;
+	<T> void convertAndSend(T payload, MessagePostProcessor postProcessor) throws MessagingException;
 
-	<T> void convertAndSend(D destination, T message, MessagePostProcessor postProcessor) throws MessagingException;
+	<T> void convertAndSend(D destination, T payload, MessagePostProcessor postProcessor) throws MessagingException;
 
 }

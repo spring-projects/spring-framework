@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  * A specialization of {@link AbstractMessageSendingTemplate} that adds String-based
  * destinations as a message header.
  *
- * @author Mark Fisher
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
 public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String>
@@ -104,7 +104,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 		headers.setDestination(destination);
 		headers.setMessageTypeIfNotSet(SimpMessageType.MESSAGE);
-		message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
+		message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
 
 		long timeout = this.sendTimeout;
 		boolean sent = (timeout >= 0)

@@ -123,7 +123,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 		public Message<?> postProcessMessage(Message<?> message) {
 			SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 			headers.setSessionId(this.sessionId);
-			return MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
+			return MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
 		}
 	}
 

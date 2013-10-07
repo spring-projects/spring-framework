@@ -155,7 +155,7 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		headers.setSessionId("sess1");
 		headers.setSubscriptionId("subs1");
 		headers.setDestination("/foo");
-		Message<?> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 
 		when(channel.send(any(Message.class))).thenReturn(true);
 		messageHandler.handleMessage(message);
@@ -179,7 +179,7 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		headers.setSessionId("sess1");
 		headers.setSubscriptionId("subs1");
 		headers.setDestination("/foo");
-		Message<?> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 
 		// subscribe
 		broker.handleMessage(message);
@@ -187,7 +187,7 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		headers = StompHeaderAccessor.create(StompCommand.SEND);
 		headers.setSessionId("sess1");
 		headers.setDestination("/foo");
-		message = MessageBuilder.withPayloadAndHeaders("bar".getBytes(), headers).build();
+		message = MessageBuilder.withPayload("bar".getBytes()).setHeaders(headers).build();
 
 		// message
 		when(channel.send(any(Message.class))).thenReturn(true);
@@ -236,7 +236,7 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
 		headers.setDestination("/foo");
-		Message<?> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 
 		when(channel.send(any(Message.class))).thenReturn(true);
 		messageHandler.handleMessage(message);
@@ -260,7 +260,7 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
 		headers.setDestination("/user/joe/foo");
-		Message<?> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 
 		when(channel.send(any(Message.class))).thenReturn(true);
 		messageHandler.handleMessage(message);

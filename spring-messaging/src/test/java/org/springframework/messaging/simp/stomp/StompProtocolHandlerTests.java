@@ -69,12 +69,12 @@ public class StompProtocolHandlerTests {
 		connectHeaders.setHeartbeat(10000, 10000);
 		connectHeaders.setNativeHeader(StompHeaderAccessor.STOMP_ACCEPT_VERSION_HEADER, "1.0,1.1");
 
-		Message<?> connectMessage = MessageBuilder.withPayloadAndHeaders(new byte[0], connectHeaders).build();
+		Message<?> connectMessage = MessageBuilder.withPayload(new byte[0]).setHeaders(connectHeaders).build();
 
 		SimpMessageHeaderAccessor connectAckHeaders = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
 		connectAckHeaders.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, connectMessage);
 
-		Message<byte[]> connectAck = MessageBuilder.withPayloadAndHeaders(new byte[0], connectAckHeaders).build();
+		Message<byte[]> connectAck = MessageBuilder.withPayload(new byte[0]).setHeaders(connectAckHeaders).build();
 		this.stompHandler.handleMessageToClient(this.session, connectAck);
 
 		verifyNoMoreInteractions(this.channel);

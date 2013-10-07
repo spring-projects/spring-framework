@@ -99,7 +99,7 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 			headers.setSessionId(this.sessionId);
 			headers.setSubscriptionId(this.subscriptionId);
 			headers.setMessageTypeIfNotSet(SimpMessageType.MESSAGE);
-			return MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
+			return MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
 		}
 	}
 }

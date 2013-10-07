@@ -159,7 +159,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 	public void messageDeliverExceptionIfSystemSessionForwardFails() throws Exception {
 		stopBrokerAndAwait();
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
-		this.relay.handleMessage(MessageBuilder.withPayloadAndHeaders("test".getBytes(), headers).build());
+		this.relay.handleMessage(MessageBuilder.withPayload("test".getBytes()).setHeaders(headers).build());
 	}
 
 	@Test
@@ -235,7 +235,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		headers.setSessionId(sess1);
 
-		this.relay.handleMessage(MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build());
+		this.relay.handleMessage(MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build());
 
 		Thread.sleep(2000);
 
@@ -404,7 +404,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 			StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
 			headers.setSessionId(sessionId);
 			headers.setAcceptVersion("1.1,1.2");
-			Message<?> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
+			Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 
 			MessageExchangeBuilder builder = new MessageExchangeBuilder(message);
 			builder.expected.add(new StompConnectedFrameMessageMatcher(sessionId));
@@ -415,7 +415,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 			StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
 			headers.setSessionId(sessionId);
 			headers.setAcceptVersion("1.1,1.2");
-			Message<?> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
+			Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 			MessageExchangeBuilder builder = new MessageExchangeBuilder(message);
 			return builder.andExpectError();
 		}
@@ -428,7 +428,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 			headers.setSubscriptionId(subscriptionId);
 			headers.setDestination(destination);
 			headers.setReceipt(receiptId);
-			Message<?> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
+			Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 
 			MessageExchangeBuilder builder = new MessageExchangeBuilder(message);
 			builder.expected.add(new StompReceiptFrameMessageMatcher(sessionId, receiptId));
@@ -438,7 +438,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		public static MessageExchangeBuilder send(String destination, String payload) {
 			StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
 			headers.setDestination(destination);
-			Message<?> message = MessageBuilder.withPayloadAndHeaders(payload.getBytes(UTF_8), headers).build();
+			Message<?> message = MessageBuilder.withPayload(payload.getBytes(UTF_8)).setHeaders(headers).build();
 			return new MessageExchangeBuilder(message);
 		}
 

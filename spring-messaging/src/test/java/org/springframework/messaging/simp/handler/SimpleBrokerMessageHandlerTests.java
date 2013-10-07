@@ -145,7 +145,7 @@ public class SimpleBrokerMessageHandlerTests {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT);
 		headers.setSessionId(sessionId);
 
-		return MessageBuilder.withPayloadAndHeaders("", headers).build();
+		return MessageBuilder.withPayload("").setHeaders(headers).build();
 	}
 
 	protected Message<String> createMessage(String destination, String payload) {

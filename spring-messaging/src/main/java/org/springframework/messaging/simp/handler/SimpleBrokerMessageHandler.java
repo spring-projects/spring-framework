@@ -106,7 +106,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 			replyHeaders.setSessionId(headers.getSessionId());
 			replyHeaders.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, message);
 
-			Message<byte[]> connectAck = MessageBuilder.withPayloadAndHeaders(EMPTY_PAYLOAD, replyHeaders).build();
+			Message<byte[]> connectAck = MessageBuilder.withPayload(EMPTY_PAYLOAD).setHeaders(replyHeaders).build();
 			this.messageChannel.send(connectAck);
 		}
 	}
@@ -121,7 +121,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 				headers.setSubscriptionId(subscriptionId);
 
 				Object payload = message.getPayload();
-				Message<?> clientMessage = MessageBuilder.withPayloadAndHeaders(payload, headers).build();
+				Message<?> clientMessage = MessageBuilder.withPayload(payload).setHeaders(headers).build();
 				try {
 					this.messageChannel.send(clientMessage);
 				}
