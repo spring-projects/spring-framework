@@ -23,7 +23,6 @@ import java.util.Map;
 
 import javax.servlet.ServletContext;
 
-import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
@@ -99,12 +98,6 @@ public class ResourceHandlerRegistry {
 				ResourceHttpRequestHandler requestHandler = registration.getRequestHandler();
 				requestHandler.setServletContext(servletContext);
 				requestHandler.setApplicationContext(applicationContext);
-				try {
-					requestHandler.afterPropertiesSet();
-				}
-				catch (Exception e) {
-					throw new BeanInitializationException("Failed to init ResourceHttpRequestHandler", e);
-				}
 				urlMap.put(pathPattern, requestHandler);
 			}
 		}
