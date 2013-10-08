@@ -55,6 +55,7 @@ import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBui
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
+import org.springframework.web.servlet.resource.PublicResourceUrlProviderExposingInterceptor;
 
 import static org.junit.Assert.*;
 
@@ -116,8 +117,9 @@ public class WebMvcConfigurationSupportTests {
 		HandlerExecutionChain chain = handlerMapping.getHandler(request);
 
 		assertNotNull(chain.getInterceptors());
-		assertEquals(2, chain.getInterceptors().length);
+		assertEquals(3, chain.getInterceptors().length);
 		assertEquals(ConversionServiceExposingInterceptor.class, chain.getInterceptors()[1].getClass());
+		assertEquals(PublicResourceUrlProviderExposingInterceptor.class, chain.getInterceptors()[2].getClass());
 	}
 
 	@Test

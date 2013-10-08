@@ -62,6 +62,7 @@ import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.servlet.resource.PublicResourceUrlProviderExposingInterceptor;
 
 /**
  * A test fixture with a sub-class of {@link WebMvcConfigurationSupport} that
@@ -94,9 +95,10 @@ public class WebMvcConfigurationSupportExtensionTests {
 		rmHandlerMapping.afterPropertiesSet();
 		HandlerExecutionChain chain = rmHandlerMapping.getHandler(new MockHttpServletRequest("GET", "/"));
 		assertNotNull(chain.getInterceptors());
-		assertEquals(2, chain.getInterceptors().length);
+		assertEquals(3, chain.getInterceptors().length);
 		assertEquals(LocaleChangeInterceptor.class, chain.getInterceptors()[0].getClass());
 		assertEquals(ConversionServiceExposingInterceptor.class, chain.getInterceptors()[1].getClass());
+		assertEquals(PublicResourceUrlProviderExposingInterceptor.class, chain.getInterceptors()[2].getClass());
 
 		AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping) webConfig.viewControllerHandlerMapping();
 		handlerMapping.setApplicationContext(webAppContext);

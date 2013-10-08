@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
+import org.springframework.web.servlet.resource.ResourceResolver;
 
 /**
  * Encapsulates information required to create a resource handlers.
@@ -42,6 +44,9 @@ public class ResourceHandlerRegistration {
 	private final List<Resource> locations = new ArrayList<Resource>();
 
 	private Integer cachePeriod;
+
+	private List<ResourceResolver> resourceResolvers;
+
 
 	/**
 	 * Create a {@link ResourceHandlerRegistration} instance.
@@ -71,6 +76,17 @@ public class ResourceHandlerRegistration {
 	}
 
 	/**
+	 * Configure the list of {@link ResourceResolver}s to use.
+	 * <p>
+	 * By default {@link PathResourceResolver} is configured. If using this property, it
+	 * is recommended to add {@link PathResourceResolver} as the last resolver.
+	 * @since 4.1
+	 */
+	public void setResourceResolvers(List<ResourceResolver> resourceResolvers) {
+		this.resourceResolvers = resourceResolvers;
+	}
+
+	/**
 	 * Specify the cache period for the resources served by the resource handler, in seconds. The default is to not
 	 * send any cache headers but to rely on last-modified timestamps only. Set to 0 in order to send cache headers
 	 * that prevent caching, or to a positive number of seconds to send cache headers with the given max-age value.
@@ -86,7 +102,11 @@ public class ResourceHandlerRegistration {
 	 * Returns the URL path patterns for the resource handler.
 	 */
 	protected String[] getPathPatterns() {
-		return pathPatterns;
+		return this.pathPatterns;
+	}
+
+	protected List<ResourceResolver> getResourceResolvers() {
+		return this.resourceResolvers;
 	}
 
 	/**
@@ -95,9 +115,12 @@ public class ResourceHandlerRegistration {
 	protected ResourceHttpRequestHandler getRequestHandler() {
 		Assert.isTrue(!CollectionUtils.isEmpty(locations), "At least one location is required for resource handling.");
 		ResourceHttpRequestHandler requestHandler = new ResourceHttpRequestHandler();
-		requestHandler.setLocations(locations);
-		if (cachePeriod != null) {
-			requestHandler.setCacheSeconds(cachePeriod);
+		if (this.resourceResolvers != null) {
+			requestHandler.setResourceResolvers(this.resourceResolvers);
+		}
+		requestHandler.setLocations(this.locations);
+		if (this.cachePeriod != null) {
+			requestHandler.setCacheSeconds(this.cachePeriod);
 		}
 		return requestHandler;
 	}

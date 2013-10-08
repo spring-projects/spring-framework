@@ -1,0 +1,139 @@
+/*
+ * Copyright 2002-2013 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.web.servlet.resource;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.mock.web.test.MockFilterChain;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.servlet.config.annotation.*;
+
+import static org.junit.Assert.*;
+
+
+/**
+ * Integration tests using {@link ResourceUrlEncodingFilter} and
+ * {@link PublicResourceUrlProvider} with the latter configured in Spring MVC Java config.
+ *
+ * @author Rossen Stoyanchev
+ */
+public class PublicResourceUrlProviderJavaConfigTests {
+
+	private MockFilterChain filterChain;
+
+	private TestServlet servlet;
+
+	private MockHttpServletRequest request;
+
+
+	@Before
+	public void setup() throws Exception {
+
+		this.servlet = new TestServlet();
+		this.filterChain = new MockFilterChain(this.servlet, new ResourceUrlEncodingFilter());
+
+		AnnotationConfigWebApplicationContext cxt = new AnnotationConfigWebApplicationContext();
+		cxt.setServletContext(new MockServletContext());
+		cxt.register(WebConfig.class);
+		cxt.refresh();
+
+		PublicResourceUrlProvider urlProvider = cxt.getBean(PublicResourceUrlProvider.class);
+
+		this.request = new MockHttpServletRequest("GET", "/");
+		request.setAttribute(PublicResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, urlProvider);
+	}
+
+
+	@Test
+	public void rootServletMapping() throws Exception {
+
+		this.request.setRequestURI("/");
+		this.request.setMethod("GET");
+		this.request.setRequestURI("/myapp/index.html");
+		this.request.setContextPath("/myapp");
+		this.request.setServletPath("/index.html");
+		this.filterChain.doFilter(request, new MockHttpServletResponse());
+
+		String actual = this.servlet.response.encodeURL("/myapp/resources/foo.css");
+		assertEquals("/myapp/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", actual);
+	}
+
+	@Test
+	public void prefixServletMapping() throws Exception {
+
+		this.request.setRequestURI("/myapp/myservlet/index.html");
+		this.request.setContextPath("/myapp");
+		this.request.setServletPath("/myservlet");
+		this.filterChain.doFilter(request, new MockHttpServletResponse());
+
+		String actual = this.servlet.response.encodeURL("/myapp/myservlet/resources/foo.css");
+		assertEquals("/myapp/myservlet/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", actual);
+	}
+
+	@Test
+	public void extensionServletMapping() throws Exception {
+
+		this.request.setRequestURI("/myapp/index.html");
+		this.request.setContextPath("/myapp");
+		this.request.setServletPath("/index.html");
+		this.filterChain.doFilter(request, new MockHttpServletResponse());
+
+		String actual = this.servlet.response.encodeURL("/myapp/resources/foo.css");
+		assertEquals("/myapp/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", actual);
+	}
+
+
+	@Configuration
+	static class WebConfig extends WebMvcConfigurationSupport {
+
+
+		@Override
+		public void addResourceHandlers(ResourceHandlerRegistry registry) {
+
+			List<ResourceResolver> resourceResolvers = new ArrayList<>();
+			resourceResolvers.add(new FingerprintResourceResolver());
+			resourceResolvers.add(new PathResourceResolver());
+
+			registry.addResourceHandler("/resources/**")
+				.addResourceLocations("classpath:org/springframework/web/servlet/resource/test/")
+				.setResourceResolvers(resourceResolvers);
+		}
+	}
+
+	@SuppressWarnings("serial")
+	private static class TestServlet extends HttpServlet {
+
+		private HttpServletResponse response;
+
+		@Override
+		protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+			this.response = response;
+		}
+	}
+
+}

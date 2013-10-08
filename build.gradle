@@ -677,6 +677,7 @@ project("spring-orm-hibernate4") {
 		optional("org.hibernate:hibernate-core:${hibernate4Version}")
 		optional("org.hibernate:hibernate-entitymanager:${hibernate4Version}")
 		optional("javax.servlet:javax.servlet-api:3.0.1")
+        optional("aopalliance:aopalliance:1.0")
 	}
 }
 

@@ -43,7 +43,7 @@ public class ResourceHttpRequestHandlerTests {
 	private ResourceHttpRequestHandler handler;
 
 	@Before
-	public void setUp() {
+	public void setUp() throws Exception {
 		List<Resource> resourcePaths = new ArrayList<Resource>();
 		resourcePaths.add(new ClassPathResource("test/", getClass()));
 		resourcePaths.add(new ClassPathResource("testalternatepath/", getClass()));
@@ -51,6 +51,7 @@ public class ResourceHttpRequestHandlerTests {
 		handler.setLocations(resourcePaths);
 		handler.setCacheSeconds(3600);
 		handler.setServletContext(new TestServletContext());
+		handler.afterPropertiesSet();
 	}
 
 	@Test

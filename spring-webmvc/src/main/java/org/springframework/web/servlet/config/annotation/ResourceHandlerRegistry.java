@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Map;
 
 import javax.servlet.ServletContext;
 
+import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
@@ -31,6 +32,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
+import org.springframework.web.servlet.resource.ResourceResolver;
 
 /**
  * Stores registrations of resource handlers for serving static resources such as images, css files and others
@@ -57,7 +59,10 @@ public class ResourceHandlerRegistry {
 
 	private final List<ResourceHandlerRegistration> registrations = new ArrayList<ResourceHandlerRegistration>();
 
+	private List<ResourceResolver> resourceResolvers;
+
 	private int order = Integer.MAX_VALUE -1;
+
 
 	public ResourceHandlerRegistry(ApplicationContext applicationContext, ServletContext servletContext) {
 		Assert.notNull(applicationContext, "ApplicationContext is required");
@@ -99,6 +104,14 @@ public class ResourceHandlerRegistry {
 	}
 
 	/**
+	 * Configure the {@link ResourceResolver}s to use by default in resource handlers that
+	 * don't have them set.
+	 */
+	public void setResourceResolvers(List<ResourceResolver> resourceResolvers) {
+		this.resourceResolvers = resourceResolvers;
+	}
+
+	/**
 	 * Return a handler mapping with the mapped resource handlers; or {@code null} in case of no registrations.
 	 */
 	protected AbstractHandlerMapping getHandlerMapping() {
@@ -109,10 +122,19 @@ public class ResourceHandlerRegistry {
 		Map<String, HttpRequestHandler> urlMap = new LinkedHashMap<String, HttpRequestHandler>();
 		for (ResourceHandlerRegistration registration : registrations) {
 			for (String pathPattern : registration.getPathPatterns()) {
-				ResourceHttpRequestHandler requestHandler = registration.getRequestHandler();
-				requestHandler.setServletContext(servletContext);
-				requestHandler.setApplicationContext(applicationContext);
-				urlMap.put(pathPattern, requestHandler);
+				ResourceHttpRequestHandler handler = registration.getRequestHandler();
+				handler.setServletContext(servletContext);
+				handler.setApplicationContext(applicationContext);
+				if ((this.resourceResolvers != null) && (registration.getResourceResolvers() == null)) {
+					handler.setResourceResolvers(this.resourceResolvers);
+				}
+				try {
+					handler.afterPropertiesSet();
+				}
+				catch (Exception e) {
+					throw new BeanInitializationException("Failed to init ResourceHttpRequestHandler", e);
+				}
+				urlMap.put(pathPattern, handler);
 			}
 		}
 

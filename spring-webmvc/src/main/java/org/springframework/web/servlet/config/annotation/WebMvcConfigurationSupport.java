@@ -48,6 +48,7 @@ import org.springframework.http.converter.support.AllEncompassingFormHttpMessage
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.PathMatcher;
 import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
@@ -76,6 +77,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExc
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
+import org.springframework.web.servlet.resource.PublicResourceUrlProvider;
+import org.springframework.web.servlet.resource.PublicResourceUrlProviderExposingInterceptor;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * This is the main class providing the configuration behind the MVC Java config.
@@ -163,6 +167,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 	private List<HttpMessageConverter<?>> messageConverters;
 
+	private PathMatchConfigurer pathMatchConfigurer;
+
 
 	/**
 	 * Set the {@link javax.servlet.ServletContext}, e.g. for resource handling,
@@ -187,12 +193,13 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public RequestMappingHandlerMapping requestMappingHandlerMapping() {
-		PathMatchConfigurer configurer = new PathMatchConfigurer();
-		configurePathMatch(configurer);
+
 		RequestMappingHandlerMapping handlerMapping = new RequestMappingHandlerMapping();
 		handlerMapping.setOrder(0);
 		handlerMapping.setInterceptors(getInterceptors());
 		handlerMapping.setContentNegotiationManager(mvcContentNegotiationManager());
+
+		PathMatchConfigurer configurer = getPathMatchConfigurer();
 		if(configurer.isUseSuffixPatternMatch() != null) {
 			handlerMapping.setUseSuffixPatternMatch(configurer.isUseSuffixPatternMatch());
 		}
@@ -211,6 +218,22 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		return handlerMapping;
 	}
 
+	protected PathMatchConfigurer getPathMatchConfigurer() {
+		if (this.pathMatchConfigurer == null) {
+			this.pathMatchConfigurer = new PathMatchConfigurer();
+			configurePathMatch(this.pathMatchConfigurer);
+		}
+		return this.pathMatchConfigurer;
+	}
+
+	/**
+	 * Override this method to configure path matching options.
+	 * @see PathMatchConfigurer
+	 * @since 4.0.3
+	 */
+	public void configurePathMatch(PathMatchConfigurer configurer) {
+	}
+
 	/**
 	 * Provide access to the shared handler interceptors used to configure
 	 * {@link HandlerMapping} instances with. This method cannot be overridden,
@@ -221,6 +244,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			InterceptorRegistry registry = new InterceptorRegistry();
 			addInterceptors(registry);
 			registry.addInterceptor(new ConversionServiceExposingInterceptor(mvcConversionService()));
+			registry.addInterceptor(new PublicResourceUrlProviderExposingInterceptor(resourceUrlPathTranslator()));
 			this.interceptors = registry.getInterceptors();
 		}
 		return this.interceptors.toArray();
@@ -318,7 +342,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public HandlerMapping resourceHandlerMapping() {
-		ResourceHandlerRegistry registry = new ResourceHandlerRegistry(applicationContext, servletContext);
+		ResourceHandlerRegistry registry = new ResourceHandlerRegistry(
+				this.applicationContext, this.servletContext);
 		addResourceHandlers(registry);
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
 		handlerMapping = handlerMapping != null ? handlerMapping : new EmptyHandlerMapping();
@@ -330,6 +355,20 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * @see ResourceHandlerRegistry
 	 */
 	protected void addResourceHandlers(ResourceHandlerRegistry registry) {
+	}
+
+	@Bean
+	public PublicResourceUrlProvider resourceUrlPathTranslator() {
+		PublicResourceUrlProvider translator = new PublicResourceUrlProvider();
+		UrlPathHelper pathHelper = getPathMatchConfigurer().getUrlPathHelper();
+		if (pathHelper != null) {
+			translator.setUrlPathHelper(pathHelper);
+		}
+		PathMatcher pathMatcher = getPathMatchConfigurer().getPathMatcher();
+		if (pathMatcher != null) {
+			translator.setPathMatcher(pathMatcher);
+		}
+		return translator;
 	}
 
 	/**
@@ -573,13 +612,6 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
 	}
 
-	/**
-	 * Override this method to configure path matching options.
-	 * @see PathMatchConfigurer
-	 * @since 4.0.3
-	 */
-	public void configurePathMatch(PathMatchConfigurer configurer) {
-	}
 
 	/**
 	 * Return an instance of {@link CompositeUriComponentsContributor} for use with
