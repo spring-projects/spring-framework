@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,12 @@
 package org.springframework.web.servlet.config.annotation;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
 
-import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
@@ -32,8 +30,6 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
-import org.springframework.web.servlet.resource.ResourceResolver;
-import org.springframework.web.servlet.resource.ResourceTransformer;
 
 /**
  * Stores registrations of resource handlers for serving static resources such as images, css files and others
@@ -60,12 +56,7 @@ public class ResourceHandlerRegistry {
 
 	private final List<ResourceHandlerRegistration> registrations = new ArrayList<ResourceHandlerRegistration>();
 
-	private List<ResourceResolver> resourceResolvers;
-
-	private List<ResourceTransformer> resourceTransformers;
-
 	private int order = Integer.MAX_VALUE -1;
-
 
 	public ResourceHandlerRegistry(ApplicationContext applicationContext, ServletContext servletContext) {
 		Assert.notNull(applicationContext, "ApplicationContext is required");
@@ -85,40 +76,12 @@ public class ResourceHandlerRegistry {
 	}
 
 	/**
-	 * Whether a resource handler has already been registered for the given pathPattern.
-	 */
-	public boolean hasMappingForPattern(String pathPattern) {
-		for (ResourceHandlerRegistration registration : registrations) {
-			if (Arrays.asList(registration.getPathPatterns()).contains(pathPattern)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
 	 * Specify the order to use for resource handling relative to other {@link HandlerMapping}s configured in
 	 * the Spring MVC application context. The default value used is {@code Integer.MAX_VALUE-1}.
 	 */
 	public ResourceHandlerRegistry setOrder(int order) {
 		this.order = order;
 		return this;
-	}
-
-	/**
-	 * Configure the {@link ResourceResolver}s to use by default in resource handlers that
-	 * don't have them set.
-	 */
-	public void setResourceResolvers(List<ResourceResolver> resourceResolvers) {
-		this.resourceResolvers = resourceResolvers;
-	}
-
-	/**
-	 * Configure the {@link ResourceTransformer}s to use by default in resource handlers
-	 * that don't have them set.
-	 */
-	public void setResourceTransformers(List<ResourceTransformer> transformers) {
-		this.resourceTransformers = transformers;
 	}
 
 	/**
@@ -132,22 +95,10 @@ public class ResourceHandlerRegistry {
 		Map<String, HttpRequestHandler> urlMap = new LinkedHashMap<String, HttpRequestHandler>();
 		for (ResourceHandlerRegistration registration : registrations) {
 			for (String pathPattern : registration.getPathPatterns()) {
-				ResourceHttpRequestHandler handler = registration.getRequestHandler();
-				handler.setServletContext(servletContext);
-				handler.setApplicationContext(applicationContext);
-				if ((this.resourceResolvers != null) && (registration.getResourceResolvers() == null)) {
-					handler.setResourceResolvers(this.resourceResolvers);
-				}
-				if ((this.resourceTransformers != null) && (registration.getResourceTransformers() == null)) {
-					handler.setResourceTransformers(this.resourceTransformers);
-				}
-				try {
-					handler.afterPropertiesSet();
-				}
-				catch (Exception e) {
-					throw new BeanInitializationException("Failed to init ResourceHttpRequestHandler", e);
-				}
-				urlMap.put(pathPattern, handler);
+				ResourceHttpRequestHandler requestHandler = registration.getRequestHandler();
+				requestHandler.setServletContext(servletContext);
+				requestHandler.setApplicationContext(applicationContext);
+				urlMap.put(pathPattern, requestHandler);
 			}
 		}
 
