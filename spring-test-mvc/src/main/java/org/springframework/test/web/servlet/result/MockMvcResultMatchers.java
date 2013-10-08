@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.test.web.servlet.result;
 
 import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 import java.util.Map;
 
@@ -25,6 +26,7 @@ import javax.xml.xpath.XPathExpressionException;
 import org.hamcrest.Matcher;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.util.AntPathMatcher;
 
 /**
  * Static, factory methods for {@link ResultMatcher}-based result actions.
@@ -33,6 +35,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
  * favorite. To navigate, open the Preferences and type "favorites".
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 3.2
  */
 public abstract class MockMvcResultMatchers {
@@ -78,6 +81,8 @@ public abstract class MockMvcResultMatchers {
 
 	/**
 	 * Asserts the request was forwarded to the given URL.
+	 * This methods accepts only exact matches.
+	 * @param expectedUrl the exact URL expected
 	 */
 	public static ResultMatcher forwardedUrl(final String expectedUrl) {
 		return new ResultMatcher() {
@@ -89,13 +94,65 @@ public abstract class MockMvcResultMatchers {
 	}
 
 	/**
+	 * Asserts the request was forwarded to the given URL.
+	 * This methods accepts {@link org.springframework.util.AntPathMatcher} expressions.
+	 *
+	 * <p>When trying to match against "?" or "*" exactly, those characters
+	 * should be escaped (e.g. "\\?" and "\\*")
+	 *
+	 * @param expectedUrl an AntPath expression to match against
+	 * @see org.springframework.util.AntPathMatcher
+	 * @since 4.0
+	 */
+	public static ResultMatcher forwardedUrlPattern(final String expectedUrl) {
+		return new ResultMatcher() {
+
+			private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
+			@Override
+			public void match(MvcResult result) {
+				assertTrue("AntPath expression",pathMatcher.isPattern(expectedUrl));
+				assertTrue("Forwarded URL",
+						pathMatcher.match(expectedUrl, result.getResponse().getForwardedUrl()));
+			}
+		};
+	}
+
+	/**
 	 * Asserts the request was redirected to the given URL.
+	 * This methods accepts only exact matches.
+	 * @param expectedUrl the exact URL expected
 	 */
 	public static ResultMatcher redirectedUrl(final String expectedUrl) {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) {
 				assertEquals("Redirected URL", expectedUrl, result.getResponse().getRedirectedUrl());
+			}
+		};
+	}
+
+	/**
+	 * Asserts the request was redirected to the given URL.
+	 * This methods accepts {@link org.springframework.util.AntPathMatcher} expressions.
+	 *
+	 * <p>When trying to match against "?" or "*" exactly, those characters
+	 * should be escaped (e.g. "\\?" and "\\*")
+	 *
+	 * @param expectedUrl an AntPath expression to match against
+	 * @see org.springframework.util.AntPathMatcher
+	 * @since 4.0
+	 */
+	public static ResultMatcher redirectedUrlPattern(final String expectedUrl) {
+		return new ResultMatcher() {
+
+			private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
+			@Override
+			public void match(MvcResult result) {
+				assertTrue("AntPath expression",pathMatcher.isPattern(expectedUrl));
+				assertTrue("Redirected URL",
+						pathMatcher.match(expectedUrl, result.getResponse().getRedirectedUrl()));
 			}
 		};
 	}

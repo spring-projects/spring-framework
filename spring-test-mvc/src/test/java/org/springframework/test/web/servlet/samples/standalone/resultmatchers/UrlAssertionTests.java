@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,9 @@ package org.springframework.test.web.servlet.samples.standalone.resultmatchers;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 import org.junit.Before;
@@ -47,10 +49,19 @@ public class UrlAssertionTests {
 	}
 
 	@Test
+	public void testRedirectPattern() throws Exception {
+		this.mockMvc.perform(get("/persons")).andExpect(redirectedUrlPattern("/persons/*"));
+	}
+
+	@Test
 	public void testForward() throws Exception {
 		this.mockMvc.perform(get("/")).andExpect(forwardedUrl("/home"));
 	}
 
+	@Test
+	public void testForwardPattern() throws Exception {
+		this.mockMvc.perform(get("/")).andExpect(forwardedUrlPattern("/ho?e"));
+	}
 
 	@Controller
 	private static class SimpleController {
