@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.config.annotation;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -322,11 +321,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public ResourceUrlGenerator resourceUrlGenerator() {
-		Map<String, ?> handlerMap = Collections.<String, Object>emptyMap();
-		if (resourceHandlerMapping() instanceof SimpleUrlHandlerMapping) {
-			handlerMap = ((SimpleUrlHandlerMapping) resourceHandlerMapping()).getUrlMap();
-		}
-		return new ResourceUrlGenerator(handlerMap);
+		SimpleUrlHandlerMapping hm = (SimpleUrlHandlerMapping) resourceHandlerMapping();
+		return new ResourceUrlGenerator(hm.getUrlMap());
 	}
 
 	/**
