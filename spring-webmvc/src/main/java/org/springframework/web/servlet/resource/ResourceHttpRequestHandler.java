@@ -83,9 +83,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 
 	private List<Resource> locations;
 
-	private final List<ResourceResolver> resourceResolvers = new ArrayList<ResourceResolver>();
+	private List<ResourceResolver> resourceResolvers = new ArrayList<ResourceResolver>();
 
-	private final List<ResourceTransformer> resourceTransformers = new ArrayList<ResourceTransformer>();
+	private List<ResourceTransformer> resourceTransformers = new ArrayList<ResourceTransformer>();
 
 
 	public ResourceHttpRequestHandler() {
@@ -114,24 +114,15 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	 * is recommended to add {@link PathResourceResolver} as the last resolver.
 	 */
 	public void setResourceResolvers(List<ResourceResolver> resourceResolvers) {
-		this.resourceResolvers.clear();
-		if (resourceResolvers != null) {
-			this.resourceResolvers.addAll(resourceResolvers);
-		}
+		this.resourceResolvers = resourceResolvers;
 	}
 
 	public List<ResourceResolver> getResourceResolvers() {
 		return this.resourceResolvers;
 	}
 
-	/**
-	 * Configure the list of {@link ResourceTransformer}s to use.
-	 */
 	public void setResourceTransformers(List<ResourceTransformer> transformers) {
-		this.resourceTransformers.clear();
-		if (transformers != null) {
-			this.resourceTransformers.addAll(transformers);
-		}
+		this.resourceTransformers = (transformers != null) ? transformers : new ArrayList<ResourceTransformer>();
 	}
 
 	public List<ResourceTransformer> getResourceTransformers() {
