@@ -35,10 +35,10 @@ import org.springframework.util.Assert;
  */
 public class MessageBodyMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
-	private final MessageConverter<?> converter;
+	private final MessageConverter converter;
 
 
-	public MessageBodyMethodArgumentResolver(MessageConverter<?> converter) {
+	public MessageBodyMethodArgumentResolver(MessageConverter converter) {
 		Assert.notNull(converter, "converter is required");
 		this.converter = converter;
 	}

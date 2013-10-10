@@ -29,6 +29,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
+import org.springframework.util.MimeType;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
@@ -234,6 +235,15 @@ public class MessageHeaderAccessor {
 	public void setErrorChannelName(String errorChannelName) {
 		setHeader(MessageHeaders.ERROR_CHANNEL, errorChannelName);
 	}
+
+    public MimeType getContentType() {
+        return (MimeType) getHeader(MessageHeaders.CONTENT_TYPE);
+    }
+
+	public void setContentType(MimeType contentType) {
+		setHeader(MessageHeaders.CONTENT_TYPE, contentType);
+	}
+
 
 	@Override
 	public String toString() {

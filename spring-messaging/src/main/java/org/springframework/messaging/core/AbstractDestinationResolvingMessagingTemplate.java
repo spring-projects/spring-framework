@@ -15,16 +15,22 @@
  */
 package org.springframework.messaging.core;
 
+import java.util.Map;
+
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 
 
 /**
+ * Base class for a messaging template that can resolve String-based destinations.
+ *
  * @author Mark Fisher
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractDestinationResolvingMessagingTemplate<D> extends AbstractMessagingTemplate<D>
-		implements DestinationResolvingMessageSendingOperations<D>,
+public abstract class AbstractDestinationResolvingMessagingTemplate<D> extends
+		AbstractMessagingTemplate<D> implements
+		DestinationResolvingMessageSendingOperations<D>,
 		DestinationResolvingMessageReceivingOperations<D>,
 		DestinationResolvingMessageRequestReplyOperations<D> {
 
@@ -48,14 +54,29 @@ public abstract class AbstractDestinationResolvingMessagingTemplate<D> extends A
 	}
 
 	@Override
-	public <T> void convertAndSend(String destinationName, T message) {
-		this.convertAndSend(destinationName, message, null);
+	public <T> void convertAndSend(String destinationName, T payload) {
+		Map<String, Object> headers = null;
+		this.convertAndSend(destinationName, payload, headers);
 	}
 
 	@Override
-	public <T> void convertAndSend(String destinationName, T message, MessagePostProcessor postProcessor) {
+	public <T> void convertAndSend(String destinationName, T payload, Map<String, Object> headers) {
+		MessagePostProcessor postProcessor = null;
+		this.convertAndSend(destinationName, payload, headers, postProcessor);
+	}
+
+	@Override
+	public <T> void convertAndSend(String destinationName, T payload, MessagePostProcessor postProcessor) {
+		Map<String, Object> headers = null;
+		this.convertAndSend(destinationName, payload, headers, postProcessor);
+	}
+
+	@Override
+	public <T> void convertAndSend(String destinationName, T payload, Map<String, Object> headers,
+			MessagePostProcessor postProcessor) {
+
 		D destination = resolveDestination(destinationName);
-		super.convertAndSend(destination, message, postProcessor);
+		super.convertAndSend(destination, payload, headers, postProcessor);
 	}
 
 	@Override
@@ -65,9 +86,9 @@ public abstract class AbstractDestinationResolvingMessagingTemplate<D> extends A
 	}
 
 	@Override
-	public Object receiveAndConvert(String destinationName) {
+	public <T> T receiveAndConvert(String destinationName, Class<T> targetClass) {
 		D destination = resolveDestination(destinationName);
-		return super.receiveAndConvert(destination);
+		return super.receiveAndConvert(destination, targetClass);
 	}
 
 	@Override
@@ -77,15 +98,33 @@ public abstract class AbstractDestinationResolvingMessagingTemplate<D> extends A
 	}
 
 	@Override
-	public Object convertSendAndReceive(String destinationName, Object request) {
+	public <T> T convertSendAndReceive(String destinationName, Object request, Class<T> targetClass) {
 		D destination = resolveDestination(destinationName);
-		return super.convertSendAndReceive(destination, request);
+		return super.convertSendAndReceive(destination, request, targetClass);
 	}
 
 	@Override
-	public Object convertSendAndReceive(String destinationName, Object request, MessagePostProcessor postProcessor) {
+	public <T> T convertSendAndReceive(String destinationName, Object request, Map<String, Object> headers,
+			Class<T> targetClass) {
+
 		D destination = resolveDestination(destinationName);
-		return super.convertSendAndReceive(destination, request, postProcessor);
+		return super.convertSendAndReceive(destination, request, headers, targetClass);
+	}
+
+	@Override
+	public <T> T convertSendAndReceive(String destinationName, Object request, Class<T> targetClass,
+			MessagePostProcessor postProcessor) {
+
+		D destination = resolveDestination(destinationName);
+		return super.convertSendAndReceive(destination, request, targetClass, postProcessor);
+	}
+
+	@Override
+	public <T> T convertSendAndReceive(String destinationName, Object request, Map<String, Object> headers,
+			Class<T> targetClass, MessagePostProcessor postProcessor) {
+
+		D destination = resolveDestination(destinationName);
+		return super.convertSendAndReceive(destination, request, headers, targetClass, postProcessor);
 	}
 
 }

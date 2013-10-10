@@ -83,7 +83,7 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 
 	private Collection<String> destinationPrefixes = new ArrayList<String>();
 
-	private MessageConverter<?> messageConverter;
+	private MessageConverter messageConverter;
 
 	private ApplicationContext applicationContext;
 
@@ -147,7 +147,7 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		return this.destinationPrefixes;
 	}
 
-	public void setMessageConverter(MessageConverter<?> converter) {
+	public void setMessageConverter(MessageConverter converter) {
 		this.messageConverter = converter;
 		if (converter != null) {
 			((AbstractMessageSendingTemplate<?>) this.webSocketResponseTemplate).setMessageConverter(converter);
@@ -176,7 +176,7 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		this.customReturnValueHandlers = customReturnValueHandlers;
 	}
 
-	public MessageConverter<?> getMessageConverter() {
+	public MessageConverter getMessageConverter() {
 		return this.messageConverter;
 	}
 

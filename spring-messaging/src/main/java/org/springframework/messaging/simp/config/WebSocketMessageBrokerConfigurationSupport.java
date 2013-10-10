@@ -16,6 +16,9 @@
 
 package org.springframework.messaging.simp.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.SubscribableChannel;
@@ -28,11 +31,18 @@ import org.springframework.messaging.simp.handler.MutableUserQueueSuffixResolver
 import org.springframework.messaging.simp.handler.SimpleUserQueueSuffixResolver;
 import org.springframework.messaging.simp.handler.UserDestinationMessageHandler;
 import org.springframework.messaging.support.channel.ExecutorSubscribableChannel;
+import org.springframework.messaging.support.converter.ByteArrayMessageConverter;
+import org.springframework.messaging.support.converter.CompositeMessageConverter;
+import org.springframework.messaging.support.converter.DefaultContentTypeResolver;
 import org.springframework.messaging.support.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.support.converter.MessageConverter;
+import org.springframework.messaging.support.converter.StringMessageConverter;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.config.SockJsServiceRegistration;
@@ -49,6 +59,10 @@ import org.springframework.web.socket.server.config.SockJsServiceRegistration;
  * @since 4.0
  */
 public abstract class WebSocketMessageBrokerConfigurationSupport {
+
+	private static final boolean jackson2Present =
+			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", WebMvcConfigurationSupport.class.getClassLoader()) &&
+					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", WebMvcConfigurationSupport.class.getClassLoader());
 
 	private MessageBrokerConfigurer messageBrokerConfigurer;
 
@@ -129,7 +143,7 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 		AnnotationMethodMessageHandler handler =
 				new AnnotationMethodMessageHandler(brokerMessagingTemplate(), webSocketResponseChannel());
 		handler.setDestinationPrefixes(getMessageBrokerConfigurer().getAnnotationMethodDestinationPrefixes());
-		handler.setMessageConverter(brokerMessageConverter());
+		handler.setMessageConverter(simpMessageConverter());
 		webSocketRequestChannel().subscribe(handler);
 		return handler;
 	}
@@ -184,7 +198,7 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 	@Bean
 	public SimpMessageSendingOperations brokerMessagingTemplate() {
 		SimpMessagingTemplate template = new SimpMessagingTemplate(brokerChannel());
-		template.setMessageConverter(brokerMessageConverter());
+		template.setMessageConverter(simpMessageConverter());
 		return template;
 	}
 
@@ -194,8 +208,16 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 	}
 
 	@Bean
-	public MessageConverter<?> brokerMessageConverter() {
-		return new MappingJackson2MessageConverter();
+	public CompositeMessageConverter simpMessageConverter() {
+		DefaultContentTypeResolver contentTypeResolver = new DefaultContentTypeResolver();
+		List<MessageConverter> converters = new ArrayList<MessageConverter>();
+		converters.add(new StringMessageConverter());
+		converters.add(new ByteArrayMessageConverter());
+		if (jackson2Present) {
+			converters.add(new MappingJackson2MessageConverter());
+			contentTypeResolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
+		}
+		return new CompositeMessageConverter(converters, contentTypeResolver);
 	}
 
 

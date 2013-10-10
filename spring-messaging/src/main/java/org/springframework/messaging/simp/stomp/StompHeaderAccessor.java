@@ -23,12 +23,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.springframework.http.MediaType;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StringUtils;
 
 
@@ -117,7 +118,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 
 		values = extHeaders.get(StompHeaderAccessor.STOMP_CONTENT_TYPE_HEADER);
 		if (!CollectionUtils.isEmpty(values)) {
-			super.setContentType(MediaType.parseMediaType(values.get(0)));
+			super.setContentType(MimeTypeUtils.parseMimeType(values.get(0)));
 		}
 
 		if (StompCommand.SUBSCRIBE.equals(command) || StompCommand.UNSUBSCRIBE.equals(command)) {
@@ -183,7 +184,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 			result.put(STOMP_DESTINATION_HEADER, Arrays.asList(destination));
 		}
 
-		MediaType contentType = getContentType();
+		MimeType contentType = super.getContentType();
 		if (contentType != null) {
 			result.put(STOMP_CONTENT_TYPE_HEADER, Arrays.asList(contentType.toString()));
 		}
@@ -281,16 +282,9 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		return new long[] { Long.valueOf(rawValues[0]), Long.valueOf(rawValues[1])};
 	}
 
-	public void setContentType(MediaType mediaType) {
-		if (mediaType != null) {
-			super.setContentType(mediaType);
-			setNativeHeader(STOMP_CONTENT_TYPE_HEADER, mediaType.toString());
-		}
-	}
-
-	public MediaType getContentType() {
-		String value = getFirstNativeHeader(STOMP_CONTENT_TYPE_HEADER);
-		return (value != null) ? MediaType.parseMediaType(value) : null;
+	public void setContentType(MimeType contentType) {
+		super.setContentType(contentType);
+		setNativeHeader(STOMP_CONTENT_TYPE_HEADER, contentType.toString());
 	}
 
 	public Integer getContentLength() {

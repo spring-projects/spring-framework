@@ -20,7 +20,12 @@ import org.springframework.messaging.MessagingException;
 
 
 /**
+ * A set of operations receiving messages from a destination.
+ *
+ * @param <D> the type of destination from which messages can be received
+ *
  * @author Mark Fisher
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
 public interface MessageReceivingOperations<D> {
@@ -29,8 +34,10 @@ public interface MessageReceivingOperations<D> {
 
 	<P> Message<P> receive(D destination) throws MessagingException;
 
-	Object receiveAndConvert() throws MessagingException;
+	<T> T receiveAndConvert(Class<T> targetClass) throws MessagingException;
 
-	Object receiveAndConvert(D destination) throws MessagingException;
+	<T> T receiveAndConvert(D destination, Class<T> targetClass) throws MessagingException;
 
 }
+
+

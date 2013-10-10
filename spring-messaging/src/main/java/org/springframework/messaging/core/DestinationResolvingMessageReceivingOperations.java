@@ -20,13 +20,16 @@ import org.springframework.messaging.MessagingException;
 
 
 /**
+ * A {@link MessageReceivingOperations} that can resolve a String-based destinations.
+ *
  * @author Mark Fisher
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
 public interface DestinationResolvingMessageReceivingOperations<D> extends MessageReceivingOperations<D> {
 
 	<P> Message<P> receive(String destinationName) throws MessagingException;
 
-	Object receiveAndConvert(String destinationName) throws MessagingException;
+	<T> T receiveAndConvert(String destinationName, Class<T> targetClass) throws MessagingException;
 
 }

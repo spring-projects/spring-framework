@@ -20,9 +20,7 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.http.MediaType;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.Assert;
 
@@ -112,14 +110,6 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
 	public String getDestination() {
 		return (String) getHeader(DESTINATION_HEADER);
-	}
-
-	public MediaType getContentType() {
-		return (MediaType) getHeader(MessageHeaders.CONTENT_TYPE);
-	}
-
-	public void setContentType(MediaType contentType) {
-		setHeader(MessageHeaders.CONTENT_TYPE, contentType);
 	}
 
 	public String getSubscriptionId() {

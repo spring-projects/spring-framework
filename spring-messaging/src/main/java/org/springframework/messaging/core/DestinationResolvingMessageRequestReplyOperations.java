@@ -15,19 +15,33 @@
  */
 package org.springframework.messaging.core;
 
+import java.util.Map;
+
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessagingException;
 
 
 /**
+ * A {@link MessageRequestReplyOperations} that can resolve a String-based destinations.
+ *
  * @author Mark Fisher
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
 public interface DestinationResolvingMessageRequestReplyOperations<D> extends MessageRequestReplyOperations<D> {
 
-	Message<?> sendAndReceive(String destinationName, Message<?> requestMessage);
+	Message<?> sendAndReceive(String destinationName, Message<?> requestMessage) throws MessagingException;
 
-	Object convertSendAndReceive(String destinationName, Object request);
+	<T> T convertSendAndReceive(String destinationName, Object request, Class<T> targetClass)
+			throws MessagingException;
 
-	Object convertSendAndReceive(String destinationName, Object request, MessagePostProcessor requestPostProcessor);
+	<T> T convertSendAndReceive(String destinationName, Object request, Map<String, Object> headers,
+			Class<T> targetClass) throws MessagingException;
+
+	<T> T convertSendAndReceive(String destinationName, Object request,
+			Class<T> targetClass, MessagePostProcessor requestPostProcessor) throws MessagingException;
+
+	<T> T convertSendAndReceive(String destinationName, Object request, Map<String, Object> headers,
+			Class<T> targetClass, MessagePostProcessor requestPostProcessor) throws MessagingException;
 
 }

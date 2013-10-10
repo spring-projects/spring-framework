@@ -16,6 +16,8 @@
 
 package org.springframework.messaging.simp;
 
+import java.util.Map;
+
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.core.MessagePostProcessor;
 import org.springframework.messaging.core.MessageSendingOperations;
@@ -35,19 +37,25 @@ public interface SimpMessageSendingOperations extends MessageSendingOperations<S
 	 *
 	 * @param user the user that should receive the message.
 	 * @param destination the destination to send the message to.
-	 * @param message the message to send
+	 * @param payload the payload to send
 	 */
-	<T> void convertAndSendToUser(String user, String destination, T message) throws MessagingException;
+	void convertAndSendToUser(String user, String destination, Object payload) throws MessagingException;
+
+	void convertAndSendToUser(String user, String destination, Object payload, Map<String, Object> headers)
+			throws MessagingException;
 
 	/**
 	 * Send a message to a specific user.
 	 *
 	 * @param user the user that should receive the message.
 	 * @param destination the destination to send the message to.
-	 * @param message the message to send
+	 * @param payload the payload to send
 	 * @param postProcessor a postProcessor to post-process or modify the created message
 	 */
-	<T> void convertAndSendToUser(String user, String destination, T message, MessagePostProcessor postProcessor)
-			throws MessagingException;
+	void convertAndSendToUser(String user, String destination, Object payload,
+			MessagePostProcessor postProcessor) throws MessagingException;
+
+	void convertAndSendToUser(String user, String destination, Object payload, Map<String, Object> headers,
+			MessagePostProcessor postProcessor) throws MessagingException;
 
 }
