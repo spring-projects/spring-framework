@@ -63,7 +63,7 @@ public class MethodParameter {
 	/** Map from Integer level to Integer type index */
 	Map<Integer, Integer> typeIndexesPerLevel;
 
-	Map<TypeVariable, Type> typeVariableMap;
+	Class<?> resolveClass;
 
 	private int hash = 0;
 
@@ -137,7 +137,7 @@ public class MethodParameter {
 		this.parameterName = original.parameterName;
 		this.nestingLevel = original.nestingLevel;
 		this.typeIndexesPerLevel = original.typeIndexesPerLevel;
-		this.typeVariableMap = original.typeVariableMap;
+		this.resolveClass = original.resolveClass;
 		this.hash = original.hash;
 	}
 

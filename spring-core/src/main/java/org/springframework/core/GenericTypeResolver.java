@@ -16,14 +16,12 @@
 
 package org.springframework.core;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.MalformedParameterizedTypeException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,6 +37,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Sam Brannen
+ * @author Phillip Webb
  * @since 2.5.2
  * @see GenericCollectionTypeResolver
  */
@@ -53,20 +52,12 @@ public abstract class GenericTypeResolver {
 	 * Determine the target type for the given parameter specification.
 	 * @param methodParam the method parameter specification
 	 * @return the corresponding generic parameter type
+	 * @deprecated as of Spring 4.0 use {@link MethodParameter#getGenericParameterType()}
 	 */
+	@Deprecated
 	public static Type getTargetType(MethodParameter methodParam) {
 		Assert.notNull(methodParam, "MethodParameter must not be null");
-		if (methodParam.getConstructor() != null) {
-			return methodParam.getConstructor().getGenericParameterTypes()[methodParam.getParameterIndex()];
-		}
-		else {
-			if (methodParam.getParameterIndex() >= 0) {
-				return methodParam.getMethod().getGenericParameterTypes()[methodParam.getParameterIndex()];
-			}
-			else {
-				return methodParam.getMethod().getGenericReturnType();
-			}
-		}
+		return methodParam.getGenericParameterType();
 	}
 
 	/**
@@ -76,14 +67,11 @@ public abstract class GenericTypeResolver {
 	 * @return the corresponding generic parameter or return type
 	 */
 	public static Class<?> resolveParameterType(MethodParameter methodParam, Class<?> clazz) {
-		Type genericType = getTargetType(methodParam);
+		Assert.notNull(methodParam, "MethodParameter must not be null");
 		Assert.notNull(clazz, "Class must not be null");
-		Map<TypeVariable, Type> typeVariableMap = getTypeVariableMap(clazz);
-		Type rawType = getRawType(genericType, typeVariableMap);
-		Class<?> result = (rawType instanceof Class ? (Class) rawType : methodParam.getParameterType());
-		methodParam.setParameterType(result);
-		methodParam.typeVariableMap = typeVariableMap;
-		return result;
+		methodParam.resolveClass = clazz;
+		methodParam.setParameterType(ResolvableType.forMethodParameter(methodParam, clazz).resolve());
+		return methodParam.getParameterType();
 	}
 
 	/**
@@ -96,11 +84,8 @@ public abstract class GenericTypeResolver {
 	 */
 	public static Class<?> resolveReturnType(Method method, Class<?> clazz) {
 		Assert.notNull(method, "Method must not be null");
-		Type genericType = method.getGenericReturnType();
 		Assert.notNull(clazz, "Class must not be null");
-		Map<TypeVariable, Type> typeVariableMap = getTypeVariableMap(clazz);
-		Type rawType = getRawType(genericType, typeVariableMap);
-		return (rawType instanceof Class ? (Class<?>) rawType : method.getReturnType());
+		return ResolvableType.forMethodReturn(method, clazz).resolve(method.getReturnType());
 	}
 
 	/**
@@ -202,22 +187,11 @@ public abstract class GenericTypeResolver {
 	 */
 	public static Class<?> resolveReturnTypeArgument(Method method, Class<?> genericIfc) {
 		Assert.notNull(method, "method must not be null");
-		Type returnType = method.getReturnType();
-		Type genericReturnType = method.getGenericReturnType();
-		if (returnType.equals(genericIfc)) {
-			if (genericReturnType instanceof ParameterizedType) {
-				ParameterizedType targetType = (ParameterizedType) genericReturnType;
-				Type[] actualTypeArguments = targetType.getActualTypeArguments();
-				Type typeArg = actualTypeArguments[0];
-				if (!(typeArg instanceof WildcardType)) {
-					return (Class<?>) typeArg;
-				}
-			}
-			else {
-				return null;
-			}
+		ResolvableType resolvableType = ResolvableType.forMethodReturn(method).as(genericIfc);
+		if (!resolvableType.hasGenerics() || resolvableType.getType() instanceof WildcardType) {
+			return null;
 		}
-		return resolveTypeArgument((Class<?>) returnType, genericIfc);
+		return getSingleGeneric(resolvableType);
 	}
 
 	/**
@@ -229,16 +203,21 @@ public abstract class GenericTypeResolver {
 	 * @return the resolved type of the argument, or {@code null} if not resolvable
 	 */
 	public static Class<?> resolveTypeArgument(Class<?> clazz, Class<?> genericIfc) {
-		Class[] typeArgs = resolveTypeArguments(clazz, genericIfc);
-		if (typeArgs == null) {
+		ResolvableType resolvableType = ResolvableType.forClass(clazz).as(genericIfc);
+		if (!resolvableType.hasGenerics()) {
 			return null;
 		}
-		if (typeArgs.length != 1) {
-			throw new IllegalArgumentException("Expected 1 type argument on generic interface [" +
-					genericIfc.getName() + "] but found " + typeArgs.length);
-		}
-		return typeArgs[0];
+		return getSingleGeneric(resolvableType);
 	}
+
+	private static Class<?> getSingleGeneric(ResolvableType resolvableType) {
+		if (resolvableType.getGenerics().length > 1) {
+			throw new IllegalArgumentException("Expected 1 type argument on generic interface [" +
+					resolvableType + "] but found " + resolvableType.getGenerics().length);
+		}
+		return resolvableType.getGeneric().resolve();
+	}
+
 
 	/**
 	 * Resolve the type arguments of the given generic interface against the given
@@ -250,87 +229,11 @@ public abstract class GenericTypeResolver {
 	 * number of actual type arguments, or {@code null} if not resolvable
 	 */
 	public static Class[] resolveTypeArguments(Class<?> clazz, Class<?> genericIfc) {
-		return doResolveTypeArguments(clazz, clazz, genericIfc);
-	}
-
-	private static Class[] doResolveTypeArguments(Class<?> ownerClass, Class<?> classToIntrospect, Class<?> genericIfc) {
-		while (classToIntrospect != null) {
-			if (genericIfc.isInterface()) {
-				Type[] ifcs = classToIntrospect.getGenericInterfaces();
-				for (Type ifc : ifcs) {
-					Class[] result = doResolveTypeArguments(ownerClass, ifc, genericIfc);
-					if (result != null) {
-						return result;
-					}
-				}
-			}
-			else {
-				try {
-					Class[] result = doResolveTypeArguments(ownerClass, classToIntrospect.getGenericSuperclass(), genericIfc);
-					if (result != null) {
-						return result;
-					}
-				}
-				catch (MalformedParameterizedTypeException ex) {
-					// from getGenericSuperclass() - return null to skip further superclass traversal
-					return null;
-				}
-			}
-			classToIntrospect = classToIntrospect.getSuperclass();
+		ResolvableType type = ResolvableType.forClass(clazz).as(genericIfc);
+		if(!type.hasGenerics()) {
+			return null;
 		}
-		return null;
-	}
-
-	private static Class[] doResolveTypeArguments(Class<?> ownerClass, Type ifc, Class<?> genericIfc) {
-		if (ifc instanceof ParameterizedType) {
-			ParameterizedType paramIfc = (ParameterizedType) ifc;
-			Type rawType = paramIfc.getRawType();
-			if (genericIfc.equals(rawType)) {
-				Type[] typeArgs = paramIfc.getActualTypeArguments();
-				Class[] result = new Class[typeArgs.length];
-				for (int i = 0; i < typeArgs.length; i++) {
-					Type arg = typeArgs[i];
-					result[i] = extractClass(ownerClass, arg);
-				}
-				return result;
-			}
-			else if (genericIfc.isAssignableFrom((Class) rawType)) {
-				return doResolveTypeArguments(ownerClass, (Class) rawType, genericIfc);
-			}
-		}
-		else if (ifc != null && genericIfc.isAssignableFrom((Class) ifc)) {
-			return doResolveTypeArguments(ownerClass, (Class) ifc, genericIfc);
-		}
-		return null;
-	}
-
-	/**
-	 * Extract a Class from the given Type.
-	 */
-	private static Class<?> extractClass(Class<?> ownerClass, Type arg) {
-		if (arg instanceof ParameterizedType) {
-			return extractClass(ownerClass, ((ParameterizedType) arg).getRawType());
-		}
-		else if (arg instanceof GenericArrayType) {
-			GenericArrayType gat = (GenericArrayType) arg;
-			Type gt = gat.getGenericComponentType();
-			Class<?> componentClass = extractClass(ownerClass, gt);
-			return Array.newInstance(componentClass, 0).getClass();
-		}
-		else if (arg instanceof TypeVariable) {
-			TypeVariable tv = (TypeVariable) arg;
-			arg = getTypeVariableMap(ownerClass).get(tv);
-			if (arg == null) {
-				arg = extractBoundForTypeVariable(tv);
-				if (arg instanceof ParameterizedType) {
-					return extractClass(ownerClass, ((ParameterizedType) arg).getRawType());
-				}
-			}
-			else {
-				return extractClass(ownerClass, arg);
-			}
-		}
-		return (arg instanceof Class ? (Class) arg : Object.class);
+		return type.resolveGenerics();
 	}
 
 	/**
@@ -338,15 +241,56 @@ public abstract class GenericTypeResolver {
 	 * @param genericType the generic type to resolve
 	 * @param typeVariableMap the TypeVariable Map to resolved against
 	 * @return the type if it resolves to a Class, or {@code Object.class} otherwise
+	 * @deprecated as of Spring 4.0 in favor of {@link ResolvableType}
 	 */
+	@Deprecated
 	public static Class<?> resolveType(Type genericType, Map<TypeVariable, Type> typeVariableMap) {
-		Type resolvedType = getRawType(genericType, typeVariableMap);
-		if (resolvedType instanceof GenericArrayType) {
-			Type componentType = ((GenericArrayType) resolvedType).getGenericComponentType();
-			Class<?> componentClass = resolveType(componentType, typeVariableMap);
-			resolvedType = Array.newInstance(componentClass, 0).getClass();
+		TypeVariableResolver variableResolver = new TypeVariableMapResolver(typeVariableMap);
+		Class<?> resolved = ResolvableType.forType(genericType, variableResolver).resolve();
+		return (resolved == null ? Object.class : resolved);
+	}
+
+	/**
+	 * Build a mapping of {@link TypeVariable#getName TypeVariable names} to
+	 * {@link Class concrete classes} for the specified {@link Class}. Searches
+	 * all super types, enclosing types and interfaces.
+	 * @deprecated as of Spring 4.0 in favor of {@link ResolvableType}
+	 */
+	@Deprecated
+	public static Map<TypeVariable, Type> getTypeVariableMap(Class<?> clazz) {
+		Map<TypeVariable, Type> typeVariableMap = typeVariableCache.get(clazz);
+		if (typeVariableMap == null) {
+			typeVariableMap = new HashMap<TypeVariable, Type>();
+			buildTypeVaraibleMap(ResolvableType.forClass(clazz), typeVariableMap);
+			typeVariableCache.put(clazz, Collections.unmodifiableMap(typeVariableMap));
 		}
-		return (resolvedType instanceof Class ? (Class) resolvedType : Object.class);
+		return typeVariableMap;
+	}
+
+	private static void buildTypeVaraibleMap(ResolvableType type,
+			Map<TypeVariable, Type> typeVariableMap) {
+		if(type != ResolvableType.NONE) {
+			if(type.getType() instanceof ParameterizedType) {
+				TypeVariable<?>[] variables = type.resolve().getTypeParameters();
+				for (int i = 0; i < variables.length; i++) {
+					ResolvableType generic = type.getGeneric(i);
+					while (generic.getType() instanceof TypeVariable<?>) {
+						generic = generic.resolveType();
+					}
+					if (generic != ResolvableType.NONE) {
+						typeVariableMap.put(variables[i], generic.getType());
+					}
+				}
+			}
+			buildTypeVaraibleMap(type.getSuperType(), typeVariableMap);
+			for (ResolvableType interfaceType : type.getInterfaces()) {
+				buildTypeVaraibleMap(interfaceType, typeVariableMap);
+			}
+			if (type.resolve().isMemberClass()) {
+				buildTypeVaraibleMap(ResolvableType.forClass(type.resolve().getEnclosingClass()),
+						typeVariableMap);
+			}
+		}
 	}
 
 	/**
@@ -355,6 +299,7 @@ public abstract class GenericTypeResolver {
 	 * @param typeVariableMap the TypeVariable Map to resolved against
 	 * @return the resolved raw type
 	 */
+	@Deprecated
 	static Type getRawType(Type genericType, Map<TypeVariable, Type> typeVariableMap) {
 		Type resolvedType = genericType;
 		if (genericType instanceof TypeVariable) {
@@ -373,61 +318,9 @@ public abstract class GenericTypeResolver {
 	}
 
 	/**
-	 * Build a mapping of {@link TypeVariable#getName TypeVariable names} to
-	 * {@link Class concrete classes} for the specified {@link Class}. Searches
-	 * all super types, enclosing types and interfaces.
-	 */
-	public static Map<TypeVariable, Type> getTypeVariableMap(Class<?> clazz) {
-		Map<TypeVariable, Type> typeVariableMap = typeVariableCache.get(clazz);
-
-		if (typeVariableMap == null) {
-			typeVariableMap = new HashMap<TypeVariable, Type>();
-
-			// interfaces
-			extractTypeVariablesFromGenericInterfaces(clazz.getGenericInterfaces(), typeVariableMap);
-
-			try {
-				// super class
-				Class<?> type = clazz;
-				while (type.getSuperclass() != null && !Object.class.equals(type.getSuperclass())) {
-					Type genericType = type.getGenericSuperclass();
-					if (genericType instanceof ParameterizedType) {
-						ParameterizedType pt = (ParameterizedType) genericType;
-						populateTypeMapFromParameterizedType(pt, typeVariableMap);
-					}
-					extractTypeVariablesFromGenericInterfaces(type.getSuperclass().getGenericInterfaces(), typeVariableMap);
-					type = type.getSuperclass();
-				}
-			}
-			catch (MalformedParameterizedTypeException ex) {
-				// from getGenericSuperclass() - ignore and continue with member class check
-			}
-
-			try {
-				// enclosing class
-				Class<?> type = clazz;
-				while (type.isMemberClass()) {
-					Type genericType = type.getGenericSuperclass();
-					if (genericType instanceof ParameterizedType) {
-						ParameterizedType pt = (ParameterizedType) genericType;
-						populateTypeMapFromParameterizedType(pt, typeVariableMap);
-					}
-					type = type.getEnclosingClass();
-				}
-			}
-			catch (MalformedParameterizedTypeException ex) {
-				// from getGenericSuperclass() - ignore and preserve previously accumulated type variables
-			}
-
-			typeVariableCache.put(clazz, typeVariableMap);
-		}
-
-		return typeVariableMap;
-	}
-
-	/**
 	 * Extracts the bound {@code Type} for a given {@link TypeVariable}.
 	 */
+	@Deprecated
 	static Type extractBoundForTypeVariable(TypeVariable typeVariable) {
 		Type[] bounds = typeVariable.getBounds();
 		if (bounds.length == 0) {
@@ -440,67 +333,43 @@ public abstract class GenericTypeResolver {
 		return bound;
 	}
 
-	private static void extractTypeVariablesFromGenericInterfaces(Type[] genericInterfaces, Map<TypeVariable, Type> typeVariableMap) {
-		for (Type genericInterface : genericInterfaces) {
-			if (genericInterface instanceof ParameterizedType) {
-				ParameterizedType pt = (ParameterizedType) genericInterface;
-				populateTypeMapFromParameterizedType(pt, typeVariableMap);
-				if (pt.getRawType() instanceof Class) {
-					extractTypeVariablesFromGenericInterfaces(
-							((Class) pt.getRawType()).getGenericInterfaces(), typeVariableMap);
-				}
-			}
-			else if (genericInterface instanceof Class) {
-				extractTypeVariablesFromGenericInterfaces(
-						((Class) genericInterface).getGenericInterfaces(), typeVariableMap);
-			}
-		}
-	}
 
 	/**
-	 * Read the {@link TypeVariable TypeVariables} from the supplied {@link ParameterizedType}
-	 * and add mappings corresponding to the {@link TypeVariable#getName TypeVariable name} ->
-	 * concrete type to the supplied {@link Map}.
-	 * <p>Consider this case:
-	 * <pre class="code>
-	 * public interface Foo<S, T> {
-	 *  ..
-	 * }
-	 *
-	 * public class FooImpl implements Foo<String, Integer> {
-	 *  ..
-	 * }</pre>
-	 * For '{@code FooImpl}' the following mappings would be added to the {@link Map}:
-	 * {S=java.lang.String, T=java.lang.Integer}.
+	 * Adapts a {@code typeVariableMap} to a {@link TypeVariableResolver}.
 	 */
-	private static void populateTypeMapFromParameterizedType(ParameterizedType type, Map<TypeVariable, Type> typeVariableMap) {
-		if (type.getRawType() instanceof Class) {
-			Type[] actualTypeArguments = type.getActualTypeArguments();
-			TypeVariable[] typeVariables = ((Class) type.getRawType()).getTypeParameters();
-			for (int i = 0; i < actualTypeArguments.length; i++) {
-				Type actualTypeArgument = actualTypeArguments[i];
-				TypeVariable variable = typeVariables[i];
-				if (actualTypeArgument instanceof Class) {
-					typeVariableMap.put(variable, actualTypeArgument);
-				}
-				else if (actualTypeArgument instanceof GenericArrayType) {
-					typeVariableMap.put(variable, actualTypeArgument);
-				}
-				else if (actualTypeArgument instanceof ParameterizedType) {
-					typeVariableMap.put(variable, actualTypeArgument);
-				}
-				else if (actualTypeArgument instanceof TypeVariable) {
-					// We have a type that is parameterized at instantiation time
-					// the nearest match on the bridge method will be the bounded type.
-					TypeVariable typeVariableArgument = (TypeVariable) actualTypeArgument;
-					Type resolvedType = typeVariableMap.get(typeVariableArgument);
-					if (resolvedType == null) {
-						resolvedType = extractBoundForTypeVariable(typeVariableArgument);
-					}
-					typeVariableMap.put(variable, resolvedType);
-				}
-			}
+	private static class TypeVariableMapResolver implements TypeVariableResolver {
+
+		private Map<TypeVariable, Type> typeVariableMap;
+
+
+		public TypeVariableMapResolver(Map<TypeVariable, Type> typeVariableMap) {
+			Assert.notNull("TypeVariableMap must not be null");
+			this.typeVariableMap = typeVariableMap;
 		}
+
+
+		@Override
+		public Type resolveVariable(TypeVariable typeVariable) {
+			return typeVariableMap.get(typeVariable);
+		}
+
+		@Override
+		public int hashCode() {
+			return typeVariableMap.hashCode();
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if(obj == this) {
+				return true;
+			}
+			if(obj instanceof TypeVariableMapResolver) {
+				TypeVariableMapResolver other = (TypeVariableMapResolver) obj;
+				return this.typeVariableMap.equals(other.typeVariableMap);
+			}
+			return false;
+		}
+
 	}
 
 }
