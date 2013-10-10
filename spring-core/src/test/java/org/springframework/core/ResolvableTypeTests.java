@@ -52,8 +52,6 @@ import static org.mockito.BDDMockito.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
-// FIXME nested
-
 /**
  * Tests for {@link ResolvableType}.
  *
@@ -822,8 +820,8 @@ public class ResolvableTypeTests {
 		ResolvableType objectType = ResolvableType.forClass(Object.class);
 		ResolvableType unresolvableVariable = ResolvableType.forField(AssignmentBase.class.getField("o"));
 		assertThat(unresolvableVariable.resolve(), nullValue());
-		assertAssignable(objectType, unresolvableVariable).equalTo(false);
-		assertAssignable(unresolvableVariable, objectType).equalTo(false);
+		assertAssignable(objectType, unresolvableVariable).equalTo(true);
+		assertAssignable(unresolvableVariable, objectType).equalTo(true);
 	}
 
 	@Test
@@ -936,6 +934,7 @@ public class ResolvableTypeTests {
 		ResolvableType object = ResolvableType.forClass(Object.class);
 		ResolvableType charSequence = ResolvableType.forClass(CharSequence.class);
 		ResolvableType string = ResolvableType.forClass(String.class);
+		ResolvableType extendsAnon = ResolvableType.forField(AssignmentBase.class.getField("listAnon"), Assignment.class).getGeneric();
 		ResolvableType extendsObject = ResolvableType.forField(AssignmentBase.class.getField("listxo"), Assignment.class).getGeneric();
 		ResolvableType extendsCharSequence = ResolvableType.forField(AssignmentBase.class.getField("listxc"), Assignment.class).getGeneric();
 		ResolvableType extendsString = ResolvableType.forField(AssignmentBase.class.getField("listxs"), Assignment.class).getGeneric();
@@ -972,6 +971,8 @@ public class ResolvableTypeTests {
 				equalTo(false, true, true);
 		assertAssignable(charSequence, extendsObject, extendsCharSequence, extendsString).
 				equalTo(false, false, false);
+		assertAssignable(extendsAnon, object, charSequence, string).
+				equalTo(true, true, true);
 
 		// T <= ? super T
 		assertAssignable(superCharSequence, object, charSequence, string).
@@ -1143,6 +1144,8 @@ public class ResolvableTypeTests {
 		public List<C> listc;
 
 		public List<S> lists;
+
+		public List<?> listAnon;
 
 		public List<? extends O> listxo;
 

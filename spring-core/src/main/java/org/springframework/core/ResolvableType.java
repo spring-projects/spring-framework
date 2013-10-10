@@ -138,7 +138,7 @@ public final class ResolvableType implements TypeVariableResolver {
 		Assert.notNull(type, "Type must not be null");
 
 		// If we cannot resolve types, we are not assignable
-		if (resolve() == null || type.resolve() == null) {
+		if (this == NONE || type == NONE) {
 			return false;
 		}
 
@@ -164,15 +164,16 @@ public final class ResolvableType implements TypeVariableResolver {
 		}
 
 		// Main assignability check
-		boolean rtn = resolve().isAssignableFrom(type.resolve());
+		boolean rtn = resolve(Object.class).isAssignableFrom(type.resolve(Object.class));
 
 		// We need an exact type match for generics
 		// List<CharSequence> is not assignable from List<String>
-		rtn &= (!checkingGeneric || resolve().equals(type.resolve()));
+		rtn &= (!checkingGeneric || resolve(Object.class).equals(type.resolve(Object.class)));
 
 		// Recursively check each generic
 		for (int i = 0; i < getGenerics().length; i++) {
-			rtn &= getGeneric(i).isAssignableFrom(type.as(resolve()).getGeneric(i), true);
+			rtn &= getGeneric(i).isAssignableFrom(
+					type.as(resolve(Object.class)).getGeneric(i), true);
 		}
 
 		return rtn;
