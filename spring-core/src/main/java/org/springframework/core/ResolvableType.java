@@ -456,7 +456,8 @@ public final class ResolvableType implements TypeVariableResolver {
 	/**
 	 * Resolve this type to a {@link java.lang.Class}, returning {@code null} if the type
 	 * cannot be resolved. This method will consider bounds of {@link TypeVariable}s and
-	 * {@link WildcardType}s if direct resolution fails.
+	 * {@link WildcardType}s if direct resolution fails, however, bounds of Object.class
+	 * will be ignored.
 	 * @return the resolved {@link Class} or {@code null}
 	 * @see #resolve(Class)
 	 * @see #resolveGeneric(int...)
@@ -469,7 +470,8 @@ public final class ResolvableType implements TypeVariableResolver {
 	/**
 	 * Resolve this type to a {@link java.lang.Class}, returning the specified
 	 * {@code fallback} if the type cannot be resolved. This method will consider bounds
-	 * of {@link TypeVariable}s and {@link WildcardType}s if direct resolution fails.
+	 * of {@link TypeVariable}s and {@link WildcardType}s if direct resolution fails,
+	 * however, bounds of Object.class will be ignored.
 	 * @param fallback the fallback class to use if resolution fails (may be {@code null})
 	 * @return the resolved {@link Class} or the {@code fallback}
 	 * @see #resolve()
