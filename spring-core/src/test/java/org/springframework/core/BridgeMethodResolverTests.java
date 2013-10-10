@@ -31,10 +31,10 @@ import java.util.Map;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
-
 import org.springframework.util.ReflectionUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
@@ -99,16 +99,16 @@ public class BridgeMethodResolverTests {
 
 	@Test
 	public void testIsBridgeMethodFor() throws Exception {
-		Map<TypeVariable, Type> typeParameterMap = GenericTypeResolver.getTypeVariableMap(MyBar.class);
 		Method bridged = MyBar.class.getDeclaredMethod("someMethod", String.class, Object.class);
 		Method other = MyBar.class.getDeclaredMethod("someMethod", Integer.class, Object.class);
 		Method bridge = MyBar.class.getDeclaredMethod("someMethod", Object.class, Object.class);
 
-		assertTrue("Should be bridge method", BridgeMethodResolver.isBridgeMethodFor(bridge, bridged, typeParameterMap));
-		assertFalse("Should not be bridge method", BridgeMethodResolver.isBridgeMethodFor(bridge, other, typeParameterMap));
+		assertTrue("Should be bridge method", BridgeMethodResolver.isBridgeMethodFor(bridge, bridged, MyBar.class));
+		assertFalse("Should not be bridge method", BridgeMethodResolver.isBridgeMethodFor(bridge, other, MyBar.class));
 	}
 
 	@Test
+	@Deprecated
 	public void testCreateTypeVariableMap() throws Exception {
 		Map<TypeVariable, Type> typeVariableMap = GenericTypeResolver.getTypeVariableMap(MyBar.class);
 		TypeVariable<?> barT = findTypeVariable(InterBar.class, "T");
@@ -220,14 +220,14 @@ public class BridgeMethodResolverTests {
 		Method otherMethod = MessageBroadcasterImpl.class.getMethod("receive", NewMessageEvent.class);
 		assertFalse(otherMethod.isBridge());
 
-		Map<TypeVariable, Type> typeVariableMap = GenericTypeResolver.getTypeVariableMap(MessageBroadcasterImpl.class);
-		assertFalse("Match identified incorrectly", BridgeMethodResolver.isBridgeMethodFor(bridgeMethod, otherMethod, typeVariableMap));
-		assertTrue("Match not found correctly", BridgeMethodResolver.isBridgeMethodFor(bridgeMethod, bridgedMethod, typeVariableMap));
+		assertFalse("Match identified incorrectly", BridgeMethodResolver.isBridgeMethodFor(bridgeMethod, otherMethod, MessageBroadcasterImpl.class));
+		assertTrue("Match not found correctly", BridgeMethodResolver.isBridgeMethodFor(bridgeMethod, bridgedMethod, MessageBroadcasterImpl.class));
 
 		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
 	}
 
 	@Test
+	@Deprecated
 	public void testSPR2454() throws Exception {
 		Map<TypeVariable, Type> typeVariableMap = GenericTypeResolver.getTypeVariableMap(YourHomer.class);
 		TypeVariable<?> variable = findTypeVariable(MyHomer.class, "L");
@@ -768,6 +768,7 @@ public class BridgeMethodResolverTests {
 	}
 
 
+	@SuppressWarnings({ "unused", "unchecked" })
 	public abstract class GenericEventBroadcasterImpl<T extends Event> extends GenericBroadcasterImpl
 					implements EventBroadcaster {
 
@@ -835,6 +836,7 @@ public class BridgeMethodResolverTests {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public class MessageBroadcasterImpl extends GenericEventBroadcasterImpl<MessageEvent>
 					implements MessageBroadcaster {
 
@@ -889,6 +891,7 @@ public class BridgeMethodResolverTests {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public class SettableRepositoryRegistry<R extends SimpleGenericRepository<?>>
 					implements RepositoryRegistry {
 

@@ -16,14 +16,11 @@
 
 package org.springframework.core;
 
-import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -44,6 +41,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 2.0
  */
 public abstract class BridgeMethodResolver {
@@ -87,32 +85,6 @@ public abstract class BridgeMethodResolver {
 	}
 
 	/**
-	 * Searches for the bridged method in the given candidates.
-	 * @param candidateMethods the List of candidate Methods
-	 * @param bridgeMethod the bridge method
-	 * @return the bridged method, or {@code null} if none found
-	 */
-	private static Method searchCandidates(List<Method> candidateMethods, Method bridgeMethod) {
-		if (candidateMethods.isEmpty()) {
-			return null;
-		}
-		Map<TypeVariable, Type> typeParameterMap = GenericTypeResolver.getTypeVariableMap(bridgeMethod.getDeclaringClass());
-		Method previousMethod = null;
-		boolean sameSig = true;
-		for (Method candidateMethod : candidateMethods) {
-			if (isBridgeMethodFor(bridgeMethod, candidateMethod, typeParameterMap)) {
-				return candidateMethod;
-			}
-			else if (previousMethod != null) {
-				sameSig = sameSig &&
-						Arrays.equals(candidateMethod.getGenericParameterTypes(), previousMethod.getGenericParameterTypes());
-			}
-			previousMethod = candidateMethod;
-		}
-		return (sameSig ? candidateMethods.get(0) : null);
-	}
-
-	/**
 	 * Returns {@code true} if the supplied '{@code candidateMethod}' can be
 	 * consider a validate candidate for the {@link Method} that is {@link Method#isBridge() bridged}
 	 * by the supplied {@link Method bridge Method}. This method performs inexpensive
@@ -125,15 +97,40 @@ public abstract class BridgeMethodResolver {
 	}
 
 	/**
+	 * Searches for the bridged method in the given candidates.
+	 * @param candidateMethods the List of candidate Methods
+	 * @param bridgeMethod the bridge method
+	 * @return the bridged method, or {@code null} if none found
+	 */
+	private static Method searchCandidates(List<Method> candidateMethods, Method bridgeMethod) {
+		if (candidateMethods.isEmpty()) {
+			return null;
+		}
+		Method previousMethod = null;
+		boolean sameSig = true;
+		for (Method candidateMethod : candidateMethods) {
+			if (isBridgeMethodFor(bridgeMethod, candidateMethod, bridgeMethod.getDeclaringClass())) {
+				return candidateMethod;
+			}
+			else if (previousMethod != null) {
+				sameSig = sameSig &&
+						Arrays.equals(candidateMethod.getGenericParameterTypes(), previousMethod.getGenericParameterTypes());
+			}
+			previousMethod = candidateMethod;
+		}
+		return (sameSig ? candidateMethods.get(0) : null);
+	}
+
+	/**
 	 * Determines whether or not the bridge {@link Method} is the bridge for the
 	 * supplied candidate {@link Method}.
 	 */
-	static boolean isBridgeMethodFor(Method bridgeMethod, Method candidateMethod, Map<TypeVariable, Type> typeVariableMap) {
-		if (isResolvedTypeMatch(candidateMethod, bridgeMethod, typeVariableMap)) {
+	static boolean isBridgeMethodFor(Method bridgeMethod, Method candidateMethod, Class<?> declaringClass) {
+		if (isResolvedTypeMatch(candidateMethod, bridgeMethod, declaringClass)) {
 			return true;
 		}
 		Method method = findGenericDeclaration(bridgeMethod);
-		return (method != null && isResolvedTypeMatch(method, candidateMethod, typeVariableMap));
+		return (method != null && isResolvedTypeMatch(method, candidateMethod, declaringClass));
 	}
 
 	/**
@@ -167,34 +164,27 @@ public abstract class BridgeMethodResolver {
 	/**
 	 * Returns {@code true} if the {@link Type} signature of both the supplied
 	 * {@link Method#getGenericParameterTypes() generic Method} and concrete {@link Method}
-	 * are equal after resolving all {@link TypeVariable TypeVariables} using the supplied
-	 * TypeVariable Map, otherwise returns {@code false}.
+	 * are equal after resolving all types against the declaringType, otherwise
+	 * returns {@code false}.
 	 */
 	private static boolean isResolvedTypeMatch(
-			Method genericMethod, Method candidateMethod, Map<TypeVariable, Type> typeVariableMap) {
-
+			Method genericMethod, Method candidateMethod, Class<?> declaringClass) {
 		Type[] genericParameters = genericMethod.getGenericParameterTypes();
 		Class[] candidateParameters = candidateMethod.getParameterTypes();
 		if (genericParameters.length != candidateParameters.length) {
 			return false;
 		}
-		for (int i = 0; i < genericParameters.length; i++) {
-			Type genericParameter = genericParameters[i];
+		for (int i = 0; i < candidateParameters.length; i++) {
+			ResolvableType genericParameter = ResolvableType.forMethodParameter(genericMethod, i, declaringClass);
 			Class candidateParameter = candidateParameters[i];
 			if (candidateParameter.isArray()) {
 				// An array type: compare the component type.
-				Type rawType = GenericTypeResolver.getRawType(genericParameter, typeVariableMap);
-				if (rawType instanceof GenericArrayType) {
-					if (!candidateParameter.getComponentType().equals(
-							GenericTypeResolver.resolveType(((GenericArrayType) rawType).getGenericComponentType(), typeVariableMap))) {
-						return false;
-					}
-					break;
+				if (!candidateParameter.getComponentType().equals(genericParameter.getComponentType().resolve(Object.class))) {
+					return false;
 				}
 			}
 			// A non-array type: compare the type itself.
-			Class resolvedParameter = GenericTypeResolver.resolveType(genericParameter, typeVariableMap);
-			if (!candidateParameter.equals(resolvedParameter)) {
+			if (!candidateParameter.equals(genericParameter.resolve(Object.class))) {
 				return false;
 			}
 		}
