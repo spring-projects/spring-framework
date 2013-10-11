@@ -25,7 +25,9 @@ import org.junit.Test;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.context.support.StaticWebApplicationContext;
@@ -184,6 +186,21 @@ public class RequestMappingHandlerAdapterTests {
 		assertEquals("gAttr2", mav.getModel().get("attr2"));
 	}
 
+	@Test
+	public void modelAttributePackageNameAdvice() throws Exception {
+		this.webAppContext.registerSingleton("mapa", ModelAttributePackageAdvice.class);
+		this.webAppContext.registerSingleton("manupa", ModelAttributeNotUsedPackageAdvice.class);
+		this.webAppContext.refresh();
+
+		HandlerMethod handlerMethod = handlerMethod(new SimpleController(), "handle");
+		this.handlerAdapter.afterPropertiesSet();
+		ModelAndView mav = this.handlerAdapter.handle(this.request, this.response, handlerMethod);
+
+		assertEquals("lAttr1", mav.getModel().get("attr1"));
+		assertEquals("gAttr2", mav.getModel().get("attr2"));
+		assertEquals(null,mav.getModel().get("attr3"));
+	}
+
 
 	private HandlerMethod handlerMethod(Object handler, String methodName, Class<?>... paramTypes) throws Exception {
 		Method method = handler.getClass().getDeclaredMethod(methodName, paramTypes);
@@ -237,4 +254,21 @@ public class RequestMappingHandlerAdapterTests {
 		}
 	}
 
+	@ControllerAdvice({"org.springframework.web.servlet.mvc.method.annotation","java.lang"})
+	private static class ModelAttributePackageAdvice {
+
+		@ModelAttribute
+		public void addAttributes(Model model) {
+			model.addAttribute("attr2", "gAttr2");
+		}
+	}
+
+	@ControllerAdvice("java.lang")
+	private static class ModelAttributeNotUsedPackageAdvice {
+
+		@ModelAttribute
+		public void addAttributes(Model model) {
+			model.addAttribute("attr3", "gAttr3");
+		}
+	}
 }
