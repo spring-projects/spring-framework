@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -351,8 +351,8 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	 * @return a method to handle the exception, or {@code null}
 	 */
 	protected ServletInvocableHandlerMethod getExceptionHandlerMethod(HandlerMethod handlerMethod, Exception exception) {
+		Class<?> handlerType = (handlerMethod != null) ? handlerMethod.getBeanType() : null;
 		if (handlerMethod != null) {
-			Class<?> handlerType = handlerMethod.getBeanType();
 			ExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache.get(handlerType);
 			if (resolver == null) {
 				resolver = new ExceptionHandlerMethodResolver(handlerType);
@@ -364,9 +364,11 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			}
 		}
 		for (Entry<ControllerAdviceBean, ExceptionHandlerMethodResolver> entry : this.exceptionHandlerAdviceCache.entrySet()) {
-			Method method = entry.getValue().resolveMethod(exception);
-			if (method != null) {
-				return new ServletInvocableHandlerMethod(entry.getKey().resolveBean(), method);
+			if(entry.getKey().isApplicableToBeanType(handlerType)) {
+				Method method = entry.getValue().resolveMethod(exception);
+				if (method != null) {
+					return new ServletInvocableHandlerMethod(entry.getKey().resolveBean(), method);
+				}
 			}
 		}
 		return null;
