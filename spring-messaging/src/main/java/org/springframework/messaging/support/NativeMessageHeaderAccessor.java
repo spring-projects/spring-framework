@@ -49,18 +49,17 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	/**
 	 * A constructor for creating new headers, accepting an optional native header map.
 	 */
-	public NativeMessageHeaderAccessor(Map<String, List<String>> nativeHeaders) {
+	protected NativeMessageHeaderAccessor(Map<String, List<String>> nativeHeaders) {
 		this.originalNativeHeaders = nativeHeaders;
 	}
 
 	/**
 	 * A constructor for accessing and modifying existing message headers.
 	 */
-	public NativeMessageHeaderAccessor(Message<?> message) {
+	protected NativeMessageHeaderAccessor(Message<?> message) {
 		super(message);
 		this.originalNativeHeaders = initNativeHeaders(message);
 	}
-
 
 	private static Map<String, List<String>> initNativeHeaders(Message<?> message) {
 		if (message != null) {
@@ -71,6 +70,13 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Create {@link NativeMessageHeaderAccessor} from the headers of an existing message.
+	 */
+	public static NativeMessageHeaderAccessor wrap(Message<?> message) {
+		return new NativeMessageHeaderAccessor(message);
 	}
 
 

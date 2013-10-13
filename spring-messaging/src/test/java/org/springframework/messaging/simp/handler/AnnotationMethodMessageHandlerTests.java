@@ -16,14 +16,25 @@
 
 package org.springframework.messaging.simp.handler;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Controller;
+
+import static org.junit.Assert.*;
 
 
 /**
@@ -32,24 +43,76 @@ import org.springframework.stereotype.Controller;
  */
 public class AnnotationMethodMessageHandlerTests {
 
+	private TestAnnotationMethodMessageHandler messageHandler;
+
+	private TestController testController;
+
+
+	@Before
+	public void setup() {
+		MessageChannel channel = Mockito.mock(MessageChannel.class);
+		SimpMessageSendingOperations brokerTemplate = new SimpMessagingTemplate(channel);
+		this.messageHandler = new TestAnnotationMethodMessageHandler(brokerTemplate, channel);
+		this.messageHandler.setApplicationContext(new StaticApplicationContext());
+		this.messageHandler.afterPropertiesSet();
+
+		testController = new TestController();
+		this.messageHandler.registerHandler(testController);
+	}
+
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void headerArgumentResolution() {
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
+		headers.setDestination("/headers");
+		headers.setHeader("foo", "bar");
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		this.messageHandler.handleMessage(message);
+
+		assertEquals("headers", this.testController.method);
+		assertEquals("bar", this.testController.arguments.get("foo"));
+		assertEquals("bar", ((Map<String, Object>) this.testController.arguments.get("headers")).get("foo"));
+	}
 
 	@Test(expected=IllegalStateException.class)
 	public void duplicateMappings() {
+		this.messageHandler.registerHandler(new DuplicateMappingController());
+	}
 
-		StaticApplicationContext cxt = new StaticApplicationContext();
-		cxt.registerSingleton("d", DuplicateMappingController.class);
-		cxt.refresh();
 
-		MessageChannel channel = Mockito.mock(MessageChannel.class);
-		SimpMessageSendingOperations brokerTemplate = new SimpMessagingTemplate(channel);
-		AnnotationMethodMessageHandler mh = new AnnotationMethodMessageHandler(brokerTemplate, channel);
-		mh.setApplicationContext(cxt);
-		mh.afterPropertiesSet();
+	private static class TestAnnotationMethodMessageHandler extends AnnotationMethodMessageHandler {
+
+		public TestAnnotationMethodMessageHandler(SimpMessageSendingOperations brokerTemplate,
+				MessageChannel webSocketResponseChannel) {
+
+			super(brokerTemplate, webSocketResponseChannel);
+		}
+
+		public void registerHandler(Object handler) {
+			super.detectHandlerMethods(handler);
+		}
 	}
 
 
 	@Controller
-	static class DuplicateMappingController {
+	private static class TestController {
+
+		private String method;
+
+		private Map<String, Object> arguments = new LinkedHashMap<String, Object>();
+
+
+		@MessageMapping("/headers")
+		public void headers(@Header String foo, @Headers Map<String, Object> headers) {
+			this.method = "headers";
+			this.arguments.put("foo", foo);
+			this.arguments.put("headers", headers);
+		}
+	}
+
+	@Controller
+	private static class DuplicateMappingController {
 
 		@MessageMapping(value="/duplicate")
 		public void handle1() { }

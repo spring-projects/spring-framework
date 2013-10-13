@@ -16,12 +16,6 @@
 
 package org.springframework.web.method.annotation;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.lang.reflect.Method;
 import java.util.Map;
 
@@ -37,7 +31,8 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
-import org.springframework.web.method.annotation.RequestHeaderMethodArgumentResolver;
+
+import static org.junit.Assert.*;
 
 /**
  * Test fixture with {@link org.springframework.web.method.annotation.RequestHeaderMethodArgumentResolver}.
@@ -143,7 +138,6 @@ public class RequestHeaderMethodArgumentResolverTests {
 	@Test(expected = ServletRequestBindingException.class)
 	public void notFound() throws Exception {
 		resolver.resolveArgument(paramNamedValueStringArray, null, webRequest, null);
-		fail("Expected exception");
 	}
 
 	public void params(@RequestHeader(value = "name", defaultValue = "bar") String param1,

@@ -31,10 +31,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
@@ -42,8 +46,10 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.core.AbstractMessageSendingTemplate;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.support.ExceptionHandlerMethodResolver;
-import org.springframework.messaging.handler.annotation.support.MessageBodyMethodArgumentResolver;
+import org.springframework.messaging.handler.annotation.support.HeaderMethodArgumentResolver;
+import org.springframework.messaging.handler.annotation.support.HeadersMethodArgumentResolver;
 import org.springframework.messaging.handler.annotation.support.MessageMethodArgumentResolver;
+import org.springframework.messaging.handler.annotation.support.PayloadArgumentResolver;
 import org.springframework.messaging.handler.method.HandlerMethod;
 import org.springframework.messaging.handler.method.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.method.HandlerMethodArgumentResolverComposite;
@@ -61,7 +67,10 @@ import org.springframework.messaging.simp.annotation.support.PrincipalMethodArgu
 import org.springframework.messaging.simp.annotation.support.SendToMethodReturnValueHandler;
 import org.springframework.messaging.simp.annotation.support.SubscriptionMethodReturnValueHandler;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.converter.ByteArrayMessageConverter;
+import org.springframework.messaging.support.converter.CompositeMessageConverter;
 import org.springframework.messaging.support.converter.MessageConverter;
+import org.springframework.messaging.support.converter.StringMessageConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -84,6 +93,8 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 	private Collection<String> destinationPrefixes = new ArrayList<String>();
 
 	private MessageConverter messageConverter;
+
+	private ConversionService conversionService = new DefaultFormattingConversionService();
 
 	private ApplicationContext applicationContext;
 
@@ -116,6 +127,11 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		Assert.notNull(webSocketResponseChannel, "webSocketReplyChannel is required");
 		this.brokerTemplate = brokerTemplate;
 		this.webSocketResponseTemplate = new SimpMessagingTemplate(webSocketResponseChannel);
+
+		Collection<MessageConverter> converters = new ArrayList<MessageConverter>();
+		converters.add(new StringMessageConverter());
+		converters.add(new ByteArrayMessageConverter());
+		this.messageConverter = new CompositeMessageConverter(converters);
 	}
 
 	/**
@@ -147,11 +163,43 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		return this.destinationPrefixes;
 	}
 
+	/**
+	 * Configure a {@link MessageConverter} to use to convert the payload of a message
+	 * from serialize form with a specific MIME type to an Object matching the target
+	 * method parameter. The converter is also used when sending message to the message
+	 * broker.
+	 *
+	 * @see CompositeMessageConverter
+	 */
 	public void setMessageConverter(MessageConverter converter) {
 		this.messageConverter = converter;
 		if (converter != null) {
 			((AbstractMessageSendingTemplate<?>) this.webSocketResponseTemplate).setMessageConverter(converter);
 		}
+	}
+
+	/**
+	 * Return the configured {@link MessageConverter}.
+	 */
+	public MessageConverter getMessageConverter() {
+		return this.messageConverter;
+	}
+
+	/**
+	 * Configure a {@link ConversionService} to use when resolving method arguments, for
+	 * example message header values.
+	 * <p>
+	 * By default an instance of {@link DefaultFormattingConversionService} is used.
+	 */
+	public void setConversionService(ConversionService conversionService) {
+		this.conversionService = conversionService;
+	}
+
+	/**
+	 * The configured {@link ConversionService}.
+	 */
+	public ConversionService getConversionService() {
+		return this.conversionService;
 	}
 
 	/**
@@ -176,19 +224,24 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		this.customReturnValueHandlers = customReturnValueHandlers;
 	}
 
-	public MessageConverter getMessageConverter() {
-		return this.messageConverter;
-	}
-
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
 	}
 
+
 	@Override
 	public void afterPropertiesSet() {
 
 		initHandlerMethods();
+
+		ConfigurableBeanFactory beanFactory =
+				(ClassUtils.isAssignableValue(ConfigurableApplicationContext.class, this.applicationContext)) ?
+						((ConfigurableApplicationContext) this.applicationContext).getBeanFactory() : null;
+
+		// Annotation-based argument resolution
+		this.argumentResolvers.addResolver(new HeaderMethodArgumentResolver(this.conversionService, beanFactory));
+		this.argumentResolvers.addResolver(new HeadersMethodArgumentResolver());
 
 		// Type-based argument resolution
 		this.argumentResolvers.addResolver(new PrincipalMethodArgumentResolver());
@@ -198,7 +251,7 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		this.argumentResolvers.addResolvers(this.customArgumentResolvers);
 
 		// catch-all argument resolver
-		this.argumentResolvers.addResolver(new MessageBodyMethodArgumentResolver(this.messageConverter));
+		this.argumentResolvers.addResolver(new PayloadArgumentResolver(this.messageConverter));
 
 		// Annotation-based return value types
 		this.returnValueHandlers.addHandler(new SendToMethodReturnValueHandler(this.brokerTemplate, true));
