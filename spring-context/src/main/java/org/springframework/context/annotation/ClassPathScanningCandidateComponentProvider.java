@@ -228,7 +228,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		try {
 			this.includeFilters.add(new AnnotationTypeFilter(
 					((Class<? extends Annotation>) cl.loadClass("javax.annotation.ManagedBean")), false));
-			logger.info("JSR-250 'javax.annotation.ManagedBean' found and supported for component scanning");
+			logger.debug("JSR-250 'javax.annotation.ManagedBean' found and supported for component scanning");
 		}
 		catch (ClassNotFoundException ex) {
 			// JSR-250 1.1 API (as included in Java EE 6) not available - simply skip.
@@ -236,7 +236,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		try {
 			this.includeFilters.add(new AnnotationTypeFilter(
 					((Class<? extends Annotation>) cl.loadClass("javax.inject.Named")), false));
-			logger.info("JSR-330 'javax.inject.Named' annotation found and supported for component scanning");
+			logger.debug("JSR-330 'javax.inject.Named' annotation found and supported for component scanning");
 		}
 		catch (ClassNotFoundException ex) {
 			// JSR-330 API not available - simply skip.
