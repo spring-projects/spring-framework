@@ -35,13 +35,13 @@ import org.springframework.util.StringUtils;
 
 /**
  * Encapsulates a Java {@link java.lang.reflect.Type}, providing access to
- * {@link #getSuperType() supertypes} , {@link #getInterfaces() interfaces} and
+ * {@link #getSuperType() supertypes}, {@link #getInterfaces() interfaces}, and
  * {@link #getGeneric(int...) generic parameters} along with the ability to ultimately
  * {@link #resolve() resolve} to a {@link java.lang.Class}.
  *
  * <p>{@code ResolvableTypes} may be obtained from {@link #forField(Field) fields},
  * {@link #forMethodParameter(Method, int) method parameters},
- * {@link #forMethodReturn(Method) method returns}, {@link #forClass(Class) classes} or
+ * {@link #forMethodReturn(Method) method returns}, {@link #forClass(Class) classes}, or
  * directly from a {@link #forType(Type) java.lang.reflect.Type}. Most methods on this class
  * will themselves return {@link ResolvableType}s, allowing easy navigation. For example:
  * <pre class="code">
@@ -90,7 +90,7 @@ public final class ResolvableType implements TypeVariableResolver {
 	private final Type type;
 
 	/**
-	 * The {@link TypeVariableResolver} to use or {@code null} if no resolver is availble.
+	 * The {@link TypeVariableResolver} to use or {@code null} if no resolver is available.
 	 */
 	private final TypeVariableResolver variableResolver;
 
@@ -241,10 +241,10 @@ public final class ResolvableType implements TypeVariableResolver {
 	 * Return this type as a {@link ResolvableType} of the specified class. Searches
 	 * {@link #getSuperType() supertype} and {@link #getInterfaces() interface}
 	 * hierarchies to find a match, returning {@link #NONE} if this type does not
-	 * implement or extends the specified class.
+	 * implement or extend the specified class.
 	 * @param type the required class type
-	 * @return a {@link ResolvableType} representing this object as the specified type or
-	 *         {@link #NONE}
+	 * @return a {@link ResolvableType} representing this object as the specified
+	 * type or {@link #NONE}
 	 * @see #asCollection()
 	 * @see #asMap()
 	 * @see #getSuperType()
@@ -308,7 +308,7 @@ public final class ResolvableType implements TypeVariableResolver {
 	}
 
 	/**
-	 * Returns a {@link ResolvableType} for the specified nesting level. See
+	 * Return a {@link ResolvableType} for the specified nesting level. See
 	 * {@link #getNested(int, Map)} for details.
 	 * @param nestingLevel the nesting level
 	 * @return the {@link ResolvableType} type, or {@code #NONE}
@@ -318,27 +318,27 @@ public final class ResolvableType implements TypeVariableResolver {
 	}
 
 	/**
-	 * Returns a {@link ResolvableType} for the specified nesting level. The nesting level
+	 * Return a {@link ResolvableType} for the specified nesting level. The nesting level
 	 * refers to the specific generic parameter that should be returned. A nesting level
-	 * of 1 indicates this type, 2 indicates the first nested generic, 3 the second and so
+	 * of 1 indicates this type; 2 indicates the first nested generic; 3 the second; and so
 	 * on. For example, given {@code List<Set<Integer>>} level 1 refers to the
-	 * {@code List}, level 2 the {@code Set} and level 3 the {@code Integer}.
+	 * {@code List}, level 2 the {@code Set}, and level 3 the {@code Integer}.
 	 *
 	 * <p>The {@code typeIndexesPerLevel} map can be used to reference a specific generic
-	 * for the given level. For example, an index of 0 would refer to a {@code Map} key,
-	 * where as 1 would refer to the value. If the map does not contain an value for a
+	 * for the given level. For example, an index of 0 would refer to a {@code Map} key;
+	 * whereas, 1 would refer to the value. If the map does not contain a value for a
 	 * specific level the last generic will be used (e.g. a {@code Map} value).
 	 *
-	 * <p>Nesting levels may also apply to array types, for example given
-	 * {@code String[]}, a nesting level of 2 referes to {@code String}.
+	 * <p>Nesting levels may also apply to array types; for example given
+	 * {@code String[]}, a nesting level of 2 refers to {@code String}.
 	 *
 	 * <p>If a type does not {@link #hasGenerics() contain} generics the
-	 * {@link #getSuperType() super-type} hierarchy will be considered.
+	 * {@link #getSuperType() supertype} hierarchy will be considered.
 	 * @param nestingLevel the required nesting level, indexed from 1 for the current
-	 *        type, 2 for the first nested generic, 3 for the second and so on.
+	 * type, 2 for the first nested generic, 3 for the second and so on
 	 * @param typeIndexesPerLevel a map containing the generic index for a given nesting
-	 *        level (may be {@code null}).
-	 * @return a {@link ResolvableType} for the nested level or {@link #NONE}.
+	 * level (may be {@code null})
+	 * @return a {@link ResolvableType} for the nested level or {@link #NONE}
 	 */
 	public ResolvableType getNested(int nestingLevel,
 			Map<Integer, Integer> typeIndexesPerLevel) {
@@ -363,16 +363,16 @@ public final class ResolvableType implements TypeVariableResolver {
 
 	/**
 	 * Return a {@link ResolvableType} representing the generic parameter for the given
-	 * indexes. Indexes are zero based, for example given the type
+	 * indexes. Indexes are zero based; for example given the type
 	 * {@code Map<Integer, List<String>>}, {@code getGeneric(0)} will access the
-	 * {@code Integer}. Nested generics can be accessed by specifying multiple indexes,
+	 * {@code Integer}. Nested generics can be accessed by specifying multiple indexes;
 	 * for example {@code getGeneric(1, 0)} will access the {@code String} from the nested
 	 * {@code List}. For convenience, if no indexes are specified the first generic is
 	 * returned.
 	 *
 	 * <p>If no generic is available at the specified indexes {@link #NONE} is returned.
-	 * @param indexes the indexes that refers to the generic parameter (may be omitted to
-	 *        return the first generic)
+	 * @param indexes the indexes that refer to the generic parameter (may be omitted to
+	 * return the first generic)
 	 * @return a {@link ResolvableType} for the specified generic or {@link #NONE}
 	 * @see #hasGenerics()
 	 * @see #getGenerics()
@@ -396,13 +396,13 @@ public final class ResolvableType implements TypeVariableResolver {
 	}
 
 	/**
-	 * Return an array of {@link ResolvableType} representing the generics parameters of
+	 * Return an array of {@link ResolvableType}s representing the generic parameters of
 	 * this type. If no generics are available an empty array is returned. If you need to
 	 * access a specific generic consider using the {@link #getGeneric(int...)} method as
-	 * it allows access to nested generics, and protects against
-	 * {@code IndexOutOfBoundsExceptions}
+	 * it allows access to nested generics and protects against
+	 * {@code IndexOutOfBoundsExceptions}.
 	 * @return an array of {@link ResolvableType}s representing the generic parameters
-	 *         (never {@code null})
+	 * (never {@code null})
 	 * @see #hasGenerics()
 	 * @see #getGeneric(int...)
 	 * @see #resolveGeneric(int...)
@@ -427,7 +427,7 @@ public final class ResolvableType implements TypeVariableResolver {
 	 * Convenience method that will {@link #getGenerics() get} and {@link #resolve()
 	 * resolve} generic parameters.
 	 * @return an array of resolved generic parameters (the resulting array will never be
-	 *         {@code null}, but it may contain {@code null} elements})
+	 * {@code null}, but it may contain {@code null} elements})
 	 * @see #getGenerics()
 	 * @see #resolve()
 	 */
@@ -443,8 +443,8 @@ public final class ResolvableType implements TypeVariableResolver {
 	/**
 	 * Convenience method that will {@link #getGeneric(int...) get} and
 	 * {@link #resolve() resolve} a specific generic parameters.
-	 * @param indexes the indexes that refers to the generic parameter (may be omitted to
-	 *        return the first generic)
+	 * @param indexes the indexes that refer to the generic parameter (may be omitted to
+	 * return the first generic)
 	 * @return a resolved {@link Class} or {@code null}
 	 * @see #getGeneric(int...)
 	 * @see #resolve()
@@ -456,7 +456,7 @@ public final class ResolvableType implements TypeVariableResolver {
 	/**
 	 * Resolve this type to a {@link java.lang.Class}, returning {@code null} if the type
 	 * cannot be resolved. This method will consider bounds of {@link TypeVariable}s and
-	 * {@link WildcardType}s if direct resolution fails, however, bounds of Object.class
+	 * {@link WildcardType}s if direct resolution fails; however, bounds of Object.class
 	 * will be ignored.
 	 * @return the resolved {@link Class} or {@code null}
 	 * @see #resolve(Class)
@@ -470,7 +470,7 @@ public final class ResolvableType implements TypeVariableResolver {
 	/**
 	 * Resolve this type to a {@link java.lang.Class}, returning the specified
 	 * {@code fallback} if the type cannot be resolved. This method will consider bounds
-	 * of {@link TypeVariable}s and {@link WildcardType}s if direct resolution fails,
+	 * of {@link TypeVariable}s and {@link WildcardType}s if direct resolution fails;
 	 * however, bounds of Object.class will be ignored.
 	 * @param fallback the fallback class to use if resolution fails (may be {@code null})
 	 * @return the resolved {@link Class} or the {@code fallback}
@@ -623,7 +623,7 @@ public final class ResolvableType implements TypeVariableResolver {
 	 * @param sourceClass the source class (must not be {@code null}
 	 * @param implementationClass the implementation class (must not be {@code null})
 	 * @return a {@link ResolvableType} for the specified class backed by the given
-	 *         implementation class
+	 * implementation class
 	 * @see #forClass(Class)
 	 */
 	public static ResolvableType forClass(Class<?> sourceClass, Class<?> implementationClass) {
@@ -807,7 +807,7 @@ public final class ResolvableType implements TypeVariableResolver {
 	 * @param type the source type (must not be {@code null})
 	 * @param variableResolver the variable resolver
 	 * @return a {@link ResolvableType} for the specified {@link java.lang.reflect.Type}
-	 *         and {@link TypeVariableResolver}
+	 * and {@link TypeVariableResolver}
 	 */
 	public static ResolvableType forType(Type type, TypeVariableResolver variableResolver) {
 		ResolvableType key = new ResolvableType(type, variableResolver);
