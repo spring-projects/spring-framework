@@ -1,7 +1,6 @@
 package org.springframework.http.client;
 
 import org.asynchttpclient.AsyncHttpClient;
-import org.asynchttpclient.ByteArrayPart;
 import org.asynchttpclient.Response;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -11,6 +10,8 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -69,13 +70,14 @@ public class NingAsyncClientHttpRequest extends AbstractBufferingAsyncClientHttp
             default:
                 throw new IOException("Unsupported HttpMethod: " + this.httpMethod);
         }
+        Map<String, Collection<String>> headersMap = new HashMap<String, Collection<String>>(headers.size());
         for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-            for (String value : entry.getValue()) {
-                boundRequestBuilder = boundRequestBuilder.addHeader(entry.getKey(), value);
-            }
+            headersMap.put(entry.getKey(), entry.getValue());
         }
+        boundRequestBuilder = boundRequestBuilder.setHeaders(headersMap);
 
-        boundRequestBuilder = boundRequestBuilder.addBodyPart(new ByteArrayPart("body", "body", bufferedOutput, null, null));
+        //boundRequestBuilder = boundRequestBuilder.addBodyPart(new ByteArrayPart("body", "body", bufferedOutput, null, null));
+        boundRequestBuilder = boundRequestBuilder.setBody(bufferedOutput);
         org.asynchttpclient.ListenableFuture<Response> ningResponse = boundRequestBuilder.execute();
         ListenableFuture<Response> springResponse =
                 new NingListenableFutureToSpringListenableFuture<Response>(ningResponse);

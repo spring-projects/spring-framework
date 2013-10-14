@@ -71,6 +71,8 @@ configure(allprojects) { project ->
 		maven { url "https://repository.apache.org/content/repositories/releases" } // tomcat 8 RC3
 		maven { url "https://repository.apache.org/content/repositories/snapshots" } // tomcat-websocket-* snapshots
 		maven { url "https://maven.java.net/content/repositories/releases" } //  javax.websocket, tyrus		
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots"} // org.asynchttpclient
+        maven { url "https://oss.sonatype.org/content/repositories/releases"} // io.netty
 	}
 
 	dependencies {
@@ -519,6 +521,7 @@ project("spring-web") {
 		optional("org.apache.httpcomponents:httpasyncclient:4.0-beta4")
         optional("org.asynchttpclient:async-http-client-api:2.0.0-SNAPSHOT")
         optional("org.asynchttpclient:async-http-client-netty-provider:2.0.0-SNAPSHOT")
+        optional("io.netty:netty-all:4.0.10.Final")
 		optional("org.codehaus.jackson:jackson-mapper-asl:1.9.12")
 		optional("com.fasterxml.jackson.core:jackson-databind:2.2.0")
 		optional("taglibs:standard:1.1.2")
