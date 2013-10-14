@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.transaction;
+
+import java.io.Flushable;
 
 /**
  * Representation of the status of a transaction.
@@ -34,7 +36,7 @@ package org.springframework.transaction;
  * @see org.springframework.transaction.support.TransactionCallback#doInTransaction
  * @see org.springframework.transaction.interceptor.TransactionInterceptor#currentTransactionStatus()
  */
-public interface TransactionStatus extends SavepointManager {
+public interface TransactionStatus extends SavepointManager, Flushable {
 
 	/**
 	 * Return whether the present transaction is new (else participating
@@ -79,6 +81,7 @@ public interface TransactionStatus extends SavepointManager {
 	 * Flush the underlying session to the datastore, if applicable:
 	 * for example, all affected Hibernate/JPA sessions.
 	 */
+	@Override
 	void flush();
 
 	/**
