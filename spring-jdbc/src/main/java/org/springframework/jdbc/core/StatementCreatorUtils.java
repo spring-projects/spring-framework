@@ -231,7 +231,9 @@ public abstract class StatementCreatorUtils {
 				sqlType = ps.getParameterMetaData().getParameterType(paramIndex);
 			}
 			catch (Throwable ex) {
-				logger.debug("JDBC 3.0 getParameterType call not supported", ex);
+				if (logger.isDebugEnabled()) {
+					logger.debug("JDBC 3.0 getParameterType call not supported: " + ex);
+				}
 				// JDBC driver not compliant with JDBC 3.0
 				// -> proceed with database-specific checks
 				try {
