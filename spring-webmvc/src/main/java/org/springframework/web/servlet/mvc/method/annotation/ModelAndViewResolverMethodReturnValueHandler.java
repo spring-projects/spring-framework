@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ public class ModelAndViewResolverMethodReturnValueHandler implements HandlerMeth
 
 		if (this.mavResolvers != null) {
 			for (ModelAndViewResolver mavResolver : this.mavResolvers) {
-				Class<?> handlerType = returnType.getDeclaringClass();
+				Class<?> handlerType = returnType.getContainingClass();
 				Method method = returnType.getMethod();
 				ExtendedModelMap model = (ExtendedModelMap) mavContainer.getModel();
 				ModelAndView mav = mavResolver.resolveModelAndView(method, handlerType, returnValue, model, request);
@@ -95,14 +95,13 @@ public class ModelAndViewResolverMethodReturnValueHandler implements HandlerMeth
 			}
 		}
 
-		// No suitable ModelAndViewResolver..
-
+		// No suitable ModelAndViewResolver...
 		if (this.modelAttributeProcessor.supportsReturnType(returnType)) {
 			this.modelAttributeProcessor.handleReturnValue(returnValue, returnType, mavContainer, request);
 		}
 		else {
-			throw new UnsupportedOperationException("Unexpected return type: "
-					+ returnType.getParameterType().getName() + " in method: " + returnType.getMethod());
+			throw new UnsupportedOperationException("Unexpected return type: " +
+					returnType.getParameterType().getName() + " in method: " + returnType.getMethod());
 		}
 	}
 

@@ -24,12 +24,11 @@ import java.util.Set;
 
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.AutowireCandidateResolver;
+import org.springframework.beans.factory.support.GenericTypeAwareAutowireCandidateResolver;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -52,13 +51,11 @@ import org.springframework.util.StringUtils;
  * @see Qualifier
  * @see Value
  */
-public class QualifierAnnotationAutowireCandidateResolver implements AutowireCandidateResolver, BeanFactoryAware {
+public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwareAutowireCandidateResolver {
 
 	private final Set<Class<? extends Annotation>> qualifierTypes = new LinkedHashSet<Class<? extends Annotation>>();
 
 	private Class<? extends Annotation> valueAnnotationType = Value.class;
-
-	private BeanFactory beanFactory;
 
 
 	/**
@@ -126,15 +123,6 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 		this.valueAnnotationType = valueAnnotationType;
 	}
 
-	@Override
-	public void setBeanFactory(BeanFactory beanFactory) {
-		this.beanFactory = beanFactory;
-	}
-
-	protected final BeanFactory getBeanFactory() {
-		return this.beanFactory;
-	}
-
 
 	/**
 	 * Determine whether the provided bean definition is an autowire candidate.
@@ -150,21 +138,16 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 	 */
 	@Override
 	public boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
-		if (!bdHolder.getBeanDefinition().isAutowireCandidate()) {
-			// if explicitly false, do not proceed with qualifier check
-			return false;
-		}
-		if (descriptor == null) {
-			// no qualification necessary
-			return true;
-		}
-		boolean match = checkQualifiers(bdHolder, descriptor.getAnnotations());
-		if (match) {
-			MethodParameter methodParam = descriptor.getMethodParameter();
-			if (methodParam != null) {
-				Method method = methodParam.getMethod();
-				if (method == null || void.class.equals(method.getReturnType())) {
-					match = checkQualifiers(bdHolder, methodParam.getMethodAnnotations());
+		boolean match = super.isAutowireCandidate(bdHolder, descriptor);
+		if (match && descriptor != null) {
+			match = checkQualifiers(bdHolder, descriptor.getAnnotations());
+			if (match) {
+				MethodParameter methodParam = descriptor.getMethodParameter();
+				if (methodParam != null) {
+					Method method = methodParam.getMethod();
+					if (method == null || void.class.equals(method.getReturnType())) {
+						match = checkQualifiers(bdHolder, methodParam.getMethodAnnotations());
+					}
 				}
 			}
 		}
@@ -244,8 +227,8 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 			}
 			if (targetAnnotation == null) {
 				// look for matching annotation on the target class
-				if (this.beanFactory != null) {
-					Class<?> beanType = this.beanFactory.getType(bdHolder.getBeanName());
+				if (getBeanFactory() != null) {
+					Class<?> beanType = getBeanFactory().getType(bdHolder.getBeanName());
 					if (beanType != null) {
 						targetAnnotation = AnnotationUtils.getAnnotation(ClassUtils.getUserClass(beanType), type);
 					}
@@ -338,16 +321,6 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 			throw new IllegalStateException("Value annotation must have a value attribute");
 		}
 		return value;
-	}
-
-
-	/**
-	 * This implementation always returns {@code null},
-	 * leaving lazy resolution support up to subclasses.
-	 */
-	@Override
-	public Object getLazyResolutionProxyIfNecessary(DependencyDescriptor descriptor, String beanName) {
-		return null;
 	}
 
 }

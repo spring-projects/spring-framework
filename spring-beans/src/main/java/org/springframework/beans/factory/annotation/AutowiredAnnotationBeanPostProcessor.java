@@ -51,7 +51,6 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.BridgeMethodResolver;
-import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
@@ -471,14 +470,15 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					value = resolvedCachedArgument(beanName, this.cachedFieldValue);
 				}
 				else {
-					DependencyDescriptor descriptor = new DependencyDescriptor(field, this.required);
+					DependencyDescriptor desc = new DependencyDescriptor(field, this.required);
+					desc.setContainingClass(bean.getClass());
 					Set<String> autowiredBeanNames = new LinkedHashSet<String>(1);
 					TypeConverter typeConverter = beanFactory.getTypeConverter();
-					value = beanFactory.resolveDependency(descriptor, beanName, autowiredBeanNames, typeConverter);
+					value = beanFactory.resolveDependency(desc, beanName, autowiredBeanNames, typeConverter);
 					synchronized (this) {
 						if (!this.cached) {
 							if (value != null || this.required) {
-								this.cachedFieldValue = descriptor;
+								this.cachedFieldValue = desc;
 								registerDependentBeans(beanName, autowiredBeanNames);
 								if (autowiredBeanNames.size() == 1) {
 									String autowiredBeanName = autowiredBeanNames.iterator().next();
@@ -544,10 +544,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					TypeConverter typeConverter = beanFactory.getTypeConverter();
 					for (int i = 0; i < arguments.length; i++) {
 						MethodParameter methodParam = new MethodParameter(method, i);
-						GenericTypeResolver.resolveParameterType(methodParam, bean.getClass());
-						descriptors[i] = new DependencyDescriptor(methodParam, this.required);
-						Object arg = beanFactory.resolveDependency(
-								descriptors[i], beanName, autowiredBeanNames, typeConverter);
+						DependencyDescriptor desc = new DependencyDescriptor(methodParam, this.required);
+						desc.setContainingClass(bean.getClass());
+						descriptors[i] = desc;
+						Object arg = beanFactory.resolveDependency(desc, beanName, autowiredBeanNames, typeConverter);
 						if (arg == null && !this.required) {
 							arguments = null;
 							break;

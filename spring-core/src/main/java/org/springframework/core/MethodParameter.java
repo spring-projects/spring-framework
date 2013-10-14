@@ -23,7 +23,6 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,6 +47,8 @@ public class MethodParameter {
 
 	private final int parameterIndex;
 
+	private Class<?> containingClass;
+
 	private Class<?> parameterType;
 
 	private Type genericParameterType;
@@ -62,8 +63,6 @@ public class MethodParameter {
 
 	/** Map from Integer level to Integer type index */
 	Map<Integer, Integer> typeIndexesPerLevel;
-
-	Class<?> resolveClass;
 
 	private int hash = 0;
 
@@ -130,6 +129,7 @@ public class MethodParameter {
 		this.method = original.method;
 		this.constructor = original.constructor;
 		this.parameterIndex = original.parameterIndex;
+		this.containingClass = original.containingClass;
 		this.parameterType = original.parameterType;
 		this.genericParameterType = original.genericParameterType;
 		this.parameterAnnotations = original.parameterAnnotations;
@@ -137,7 +137,6 @@ public class MethodParameter {
 		this.parameterName = original.parameterName;
 		this.nestingLevel = original.nestingLevel;
 		this.typeIndexesPerLevel = original.typeIndexesPerLevel;
-		this.resolveClass = original.resolveClass;
 		this.hash = original.hash;
 	}
 
@@ -195,7 +194,7 @@ public class MethodParameter {
 	/**
 	 * Return the class that declares the underlying Method or Constructor.
 	 */
-	public Class getDeclaringClass() {
+	public Class<?> getDeclaringClass() {
 		return getMember().getDeclaringClass();
 	}
 
@@ -205,6 +204,17 @@ public class MethodParameter {
 	 */
 	public int getParameterIndex() {
 		return this.parameterIndex;
+	}
+
+	/**
+	 * Set a containing class to resolve the parameter type against.
+	 */
+	void setContainingClass(Class<?> containingClass) {
+		this.containingClass = containingClass;
+	}
+
+	public Class<?> getContainingClass() {
+		return (this.containingClass != null ? this.containingClass : getDeclaringClass());
 	}
 
 	/**

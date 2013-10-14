@@ -25,8 +25,10 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 import org.springframework.core.GenericCollectionTypeResolver;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.core.ResolvableType;
 import org.springframework.util.Assert;
 
 /**
@@ -45,6 +47,8 @@ public class DependencyDescriptor implements Serializable {
 	private transient Field field;
 
 	private Class<?> declaringClass;
+
+	private Class<?> containingClass;
 
 	private String methodName;
 
@@ -84,6 +88,7 @@ public class DependencyDescriptor implements Serializable {
 		Assert.notNull(methodParameter, "MethodParameter must not be null");
 		this.methodParameter = methodParameter;
 		this.declaringClass = methodParameter.getDeclaringClass();
+		this.containingClass = methodParameter.getContainingClass();
 		if (this.methodParameter.getMethod() != null) {
 			this.methodName = methodParameter.getMethod().getName();
 			this.parameterTypes = methodParameter.getMethod().getParameterTypes();
@@ -130,6 +135,7 @@ public class DependencyDescriptor implements Serializable {
 		this.methodParameter = (original.methodParameter != null ? new MethodParameter(original.methodParameter) : null);
 		this.field = original.field;
 		this.declaringClass = original.declaringClass;
+		this.containingClass = original.containingClass;
 		this.methodName = original.methodName;
 		this.parameterTypes = original.parameterTypes;
 		this.parameterIndex = original.parameterIndex;
@@ -184,6 +190,26 @@ public class DependencyDescriptor implements Serializable {
 		if (this.methodParameter != null) {
 			this.methodParameter.increaseNestingLevel();
 		}
+	}
+
+	/**
+	 * Optionally set the concrete class that contains this dependency.
+	 * This may differ from the class that declares the parameter/field in that
+	 * it may be a subclass thereof, potentially substituting type variables.
+	 */
+	public void setContainingClass(Class<?> containingClass) {
+		this.containingClass = containingClass;
+		if (this.methodParameter != null) {
+			GenericTypeResolver.resolveParameterType(this.methodParameter, containingClass);
+		}
+	}
+
+	/**
+	 * Build a ResolvableType object for the wrapped parameter/field.
+	 */
+	public ResolvableType getResolvableType() {
+		return (this.field != null ? ResolvableType.forField(this.field, this.nestingLevel, this.containingClass) :
+				ResolvableType.forMethodParameter(this.methodParameter));
 	}
 
 	/**

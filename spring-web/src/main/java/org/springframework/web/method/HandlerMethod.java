@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
@@ -157,9 +158,8 @@ public class HandlerMethod {
 	 * Note that if the bean type is a CGLIB-generated class, the original, user-defined class is returned.
 	 */
 	public Class<?> getBeanType() {
-		Class<?> clazz = (this.bean instanceof String)
-				? this.beanFactory.getType((String) this.bean) : this.bean.getClass();
-
+		Class<?> clazz = (this.bean instanceof String ?
+				this.beanFactory.getType((String) this.bean) : this.bean.getClass());
 		return ClassUtils.getUserClass(clazz);
 	}
 
@@ -223,12 +223,12 @@ public class HandlerMethod {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
+	public boolean equals(Object obj) {
+		if (this == obj) {
 			return true;
 		}
-		if (o != null && o instanceof HandlerMethod) {
-			HandlerMethod other = (HandlerMethod) o;
+		if (obj != null && obj instanceof HandlerMethod) {
+			HandlerMethod other = (HandlerMethod) obj;
 			return this.bean.equals(other.bean) && this.method.equals(other.method);
 		}
 		return false;
@@ -236,25 +236,26 @@ public class HandlerMethod {
 
 	@Override
 	public int hashCode() {
-		return 31 * this.bean.hashCode() + this.method.hashCode();
+		return this.bean.hashCode() * 31 + this.method.hashCode();
 	}
 
 	@Override
 	public String toString() {
-		return method.toGenericString();
+		return this.method.toGenericString();
 	}
+
 
 	/**
 	 * A MethodParameter with HandlerMethod-specific behavior.
 	 */
 	private class HandlerMethodParameter extends MethodParameter {
 
-		protected HandlerMethodParameter(int index) {
+		public HandlerMethodParameter(int index) {
 			super(HandlerMethod.this.bridgedMethod, index);
 		}
 
 		@Override
-		public Class<?> getDeclaringClass() {
+		public Class<?> getContainingClass() {
 			return HandlerMethod.this.getBeanType();
 		}
 
@@ -263,6 +264,7 @@ public class HandlerMethod {
 			return HandlerMethod.this.getMethodAnnotation(annotationType);
 		}
 	}
+
 
 	/**
 	 * A MethodParameter for a HandlerMethod return type based on an actual return value.

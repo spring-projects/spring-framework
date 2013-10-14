@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.io.PushbackInputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.Conventions;
@@ -81,16 +80,16 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		return ((AnnotationUtils.findAnnotation(returnType.getDeclaringClass(), ResponseBody.class) != null)
-				|| (returnType.getMethodAnnotation(ResponseBody.class) != null));
+		return ((AnnotationUtils.findAnnotation(returnType.getContainingClass(), ResponseBody.class) != null) ||
+				(returnType.getMethodAnnotation(ResponseBody.class) != null));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 * @throws MethodArgumentNotValidException if validation fails
 	 * @throws HttpMessageNotReadableException if {@link RequestBody#required()}
-	 * 	is {@code true} and there is no body content or if there is no suitable
-	 * 	converter to read the content with.
+	 * is {@code true} and there is no body content or if there is no suitable
+	 * converter to read the content with.
 	 */
 	@Override
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,

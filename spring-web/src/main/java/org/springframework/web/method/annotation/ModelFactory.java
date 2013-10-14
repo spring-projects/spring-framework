@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -167,7 +167,7 @@ public final class ModelFactory {
 		}
 		else {
 			Method method = returnType.getMethod();
-			Class<?> resolvedType = GenericTypeResolver.resolveReturnType(method, returnType.getDeclaringClass());
+			Class<?> resolvedType = GenericTypeResolver.resolveReturnType(method, returnType.getContainingClass());
 			return Conventions.getVariableNameForReturnType(method, resolvedType, returnValue);
 		}
 	}
