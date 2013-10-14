@@ -69,67 +69,6 @@ public class GenericTypeResolverTests {
 		assertEquals(null, resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "object"), MyInterfaceType.class));
 	}
 
-	/**
-	 * @since 3.2
-	 */
-	@Test
-	public void genericMethodReturnTypes() {
-		Method notParameterized = findMethod(MyTypeWithMethods.class, "notParameterized", new Class[] {});
-		assertEquals(String.class, resolveReturnTypeForGenericMethod(notParameterized, new Object[] {}));
-
-		Method notParameterizedWithArguments = findMethod(MyTypeWithMethods.class, "notParameterizedWithArguments",
-			new Class[] { Integer.class, Boolean.class });
-		assertEquals(String.class,
-			resolveReturnTypeForGenericMethod(notParameterizedWithArguments, new Object[] { 99, true }));
-
-		Method createProxy = findMethod(MyTypeWithMethods.class, "createProxy", new Class[] { Object.class });
-		assertEquals(String.class, resolveReturnTypeForGenericMethod(createProxy, new Object[] { "foo" }));
-
-		Method createNamedProxyWithDifferentTypes = findMethod(MyTypeWithMethods.class, "createNamedProxy",
-			new Class[] { String.class, Object.class });
-		// one argument to few
-		assertNull(resolveReturnTypeForGenericMethod(createNamedProxyWithDifferentTypes, new Object[] { "enigma" }));
-		assertEquals(Long.class,
-			resolveReturnTypeForGenericMethod(createNamedProxyWithDifferentTypes, new Object[] { "enigma", 99L }));
-
-		Method createNamedProxyWithDuplicateTypes = findMethod(MyTypeWithMethods.class, "createNamedProxy",
-			new Class[] { String.class, Object.class });
-		assertEquals(String.class,
-			resolveReturnTypeForGenericMethod(createNamedProxyWithDuplicateTypes, new Object[] { "enigma", "foo" }));
-
-		Method createMock = findMethod(MyTypeWithMethods.class, "createMock", new Class[] { Class.class });
-		assertEquals(Runnable.class, resolveReturnTypeForGenericMethod(createMock, new Object[] { Runnable.class }));
-
-		Method createNamedMock = findMethod(MyTypeWithMethods.class, "createNamedMock", new Class[] { String.class,
-			Class.class });
-		assertEquals(Runnable.class,
-			resolveReturnTypeForGenericMethod(createNamedMock, new Object[] { "foo", Runnable.class }));
-
-		Method createVMock = findMethod(MyTypeWithMethods.class, "createVMock",
-			new Class[] { Object.class, Class.class });
-		assertEquals(Runnable.class,
-			resolveReturnTypeForGenericMethod(createVMock, new Object[] { "foo", Runnable.class }));
-
-		// Ideally we would expect String.class instead of Object.class, but
-		// resolveReturnTypeForGenericMethod() does not currently support this form of
-		// look-up.
-		Method extractValueFrom = findMethod(MyTypeWithMethods.class, "extractValueFrom",
-			new Class[] { MyInterfaceType.class });
-		assertEquals(Object.class,
-			resolveReturnTypeForGenericMethod(extractValueFrom, new Object[] { new MySimpleInterfaceType() }));
-
-		// Ideally we would expect Boolean.class instead of Object.class, but this
-		// information is not available at run-time due to type erasure.
-		Map<Integer, Boolean> map = new HashMap<Integer, Boolean>();
-		map.put(0, false);
-		map.put(1, true);
-		Method extractMagicValue = findMethod(MyTypeWithMethods.class, "extractMagicValue", new Class[] { Map.class });
-		assertEquals(Object.class, resolveReturnTypeForGenericMethod(extractMagicValue, new Object[] { map }));
-	}
-
-	/**
-	 * @since 3.2
-	 */
 	@Test
 	public void testResolveType() {
 			Method intMessageMethod = findMethod(MyTypeWithMethods.class, "readIntegerInputMessage", MyInterfaceType.class);
@@ -152,6 +91,7 @@ public class GenericTypeResolverTests {
 	public void testBoundParameterizedType() {
 		assertEquals(B.class, resolveTypeArgument(TestImpl.class, ITest.class));
 	}
+
 
 
 	public interface MyInterfaceType<T> {

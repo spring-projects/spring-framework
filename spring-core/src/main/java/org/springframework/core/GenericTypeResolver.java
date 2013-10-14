@@ -131,8 +131,10 @@ public abstract class GenericTypeResolver {
 	 * invoked, never {@code null}
 	 * @return the resolved target return type, the standard return type, or {@code null}
 	 * @since 3.2
-	 * @see #resolveReturnType
+	 * @deprecated in favor of resolveReturnTypeForFactoryMethod in the internal
+	 * AutowireUtils class in the beans module; we do not expect other use of it!
 	 */
+	@Deprecated
 	public static Class<?> resolveReturnTypeForGenericMethod(Method method, Object[] args) {
 		Assert.notNull(method, "Method must not be null");
 		Assert.notNull(args, "Argument array must not be null");
