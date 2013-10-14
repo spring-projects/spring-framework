@@ -174,9 +174,10 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	}
 
 	/**
-	 * Return a ServletInvocableHandlerMethod that will process the value returned
-	 * from an async operation essentially either applying return value handling or
-	 * raising an exception if the end result is an Exception.
+	 * Create a ServletInvocableHandlerMethod that will return the given value from an
+	 * async operation instead of invoking the controller method again. The async result
+	 * value is then either processed as if the controller method returned it or an
+	 * exception is raised if the async result value itself is an Exception.
 	 */
 	ServletInvocableHandlerMethod wrapConcurrentResult(final Object result) {
 
@@ -197,9 +198,12 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 
 	/**
-	 * A ServletInvocableHandlerMethod sub-class that invokes a given
-	 * {@link Callable} and "inherits" the annotations of the containing class
-	 * instance, useful for invoking a Callable returned from a HandlerMethod.
+	 * A sub-class of {@link HandlerMethod} that invokes the given {@link Callable}
+	 * instead of the target controller method. This is useful for resuming processing
+	 * with the result of an async operation. The goal is to process the value returned
+	 * from the Callable as if it was returned by the target controller method, i.e.
+	 * taking into consideration both method and type-level controller annotations (e.g.
+	 * {@code @ResponseBody}, {@code @ResponseStatus}, etc).
 	 */
 	private class CallableHandlerMethod extends ServletInvocableHandlerMethod {
 
@@ -208,6 +212,17 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 			this.setHandlerMethodReturnValueHandlers(ServletInvocableHandlerMethod.this.returnValueHandlers);
 		}
 
+		/**
+		 * Bridge to type-level annotations of the target controller method.
+		 */
+		@Override
+		public Class<?> getBeanType() {
+			return ServletInvocableHandlerMethod.this.getBeanType();
+		}
+
+		/**
+		 * Bridge to method-level annotations of the target controller method.
+		 */
 		@Override
 		public <A extends Annotation> A getMethodAnnotation(Class<A> annotationType) {
 			return ServletInvocableHandlerMethod.this.getMethodAnnotation(annotationType);
