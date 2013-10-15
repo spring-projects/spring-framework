@@ -36,6 +36,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Sam Brannen
  * @author Phillip Webb
  * @since 2.5.2
  * @see GenericCollectionTypeResolver
