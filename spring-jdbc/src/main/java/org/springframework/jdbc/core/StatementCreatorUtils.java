@@ -120,8 +120,7 @@ public abstract class StatementCreatorUtils {
 	 * @param inValue the value to set
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 */
-	public static void setParameterValue(
-			PreparedStatement ps, int paramIndex, SqlParameter param, Object inValue)
+	public static void setParameterValue(PreparedStatement ps, int paramIndex, SqlParameter param, Object inValue)
 			throws SQLException {
 
 		setParameterValueInternal(ps, paramIndex, param.getSqlType(), param.getTypeName(), param.getScale(), inValue);
@@ -137,8 +136,7 @@ public abstract class StatementCreatorUtils {
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 * @see SqlTypeValue
 	 */
-	public static void setParameterValue(
-			PreparedStatement ps, int paramIndex, int sqlType, Object inValue)
+	public static void setParameterValue(PreparedStatement ps, int paramIndex, int sqlType, Object inValue)
 			throws SQLException {
 
 		setParameterValueInternal(ps, paramIndex, sqlType, null, null, inValue);
@@ -156,9 +154,8 @@ public abstract class StatementCreatorUtils {
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 * @see SqlTypeValue
 	 */
-	public static void setParameterValue(
-			PreparedStatement ps, int paramIndex, int sqlType, String typeName, Object inValue)
-			throws SQLException {
+	public static void setParameterValue(PreparedStatement ps, int paramIndex, int sqlType, String typeName,
+			Object inValue) throws SQLException {
 
 		setParameterValueInternal(ps, paramIndex, sqlType, typeName, null, inValue);
 	}
@@ -177,9 +174,8 @@ public abstract class StatementCreatorUtils {
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 * @see SqlTypeValue
 	 */
-	private static void setParameterValueInternal(
-			PreparedStatement ps, int paramIndex, int sqlType, String typeName, Integer scale, Object inValue)
-			throws SQLException {
+	private static void setParameterValueInternal(PreparedStatement ps, int paramIndex, int sqlType,
+			String typeName, Integer scale, Object inValue) throws SQLException {
 
 		String typeNameToUse = typeName;
 		int sqlTypeToUse = sqlType;
@@ -190,8 +186,7 @@ public abstract class StatementCreatorUtils {
 			SqlParameterValue parameterValue = (SqlParameterValue) inValue;
 			if (logger.isDebugEnabled()) {
 				logger.debug("Overriding type info with runtime info from SqlParameterValue: column index " + paramIndex +
-						", SQL type " + parameterValue.getSqlType() +
-						", Type name " + parameterValue.getTypeName());
+						", SQL type " + parameterValue.getSqlType() + ", type name " + parameterValue.getTypeName());
 			}
 			if (parameterValue.getSqlType() != SqlTypeValue.TYPE_UNKNOWN) {
 				sqlTypeToUse = parameterValue.getSqlType();
@@ -221,9 +216,7 @@ public abstract class StatementCreatorUtils {
 	 * Set the specified PreparedStatement parameter to null,
 	 * respecting database-specific peculiarities.
 	 */
-	private static void setNull(PreparedStatement ps, int paramIndex, int sqlType, String typeName)
-			throws SQLException {
-
+	private static void setNull(PreparedStatement ps, int paramIndex, int sqlType, String typeName) throws SQLException {
 		if (sqlType == SqlTypeValue.TYPE_UNKNOWN) {
 			boolean useSetObject = false;
 			sqlType = Types.NULL;
@@ -232,10 +225,9 @@ public abstract class StatementCreatorUtils {
 			}
 			catch (Throwable ex) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("JDBC 3.0 getParameterType call not supported: " + ex);
+					logger.debug("JDBC 3.0 getParameterType call not supported - using fallback method instead: " + ex);
 				}
-				// JDBC driver not compliant with JDBC 3.0
-				// -> proceed with database-specific checks
+				// JDBC driver not compliant with JDBC 3.0 -> proceed with database-specific checks
 				try {
 					DatabaseMetaData dbmd = ps.getConnection().getMetaData();
 					String databaseProductName = dbmd.getDatabaseProductName();
