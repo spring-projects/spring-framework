@@ -164,7 +164,7 @@ public abstract class GenericTypeResolver {
 							if (arg instanceof Class) {
 								return (Class<?>) arg;
 							}
-							else if (arg instanceof String) {
+							else if (arg instanceof String && classLoader != null) {
 								try {
 									return classLoader.loadClass((String) arg);
 								}

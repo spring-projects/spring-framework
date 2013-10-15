@@ -36,8 +36,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Utility class that contains various methods useful for
- * the implementation of autowire-capable bean factories.
+ * Utility class that contains various methods useful for the implementation of
+ * autowire-capable bean factories.
  *
  * @author Juergen Hoeller
  * @author Mark Fisher
@@ -161,9 +161,9 @@ abstract class AutowireUtils {
 	 * <em>generic factory method</em>, where formal type variables are declared
 	 * on the given method itself.
 	 * <p>For example, given a factory method with the following signature,
-	 * if {@code resolveReturnTypeForGenericMethod()} is invoked with the reflected
+	 * if {@code resolveReturnTypeForFactoryMethod()} is invoked with the reflected
 	 * method for {@code creatProxy()} and an {@code Object[]} array containing
-	 * {@code MyService.class}, {@code resolveReturnTypeForGenericMethod()} will
+	 * {@code MyService.class}, {@code resolveReturnTypeForFactoryMethod()} will
 	 * infer that the target return type is {@code MyService}.
 	 * <pre class="code">{@code public static <T> T createProxy(Class<T> clazz)}</pre>
 	 * <h4>Possible Return Values</h4>
@@ -185,10 +185,12 @@ abstract class AutowireUtils {
 	 * @param classLoader the ClassLoader to resolve class names against, if necessary
 	 * (never {@code null})
 	 * @return the resolved target return type, the standard return type, or {@code null}
+	 * @since 3.2.5
 	 */
 	public static Class<?> resolveReturnTypeForFactoryMethod(Method method, Object[] args, ClassLoader classLoader) {
 		Assert.notNull(method, "Method must not be null");
 		Assert.notNull(args, "Argument array must not be null");
+		Assert.notNull(classLoader, "ClassLoader must not be null");
 
 		TypeVariable<Method>[] declaredTypeVariables = method.getTypeParameters();
 		Type genericReturnType = method.getGenericReturnType();
