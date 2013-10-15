@@ -41,6 +41,7 @@ public class PayloadArgumentResolverTests {
 
 	private MethodParameter param;
 	private MethodParameter paramNotRequired;
+	private MethodParameter paramWithSpelExpression;
 
 
 	@Before
@@ -50,10 +51,11 @@ public class PayloadArgumentResolverTests {
 		this.resolver = new PayloadArgumentResolver(messageConverter );
 
 		Method method = PayloadArgumentResolverTests.class.getDeclaredMethod("handleMessage",
-				String.class, String.class);
+				String.class, String.class, String.class);
 
 		this.param = new MethodParameter(method , 0);
 		this.paramNotRequired = new MethodParameter(method , 1);
+		this.paramWithSpelExpression = new MethodParameter(method , 2);
 	}
 
 
@@ -75,11 +77,18 @@ public class PayloadArgumentResolverTests {
 		assertEquals("ABC", this.resolver.resolveArgument(this.paramNotRequired, notEmptyMessage));
 	}
 
+	@Test(expected=IllegalStateException.class)
+	public void resolveSpelExpressionNotSupported() throws Exception {
+		Message<?> message = MessageBuilder.withPayload("ABC".getBytes()).build();
+		this.resolver.resolveArgument(this.paramWithSpelExpression, message);
+	}
+
 
 	@SuppressWarnings("unused")
 	private void handleMessage(
 			@Payload String param,
-			@Payload(required=false) String paramNotRequired) {
+			@Payload(required=false) String paramNotRequired,
+			@Payload("foo.bar") String paramWithSpelExpression) {
 	}
 
 }

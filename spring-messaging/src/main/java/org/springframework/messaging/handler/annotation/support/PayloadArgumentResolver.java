@@ -23,6 +23,7 @@ import org.springframework.messaging.handler.method.HandlerMethodArgumentResolve
 import org.springframework.messaging.support.converter.MessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 
 /**
@@ -67,6 +68,10 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 			if ((annot != null) && !annot.required()) {
 				return null;
 			}
+		}
+
+		if ((annot != null) && StringUtils.hasText(annot.value())) {
+			throw new IllegalStateException("@Payload SpEL expressions not supported by this resolver.");
 		}
 
 		return this.converter.fromMessage(message, targetClass);
