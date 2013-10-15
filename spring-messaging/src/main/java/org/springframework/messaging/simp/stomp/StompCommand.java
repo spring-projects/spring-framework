@@ -17,10 +17,9 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.messaging.simp.SimpMessageType;
 
@@ -51,36 +50,38 @@ public enum StompCommand {
 	RECEIPT,
 	ERROR;
 
+	private static Map<StompCommand, SimpMessageType> messageTypes = new HashMap<StompCommand, SimpMessageType>();
 
-	private static Map<StompCommand, SimpMessageType> messageTypeLookup = new HashMap<StompCommand, SimpMessageType>();
-
-	private static Set<StompCommand> destinationRequiredLookup =
-			new HashSet<StompCommand>(Arrays.asList(SEND, SUBSCRIBE, MESSAGE));
-
-	private static Set<StompCommand> subscriptionIdRequiredLookup =
-			new HashSet<StompCommand>(Arrays.asList(SUBSCRIBE, UNSUBSCRIBE, MESSAGE));
+	private static Collection<StompCommand> destinationRequired = Arrays.asList(SEND, SUBSCRIBE, MESSAGE);
+	private static Collection<StompCommand> subscriptionIdRequired = Arrays.asList(SUBSCRIBE, UNSUBSCRIBE, MESSAGE);
+	private static Collection<StompCommand> bodyAllowed = Arrays.asList(SEND, MESSAGE, ERROR);
 
 	static {
-		messageTypeLookup.put(StompCommand.CONNECT, SimpMessageType.CONNECT);
-		messageTypeLookup.put(StompCommand.STOMP, SimpMessageType.CONNECT);
-		messageTypeLookup.put(StompCommand.SEND, SimpMessageType.MESSAGE);
-		messageTypeLookup.put(StompCommand.MESSAGE, SimpMessageType.MESSAGE);
-		messageTypeLookup.put(StompCommand.SUBSCRIBE, SimpMessageType.SUBSCRIBE);
-		messageTypeLookup.put(StompCommand.UNSUBSCRIBE, SimpMessageType.UNSUBSCRIBE);
-		messageTypeLookup.put(StompCommand.DISCONNECT, SimpMessageType.DISCONNECT);
+		messageTypes.put(StompCommand.CONNECT, SimpMessageType.CONNECT);
+		messageTypes.put(StompCommand.STOMP, SimpMessageType.CONNECT);
+		messageTypes.put(StompCommand.SEND, SimpMessageType.MESSAGE);
+		messageTypes.put(StompCommand.MESSAGE, SimpMessageType.MESSAGE);
+		messageTypes.put(StompCommand.SUBSCRIBE, SimpMessageType.SUBSCRIBE);
+		messageTypes.put(StompCommand.UNSUBSCRIBE, SimpMessageType.UNSUBSCRIBE);
+		messageTypes.put(StompCommand.DISCONNECT, SimpMessageType.DISCONNECT);
 	}
 
 	public SimpMessageType getMessageType() {
-		SimpMessageType type = messageTypeLookup.get(this);
+		SimpMessageType type = messageTypes.get(this);
 		return (type != null) ? type : SimpMessageType.OTHER;
 	}
 
 	public boolean requiresDestination() {
-		return destinationRequiredLookup.contains(this);
+		return destinationRequired.contains(this);
 	}
 
 	public boolean requiresSubscriptionId() {
-		return subscriptionIdRequiredLookup.contains(this);
+		return subscriptionIdRequired.contains(this);
+	}
+
+	public boolean isBodyAllowed() {
+		return bodyAllowed.contains(this);
 	}
 
 }
+
