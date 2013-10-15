@@ -16,19 +16,20 @@
 
 package org.springframework.context.annotation;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-
 import org.junit.Test;
 
+import org.springframework.stereotype.Component;
 import org.springframework.tests.sample.beans.TestBean;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Tests ensuring that nested static @Configuration classes are automatically detected
  * and registered without the need for explicit registration or @Import. See SPR-8186.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class NestedConfigurationClassTests {
@@ -89,6 +90,36 @@ public class NestedConfigurationClassTests {
 		assertThat(ctx.getBean("overrideBean", TestBean.class).getName(), is("override-s1"));
 	}
 
+	@Test
+	public void twoLevelsInLiteMode() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(L0ConfigLight.class);
+		ctx.refresh();
+
+		ctx.getBean(L0ConfigLight.class);
+		ctx.getBean("l0Bean");
+
+		ctx.getBean(L0ConfigLight.L1ConfigLight.class);
+		ctx.getBean("l1Bean");
+
+		ctx.getBean(L0ConfigLight.L1ConfigLight.L2ConfigLight.class);
+		ctx.getBean("l2Bean");
+
+		// ensure that override order is correct
+		assertThat(ctx.getBean("overrideBean", TestBean.class).getName(), is("override-l0"));
+	}
+
+	@Test
+	public void twoLevelsWithNoBeanMethods() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(L0ConfigEmpty.class);
+		ctx.refresh();
+
+		ctx.getBean(L0ConfigEmpty.class);
+		ctx.getBean(L0ConfigEmpty.L1ConfigEmpty.class);
+		ctx.getBean(L0ConfigEmpty.L1ConfigEmpty.L2ConfigEmpty.class);
+	}
+
 
 	@Configuration
 	static class L0Config {
@@ -125,6 +156,59 @@ public class NestedConfigurationClassTests {
 				public TestBean overrideBean() {
 					return new TestBean("override-l2");
 				}
+			}
+		}
+	}
+
+
+	@Component
+	static class L0ConfigLight {
+		@Bean
+		public TestBean l0Bean() {
+			return new TestBean("l0");
+		}
+
+		@Bean
+		public TestBean overrideBean() {
+			return new TestBean("override-l0");
+		}
+
+		@Component
+		static class L1ConfigLight {
+			@Bean
+			public TestBean l1Bean() {
+				return new TestBean("l1");
+			}
+
+			@Bean
+			public TestBean overrideBean() {
+				return new TestBean("override-l1");
+			}
+
+			@Component
+			protected static class L2ConfigLight {
+				@Bean
+				public TestBean l2Bean() {
+					return new TestBean("l2");
+				}
+
+				@Bean
+				public TestBean overrideBean() {
+					return new TestBean("override-l2");
+				}
+			}
+		}
+	}
+
+
+	@Component
+	static class L0ConfigEmpty {
+
+		@Component
+		static class L1ConfigEmpty {
+
+			@Component
+			protected static class L2ConfigEmpty {
 			}
 		}
 	}
