@@ -220,7 +220,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		return toNativeHeaderMap();
 	}
 
-	public void updateStompCommandAsClientMessage() {
+	public StompCommand updateStompCommandAsClientMessage() {
 
 		Assert.state(SimpMessageType.MESSAGE.equals(getMessageType()),
 				"Unexpected message type " + getMessage());
@@ -231,6 +231,8 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		else if (!getCommand().equals(StompCommand.SEND)) {
 			throw new IllegalStateException("Unexpected STOMP command " + getCommand());
 		}
+
+		return getCommand();
 	}
 
 	public void updateStompCommandAsServerMessage() {

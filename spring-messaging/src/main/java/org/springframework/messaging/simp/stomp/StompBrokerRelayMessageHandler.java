@@ -283,7 +283,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		if (SimpMessageType.MESSAGE.equals(messageType)) {
 			sessionId = (sessionId == null) ? SystemStompRelaySession.ID : sessionId;
 			headers.setSessionId(sessionId);
-			headers.updateStompCommandAsClientMessage();
+			command = headers.updateStompCommandAsClientMessage();
 			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
 		}
 
@@ -292,7 +292,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			return;
 		}
 
-		if (command != null && command.requiresDestination() && !checkDestinationPrefix(destination)) {
+		if ((command != null) && command.requiresDestination() && !checkDestinationPrefix(destination)) {
 			return;
 		}
 
@@ -386,7 +386,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 					readStompFrame(message);
 				}
 			});
-			forwardInternal(tcpConn, connectMessage);
+			forwardInternal(connectMessage, tcpConn);
 		}
 
 		protected void connectionClosed() {
@@ -445,7 +445,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				logger.warn("Connection to STOMP broker is not active");
 				handleForwardFailure(message);
 			}
-			else if (!forwardInternal(tcpConnection, message)) {
+			else if (!forwardInternal(message, tcpConnection)) {
 				handleForwardFailure(message);
 			}
 		}
@@ -457,7 +457,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 
 		private boolean forwardInternal(
-				TcpConnection<Message<byte[]>, Message<byte[]>> tcpConnection, Message<?> message) {
+				Message<?> message, TcpConnection<Message<byte[]>, Message<byte[]>> tcpConnection) {
 
 			Assert.isInstanceOf(byte[].class, message.getPayload(), "Message's payload must be a byte[]");
 
