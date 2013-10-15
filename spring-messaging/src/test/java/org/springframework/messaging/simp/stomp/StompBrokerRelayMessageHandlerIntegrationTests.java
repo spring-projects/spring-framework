@@ -46,6 +46,8 @@ import org.springframework.util.SocketUtils;
 import static org.junit.Assert.*;
 
 /**
+ * Integration tests for {@link StompBrokerRelayMessageHandler} running against ActiveMQ.
+ *
  * @author Rossen Stoyanchev
  */
 public class StompBrokerRelayMessageHandlerIntegrationTests {
@@ -91,14 +93,13 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 	}
 
 	private void createAndStartRelay() throws InterruptedException {
-		this.relay = new StompBrokerRelayMessageHandler(
-				this.responseChannel, Arrays.asList("/queue/", "/topic/"));
+		this.relay = new StompBrokerRelayMessageHandler(this.responseChannel, Arrays.asList("/queue/", "/topic/"));
 		this.relay.setRelayPort(port);
 		this.relay.setApplicationEventPublisher(this.eventPublisher);
 		this.relay.setSystemHeartbeatReceiveInterval(0);
 		this.relay.setSystemHeartbeatSendInterval(0);
 
-		this.eventPublisher.expect(true);
+		this.eventPublisher.expectAvailabilityStatusChanges(true);
 		this.relay.start();
 		this.eventPublisher.awaitAndAssert();
 	}
@@ -186,7 +187,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 	@Test
 	public void brokerAvailabilityEventWhenStopped() throws Exception {
-		this.eventPublisher.expect(false);
+		this.eventPublisher.expectAvailabilityStatusChanges(false);
 		stopBrokerAndAwait();
 		this.eventPublisher.awaitAndAssert();
 	}
@@ -215,10 +216,10 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		this.responseHandler.awaitAndAssert();
 
-		this.eventPublisher.expect(false);
+		this.eventPublisher.expectAvailabilityStatusChanges(false);
 		this.eventPublisher.awaitAndAssert();
 
-		this.eventPublisher.expect(true);
+		this.eventPublisher.expectAvailabilityStatusChanges(true);
 		createAndStartBroker();
 		this.eventPublisher.awaitAndAssert();
 
@@ -587,7 +588,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		private final Object monitor = new Object();
 
 
-		public void expect(Boolean... expected) {
+		public void expectAvailabilityStatusChanges(Boolean... expected) {
 			synchronized (this.monitor) {
 				this.expected.addAll(Arrays.asList(expected));
 			}
