@@ -41,8 +41,14 @@ public abstract class AbstractSubscribableChannel extends AbstractMessageChannel
 		return subscribeInternal(handler);
 	}
 
+	/**
+	 * Whether the given {@link MessageHandler} is already subscribed.
+	 */
 	protected abstract boolean hasSubscription(MessageHandler handler);
 
+	/**
+	 * Subscribe the given {@link MessageHandler}.
+	 */
 	protected abstract boolean subscribeInternal(MessageHandler handler);
 
 	@Override
@@ -53,6 +59,9 @@ public abstract class AbstractSubscribableChannel extends AbstractMessageChannel
 		return unsubscribeInternal(handler);
 	}
 
+	/**
+	 * Unsubscribe the given {@link MessageHandler}.
+	 */
 	protected abstract boolean unsubscribeInternal(MessageHandler handler);
 
 }
