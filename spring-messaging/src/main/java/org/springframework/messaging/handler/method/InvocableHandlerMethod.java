@@ -20,8 +20,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.GenericTypeResolver;
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.messaging.Message;
@@ -41,7 +41,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	private HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
 
-	private ParameterNameDiscoverer parameterNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
+	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
 
 	/**
@@ -59,19 +59,16 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * Constructs a new handler method with the given bean instance, method name and
-	 * parameters.
-	 *
+	 * Construct a new handler method with the given bean instance, method name and parameters.
 	 * @param bean the object bean
 	 * @param methodName the method name
 	 * @param parameterTypes the method parameter types
 	 * @throws NoSuchMethodException when the method cannot be found
 	 */
-	public InvocableHandlerMethod(Object bean, String methodName, Class<?>... parameterTypes)
-			throws NoSuchMethodException {
-
+	public InvocableHandlerMethod(Object bean, String methodName, Class<?>... parameterTypes) throws NoSuchMethodException {
 		super(bean, methodName, parameterTypes);
 	}
+
 
 	/**
 	 * Set {@link HandlerMethodArgumentResolver}s to use to use for resolving method
@@ -82,41 +79,33 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * Set the ParameterNameDiscoverer for resolving parameter names when needed (e.g.
-	 * default request attribute name).
-	 * <p>
-	 * Default is an
-	 * {@link org.springframework.core.LocalVariableTableParameterNameDiscoverer}
-	 * instance.
+	 * Set the ParameterNameDiscoverer for resolving parameter names when needed
+	 * (e.g. default request attribute name).
+	 * <p>Default is a {@link org.springframework.core.DefaultParameterNameDiscoverer}.
 	 */
 	public void setParameterNameDiscoverer(ParameterNameDiscoverer parameterNameDiscoverer) {
 		this.parameterNameDiscoverer = parameterNameDiscoverer;
 	}
 
+
 	/**
 	 * Invoke the method with the given message.
-	 *
-	 * @exception Exception raised if no suitable argument resolver can be found, or the
-	 *            method raised an exception
+	 * @throws Exception raised if no suitable argument resolver can be found,
+	 * or the method raised an exception
 	 */
 	public final Object invoke(Message<?> message, Object... providedArgs) throws Exception {
-
 		Object[] args = getMethodArgumentValues(message, providedArgs);
-
 		if (logger.isTraceEnabled()) {
 			StringBuilder sb = new StringBuilder("Invoking [");
 			sb.append(this.getBeanType().getSimpleName()).append(".");
-			sb.append(this.getMethod().getName()).append("] method with arguments ");
+			sb.append(getMethod().getName()).append("] method with arguments ");
 			sb.append(Arrays.asList(args));
 			logger.trace(sb.toString());
 		}
-
 		Object returnValue = invoke(args);
-
 		if (logger.isTraceEnabled()) {
-			logger.trace("Method returned [" + returnValue + "]");
+			logger.trace("Method [" + getMethod().getName() + "] returned [" + returnValue + "]");
 		}
-
 		return returnValue;
 	}
 
@@ -124,31 +113,28 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * Get the method argument values for the current request.
 	 */
 	private Object[] getMethodArgumentValues(Message<?> message, Object... providedArgs) throws Exception {
-
 		MethodParameter[] parameters = getMethodParameters();
 		Object[] args = new Object[parameters.length];
 		for (int i = 0; i < parameters.length; i++) {
 			MethodParameter parameter = parameters[i];
 			parameter.initParameterNameDiscovery(parameterNameDiscoverer);
 			GenericTypeResolver.resolveParameterType(parameter, getBean().getClass());
-
 			args[i] = resolveProvidedArgument(parameter, providedArgs);
 			if (args[i] != null) {
 				continue;
 			}
-
 			if (this.argumentResolvers.supportsParameter(parameter)) {
 				try {
 					args[i] = this.argumentResolvers.resolveArgument(parameter, message);
 					continue;
-				} catch (Exception ex) {
+				}
+				catch (Exception ex) {
 					if (logger.isTraceEnabled()) {
 						logger.trace(getArgumentResolutionErrorMessage("Error resolving argument", i), ex);
 					}
 					throw ex;
 				}
 			}
-
 			if (args[i] == null) {
 				String msg = getArgumentResolutionErrorMessage("No suitable resolver for argument", i);
 				throw new IllegalStateException(msg);
