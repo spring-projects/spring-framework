@@ -1421,6 +1421,45 @@ public class MyTest {
     // class body...
 }</programlisting>
 
+          <tip>
+            <title>Annotated Classes</title>
+
+            <para>The term <emphasis>annotated class</emphasis> can refer to any
+            of the following.</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>A class annotated with
+                <interfacename>@Configuration</interfacename></para>
+              </listitem>
+
+              <listitem>
+                <para>A component (i.e., a class annotated with
+                <interfacename>@Component</interfacename>,
+                <interfacename>@Service</interfacename>,
+                <interfacename>@Repository</interfacename>, etc.)</para>
+              </listitem>
+
+              <listitem>
+                <para>A JSR-330 compliant class that is annotated with
+                <literal>javax.inject</literal> annotations</para>
+              </listitem>
+
+              <listitem>
+                <para>Any other class that contains
+                <interfacename>@Bean</interfacename>-methods</para>
+              </listitem>
+            </itemizedlist>
+
+            <para>Consult the Javadoc for
+            <interfacename>@Configuration</interfacename> and
+            <interfacename>@Bean</interfacename> for further information
+            regarding the configuration and semantics of <emphasis>annotated
+            classes</emphasis>, paying special attention to the discussion of
+            <emphasis><interfacename>@Bean</interfacename> Lite
+            Mode</emphasis>.</para>
+          </tip>
+
           <para>If you omit the <varname>classes</varname> attribute from the
           <interfacename>@ContextConfiguration</interfacename> annotation, the
           TestContext framework will attempt to detect the presence of default
