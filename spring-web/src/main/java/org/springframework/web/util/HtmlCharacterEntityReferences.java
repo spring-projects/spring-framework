@@ -106,19 +106,44 @@ class HtmlCharacterEntityReferences {
 	/**
 	 * Return true if the given character is mapped to a supported entity reference.
 	 */
-	public boolean isMappedToReference(char character) {
+	public boolean isMappedToReference(char character, String encoding) {
 		return (convertToReference(character) != null);
 	}
 
 	/**
 	 * Return the reference mapped to the given character or {@code null}.
 	 */
-	public String convertToReference(char character) {
-		if (character < 1000 || (character >= 8000 && character < 10000)) {
-			int index = (character < 1000 ? character : character - 7000);
-			String entityReference = this.characterToEntityReferenceMap[index];
-			if (entityReference != null) {
-				return entityReference;
+	public String convertToReference(char character, String encoding) {
+		if(encoding.startsWith("UTF-")){
+			// There are only 5 characters to handle, so just do it inline
+			switch(character){
+			case '<':
+				return "&lt;";
+				break;
+			case '>:
+				return "&gt;";
+				break;
+			case '"':
+				return "&quot;";
+				break;
+			case '&':
+				return "&amp;";
+				break;
+			case '\'':
+				// XML defines the &apos;, but HTML 4 does not.
+				// To ensure backwards compatibility use &#39; instead
+				// as recommended by the XHTML specification, see
+				// http://www.w3.org/TR/2002/REC-xhtml1-20020801/#C_16
+				return "&#39;";
+				break;
+			}
+		}else{
+			if (character < 1000 || (character >= 8000 && character < 10000)) {
+				int index = (character < 1000 ? character : character - 7000);
+				String entityReference = this.characterToEntityReferenceMap[index];
+				if (entityReference != null) {
+					return entityReference;
+				}
 			}
 		}
 		return null;
