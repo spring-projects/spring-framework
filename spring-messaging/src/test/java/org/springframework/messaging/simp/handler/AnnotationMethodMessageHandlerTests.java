@@ -28,9 +28,12 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.PathVariable;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.annotation.SubscribeEvent;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Controller;
 
@@ -40,6 +43,7 @@ import static org.junit.Assert.*;
 /**
  * Test fixture for {@link AnnotationMethodMessageHandler}.
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  */
 public class AnnotationMethodMessageHandlerTests {
 
@@ -80,6 +84,63 @@ public class AnnotationMethodMessageHandlerTests {
 		this.messageHandler.registerHandler(new DuplicateMappingController());
 	}
 
+	@Test
+	public void messageMappingPathVariableResolution() {
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
+		headers.setDestination("/message/bar/value");
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		this.messageHandler.handleMessage(message);
+
+		assertEquals("messageMappingPathVariable", this.testController.method);
+		assertEquals("bar", this.testController.arguments.get("foo"));
+		assertEquals("value", this.testController.arguments.get("name"));
+	}
+
+	@Test
+	public void subscribeEventPathVariableResolution() {
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.SUBSCRIBE);
+		headers.setDestination("/sub/bar/value");
+		Message<?> message = MessageBuilder.withPayload(new byte[0])
+				.copyHeaders(headers.toMap()).build();
+		this.messageHandler.handleMessage(message);
+
+		assertEquals("subscribeEventPathVariable", this.testController.method);
+		assertEquals("bar", this.testController.arguments.get("foo"));
+		assertEquals("value", this.testController.arguments.get("name"));
+	}
+
+	@Test
+	public void antPatchMatchWildcard() {
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
+		headers.setDestination("/pathmatch/wildcard/test");
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		this.messageHandler.handleMessage(message);
+
+		assertEquals("pathMatchWildcard", this.testController.method);
+	}
+
+	@Test
+	public void bestMatchWildcard() {
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
+		headers.setDestination("/bestmatch/bar/path");
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		this.messageHandler.handleMessage(message);
+
+		assertEquals("bestMatch", this.testController.method);
+		assertEquals("bar", this.testController.arguments.get("foo"));
+	}
+
+	@Test
+	public void simpleBinding() {
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
+		headers.setDestination("/binding/id/12");
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		this.messageHandler.handleMessage(message);
+
+		assertEquals("simpleBinding", this.testController.method);
+		assertTrue("should be bound to type long", this.testController.arguments.get("id") instanceof Long);
+		assertEquals(12L, this.testController.arguments.get("id"));
+	}
 
 	private static class TestAnnotationMethodMessageHandler extends AnnotationMethodMessageHandler {
 
@@ -108,6 +169,44 @@ public class AnnotationMethodMessageHandlerTests {
 			this.method = "headers";
 			this.arguments.put("foo", foo);
 			this.arguments.put("headers", headers);
+		}
+
+		@MessageMapping("/message/{foo}/{name}")
+		public void messageMappingPathVariable(@PathVariable("foo") String param1,
+		                                       @PathVariable("name") String param2) {
+			this.method = "messageMappingPathVariable";
+			this.arguments.put("foo", param1);
+			this.arguments.put("name", param2);
+		}
+
+		@SubscribeEvent("/sub/{foo}/{name}")
+		public void subscribeEventPathVariable(@PathVariable("foo") String param1,
+		                                       @PathVariable("name") String param2) {
+			this.method = "subscribeEventPathVariable";
+			this.arguments.put("foo", param1);
+			this.arguments.put("name", param2);
+		}
+
+		@MessageMapping("/pathmatch/wildcard/**")
+		public void pathMatchWildcard() {
+			this.method = "pathMatchWildcard";
+		}
+
+		@MessageMapping("/bestmatch/{foo}/path")
+		public void bestMatch(@PathVariable("foo") String param1) {
+			this.method = "bestMatch";
+			this.arguments.put("foo", param1);
+		}
+
+		@MessageMapping("/bestmatch/**")
+		public void otherMatch() {
+			this.method = "otherMatch";
+		}
+
+		@MessageMapping("/binding/id/{id}")
+		public void simpleBinding(@PathVariable("id") Long id) {
+			this.method = "simpleBinding";
+			this.arguments.put("id", id);
 		}
 	}
 

@@ -21,6 +21,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +52,7 @@ import org.springframework.messaging.handler.annotation.support.HeaderMethodArgu
 import org.springframework.messaging.handler.annotation.support.HeadersMethodArgumentResolver;
 import org.springframework.messaging.handler.annotation.support.MessageMethodArgumentResolver;
 import org.springframework.messaging.handler.annotation.support.PayloadArgumentResolver;
+import org.springframework.messaging.handler.annotation.support.PathVariableMethodArgumentResolver;
 import org.springframework.messaging.handler.method.HandlerMethod;
 import org.springframework.messaging.handler.method.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.method.HandlerMethodArgumentResolverComposite;
@@ -67,24 +70,34 @@ import org.springframework.messaging.simp.annotation.support.PrincipalMethodArgu
 import org.springframework.messaging.simp.annotation.support.SendToMethodReturnValueHandler;
 import org.springframework.messaging.simp.annotation.support.SubscriptionMethodReturnValueHandler;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.support.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.support.converter.CompositeMessageConverter;
 import org.springframework.messaging.support.converter.MessageConverter;
 import org.springframework.messaging.support.converter.StringMessageConverter;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.PathMatcher;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 
 
 /**
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 4.0
  */
 public class AnnotationMethodMessageHandler implements MessageHandler, ApplicationContextAware, InitializingBean {
 
+	public static final String PATH_TEMPLATE_VARIABLES_HEADER = "Spring-PathTemplateVariables";
+
+	public static final String BEST_MATCHING_PATTERN_HEADER = "Spring-BestMatchingPattern";
+
 	private static final Log logger = LogFactory.getLog(AnnotationMethodMessageHandler.class);
+
+	private final PathMatcher pathMatcher = new AntPathMatcher();
 
 	private final SimpMessageSendingOperations brokerTemplate;
 
@@ -242,6 +255,7 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		// Annotation-based argument resolution
 		this.argumentResolvers.addResolver(new HeaderMethodArgumentResolver(this.conversionService, beanFactory));
 		this.argumentResolvers.addResolver(new HeadersMethodArgumentResolver());
+		this.argumentResolvers.addResolver(new PathVariableMethodArgumentResolver(this.conversionService, beanFactory));
 
 		// Type-based argument resolution
 		this.argumentResolvers.addResolver(new PrincipalMethodArgumentResolver());
@@ -363,7 +377,7 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 			return;
 		}
 
-		HandlerMethod match = getHandlerMethod(lookupPath, handlerMethods);
+		MappingInfoMatch match = matchMappingInfo(lookupPath, handlerMethods);
 		if (match == null) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("No matching method, lookup path " + lookupPath);
@@ -371,13 +385,16 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 			return;
 		}
 
-		HandlerMethod handlerMethod = match.createWithResolvedBean();
+		HandlerMethod handlerMethod = match.handlerMethod.createWithResolvedBean();
 
 		InvocableHandlerMethod invocableHandlerMethod = new InvocableHandlerMethod(handlerMethod);
 		invocableHandlerMethod.setMessageMethodArgumentResolvers(this.argumentResolvers);
 
 		try {
 			headers.setDestination(lookupPath);
+			headers.setHeader(BEST_MATCHING_PATTERN_HEADER,match.mappingDestination);
+			headers.setHeader(PATH_TEMPLATE_VARIABLES_HEADER,
+					pathMatcher.extractUriTemplateVariables(match.mappingDestination,lookupPath));
 			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
 
 			Object returnValue = invocableHandlerMethod.invoke(message);
@@ -444,17 +461,52 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		}
 	}
 
-	protected HandlerMethod getHandlerMethod(String destination, Map<MappingInfo, HandlerMethod> handlerMethods) {
+	protected MappingInfoMatch matchMappingInfo(String destination,
+	                                         Map<MappingInfo, HandlerMethod> handlerMethods) {
+
+		List<MappingInfoMatch> matches = new ArrayList<MappingInfoMatch>(4);
 		for (MappingInfo key : handlerMethods.keySet()) {
 			for (String mappingDestination : key.getDestinations()) {
-				if (destination.equals(mappingDestination)) {
-					return handlerMethods.get(key);
+				if (this.pathMatcher.match(mappingDestination, destination)) {
+					matches.add(new MappingInfoMatch(mappingDestination,
+							handlerMethods.get(key)));
 				}
 			}
+		}
+		if(!matches.isEmpty()) {
+			Comparator<MappingInfoMatch> comparator = getMappingInfoMatchComparator(destination, this.pathMatcher);
+			Collections.sort(matches, comparator);
+
+			if (logger.isTraceEnabled()) {
+				logger.trace("Found " + matches.size() + " matching mapping(s) for [" + destination + "] : " + matches);
+			}
+
+			MappingInfoMatch bestMatch = matches.get(0);
+			if (matches.size() > 1) {
+				MappingInfoMatch secondBestMatch = matches.get(1);
+				if (comparator.compare(bestMatch, secondBestMatch) == 0) {
+					Method m1 = bestMatch.handlerMethod.getMethod();
+					Method m2 = secondBestMatch.handlerMethod.getMethod();
+					throw new IllegalStateException(
+							"Ambiguous handler methods mapped for Message destination '" + destination + "': {" +
+									m1 + ", " + m2 + "}");
+				}
+			}
+			return bestMatch;
 		}
 		return null;
 	}
 
+	private Comparator<MappingInfoMatch> getMappingInfoMatchComparator(String destination,
+	                                                                   PathMatcher pathMatcher) {
+		return new Comparator<MappingInfoMatch>() {
+			@Override
+			public int compare(MappingInfoMatch one, MappingInfoMatch other) {
+				Comparator<String> patternComparator = pathMatcher.getPatternComparator(destination);
+				return patternComparator.compare(one.mappingDestination,other.mappingDestination);
+			}
+		};
+	}
 
 	private static class MappingInfo {
 
@@ -493,4 +545,14 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		}
 	}
 
+	private static class MappingInfoMatch {
+
+		private final String mappingDestination;
+		private final HandlerMethod handlerMethod;
+
+		public MappingInfoMatch(String destination, HandlerMethod handlerMethod) {
+			this.mappingDestination = destination;
+			this.handlerMethod = handlerMethod;
+		}
+	}
 }
