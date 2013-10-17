@@ -23,27 +23,27 @@ import org.springframework.context.support.GenericGroovyApplicationContext
  * @author Jeff Brown
  */
 class GroovyApplicationContextDynamicBeanPropertyTests extends GroovyTestCase {
-    
-    void testAccessDynamicBeanProperties() {
-        def ctx = new GenericGroovyApplicationContext();
-		ctx.reader.loadBeanDefinitions("org/springframework/context/groovy/applicationContext.groovy");
-		ctx.refresh()
 
-        def framework = ctx.framework
-        assertNotNull 'could not find framework bean', framework
-        assertEquals 'Grails', framework
-    }
-    
-    void testAccessingNonExistentBeanViaDynamicProperty() {
+	void testAccessDynamicBeanProperties() {
 		def ctx = new GenericGroovyApplicationContext();
 		ctx.reader.loadBeanDefinitions("org/springframework/context/groovy/applicationContext.groovy");
 		ctx.refresh()
 
-        def err = shouldFail(NoSuchBeanDefinitionException) {
-            ctx.someNonExistentBean
-        }
-        
-        assertEquals "No bean named 'someNonExistentBean' is defined", err
-    }
+		def framework = ctx.framework
+		assertNotNull 'could not find framework bean', framework
+		assertEquals 'Grails', framework
+	}
+
+	void testAccessingNonExistentBeanViaDynamicProperty() {
+		def ctx = new GenericGroovyApplicationContext();
+		ctx.reader.loadBeanDefinitions("org/springframework/context/groovy/applicationContext.groovy");
+		ctx.refresh()
+
+		def err = shouldFail(NoSuchBeanDefinitionException) {
+			ctx.someNonExistentBean
+		}
+
+		assertEquals "No bean named 'someNonExistentBean' is defined", err
+	}
 
 }

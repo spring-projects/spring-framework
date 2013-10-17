@@ -132,7 +132,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 
 	private final Map <String, String> namespaces = new HashMap<String, String>();
 
-    private final Map<String, DeferredProperty> deferredProperties = new HashMap<String, DeferredProperty>();
+	private final Map<String, DeferredProperty> deferredProperties = new HashMap<String, DeferredProperty>();
 
 
 	/**
@@ -140,11 +140,11 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 * @param registry the BeanFactory to load bean definitions into,
 	 * in the form of a BeanDefinitionRegistry
 	 */
-    public GroovyBeanDefinitionReader(BeanDefinitionRegistry registry) {
-        super(registry);
-        this.xmlBeanDefinitionReader = new XmlBeanDefinitionReader(registry);
+	public GroovyBeanDefinitionReader(BeanDefinitionRegistry registry) {
+		super(registry);
+		this.xmlBeanDefinitionReader = new XmlBeanDefinitionReader(registry);
 		this.xmlBeanDefinitionReader.setValidating(false);
-    }
+	}
 
 	/**
 	 * Create new GroovyBeanDefinitionReader based on the given XmlBeanDefinitionReader,
@@ -182,7 +182,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 
-	// TRADITIONAL BEAN DEFINITION READER METHODS 
+	// TRADITIONAL BEAN DEFINITION READER METHODS
 
 	/**
 	 * Load bean definitions from the specified Groovy script.
@@ -293,26 +293,26 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 	/**
-     * Defines an Spring namespace definition to use.
-     * @param definition the namespace definition
-     */
-    public void xmlns(Map<String, String> definition) {
-        if (!definition.isEmpty()) {
-            for (Map.Entry<String,String> entry : definition.entrySet()) {
-                String namespace = entry.getKey();
-                String uri = entry.getValue();
-                if (uri == null) {
-                    throw new IllegalArgumentException("Namespace definition must supply a non-null URI");
-                }
-                NamespaceHandler namespaceHandler = this.xmlBeanDefinitionReader.getNamespaceHandlerResolver().resolve(uri);
-                if (namespaceHandler == null) {
-                    throw new BeanDefinitionParsingException(new Problem("No namespace handler found for URI: " + uri,
+	 * Defines an Spring namespace definition to use.
+	 * @param definition the namespace definition
+	 */
+	public void xmlns(Map<String, String> definition) {
+		if (!definition.isEmpty()) {
+			for (Map.Entry<String,String> entry : definition.entrySet()) {
+				String namespace = entry.getKey();
+				String uri = entry.getValue();
+				if (uri == null) {
+					throw new IllegalArgumentException("Namespace definition must supply a non-null URI");
+				}
+				NamespaceHandler namespaceHandler = this.xmlBeanDefinitionReader.getNamespaceHandlerResolver().resolve(uri);
+				if (namespaceHandler == null) {
+					throw new BeanDefinitionParsingException(new Problem("No namespace handler found for URI: " + uri,
 							new Location(new DescriptiveResource(("Groovy")))));
-                }
-                this.namespaces.put(namespace, uri);
-            }
-        }
-    }
+				}
+				this.namespaces.put(namespace, uri);
+			}
+		}
+	}
 
 	/**
 	 * Imports Spring bean definitions from either XML or Groovy sources into the current bean builder instance.
@@ -335,25 +335,25 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 
 	// INTERNAL HANDLING OF GROOVY CLOSURES AND PROPERTIES
 
-    /**
+	/**
 	 * This method overrides method invocation to create beans for each method name that
 	 * takes a class argument
 	 */
 	public Object invokeMethod(String name, Object arg) {
-        Object[] args = (Object[])arg;
-        if ("beans".equals(name) && args.length == 1 && args[0] instanceof Closure) {
-            return beans((Closure) args[0]);
-        }
+		Object[] args = (Object[])arg;
+		if ("beans".equals(name) && args.length == 1 && args[0] instanceof Closure) {
+			return beans((Closure) args[0]);
+		}
 		else if ("ref".equals(name)) {
 			String refName;
 			if (args[0] == null)
 				throw new IllegalArgumentException("Argument to ref() is not a valid bean or was not found");
-			
+
 			if (args[0] instanceof RuntimeBeanReference) {
 				refName = ((RuntimeBeanReference)args[0]).getBeanName();
 			}
 			else {
-				refName = args[0].toString();	
+				refName = args[0].toString();
 			}
 			boolean parentRef = false;
 			if (args.length > 1) {
@@ -363,27 +363,27 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			}
 			return new RuntimeBeanReference(refName, parentRef);
 		}
-        else if (this.namespaces.containsKey(name) && args.length > 0 && (args[0] instanceof Closure)) {
-            GroovyDynamicElementReader reader = createDynamicElementReader(name);
-            reader.invokeMethod("doCall", args);
-        }
+		else if (this.namespaces.containsKey(name) && args.length > 0 && (args[0] instanceof Closure)) {
+			GroovyDynamicElementReader reader = createDynamicElementReader(name);
+			reader.invokeMethod("doCall", args);
+		}
 		else if (args.length > 0 && args[0] instanceof Closure) {
-            // abstract bean definition
-            return invokeBeanDefiningMethod(name, args);
+			// abstract bean definition
+			return invokeBeanDefiningMethod(name, args);
 		}
 		else if (args.length > 0 && (args[0] instanceof Class || args[0] instanceof RuntimeBeanReference || args[0] instanceof Map)) {
-			return invokeBeanDefiningMethod(name, args);			
+			return invokeBeanDefiningMethod(name, args);
 		}
 		else if (args.length > 1 && args[args.length -1] instanceof Closure) {
 			return invokeBeanDefiningMethod(name, args);
 		}
-        MetaClass mc = DefaultGroovyMethods.getMetaClass(getRegistry());
-        if (!mc.respondsTo(getRegistry(), name, args).isEmpty()){
-            return mc.invokeMethod(getRegistry(), name, args);
-        }
-        return this;
+		MetaClass mc = DefaultGroovyMethods.getMetaClass(getRegistry());
+		if (!mc.respondsTo(getRegistry(), name, args).isEmpty()){
+			return mc.invokeMethod(getRegistry(), name, args);
+		}
+		return this;
 	}
-	
+
 	private boolean addDeferredProperty(String property, Object newValue) {
 		if (newValue instanceof List) {
 			this.deferredProperties.put(this.currentBeanDefinition.getBeanName() + '.' + property,
@@ -431,102 +431,102 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 * @return the bean definition wrapper
 	 */
 	private GroovyBeanDefinitionWrapper invokeBeanDefiningMethod(String beanName, Object[] args) {
-        boolean hasClosureArgument = args[args.length - 1] instanceof Closure;
-        if (args[0] instanceof Class) {
-            Class beanClass = (args[0] instanceof Class ? (Class) args[0] : args[0].getClass());
-            if (args.length >= 1) {
-                if (hasClosureArgument) {
+		boolean hasClosureArgument = args[args.length - 1] instanceof Closure;
+		if (args[0] instanceof Class) {
+			Class beanClass = (args[0] instanceof Class ? (Class) args[0] : args[0].getClass());
+			if (args.length >= 1) {
+				if (hasClosureArgument) {
 					if (args.length-1 != 1) {
-                        this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(
+						this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(
 								beanName, beanClass, resolveConstructorArguments(args,1,args.length-1));
 					}
 					else {
 						this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName, beanClass);
-					}				
+					}
 				}
 				else  {
 					this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(
 							beanName, beanClass, resolveConstructorArguments(args,1,args.length));
 				}
 
-			}			
+			}
 		}
 		else if (args[0] instanceof RuntimeBeanReference) {
 			this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName);
 			this.currentBeanDefinition.getBeanDefinition().setFactoryBeanName(((RuntimeBeanReference) args[0]).getBeanName());
 		}
 		else if (args[0] instanceof Map) {
-            // named constructor arguments
-            if (args.length > 1 && args[1] instanceof Class) {
-                List constructorArgs = resolveConstructorArguments(args, 2, hasClosureArgument ? args.length-1 :  args.length);
-                this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName, (Class)args[1], constructorArgs);
-                Map namedArgs = (Map)args[0];
-                for (Object o : namedArgs.keySet()) {
-                    String propName = (String) o;
-                    setProperty(propName, namedArgs.get(propName));
-                }
-            }
-            // factory method syntax
-            else {
+			// named constructor arguments
+			if (args.length > 1 && args[1] instanceof Class) {
+				List constructorArgs = resolveConstructorArguments(args, 2, hasClosureArgument ? args.length-1 :  args.length);
+				this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName, (Class)args[1], constructorArgs);
+				Map namedArgs = (Map)args[0];
+				for (Object o : namedArgs.keySet()) {
+					String propName = (String) o;
+					setProperty(propName, namedArgs.get(propName));
+				}
+			}
+			// factory method syntax
+			else {
 				this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName);
-                //First arg is the map containing factoryBean : factoryMethod
-                Map.Entry factoryBeanEntry = (Map.Entry) ((Map) args[0]).entrySet().iterator().next();
-                // If we have a closure body, that will be the last argument.
-                // In between are the constructor args
-                int constructorArgsTest = hasClosureArgument?2:1;
-                // If we have more than this number of args, we have constructor args
-                if (args.length > constructorArgsTest){
-                    // factory-method requires args
-                    int endOfConstructArgs = (hasClosureArgument? args.length - 1 : args.length);
+				//First arg is the map containing factoryBean : factoryMethod
+				Map.Entry factoryBeanEntry = (Map.Entry) ((Map) args[0]).entrySet().iterator().next();
+				// If we have a closure body, that will be the last argument.
+				// In between are the constructor args
+				int constructorArgsTest = hasClosureArgument?2:1;
+				// If we have more than this number of args, we have constructor args
+				if (args.length > constructorArgsTest){
+					// factory-method requires args
+					int endOfConstructArgs = (hasClosureArgument? args.length - 1 : args.length);
 					this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName, null,
 							resolveConstructorArguments(args, 1, endOfConstructArgs));
-                }
+				}
 				else {
 					this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName);
-                }
+				}
 				this.currentBeanDefinition.getBeanDefinition().setFactoryBeanName(factoryBeanEntry.getKey().toString());
 				this.currentBeanDefinition.getBeanDefinition().setFactoryMethodName(factoryBeanEntry.getValue().toString());
-            }
+			}
 
-        }
-        else if (args[0] instanceof Closure) {
+		}
+		else if (args[0] instanceof Closure) {
 			this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName);
 			this.currentBeanDefinition.getBeanDefinition().setAbstract(true);
-        }
-        else {
-            List constructorArgs = resolveConstructorArguments(args, 0, hasClosureArgument ? args.length-1 : args.length);
-            currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName, null, constructorArgs);
-        }
-
-        if (hasClosureArgument) {
-			Closure callable = (Closure)args[args.length-1];
-			callable.setDelegate(this);
-            callable.setResolveStrategy(Closure.DELEGATE_FIRST);
-            callable.call(new Object[]{currentBeanDefinition});
+		}
+		else {
+			List constructorArgs = resolveConstructorArguments(args, 0, hasClosureArgument ? args.length-1 : args.length);
+			currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName, null, constructorArgs);
 		}
 
-        GroovyBeanDefinitionWrapper beanDefinition = currentBeanDefinition;
+		if (hasClosureArgument) {
+			Closure callable = (Closure)args[args.length-1];
+			callable.setDelegate(this);
+			callable.setResolveStrategy(Closure.DELEGATE_FIRST);
+			callable.call(new Object[]{currentBeanDefinition});
+		}
+
+		GroovyBeanDefinitionWrapper beanDefinition = currentBeanDefinition;
 		this.currentBeanDefinition = null;
 		beanDefinition.getBeanDefinition().setAttribute(GroovyBeanDefinitionWrapper.class.getName(), beanDefinition);
 		getRegistry().registerBeanDefinition(beanName, beanDefinition.getBeanDefinition());
 		return beanDefinition;
 	}
 
-    protected List<Object> resolveConstructorArguments(Object[] args, int start, int end) {
-        Object[] constructorArgs = Arrays.copyOfRange(args, start, end);
-        for (int i = 0; i < constructorArgs.length; i++) {
+	protected List<Object> resolveConstructorArguments(Object[] args, int start, int end) {
+		Object[] constructorArgs = Arrays.copyOfRange(args, start, end);
+		for (int i = 0; i < constructorArgs.length; i++) {
 			if (constructorArgs[i] instanceof GString) {
 				constructorArgs[i] = constructorArgs[i].toString();
 			}
-        	else if (constructorArgs[i] instanceof List) {
-        		constructorArgs[i] = manageListIfNecessary((List) constructorArgs[i]);
-        	}
+			else if (constructorArgs[i] instanceof List) {
+				constructorArgs[i] = manageListIfNecessary((List) constructorArgs[i]);
+			}
 			else if (constructorArgs[i] instanceof Map){
-        		constructorArgs[i] = manageMapIfNecessary((Map) constructorArgs[i]);
-        	}
-        }
-        return Arrays.asList(constructorArgs);
-    }
+				constructorArgs[i] = manageMapIfNecessary((Map) constructorArgs[i]);
+			}
+		}
+		return Arrays.asList(constructorArgs);
+	}
 
 	/**
 	 * Checks whether there are any {@link RuntimeBeanReference} inside the Map
@@ -578,39 +578,39 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 */
 	public void setProperty(String name, Object value) {
 		if (this.currentBeanDefinition != null) {
-            applyPropertyToBeanDefinition(name, value);
-		}		
+			applyPropertyToBeanDefinition(name, value);
+		}
 	}
 
-    protected void applyPropertyToBeanDefinition(String name, Object value) {
-        if (value instanceof GString) {
+	protected void applyPropertyToBeanDefinition(String name, Object value) {
+		if (value instanceof GString) {
 			value = value.toString();
 		}
-        if (addDeferredProperty(name, value)) {
-            return;
-        }
-        else if (value instanceof Closure) {
-            GroovyBeanDefinitionWrapper current = this.currentBeanDefinition;
-            try {
-                Closure callable = (Closure) value;
-                Class parameterType = callable.getParameterTypes()[0];
-                if (parameterType.equals(Object.class)) {
+		if (addDeferredProperty(name, value)) {
+			return;
+		}
+		else if (value instanceof Closure) {
+			GroovyBeanDefinitionWrapper current = this.currentBeanDefinition;
+			try {
+				Closure callable = (Closure) value;
+				Class parameterType = callable.getParameterTypes()[0];
+				if (parameterType.equals(Object.class)) {
 					this.currentBeanDefinition = new GroovyBeanDefinitionWrapper("");
-                    callable.call(this.currentBeanDefinition);
-                }
-                else {
+					callable.call(this.currentBeanDefinition);
+				}
+				else {
 					this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(null, parameterType);
-                    callable.call((Object) null);
-                }
+					callable.call((Object) null);
+				}
 
-                value = this.currentBeanDefinition.getBeanDefinition();
-            }
-            finally {
+				value = this.currentBeanDefinition.getBeanDefinition();
+			}
+			finally {
 				this.currentBeanDefinition = current;
-            }
-        }
+			}
+		}
 		this.currentBeanDefinition.addProperty(name, value);
-    }
+	}
 
 	/**
 	 * This method overrides property retrieval in the scope of the GroovyBeanDefinitionReader to either:
@@ -624,15 +624,15 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			return binding.getVariable(name);
 		}
 		else {
-            if (this.namespaces.containsKey(name)) {
-                return createDynamicElementReader(name);
-            }
+			if (this.namespaces.containsKey(name)) {
+				return createDynamicElementReader(name);
+			}
 			if (getRegistry().containsBeanDefinition(name)) {
 				GroovyBeanDefinitionWrapper beanDefinition = (GroovyBeanDefinitionWrapper)
 						getRegistry().getBeanDefinition(name).getAttribute(GroovyBeanDefinitionWrapper.class.getName());
 				if (beanDefinition != null) {
 					return new GroovyRuntimeBeanReference(name, beanDefinition, false);
-				}					
+				}
 				else {
 					return new RuntimeBeanReference(name, false);
 				}
@@ -656,26 +656,26 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			}
 			else {
 				return getMetaClass().getProperty(this, name);
-			}			
-		}			
+			}
+		}
 	}
 
-    private GroovyDynamicElementReader createDynamicElementReader(String namespace) {
+	private GroovyDynamicElementReader createDynamicElementReader(String namespace) {
 		XmlReaderContext readerContext = this.xmlBeanDefinitionReader.createReaderContext(new DescriptiveResource("Groovy"));
 		BeanDefinitionParserDelegate delegate = new BeanDefinitionParserDelegate(readerContext, getEnvironment());
 		boolean decorating = (this.currentBeanDefinition != null);
 		if (!decorating) {
 			this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(namespace);
 		}
-        return new GroovyDynamicElementReader(namespace, this.namespaces, delegate, this.currentBeanDefinition, decorating) {
-            @Override
-            protected void afterInvocation() {
-                if (!this.decorating) {
-                    currentBeanDefinition = null;
-                }
-            }
-        };
-    }
+		return new GroovyDynamicElementReader(namespace, this.namespaces, delegate, this.currentBeanDefinition, decorating) {
+			@Override
+			protected void afterInvocation() {
+				if (!this.decorating) {
+					currentBeanDefinition = null;
+				}
+			}
+		};
+	}
 
 
 	/**

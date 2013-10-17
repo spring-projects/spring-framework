@@ -50,7 +50,7 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 	private static final String FACTORY_METHOD = "factoryMethod";
 	private static final String INIT_METHOD = "initMethod";
 	private static final String DESTROY_METHOD = "destroyMethod";
-    private static final String SINGLETON = "singleton";
+	private static final String SINGLETON = "singleton";
 
 	private static final List<String> dynamicProperties = new ArrayList<String>(8);
 
@@ -173,69 +173,69 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 	}
 
 	public void setProperty(String property, Object newValue) {
-        if (PARENT.equals(property)) {
-            setParent(newValue);
-        }
-        else {
-            AbstractBeanDefinition bd = getBeanDefinition();
-            if (AUTOWIRE.equals(property)) {
-                if ("byName".equals(newValue)) {
-                    bd.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_NAME);
-                }
-                else if ("byType".equals(newValue)) {
-                    bd.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
-                }
+		if (PARENT.equals(property)) {
+			setParent(newValue);
+		}
+		else {
+			AbstractBeanDefinition bd = getBeanDefinition();
+			if (AUTOWIRE.equals(property)) {
+				if ("byName".equals(newValue)) {
+					bd.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_NAME);
+				}
+				else if ("byType".equals(newValue)) {
+					bd.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
+				}
 				else if ("constructor".equals(newValue)) {
 					bd.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR);
 				}
-                else if (Boolean.TRUE.equals(newValue)) {
-                    bd.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_NAME);
-                }
-            }
-            // constructorArgs
-            else if (CONSTRUCTOR_ARGS.equals(property) && newValue instanceof List) {
-                ConstructorArgumentValues cav = new ConstructorArgumentValues();
-                List args = (List) newValue;
+				else if (Boolean.TRUE.equals(newValue)) {
+					bd.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_NAME);
+				}
+			}
+			// constructorArgs
+			else if (CONSTRUCTOR_ARGS.equals(property) && newValue instanceof List) {
+				ConstructorArgumentValues cav = new ConstructorArgumentValues();
+				List args = (List) newValue;
 				for (Object arg : args) {
 					cav.addGenericArgumentValue(arg);
 				}
-                bd.setConstructorArgumentValues(cav);
-            }
-            // factoryBean
-            else if (FACTORY_BEAN.equals(property)) {
-                if (newValue != null) {
-                    bd.setFactoryBeanName(newValue.toString());
+				bd.setConstructorArgumentValues(cav);
+			}
+			// factoryBean
+			else if (FACTORY_BEAN.equals(property)) {
+				if (newValue != null) {
+					bd.setFactoryBeanName(newValue.toString());
 				}
-            }
-            // factoryMethod
-            else if (FACTORY_METHOD.equals(property)) {
-                if (newValue != null)
-                    bd.setFactoryMethodName(newValue.toString());
-            }
-            // initMethod
-            else if (INIT_METHOD.equals(property)) {
-                if (newValue != null) {
-                    bd.setInitMethodName(newValue.toString());
+			}
+			// factoryMethod
+			else if (FACTORY_METHOD.equals(property)) {
+				if (newValue != null)
+					bd.setFactoryMethodName(newValue.toString());
+			}
+			// initMethod
+			else if (INIT_METHOD.equals(property)) {
+				if (newValue != null) {
+					bd.setInitMethodName(newValue.toString());
 				}
-            }
+			}
 			// destroyMethod
 			else if (DESTROY_METHOD.equals(property)) {
 				if (newValue != null) {
 					bd.setDestroyMethodName(newValue.toString());
 				}
 			}
-            // singleton property
-            else if (SINGLETON.equals(property)) {
-                bd.setScope(Boolean.TRUE.equals(newValue) ?
+			// singleton property
+			else if (SINGLETON.equals(property)) {
+				bd.setScope(Boolean.TRUE.equals(newValue) ?
 						BeanDefinition.SCOPE_SINGLETON : BeanDefinition.SCOPE_PROTOTYPE);
-            }
-            else if (this.definitionWrapper.isWritableProperty(property)) {
+			}
+			else if (this.definitionWrapper.isWritableProperty(property)) {
 				this.definitionWrapper.setPropertyValue(property, newValue);
-            }
-            else {
-                super.setProperty(property, newValue);
-            }
-        }
+			}
+			else {
+				super.setProperty(property, newValue);
+			}
+		}
 	}
 
 }

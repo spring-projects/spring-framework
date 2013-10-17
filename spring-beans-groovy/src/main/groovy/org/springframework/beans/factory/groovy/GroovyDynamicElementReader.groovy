@@ -45,53 +45,53 @@ class GroovyDynamicElementReader extends GroovyObjectSupport {
 	private boolean callAfterInvocation = true
 
 
-    public GroovyDynamicElementReader(String namespace, Map<String, String> namespaceMap,
-			  BeanDefinitionParserDelegate delegate, GroovyBeanDefinitionWrapper beanDefinition, boolean decorating) {
-        super();
+	public GroovyDynamicElementReader(String namespace, Map<String, String> namespaceMap,
+			BeanDefinitionParserDelegate delegate, GroovyBeanDefinitionWrapper beanDefinition, boolean decorating) {
+		super();
 		this.rootNamespace = namespace
-        this.xmlNamespaces = namespaceMap
-        this.delegate = delegate
+		this.xmlNamespaces = namespaceMap
+		this.delegate = delegate
 		this.beanDefinition = beanDefinition;
 		this.decorating = decorating;
-    }
+	}
 
 
-    @Override
-    public Object invokeMethod(String name, Object args) {
-        if (name.equals("doCall")) {
-            def callable = args[0]
-            callable.resolveStrategy = Closure.DELEGATE_FIRST
-            callable.delegate = this
-            def result = callable.call()
+	@Override
+	public Object invokeMethod(String name, Object args) {
+		if (name.equals("doCall")) {
+			def callable = args[0]
+			callable.resolveStrategy = Closure.DELEGATE_FIRST
+			callable.delegate = this
+			def result = callable.call()
 
 			if (this.callAfterInvocation) {
 				afterInvocation()
 				this.callAfterInvocation = false
 			}
-            return result
-        }
+			return result
+		}
 
-        else {
-            StreamingMarkupBuilder builder = new StreamingMarkupBuilder();
+		else {
+			StreamingMarkupBuilder builder = new StreamingMarkupBuilder();
 			def myNamespace = this.rootNamespace
-            def myNamespaces = this.xmlNamespaces
+			def myNamespaces = this.xmlNamespaces
 
-            def callable = {
-                for (namespace in myNamespaces) {
-                    mkp.declareNamespace([(namespace.key):namespace.value])
-                }
-                if (args && (args[-1] instanceof Closure)) {
-                    args[-1].resolveStrategy = Closure.DELEGATE_FIRST
-                    args[-1].delegate = builder
-                }
-                delegate."$myNamespace"."$name"(*args)
-            }
+			def callable = {
+				for (namespace in myNamespaces) {
+					mkp.declareNamespace([(namespace.key):namespace.value])
+				}
+				if (args && (args[-1] instanceof Closure)) {
+					args[-1].resolveStrategy = Closure.DELEGATE_FIRST
+					args[-1].delegate = builder
+				}
+				delegate."$myNamespace"."$name"(*args)
+			}
 
-            callable.resolveStrategy = Closure.DELEGATE_FIRST
-            callable.delegate = builder
-            def writable = builder.bind(callable)
-            def sw = new StringWriter()
-            writable.writeTo(sw)
+			callable.resolveStrategy = Closure.DELEGATE_FIRST
+			callable.delegate = builder
+			def writable = builder.bind(callable)
+			def sw = new StringWriter()
+			writable.writeTo(sw)
 
 			Element element = this.delegate.readerContext.readDocumentFromString(sw.toString()).documentElement
 			this.delegate.initDefaults(element)
@@ -106,13 +106,13 @@ class GroovyDynamicElementReader extends GroovyObjectSupport {
 					this.beanDefinition.setBeanDefinition(beanDefinition)
 				}
 			}
-            if (this.callAfterInvocation) {
-                afterInvocation()
+			if (this.callAfterInvocation) {
+				afterInvocation()
 				this.callAfterInvocation = false
-            }
-            return element
-        }
-    }
+			}
+			return element
+		}
+	}
 
 	/**
 	 * Hook that subclass or anonymous classes can overwrite to implement custom behavior
