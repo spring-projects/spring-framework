@@ -287,11 +287,11 @@ class ConfigurationClassParser {
 	private void processPropertySource(AnnotationAttributes propertySource) throws IOException {
 		String name = propertySource.getString("name");
 		String[] locations = propertySource.getStringArray("value");
-		int nLocations = locations.length;
-		if (nLocations == 0) {
+		int locationCount = locations.length;
+		if (locationCount == 0) {
 			throw new IllegalArgumentException("At least one @PropertySource(value) location is required");
 		}
-		for (int i = 0; i < nLocations; i++) {
+		for (int i = 0; i < locationCount; i++) {
 			locations[i] = this.environment.resolveRequiredPlaceholders(locations[i]);
 		}
 		ClassLoader classLoader = this.resourceLoader.getClassLoader();
@@ -301,7 +301,7 @@ class ConfigurationClassParser {
 			}
 		}
 		else {
-			if (nLocations == 1) {
+			if (locationCount == 1) {
 				this.propertySources.push(new ResourcePropertySource(name, locations[0], classLoader));
 			}
 			else {

@@ -133,7 +133,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		// then ultimately reset this.delegate back to its original (parent) reference.
 		// this behavior emulates a stack of delegates without actually necessitating one.
 		BeanDefinitionParserDelegate parent = this.delegate;
-		this.delegate = createHelper(this.readerContext, root, parent);
+		this.delegate = createDelegate(this.readerContext, root, parent);
 
 		preProcessXml(root);
 		parseBeanDefinitions(root, this.delegate);
@@ -142,12 +142,22 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		this.delegate = parent;
 	}
 
+	protected BeanDefinitionParserDelegate createDelegate(
+			XmlReaderContext readerContext, Element root, BeanDefinitionParserDelegate parentDelegate) {
+
+		BeanDefinitionParserDelegate delegate = createHelper(readerContext, root, parentDelegate);
+		if (delegate == null) {
+			delegate = new BeanDefinitionParserDelegate(readerContext, this.environment);
+			delegate.initDefaults(root, parentDelegate);
+		}
+		return delegate;
+	}
+
+	@Deprecated
 	protected BeanDefinitionParserDelegate createHelper(
 			XmlReaderContext readerContext, Element root, BeanDefinitionParserDelegate parentDelegate) {
 
-		BeanDefinitionParserDelegate delegate = new BeanDefinitionParserDelegate(readerContext, environment);
-		delegate.initDefaults(root, parentDelegate);
-		return delegate;
+		return null;
 	}
 
 	/**

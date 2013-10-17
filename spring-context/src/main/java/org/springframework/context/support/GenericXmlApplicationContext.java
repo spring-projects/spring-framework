@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,10 +45,9 @@ public class GenericXmlApplicationContext extends GenericApplicationContext {
 
 	/**
 	 * Create a new GenericXmlApplicationContext that needs to be
-	 * {@linkplain #load loaded} and then manually {@link #refresh refreshed}.
+	 * {@link #load loaded} and then manually {@link #refresh refreshed}.
 	 */
 	public GenericXmlApplicationContext() {
-		reader.setEnvironment(this.getEnvironment());
 	}
 
 	/**
@@ -91,14 +90,13 @@ public class GenericXmlApplicationContext extends GenericApplicationContext {
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>Delegates the given environment to underlying {@link XmlBeanDefinitionReader}.
-	 * Should be called before any call to {@link #load}.
+	 * Delegates the given environment to underlying {@link XmlBeanDefinitionReader}.
+	 * Should be called before any call to {@code #load}.
 	 */
 	@Override
 	public void setEnvironment(ConfigurableEnvironment environment) {
 		super.setEnvironment(environment);
-		this.reader.setEnvironment(this.getEnvironment());
+		this.reader.setEnvironment(getEnvironment());
 	}
 
 	/**
