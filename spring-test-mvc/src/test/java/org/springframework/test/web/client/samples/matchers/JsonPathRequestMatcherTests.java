@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.test.web.client.samples.matchers;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.isIn;
 import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
@@ -92,8 +93,8 @@ public class JsonPathRequestMatcherTests {
 	public void testDoesNotExist() throws Exception {
 		this.mockServer.expect(requestTo("/composers"))
 			.andExpect(content().contentType("application/json;charset=UTF-8"))
-			.andExpect(jsonPath("$.composers[?(@.name = 'Edvard Grieeeeeeg')]").doesNotExist())
-			.andExpect(jsonPath("$.composers[?(@.name = 'Robert Schuuuuuuman')]").doesNotExist())
+			.andExpect(jsonPath("$.composers[?(@.name == 'Edvard Grieeeeeeg')]").doesNotExist())
+			.andExpect(jsonPath("$.composers[?(@.name == 'Robert Schuuuuuuman')]").doesNotExist())
 			.andExpect(jsonPath("$.composers[-1]").doesNotExist())
 			.andExpect(jsonPath("$.composers[4]").doesNotExist())
 			.andRespond(withSuccess());
@@ -124,6 +125,7 @@ public class JsonPathRequestMatcherTests {
 			.andExpect(jsonPath("$.performers[0].name", endsWith("Ashkenazy")))
 			.andExpect(jsonPath("$.performers[1].name", containsString("di Me")))
 			.andExpect(jsonPath("$.composers[1].name", isIn(Arrays.asList("Johann Sebastian Bach", "Johannes Brahms"))))
+			.andExpect(jsonPath("$.composers[:3].name", hasItem("Johannes Brahms")))
 			.andRespond(withSuccess());
 
 		this.restTemplate.put(new URI("/composers"), this.people);
