@@ -133,6 +133,11 @@ public class StompCodecTests {
 		assertEquals("alpha:bravo\r\n\\", headers.getFirstNativeHeader("a:\r\n\\b"));
 	}
 
+	@Test(expected=StompConversionException.class)
+	public void decodeFrameBodyNotAllowed() {
+		decode("CONNECT\naccept-version:1.2\n\nThe body of the message\0");
+	}
+
 	@Test
 	public void decodeMultipleFramesFromSameBuffer() {
 		String frame1 = "SEND\ndestination:test\n\nThe body of the message\0";

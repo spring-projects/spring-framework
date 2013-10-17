@@ -1145,6 +1145,166 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.destroySingletons();
 	}
 
+	@Test
+	public void testGenericsBasedFieldInjection() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(RepositoryFieldInjectionBean.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		StringRepository sr = new StringRepository();
+		bf.registerSingleton("stringRepo", sr);
+		IntegerRepository ir = new IntegerRepository();
+		bf.registerSingleton("integerRepo", ir);
+
+		RepositoryFieldInjectionBean bean = (RepositoryFieldInjectionBean) bf.getBean("annotatedBean");
+		assertSame(sr, bean.stringRepository);
+		assertSame(ir, bean.integerRepository);
+		assertSame(1, bean.stringRepositoryArray.length);
+		assertSame(1, bean.integerRepositoryArray.length);
+		assertSame(sr, bean.stringRepositoryArray[0]);
+		assertSame(ir, bean.integerRepositoryArray[0]);
+		assertSame(1, bean.stringRepositoryList.size());
+		assertSame(1, bean.integerRepositoryList.size());
+		assertSame(sr, bean.stringRepositoryList.get(0));
+		assertSame(ir, bean.integerRepositoryList.get(0));
+		assertSame(1, bean.stringRepositoryMap.size());
+		assertSame(1, bean.integerRepositoryMap.size());
+		assertSame(sr, bean.stringRepositoryMap.get("stringRepo"));
+		assertSame(ir, bean.integerRepositoryMap.get("integerRepo"));
+	}
+
+	@Test
+	public void testGenericsBasedFieldInjectionWithSubstitutedVariables() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(RepositoryFieldInjectionBeanWithSubstitutedVariables.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		StringRepository sr = new StringRepository();
+		bf.registerSingleton("stringRepo", sr);
+		IntegerRepository ir = new IntegerRepository();
+		bf.registerSingleton("integerRepo", ir);
+
+		RepositoryFieldInjectionBeanWithSubstitutedVariables bean = (RepositoryFieldInjectionBeanWithSubstitutedVariables) bf.getBean("annotatedBean");
+		assertSame(sr, bean.stringRepository);
+		assertSame(ir, bean.integerRepository);
+		assertSame(1, bean.stringRepositoryArray.length);
+		assertSame(1, bean.integerRepositoryArray.length);
+		assertSame(sr, bean.stringRepositoryArray[0]);
+		assertSame(ir, bean.integerRepositoryArray[0]);
+		assertSame(1, bean.stringRepositoryList.size());
+		assertSame(1, bean.integerRepositoryList.size());
+		assertSame(sr, bean.stringRepositoryList.get(0));
+		assertSame(ir, bean.integerRepositoryList.get(0));
+		assertSame(1, bean.stringRepositoryMap.size());
+		assertSame(1, bean.integerRepositoryMap.size());
+		assertSame(sr, bean.stringRepositoryMap.get("stringRepo"));
+		assertSame(ir, bean.integerRepositoryMap.get("integerRepo"));
+	}
+
+	@Test
+	public void testGenericsBasedMethodInjection() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(RepositoryMethodInjectionBean.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		StringRepository sr = new StringRepository();
+		bf.registerSingleton("stringRepo", sr);
+		IntegerRepository ir = new IntegerRepository();
+		bf.registerSingleton("integerRepo", ir);
+
+		RepositoryMethodInjectionBean bean = (RepositoryMethodInjectionBean) bf.getBean("annotatedBean");
+		assertSame(sr, bean.stringRepository);
+		assertSame(ir, bean.integerRepository);
+		assertSame(1, bean.stringRepositoryArray.length);
+		assertSame(1, bean.integerRepositoryArray.length);
+		assertSame(sr, bean.stringRepositoryArray[0]);
+		assertSame(ir, bean.integerRepositoryArray[0]);
+		assertSame(1, bean.stringRepositoryList.size());
+		assertSame(1, bean.integerRepositoryList.size());
+		assertSame(sr, bean.stringRepositoryList.get(0));
+		assertSame(ir, bean.integerRepositoryList.get(0));
+		assertSame(1, bean.stringRepositoryMap.size());
+		assertSame(1, bean.integerRepositoryMap.size());
+		assertSame(sr, bean.stringRepositoryMap.get("stringRepo"));
+		assertSame(ir, bean.integerRepositoryMap.get("integerRepo"));
+	}
+
+	@Test
+	public void testGenericsBasedMethodInjectionWithSubstitutedVariables() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(RepositoryMethodInjectionBeanWithSubstitutedVariables.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		StringRepository sr = new StringRepository();
+		bf.registerSingleton("stringRepo", sr);
+		IntegerRepository ir = new IntegerRepository();
+		bf.registerSingleton("integerRepo", ir);
+
+		RepositoryMethodInjectionBeanWithSubstitutedVariables bean = (RepositoryMethodInjectionBeanWithSubstitutedVariables) bf.getBean("annotatedBean");
+		assertSame(sr, bean.stringRepository);
+		assertSame(ir, bean.integerRepository);
+		assertSame(1, bean.stringRepositoryArray.length);
+		assertSame(1, bean.integerRepositoryArray.length);
+		assertSame(sr, bean.stringRepositoryArray[0]);
+		assertSame(ir, bean.integerRepositoryArray[0]);
+		assertSame(1, bean.stringRepositoryList.size());
+		assertSame(1, bean.integerRepositoryList.size());
+		assertSame(sr, bean.stringRepositoryList.get(0));
+		assertSame(ir, bean.integerRepositoryList.get(0));
+		assertSame(1, bean.stringRepositoryMap.size());
+		assertSame(1, bean.integerRepositoryMap.size());
+		assertSame(sr, bean.stringRepositoryMap.get("stringRepo"));
+		assertSame(ir, bean.integerRepositoryMap.get("integerRepo"));
+	}
+
+	@Test
+	public void testGenericsBasedConstructorInjection() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(RepositoryConstructorInjectionBean.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		StringRepository sr = new StringRepository();
+		bf.registerSingleton("stringRepo", sr);
+		IntegerRepository ir = new IntegerRepository();
+		bf.registerSingleton("integerRepo", ir);
+
+		RepositoryConstructorInjectionBean bean = (RepositoryConstructorInjectionBean) bf.getBean("annotatedBean");
+		assertSame(sr, bean.stringRepository);
+		assertSame(ir, bean.integerRepository);
+		assertSame(1, bean.stringRepositoryArray.length);
+		assertSame(1, bean.integerRepositoryArray.length);
+		assertSame(sr, bean.stringRepositoryArray[0]);
+		assertSame(ir, bean.integerRepositoryArray[0]);
+		assertSame(1, bean.stringRepositoryList.size());
+		assertSame(1, bean.integerRepositoryList.size());
+		assertSame(sr, bean.stringRepositoryList.get(0));
+		assertSame(ir, bean.integerRepositoryList.get(0));
+		assertSame(1, bean.stringRepositoryMap.size());
+		assertSame(1, bean.integerRepositoryMap.size());
+		assertSame(sr, bean.stringRepositoryMap.get("stringRepo"));
+		assertSame(ir, bean.integerRepositoryMap.get("integerRepo"));
+	}
+
 
 	public static class ResourceInjectionBean {
 
@@ -1687,6 +1847,237 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 	@Order(2)
 	public static class FixedOrder2NestedTestBean extends NestedTestBean {
+	}
+
+
+	public interface Repository<T> {
+	}
+
+	public static class StringRepository implements Repository<String> {
+	}
+
+	public static class IntegerRepository implements Repository<Integer> {
+	}
+
+
+	public static class RepositoryFieldInjectionBean {
+
+		@Autowired
+		public Repository<String> stringRepository;
+
+		@Autowired
+		public Repository<Integer> integerRepository;
+
+		@Autowired
+		public Repository<String>[] stringRepositoryArray;
+
+		@Autowired
+		public Repository<Integer>[] integerRepositoryArray;
+
+		@Autowired
+		public List<Repository<String>> stringRepositoryList;
+
+		@Autowired
+		public List<Repository<Integer>> integerRepositoryList;
+
+		@Autowired
+		public Map<String, Repository<String>> stringRepositoryMap;
+
+		@Autowired
+		public Map<String, Repository<Integer>> integerRepositoryMap;
+	}
+
+
+	public static class RepositoryFieldInjectionBeanWithVariables<S, I> {
+
+		@Autowired
+		public Repository<S> stringRepository;
+
+		@Autowired
+		public Repository<I> integerRepository;
+
+		@Autowired
+		public Repository<S>[] stringRepositoryArray;
+
+		@Autowired
+		public Repository<I>[] integerRepositoryArray;
+
+		@Autowired
+		public List<Repository<S>> stringRepositoryList;
+
+		@Autowired
+		public List<Repository<I>> integerRepositoryList;
+
+		@Autowired
+		public Map<String, Repository<S>> stringRepositoryMap;
+
+		@Autowired
+		public Map<String, Repository<I>> integerRepositoryMap;
+	}
+
+
+	public static class RepositoryFieldInjectionBeanWithSubstitutedVariables
+			extends RepositoryFieldInjectionBeanWithVariables<String, Integer> {
+	}
+
+
+	public static class RepositoryMethodInjectionBean {
+
+		public Repository<String> stringRepository;
+
+		public Repository<Integer> integerRepository;
+
+		public Repository<String>[] stringRepositoryArray;
+
+		public Repository<Integer>[] integerRepositoryArray;
+
+		public List<Repository<String>> stringRepositoryList;
+
+		public List<Repository<Integer>> integerRepositoryList;
+
+		public Map<String, Repository<String>> stringRepositoryMap;
+
+		public Map<String, Repository<Integer>> integerRepositoryMap;
+
+		@Autowired
+		public void setStringRepository(Repository<String> stringRepository) {
+			this.stringRepository = stringRepository;
+		}
+
+		@Autowired
+		public void setIntegerRepository(Repository<Integer> integerRepository) {
+			this.integerRepository = integerRepository;
+		}
+
+		@Autowired
+		public void setStringRepositoryArray(Repository<String>[] stringRepositoryArray) {
+			this.stringRepositoryArray = stringRepositoryArray;
+		}
+
+		@Autowired
+		public void setIntegerRepositoryArray(Repository<Integer>[] integerRepositoryArray) {
+			this.integerRepositoryArray = integerRepositoryArray;
+		}
+
+		@Autowired
+		public void setStringRepositoryList(List<Repository<String>> stringRepositoryList) {
+			this.stringRepositoryList = stringRepositoryList;
+		}
+
+		@Autowired
+		public void setIntegerRepositoryList(List<Repository<Integer>> integerRepositoryList) {
+			this.integerRepositoryList = integerRepositoryList;
+		}
+
+		@Autowired
+		public void setStringRepositoryMap(Map<String, Repository<String>> stringRepositoryMap) {
+			this.stringRepositoryMap = stringRepositoryMap;
+		}
+
+		@Autowired
+		public void setIntegerRepositoryMap(Map<String, Repository<Integer>> integerRepositoryMap) {
+			this.integerRepositoryMap = integerRepositoryMap;
+		}
+	}
+
+
+	public static class RepositoryMethodInjectionBeanWithVariables<S, I> {
+
+		public Repository<S> stringRepository;
+
+		public Repository<I> integerRepository;
+
+		public Repository<S>[] stringRepositoryArray;
+
+		public Repository<I>[] integerRepositoryArray;
+
+		public List<Repository<S>> stringRepositoryList;
+
+		public List<Repository<I>> integerRepositoryList;
+
+		public Map<String, Repository<S>> stringRepositoryMap;
+
+		public Map<String, Repository<I>> integerRepositoryMap;
+
+		@Autowired
+		public void setStringRepository(Repository<S> stringRepository) {
+			this.stringRepository = stringRepository;
+		}
+
+		@Autowired
+		public void setIntegerRepository(Repository<I> integerRepository) {
+			this.integerRepository = integerRepository;
+		}
+
+		@Autowired
+		public void setStringRepositoryArray(Repository<S>[] stringRepositoryArray) {
+			this.stringRepositoryArray = stringRepositoryArray;
+		}
+
+		@Autowired
+		public void setIntegerRepositoryArray(Repository<I>[] integerRepositoryArray) {
+			this.integerRepositoryArray = integerRepositoryArray;
+		}
+
+		@Autowired
+		public void setStringRepositoryList(List<Repository<S>> stringRepositoryList) {
+			this.stringRepositoryList = stringRepositoryList;
+		}
+
+		@Autowired
+		public void setIntegerRepositoryList(List<Repository<I>> integerRepositoryList) {
+			this.integerRepositoryList = integerRepositoryList;
+		}
+
+		@Autowired
+		public void setStringRepositoryMap(Map<String, Repository<S>> stringRepositoryMap) {
+			this.stringRepositoryMap = stringRepositoryMap;
+		}
+
+		@Autowired
+		public void setIntegerRepositoryMap(Map<String, Repository<I>> integerRepositoryMap) {
+			this.integerRepositoryMap = integerRepositoryMap;
+		}
+	}
+
+
+	public static class RepositoryMethodInjectionBeanWithSubstitutedVariables
+			extends RepositoryMethodInjectionBeanWithVariables<String, Integer> {
+	}
+
+
+	public static class RepositoryConstructorInjectionBean {
+
+		public Repository<String> stringRepository;
+
+		public Repository<Integer> integerRepository;
+
+		public Repository<String>[] stringRepositoryArray;
+
+		public Repository<Integer>[] integerRepositoryArray;
+
+		public List<Repository<String>> stringRepositoryList;
+
+		public List<Repository<Integer>> integerRepositoryList;
+
+		public Map<String, Repository<String>> stringRepositoryMap;
+
+		public Map<String, Repository<Integer>> integerRepositoryMap;
+
+		@Autowired
+		public RepositoryConstructorInjectionBean(Repository<String> stringRepository, Repository<Integer> integerRepository,
+				Repository<String>[] stringRepositoryArray, Repository<Integer>[] integerRepositoryArray,
+				List<Repository<String>> stringRepositoryList, List<Repository<Integer>> integerRepositoryList,
+				Map<String, Repository<String>> stringRepositoryMap, Map<String, Repository<Integer>> integerRepositoryMap) {
+			this.stringRepository = stringRepository;
+			this.integerRepository = integerRepository;
+			this.stringRepositoryArray = stringRepositoryArray;
+			this.integerRepositoryArray = integerRepositoryArray;
+			this.stringRepositoryList = stringRepositoryList;
+			this.integerRepositoryList = integerRepositoryList;
+			this.stringRepositoryMap = stringRepositoryMap;
+			this.integerRepositoryMap = integerRepositoryMap;
+		}
 	}
 
 }

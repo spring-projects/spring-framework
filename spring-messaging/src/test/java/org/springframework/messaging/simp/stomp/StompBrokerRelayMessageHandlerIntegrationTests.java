@@ -113,6 +113,8 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		}
 	}
 
+	// test "host" header (virtualHost property) when TCP client is behind interface and configurable
+
 	@Test
 	public void publishSubscribe() throws Exception {
 

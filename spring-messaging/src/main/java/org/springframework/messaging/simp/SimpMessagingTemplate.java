@@ -15,6 +15,8 @@
  */
 package org.springframework.messaging.simp;
 
+import java.util.Map;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
@@ -90,7 +92,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 
 	@Override
-	public <P> void send(Message<P> message) {
+	public void send(Message<?> message) {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 		String destination = headers.getDestination();
 		destination = (destination != null) ? destination : getRequiredDefaultDestination();
@@ -120,16 +122,33 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 
 	@Override
-	public <T> void convertAndSendToUser(String user, String destination, T message) throws MessagingException {
-		convertAndSendToUser(user, destination, message, null);
+	public void convertAndSendToUser(String user, String destination, Object payload) throws MessagingException {
+		MessagePostProcessor postProcessor = null;
+		this.convertAndSendToUser(user, destination, payload, postProcessor);
 	}
 
 	@Override
-	public <T> void convertAndSendToUser(String user, String destination, T message,
+	public void convertAndSendToUser(String user, String destination, Object payload,
+			Map<String, Object> headers) throws MessagingException {
+
+		MessagePostProcessor postProcessor = null;
+		this.convertAndSendToUser(user, destination, payload, headers, postProcessor);
+	}
+
+	@Override
+	public void convertAndSendToUser(String user, String destination, Object payload,
+			MessagePostProcessor postProcessor) throws MessagingException {
+
+		Map<String, Object> headers = null;
+		this.convertAndSendToUser(user, destination, payload, headers, postProcessor);
+	}
+
+	@Override
+	public void convertAndSendToUser(String user, String destination, Object payload, Map<String, Object> headers,
 			MessagePostProcessor postProcessor) throws MessagingException {
 
 		Assert.notNull(user, "user is required");
-		convertAndSend(this.userDestinationPrefix + user + destination, message, postProcessor);
+		super.convertAndSend(this.userDestinationPrefix + user + destination, payload, headers, postProcessor);
 	}
 
 }

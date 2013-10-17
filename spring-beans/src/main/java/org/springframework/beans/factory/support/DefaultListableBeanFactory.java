@@ -842,7 +842,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		if (type.isArray()) {
 			Class<?> componentType = type.getComponentType();
-			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, componentType, descriptor);
+			DependencyDescriptor targetDesc = new DependencyDescriptor(descriptor);
+			targetDesc.increaseNestingLevel();
+			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, componentType, targetDesc);
 			if (matchingBeans.isEmpty()) {
 				if (descriptor.isRequired()) {
 					raiseNoSuchBeanDefinitionException(componentType, "array of " + componentType.getName(), descriptor);
@@ -867,7 +869,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 				return null;
 			}
-			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, elementType, descriptor);
+			DependencyDescriptor targetDesc = new DependencyDescriptor(descriptor);
+			targetDesc.increaseNestingLevel();
+			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, elementType, targetDesc);
 			if (matchingBeans.isEmpty()) {
 				if (descriptor.isRequired()) {
 					raiseNoSuchBeanDefinitionException(elementType, "collection of " + elementType.getName(), descriptor);
@@ -900,7 +904,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 				return null;
 			}
-			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, valueType, descriptor);
+			DependencyDescriptor targetDesc = new DependencyDescriptor(descriptor);
+			targetDesc.increaseNestingLevel();
+			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, valueType, targetDesc);
 			if (matchingBeans.isEmpty()) {
 				if (descriptor.isRequired()) {
 					raiseNoSuchBeanDefinitionException(valueType, "map with value type " + valueType.getName(), descriptor);

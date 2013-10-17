@@ -15,26 +15,39 @@
  */
 package org.springframework.messaging.core;
 
+import java.util.Map;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
 
 /**
+ * A set of operations sending messages to a destination.
+ *
+ * @param <D> the type of destination to which messages can be sent
+ *
  * @author Mark Fisher
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
 public interface MessageSendingOperations<D> {
 
-	<P> void send(Message<P> message) throws MessagingException;
+	void send(Message<?> message) throws MessagingException;
 
-	<P> void send(D destination, Message<P> message) throws MessagingException;
+	void send(D destination, Message<?> message) throws MessagingException;
 
-	<T> void convertAndSend(T payload) throws MessagingException;
+	void convertAndSend(Object payload) throws MessagingException;
 
-	<T> void convertAndSend(D destination, T payload) throws MessagingException;
+	void convertAndSend(D destination, Object payload) throws MessagingException;
 
-	<T> void convertAndSend(T payload, MessagePostProcessor postProcessor) throws MessagingException;
+	void convertAndSend(D destination, Object payload, Map<String, Object> headers) throws MessagingException;
 
-	<T> void convertAndSend(D destination, T payload, MessagePostProcessor postProcessor) throws MessagingException;
+	void convertAndSend(Object payload, MessagePostProcessor postProcessor) throws MessagingException;
+
+	void convertAndSend(D destination, Object payload,
+			MessagePostProcessor postProcessor) throws MessagingException;
+
+	void convertAndSend(D destination, Object payload, Map<String, Object> headers,
+			MessagePostProcessor postProcessor) throws MessagingException;
 
 }

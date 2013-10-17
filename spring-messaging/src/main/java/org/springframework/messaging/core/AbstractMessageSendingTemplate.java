@@ -15,17 +15,27 @@
  */
 package org.springframework.messaging.core;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.support.converter.ByteArrayMessageConverter;
+import org.springframework.messaging.support.converter.CompositeMessageConverter;
 import org.springframework.messaging.support.converter.MessageConverter;
-import org.springframework.messaging.support.converter.SimplePayloadMessageConverter;
+import org.springframework.messaging.support.converter.StringMessageConverter;
 import org.springframework.util.Assert;
 
 
 /**
+ * Base class for templates that support sending messages.
+ *
  * @author Mark Fisher
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
 public abstract class AbstractMessageSendingTemplate<D> implements MessageSendingOperations<D> {
@@ -34,8 +44,15 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 
 	private volatile D defaultDestination;
 
-	private volatile MessageConverter converter = new SimplePayloadMessageConverter();
+	private volatile MessageConverter converter;
 
+
+	public AbstractMessageSendingTemplate() {
+		Collection<MessageConverter> converters = new ArrayList<MessageConverter>();
+		converters.add(new StringMessageConverter());
+		converters.add(new ByteArrayMessageConverter());
+		this.converter = new CompositeMessageConverter(converters);
+	}
 
 	public void setDefaultDestination(D defaultDestination) {
 		this.defaultDestination = defaultDestination;
@@ -58,19 +75,13 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	/**
 	 * @return the configured {@link MessageConverter}
 	 */
-	public MessageConverter getConverter() {
+	public MessageConverter getMessageConverter() {
 		return this.converter;
 	}
 
-	/**
-	 * @param converter the converter to set
-	 */
-	public void setConverter(MessageConverter converter) {
-		this.converter = converter;
-	}
 
 	@Override
-	public <P> void send(Message<P> message) {
+	public void send(Message<?> message) {
 		this.send(getRequiredDefaultDestination(), message);
 	}
 
@@ -82,7 +93,7 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	}
 
 	@Override
-	public <P> void send(D destination, Message<P> message) {
+	public void send(D destination, Message<?> message) {
 		this.doSend(destination, message);
 	}
 
@@ -90,26 +101,40 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 
 
 	@Override
-	public <T> void convertAndSend(T message) {
+	public void convertAndSend(Object message) throws MessagingException {
 		this.convertAndSend(getRequiredDefaultDestination(), message);
 	}
 
 	@Override
-	public <T> void convertAndSend(D destination, T object) {
-		this.convertAndSend(destination, object, null);
+	public void convertAndSend(D destination, Object payload) throws MessagingException {
+		this.convertAndSend(destination, payload, (Map<String, Object>) null);
 	}
 
 	@Override
-	public <T> void convertAndSend(T object, MessagePostProcessor postProcessor) {
-		this.convertAndSend(getRequiredDefaultDestination(), object, postProcessor);
+	public void convertAndSend(D destination, Object payload, Map<String, Object> headers) throws MessagingException {
+		MessagePostProcessor postProcessor = null;
+		this.convertAndSend(destination, payload, headers, postProcessor);
 	}
 
 	@Override
-	public <T> void convertAndSend(D destination, T object, MessagePostProcessor postProcessor)
+	public void convertAndSend(Object payload, MessagePostProcessor postProcessor) throws MessagingException {
+		this.convertAndSend(getRequiredDefaultDestination(), payload, postProcessor);
+	}
+
+	@Override
+	public void convertAndSend(D destination, Object payload, MessagePostProcessor postProcessor)
 			throws MessagingException {
 
-		@SuppressWarnings("unchecked")
-		Message<?> message = this.converter.toMessage(object);
+		Map<String, Object> headers = null;
+		this.convertAndSend(destination, payload, headers, postProcessor);
+	}
+
+	@Override
+	public void convertAndSend(D destination, Object payload, Map<String, Object> headers,
+			MessagePostProcessor postProcessor) throws MessagingException {
+
+		MessageHeaders messageHeaders = (headers != null) ? new MessageHeaders(headers) : null;
+		Message<?> message = this.converter.toMessage(payload, messageHeaders);
 		if (postProcessor != null) {
 			message = postProcessor.postProcessMessage(message);
 		}

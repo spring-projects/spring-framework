@@ -28,11 +28,13 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.stereotype.Component;
 
 /**
  * Utilities for processing @{@link Configuration} classes.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  */
 abstract class ConfigurationClassUtils {
@@ -48,8 +50,9 @@ abstract class ConfigurationClassUtils {
 
 
 	/**
-	 * Check whether the given bean definition is a candidate for a configuration class,
-	 * and mark it accordingly.
+	 * Check whether the given bean definition is a candidate for a configuration class
+	 * (or a nested component class declared within a configuration/component class,
+	 * to be auto-registered as well), and mark it accordingly.
 	 * @param beanDef the bean definition to check
 	 * @param metadataReaderFactory the current factory in use by the caller
 	 * @return whether the candidate qualifies as (any kind of) configuration class
@@ -92,22 +95,45 @@ abstract class ConfigurationClassUtils {
 		return false;
 	}
 
+	/**
+	 * Check the given metadata for a configuration class candidate
+	 * (or nested component class declared within a configuration/component class).
+	 * @param metadata the metadata of the annotated class
+	 * @return {@code true} if the given class is to be registered as a
+	 * reflection-detected bean definition; {@code false} otherwise
+	 */
 	public static boolean isConfigurationCandidate(AnnotationMetadata metadata) {
 		return (isFullConfigurationCandidate(metadata) || isLiteConfigurationCandidate(metadata));
 	}
 
+	/**
+	 * Check the given metadata for a full configuration class candidate
+	 * (i.e. a class annotated with {@code @Configuration}).
+	 * @param metadata the metadata of the annotated class
+	 * @return {@code true} if the given class is to be processed as a full
+	 * configuration class, including cross-method call interception
+	 */
 	public static boolean isFullConfigurationCandidate(AnnotationMetadata metadata) {
 		return metadata.isAnnotated(Configuration.class.getName());
 	}
 
+	/**
+	 * Check the given metadata for a lite configuration class candidate
+	 * (i.e. a class annotated with {@code @Component} or just having
+	 * {@code @Import} declarations or {@code @Bean methods}).
+	 * @param metadata the metadata of the annotated class
+	 * @return {@code true} if the given class is to be processed as a lite
+	 * configuration class, just registering it and scanning it for {@code @Bean} methods
+	 */
 	public static boolean isLiteConfigurationCandidate(AnnotationMetadata metadata) {
 		// Do not consider an interface or an annotation...
-		return (!metadata.isInterface() && (
+		return (!metadata.isInterface() && (metadata.isAnnotated(Component.class.getName()) ||
 				metadata.isAnnotated(Import.class.getName()) || metadata.hasAnnotatedMethods(Bean.class.getName())));
 	}
 
 	/**
-	 * Determine whether the given bean definition indicates a full @Configuration class.
+	 * Determine whether the given bean definition indicates a full {@code @Configuration}
+	 * class, through checking {@link #checkConfigurationClassCandidate}'s metadata marker.
 	 */
 	public static boolean isFullConfigurationClass(BeanDefinition beanDef) {
 		return CONFIGURATION_CLASS_FULL.equals(beanDef.getAttribute(CONFIGURATION_CLASS_ATTRIBUTE));

@@ -15,12 +15,17 @@
  */
 package org.springframework.messaging.core;
 
+import java.util.Map;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
 
 /**
+ * A {@link MessageSendingOperations} that can resolve a String-based destinations.
+ *
  * @author Mark Fisher
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
 public interface DestinationResolvingMessageSendingOperations<D> extends MessageSendingOperations<D> {
@@ -29,7 +34,12 @@ public interface DestinationResolvingMessageSendingOperations<D> extends Message
 
 	<T> void convertAndSend(String destinationName, T payload) throws MessagingException;
 
-	<T> void convertAndSend(String destinationName, T payload, MessagePostProcessor postProcessor)
-			throws MessagingException;
+	<T> void convertAndSend(String destinationName, T payload, Map<String, Object> headers) throws MessagingException;
+
+	<T> void convertAndSend(String destinationName, T payload,
+			MessagePostProcessor postProcessor) throws MessagingException;
+
+	<T> void convertAndSend(String destinationName, T payload, Map<String, Object> headers,
+			MessagePostProcessor postProcessor) throws MessagingException;
 
 }

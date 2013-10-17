@@ -20,11 +20,14 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
 /**
+ * An exception raised by {@link MessageConverter} implementations.
+ *
  * @author Mark Fisher
  * @since 4.0
  */
 @SuppressWarnings("serial")
 public class MessageConversionException extends MessagingException {
+
 
 	public MessageConversionException(String description, Throwable cause) {
 		super(description, cause);

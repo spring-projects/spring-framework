@@ -218,7 +218,8 @@ class ConfigurationClassParser {
 		processMemberClasses(configClass, sourceClass);
 
 		// process any @PropertySource annotations
-		AnnotationAttributes propertySource = AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), org.springframework.context.annotation.PropertySource.class);
+		AnnotationAttributes propertySource = AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(),
+				org.springframework.context.annotation.PropertySource.class);
 		if (propertySource != null) {
 			processPropertySource(propertySource);
 		}
@@ -227,7 +228,7 @@ class ConfigurationClassParser {
 		AnnotationAttributes componentScan = AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), ComponentScan.class);
 		if (componentScan != null) {
 			// the config class is annotated with @ComponentScan -> perform the scan immediately
-			if (!conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
+			if (!this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
 				Set<BeanDefinitionHolder> scannedBeanDefinitions =
 						this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
 
@@ -300,11 +301,11 @@ class ConfigurationClassParser {
 	private void processPropertySource(AnnotationAttributes propertySource) throws IOException {
 		String name = propertySource.getString("name");
 		String[] locations = propertySource.getStringArray("value");
-		int nLocations = locations.length;
-		if (nLocations == 0) {
+		int locationCount = locations.length;
+		if (locationCount == 0) {
 			throw new IllegalArgumentException("At least one @PropertySource(value) location is required");
 		}
-		for (int i = 0; i < nLocations; i++) {
+		for (int i = 0; i < locationCount; i++) {
 			locations[i] = this.environment.resolveRequiredPlaceholders(locations[i]);
 		}
 		ClassLoader classLoader = this.resourceLoader.getClassLoader();
@@ -314,7 +315,7 @@ class ConfigurationClassParser {
 			}
 		}
 		else {
-			if (nLocations == 1) {
+			if (locationCount == 1) {
 				this.propertySources.push(new ResourcePropertySource(name, locations[0], classLoader));
 			}
 			else {
@@ -354,7 +355,7 @@ class ConfigurationClassParser {
 		try {
 			if (visited.add(sourceClass)) {
 				for (SourceClass annotation : sourceClass.getAnnotations()) {
-					if(!annotation.getMetadata().getClassName().startsWith("java") && !annotation.isAssignable(Import.class)) {
+					if (!annotation.getMetadata().getClassName().startsWith("java") && !annotation.isAssignable(Import.class)) {
 						collectImports(annotation, imports, visited);
 					}
 				}
@@ -384,7 +385,7 @@ class ConfigurationClassParser {
 	private void processImports(ConfigurationClass configClass, Collection<SourceClass> sourceClasses, boolean checkForCircularImports)
 			throws IOException {
 
-		if(sourceClasses.isEmpty()) {
+		if (sourceClasses.isEmpty()) {
 			return;
 		}
 		if (checkForCircularImports && this.importStack.contains(configClass)) {
@@ -400,7 +401,7 @@ class ConfigurationClassParser {
 						Class<?> candidateClass = candidate.loadClass();
 						ImportSelector selector = BeanUtils.instantiateClass(candidateClass, ImportSelector.class);
 						invokeAwareMethods(selector);
-						if(selector instanceof DeferredImportSelector) {
+						if (selector instanceof DeferredImportSelector) {
 							this.deferredImportSelectors.add(new DeferredImportSelectorHolder(configClass, (DeferredImportSelector) selector));
 						}
 						else {

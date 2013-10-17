@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.config.annotation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +65,7 @@ public class ResourceHandlerRegistry {
 		this.servletContext = servletContext;
 	}
 
+
 	/**
 	 * Add a resource handler for serving static resources based on the specified URL path patterns.
 	 * The handler will be invoked for every incoming request that matches to one of the specified path patterns.
@@ -73,6 +75,18 @@ public class ResourceHandlerRegistry {
 		ResourceHandlerRegistration registration = new ResourceHandlerRegistration(applicationContext, pathPatterns);
 		registrations.add(registration);
 		return registration;
+	}
+
+	/**
+	 * Whether a resource handler has already been registered for the given pathPattern.
+	 */
+	public boolean hasMappingForPattern(String pathPattern) {
+		for (ResourceHandlerRegistration registration : registrations) {
+			if (Arrays.asList(registration.getPathPatterns()).contains(pathPattern)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

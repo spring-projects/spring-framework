@@ -29,9 +29,9 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * A decoder for STOMP frames
+ * A decoder for STOMP frames.
  *
- * @author awilkinson
+ * @author Andy Wilkinson
  * @since 4.0
  */
 public class StompDecoder {
@@ -60,8 +60,15 @@ public class StompDecoder {
 			MultiValueMap<String, String> headers = readHeaders(buffer);
 			byte[] payload = readPayload(buffer, headers);
 
-			decodedMessage = MessageBuilder.withPayload(payload).setHeaders(
-					StompHeaderAccessor.create(StompCommand.valueOf(command), headers)).build();
+			StompCommand stompCommand = StompCommand.valueOf(command);
+			if ((payload.length > 0) && (!stompCommand.isBodyAllowed())) {
+				throw new StompConversionException(stompCommand +
+						" isn't allowed to have a body but has payload length=" + payload.length +
+						", headers=" + headers);
+			}
+
+			decodedMessage = MessageBuilder.withPayload(payload)
+					.setHeaders(StompHeaderAccessor.create(stompCommand, headers)).build();
 		}
 		else {
 			decodedMessage = MessageBuilder.withPayload(HEARTBEAT_PAYLOAD).setHeaders(

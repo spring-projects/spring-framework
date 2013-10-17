@@ -113,7 +113,7 @@ public Book findBook(ISBN isbn) {...}]]></programlisting>
             obvious when the target method has multiple arguments out of which only some are suitable for caching (while the rest are used only by the method logic). For example:</para>
 
             <programlisting language="java"><![CDATA[@Cacheable("books")
-public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed]]></programlisting>
+public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]></programlisting>
 
             <para>At first glance, while the two <literal>boolean</literal> arguments influence the way the book is found, they are no use for the cache. Further more what if only one of the two
             is important while the other is not?</para>
@@ -128,7 +128,7 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed]]></
             </para>
 
             <programlisting language="java"><!-- select 'isbn' argument -->
-@Cacheable(value="books", <emphasis role="bold">key="#isbn"</emphasis>
+@Cacheable(value="books", <emphasis role="bold">key="#isbn")</emphasis>
 public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 
 <!-- select nested property of a certain argument -->
@@ -298,7 +298,6 @@ public Book importBooks(String deposit, Date date)]]></programlisting>
         <programlisting language="java">@Configuration
 @EnableCaching
 public class AppConfig {
-
 }</programlisting>
 
         <para>Alternatively for XML configuration use the <literal>cache:annotation-driven</literal> element:</para>
@@ -506,8 +505,8 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]><
 <aop:config>
     <aop:advisor advice-ref="cacheAdvice" pointcut="execution(* x.y.BookService.*(..))"/>
 </aop:config>
-...
-// cache manager definition omitted
+
+<!-- cache manager definition omitted -->
 ]]>
         </programlisting>
 
@@ -530,8 +529,8 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]><
     <title>Configuring the cache storage</title>
 
     <para>Out of the box, the cache abstraction provides integration with two storages - one on top of the JDK <interfacename>ConcurrentMap</interfacename> and one
-    for <link xl:href="ehcache.org">ehcache</link> library. To use them, one needs to simply declare an appropriate <interfacename>CacheManager</interfacename> - an entity that controls and manages
-    <interfacename>Cache</interfacename>s and can be used to retrieve these for storage.</para>
+    for <link xl:href="http://ehcache.org/">EhCache</link> library. To use them, one needs to simply declare an appropriate <interfacename>CacheManager</interfacename> - an entity that controls and
+    manages <interfacename>Cache</interfacename>s and can be used to retrieve these for storage.</para>
 
     <section xml:id="cache-store-configuration-jdk">
         <title>JDK <interfacename>ConcurrentMap</interfacename>-based <interfacename>Cache</interfacename></title>
@@ -542,15 +541,15 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]><
     <programlisting language="xml"><![CDATA[<!-- generic cache manager -->
 <bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
     <property name="caches">
-    <set>
-        <bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="default"/>
-        <bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="books"/>
-    </set>
+        <set>
+            <bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="default"/>
+            <bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="books"/>
+        </set>
     </property>
 </bean>]]></programlisting>
 
-        <para>The snippet above uses the <classname>SimpleCacheManager</classname> to create a <interfacename>CacheManager</interfacename> for the two, nested <interfacename>Concurrent</interfacename>
-        <interfacename>Cache</interfacename> implementations named <emphasis>default</emphasis> and <emphasis>books</emphasis>.
+        <para>The snippet above uses the <classname>SimpleCacheManager</classname> to create a <interfacename>CacheManager</interfacename> for the two nested <classname>ConcurrentMapCache</classname>
+        instances named <emphasis>default</emphasis> and <emphasis>books</emphasis>.
         Note that the names are configured directly for each cache.</para>
 
         <para>As the cache is created by the application, it is bound to its lifecycle, making it suitable for basic use cases, tests or simple applications. The cache scales well and is very fast
@@ -588,10 +587,12 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]><
         one can wire in a simple, dummy cache that performs no caching - that is, forces the cached methods to be executed every time:</para>
 
         <programlisting language="xml"><![CDATA[<bean id="cacheManager" class="org.springframework.cache.support.CompositeCacheManager">
-    <property name="cacheManagers"><list>
-        <ref bean="jdkCache"/>
-        <ref bean="gemfireCache"/>
-    </list></property>
+    <property name="cacheManagers">
+        <list>
+            <ref bean="jdkCache"/>
+            <ref bean="gemfireCache"/>
+        </list>
+    </property>
     <property name="fallbackToNoOpCache" value="true"/>
 </bean>]]></programlisting>
 

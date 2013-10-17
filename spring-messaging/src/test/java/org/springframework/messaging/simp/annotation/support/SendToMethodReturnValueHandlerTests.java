@@ -76,11 +76,11 @@ public class SendToMethodReturnValueHandlerTests {
 
 		MockitoAnnotations.initMocks(this);
 
-		Message<String> message = MessageBuilder.withPayload(payloadContent).build();
-		when(this.messageConverter.toMessage(payloadContent)).thenReturn(message);
+		Message message = MessageBuilder.withPayload(payloadContent).build();
+		when(this.messageConverter.toMessage(payloadContent, null)).thenReturn(message);
 
 		SimpMessagingTemplate messagingTemplate = new SimpMessagingTemplate(this.messageChannel);
-		messagingTemplate.setConverter(this.messageConverter);
+		messagingTemplate.setMessageConverter(this.messageConverter);
 
 		this.handler = new SendToMethodReturnValueHandler(messagingTemplate, true);
 		this.handlerAnnotationNotRequired = new SendToMethodReturnValueHandler(messagingTemplate, false);

@@ -18,6 +18,9 @@ package org.springframework.context.annotation;
 
 import org.junit.Test;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -132,6 +135,25 @@ public class ConfigurationClassPostProcessorTests {
 		}
 	}
 
+	@Test
+	public void testGenericsBasedInjection() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(RepositoryInjectionBean.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		bf.registerBeanDefinition("configClass", new RootBeanDefinition(RepositoryConfiguration.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(bf);
+
+		RepositoryInjectionBean bean = (RepositoryInjectionBean) bf.getBean("annotatedBean");
+		assertSame(bf.getBean("stringRepo"), bean.stringRepository);
+		assertSame(bf.getBean("integerRepo"), bean.integerRepository);
+	}
+
 
 	@Configuration
 	static class SingletonBeanConfig {
@@ -168,6 +190,37 @@ public class ConfigurationClassPostProcessorTests {
 	static class LoadedConfig {
 		public @Bean Bar bar() {
 			return new Bar(new Foo());
+		}
+	}
+
+
+	public interface Repository<T> {
+	}
+
+
+	public static class RepositoryInjectionBean {
+
+		@Autowired
+		public Repository<String> stringRepository;
+
+		@Autowired
+		public Repository<Integer> integerRepository;
+	}
+
+
+	@Configuration
+	public static class RepositoryConfiguration {
+
+		@Bean
+		public Repository<String> stringRepo() {
+			return new Repository<String>() {
+			};
+		}
+
+		@Bean
+		public Repository<Integer> integerRepo() {
+			return new Repository<Integer>() {
+			};
 		}
 	}
 

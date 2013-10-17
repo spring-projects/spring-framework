@@ -24,14 +24,16 @@ import java.lang.reflect.TypeVariable;
  *
  * @author Phillip Webb
  * @since 4.0
+ * @see ResolvableType
+ * @see GenericTypeResolver
  */
-public interface TypeVariableResolver {
+interface TypeVariableResolver {
 
 	/**
 	 * Resolve the specified type variable.
 	 * @param typeVariable the type variable to resolve (must not be {@code null})
 	 * @return the resolved {@link java.lang.reflect.Type} for the variable or
-	 *         {@code null} if the variable cannot be resolved.
+	 * {@code null} if the variable cannot be resolved.
 	 */
 	Type resolveVariable(TypeVariable<?> typeVariable);
 

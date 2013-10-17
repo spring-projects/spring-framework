@@ -33,6 +33,9 @@ import org.springframework.util.Assert;
 
 
 /**
+ * A messaging template for sending to and/or receiving messages from a
+ * {@link MessageChannel}.
+ *
  * @author Mark Fisher
  * @since 4.0
  */

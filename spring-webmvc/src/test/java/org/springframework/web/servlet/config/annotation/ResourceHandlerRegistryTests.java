@@ -16,9 +16,6 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -28,6 +25,8 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
+
+import static org.junit.Assert.*;
 
 /**
  * Test fixture with a {@link ResourceHandlerRegistry}.
@@ -83,6 +82,13 @@ public class ResourceHandlerRegistryTests {
 		registry.setOrder(0);
 		assertEquals(0, registry.getHandlerMapping().getOrder());
 	}
+
+	@Test
+	public void hasMappingForPattern() {
+		assertTrue(registry.hasMappingForPattern("/resources/**"));
+		assertFalse(registry.hasMappingForPattern("/whatever"));
+	}
+
 
 	private ResourceHttpRequestHandler getHandler(String pathPattern) {
 		SimpleUrlHandlerMapping handlerMapping = (SimpleUrlHandlerMapping) registry.getHandlerMapping();

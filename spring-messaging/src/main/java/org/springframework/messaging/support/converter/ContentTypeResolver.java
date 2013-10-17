@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,28 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.support.converter;
 
-import java.lang.reflect.Type;
-
-import org.springframework.messaging.Message;
-import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.MessageHeaders;
+import org.springframework.util.MimeType;
 
 
 /**
- * @author Mark Fisher
+ * Resolve the content type for a message given a set of {@link MessageHeaders}.
+ *
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class SimplePayloadMessageConverter implements MessageConverter<Object> {
+public interface ContentTypeResolver {
 
-	@Override
-	public Message<Object> toMessage(Object object) {
-		return MessageBuilder.withPayload(object).build();
-	}
-
-	@Override
-	public Object fromMessage(Message<?> message, Type targetClass) {
-		return message.getPayload();
-	}
+	MimeType resolve(MessageHeaders headers);
 
 }

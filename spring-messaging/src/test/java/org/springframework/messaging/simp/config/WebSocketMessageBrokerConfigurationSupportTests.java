@@ -43,7 +43,10 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.simp.stomp.StompTextMessageBuilder;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.converter.CompositeMessageConverter;
+import org.springframework.messaging.support.converter.DefaultContentTypeResolver;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.socket.TextMessage;
@@ -272,6 +275,15 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 
 		assertEquals(SimpMessageType.MESSAGE, headers.getMessageType());
 		assertEquals("/foos1", headers.getDestination());
+	}
+
+	@Test
+	public void messageConverter() {
+		CompositeMessageConverter messageConverter = this.cxtStompBroker.getBean(
+				"simpMessageConverter", CompositeMessageConverter.class);
+
+		DefaultContentTypeResolver resolver = (DefaultContentTypeResolver) messageConverter.getContentTypeResolver();
+		assertEquals(MimeTypeUtils.APPLICATION_JSON, resolver.getDefaultMimeType());
 	}
 
 

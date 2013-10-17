@@ -15,11 +15,17 @@
  */
 package org.springframework.messaging.core;
 
+import java.util.Map;
+
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 
 
 /**
+ * Base class for a messaging template that send and receive messages.
+ *
  * @author Mark Fisher
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
 public abstract class AbstractMessagingTemplate<D> extends AbstractMessageSendingTemplate<D>
@@ -40,17 +46,21 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageSendin
 
 
 	@Override
-	public Object receiveAndConvert() {
-		return this.receiveAndConvert(getRequiredDefaultDestination());
+	public <T> T receiveAndConvert(Class<T> targetClass) {
+		return this.receiveAndConvert(getRequiredDefaultDestination(), targetClass);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Object receiveAndConvert(D destination) {
+	public <T> T receiveAndConvert(D destination, Class<T> targetClass) {
 		Message<?> message = this.doReceive(destination);
-		return (message != null) ? getConverter().fromMessage(message, null) : null;
+		if (message != null) {
+			return (T) getMessageConverter().fromMessage(message, targetClass);
+		}
+		else {
+			return null;
+		}
 	}
-
 
 	@Override
 	public Message<?> sendAndReceive(Message<?> requestMessage) {
@@ -66,29 +76,48 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageSendin
 
 
 	@Override
-	public Object convertSendAndReceive(Object request) {
-		return this.convertSendAndReceive(getRequiredDefaultDestination(), request);
+	public <T> T convertSendAndReceive(Object request, Class<T> targetClass) {
+		return this.convertSendAndReceive(getRequiredDefaultDestination(), request, targetClass);
 	}
 
 	@Override
-	public Object convertSendAndReceive(D destination, Object request) {
+	public <T> T convertSendAndReceive(D destination, Object request, Class<T> targetClass) {
+		Map<String, Object> headers = null;
+		return this.convertSendAndReceive(destination, request, headers, targetClass);
+	}
+
+	@Override
+	public <T> T convertSendAndReceive(D destination, Object request, Map<String, Object> headers,
+			Class<T> targetClass) {
+
 		return this.convertSendAndReceive(destination, request, null);
 	}
 
 	@Override
-	public Object convertSendAndReceive(Object request, MessagePostProcessor postProcessor) {
-		return this.convertSendAndReceive(getRequiredDefaultDestination(), request, postProcessor);
+	public <T> T convertSendAndReceive(Object request, Class<T> targetClass, MessagePostProcessor postProcessor) {
+		return this.convertSendAndReceive(getRequiredDefaultDestination(), request, targetClass, postProcessor);
+	}
+
+	@Override
+	public <T> T convertSendAndReceive(D destination, Object request, Class<T> targetClass,
+			MessagePostProcessor postProcessor) {
+
+		Map<String, Object> headers = null;
+		return this.convertSendAndReceive(destination, request, headers, targetClass, postProcessor);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Object convertSendAndReceive(D destination, Object request, MessagePostProcessor postProcessor) {
-		Message<?> requestMessage = getConverter().toMessage(request);
+	public <T> T convertSendAndReceive(D destination, Object request, Map<String, Object> headers,
+			Class<T> targetClass, MessagePostProcessor postProcessor) {
+
+		MessageHeaders messageHeaders = (headers != null) ? new MessageHeaders(headers) : null;
+		Message<?> requestMessage = getMessageConverter().toMessage(request, messageHeaders);
 		if (postProcessor != null) {
 			requestMessage = postProcessor.postProcessMessage(requestMessage);
 		}
 		Message<?> replyMessage = this.sendAndReceive(destination, requestMessage);
-		return getConverter().fromMessage(replyMessage, null);
+		return (T) getMessageConverter().fromMessage(replyMessage, targetClass);
 	}
 
 }

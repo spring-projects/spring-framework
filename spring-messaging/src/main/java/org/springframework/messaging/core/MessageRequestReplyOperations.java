@@ -15,25 +15,41 @@
  */
 package org.springframework.messaging.core;
 
+import java.util.Map;
+
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessagingException;
 
 
 /**
+ * A set of operations for exchanging messages to and from a destination.
+ *
+ * @param <D> the type of destination to send and receive messages from
+ *
  * @author Mark Fisher
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
 public interface MessageRequestReplyOperations<D> {
 
-	Message<?> sendAndReceive(Message<?> requestMessage);
+	Message<?> sendAndReceive(Message<?> requestMessage) throws MessagingException;
 
-	Message<?> sendAndReceive(D destination, Message<?> requestMessage);
+	Message<?> sendAndReceive(D destination, Message<?> requestMessage) throws MessagingException;
 
-	Object convertSendAndReceive(Object request);
+	<T> T convertSendAndReceive(Object request, Class<T> targetClass) throws MessagingException;
 
-	Object convertSendAndReceive(D destination, Object request);
+	<T> T convertSendAndReceive(D destination, Object request, Class<T> targetClass) throws MessagingException;
 
-	Object convertSendAndReceive(Object request, MessagePostProcessor requestPostProcessor);
+	<T> T convertSendAndReceive(D destination, Object request, Map<String, Object> headers, Class<T> targetClass)
+			throws MessagingException;
 
-	Object convertSendAndReceive(D destination, Object request, MessagePostProcessor requestPostProcessor);
+	<T> T convertSendAndReceive(Object request, Class<T> targetClass, MessagePostProcessor requestPostProcessor)
+			throws MessagingException;
+
+	<T> T convertSendAndReceive(D destination, Object request, Class<T> targetClass,
+			MessagePostProcessor requestPostProcessor) throws MessagingException;
+
+	<T> T convertSendAndReceive(D destination, Object request, Map<String, Object> headers,
+			Class<T> targetClass, MessagePostProcessor requestPostProcessor) throws MessagingException;
 
 }

@@ -44,15 +44,12 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.runners.MockitoJUnitRunner;
+
 import org.springframework.util.MultiValueMap;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-
-// FIXME nested
 
 /**
  * Tests for {@link ResolvableType}.
@@ -198,7 +195,7 @@ public class ResolvableTypeTests {
 	@Test
 	public void forMethodReturn() throws Exception {
 		Method method = Methods.class.getMethod("charSequenceReturn");
-		ResolvableType type = ResolvableType.forMethodReturn(method);
+		ResolvableType type = ResolvableType.forMethodReturnType(method);
 		assertThat(type.getType(), equalTo(method.getGenericReturnType()));
 	}
 
@@ -206,7 +203,7 @@ public class ResolvableTypeTests {
 	public void forMethodReturnMustNotBeNull() throws Exception {
 		this.thrown.expect(IllegalArgumentException.class);
 		this.thrown.expectMessage("Method must not be null");
-		ResolvableType.forMethodReturn(null);
+		ResolvableType.forMethodReturnType(null);
 	}
 
 	@Test
@@ -559,25 +556,25 @@ public class ResolvableTypeTests {
 
 	@Test
 	public void resolveBoundedTypeVariableResult() throws Exception {
-		ResolvableType type = ResolvableType.forMethodReturn(Methods.class.getMethod("boundedTypeVaraibleResult"));
+		ResolvableType type = ResolvableType.forMethodReturnType(Methods.class.getMethod("boundedTypeVaraibleResult"));
 		assertThat(type.resolve(), equalTo((Class) CharSequence.class));
 	}
 
 	@Test
 	public void resolveVariableNotFound() throws Exception {
-		ResolvableType type = ResolvableType.forMethodReturn(Methods.class.getMethod("typedReturn"));
+		ResolvableType type = ResolvableType.forMethodReturnType(Methods.class.getMethod("typedReturn"));
 		assertThat(type.resolve(), nullValue());
 	}
 
 	@Test
 	public void resolveTypeVaraibleFromMethodReturn() throws Exception {
-		ResolvableType type = ResolvableType.forMethodReturn(Methods.class.getMethod("typedReturn"));
+		ResolvableType type = ResolvableType.forMethodReturnType(Methods.class.getMethod("typedReturn"));
 		assertThat(type.resolve(), nullValue());
 	}
 
 	@Test
 	public void resolveTypeVaraibleFromMethodReturnWithInstanceClass() throws Exception {
-		ResolvableType type = ResolvableType.forMethodReturn(
+		ResolvableType type = ResolvableType.forMethodReturnType(
 				Methods.class.getMethod("typedReturn"), TypedMethods.class);
 		assertThat(type.resolve(), equalTo((Class) String.class));
 	}
@@ -687,11 +684,11 @@ public class ResolvableTypeTests {
 	}
 
 	@Test
-	public void resolveTypeVariableFromMethodParameterTypeWithImplementsClass()
-			throws Exception {
+	public void resolveTypeVariableFromMethodParameterTypeWithImplementsClass() throws Exception {
 		Method method = Methods.class.getMethod("typedParameter", Object.class);
 		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(method, 0);
-		ResolvableType type = ResolvableType.forMethodParameter(methodParameter, TypedMethods.class);
+		methodParameter.setContainingClass(TypedMethods.class);
+		ResolvableType type = ResolvableType.forMethodParameter(methodParameter);
 		assertThat(type.resolve(), equalTo((Class) String.class));
 		assertThat(type.getType().toString(), equalTo("T"));
 	}
@@ -699,7 +696,7 @@ public class ResolvableTypeTests {
 	@Test
 	public void resolveTypeVariableFromMethodReturn() throws Exception {
 		Method method = Methods.class.getMethod("typedReturn");
-		ResolvableType type = ResolvableType.forMethodReturn(method);
+		ResolvableType type = ResolvableType.forMethodReturnType(method);
 		assertThat(type.resolve(), nullValue());
 		assertThat(type.getType().toString(), equalTo("T"));
 	}
@@ -707,7 +704,7 @@ public class ResolvableTypeTests {
 	@Test
 	public void resolveTypeVariableFromMethodReturnWithImplementsClass() throws Exception {
 		Method method = Methods.class.getMethod("typedReturn");
-		ResolvableType type = ResolvableType.forMethodReturn(method, TypedMethods.class);
+		ResolvableType type = ResolvableType.forMethodReturnType(method, TypedMethods.class);
 		assertThat(type.resolve(), equalTo((Class) String.class));
 		assertThat(type.getType().toString(), equalTo("T"));
 	}
@@ -822,8 +819,8 @@ public class ResolvableTypeTests {
 		ResolvableType objectType = ResolvableType.forClass(Object.class);
 		ResolvableType unresolvableVariable = ResolvableType.forField(AssignmentBase.class.getField("o"));
 		assertThat(unresolvableVariable.resolve(), nullValue());
-		assertAssignable(objectType, unresolvableVariable).equalTo(false);
-		assertAssignable(unresolvableVariable, objectType).equalTo(false);
+		assertAssignable(objectType, unresolvableVariable).equalTo(true);
+		assertAssignable(unresolvableVariable, objectType).equalTo(true);
 	}
 
 	@Test
@@ -936,6 +933,7 @@ public class ResolvableTypeTests {
 		ResolvableType object = ResolvableType.forClass(Object.class);
 		ResolvableType charSequence = ResolvableType.forClass(CharSequence.class);
 		ResolvableType string = ResolvableType.forClass(String.class);
+		ResolvableType extendsAnon = ResolvableType.forField(AssignmentBase.class.getField("listAnon"), Assignment.class).getGeneric();
 		ResolvableType extendsObject = ResolvableType.forField(AssignmentBase.class.getField("listxo"), Assignment.class).getGeneric();
 		ResolvableType extendsCharSequence = ResolvableType.forField(AssignmentBase.class.getField("listxc"), Assignment.class).getGeneric();
 		ResolvableType extendsString = ResolvableType.forField(AssignmentBase.class.getField("listxs"), Assignment.class).getGeneric();
@@ -972,6 +970,8 @@ public class ResolvableTypeTests {
 				equalTo(false, true, true);
 		assertAssignable(charSequence, extendsObject, extendsCharSequence, extendsString).
 				equalTo(false, false, false);
+		assertAssignable(extendsAnon, object, charSequence, string).
+				equalTo(true, true, true);
 
 		// T <= ? super T
 		assertAssignable(superCharSequence, object, charSequence, string).
@@ -1143,6 +1143,8 @@ public class ResolvableTypeTests {
 		public List<C> listc;
 
 		public List<S> lists;
+
+		public List<?> listAnon;
 
 		public List<? extends O> listxo;
 

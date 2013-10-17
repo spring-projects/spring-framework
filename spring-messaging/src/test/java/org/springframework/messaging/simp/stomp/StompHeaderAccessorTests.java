@@ -21,8 +21,12 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.springframework.http.MediaType;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 
 import static org.junit.Assert.*;
@@ -151,6 +155,18 @@ public class StompHeaderAccessorTests {
 		assertEquals("/d", actual.get(StompHeaderAccessor.STOMP_DESTINATION_HEADER).get(0));
 		assertEquals("application/json", actual.get(StompHeaderAccessor.STOMP_CONTENT_TYPE_HEADER).get(0));
 		assertNotNull("message-id was not created", actual.get(StompHeaderAccessor.STOMP_MESSAGE_ID_HEADER).get(0));
+	}
+
+	@Test
+	public void toNativeHeadersContentType() {
+
+		Message<byte[]> message = MessageBuilder.withPayload(new byte[0])
+				.setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_ATOM_XML).build();
+
+		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
+		Map<String, List<String>> map = headers.toNativeHeaderMap();
+
+		assertEquals("application/atom+xml", map.get(StompHeaderAccessor.STOMP_CONTENT_TYPE_HEADER).get(0));
 	}
 
 	@Test

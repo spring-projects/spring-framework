@@ -29,7 +29,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageType;
 
 /**
- * An encoder for STOMP frames
+ * An encoder for STOMP frames.
  *
  * @author Andy Wilkinson
  * @since 4.0
