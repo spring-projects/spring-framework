@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ public class LiteralExpression implements Expression {
 
 	public <T> T getValue(EvaluationContext context, Object rootObject, Class<T> desiredResultType) throws EvaluationException {
 		Object value = getValue(context, rootObject);
-		return ExpressionUtils.convert(null, value, desiredResultType);
+		return ExpressionUtils.convert(context, value, desiredResultType);
 	}
 
 	public Class getValueType(Object rootObject) throws EvaluationException {
