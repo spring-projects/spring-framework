@@ -78,6 +78,10 @@ abstract class SerializableTypeWrapper {
 	 */
 	public static Type forGenericSuperclass(final Class<?> type) {
 		return forTypeProvider(new TypeProvider() {
+
+			private static final long serialVersionUID = 1L;
+
+
 			@Override
 			public Type getType() {
 				return type.getGenericSuperclass();
@@ -93,6 +97,10 @@ abstract class SerializableTypeWrapper {
 		for (int i = 0; i < result.length; i++) {
 			final int index = i;
 			result[i] = forTypeProvider(new TypeProvider() {
+
+				private static final long serialVersionUID = 1L;
+
+
 				@Override
 				public Type getType() {
 					return type.getGenericInterfaces()[index];
@@ -110,6 +118,10 @@ abstract class SerializableTypeWrapper {
 		for (int i = 0; i < result.length; i++) {
 			final int index = i;
 			result[i] = forTypeProvider(new TypeProvider() {
+
+				private static final long serialVersionUID = 1L;
+
+
 				@Override
 				public Type getType() {
 					return type.getTypeParameters()[index];
@@ -162,6 +174,9 @@ abstract class SerializableTypeWrapper {
 	private static class TypeProxyInvocationHandler implements InvocationHandler,
 			Serializable {
 
+		private static final long serialVersionUID = 1L;
+
+
 		private final TypeProvider provider;
 
 
@@ -193,6 +208,9 @@ abstract class SerializableTypeWrapper {
 	 * {@link TypeProvider} for {@link Type}s obtained from a {@link Field}.
 	 */
 	private static class FieldTypeProvider implements TypeProvider {
+
+		private static final long serialVersionUID = 1L;
+
 
 		private final String fieldName;
 
@@ -232,6 +250,9 @@ abstract class SerializableTypeWrapper {
 	 * {@link TypeProvider} for {@link Type}s obtained from a {@link MethodParameter}.
 	 */
 	private static class MethodParameterTypeProvider implements TypeProvider {
+
+		private static final long serialVersionUID = 1L;
+
 
 		private final String methodName;
 
@@ -292,6 +313,9 @@ abstract class SerializableTypeWrapper {
 	 * {@link TypeProvider} for {@link Type}s obtained by invoking a no-arg method.
 	 */
 	private static class MethodInvokeTypeProvider implements TypeProvider {
+
+		private static final long serialVersionUID = 1L;
+
 
 		private final TypeProvider provider;
 

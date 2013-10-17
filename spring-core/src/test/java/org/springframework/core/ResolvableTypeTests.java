@@ -52,7 +52,6 @@ import org.springframework.core.ResolvableType.VariableResolver;
 import org.springframework.util.MultiValueMap;
 
 import static org.mockito.BDDMockito.*;
-
 import static org.mockito.Mockito.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -1096,6 +1095,20 @@ public class ResolvableTypeTests {
 		ResolvableType deserializedNone = testSerialization(ResolvableType.NONE);
 		assertThat(deserializedNone, sameInstance(ResolvableType.NONE));
 	}
+
+	@Test
+	public void canResolveVoid() throws Exception {
+		ResolvableType type = ResolvableType.forClass(void.class);
+		assertThat(type.resolve(), equalTo((Class) void.class));
+	}
+
+	@Test
+	public void narrow() throws Exception {
+		ResolvableType type = ResolvableType.forField(Fields.class.getField("stringList"));
+		ResolvableType narrow = ResolvableType.forType(ArrayList.class, type);
+		assertThat(narrow.getGeneric().resolve(), equalTo((Class) String.class));
+	}
+
 
 	private ResolvableType testSerialization(ResolvableType type) throws Exception {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();

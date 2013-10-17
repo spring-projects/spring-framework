@@ -72,6 +72,9 @@ import org.springframework.util.StringUtils;
  */
 public final class ResolvableType implements Serializable {
 
+	private static final long serialVersionUID = 1L;
+
+
 	private static ConcurrentReferenceHashMap<ResolvableType, ResolvableType> cache =
 			new ConcurrentReferenceHashMap<ResolvableType, ResolvableType>();
 
@@ -97,8 +100,13 @@ public final class ResolvableType implements Serializable {
 	private final VariableResolver variableResolver;
 
 	/**
-	 * Stored copy of the resolved value or {@code null} if the resolve method has not
-	 * yet been called. {@code void.class} is used when the resolve method failed.
+	 * If resolution has happened and {@link #resolved} contains a valid result.
+	 */
+	private boolean isResolved = false;
+
+	/**
+	 * Late binding stored copy of the resolved value (valid when {@link #isResolved} is
+	 * true).
 	 */
 	private Class<?> resolved;
 
@@ -484,11 +492,11 @@ public final class ResolvableType implements Serializable {
 	 * @see #resolveGenerics()
 	 */
 	public Class<?> resolve(Class<?> fallback) {
-		if (this.resolved == null) {
-			Class<?> resolvedClass = resolveClass();
-			this.resolved = (resolvedClass == null ? void.class : resolvedClass);
+		if (!this.isResolved) {
+			this.resolved = resolveClass();
+			this.isResolved = true;
 		}
-		return (this.resolved == void.class ? fallback : this.resolved);
+		return (this.resolved == null ? fallback : this.resolved);
 	}
 
 	private Class<?> resolveClass() {
@@ -553,15 +561,12 @@ public final class ResolvableType implements Serializable {
 		}
 
 		if (this.type instanceof ParameterizedType) {
-
 			ParameterizedType parameterizedType = (ParameterizedType) this.type;
-			if (parameterizedType.getRawType().equals(variable.getGenericDeclaration())) {
-				TypeVariable<?>[] variables = resolve().getTypeParameters();
-				for (int i = 0; i < variables.length; i++) {
-					if (ObjectUtils.nullSafeEquals(variables[i].getName(), variable.getName())) {
-						Type actualType = parameterizedType.getActualTypeArguments()[i];
-						return forType(actualType, this.variableResolver);
-					}
+			TypeVariable<?>[] variables = resolve().getTypeParameters();
+			for (int i = 0; i < variables.length; i++) {
+				if (ObjectUtils.nullSafeEquals(variables[i].getName(), variable.getName())) {
+					Type actualType = parameterizedType.getActualTypeArguments()[i];
+					return forType(actualType, this.variableResolver);
 				}
 			}
 
@@ -637,6 +642,10 @@ public final class ResolvableType implements Serializable {
 		}
 
 		return new VariableResolver() {
+
+			private static final long serialVersionUID = 1L;
+
+
 			@Override
 			public ResolvableType resolveVariable(TypeVariable<?> variable) {
 				return ResolvableType.this.resolveVariable(variable);
@@ -901,7 +910,13 @@ public final class ResolvableType implements Serializable {
 		final TypeVariable<?>[] typeVariables = sourceClass.getTypeParameters();
 		Assert.isTrue(typeVariables.length == generics.length,
 				"Missmatched number of generics specified");
+
+
 		VariableResolver variableResolver = new VariableResolver() {
+
+			private static final long serialVersionUID = 1L;
+
+
 			@Override
 			public ResolvableType resolveVariable(TypeVariable<?> variable) {
 				for (int i = 0; i < typeVariables.length; i++) {
