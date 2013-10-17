@@ -32,14 +32,20 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
+ * Tests for {@link TypeDescriptor}.
+ *
  * @author Keith Donald
  * @author Andy Clement
  * @author Phillip Webb
@@ -105,7 +111,7 @@ public class TypeDescriptorTests {
 		assertEquals(List.class, desc.getType());
 		assertEquals(List.class, desc.getObjectType());
 		assertEquals("java.util.List", desc.getName());
-		assertEquals("java.util.List<java.util.List<java.util.Map<java.lang.Integer, java.lang.Enum>>>", desc.toString());
+		assertEquals("java.util.List<java.util.List<java.util.Map<java.lang.Integer, java.lang.Enum<?>>>>", desc.toString());
 		assertTrue(!desc.isPrimitive());
 		assertEquals(0, desc.getAnnotations().length);
 		assertTrue(desc.isCollection());
@@ -435,7 +441,7 @@ public class TypeDescriptorTests {
 		assertTrue(typeDescriptor.isArray());
 		assertEquals(List.class,typeDescriptor.getElementTypeDescriptor().getType());
 		assertEquals(String.class, typeDescriptor.getElementTypeDescriptor().getElementTypeDescriptor().getType());
-		assertEquals("java.util.List[]",typeDescriptor.toString());
+		assertEquals("java.util.List<java.lang.String>[]",typeDescriptor.toString());
 	}
 
 	@Test
@@ -811,6 +817,31 @@ public class TypeDescriptorTests {
 	public Map notGenericMap;
 
 	public Map<CharSequence, Number> isAssignableMapKeyValueTypes;
+
+	@Test
+	public void multiValueMap() throws Exception {
+		TypeDescriptor td = new TypeDescriptor(getClass().getField("multiValueMap"));
+		assertTrue(td.isMap());
+		assertEquals(String.class, td.getMapKeyTypeDescriptor().getType());
+		assertEquals(List.class, td.getMapValueTypeDescriptor().getType());
+		assertEquals(Integer.class,
+				td.getMapValueTypeDescriptor().getElementTypeDescriptor().getType());
+	}
+
+	public MultiValueMap<String, Integer> multiValueMap = new LinkedMultiValueMap<String, Integer>();
+
+	@Test
+	public void passDownGeneric() throws Exception {
+		TypeDescriptor td = new TypeDescriptor(getClass().getField("passDownGeneric"));
+		assertEquals(List.class, td.getElementTypeDescriptor().getType());
+		assertEquals(Set.class, td.getElementTypeDescriptor().getElementTypeDescriptor().getType());
+		assertEquals(Integer.class, td.getElementTypeDescriptor().getElementTypeDescriptor().getElementTypeDescriptor().getType());
+	}
+
+	public PassDownGeneric<Integer> passDownGeneric = new PassDownGeneric<Integer>();
+
+	public static class PassDownGeneric<T> extends ArrayList<List<Set<T>>> {
+	}
 
 	@Test
 	public void testUpCast() throws Exception {

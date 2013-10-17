@@ -25,11 +25,13 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 public class MapToMapConverterTests {
@@ -215,6 +217,36 @@ public class MapToMapConverterTests {
 		Map<String, Integer> result = (Map<String, Integer>) conversionService.convert(map, sourceType, targetType);
 		assertEquals(map, result);
 		assertEquals(NoDefaultConstructorMap.class, result.getClass());
+	}
+
+	public MultiValueMap<String, String> multiValueMapTarget;
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void multiValueMapToMultiValueMap() throws Exception {
+		DefaultConversionService.addDefaultConverters(conversionService);
+		MultiValueMap<String, Integer> source = new LinkedMultiValueMap<String, Integer>();
+		source.put("a", Arrays.asList(1, 2, 3));
+		source.put("b", Arrays.asList(4, 5, 6));
+		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("multiValueMapTarget"));
+		MultiValueMap<String, String> converted = (MultiValueMap<String, String>) conversionService.convert(source, targetType);
+		assertThat(converted.size(), equalTo(2));
+		assertThat(converted.get("a"), equalTo(Arrays.asList("1", "2", "3")));
+		assertThat(converted.get("b"), equalTo(Arrays.asList("4", "5", "6")));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void mapToMultiValueMap() throws Exception {
+		DefaultConversionService.addDefaultConverters(conversionService);
+		Map<String, Integer> source = new HashMap<String, Integer>();
+		source.put("a", 1);
+		source.put("b", 2);
+		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("multiValueMapTarget"));
+		MultiValueMap<String, String> converted = (MultiValueMap<String, String>) conversionService.convert(source, targetType);
+		assertThat(converted.size(), equalTo(2));
+		assertThat(converted.get("a"), equalTo(Arrays.asList("1")));
+		assertThat(converted.get("b"), equalTo(Arrays.asList("2")));
 	}
 
 	@SuppressWarnings("serial")
