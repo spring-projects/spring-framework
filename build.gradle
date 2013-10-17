@@ -13,6 +13,7 @@ configure(allprojects) { project ->
 	version = qualifyVersionIfNecessary(version)
 
 	ext.aspectjVersion  = "1.8.0.M1"
+	ext.groovyVersion   = "1.8.9"
 	ext.hsqldbVersion   = "1.8.0.10"
 	ext.junitVersion    = "4.11"
 	ext.slf4jVersion    = "1.6.1"
@@ -20,6 +21,7 @@ configure(allprojects) { project ->
 
 	apply plugin: "propdeps"
 	apply plugin: "java"
+	apply plugin: 'groovy'
 	apply plugin: "test-source-set-dependencies"
 	apply from: "${gradleScriptDir}/ide.gradle"
 
@@ -50,9 +52,13 @@ configure(allprojects) { project ->
 	}
 
 	compileTestJava {
-		sourceCompatibility=1.8
-		targetCompatibility=1.8
-		compileTestJava.options.compilerArgs += "-parameters"
+		sourceCompatibility=1.7
+		targetCompatibility=1.7
+	}
+
+	compileGroovy {
+		sourceCompatibility=1.6
+		targetCompatibility=1.6
 	}
 
 	sourceSets.test.resources.srcDirs = ["src/test/resources", "src/test/java"]
@@ -68,9 +74,9 @@ configure(allprojects) { project ->
 	repositories {
 		maven { url "http://repo.spring.io/libs-release" }
 		maven { url "http://repo.spring.io/milestone" }  // for AspectJ 1.8.0.M1
-		maven { url "https://repository.apache.org/content/repositories/releases" } // tomcat 8 RC3
-		maven { url "https://repository.apache.org/content/repositories/snapshots" } // tomcat-websocket-* snapshots
-		maven { url "https://maven.java.net/content/repositories/releases" } //  javax.websocket, tyrus		
+		maven { url "https://repository.apache.org/content/repositories/releases" }  // tomcat 8 RC3
+		maven { url "https://repository.apache.org/content/repositories/snapshots" }  // tomcat-websocket-* snapshots
+		maven { url "https://maven.java.net/content/repositories/releases" }  // javax.websocket, tyrus
 	}
 
 	dependencies {
@@ -153,7 +159,6 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 
 project("spring-build-src") {
 	description = "Exposes gradle buildSrc for IDE support"
-	apply plugin: "groovy"
 
 	dependencies {
 		compile gradleApi()
@@ -249,6 +254,12 @@ project("spring-core") {
 			include "org/springframework/objenesis/**"
 		}
 	}
+
+	compileTestJava {
+		sourceCompatibility=1.8
+		targetCompatibility=1.8
+		compileTestJava.options.compilerArgs += "-parameters"
+	}
 }
 
 project("spring-beans") {
@@ -260,6 +271,26 @@ project("spring-beans") {
 		provided("javax.el:javax.el-api:2.2.4")
 		provided("javax.inject:javax.inject:1")
 		testCompile("log4j:log4j:1.2.17")
+	}
+}
+
+project('spring-beans-groovy') {
+	description 'Groovy Bean Definitions'
+	merge.into = project(":spring-beans")
+
+	dependencies {
+		compile(project(":spring-core"))
+		compile "org.codehaus.groovy:groovy-all:${groovyVersion}"
+	}
+
+	// this module's Java and Groovy sources need to be compiled together
+	compileJava.enabled=false
+	sourceSets {
+		main {
+			groovy {
+				srcDir 'src/main/java'
+			}
+		}
 	}
 }
 
@@ -322,7 +353,7 @@ project("spring-context") {
 		optional("org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1")
 		optional("org.eclipse.persistence:javax.persistence:2.0.0")
 		optional("org.beanshell:bsh:2.0b4")
-		optional("org.codehaus.groovy:groovy-all:1.8.9")
+		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("org.jruby:jruby:1.7.2")
 		optional("joda-time:joda-time:2.2")
 		optional("org.slf4j:slf4j-api:${slf4jVersion}")
@@ -827,7 +858,6 @@ configure(rootProject) {
 	description = "Spring Framework"
 
 	apply plugin: "docbook-reference"
-	apply plugin: "groovy"
 	// apply plugin: "detect-split-packages"
 	apply from: "${gradleScriptDir}/jdiff.gradle"
 

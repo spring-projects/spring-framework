@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,12 @@
 
 package org.springframework.beans.factory.xml;
 
+import java.io.StringReader;
+
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.ReaderContext;
@@ -81,6 +87,16 @@ public class XmlReaderContext extends ReaderContext {
 		String generatedName = generateBeanName(beanDefinition);
 		getRegistry().registerBeanDefinition(generatedName, beanDefinition);
 		return generatedName;
+	}
+
+	public Document readDocumentFromString(String documentContent) {
+		InputSource is = new InputSource(new StringReader(documentContent));
+		try {
+			return this.reader.doLoadDocument(is, getResource());
+		}
+		catch (Exception ex) {
+			throw new BeanDefinitionStoreException("Failed to read XML document", ex);
+		}
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -257,6 +257,18 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Get the raw property value, if any.
+	 * @param propertyName the name to search for
+	 * @return the raw property value, or {@code null}
+	 * @see #getPropertyValue(String)
+	 * @see PropertyValue#getValue()
+	 */
+	public Object get(String propertyName) {
+		PropertyValue pv = getPropertyValue(propertyName);
+		return (pv != null ? pv.getValue() : null);
 	}
 
 	@Override
