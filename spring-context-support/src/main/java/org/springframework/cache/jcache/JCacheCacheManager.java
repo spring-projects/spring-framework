@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,16 @@ package org.springframework.cache.jcache;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import javax.cache.CacheManager;
-import javax.cache.Status;
+import javax.cache.Caching;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.transaction.AbstractTransactionSupportingCacheManager;
-import org.springframework.util.Assert;
 
 /**
  * {@link org.springframework.cache.CacheManager} implementation
  * backed by a JCache {@link javax.cache.CacheManager}.
+ *
+ * <p>Note: This class has been updated for JCache 0.11, as of Spring 4.0.
  *
  * @author Juergen Hoeller
  * @since 3.2
@@ -87,16 +88,20 @@ public class JCacheCacheManager extends AbstractTransactionSupportingCacheManage
 		return this.allowNullValues;
 	}
 
+	@Override
+	public void afterPropertiesSet() {
+		if (this.cacheManager == null) {
+			this.cacheManager = Caching.getCachingProvider().getCacheManager();
+		}
+		super.afterPropertiesSet();
+	}
+
 
 	@Override
 	protected Collection<Cache> loadCaches() {
-		Assert.notNull(this.cacheManager, "A backing CacheManager is required");
-		Status status = this.cacheManager.getStatus();
-		Assert.isTrue(Status.STARTED.equals(status),
-				"A 'started' JCache CacheManager is required - current cache is " + status.toString());
-
 		Collection<Cache> caches = new LinkedHashSet<Cache>();
-		for (javax.cache.Cache<?,?> jcache : this.cacheManager.getCaches()) {
+		for (String cacheName : this.cacheManager.getCacheNames()) {
+			javax.cache.Cache jcache = this.cacheManager.getCache(cacheName);
 			caches.add(new JCacheCache(jcache, this.allowNullValues));
 		}
 		return caches;

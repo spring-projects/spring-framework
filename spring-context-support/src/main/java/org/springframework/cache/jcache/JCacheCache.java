@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package org.springframework.cache.jcache;
 
 import java.io.Serializable;
 
-import javax.cache.Status;
-
 import org.springframework.cache.Cache;
 import org.springframework.cache.support.SimpleValueWrapper;
 import org.springframework.util.Assert;
@@ -27,6 +25,8 @@ import org.springframework.util.Assert;
 /**
  * {@link org.springframework.cache.Cache} implementation on top of a
  * {@link javax.cache.Cache} instance.
+ *
+ * <p>Note: This class has been updated for JCache 0.11, as of Spring 4.0.
  *
  * @author Juergen Hoeller
  * @since 3.2
@@ -56,9 +56,6 @@ public class JCacheCache implements Cache {
 	 */
 	public JCacheCache(javax.cache.Cache<?,?> jcache, boolean allowNullValues) {
 		Assert.notNull(jcache, "Cache must not be null");
-		Status status = jcache.getStatus();
-		Assert.isTrue(Status.STARTED.equals(status),
-				"A 'started' cache is required - current cache is " + status.toString());
 		this.cache = jcache;
 		this.allowNullValues = allowNullValues;
 	}
