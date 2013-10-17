@@ -35,16 +35,30 @@ public class JaxWsPortProxyFactoryBean extends JaxWsPortClientInterceptor
 		implements FactoryBean<Object> {
 
 	private Object serviceProxy;
+        
+        private List<Advice> adviceList;
 
-
+	public addAdvice(Advice advice){
+		
+		if(adviceList == null){
+			adviceList = new ArrayList<Advice>();
+		}
+		adviceList.add(advice);
+	}
+	
 	@Override
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 
 		// Build a proxy that also exposes the JAX-WS BindingProvider interface.
-		ProxyFactory pf = new ProxyFactory();
+		ProxyFactory pf = new ProxyFactory(this);
 		pf.addInterface(getServiceInterface());
 		pf.addInterface(BindingProvider.class);
+		if(adviceList != null ){
+			for(Advice advice : adviceList){
+				pf.addAdvice(advice);
+			}
+		}
 		pf.addAdvice(this);
 		this.serviceProxy = pf.getProxy(getBeanClassLoader());
 	}
@@ -64,5 +78,12 @@ public class JaxWsPortProxyFactoryBean extends JaxWsPortClientInterceptor
 	public boolean isSingleton() {
 		return true;
 	}
-
+	
+	public void setAdviceList(List<Advice> adviceList){
+		this.adviceList = adviceList;
+	}
+	
+	public List<Advice> getAdviceList(){
+		return adviceList;
+	}
 }
