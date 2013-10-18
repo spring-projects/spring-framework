@@ -90,7 +90,8 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageSendin
 	public <T> T convertSendAndReceive(D destination, Object request, Map<String, Object> headers,
 			Class<T> targetClass) {
 
-		return this.convertSendAndReceive(destination, request, null);
+		MessagePostProcessor postProcessor = null;
+		return this.convertSendAndReceive(destination, request, headers, targetClass, postProcessor);
 	}
 
 	@Override
