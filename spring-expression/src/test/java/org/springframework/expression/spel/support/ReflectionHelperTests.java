@@ -335,6 +335,12 @@ public class ReflectionHelperTests extends ExpressionTestCase {
 		assertEquals("id",rpr.read(ctx,t,"Id").getValue());
 		assertTrue(rpr.canRead(ctx,t,"Id"));
 
+		// repro SPR-10994
+		assertEquals("xyZ",rpr.read(ctx,t,"xyZ").getValue());
+		assertTrue(rpr.canRead(ctx,t,"xyZ"));
+		assertEquals("xY",rpr.read(ctx,t,"xY").getValue());
+		assertTrue(rpr.canRead(ctx,t,"xY"));
+
 		// SPR-10122, ReflectivePropertyAccessor JavaBean property names compliance tests - setters
 		rpr.write(ctx, t, "pEBS","Test String");
 		assertEquals("Test String",rpr.read(ctx,t,"pEBS").getValue());
@@ -429,6 +435,8 @@ public class ReflectionHelperTests extends ExpressionTestCase {
 		String id = "id";
 		String ID = "ID";
 		String pEBS = "pEBS";
+		String xY = "xY";
+		String xyZ = "xyZ";
 
 		public String getProperty() { return property; }
 		public void setProperty(String value) { property = value; }
@@ -444,6 +452,10 @@ public class ReflectionHelperTests extends ExpressionTestCase {
 		public String getId() { return id; }
 
 		public String getID() { return ID; }
+
+		public String getXY() { return xY; }
+
+		public String getXyZ() { return xyZ; }
 
 		public String getpEBS() {
 			return pEBS;

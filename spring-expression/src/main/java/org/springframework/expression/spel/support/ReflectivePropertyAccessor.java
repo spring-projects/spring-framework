@@ -314,42 +314,34 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 * Find a getter method for the specified property.
 	 */
 	protected Method findGetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
-		Method[] ms = getSortedClassMethods(clazz);
-		String propertyMethodSuffix = getPropertyMethodSuffix(propertyName);
-
-		// Try "get*" method...
-		String getterName = "get" + propertyMethodSuffix;
-		for (Method method : ms) {
-			if (method.getName().equals(getterName) && method.getParameterTypes().length == 0 &&
-					(!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
-				return method;
-			}
-		}
-		// Try "is*" method...
-		getterName = "is" + propertyMethodSuffix;
-		for (Method method : ms) {
-			if (method.getName().equals(getterName) && method.getParameterTypes().length == 0 &&
-					(boolean.class.equals(method.getReturnType()) || Boolean.class.equals(method.getReturnType())) &&
-					(!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
-				return method;
-			}
-		}
-		return null;
+		return findMethodForProperty(getPropertyMethodSuffixes(propertyName),
+				new String[] { "get", "is" }, clazz, mustBeStatic, 0);
 	}
 
 	/**
 	 * Find a setter method for the specified property.
 	 */
 	protected Method findSetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
+		return findMethodForProperty(getPropertyMethodSuffixes(propertyName),
+				new String[] { "set" }, clazz, mustBeStatic, 1);
+	}
+
+	private Method findMethodForProperty(String[] methodSuffixes, String[] prefixes, Class<?> clazz,
+			boolean mustBeStatic, int numberOfParams) {
 		Method[] methods = getSortedClassMethods(clazz);
-		String setterName = "set" + getPropertyMethodSuffix(propertyName);
-		for (Method method : methods) {
-			if (method.getName().equals(setterName) && method.getParameterTypes().length == 1 &&
-					(!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
-				return method;
+		for (String methodSuffix : methodSuffixes) {
+			for (String prefix : prefixes) {
+				for (Method method : methods) {
+					if (method.getName().equals(prefix + methodSuffix)
+							&& method.getParameterTypes().length == numberOfParams
+							&& (!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
+						return method;
+					}
+				}
 			}
 		}
 		return null;
+
 	}
 
 	/**
@@ -365,13 +357,29 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		return methods;
 	}
 
+	/**
+	 * Return the method suffixes for a given property name. The default implementation
+	 * uses JavaBean conventions with additional support for properties of the form 'xY'
+	 * where the method 'getXY()' is used in preference to the JavaBean convention of
+	 * 'getxY()'.
+	 */
+	protected String[] getPropertyMethodSuffixes(String propertyName) {
+		String suffix = getPropertyMethodSuffix(propertyName);
+		if (suffix.length() > 0 && Character.isUpperCase(suffix.charAt(0))) {
+			return new String[] { suffix };
+		}
+		return new String[] { suffix, StringUtils.capitalize(suffix) };
+	}
+
+	/**
+	 * Return the method suffix for a given property name. The default implementation
+	 * uses JavaBean conventions.
+	 */
 	protected String getPropertyMethodSuffix(String propertyName) {
 		if (propertyName.length() > 1 && Character.isUpperCase(propertyName.charAt(1))) {
 			return propertyName;
 		}
-		else {
-			return StringUtils.capitalize(propertyName);
-		}
+		return StringUtils.capitalize(propertyName);
 	}
 
 	/**
