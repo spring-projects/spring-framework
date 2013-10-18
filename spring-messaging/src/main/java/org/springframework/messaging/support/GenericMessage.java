@@ -83,7 +83,7 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		if (byte[].class.equals(this.payload.getClass())) {
+		if (this.payload instanceof byte[]) {
 			sb.append("[Payload byte[").append(((byte[]) this.payload).length).append("]]");
 		}
 		else {
