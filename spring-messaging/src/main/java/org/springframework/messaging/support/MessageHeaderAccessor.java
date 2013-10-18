@@ -183,10 +183,12 @@ public class MessageHeaderAccessor {
 	 * values.
 	 */
 	public void copyHeaders(Map<String, ?> headersToCopy) {
-		Set<String> keys = headersToCopy.keySet();
-		for (String key : keys) {
-			if (!isReadOnly(key)) {
-				setHeader(key, headersToCopy.get(key));
+		if (headersToCopy != null) {
+			Set<String> keys = headersToCopy.keySet();
+			for (String key : keys) {
+				if (!isReadOnly(key)) {
+					setHeader(key, headersToCopy.get(key));
+				}
 			}
 		}
 	}
@@ -196,10 +198,12 @@ public class MessageHeaderAccessor {
 	 * overwrite any existing values.
 	 */
 	public void copyHeadersIfAbsent(Map<String, ?> headersToCopy) {
-		Set<String> keys = headersToCopy.keySet();
-		for (String key : keys) {
-			if (!this.isReadOnly(key)) {
-				setHeaderIfAbsent(key, headersToCopy.get(key));
+		if (headersToCopy != null) {
+			Set<String> keys = headersToCopy.keySet();
+			for (String key : keys) {
+				if (!this.isReadOnly(key)) {
+					setHeaderIfAbsent(key, headersToCopy.get(key));
+				}
 			}
 		}
 	}

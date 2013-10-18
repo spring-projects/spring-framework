@@ -75,4 +75,13 @@ public class MessageHeaderAccessorTests {
 		assertEquals("baz", actual.get("bar"));
 	}
 
+	@Test
+	public void copyHeadersNullMap() {
+		MessageHeaderAccessor headers = new MessageHeaderAccessor();
+		headers.copyHeaders(null);
+		headers.copyHeadersIfAbsent(null);
+
+		assertEquals(0, headers.toMap().size());
+	}
+
 }

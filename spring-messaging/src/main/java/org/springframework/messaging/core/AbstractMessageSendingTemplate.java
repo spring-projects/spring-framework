@@ -15,8 +15,6 @@
  */
 package org.springframework.messaging.core;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -24,10 +22,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.support.converter.ByteArrayMessageConverter;
-import org.springframework.messaging.support.converter.CompositeMessageConverter;
 import org.springframework.messaging.support.converter.MessageConverter;
-import org.springframework.messaging.support.converter.StringMessageConverter;
+import org.springframework.messaging.support.converter.SimpleMessageConverter;
 import org.springframework.util.Assert;
 
 
@@ -44,15 +40,8 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 
 	private volatile D defaultDestination;
 
-	private volatile MessageConverter converter;
+	private volatile MessageConverter converter = new SimpleMessageConverter();
 
-
-	public AbstractMessageSendingTemplate() {
-		Collection<MessageConverter> converters = new ArrayList<MessageConverter>();
-		converters.add(new StringMessageConverter());
-		converters.add(new ByteArrayMessageConverter());
-		this.converter = new CompositeMessageConverter(converters);
-	}
 
 	public void setDefaultDestination(D defaultDestination) {
 		this.defaultDestination = defaultDestination;

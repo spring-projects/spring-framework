@@ -209,14 +209,17 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 
 	@Bean
 	public CompositeMessageConverter simpMessageConverter() {
+
 		DefaultContentTypeResolver contentTypeResolver = new DefaultContentTypeResolver();
+
 		List<MessageConverter> converters = new ArrayList<MessageConverter>();
-		converters.add(new StringMessageConverter());
-		converters.add(new ByteArrayMessageConverter());
 		if (jackson2Present) {
 			converters.add(new MappingJackson2MessageConverter());
 			contentTypeResolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
 		}
+		converters.add(new StringMessageConverter());
+		converters.add(new ByteArrayMessageConverter());
+
 		return new CompositeMessageConverter(converters, contentTypeResolver);
 	}
 
