@@ -18,6 +18,7 @@ package org.springframework.context.annotation;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -172,6 +173,26 @@ final class ConfigurationClass {
 	public Set<BeanMethod> getBeanMethods() {
 		return this.beanMethods;
 	}
+	
+	/**
+	 * Gets bean methods elegibles for bean definitions
+	 * skipping overriden methods from superclasses.
+	 */
+	public Set<BeanMethod> getBeanMethodsToDefine() {
+		Set<BeanMethod> methods = new LinkedHashSet<BeanMethod>();
+		Set<String> names = new HashSet<String>();
+
+		for (BeanMethod method : beanMethods) {
+			String name = method.getMetadata().getMethodName();
+			if (!names.contains(name)) {
+				methods.add(method);
+				names.add(name);
+			}
+		}
+
+		return methods;
+	}
+
 
 	public void addImportedResource(String importedResource, Class<? extends BeanDefinitionReader> readerClass) {
 		this.importedResources.put(importedResource, readerClass);
