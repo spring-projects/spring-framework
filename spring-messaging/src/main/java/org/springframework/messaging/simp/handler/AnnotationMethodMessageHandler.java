@@ -65,7 +65,6 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeEvent;
-import org.springframework.messaging.simp.annotation.UnsubscribeEvent;
 import org.springframework.messaging.simp.annotation.support.PrincipalMethodArgumentResolver;
 import org.springframework.messaging.simp.annotation.support.SendToMethodReturnValueHandler;
 import org.springframework.messaging.simp.annotation.support.SubscriptionMethodReturnValueHandler;
@@ -119,8 +118,6 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 	private Map<MappingInfo, HandlerMethod> messageMethods = new HashMap<MappingInfo, HandlerMethod>();
 
 	private Map<MappingInfo, HandlerMethod> subscribeMethods = new HashMap<MappingInfo, HandlerMethod>();
-
-	private Map<MappingInfo, HandlerMethod> unsubscribeMethods = new HashMap<MappingInfo, HandlerMethod>();
 
 	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache =
 			new ConcurrentHashMap<Class<?>, ExceptionHandlerMethodResolver>(64);
@@ -308,7 +305,6 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 
 		initHandlerMethods(handler, handlerType, MessageMapping.class, this.messageMethods);
 		initHandlerMethods(handler, handlerType, SubscribeEvent.class, this.subscribeMethods);
-		initHandlerMethods(handler, handlerType, UnsubscribeEvent.class, this.unsubscribeMethods);
 	}
 
 	private <A extends Annotation> void initHandlerMethods(Object handler, Class<?> handlerType,
@@ -364,9 +360,6 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		}
 		else if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
 			handleMessageInternal(message, this.subscribeMethods);
-		}
-		else if (SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
-			handleMessageInternal(message, this.unsubscribeMethods);
 		}
 	}
 
