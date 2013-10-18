@@ -16,15 +16,14 @@
 
 package org.springframework.messaging.handler.annotation.support;
 
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import java.util.Map;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.PathVariable;
 import org.springframework.messaging.handler.annotation.ValueConstants;
 import org.springframework.messaging.simp.handler.AnnotationMethodMessageHandler;
-
-import java.util.Map;
 
 /**
  * Resolves method parameters annotated with {@link PathVariable @PathVariable}.
@@ -40,8 +39,9 @@ import java.util.Map;
  */
 public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
 
-	public PathVariableMethodArgumentResolver(ConversionService cs, ConfigurableBeanFactory beanFactory) {
-		super(cs, beanFactory);
+
+	public PathVariableMethodArgumentResolver(ConversionService cs) {
+		super(cs, null);
 	}
 
 	@Override
@@ -57,9 +57,10 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 
 	@Override
 	protected Object resolveArgumentInternal(MethodParameter parameter, Message<?> message, String name) throws Exception {
-		Map<String, String> pathTemplateVars =
-				(Map<String, String>) message.getHeaders().get(AnnotationMethodMessageHandler.PATH_TEMPLATE_VARIABLES_HEADER);
-		return (pathTemplateVars != null) ? pathTemplateVars.get(name) : null;
+		String headerName = AnnotationMethodMessageHandler.PATH_TEMPLATE_VARIABLES_HEADER;
+		@SuppressWarnings("unchecked")
+		Map<String, String> vars = (Map<String, String>) message.getHeaders().get(headerName);
+		return (vars != null) ? vars.get(name) : null;
 	}
 
 	@Override
@@ -67,6 +68,7 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 		throw new MessageHandlingException(message, "Missing path template variable '" + name +
 				"' for method parameter type [" + parameter.getParameterType() + "]");
 	}
+
 
 	private static class PathVariableNamedValueInfo extends NamedValueInfo {
 

@@ -51,8 +51,8 @@ import org.springframework.messaging.handler.annotation.support.ExceptionHandler
 import org.springframework.messaging.handler.annotation.support.HeaderMethodArgumentResolver;
 import org.springframework.messaging.handler.annotation.support.HeadersMethodArgumentResolver;
 import org.springframework.messaging.handler.annotation.support.MessageMethodArgumentResolver;
-import org.springframework.messaging.handler.annotation.support.PayloadArgumentResolver;
 import org.springframework.messaging.handler.annotation.support.PathVariableMethodArgumentResolver;
+import org.springframework.messaging.handler.annotation.support.PayloadArgumentResolver;
 import org.springframework.messaging.handler.method.HandlerMethod;
 import org.springframework.messaging.handler.method.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.method.HandlerMethodArgumentResolverComposite;
@@ -70,7 +70,6 @@ import org.springframework.messaging.simp.annotation.support.PrincipalMethodArgu
 import org.springframework.messaging.simp.annotation.support.SendToMethodReturnValueHandler;
 import org.springframework.messaging.simp.annotation.support.SubscriptionMethodReturnValueHandler;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.support.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.support.converter.CompositeMessageConverter;
 import org.springframework.messaging.support.converter.MessageConverter;
@@ -85,17 +84,23 @@ import org.springframework.util.ReflectionUtils.MethodFilter;
 
 
 /**
+ * A handler for messages that delegates to {@link SubscribeEvent @SubscribeEvent} and
+ * {@link MessageMapping @MessageMapping} annotated methods.
+ *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @since 4.0
  */
 public class AnnotationMethodMessageHandler implements MessageHandler, ApplicationContextAware, InitializingBean {
 
-	public static final String PATH_TEMPLATE_VARIABLES_HEADER = "Spring-PathTemplateVariables";
+	public static final String PATH_TEMPLATE_VARIABLES_HEADER =
+			AnnotationMethodMessageHandler.class.getSimpleName() + ".templateVariables";
 
-	public static final String BEST_MATCHING_PATTERN_HEADER = "Spring-BestMatchingPattern";
+	public static final String BEST_MATCHING_PATTERN_HEADER =
+			AnnotationMethodMessageHandler.class.getSimpleName() + ".bestMatchingPattern";
 
 	private static final Log logger = LogFactory.getLog(AnnotationMethodMessageHandler.class);
+
 
 	private final PathMatcher pathMatcher = new AntPathMatcher();
 
@@ -255,7 +260,7 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		// Annotation-based argument resolution
 		this.argumentResolvers.addResolver(new HeaderMethodArgumentResolver(this.conversionService, beanFactory));
 		this.argumentResolvers.addResolver(new HeadersMethodArgumentResolver());
-		this.argumentResolvers.addResolver(new PathVariableMethodArgumentResolver(this.conversionService, beanFactory));
+		this.argumentResolvers.addResolver(new PathVariableMethodArgumentResolver(this.conversionService));
 
 		// Type-based argument resolution
 		this.argumentResolvers.addResolver(new PrincipalMethodArgumentResolver());
@@ -287,6 +292,9 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		}
 	}
 
+	/**
+	 * Whether the given bean type should be introspected for messaging handling methods.
+	 */
 	protected boolean isHandler(Class<?> beanType) {
 		return (AnnotationUtils.findAnnotation(beanType, Controller.class) != null);
 	}
@@ -369,32 +377,33 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		}
 
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		String lookupPath = getLookupPath(headers.getDestination());
-		if (lookupPath == null) {
+		String destinationToMatch = getDestinationToMatch(headers.getDestination());
+		if (destinationToMatch == null) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Ignoring message with destination " + headers.getDestination());
+				logger.trace("Ignoring message with destination=" + headers.getDestination());
 			}
 			return;
 		}
 
-		MappingInfoMatch match = matchMappingInfo(lookupPath, handlerMethods);
+		Match match = getMatchingHandlerMethod(destinationToMatch, handlerMethods);
 		if (match == null) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("No matching method, lookup path " + lookupPath);
+				logger.trace("No matching handler method for destination=" + destinationToMatch);
 			}
 			return;
 		}
 
-		HandlerMethod handlerMethod = match.handlerMethod.createWithResolvedBean();
+		String matchedPattern = match.getMatchedPattern();
+		HandlerMethod handlerMethod = match.getHandlerMethod().createWithResolvedBean();
 
 		InvocableHandlerMethod invocableHandlerMethod = new InvocableHandlerMethod(handlerMethod);
 		invocableHandlerMethod.setMessageMethodArgumentResolvers(this.argumentResolvers);
 
 		try {
-			headers.setDestination(lookupPath);
-			headers.setHeader(BEST_MATCHING_PATTERN_HEADER,match.mappingDestination);
-			headers.setHeader(PATH_TEMPLATE_VARIABLES_HEADER,
-					pathMatcher.extractUriTemplateVariables(match.mappingDestination,lookupPath));
+			headers.setDestination(destinationToMatch);
+			headers.setHeader(BEST_MATCHING_PATTERN_HEADER, matchedPattern);
+			Map<String, String> vars = this.pathMatcher.extractUriTemplateVariables(matchedPattern, destinationToMatch);
+			headers.setHeader(PATH_TEMPLATE_VARIABLES_HEADER, vars);
 			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
 
 			Object returnValue = invocableHandlerMethod.invoke(message);
@@ -413,15 +422,20 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		}
 	}
 
-	private String getLookupPath(String destination) {
-		if (destination != null) {
-			if (CollectionUtils.isEmpty(this.destinationPrefixes)) {
-				return destination;
-			}
-			for (String prefix : this.destinationPrefixes) {
-				if (destination.startsWith(prefix)) {
-					return destination.substring(prefix.length() - 1);
-				}
+	/**
+	 * Match the destination against the list the configured destination prefixes, if any,
+	 * and return a destination with the matched prefix removed.
+	 */
+	private String getDestinationToMatch(String destination) {
+		if (destination == null) {
+			return null;
+		}
+		if (CollectionUtils.isEmpty(this.destinationPrefixes)) {
+			return destination;
+		}
+		for (String prefix : this.destinationPrefixes) {
+			if (destination.startsWith(prefix)) {
+				return destination.substring(prefix.length() - 1);
 			}
 		}
 		return null;
@@ -461,29 +475,31 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		}
 	}
 
-	protected MappingInfoMatch matchMappingInfo(String destination,
-	                                         Map<MappingInfo, HandlerMethod> handlerMethods) {
-
-		List<MappingInfoMatch> matches = new ArrayList<MappingInfoMatch>(4);
+	protected Match getMatchingHandlerMethod(String destination, Map<MappingInfo, HandlerMethod> handlerMethods) {
+		List<Match> matches = new ArrayList<Match>(4);
 		for (MappingInfo key : handlerMethods.keySet()) {
-			for (String mappingDestination : key.getDestinations()) {
-				if (this.pathMatcher.match(mappingDestination, destination)) {
-					matches.add(new MappingInfoMatch(mappingDestination,
-							handlerMethods.get(key)));
+			for (String pattern : key.getDestinationPatterns()) {
+				if (this.pathMatcher.match(pattern, destination)) {
+					matches.add(new Match(pattern, handlerMethods.get(key)));
 				}
 			}
 		}
-		if(!matches.isEmpty()) {
-			Comparator<MappingInfoMatch> comparator = getMappingInfoMatchComparator(destination, this.pathMatcher);
+		if (matches.isEmpty()) {
+			return null;
+		}
+		else if (matches.size() == 1) {
+			return matches.get(0);
+		}
+		else {
+			Comparator<Match> comparator = getMatchComparator(destination, this.pathMatcher);
 			Collections.sort(matches, comparator);
-
 			if (logger.isTraceEnabled()) {
-				logger.trace("Found " + matches.size() + " matching mapping(s) for [" + destination + "] : " + matches);
+				logger.trace("Found " + matches.size() +
+						" matching mapping(s) for [" + destination + "] : " + matches);
 			}
-
-			MappingInfoMatch bestMatch = matches.get(0);
+			Match bestMatch = matches.get(0);
 			if (matches.size() > 1) {
-				MappingInfoMatch secondBestMatch = matches.get(1);
+				Match secondBestMatch = matches.get(1);
 				if (comparator.compare(bestMatch, secondBestMatch) == 0) {
 					Method m1 = bestMatch.handlerMethod.getMethod();
 					Method m2 = secondBestMatch.handlerMethod.getMethod();
@@ -494,37 +510,36 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 			}
 			return bestMatch;
 		}
-		return null;
 	}
 
-	private Comparator<MappingInfoMatch> getMappingInfoMatchComparator(String destination,
-	                                                                   PathMatcher pathMatcher) {
-		return new Comparator<MappingInfoMatch>() {
+	private Comparator<Match> getMatchComparator(final String destination, final PathMatcher pathMatcher) {
+		return new Comparator<Match>() {
 			@Override
-			public int compare(MappingInfoMatch one, MappingInfoMatch other) {
+			public int compare(Match one, Match other) {
 				Comparator<String> patternComparator = pathMatcher.getPatternComparator(destination);
-				return patternComparator.compare(one.mappingDestination,other.mappingDestination);
+				return patternComparator.compare(one.destinationPattern, other.destinationPattern);
 			}
 		};
 	}
 
+
 	private static class MappingInfo {
 
-		private final String[] destinations;
+		private final String[] destinationPatterns;
 
 
-		public MappingInfo(String[] destinations) {
-			Assert.notNull(destinations, "No destinations");
-			this.destinations = destinations;
+		public MappingInfo(String[] destinationPatterns) {
+			Assert.notNull(destinationPatterns, "No destination patterns");
+			this.destinationPatterns = destinationPatterns;
 		}
 
-		public String[] getDestinations() {
-			return this.destinations;
+		public String[] getDestinationPatterns() {
+			return this.destinationPatterns;
 		}
 
 		@Override
 		public int hashCode() {
-			return Arrays.hashCode(this.destinations);
+			return Arrays.hashCode(this.destinationPatterns);
 		}
 
 		@Override
@@ -534,25 +549,34 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 			}
 			if (o != null && getClass().equals(o.getClass())) {
 				MappingInfo other = (MappingInfo) o;
-				return Arrays.equals(destinations, other.getDestinations());
+				return Arrays.equals(destinationPatterns, other.getDestinationPatterns());
 			}
 			return false;
 		}
 
 		@Override
 		public String toString() {
-			return "[destinations=" + Arrays.toString(this.destinations) + "]";
+			return "[destinationPatters=" + Arrays.toString(this.destinationPatterns) + "]";
 		}
 	}
 
-	private static class MappingInfoMatch {
+	private static class Match {
 
-		private final String mappingDestination;
+		private final String destinationPattern;
+
 		private final HandlerMethod handlerMethod;
 
-		public MappingInfoMatch(String destination, HandlerMethod handlerMethod) {
-			this.mappingDestination = destination;
+		public Match(String destinationPattern, HandlerMethod handlerMethod) {
+			this.destinationPattern = destinationPattern;
 			this.handlerMethod = handlerMethod;
+		}
+
+		public String getMatchedPattern() {
+			return this.destinationPattern;
+		}
+
+		public HandlerMethod getHandlerMethod() {
+			return this.handlerMethod;
 		}
 	}
 }

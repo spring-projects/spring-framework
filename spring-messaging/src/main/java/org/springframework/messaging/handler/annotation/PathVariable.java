@@ -23,19 +23,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation which indicates that a method parameter should be bound to a path template
- * variable. Supported for {@link org.springframework.messaging.simp.annotation.SubscribeEvent},
- * {@link org.springframework.messaging.simp.annotation.UnsubscribeEvent},
- * {@link org.springframework.messaging.handler.annotation.MessageMapping}
- * annotated handler methods.
- *
- * <p>A {@code @PathVariable} template variable is always required and does not have
- * a default value to fall back on.
+ * Annotation that indicates a method parameter should be bound to a path template
+ * variable. Supported on message handling methods such as {@link MessageMapping
+ * @MessageMapping} for messages with path-like destination semantics.
+ * <p>
+ * A {@code @PathVariable} template variable is always required and does not have a
+ * default value to fall back on.
  *
  * @author Brian Clozel
- * @see org.springframework.messaging.simp.annotation.SubscribeEvent
- * @see org.springframework.messaging.simp.annotation.UnsubscribeEvent
  * @see org.springframework.messaging.handler.annotation.MessageMapping
+ * @see org.springframework.messaging.simp.handler.AnnotationMethodMessageHandler
+ *
  * @since 4.0
  */
 @Target(ElementType.PARAMETER)
@@ -43,6 +41,9 @@ import java.lang.annotation.Target;
 @Documented
 public @interface PathVariable {
 
-	/** The path template variable to bind to. */
+	/**
+	 * The path template variable to bind to.
+	 */
 	String value() default "";
+
 }

@@ -16,9 +16,12 @@
 
 package org.springframework.messaging.handler.annotation.support;
 
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
@@ -28,13 +31,7 @@ import org.springframework.messaging.handler.annotation.PathVariable;
 import org.springframework.messaging.simp.handler.AnnotationMethodMessageHandler;
 import org.springframework.messaging.support.MessageBuilder;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for {@link PathVariableMethodArgumentResolver} tests.
@@ -50,9 +47,7 @@ public class PathVariableMethodArgumentResolverTests {
 
 	@Before
 	public void setup() throws Exception {
-		GenericApplicationContext cxt = new GenericApplicationContext();
-		cxt.refresh();
-		this.resolver = new PathVariableMethodArgumentResolver(new DefaultConversionService(), cxt.getBeanFactory());
+		this.resolver = new PathVariableMethodArgumentResolver(new DefaultConversionService());
 
 		Method method = getClass().getDeclaredMethod("handleMessage",
 				String.class, String.class, String.class);

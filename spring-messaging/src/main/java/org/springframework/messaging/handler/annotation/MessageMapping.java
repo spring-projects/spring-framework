@@ -26,11 +26,13 @@ import org.springframework.messaging.Message;
 
 
 /**
- * Annotation for mapping a {@link Message} onto specific handler methods based on
- * the destination for the message.
+ * Annotation for mapping a {@link Message} onto message handling methods by matching to
+ * the message destination.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
+ *
+ * @see org.springframework.messaging.simp.handler.AnnotationMethodMessageHandler
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
@@ -38,7 +40,11 @@ import org.springframework.messaging.Message;
 public @interface MessageMapping {
 
 	/**
-	 * Destination values for the message.
+	 * Destination-based mapping expressed by this annotation.
+	 * <p>
+	 * For STOMP over WebSocket messages: this is the destination of the STOMP message
+	 * (e.g. "/positions"). Ant-style path patterns (e.g. "/price.stock.*") are supported
+	 * and so are path template variables (e.g. "/price.stock.{ticker}"").
 	 */
 	String[] value() default {};
 

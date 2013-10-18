@@ -36,7 +36,11 @@ import java.lang.annotation.Target;
 public @interface SubscribeEvent {
 
 	/**
-	 * Destination value(s) for the subscription.
+	 * Destination-based mapping expressed by this annotation.
+	 * <p>
+	 * For STOMP over WebSocket messages: this is the destination of the STOMP message
+	 * (e.g. "/positions"). Ant-style path patterns (e.g. "/price.stock.*") are supported
+	 * and so are path template variables (e.g. "/price.stock.{ticker}"").
 	 */
 	String[] value() default {};
 
