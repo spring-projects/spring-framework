@@ -1,11 +1,11 @@
 package org.springframework.web.method;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 import org.junit.Test;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 import static org.junit.Assert.*;
 
@@ -116,12 +116,10 @@ public class ControllerAdviceBeanTests {
 	@ControllerAdvice("org.springframework.web.method")
 	static class BasePackageValueSupport {}
 
-	@ControllerAdvice(annotations = ControllerAnnotation.class,
-			assignableTypes = ControllerInterface.class)
+	@ControllerAdvice(annotations = ControllerAnnotation.class, assignableTypes = ControllerInterface.class)
 	static class MultipleSelectorsSupport {}
 
-	@ControllerAdvice(basePackages = "java.util",
-			annotations = RestController.class)
+	@ControllerAdvice(basePackages = "java.util", annotations = {RestController.class})
 	static class ShouldNotMatch {}
 
 	// Support classes

@@ -16,6 +16,7 @@
 
 package org.springframework.web.bind.annotation;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -60,29 +61,44 @@ public @interface ControllerAdvice {
 	/**
 	 * Alias for the {@link #basePackages()} attribute.
 	 * Allows for more concise annotation declarations e.g.:
-	 * {@code @ControllerAdvice("org.my.pkg")} instead of
+	 * {@code @ControllerAdvice("org.my.pkg")} is equivalent to
 	 * {@code @ControllerAdvice(basePackages="org.my.pkg")}.
+	 *
 	 * @since 4.0
 	 */
 	String[] value() default {};
 
 	/**
 	 * Array of base packages.
-	 * Controllers that belong to those base packages will be selected
-	 * to be assisted by the annotated class, e.g.:
-	 * {@code @ControllerAdvice(basePackages="org.my.pkg")}
+	 * Controllers that belong to those base packages will be included, e.g.:
+	 * {@code @ControllerAdvice(basePackages="org.my.pkg")} or
 	 * {@code @ControllerAdvice(basePackages={"org.my.pkg","org.my.other.pkg"})}
 	 *
 	 * <p>{@link #value()} is an alias for this attribute.
-	 * <p>Use {@link #basePackageClasses()} for a type-safe alternative to String-based package names.
+	 * <p>Also consider using {@link #basePackageClasses()} as a type-safe
+	 * alternative to String-based package names.
+	 *
 	 * @since 4.0
 	 */
 	String[] basePackages() default {};
 
 	/**
+	 * Type-safe alternative to {@link #value()} for specifying the packages
+	 * to select Controllers to be assisted by the {@code @ControllerAdvice}
+	 * annotated class.
+	 *
+	 * <p>Consider creating a special no-op marker class or interface in each package
+	 * that serves no purpose other than being referenced by this attribute.
+	 *
+	 * @since 4.0
+	 */
+	Class<?>[] basePackageClasses() default {};
+
+	/**
 	 * Array of classes.
 	 * Controllers that are assignable to at least one of the given types
 	 * will be assisted by the {@code @ControllerAdvice} annotated class.
+	 *
 	 * @since 4.0
 	 */
 	Class<?>[] assignableTypes() default {};
@@ -95,18 +111,9 @@ public @interface ControllerAdvice {
 	 *
 	 * <p>Consider creating a special annotation or use a predefined one,
 	 * like {@link RestController @RestController}.
-	 * @since 4.0
-	 */
-	Class<?>[] annotations() default {};
-
-	/**
-	 * Type-safe alternative to {@link #value()} for specifying the packages
-	 * to select Controllers to be assisted by the {@code @ControllerAdvice}
-	 * annotated class.
 	 *
-	 * <p>Consider creating a special no-op marker class or interface in each package
-	 * that serves no purpose other than being referenced by this attribute.
 	 * @since 4.0
 	 */
-	Class<?>[] basePackageClasses() default {};
+	Class<? extends Annotation>[] annotations() default {};
+
 }
