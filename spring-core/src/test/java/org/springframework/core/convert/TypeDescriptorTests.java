@@ -918,4 +918,18 @@ public class TypeDescriptorTests {
 		TypeDescriptor readObject = (TypeDescriptor) inputStream.readObject();
 		assertThat(readObject, equalTo(typeDescriptor));
 	}
+
+	@Test
+	public void createCollectionWithNullElement() throws Exception {
+		TypeDescriptor typeDescriptor = TypeDescriptor.collection(List.class, null);
+		assertThat(typeDescriptor.getElementTypeDescriptor(), nullValue());
+	}
+
+	@Test
+	public void createMapWithNullElements() throws Exception {
+		TypeDescriptor typeDescriptor = TypeDescriptor.map(LinkedHashMap.class, null, null);
+		assertThat(typeDescriptor.getMapKeyTypeDescriptor(), nullValue());
+		assertThat(typeDescriptor.getMapValueTypeDescriptor(), nullValue());
+	}
+
 }

@@ -498,12 +498,13 @@ public class TypeDescriptor implements Serializable {
 	 */
 	public static TypeDescriptor collection(Class<?> collectionType, TypeDescriptor elementTypeDescriptor) {
 		Assert.notNull(collectionType, "CollectionType must not be null");
-		Assert.notNull(elementTypeDescriptor, "ElementTypeDesciptor must not be null");
 		if (!Collection.class.isAssignableFrom(collectionType)) {
 			throw new IllegalArgumentException("collectionType must be a java.util.Collection");
 		}
+		ResolvableType element = (elementTypeDescriptor == null ? null
+				: elementTypeDescriptor.resolvableType);
 		return new TypeDescriptor(ResolvableType.forClassWithGenerics(collectionType,
-				elementTypeDescriptor.resolvableType), null, null);
+				element), null, null);
 	}
 
 	/**
@@ -520,8 +521,9 @@ public class TypeDescriptor implements Serializable {
 		if (!Map.class.isAssignableFrom(mapType)) {
 			throw new IllegalArgumentException("mapType must be a java.util.Map");
 		}
-		return new TypeDescriptor(ResolvableType.forClassWithGenerics(mapType,
-				keyTypeDescriptor.resolvableType, valueTypeDescriptor.resolvableType), null, null);
+		ResolvableType key = (keyTypeDescriptor == null ? null : keyTypeDescriptor.resolvableType);
+		ResolvableType value = (valueTypeDescriptor == null ? null : valueTypeDescriptor.resolvableType);
+		return new TypeDescriptor(ResolvableType.forClassWithGenerics(mapType, key, value), null, null);
 	}
 
 	/**
