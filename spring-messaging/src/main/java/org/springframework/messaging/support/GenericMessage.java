@@ -82,9 +82,15 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 	}
 
 	public String toString() {
-		StringBuilder sb = new StringBuilder("[Headers=" + this.headers + "]");
-		sb.append("[Payload ").append(this.payload.getClass().getSimpleName());
-		sb.append(" content=").append(this.payload).append("]");
+		StringBuilder sb = new StringBuilder();
+		if (byte[].class.equals(this.payload.getClass())) {
+			sb.append("[Payload byte[").append(((byte[]) this.payload).length).append("]]");
+		}
+		else {
+			sb.append("[Payload ").append(this.payload.getClass().getSimpleName());
+			sb.append(" content=").append(this.payload).append("]");
+		}
+		sb.append("[Headers=" + this.headers + "]");
 		return sb.toString();
 	}
 
