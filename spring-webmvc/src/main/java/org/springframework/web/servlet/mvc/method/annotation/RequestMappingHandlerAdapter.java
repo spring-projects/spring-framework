@@ -776,9 +776,11 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		List<InvocableHandlerMethod> attrMethods = new ArrayList<InvocableHandlerMethod>();
 		// Global methods first
 		for (Entry<ControllerAdviceBean, Set<Method>> entry : this.modelAttributeAdviceCache.entrySet()) {
-			Object bean = entry.getKey().resolveBean();
-			for (Method method : entry.getValue()) {
-				attrMethods.add(createModelAttributeMethod(binderFactory, bean, method));
+			if(entry.getKey().isApplicableToBeanType(handlerType)) {
+				Object bean = entry.getKey().resolveBean();
+				for (Method method : entry.getValue()) {
+					attrMethods.add(createModelAttributeMethod(binderFactory, bean, method));
+				}
 			}
 		}
 		for (Method method : methods) {
@@ -806,9 +808,11 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		List<InvocableHandlerMethod> initBinderMethods = new ArrayList<InvocableHandlerMethod>();
 		// Global methods first
 		for (Entry<ControllerAdviceBean, Set<Method>> entry : this.initBinderAdviceCache .entrySet()) {
-			Object bean = entry.getKey().resolveBean();
-			for (Method method : entry.getValue()) {
-				initBinderMethods.add(createInitBinderMethod(bean, method));
+			if(entry.getKey().isApplicableToBeanType(handlerType)) {
+				Object bean = entry.getKey().resolveBean();
+				for (Method method : entry.getValue()) {
+					initBinderMethods.add(createInitBinderMethod(bean, method));
+				}
 			}
 		}
 		for (Method method : methods) {
