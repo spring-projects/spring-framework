@@ -16,11 +16,10 @@
 
 package org.springframework.messaging.simp.stomp;
 
-import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -29,21 +28,15 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.handler.AbstractBrokerMessageHandler;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.tcp.FixedIntervalReconnectStrategy;
+import org.springframework.messaging.support.tcp.ReactorNettyTcpClient;
+import org.springframework.messaging.support.tcp.TcpConnection;
+import org.springframework.messaging.support.tcp.TcpConnectionHandler;
+import org.springframework.messaging.support.tcp.TcpOperations;
 import org.springframework.util.Assert;
-
-import reactor.core.Environment;
-import reactor.core.composable.Composable;
-import reactor.core.composable.Deferred;
-import reactor.core.composable.Promise;
-import reactor.core.composable.spec.DeferredPromiseSpec;
-import reactor.function.Consumer;
-import reactor.tcp.Reconnect;
-import reactor.tcp.TcpClient;
-import reactor.tcp.TcpConnection;
-import reactor.tcp.netty.NettyTcpClient;
-import reactor.tcp.spec.TcpClientSpec;
-import reactor.tuple.Tuple;
-import reactor.tuple.Tuple2;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
+import org.springframework.util.concurrent.ListenableFutureTask;
 
 
 /**
@@ -61,7 +54,7 @@ import reactor.tuple.Tuple2;
  * opposed to from a client). Such messages are recognized because they are not associated
  * with any client and therefore do not have a session id header. The "system" connection
  * is effectively shared and cannot be used to receive messages. Several properties are
- * provided to configure the "system" session including the the
+ * provided to configure the "system" connection including the the
  * {@link #setSystemLogin(String) login} {@link #setSystemPasscode(String) passcode},
  * heartbeat {@link #setSystemHeartbeatSendInterval(long) send} and
  * {@link #setSystemHeartbeatReceiveInterval(long) receive} intervals.
@@ -71,6 +64,13 @@ import reactor.tuple.Tuple2;
  * @since 4.0
  */
 public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler {
+
+	private static final byte[] EMPTY_PAYLOAD = new byte[0];
+
+	private static final Message<byte[]> HEARTBEAT_MESSAGE = MessageBuilder.withPayload(new byte[] {'\n'}).build();
+
+	private static final long HEARTBEAT_MULTIPLIER = 3;
+
 
 	private final MessageChannel messageChannel;
 
@@ -88,11 +88,10 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	private String virtualHost;
 
-	private Environment environment;
+	private TcpOperations<byte[]> tcpClient;
 
-	private TcpClient<Message<byte[]>, Message<byte[]>> tcpClient;
-
-	private final Map<String, StompRelaySession> relaySessions = new ConcurrentHashMap<String, StompRelaySession>();
+	private final Map<String, StompConnectionHandler> connectionHandlers =
+			new ConcurrentHashMap<String, StompConnectionHandler>();
 
 
 	/**
@@ -137,20 +136,31 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 	/**
-	 * Set the interval, in milliseconds, at which the "system" relay session will, in the
+	 * Configure the TCP client to for managing STOMP over TCP connections to the message
+	 * broker. This is an optional property that can be used to replace the default
+	 * implementation used for example for testing purposes.
+	 * <p>
+	 * By default an instance of {@link ReactorNettyTcpClient} is used.
+	 */
+	public void setTcpClient(TcpOperations<byte[]> tcpClient) {
+		this.tcpClient = tcpClient;
+	}
+
+	/**
+	 * Set the interval, in milliseconds, at which the "system" connection will, in the
 	 * absence of any other data being sent, send a heartbeat to the STOMP broker. A value
 	 * of zero will prevent heartbeats from being sent to the broker.
 	 * <p>
 	 * The default value is 10000.
 	 * <p>
-	 * See class-level documentation for more information on the "system" session.
+	 * See class-level documentation for more information on the "system" connection.
 	 */
 	public void setSystemHeartbeatSendInterval(long systemHeartbeatSendInterval) {
 		this.systemHeartbeatSendInterval = systemHeartbeatSendInterval;
 	}
 
 	/**
-	 * @return The interval, in milliseconds, at which the "system" relay session will
+	 * @return The interval, in milliseconds, at which the "system" connection will
 	 * send heartbeats to the STOMP broker.
 	 */
 	public long getSystemHeartbeatSendInterval() {
@@ -158,21 +168,21 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 	/**
-	 * Set the maximum interval, in milliseconds, at which the "system" relay session
+	 * Set the maximum interval, in milliseconds, at which the "system" connection
 	 * expects, in the absence of any other data, to receive a heartbeat from the STOMP
-	 * broker. A value of zero will configure the relay session to expect not to receive
+	 * broker. A value of zero will configure the connection to expect not to receive
 	 * heartbeats from the broker.
 	 * <p>
 	 * The default value is 10000.
 	 * <p>
-	 * See class-level documentation for more information on the "system" session.
+	 * See class-level documentation for more information on the "system" connection.
 	 */
 	public void setSystemHeartbeatReceiveInterval(long heartbeatReceiveInterval) {
 		this.systemHeartbeatReceiveInterval = heartbeatReceiveInterval;
 	}
 
 	/**
-	 * @return The interval, in milliseconds, at which the "system" relay session expects
+	 * @return The interval, in milliseconds, at which the "system" connection expects
 	 * to receive heartbeats from the STOMP broker.
 	 */
 	public long getSystemHeartbeatReceiveInterval() {
@@ -180,10 +190,10 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 	/**
-	 * Set the login for the "system" relay session used to send messages to the STOMP
+	 * Set the login for the "system" connection used to send messages to the STOMP
 	 * broker without having a client session (e.g. REST/HTTP request handling method).
 	 * <p>
-	 * See class-level documentation for more information on the "system" session.
+	 * See class-level documentation for more information on the "system" connection.
 	 */
 	public void setSystemLogin(String systemLogin) {
 		Assert.hasText(systemLogin, "systemLogin must not be empty");
@@ -191,24 +201,24 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 	/**
-	 * @return the login used by the "system" relay session to connect to the STOMP broker
+	 * @return the login used by the "system" connection to connect to the STOMP broker
 	 */
 	public String getSystemLogin() {
 		return this.systemLogin;
 	}
 
 	/**
-	 * Set the passcode for the "system" relay session used to send messages to the STOMP
+	 * Set the passcode for the "system" connection used to send messages to the STOMP
 	 * broker without having a client session (e.g. REST/HTTP request handling method).
 	 * <p>
-	 * See class-level documentation for more information on the "system" session.
+	 * See class-level documentation for more information on the "system" connection.
 	 */
 	public void setSystemPasscode(String systemPasscode) {
 		this.systemPasscode = systemPasscode;
 	}
 
 	/**
-	 * @return the passcode used by the "system" relay session to connect to the STOMP broker
+	 * @return the passcode used by the "system" connection to connect to the STOMP broker
 	 */
 	public String getSystemPasscode() {
 		return this.systemPasscode;
@@ -237,12 +247,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	@Override
 	protected void startInternal() {
-		this.environment = new Environment();
-		this.tcpClient = new TcpClientSpec<Message<byte[]>, Message<byte[]>>(NettyTcpClient.class)
-				.env(this.environment)
-				.codec(new StompCodec())
-				.connect(this.relayHost, this.relayPort)
-				.get();
+
+		this.tcpClient = new ReactorNettyTcpClient<byte[]>(this.relayHost, this.relayPort, new StompCodec());
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Initializing \"system\" TCP connection");
@@ -254,30 +260,28 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		headers.setPasscode(this.systemPasscode);
 		headers.setHeartbeat(this.systemHeartbeatSendInterval, this.systemHeartbeatReceiveInterval);
 		headers.setHost(getVirtualHost());
-		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 
-		SystemStompRelaySession session = new SystemStompRelaySession();
-		session.connect(message);
+		SystemStompConnectionHandler handler = new SystemStompConnectionHandler(headers);
+		this.connectionHandlers.put(handler.getSessionId(), handler);
 
-		this.relaySessions.put(session.getId(), session);
+		this.tcpClient.connect(handler, new FixedIntervalReconnectStrategy(5000));
 	}
 
 	@Override
 	protected void stopInternal() {
-		for (StompRelaySession session: this.relaySessions.values()) {
-			session.disconnect();
+		for (StompConnectionHandler handler : this.connectionHandlers.values()) {
+			try {
+				handler.resetTcpConnection();
+			}
+			catch (Throwable t) {
+				logger.error("Failed to close STOMP connection " + t.getMessage());
+			}
 		}
 		try {
-			this.tcpClient.close().await();
+			this.tcpClient.shutdown();
 		}
 		catch (Throwable t) {
-			logger.error("Failed to close reactor TCP client", t);
-		}
-		try {
-			this.environment.shutdown();
-		}
-		catch (Throwable t) {
-			logger.error("Failed to shut down reactor Environment", t);
+			logger.error("Error while shutting down TCP client", t);
 		}
 	}
 
@@ -291,7 +295,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		SimpMessageType messageType = headers.getMessageType();
 
 		if (SimpMessageType.MESSAGE.equals(messageType)) {
-			sessionId = (sessionId == null) ? SystemStompRelaySession.ID : sessionId;
+			sessionId = (sessionId == null) ? SystemStompConnectionHandler.SESSION_ID : sessionId;
 			headers.setSessionId(sessionId);
 			command = headers.updateStompCommandAsClientMessage();
 			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
@@ -309,138 +313,120 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		if (SimpMessageType.CONNECT.equals(messageType)) {
 			if (getVirtualHost() != null) {
 				headers.setHost(getVirtualHost());
-				message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
 			}
-			StompRelaySession session = new StompRelaySession(sessionId);
-			session.connect(message);
-			this.relaySessions.put(sessionId, session);
+			StompConnectionHandler handler = new StompConnectionHandler(sessionId, headers);
+			this.connectionHandlers.put(sessionId, handler);
+			this.tcpClient.connect(handler);
 		}
 		else if (SimpMessageType.DISCONNECT.equals(messageType)) {
-			StompRelaySession session = this.relaySessions.remove(sessionId);
-			if (session == null) {
+			StompConnectionHandler handler = removeConnectionHandler(sessionId);
+			if (handler == null) {
 				if (logger.isTraceEnabled()) {
-					logger.trace("Session already removed, sessionId=" + sessionId);
+					logger.trace("Connection already removed for sessionId=" + sessionId);
 				}
 				return;
 			}
-			session.forward(message);
+			handler.forward(message);
 		}
 		else {
-			StompRelaySession session = this.relaySessions.get(sessionId);
-			if (session == null) {
-				logger.warn("Session id=" + sessionId + " not found. Ignoring message: " + message);
+			StompConnectionHandler handler = this.connectionHandlers.get(sessionId);
+			if (handler == null) {
+				logger.warn("Connection for sessionId=" + sessionId + " not found. Ignoring message: " + message);
 				return;
 			}
-			session.forward(message);
+			handler.forward(message);
 		}
 	}
 
+	private StompConnectionHandler removeConnectionHandler(String sessionId) {
+		return SystemStompConnectionHandler.SESSION_ID.equals(sessionId)
+				? null : this.connectionHandlers.remove(sessionId);
+	}
 
-	private class StompRelaySession {
 
-		private static final long HEARTBEAT_MULTIPLIER = 3;
+	private class StompConnectionHandler implements TcpConnectionHandler<byte[]> {
 
 		private final String sessionId;
 
 		private final boolean isRemoteClientSession;
 
-		private final long reconnectInterval;
+		private final StompHeaderAccessor connectHeaders;
 
-		private volatile StompConnection stompConnection = new StompConnection();
+		private volatile TcpConnection<byte[]> tcpConnection;
 
-		private volatile StompHeaderAccessor connectHeaders;
-
-		private volatile StompHeaderAccessor connectedHeaders;
+		private volatile boolean isStompConnected;
 
 
-		private StompRelaySession(String sessionId) {
-			this(sessionId, true, 0);
+		private StompConnectionHandler(String sessionId, StompHeaderAccessor connectHeaders) {
+			this(sessionId, connectHeaders, true);
 		}
 
-		private StompRelaySession(String sessionId, boolean isRemoteClientSession, long reconnectInterval) {
+		private StompConnectionHandler(String sessionId, StompHeaderAccessor connectHeaders,
+				boolean isRemoteClientSession) {
+
 			Assert.notNull(sessionId, "sessionId is required");
+			Assert.notNull(connectHeaders, "connectHeaders is required");
+
 			this.sessionId = sessionId;
+			this.connectHeaders = connectHeaders;
 			this.isRemoteClientSession = isRemoteClientSession;
-			this.reconnectInterval = reconnectInterval;
 		}
 
-
-		public String getId() {
+		public String getSessionId() {
 			return this.sessionId;
 		}
 
-		public void connect(final Message<?> connectMessage) {
+		@Override
+		public void afterConnected(TcpConnection<byte[]> connection) {
+			this.tcpConnection = connection;
+			connection.send(MessageBuilder.withPayload(EMPTY_PAYLOAD).setHeaders(this.connectHeaders).build());
+		}
 
-			Assert.notNull(connectMessage, "connectMessage is required");
-			this.connectHeaders = StompHeaderAccessor.wrap(connectMessage);
+		@Override
+		public void afterConnectFailure(Throwable ex) {
+			handleTcpConnectionFailure("Failed to connect to message broker", ex);
+		}
 
-			Composable<TcpConnection<Message<byte[]>, Message<byte[]>>> promise;
-			if (this.reconnectInterval > 0) {
-				promise = tcpClient.open(new Reconnect() {
-					@Override
-					public Tuple2<InetSocketAddress, Long> reconnect(InetSocketAddress address, int attempt) {
-						return Tuple.of(address, 5000L);
-					}
-				});
+		/**
+		 * Invoked when any TCP connectivity issue is detected, i.e. failure to establish
+		 * the TCP connection, failure to send a message, missed heartbeat.
+		 */
+		protected void handleTcpConnectionFailure(String errorMessage, Throwable ex) {
+			if (logger.isErrorEnabled()) {
+				logger.error(errorMessage + ", sessionId=" + this.sessionId, ex);
 			}
-			else {
-				promise = tcpClient.open();
-			}
-
-			promise.consume(new Consumer<TcpConnection<Message<byte[]>, Message<byte[]>>>() {
-				@Override
-				public void accept(TcpConnection<Message<byte[]>, Message<byte[]>> connection) {
-					handleConnectionReady(connection, connectMessage);
-				}
-			});
-			promise.when(Throwable.class, new Consumer<Throwable>() {
-				@Override
-				public void accept(Throwable ex) {
-					relaySessions.remove(sessionId);
-					handleTcpClientFailure("Failed to connect to message broker", ex);
-				}
-			});
+			resetTcpConnection();
+			sendStompErrorToClient(errorMessage);
 		}
 
-		public void disconnect() {
-			this.stompConnection.setDisconnected();
-		}
-
-		protected void handleConnectionReady(
-				TcpConnection<Message<byte[]>, Message<byte[]>> tcpConn, final Message<?> connectMessage) {
-
-			this.stompConnection.setTcpConnection(tcpConn);
-			tcpConn.on().close(new Runnable() {
-				@Override
-				public void run() {
-					connectionClosed();
+		private void sendStompErrorToClient(String errorText) {
+			if (this.isRemoteClientSession) {
+				StompConnectionHandler removed = removeConnectionHandler(this.sessionId);
+				if (removed != null) {
+					StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.ERROR);
+					headers.setSessionId(this.sessionId);
+					headers.setMessage(errorText);
+					Message<?> errorMessage = MessageBuilder.withPayload(EMPTY_PAYLOAD).setHeaders(headers).build();
+					sendMessageToClient(errorMessage);
 				}
-			});
-			tcpConn.in().consume(new Consumer<Message<byte[]>>() {
-				@Override
-				public void accept(Message<byte[]> message) {
-					readStompFrame(message);
-				}
-			});
-			forwardInternal(connectMessage, tcpConn);
-		}
-
-		protected void connectionClosed() {
-			relaySessions.remove(this.sessionId);
-			if (this.stompConnection.isReady()) {
-				sendError("Lost connection to the broker");
 			}
 		}
 
-		private void readStompFrame(Message<byte[]> message) {
+		protected void sendMessageToClient(Message<?> message) {
+			if (this.isRemoteClientSession) {
+				StompBrokerRelayMessageHandler.this.messageChannel.send(message);
+			}
+		}
+
+		@Override
+		public void handleMessage(Message<byte[]> message) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Reading message for sessionId=" + sessionId + ", " + message);
+				logger.trace("Reading message for sessionId=" + this.sessionId + ", " + message);
 			}
 
 			StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
 			if (StompCommand.CONNECTED == headers.getCommand()) {
-				this.connectedHeaders = headers;
-				connected();
+				afterStompConnected(headers);
 			}
 
 			headers.setSessionId(this.sessionId);
@@ -448,230 +434,157 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			sendMessageToClient(message);
 		}
 
-		private void initHeartbeats() {
+		/**
+		 * Invoked after the STOMP CONNECTED frame is received. At this point the
+		 * connection is ready for sending STOMP messages to the broker.
+		 */
+		protected void afterStompConnected(StompHeaderAccessor connectedHeaders) {
+			this.isStompConnected = true;
+			initHeartbeats(connectedHeaders);
+		}
+
+		private void initHeartbeats(StompHeaderAccessor connectedHeaders) {
+
+			// Remote clients do their own heartbeat management
+			if (this.isRemoteClientSession) {
+				return;
+			}
 
 			long clientSendInterval = this.connectHeaders.getHeartbeat()[0];
 			long clientReceiveInterval = this.connectHeaders.getHeartbeat()[1];
 
-			long serverSendInterval = this.connectedHeaders.getHeartbeat()[0];
-			long serverReceiveInterval = this.connectedHeaders.getHeartbeat()[1];
+			long serverSendInterval = connectedHeaders.getHeartbeat()[0];
+			long serverReceiveInterval = connectedHeaders.getHeartbeat()[1];
 
 			if ((clientSendInterval > 0) && (serverReceiveInterval > 0)) {
 				long interval = Math.max(clientSendInterval,  serverReceiveInterval);
-				stompConnection.connection.on().writeIdle(interval, new Runnable() {
-
+				this.tcpConnection.onWriteInactivity(new Runnable() {
 					@Override
 					public void run() {
-						TcpConnection<Message<byte[]>, Message<byte[]>> tcpConn = stompConnection.connection;
-						if (tcpConn != null) {
-							tcpConn.send(MessageBuilder.withPayload(new byte[] {'\n'}).build(),
-								new Consumer<Boolean>() {
-									@Override
-									public void accept(Boolean result) {
-										if (!result) {
-											handleTcpClientFailure("Failed to send heartbeat to the broker", null);
+						TcpConnection<byte[]> conn = tcpConnection;
+						if (conn != null) {
+							conn.send(HEARTBEAT_MESSAGE).addCallback(
+									new ListenableFutureCallback<Boolean>() {
+										public void onFailure(Throwable t) {
+											handleTcpConnectionFailure("Failed to send heartbeat", null);
 										}
-									}
-								});
+										public void onSuccess(Boolean result) {}
+									});
 						}
 					}
-				});
+				}, interval);
 			}
 
 			if (clientReceiveInterval > 0 && serverSendInterval > 0) {
 				final long interval = Math.max(clientReceiveInterval, serverSendInterval) * HEARTBEAT_MULTIPLIER;
-				stompConnection.connection.on().readIdle(interval,  new Runnable() {
-
+				this.tcpConnection.onReadInactivity(new Runnable() {
 					@Override
 					public void run() {
-						String message = "Broker hearbeat missed: connection idle for more than " + interval + "ms";
-						if (logger.isWarnEnabled()) {
-							logger.warn(message);
-						}
-						disconnected(message);
+						handleTcpConnectionFailure("No hearbeat from broker for more than " +
+								interval + "ms, closing connection", null);
+					}
+				},  interval);
+			}
+		}
+
+		@Override
+		public void afterConnectionClosed() {
+			sendStompErrorToClient("Connection to broker closed");
+		}
+
+		public ListenableFuture<Boolean> forward(final Message<?> message) {
+
+			if (!this.isStompConnected) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Connection to broker inactive or not ready, ignoring message=" + message);
+				}
+				return new ListenableFutureTask<Boolean>(new Callable<Boolean>() {
+					@Override
+					public Boolean call() throws Exception {
+						return Boolean.FALSE;
 					}
 				});
 			}
-		}
 
-		protected void connected() {
-			if (!this.isRemoteClientSession) {
-				initHeartbeats();
+			if (logger.isTraceEnabled()) {
+				logger.trace("Forwarding message to broker: " + message);
 			}
-			this.stompConnection.setReady();
-		}
-
-		protected void handleTcpClientFailure(String message, Throwable ex) {
-			if (logger.isErrorEnabled()) {
-				logger.error(message + ", sessionId=" + this.sessionId, ex);
-			}
-			disconnected(message);
-		}
-
-		protected void disconnected(String errorMessage) {
-			this.stompConnection.setDisconnected();
-			sendError(errorMessage);
-		}
-
-		private void sendError(String errorText) {
-			StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.ERROR);
-			headers.setSessionId(this.sessionId);
-			headers.setMessage(errorText);
-			Message<?> errorMessage = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
-			sendMessageToClient(errorMessage);
-		}
-
-		protected void sendMessageToClient(Message<?> message) {
-			if (this.isRemoteClientSession) {
-				messageChannel.send(message);
-			}
-			else {
-				StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-				if (StompCommand.ERROR.equals(headers.getCommand())) {
-					if (logger.isErrorEnabled()) {
-						logger.error("STOMP ERROR on sessionId=" + this.sessionId + ": " + message);
-					}
-				}
-				// ignore otherwise
-			}
-		}
-
-		private void forward(Message<?> message) {
-			TcpConnection<Message<byte[]>, Message<byte[]>> tcpConnection = this.stompConnection.getReadyConnection();
-			if (tcpConnection == null) {
-				logger.warn("Connection to STOMP broker is not active");
-				handleForwardFailure(message);
-			}
-			else if (!forwardInternal(message, tcpConnection)) {
-				handleForwardFailure(message);
-			}
-		}
-
-		protected void handleForwardFailure(Message<?> message) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Failed to forward message to the broker. message=" + message);
-			}
-		}
-
-		private boolean forwardInternal(
-				Message<?> message, TcpConnection<Message<byte[]>, Message<byte[]>> tcpConnection) {
-
-			Assert.isInstanceOf(byte[].class, message.getPayload(), "Message's payload must be a byte[]");
 
 			@SuppressWarnings("unchecked")
-			Message<byte[]> byteMessage = (Message<byte[]>) message;
-			if (logger.isTraceEnabled()) {
-				logger.trace("Forwarding to STOMP broker, message: " + message);
-			}
+			ListenableFuture<Boolean> future = this.tcpConnection.send((Message<byte[]>) message);
 
-			StompCommand command = StompHeaderAccessor.wrap(message).getCommand();
-
-			final Deferred<Boolean, Promise<Boolean>> deferred = new DeferredPromiseSpec<Boolean>().get();
-			tcpConnection.send(byteMessage, new Consumer<Boolean>() {
+			future.addCallback(new ListenableFutureCallback<Boolean>() {
 				@Override
-				public void accept(Boolean success) {
-					deferred.accept(success);
+				public void onSuccess(Boolean result) {
+					StompCommand command = StompHeaderAccessor.wrap(message).getCommand();
+					if (command == StompCommand.DISCONNECT) {
+						resetTcpConnection();
+					}
+				}
+				@Override
+				public void onFailure(Throwable t) {
+					handleTcpConnectionFailure("Failed to send message " + message, t);
 				}
 			});
 
-			Boolean success = null;
-			try {
-				success = deferred.compose().await();
-				if (success == null) {
-					handleTcpClientFailure("Timed out waiting for message to be forwarded to the broker", null);
-				}
-				else if (!success) {
-					handleTcpClientFailure("Failed to forward message to the broker", null);
-				}
-				else {
-					if (command == StompCommand.DISCONNECT) {
-						this.stompConnection.setDisconnected();
-					}
-				}
-			}
-			catch (InterruptedException ex) {
-				Thread.currentThread().interrupt();
-				handleTcpClientFailure("Interrupted while forwarding message to the broker", ex);
-			}
-			return (success != null) ? success : false;
+			return future;
 		}
+
+		public void resetTcpConnection() {
+			TcpConnection<byte[]> conn = this.tcpConnection;
+			this.isStompConnected = false;
+			this.tcpConnection = null;
+			if (conn != null) {
+				try {
+					this.tcpConnection.close();
+				}
+				catch (Throwable t) {
+					// ignore
+				}
+			}
+		}
+
 	}
 
-	private static class StompConnection {
+	private class SystemStompConnectionHandler extends StompConnectionHandler {
 
-		private volatile TcpConnection<Message<byte[]>, Message<byte[]>> connection;
-
-		private AtomicReference<TcpConnection<Message<byte[]>, Message<byte[]>>> readyConnection =
-				new AtomicReference<TcpConnection<Message<byte[]>, Message<byte[]>>>();
+		public static final String SESSION_ID = "stompRelaySystemSessionId";
 
 
-		public void setTcpConnection(TcpConnection<Message<byte[]>, Message<byte[]>> connection) {
-			Assert.notNull(connection, "connection must not be null");
-			this.connection = connection;
-		}
-
-		/**
-		 * Return the underlying {@link TcpConnection} but only after the CONNECTED STOMP
-		 * frame is received.
-		 */
-		public TcpConnection<Message<byte[]>, Message<byte[]>> getReadyConnection() {
-			return this.readyConnection.get();
-		}
-
-		public void setReady() {
-			this.readyConnection.set(this.connection);
-		}
-
-		public boolean isReady() {
-			return (this.readyConnection.get() != null);
-		}
-
-		public void setDisconnected() {
-			this.readyConnection.set(null);
-
-			TcpConnection<Message<byte[]>, Message<byte[]>> localConnection = this.connection;
-			if (localConnection != null) {
-				localConnection.close();
-				this.connection = null;
-			}
+		public SystemStompConnectionHandler(StompHeaderAccessor connectHeaders) {
+			super(SESSION_ID, connectHeaders, false);
 		}
 
 		@Override
-		public String toString() {
-			return "StompConnection [ready=" + isReady() + "]";
-		}
-	}
-
-	private class SystemStompRelaySession extends StompRelaySession {
-
-		public static final String ID = "stompRelaySystemSessionId";
-
-
-		public SystemStompRelaySession() {
-			super(ID, false, 5000);
-		}
-
-		@Override
-		protected void connected() {
-			super.connected();
+		protected void afterStompConnected(StompHeaderAccessor connectedHeaders) {
+			super.afterStompConnected(connectedHeaders);
 			publishBrokerAvailableEvent();
 		}
 
 		@Override
-		protected void disconnected(String errorMessage) {
-			super.disconnected(errorMessage);
+		protected void handleTcpConnectionFailure(String errorMessage, Throwable t) {
+			super.handleTcpConnectionFailure(errorMessage, t);
 			publishBrokerUnavailableEvent();
 		}
 
 		@Override
-		protected void connectionClosed() {
+		public void afterConnectionClosed() {
+			super.afterConnectionClosed();
 			publishBrokerUnavailableEvent();
 		}
 
 		@Override
-		protected void handleForwardFailure(Message<?> message) {
-			super.handleForwardFailure(message);
-			throw new MessageDeliveryException(message);
+		public ListenableFuture<Boolean> forward(Message<?> message) {
+			try {
+				ListenableFuture<Boolean> future = super.forward(message);
+				if (!future.get()) {
+					throw new MessageDeliveryException(message);
+				}
+				return future;
+			}
+			catch (Throwable t) {
+				throw new MessageDeliveryException(message, t);
+			}
 		}
 	}
 

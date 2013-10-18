@@ -231,14 +231,13 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 	@Test
 	public void disconnectClosesRelaySessionCleanly() throws Exception {
-		String sess1 = "sess1";
-		MessageExchange conn1 = MessageExchangeBuilder.connect(sess1).build();
-		this.responseHandler.expect(conn1);
-		this.relay.handleMessage(conn1.message);
+		MessageExchange connect = MessageExchangeBuilder.connect("sess1").build();
+		this.responseHandler.expect(connect);
+		this.relay.handleMessage(connect.message);
 		this.responseHandler.awaitAndAssert();
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
-		headers.setSessionId(sess1);
+		headers.setSessionId("sess1");
 
 		this.relay.handleMessage(MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build());
 
@@ -330,9 +329,9 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 			StringBuilder sb = new StringBuilder("\n");
 
 			synchronized (this.monitor) {
-				sb.append("INCOMPLETE:\n").append(this.expected).append("\n");
-				sb.append("COMPLETE:\n").append(this.actual).append("\n");
-				sb.append("UNMATCHED MESSAGES:\n").append(this.unexpected).append("\n");
+				sb.append("UNMATCHED EXPECTATIONS:\n").append(this.expected).append("\n");
+				sb.append("MATCHED EXPECTATIONS:\n").append(this.actual).append("\n");
+				sb.append("UNEXPECTED MESSAGES:\n").append(this.unexpected).append("\n");
 			}
 
 			return sb.toString();
