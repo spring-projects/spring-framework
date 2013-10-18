@@ -595,7 +595,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		public void awaitAndAssert() throws InterruptedException {
 			synchronized(this.monitor) {
-				long endTime = System.currentTimeMillis() + 5000;
+				long endTime = System.currentTimeMillis() + 6000;
 				while (this.expected.size() != this.actual.size() && System.currentTimeMillis() < endTime) {
 					this.monitor.wait(500);
 				}
