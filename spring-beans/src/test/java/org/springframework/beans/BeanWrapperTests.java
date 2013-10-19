@@ -63,6 +63,10 @@ import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
+import static org.hamcrest.Matchers.*;
+
+import static org.junit.Assert.*;
+
 
 /**
  * @author Rod Johnson
@@ -1559,6 +1563,20 @@ public final class BeanWrapperTests {
 		assertEquals("val1", Spr10115Bean.prop1);
 	}
 
+	@Test
+	public void testArrayToObject() throws Exception {
+		ArrayToObject foo = new ArrayToObject();
+		BeanWrapperImpl bwi = new BeanWrapperImpl();
+		bwi.setWrappedInstance(foo);
+
+		Object[] array = new Object[] {"1","2"};
+		bwi.setPropertyValue("object", array );
+		assertThat(foo.getObject(), equalTo((Object) array));
+
+		array = new Object[] {"1"};
+		bwi.setPropertyValue("object", array );
+		assertThat(foo.getObject(), equalTo((Object) array));
+}
 
 	static class Spr10115Bean {
 		private static String prop1;
@@ -1944,4 +1962,19 @@ public final class BeanWrapperTests {
 		TEST_VALUE
 	}
 
+
+	static class ArrayToObject {
+
+		private Object object;
+
+
+		public void setObject(Object object) {
+			this.object = object;
+		}
+
+		public Object getObject() {
+			return object;
+		}
+
+	}
 }
