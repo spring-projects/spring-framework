@@ -689,6 +689,7 @@ project("spring-webmvc") {
 		testCompile("commons-io:commons-io:1.3")
 		testCompile("org.hibernate:hibernate-validator:4.3.0.Final")
 		testCompile("org.apache.httpcomponents:httpclient:4.3-beta2")
+		testCompile("joda-time:joda-time:2.2")
 	}
 
 	// pick up DispatcherServlet.properties in src/main

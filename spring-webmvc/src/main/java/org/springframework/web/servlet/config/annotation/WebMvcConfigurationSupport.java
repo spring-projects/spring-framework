@@ -78,6 +78,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExc
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.support.DefaultMvcUrls;
+import org.springframework.web.servlet.mvc.support.MvcUrls;
 
 /**
  * This is the main class providing the configuration behind the MVC Java config.
@@ -561,6 +563,15 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * @see AsyncSupportConfigurer
 	 */
 	public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+	}
+
+	/**
+	 * Return an instance of {@link MvcUrls} for injection into controllers to create
+	 * URLs by referencing controllers and controller methods.
+	 */
+	@Bean
+	public MvcUrls mvcUrls() {
+		return new DefaultMvcUrls(requestMappingHandlerAdapter().getArgumentResolvers(), mvcConversionService());
 	}
 
 	/**

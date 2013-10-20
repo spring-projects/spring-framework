@@ -248,7 +248,7 @@ public class UriComponentsBuilder {
 			throw new IllegalArgumentException("[" + httpUrl + "] is not a valid HTTP URL");
 		}
 	}
-
+	
 
 	// build methods
 
@@ -362,6 +362,43 @@ public class UriComponentsBuilder {
 		return this;
 	}
 
+	/**
+	 * Initializes all components of this URI builder from the given {@link UriComponents}.
+	 * @param uriComponents the UriComponents instance
+	 * @return this UriComponentsBuilder
+	 */
+	public UriComponentsBuilder uriComponents(UriComponents uriComponents) {
+		Assert.notNull(uriComponents, "'uriComponents' must not be null");
+		this.scheme = uriComponents.getScheme();
+		if (uriComponents instanceof OpaqueUriComponents) {
+			this.ssp = uriComponents.getSchemeSpecificPart();
+			resetHierarchicalComponents();
+		}
+		else {
+			if (uriComponents.getUserInfo() != null) {
+				this.userInfo = uriComponents.getUserInfo();
+			}
+			if (uriComponents.getHost() != null) {
+				this.host = uriComponents.getHost();
+			}
+			if (uriComponents.getPort() != -1) {
+				this.port = uriComponents.getPort();
+			}
+			if (StringUtils.hasLength(uriComponents.getPath())) {
+				this.pathBuilder = new CompositePathComponentBuilder(uriComponents.getPath());
+			}
+			if (!uriComponents.getQueryParams().isEmpty()) {
+				this.queryParams.clear();
+				this.queryParams.putAll(uriComponents.getQueryParams());
+			}
+			resetSchemeSpecificPart();
+		}
+		if (uriComponents.getFragment() != null) {
+			this.fragment = uriComponents.getFragment();
+		}
+		return this;
+	}
+		
 	/**
 	 * Set the URI scheme-specific-part. When invoked, this method overwrites
 	 * {@linkplain #userInfo(String) user-info}, {@linkplain #host(String) host},
@@ -554,36 +591,6 @@ public class UriComponentsBuilder {
 		return this;
 	}
 
-	public UriComponentsBuilder with(UriComponentsBuilder builder) {
-
-		UriComponents components = builder.build().normalize();
-
-		if (StringUtils.hasText(components.getScheme())) {
-			scheme(components.getScheme());
-		}
-
-		if (StringUtils.hasText(components.getHost())) {
-			host(components.getHost());
-		}
-
-		if (components.getPort() != -1) {
-			port(components.getPort());
-		}
-
-		if (StringUtils.hasText(components.getPath())) {
-			path(components.getPath());
-		}
-
-		if (StringUtils.hasText(components.getQuery())) {
-			query(components.getQuery());
-		}
-
-		if (StringUtils.hasText(components.getFragment())) {
-			fragment(components.getFragment());
-		}
-
-		return this;
-	}
 
 	private interface PathComponentBuilder {
 

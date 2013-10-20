@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.ServletRequestBindingException;
@@ -32,8 +34,10 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver;
 import org.springframework.web.method.annotation.RequestParamMapMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.method.support.UriComponentsContributor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.View;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Resolves method arguments annotated with an @{@link PathVariable}.
@@ -59,7 +63,11 @@ import org.springframework.web.servlet.View;
  * @author Arjen Poutsma
  * @since 3.1
  */
-public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
+public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver
+		implements UriComponentsContributor {
+
+	private static final TypeDescriptor STRING_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(String.class);
+
 
 	public PathVariableMethodArgumentResolver() {
 		super(null);
@@ -113,6 +121,25 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 		}
 		pathVars.put(name, arg);
 	}
+
+	@Override
+	public void contributeMethodArgument(MethodParameter parameter, Object value,
+			UriComponentsBuilder builder, Map<String, Object> uriVariables, ConversionService conversionService) {
+
+		if (Map.class.isAssignableFrom(parameter.getParameterType())) {
+			return;
+		}
+
+		PathVariable annot = parameter.getParameterAnnotation(PathVariable.class);
+		String name = StringUtils.isEmpty(annot.value()) ? parameter.getParameterName() : annot.value();
+
+		if (conversionService != null) {
+			value = conversionService.convert(value, new TypeDescriptor(parameter), STRING_TYPE_DESCRIPTOR);
+		}
+
+		uriVariables.put(name, value);
+	}
+
 
 	private static class PathVariableNamedValueInfo extends NamedValueInfo {
 

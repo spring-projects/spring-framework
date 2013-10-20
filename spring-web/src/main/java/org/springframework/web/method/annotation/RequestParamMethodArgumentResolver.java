@@ -29,6 +29,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -38,10 +40,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.method.support.UriComponentsContributor;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -69,7 +73,10 @@ import org.springframework.web.util.WebUtils;
  * @since 3.1
  * @see RequestParamMapMethodArgumentResolver
  */
-public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
+public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver
+		implements UriComponentsContributor {
+
+	private static final TypeDescriptor STRING_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(String.class);
 
 	private final boolean useDefaultResolution;
 
@@ -83,7 +90,8 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	 * request parameter name is derived from the method parameter name.
 	 */
 	public RequestParamMethodArgumentResolver(ConfigurableBeanFactory beanFactory,
-											  boolean useDefaultResolution) {
+			boolean useDefaultResolution) {
+
 		super(beanFactory);
 		this.useDefaultResolution = useDefaultResolution;
 	}
@@ -218,6 +226,39 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 		throw new MissingServletRequestParameterException(paramName, parameter.getParameterType().getSimpleName());
 	}
 
+	@Override
+	public void contributeMethodArgument(MethodParameter parameter, Object value,
+			UriComponentsBuilder builder, Map<String, Object> uriVariables, ConversionService conversionService) {
+
+		Class<?> paramType = parameter.getParameterType();
+		if (Map.class.isAssignableFrom(paramType) || MultipartFile.class.equals(paramType) ||
+				"javax.servlet.http.Part".equals(paramType.getName())) {
+			return;
+		}
+
+		RequestParam annot = parameter.getParameterAnnotation(RequestParam.class);
+		String name = StringUtils.isEmpty(annot.value()) ? parameter.getParameterName() : annot.value();
+
+		if (value == null) {
+			builder.queryParam(name);
+		}
+		else if (value instanceof Collection) {
+			for (Object v : (Collection) value) {
+				v = formatUriValue(conversionService, TypeDescriptor.nested(parameter, 1), v);
+				builder.queryParam(name, v);
+			}
+		}
+		else {
+			builder.queryParam(name, formatUriValue(conversionService, new TypeDescriptor(parameter), value));
+		}
+	}
+
+	protected String formatUriValue(ConversionService cs, TypeDescriptor sourceType, Object value) {
+		return (cs != null) ?
+			(String) cs.convert(value, sourceType, STRING_TYPE_DESCRIPTOR) : null;
+	}
+
+
 	private class RequestParamNamedValueInfo extends NamedValueInfo {
 
 		private RequestParamNamedValueInfo() {
@@ -228,4 +269,5 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 			super(annotation.value(), annotation.required(), annotation.defaultValue());
 		}
 	}
+
 }

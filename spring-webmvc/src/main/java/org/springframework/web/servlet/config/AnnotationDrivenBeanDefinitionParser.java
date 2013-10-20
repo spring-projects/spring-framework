@@ -207,6 +207,13 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		handlerAdapterDef.getPropertyValues().add("deferredResultInterceptors", deferredResultInterceptors);
 		String handlerAdapterName = parserContext.getReaderContext().registerWithGeneratedName(handlerAdapterDef);
 
+		String mvcUrlsName = "mvcUrls";
+		RootBeanDefinition mvcUrlsDef = new RootBeanDefinition(DefaultMvcUrlsFactoryBean.class);
+		mvcUrlsDef.setSource(source);
+		mvcUrlsDef.getPropertyValues().addPropertyValue("handlerAdapter", handlerAdapterDef);
+		mvcUrlsDef.getPropertyValues().addPropertyValue("conversionService", conversionService);
+		parserContext.getReaderContext().getRegistry().registerBeanDefinition(mvcUrlsName, mvcUrlsDef);
+
 		RootBeanDefinition csInterceptorDef = new RootBeanDefinition(ConversionServiceExposingInterceptor.class);
 		csInterceptorDef.setSource(source);
 		csInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(0, conversionService);
@@ -242,6 +249,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 		parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef, methodMappingName));
 		parserContext.registerComponent(new BeanComponentDefinition(handlerAdapterDef, handlerAdapterName));
+		parserContext.registerComponent(new BeanComponentDefinition(mvcUrlsDef, mvcUrlsName));
 		parserContext.registerComponent(new BeanComponentDefinition(exceptionHandlerExceptionResolver, methodExceptionResolverName));
 		parserContext.registerComponent(new BeanComponentDefinition(responseStatusExceptionResolver, responseStatusExceptionResolverName));
 		parserContext.registerComponent(new BeanComponentDefinition(defaultExceptionResolver, defaultExceptionResolverName));

@@ -16,28 +16,33 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.ISODateTimeFormat;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.format.support.FormattingConversionService;
-import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.HttpEntity;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
-import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
@@ -49,6 +54,11 @@ import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExc
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.support.MvcUrls;
+import org.springframework.web.util.UriComponents;
+
+import static org.junit.Assert.*;
+import static org.springframework.web.servlet.mvc.support.MvcUrlUtils.*;
 
 /**
  * A test fixture with an {@link WebMvcConfigurationSupport} instance.
@@ -57,27 +67,26 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  */
 public class WebMvcConfigurationSupportTests {
 
-	private WebMvcConfigurationSupport mvcConfiguration;
-
-	private StaticWebApplicationContext wac;
+	private WebApplicationContext wac;
 
 
 	@Before
 	public void setUp() {
-		this.wac = new StaticWebApplicationContext();
-		this.mvcConfiguration = new WebMvcConfigurationSupport();
-		this.mvcConfiguration.setApplicationContext(wac);
+
+		AnnotationConfigWebApplicationContext cxt = new AnnotationConfigWebApplicationContext();
+		cxt.setServletContext(new MockServletContext());
+		cxt.register(TestConfig.class);
+		cxt.refresh();
+
+		this.wac = cxt;
 	}
 
 	@Test
 	public void requestMappingHandlerMapping() throws Exception {
-		this.wac.registerSingleton("controller", TestController.class);
 
-		RequestMappingHandlerMapping handlerMapping = mvcConfiguration.requestMappingHandlerMapping();
+		RequestMappingHandlerMapping handlerMapping = this.wac.getBean(RequestMappingHandlerMapping.class);
 		assertEquals(0, handlerMapping.getOrder());
 
-		handlerMapping.setApplicationContext(this.wac);
-		handlerMapping.afterPropertiesSet();
 		HandlerExecutionChain chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/"));
 		assertNotNull(chain.getInterceptors());
 		assertEquals(ConversionServiceExposingInterceptor.class, chain.getInterceptors()[0].getClass());
@@ -85,7 +94,10 @@ public class WebMvcConfigurationSupportTests {
 
 	@Test
 	public void emptyViewControllerHandlerMapping() {
-		AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping) mvcConfiguration.viewControllerHandlerMapping();
+
+		AbstractHandlerMapping handlerMapping = this.wac.getBean(
+				"viewControllerHandlerMapping", AbstractHandlerMapping.class);
+
 		assertNotNull(handlerMapping);
 		assertEquals(Integer.MAX_VALUE, handlerMapping.getOrder());
 		assertTrue(handlerMapping.getClass().getName().endsWith("EmptyHandlerMapping"));
@@ -93,16 +105,13 @@ public class WebMvcConfigurationSupportTests {
 
 	@Test
 	public void beanNameHandlerMapping() throws Exception {
-		StaticWebApplicationContext cxt = new StaticWebApplicationContext();
-		cxt.registerSingleton("/controller", TestController.class);
 
-		HttpServletRequest request = new MockHttpServletRequest("GET", "/controller");
-
-		BeanNameUrlHandlerMapping handlerMapping = mvcConfiguration.beanNameHandlerMapping();
+		BeanNameUrlHandlerMapping handlerMapping = this.wac.getBean(BeanNameUrlHandlerMapping.class);
 		assertEquals(2, handlerMapping.getOrder());
 
-		handlerMapping.setApplicationContext(cxt);
+		HttpServletRequest request = new MockHttpServletRequest("GET", "/testController");
 		HandlerExecutionChain chain = handlerMapping.getHandler(request);
+
 		assertNotNull(chain.getInterceptors());
 		assertEquals(2, chain.getInterceptors().length);
 		assertEquals(ConversionServiceExposingInterceptor.class, chain.getInterceptors()[1].getClass());
@@ -110,8 +119,10 @@ public class WebMvcConfigurationSupportTests {
 
 	@Test
 	public void emptyResourceHandlerMapping() {
-		mvcConfiguration.setApplicationContext(new StaticWebApplicationContext());
-		AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping) mvcConfiguration.resourceHandlerMapping();
+
+		AbstractHandlerMapping handlerMapping = this.wac.getBean(
+				"resourceHandlerMapping", AbstractHandlerMapping.class);
+
 		assertNotNull(handlerMapping);
 		assertEquals(Integer.MAX_VALUE, handlerMapping.getOrder());
 		assertTrue(handlerMapping.getClass().getName().endsWith("EmptyHandlerMapping"));
@@ -119,8 +130,10 @@ public class WebMvcConfigurationSupportTests {
 
 	@Test
 	public void emptyDefaultServletHandlerMapping() {
-		mvcConfiguration.setServletContext(new MockServletContext());
-		AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping) mvcConfiguration.defaultServletHandlerMapping();
+
+		AbstractHandlerMapping handlerMapping = this.wac.getBean(
+				"defaultServletHandlerMapping", AbstractHandlerMapping.class);
+
 		assertNotNull(handlerMapping);
 		assertEquals(Integer.MAX_VALUE, handlerMapping.getOrder());
 		assertTrue(handlerMapping.getClass().getName().endsWith("EmptyHandlerMapping"));
@@ -128,11 +141,10 @@ public class WebMvcConfigurationSupportTests {
 
 	@Test
 	public void requestMappingHandlerAdapter() throws Exception {
-		RequestMappingHandlerAdapter adapter = mvcConfiguration.requestMappingHandlerAdapter();
 
-		List<HttpMessageConverter<?>> expectedConverters = new ArrayList<HttpMessageConverter<?>>();
-		mvcConfiguration.addDefaultHttpMessageConverters(expectedConverters);
-		assertEquals(expectedConverters.size(), adapter.getMessageConverters().size());
+		RequestMappingHandlerAdapter adapter = this.wac.getBean(RequestMappingHandlerAdapter.class);
+
+		assertEquals(9, adapter.getMessageConverters().size());
 
 		ConfigurableWebBindingInitializer initializer = (ConfigurableWebBindingInitializer) adapter.getWebBindingInitializer();
 		assertNotNull(initializer);
@@ -147,9 +159,26 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 	@Test
+	public void mvcUrls() throws Exception {
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(new MockHttpServletRequest()));
+		try {
+			DateTime now = DateTime.now();
+			MvcUrls mvcUrls = this.wac.getBean(MvcUrls.class);
+			UriComponents uriComponents = mvcUrls.linkToMethodOn(controller(
+					TestController.class).methodWithTwoPathVariables(1, now));
+
+			assertEquals("/foo/1/bar/" + ISODateTimeFormat.date().print(now), uriComponents.getPath());
+		}
+		finally {
+			RequestContextHolder.resetRequestAttributes();
+		}
+	}
+
+	@Test
 	public void handlerExceptionResolver() throws Exception {
+
 		HandlerExceptionResolverComposite compositeResolver =
-			(HandlerExceptionResolverComposite) mvcConfiguration.handlerExceptionResolver();
+			this.wac.getBean("handlerExceptionResolver", HandlerExceptionResolverComposite.class);
 
 		assertEquals(0, compositeResolver.getOrder());
 
@@ -164,11 +193,27 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 
+	@EnableWebMvc
+	@Configuration
+	public static class TestConfig {
+
+		@Bean(name={"/testController"})
+		public TestController testController() {
+			return new TestController();
+		}
+	}
+
 	@Controller
 	private static class TestController {
 
 		@RequestMapping("/")
 		public void handle() {
+		}
+
+		@RequestMapping("/foo/{id}/bar/{date}")
+		public HttpEntity<Void> methodWithTwoPathVariables(@PathVariable Integer id,
+				@DateTimeFormat(iso = ISO.DATE) @PathVariable DateTime date) {
+			return null;
 		}
 	}
 
