@@ -130,6 +130,18 @@ public class PropertySourceAnnotationTests {
 		assertThat(ctx.getEnvironment().containsProperty("from.p2"), is(true));
 	}
 
+	/**
+	 * SPR-10820
+	 */
+	@Test
+	public void orderingWithAndWithoutNameAndMultipleResourceLocations() {
+		// p2 should 'win' as it was registered last
+		AnnotationConfigApplicationContext ctxWithName = new AnnotationConfigApplicationContext(ConfigWithNameAndMultipleResourceLocations.class);
+		AnnotationConfigApplicationContext ctxWithoutName = new AnnotationConfigApplicationContext(ConfigWithMultipleResourceLocations.class);
+		assertThat(ctxWithoutName.getEnvironment().getProperty("testbean.name"), equalTo("p2TestBean"));
+		assertThat(ctxWithName.getEnvironment().getProperty("testbean.name"), equalTo("p2TestBean"));
+	}
+
 	@Test(expected=IllegalArgumentException.class)
 	public void withEmptyResourceLocations() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
@@ -207,6 +219,15 @@ public class PropertySourceAnnotationTests {
 					"classpath:org/springframework/context/annotation/p2.properties"
 			})
 	static class ConfigWithNameAndMultipleResourceLocations {
+	}
+
+	@Configuration
+	@PropertySource(
+			value = {
+					"classpath:org/springframework/context/annotation/p1.properties",
+					"classpath:org/springframework/context/annotation/p2.properties"
+			})
+	static class ConfigWithMultipleResourceLocations {
 	}
 
 

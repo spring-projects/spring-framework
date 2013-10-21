@@ -306,8 +306,8 @@ class ConfigurationClassParser {
 			}
 			else {
 				CompositePropertySource ps = new CompositePropertySource(name);
-				for (String location : locations) {
-					ps.addPropertySource(new ResourcePropertySource(location, classLoader));
+				for (int i = locations.length - 1; i >= 0; i--) {
+					ps.addPropertySource(new ResourcePropertySource(locations[i], classLoader));
 				}
 				this.propertySources.push(ps);
 			}
