@@ -225,29 +225,6 @@ public class ContextLoaderUtilsTests {
 		assertThat(configAttributesListClassLevel3.get(2).getLocations()[0], equalTo("3-C.xml"));
 	}
 
-	private void assertContextConfigEntriesAreNotUnique(Class<?> testClass) {
-		try {
-			resolveContextHierarchyAttributes(testClass);
-			fail("Should throw an IllegalStateException");
-		}
-		catch (IllegalStateException e) {
-			String msg = String.format(
-				"The @ContextConfiguration elements configured via @ContextHierarchy in test class [%s] must define unique contexts to load.",
-				testClass.getName());
-			assertEquals(msg, e.getMessage());
-		}
-	}
-
-	@Test
-	public void resolveContextHierarchyAttributesForSingleTestClassWithMultiLevelContextHierarchyWithEmptyContextConfig() {
-		assertContextConfigEntriesAreNotUnique(SingleTestClassWithMultiLevelContextHierarchyWithEmptyContextConfig.class);
-	}
-
-	@Test
-	public void resolveContextHierarchyAttributesForSingleTestClassWithMultiLevelContextHierarchyWithDuplicatedContextConfig() {
-		assertContextConfigEntriesAreNotUnique(SingleTestClassWithMultiLevelContextHierarchyWithDuplicatedContextConfig.class);
-	}
-
 	@Test
 	public void buildContextHierarchyMapForTestClassHierarchyWithMultiLevelContextHierarchies() {
 		Map<String, List<ContextConfigurationAttributes>> map = buildContextHierarchyMap(TestClass3WithMultiLevelContextHierarchy.class);
@@ -333,6 +310,58 @@ public class ContextLoaderUtilsTests {
 		List<ContextConfigurationAttributes> level3Config = map.get(level3);
 		assertThat(level3Config.size(), is(1));
 		assertThat(level3Config.get(0).getLocations()[0], is("2-C.xml"));
+	}
+
+	private void assertContextConfigEntriesAreNotUnique(Class<?> testClass) {
+		try {
+			buildContextHierarchyMap(testClass);
+			fail("Should throw an IllegalStateException");
+		}
+		catch (IllegalStateException e) {
+			String msg = String.format(
+				"The @ContextConfiguration elements configured via @ContextHierarchy in test class [%s] and its superclasses must define unique contexts per hierarchy level.",
+				testClass.getName());
+			assertEquals(msg, e.getMessage());
+		}
+	}
+
+	@Test
+	public void buildContextHierarchyMapForSingleTestClassWithMultiLevelContextHierarchyWithEmptyContextConfig() {
+		assertContextConfigEntriesAreNotUnique(SingleTestClassWithMultiLevelContextHierarchyWithEmptyContextConfig.class);
+	}
+
+	@Test
+	public void buildContextHierarchyMapForSingleTestClassWithMultiLevelContextHierarchyWithDuplicatedContextConfig() {
+		assertContextConfigEntriesAreNotUnique(SingleTestClassWithMultiLevelContextHierarchyWithDuplicatedContextConfig.class);
+	}
+
+	/**
+	 * Used to reproduce bug reported in https://jira.springsource.org/browse/SPR-10997
+	 */
+	@Test
+	public void buildContextHierarchyMapForTestClassHierarchyWithMultiLevelContextHierarchiesAndOverriddenInitializers() {
+		Map<String, List<ContextConfigurationAttributes>> map = buildContextHierarchyMap(TestClass2WithMultiLevelContextHierarchyWithOverriddenInitializers.class);
+
+		assertThat(map.size(), is(2));
+		assertThat(map.keySet(), hasItems("alpha", "beta"));
+
+		List<ContextConfigurationAttributes> alphaConfig = map.get("alpha");
+		assertThat(alphaConfig.size(), is(2));
+		assertThat(alphaConfig.get(0).getLocations().length, is(1));
+		assertThat(alphaConfig.get(0).getLocations()[0], is("1-A.xml"));
+		assertThat(alphaConfig.get(0).getInitializers().length, is(0));
+		assertThat(alphaConfig.get(1).getLocations().length, is(0));
+		assertThat(alphaConfig.get(1).getInitializers().length, is(1));
+		assertEquals(DummyApplicationContextInitializer.class, alphaConfig.get(1).getInitializers()[0]);
+
+		List<ContextConfigurationAttributes> betaConfig = map.get("beta");
+		assertThat(betaConfig.size(), is(2));
+		assertThat(betaConfig.get(0).getLocations().length, is(1));
+		assertThat(betaConfig.get(0).getLocations()[0], is("1-B.xml"));
+		assertThat(betaConfig.get(0).getInitializers().length, is(0));
+		assertThat(betaConfig.get(1).getLocations().length, is(0));
+		assertThat(betaConfig.get(1).getInitializers().length, is(1));
+		assertEquals(DummyApplicationContextInitializer.class, betaConfig.get(1).getInitializers()[0]);
 	}
 
 	@Test(expected = IllegalStateException.class)
@@ -841,6 +870,42 @@ public class ContextLoaderUtilsTests {
 		@ContextConfiguration(loader = AnnotationConfigContextLoader.class) //
 	})
 	private static class SingleTestClassWithMultiLevelContextHierarchyWithDuplicatedContextConfig {
+	}
+
+	/**
+	 * Used to reproduce bug reported in https://jira.springsource.org/browse/SPR-10997
+	 */
+	@ContextHierarchy({//
+	//
+		@ContextConfiguration(name = "alpha", locations = "1-A.xml"),//
+		@ContextConfiguration(name = "beta", locations = "1-B.xml") //
+	})
+	private static class TestClass1WithMultiLevelContextHierarchyWithUniqueContextConfig {
+	}
+
+	/**
+	 * Used to reproduce bug reported in https://jira.springsource.org/browse/SPR-10997
+	 */
+	@ContextHierarchy({//
+	//
+		@ContextConfiguration(name = "alpha", initializers = DummyApplicationContextInitializer.class),//
+		@ContextConfiguration(name = "beta", initializers = DummyApplicationContextInitializer.class) //
+	})
+	private static class TestClass2WithMultiLevelContextHierarchyWithOverriddenInitializers extends
+			TestClass1WithMultiLevelContextHierarchyWithUniqueContextConfig {
+	}
+
+	/**
+	 * Used to reproduce bug reported in https://jira.springsource.org/browse/SPR-10997
+	 */
+	private static class DummyApplicationContextInitializer implements
+			ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+		@Override
+		public void initialize(ConfigurableApplicationContext applicationContext) {
+			/* no-op */
+		}
+
 	}
 
 }
