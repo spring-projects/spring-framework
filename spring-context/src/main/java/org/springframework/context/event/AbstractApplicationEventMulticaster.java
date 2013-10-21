@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.OrderComparator;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Abstract implementation of the {@link ApplicationEventMulticaster} interface,
@@ -134,7 +135,8 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 	 */
 	protected Collection<ApplicationListener> getApplicationListeners(ApplicationEvent event) {
 		Class<? extends ApplicationEvent> eventType = event.getClass();
-		Class sourceType = event.getSource().getClass();
+		Object source = event.getSource();
+		Class sourceType = (source == null ? null : source.getClass());
 		ListenerCacheKey cacheKey = new ListenerCacheKey(eventType, sourceType);
 		ListenerRetriever retriever = this.retrieverCache.get(cacheKey);
 		if (retriever != null) {
@@ -212,12 +214,14 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 				return true;
 			}
 			ListenerCacheKey otherKey = (ListenerCacheKey) other;
-			return (this.eventType.equals(otherKey.eventType) && this.sourceType.equals(otherKey.sourceType));
+			return ObjectUtils.nullSafeEquals(this.eventType, otherKey.eventType)
+					&& ObjectUtils.nullSafeEquals(this.sourceType, otherKey.sourceType);
 		}
 
 		@Override
 		public int hashCode() {
-			return this.eventType.hashCode() * 29 + this.sourceType.hashCode();
+			return ObjectUtils.nullSafeHashCode(this.eventType) * 29
+					+ ObjectUtils.nullSafeHashCode(this.sourceType);
 		}
 	}
 
