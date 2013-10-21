@@ -31,11 +31,12 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Mark Fisher
  * @since 4.0
+ *
  * @see MessageBuilder
  */
 public class GenericMessage<T> implements Message<T>, Serializable {
 
-	private static final long serialVersionUID = -9004496725833093406L;
+	private static final long serialVersionUID = 4268801052358035098L;
 
 
 	private final T payload;
@@ -48,19 +49,19 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 	 *
 	 * @param payload the message payload
 	 */
-	protected GenericMessage(T payload) {
+	public GenericMessage(T payload) {
 		this(payload, null);
 	}
 
 	/**
-	 * Create a new message with the given payload. The provided map
-	 * will be used to populate the message headers
+	 * Create a new message with the given payload. The provided map will be used to
+	 * populate the message headers
 	 *
 	 * @param payload the message payload
 	 * @param headers message headers
 	 * @see MessageHeaders
 	 */
-	protected GenericMessage(T payload, Map<String, Object> headers) {
+	public GenericMessage(T payload, Map<String, Object> headers) {
 		Assert.notNull(payload, "payload must not be null");
 		if (headers == null) {
 			headers = new HashMap<String, Object>();
