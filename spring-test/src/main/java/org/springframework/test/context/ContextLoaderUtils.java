@@ -237,11 +237,9 @@ abstract class ContextLoaderUtils {
 	 * never {@code null}
 	 * @throws IllegalArgumentException if the supplied class is {@code null}; if
 	 * neither {@code @ContextConfiguration} nor {@code @ContextHierarchy} is
-	 * <em>present</em> on the supplied class; if a given class in the class hierarchy
+	 * <em>present</em> on the supplied class; or if a given class in the class hierarchy
 	 * declares both {@code @ContextConfiguration} and {@code @ContextHierarchy} as
-	 * top-level annotations; or if individual {@code @ContextConfiguration}
-	 * elements within a {@code @ContextHierarchy} declaration on a given class
-	 * in the class hierarchy do not define unique context configuration.
+	 * top-level annotations.
 	 *
 	 * @since 3.2.2
 	 * @see #buildContextHierarchyMap(Class)
@@ -287,17 +285,6 @@ abstract class ContextLoaderUtils {
 					convertContextConfigToConfigAttributesAndAddToList(contextConfiguration, declaringClass,
 						configAttributesList);
 				}
-
-				// Check for uniqueness
-				Set<ContextConfigurationAttributes> configAttributesSet = new HashSet<ContextConfigurationAttributes>(
-					configAttributesList);
-				if (configAttributesSet.size() != configAttributesList.size()) {
-					String msg = String.format("The @ContextConfiguration elements configured via "
-							+ "@ContextHierarchy in test class [%s] must define unique contexts to load.",
-						declaringClass.getName());
-					logger.error(msg);
-					throw new IllegalStateException(msg);
-				}
 			}
 			else {
 				// This should theoretically actually never happen...
@@ -336,6 +323,9 @@ abstract class ContextLoaderUtils {
 	 * (must not be {@code null})
 	 * @return a map of context configuration attributes for the context hierarchy,
 	 * keyed by context hierarchy level name; never {@code null}
+	 * @throws IllegalArgumentException if the lists of context configuration
+	 * attributes for each level in the {@code @ContextHierarchy} do not define
+	 * unique context configuration within the overall hierarchy.
 	 *
 	 * @since 3.2.2
 	 * @see #resolveContextHierarchyAttributes(Class)
@@ -361,6 +351,16 @@ abstract class ContextLoaderUtils {
 
 				map.get(name).add(configAttributes);
 			}
+		}
+
+		// Check for uniqueness
+		Set<List<ContextConfigurationAttributes>> set = new HashSet<List<ContextConfigurationAttributes>>(map.values());
+		if (set.size() != map.size()) {
+			String msg = String.format("The @ContextConfiguration elements configured via "
+					+ "@ContextHierarchy in test class [%s] and its superclasses must "
+					+ "define unique contexts per hierarchy level.", testClass.getName());
+			logger.error(msg);
+			throw new IllegalStateException(msg);
 		}
 
 		return map;
