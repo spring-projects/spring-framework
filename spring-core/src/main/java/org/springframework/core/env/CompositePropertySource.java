@@ -16,11 +16,11 @@
 
 package org.springframework.core.env;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Composite {@link PropertySource} implementation that iterates over a set of
+ * Composite {@link PropertySource} implementation that iterates over a list of
  * {@link PropertySource} instances. Necessary in cases where multiple property sources
  * share the same name, e.g. when multiple values are supplied to {@code @PropertySource}.
  *
@@ -29,7 +29,7 @@ import java.util.Set;
  */
 public class CompositePropertySource extends PropertySource<Object> {
 
-	private Set<PropertySource<?>> propertySources = new LinkedHashSet<PropertySource<?>>();
+	private List<PropertySource<?>> propertySources = new ArrayList<PropertySource<?>>();
 
 
 	/**
@@ -54,7 +54,7 @@ public class CompositePropertySource extends PropertySource<Object> {
 	}
 
 	public void addPropertySource(PropertySource<?> propertySource) {
-		this.propertySources.add(propertySource);
+		this.propertySources.add(0, propertySource);
 	}
 
 	@Override
