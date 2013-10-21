@@ -56,5 +56,12 @@ public interface MethodMetadata extends AnnotatedTypeMetadata {
 	 * i.e. not marked as static, final or private.
 	 */
 	boolean isOverridable();
+	
+	/** 
+	 * Returns an array of strings that represent the formal parameter types
+	 * in declaration order. 
+	 */
+	String[] getParameterTypes();
+
 
 }

@@ -54,10 +54,12 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 	protected final MultiValueMap<String, MethodMetadata> methodMetadataMap;
 
 	protected final MultiValueMap<String, AnnotationAttributes> attributeMap = new LinkedMultiValueMap<String, AnnotationAttributes>(2);
+	
+	protected final String[] parameterTypes;
 
 
-	public MethodMetadataReadingVisitor(String name, int access, String declaringClassName, ClassLoader classLoader,
-			MultiValueMap<String, MethodMetadata> methodMetadataMap) {
+	public MethodMetadataReadingVisitor(String name, int access, String desc, String declaringClassName,
+			ClassLoader classLoader, MultiValueMap<String, MethodMetadata> methodMetadataMap) {
 
 		super(SpringAsmInfo.ASM_VERSION);
 		this.name = name;
@@ -65,9 +67,20 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 		this.declaringClassName = declaringClassName;
 		this.classLoader = classLoader;
 		this.methodMetadataMap = methodMetadataMap;
+		this.parameterTypes = convertParameters(desc);
 	}
 
-
+	private String[] convertParameters(String desc) {
+		Type[] types = Type.getArgumentTypes(desc);
+		String[] values = new String[types.length];
+		
+		for (int i = 0; i < types.length; i++) {
+			values[i] = types[i].getClassName();
+		}
+		
+		return values;
+	}
+	
 	@Override
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
 		String className = Type.getType(desc).getClassName();
@@ -137,6 +150,12 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 	@Override
 	public String getDeclaringClassName() {
 		return this.declaringClassName;
+	}
+
+
+	@Override
+	public String[] getParameterTypes() {
+		return parameterTypes;
 	}
 
 }

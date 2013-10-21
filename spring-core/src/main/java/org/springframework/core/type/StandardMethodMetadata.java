@@ -126,4 +126,16 @@ public class StandardMethodMetadata implements MethodMetadata {
 				annotationType, classValuesAsString, this.nestedAnnotationsAsMap);
 	}
 
+	@Override
+	public String[] getParameterTypes() {
+		Class<?>[] parameterTypes = getIntrospectedMethod().getParameterTypes();
+		String[] values = new String[parameterTypes.length];
+		
+		for (int i = 0; i < parameterTypes.length; i++) {
+			values[i] = parameterTypes[i].getName();
+		}
+		
+		return values;
+	}
+
 }
