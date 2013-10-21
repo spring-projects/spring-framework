@@ -16,8 +16,13 @@
 
 package org.springframework.context;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Locale;
 
+import org.junit.Test;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.AbstractListableBeanFactoryTests;
 import org.springframework.tests.sample.beans.LifecycleBean;
@@ -129,11 +134,29 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 	}
 
 	public void testEvents() throws Exception {
+		doTestEvents(this.listener, this.parentListener, new MyEvent(this));
+	}
+
+	@Test
+	public void testEventsWithNoSource() throws Exception {
+		// See SPR-10945 Serialized events result in a null source
+		MyEvent event = new MyEvent(this);
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ObjectOutputStream oos = new ObjectOutputStream(bos);
+		oos.writeObject(event);
+		oos.close();
+		event = (MyEvent) new ObjectInputStream(new ByteArrayInputStream(
+				bos.toByteArray())).readObject();
+		doTestEvents(this.listener, this.parentListener, event);
+	}
+
+	protected void doTestEvents(TestListener listener, TestListener parentListener,
+			MyEvent event) {
 		listener.zeroCounter();
 		parentListener.zeroCounter();
 		assertTrue("0 events before publication", listener.getEventCount() == 0);
 		assertTrue("0 parent events before publication", parentListener.getEventCount() == 0);
-		this.applicationContext.publishEvent(new MyEvent(this));
+		this.applicationContext.publishEvent(event);
 		assertTrue("1 events after publication, not " + listener.getEventCount(), listener.getEventCount() == 1);
 		assertTrue("1 parent events after publication", parentListener.getEventCount() == 1);
 	}

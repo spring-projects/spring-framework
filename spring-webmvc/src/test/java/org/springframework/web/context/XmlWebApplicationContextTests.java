@@ -96,18 +96,11 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 	 * @see org.springframework.context.AbstractApplicationContextTests#testEvents()
 	 */
 	@Override
-	public void testEvents() throws Exception {
-		TestListener listener = (TestListener) this.applicationContext.getBean("testListener");
-		listener.zeroCounter();
-		TestListener parentListener = (TestListener) this.applicationContext.getParent().getBean("parentListener");
-		parentListener.zeroCounter();
-
-		parentListener.zeroCounter();
-		assertTrue("0 events before publication", listener.getEventCount() == 0);
-		assertTrue("0 parent events before publication", parentListener.getEventCount() == 0);
-		this.applicationContext.publishEvent(new MyEvent(this));
-		assertTrue("1 events after publication, not " + listener.getEventCount(), listener.getEventCount() == 1);
-		assertTrue("1 parent events after publication", parentListener.getEventCount() == 1);
+	protected void doTestEvents(TestListener listener, TestListener parentListener,
+			MyEvent event) {
+		TestListener listenerBean = (TestListener) this.applicationContext.getBean("testListener");
+		TestListener parentListenerBean = (TestListener) this.applicationContext.getParent().getBean("parentListener");
+		super.doTestEvents(listenerBean, parentListenerBean, event);
 	}
 
 	@Override
