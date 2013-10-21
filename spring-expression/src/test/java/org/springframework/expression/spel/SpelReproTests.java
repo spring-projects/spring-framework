@@ -1818,6 +1818,19 @@ public class SpelReproTests extends ExpressionTestCase {
 		assertEquals(XYZ.Z, Array.get(result, 2));
 	}
 
+	@Test
+	public void SPR_10486() throws Exception {
+		SpelExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		SPR10486 rootObject = new SPR10486();
+		Expression classNameExpression = parser.parseExpression("class.name");
+		Expression nameExpression = parser.parseExpression("name");
+		assertThat(classNameExpression.getValue(context, rootObject),
+				equalTo((Object) SPR10486.class.getName()));
+		assertThat(nameExpression.getValue(context, rootObject),
+				equalTo((Object) "name"));
+	}
+
 
 	private static enum ABC {A, B, C}
 
@@ -1885,4 +1898,20 @@ public class SpelReproTests extends ExpressionTestCase {
 	public static class StaticFinalImpl2 extends AbstractStaticFinal {
 	}
 
+	/**
+	 * The Class TestObject.
+	 */
+	public static class SPR10486 {
+
+		private String name = "name";
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+	}
 }
