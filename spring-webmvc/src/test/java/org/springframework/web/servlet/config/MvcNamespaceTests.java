@@ -19,6 +19,8 @@ package org.springframework.web.servlet.config;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -161,8 +163,8 @@ public class MvcNamespaceTests {
 			testController.testBind(now, null, null);
 			MvcUrls mvcUrls = this.appContext.getBean(MvcUrls.class);
 			UriComponents uriComponents = mvcUrls.linkToMethodOn(testController);
-
-			assertEquals("http://localhost/?date=2013-10-21", uriComponents.toUriString());
+			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			assertEquals("http://localhost/?date=" + dateFormat.format(now), uriComponents.toUriString());
 		}
 		finally {
 			RequestContextHolder.resetRequestAttributes();
