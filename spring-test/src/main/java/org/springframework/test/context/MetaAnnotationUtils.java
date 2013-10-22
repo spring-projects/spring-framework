@@ -35,70 +35,124 @@ abstract class MetaAnnotationUtils {
 		/* no-op */
 	}
 
-	// TODO Rename and document findAnnotationDescriptor().
-	// Note: does not traverse interface hierarchies.
-	public static <T extends Annotation> AnnotationDescriptor<T> findAnnotationDescriptor(Class<T> annotationType,
-			Class<?> clazz) {
+	/**
+	 * TODO Document findAnnotationDescriptor().
+	 *
+	 * @param clazz the class to look for annotations on
+	 * @param annotationType the annotation class to look for
+	 * @return the annotation found, or {@code null} if none found
+	 */
+	public static <T extends Annotation> AnnotationDescriptor<T> findAnnotationDescriptor(Class<?> clazz,
+			Class<T> annotationType) {
 
 		Assert.notNull(annotationType, "Annotation type must not be null");
+
 		if (clazz == null || clazz.equals(Object.class)) {
 			return null;
 		}
 
 		// Declared locally?
 		if (isAnnotationDeclaredLocally(annotationType, clazz)) {
-			return new AnnotationDescriptor<T>(clazz.getAnnotation(annotationType), clazz);
+			return new AnnotationDescriptor<T>(clazz, clazz.getAnnotation(annotationType));
 		}
 
-		// Declared on an annotation (i.e., as a meta-annotation)?
+		// Declared on a stereotype annotation (i.e., as a meta-annotation)?
 		if (!Annotation.class.isAssignableFrom(clazz)) {
-			for (Annotation ann : clazz.getAnnotations()) {
-				T annotation = ann.annotationType().getAnnotation(annotationType);
+			for (Annotation stereotype : clazz.getAnnotations()) {
+				T annotation = stereotype.annotationType().getAnnotation(annotationType);
 				if (annotation != null) {
-					return new AnnotationDescriptor<T>(annotation, clazz, ann.annotationType());
+					return new AnnotationDescriptor<T>(clazz, stereotype, annotation);
 				}
 			}
 		}
 
+		// Declared on an interface?
+		for (Class<?> ifc : clazz.getInterfaces()) {
+			AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(ifc, annotationType);
+			if (descriptor != null) {
+				return descriptor;
+			}
+		}
+
 		// Declared on a superclass?
-		return findAnnotationDescriptor(annotationType, clazz.getSuperclass());
+		return findAnnotationDescriptor(clazz.getSuperclass(), annotationType);
 	}
 
 
 	/**
-	 * Descriptor for an {@link Annotation}, including the
-	 * {@linkplain #getAnnotatedClass() class} on which the annotation is declared as well
-	 * as the {@linkplain #getAnnotation() annotation} itself.
-	 * 
+	 * Descriptor for an {@link Annotation}, including the {@linkplain
+	 * #getDeclaringClass() class} on which the annotation is <em>declared</em>
+	 * as well as the actual {@linkplain #getAnnotation() annotation} instance.
+	 *
 	 * <p>
-	 * If the annotation is used as a meta-annotation, the descriptor also includes the
-	 * {@linkplain #getMetaAnnotatedClass() meta-annotated class} (i.e., an annotation
-	 * that is present on the {@linkplain #getAnnotatedClass() annotated class} and is
-	 * itself annotated with the {@linkplain #getAnnotation() annotation} that this object
-	 * describes).
+	 * If the annotation is used as a meta-annotation, the descriptor also includes
+	 * the {@linkplain #getStereotype() stereotype} on which the annotation is
+	 * present. In such cases, the <em>declaring class</em> is not directly
+	 * annotated with the annotation but rather indirectly via the stereotype.
+	 *
+	 * <p>
+	 * Given the following example, if we are searching for the {@code @Transactional}
+	 * annotation <em>on</em> the {@code TransactionalTests} class, then the
+	 * properties of the {@code AnnotationDescriptor} would be as follows.
+	 *
+	 * <ul>
+	 * <li>declaringClass: {@code TransactionalTests} class object</li>
+	 * <li>stereotype: {@code null}</li>
+	 * <li>annotation: instance of the {@code Transactional} annotation</li>
+	 * </ul>
+	 *
+	 * <pre style="code">
+	 * &#064;Transactional
+	 * &#064;ContextConfiguration({"/test-datasource.xml", "/repository-config.xml"})
+	 * public class TransactionalTests { }
+	 * </pre>
+	 *
+	 * <p>
+	 * Given the following example, if we are searching for the {@code @Transactional}
+	 * annotation <em>on</em> the {@code UserRepositoryTests} class, then the
+	 * properties of the {@code AnnotationDescriptor} would be as follows.
 	 * 
+	 * <ul>
+	 * <li>declaringClass: {@code UserRepositoryTests} class object</li>
+	 * <li>stereotype: instance of the {@code RepositoryTests} annotation</li>
+	 * <li>annotation: instance of the {@code Transactional} annotation</li>
+	 * </ul>
+	 *
+	 * <pre style="code">
+	 * &#064;Transactional
+	 * &#064;ContextConfiguration({"/test-datasource.xml", "/repository-config.xml"})
+	 * &#064;Retention(RetentionPolicy.RUNTIME)
+	 * public &#064;interface RepositoryTests { }
+	 *
+	 * &#064;RepositoryTests
+	 * public class UserRepositoryTests { }
+	 * </pre>
+	 *
 	 * @author Sam Brannen
 	 * @since 4.0
 	 */
 	public static class AnnotationDescriptor<T extends Annotation> {
 
+		private final Class<?> declaringClass;
+		private final Annotation stereotype;
 		private final T annotation;
 
-		private final Class<?> annotatedClass;
 
-		private final Class<?> metaAnnotatedClass;
-
-
-		public AnnotationDescriptor(T annotation, Class<?> annotatedClass) {
-			this(annotation, annotatedClass, null);
+		public AnnotationDescriptor(Class<?> declaringClass, T annotation) {
+			this(declaringClass, null, annotation);
 		}
 
-		public AnnotationDescriptor(T annotation, Class<?> annotatedClass, Class<?> metaAnnotatedClass) {
+		public AnnotationDescriptor(Class<?> declaringClass, Annotation stereotype, T annotation) {
+			Assert.notNull(declaringClass, "declaringClass must not be null");
 			Assert.notNull(annotation, "annotation must not be null");
-			Assert.notNull(annotatedClass, "annotatedClass must not be null");
+
+			this.declaringClass = declaringClass;
+			this.stereotype = stereotype;
 			this.annotation = annotation;
-			this.annotatedClass = annotatedClass;
-			this.metaAnnotatedClass = metaAnnotatedClass;
+		}
+
+		public Class<?> getDeclaringClass() {
+			return this.declaringClass;
 		}
 
 		public T getAnnotation() {
@@ -109,23 +163,23 @@ abstract class MetaAnnotationUtils {
 			return this.annotation.annotationType();
 		}
 
-		public Class<?> getAnnotatedClass() {
-			return this.annotatedClass;
+		public Annotation getStereotype() {
+			return this.stereotype;
 		}
 
-		public Class<?> getMetaAnnotatedClass() {
-			return this.metaAnnotatedClass;
+		public Class<? extends Annotation> getStereotypeType() {
+			return this.stereotype == null ? null : this.stereotype.annotationType();
 		}
 
 		/**
-		 * Provide a String representation of this {@code AnnotationDescriptor}.
+		 * Provide a textual representation of this {@code AnnotationDescriptor}.
 		 */
 		@Override
 		public String toString() {
 			return new ToStringCreator(this)//
+			.append("declaringClass", declaringClass)//
+			.append("stereotype", stereotype)//
 			.append("annotation", annotation)//
-			.append("annotatedClass", annotatedClass)//
-			.append("metaAnnotatedClass", metaAnnotatedClass)//
 			.toString();
 		}
 	}

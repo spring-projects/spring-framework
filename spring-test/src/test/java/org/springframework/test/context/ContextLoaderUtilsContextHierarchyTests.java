@@ -69,6 +69,7 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextLoad
 		debugConfigAttributes(configAttributesList);
 	}
 
+	@Ignore("[SPR-7827] Work in Progress")
 	@Test
 	public void resolveContextHierarchyAttributesForSingleTestClassWithSingleLevelContextHierarchyFromMetaAnnotation() {
 		List<List<ContextConfigurationAttributes>> hierarchyAttributes = resolveContextHierarchyAttributes(SingleTestClassWithSingleLevelContextHierarchyFromMetaAnnotation.class);
@@ -109,7 +110,7 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextLoad
 		assertThat(configAttributesListClassLevel3.get(0).getLocations()[0], equalTo("three.xml"));
 	}
 
-	@Ignore("Work in Progress")
+	@Ignore("[SPR-7827] Work in Progress")
 	@Test
 	public void resolveContextHierarchyAttributesForTestClassHierarchyWithSingleLevelContextHierarchiesAndMetaAnnotations() {
 		List<List<ContextConfigurationAttributes>> hierarchyAttributes = resolveContextHierarchyAttributes(TestClass3WithSingleLevelContextHierarchyFromMetaAnnotation.class);

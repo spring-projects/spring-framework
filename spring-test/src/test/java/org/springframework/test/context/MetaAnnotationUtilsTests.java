@@ -37,38 +37,104 @@ import static org.springframework.test.context.MetaAnnotationUtils.*;
 public class MetaAnnotationUtilsTests {
 
 	@Test
-	public void testFindAnnotationDescriptor() throws Exception {
-		// no annotation
-		assertNull(findAnnotationDescriptor(Transactional.class, NonAnnotatedInterface.class));
-		assertNull(findAnnotationDescriptor(Transactional.class, NonAnnotatedClass.class));
+	public void findAnnotationDescriptorWithNoAnnotationPresent() throws Exception {
+		assertNull(findAnnotationDescriptor(NonAnnotatedInterface.class, Transactional.class));
+		assertNull(findAnnotationDescriptor(NonAnnotatedClass.class, Transactional.class));
+	}
 
-		// inherited class-level annotation; note: @Transactional is inherited
+	@Test
+	public void findAnnotationDescriptorWithInheritedClassLevelAnnotation() throws Exception {
+		// Note: @Transactional is inherited
+
 		assertEquals(InheritedAnnotationInterface.class,
-			findAnnotationDescriptor(Transactional.class, InheritedAnnotationInterface.class).getAnnotatedClass());
-		assertNull(findAnnotationDescriptor(Transactional.class, SubInheritedAnnotationInterface.class));
-		assertEquals(InheritedAnnotationClass.class,
-			findAnnotationDescriptor(Transactional.class, InheritedAnnotationClass.class).getAnnotatedClass());
-		assertEquals(InheritedAnnotationClass.class,
-			findAnnotationDescriptor(Transactional.class, SubInheritedAnnotationClass.class).getAnnotatedClass());
+			findAnnotationDescriptor(InheritedAnnotationInterface.class, Transactional.class).getDeclaringClass());
+		assertEquals(InheritedAnnotationInterface.class,
+			findAnnotationDescriptor(SubInheritedAnnotationInterface.class, Transactional.class).getDeclaringClass());
+		assertEquals(InheritedAnnotationInterface.class,
+			findAnnotationDescriptor(SubSubInheritedAnnotationInterface.class, Transactional.class).getDeclaringClass());
 
-		// non-inherited class-level annotation; note: @Order is not inherited,
-		// but findAnnotationDescriptor() should still find it.
+		assertEquals(InheritedAnnotationClass.class,
+			findAnnotationDescriptor(InheritedAnnotationClass.class, Transactional.class).getDeclaringClass());
+		assertEquals(InheritedAnnotationClass.class,
+			findAnnotationDescriptor(SubInheritedAnnotationClass.class, Transactional.class).getDeclaringClass());
+	}
+
+	@Test
+	public void findAnnotationDescriptorWithNonInheritedClassLevelAnnotation() throws Exception {
+		// Note: @Order is not inherited, but findAnnotationDescriptor() should still find
+		// it.
+
 		assertEquals(NonInheritedAnnotationInterface.class,
-			findAnnotationDescriptor(Order.class, NonInheritedAnnotationInterface.class).getAnnotatedClass());
-		assertNull(findAnnotationDescriptor(Order.class, SubNonInheritedAnnotationInterface.class));
-		assertEquals(NonInheritedAnnotationClass.class,
-			findAnnotationDescriptor(Order.class, NonInheritedAnnotationClass.class).getAnnotatedClass());
-		assertEquals(NonInheritedAnnotationClass.class,
-			findAnnotationDescriptor(Order.class, SubNonInheritedAnnotationClass.class).getAnnotatedClass());
+			findAnnotationDescriptor(NonInheritedAnnotationInterface.class, Order.class).getDeclaringClass());
+		assertEquals(NonInheritedAnnotationInterface.class,
+			findAnnotationDescriptor(SubNonInheritedAnnotationInterface.class, Order.class).getDeclaringClass());
 
-		// Meta-annotations:
-		AnnotationDescriptor<Component> descriptor = findAnnotationDescriptor(Component.class,
-			HasMetaComponentAnnotation.class);
-		assertEquals(HasMetaComponentAnnotation.class, descriptor.getAnnotatedClass());
-		assertEquals(Meta1.class, descriptor.getMetaAnnotatedClass());
-		descriptor = findAnnotationDescriptor(Component.class, HasLocalAndMetaComponentAnnotation.class);
-		assertEquals(HasLocalAndMetaComponentAnnotation.class, descriptor.getAnnotatedClass());
-		assertNull(descriptor.getMetaAnnotatedClass());
+		assertEquals(NonInheritedAnnotationClass.class,
+			findAnnotationDescriptor(NonInheritedAnnotationClass.class, Order.class).getDeclaringClass());
+		assertEquals(NonInheritedAnnotationClass.class,
+			findAnnotationDescriptor(SubNonInheritedAnnotationClass.class, Order.class).getDeclaringClass());
+	}
+
+	@Test
+	public void findAnnotationDescriptorWithMetaAnnotations() throws Exception {
+
+		AnnotationDescriptor<Component> descriptor = findAnnotationDescriptor(HasMetaComponentAnnotation.class,
+			Component.class);
+		assertEquals(HasMetaComponentAnnotation.class, descriptor.getDeclaringClass());
+		assertEquals(Component.class, descriptor.getAnnotationType());
+		assertEquals("meta1", descriptor.getAnnotation().value());
+		assertNotNull(descriptor.getStereotype());
+		assertEquals(Meta1.class, descriptor.getStereotypeType());
+
+		descriptor = findAnnotationDescriptor(HasLocalAndMetaComponentAnnotation.class, Component.class);
+		assertEquals(HasLocalAndMetaComponentAnnotation.class, descriptor.getDeclaringClass());
+		assertEquals(Component.class, descriptor.getAnnotationType());
+		assertNull(descriptor.getStereotype());
+		assertNull(descriptor.getStereotypeType());
+	}
+
+	@Test
+	public void findAnnotationDescriptorForInterfaceWithMetaAnnotation() {
+		AnnotationDescriptor<Component> descriptor = findAnnotationDescriptor(InterfaceWithMetaAnnotation.class,
+			Component.class);
+		assertEquals(InterfaceWithMetaAnnotation.class, descriptor.getDeclaringClass());
+		assertEquals(Component.class, descriptor.getAnnotationType());
+		assertEquals("meta1", descriptor.getAnnotation().value());
+		assertNotNull(descriptor.getStereotype());
+		assertEquals(Meta1.class, descriptor.getStereotypeType());
+	}
+
+	@Test
+	public void findAnnotationDescriptorForClassWithMetaAnnotatedInterface() {
+		AnnotationDescriptor<Component> descriptor = findAnnotationDescriptor(ClassWithMetaAnnotatedInterface.class,
+			Component.class);
+		assertEquals(InterfaceWithMetaAnnotation.class, descriptor.getDeclaringClass());
+		assertEquals(Component.class, descriptor.getAnnotationType());
+		assertEquals("meta1", descriptor.getAnnotation().value());
+		assertNotNull(descriptor.getStereotype());
+		assertEquals(Meta1.class, descriptor.getStereotypeType());
+	}
+
+	@Test
+	public void findAnnotationDescriptorForClassWithLocalMetaAnnotationAndMetaAnnotatedInterface() {
+		AnnotationDescriptor<Component> descriptor = findAnnotationDescriptor(
+			ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, Component.class);
+		assertEquals(ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, descriptor.getDeclaringClass());
+		assertEquals(Component.class, descriptor.getAnnotationType());
+		assertEquals("meta2", descriptor.getAnnotation().value());
+		assertNotNull(descriptor.getStereotype());
+		assertEquals(Meta2.class, descriptor.getStereotypeType());
+	}
+
+	@Test
+	public void findAnnotationDescriptorForSubClassWithLocalMetaAnnotationAndMetaAnnotatedInterface() {
+		AnnotationDescriptor<Component> descriptor = findAnnotationDescriptor(
+			SubClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, Component.class);
+		assertEquals(ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, descriptor.getDeclaringClass());
+		assertEquals(Component.class, descriptor.getAnnotationType());
+		assertEquals("meta2", descriptor.getAnnotation().value());
+		assertNotNull(descriptor.getStereotype());
+		assertEquals(Meta2.class, descriptor.getStereotypeType());
 	}
 
 
@@ -77,13 +143,13 @@ public class MetaAnnotationUtilsTests {
 	@Component(value = "meta1")
 	@Order
 	@Retention(RetentionPolicy.RUNTIME)
-	@interface Meta1 {
+	static @interface Meta1 {
 	}
 
 	@Component(value = "meta2")
 	@Transactional
 	@Retention(RetentionPolicy.RUNTIME)
-	@interface Meta2 {
+	static @interface Meta2 {
 	}
 
 	@Meta1
@@ -107,40 +173,47 @@ public class MetaAnnotationUtilsTests {
 	static class ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface implements InterfaceWithMetaAnnotation {
 	}
 
+	static class SubClassWithLocalMetaAnnotationAndMetaAnnotatedInterface extends
+			ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface {
+	}
+
 	// -------------------------------------------------------------------------
 
 	@Transactional
-	public static interface InheritedAnnotationInterface {
+	static interface InheritedAnnotationInterface {
 	}
 
-	public static interface SubInheritedAnnotationInterface extends InheritedAnnotationInterface {
+	static interface SubInheritedAnnotationInterface extends InheritedAnnotationInterface {
+	}
+
+	static interface SubSubInheritedAnnotationInterface extends SubInheritedAnnotationInterface {
 	}
 
 	@Order
-	public static interface NonInheritedAnnotationInterface {
+	static interface NonInheritedAnnotationInterface {
 	}
 
-	public static interface SubNonInheritedAnnotationInterface extends NonInheritedAnnotationInterface {
+	static interface SubNonInheritedAnnotationInterface extends NonInheritedAnnotationInterface {
 	}
 
-	public static class NonAnnotatedClass {
+	static class NonAnnotatedClass {
 	}
 
-	public static interface NonAnnotatedInterface {
+	static interface NonAnnotatedInterface {
 	}
 
 	@Transactional
-	public static class InheritedAnnotationClass {
+	static class InheritedAnnotationClass {
 	}
 
-	public static class SubInheritedAnnotationClass extends InheritedAnnotationClass {
+	static class SubInheritedAnnotationClass extends InheritedAnnotationClass {
 	}
 
 	@Order
-	public static class NonInheritedAnnotationClass {
+	static class NonInheritedAnnotationClass {
 	}
 
-	public static class SubNonInheritedAnnotationClass extends NonInheritedAnnotationClass {
+	static class SubNonInheritedAnnotationClass extends NonInheritedAnnotationClass {
 	}
 
 }

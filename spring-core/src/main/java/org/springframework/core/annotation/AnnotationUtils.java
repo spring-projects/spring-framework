@@ -301,8 +301,32 @@ public abstract class AnnotationUtils {
 		if (clazz == null || clazz.equals(Object.class)) {
 			return null;
 		}
-		return (isAnnotationDeclaredLocally(annotationType, clazz)) ? clazz : findAnnotationDeclaringClass(
-			annotationType, clazz.getSuperclass());
+
+		// Declared locally?
+		if (isAnnotationDeclaredLocally(annotationType, clazz)) {
+			return clazz;
+		}
+
+		// Declared on a stereotype annotation (i.e., as a meta-annotation)?
+		if (!Annotation.class.isAssignableFrom(clazz)) {
+			for (Annotation stereotype : clazz.getAnnotations()) {
+				Class<?> declaringClass = findAnnotationDeclaringClass(annotationType, stereotype.annotationType());
+				if (declaringClass != null) {
+					return declaringClass;
+				}
+			}
+		}
+
+		// Declared on an interface?
+		for (Class<?> ifc : clazz.getInterfaces()) {
+			Class<?> declaringClass = findAnnotationDeclaringClass(annotationType, ifc);
+			if (declaringClass != null) {
+				return declaringClass;
+			}
+		}
+
+		// Declared on a superclass?
+		return findAnnotationDeclaringClass(annotationType, clazz.getSuperclass());
 	}
 
 	/**
