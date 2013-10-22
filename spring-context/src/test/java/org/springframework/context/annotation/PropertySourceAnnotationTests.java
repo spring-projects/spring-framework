@@ -16,28 +16,34 @@
 
 package org.springframework.context.annotation;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
+import java.io.FileNotFoundException;
 import java.util.Iterator;
 
 import javax.inject.Inject;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
-
 import org.springframework.tests.sample.beans.TestBean;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Tests the processing of @PropertySource annotations on @Configuration classes.
  *
  * @author Chris Beams
+ * @author Phillip Webb
  * @since 3.1
  */
 public class PropertySourceAnnotationTests {
+
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
+
 
 	@Test
 	public void withExplicitName() {
@@ -149,6 +155,29 @@ public class PropertySourceAnnotationTests {
 		ctx.refresh();
 	}
 
+	@Test
+	public void withPropertySources() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithPropertySources.class);
+		assertThat(ctx.getEnvironment().containsProperty("from.p1"), is(true));
+		assertThat(ctx.getEnvironment().containsProperty("from.p2"), is(true));
+		// p2 should 'win' as it was registered last
+		assertThat(ctx.getEnvironment().getProperty("testbean.name"), equalTo("p2TestBean"));
+	}
+
+	@Test
+	public void withMissingPropertySource() {
+		thrown.expect(BeanDefinitionStoreException.class);
+		thrown.expectCause(isA(FileNotFoundException.class));
+		new AnnotationConfigApplicationContext(ConfigWithMissingPropertySource.class);
+	}
+
+	@Test
+	public void withIgnoredPropertySource() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithIgnoredPropertySource.class);
+		assertThat(ctx.getEnvironment().containsProperty("from.p1"), is(true));
+		assertThat(ctx.getEnvironment().containsProperty("from.p2"), is(true));
+	}
+
 
 	@Configuration
 	@PropertySource(value="classpath:${unresolvable}/p1.properties")
@@ -230,6 +259,33 @@ public class PropertySourceAnnotationTests {
 	static class ConfigWithMultipleResourceLocations {
 	}
 
+
+	@Configuration
+	@PropertySources({
+		@PropertySource(name = "psName", value="classpath:org/springframework/context/annotation/p1.properties"),
+		@PropertySource(name = "psName", value="classpath:org/springframework/context/annotation/p2.properties")
+	})
+	static class ConfigWithPropertySources {
+	}
+
+	@Configuration
+	@PropertySources({
+		@PropertySource(name = "psName", value="classpath:org/springframework/context/annotation/p1.properties"),
+		@PropertySource(name = "psName", value="classpath:org/springframework/context/annotation/missing.properties"),
+		@PropertySource(name = "psName", value="classpath:org/springframework/context/annotation/p2.properties")
+	})
+	static class ConfigWithMissingPropertySource {
+	}
+
+
+	@Configuration
+	@PropertySources({
+		@PropertySource(name = "psName", value="classpath:org/springframework/context/annotation/p1.properties"),
+		@PropertySource(name = "psName", value="classpath:org/springframework/context/annotation/missing.properties", ignoreResourceNotFound=true),
+		@PropertySource(name = "psName", value="classpath:org/springframework/context/annotation/p2.properties")
+	})
+	static class ConfigWithIgnoredPropertySource {
+	}
 
 	@Configuration
 	@PropertySource(value = {})

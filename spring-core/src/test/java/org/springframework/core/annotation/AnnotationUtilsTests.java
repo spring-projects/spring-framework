@@ -18,16 +18,20 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Test;
-
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
+
+import static org.hamcrest.Matchers.*;
 
 import static org.junit.Assert.*;
 import static org.springframework.core.annotation.AnnotationUtils.*;
@@ -37,6 +41,7 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Chris Beams
+ * @author Phillip Webb
  */
 public class AnnotationUtilsTests {
 
@@ -268,6 +273,19 @@ public class AnnotationUtilsTests {
 		assertNotNull(order);
 	}
 
+	@Test
+	public void testGetRepeatableFromMethod() throws Exception {
+		Method method = InterfaceWithRepeated.class.getMethod("foo");
+		Set<MyRepeatable> annotions = AnnotationUtils.getRepeatableAnnotation(method,
+				MyRepeatableContainer.class, MyRepeatable.class);
+		Set<String> values = new HashSet<String>();
+		for (MyRepeatable myRepeatable : annotions) {
+			values.add(myRepeatable.value());
+		}
+		assertThat(values, equalTo((Set<String>) new HashSet<String>(
+				Arrays.asList("a", "b", "c", "meta"))));
+	}
+
 
 	@Component(value = "meta1")
 	@Retention(RetentionPolicy.RUNTIME)
@@ -428,10 +446,46 @@ public class AnnotationUtilsTests {
 		}
 	}
 
+	public static interface InterfaceWithRepeated {
+
+		@MyRepeatable("a")
+		@MyRepeatableContainer({ @MyRepeatable("b"), @MyRepeatable("c") })
+		@MyRepeatableMeta
+		void foo();
+
+	}
+
 }
+
 
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @interface Transactional {
 
+}
+
+
+@Retention(RetentionPolicy.RUNTIME)
+@Inherited
+@interface MyRepeatableContainer {
+
+	MyRepeatable[] value();
+
+}
+
+
+@Retention(RetentionPolicy.RUNTIME)
+@Inherited
+@Repeatable(MyRepeatableContainer.class)
+@interface MyRepeatable {
+
+	String value();
+
+}
+
+
+@Retention(RetentionPolicy.RUNTIME)
+@Inherited
+@MyRepeatable("meta")
+@interface MyRepeatableMeta {
 }

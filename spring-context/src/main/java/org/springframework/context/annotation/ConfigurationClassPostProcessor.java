@@ -21,13 +21,12 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -298,7 +297,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		parser.validate();
 
 		// Handle any @PropertySource annotations
-		Stack<PropertySource<?>> parsedPropertySources = parser.getPropertySources();
+		List<PropertySource<?>> parsedPropertySources = parser.getPropertySources();
 		if (!parsedPropertySources.isEmpty()) {
 			if (!(this.environment instanceof ConfigurableEnvironment)) {
 				logger.warn("Ignoring @PropertySource annotations. " +
@@ -306,8 +305,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			}
 			else {
 				MutablePropertySources envPropertySources = ((ConfigurableEnvironment)this.environment).getPropertySources();
-				while (!parsedPropertySources.isEmpty()) {
-					envPropertySources.addLast(parsedPropertySources.pop());
+				for (PropertySource<?> propertySource : parsedPropertySources) {
+					envPropertySources.addLast(propertySource);
 				}
 			}
 		}

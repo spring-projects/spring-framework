@@ -16,7 +16,9 @@
 
 package org.springframework.context.annotation;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -32,6 +34,7 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.type.AnnotatedTypeMetadata;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -44,6 +47,7 @@ import org.springframework.util.ClassUtils;
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Phillip Webb
  * @since 2.5
  * @see ContextAnnotationAutowireCandidateResolver
  * @see CommonAnnotationBeanPostProcessor
@@ -297,12 +301,40 @@ public class AnnotationConfigUtils {
 		return ScopedProxyCreator.createScopedProxy(definition, registry, proxyTargetClass);
 	}
 
-	static AnnotationAttributes attributesFor(AnnotatedTypeMetadata metadata, Class<?> annoClass) {
-		return attributesFor(metadata, annoClass.getName());
+	static AnnotationAttributes attributesFor(AnnotatedTypeMetadata metadata, Class<?> annotationClass) {
+		return attributesFor(metadata, annotationClass.getName());
 	}
 
-	static AnnotationAttributes attributesFor(AnnotatedTypeMetadata metadata, String annoClassName) {
-		return AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(annoClassName, false));
+	static AnnotationAttributes attributesFor(AnnotatedTypeMetadata metadata, String annotationClassName) {
+		return AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(annotationClassName, false));
+	}
+
+	static Set<AnnotationAttributes> attributesForRepeatable(AnnotationMetadata metadata,
+			Class<?> containerClass, Class<?> annotationClass) {
+		return attributesForRepeatable(metadata, containerClass.getName(), annotationClass.getName());
+	}
+
+	@SuppressWarnings("unchecked")
+	static Set<AnnotationAttributes> attributesForRepeatable(AnnotationMetadata metadata,
+			String containerClassName, String annotationClassName) {
+		Set<AnnotationAttributes> result = new LinkedHashSet<AnnotationAttributes>();
+
+		addAttributesIfNotNull(result, metadata.getAnnotationAttributes(annotationClassName, false));
+
+		Map<String, Object> container = metadata.getAnnotationAttributes(containerClassName, false);
+		if (container != null && container.containsKey("value")) {
+			for (Map<String, Object> containedAttributes : (Map<String, Object>[]) container.get("value")) {
+				addAttributesIfNotNull(result, containedAttributes);
+			}
+		}
+		return Collections.unmodifiableSet(result);
+	}
+
+	private static void addAttributesIfNotNull(Set<AnnotationAttributes> result,
+			Map<String, Object> attributes) {
+		if (attributes != null) {
+			result.add(AnnotationAttributes.fromMap(attributes));
+		}
 	}
 
 }

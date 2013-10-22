@@ -117,17 +117,8 @@ public class ScheduledAnnotationBeanPostProcessor
 		ReflectionUtils.doWithMethods(targetClass, new MethodCallback() {
 			@Override
 			public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
-				Schedules schedules = AnnotationUtils.getAnnotation(method, Schedules.class);
-				if (schedules != null) {
-					for (Scheduled scheduled : schedules.value()) {
-						processScheduled(scheduled, method, bean);
-					}
-				}
-				else {
-					Scheduled scheduled = AnnotationUtils.getAnnotation(method, Scheduled.class);
-					if (scheduled != null) {
-						processScheduled(scheduled, method, bean);
-					}
+				for (Scheduled scheduled : AnnotationUtils.getRepeatableAnnotation(method, Schedules.class, Scheduled.class)) {
+					processScheduled(scheduled, method, bean);
 				}
 			}
 		});

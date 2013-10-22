@@ -16,6 +16,7 @@
 
 package org.springframework.context.annotation;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,6 +56,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.core.type.AnnotationMetadata;
@@ -63,6 +65,8 @@ import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AssignableTypeFilter;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
@@ -112,7 +116,7 @@ class ConfigurationClassParser {
 
 	private final Map<String, ConfigurationClass> knownSuperclasses = new HashMap<String, ConfigurationClass>();
 
-	private final Stack<PropertySource<?>> propertySources = new Stack<PropertySource<?>>();
+	private final MultiValueMap<String, PropertySource<?>> propertySources = new LinkedMultiValueMap<String, PropertySource<?>>();
 
 	private final ImportStack importStack = new ImportStack();
 
@@ -218,9 +222,9 @@ class ConfigurationClassParser {
 		processMemberClasses(configClass, sourceClass);
 
 		// process any @PropertySource annotations
-		AnnotationAttributes propertySource = AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(),
-				org.springframework.context.annotation.PropertySource.class);
-		if (propertySource != null) {
+		for (AnnotationAttributes propertySource : AnnotationConfigUtils.attributesForRepeatable(
+				sourceClass.getMetadata(), PropertySources.class,
+				org.springframework.context.annotation.PropertySource.class)) {
 			processPropertySource(propertySource);
 		}
 
@@ -301,29 +305,29 @@ class ConfigurationClassParser {
 	private void processPropertySource(AnnotationAttributes propertySource) throws IOException {
 		String name = propertySource.getString("name");
 		String[] locations = propertySource.getStringArray("value");
+		boolean ignoreResourceNotFound = propertySource.getBoolean("ignoreResourceNotFound");
 		int locationCount = locations.length;
 		if (locationCount == 0) {
 			throw new IllegalArgumentException("At least one @PropertySource(value) location is required");
 		}
-		for (int i = 0; i < locationCount; i++) {
-			locations[i] = this.environment.resolveRequiredPlaceholders(locations[i]);
-		}
-		ClassLoader classLoader = this.resourceLoader.getClassLoader();
-		if (!StringUtils.hasText(name)) {
-			for (String location : locations) {
-				this.propertySources.push(new ResourcePropertySource(location, classLoader));
-			}
-		}
-		else {
-			if (locationCount == 1) {
-				this.propertySources.push(new ResourcePropertySource(name, locations[0], classLoader));
-			}
-			else {
-				CompositePropertySource ps = new CompositePropertySource(name);
-				for (int i = locations.length - 1; i >= 0; i--) {
-					ps.addPropertySource(new ResourcePropertySource(locations[i], classLoader));
+		for (String location : locations) {
+			Resource resource = this.resourceLoader.getResource(
+					this.environment.resolveRequiredPlaceholders(location));
+			try {
+				if (!StringUtils.hasText(name) || this.propertySources.containsKey(name)) {
+					// We need to ensure unique names when the property source will
+					// ultimately end up in a composite
+					ResourcePropertySource ps = new ResourcePropertySource(resource);
+					this.propertySources.add((StringUtils.hasText(name) ? name : ps.getName()), ps);
 				}
-				this.propertySources.push(ps);
+				else {
+					this.propertySources.add(name, new ResourcePropertySource(name, resource));
+				}
+			}
+			catch (FileNotFoundException ex) {
+				if (!ignoreResourceNotFound) {
+					throw ex;
+				}
 			}
 		}
 	}
@@ -473,9 +477,26 @@ class ConfigurationClassParser {
 		return this.configurationClasses;
 	}
 
-	public Stack<PropertySource<?>> getPropertySources() {
-		return this.propertySources;
+	public List<PropertySource<?>> getPropertySources() {
+		List<PropertySource<?>> propertySources = new LinkedList<PropertySource<?>>();
+		for (Map.Entry<String, List<PropertySource<?>>> entry : this.propertySources.entrySet()) {
+			propertySources.add(0, collatePropertySources(entry.getKey(), entry.getValue()));
+		}
+		return propertySources;
 	}
+
+	private PropertySource<?> collatePropertySources(String name,
+			List<PropertySource<?>> propertySources) {
+		if (propertySources.size() == 1) {
+			return propertySources.get(0);
+		}
+		CompositePropertySource result = new CompositePropertySource(name);
+		for (int i = propertySources.size() - 1; i >= 0; i--) {
+			result.addPropertySource(propertySources.get(i));
+		}
+		return result;
+	}
+
 
 	ImportRegistry getImportRegistry() {
 		return this.importStack;
