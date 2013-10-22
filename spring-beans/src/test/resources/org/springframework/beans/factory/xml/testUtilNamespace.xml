@@ -155,6 +155,10 @@
 
 	<util:properties id="myProperties"
 			location="classpath:/org/springframework/beans/factory/xml/util.properties"/>
+			
+	<util:properties id="multiLocationProperties"
+			location="classpath:/org/springframework/beans/factory/xml/util.properties,
+			classpath:/org/springframework/beans/factory/xml/util2.properties"/>		
 
 	<util:properties id="myScopedProperties"
 			location="classpath:/org/springframework/beans/factory/xml/util.properties" scope="prototype"/>

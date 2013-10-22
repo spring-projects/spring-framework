@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.w3c.dom.Element;
-
 import org.springframework.beans.factory.config.FieldRetrievingFactoryBean;
 import org.springframework.beans.factory.config.ListFactoryBean;
 import org.springframework.beans.factory.config.MapFactoryBean;
@@ -38,6 +37,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Biju Kunjummen
  * @since 2.0
  */
 public class UtilNamespaceHandler extends NamespaceHandlerSupport {
@@ -180,7 +180,7 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 	}
 
 
-	private static class PropertiesBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
+	private static class PropertiesBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 		@Override
 		protected Class getBeanClass(Element element) {
@@ -188,13 +188,14 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 		}
 
 		@Override
-		protected boolean isEligibleAttribute(String attributeName) {
-			return super.isEligibleAttribute(attributeName) && !SCOPE_ATTRIBUTE.equals(attributeName);
-		}
-
-		@Override
 		protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
-			super.doParse(element, parserContext, builder);
+			String location = element.getAttribute("location");
+			if (StringUtils.hasLength(location)) {
+				String[] locations = StringUtils.commaDelimitedListToStringArray(location);
+				builder.addPropertyValue("locations", locations);
+			}
+			builder.addPropertyValue("localOverride",
+					Boolean.valueOf(element.getAttribute("local-override")));
 			Properties parsedProps = parserContext.getDelegate().parsePropsElement(element);
 			builder.addPropertyValue("properties", parsedProps);
 			String scope = element.getAttribute(SCOPE_ATTRIBUTE);
