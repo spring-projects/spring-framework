@@ -142,17 +142,6 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 	/**
-	 * Configure the TCP client to for managing STOMP over TCP connections to the message
-	 * broker. This is an optional property that can be used to replace the default
-	 * implementation used for example for testing purposes.
-	 * <p>
-	 * By default an instance of {@link ReactorNettyTcpClient} is used.
-	 */
-	public void setTcpClient(TcpOperations<byte[]> tcpClient) {
-		this.tcpClient = tcpClient;
-	}
-
-	/**
 	 * Set the interval, in milliseconds, at which the "system" connection will, in the
 	 * absence of any other data being sent, send a heartbeat to the STOMP broker. A value
 	 * of zero will prevent heartbeats from being sent to the broker.
@@ -250,11 +239,20 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		return this.virtualHost;
 	}
 
+	/**
+	 * Used for unit testing.
+	 */
+	void setTcpClient(TcpOperations<byte[]> tcpClient) {
+		this.tcpClient = tcpClient;
+	}
+
 
 	@Override
 	protected void startInternal() {
 
-		this.tcpClient = new ReactorNettyTcpClient<byte[]>(this.relayHost, this.relayPort, new StompCodec());
+		if (this.tcpClient == null) {
+			this.tcpClient = new ReactorNettyTcpClient<byte[]>(this.relayHost, this.relayPort, new StompCodec());
+		}
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Initializing \"system\" TCP connection");

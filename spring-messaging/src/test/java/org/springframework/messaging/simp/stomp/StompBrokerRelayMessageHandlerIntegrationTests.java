@@ -130,11 +130,6 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		logger.debug("Broker stopped");
 	}
 
-
-	// When TCP client is behind interface and configurable:
-	// test "host" header (virtualHost property)
-	// test "/user/.." destination is excluded
-
 	@Test
 	public void publishSubscribe() throws Exception {
 
