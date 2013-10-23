@@ -34,7 +34,7 @@ public interface TcpConnection<P> {
 	 * @param message the message
 	 * @return whether the send succeeded or not
 	 */
-	ListenableFuture<Boolean> send(Message<P> message);
+	ListenableFuture<Void> send(Message<P> message);
 
 	/**
 	 * Register a task to invoke after a period of of read inactivity.

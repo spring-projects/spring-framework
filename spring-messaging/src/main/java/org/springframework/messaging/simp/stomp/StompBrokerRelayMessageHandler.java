@@ -25,6 +25,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.handler.AbstractBrokerMessageHandler;
 import org.springframework.messaging.support.MessageBuilder;
@@ -67,9 +68,14 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
-	private static final Message<byte[]> HEARTBEAT_MESSAGE = MessageBuilder.withPayload(new byte[] {'\n'}).build();
+	private static final Message<byte[]> HEARTBEAT_MESSAGE;
 
 	private static final long HEARTBEAT_MULTIPLIER = 3;
+
+	static {
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.HEARTBEAT);
+		HEARTBEAT_MESSAGE = MessageBuilder.withPayload(new byte[] {'\n'}).setHeaders(headers).build();
+	}
 
 
 	private final MessageChannel messageChannel;
@@ -464,11 +470,11 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 						TcpConnection<byte[]> conn = tcpConnection;
 						if (conn != null) {
 							conn.send(HEARTBEAT_MESSAGE).addCallback(
-									new ListenableFutureCallback<Boolean>() {
+									new ListenableFutureCallback<Void>() {
 										public void onFailure(Throwable t) {
-											handleTcpConnectionFailure("Failed to send heartbeat", null);
+											handleTcpConnectionFailure("Failed to send heartbeat", t);
 										}
-										public void onSuccess(Boolean result) {}
+										public void onSuccess(Void result) {}
 									});
 						}
 					}
@@ -492,16 +498,16 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			sendStompErrorToClient("Connection to broker closed");
 		}
 
-		public ListenableFuture<Boolean> forward(final Message<?> message) {
+		public ListenableFuture<Void> forward(final Message<?> message) {
 
 			if (!this.isStompConnected) {
 				if (logger.isWarnEnabled()) {
 					logger.warn("Connection to broker inactive or not ready, ignoring message=" + message);
 				}
-				return new ListenableFutureTask<Boolean>(new Callable<Boolean>() {
+				return new ListenableFutureTask<Void>(new Callable<Void>() {
 					@Override
-					public Boolean call() throws Exception {
-						return Boolean.FALSE;
+					public Void call() throws Exception {
+						return null;
 					}
 				});
 			}
@@ -511,11 +517,11 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			}
 
 			@SuppressWarnings("unchecked")
-			ListenableFuture<Boolean> future = this.tcpConnection.send((Message<byte[]>) message);
+			ListenableFuture<Void> future = this.tcpConnection.send((Message<byte[]>) message);
 
-			future.addCallback(new ListenableFutureCallback<Boolean>() {
+			future.addCallback(new ListenableFutureCallback<Void>() {
 				@Override
-				public void onSuccess(Boolean result) {
+				public void onSuccess(Void result) {
 					StompCommand command = StompHeaderAccessor.wrap(message).getCommand();
 					if (command == StompCommand.DISCONNECT) {
 						resetTcpConnection();
@@ -574,12 +580,10 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 
 		@Override
-		public ListenableFuture<Boolean> forward(Message<?> message) {
+		public ListenableFuture<Void> forward(Message<?> message) {
 			try {
-				ListenableFuture<Boolean> future = super.forward(message);
-				if (!future.get()) {
-					throw new MessageDeliveryException(message);
-				}
+				ListenableFuture<Void> future = super.forward(message);
+				future.get();
 				return future;
 			}
 			catch (Throwable t) {

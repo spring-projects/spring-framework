@@ -41,10 +41,9 @@ public class ReactorTcpConnection<P> implements TcpConnection<P> {
 	}
 
 	@Override
-	public ListenableFuture<Boolean> send(Message<P> message) {
-		ConsumerListenableFuture future = new ConsumerListenableFuture();
-		this.reactorTcpConnection.send(message, future);
-		return future;
+	public ListenableFuture<Void> send(Message<P> message) {
+		Promise<Void> promise = this.reactorTcpConnection.send(message);
+		return new PassThroughPromiseToListenableFutureAdapter<Void>(promise);
 	}
 
 	@Override
@@ -60,75 +59,6 @@ public class ReactorTcpConnection<P> implements TcpConnection<P> {
 	@Override
 	public void close() {
 		this.reactorTcpConnection.close();
-	}
-
-
-	// Use this temporarily until reactor provides a send method returning a Promise
-
-
-	private static class ConsumerListenableFuture implements ListenableFuture<Boolean>, Consumer<Boolean> {
-
-		final Deferred<Boolean, Promise<Boolean>> deferred = new DeferredPromiseSpec<Boolean>().get();
-
-		private final ListenableFutureCallbackRegistry<Boolean> registry =
-				new ListenableFutureCallbackRegistry<Boolean>();
-
-		@Override
-		public void accept(Boolean result) {
-
-			this.deferred.accept(result);
-
-			if (result == null) {
-				this.registry.failure(new TimeoutException());
-			}
-			else if (result) {
-				this.registry.success(result);
-			}
-			else {
-				this.registry.failure(new Exception("Failed send message"));
-			}
-		}
-
-		@Override
-		public Boolean get() {
-			try {
-				return this.deferred.compose().await();
-			}
-			catch (InterruptedException e) {
-				return Boolean.FALSE;
-			}
-		}
-
-		@Override
-		public Boolean get(long timeout, TimeUnit unit)
-				throws InterruptedException, ExecutionException, TimeoutException {
-
-			Boolean result = this.deferred.compose().await(timeout, unit);
-			if (result == null) {
-				throw new TimeoutException();
-			}
-			return result;
-		}
-
-		@Override
-		public boolean cancel(boolean mayInterruptIfRunning) {
-			return false;
-		}
-
-		@Override
-		public boolean isCancelled() {
-			return false;
-		}
-
-		@Override
-		public boolean isDone() {
-			return this.deferred.compose().isComplete();
-		}
-
-		@Override
-		public void addCallback(ListenableFutureCallback<? super Boolean> callback) {
-			this.registry.addCallback(callback);
-		}
 	}
 
 }

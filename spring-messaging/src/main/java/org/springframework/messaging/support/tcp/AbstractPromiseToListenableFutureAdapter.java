@@ -38,14 +38,14 @@ import reactor.function.Consumer;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-abstract class PromiseToListenableFutureAdapter<S, T> implements ListenableFuture<T> {
+abstract class AbstractPromiseToListenableFutureAdapter<S, T> implements ListenableFuture<T> {
 
 	private final Promise<S> promise;
 
 	private final ListenableFutureCallbackRegistry<T> registry = new ListenableFutureCallbackRegistry<T>();
 
 
-	protected PromiseToListenableFutureAdapter(Promise<S> promise) {
+	protected AbstractPromiseToListenableFutureAdapter(Promise<S> promise) {
 
 		Assert.notNull(promise, "promise is required");
 		this.promise = promise;
@@ -70,11 +70,11 @@ abstract class PromiseToListenableFutureAdapter<S, T> implements ListenableFutur
 		});
 	}
 
-	protected abstract T adapt(S adapteeResult);
+	protected abstract T adapt(S result);
 
 	@Override
-	public T get() {
-		S result = this.promise.get();
+	public T get() throws InterruptedException {
+		S result = this.promise.await();
 		return adapt(result);
 	}
 

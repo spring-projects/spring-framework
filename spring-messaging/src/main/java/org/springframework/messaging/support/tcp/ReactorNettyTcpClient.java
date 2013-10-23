@@ -112,7 +112,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	public ListenableFuture<Void> shutdown() {
 		try {
 			Promise<Void> promise = this.tcpClient.close();
-			return new PromiseToListenableFutureAdapter<Void, Void>(promise) {
+			return new AbstractPromiseToListenableFutureAdapter<Void, Void>(promise) {
 				@Override
 				protected Void adapt(Void result) {
 					return result;
