@@ -45,4 +45,10 @@ public class BrokerAvailabilityEvent extends ApplicationEvent {
 	public boolean isBrokerAvailable() {
 		return this.brokerAvailable;
 	}
+
+	@Override
+	public String toString() {
+		return "BrokerAvailabilityEvent=" + this.brokerAvailable;
+	}
+
 }
