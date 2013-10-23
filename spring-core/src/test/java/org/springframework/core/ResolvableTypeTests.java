@@ -786,6 +786,21 @@ public class ResolvableTypeTests {
 		assertThat(ResolvableType.forClass(List.class, ListOfGenericArray.class).toString(), equalTo("java.util.List<java.util.List<java.lang.String>[]>"));
 	}
 
+	@Test
+	public void getSource() throws Exception {
+		Class<?> classType = MySimpleInterfaceType.class;
+		Field basicField = Fields.class.getField("classType");
+		Field field = Fields.class.getField("charSequenceList");
+		Method method = Methods.class.getMethod("charSequenceParameter", List.class);
+		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(method, 0);
+		assertThat(ResolvableType.forField(basicField).getSource(), equalTo((Object) basicField));
+		assertThat(ResolvableType.forField(field).getSource(), equalTo((Object) field));
+		assertThat(ResolvableType.forMethodParameter(methodParameter).getSource(), equalTo((Object) methodParameter));
+		assertThat(ResolvableType.forMethodParameter(method, 0).getSource(), equalTo((Object) methodParameter));
+		assertThat(ResolvableType.forClass(classType).getSource(), equalTo((Object) classType));
+		assertThat(ResolvableType.forClass(classType).getSuperType().getSource(), equalTo((Object) classType.getGenericSuperclass()));
+	}
+
 	private void assertFieldToStringValue(String field, String expected) throws Exception {
 		ResolvableType type = ResolvableType.forField(Fields.class.getField(field));
 		assertThat("field " + field + " toString", type.toString(), equalTo(expected));
@@ -1033,7 +1048,7 @@ public class ResolvableTypeTests {
 		assertThat(forClass, not(equalTo(forFieldWithImplementation)));
 
 		assertThat(forFieldDirect, equalTo(forFieldDirect));
-		assertThat(forFieldDirect, equalTo(forFieldViaType));
+		assertThat(forFieldDirect, not(equalTo(forFieldViaType)));
 		assertThat(forFieldDirect, not(equalTo(forFieldWithImplementation)));
 	}
 

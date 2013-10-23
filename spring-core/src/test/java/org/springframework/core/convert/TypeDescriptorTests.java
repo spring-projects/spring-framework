@@ -24,6 +24,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -34,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.LinkedMultiValueMap;
@@ -932,4 +932,12 @@ public class TypeDescriptorTests {
 		assertThat(typeDescriptor.getMapValueTypeDescriptor(), nullValue());
 	}
 
+	@Test
+	public void getSource() throws Exception {
+		Field field = getClass().getField("fieldScalar");
+		MethodParameter methodParameter = new MethodParameter(getClass().getMethod("testParameterPrimitive", int.class), 0);
+		assertThat(new TypeDescriptor(field).getSource(), equalTo((Object) field));
+		assertThat(new TypeDescriptor(methodParameter).getSource(), equalTo((Object) methodParameter));
+		assertThat(TypeDescriptor.valueOf(Integer.class).getSource(), equalTo((Object) Integer.class));
+	}
 }

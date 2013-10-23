@@ -19,6 +19,7 @@ package org.springframework.core.convert;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -139,6 +140,16 @@ public class TypeDescriptor implements Serializable {
 	 */
 	public Class<?> getType() {
 		return this.type;
+	}
+
+	/**
+	 * Return the underlying source of the descriptor. Will return a {@link Field},
+	 * {@link MethodParameter} or {@link Type} depending on how the {@link TypeDescriptor}
+	 * was constructed. This method is primarily to provide access to additional
+	 * type information or meta-data that alternative JVM languages may provide.
+	 */
+	public Object getSource() {
+		return (this.resolvableType == null ? null : this.resolvableType.getSource());
 	}
 
 	/**
