@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
 
@@ -57,6 +58,8 @@ public class TestSockJsSession extends AbstractSockJsSession {
 	private boolean cancelledHeartbeat;
 
 	private String subProtocol;
+
+	private List<WebSocketExtension> extensions = new ArrayList<WebSocketExtension>();
 
 
 	public TestSockJsSession(String sessionId, SockJsServiceConfig config,
@@ -118,7 +121,7 @@ public class TestSockJsSession extends AbstractSockJsSession {
 	}
 
 	/**
-	 * @param remoteAddress the remoteAddress to set
+	 * @param localAddress the remoteAddress to set
 	 */
 	public void setLocalAddress(InetSocketAddress localAddress) {
 		this.localAddress = localAddress;
@@ -147,6 +150,18 @@ public class TestSockJsSession extends AbstractSockJsSession {
 	public void setAcceptedProtocol(String protocol) {
 		this.subProtocol = protocol;
 	}
+
+	/**
+	 * @return the extensions
+	 */
+	@Override
+	public List<WebSocketExtension> getExtensions() { return this.extensions; }
+
+	/**
+	 *
+	 * @param extensions the extensions to set
+	 */
+	public void setExtensions(List<WebSocketExtension> extensions) { this.extensions = extensions; }
 
 	public CloseStatus getCloseStatus() {
 		return this.closeStatus;

@@ -69,7 +69,7 @@ public interface SubProtocolHandler {
 	/**
 	 * Resolve the session id from the given message or return {@code null}.
 	 *
-	 * @param the message to resolve the session id from
+	 * @param message the message to resolve the session id from
 	 */
 	String resolveSessionId(Message<?> message);
 

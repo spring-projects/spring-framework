@@ -27,6 +27,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -50,6 +51,8 @@ public class TestWebSocketSession implements WebSocketSession {
 	private InetSocketAddress remoteAddress;
 
 	private String protocol;
+
+	private List<WebSocketExtension> extensions = new ArrayList<WebSocketExtension>();
 
 	private boolean open;
 
@@ -149,7 +152,7 @@ public class TestWebSocketSession implements WebSocketSession {
 	}
 
 	/**
-	 * @param remoteAddress the remoteAddress to set
+	 * @param localAddress the remoteAddress to set
 	 */
 	public void setLocalAddress(InetSocketAddress localAddress) {
 		this.localAddress = localAddress;
@@ -183,6 +186,18 @@ public class TestWebSocketSession implements WebSocketSession {
 	public void setAcceptedProtocol(String protocol) {
 		this.protocol = protocol;
 	}
+
+	/**
+	 * @return the extensions
+	 */
+	@Override
+	public List<WebSocketExtension> getExtensions() { return this.extensions; }
+
+	/**
+	 *
+	 * @param extensions the extensions to set
+	 */
+	public void setExtensions(List<WebSocketExtension> extensions) { this.extensions = extensions; }
 
 	/**
 	 * @return the open
