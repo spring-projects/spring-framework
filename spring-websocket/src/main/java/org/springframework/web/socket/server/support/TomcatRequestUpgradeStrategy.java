@@ -17,8 +17,10 @@
 package org.springframework.web.socket.server.support;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -26,6 +28,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.websocket.Endpoint;
+import javax.websocket.Extension;
 
 import org.apache.tomcat.websocket.server.WsServerContainer;
 import org.springframework.http.server.ServerHttpRequest;
@@ -33,6 +36,7 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.endpoint.ServerEndpointRegistration;
 import org.springframework.web.socket.server.endpoint.ServletServerContainerFactoryBean;
@@ -50,10 +54,24 @@ import org.springframework.web.socket.server.endpoint.ServletServerContainerFact
  */
 public class TomcatRequestUpgradeStrategy extends AbstractStandardUpgradeStrategy {
 
+	private List<WebSocketExtension> availableExtensions;
 
 	@Override
 	public String[] getSupportedVersions() {
 		return new String[] { "13" };
+	}
+
+	@Override
+	public List<WebSocketExtension> getAvailableExtensions(ServerHttpRequest request) {
+
+		if(this.availableExtensions == null) {
+			this.availableExtensions = new ArrayList<WebSocketExtension>();
+			HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
+			for(Extension extension : getContainer(servletRequest).getInstalledExtensions()) {
+				this.availableExtensions.add(parseStandardExtension(extension));
+			}
+		}
+		return this.availableExtensions;
 	}
 
 	@Override

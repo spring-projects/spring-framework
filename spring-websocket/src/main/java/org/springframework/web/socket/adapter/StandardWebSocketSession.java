@@ -20,10 +20,14 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.websocket.CloseReason;
 import javax.websocket.CloseReason.CloseCodes;
+import javax.websocket.Extension;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.StringUtils;
@@ -32,6 +36,7 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.PingMessage;
 import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketSession;
 
 /**
@@ -47,6 +52,8 @@ public class StandardWebSocketSession extends AbstractWebSocketSesssion<javax.we
 	private final InetSocketAddress localAddress;
 
 	private final InetSocketAddress remoteAddress;
+
+	private List<WebSocketExtension> extensions;
 
 
 	/**
@@ -106,6 +113,23 @@ public class StandardWebSocketSession extends AbstractWebSocketSesssion<javax.we
 		checkNativeSessionInitialized();
 		String protocol = getNativeSession().getNegotiatedSubprotocol();
 		return StringUtils.isEmpty(protocol)? null : protocol;
+	}
+
+	@Override
+	public List<WebSocketExtension> getExtensions() {
+		checkNativeSessionInitialized();
+		if(this.extensions == null) {
+			List<Extension> nativeExtensions = getNativeSession().getNegotiatedExtensions();
+			this.extensions = new ArrayList<WebSocketExtension>(nativeExtensions.size());
+			for(Extension nativeExtension : nativeExtensions) {
+				Map<String, String> parameters = new HashMap<String, String>();
+				for (Extension.Parameter param : nativeExtension.getParameters()) {
+					parameters.put(param.getName(),param.getValue());
+				}
+				this.extensions.add(new WebSocketExtension(nativeExtension.getName(),parameters));
+			}
+		}
+		return this.extensions;
 	}
 
 	@Override

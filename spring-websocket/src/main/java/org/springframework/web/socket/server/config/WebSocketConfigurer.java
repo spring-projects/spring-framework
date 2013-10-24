@@ -16,8 +16,7 @@
 
 package org.springframework.web.socket.server.config;
 
-import org.eclipse.jetty.websocket.server.WebSocketHandler;
-
+import org.springframework.web.socket.WebSocketHandler;
 
 
 /**

@@ -16,10 +16,12 @@
 
 package org.springframework.web.socket.server;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 
 /**
@@ -35,6 +37,12 @@ public interface RequestUpgradeStrategy {
 	 * Return the supported WebSocket protocol versions.
 	 */
 	String[] getSupportedVersions();
+
+	/**
+	 * @return the list of available WebSocket protocol extensions,
+	 * implemented by the underlying WebSocket server.
+	 */
+	List<WebSocketExtension> getAvailableExtensions(ServerHttpRequest request);
 
 	/**
 	 * Perform runtime specific steps to complete the upgrade. Invoked after successful
