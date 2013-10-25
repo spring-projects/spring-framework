@@ -726,6 +726,7 @@ project("spring-webmvc-tiles3") {
 		}
 		optional("org.apache.tiles:tiles-extras:3.0.1") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
+			exclude group: "org.springframework", module: "spring-web"
 		}
 		optional("org.apache.tiles:tiles-el:3.0.1") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"

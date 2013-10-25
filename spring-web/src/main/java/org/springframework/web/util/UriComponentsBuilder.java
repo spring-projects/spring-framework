@@ -248,7 +248,7 @@ public class UriComponentsBuilder {
 			throw new IllegalArgumentException("[" + httpUrl + "] is not a valid HTTP URL");
 		}
 	}
-	
+
 
 	// build methods
 
@@ -398,7 +398,7 @@ public class UriComponentsBuilder {
 		}
 		return this;
 	}
-		
+
 	/**
 	 * Set the URI scheme-specific-part. When invoked, this method overwrites
 	 * {@linkplain #userInfo(String) user-info}, {@linkplain #host(String) host},

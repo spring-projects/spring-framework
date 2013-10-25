@@ -63,10 +63,9 @@ public class DefaultMvcUrls implements MvcUrls {
 	 * {@link HandlerMethodArgumentResolver}s. Since both of these tend to be implemented
 	 * by the same class, the most convenient option is to obtain the configured
 	 * {@code HandlerMethodArgumentResolvers} in the {@code RequestMappingHandlerAdapter}
-	 * and provide that to this contstructor.
-	 *
+	 * and provide that to this constructor.
 	 * @param uriComponentsContributors a collection of {@link UriComponentsContributor}
-	 *        or {@link HandlerMethodArgumentResolver}s.
+	 * or {@link HandlerMethodArgumentResolver}s.
 	 */
 	public DefaultMvcUrls(Collection<?> uriComponentsContributors) {
 		this(uriComponentsContributors, null);
@@ -77,26 +76,22 @@ public class DefaultMvcUrls implements MvcUrls {
 	 * {@link HandlerMethodArgumentResolver}s. Since both of these tend to be implemented
 	 * by the same class, the most convenient option is to obtain the configured
 	 * {@code HandlerMethodArgumentResolvers} in the {@code RequestMappingHandlerAdapter}
-	 * and provide that to this contstructor.
-	 * <p>
-	 * If the {@link ConversionService} argument is {@code null},
-	 * {@link DefaultFormattingConversionService} will be used by default.
+	 * and provide that to this constructor.
 	 *
+	 * <p>If the {@link ConversionService} argument is {@code null},
+	 * {@link DefaultFormattingConversionService} will be used by default.
 	 * @param uriComponentsContributors a collection of {@link UriComponentsContributor}
-	 *        or {@link HandlerMethodArgumentResolver}s.
+	 * or {@link HandlerMethodArgumentResolver}s.
 	 * @param conversionService a ConversionService to use when method argument values
-	 *        need to be formatted as Strings before being added to the URI
+	 * need to be formatted as Strings before being added to the URI
 	 */
 	public DefaultMvcUrls(Collection<?> uriComponentsContributors, ConversionService conversionService) {
-
 		Assert.notNull(uriComponentsContributors, "'uriComponentsContributors' must not be null");
-
 		for (Object contributor : uriComponentsContributors) {
 			if (contributor instanceof UriComponentsContributor) {
 				this.contributors.add((UriComponentsContributor) contributor);
 			}
 		}
-
 		this.conversionService = (conversionService != null) ?
 				conversionService : new DefaultFormattingConversionService();
 	}
@@ -118,14 +113,12 @@ public class DefaultMvcUrls implements MvcUrls {
 
 	private UriComponents applyContributers(UriComponentsBuilder builder, Method method,
 			Object[] argumentValues, Map<String, Object> uriVars) {
-
 		if (this.contributors.isEmpty()) {
 			return builder.buildAndExpand(uriVars);
 		}
 
 		int paramCount = method.getParameters().length;
 		int argCount = argumentValues.length;
-
 		Assert.isTrue(paramCount == argCount,  "Number of method parameters " + paramCount +
 				" does not match number of argument values " + argCount);
 
@@ -145,7 +138,6 @@ public class DefaultMvcUrls implements MvcUrls {
 
 	@Override
 	public UriComponents linkToMethodOn(Object mockController) {
-
 		Assert.isInstanceOf(ControllerMethodValues.class, mockController);
 		ControllerMethodValues controllerMethodValues = (ControllerMethodValues) mockController;
 
@@ -162,7 +154,6 @@ public class DefaultMvcUrls implements MvcUrls {
 	}
 
 	private void addTypeLevelUriVaris(ControllerMethodValues info, Map<String, Object> uriVariables) {
-
 		Object[] values = info.getTypeLevelUriVariables();
 		if (!ObjectUtils.isEmpty(values)) {
 

@@ -24,17 +24,17 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation that indicates a method parameter should be bound to a path template
- * variable. Supported on message handling methods such as {@link MessageMapping
- * @MessageMapping} for messages with path-like destination semantics.
- * <p>
- * A {@code @PathVariable} template variable is always required and does not have a
+ * variable. Supported on message handling methods such as
+ * {@link MessageMapping @MessageMapping} for messages with path-like destination
+ * semantics.
+ *
+ * <p>A {@code @PathVariable} template variable is always required and does not have a
  * default value to fall back on.
  *
  * @author Brian Clozel
+ * @since 4.0
  * @see org.springframework.messaging.handler.annotation.MessageMapping
  * @see org.springframework.messaging.simp.handler.SimpAnnotationMethodMessageHandler
- *
- * @since 4.0
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)

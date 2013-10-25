@@ -27,19 +27,18 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * A contract for creating URLs by referencing Spring MVC controllers and methods.
- * <p>
- * The MVC Java config and the MVC namespace automatically create an instance of this
+ *
+ * <p>The MVC Java config and the MVC namespace automatically create an instance of this
  * contract for use in controllers and anywhere else during the processing of a request.
  * The best way for access it is to have it autowired, or otherwise injected either by
  * type or also qualified by name ("mvcUrls") if necessary.
- * <p>
- * If not using either option, with explicit configuration it's easy to create an instance
- * of {@link DefaultMvcUrls} in Java config or in XML configuration, use
+ *
+ * <p>If not using either option, with explicit configuration it's easy to create an
+ * instance of {@link DefaultMvcUrls} in Java config or in XML configuration, use
  * {@link DefaultMvcUrlsFactoryBean}.
  *
  * @author Oliver Gierke
  * @author Rossen Stoyanchev
- *
  * @since 4.0
  */
 public interface MvcUrls {
@@ -50,9 +49,7 @@ public interface MvcUrls {
 	 * the Servlet mapping as well as the portion of the path matching to the controller
 	 * level request mapping. If the controller contains multiple mappings, the
 	 * {@link DefaultMvcUrls} will use the first one.
-	 *
 	 * @param controllerType the controller type to create a URL to
-	 *
 	 * @return a builder that can be used to further build the {@link UriComponents}.
 	 */
 	UriComponentsBuilder linkToController(Class<?> controllerType);
@@ -60,19 +57,15 @@ public interface MvcUrls {
 	/**
 	 * Create a {@link UriComponents} by pointing to a controller method along with method
 	 * argument values.
-	 * <p>
-	 * Type and method-level mappings of the controller method are extracted and the
+	 *
+	 * <p>Type and method-level mappings of the controller method are extracted and the
 	 * resulting {@link UriComponents} is further enriched with method argument values from
 	 * {@link PathVariable} and {@link RequestParam} parameters. Any other arguments not
 	 * relevant to the building of the URL can be provided as {@literal null} and will be
 	 * ignored. Support for additional custom arguments can be added through a
 	 * {@link UriComponentsContributor}.
-	 *
-	 * FIXME Type-level URI template variables?
-	 *
 	 * @param method the target controller method
 	 * @param argumentValues argument values matching to method parameters
-	 *
 	 * @return UriComponents instance, never {@literal null}
 	 */
 	UriComponents linkToMethod(Method method, Object... argumentValues);
@@ -88,10 +81,10 @@ public interface MvcUrls {
 	 * class AddressController {
 	 *
 	 *   &#064;RequestMapping("/{country}")
-	 *   public HttpEntity<Void> getAddressesForCountry(&#064;PathVariable String country) { … }
+	 *   public HttpEntity&lt;Void&gt; getAddressesForCountry(&#064;PathVariable String country) { ... }
 	 *
 	 *   &#064;RequestMapping(value="/", method=RequestMethod.POST)
-	 *   public void addAddress(Address address) { … }
+	 *   public void addAddress(Address address) { ... }
 	 * }
 	 *
 	 * // short-hand style with static import of MvcUrlUtils.controller
@@ -104,16 +97,13 @@ public interface MvcUrls {
 	 * controller.addAddress(null);
 	 *
 	 * mvcUrls.linkToMethodOn(controller);
-	 *
 	 * </pre>
 	 *
 	 * The above mechanism supports {@link PathVariable} and {@link RequestParam} method
 	 * arguments. Any other arguments can be provided as {@literal null} and will be
 	 * ignored. Additional custom arguments can be added through an implementation of
 	 * {@link UriComponentsContributor}.
-	 *
 	 * @param mockController created via {@link MvcUrlUtils#controller(Class, Object...)}
-	 *
 	 * @return UriComponents instance, never {@literal null}
 	 */
 	UriComponents linkToMethodOn(Object mockController);

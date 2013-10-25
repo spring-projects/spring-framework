@@ -28,17 +28,19 @@ import java.lang.annotation.Target;
  * environments.
  *
  * @author Arjen Poutsma
+ * @since 3.0
  * @see RequestMapping
  * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
  * @see org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter
- * @since 3.0
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface PathVariable {
 
-	/** The URI template variable to bind to. */
+	/**
+	 * The URI template variable to bind to.
+	 */
 	String value() default "";
 
 }

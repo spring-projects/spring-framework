@@ -43,7 +43,6 @@ import org.springframework.web.util.UriComponents;
  *
  * @author Oliver Gierke
  * @author Rossen Stoyanchev
- *
  * @since 4.0
  */
 public class MvcUrlUtils {
@@ -67,7 +66,6 @@ public class MvcUrlUtils {
 			logger.warn("Multiple class level mappings on " + controllerType.getName() + ", using the first one");
 		}
 		return annot.value()[0];
-
 	}
 
 	/**
@@ -97,7 +95,6 @@ public class MvcUrlUtils {
 	 * invoked method and argument values are remembered, and a "mock" value is returned
 	 * so it can be used to help prepare a {@link UriComponents} through
 	 * {@link MvcUrls#linkToMethodOn(Object)}.
-	 *
 	 * @param controllerType the type of controller to mock, must not be {@literal null}.
 	 * @param typeLevelUriVariables URI variables to expand into the type-level mapping
 	 * @return the created controller instance
@@ -109,7 +106,6 @@ public class MvcUrlUtils {
 
 	@SuppressWarnings("unchecked")
 	private static <T> T initProxy(Class<?> type, ControllerMethodInvocationInterceptor interceptor) {
-
 		if (type.isInterface()) {
 			ProxyFactory factory = new ProxyFactory(EmptyTargetSource.INSTANCE);
 			factory.addInterface(type);
@@ -192,7 +188,7 @@ public class MvcUrlUtils {
 	 * <p>
 	 * Instances of this interface are returned from
 	 * {@link MvcUrlUtils#controller(Class, Object...) controller(Class, Object...)} and
-	 * are needed for {@link MvcUrls#linkToMethodOn(ControllerMethodValues)}.
+	 * are needed for {@link MvcUrls#linkToMethodOn(Object)}.
 	 */
 	public interface ControllerMethodValues {
 
