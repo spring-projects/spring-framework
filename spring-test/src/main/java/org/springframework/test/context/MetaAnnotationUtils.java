@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 import static org.springframework.core.annotation.AnnotationUtils.*;
 
@@ -76,6 +77,54 @@ abstract class MetaAnnotationUtils {
 
 		// Declared on a superclass?
 		return findAnnotationDescriptor(clazz.getSuperclass(), annotationType);
+	}
+
+	/**
+	 * TODO Document findAnnotationDescriptorForTypes().
+	 *
+	 * @param clazz the class to look for annotations on
+	 * @param annotationTypes the types of annotations to look for
+	 * @return the annotation found, or {@code null} if none found
+	 */
+	@SuppressWarnings("unchecked")
+	public static UntypedAnnotationDescriptor findAnnotationDescriptorForTypes(Class<?> clazz,
+			Class<? extends Annotation>... annotationTypes) {
+
+		assertNonEmptyAnnotationTypeArray(annotationTypes, "The list of annotation types must not be empty");
+
+		if (clazz == null || clazz.equals(Object.class)) {
+			return null;
+		}
+
+		// Declared locally?
+		for (Class<? extends Annotation> annotationType : annotationTypes) {
+			if (isAnnotationDeclaredLocally(annotationType, clazz)) {
+				return new UntypedAnnotationDescriptor(clazz, clazz.getAnnotation(annotationType));
+			}
+		}
+
+		// Declared on a stereotype annotation (i.e., as a meta-annotation)?
+		if (!Annotation.class.isAssignableFrom(clazz)) {
+			for (Annotation stereotype : clazz.getAnnotations()) {
+				for (Class<? extends Annotation> annotationType : annotationTypes) {
+					Annotation annotation = stereotype.annotationType().getAnnotation(annotationType);
+					if (annotation != null) {
+						return new UntypedAnnotationDescriptor(clazz, stereotype, annotation);
+					}
+				}
+			}
+		}
+
+		// Declared on an interface?
+		for (Class<?> ifc : clazz.getInterfaces()) {
+			UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(ifc, annotationTypes);
+			if (descriptor != null) {
+				return descriptor;
+			}
+		}
+
+		// Declared on a superclass?
+		return findAnnotationDescriptorForTypes(clazz.getSuperclass(), annotationTypes);
 	}
 
 
@@ -181,6 +230,30 @@ abstract class MetaAnnotationUtils {
 			.append("stereotype", stereotype)//
 			.append("annotation", annotation)//
 			.toString();
+		}
+	}
+
+	public static class UntypedAnnotationDescriptor extends AnnotationDescriptor<Annotation> {
+
+		public UntypedAnnotationDescriptor(Class<?> declaringClass, Annotation annotation) {
+			super(declaringClass, annotation);
+		}
+
+		public UntypedAnnotationDescriptor(Class<?> declaringClass, Annotation stereotype, Annotation annotation) {
+			super(declaringClass, stereotype, annotation);
+		}
+	}
+
+
+	private static void assertNonEmptyAnnotationTypeArray(Class<?>[] annotationTypes, String message) {
+		if (ObjectUtils.isEmpty(annotationTypes)) {
+			throw new IllegalArgumentException(message);
+		}
+
+		for (Class clazz : annotationTypes) {
+			if (!Annotation.class.isAssignableFrom(clazz)) {
+				throw new IllegalArgumentException("Array elements must be of type Annotation");
+			}
 		}
 	}
 

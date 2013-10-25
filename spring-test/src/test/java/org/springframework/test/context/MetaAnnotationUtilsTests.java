@@ -16,13 +16,16 @@
 
 package org.springframework.test.context;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import org.junit.Test;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.test.context.MetaAnnotationUtils.AnnotationDescriptor;
+import org.springframework.test.context.MetaAnnotationUtils.UntypedAnnotationDescriptor;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.Assert.*;
@@ -35,6 +38,31 @@ import static org.springframework.test.context.MetaAnnotationUtils.*;
  * @since 4.0
  */
 public class MetaAnnotationUtilsTests {
+
+	private void assertComponentOnStereotype(Class<?> startClass, Class<?> declaringClass, String name,
+			Class<? extends Annotation> stereotypeType) {
+		AnnotationDescriptor<Component> descriptor = findAnnotationDescriptor(startClass, Component.class);
+		assertNotNull(descriptor);
+		assertEquals(declaringClass, descriptor.getDeclaringClass());
+		assertEquals(Component.class, descriptor.getAnnotationType());
+		assertEquals(name, descriptor.getAnnotation().value());
+		assertNotNull(descriptor.getStereotype());
+		assertEquals(stereotypeType, descriptor.getStereotypeType());
+	}
+
+	@SuppressWarnings("unchecked")
+	private void assertComponentOnStereotypeForMultipleCandidateTypes(Class<?> startClass, Class<?> declaringClass,
+			String name, Class<? extends Annotation> stereotypeType) {
+		Class<Component> annotationType = Component.class;
+		UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(startClass, Service.class,
+			annotationType, Order.class, Transactional.class);
+		assertNotNull(descriptor);
+		assertEquals(declaringClass, descriptor.getDeclaringClass());
+		assertEquals(annotationType, descriptor.getAnnotationType());
+		assertEquals(name, ((Component) descriptor.getAnnotation()).value());
+		assertNotNull(descriptor.getStereotype());
+		assertEquals(stereotypeType, descriptor.getStereotypeType());
+	}
 
 	@Test
 	public void findAnnotationDescriptorWithNoAnnotationPresent() throws Exception {
@@ -76,65 +104,135 @@ public class MetaAnnotationUtilsTests {
 	}
 
 	@Test
-	public void findAnnotationDescriptorWithMetaAnnotations() throws Exception {
+	public void findAnnotationDescriptorWithMetaComponentAnnotation() throws Exception {
+		Class<HasMetaComponentAnnotation> startClass = HasMetaComponentAnnotation.class;
+		assertComponentOnStereotype(startClass, startClass, "meta1", Meta1.class);
+	}
 
-		AnnotationDescriptor<Component> descriptor = findAnnotationDescriptor(HasMetaComponentAnnotation.class,
-			Component.class);
-		assertEquals(HasMetaComponentAnnotation.class, descriptor.getDeclaringClass());
-		assertEquals(Component.class, descriptor.getAnnotationType());
-		assertEquals("meta1", descriptor.getAnnotation().value());
-		assertNotNull(descriptor.getStereotype());
-		assertEquals(Meta1.class, descriptor.getStereotypeType());
-
-		descriptor = findAnnotationDescriptor(HasLocalAndMetaComponentAnnotation.class, Component.class);
+	@Test
+	public void findAnnotationDescriptorWithLocalAndMetaComponentAnnotation() throws Exception {
+		Class<Component> annotationType = Component.class;
+		AnnotationDescriptor<Component> descriptor = findAnnotationDescriptor(HasLocalAndMetaComponentAnnotation.class,
+			annotationType);
 		assertEquals(HasLocalAndMetaComponentAnnotation.class, descriptor.getDeclaringClass());
-		assertEquals(Component.class, descriptor.getAnnotationType());
+		assertEquals(annotationType, descriptor.getAnnotationType());
 		assertNull(descriptor.getStereotype());
 		assertNull(descriptor.getStereotypeType());
 	}
 
 	@Test
 	public void findAnnotationDescriptorForInterfaceWithMetaAnnotation() {
-		AnnotationDescriptor<Component> descriptor = findAnnotationDescriptor(InterfaceWithMetaAnnotation.class,
-			Component.class);
-		assertEquals(InterfaceWithMetaAnnotation.class, descriptor.getDeclaringClass());
-		assertEquals(Component.class, descriptor.getAnnotationType());
-		assertEquals("meta1", descriptor.getAnnotation().value());
-		assertNotNull(descriptor.getStereotype());
-		assertEquals(Meta1.class, descriptor.getStereotypeType());
+		Class<InterfaceWithMetaAnnotation> startClass = InterfaceWithMetaAnnotation.class;
+		assertComponentOnStereotype(startClass, startClass, "meta1", Meta1.class);
 	}
 
 	@Test
 	public void findAnnotationDescriptorForClassWithMetaAnnotatedInterface() {
-		AnnotationDescriptor<Component> descriptor = findAnnotationDescriptor(ClassWithMetaAnnotatedInterface.class,
-			Component.class);
-		assertEquals(InterfaceWithMetaAnnotation.class, descriptor.getDeclaringClass());
-		assertEquals(Component.class, descriptor.getAnnotationType());
-		assertEquals("meta1", descriptor.getAnnotation().value());
-		assertNotNull(descriptor.getStereotype());
-		assertEquals(Meta1.class, descriptor.getStereotypeType());
+		assertComponentOnStereotype(ClassWithMetaAnnotatedInterface.class, InterfaceWithMetaAnnotation.class, "meta1",
+			Meta1.class);
 	}
 
 	@Test
 	public void findAnnotationDescriptorForClassWithLocalMetaAnnotationAndMetaAnnotatedInterface() {
-		AnnotationDescriptor<Component> descriptor = findAnnotationDescriptor(
-			ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, Component.class);
-		assertEquals(ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, descriptor.getDeclaringClass());
-		assertEquals(Component.class, descriptor.getAnnotationType());
-		assertEquals("meta2", descriptor.getAnnotation().value());
-		assertNotNull(descriptor.getStereotype());
-		assertEquals(Meta2.class, descriptor.getStereotypeType());
+		Class<ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface> startClass = ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class;
+		assertComponentOnStereotype(startClass, startClass, "meta2", Meta2.class);
 	}
 
 	@Test
 	public void findAnnotationDescriptorForSubClassWithLocalMetaAnnotationAndMetaAnnotatedInterface() {
-		AnnotationDescriptor<Component> descriptor = findAnnotationDescriptor(
-			SubClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, Component.class);
-		assertEquals(ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, descriptor.getDeclaringClass());
-		assertEquals(Component.class, descriptor.getAnnotationType());
-		assertEquals("meta2", descriptor.getAnnotation().value());
-		assertNotNull(descriptor.getStereotype());
-		assertEquals(Meta2.class, descriptor.getStereotypeType());
+		assertComponentOnStereotype(SubClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class,
+			ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, "meta2", Meta2.class);
+	}
+
+	// -------------------------------------------------------------------------
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void findAnnotationDescriptorForTypesWithNoAnnotationPresent() throws Exception {
+		assertNull(findAnnotationDescriptorForTypes(NonAnnotatedInterface.class, Transactional.class, Component.class));
+		assertNull(findAnnotationDescriptorForTypes(NonAnnotatedClass.class, Transactional.class, Order.class));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void findAnnotationDescriptorForTypesWithInheritedClassLevelAnnotation() throws Exception {
+		// Note: @Transactional is inherited
+
+		assertEquals(
+			InheritedAnnotationInterface.class,
+			findAnnotationDescriptorForTypes(InheritedAnnotationInterface.class, Transactional.class).getDeclaringClass());
+		assertEquals(
+			InheritedAnnotationInterface.class,
+			findAnnotationDescriptorForTypes(SubInheritedAnnotationInterface.class, Transactional.class).getDeclaringClass());
+		assertEquals(
+			InheritedAnnotationInterface.class,
+			findAnnotationDescriptorForTypes(SubSubInheritedAnnotationInterface.class, Transactional.class).getDeclaringClass());
+
+		assertEquals(InheritedAnnotationClass.class,
+			findAnnotationDescriptorForTypes(InheritedAnnotationClass.class, Transactional.class).getDeclaringClass());
+		assertEquals(
+			InheritedAnnotationClass.class,
+			findAnnotationDescriptorForTypes(SubInheritedAnnotationClass.class, Transactional.class).getDeclaringClass());
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void findAnnotationDescriptorForTypesWithNonInheritedClassLevelAnnotation() throws Exception {
+		// Note: @Order is not inherited, but findAnnotationDescriptor() should still find
+		// it.
+
+		assertEquals(NonInheritedAnnotationInterface.class,
+			findAnnotationDescriptorForTypes(NonInheritedAnnotationInterface.class, Order.class).getDeclaringClass());
+		assertEquals(NonInheritedAnnotationInterface.class,
+			findAnnotationDescriptorForTypes(SubNonInheritedAnnotationInterface.class, Order.class).getDeclaringClass());
+
+		assertEquals(NonInheritedAnnotationClass.class,
+			findAnnotationDescriptorForTypes(NonInheritedAnnotationClass.class, Order.class).getDeclaringClass());
+		assertEquals(NonInheritedAnnotationClass.class,
+			findAnnotationDescriptorForTypes(SubNonInheritedAnnotationClass.class, Order.class).getDeclaringClass());
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void findAnnotationDescriptorForTypesWithLocalAndMetaComponentAnnotation() throws Exception {
+		Class<Component> annotationType = Component.class;
+		UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(
+			HasLocalAndMetaComponentAnnotation.class, Transactional.class, annotationType, Order.class);
+		assertEquals(HasLocalAndMetaComponentAnnotation.class, descriptor.getDeclaringClass());
+		assertEquals(annotationType, descriptor.getAnnotationType());
+		assertNull(descriptor.getStereotype());
+		assertNull(descriptor.getStereotypeType());
+	}
+
+	@Test
+	public void findAnnotationDescriptorForTypesWithMetaComponentAnnotation() throws Exception {
+		Class<HasMetaComponentAnnotation> startClass = HasMetaComponentAnnotation.class;
+		assertComponentOnStereotypeForMultipleCandidateTypes(startClass, startClass, "meta1", Meta1.class);
+	}
+
+	@Test
+	public void findAnnotationDescriptorForTypesForInterfaceWithMetaAnnotation() {
+		Class<InterfaceWithMetaAnnotation> startClass = InterfaceWithMetaAnnotation.class;
+		assertComponentOnStereotypeForMultipleCandidateTypes(startClass, startClass, "meta1", Meta1.class);
+	}
+
+	@Test
+	public void findAnnotationDescriptorForTypesForClassWithMetaAnnotatedInterface() {
+		assertComponentOnStereotypeForMultipleCandidateTypes(ClassWithMetaAnnotatedInterface.class,
+			InterfaceWithMetaAnnotation.class, "meta1", Meta1.class);
+	}
+
+	@Test
+	public void findAnnotationDescriptorForTypesForClassWithLocalMetaAnnotationAndMetaAnnotatedInterface() {
+		Class<ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface> startClass = ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class;
+		assertComponentOnStereotypeForMultipleCandidateTypes(startClass, startClass, "meta2", Meta2.class);
+	}
+
+	@Test
+	public void findAnnotationDescriptorForTypesForSubClassWithLocalMetaAnnotationAndMetaAnnotatedInterface() {
+		assertComponentOnStereotypeForMultipleCandidateTypes(
+			SubClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class,
+			ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, "meta2", Meta2.class);
 	}
 
 
