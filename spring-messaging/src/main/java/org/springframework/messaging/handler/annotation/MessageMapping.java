@@ -32,7 +32,7 @@ import org.springframework.messaging.Message;
  * @author Rossen Stoyanchev
  * @since 4.0
  *
- * @see org.springframework.messaging.simp.handler.AnnotationMethodMessageHandler
+ * @see org.springframework.messaging.simp.handler.SimpAnnotationMethodMessageHandler
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

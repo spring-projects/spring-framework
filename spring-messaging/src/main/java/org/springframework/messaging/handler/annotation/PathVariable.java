@@ -32,7 +32,7 @@ import java.lang.annotation.Target;
  *
  * @author Brian Clozel
  * @see org.springframework.messaging.handler.annotation.MessageMapping
- * @see org.springframework.messaging.simp.handler.AnnotationMethodMessageHandler
+ * @see org.springframework.messaging.simp.handler.SimpAnnotationMethodMessageHandler
  *
  * @since 4.0
  */

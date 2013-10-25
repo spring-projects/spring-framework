@@ -21,7 +21,7 @@ import org.springframework.util.ObjectUtils;
 /**
  * Simple test entity for use with caching tests.
  *
- * @author Michael Plšd
+ * @author Michael Plod
  */
 public class TestEntity {
 

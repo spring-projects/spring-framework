@@ -41,13 +41,13 @@ import static org.junit.Assert.*;
 
 
 /**
- * Test fixture for {@link AnnotationMethodMessageHandler}.
+ * Test fixture for {@link SimpAnnotationMethodMessageHandler}.
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  */
-public class AnnotationMethodMessageHandlerTests {
+public class SimpAnnotationMethodMessageHandlerTests {
 
-	private TestAnnotationMethodMessageHandler messageHandler;
+	private TestSimpAnnotationMethodMessageHandler messageHandler;
 
 	private TestController testController;
 
@@ -56,7 +56,7 @@ public class AnnotationMethodMessageHandlerTests {
 	public void setup() {
 		MessageChannel channel = Mockito.mock(MessageChannel.class);
 		SimpMessageSendingOperations brokerTemplate = new SimpMessagingTemplate(channel);
-		this.messageHandler = new TestAnnotationMethodMessageHandler(brokerTemplate, channel);
+		this.messageHandler = new TestSimpAnnotationMethodMessageHandler(brokerTemplate, channel);
 		this.messageHandler.setApplicationContext(new StaticApplicationContext());
 		this.messageHandler.afterPropertiesSet();
 
@@ -69,7 +69,7 @@ public class AnnotationMethodMessageHandlerTests {
 	@Test
 	public void headerArgumentResolution() {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
-		headers.setDestination("/headers");
+		headers.setDestination("/pre/headers");
 		headers.setHeader("foo", "bar");
 		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 		this.messageHandler.handleMessage(message);
@@ -87,7 +87,7 @@ public class AnnotationMethodMessageHandlerTests {
 	@Test
 	public void messageMappingPathVariableResolution() {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
-		headers.setDestination("/message/bar/value");
+		headers.setDestination("/pre/message/bar/value");
 		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 		this.messageHandler.handleMessage(message);
 
@@ -99,7 +99,7 @@ public class AnnotationMethodMessageHandlerTests {
 	@Test
 	public void subscribeEventPathVariableResolution() {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.SUBSCRIBE);
-		headers.setDestination("/sub/bar/value");
+		headers.setDestination("/pre/sub/bar/value");
 		Message<?> message = MessageBuilder.withPayload(new byte[0])
 				.copyHeaders(headers.toMap()).build();
 		this.messageHandler.handleMessage(message);
@@ -112,7 +112,7 @@ public class AnnotationMethodMessageHandlerTests {
 	@Test
 	public void antPatchMatchWildcard() {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
-		headers.setDestination("/pathmatch/wildcard/test");
+		headers.setDestination("/pre/pathmatch/wildcard/test");
 		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 		this.messageHandler.handleMessage(message);
 
@@ -122,7 +122,7 @@ public class AnnotationMethodMessageHandlerTests {
 	@Test
 	public void bestMatchWildcard() {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
-		headers.setDestination("/bestmatch/bar/path");
+		headers.setDestination("/pre/bestmatch/bar/path");
 		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 		this.messageHandler.handleMessage(message);
 
@@ -133,7 +133,7 @@ public class AnnotationMethodMessageHandlerTests {
 	@Test
 	public void simpleBinding() {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
-		headers.setDestination("/binding/id/12");
+		headers.setDestination("/pre/binding/id/12");
 		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 		this.messageHandler.handleMessage(message);
 
@@ -142,9 +142,10 @@ public class AnnotationMethodMessageHandlerTests {
 		assertEquals(12L, this.testController.arguments.get("id"));
 	}
 
-	private static class TestAnnotationMethodMessageHandler extends AnnotationMethodMessageHandler {
 
-		public TestAnnotationMethodMessageHandler(SimpMessageSendingOperations brokerTemplate,
+	private static class TestSimpAnnotationMethodMessageHandler extends SimpAnnotationMethodMessageHandler {
+
+		public TestSimpAnnotationMethodMessageHandler(SimpMessageSendingOperations brokerTemplate,
 				MessageChannel webSocketResponseChannel) {
 
 			super(brokerTemplate, webSocketResponseChannel);
@@ -157,6 +158,8 @@ public class AnnotationMethodMessageHandlerTests {
 
 
 	@Controller
+	@MessageMapping("/pre")
+	@SubscribeEvent("/pre")
 	private static class TestController {
 
 		private String method;

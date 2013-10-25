@@ -98,7 +98,6 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 
 	/**
 	 * Private constructor accepting a collection of patterns.
-	 * @param fileExtensionResolver
 	 */
 	private PatternsRequestCondition(Collection<String> patterns, UrlPathHelper urlPathHelper,
 			PathMatcher pathMatcher, boolean useSuffixPatternMatch, boolean useTrailingSlashMatch,

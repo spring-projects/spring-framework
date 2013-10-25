@@ -39,17 +39,17 @@ import org.springframework.util.Assert;
  */
 public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
-	public static final String CONNECT_MESSAGE_HEADER = "connectMessage";
+	public static final String CONNECT_MESSAGE_HEADER = "simpConnectMessage";
 
-	public static final String DESTINATION_HEADER = "destination";
+	public static final String DESTINATION_HEADER = "simpDestination";
 
-	public static final String MESSAGE_TYPE_HEADER = "messageType";
+	public static final String MESSAGE_TYPE_HEADER = "simpMessageType";
 
-	public static final String SESSION_ID_HEADER = "sessionId";
+	public static final String SESSION_ID_HEADER = "simpSessionId";
 
-	public static final String SUBSCRIPTION_ID_HEADER = "subscriptionId";
+	public static final String SUBSCRIPTION_ID_HEADER = "simpSubscriptionId";
 
-	public static final String USER_HEADER = "user";
+	public static final String USER_HEADER = "simpUser";
 
 
 	/**

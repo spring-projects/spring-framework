@@ -337,7 +337,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 
 	/**
-	 * A temporary container for a mapping matched to a request.
+	 * A thin wrapper around a matched HandlerMethod and its matched mapping for
+	 * the purpose of comparing the best match with a comparator in the context
+	 * of the current request.
 	 */
 	private class Match {
 

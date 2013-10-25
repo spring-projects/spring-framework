@@ -40,7 +40,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final List<HandlerMethodArgumentResolver> argumentResolvers =	new LinkedList<HandlerMethodArgumentResolver>();
+	private final List<HandlerMethodArgumentResolver> argumentResolvers = new LinkedList<HandlerMethodArgumentResolver>();
 
 	private final Map<MethodParameter, HandlerMethodArgumentResolver> argumentResolverCache =
 			new ConcurrentHashMap<MethodParameter, HandlerMethodArgumentResolver>(256);
@@ -51,6 +51,13 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	 */
 	public List<HandlerMethodArgumentResolver> getResolvers() {
 		return Collections.unmodifiableList(this.argumentResolvers);
+	}
+
+	/**
+	 * Clear the list of configured resolvers.
+	 */
+	public void clear() {
+		this.argumentResolvers.clear();
 	}
 
 	/**

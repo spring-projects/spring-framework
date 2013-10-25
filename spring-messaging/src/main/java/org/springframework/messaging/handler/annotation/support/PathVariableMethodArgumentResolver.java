@@ -23,7 +23,6 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.PathVariable;
 import org.springframework.messaging.handler.annotation.ValueConstants;
-import org.springframework.messaging.simp.handler.AnnotationMethodMessageHandler;
 
 /**
  * Resolves method parameters annotated with {@link PathVariable @PathVariable}.
@@ -38,6 +37,9 @@ import org.springframework.messaging.simp.handler.AnnotationMethodMessageHandler
  * @since 4.0
  */
 public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
+
+	public static final String PATH_TEMPLATE_VARIABLES_HEADER =
+			PathVariableMethodArgumentResolver.class.getSimpleName() + ".templateVariables";
 
 
 	public PathVariableMethodArgumentResolver(ConversionService cs) {
@@ -57,9 +59,8 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 
 	@Override
 	protected Object resolveArgumentInternal(MethodParameter parameter, Message<?> message, String name) throws Exception {
-		String headerName = AnnotationMethodMessageHandler.PATH_TEMPLATE_VARIABLES_HEADER;
 		@SuppressWarnings("unchecked")
-		Map<String, String> vars = (Map<String, String>) message.getHeaders().get(headerName);
+		Map<String, String> vars = (Map<String, String>) message.getHeaders().get(PATH_TEMPLATE_VARIABLES_HEADER);
 		return (vars != null) ? vars.get(name) : null;
 	}
 

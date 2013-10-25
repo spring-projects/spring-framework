@@ -30,29 +30,29 @@ import static org.junit.Assert.*;
 
 
 /**
- * Test fixture for {@link ExceptionHandlerMethodResolver} tests.
+ * Test fixture for {@link AnnotationExceptionHandlerMethodResolver} tests.
  *
  * @author Rossen Stoyanchev
  */
-public class ExceptionHandlerMethodResolverTests {
+public class AnnotationExceptionHandlerMethodResolverTests {
 
 	@Test
 	public void resolveMethodFromAnnotation() {
-		ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(ExceptionController.class);
+		AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(ExceptionController.class);
 		IOException exception = new IOException();
 		assertEquals("handleIOException", resolver.resolveMethod(exception).getName());
 	}
 
 	@Test
 	public void resolveMethodFromArgument() {
-		ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(ExceptionController.class);
+		AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(ExceptionController.class);
 		IllegalArgumentException exception = new IllegalArgumentException();
 		assertEquals("handleIllegalArgumentException", resolver.resolveMethod(exception).getName());
 	}
 
 	@Test
 	public void resolveMethodExceptionSubType() {
-		ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(ExceptionController.class);
+		AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(ExceptionController.class);
 		IOException ioException = new FileNotFoundException();
 		assertEquals("handleIOException", resolver.resolveMethod(ioException).getName());
 		SocketException bindException = new BindException();
@@ -61,14 +61,14 @@ public class ExceptionHandlerMethodResolverTests {
 
 	@Test
 	public void resolveMethodBestMatch() {
-		ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(ExceptionController.class);
+		AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(ExceptionController.class);
 		SocketException exception = new SocketException();
 		assertEquals("handleSocketException", resolver.resolveMethod(exception).getName());
 	}
 
 	@Test
 	public void resolveMethodNoMatch() {
-		ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(ExceptionController.class);
+		AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(ExceptionController.class);
 		Exception exception = new Exception();
 		assertNull("1st lookup", resolver.resolveMethod(exception));
 		assertNull("2nd lookup from cache", resolver.resolveMethod(exception));
@@ -76,19 +76,19 @@ public class ExceptionHandlerMethodResolverTests {
 
 	@Test
 	public void resolveMethodInherited() {
-		ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(InheritedController.class);
+		AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(InheritedController.class);
 		IOException exception = new IOException();
 		assertEquals("handleIOException", resolver.resolveMethod(exception).getName());
 	}
 
 	@Test(expected = IllegalStateException.class)
 	public void ambiguousExceptionMapping() {
-		new ExceptionHandlerMethodResolver(AmbiguousController.class);
+		new AnnotationExceptionHandlerMethodResolver(AmbiguousController.class);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void noExceptionMapping() {
-		new ExceptionHandlerMethodResolver(NoExceptionController.class);
+		new AnnotationExceptionHandlerMethodResolver(NoExceptionController.class);
 	}
 
 	@Controller

@@ -34,7 +34,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.handler.websocket.SubProtocolWebSocketHandler;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.annotation.SubscribeEvent;
-import org.springframework.messaging.simp.handler.AnnotationMethodMessageHandler;
+import org.springframework.messaging.simp.handler.SimpAnnotationMethodMessageHandler;
 import org.springframework.messaging.simp.handler.MutableUserQueueSuffixResolver;
 import org.springframework.messaging.simp.handler.SimpleBrokerMessageHandler;
 import org.springframework.messaging.simp.handler.UserDestinationMessageHandler;
@@ -103,7 +103,7 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		List<MessageHandler> values = captor.getAllValues();
 		assertEquals(3, values.size());
 
-		assertTrue(values.contains(cxtSimpleBroker.getBean(AnnotationMethodMessageHandler.class)));
+		assertTrue(values.contains(cxtSimpleBroker.getBean(SimpAnnotationMethodMessageHandler.class)));
 		assertTrue(values.contains(cxtSimpleBroker.getBean(UserDestinationMessageHandler.class)));
 		assertTrue(values.contains(cxtSimpleBroker.getBean(SimpleBrokerMessageHandler.class)));
 	}
@@ -117,7 +117,7 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 
 		List<MessageHandler> values = captor.getAllValues();
 		assertEquals(3, values.size());
-		assertTrue(values.contains(cxtStompBroker.getBean(AnnotationMethodMessageHandler.class)));
+		assertTrue(values.contains(cxtStompBroker.getBean(SimpAnnotationMethodMessageHandler.class)));
 		assertTrue(values.contains(cxtStompBroker.getBean(UserDestinationMessageHandler.class)));
 		assertTrue(values.contains(cxtStompBroker.getBean(StompBrokerRelayMessageHandler.class)));
 	}
@@ -152,7 +152,7 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 	public void webSocketResponseChannelUsedByAnnotatedMethod() {
 
 		SubscribableChannel channel = this.cxtSimpleBroker.getBean("webSocketResponseChannel", SubscribableChannel.class);
-		AnnotationMethodMessageHandler messageHandler = this.cxtSimpleBroker.getBean(AnnotationMethodMessageHandler.class);
+		SimpAnnotationMethodMessageHandler messageHandler = this.cxtSimpleBroker.getBean(SimpAnnotationMethodMessageHandler.class);
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
 		headers.setSessionId("sess1");
@@ -235,7 +235,7 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 	@Test
 	public void brokerChannelUsedByAnnotatedMethod() {
 		SubscribableChannel channel = this.cxtSimpleBroker.getBean("brokerChannel", SubscribableChannel.class);
-		AnnotationMethodMessageHandler messageHandler = this.cxtSimpleBroker.getBean(AnnotationMethodMessageHandler.class);
+		SimpAnnotationMethodMessageHandler messageHandler = this.cxtSimpleBroker.getBean(SimpAnnotationMethodMessageHandler.class);
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
 		headers.setDestination("/foo");

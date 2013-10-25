@@ -28,7 +28,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.PathVariable;
-import org.springframework.messaging.simp.handler.AnnotationMethodMessageHandler;
+import org.springframework.messaging.simp.handler.SimpAnnotationMethodMessageHandler;
 import org.springframework.messaging.support.MessageBuilder;
 
 import static org.junit.Assert.*;
@@ -74,7 +74,7 @@ public class PathVariableMethodArgumentResolverTests {
 		pathParams.put("foo","bar");
 		pathParams.put("name","value");
 		Message<byte[]> message = MessageBuilder.withPayload(new byte[0])
-				.setHeader(AnnotationMethodMessageHandler.PATH_TEMPLATE_VARIABLES_HEADER, pathParams).build();
+				.setHeader(PathVariableMethodArgumentResolver.PATH_TEMPLATE_VARIABLES_HEADER, pathParams).build();
 		Object result = this.resolver.resolveArgument(this.paramAnnotated, message);
 		assertEquals("bar",result);
 		result = this.resolver.resolveArgument(this.paramAnnotatedValue, message);

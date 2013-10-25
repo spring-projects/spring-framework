@@ -62,7 +62,7 @@ import static org.springframework.messaging.simp.stomp.StompTextMessageBuilder.*
  * @author Rossen Stoyanchev
  */
 @RunWith(Parameterized.class)
-public class AnnotationMethodIntegrationTests extends AbstractWebSocketIntegrationTests {
+public class SimpAnnotationMethodIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 	@Parameters
 	public static Iterable<Object[]> arguments() {
@@ -190,7 +190,7 @@ public class AnnotationMethodIntegrationTests extends AbstractWebSocketIntegrati
 	}
 
 	@Configuration
-	@ComponentScan(basePackageClasses=AnnotationMethodIntegrationTests.class,
+	@ComponentScan(basePackageClasses=SimpAnnotationMethodIntegrationTests.class,
 			useDefaultFilters=false,
 			includeFilters=@ComponentScan.Filter(IntegrationTestController.class))
 	static class TestMessageBrokerConfigurer implements WebSocketMessageBrokerConfigurer {

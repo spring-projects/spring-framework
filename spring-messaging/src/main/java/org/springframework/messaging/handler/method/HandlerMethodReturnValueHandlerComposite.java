@@ -17,6 +17,7 @@
 package org.springframework.messaging.handler.method;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -36,6 +37,20 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 
 	private final List<HandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>();
 
+
+	/**
+	 * Return a read-only list with the configured handlers.
+	 */
+	public List<HandlerMethodReturnValueHandler> getReturnValueHandlers() {
+		return Collections.unmodifiableList(this.returnValueHandlers);
+	}
+
+	/**
+	 * Clear the list of configured handlers.
+	 */
+	public void clear() {
+		this.returnValueHandlers.clear();
+	}
 
 	/**
 	 * Add the given {@link HandlerMethodReturnValueHandler}.

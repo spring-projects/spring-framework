@@ -25,11 +25,8 @@ import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.handler.websocket.SubProtocolWebSocketHandler;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.handler.AbstractBrokerMessageHandler;
-import org.springframework.messaging.simp.handler.AnnotationMethodMessageHandler;
-import org.springframework.messaging.simp.handler.MutableUserQueueSuffixResolver;
-import org.springframework.messaging.simp.handler.SimpleUserQueueSuffixResolver;
-import org.springframework.messaging.simp.handler.UserDestinationMessageHandler;
+import org.springframework.messaging.simp.handler.*;
+import org.springframework.messaging.simp.handler.SimpAnnotationMethodMessageHandler;
 import org.springframework.messaging.support.channel.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.support.converter.CompositeMessageConverter;
@@ -139,9 +136,9 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 	// Handling of messages by the application
 
 	@Bean
-	public AnnotationMethodMessageHandler annotationMethodMessageHandler() {
-		AnnotationMethodMessageHandler handler =
-				new AnnotationMethodMessageHandler(brokerMessagingTemplate(), webSocketResponseChannel());
+	public SimpAnnotationMethodMessageHandler annotationMethodMessageHandler() {
+		SimpAnnotationMethodMessageHandler handler =
+				new SimpAnnotationMethodMessageHandler(brokerMessagingTemplate(), webSocketResponseChannel());
 		handler.setDestinationPrefixes(getMessageBrokerConfigurer().getAnnotationMethodDestinationPrefixes());
 		handler.setMessageConverter(simpMessageConverter());
 		webSocketRequestChannel().subscribe(handler);
