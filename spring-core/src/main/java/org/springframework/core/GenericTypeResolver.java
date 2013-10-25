@@ -251,27 +251,13 @@ public abstract class GenericTypeResolver {
 	/**
 	 * Resolve the specified generic type against the given TypeVariable map.
 	 * @param genericType the generic type to resolve
-	 * @param typeVariableMap the TypeVariable Map to resolved against
+	 * @param map the TypeVariable Map to resolved against
 	 * @return the type if it resolves to a Class, or {@code Object.class} otherwise
 	 * @deprecated as of Spring 4.0 in favor of {@link ResolvableType}
 	 */
 	@Deprecated
-	public static Class<?> resolveType(Type genericType, final Map<TypeVariable, Type> typeVariableMap) {
-
-		ResolvableType.VariableResolver variableResolver = new ResolvableType.VariableResolver() {
-			@Override
-			public ResolvableType resolveVariable(TypeVariable<?> variable) {
-				Type type = typeVariableMap.get(variable);
-				return (type == null ? null : ResolvableType.forType(type));
-			}
-
-			@Override
-			public Object getSource() {
-				return typeVariableMap;
-			}
-		};
-
-		return ResolvableType.forType(genericType, variableResolver).resolve(Object.class);
+	public static Class<?> resolveType(Type genericType, Map<TypeVariable, Type> map) {
+		return ResolvableType.forType(genericType, new TypeVariableMapVariableResolver(map)).resolve(Object.class);
 	}
 
 	/**
@@ -312,6 +298,28 @@ public abstract class GenericTypeResolver {
 			if (type.resolve().isMemberClass()) {
 				buildTypeVariableMap(ResolvableType.forClass(type.resolve().getEnclosingClass()), typeVariableMap);
 			}
+		}
+	}
+
+
+	@SuppressWarnings("serial")
+	private static class TypeVariableMapVariableResolver implements ResolvableType.VariableResolver {
+
+		private final Map<TypeVariable, Type> typeVariableMap;
+
+		public TypeVariableMapVariableResolver(Map<TypeVariable, Type> typeVariableMap) {
+			this.typeVariableMap = typeVariableMap;
+		}
+
+		@Override
+		public ResolvableType resolveVariable(TypeVariable<?> variable) {
+			Type type = this.typeVariableMap.get(variable);
+			return (type != null ? ResolvableType.forType(type) : null);
+		}
+
+		@Override
+		public Object getSource() {
+			return this.typeVariableMap;
 		}
 	}
 

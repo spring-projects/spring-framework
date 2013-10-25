@@ -57,24 +57,28 @@ public class GenericTypeAwareAutowireCandidateResolver implements AutowireCandid
 			// if explicitly false, do not proceed with any other checks
 			return false;
 		}
-		return (descriptor == null || checkGenericTypeMatch(bdHolder, descriptor.getResolvableType()));
+		return (descriptor == null || checkGenericTypeMatch(bdHolder, descriptor));
 	}
 
 	/**
 	 * Match the given dependency type with its generic type information
 	 * against the given candidate bean definition.
 	 */
-	protected boolean checkGenericTypeMatch(BeanDefinitionHolder bdHolder, ResolvableType dependencyType) {
-		if (dependencyType.getType() instanceof Class) {
+	protected boolean checkGenericTypeMatch(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
+		ResolvableType dependencyType = descriptor.getResolvableType();
+		if (!dependencyType.hasGenerics()) {
 			// No generic type -> we know it's a Class type-match, so no need to check again.
 			return true;
 		}
-		RootBeanDefinition bd = (RootBeanDefinition) bdHolder.getBeanDefinition();
 		ResolvableType targetType = null;
-		if (bd.getResolvedFactoryMethod() != null) {
+		RootBeanDefinition rbd = null;
+		if (bdHolder.getBeanDefinition() instanceof RootBeanDefinition) {
+			rbd = (RootBeanDefinition) bdHolder.getBeanDefinition();
+		}
+		if (rbd != null && rbd.getResolvedFactoryMethod() != null) {
 			// Should typically be set for any kind of factory method, since the BeanFactory
 			// pre-resolves them before reaching out to the AutowireCandidateResolver...
-			targetType = ResolvableType.forMethodReturnType(bd.getResolvedFactoryMethod());
+			targetType = ResolvableType.forMethodReturnType(rbd.getResolvedFactoryMethod());
 		}
 		if (targetType == null) {
 			// Regular case: straight bean instance, with BeanFactory available.
@@ -86,14 +90,20 @@ public class GenericTypeAwareAutowireCandidateResolver implements AutowireCandid
 			}
 			// Fallback: no BeanFactory set, or no type resolvable through it
 			// -> best-effort match against the target class if applicable.
-			if (targetType == null && bd.hasBeanClass() && bd.getFactoryMethodName() == null) {
-				Class<?> beanClass = bd.getBeanClass();
+			if (targetType == null && rbd != null && rbd.hasBeanClass() && rbd.getFactoryMethodName() == null) {
+				Class<?> beanClass = rbd.getBeanClass();
 				if (!FactoryBean.class.isAssignableFrom(beanClass)) {
 					targetType = ResolvableType.forClass(ClassUtils.getUserClass(beanClass));
 				}
 			}
 		}
-		return (targetType == null || dependencyType.isAssignableFrom(targetType));
+		if (targetType == null) {
+			return true;
+		}
+		if (descriptor.fallbackMatchAllowed() && targetType.hasUnresolvableGenerics()) {
+			return descriptor.getDependencyType().isAssignableFrom(targetType.getRawClass());
+		}
+		return dependencyType.isAssignableFrom(targetType);
 	}
 
 

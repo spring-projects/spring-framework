@@ -265,7 +265,8 @@ public class MethodParameter {
 			Type type = getGenericParameterType();
 			if (type instanceof ParameterizedType) {
 				Integer index = getTypeIndexForCurrentLevel();
-				Type arg = ((ParameterizedType) type).getActualTypeArguments()[index != null ? index : 0];
+				Type[] args = ((ParameterizedType) type).getActualTypeArguments();
+				Type arg = args[index != null ? index : args.length - 1];
 				if (arg instanceof Class) {
 					return (Class) arg;
 				}

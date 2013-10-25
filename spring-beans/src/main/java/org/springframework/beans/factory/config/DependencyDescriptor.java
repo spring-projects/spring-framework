@@ -213,6 +213,29 @@ public class DependencyDescriptor implements Serializable {
 	}
 
 	/**
+	 * Return whether a fallback match is allowed.
+	 * <p>This is {@code false} by default but may be overridden to return {@code true} in order
+	 * to suggest to a {@link org.springframework.beans.factory.support.AutowireCandidateResolver}
+	 * that a fallback match is acceptable as well.
+	 */
+	public boolean fallbackMatchAllowed() {
+		return false;
+	}
+
+	/**
+	 * Return a variant of this descriptor that is intended for a fallback match.
+	 * @see #fallbackMatchAllowed()
+	 */
+	public DependencyDescriptor forFallbackMatch() {
+		return new DependencyDescriptor(this) {
+			@Override
+			public boolean fallbackMatchAllowed() {
+				return true;
+			}
+		};
+	}
+
+	/**
 	 * Initialize parameter name discovery for the underlying method parameter, if any.
 	 * <p>This method does not actually try to retrieve the parameter name at
 	 * this point; it just allows discovery to happen when the application calls
@@ -241,7 +264,8 @@ public class DependencyDescriptor implements Serializable {
 			if (this.nestingLevel > 1) {
 				Type type = this.field.getGenericType();
 				if (type instanceof ParameterizedType) {
-					Type arg = ((ParameterizedType) type).getActualTypeArguments()[0];
+					Type[] args = ((ParameterizedType) type).getActualTypeArguments();
+					Type arg = args[args.length - 1];
 					if (arg instanceof Class) {
 						return (Class) arg;
 					}

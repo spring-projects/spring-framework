@@ -48,23 +48,20 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.runners.MockitoJUnitRunner;
+
 import org.springframework.core.ResolvableType.VariableResolver;
 import org.springframework.util.MultiValueMap;
 
-import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
- * Tests for {@link ResolvableType}.
- *
  * @author Phillip Webb
  */
 @SuppressWarnings("rawtypes")
 @RunWith(MockitoJUnitRunner.class)
 public class ResolvableTypeTests {
-
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -1070,7 +1067,7 @@ public class ResolvableTypeTests {
 	@Test
 	public void forClassWithMismatchedGenerics() throws Exception {
 		thrown.expect(IllegalArgumentException.class);
-		thrown.expectMessage("Missmatched number of generics specified");
+		thrown.expectMessage("Mismatched number of generics specified");
 		ResolvableType.forClassWithGenerics(Map.class, Integer.class);
 	}
 
