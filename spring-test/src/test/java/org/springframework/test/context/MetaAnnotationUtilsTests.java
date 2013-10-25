@@ -71,16 +71,8 @@ public class MetaAnnotationUtilsTests {
 	}
 
 	@Test
-	public void findAnnotationDescriptorWithInheritedClassLevelAnnotation() throws Exception {
+	public void findAnnotationDescriptorWithInheritedAnnotationOnClass() throws Exception {
 		// Note: @Transactional is inherited
-
-		assertEquals(InheritedAnnotationInterface.class,
-			findAnnotationDescriptor(InheritedAnnotationInterface.class, Transactional.class).getDeclaringClass());
-		assertEquals(InheritedAnnotationInterface.class,
-			findAnnotationDescriptor(SubInheritedAnnotationInterface.class, Transactional.class).getDeclaringClass());
-		assertEquals(InheritedAnnotationInterface.class,
-			findAnnotationDescriptor(SubSubInheritedAnnotationInterface.class, Transactional.class).getDeclaringClass());
-
 		assertEquals(InheritedAnnotationClass.class,
 			findAnnotationDescriptor(InheritedAnnotationClass.class, Transactional.class).getDeclaringClass());
 		assertEquals(InheritedAnnotationClass.class,
@@ -88,19 +80,29 @@ public class MetaAnnotationUtilsTests {
 	}
 
 	@Test
-	public void findAnnotationDescriptorWithNonInheritedClassLevelAnnotation() throws Exception {
-		// Note: @Order is not inherited, but findAnnotationDescriptor() should still find
-		// it.
+	public void findAnnotationDescriptorWithInheritedAnnotationOnInterface() throws Exception {
+		// Note: @Transactional is inherited
+		assertEquals(InheritedAnnotationInterface.class,
+			findAnnotationDescriptor(InheritedAnnotationInterface.class, Transactional.class).getDeclaringClass());
+		assertNull(findAnnotationDescriptor(SubInheritedAnnotationInterface.class, Transactional.class));
+		assertNull(findAnnotationDescriptor(SubSubInheritedAnnotationInterface.class, Transactional.class));
+	}
 
-		assertEquals(NonInheritedAnnotationInterface.class,
-			findAnnotationDescriptor(NonInheritedAnnotationInterface.class, Order.class).getDeclaringClass());
-		assertEquals(NonInheritedAnnotationInterface.class,
-			findAnnotationDescriptor(SubNonInheritedAnnotationInterface.class, Order.class).getDeclaringClass());
-
+	@Test
+	public void findAnnotationDescriptorForNonInheritedAnnotationOnClass() throws Exception {
+		// Note: @Order is not inherited.
 		assertEquals(NonInheritedAnnotationClass.class,
 			findAnnotationDescriptor(NonInheritedAnnotationClass.class, Order.class).getDeclaringClass());
 		assertEquals(NonInheritedAnnotationClass.class,
 			findAnnotationDescriptor(SubNonInheritedAnnotationClass.class, Order.class).getDeclaringClass());
+	}
+
+	@Test
+	public void findAnnotationDescriptorForNonInheritedAnnotationOnInterface() throws Exception {
+		// Note: @Order is not inherited.
+		assertEquals(NonInheritedAnnotationInterface.class,
+			findAnnotationDescriptor(NonInheritedAnnotationInterface.class, Order.class).getDeclaringClass());
+		assertNull(findAnnotationDescriptor(SubNonInheritedAnnotationInterface.class, Order.class));
 	}
 
 	@Test
@@ -128,8 +130,7 @@ public class MetaAnnotationUtilsTests {
 
 	@Test
 	public void findAnnotationDescriptorForClassWithMetaAnnotatedInterface() {
-		assertComponentOnStereotype(ClassWithMetaAnnotatedInterface.class, InterfaceWithMetaAnnotation.class, "meta1",
-			Meta1.class);
+		assertNull(findAnnotationDescriptor(ClassWithMetaAnnotatedInterface.class, Component.class));
 	}
 
 	@Test
@@ -155,19 +156,8 @@ public class MetaAnnotationUtilsTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void findAnnotationDescriptorForTypesWithInheritedClassLevelAnnotation() throws Exception {
+	public void findAnnotationDescriptorForTypesWithInheritedAnnotationOnClass() throws Exception {
 		// Note: @Transactional is inherited
-
-		assertEquals(
-			InheritedAnnotationInterface.class,
-			findAnnotationDescriptorForTypes(InheritedAnnotationInterface.class, Transactional.class).getDeclaringClass());
-		assertEquals(
-			InheritedAnnotationInterface.class,
-			findAnnotationDescriptorForTypes(SubInheritedAnnotationInterface.class, Transactional.class).getDeclaringClass());
-		assertEquals(
-			InheritedAnnotationInterface.class,
-			findAnnotationDescriptorForTypes(SubSubInheritedAnnotationInterface.class, Transactional.class).getDeclaringClass());
-
 		assertEquals(InheritedAnnotationClass.class,
 			findAnnotationDescriptorForTypes(InheritedAnnotationClass.class, Transactional.class).getDeclaringClass());
 		assertEquals(
@@ -177,19 +167,32 @@ public class MetaAnnotationUtilsTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void findAnnotationDescriptorForTypesWithNonInheritedClassLevelAnnotation() throws Exception {
-		// Note: @Order is not inherited, but findAnnotationDescriptor() should still find
-		// it.
+	public void findAnnotationDescriptorForTypesWithInheritedAnnotationOnInterface() throws Exception {
+		// Note: @Transactional is inherited
+		assertEquals(
+			InheritedAnnotationInterface.class,
+			findAnnotationDescriptorForTypes(InheritedAnnotationInterface.class, Transactional.class).getDeclaringClass());
+		assertNull(findAnnotationDescriptorForTypes(SubInheritedAnnotationInterface.class, Transactional.class));
+		assertNull(findAnnotationDescriptorForTypes(SubSubInheritedAnnotationInterface.class, Transactional.class));
+	}
 
-		assertEquals(NonInheritedAnnotationInterface.class,
-			findAnnotationDescriptorForTypes(NonInheritedAnnotationInterface.class, Order.class).getDeclaringClass());
-		assertEquals(NonInheritedAnnotationInterface.class,
-			findAnnotationDescriptorForTypes(SubNonInheritedAnnotationInterface.class, Order.class).getDeclaringClass());
-
+	@Test
+	@SuppressWarnings("unchecked")
+	public void findAnnotationDescriptorForTypesForNonInheritedAnnotationOnClass() throws Exception {
+		// Note: @Order is not inherited.
 		assertEquals(NonInheritedAnnotationClass.class,
 			findAnnotationDescriptorForTypes(NonInheritedAnnotationClass.class, Order.class).getDeclaringClass());
 		assertEquals(NonInheritedAnnotationClass.class,
 			findAnnotationDescriptorForTypes(SubNonInheritedAnnotationClass.class, Order.class).getDeclaringClass());
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void findAnnotationDescriptorForTypesForNonInheritedAnnotationOnInterface() throws Exception {
+		// Note: @Order is not inherited.
+		assertEquals(NonInheritedAnnotationInterface.class,
+			findAnnotationDescriptorForTypes(NonInheritedAnnotationInterface.class, Order.class).getDeclaringClass());
+		assertNull(findAnnotationDescriptorForTypes(SubNonInheritedAnnotationInterface.class, Order.class));
 	}
 
 	@Test
@@ -217,9 +220,10 @@ public class MetaAnnotationUtilsTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void findAnnotationDescriptorForTypesForClassWithMetaAnnotatedInterface() {
-		assertComponentOnStereotypeForMultipleCandidateTypes(ClassWithMetaAnnotatedInterface.class,
-			InterfaceWithMetaAnnotation.class, "meta1", Meta1.class);
+		assertNull(findAnnotationDescriptorForTypes(ClassWithMetaAnnotatedInterface.class, Service.class,
+			Component.class, Order.class, Transactional.class));
 	}
 
 	@Test

@@ -40,8 +40,10 @@ abstract class MetaAnnotationUtils {
 	 * TODO Document findAnnotationDescriptor().
 	 *
 	 * @param clazz the class to look for annotations on
-	 * @param annotationType the annotation class to look for
-	 * @return the annotation found, or {@code null} if none found
+	 * @param annotationType the annotation class to look for, both locally and
+	 * as a meta-annotation
+	 * @return the corresponding annotation descriptor if the annotation was found;
+	 * otherwise {@code null}
 	 */
 	public static <T extends Annotation> AnnotationDescriptor<T> findAnnotationDescriptor(Class<?> clazz,
 			Class<T> annotationType) {
@@ -67,14 +69,6 @@ abstract class MetaAnnotationUtils {
 			}
 		}
 
-		// Declared on an interface?
-		for (Class<?> ifc : clazz.getInterfaces()) {
-			AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(ifc, annotationType);
-			if (descriptor != null) {
-				return descriptor;
-			}
-		}
-
 		// Declared on a superclass?
 		return findAnnotationDescriptor(clazz.getSuperclass(), annotationType);
 	}
@@ -83,8 +77,10 @@ abstract class MetaAnnotationUtils {
 	 * TODO Document findAnnotationDescriptorForTypes().
 	 *
 	 * @param clazz the class to look for annotations on
-	 * @param annotationTypes the types of annotations to look for
-	 * @return the annotation found, or {@code null} if none found
+	 * @param annotationTypes the types of annotations to look for, both locally
+	 * and as meta-annotations
+	 * @return the corresponding annotation descriptor if one of the annotations
+	 * was found; otherwise {@code null}
 	 */
 	@SuppressWarnings("unchecked")
 	public static UntypedAnnotationDescriptor findAnnotationDescriptorForTypes(Class<?> clazz,
@@ -112,14 +108,6 @@ abstract class MetaAnnotationUtils {
 						return new UntypedAnnotationDescriptor(clazz, stereotype, annotation);
 					}
 				}
-			}
-		}
-
-		// Declared on an interface?
-		for (Class<?> ifc : clazz.getInterfaces()) {
-			UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(ifc, annotationTypes);
-			if (descriptor != null) {
-				return descriptor;
 			}
 		}
 

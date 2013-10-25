@@ -117,8 +117,7 @@ public class AnnotationUtilsTests {
 		// inherited class-level annotation; note: @Transactional is inherited
 		assertEquals(InheritedAnnotationInterface.class,
 			findAnnotationDeclaringClass(Transactional.class, InheritedAnnotationInterface.class));
-		assertEquals(InheritedAnnotationInterface.class,
-			findAnnotationDeclaringClass(Transactional.class, SubInheritedAnnotationInterface.class));
+		assertNull(findAnnotationDeclaringClass(Transactional.class, SubInheritedAnnotationInterface.class));
 		assertEquals(InheritedAnnotationClass.class,
 			findAnnotationDeclaringClass(Transactional.class, InheritedAnnotationClass.class));
 		assertEquals(InheritedAnnotationClass.class,
@@ -128,8 +127,7 @@ public class AnnotationUtilsTests {
 		// but findAnnotationDeclaringClass() should still find it on classes.
 		assertEquals(NonInheritedAnnotationInterface.class,
 			findAnnotationDeclaringClass(Order.class, NonInheritedAnnotationInterface.class));
-		assertEquals(NonInheritedAnnotationInterface.class,
-			findAnnotationDeclaringClass(Order.class, SubNonInheritedAnnotationInterface.class));
+		assertNull(findAnnotationDeclaringClass(Order.class, SubNonInheritedAnnotationInterface.class));
 		assertEquals(NonInheritedAnnotationClass.class,
 			findAnnotationDeclaringClass(Order.class, NonInheritedAnnotationClass.class));
 		assertEquals(NonInheritedAnnotationClass.class,
