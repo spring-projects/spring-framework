@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,13 @@ package org.springframework.scripting.support;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.EncodedResource;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
@@ -49,41 +50,56 @@ public class ResourceScriptSource implements ScriptSource {
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final Resource resource;
+	private EncodedResource resource;
 
 	private long lastModified = -1;
 
 	private final Object lastModifiedMonitor = new Object();
 
-	private String encoding = "UTF-8";
 
 	/**
 	 * Create a new ResourceScriptSource for the given resource.
-	 * @param resource the Resource to load the script from
+	 * @param resource the EncodedResource to load the script from
 	 */
-	public ResourceScriptSource(Resource resource) {
+	public ResourceScriptSource(EncodedResource resource) {
 		Assert.notNull(resource, "Resource must not be null");
 		this.resource = resource;
 	}
+
+	/**
+	 * Create a new ResourceScriptSource for the given resource.
+	 * @param resource the Resource to load the script from (using UTF-8 encoding)
+	 */
+	public ResourceScriptSource(Resource resource) {
+		Assert.notNull(resource, "Resource must not be null");
+		this.resource = new EncodedResource(resource, "UTF-8");
+	}
+
 
 	/**
 	 * Return the {@link org.springframework.core.io.Resource} to load the
 	 * script from.
 	 */
 	public final Resource getResource() {
-		return this.resource;
+		return this.resource.getResource();
 	}
+
+	/**
+	 * Set the encoding used for reading the script resource.
+	 * <p>The default value for regular Resources is "UTF-8".
+	 * A {@code null} value implies the platform default.
+	 */
+	public void setEncoding(String encoding) {
+		this.resource = new EncodedResource(this.resource.getResource(), encoding);
+	}
+
 
 	@Override
 	public String getScriptAsString() throws IOException {
 		synchronized (this.lastModifiedMonitor) {
 			this.lastModified = retrieveLastModifiedTime();
 		}
-
-		InputStream stream = this.resource.getInputStream();
-		Reader reader = (StringUtils.hasText(encoding) ? new InputStreamReader(stream, encoding)
-				: new InputStreamReader(stream));
-
+		Reader reader = this.resource.getReader();
 		return FileCopyUtils.copyToString(reader);
 	}
 
@@ -101,10 +117,11 @@ public class ResourceScriptSource implements ScriptSource {
 	protected long retrieveLastModifiedTime() {
 		try {
 			return getResource().lastModified();
-		} catch (IOException ex) {
+		}
+		catch (IOException ex) {
 			if (logger.isDebugEnabled()) {
-				logger.debug(getResource() + " could not be resolved in the file system - "
-						+ "current timestamp not available for script modification check", ex);
+				logger.debug(getResource() + " could not be resolved in the file system - " +
+						"current timestamp not available for script modification check", ex);
 			}
 			return 0;
 		}
@@ -115,18 +132,9 @@ public class ResourceScriptSource implements ScriptSource {
 		return StringUtils.stripFilenameExtension(getResource().getFilename());
 	}
 
-	/**
-	 * Sets the encoding used for reading the script resource. The default value is "UTF-8".
-	 * A null value, implies the platform default.
-	 *
-	 * @param encoding charset encoding used for reading the script.
-	 */
-	public void setEncoding(String encoding) {
-		this.encoding = encoding;
-	}
-
 	@Override
 	public String toString() {
 		return this.resource.toString();
 	}
+
 }

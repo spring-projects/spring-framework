@@ -32,15 +32,6 @@ import static org.mockito.BDDMockito.*;
  */
 public class ResourceScriptSourceTests extends TestCase {
 
-	public void testCtorWithNullResource() throws Exception {
-		try {
-			new ResourceScriptSource(null);
-			fail("Must have thrown exception by this point.");
-		}
-		catch (IllegalArgumentException expected) {
-		}
-	}
-
 	public void testDoesNotPropagateFatalExceptionOnResourceThatCannotBeResolvedToAFile() throws Exception {
 		Resource resource = mock(Resource.class);
 		given(resource.lastModified()).willThrow(new IOException());

@@ -106,7 +106,7 @@ public class JRubyScriptFactoryTests {
 	@Test
 	public void testCtorWithNullScriptSourceLocator() throws Exception {
 		try {
-			new JRubyScriptFactory(null, new Class<?>[]{Messenger.class});
+			new JRubyScriptFactory(null, Messenger.class);
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
@@ -116,7 +116,7 @@ public class JRubyScriptFactoryTests {
 	@Test
 	public void testCtorWithEmptyScriptSourceLocator() throws Exception {
 		try {
-			new JRubyScriptFactory("", new Class<?>[]{Messenger.class});
+			new JRubyScriptFactory("", Messenger.class);
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
@@ -126,7 +126,7 @@ public class JRubyScriptFactoryTests {
 	@Test
 	public void testCtorWithWhitespacedScriptSourceLocator() throws Exception {
 		try {
-			new JRubyScriptFactory("\n   ", new Class<?>[]{Messenger.class});
+			new JRubyScriptFactory("\n   ", Messenger.class);
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
@@ -136,7 +136,7 @@ public class JRubyScriptFactoryTests {
 	@Test
 	public void testCtorWithNullScriptInterfacesArray() throws Exception {
 		try {
-			new JRubyScriptFactory(RUBY_SCRIPT_SOURCE_LOCATOR, null);
+			new JRubyScriptFactory(RUBY_SCRIPT_SOURCE_LOCATOR);
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {

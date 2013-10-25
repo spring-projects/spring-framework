@@ -63,7 +63,7 @@ public abstract class JRubyScriptUtils {
 	 * @throws JumpException in case of JRuby parsing failure
 	 * @see ClassUtils#getDefaultClassLoader()
 	 */
-	public static Object createJRubyObject(String scriptSource, Class[] interfaces) throws JumpException {
+	public static Object createJRubyObject(String scriptSource, Class<?>... interfaces) throws JumpException {
 		return createJRubyObject(scriptSource, interfaces, ClassUtils.getDefaultClassLoader());
 	}
 
@@ -75,8 +75,7 @@ public abstract class JRubyScriptUtils {
 	 * @return the scripted Java object
 	 * @throws JumpException in case of JRuby parsing failure
 	 */
-	@SuppressWarnings("deprecation")
-	public static Object createJRubyObject(String scriptSource, Class[] interfaces, ClassLoader classLoader) {
+	public static Object createJRubyObject(String scriptSource, Class<?>[] interfaces, ClassLoader classLoader) {
 		Ruby ruby = initializeRuntime();
 
 		Node scriptRootNode = ruby.parseEval(scriptSource, "", null, 0);
@@ -131,16 +130,16 @@ public abstract class JRubyScriptUtils {
 			}
 			else if (child instanceof NewlineNode) {
 				NewlineNode nn = (NewlineNode) child;
-				Node found = findClassNode(nn.getNextNode());
-				if (found instanceof ClassNode) {
-					return (ClassNode) found;
+				ClassNode found = findClassNode(nn.getNextNode());
+				if (found != null) {
+					return found;
 				}
 			}
 		}
 		for (Node child : children) {
-			Node found = findClassNode(child);
-			if (found instanceof ClassNode) {
-				return (ClassNode) found;
+			ClassNode found = findClassNode(child);
+			if (found != null) {
+				return found;
 			}
 		}
 		return null;

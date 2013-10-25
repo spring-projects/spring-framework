@@ -25,7 +25,7 @@ public class GroovyAspectTests {
 
 		GroovyScriptFactory scriptFactory = new GroovyScriptFactory("GroovyServiceImpl.grv");
 		TestService target = (TestService) scriptFactory.getScriptedObject(new ResourceScriptSource(
-				new ClassPathResource("GroovyServiceImpl.grv", getClass())), null);
+				new ClassPathResource("GroovyServiceImpl.grv", getClass())));
 
 		testAdvice(new DefaultPointcutAdvisor(logAdvice), logAdvice, target, "GroovyServiceImpl");
 
@@ -37,7 +37,7 @@ public class GroovyAspectTests {
 
 		GroovyScriptFactory scriptFactory = new GroovyScriptFactory("GroovyServiceImpl.grv");
 		TestService target = (TestService) scriptFactory.getScriptedObject(new ResourceScriptSource(
-				new ClassPathResource("GroovyServiceImpl.grv", getClass())), null);
+				new ClassPathResource("GroovyServiceImpl.grv", getClass())));
 
 		AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
 		pointcut.setExpression(String.format("execution(* %s.TestService+.*(..))", ClassUtils.getPackageName(getClass())));
@@ -51,7 +51,7 @@ public class GroovyAspectTests {
 
 		GroovyScriptFactory scriptFactory = new GroovyScriptFactory("GroovyServiceImpl.grv");
 		TestService target = (TestService) scriptFactory.getScriptedObject(new ResourceScriptSource(
-				new ClassPathResource("GroovyServiceImpl.grv", getClass())), null);
+				new ClassPathResource("GroovyServiceImpl.grv", getClass())));
 
 		AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
 		pointcut.setExpression(String.format("@within(%s.Log)", ClassUtils.getPackageName(getClass())));
@@ -66,7 +66,7 @@ public class GroovyAspectTests {
 
 		GroovyScriptFactory scriptFactory = new GroovyScriptFactory("GroovyServiceImpl.grv");
 		TestService target = (TestService) scriptFactory.getScriptedObject(new ResourceScriptSource(
-				new ClassPathResource("GroovyServiceImpl.grv", getClass())), null);
+				new ClassPathResource("GroovyServiceImpl.grv", getClass())));
 
 		AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
 		pointcut.setExpression(String.format("@within(%s.Log)", ClassUtils.getPackageName(getClass())));

@@ -43,7 +43,7 @@ import org.springframework.util.ClassUtils;
  * {@link org.springframework.scripting.support.ScriptFactoryPostProcessor};
  * see the latter's javadoc} for a configuration example.
  *
- * <p>Note: Spring 4.0 supports Groovy 1.7 and higher.
+ * <p>Note: Spring 4.0 supports Groovy 1.8 and higher.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -60,9 +60,9 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 
 	private GroovyClassLoader groovyClassLoader;
 
-	private Class scriptClass;
+	private Class<?> scriptClass;
 
-	private Class scriptResultClass;
+	private Class<?> scriptResultClass;
 
 	private CachedResultHolder cachedResult;
 
@@ -137,7 +137,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 	 * @return {@code null} always
 	 */
 	@Override
-	public Class[] getScriptInterfaces() {
+	public Class<?>[] getScriptInterfaces() {
 		return null;
 	}
 
@@ -156,11 +156,11 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 	 * @see groovy.lang.GroovyClassLoader
 	 */
 	@Override
-	public Object getScriptedObject(ScriptSource scriptSource, Class[] actualInterfaces)
+	public Object getScriptedObject(ScriptSource scriptSource, Class<?>... actualInterfaces)
 			throws IOException, ScriptCompilationException {
 
 		try {
-			Class scriptClassToExecute = null;
+			Class<?> scriptClassToExecute;
 
 			synchronized (this.scriptClassMonitor) {
 				this.wasModifiedForTypeCheck = false;
@@ -198,7 +198,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 	}
 
 	@Override
-	public Class getScriptedObjectType(ScriptSource scriptSource)
+	public Class<?> getScriptedObjectType(ScriptSource scriptSource)
 			throws IOException, ScriptCompilationException {
 
 		try {
@@ -243,7 +243,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 	 * or the result of running the script instance)
 	 * @throws ScriptCompilationException in case of instantiation failure
 	 */
-	protected Object executeScript(ScriptSource scriptSource, Class scriptClass) throws ScriptCompilationException {
+	protected Object executeScript(ScriptSource scriptSource, Class<?> scriptClass) throws ScriptCompilationException {
 		try {
 			GroovyObject goo = (GroovyObject) scriptClass.newInstance();
 
