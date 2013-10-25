@@ -49,8 +49,7 @@ public class SpelParserConfiguration {
 	 * @param autoGrowCollections if collections should automatically grow
 	 * @param maximumAutoGrowSize the maximum size that the collection can auto grow
 	 */
-	public SpelParserConfiguration(boolean autoGrowNullReferences,
-			boolean autoGrowCollections, int maximumAutoGrowSize) {
+	public SpelParserConfiguration(boolean autoGrowNullReferences, boolean autoGrowCollections, int maximumAutoGrowSize) {
 		this.autoGrowNullReferences = autoGrowNullReferences;
 		this.autoGrowCollections = autoGrowCollections;
 		this.maximumAutoGrowSize = maximumAutoGrowSize;

@@ -67,50 +67,20 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	}
 
 
-	static class AccessorLValue implements ValueRef {
-		private final PropertyOrFieldReference ref;
-		private final TypedValue contextObject;
-		private final EvaluationContext eContext;
-		private final boolean isAutoGrowNullReferences;
-
-		public AccessorLValue(
-				PropertyOrFieldReference propertyOrFieldReference,
-				TypedValue activeContextObject,
-				EvaluationContext evaluationContext, boolean isAutoGrowNullReferences) {
-			this.ref = propertyOrFieldReference;
-			this.contextObject = activeContextObject;
-			this.eContext =evaluationContext;
-			this.isAutoGrowNullReferences = isAutoGrowNullReferences;
-		}
-
-		@Override
-		public TypedValue getValue() {
-			return this.ref.getValueInternal(this.contextObject,this.eContext,this.isAutoGrowNullReferences);
-		}
-
-		@Override
-		public void setValue(Object newValue) {
-			this.ref.writeProperty(this.contextObject,this.eContext, this.ref.name, newValue);
-		}
-
-		@Override
-		public boolean isWritable() {
-			return true;
-		}
-
-	}
-
 	@Override
 	public ValueRef getValueRef(ExpressionState state) throws EvaluationException {
-		return new AccessorLValue(this,state.getActiveContextObject(),state.getEvaluationContext(),state.getConfiguration().isAutoGrowNullReferences());
+		return new AccessorLValue(this, state.getActiveContextObject(), state.getEvaluationContext(),
+				state.getConfiguration().isAutoGrowNullReferences());
 	}
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
-		return getValueInternal(state.getActiveContextObject(), state.getEvaluationContext(), state.getConfiguration().isAutoGrowNullReferences());
+		return getValueInternal(state.getActiveContextObject(), state.getEvaluationContext(),
+				state.getConfiguration().isAutoGrowNullReferences());
 	}
 
-	private TypedValue getValueInternal(TypedValue contextObject, EvaluationContext eContext, boolean isAutoGrowNullReferences) throws EvaluationException {
+	private TypedValue getValueInternal(TypedValue contextObject, EvaluationContext eContext,
+			boolean isAutoGrowNullReferences) throws EvaluationException {
 
 		TypedValue result = readProperty(contextObject, eContext, this.name);
 
@@ -195,14 +165,11 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 	/**
 	 * Attempt to read the named property from the current context object.
-	 * @param state the evaluation state
-	 * @param name the name of the property
 	 * @return the value of the property
 	 * @throws SpelEvaluationException if any problem accessing the property or it cannot be found
 	 */
 	private TypedValue readProperty(TypedValue contextObject, EvaluationContext eContext, String name) throws EvaluationException {
 		Object targetObject = contextObject.getValue();
-
 		if (targetObject == null && this.nullSafe) {
 			return TypedValue.NULL;
 		}
@@ -252,7 +219,6 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	}
 
 	private void writeProperty(TypedValue contextObject, EvaluationContext eContext, String name, Object newValue) throws SpelEvaluationException {
-
 		if (contextObject.getValue() == null && this.nullSafe) {
 			return;
 		}
@@ -354,6 +320,41 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		generalAccessors.removeAll(specificAccessors);
 		resolvers.addAll(generalAccessors);
 		return resolvers;
+	}
+
+
+	private static class AccessorLValue implements ValueRef {
+
+		private final PropertyOrFieldReference ref;
+
+		private final TypedValue contextObject;
+
+		private final EvaluationContext eContext;
+
+		private final boolean autoGrowNullReferences;
+
+		public AccessorLValue(PropertyOrFieldReference propertyOrFieldReference, TypedValue activeContextObject,
+				EvaluationContext evaluationContext, boolean autoGrowNullReferences) {
+			this.ref = propertyOrFieldReference;
+			this.contextObject = activeContextObject;
+			this.eContext = evaluationContext;
+			this.autoGrowNullReferences = autoGrowNullReferences;
+		}
+
+		@Override
+		public TypedValue getValue() {
+			return this.ref.getValueInternal(this.contextObject, this.eContext, this.autoGrowNullReferences);
+		}
+
+		@Override
+		public void setValue(Object newValue) {
+			this.ref.writeProperty(this.contextObject, this.eContext, this.ref.name, newValue);
+		}
+
+		@Override
+		public boolean isWritable() {
+			return true;
+		}
 	}
 
 }
