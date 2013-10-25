@@ -260,7 +260,7 @@ public class AnnotationConfigUtils {
 		}
 	}
 
-	static void processCommonDefinitionAnnotations(AnnotatedBeanDefinition abd) {
+	public static void processCommonDefinitionAnnotations(AnnotatedBeanDefinition abd) {
 		processCommonDefinitionAnnotations(abd, abd.getMetadata());
 	}
 
