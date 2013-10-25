@@ -167,7 +167,7 @@ project("spring-build-src") {
 project("spring-core") {
 	description = "Spring Core"
 
-	// As of Spring 4.0, spring-core includes asm 4.1 and repackages cglib 3.0, inlining
+	// As of Spring 4.0, spring-core includes asm 4.2 and repackages cglib 3.0, inlining
 	// both into the spring-core jar. cglib 3.0 itself depends on asm 4, and is therefore
 	// further transformed by the JarJar task to depend on org.springframework.asm; this
 	// avoids including two different copies of asm unnecessarily.
@@ -341,6 +341,7 @@ project("spring-instrument-tomcat") {
 
 project("spring-context") {
 	description = "Spring Context"
+	apply plugin: "groovy"
 
 	dependencies {
 		optional(project(":spring-instrument"))
