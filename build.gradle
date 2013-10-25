@@ -21,7 +21,6 @@ configure(allprojects) { project ->
 
 	apply plugin: "propdeps"
 	apply plugin: "java"
-	apply plugin: 'groovy'
 	apply plugin: "test-source-set-dependencies"
 	apply from: "${gradleScriptDir}/ide.gradle"
 
@@ -54,11 +53,6 @@ configure(allprojects) { project ->
 	compileTestJava {
 		sourceCompatibility=1.7
 		targetCompatibility=1.7
-	}
-
-	compileGroovy {
-		sourceCompatibility=1.6
-		targetCompatibility=1.6
 	}
 
 	sourceSets.test.resources.srcDirs = ["src/test/resources", "src/test/java"]
@@ -160,6 +154,7 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 
 project("spring-build-src") {
 	description = "Exposes gradle buildSrc for IDE support"
+	apply plugin: "groovy"
 
 	dependencies {
 		compile gradleApi()
@@ -278,6 +273,7 @@ project("spring-beans") {
 project('spring-beans-groovy') {
 	description 'Groovy Bean Definitions'
 	merge.into = project(":spring-beans")
+	apply plugin: "groovy"
 
 	dependencies {
 		compile(project(":spring-core"))
@@ -292,6 +288,11 @@ project('spring-beans-groovy') {
 				srcDir 'src/main/java'
 			}
 		}
+	}
+
+	compileGroovy {
+		sourceCompatibility=1.6
+		targetCompatibility=1.6
 	}
 }
 
@@ -866,6 +867,7 @@ configure(rootProject) {
 	description = "Spring Framework"
 
 	apply plugin: "docbook-reference"
+	apply plugin: "groovy"
 	// apply plugin: "detect-split-packages"
 	apply from: "${gradleScriptDir}/jdiff.gradle"
 
