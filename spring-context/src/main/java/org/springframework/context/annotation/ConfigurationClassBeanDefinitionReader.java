@@ -107,8 +107,8 @@ class ConfigurationClassBeanDefinitionReader {
 
 
 	/**
-	 * Read {@code configurationModel}, registering bean definitions with {@link #registry}
-	 * based on its contents.
+	 * Read {@code configurationModel}, registering bean definitions
+	 * with the registry based on its contents.
 	 */
 	public void loadBeanDefinitions(Set<ConfigurationClass> configurationModel) {
 		TrackedConditionEvaluator trackedConditionEvaluator = new TrackedConditionEvaluator();
@@ -140,8 +140,9 @@ class ConfigurationClassBeanDefinitionReader {
 	}
 
 	private void removeBeanDefinition(ConfigurationClass configClass) {
-		if (StringUtils.hasLength(configClass.getBeanName()) && this.registry.containsBeanDefinition(configClass.getBeanName())) {
-			this.registry.removeBeanDefinition(configClass.getBeanName());
+		String beanName = configClass.getBeanName();
+		if (StringUtils.hasLength(beanName) && this.registry.containsBeanDefinition(beanName)) {
+			this.registry.removeBeanDefinition(beanName);
 		}
 	}
 
@@ -200,7 +201,7 @@ class ConfigurationClassBeanDefinitionReader {
 			this.registry.registerAlias(beanName, alias);
 		}
 
-		// Has this  effectively been overridden before (e.g. via XML)?
+		// Has this effectively been overridden before (e.g. via XML)?
 		if (isOverriddenByExistingDefinition(beanMethod, beanName)) {
 			return;
 		}
@@ -299,7 +300,8 @@ class ConfigurationClassBeanDefinitionReader {
 					readerInstanceCache.put(readerClass, readerInstance);
 				}
 				catch (Exception ex) {
-					throw new IllegalStateException("Could not instantiate BeanDefinitionReader class [" + readerClass.getName() + "]");
+					throw new IllegalStateException(
+							"Could not instantiate BeanDefinitionReader class [" + readerClass.getName() + "]");
 				}
 			}
 			BeanDefinitionReader reader = readerInstanceCache.get(readerClass);
@@ -375,7 +377,7 @@ class ConfigurationClassBeanDefinitionReader {
 
 
 	/**
-	 * Evaluate {@Code @Conditional} annotations, tracking results and taking into
+	 * Evaluate {@code @Conditional} annotations, tracking results and taking into
 	 * account 'imported by'.
 	 */
 	private class TrackedConditionEvaluator {
