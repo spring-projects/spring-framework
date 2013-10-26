@@ -61,6 +61,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.context.ServletContextAware;
+import org.springframework.web.method.support.CompositeUriComponentsContributor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerAdapter;
@@ -78,8 +79,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExc
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
-import org.springframework.web.servlet.mvc.support.DefaultMvcUrls;
-import org.springframework.web.servlet.mvc.support.MvcUrls;
 
 /**
  * This is the main class providing the configuration behind the MVC Java config.
@@ -566,12 +565,13 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
-	 * Return an instance of {@link MvcUrls} for injection into controllers to create
-	 * URLs by referencing controllers and controller methods.
+	 * Return an instance of {@link CompositeUriComponentsContributor} for use with
+	 * {@link org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder}.
 	 */
 	@Bean
-	public MvcUrls mvcUrls() {
-		return new DefaultMvcUrls(requestMappingHandlerAdapter().getArgumentResolvers(), mvcConversionService());
+	public CompositeUriComponentsContributor mvcUriComponentsContributor() {
+		return new CompositeUriComponentsContributor(
+				requestMappingHandlerAdapter().getArgumentResolvers(), mvcConversionService());
 	}
 
 	/**

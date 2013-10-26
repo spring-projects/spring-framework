@@ -19,6 +19,8 @@ package org.springframework.web.servlet.config;
 import java.util.List;
 import java.util.Properties;
 
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -28,6 +30,7 @@ import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.http.MediaType;
@@ -52,6 +55,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebArgumentResolver;
+import org.springframework.web.method.support.CompositeUriComponentsContributor;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerMapping;
@@ -67,6 +71,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.ServletWebArgumentResolverAdapter;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.w3c.dom.Element;
 
 /**
@@ -207,12 +212,12 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		handlerAdapterDef.getPropertyValues().add("deferredResultInterceptors", deferredResultInterceptors);
 		String handlerAdapterName = parserContext.getReaderContext().registerWithGeneratedName(handlerAdapterDef);
 
-		String mvcUrlsName = "mvcUrls";
-		RootBeanDefinition mvcUrlsDef = new RootBeanDefinition(DefaultMvcUrlsFactoryBean.class);
-		mvcUrlsDef.setSource(source);
-		mvcUrlsDef.getPropertyValues().addPropertyValue("handlerAdapter", handlerAdapterDef);
-		mvcUrlsDef.getPropertyValues().addPropertyValue("conversionService", conversionService);
-		parserContext.getReaderContext().getRegistry().registerBeanDefinition(mvcUrlsName, mvcUrlsDef);
+		String uriCompContribName = MvcUriComponentsBuilder.MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME;
+		RootBeanDefinition uriCompContribDef = new RootBeanDefinition(CompositeUriComponentsContributorFactoryBean.class);
+		uriCompContribDef.setSource(source);
+		uriCompContribDef.getPropertyValues().addPropertyValue("handlerAdapter", handlerAdapterDef);
+		uriCompContribDef.getPropertyValues().addPropertyValue("conversionService", conversionService);
+		parserContext.getReaderContext().getRegistry().registerBeanDefinition(uriCompContribName, uriCompContribDef);
 
 		RootBeanDefinition csInterceptorDef = new RootBeanDefinition(ConversionServiceExposingInterceptor.class);
 		csInterceptorDef.setSource(source);
@@ -249,7 +254,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 		parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef, methodMappingName));
 		parserContext.registerComponent(new BeanComponentDefinition(handlerAdapterDef, handlerAdapterName));
-		parserContext.registerComponent(new BeanComponentDefinition(mvcUrlsDef, mvcUrlsName));
+		parserContext.registerComponent(new BeanComponentDefinition(uriCompContribDef, uriCompContribName));
 		parserContext.registerComponent(new BeanComponentDefinition(exceptionHandlerExceptionResolver, methodExceptionResolverName));
 		parserContext.registerComponent(new BeanComponentDefinition(responseStatusExceptionResolver, responseStatusExceptionResolverName));
 		parserContext.registerComponent(new BeanComponentDefinition(defaultExceptionResolver, defaultExceptionResolverName));
@@ -482,6 +487,52 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		}
 
 		return result;
+	}
+
+
+	/**
+	 * A FactoryBean for a CompositeUriComponentsContributor that obtains the
+	 * HandlerMethodArgumentResolver's configured in RequestMappingHandlerAdapter
+	 * after it is fully initialized.
+	 */
+	private static class CompositeUriComponentsContributorFactoryBean
+			implements InitializingBean, FactoryBean<CompositeUriComponentsContributor> {
+
+		private RequestMappingHandlerAdapter handlerAdapter;
+
+		private ConversionService conversionService;
+
+		private CompositeUriComponentsContributor uriComponentsContributor;
+
+
+		public void setHandlerAdapter(RequestMappingHandlerAdapter handlerAdapter) {
+			this.handlerAdapter = handlerAdapter;
+		}
+
+		public void setConversionService(ConversionService conversionService) {
+			this.conversionService = conversionService;
+		}
+
+		@Override
+		public void afterPropertiesSet() throws Exception {
+			this.uriComponentsContributor = new CompositeUriComponentsContributor(
+					this.handlerAdapter.getArgumentResolvers(), this.conversionService);
+		}
+
+		@Override
+		public CompositeUriComponentsContributor getObject() throws Exception {
+			return this.uriComponentsContributor;
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return CompositeUriComponentsContributor.class;
+		}
+
+		@Override
+		public boolean isSingleton() {
+			return true;
+		}
 	}
 
 }

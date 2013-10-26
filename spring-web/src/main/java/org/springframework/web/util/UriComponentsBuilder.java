@@ -556,6 +556,17 @@ public class UriComponentsBuilder {
 	}
 
 	/**
+	 * Adds the given query parameters.
+	 * @param params the params
+	 * @return this UriComponentsBuilder
+	 */
+	public UriComponentsBuilder queryParams(MultiValueMap<String, String> params) {
+		Assert.notNull(params, "'params' must not be null");
+		this.queryParams.putAll(params);
+		return this;
+	}
+
+	/**
 	 * Sets the query parameter values overriding all existing query values for
 	 * the same parameter. If no values are given, the query parameter is
 	 * removed.

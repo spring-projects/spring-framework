@@ -19,8 +19,6 @@ package org.springframework.web.servlet.config;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -58,8 +56,6 @@ import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.async.CallableProcessingInterceptor;
 import org.springframework.web.context.request.async.CallableProcessingInterceptorAdapter;
@@ -67,6 +63,7 @@ import org.springframework.web.context.request.async.DeferredResultProcessingInt
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptorAdapter;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.method.support.CompositeUriComponentsContributor;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -80,14 +77,12 @@ import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import org.springframework.web.servlet.mvc.support.MvcUrls;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
-import org.springframework.web.util.UriComponents;
 
 import static org.junit.Assert.*;
-import static org.springframework.web.servlet.mvc.support.MvcUrlUtils.*;
 
 /**
  * @author Keith Donald
@@ -155,20 +150,11 @@ public class MvcNamespaceTests {
 		adapter.handle(request, response, handlerMethod);
 		assertTrue(handler.recordedValidationError);
 
-		// MvcUrls
-		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(new MockHttpServletRequest()));
-		try {
-			Date now = new Date();
-			TestController testController = controller(TestController.class);
-			testController.testBind(now, null, null);
-			MvcUrls mvcUrls = this.appContext.getBean(MvcUrls.class);
-			UriComponents uriComponents = mvcUrls.linkToMethodOn(testController);
-			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-			assertEquals("http://localhost/?date=" + dateFormat.format(now), uriComponents.toUriString());
-		}
-		finally {
-			RequestContextHolder.resetRequestAttributes();
-		}
+		CompositeUriComponentsContributor uriComponentsContributor = this.appContext.getBean(
+				MvcUriComponentsBuilder.MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME,
+				CompositeUriComponentsContributor.class);
+
+		assertNotNull(uriComponentsContributor);
 	}
 
 	@Test(expected=TypeMismatchException.class)

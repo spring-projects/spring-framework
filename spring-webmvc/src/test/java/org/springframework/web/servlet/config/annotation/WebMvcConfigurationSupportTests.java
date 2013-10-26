@@ -21,7 +21,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.joda.time.DateTime;
-import org.joda.time.format.ISODateTimeFormat;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.annotation.Bean;
@@ -40,9 +39,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.method.support.CompositeUriComponentsContributor;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
@@ -54,11 +52,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExc
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
-import org.springframework.web.servlet.mvc.support.MvcUrls;
-import org.springframework.web.util.UriComponents;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
 import static org.junit.Assert.*;
-import static org.springframework.web.servlet.mvc.support.MvcUrlUtils.*;
 
 /**
  * A test fixture with an {@link WebMvcConfigurationSupport} instance.
@@ -159,19 +155,13 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 	@Test
-	public void mvcUrls() throws Exception {
-		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(new MockHttpServletRequest()));
-		try {
-			DateTime now = DateTime.now();
-			MvcUrls mvcUrls = this.wac.getBean(MvcUrls.class);
-			UriComponents uriComponents = mvcUrls.linkToMethodOn(controller(
-					TestController.class).methodWithTwoPathVariables(1, now));
+	public void uriComponentsContributor() throws Exception {
 
-			assertEquals("/foo/1/bar/" + ISODateTimeFormat.date().print(now), uriComponents.getPath());
-		}
-		finally {
-			RequestContextHolder.resetRequestAttributes();
-		}
+		CompositeUriComponentsContributor uriComponentsContributor = this.wac.getBean(
+				MvcUriComponentsBuilder.MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME,
+				CompositeUriComponentsContributor.class);
+
+		assertNotNull(uriComponentsContributor);
 	}
 
 	@Test
