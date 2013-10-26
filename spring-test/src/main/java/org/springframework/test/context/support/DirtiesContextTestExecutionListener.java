@@ -47,22 +47,6 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	/**
 	 * Marks the {@linkplain ApplicationContext application context} of the supplied
 	 * {@linkplain TestContext test context} as
-	 * {@linkplain TestContext#markApplicationContextDirty() dirty}, and sets the
-	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE}
-	 * in the test context to {@code true}.
-	 * @param testContext the test context whose application context should
-	 * marked as dirty
-	 * @deprecated as of Spring 3.2.2, use {@link #dirtyContext(TestContext, HierarchyMode)} instead.
-	 */
-	@Deprecated
-	protected void dirtyContext(TestContext testContext) {
-		testContext.markApplicationContextDirty();
-		testContext.setAttribute(DependencyInjectionTestExecutionListener.REINJECT_DEPENDENCIES_ATTRIBUTE, Boolean.TRUE);
-	}
-
-	/**
-	 * Marks the {@linkplain ApplicationContext application context} of the supplied
-	 * {@linkplain TestContext test context} as
 	 * {@linkplain TestContext#markApplicationContextDirty(DirtiesContext.HierarchyMode) dirty}
 	 * and sets {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE}
 	 * in the test context to {@code true}.

@@ -56,7 +56,7 @@ public class ContextCacheTests {
 	}
 
 	private ApplicationContext loadContext(Class<?> testClass) {
-		TestContext testContext = new TestContext(testClass, contextCache);
+		TestContext testContext = new DefaultTestContext(testClass, contextCache);
 		return testContext.getApplicationContext();
 	}
 
@@ -119,13 +119,15 @@ public class ContextCacheTests {
 	public void removeContextHierarchyCacheLevel1() {
 
 		// Load Level 3-A
-		TestContext testContext3a = new TestContext(ClassHierarchyContextHierarchyLevel3aTestCase.class, contextCache);
+		TestContext testContext3a = new DefaultTestContext(ClassHierarchyContextHierarchyLevel3aTestCase.class,
+			contextCache);
 		testContext3a.getApplicationContext();
 		assertContextCacheStatistics(contextCache, "level 3, A", 3, 0, 3);
 		assertParentContextCount(2);
 
 		// Load Level 3-B
-		TestContext testContext3b = new TestContext(ClassHierarchyContextHierarchyLevel3bTestCase.class, contextCache);
+		TestContext testContext3b = new DefaultTestContext(ClassHierarchyContextHierarchyLevel3bTestCase.class,
+			contextCache);
 		testContext3b.getApplicationContext();
 		assertContextCacheStatistics(contextCache, "level 3, A and B", 4, 1, 4);
 		assertParentContextCount(2);
@@ -142,13 +144,15 @@ public class ContextCacheTests {
 	public void removeContextHierarchyCacheLevel1WithExhaustiveMode() {
 
 		// Load Level 3-A
-		TestContext testContext3a = new TestContext(ClassHierarchyContextHierarchyLevel3aTestCase.class, contextCache);
+		TestContext testContext3a = new DefaultTestContext(ClassHierarchyContextHierarchyLevel3aTestCase.class,
+			contextCache);
 		testContext3a.getApplicationContext();
 		assertContextCacheStatistics(contextCache, "level 3, A", 3, 0, 3);
 		assertParentContextCount(2);
 
 		// Load Level 3-B
-		TestContext testContext3b = new TestContext(ClassHierarchyContextHierarchyLevel3bTestCase.class, contextCache);
+		TestContext testContext3b = new DefaultTestContext(ClassHierarchyContextHierarchyLevel3bTestCase.class,
+			contextCache);
 		testContext3b.getApplicationContext();
 		assertContextCacheStatistics(contextCache, "level 3, A and B", 4, 1, 4);
 		assertParentContextCount(2);
@@ -165,13 +169,15 @@ public class ContextCacheTests {
 	public void removeContextHierarchyCacheLevel2() {
 
 		// Load Level 3-A
-		TestContext testContext3a = new TestContext(ClassHierarchyContextHierarchyLevel3aTestCase.class, contextCache);
+		TestContext testContext3a = new DefaultTestContext(ClassHierarchyContextHierarchyLevel3aTestCase.class,
+			contextCache);
 		testContext3a.getApplicationContext();
 		assertContextCacheStatistics(contextCache, "level 3, A", 3, 0, 3);
 		assertParentContextCount(2);
 
 		// Load Level 3-B
-		TestContext testContext3b = new TestContext(ClassHierarchyContextHierarchyLevel3bTestCase.class, contextCache);
+		TestContext testContext3b = new DefaultTestContext(ClassHierarchyContextHierarchyLevel3bTestCase.class,
+			contextCache);
 		testContext3b.getApplicationContext();
 		assertContextCacheStatistics(contextCache, "level 3, A and B", 4, 1, 4);
 		assertParentContextCount(2);
@@ -189,13 +195,15 @@ public class ContextCacheTests {
 	public void removeContextHierarchyCacheLevel2WithExhaustiveMode() {
 
 		// Load Level 3-A
-		TestContext testContext3a = new TestContext(ClassHierarchyContextHierarchyLevel3aTestCase.class, contextCache);
+		TestContext testContext3a = new DefaultTestContext(ClassHierarchyContextHierarchyLevel3aTestCase.class,
+			contextCache);
 		testContext3a.getApplicationContext();
 		assertContextCacheStatistics(contextCache, "level 3, A", 3, 0, 3);
 		assertParentContextCount(2);
 
 		// Load Level 3-B
-		TestContext testContext3b = new TestContext(ClassHierarchyContextHierarchyLevel3bTestCase.class, contextCache);
+		TestContext testContext3b = new DefaultTestContext(ClassHierarchyContextHierarchyLevel3bTestCase.class,
+			contextCache);
 		testContext3b.getApplicationContext();
 		assertContextCacheStatistics(contextCache, "level 3, A and B", 4, 1, 4);
 		assertParentContextCount(2);
@@ -211,13 +219,15 @@ public class ContextCacheTests {
 	public void removeContextHierarchyCacheLevel3Then2() {
 
 		// Load Level 3-A
-		TestContext testContext3a = new TestContext(ClassHierarchyContextHierarchyLevel3aTestCase.class, contextCache);
+		TestContext testContext3a = new DefaultTestContext(ClassHierarchyContextHierarchyLevel3aTestCase.class,
+			contextCache);
 		testContext3a.getApplicationContext();
 		assertContextCacheStatistics(contextCache, "level 3, A", 3, 0, 3);
 		assertParentContextCount(2);
 
 		// Load Level 3-B
-		TestContext testContext3b = new TestContext(ClassHierarchyContextHierarchyLevel3bTestCase.class, contextCache);
+		TestContext testContext3b = new DefaultTestContext(ClassHierarchyContextHierarchyLevel3bTestCase.class,
+			contextCache);
 		testContext3b.getApplicationContext();
 		assertContextCacheStatistics(contextCache, "level 3, A and B", 4, 1, 4);
 		assertParentContextCount(2);
@@ -238,13 +248,15 @@ public class ContextCacheTests {
 	public void removeContextHierarchyCacheLevel3Then2WithExhaustiveMode() {
 
 		// Load Level 3-A
-		TestContext testContext3a = new TestContext(ClassHierarchyContextHierarchyLevel3aTestCase.class, contextCache);
+		TestContext testContext3a = new DefaultTestContext(ClassHierarchyContextHierarchyLevel3aTestCase.class,
+			contextCache);
 		testContext3a.getApplicationContext();
 		assertContextCacheStatistics(contextCache, "level 3, A", 3, 0, 3);
 		assertParentContextCount(2);
 
 		// Load Level 3-B
-		TestContext testContext3b = new TestContext(ClassHierarchyContextHierarchyLevel3bTestCase.class, contextCache);
+		TestContext testContext3b = new DefaultTestContext(ClassHierarchyContextHierarchyLevel3bTestCase.class,
+			contextCache);
 		testContext3b.getApplicationContext();
 		assertContextCacheStatistics(contextCache, "level 3, A and B", 4, 1, 4);
 		assertParentContextCount(2);
