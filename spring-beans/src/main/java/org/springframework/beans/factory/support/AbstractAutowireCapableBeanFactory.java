@@ -63,7 +63,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
+import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
@@ -632,12 +632,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return null;
 		}
 
-		List<ValueHolder> argumentValues = mbd.getConstructorArgumentValues().getGenericArgumentValues();
-		Object[] args = new Object[argumentValues.size()];
-		for (int i = 0; i < args.length; i++) {
-			args[i] = argumentValues.get(i).getValue();
-		}
-
 		// If all factory methods have the same return type, return that type.
 		// Can't clearly figure out exact method due to type converting / autowiring!
 		int minNrOfArgs = mbd.getConstructorArgumentValues().getArgumentCount();
@@ -647,6 +641,27 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (Modifier.isStatic(factoryMethod.getModifiers()) == isStatic &&
 					factoryMethod.getName().equals(mbd.getFactoryMethodName()) &&
 					factoryMethod.getParameterTypes().length >= minNrOfArgs) {
+				Class<?>[] paramTypes = factoryMethod.getParameterTypes();
+				String[] paramNames = null;
+				ParameterNameDiscoverer pnd = getParameterNameDiscoverer();
+				if (pnd != null) {
+					paramNames = pnd.getParameterNames(factoryMethod);
+				}
+				ConstructorArgumentValues cav = mbd.getConstructorArgumentValues();
+				Set<ConstructorArgumentValues.ValueHolder> usedValueHolders =
+						new HashSet<ConstructorArgumentValues.ValueHolder>(paramTypes.length);
+				Object[] args = new Object[paramTypes.length];
+				for (int i = 0; i < args.length; i++) {
+					ConstructorArgumentValues.ValueHolder valueHolder = cav.getArgumentValue(
+							i, paramTypes[i], (paramNames != null ? paramNames[i] : null), usedValueHolders);
+					if (valueHolder == null) {
+						valueHolder = cav.getGenericArgumentValue(null, null, usedValueHolders);
+					}
+					if (valueHolder != null) {
+						args[i] = valueHolder.getValue();
+						usedValueHolders.add(valueHolder);
+					}
+				}
 				Class<?> returnType = AutowireUtils.resolveReturnTypeForFactoryMethod(
 						factoryMethod, args, getBeanClassLoader());
 				if (returnType != null) {
