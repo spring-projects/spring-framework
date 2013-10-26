@@ -16,6 +16,10 @@
 
 package org.springframework.test.context;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Arrays;
 import java.util.List;
 
@@ -72,13 +76,6 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	}
 
 	@Test
-	public void resolveActiveProfilesWithMetaAnnotation() {
-		String[] profiles = resolveActiveProfiles(MetaLocationsFoo.class);
-		assertNotNull(profiles);
-		assertArrayEquals(new String[] { "foo" }, profiles);
-	}
-
-	@Test
 	public void resolveActiveProfilesWithInheritedAnnotationAndLocations() {
 		String[] profiles = resolveActiveProfiles(InheritedLocationsFoo.class);
 		assertNotNull(profiles);
@@ -106,6 +103,44 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	@Test
 	public void resolveActiveProfilesWithOverriddenAnnotation() {
 		String[] profiles = resolveActiveProfiles(Animals.class);
+		assertNotNull(profiles);
+		assertEquals(2, profiles.length);
+
+		List<String> list = Arrays.asList(profiles);
+		assertTrue(list.contains("dog"));
+		assertTrue(list.contains("cat"));
+	}
+
+	/**
+	 * @since 4.0
+	 */
+	@Test
+	public void resolveActiveProfilesWithMetaAnnotation() {
+		String[] profiles = resolveActiveProfiles(MetaLocationsFoo.class);
+		assertNotNull(profiles);
+		assertArrayEquals(new String[] { "foo" }, profiles);
+	}
+
+	/**
+	 * @since 4.0
+	 */
+	@Test
+	public void resolveActiveProfilesWithLocalAndInheritedMetaAnnotations() {
+		String[] profiles = resolveActiveProfiles(MetaLocationsBar.class);
+		assertNotNull(profiles);
+		assertEquals(2, profiles.length);
+
+		List<String> list = Arrays.asList(profiles);
+		assertTrue(list.contains("foo"));
+		assertTrue(list.contains("bar"));
+	}
+
+	/**
+	 * @since 4.0
+	 */
+	@Test
+	public void resolveActiveProfilesWithOverriddenMetaAnnotation() {
+		String[] profiles = resolveActiveProfiles(MetaAnimals.class);
 		assertNotNull(profiles);
 		assertEquals(2, profiles.length);
 
@@ -213,6 +248,16 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 
 	@ActiveProfiles(profiles = { "dog", "cat" }, inheritProfiles = false)
 	private static class Animals extends LocationsBar {
+	}
+
+	@ActiveProfiles(profiles = { "dog", "cat" }, inheritProfiles = false)
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	private static @interface MetaAnimalsConfig {
+	}
+
+	@MetaAnimalsConfig
+	private static class MetaAnimals extends MetaLocationsBar {
 	}
 
 	private static class InheritedLocationsFoo extends LocationsFoo {

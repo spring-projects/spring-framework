@@ -399,7 +399,7 @@ abstract class ContextLoaderUtils {
 
 		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
 
-		AnnotationDescriptor descriptor = findAnnotationDescriptor(testClass, annotationType);
+		AnnotationDescriptor<ContextConfiguration> descriptor = findAnnotationDescriptor(testClass, annotationType);
 		Assert.notNull(descriptor, String.format(
 			"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",
 			annotationType.getName(), testClass.getName()));
@@ -409,8 +409,8 @@ abstract class ContextLoaderUtils {
 			Class<?> declaringClass = (descriptor.getStereotype() != null) ? descriptor.getStereotypeType()
 					: rootDeclaringClass;
 
-			ContextConfiguration contextConfiguration = getAnnotation(declaringClass, annotationType);
-			convertContextConfigToConfigAttributesAndAddToList(contextConfiguration, declaringClass, attributesList);
+			convertContextConfigToConfigAttributesAndAddToList(descriptor.getAnnotation(), declaringClass,
+				attributesList);
 			descriptor = findAnnotationDescriptor(rootDeclaringClass.getSuperclass(), annotationType);
 		}
 
@@ -477,9 +477,10 @@ abstract class ContextLoaderUtils {
 		Assert.notNull(testClass, "Class must not be null");
 
 		Class<ActiveProfiles> annotationType = ActiveProfiles.class;
-		Class<?> declaringClass = findAnnotationDeclaringClass(annotationType, testClass);
 
-		if (declaringClass == null && logger.isDebugEnabled()) {
+		AnnotationDescriptor<ActiveProfiles> descriptor = findAnnotationDescriptor(testClass, annotationType);
+
+		if (descriptor == null && logger.isDebugEnabled()) {
 			logger.debug(String.format(
 				"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",
 				annotationType.getName(), testClass.getName()));
@@ -487,8 +488,12 @@ abstract class ContextLoaderUtils {
 
 		final Set<String> activeProfiles = new HashSet<String>();
 
-		while (declaringClass != null) {
-			ActiveProfiles annotation = getAnnotation(declaringClass, annotationType);
+		while (descriptor != null) {
+			Class<?> rootDeclaringClass = descriptor.getDeclaringClass();
+			Class<?> declaringClass = (descriptor.getStereotype() != null) ? descriptor.getStereotypeType()
+					: rootDeclaringClass;
+
+			ActiveProfiles annotation = descriptor.getAnnotation();
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Retrieved @ActiveProfiles [%s] for declaring class [%s].", annotation,
 					declaringClass.getName()));
@@ -533,8 +538,8 @@ abstract class ContextLoaderUtils {
 				}
 			}
 
-			declaringClass = annotation.inheritProfiles() ? findAnnotationDeclaringClass(annotationType,
-				declaringClass.getSuperclass()) : null;
+			descriptor = annotation.inheritProfiles() ? findAnnotationDescriptor(rootDeclaringClass.getSuperclass(),
+				annotationType) : null;
 		}
 
 		return StringUtils.toStringArray(activeProfiles);

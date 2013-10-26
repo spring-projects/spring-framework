@@ -30,8 +30,6 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import static org.junit.Assert.*;
 
-import static org.junit.Assert.*;
-
 /**
  * Abstract base class for tests involving {@link ContextLoaderUtils}.
  *
