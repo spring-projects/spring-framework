@@ -688,7 +688,7 @@ public abstract class StringUtils {
 		validateLocalePart(language);
 		validateLocalePart(country);
 		String variant = "";
-		if (parts.length >= 2) {
+		if (parts.length > 2) {
 			// There is definitely a variant, and it is everything after the country
 			// code sans the separator between the country code and the variant.
 			int endIndexOfCountryCode = localeString.lastIndexOf(country) + country.length();
