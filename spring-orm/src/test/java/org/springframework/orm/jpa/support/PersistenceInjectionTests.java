@@ -23,7 +23,6 @@ import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
@@ -34,6 +33,7 @@ import javax.persistence.PersistenceUnit;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -524,7 +524,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	public void testFieldOfWrongTypeAnnotatedWithPersistenceUnit() {
 		PersistenceAnnotationBeanPostProcessor babpp = new PersistenceAnnotationBeanPostProcessor();
 		try {
-			babpp.postProcessPropertyValues(null, null, new FieldOfWrongTypeAnnotatedWithPersistenceUnit(), null);
+			babpp.postProcessPropertyValues(null, null, new FieldOfWrongTypeAnnotatedWithPersistenceUnit(), "bean");
 			fail("Can't inject this field");
 		}
 		catch (IllegalStateException ex) {
@@ -536,7 +536,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	public void testSetterOfWrongTypeAnnotatedWithPersistenceUnit() {
 		PersistenceAnnotationBeanPostProcessor babpp = new PersistenceAnnotationBeanPostProcessor();
 		try {
-			babpp.postProcessPropertyValues(null, null, new SetterOfWrongTypeAnnotatedWithPersistenceUnit(), null);
+			babpp.postProcessPropertyValues(null, null, new SetterOfWrongTypeAnnotatedWithPersistenceUnit(), "bean");
 			fail("Can't inject this setter");
 		}
 		catch (IllegalStateException ex) {
@@ -548,7 +548,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	public void testSetterWithNoArgs() {
 		PersistenceAnnotationBeanPostProcessor babpp = new PersistenceAnnotationBeanPostProcessor();
 		try {
-			babpp.postProcessPropertyValues(null, null, new SetterWithNoArgs(), null);
+			babpp.postProcessPropertyValues(null, null, new SetterWithNoArgs(), "bean");
 			fail("Can't inject this setter");
 		}
 		catch (IllegalStateException ex) {
@@ -593,7 +593,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		PersistenceAnnotationBeanPostProcessor babpp = new MockPersistenceAnnotationBeanPostProcessor();
 		DefaultPrivatePersistenceContextFieldWithProperties transactionalField =
 				new DefaultPrivatePersistenceContextFieldWithProperties();
-		babpp.postProcessPropertyValues(null, null, transactionalField, null);
+		babpp.postProcessPropertyValues(null, null, transactionalField, "bean");
 
 		assertNotNull(transactionalField.em);
 		assertNotNull(transactionalField.em.getDelegate());
@@ -620,8 +620,8 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 				new DefaultPrivatePersistenceContextFieldWithProperties();
 		DefaultPrivatePersistenceContextField transactionalField = new DefaultPrivatePersistenceContextField();
 
-		babpp.postProcessPropertyValues(null, null, transactionalFieldWithProperties, null);
-		babpp.postProcessPropertyValues(null, null, transactionalField, null);
+		babpp.postProcessPropertyValues(null, null, transactionalFieldWithProperties, "bean1");
+		babpp.postProcessPropertyValues(null, null, transactionalField, "bean2");
 
 		assertNotNull(transactionalFieldWithProperties.em);
 		assertNotNull(transactionalField.em);
@@ -653,8 +653,8 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 				new DefaultPrivatePersistenceContextFieldWithProperties();
 		DefaultPrivatePersistenceContextField transactionalField = new DefaultPrivatePersistenceContextField();
 
-		babpp.postProcessPropertyValues(null, null, transactionalFieldWithProperties, null);
-		babpp.postProcessPropertyValues(null, null, transactionalField, null);
+		babpp.postProcessPropertyValues(null, null, transactionalFieldWithProperties, "bean1");
+		babpp.postProcessPropertyValues(null, null, transactionalField, "bean2");
 
 		assertNotNull(transactionalFieldWithProperties.em);
 		assertNotNull(transactionalField.em);

@@ -121,8 +121,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	private final Map<Class<?>, Constructor<?>[]> candidateConstructorsCache =
 			new ConcurrentHashMap<Class<?>, Constructor<?>[]>(64);
 
-	private final Map<Class<?>, InjectionMetadata> injectionMetadataCache =
-			new ConcurrentHashMap<Class<?>, InjectionMetadata>(64);
+	private final Map<String, InjectionMetadata> injectionMetadataCache =
+			new ConcurrentHashMap<String, InjectionMetadata>(64);
 
 
 	/**
@@ -217,7 +217,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		if (beanType != null) {
-			InjectionMetadata metadata = findAutowiringMetadata(beanType);
+			InjectionMetadata metadata = findAutowiringMetadata(beanName, beanType);
 			metadata.checkConfigMembers(beanDefinition);
 		}
 	}
@@ -283,7 +283,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	public PropertyValues postProcessPropertyValues(
 			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
 
-		InjectionMetadata metadata = findAutowiringMetadata(bean.getClass());
+		InjectionMetadata metadata = findAutowiringMetadata(beanName, bean.getClass());
 		try {
 			metadata.inject(bean, beanName, pvs);
 		}
@@ -301,7 +301,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	 */
 	public void processInjection(Object bean) throws BeansException {
 		Class<?> clazz = bean.getClass();
-		InjectionMetadata metadata = findAutowiringMetadata(clazz);
+		InjectionMetadata metadata = findAutowiringMetadata(clazz.getName(), clazz);
 		try {
 			metadata.inject(bean, null, null);
 		}
@@ -311,15 +311,15 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 
-	private InjectionMetadata findAutowiringMetadata(Class<?> clazz) {
+	private InjectionMetadata findAutowiringMetadata(String beanName, Class<?> clazz) {
 		// Quick check on the concurrent map first, with minimal locking.
-		InjectionMetadata metadata = this.injectionMetadataCache.get(clazz);
+		InjectionMetadata metadata = this.injectionMetadataCache.get(beanName);
 		if (metadata == null) {
 			synchronized (this.injectionMetadataCache) {
-				metadata = this.injectionMetadataCache.get(clazz);
+				metadata = this.injectionMetadataCache.get(beanName);
 				if (metadata == null) {
 					metadata = buildAutowiringMetadata(clazz);
-					this.injectionMetadataCache.put(clazz, metadata);
+					this.injectionMetadataCache.put(beanName, metadata);
 				}
 			}
 		}
