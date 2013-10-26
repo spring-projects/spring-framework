@@ -33,6 +33,7 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.mockito.Mockito;
+
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.factory.BeanCreationException;
@@ -682,17 +683,12 @@ public class BeanFactoryGenericsTests {
 	 * Tests support for parameterized instance {@code factory-method} declarations such
 	 * as EasyMock's {@code IMocksControl.createMock()} method which has the following
 	 * signature.
-	 * 
 	 * <pre>
 	 * {@code
 	 * public <T> T createMock(Class<T> toMock)
 	 * }
 	 * </pre>
-	 * 
-	 * <p>
-	 * See SPR-10411
-	 * 
-	 * @since 4.0
+	 * <p>See SPR-10411
 	 */
 	@Test
 	public void parameterizedInstanceFactoryMethod() {
@@ -711,6 +707,43 @@ public class BeanFactoryGenericsTests {
 		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
 		assertEquals(1, beans.size());
 	}
+
+	@Test
+	public void parameterizedInstanceFactoryMethodWithNonResolvedClassName() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+
+		RootBeanDefinition rbd = new RootBeanDefinition(MocksControl.class);
+		bf.registerBeanDefinition("mocksControl", rbd);
+
+		rbd = new RootBeanDefinition();
+		rbd.setFactoryBeanName("mocksControl");
+		rbd.setFactoryMethodName("createMock");
+		rbd.getConstructorArgumentValues().addGenericArgumentValue(Runnable.class.getName());
+
+		bf.registerBeanDefinition("mock", rbd);
+
+		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
+		assertEquals(1, beans.size());
+	}
+
+	@Test
+	public void parameterizedInstanceFactoryMethodWithIndexedArgument() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+
+		RootBeanDefinition rbd = new RootBeanDefinition(MocksControl.class);
+		bf.registerBeanDefinition("mocksControl", rbd);
+
+		rbd = new RootBeanDefinition();
+		rbd.setFactoryBeanName("mocksControl");
+		rbd.setFactoryMethodName("createMock");
+		rbd.getConstructorArgumentValues().addIndexedArgumentValue(0, Runnable.class);
+
+		bf.registerBeanDefinition("mock", rbd);
+
+		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
+		assertEquals(1, beans.size());
+	}
+
 
 	@SuppressWarnings("serial")
 	public static class NamedUrlList extends LinkedList<URL> {
