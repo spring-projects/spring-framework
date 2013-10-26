@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@
 package org.springframework.test.context;
 
 import static org.junit.Assert.assertEquals;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 import org.junit.Test;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
@@ -42,7 +45,7 @@ public class TestExecutionListenersTests {
 	@Test
 	public void verifyNumDefaultListenersRegistered() throws Exception {
 		TestContextManager testContextManager = new TestContextManager(DefaultListenersExampleTestCase.class);
-		assertEquals("Verifying the number of registered TestExecutionListeners for DefaultListenersExampleTest.", 4,
+		assertEquals("Num registered TELs for DefaultListenersExampleTestCase.", 4,
 			testContextManager.getTestExecutionListeners().size());
 	}
 
@@ -50,47 +53,64 @@ public class TestExecutionListenersTests {
 	public void verifyNumNonInheritedDefaultListenersRegistered() throws Exception {
 		TestContextManager testContextManager = new TestContextManager(
 			NonInheritedDefaultListenersExampleTestCase.class);
-		assertEquals(
-			"Verifying the number of registered TestExecutionListeners for NonInheritedDefaultListenersExampleTest.",
-			1, testContextManager.getTestExecutionListeners().size());
+		assertEquals("Num registered TELs for NonInheritedDefaultListenersExampleTestCase.", 1,
+			testContextManager.getTestExecutionListeners().size());
 	}
 
 	@Test
 	public void verifyNumInheritedDefaultListenersRegistered() throws Exception {
 		TestContextManager testContextManager = new TestContextManager(InheritedDefaultListenersExampleTestCase.class);
-		assertEquals(
-			"Verifying the number of registered TestExecutionListeners for InheritedDefaultListenersExampleTest.", 1,
+		assertEquals("Num registered TELs for InheritedDefaultListenersExampleTestCase.", 1,
 			testContextManager.getTestExecutionListeners().size());
 
 		testContextManager = new TestContextManager(SubInheritedDefaultListenersExampleTestCase.class);
-		assertEquals(
-			"Verifying the number of registered TestExecutionListeners for SubInheritedDefaultListenersExampleTest.",
-			1, testContextManager.getTestExecutionListeners().size());
+		assertEquals("Num registered TELs for SubInheritedDefaultListenersExampleTestCase.", 1,
+			testContextManager.getTestExecutionListeners().size());
 
 		testContextManager = new TestContextManager(SubSubInheritedDefaultListenersExampleTestCase.class);
-		assertEquals(
-			"Verifying the number of registered TestExecutionListeners for SubSubInheritedDefaultListenersExampleTest.",
-			2, testContextManager.getTestExecutionListeners().size());
+		assertEquals("Num registered TELs for SubSubInheritedDefaultListenersExampleTestCase.", 2,
+			testContextManager.getTestExecutionListeners().size());
 	}
 
 	@Test
 	public void verifyNumListenersRegistered() throws Exception {
 		TestContextManager testContextManager = new TestContextManager(ExampleTestCase.class);
-		assertEquals("Verifying the number of registered TestExecutionListeners for ExampleTest.", 3,
+		assertEquals("Num registered TELs for ExampleTestCase.", 3,
 			testContextManager.getTestExecutionListeners().size());
 	}
 
 	@Test
 	public void verifyNumNonInheritedListenersRegistered() throws Exception {
 		TestContextManager testContextManager = new TestContextManager(NonInheritedListenersExampleTestCase.class);
-		assertEquals("Verifying the number of registered TestExecutionListeners for NonInheritedListenersExampleTest.",
-			1, testContextManager.getTestExecutionListeners().size());
+		assertEquals("Num registered TELs for NonInheritedListenersExampleTestCase.", 1,
+			testContextManager.getTestExecutionListeners().size());
 	}
 
 	@Test
 	public void verifyNumInheritedListenersRegistered() throws Exception {
 		TestContextManager testContextManager = new TestContextManager(InheritedListenersExampleTestCase.class);
-		assertEquals("Verifying the number of registered TestExecutionListeners for InheritedListenersExampleTest.", 4,
+		assertEquals("Num registered TELs for InheritedListenersExampleTestCase.", 4,
+			testContextManager.getTestExecutionListeners().size());
+	}
+
+	@Test
+	public void verifyNumListenersRegisteredViaMetaAnnotation() throws Exception {
+		TestContextManager testContextManager = new TestContextManager(MetaExampleTestCase.class);
+		assertEquals("Num registered TELs for MetaExampleTestCase.", 3,
+			testContextManager.getTestExecutionListeners().size());
+	}
+
+	@Test
+	public void verifyNumNonInheritedListenersRegisteredViaMetaAnnotation() throws Exception {
+		TestContextManager testContextManager = new TestContextManager(MetaNonInheritedListenersExampleTestCase.class);
+		assertEquals("Num registered TELs for MetaNonInheritedListenersExampleTestCase.", 1,
+			testContextManager.getTestExecutionListeners().size());
+	}
+
+	@Test
+	public void verifyNumInheritedListenersRegisteredViaMetaAnnotation() throws Exception {
+		TestContextManager testContextManager = new TestContextManager(MetaInheritedListenersExampleTestCase.class);
+		assertEquals("Num registered TELs for MetaInheritedListenersExampleTestCase.", 4,
 			testContextManager.getTestExecutionListeners().size());
 	}
 
@@ -118,7 +138,7 @@ public class TestExecutionListenersTests {
 	static class NonInheritedDefaultListenersExampleTestCase extends InheritedDefaultListenersExampleTestCase {
 	}
 
-	@TestExecutionListeners( { FooTestExecutionListener.class, BarTestExecutionListener.class,
+	@TestExecutionListeners({ FooTestExecutionListener.class, BarTestExecutionListener.class,
 		BazTestExecutionListener.class })
 	static class ExampleTestCase {
 	}
@@ -133,6 +153,37 @@ public class TestExecutionListenersTests {
 
 	@TestExecutionListeners(listeners = FooTestExecutionListener.class, value = BarTestExecutionListener.class)
 	static class DuplicateListenersConfigExampleTestCase {
+	}
+
+	@TestExecutionListeners({//
+	FooTestExecutionListener.class,//
+		BarTestExecutionListener.class,//
+		BazTestExecutionListener.class //
+	})
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface MetaListeners {
+	}
+
+	@TestExecutionListeners(QuuxTestExecutionListener.class)
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface MetaInheritedListeners {
+	}
+
+	@TestExecutionListeners(listeners = QuuxTestExecutionListener.class, inheritListeners = false)
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface MetaNonInheritedListeners {
+	}
+
+	@MetaListeners
+	static class MetaExampleTestCase {
+	}
+
+	@MetaInheritedListeners
+	static class MetaInheritedListenersExampleTestCase extends MetaExampleTestCase {
+	}
+
+	@MetaNonInheritedListeners
+	static class MetaNonInheritedListenersExampleTestCase extends MetaInheritedListenersExampleTestCase {
 	}
 
 	static class FooTestExecutionListener extends AbstractTestExecutionListener {
