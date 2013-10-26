@@ -61,6 +61,7 @@ import org.springframework.orm.jpa.ExtendedEntityManagerCreator;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * BeanPostProcessor that processes {@link javax.persistence.PersistenceUnit}
@@ -181,8 +182,8 @@ public class PersistenceAnnotationBeanPostProcessor
 
 	private transient ListableBeanFactory beanFactory;
 
-	private transient final Map<Class<?>, InjectionMetadata> injectionMetadataCache =
-			new ConcurrentHashMap<Class<?>, InjectionMetadata>(64);
+	private transient final Map<String, InjectionMetadata> injectionMetadataCache =
+			new ConcurrentHashMap<String, InjectionMetadata>(64);
 
 	private final Map<Object, EntityManager> extendedEntityManagersToClose =
 			new ConcurrentHashMap<Object, EntityManager>(16);
@@ -319,7 +320,7 @@ public class PersistenceAnnotationBeanPostProcessor
 
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		if (beanType != null) {
-			InjectionMetadata metadata = findPersistenceMetadata(beanType);
+			InjectionMetadata metadata = findPersistenceMetadata(beanName, beanType);
 			metadata.checkConfigMembers(beanDefinition);
 		}
 	}
@@ -335,7 +336,7 @@ public class PersistenceAnnotationBeanPostProcessor
 	public PropertyValues postProcessPropertyValues(
 			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
 
-		InjectionMetadata metadata = findPersistenceMetadata(bean.getClass());
+		InjectionMetadata metadata = findPersistenceMetadata(beanName, bean.getClass());
 		try {
 			metadata.inject(bean, beanName, pvs);
 		}
@@ -359,12 +360,14 @@ public class PersistenceAnnotationBeanPostProcessor
 	}
 
 
-	private InjectionMetadata findPersistenceMetadata(final Class<?> clazz) {
+	private InjectionMetadata findPersistenceMetadata(String beanName, final Class<?> clazz) {
 		// Quick check on the concurrent map first, with minimal locking.
-		InjectionMetadata metadata = this.injectionMetadataCache.get(clazz);
+		// Fall back to class name as cache key, for backwards compatibility with custom callers.
+		String cacheKey = (StringUtils.hasLength(beanName) ? beanName : clazz.getName());
+		InjectionMetadata metadata = this.injectionMetadataCache.get(cacheKey);
 		if (metadata == null) {
 			synchronized (this.injectionMetadataCache) {
-				metadata = this.injectionMetadataCache.get(clazz);
+				metadata = this.injectionMetadataCache.get(cacheKey);
 				if (metadata == null) {
 					LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<InjectionMetadata.InjectedElement>();
 					Class<?> targetClass = clazz;
@@ -402,7 +405,7 @@ public class PersistenceAnnotationBeanPostProcessor
 					while (targetClass != null && targetClass != Object.class);
 
 					metadata = new InjectionMetadata(clazz, elements);
-					this.injectionMetadataCache.put(clazz, metadata);
+					this.injectionMetadataCache.put(cacheKey, metadata);
 				}
 			}
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -177,8 +177,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 	private transient BeanFactory beanFactory;
 
-	private transient final Map<Class<?>, InjectionMetadata> injectionMetadataCache =
-			new ConcurrentHashMap<Class<?>, InjectionMetadata>(64);
+	private transient final Map<String, InjectionMetadata> injectionMetadataCache =
+			new ConcurrentHashMap<String, InjectionMetadata>(64);
 
 
 	/**
@@ -282,7 +282,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		super.postProcessMergedBeanDefinition(beanDefinition, beanType, beanName);
 		if (beanType != null) {
-			InjectionMetadata metadata = findResourceMetadata(beanType);
+			InjectionMetadata metadata = findResourceMetadata(beanName, beanType);
 			metadata.checkConfigMembers(beanDefinition);
 		}
 	}
@@ -298,7 +298,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	public PropertyValues postProcessPropertyValues(
 			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
 
-		InjectionMetadata metadata = findResourceMetadata(bean.getClass());
+		InjectionMetadata metadata = findResourceMetadata(beanName, bean.getClass());
 		try {
 			metadata.inject(bean, beanName, pvs);
 		}
@@ -309,12 +309,14 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 
-	private InjectionMetadata findResourceMetadata(final Class<?> clazz) {
+	private InjectionMetadata findResourceMetadata(String beanName, final Class<?> clazz) {
 		// Quick check on the concurrent map first, with minimal locking.
-		InjectionMetadata metadata = this.injectionMetadataCache.get(clazz);
+		// Fall back to class name as cache key, for backwards compatibility with custom callers.
+		String cacheKey = (StringUtils.hasLength(beanName) ? beanName : clazz.getName());
+		InjectionMetadata metadata = this.injectionMetadataCache.get(cacheKey);
 		if (metadata == null) {
 			synchronized (this.injectionMetadataCache) {
-				metadata = this.injectionMetadataCache.get(clazz);
+				metadata = this.injectionMetadataCache.get(cacheKey);
 				if (metadata == null) {
 					LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<InjectionMetadata.InjectedElement>();
 					Class<?> targetClass = clazz;
@@ -388,7 +390,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 					while (targetClass != null && targetClass != Object.class);
 
 					metadata = new InjectionMetadata(clazz, elements);
-					this.injectionMetadataCache.put(clazz, metadata);
+					this.injectionMetadataCache.put(cacheKey, metadata);
 				}
 			}
 		}

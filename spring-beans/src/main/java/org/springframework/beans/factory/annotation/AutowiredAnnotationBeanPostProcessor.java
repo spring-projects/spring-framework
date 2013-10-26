@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link org.springframework.beans.factory.config.BeanPostProcessor} implementation
@@ -121,8 +122,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	private final Map<Class<?>, Constructor<?>[]> candidateConstructorsCache =
 			new ConcurrentHashMap<Class<?>, Constructor<?>[]>(64);
 
-	private final Map<Class<?>, InjectionMetadata> injectionMetadataCache =
-			new ConcurrentHashMap<Class<?>, InjectionMetadata>(64);
+	private final Map<String, InjectionMetadata> injectionMetadataCache =
+			new ConcurrentHashMap<String, InjectionMetadata>(64);
 
 
 	/**
@@ -214,7 +215,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		if (beanType != null) {
-			InjectionMetadata metadata = findAutowiringMetadata(beanType);
+			InjectionMetadata metadata = findAutowiringMetadata(beanName, beanType);
 			metadata.checkConfigMembers(beanDefinition);
 		}
 	}
@@ -280,7 +281,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	public PropertyValues postProcessPropertyValues(
 			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
 
-		InjectionMetadata metadata = findAutowiringMetadata(bean.getClass());
+		InjectionMetadata metadata = findAutowiringMetadata(beanName, bean.getClass());
 		try {
 			metadata.inject(bean, beanName, pvs);
 		}
@@ -298,7 +299,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	 */
 	public void processInjection(Object bean) throws BeansException {
 		Class<?> clazz = bean.getClass();
-		InjectionMetadata metadata = findAutowiringMetadata(clazz);
+		InjectionMetadata metadata = findAutowiringMetadata(clazz.getName(), clazz);
 		try {
 			metadata.inject(bean, null, null);
 		}
@@ -308,15 +309,17 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 
-	private InjectionMetadata findAutowiringMetadata(Class<?> clazz) {
+	private InjectionMetadata findAutowiringMetadata(String beanName, Class<?> clazz) {
 		// Quick check on the concurrent map first, with minimal locking.
-		InjectionMetadata metadata = this.injectionMetadataCache.get(clazz);
+		// Fall back to class name as cache key, for backwards compatibility with custom callers.
+		String cacheKey = (StringUtils.hasLength(beanName) ? beanName : clazz.getName());
+		InjectionMetadata metadata = this.injectionMetadataCache.get(cacheKey);
 		if (metadata == null) {
 			synchronized (this.injectionMetadataCache) {
-				metadata = this.injectionMetadataCache.get(clazz);
+				metadata = this.injectionMetadataCache.get(cacheKey);
 				if (metadata == null) {
 					metadata = buildAutowiringMetadata(clazz);
-					this.injectionMetadataCache.put(clazz, metadata);
+					this.injectionMetadataCache.put(cacheKey, metadata);
 				}
 			}
 		}
