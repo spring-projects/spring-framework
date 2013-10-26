@@ -358,18 +358,16 @@ public final class ResolvableType implements Serializable {
 	 * The result will be {@code true} only in those two scenarios.
 	 */
 	public boolean hasUnresolvableGenerics() {
-		ResolvableType[] generics = getGenerics();
-		for (ResolvableType generic : generics) {
-			if (generic.resolve() == null) {
+		for (Class<?> generic : resolveGenerics()) {
+			if (generic == null) {
 				return true;
 			}
 		}
 		Class<?> resolved = resolve();
 		if (resolved != null) {
-			Type[] ifcs = resolved.getGenericInterfaces();
-			for (Type ifc : ifcs) {
-				if (ifc instanceof Class) {
-					if (forClass((Class) ifc).hasGenerics()) {
+			for (Type genericInterface : resolved.getGenericInterfaces()) {
+				if (genericInterface instanceof Class) {
+					if (forClass((Class<?>) genericInterface).hasGenerics()) {
 						return true;
 					}
 				}

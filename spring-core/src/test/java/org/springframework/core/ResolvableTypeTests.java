@@ -48,7 +48,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.runners.MockitoJUnitRunner;
-
 import org.springframework.core.ResolvableType.VariableResolver;
 import org.springframework.util.MultiValueMap;
 
@@ -57,6 +56,8 @@ import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
 /**
+ * Tests for {@link ResolvableType}.
+ *
  * @author Phillip Webb
  */
 @SuppressWarnings("rawtypes")
@@ -89,6 +90,7 @@ public class ResolvableTypeTests {
 		assertThat(none.resolveGeneric(0), nullValue());
 		assertThat(none.resolveGenerics().length, equalTo(0));
 		assertThat(none.toString(), equalTo("?"));
+		assertThat(none.hasUnresolvableGenerics(), equalTo(false));
 		assertThat(none.isAssignableFrom(ResolvableType.forClass(Object.class)), equalTo(false));
 	}
 
@@ -1121,6 +1123,42 @@ public class ResolvableTypeTests {
 		assertThat(narrow.getGeneric().resolve(), equalTo((Class) String.class));
 	}
 
+	@Test
+	public void hasUnresolvableGenerics() throws Exception {
+		ResolvableType type = ResolvableType.forField(Fields.class.getField("stringList"));
+		assertThat(type.hasUnresolvableGenerics(), equalTo(false));
+	}
+
+	@Test
+	public void hasUnresolvableGenericsBasedOnOwnGenerics() throws Exception {
+		ResolvableType type = ResolvableType.forClass(List.class);
+		assertThat(type.hasUnresolvableGenerics(), equalTo(true));
+	}
+
+	@Test
+	public void hasUnresolvableGenericsWhenSelfNotResolvable() throws Exception {
+		ResolvableType type = ResolvableType.forClass(List.class).getGeneric();
+		assertThat(type.hasUnresolvableGenerics(), equalTo(false));
+	}
+
+	@Test
+	public void hasUnresolvableGenericsWhenImplementesRawInterface() throws Exception {
+		ResolvableType type = ResolvableType.forClass(MySimpleInterfaceTypeWithImplementsRaw.class);
+		for (ResolvableType generic : type.getGenerics()) {
+			assertThat(generic.resolve(), not(nullValue()));
+		}
+		assertThat(type.hasUnresolvableGenerics(), equalTo(true));
+	}
+
+	@Test
+	public void hasUnresolvableGenericsWhenExtends() throws Exception {
+		ResolvableType type = ResolvableType.forClass(ExtendsMySimpleInterfaceTypeWithImplementsRaw.class);
+		for (ResolvableType generic : type.getGenerics()) {
+			assertThat(generic.resolve(), not(nullValue()));
+		}
+		assertThat(type.hasUnresolvableGenerics(), equalTo(true));
+	}
+
 
 	private ResolvableType testSerialization(ResolvableType type) throws Exception {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -1329,6 +1367,14 @@ public class ResolvableTypeTests {
 
 
 	public class MySimpleInterfaceType implements MyInterfaceType<String> {
+
+	}
+
+	public abstract class MySimpleInterfaceTypeWithImplementsRaw implements MyInterfaceType<String>, List {
+
+	}
+
+	public abstract class ExtendsMySimpleInterfaceTypeWithImplementsRaw extends MySimpleInterfaceTypeWithImplementsRaw {
 
 	}
 
