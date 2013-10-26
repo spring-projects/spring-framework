@@ -31,7 +31,6 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
@@ -39,6 +38,7 @@ import org.springframework.expression.BeanResolver;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionException;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.MethodExecutor;
 import org.springframework.expression.MethodResolver;
@@ -545,20 +545,26 @@ public class SpelReproTests extends ExpressionTestCase {
 		assertEquals(expectedValue,expr.getValue(TestScenarioCreator.getTestEvaluationContext()));
 	}
 
-	private void checkTemplateParsingError(String expression,String expectedMessage) throws Exception {
-		checkTemplateParsingError(expression, TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT,expectedMessage);
+	private void checkTemplateParsingError(String expression, String expectedMessage)
+			throws Exception {
+		checkTemplateParsingError(expression, TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT, expectedMessage);
 	}
 
-	private void checkTemplateParsingError(String expression,ParserContext context, String expectedMessage) throws Exception {
+	private void checkTemplateParsingError(String expression, ParserContext context,
+			String expectedMessage) throws Exception {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		try {
 			parser.parseExpression(expression,context);
 			fail("Should have failed");
-		} catch (Exception e) {
-			if (!e.getMessage().equals(expectedMessage)) {
-				e.printStackTrace();
+		} catch (Exception ex) {
+			String message = ex.getMessage();
+			if (ex instanceof ExpressionException) {
+				message = ((ExpressionException) ex).getSimpleMessage();
 			}
-			assertEquals(expectedMessage,e.getMessage());
+			if (!message.equals(expectedMessage)) {
+				ex.printStackTrace();
+			}
+			assertThat(expectedMessage, equalTo(message));
 		}
 	}
 
