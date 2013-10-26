@@ -654,17 +654,12 @@ public class BeanFactoryGenericsTests {
 	/**
 	 * Tests support for parameterized static {@code factory-method} declarations such as
 	 * Mockito's {@code mock()} method which has the following signature.
-	 * 
 	 * <pre>
 	 * {@code
 	 * public static <T> T mock(Class<T> classToMock)
 	 * }
 	 * </pre>
-	 * 
-	 * <p>
-	 * See SPR-9493
-	 * 
-	 * @since 3.2
+	 * <p>See SPR-9493
 	 */
 	@Test
 	public void parameterizedStaticFactoryMethod() {

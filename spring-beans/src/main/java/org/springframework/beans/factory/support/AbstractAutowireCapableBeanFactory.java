@@ -21,7 +21,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.TypeVariable;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
@@ -666,9 +665,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (Modifier.isStatic(factoryMethod.getModifiers()) == isStatic &&
 					factoryMethod.getName().equals(mbd.getFactoryMethodName()) &&
 					factoryMethod.getParameterTypes().length >= minNrOfArgs) {
-				TypeVariable<Method>[] declaredTypeVariables = factoryMethod.getTypeParameters();
 				// No declared type variables to inspect, so just process the standard return type.
-				if (declaredTypeVariables.length > 0) {
+				if (factoryMethod.getTypeParameters().length > 0) {
 					// Fully resolve parameter names and argument values.
 					Class<?>[] paramTypes = factoryMethod.getParameterTypes();
 					String[] paramNames = null;
@@ -747,15 +745,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				// Find the given factory method, taking into account that in the case of
 				// @Bean methods, there may be parameters present.
 				ReflectionUtils.doWithMethods(fbClass,
-					new ReflectionUtils.MethodCallback() {
-						@Override
-						public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
-							if (method.getName().equals(factoryMethodName) &&
-									FactoryBean.class.isAssignableFrom(method.getReturnType())) {
-								objectType.value = GenericTypeResolver.resolveReturnTypeArgument(method, FactoryBean.class);
+						new ReflectionUtils.MethodCallback() {
+							@Override
+							public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+								if (method.getName().equals(factoryMethodName) &&
+										FactoryBean.class.isAssignableFrom(method.getReturnType())) {
+									objectType.value = GenericTypeResolver.resolveReturnTypeArgument(method, FactoryBean.class);
+								}
 							}
-						}
-					});
+						});
 				if (objectType.value != null) {
 					return objectType.value;
 				}
