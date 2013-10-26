@@ -106,6 +106,7 @@ class DefaultTestContext extends AttributeAccessorSupport implements TestContext
 		final Class<ContextHierarchy> contextHierarchyType = ContextHierarchy.class;
 		final List<Class<? extends Annotation>> annotationTypes = Arrays.asList(contextConfigType, contextHierarchyType);
 
+		// TODO Switch to MetaAnnotationUtils for proper meta-annotation support
 		if (findAnnotationDeclaringClassForTypes(annotationTypes, testClass) != null) {
 			mergedContextConfiguration = ContextLoaderUtils.buildMergedContextConfiguration(testClass,
 				defaultContextLoaderClassName, cacheAwareContextLoaderDelegate);
