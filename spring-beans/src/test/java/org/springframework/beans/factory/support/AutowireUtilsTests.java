@@ -49,9 +49,6 @@ public class AutowireUtilsTests {
 
 		Method createNamedProxyWithDifferentTypes = ReflectionUtils.findMethod(MyTypeWithMethods.class, "createNamedProxy",
 				new Class[] { String.class, Object.class });
-		// one argument to few
-		assertNull(
-				AutowireUtils.resolveReturnTypeForFactoryMethod(createNamedProxyWithDifferentTypes, new Object[]{"enigma"}, getClass().getClassLoader()));
 		assertEquals(Long.class,
 				AutowireUtils.resolveReturnTypeForFactoryMethod(createNamedProxyWithDifferentTypes, new Object[] { "enigma", 99L }, getClass().getClassLoader()));
 

@@ -21,6 +21,9 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.Map;
 
@@ -1210,6 +1213,81 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	public void testGenericsBasedFieldInjectionWithQualifiers() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(RepositoryFieldInjectionBeanWithQualifiers.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		StringRepository sr = new StringRepository();
+		bf.registerSingleton("stringRepo", sr);
+		IntegerRepository ir = new IntegerRepository();
+		bf.registerSingleton("integerRepo", ir);
+
+		RepositoryFieldInjectionBeanWithQualifiers bean = (RepositoryFieldInjectionBeanWithQualifiers) bf.getBean("annotatedBean");
+		assertSame(sr, bean.stringRepository);
+		assertSame(ir, bean.integerRepository);
+		assertSame(1, bean.stringRepositoryArray.length);
+		assertSame(1, bean.integerRepositoryArray.length);
+		assertSame(sr, bean.stringRepositoryArray[0]);
+		assertSame(ir, bean.integerRepositoryArray[0]);
+		assertSame(1, bean.stringRepositoryList.size());
+		assertSame(1, bean.integerRepositoryList.size());
+		assertSame(sr, bean.stringRepositoryList.get(0));
+		assertSame(ir, bean.integerRepositoryList.get(0));
+		assertSame(1, bean.stringRepositoryMap.size());
+		assertSame(1, bean.integerRepositoryMap.size());
+		assertSame(sr, bean.stringRepositoryMap.get("stringRepo"));
+		assertSame(ir, bean.integerRepositoryMap.get("integerRepo"));
+	}
+
+	@Test
+	public void testGenericsBasedFieldInjectionWithMocks() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(RepositoryFieldInjectionBeanWithQualifiers.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+
+		RootBeanDefinition rbd = new RootBeanDefinition(MocksControl.class);
+		bf.registerBeanDefinition("mocksControl", rbd);
+		rbd = new RootBeanDefinition();
+		rbd.setFactoryBeanName("mocksControl");
+		rbd.setFactoryMethodName("createMock");
+		rbd.getConstructorArgumentValues().addGenericArgumentValue(Repository.class);
+		bf.registerBeanDefinition("stringRepo", rbd);
+		rbd = new RootBeanDefinition();
+		rbd.setFactoryBeanName("mocksControl");
+		rbd.setFactoryMethodName("createMock");
+		rbd.getConstructorArgumentValues().addGenericArgumentValue(Repository.class);
+		bf.registerBeanDefinition("integerRepo", rbd);
+
+		Repository sr = bf.getBean("stringRepo", Repository.class);
+		Repository ir = bf.getBean("integerRepo", Repository.class);
+		RepositoryFieldInjectionBeanWithQualifiers bean = (RepositoryFieldInjectionBeanWithQualifiers) bf.getBean("annotatedBean");
+		assertSame(sr, bean.stringRepository);
+		assertSame(ir, bean.integerRepository);
+		assertSame(1, bean.stringRepositoryArray.length);
+		assertSame(1, bean.integerRepositoryArray.length);
+		assertSame(sr, bean.stringRepositoryArray[0]);
+		assertSame(ir, bean.integerRepositoryArray[0]);
+		assertSame(1, bean.stringRepositoryList.size());
+		assertSame(1, bean.integerRepositoryList.size());
+		assertSame(sr, bean.stringRepositoryList.get(0));
+		assertSame(ir, bean.integerRepositoryList.get(0));
+		assertSame(1, bean.stringRepositoryMap.size());
+		assertSame(1, bean.integerRepositoryMap.size());
+		assertSame(sr, bean.stringRepositoryMap.get("stringRepo"));
+		assertSame(ir, bean.integerRepositoryMap.get("integerRepo"));
+	}
+
+	@Test
 	public void testGenericsBasedMethodInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
@@ -2057,6 +2135,34 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
+	public static class RepositoryFieldInjectionBeanWithQualifiers {
+
+		@Autowired @Qualifier("stringRepo")
+		public Repository<?> stringRepository;
+
+		@Autowired @Qualifier("integerRepo")
+		public Repository integerRepository;
+
+		@Autowired @Qualifier("stringRepo")
+		public Repository<?>[] stringRepositoryArray;
+
+		@Autowired @Qualifier("integerRepo")
+		public Repository[] integerRepositoryArray;
+
+		@Autowired @Qualifier("stringRepo")
+		public List<Repository> stringRepositoryList;
+
+		@Autowired @Qualifier("integerRepo")
+		public List<Repository<?>> integerRepositoryList;
+
+		@Autowired @Qualifier("stringRepo")
+		public Map<String, Repository<?>> stringRepositoryMap;
+
+		@Autowired @Qualifier("integerRepo")
+		public Map<String, Repository> integerRepositoryMap;
+	}
+
+
 	public static class RepositoryMethodInjectionBean {
 
 		public Repository<String> stringRepository;
@@ -2213,6 +2319,24 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 			this.integerRepositoryList = integerRepositoryList;
 			this.stringRepositoryMap = stringRepositoryMap;
 			this.integerRepositoryMap = integerRepositoryMap;
+		}
+	}
+
+
+	/**
+	 * Pseudo-implementation of EasyMock's {@code MocksControl} class.
+	 */
+	public static class MocksControl {
+
+		@SuppressWarnings("unchecked")
+		public <T> T createMock(Class<T> toMock) {
+			return (T) Proxy.newProxyInstance(AutowiredAnnotationBeanPostProcessorTests.class.getClassLoader(), new Class<?>[]{toMock},
+					new InvocationHandler() {
+						@Override
+						public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+							throw new UnsupportedOperationException("mocked!");
+						}
+					});
 		}
 	}
 

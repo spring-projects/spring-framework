@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.support;
 
+import java.lang.reflect.Method;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
@@ -66,7 +68,7 @@ public class GenericTypeAwareAutowireCandidateResolver implements AutowireCandid
 	 */
 	protected boolean checkGenericTypeMatch(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
 		ResolvableType dependencyType = descriptor.getResolvableType();
-		if (!dependencyType.hasGenerics()) {
+		if (dependencyType.getType() instanceof Class) {
 			// No generic type -> we know it's a Class type-match, so no need to check again.
 			return true;
 		}
@@ -75,10 +77,19 @@ public class GenericTypeAwareAutowireCandidateResolver implements AutowireCandid
 		if (bdHolder.getBeanDefinition() instanceof RootBeanDefinition) {
 			rbd = (RootBeanDefinition) bdHolder.getBeanDefinition();
 		}
-		if (rbd != null && rbd.getResolvedFactoryMethod() != null) {
+		if (rbd != null && rbd.getFactoryMethodName() != null) {
 			// Should typically be set for any kind of factory method, since the BeanFactory
 			// pre-resolves them before reaching out to the AutowireCandidateResolver...
-			targetType = ResolvableType.forMethodReturnType(rbd.getResolvedFactoryMethod());
+			Class<?> preResolved = rbd.resolvedFactoryMethodReturnType;
+			if (preResolved != null) {
+				targetType = ResolvableType.forClass(preResolved);
+			}
+			else {
+				Method resolvedFactoryMethod = rbd.getResolvedFactoryMethod();
+				if (resolvedFactoryMethod != null) {
+					targetType = ResolvableType.forMethodReturnType(resolvedFactoryMethod);
+				}
+			}
 		}
 		if (targetType == null) {
 			// Regular case: straight bean instance, with BeanFactory available.

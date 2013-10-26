@@ -222,8 +222,9 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 		}
 		if (qualifier == null) {
 			Annotation targetAnnotation = null;
-			if (bd.getResolvedFactoryMethod() != null) {
-				targetAnnotation = AnnotationUtils.getAnnotation(bd.getResolvedFactoryMethod(), type);
+			Method resolvedFactoryMethod = bd.getResolvedFactoryMethod();
+			if (resolvedFactoryMethod != null) {
+				targetAnnotation = AnnotationUtils.getAnnotation(resolvedFactoryMethod, type);
 			}
 			if (targetAnnotation == null) {
 				// look for matching annotation on the target class

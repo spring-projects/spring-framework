@@ -21,6 +21,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.TypeVariable;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
@@ -587,7 +588,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	@Override
-	protected Class<?> predictBeanType(String beanName, RootBeanDefinition mbd, Class... typesToMatch) {
+	protected Class<?> predictBeanType(String beanName, RootBeanDefinition mbd, Class<?>... typesToMatch) {
 		Class<?> targetType = mbd.getTargetType();
 		if (targetType == null) {
 			targetType = (mbd.getFactoryMethodName() != null ? getTypeForFactoryMethod(beanName, mbd, typesToMatch) :
@@ -627,7 +628,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @return the type for the bean if determinable, or {@code null} else
 	 * @see #createBean
 	 */
-	protected Class<?> getTypeForFactoryMethod(String beanName, RootBeanDefinition mbd, Class[] typesToMatch) {
+	protected Class<?> getTypeForFactoryMethod(String beanName, RootBeanDefinition mbd, Class<?>... typesToMatch) {
+		Class<?> preResolved = mbd.resolvedFactoryMethodReturnType;
+		if (preResolved != null) {
+			return preResolved;
+		}
+
 		Class<?> factoryClass;
 		boolean isStatic = true;
 
@@ -652,6 +658,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		// If all factory methods have the same return type, return that type.
 		// Can't clearly figure out exact method due to type converting / autowiring!
+		boolean cache = false;
 		int minNrOfArgs = mbd.getConstructorArgumentValues().getArgumentCount();
 		Method[] candidates = ReflectionUtils.getUniqueDeclaredMethods(factoryClass);
 		Set<Class<?>> returnTypes = new HashSet<Class<?>>(1);
@@ -659,38 +666,51 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (Modifier.isStatic(factoryMethod.getModifiers()) == isStatic &&
 					factoryMethod.getName().equals(mbd.getFactoryMethodName()) &&
 					factoryMethod.getParameterTypes().length >= minNrOfArgs) {
-				Class<?>[] paramTypes = factoryMethod.getParameterTypes();
-				String[] paramNames = null;
-				ParameterNameDiscoverer pnd = getParameterNameDiscoverer();
-				if (pnd != null) {
-					paramNames = pnd.getParameterNames(factoryMethod);
-				}
-				ConstructorArgumentValues cav = mbd.getConstructorArgumentValues();
-				Set<ConstructorArgumentValues.ValueHolder> usedValueHolders =
-						new HashSet<ConstructorArgumentValues.ValueHolder>(paramTypes.length);
-				Object[] args = new Object[paramTypes.length];
-				for (int i = 0; i < args.length; i++) {
-					ConstructorArgumentValues.ValueHolder valueHolder = cav.getArgumentValue(
-							i, paramTypes[i], (paramNames != null ? paramNames[i] : null), usedValueHolders);
-					if (valueHolder == null) {
-						valueHolder = cav.getGenericArgumentValue(null, null, usedValueHolders);
+				TypeVariable<Method>[] declaredTypeVariables = factoryMethod.getTypeParameters();
+				// No declared type variables to inspect, so just process the standard return type.
+				if (declaredTypeVariables.length > 0) {
+					// Fully resolve parameter names and argument values.
+					Class<?>[] paramTypes = factoryMethod.getParameterTypes();
+					String[] paramNames = null;
+					ParameterNameDiscoverer pnd = getParameterNameDiscoverer();
+					if (pnd != null) {
+						paramNames = pnd.getParameterNames(factoryMethod);
 					}
-					if (valueHolder != null) {
-						args[i] = valueHolder.getValue();
-						usedValueHolders.add(valueHolder);
+					ConstructorArgumentValues cav = mbd.getConstructorArgumentValues();
+					Set<ConstructorArgumentValues.ValueHolder> usedValueHolders =
+							new HashSet<ConstructorArgumentValues.ValueHolder>(paramTypes.length);
+					Object[] args = new Object[paramTypes.length];
+					for (int i = 0; i < args.length; i++) {
+						ConstructorArgumentValues.ValueHolder valueHolder = cav.getArgumentValue(
+								i, paramTypes[i], (paramNames != null ? paramNames[i] : null), usedValueHolders);
+						if (valueHolder == null) {
+							valueHolder = cav.getGenericArgumentValue(null, null, usedValueHolders);
+						}
+						if (valueHolder != null) {
+							args[i] = valueHolder.getValue();
+							usedValueHolders.add(valueHolder);
+						}
+					}
+					Class<?> returnType = AutowireUtils.resolveReturnTypeForFactoryMethod(
+							factoryMethod, args, getBeanClassLoader());
+					if (returnType != null) {
+						cache = true;
+						returnTypes.add(returnType);
 					}
 				}
-				Class<?> returnType = AutowireUtils.resolveReturnTypeForFactoryMethod(
-						factoryMethod, args, getBeanClassLoader());
-				if (returnType != null) {
-					returnTypes.add(returnType);
+				else {
+					returnTypes.add(factoryMethod.getReturnType());
 				}
 			}
 		}
 
 		if (returnTypes.size() == 1) {
 			// Clear return type found: all factory methods return same type.
-			return returnTypes.iterator().next();
+			Class<?> result = returnTypes.iterator().next();
+			if (cache) {
+				mbd.resolvedFactoryMethodReturnType = result;
+			}
+			return result;
 		}
 		else {
 			// Ambiguous return types found: return null to indicate "not determinable".
