@@ -32,16 +32,6 @@ import static org.springframework.test.context.ContextLoaderUtils.*;
  */
 public class ContextLoaderUtilsConfigurationAttributesTests extends AbstractContextLoaderUtilsTests {
 
-	private void assertAttributes(ContextConfigurationAttributes attributes, Class<?> expectedDeclaringClass,
-			String[] expectedLocations, Class<?>[] expectedClasses,
-			Class<? extends ContextLoader> expectedContextLoaderClass, boolean expectedInheritLocations) {
-		assertEquals(expectedDeclaringClass, attributes.getDeclaringClass());
-		assertArrayEquals(expectedLocations, attributes.getLocations());
-		assertArrayEquals(expectedClasses, attributes.getClasses());
-		assertEquals(expectedInheritLocations, attributes.isInheritLocations());
-		assertEquals(expectedContextLoaderClass, attributes.getContextLoaderClass());
-	}
-
 	private void assertLocationsFooAttributes(ContextConfigurationAttributes attributes) {
 		assertAttributes(attributes, LocationsFoo.class, new String[] { "/foo.xml" }, EMPTY_CLASS_ARRAY,
 			ContextLoader.class, false);
@@ -89,7 +79,18 @@ public class ContextLoaderUtilsConfigurationAttributesTests extends AbstractCont
 		List<ContextConfigurationAttributes> attributesList = resolveContextConfigurationAttributes(MetaLocationsFoo.class);
 		assertNotNull(attributesList);
 		assertEquals(1, attributesList.size());
-		assertAttributes(attributesList.get(0), MetaLocationsFooTest.class, new String[] { "/foo.xml" },
+		assertAttributes(attributesList.get(0), MetaLocationsFooConfig.class, new String[] { "/foo.xml" },
+			EMPTY_CLASS_ARRAY, ContextLoader.class, true);
+	}
+
+	@Test
+	public void resolveConfigAttributesWithMetaAnnotationAndLocationsInClassHierarchy() {
+		List<ContextConfigurationAttributes> attributesList = resolveContextConfigurationAttributes(MetaLocationsBar.class);
+		assertNotNull(attributesList);
+		assertEquals(2, attributesList.size());
+		assertAttributes(attributesList.get(0), MetaLocationsBarConfig.class, new String[] { "/bar.xml" },
+			EMPTY_CLASS_ARRAY, ContextLoader.class, true);
+		assertAttributes(attributesList.get(1), MetaLocationsFooConfig.class, new String[] { "/foo.xml" },
 			EMPTY_CLASS_ARRAY, ContextLoader.class, true);
 	}
 

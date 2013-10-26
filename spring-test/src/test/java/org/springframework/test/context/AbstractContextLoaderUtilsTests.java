@@ -30,6 +30,8 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import static org.junit.Assert.*;
 
+import static org.junit.Assert.*;
+
 /**
  * Abstract base class for tests involving {@link ContextLoaderUtils}.
  *
@@ -43,6 +45,16 @@ abstract class AbstractContextLoaderUtilsTests {
 	static final Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> EMPTY_INITIALIZER_CLASSES = //
 	Collections.<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> emptySet();
 
+
+	void assertAttributes(ContextConfigurationAttributes attributes, Class<?> expectedDeclaringClass,
+			String[] expectedLocations, Class<?>[] expectedClasses,
+			Class<? extends ContextLoader> expectedContextLoaderClass, boolean expectedInheritLocations) {
+		assertEquals(expectedDeclaringClass, attributes.getDeclaringClass());
+		assertArrayEquals(expectedLocations, attributes.getLocations());
+		assertArrayEquals(expectedClasses, attributes.getClasses());
+		assertEquals(expectedInheritLocations, attributes.isInheritLocations());
+		assertEquals(expectedContextLoaderClass, attributes.getContextLoaderClass());
+	}
 
 	void assertMergedConfig(MergedContextConfiguration mergedConfig, Class<?> expectedTestClass,
 			String[] expectedLocations, Class<?>[] expectedClasses,
@@ -91,11 +103,22 @@ abstract class AbstractContextLoaderUtilsTests {
 	@ActiveProfiles(profiles = "foo")
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface MetaLocationsFooTest {
+	public static @interface MetaLocationsFooConfig {
 	}
 
-	@MetaLocationsFooTest
+	@ContextConfiguration("/bar.xml")
+	@ActiveProfiles(profiles = "bar")
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	public static @interface MetaLocationsBarConfig {
+	}
+
+	@MetaLocationsFooConfig
 	static class MetaLocationsFoo {
+	}
+
+	@MetaLocationsBarConfig
+	static class MetaLocationsBar extends MetaLocationsFoo {
 	}
 
 	@ContextConfiguration(locations = "/foo.xml", inheritLocations = false)
