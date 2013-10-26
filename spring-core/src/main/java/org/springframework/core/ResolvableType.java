@@ -365,16 +365,18 @@ public final class ResolvableType implements Serializable {
 			}
 		}
 		Class<?> resolved = resolve();
-		Type[] ifcs = resolved.getGenericInterfaces();
-		for (Type ifc : ifcs) {
-			if (ifc instanceof Class) {
-				if (forClass((Class) ifc).hasGenerics()) {
-					return true;
+		if (resolved != null) {
+			Type[] ifcs = resolved.getGenericInterfaces();
+			for (Type ifc : ifcs) {
+				if (ifc instanceof Class) {
+					if (forClass((Class) ifc).hasGenerics()) {
+						return true;
+					}
 				}
 			}
-		}
-		if (resolved.getGenericSuperclass() != null) {
-			return getSuperType().hasUnresolvableGenerics();
+			if (resolved.getGenericSuperclass() != null) {
+				return getSuperType().hasUnresolvableGenerics();
+			}
 		}
 		return false;
 	}
