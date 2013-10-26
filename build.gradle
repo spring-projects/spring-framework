@@ -277,7 +277,7 @@ project('spring-beans-groovy') {
 
 	dependencies {
 		compile(project(":spring-core"))
-		compile "org.codehaus.groovy:groovy-all:${groovyVersion}"
+		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 	}
 
 	// this module's Java and Groovy sources need to be compiled together
