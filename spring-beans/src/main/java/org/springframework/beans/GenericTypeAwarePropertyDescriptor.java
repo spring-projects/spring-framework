@@ -69,8 +69,11 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 			// Fallback: Original JavaBeans introspection might not have found matching setter
 			// method due to lack of bridge method resolution, in case of the getter using a
 			// covariant return type whereas the setter is defined for the concrete property type.
-			writeMethodToUse = ClassUtils.getMethodIfAvailable(this.beanClass,
-					"set" + StringUtils.capitalize(getName()), readMethodToUse.getReturnType());
+			Method candidate = ClassUtils.getMethodIfAvailable(
+					this.beanClass, "set" + StringUtils.capitalize(getName()), (Class<?>[]) null);
+			if (candidate != null && candidate.getParameterTypes().length == 1) {
+				writeMethodToUse = candidate;
+			}
 		}
 		this.readMethod = readMethodToUse;
 		this.writeMethod = writeMethodToUse;

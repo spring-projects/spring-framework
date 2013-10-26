@@ -17,15 +17,12 @@
 package org.springframework.util;
 
 import java.beans.Introspector;
-
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
-
 import java.security.AccessControlException;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -546,7 +543,7 @@ public abstract class ClassUtils {
 	/**
 	 * Determine whether the given class has a public constructor with the given signature.
 	 * <p>Essentially translates {@code NoSuchMethodException} to "false".
-	 * @param clazz    the clazz to analyze
+	 * @param clazz the clazz to analyze
 	 * @param paramTypes the parameter types of the method
 	 * @return whether the class has a corresponding constructor
 	 * @see Class#getMethod
@@ -559,7 +556,7 @@ public abstract class ClassUtils {
 	 * Determine whether the given class has a public constructor with the given signature,
 	 * and return it if available (else return {@code null}).
 	 * <p>Essentially translates {@code NoSuchMethodException} to {@code null}.
-	 * @param clazz    the clazz to analyze
+	 * @param clazz the clazz to analyze
 	 * @param paramTypes the parameter types of the method
 	 * @return the constructor, or {@code null} if not found
 	 * @see Class#getConstructor
@@ -575,9 +572,9 @@ public abstract class ClassUtils {
 	}
 
 	/**
-	 * Determine whether the given class has a method with the given signature.
+	 * Determine whether the given class has a public method with the given signature.
 	 * <p>Essentially translates {@code NoSuchMethodException} to "false".
-	 * @param clazz    the clazz to analyze
+	 * @param clazz the clazz to analyze
 	 * @param methodName the name of the method
 	 * @param paramTypes the parameter types of the method
 	 * @return whether the class has a corresponding method
@@ -588,12 +585,15 @@ public abstract class ClassUtils {
 	}
 
 	/**
-	 * Determine whether the given class has a method with the given signature,
+	 * Determine whether the given class has a public method with the given signature,
 	 * and return it if available (else throws an {@code IllegalStateException}).
+	 * <p>In case of any signature specified, only returns the method if there is a
+	 * unique candidate, i.e. a single public method with the specified name.
 	 * <p>Essentially translates {@code NoSuchMethodException} to {@code IllegalStateException}.
-	 * @param clazz    the clazz to analyze
+	 * @param clazz the clazz to analyze
 	 * @param methodName the name of the method
 	 * @param paramTypes the parameter types of the method
+	 * (may be {@code null} to indicate any signature)
 	 * @return the method (never {@code null})
 	 * @throws IllegalStateException if the method has not been found
 	 * @see Class#getMethod
@@ -601,31 +601,69 @@ public abstract class ClassUtils {
 	public static Method getMethod(Class<?> clazz, String methodName, Class<?>... paramTypes) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(methodName, "Method name must not be null");
-		try {
-			return clazz.getMethod(methodName, paramTypes);
+		if (paramTypes != null) {
+			try {
+				return clazz.getMethod(methodName, paramTypes);
+			}
+			catch (NoSuchMethodException ex) {
+				throw new IllegalStateException("Expected method not found: " + ex);
+			}
 		}
-		catch (NoSuchMethodException ex) {
-			throw new IllegalStateException("Expected method not found: " + ex);
+		else {
+			Set<Method> candidates = new HashSet<Method>(1);
+			Method[] methods = clazz.getMethods();
+			for (Method method : methods) {
+				if (methodName.equals(method.getName())) {
+					candidates.add(method);
+				}
+			}
+			if (candidates.size() == 1) {
+				return candidates.iterator().next();
+			}
+			else if (candidates.isEmpty()) {
+				throw new IllegalStateException("Expected method not found: " + clazz + "." + methodName);
+			}
+			else {
+				throw new IllegalStateException("No unique method found: " + clazz + "." + methodName);
+			}
 		}
 	}
 
 	/**
-	 * Determine whether the given class has a method with the given signature,
+	 * Determine whether the given class has a public method with the given signature,
 	 * and return it if available (else return {@code null}).
+	 * <p>In case of any signature specified, only returns the method if there is a
+	 * unique candidate, i.e. a single public method with the specified name.
 	 * <p>Essentially translates {@code NoSuchMethodException} to {@code null}.
-	 * @param clazz    the clazz to analyze
+	 * @param clazz the clazz to analyze
 	 * @param methodName the name of the method
 	 * @param paramTypes the parameter types of the method
+	 * (may be {@code null} to indicate any signature)
 	 * @return the method, or {@code null} if not found
 	 * @see Class#getMethod
 	 */
 	public static Method getMethodIfAvailable(Class<?> clazz, String methodName, Class<?>... paramTypes) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(methodName, "Method name must not be null");
-		try {
-			return clazz.getMethod(methodName, paramTypes);
+		if (paramTypes != null) {
+			try {
+				return clazz.getMethod(methodName, paramTypes);
+			}
+			catch (NoSuchMethodException ex) {
+				return null;
+			}
 		}
-		catch (NoSuchMethodException ex) {
+		else {
+			Set<Method> candidates = new HashSet<Method>(1);
+			Method[] methods = clazz.getMethods();
+			for (Method method : methods) {
+				if (methodName.equals(method.getName())) {
+					candidates.add(method);
+				}
+			}
+			if (candidates.size() == 1) {
+				return candidates.iterator().next();
+			}
 			return null;
 		}
 	}
@@ -993,7 +1031,7 @@ public abstract class ClassUtils {
 	 * @param instance the instance to analyze for interfaces
 	 * @return all interfaces that the given instance implements as array
 	 */
-	public static Class[] getAllInterfaces(Object instance) {
+	public static Class<?>[] getAllInterfaces(Object instance) {
 		Assert.notNull(instance, "Instance must not be null");
 		return getAllInterfacesForClass(instance.getClass());
 	}
