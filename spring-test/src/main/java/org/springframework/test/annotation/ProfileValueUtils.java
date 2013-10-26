@@ -65,7 +65,7 @@ public abstract class ProfileValueUtils {
 		Assert.notNull(testClass, "testClass must not be null");
 
 		Class<ProfileValueSourceConfiguration> annotationType = ProfileValueSourceConfiguration.class;
-		ProfileValueSourceConfiguration config = testClass.getAnnotation(annotationType);
+		ProfileValueSourceConfiguration config = findAnnotation(testClass, annotationType);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Retrieved @ProfileValueSourceConfiguration [" + config + "] for test class ["
 					+ testClass.getName() + "]");

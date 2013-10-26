@@ -90,9 +90,11 @@ public class ProfileValueUtilsTests {
 		assertClassIsEnabled(EnabledAnnotatedSingleValue.class);
 		assertClassIsEnabled(EnabledAnnotatedMultiValue.class);
 		assertClassIsEnabled(MetaEnabledClass.class);
+		assertClassIsEnabled(MetaEnabledWithCustomProfileValueSourceClass.class);
 		assertClassIsDisabled(DisabledAnnotatedSingleValue.class);
 		assertClassIsDisabled(DisabledAnnotatedMultiValue.class);
 		assertClassIsDisabled(MetaDisabledClass.class);
+		assertClassIsDisabled(MetaDisabledWithCustomProfileValueSourceClass.class);
 	}
 
 	@Test
@@ -270,6 +272,34 @@ public class ProfileValueUtilsTests {
 		@MetaDisabled
 		public void disabledAnnotatedMethod() {
 		}
+	}
+
+	public static class HardCodedProfileValueSource implements ProfileValueSource {
+
+		@Override
+		public String get(final String key) {
+			return (key.equals(NAME) ? "42" : null);
+		}
+	}
+
+	@ProfileValueSourceConfiguration(HardCodedProfileValueSource.class)
+	@IfProfileValue(name = NAME, value = "42")
+	@Retention(RetentionPolicy.RUNTIME)
+	private static @interface MetaEnabledWithCustomProfileValueSource {
+	}
+
+	@ProfileValueSourceConfiguration(HardCodedProfileValueSource.class)
+	@IfProfileValue(name = NAME, value = "13")
+	@Retention(RetentionPolicy.RUNTIME)
+	private static @interface MetaDisabledWithCustomProfileValueSource {
+	}
+
+	@MetaEnabledWithCustomProfileValueSource
+	private static class MetaEnabledWithCustomProfileValueSourceClass {
+	}
+
+	@MetaDisabledWithCustomProfileValueSource
+	private static class MetaDisabledWithCustomProfileValueSourceClass {
 	}
 
 }
