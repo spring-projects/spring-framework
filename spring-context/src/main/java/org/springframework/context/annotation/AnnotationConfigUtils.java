@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -230,7 +230,7 @@ public class AnnotationConfigUtils {
 		return new BeanDefinitionHolder(definition, beanName);
 	}
 
-	static void processCommonDefinitionAnnotations(AnnotatedBeanDefinition abd) {
+	public static void processCommonDefinitionAnnotations(AnnotatedBeanDefinition abd) {
 		AnnotationMetadata metadata = abd.getMetadata();
 		if (metadata.isAnnotated(Primary.class.getName())) {
 			abd.setPrimary(true);
@@ -259,6 +259,5 @@ public class AnnotationConfigUtils {
 		boolean proxyTargetClass = scopedProxyMode.equals(ScopedProxyMode.TARGET_CLASS);
 		return ScopedProxyCreator.createScopedProxy(definition, registry, proxyTargetClass);
 	}
-
 
 }
