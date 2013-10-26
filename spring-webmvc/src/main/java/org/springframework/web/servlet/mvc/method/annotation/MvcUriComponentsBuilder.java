@@ -40,6 +40,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.method.annotation.RequestParamMethodArgumentResolver;
 import org.springframework.web.method.support.CompositeUriComponentsContributor;
+import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -297,10 +299,10 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 			logger.debug("Request bound to current thread is not an HttpServletRequest");
 			return null;
 		}
-		ServletContext servletContext = request.getServletContext();
-		WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+		WebApplicationContext wac = (WebApplicationContext) request.getAttribute(
+				DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		if (wac == null) {
-			logger.debug("No WebApplicationContext found: no ContextLoaderListener registered?");
+			logger.debug("No WebApplicationContext found: not in a DispatcherServlet request?");
 			return null;
 		}
 		try {
