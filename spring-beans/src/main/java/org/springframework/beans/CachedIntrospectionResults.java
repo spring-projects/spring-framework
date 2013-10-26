@@ -101,15 +101,14 @@ public class CachedIntrospectionResults {
 
 	/**
 	 * Clear the introspection cache for the given ClassLoader, removing the
-	 * introspection results for all classes underneath that ClassLoader,
-	 * and deregistering the ClassLoader (and any of its children) from the
-	 * acceptance list.
+	 * introspection results for all classes underneath that ClassLoader, and
+	 * removing the ClassLoader (and its children) from the acceptance list.
 	 * @param classLoader the ClassLoader to clear the cache for
 	 */
 	public static void clearClassLoader(ClassLoader classLoader) {
 		synchronized (classCache) {
 			for (Iterator<Class> it = classCache.keySet().iterator(); it.hasNext();) {
-				Class beanClass = it.next();
+				Class<?> beanClass = it.next();
 				if (isUnderneathClassLoader(beanClass.getClassLoader(), classLoader)) {
 					it.remove();
 				}
@@ -127,13 +126,11 @@ public class CachedIntrospectionResults {
 
 	/**
 	 * Create CachedIntrospectionResults for the given bean class.
-	 * <P>We don't want to use synchronization here. Object references are atomic,
-	 * so we can live with doing the occasional unnecessary lookup at startup only.
 	 * @param beanClass the bean class to analyze
 	 * @return the corresponding CachedIntrospectionResults
 	 * @throws BeansException in case of introspection failure
 	 */
-	static CachedIntrospectionResults forClass(Class beanClass) throws BeansException {
+	static CachedIntrospectionResults forClass(Class<?> beanClass) throws BeansException {
 		CachedIntrospectionResults results;
 		Object value;
 		synchronized (classCache) {
@@ -225,7 +222,7 @@ public class CachedIntrospectionResults {
 	 * @param beanClass the bean class to analyze
 	 * @throws BeansException in case of introspection failure
 	 */
-	private CachedIntrospectionResults(Class beanClass) throws BeansException {
+	private CachedIntrospectionResults(Class<?> beanClass) throws BeansException {
 		try {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Getting BeanInfo for class [" + beanClass.getName() + "]");
@@ -248,7 +245,7 @@ public class CachedIntrospectionResults {
 			// garbage collection on class loader shutdown - we cache it here anyway,
 			// in a GC-friendly manner. In contrast to CachedIntrospectionResults,
 			// Introspector does not use WeakReferences as values of its WeakHashMap!
-			Class classToFlush = beanClass;
+			Class<?> classToFlush = beanClass;
 			do {
 				Introspector.flushFromCaches(classToFlush);
 				classToFlush = classToFlush.getSuperclass();
@@ -286,7 +283,7 @@ public class CachedIntrospectionResults {
 		return this.beanInfo;
 	}
 
-	Class getBeanClass() {
+	Class<?> getBeanClass() {
 		return this.beanInfo.getBeanDescriptor().getBeanClass();
 	}
 
@@ -314,7 +311,7 @@ public class CachedIntrospectionResults {
 		return pds;
 	}
 
-	private PropertyDescriptor buildGenericTypeAwarePropertyDescriptor(Class beanClass, PropertyDescriptor pd) {
+	private PropertyDescriptor buildGenericTypeAwarePropertyDescriptor(Class<?> beanClass, PropertyDescriptor pd) {
 		try {
 			return new GenericTypeAwarePropertyDescriptor(beanClass, pd.getName(), pd.getReadMethod(),
 					pd.getWriteMethod(), pd.getPropertyEditorClass());
