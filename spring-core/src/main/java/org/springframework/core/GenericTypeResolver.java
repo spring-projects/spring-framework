@@ -245,7 +245,7 @@ public abstract class GenericTypeResolver {
 		if (!type.hasGenerics()) {
 			return null;
 		}
-		return type.resolveGenerics();
+		return type.resolveGenerics(Object.class);
 	}
 
 	/**

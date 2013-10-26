@@ -480,10 +480,24 @@ public final class ResolvableType implements Serializable {
 	 * @see #resolve()
 	 */
 	public Class<?>[] resolveGenerics() {
+		return resolveGenerics(null);
+	}
+
+	/**
+	 * Convenience method that will {@link #getGenerics() get} and {@link #resolve()
+	 * resolve} generic parameters, using the specified {@code fallback} if any type
+	 * cannot be resolved.
+	 * @param fallback the fallback class to use if resolution fails (may be {@code null})
+	 * @return an array of resolved generic parameters (the resulting array will never be
+	 * {@code null}, but it may contain {@code null} elements})
+	 * @see #getGenerics()
+	 * @see #resolve()
+	 */
+	public Class<?>[] resolveGenerics(Class<?> fallback) {
 		ResolvableType[] generics = getGenerics();
 		Class<?>[] resolvedGenerics = new Class<?>[generics.length];
 		for (int i = 0; i < generics.length; i++) {
-			resolvedGenerics[i] = generics[i].resolve();
+			resolvedGenerics[i] = generics[i].resolve(fallback);
 		}
 		return resolvedGenerics;
 	}

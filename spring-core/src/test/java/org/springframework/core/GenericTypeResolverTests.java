@@ -21,6 +21,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
@@ -136,6 +137,12 @@ public class GenericTypeResolverTests {
 		assertThat(x, equalTo((Type) Long.class));
 	}
 
+	@Test
+	public void getGenericsCannotBeResovled() throws Exception {
+		// SPR-11030
+		Class[] resolved = GenericTypeResolver.resolveTypeArguments(List.class, Iterable.class);
+		assertThat(resolved, equalTo(new Class[] { Object.class }));
+	}
 
 	public interface MyInterfaceType<T> {
 	}

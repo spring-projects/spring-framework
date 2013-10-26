@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.core.GenericTypeResolver;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
@@ -267,8 +268,11 @@ public class GenericConversionService implements ConfigurableConversionService {
 	// internal helpers
 
 	private GenericConverter.ConvertiblePair getRequiredTypeInfo(Object converter, Class<?> genericIfc) {
-		Class<?>[] args = GenericTypeResolver.resolveTypeArguments(converter.getClass(), genericIfc);
-		return (args != null ? new GenericConverter.ConvertiblePair(args[0], args[1]) : null);
+		ResolvableType resolvableType = ResolvableType.forClass(converter.getClass()).as(genericIfc);
+		if(resolvableType.hasUnresolvableGenerics()) {
+			return null;
+		}
+		return new GenericConverter.ConvertiblePair(resolvableType.resolveGeneric(0), resolvableType.resolveGeneric(1));
 	}
 
 	private void invalidateCache() {
