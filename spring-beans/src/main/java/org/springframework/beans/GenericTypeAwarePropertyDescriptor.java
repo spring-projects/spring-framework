@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,32 +31,32 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Extension of the standard JavaBeans PropertyDescriptor class,
- * overriding {@code getPropertyType()} such that a generically
- * declared type will be resolved against the containing bean class.
+ * Extension of the standard JavaBeans {@link PropertyDescriptor} class,
+ * overriding {@code getPropertyType()} such that a generically declared
+ * type variable will be resolved against the containing bean class.
  *
  * @author Juergen Hoeller
  * @since 2.5.2
  */
 class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 
-	private final Class beanClass;
+	private final Class<?> beanClass;
 
 	private final Method readMethod;
 
 	private final Method writeMethod;
 
-	private final Class propertyEditorClass;
+	private final Class<?> propertyEditorClass;
 
 	private volatile Set<Method> ambiguousWriteMethods;
 
-	private Class propertyType;
+	private Class<?> propertyType;
 
 	private MethodParameter writeMethodParameter;
 
 
-	public GenericTypeAwarePropertyDescriptor(Class beanClass, String propertyName,
-			Method readMethod, Method writeMethod, Class propertyEditorClass)
+	public GenericTypeAwarePropertyDescriptor(Class<?> beanClass, String propertyName,
+			Method readMethod, Method writeMethod, Class<?> propertyEditorClass)
 			throws IntrospectionException {
 
 		super(propertyName, null, null);
@@ -118,12 +118,12 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 	}
 
 	@Override
-	public Class getPropertyEditorClass() {
+	public Class<?> getPropertyEditorClass() {
 		return this.propertyEditorClass;
 	}
 
 	@Override
-	public synchronized Class getPropertyType() {
+	public synchronized Class<?> getPropertyType() {
 		if (this.propertyType == null) {
 			if (this.readMethod != null) {
 				this.propertyType = GenericTypeResolver.resolveReturnType(this.readMethod, this.beanClass);
