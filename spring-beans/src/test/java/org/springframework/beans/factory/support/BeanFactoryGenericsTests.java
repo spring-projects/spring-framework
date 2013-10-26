@@ -654,17 +654,13 @@ public class BeanFactoryGenericsTests {
 	/**
 	 * Tests support for parameterized static {@code factory-method} declarations such as
 	 * Mockito's {@code mock()} method which has the following signature.
-	 * 
 	 * <pre>
 	 * {@code
 	 * public static <T> T mock(Class<T> classToMock)
 	 * }
 	 * </pre>
-	 * 
 	 * <p>
 	 * See SPR-9493
-	 * 
-	 * @since 3.2
 	 */
 	@Test
 	public void parameterizedStaticFactoryMethod() {
@@ -701,7 +697,6 @@ public class BeanFactoryGenericsTests {
 		rbd.setFactoryBeanName("mocksControl");
 		rbd.setFactoryMethodName("createMock");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(Runnable.class);
-
 		bf.registerBeanDefinition("mock", rbd);
 
 		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
@@ -719,7 +714,6 @@ public class BeanFactoryGenericsTests {
 		rbd.setFactoryBeanName("mocksControl");
 		rbd.setFactoryMethodName("createMock");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(Runnable.class.getName());
-
 		bf.registerBeanDefinition("mock", rbd);
 
 		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
@@ -737,7 +731,6 @@ public class BeanFactoryGenericsTests {
 		rbd.setFactoryBeanName("mocksControl");
 		rbd.setFactoryMethodName("createMock");
 		rbd.getConstructorArgumentValues().addIndexedArgumentValue(0, Runnable.class);
-
 		bf.registerBeanDefinition("mock", rbd);
 
 		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
@@ -788,6 +781,7 @@ public class BeanFactoryGenericsTests {
 		}
 	}
 
+
 	/**
 	 * Pseudo-implementation of EasyMock's {@code MocksControl} class.
 	 */
@@ -795,14 +789,10 @@ public class BeanFactoryGenericsTests {
 
 		@SuppressWarnings("unchecked")
 		public <T> T createMock(Class<T> toMock) {
-
-			return (T) Proxy.newProxyInstance(
-					BeanFactoryGenericsTests.class.getClassLoader(),
-					new Class[] { toMock }, new InvocationHandler() {
-
+			return (T) Proxy.newProxyInstance(BeanFactoryGenericsTests.class.getClassLoader(), new Class<?>[] {toMock},
+					new InvocationHandler() {
 						@Override
-						public Object invoke(Object proxy, Method method, Object[] args)
-								throws Throwable {
+						public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 							throw new UnsupportedOperationException("mocked!");
 						}
 					});

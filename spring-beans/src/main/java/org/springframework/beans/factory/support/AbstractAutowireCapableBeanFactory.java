@@ -569,7 +569,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	@Override
-	protected Class<?> predictBeanType(String beanName, RootBeanDefinition mbd, Class... typesToMatch) {
+	protected Class<?> predictBeanType(String beanName, RootBeanDefinition mbd, Class<?>... typesToMatch) {
 		Class<?> targetType = mbd.getTargetType();
 		if (targetType == null) {
 			targetType = (mbd.getFactoryMethodName() != null ? getTypeForFactoryMethod(beanName, mbd, typesToMatch) :
@@ -641,31 +641,38 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (Modifier.isStatic(factoryMethod.getModifiers()) == isStatic &&
 					factoryMethod.getName().equals(mbd.getFactoryMethodName()) &&
 					factoryMethod.getParameterTypes().length >= minNrOfArgs) {
-				Class<?>[] paramTypes = factoryMethod.getParameterTypes();
-				String[] paramNames = null;
-				ParameterNameDiscoverer pnd = getParameterNameDiscoverer();
-				if (pnd != null) {
-					paramNames = pnd.getParameterNames(factoryMethod);
-				}
-				ConstructorArgumentValues cav = mbd.getConstructorArgumentValues();
-				Set<ConstructorArgumentValues.ValueHolder> usedValueHolders =
-						new HashSet<ConstructorArgumentValues.ValueHolder>(paramTypes.length);
-				Object[] args = new Object[paramTypes.length];
-				for (int i = 0; i < args.length; i++) {
-					ConstructorArgumentValues.ValueHolder valueHolder = cav.getArgumentValue(
-							i, paramTypes[i], (paramNames != null ? paramNames[i] : null), usedValueHolders);
-					if (valueHolder == null) {
-						valueHolder = cav.getGenericArgumentValue(null, null, usedValueHolders);
+				// No declared type variables to inspect, so just process the standard return type.
+				if (factoryMethod.getTypeParameters().length > 0) {
+					// Fully resolve parameter names and argument values.
+					Class<?>[] paramTypes = factoryMethod.getParameterTypes();
+					String[] paramNames = null;
+					ParameterNameDiscoverer pnd = getParameterNameDiscoverer();
+					if (pnd != null) {
+						paramNames = pnd.getParameterNames(factoryMethod);
 					}
-					if (valueHolder != null) {
-						args[i] = valueHolder.getValue();
-						usedValueHolders.add(valueHolder);
+					ConstructorArgumentValues cav = mbd.getConstructorArgumentValues();
+					Set<ConstructorArgumentValues.ValueHolder> usedValueHolders =
+							new HashSet<ConstructorArgumentValues.ValueHolder>(paramTypes.length);
+					Object[] args = new Object[paramTypes.length];
+					for (int i = 0; i < args.length; i++) {
+						ConstructorArgumentValues.ValueHolder valueHolder = cav.getArgumentValue(
+								i, paramTypes[i], (paramNames != null ? paramNames[i] : null), usedValueHolders);
+						if (valueHolder == null) {
+							valueHolder = cav.getGenericArgumentValue(null, null, usedValueHolders);
+						}
+						if (valueHolder != null) {
+							args[i] = valueHolder.getValue();
+							usedValueHolders.add(valueHolder);
+						}
+					}
+					Class<?> returnType = AutowireUtils.resolveReturnTypeForFactoryMethod(
+							factoryMethod, args, getBeanClassLoader());
+					if (returnType != null) {
+						returnTypes.add(returnType);
 					}
 				}
-				Class<?> returnType = AutowireUtils.resolveReturnTypeForFactoryMethod(
-						factoryMethod, args, getBeanClassLoader());
-				if (returnType != null) {
-					returnTypes.add(returnType);
+				else {
+					returnTypes.add(factoryMethod.getReturnType());
 				}
 			}
 		}

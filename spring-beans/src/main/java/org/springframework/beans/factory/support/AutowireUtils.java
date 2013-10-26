@@ -193,17 +193,7 @@ abstract class AutowireUtils {
 		TypeVariable<Method>[] declaredTypeVariables = method.getTypeParameters();
 		Type genericReturnType = method.getGenericReturnType();
 		Type[] methodArgumentTypes = method.getGenericParameterTypes();
-
-		// No declared type variables to inspect, so just return the standard return type.
-		if (declaredTypeVariables.length == 0) {
-			return method.getReturnType();
-		}
-
-		// The supplied argument list is too short for the method's signature, so
-		// return null, since such a method invocation would fail.
-		if (args.length < methodArgumentTypes.length) {
-			return null;
-		}
+		Assert.isTrue(args.length == methodArgumentTypes.length, "Argument array does not match parameter count");
 
 		// Ensure that the type variable (e.g., T) is declared directly on the method
 		// itself (e.g., via <T>), not on the enclosing class or interface.
