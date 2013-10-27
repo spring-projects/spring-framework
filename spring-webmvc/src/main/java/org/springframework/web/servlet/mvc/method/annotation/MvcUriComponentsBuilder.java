@@ -271,7 +271,7 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 			contributor = defaultUriComponentsContributor;
 		}
 
-		int paramCount = method.getParameterCount();
+		int paramCount = method.getParameterTypes().length;
 		int argCount = args.length;
 
 		Assert.isTrue(paramCount == argCount,  "Number of method parameters " + paramCount +
