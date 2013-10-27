@@ -31,7 +31,9 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Set;
 
+import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -192,8 +194,8 @@ abstract class AutowireUtils {
 
 		TypeVariable<Method>[] declaredTypeVariables = method.getTypeParameters();
 		Type genericReturnType = method.getGenericReturnType();
-		Type[] methodArgumentTypes = method.getGenericParameterTypes();
-		Assert.isTrue(args.length == methodArgumentTypes.length, "Argument array does not match parameter count");
+		Type[] methodParameterTypes = method.getGenericParameterTypes();
+		Assert.isTrue(args.length == methodParameterTypes.length, "Argument array does not match parameter count");
 
 		// Ensure that the type variable (e.g., T) is declared directly on the method
 		// itself (e.g., via <T>), not on the enclosing class or interface.
@@ -206,30 +208,57 @@ abstract class AutowireUtils {
 		}
 
 		if (locallyDeclaredTypeVariableMatchesReturnType) {
-			for (int i = 0; i < methodArgumentTypes.length; i++) {
-				Type currentMethodArgumentType = methodArgumentTypes[i];
-				if (currentMethodArgumentType.equals(genericReturnType)) {
-					return args[i].getClass();
+			for (int i = 0; i < methodParameterTypes.length; i++) {
+				Type methodParameterType = methodParameterTypes[i];
+				Object arg = args[i];
+				if (methodParameterType.equals(genericReturnType)) {
+					if (arg instanceof TypedStringValue) {
+						TypedStringValue typedValue = ((TypedStringValue) arg);
+						if (typedValue.hasTargetType()) {
+							return typedValue.getTargetType();
+						}
+						try {
+							return typedValue.resolveTargetType(classLoader);
+						}
+						catch (ClassNotFoundException ex) {
+							throw new IllegalStateException("Failed to resolve typed value", ex);
+						}
+					}
+					// Only consider argument type if it is a simple value...
+					if (arg != null && !(arg instanceof BeanMetadataElement)) {
+						return arg.getClass();
+					}
+					return method.getReturnType();
 				}
-				if (currentMethodArgumentType instanceof ParameterizedType) {
-					ParameterizedType parameterizedType = (ParameterizedType) currentMethodArgumentType;
+				else if (methodParameterType instanceof ParameterizedType) {
+					ParameterizedType parameterizedType = (ParameterizedType) methodParameterType;
 					Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 					for (Type typeArg : actualTypeArguments) {
 						if (typeArg.equals(genericReturnType)) {
-							Object arg = args[i];
 							if (arg instanceof Class) {
 								return (Class<?>) arg;
 							}
-							else if (arg instanceof String) {
-								try {
-									return classLoader.loadClass((String) arg);
-								}
-								catch (ClassNotFoundException ex) {
-									throw new IllegalStateException(
-											"Could not resolve specified class name argument [" + arg + "]", ex);
-								}
-							}
 							else {
+								String className = null;
+								if (arg instanceof String) {
+									className = (String) arg;
+								}
+								else if (arg instanceof TypedStringValue) {
+									TypedStringValue typedValue = ((TypedStringValue) arg);
+									String targetTypeName = typedValue.getTargetTypeName();
+									if (targetTypeName == null || Class.class.getName().equals(targetTypeName)) {
+										className = typedValue.getValue();
+									}
+								}
+								if (className != null) {
+									try {
+										return classLoader.loadClass(className);
+									}
+									catch (ClassNotFoundException ex) {
+										throw new IllegalStateException(
+												"Could not resolve specified class name argument [" + arg + "]", ex);
+									}
+								}
 								// Consider adding logic to determine the class of the typeArg, if possible.
 								// For now, just fall back...
 								return method.getReturnType();
