@@ -154,6 +154,17 @@ public class ConfigurationClassPostProcessorTests {
 		assertSame(bf.getBean("integerRepo"), bean.integerRepository);
 	}
 
+	@Test
+	public void testGenericsBasedInjectionWithRawMatch() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		bf.registerBeanDefinition("configClass", new RootBeanDefinition(RawMatchingConfiguration.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(bf);
+
+		assertSame(bf.getBean("repo"), bf.getBean("repoConsumer"));
+	}
+
 
 	@Configuration
 	static class SingletonBeanConfig {
@@ -173,13 +184,18 @@ public class ConfigurationClassPostProcessorTests {
 
 
 	static class Bar {
+
 		final Foo foo;
-		public Bar(Foo foo) { this.foo = foo; }
+
+		public Bar(Foo foo) {
+			this.foo = foo;
+		}
 	}
 
 
 	@Configuration
 	static class UnloadedConfig {
+
 		public @Bean Foo foo() {
 			return new Foo();
 		}
@@ -188,13 +204,14 @@ public class ConfigurationClassPostProcessorTests {
 
 	@Configuration
 	static class LoadedConfig {
+
 		public @Bean Bar bar() {
 			return new Bar(new Foo());
 		}
 	}
 
 
-	public interface Repository<T> {
+	public static class Repository<T> {
 	}
 
 
@@ -213,14 +230,27 @@ public class ConfigurationClassPostProcessorTests {
 
 		@Bean
 		public Repository<String> stringRepo() {
-			return new Repository<String>() {
-			};
+			return new Repository<String>();
 		}
 
 		@Bean
 		public Repository<Integer> integerRepo() {
-			return new Repository<Integer>() {
-			};
+			return new Repository<Integer>();
+		}
+	}
+
+
+	@Configuration
+	public static class RawMatchingConfiguration {
+
+		@Bean
+		public Repository repo() {
+			return new Repository();
+		}
+
+		@Bean
+		public Object repoConsumer(Repository<String> repo) {
+			return repo;
 		}
 	}
 
