@@ -599,9 +599,18 @@ abstract class ContextLoaderUtils {
 	 * @see #buildContextHierarchyMap(Class)
 	 * @see #buildMergedContextConfiguration(Class, List, String, MergedContextConfiguration, CacheAwareContextLoaderDelegate)
 	 */
-	@SuppressWarnings("javadoc")
+	@SuppressWarnings({ "javadoc", "unchecked" })
 	static MergedContextConfiguration buildMergedContextConfiguration(Class<?> testClass,
 			String defaultContextLoaderClassName, CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
+
+		if (findAnnotationDescriptorForTypes(testClass, ContextConfiguration.class, ContextHierarchy.class) == null) {
+			if (logger.isInfoEnabled()) {
+				logger.info(String.format(
+					"Neither @ContextConfiguration nor @ContextHierarchy found for test class [%s]",
+					testClass.getName()));
+			}
+			return new MergedContextConfiguration(testClass, null, null, null, null);
+		}
 
 		if (findAnnotation(testClass, ContextHierarchy.class) != null) {
 			Map<String, List<ContextConfigurationAttributes>> hierarchyMap = buildContextHierarchyMap(testClass);

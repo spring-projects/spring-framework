@@ -16,20 +16,13 @@
 
 package org.springframework.test.context;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.AttributeAccessorSupport;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.util.Assert;
-
-import static org.springframework.core.annotation.AnnotationUtils.*;
 
 /**
  * Default implementation of the {@link TestContext} interface.
@@ -46,8 +39,6 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
 class DefaultTestContext extends AttributeAccessorSupport implements TestContext {
 
 	private static final long serialVersionUID = -5827157174866681233L;
-
-	private static final Log logger = LogFactory.getLog(DefaultTestContext.class);
 
 	private final ContextCache contextCache;
 
@@ -99,28 +90,8 @@ class DefaultTestContext extends AttributeAccessorSupport implements TestContext
 		this.testClass = testClass;
 		this.contextCache = contextCache;
 		this.cacheAwareContextLoaderDelegate = new CacheAwareContextLoaderDelegate(contextCache);
-
-		MergedContextConfiguration mergedContextConfiguration;
-
-		final Class<ContextConfiguration> contextConfigType = ContextConfiguration.class;
-		final Class<ContextHierarchy> contextHierarchyType = ContextHierarchy.class;
-		final List<Class<? extends Annotation>> annotationTypes = Arrays.asList(contextConfigType, contextHierarchyType);
-
-		// TODO Switch to MetaAnnotationUtils for proper meta-annotation support
-		if (findAnnotationDeclaringClassForTypes(annotationTypes, testClass) != null) {
-			mergedContextConfiguration = ContextLoaderUtils.buildMergedContextConfiguration(testClass,
-				defaultContextLoaderClassName, cacheAwareContextLoaderDelegate);
-		}
-		else {
-			if (logger.isInfoEnabled()) {
-				logger.info(String.format(
-					"Neither @ContextConfiguration nor @ContextHierarchy found for test class [%s]",
-					testClass.getName()));
-			}
-			mergedContextConfiguration = new MergedContextConfiguration(testClass, null, null, null, null);
-		}
-
-		this.mergedContextConfiguration = mergedContextConfiguration;
+		this.mergedContextConfiguration = ContextLoaderUtils.buildMergedContextConfiguration(testClass,
+			defaultContextLoaderClassName, cacheAwareContextLoaderDelegate);
 	}
 
 	/**
