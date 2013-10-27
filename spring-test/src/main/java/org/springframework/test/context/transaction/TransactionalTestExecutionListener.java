@@ -27,7 +27,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -310,7 +309,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * @throws BeansException if an error occurs while retrieving the transaction manager
 	 * @see #getTransactionManager(TestContext)
 	 */
-	protected final PlatformTransactionManager getTransactionManager(TestContext testContext, String qualifier) {
+	protected PlatformTransactionManager getTransactionManager(TestContext testContext, String qualifier) {
 		// look up by type and qualifier from @Transactional
 		if (StringUtils.hasText(qualifier)) {
 			try {
@@ -343,7 +342,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * @throws BeansException if an error occurs while retrieving the transaction manager
 	 * @see #getTransactionManager(TestContext, String)
 	 */
-	protected final PlatformTransactionManager getTransactionManager(TestContext testContext) {
+	protected PlatformTransactionManager getTransactionManager(TestContext testContext) {
 		BeanFactory bf = testContext.getApplicationContext().getAutowireCapableBeanFactory();
 		String tmName = retrieveConfigurationAttributes(testContext).getTransactionManagerName();
 
@@ -432,17 +431,17 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	/**
 	 * Gets all superclasses of the supplied {@link Class class}, including the
 	 * class itself. The ordering of the returned list will begin with the
-	 * supplied class and continue up the class hierarchy.
+	 * supplied class and continue up the class hierarchy, excluding {@link Object}.
 	 * <p>Note: This code has been borrowed from
 	 * {@link org.junit.internal.runners.TestClass#getSuperClasses(Class)} and
 	 * adapted.
-	 * @param clazz the class for which to retrieve the superclasses.
-	 * @return all superclasses of the supplied class.
+	 * @param clazz the class for which to retrieve the superclasses
+	 * @return all superclasses of the supplied class, excluding {@code Object}
 	 */
 	private List<Class<?>> getSuperClasses(Class<?> clazz) {
-		ArrayList<Class<?>> results = new ArrayList<Class<?>>();
+		List<Class<?>> results = new ArrayList<Class<?>>();
 		Class<?> current = clazz;
-		while (current != null) {
+		while (current != null && !current.equals(Object.class)) {
 			results.add(current);
 			current = current.getSuperclass();
 		}
@@ -462,12 +461,11 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 */
 	private List<Method> getAnnotatedMethods(Class<?> clazz, Class<? extends Annotation> annotationType) {
 		List<Method> results = new ArrayList<Method>();
-		for (Class<?> eachClass : getSuperClasses(clazz)) {
-			Method[] methods = eachClass.getDeclaredMethods();
-			for (Method eachMethod : methods) {
-				Annotation annotation = eachMethod.getAnnotation(annotationType);
-				if (annotation != null && !isShadowed(eachMethod, results)) {
-					results.add(eachMethod);
+		for (Class<?> current : getSuperClasses(clazz)) {
+			for (Method method : current.getDeclaredMethods()) {
+				Annotation annotation = getAnnotation(method, annotationType);
+				if (annotation != null && !isShadowed(method, results)) {
+					results.add(method);
 				}
 			}
 		}
@@ -475,8 +473,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	}
 
 	/**
-	 * Determines if the supplied {@link Method method} is <em>shadowed</em>
-	 * by a method in supplied {@link List list} of previous methods.
+	 * Determine if the supplied {@link Method method} is <em>shadowed</em> by
+	 * a method in the supplied {@link List list} of previous methods.
 	 * <p>Note: This code has been borrowed from
 	 * {@link org.junit.internal.runners.TestClass#isShadowed(Method, List)}.
 	 * @param method the method to check for shadowing
@@ -494,8 +492,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	}
 
 	/**
-	 * Determines if the supplied {@link Method current method} is
-	 * <em>shadowed</em> by a {@link Method previous method}.
+	 * Determine if the supplied {@link Method current method} is <em>shadowed</em>
+	 * by a {@link Method previous method}.
 	 * <p>Note: This code has been borrowed from
 	 * {@link org.junit.internal.runners.TestClass#isShadowed(Method, Method)}.
 	 * @param current the current method
