@@ -61,7 +61,7 @@ public class TypedStringValue implements BeanMetadataElement {
 	 * @param value the String value
 	 * @param targetType the type to convert to
 	 */
-	public TypedStringValue(String value, Class targetType) {
+	public TypedStringValue(String value, Class<?> targetType) {
 		setValue(value);
 		setTargetType(targetType);
 	}
@@ -101,7 +101,7 @@ public class TypedStringValue implements BeanMetadataElement {
 	 * for example in BeanFactoryPostProcessors.
 	 * @see PropertyPlaceholderConfigurer
 	 */
-	public void setTargetType(Class targetType) {
+	public void setTargetType(Class<?> targetType) {
 		Assert.notNull(targetType, "'targetType' must not be null");
 		this.targetType = targetType;
 	}
