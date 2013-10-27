@@ -32,6 +32,7 @@ import java.util.Comparator;
 import java.util.Set;
 
 import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -222,19 +223,28 @@ abstract class AutowireUtils {
 							if (arg instanceof Class) {
 								return (Class<?>) arg;
 							}
-							else if (arg instanceof String) {
-								try {
-									return classLoader.loadClass((String) arg);
-								}
-								catch (ClassNotFoundException ex) {
-									throw new IllegalStateException(
-											"Could not resolve specified class name argument [" + arg + "]", ex);
-								}
-							}
 							else {
-								// Consider adding logic to determine the class of the typeArg, if possible.
-								// For now, just fall back...
-								return method.getReturnType();
+								String className = null;
+								if (arg instanceof String) {
+									className = (String) arg;
+								}
+								else if (arg instanceof TypedStringValue) {
+									className = ((TypedStringValue) arg).getValue();
+								}
+								if (className != null) {
+									try {
+										return classLoader.loadClass(className);
+									}
+									catch (ClassNotFoundException ex) {
+										throw new IllegalStateException(
+												"Could not resolve specified class name argument [" + arg + "]", ex);
+									}
+								}
+								else {
+									// Consider adding logic to determine the class of the typeArg, if possible.
+									// For now, just fall back...
+									return method.getReturnType();
+								}
 							}
 						}
 					}
