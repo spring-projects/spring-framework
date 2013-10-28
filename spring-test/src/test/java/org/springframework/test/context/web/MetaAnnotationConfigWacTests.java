@@ -33,10 +33,10 @@ import static org.junit.Assert.*;
  *
  * @author Sam Brannen
  * @since 4.0
- * @see WebTests
+ * @see WebTest
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@WebTests
+@WebTest
 public class MetaAnnotationConfigWacTests {
 
 	@Autowired

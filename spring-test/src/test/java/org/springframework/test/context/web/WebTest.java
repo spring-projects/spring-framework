@@ -33,7 +33,7 @@ import org.springframework.test.context.ContextConfiguration;
 @WebAppConfiguration
 @ContextConfiguration
 @Retention(RetentionPolicy.RUNTIME)
-public @interface WebTests {
+public @interface WebTest {
 
 	@Configuration
 	static class Config {
