@@ -32,6 +32,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.test.context.MetaAnnotationUtils.AnnotationDescriptor;
+import org.springframework.test.context.MetaAnnotationUtils.UntypedAnnotationDescriptor;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -39,6 +41,7 @@ import org.springframework.util.StringUtils;
 
 import static org.springframework.beans.BeanUtils.*;
 import static org.springframework.core.annotation.AnnotationUtils.*;
+import static org.springframework.test.context.MetaAnnotationUtils.*;
 
 /**
  * Utility methods for working with {@link ContextLoader ContextLoaders} and
@@ -108,7 +111,7 @@ abstract class ContextLoaderUtils {
 		if (!StringUtils.hasText(defaultContextLoaderClassName)) {
 			Class<? extends Annotation> webAppConfigClass = loadWebAppConfigurationClass();
 			defaultContextLoaderClassName = webAppConfigClass != null
-					&& testClass.isAnnotationPresent(webAppConfigClass) ? DEFAULT_WEB_CONTEXT_LOADER_CLASS_NAME
+					&& findAnnotation(testClass, webAppConfigClass) != null ? DEFAULT_WEB_CONTEXT_LOADER_CLASS_NAME
 					: DEFAULT_CONTEXT_LOADER_CLASS_NAME;
 		}
 
@@ -245,29 +248,32 @@ abstract class ContextLoaderUtils {
 	 * @see #buildContextHierarchyMap(Class)
 	 * @see #resolveContextConfigurationAttributes(Class)
 	 */
+	@SuppressWarnings("unchecked")
 	static List<List<ContextConfigurationAttributes>> resolveContextHierarchyAttributes(Class<?> testClass) {
 		Assert.notNull(testClass, "Class must not be null");
 
 		final Class<ContextConfiguration> contextConfigType = ContextConfiguration.class;
 		final Class<ContextHierarchy> contextHierarchyType = ContextHierarchy.class;
-		final List<Class<? extends Annotation>> annotationTypes = Arrays.asList(contextConfigType, contextHierarchyType);
-
 		final List<List<ContextConfigurationAttributes>> hierarchyAttributes = new ArrayList<List<ContextConfigurationAttributes>>();
 
-		Class<?> declaringClass = findAnnotationDeclaringClassForTypes(annotationTypes, testClass);
-		Assert.notNull(declaringClass, String.format(
+		UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(testClass, contextConfigType,
+			contextHierarchyType);
+		Assert.notNull(descriptor, String.format(
 			"Could not find an 'annotation declaring class' for annotation type [%s] or [%s] and test class [%s]",
 			contextConfigType.getName(), contextHierarchyType.getName(), testClass.getName()));
 
-		while (declaringClass != null) {
+		while (descriptor != null) {
+			Class<?> rootDeclaringClass = descriptor.getDeclaringClass();
+			Class<?> declaringClass = (descriptor.getStereotype() != null) ? descriptor.getStereotypeType()
+					: rootDeclaringClass;
 
 			boolean contextConfigDeclaredLocally = isAnnotationDeclaredLocally(contextConfigType, declaringClass);
 			boolean contextHierarchyDeclaredLocally = isAnnotationDeclaredLocally(contextHierarchyType, declaringClass);
 
 			if (contextConfigDeclaredLocally && contextHierarchyDeclaredLocally) {
 				String msg = String.format("Test class [%s] has been configured with both @ContextConfiguration "
-						+ "and @ContextHierarchy as class-level annotations. Only one of these annotations may "
-						+ "be declared as a top-level annotation per test class.", declaringClass.getName());
+						+ "and @ContextHierarchy. Only one of these annotations may be declared on a test class "
+						+ "or custom stereotype annotation.", rootDeclaringClass.getName());
 				logger.error(msg);
 				throw new IllegalStateException(msg);
 			}
@@ -275,12 +281,12 @@ abstract class ContextLoaderUtils {
 			final List<ContextConfigurationAttributes> configAttributesList = new ArrayList<ContextConfigurationAttributes>();
 
 			if (contextConfigDeclaredLocally) {
-				ContextConfiguration contextConfiguration = declaringClass.getAnnotation(contextConfigType);
+				ContextConfiguration contextConfiguration = getAnnotation(declaringClass, contextConfigType);
 				convertContextConfigToConfigAttributesAndAddToList(contextConfiguration, declaringClass,
 					configAttributesList);
 			}
 			else if (contextHierarchyDeclaredLocally) {
-				ContextHierarchy contextHierarchy = declaringClass.getAnnotation(contextHierarchyType);
+				ContextHierarchy contextHierarchy = getAnnotation(declaringClass, contextHierarchyType);
 				for (ContextConfiguration contextConfiguration : contextHierarchy.value()) {
 					convertContextConfigToConfigAttributesAndAddToList(contextConfiguration, declaringClass,
 						configAttributesList);
@@ -289,14 +295,15 @@ abstract class ContextLoaderUtils {
 			else {
 				// This should theoretically actually never happen...
 				String msg = String.format("Test class [%s] has been configured with neither @ContextConfiguration "
-						+ "nor @ContextHierarchy as a class-level annotation.", declaringClass.getName());
+						+ "nor @ContextHierarchy as a class-level annotation.", rootDeclaringClass.getName());
 				logger.error(msg);
 				throw new IllegalStateException(msg);
 			}
 
 			hierarchyAttributes.add(0, configAttributesList);
 
-			declaringClass = findAnnotationDeclaringClassForTypes(annotationTypes, declaringClass.getSuperclass());
+			descriptor = findAnnotationDescriptorForTypes(rootDeclaringClass.getSuperclass(), contextConfigType,
+				contextHierarchyType);
 		}
 
 		return hierarchyAttributes;
@@ -391,15 +398,20 @@ abstract class ContextLoaderUtils {
 		final List<ContextConfigurationAttributes> attributesList = new ArrayList<ContextConfigurationAttributes>();
 
 		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
-		Class<?> declaringClass = findAnnotationDeclaringClass(annotationType, testClass);
-		Assert.notNull(declaringClass, String.format(
+
+		AnnotationDescriptor<ContextConfiguration> descriptor = findAnnotationDescriptor(testClass, annotationType);
+		Assert.notNull(descriptor, String.format(
 			"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",
 			annotationType.getName(), testClass.getName()));
 
-		while (declaringClass != null) {
-			ContextConfiguration contextConfiguration = declaringClass.getAnnotation(annotationType);
-			convertContextConfigToConfigAttributesAndAddToList(contextConfiguration, declaringClass, attributesList);
-			declaringClass = findAnnotationDeclaringClass(annotationType, declaringClass.getSuperclass());
+		while (descriptor != null) {
+			Class<?> rootDeclaringClass = descriptor.getDeclaringClass();
+			Class<?> declaringClass = (descriptor.getStereotype() != null) ? descriptor.getStereotypeType()
+					: rootDeclaringClass;
+
+			convertContextConfigToConfigAttributesAndAddToList(descriptor.getAnnotation(), declaringClass,
+				attributesList);
+			descriptor = findAnnotationDescriptor(rootDeclaringClass.getSuperclass(), annotationType);
 		}
 
 		return attributesList;
@@ -465,9 +477,10 @@ abstract class ContextLoaderUtils {
 		Assert.notNull(testClass, "Class must not be null");
 
 		Class<ActiveProfiles> annotationType = ActiveProfiles.class;
-		Class<?> declaringClass = findAnnotationDeclaringClass(annotationType, testClass);
 
-		if (declaringClass == null && logger.isDebugEnabled()) {
+		AnnotationDescriptor<ActiveProfiles> descriptor = findAnnotationDescriptor(testClass, annotationType);
+
+		if (descriptor == null && logger.isDebugEnabled()) {
 			logger.debug(String.format(
 				"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",
 				annotationType.getName(), testClass.getName()));
@@ -475,8 +488,12 @@ abstract class ContextLoaderUtils {
 
 		final Set<String> activeProfiles = new HashSet<String>();
 
-		while (declaringClass != null) {
-			ActiveProfiles annotation = declaringClass.getAnnotation(annotationType);
+		while (descriptor != null) {
+			Class<?> rootDeclaringClass = descriptor.getDeclaringClass();
+			Class<?> declaringClass = (descriptor.getStereotype() != null) ? descriptor.getStereotypeType()
+					: rootDeclaringClass;
+
+			ActiveProfiles annotation = descriptor.getAnnotation();
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Retrieved @ActiveProfiles [%s] for declaring class [%s].", annotation,
 					declaringClass.getName()));
@@ -521,8 +538,8 @@ abstract class ContextLoaderUtils {
 				}
 			}
 
-			declaringClass = annotation.inheritProfiles() ? findAnnotationDeclaringClass(annotationType,
-				declaringClass.getSuperclass()) : null;
+			descriptor = annotation.inheritProfiles() ? findAnnotationDescriptor(rootDeclaringClass.getSuperclass(),
+				annotationType) : null;
 		}
 
 		return StringUtils.toStringArray(activeProfiles);
@@ -582,11 +599,20 @@ abstract class ContextLoaderUtils {
 	 * @see #buildContextHierarchyMap(Class)
 	 * @see #buildMergedContextConfiguration(Class, List, String, MergedContextConfiguration, CacheAwareContextLoaderDelegate)
 	 */
-	@SuppressWarnings("javadoc")
+	@SuppressWarnings({ "javadoc", "unchecked" })
 	static MergedContextConfiguration buildMergedContextConfiguration(Class<?> testClass,
 			String defaultContextLoaderClassName, CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
 
-		if (testClass.isAnnotationPresent(ContextHierarchy.class)) {
+		if (findAnnotationDescriptorForTypes(testClass, ContextConfiguration.class, ContextHierarchy.class) == null) {
+			if (logger.isInfoEnabled()) {
+				logger.info(String.format(
+					"Neither @ContextConfiguration nor @ContextHierarchy found for test class [%s]",
+					testClass.getName()));
+			}
+			return new MergedContextConfiguration(testClass, null, null, null, null);
+		}
+
+		if (findAnnotation(testClass, ContextHierarchy.class) != null) {
 			Map<String, List<ContextConfigurationAttributes>> hierarchyMap = buildContextHierarchyMap(testClass);
 
 			MergedContextConfiguration parentConfig = null;
@@ -729,28 +755,32 @@ abstract class ContextLoaderUtils {
 			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, MergedContextConfiguration parentConfig) {
 
 		Class<? extends Annotation> webAppConfigClass = loadWebAppConfigurationClass();
+		if (webAppConfigClass != null) {
 
-		if (webAppConfigClass != null && testClass.isAnnotationPresent(webAppConfigClass)) {
-			Annotation annotation = testClass.getAnnotation(webAppConfigClass);
-			String resourceBasePath = (String) AnnotationUtils.getValue(annotation);
+			Annotation annotation = findAnnotation(testClass, webAppConfigClass);
+			if (annotation != null) {
 
-			try {
-				Class<? extends MergedContextConfiguration> webMergedConfigClass = (Class<? extends MergedContextConfiguration>) ClassUtils.forName(
-					WEB_MERGED_CONTEXT_CONFIGURATION_CLASS_NAME, ContextLoaderUtils.class.getClassLoader());
+				String resourceBasePath = (String) AnnotationUtils.getValue(annotation);
 
-				Constructor<? extends MergedContextConfiguration> constructor = ClassUtils.getConstructorIfAvailable(
-					webMergedConfigClass, Class.class, String[].class, Class[].class, Set.class, String[].class,
-					String.class, ContextLoader.class, CacheAwareContextLoaderDelegate.class,
-					MergedContextConfiguration.class);
+				try {
+					Class<? extends MergedContextConfiguration> webMergedConfigClass = (Class<? extends MergedContextConfiguration>) ClassUtils.forName(
+						WEB_MERGED_CONTEXT_CONFIGURATION_CLASS_NAME, ContextLoaderUtils.class.getClassLoader());
 
-				if (constructor != null) {
-					return instantiateClass(constructor, testClass, locations, classes, initializerClasses,
-						activeProfiles, resourceBasePath, contextLoader, cacheAwareContextLoaderDelegate, parentConfig);
+					Constructor<? extends MergedContextConfiguration> constructor = ClassUtils.getConstructorIfAvailable(
+						webMergedConfigClass, Class.class, String[].class, Class[].class, Set.class, String[].class,
+						String.class, ContextLoader.class, CacheAwareContextLoaderDelegate.class,
+						MergedContextConfiguration.class);
+
+					if (constructor != null) {
+						return instantiateClass(constructor, testClass, locations, classes, initializerClasses,
+							activeProfiles, resourceBasePath, contextLoader, cacheAwareContextLoaderDelegate,
+							parentConfig);
+					}
 				}
-			}
-			catch (Throwable t) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Could not instantiate [" + WEB_MERGED_CONTEXT_CONFIGURATION_CLASS_NAME + "].", t);
+				catch (Throwable t) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Could not instantiate [" + WEB_MERGED_CONTEXT_CONFIGURATION_CLASS_NAME + "].", t);
+					}
 				}
 			}
 		}

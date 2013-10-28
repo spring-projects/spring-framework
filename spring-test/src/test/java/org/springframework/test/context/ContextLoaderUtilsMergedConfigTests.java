@@ -31,9 +31,12 @@ import static org.springframework.test.context.ContextLoaderUtils.*;
  */
 public class ContextLoaderUtilsMergedConfigTests extends AbstractContextLoaderUtilsTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void buildMergedConfigWithoutAnnotation() {
-		buildMergedContextConfiguration(Enigma.class, null, null);
+		Class<Enigma> testClass = Enigma.class;
+		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass, null, null);
+
+		assertMergedConfig(mergedConfig, testClass, EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, null);
 	}
 
 	@Test
@@ -51,6 +54,15 @@ public class ContextLoaderUtilsMergedConfigTests extends AbstractContextLoaderUt
 	@Test
 	public void buildMergedConfigWithLocalAnnotationAndLocations() {
 		Class<?> testClass = LocationsFoo.class;
+		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass, null, null);
+
+		assertMergedConfig(mergedConfig, testClass, new String[] { "classpath:/foo.xml" }, EMPTY_CLASS_ARRAY,
+			DelegatingSmartContextLoader.class);
+	}
+
+	@Test
+	public void buildMergedConfigWithMetaAnnotationAndLocations() {
+		Class<?> testClass = MetaLocationsFoo.class;
 		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass, null, null);
 
 		assertMergedConfig(mergedConfig, testClass, new String[] { "classpath:/foo.xml" }, EMPTY_CLASS_ARRAY,

@@ -28,9 +28,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.test.context.MetaAnnotationUtils.AnnotationDescriptor;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+
+import static org.springframework.test.context.MetaAnnotationUtils.*;
 
 /**
  * <p>
@@ -174,11 +176,13 @@ public class TestContextManager {
 		Assert.notNull(clazz, "Class must not be null");
 		Class<TestExecutionListeners> annotationType = TestExecutionListeners.class;
 		List<Class<? extends TestExecutionListener>> classesList = new ArrayList<Class<? extends TestExecutionListener>>();
-		Class<?> declaringClass = AnnotationUtils.findAnnotationDeclaringClass(annotationType, clazz);
+
+		AnnotationDescriptor<TestExecutionListeners> descriptor = findAnnotationDescriptor(clazz, annotationType);
+
 		boolean defaultListeners = false;
 
 		// Use defaults?
-		if (declaringClass == null) {
+		if (descriptor == null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("@TestExecutionListeners is not present for class [" + clazz + "]: using defaults.");
 			}
@@ -187,7 +191,11 @@ public class TestContextManager {
 		}
 		else {
 			// Traverse the class hierarchy...
-			while (declaringClass != null) {
+			while (descriptor != null) {
+				Class<?> rootDeclaringClass = descriptor.getDeclaringClass();
+				Class<?> declaringClass = (descriptor.getStereotype() != null) ? descriptor.getStereotypeType()
+						: rootDeclaringClass;
+
 				TestExecutionListeners testExecutionListeners = declaringClass.getAnnotation(annotationType);
 				if (logger.isTraceEnabled()) {
 					logger.trace("Retrieved @TestExecutionListeners [" + testExecutionListeners
@@ -212,8 +220,9 @@ public class TestContextManager {
 				if (listenerClasses != null) {
 					classesList.addAll(0, Arrays.<Class<? extends TestExecutionListener>> asList(listenerClasses));
 				}
-				declaringClass = (testExecutionListeners.inheritListeners() ? AnnotationUtils.findAnnotationDeclaringClass(
-					annotationType, declaringClass.getSuperclass()) : null);
+
+				descriptor = (testExecutionListeners.inheritListeners() ? findAnnotationDescriptor(
+					rootDeclaringClass.getSuperclass(), annotationType) : null);
 			}
 		}
 

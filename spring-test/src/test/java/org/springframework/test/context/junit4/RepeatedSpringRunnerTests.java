@@ -19,6 +19,8 @@ package org.springframework.test.context.junit4;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -77,6 +79,7 @@ public class RepeatedSpringRunnerTests {
 			{ DefaultRepeatValueRepeatedTestCase.class, 0, 1, 1, 1 },//
 			{ NegativeRepeatValueRepeatedTestCase.class, 0, 1, 1, 1 },//
 			{ RepeatedFiveTimesRepeatedTestCase.class, 0, 1, 1, 5 },//
+			{ RepeatedFiveTimesViaMetaAnnotationRepeatedTestCase.class, 0, 1, 1, 5 },//
 			{ TimedRepeatedTestCase.class, 3, 4, 4, (5 + 1 + 4 + 10) } //
 		});
 	}
@@ -142,6 +145,20 @@ public class RepeatedSpringRunnerTests {
 
 		@Test
 		@Repeat(5)
+		public void repeatedFiveTimes() throws Exception {
+			incrementInvocationCount();
+		}
+	}
+
+	@Repeat(5)
+	@Retention(RetentionPolicy.RUNTIME)
+	private static @interface RepeatedFiveTimes {
+	}
+
+	public static final class RepeatedFiveTimesViaMetaAnnotationRepeatedTestCase extends AbstractRepeatedTestCase {
+
+		@Test
+		@RepeatedFiveTimes
 		public void repeatedFiveTimes() throws Exception {
 			incrementInvocationCount();
 		}

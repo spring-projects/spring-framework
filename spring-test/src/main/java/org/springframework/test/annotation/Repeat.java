@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,25 +17,27 @@
 package org.springframework.test.annotation;
 
 import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
 
 /**
  * Test annotation to indicate that a test method should be invoked repeatedly.
- * <p />
- * Note that the scope of execution to be repeated includes execution of the
+ *
+ * <p>Note that the scope of execution to be repeated includes execution of the
  * test method itself as well as any <em>set up</em> or <em>tear down</em> of
  * the test fixture.
  *
  * @author Rod Johnson
  * @author Sam Brannen
  * @since 2.0
+ * @see Timed
  */
 @Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Retention(RUNTIME)
+@Target({ METHOD, ANNOTATION_TYPE })
 public @interface Repeat {
 
 	int value() default 1;

@@ -16,6 +16,10 @@
 
 package org.springframework.test.context;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Collections;
 import java.util.Set;
 
@@ -40,6 +44,16 @@ abstract class AbstractContextLoaderUtilsTests {
 	Collections.<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> emptySet();
 
 
+	void assertAttributes(ContextConfigurationAttributes attributes, Class<?> expectedDeclaringClass,
+			String[] expectedLocations, Class<?>[] expectedClasses,
+			Class<? extends ContextLoader> expectedContextLoaderClass, boolean expectedInheritLocations) {
+		assertEquals(expectedDeclaringClass, attributes.getDeclaringClass());
+		assertArrayEquals(expectedLocations, attributes.getLocations());
+		assertArrayEquals(expectedClasses, attributes.getClasses());
+		assertEquals(expectedInheritLocations, attributes.isInheritLocations());
+		assertEquals(expectedContextLoaderClass, attributes.getContextLoaderClass());
+	}
+
 	void assertMergedConfig(MergedContextConfiguration mergedConfig, Class<?> expectedTestClass,
 			String[] expectedLocations, Class<?>[] expectedClasses,
 			Class<? extends ContextLoader> expectedContextLoaderClass) {
@@ -61,7 +75,13 @@ abstract class AbstractContextLoaderUtilsTests {
 		assertNotNull(mergedConfig.getClasses());
 		assertArrayEquals(expectedClasses, mergedConfig.getClasses());
 		assertNotNull(mergedConfig.getActiveProfiles());
-		assertEquals(expectedContextLoaderClass, mergedConfig.getContextLoader().getClass());
+		System.err.println(expectedContextLoaderClass);
+		if (expectedContextLoaderClass == null) {
+			assertNull(mergedConfig.getContextLoader());
+		}
+		else {
+			assertEquals(expectedContextLoaderClass, mergedConfig.getContextLoader().getClass());
+		}
 		assertNotNull(mergedConfig.getContextInitializerClasses());
 		assertEquals(expectedInitializerClasses, mergedConfig.getContextInitializerClasses());
 	}
@@ -81,6 +101,28 @@ abstract class AbstractContextLoaderUtilsTests {
 
 	@Configuration
 	static class BarConfig {
+	}
+
+	@ContextConfiguration("/foo.xml")
+	@ActiveProfiles(profiles = "foo")
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	public static @interface MetaLocationsFooConfig {
+	}
+
+	@ContextConfiguration("/bar.xml")
+	@ActiveProfiles(profiles = "bar")
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	public static @interface MetaLocationsBarConfig {
+	}
+
+	@MetaLocationsFooConfig
+	static class MetaLocationsFoo {
+	}
+
+	@MetaLocationsBarConfig
+	static class MetaLocationsBar extends MetaLocationsFoo {
 	}
 
 	@ContextConfiguration(locations = "/foo.xml", inheritLocations = false)
