@@ -667,33 +667,40 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					factoryMethod.getParameterTypes().length >= minNrOfArgs) {
 				// No declared type variables to inspect, so just process the standard return type.
 				if (factoryMethod.getTypeParameters().length > 0) {
-					// Fully resolve parameter names and argument values.
-					Class<?>[] paramTypes = factoryMethod.getParameterTypes();
-					String[] paramNames = null;
-					ParameterNameDiscoverer pnd = getParameterNameDiscoverer();
-					if (pnd != null) {
-						paramNames = pnd.getParameterNames(factoryMethod);
-					}
-					ConstructorArgumentValues cav = mbd.getConstructorArgumentValues();
-					Set<ConstructorArgumentValues.ValueHolder> usedValueHolders =
-							new HashSet<ConstructorArgumentValues.ValueHolder>(paramTypes.length);
-					Object[] args = new Object[paramTypes.length];
-					for (int i = 0; i < args.length; i++) {
-						ConstructorArgumentValues.ValueHolder valueHolder = cav.getArgumentValue(
-								i, paramTypes[i], (paramNames != null ? paramNames[i] : null), usedValueHolders);
-						if (valueHolder == null) {
-							valueHolder = cav.getGenericArgumentValue(null, null, usedValueHolders);
+					try {
+						// Fully resolve parameter names and argument values.
+						Class<?>[] paramTypes = factoryMethod.getParameterTypes();
+						String[] paramNames = null;
+						ParameterNameDiscoverer pnd = getParameterNameDiscoverer();
+						if (pnd != null) {
+							paramNames = pnd.getParameterNames(factoryMethod);
 						}
-						if (valueHolder != null) {
-							args[i] = valueHolder.getValue();
-							usedValueHolders.add(valueHolder);
+						ConstructorArgumentValues cav = mbd.getConstructorArgumentValues();
+						Set<ConstructorArgumentValues.ValueHolder> usedValueHolders =
+								new HashSet<ConstructorArgumentValues.ValueHolder>(paramTypes.length);
+						Object[] args = new Object[paramTypes.length];
+						for (int i = 0; i < args.length; i++) {
+							ConstructorArgumentValues.ValueHolder valueHolder = cav.getArgumentValue(
+									i, paramTypes[i], (paramNames != null ? paramNames[i] : null), usedValueHolders);
+							if (valueHolder == null) {
+								valueHolder = cav.getGenericArgumentValue(null, null, usedValueHolders);
+							}
+							if (valueHolder != null) {
+								args[i] = valueHolder.getValue();
+								usedValueHolders.add(valueHolder);
+							}
+						}
+						Class<?> returnType = AutowireUtils.resolveReturnTypeForFactoryMethod(
+								factoryMethod, args, getBeanClassLoader());
+						if (returnType != null) {
+							cache = true;
+							returnTypes.add(returnType);
 						}
 					}
-					Class<?> returnType = AutowireUtils.resolveReturnTypeForFactoryMethod(
-							factoryMethod, args, getBeanClassLoader());
-					if (returnType != null) {
-						cache = true;
-						returnTypes.add(returnType);
+					catch (Throwable ex) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Failed to resolve generic return type for factory method: " + ex);
+						}
 					}
 				}
 				else {

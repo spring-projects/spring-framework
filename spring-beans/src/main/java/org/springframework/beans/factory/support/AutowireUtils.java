@@ -223,7 +223,8 @@ abstract class AutowireUtils {
 							return typedValue.resolveTargetType(classLoader);
 						}
 						catch (ClassNotFoundException ex) {
-							throw new IllegalStateException("Failed to resolve typed value", ex);
+							throw new IllegalStateException("Failed to resolve value type [" +
+									typedValue.getTargetTypeName() + "] for factory method argument", ex);
 						}
 					}
 					// Only consider argument type if it is a simple value...
@@ -254,11 +255,11 @@ abstract class AutowireUtils {
 								}
 								if (className != null) {
 									try {
-										return classLoader.loadClass(className);
+										return ClassUtils.forName(className, classLoader);
 									}
 									catch (ClassNotFoundException ex) {
-										throw new IllegalStateException(
-												"Could not resolve specified class name argument [" + arg + "]", ex);
+										throw new IllegalStateException("Could not resolve class name [" + arg +
+												"] for factory method argument", ex);
 									}
 								}
 								// Consider adding logic to determine the class of the typeArg, if possible.
