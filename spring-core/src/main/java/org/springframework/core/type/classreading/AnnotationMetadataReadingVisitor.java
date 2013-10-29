@@ -64,7 +64,8 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 
 	@Override
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-		return new MethodMetadataReadingVisitor(name, access, this.getClassName(), this.classLoader, this.methodMetadataMap);
+		return new MethodMetadataReadingVisitor(name, access, desc, this.getClassName(), this.classLoader, 
+				this.methodMetadataMap);
 	}
 
 	@Override

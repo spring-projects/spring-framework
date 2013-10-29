@@ -16,10 +16,11 @@
 
 package org.springframework.context.annotation;
 
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,6 +35,8 @@ import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 /**
  * Represents a user-defined {@link Configuration @Configuration} class.
@@ -199,18 +202,27 @@ final class ConfigurationClass {
 
 		// An @Bean method may only be overloaded through inheritance. No single
 		// @Configuration class may declare two @Bean methods with the same name.
-		Map<String, Integer> methodNameCounts = new HashMap<String, Integer>();
+		MultiValueMap<String, BeanMethod> methods = new LinkedMultiValueMap<String, BeanMethod>();
 		for (BeanMethod beanMethod : this.beanMethods) {
-			String fqMethodName = beanMethod.getFullyQualifiedMethodName();
-			Integer currentCount = methodNameCounts.get(fqMethodName);
-			int newCount = (currentCount != null ? currentCount + 1 : 1);
-			methodNameCounts.put(fqMethodName, newCount);
+			String methodName = beanMethod.getMetadata().getMethodName();
+			methods.add(methodName, beanMethod);
 		}
-		for (String fqMethodName : methodNameCounts.keySet()) {
-			int count = methodNameCounts.get(fqMethodName);
-			if (count > 1) {
-				String shortMethodName = ConfigurationMethod.getShortMethodName(fqMethodName);
-				problemReporter.error(new BeanMethodOverloadingProblem(shortMethodName, count));
+		
+		for (String methodName : methods.keySet()) {
+			List<BeanMethod> methodList = methods.get(methodName);
+			if (methodList.size() > 1) {
+				// Check for overloading
+				String[] firstParameters = methodList.get(0).getMetadata().getParameterTypes();
+
+				for (int i = 1; i < methodList.size(); i++) {
+					BeanMethod method = methodList.get(i);
+					String[] methodParameters =  method.getMetadata().getParameterTypes();
+
+					if (!Arrays.equals(firstParameters, methodParameters)) {
+						// Overloaded
+						problemReporter.error(new BeanMethodOverloadingProblem(methodName, methodList.size()));
+					}
+				}
 			}
 		}
 
