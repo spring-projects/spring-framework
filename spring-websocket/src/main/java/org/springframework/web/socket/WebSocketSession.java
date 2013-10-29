@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.web.socket.support.WebSocketExtension;
 
 /**
  * A WebSocket session abstraction. Allows sending messages over a WebSocket connection

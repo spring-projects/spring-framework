@@ -31,6 +31,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.WebSocketHandlerAdapter;
 import org.springframework.web.socket.support.LoggingWebSocketHandlerDecorator;
 import org.springframework.web.socket.support.WebSocketHandlerDecorator;
+import org.springframework.web.socket.support.WebSocketHttpHeaders;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.junit.Assert.*;
@@ -54,7 +55,7 @@ public class WebSocketConnectionManagerTests {
 		manager.setSubProtocols(subprotocols);
 		manager.openConnection();
 
-		HttpHeaders expectedHeaders = new HttpHeaders();
+		WebSocketHttpHeaders expectedHeaders = new WebSocketHttpHeaders();
 		expectedHeaders.setSecWebSocketProtocol(subprotocols);
 
 		assertEquals(expectedHeaders, client.headers);
@@ -150,7 +151,7 @@ public class WebSocketConnectionManagerTests {
 
 		@Override
 		public ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler,
-				HttpHeaders headers, URI uri) {
+				WebSocketHttpHeaders headers, URI uri) {
 
 			this.webSocketHandler = webSocketHandler;
 			this.headers = headers;

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -31,7 +32,7 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.WebSocketExtension;
+import org.springframework.web.socket.support.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
@@ -69,6 +70,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	private String acceptedProtocol;
 
 	private List<WebSocketExtension> extensions;
+
 
 	public AbstractHttpSockJsSession(String id, SockJsServiceConfig config,
 			WebSocketHandler wsHandler, Map<String, Object> handshakeAttributes) {
@@ -120,7 +122,9 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	}
 
 	@Override
-	public List<WebSocketExtension> getExtensions() { return this.extensions; }
+	public List<WebSocketExtension> getExtensions() {
+		return Collections.emptyList();
+	}
 
 	/**
 	 * Unlike WebSocket where sub-protocol negotiation is part of the
@@ -158,7 +162,6 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		this.principal = request.getPrincipal();
 		this.localAddress = request.getLocalAddress();
 		this.remoteAddress = request.getRemoteAddress();
-		this.extensions = WebSocketExtension.parseHeaders(response.getHeaders().getSecWebSocketExtensions());
 
 		try {
 			delegateConnectionEstablished();

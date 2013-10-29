@@ -31,6 +31,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.support.WebSocketExtension;
+import org.springframework.web.socket.support.WebSocketHttpHeaders;
 import org.springframework.web.util.UriComponentsBuilder;
 
 
@@ -44,19 +46,19 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private static final Set<String> disallowedHeaders = new HashSet<String>();
+	private static final Set<String> specialHeaders = new HashSet<String>();
 
 	static {
-		disallowedHeaders.add("cache-control");
-		disallowedHeaders.add("cookie");
-		disallowedHeaders.add("connection");
-		disallowedHeaders.add("host");
-		disallowedHeaders.add("sec-websocket-extensions");
-		disallowedHeaders.add("sec-websocket-key");
-		disallowedHeaders.add("sec-websocket-protocol");
-		disallowedHeaders.add("sec-websocket-version");
-		disallowedHeaders.add("pragma");
-		disallowedHeaders.add("upgrade");
+		specialHeaders.add("cache-control");
+		specialHeaders.add("cookie");
+		specialHeaders.add("connection");
+		specialHeaders.add("host");
+		specialHeaders.add("sec-websocket-extensions");
+		specialHeaders.add("sec-websocket-key");
+		specialHeaders.add("sec-websocket-protocol");
+		specialHeaders.add("sec-websocket-version");
+		specialHeaders.add("pragma");
+		specialHeaders.add("upgrade");
 	}
 
 
@@ -71,7 +73,7 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 
 	@Override
 	public final ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler,
-			HttpHeaders headers, URI uri) {
+			WebSocketHttpHeaders headers, URI uri) {
 
 		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
 		Assert.notNull(uri, "uri must not be null");
@@ -86,18 +88,19 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 		HttpHeaders headersToUse = new HttpHeaders();
 		if (headers != null) {
 			for (String header : headers.keySet()) {
-				if (!disallowedHeaders.contains(header.toLowerCase())) {
+				if (!specialHeaders.contains(header.toLowerCase())) {
 					headersToUse.put(header, headers.get(header));
 				}
 			}
 		}
 
-		List<String> subProtocols = new ArrayList<String>();
-		if ((headers != null) && (headers.getSecWebSocketProtocol() != null)) {
-			subProtocols.addAll(headers.getSecWebSocketProtocol());
-		}
+		List<String> subProtocols = ((headers != null) && (headers.getSecWebSocketProtocol() != null)) ?
+				headers.getSecWebSocketProtocol() : Collections.<String>emptyList();
 
-		return doHandshakeInternal(webSocketHandler, headersToUse, uri, subProtocols,
+		List<WebSocketExtension> extensions = ((headers != null) && (headers.getSecWebSocketExtensions() != null)) ?
+				headers.getSecWebSocketExtensions() : Collections.<WebSocketExtension>emptyList();
+
+		return doHandshakeInternal(webSocketHandler, headersToUse, uri, subProtocols, extensions,
 				Collections.<String, Object>emptyMap());
 	}
 
@@ -109,12 +112,14 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 	 *        headers filtered out, never {@code null}
 	 * @param uri the target URI for the handshake, never {@code null}
 	 * @param subProtocols requested sub-protocols, or an empty list
+	 * @param extensions requested WebSocket extensions, or an empty list
 	 * @param handshakeAttributes attributes to make available via
 	 *        {@link WebSocketSession#getHandshakeAttributes()}; currently always an empty map.
 	 *
 	 * @return the established WebSocket session wrapped in a ListenableFuture.
 	 */
 	protected abstract ListenableFuture<WebSocketSession> doHandshakeInternal(WebSocketHandler webSocketHandler,
-			HttpHeaders headers, URI uri, List<String> subProtocols, Map<String, Object> handshakeAttributes);
+			HttpHeaders headers, URI uri, List<String> subProtocols, List<WebSocketExtension> extensions,
+			Map<String, Object> handshakeAttributes);
 
 }

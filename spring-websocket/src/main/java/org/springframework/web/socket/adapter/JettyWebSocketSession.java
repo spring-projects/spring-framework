@@ -32,7 +32,7 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.PingMessage;
 import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketExtension;
+import org.springframework.web.socket.support.WebSocketExtension;
 import org.springframework.web.socket.WebSocketSession;
 
 /**
@@ -114,9 +114,10 @@ public class JettyWebSocketSession extends AbstractWebSocketSesssion<org.eclipse
 	public List<WebSocketExtension> getExtensions() {
 		checkNativeSessionInitialized();
 		if(this.extensions == null) {
-			this.extensions = new ArrayList<WebSocketExtension>();
-			for(ExtensionConfig ext : getNativeSession().getUpgradeResponse().getExtensions()) {
-				this.extensions.add(new WebSocketExtension(ext.getName(),ext.getParameters()));
+			List<ExtensionConfig> source = getNativeSession().getUpgradeResponse().getExtensions();
+			this.extensions = new ArrayList<WebSocketExtension>(source.size());
+			for(ExtensionConfig e : source) {
+				this.extensions.add(new WebSocketExtension(e.getName(), e.getParameters()));
 			}
 		}
 		return this.extensions;

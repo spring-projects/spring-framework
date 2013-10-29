@@ -25,6 +25,7 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.support.LoggingWebSocketHandlerDecorator;
+import org.springframework.web.socket.support.WebSocketHttpHeaders;
 
 /**
  * A WebSocket connection manager that is given a URI, a {@link WebSocketClient}, and a
@@ -43,7 +44,7 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 
 	private WebSocketSession webSocketSession;
 
-	private HttpHeaders headers = new HttpHeaders();
+	private WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 
 	private final boolean syncClientLifecycle;
 

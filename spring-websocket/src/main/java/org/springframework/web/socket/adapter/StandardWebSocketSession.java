@@ -36,8 +36,9 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.PingMessage;
 import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketExtension;
+import org.springframework.web.socket.support.WebSocketExtension;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.support.WebSocketHttpHeaders;
 
 /**
  * A {@link WebSocketSession} for use with the standard WebSocket for Java API.
@@ -59,18 +60,18 @@ public class StandardWebSocketSession extends AbstractWebSocketSesssion<javax.we
 	/**
 	 * Class constructor.
 	 *
-	 * @param handshakeHeaders the headers of the handshake request
+	 * @param headers the headers of the handshake request
 	 * @param handshakeAttributes attributes from the HTTP handshake to make available
 	 *        through the WebSocket session
 	 * @param localAddress the address on which the request was received
 	 * @param remoteAddress the address of the remote client
 	 */
-	public StandardWebSocketSession(HttpHeaders handshakeHeaders, Map<String, Object> handshakeAttributes,
+	public StandardWebSocketSession(HttpHeaders headers, Map<String, Object> handshakeAttributes,
 			InetSocketAddress localAddress, InetSocketAddress remoteAddress) {
 
 		super(handshakeAttributes);
-		handshakeHeaders = (handshakeHeaders != null) ? handshakeHeaders : new HttpHeaders();
-		this.handshakeHeaders = HttpHeaders.readOnlyHttpHeaders(handshakeHeaders);
+		headers = (headers != null) ? headers : new HttpHeaders();
+		this.handshakeHeaders = HttpHeaders.readOnlyHttpHeaders(headers);
 		this.localAddress = localAddress;
 		this.remoteAddress = remoteAddress;
 	}
@@ -119,14 +120,10 @@ public class StandardWebSocketSession extends AbstractWebSocketSesssion<javax.we
 	public List<WebSocketExtension> getExtensions() {
 		checkNativeSessionInitialized();
 		if(this.extensions == null) {
-			List<Extension> nativeExtensions = getNativeSession().getNegotiatedExtensions();
-			this.extensions = new ArrayList<WebSocketExtension>(nativeExtensions.size());
-			for(Extension nativeExtension : nativeExtensions) {
-				Map<String, String> parameters = new HashMap<String, String>();
-				for (Extension.Parameter param : nativeExtension.getParameters()) {
-					parameters.put(param.getName(),param.getValue());
-				}
-				this.extensions.add(new WebSocketExtension(nativeExtension.getName(),parameters));
+			List<Extension> source = getNativeSession().getNegotiatedExtensions();
+			this.extensions = new ArrayList<WebSocketExtension>(source.size());
+			for(Extension e : source) {
+				this.extensions.add(new WebSocketExtension.StandardToWebSocketExtensionAdapter(e));
 			}
 		}
 		return this.extensions;

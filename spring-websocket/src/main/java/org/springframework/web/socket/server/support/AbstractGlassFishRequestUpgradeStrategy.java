@@ -19,21 +19,17 @@ package org.springframework.web.socket.server.support;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.websocket.DeploymentException;
 import javax.websocket.Endpoint;
 import javax.websocket.Extension;
-import javax.websocket.server.ServerContainer;
 
-import org.apache.tomcat.websocket.server.WsServerContainer;
 import org.glassfish.tyrus.core.ComponentProviderService;
 import org.glassfish.tyrus.core.EndpointWrapper;
 import org.glassfish.tyrus.core.ErrorCollector;
@@ -53,7 +49,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.endpoint.ServerEndpointRegistration;
 import org.springframework.web.socket.server.endpoint.ServletServerContainerFactoryBean;
@@ -73,7 +68,6 @@ public abstract class AbstractGlassFishRequestUpgradeStrategy extends AbstractSt
 
 	private final static Random random = new Random();
 
-	private List<WebSocketExtension> availableExtensions;
 
 	@Override
 	public String[] getSupportedVersions() {
@@ -81,21 +75,9 @@ public abstract class AbstractGlassFishRequestUpgradeStrategy extends AbstractSt
 	}
 
 	@Override
-	public List<WebSocketExtension> getAvailableExtensions(ServerHttpRequest request) {
-
-		if(this.availableExtensions == null) {
-			this.availableExtensions = new ArrayList<WebSocketExtension>();
-			HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
-			for(Extension extension : getContainer(servletRequest).getInstalledExtensions()) {
-				this.availableExtensions.add(parseStandardExtension(extension));
-			}
-		}
-		return this.availableExtensions;
-	}
-
-	@Override
 	public void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,
-			String selectedProtocol, Endpoint endpoint) throws HandshakeFailureException {
+			String selectedProtocol, List<Extension> selectedExtensions,
+			Endpoint endpoint) throws HandshakeFailureException {
 
 		Assert.isTrue(request instanceof ServletServerHttpRequest);
 		HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
@@ -103,7 +85,9 @@ public abstract class AbstractGlassFishRequestUpgradeStrategy extends AbstractSt
 		Assert.isTrue(response instanceof ServletServerHttpResponse);
 		HttpServletResponse servletResponse = ((ServletServerHttpResponse) response).getServletResponse();
 
-		WebSocketApplication webSocketApplication = createTyrusEndpoint(servletRequest, endpoint, selectedProtocol);
+		WebSocketApplication webSocketApplication = createTyrusEndpoint(servletRequest,
+				endpoint, selectedProtocol, selectedExtensions);
+
 		WebSocketEngine webSocketEngine = WebSocketEngine.getEngine();
 
 		try {
@@ -123,13 +107,6 @@ public abstract class AbstractGlassFishRequestUpgradeStrategy extends AbstractSt
 		finally {
 			webSocketEngine.unregister(webSocketApplication);
 		}
-	}
-
-	public ServerContainer getContainer(HttpServletRequest servletRequest) {
-
-		String attributeName = "javax.websocket.server.ServerContainer";
-		ServletContext servletContext = servletRequest.getServletContext();
-		return (ServerContainer)servletContext.getAttribute(attributeName);
 	}
 
 	private boolean performUpgrade(HttpServletRequest request, HttpServletResponse response,
@@ -162,12 +139,13 @@ public abstract class AbstractGlassFishRequestUpgradeStrategy extends AbstractSt
 	}
 
 	private WebSocketApplication createTyrusEndpoint(HttpServletRequest request,
-			Endpoint endpoint, String selectedProtocol) {
+			Endpoint endpoint, String selectedProtocol, List<Extension> selectedExtensions) {
 
 		// shouldn't matter for processing but must be unique
 		String endpointPath = "/" + random.nextLong();
 		ServerEndpointRegistration endpointConfig = new ServerEndpointRegistration(endpointPath, endpoint);
 		endpointConfig.setSubprotocols(Arrays.asList(selectedProtocol));
+		endpointConfig.setExtensions(selectedExtensions);
 		return createTyrusEndpoint(new EndpointWrapper(endpoint, endpointConfig,
 				ComponentProviderService.create(), null, "/", new ErrorCollector(),
 				endpointConfig.getConfigurator()));

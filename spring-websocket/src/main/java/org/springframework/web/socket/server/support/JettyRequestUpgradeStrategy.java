@@ -27,16 +27,18 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.websocket.api.UpgradeRequest;
 import org.eclipse.jetty.websocket.api.UpgradeResponse;
 import org.eclipse.jetty.websocket.api.WebSocketPolicy;
+import org.eclipse.jetty.websocket.api.extensions.ExtensionConfig;
 import org.eclipse.jetty.websocket.server.HandshakeRFC6455;
 import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
+import org.springframework.core.NamedThreadLocal;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
-import org.springframework.web.socket.WebSocketExtension;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.socket.support.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.adapter.JettyWebSocketHandlerAdapter;
 import org.springframework.web.socket.adapter.JettyWebSocketSession;
@@ -53,11 +55,13 @@ import org.springframework.web.socket.server.RequestUpgradeStrategy;
  */
 public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
-	private static final String WS_HANDLER_ATTR_NAME = JettyRequestUpgradeStrategy.class.getName() + ".WS_LISTENER";
+	private static final ThreadLocal<WebSocketHandlerContainer> wsContainerHolder =
+			new NamedThreadLocal<WebSocketHandlerContainer>("WebSocket Handler Container");
+
 
 	private WebSocketServerFactory factory;
 
-	private List<WebSocketExtension> availableExtensions;
+	private volatile List<WebSocketExtension> supportedExtensions;
 
 
 	/**
@@ -79,8 +83,14 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		this.factory.setCreator(new WebSocketCreator() {
 			@Override
 			public Object createWebSocket(UpgradeRequest request, UpgradeResponse response) {
-				Assert.isInstanceOf(ServletUpgradeRequest.class, request);
-				return ((ServletUpgradeRequest) request).getServletAttributes().get(WS_HANDLER_ATTR_NAME);
+
+				WebSocketHandlerContainer container = wsContainerHolder.get();
+				Assert.state(container != null, "Expected WebSocketHandlerContainer");
+
+				response.setAcceptedSubProtocol(container.getSelectedProtocol());
+				response.setExtensions(container.getExtensionConfigs());
+
+				return container.getHandler();
 			}
 		});
 		try {
@@ -98,19 +108,25 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 	}
 
 	@Override
-	public List<WebSocketExtension> getAvailableExtensions(ServerHttpRequest request) {
-		if(this.availableExtensions == null) {
-			this.availableExtensions = new ArrayList<WebSocketExtension>();
-			for(String extensionName : this.factory.getExtensionFactory().getExtensionNames()) {
-				this.availableExtensions.add(new WebSocketExtension(extensionName));
-			}
+	public List<WebSocketExtension> getSupportedExtensions(ServerHttpRequest request) {
+		if (this.supportedExtensions == null) {
+			this.supportedExtensions = getWebSocketExtensions();
 		}
-		return this.availableExtensions;
+		return this.supportedExtensions;
+	}
+
+	private List<WebSocketExtension> getWebSocketExtensions() {
+		List<WebSocketExtension> result = new ArrayList<WebSocketExtension>();
+		for(String name : this.factory.getExtensionFactory().getExtensionNames()) {
+			result.add(new WebSocketExtension(name));
+		}
+		return result;
 	}
 
 	@Override
 	public void upgrade(ServerHttpRequest request, ServerHttpResponse response,
-			String protocol, WebSocketHandler wsHandler, Map<String, Object> attrs) throws HandshakeFailureException {
+			String selectedProtocol, List<WebSocketExtension> selectedExtensions,
+			WebSocketHandler wsHandler, Map<String, Object> attributes) throws HandshakeFailureException {
 
 		Assert.isInstanceOf(ServletServerHttpRequest.class, request);
 		HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
@@ -120,11 +136,14 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 		Assert.isTrue(this.factory.isUpgradeRequest(servletRequest, servletResponse), "Not a WebSocket handshake");
 
-		JettyWebSocketSession session = new JettyWebSocketSession(request.getPrincipal(), attrs);
+		JettyWebSocketSession session = new JettyWebSocketSession(request.getPrincipal(), attributes);
 		JettyWebSocketHandlerAdapter handlerAdapter = new JettyWebSocketHandlerAdapter(wsHandler, session);
 
+		WebSocketHandlerContainer container =
+				new WebSocketHandlerContainer(handlerAdapter, selectedProtocol, selectedExtensions);
+
 		try {
-			servletRequest.setAttribute(WS_HANDLER_ATTR_NAME, handlerAdapter);
+			wsContainerHolder.set(container);
 			this.factory.acceptWebSocket(servletRequest, servletResponse);
 		}
 		catch (IOException ex) {
@@ -132,8 +151,46 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 					"Response update failed during upgrade to WebSocket, uri=" + request.getURI(), ex);
 		}
 		finally {
-			servletRequest.removeAttribute(WS_HANDLER_ATTR_NAME);
+			wsContainerHolder.remove();
 		}
 	}
 
+
+	private static class WebSocketHandlerContainer {
+
+		private final JettyWebSocketHandlerAdapter handler;
+
+		private final String selectedProtocol;
+
+		private final List<ExtensionConfig> extensionConfigs;
+
+		private WebSocketHandlerContainer(JettyWebSocketHandlerAdapter handler, String protocol,
+				List<WebSocketExtension> extensions) {
+
+			this.handler = handler;
+			this.selectedProtocol = protocol;
+
+			if (CollectionUtils.isEmpty(extensions)) {
+				this.extensionConfigs = null;
+			}
+			else {
+				this.extensionConfigs = new ArrayList<ExtensionConfig>();
+				for (WebSocketExtension e : extensions) {
+					this.extensionConfigs.add(new WebSocketExtension.WebSocketToJettyExtensionConfigAdapter(e));
+				}
+			}
+		}
+
+		private JettyWebSocketHandlerAdapter getHandler() {
+			return this.handler;
+		}
+
+		private String getSelectedProtocol() {
+			return this.selectedProtocol;
+		}
+
+		private List<ExtensionConfig> getExtensionConfigs() {
+			return this.extensionConfigs;
+		}
+	}
 }

@@ -21,41 +21,35 @@ import static org.junit.Assert.assertThat;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
+import org.springframework.web.socket.support.WebSocketExtension;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Test fixture for {@link WebSocketExtension}
+ * Test fixture for {@link org.springframework.web.socket.support.WebSocketExtension}
  * @author Brian Clozel
  */
 public class WebSocketExtensionTests {
 
 	@Test
 	public void parseHeaderSingle() {
-		List<WebSocketExtension> extensions = WebSocketExtension.parseHeader("x-test-extension ; foo=bar");
+		List<WebSocketExtension> extensions = WebSocketExtension.parseExtensions("x-test-extension ; foo=bar ; bar=baz");
 		assertThat(extensions, Matchers.hasSize(1));
 		WebSocketExtension extension = extensions.get(0);
+
 		assertEquals("x-test-extension", extension.getName());
-		assertEquals(1, extension.getParameters().size());
+		assertEquals(2, extension.getParameters().size());
 		assertEquals("bar", extension.getParameters().get("foo"));
+		assertEquals("baz", extension.getParameters().get("bar"));
 	}
 
 	@Test
 	public void parseHeaderMultiple() {
-		List<WebSocketExtension> extensions = WebSocketExtension.parseHeader("x-foo-extension, x-bar-extension");
+		List<WebSocketExtension> extensions = WebSocketExtension.parseExtensions("x-foo-extension, x-bar-extension");
 		assertThat(extensions, Matchers.hasSize(2));
 		assertEquals("x-foo-extension", extensions.get(0).getName());
 		assertEquals("x-bar-extension", extensions.get(1).getName());
-	}
-
-	@Test
-	public void parseHeaders() {
-		List<String> extensions = new ArrayList<String>();
-		extensions.add("x-foo-extension, x-bar-extension");
-		extensions.add("x-test-extension");
-		List<WebSocketExtension> parsedExtensions = WebSocketExtension.parseHeaders(extensions);
-		assertThat(parsedExtensions, Matchers.hasSize(3));
 	}
 
 }

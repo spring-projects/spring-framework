@@ -34,6 +34,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.WebSocketHandlerAdapter;
+import org.springframework.web.socket.support.WebSocketHttpHeaders;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -51,12 +52,12 @@ public class StandardWebSocketClientTests {
 
 	private WebSocketHandler wsHandler;
 
-	private HttpHeaders headers;
+	private WebSocketHttpHeaders headers;
 
 
 	@Before
 	public void setup() {
-		this.headers = new HttpHeaders();
+		this.headers = new WebSocketHttpHeaders();
 		this.wsHandler = new WebSocketHandlerAdapter();
 		this.wsContainer = mock(WebSocketContainer.class);
 		this.wsClient = new StandardWebSocketClient(this.wsContainer);

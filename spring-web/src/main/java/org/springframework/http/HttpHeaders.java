@@ -92,16 +92,6 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	private static final String ORIGIN = "Origin";
 
-	private static final String SEC_WEBSOCKET_ACCEPT = "Sec-WebSocket-Accept";
-
-	private static final String SEC_WEBSOCKET_EXTENSIONS = "Sec-WebSocket-Extensions";
-
-	private static final String SEC_WEBSOCKET_KEY = "Sec-WebSocket-Key";
-
-	private static final String SEC_WEBSOCKET_PROTOCOL = "Sec-WebSocket-Protocol";
-
-	private static final String SEC_WEBSOCKET_VERSION = "Sec-WebSocket-Version";
-
 	private static final String PRAGMA = "Pragma";
 
 	private static final String UPGARDE = "Upgrade";
@@ -452,7 +442,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		set(IF_NONE_MATCH, toCommaDelimitedString(ifNoneMatchList));
 	}
 
-	private String toCommaDelimitedString(List<String> list) {
+	protected String toCommaDelimitedString(List<String> list) {
 		StringBuilder builder = new StringBuilder();
 		for (Iterator<String> iterator = list.iterator(); iterator.hasNext();) {
 			String ifNoneMatch = iterator.next();
@@ -472,7 +462,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		return getFirstValueAsList(IF_NONE_MATCH);
 	}
 
-	private List<String> getFirstValueAsList(String header) {
+	protected List<String> getFirstValueAsList(String header) {
 		List<String> result = new ArrayList<String>();
 
 		String value = getFirst(header);
@@ -535,114 +525,6 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public String getOrigin() {
 		return getFirst(ORIGIN);
-	}
-
-	/**
-	 * Sets the (new) value of the {@code Sec-WebSocket-Accept} header.
-	 * @param secWebSocketAccept the value of the header
-	 */
-	public void setSecWebSocketAccept(String secWebSocketAccept) {
-		set(SEC_WEBSOCKET_ACCEPT, secWebSocketAccept);
-	}
-
-	/**
-	 * Returns the value of the {@code Sec-WebSocket-Accept} header.
-	 * @return the value of the header
-	 */
-	public String getSecWebSocketAccept() {
-		return getFirst(SEC_WEBSOCKET_ACCEPT);
-	}
-
-	/**
-	 * Returns the value of the {@code Sec-WebSocket-Extensions} header.
-	 * @return the value of the header
-	 */
-	public List<String> getSecWebSocketExtensions() {
-		List<String> values = get(SEC_WEBSOCKET_EXTENSIONS);
-		if (CollectionUtils.isEmpty(values)) {
-			return Collections.emptyList();
-		}
-		else if (values.size() == 1) {
-			return getFirstValueAsList(SEC_WEBSOCKET_EXTENSIONS);
-		}
-		else {
-			return values;
-		}
-	}
-
-	/**
-	 * Sets the (new) value of the {@code Sec-WebSocket-Extensions} header.
-	 * @param secWebSocketExtensions the value of the header
-	 */
-	public void setSecWebSocketExtensions(List<String> secWebSocketExtensions) {
-		set(SEC_WEBSOCKET_EXTENSIONS, toCommaDelimitedString(secWebSocketExtensions));
-	}
-
-	/**
-	 * Sets the (new) value of the {@code Sec-WebSocket-Key} header.
-	 * @param secWebSocketKey the value of the header
-	 */
-	public void setSecWebSocketKey(String secWebSocketKey) {
-		set(SEC_WEBSOCKET_KEY, secWebSocketKey);
-	}
-
-	/**
-	 * Returns the value of the {@code Sec-WebSocket-Key} header.
-	 * @return the value of the header
-	 */
-	public String getSecWebSocketKey() {
-		return getFirst(SEC_WEBSOCKET_KEY);
-	}
-
-	/**
-	 * Sets the (new) value of the {@code Sec-WebSocket-Protocol} header.
-	 * @param secWebSocketProtocol the value of the header
-	 */
-	public void setSecWebSocketProtocol(String secWebSocketProtocol) {
-		if (secWebSocketProtocol != null) {
-			set(SEC_WEBSOCKET_PROTOCOL, secWebSocketProtocol);
-		}
-	}
-
-	/**
-	 * Sets the (new) value of the {@code Sec-WebSocket-Protocol} header.
-	 * @param secWebSocketProtocols the value of the header
-	 */
-	public void setSecWebSocketProtocol(List<String> secWebSocketProtocols) {
-		set(SEC_WEBSOCKET_PROTOCOL, toCommaDelimitedString(secWebSocketProtocols));
-	}
-
-	/**
-	 * Returns the value of the {@code Sec-WebSocket-Key} header.
-	 * @return the value of the header
-	 */
-	public List<String> getSecWebSocketProtocol() {
-		List<String> values = get(SEC_WEBSOCKET_PROTOCOL);
-		if (CollectionUtils.isEmpty(values)) {
-			return Collections.emptyList();
-		}
-		else if (values.size() == 1) {
-			return getFirstValueAsList(SEC_WEBSOCKET_PROTOCOL);
-		}
-		else {
-			return values;
-		}
-	}
-
-	/**
-	 * Sets the (new) value of the {@code Sec-WebSocket-Version} header.
-	 * @param secWebSocketKey the value of the header
-	 */
-	public void setSecWebSocketVersion(String secWebSocketVersion) {
-		set(SEC_WEBSOCKET_VERSION, secWebSocketVersion);
-	}
-
-	/**
-	 * Returns the value of the {@code Sec-WebSocket-Version} header.
-	 * @return the value of the header
-	 */
-	public String getSecWebSocketVersion() {
-		return getFirst(SEC_WEBSOCKET_VERSION);
 	}
 
 	/**

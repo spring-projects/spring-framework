@@ -20,17 +20,14 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import javax.websocket.ClientEndpointConfig;
+import javax.websocket.*;
 import javax.websocket.ClientEndpointConfig.Configurator;
-import javax.websocket.ContainerProvider;
-import javax.websocket.Endpoint;
-import javax.websocket.HandshakeResponse;
-import javax.websocket.WebSocketContainer;
 
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
@@ -43,6 +40,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.StandardWebSocketHandlerAdapter;
 import org.springframework.web.socket.adapter.StandardWebSocketSession;
 import org.springframework.web.socket.client.AbstractWebSocketClient;
+import org.springframework.web.socket.support.WebSocketExtension;
 
 /**
  * Initiates WebSocket requests to a WebSocket server programatically through the standard
@@ -96,7 +94,8 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 
 	@Override
 	protected ListenableFuture<WebSocketSession> doHandshakeInternal(WebSocketHandler webSocketHandler,
-			HttpHeaders headers, final URI uri, List<String> protocols, Map<String, Object> handshakeAttributes) {
+			HttpHeaders headers, final URI uri, List<String> protocols,
+			List<WebSocketExtension> extensions, Map<String, Object> handshakeAttributes) {
 
 		int port = getPort(uri);
 		InetSocketAddress localAddress = new InetSocketAddress(getLocalHost(), port);
@@ -108,6 +107,7 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 		final ClientEndpointConfig.Builder configBuidler = ClientEndpointConfig.Builder.create();
 		configBuidler.configurator(new StandardWebSocketClientConfigurator(headers));
 		configBuidler.preferredSubprotocols(protocols);
+		configBuidler.extensions(adaptExtensions(extensions));
 		final Endpoint endpoint = new StandardWebSocketHandlerAdapter(webSocketHandler, session);
 
 		return this.taskExecutor.submitListenable(new Callable<WebSocketSession>() {
@@ -117,6 +117,14 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 				return session;
 			}
 		});
+	}
+
+	private static List<Extension> adaptExtensions(List<WebSocketExtension> extensions) {
+		List<Extension> result = new ArrayList<Extension>();
+		for (WebSocketExtension e : extensions) {
+			result.add(new WebSocketExtension.WebSocketToStandardExtensionAdapter(e));
+		}
+		return result;
 	}
 
 	private InetAddress getLocalHost() {

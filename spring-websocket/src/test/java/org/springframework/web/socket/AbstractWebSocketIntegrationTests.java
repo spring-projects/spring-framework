@@ -117,7 +117,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 	static abstract class AbstractRequestUpgradeStrategyConfig {
 
 		@Bean
-		public HandshakeHandler handshakeHandler() {
+		public DefaultHandshakeHandler handshakeHandler() {
 			return new DefaultHandshakeHandler(requestUpgradeStrategy());
 		}
 

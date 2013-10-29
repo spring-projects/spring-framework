@@ -17,18 +17,22 @@
 package org.springframework.web.socket.server.support;
 
 import java.net.InetSocketAddress;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.websocket.Endpoint;
 import javax.websocket.Extension;
+import javax.websocket.WebSocketContainer;
+import javax.websocket.server.ServerContainer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.web.socket.WebSocketExtension;
+import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.web.socket.support.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.adapter.StandardWebSocketHandlerAdapter;
 import org.springframework.web.socket.adapter.StandardWebSocketSession;
@@ -46,9 +50,34 @@ public abstract class AbstractStandardUpgradeStrategy implements RequestUpgradeS
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	private volatile List<WebSocketExtension> extensions;
+
 
 	@Override
-	public void upgrade(ServerHttpRequest request, ServerHttpResponse response, String acceptedProtocol,
+	public List<WebSocketExtension> getSupportedExtensions(ServerHttpRequest request) {
+		if(this.extensions == null) {
+			HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
+			this.extensions = getInstalledExtensions(getContainer(servletRequest));
+		}
+		return this.extensions;
+	}
+
+	protected ServerContainer getContainer(HttpServletRequest request) {
+		ServletContext servletContext = request.getServletContext();
+		return (ServerContainer) servletContext.getAttribute("javax.websocket.server.ServerContainer");
+	}
+
+	protected List<WebSocketExtension> getInstalledExtensions(WebSocketContainer container) {
+		List<WebSocketExtension> result = new ArrayList<WebSocketExtension>();
+		for(Extension e : container.getInstalledExtensions()) {
+			result.add(new WebSocketExtension.StandardToWebSocketExtensionAdapter(e));
+		}
+		return result;
+	}
+
+	@Override
+	public void upgrade(ServerHttpRequest request, ServerHttpResponse response,
+			String selectedProtocol, List<WebSocketExtension> selectedExtensions,
 			WebSocketHandler wsHandler, Map<String, Object> attributes) throws HandshakeFailureException {
 
 		HttpHeaders headers = request.getHeaders();
@@ -59,18 +88,16 @@ public abstract class AbstractStandardUpgradeStrategy implements RequestUpgradeS
 		StandardWebSocketSession session = new StandardWebSocketSession(headers, attributes, localAddr, remoteAddr);
 		StandardWebSocketHandlerAdapter endpoint = new StandardWebSocketHandlerAdapter(wsHandler, session);
 
-		upgradeInternal(request, response, acceptedProtocol, endpoint);
+		List<Extension> extensions = new ArrayList<Extension>();
+		for (WebSocketExtension e : selectedExtensions) {
+			extensions.add(new WebSocketExtension.WebSocketToStandardExtensionAdapter(e));
+		}
+
+		upgradeInternal(request, response, selectedProtocol, extensions, endpoint);
 	}
 
 	protected abstract void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,
-			String selectedProtocol, Endpoint endpoint) throws HandshakeFailureException;
-
-	protected WebSocketExtension parseStandardExtension(Extension extension) {
-		Map<String, String> params = new HashMap<String,String>(extension.getParameters().size());
-		for(Extension.Parameter param : extension.getParameters()) {
-			params.put(param.getName(),param.getValue());
-		}
-		return new WebSocketExtension(extension.getName(),params);
-	}
+			String selectedProtocol, List<Extension> selectedExtensions,
+			Endpoint endpoint) throws HandshakeFailureException;
 
 }
