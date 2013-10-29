@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.util.UriComponents;
 
 import java.util.Arrays;
@@ -41,7 +40,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
-import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.mock;
+import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.on;
 
 /**
  * Unit tests for {@link org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder}.
@@ -146,36 +145,36 @@ public class MvcUriComponentsContributorTests {
 	}
 
 	@Test
-	public void fromLastCall() {
-		UriComponents uriComponents = this.builder.fromLastCall(
-				mock(ControllerWithMethods.class).myMethod(null)).build();
+	public void fromMethodCall() {
+		UriComponents uriComponents = this.builder.fromMethodCall(
+				on(ControllerWithMethods.class).myMethod(null)).build();
 
 		assertThat(uriComponents.toUriString(), startsWith("http://localhost"));
 		assertThat(uriComponents.toUriString(), endsWith("/something/else"));
 	}
 
 	@Test
-	public void fromLastCallWithTypeLevelUriVars() {
-		UriComponents uriComponents = this.builder.fromLastCall(
-				mock(PersonsAddressesController.class).getAddressesForCountry("DE")).buildAndExpand(15);
+	public void fromMethodCallWithTypeLevelUriVars() {
+		UriComponents uriComponents = this.builder.fromMethodCall(
+				on(PersonsAddressesController.class).getAddressesForCountry("DE")).buildAndExpand(15);
 
 		assertThat(uriComponents.toUriString(), endsWith("/people/15/addresses/DE"));
 	}
 
 
 	@Test
-	public void fromLastCallWithPathVar() {
-		UriComponents uriComponents = this.builder.fromLastCall(
-				mock(ControllerWithMethods.class).methodWithPathVariable("1")).build();
+	public void fromMethodCallWithPathVar() {
+		UriComponents uriComponents = this.builder.fromMethodCall(
+				on(ControllerWithMethods.class).methodWithPathVariable("1")).build();
 
 		assertThat(uriComponents.toUriString(), startsWith("http://localhost"));
 		assertThat(uriComponents.toUriString(), endsWith("/something/1/foo"));
 	}
 
 	@Test
-	public void fromLastCallWithPathVarAndRequestParams() {
-		UriComponents uriComponents = this.builder.fromLastCall(
-				mock(ControllerWithMethods.class).methodForNextPage("1", 10, 5)).build();
+	public void fromMethodCallWithPathVarAndRequestParams() {
+		UriComponents uriComponents = this.builder.fromMethodCall(
+				on(ControllerWithMethods.class).methodForNextPage("1", 10, 5)).build();
 
 		assertThat(uriComponents.getPath(), is("/something/1/foo"));
 
@@ -185,9 +184,9 @@ public class MvcUriComponentsContributorTests {
 	}
 
 	@Test
-	public void fromLastCallWithPathVarAndMultiValueRequestParams() {
-		UriComponents uriComponents = this.builder.fromLastCall(
-				mock(ControllerWithMethods.class).methodWithMultiValueRequestParams(
+	public void fromMethodCallWithPathVarAndMultiValueRequestParams() {
+		UriComponents uriComponents = this.builder.fromMethodCall(
+				on(ControllerWithMethods.class).methodWithMultiValueRequestParams(
 						"1", Arrays.asList(3, 7), 5)).build();
 
 		assertThat(uriComponents.getPath(), is("/something/1/foo"));

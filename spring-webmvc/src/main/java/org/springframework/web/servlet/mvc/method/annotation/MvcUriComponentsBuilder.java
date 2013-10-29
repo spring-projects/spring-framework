@@ -37,16 +37,13 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.method.annotation.RequestParamMethodArgumentResolver;
 import org.springframework.web.method.support.CompositeUriComponentsContributor;
 import org.springframework.web.servlet.DispatcherServlet;
-import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -196,7 +193,7 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	 *
 	 * // Inline style with static import of MvcUriComponentsBuilder.mock
 	 *
-	 * MvcUriComponentsBuilder.fromLastCall(
+	 * MvcUriComponentsBuilder.fromMethodCall(
 	 * 		mock(CustomerController.class).showAddresses("US")).buildAndExpand(1);
 	 *
 	 * // Longer style for preparing multiple URIs and for void controller methods
@@ -204,7 +201,7 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	 * CustomerController controller = MvcUriComponentsBuilder.mock(CustomController.class);
 	 * controller.addAddress(null);
 	 *
-	 * MvcUriComponentsBuilder.fromLastCall(controller);
+	 * MvcUriComponentsBuilder.fromMethodCall(controller);
 	 *
 	 * </pre>
 	 *
@@ -219,7 +216,7 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	 *
 	 * @return a UriComponents instance
 	 */
-	public static UriComponentsBuilder fromLastCall(Object methodInvocationInfo) {
+	public static UriComponentsBuilder fromMethodCall(Object methodInvocationInfo) {
 
 		Assert.isInstanceOf(MethodInvocationInfo.class, methodInvocationInfo);
 		MethodInvocationInfo info = (MethodInvocationInfo) methodInvocationInfo;
@@ -319,39 +316,47 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	}
 
 	/**
-	 * Return a "mock" controller instance. When a method on the mock is invoked, the
-	 * supplied argument values are remembered and the result can then be used to
-	 * prepare a UriComponents through the factory method {@link #fromLastCall(Object)}.
+	 * Return a "mock" controller instance. When an {@code @RequestMapping} method
+	 * on the controller is invoked, the supplied argument values are remembered
+	 * and the result can then be used to prepare a URL to the method via
+	 * {@link #fromMethodCall(Object)}.
 	 * <p>
-	 * The controller can be invoked more than once. However, only the last invocation
-	 * is remembered. This means the same mock controller can be used to create
-	 * multiple links in succession, for example:
+	 * This is a shorthand version of {@link #controller(Class)} intended for
+	 * inline use as follows:
 	 *
 	 * <pre>
-	 * CustomerController controller = MvcUriComponentsBuilder.mock(CustomController.class);
-	 *
-	 * MvcUriComponentsBuilder.fromLastCall(controller.getFoo(1)).build();
-	 * MvcUriComponentsBuilder.fromLastCall(controller.getFoo(2)).build();
-	 *
-	 * MvcUriComponentsBuilder.fromLastCall(controller.getBar(1)).build();
-	 * MvcUriComponentsBuilder.fromLastCall(controller.getBar(2)).build();
+	 * UriComponentsBuilder builder = MvcUriComponentsBuilder.fromMethodCall(
+	 * 		on(FooController.class).getFoo(1)).build();
 	 * </pre>
 	 *
-	 * If a controller method returns void, use the following style:
-	 *
-	 * <pre>
-	 * CustomerController controller = MvcUriComponentsBuilder.mock(CustomController.class);
-	 *
-	 * controller.handleFoo(1);
-	 * MvcUriComponentsBuilder.fromLastCall(controller).build();
-	 *
-	 * controller.handleFoo(2)
-	 * MvcUriComponentsBuilder.fromLastCall(controller).build();
-	 * </pre>
-	 *
-	 * @param controllerType the type of controller to mock
+	 * @param controllerType the target controller
 	 */
-	public static <T> T mock(Class<T> controllerType) {
+	public static <T> T on(Class<T> controllerType) {
+		return controller(controllerType);
+	}
+
+	/**
+	 * Return a "mock" controller instance. When an {@code @RequestMapping} method
+	 * on the controller is invoked, the supplied argument values are remembered
+	 * and the result can then be used to prepare a URL to the method via
+	 * {@link #fromMethodCall(Object)}.
+	 * <p>
+	 * This is a longer version of {@link #on(Class)} for use with void controller
+	 * methods as well as for creating multiple links in succession.
+	 *
+	 * <pre>
+	 * FooController fooController = controller(FooController.class);
+	 *
+	 * fooController.saveFoo(1, null);
+	 * builder = MvcUriComponentsBuilder.fromMethodCall(fooController);
+	 *
+	 * fooController.saveFoo(2, null);
+	 * builder = MvcUriComponentsBuilder.fromMethodCall(fooController);
+	 * </pre>
+	 *
+	 * @param controllerType the target controller
+	 */
+	public static <T> T controller(Class<T> controllerType) {
 		Assert.notNull(controllerType, "'controllerType' must not be null");
 		return initProxy(controllerType, new ControllerMethodInvocationInterceptor());
 	}
