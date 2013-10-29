@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,8 @@ import org.springframework.util.Assert;
 
 /**
  * Helper methods for named parameter parsing.
- * Only intended for internal use within Spring's JDBC framework.
+ *
+ * <p>Only intended for internal use within Spring's JDBC framework.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -229,18 +230,18 @@ public abstract class NamedParameterUtils {
 	}
 
 	/**
-	 * Parse the SQL statement and locate any placeholders or named parameters.
-	 * Named parameters are substituted for a JDBC placeholder and any select list
-	 * is expanded to the required number of placeholders.  Select lists may contain
-	 * an array of objects and in that case the placeholders will be grouped and
-	 * enclosed with parantheses.  This allows for the use of "expression lists" in
-	 * the SQL statement like:<br/>
-	 * select id, name, state from table where (name, age) in (('John', 35), ('Ann', 50))
-	 * <p>The parameter values passed in are used to determine the number of
-	 * placeholder to be used for a select list. Select lists should be limited
-	 * to 100 or fewer elements. A larger number of elements is not guaramteed to
-	 * be supported by the database and is strictly vendor-dependent.
-	 * @param parsedSql the parsed represenation of the SQL statement
+	 * Parse the SQL statement and locate any placeholders or named parameters. Named
+	 * parameters are substituted for a JDBC placeholder, and any select list is expanded
+	 * to the required number of placeholders. Select lists may contain an array of
+	 * objects, and in that case the placeholders will be grouped and enclosed with
+	 * parentheses. This allows for the use of "expression lists" in the SQL statement
+	 * like: <br /><br />
+	 * {@code select id, name, state from table where (name, age) in (('John', 35), ('Ann', 50))}
+	 * <p>The parameter values passed in are used to determine the number of placeholders to
+	 * be used for a select list. Select lists should be limited to 100 or fewer elements.
+	 * A larger number of elements is not guaranteed to be supported by the database and
+	 * is strictly vendor-dependent.
+	 * @param parsedSql the parsed representation of the SQL statement
 	 * @param paramSource the source for named parameters
 	 * @return the SQL statement with substituted parameters
 	 * @see #parseSqlStatement
