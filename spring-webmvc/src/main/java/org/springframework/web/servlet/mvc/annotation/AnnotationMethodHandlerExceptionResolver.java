@@ -206,7 +206,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 
 	/**
 	 * Returns all the exception classes handled by the given method.
-	 * <p>The default implementation looks for exceptions in the {@linkplain ExceptionHandler#value() annotation},
+	 * <p>The default implementation looks for exceptions in the annotation,
 	 * or - if that annotation element is empty - any exceptions listed in the method parameters if the method
 	 * is annotated with {@code @ExceptionHandler}.
 	 * @param method the method
