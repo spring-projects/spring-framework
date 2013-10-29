@@ -30,6 +30,8 @@ import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 import org.eclipse.jetty.websocket.api.extensions.ExtensionConfig;
 import org.eclipse.jetty.websocket.server.HandshakeRFC6455;
 import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.http.server.ServerHttpRequest;
@@ -81,7 +83,12 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		Assert.notNull(factory, "WebSocketServerFactory is required");
 		this.factory = factory;
 		this.factory.setCreator(new WebSocketCreator() {
-			@Override
+			// Jetty 9.1
+			public Object createWebSocket(ServletUpgradeRequest request, ServletUpgradeResponse response) {
+				return createWebSocket((UpgradeRequest)request,(UpgradeResponse)response);
+			}
+
+			// Jetty < 9.1
 			public Object createWebSocket(UpgradeRequest request, UpgradeResponse response) {
 
 				WebSocketHandlerContainer container = wsContainerHolder.get();
