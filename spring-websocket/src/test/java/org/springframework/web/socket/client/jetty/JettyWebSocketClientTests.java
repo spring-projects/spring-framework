@@ -21,14 +21,13 @@ import java.util.Arrays;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.websocket.api.UpgradeRequest;
-import org.eclipse.jetty.websocket.api.UpgradeResponse;
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.http.HttpHeaders;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.SocketUtils;
 import org.springframework.web.socket.WebSocketHandler;
@@ -108,7 +107,7 @@ public class JettyWebSocketClientTests {
 				public void configure(WebSocketServletFactory factory) {
 					factory.setCreator(new WebSocketCreator() {
 						@Override
-						public Object createWebSocket(UpgradeRequest req, UpgradeResponse resp) {
+						public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp) {
 							if (!CollectionUtils.isEmpty(req.getSubProtocols())) {
 								resp.setAcceptedSubProtocol(req.getSubProtocols().get(0));
 							}
