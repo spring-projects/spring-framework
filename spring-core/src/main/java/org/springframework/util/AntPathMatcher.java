@@ -16,12 +16,12 @@
 
 package org.springframework.util;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -57,9 +57,17 @@ public class AntPathMatcher implements PathMatcher {
 
 	private String pathSeparator = DEFAULT_PATH_SEPARATOR;
 
-	private final Map<String, AntPathStringMatcher> stringMatcherCache =
-			new ConcurrentHashMap<String, AntPathStringMatcher>(256);
+	private static final int DEFAULT_STRING_MATCHER_CACHE_LIMIT = 1024;
 
+	private int stringMatcherCacheLimit = DEFAULT_STRING_MATCHER_CACHE_LIMIT;
+
+	private Map<String, AntPathStringMatcher> stringMatcherCache = Collections
+					.synchronizedMap(new LinkedHashMap<String, AntPathStringMatcher>(DEFAULT_STRING_MATCHER_CACHE_LIMIT, 0.75f, true) {
+						@Override
+						protected boolean removeEldestEntry(Map.Entry<String, AntPathStringMatcher> eldest) {
+							return size() > stringMatcherCacheLimit;
+						}
+					});
 	private boolean trimTokens = true;
 
 
@@ -71,6 +79,17 @@ public class AntPathMatcher implements PathMatcher {
 	/** Whether to trim tokenized paths and patterns. */
 	public void setTrimTokens(boolean trimTokens) {
 		this.trimTokens  = trimTokens;
+	}
+
+	/** Set the cache map for AntPathStringMatcher instances by pattern. Default is LRU
+	 * cache based on LinkedHashMap. */
+	public void setStringMatcherCache(Map<String, AntPathStringMatcher> stringMatcherCache) {
+		this.stringMatcherCache = stringMatcherCache;
+	}
+
+	/** Set the default matcher cache limit. */
+	public void setStringMatcherCacheLimit(int stringMatcherCacheLimit) {
+		this.stringMatcherCacheLimit = stringMatcherCacheLimit;
 	}
 
 	@Override

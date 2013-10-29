@@ -16,6 +16,7 @@
 
 package org.springframework.util;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -23,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -560,4 +562,22 @@ public class AntPathMatcherTests {
 		assertTrue(pathMatcher.match("/group/{groupName}/members", "/group/  sales/members"));
 	}
 
+	// SPR-10803
+	@Test
+	public void matcherCacheShouldNotExceedTheLimit() throws Exception {
+		// given
+		pathMatcher.setStringMatcherCacheLimit(2);
+
+		// when
+		pathMatcher.match("/pattern-1", "/path");
+		pathMatcher.match("/pattern-2", "/path");
+		pathMatcher.match("/pattern-3", "/path");
+
+		//then
+		Field stringMatcherCacheField = pathMatcher.getClass().getDeclaredField("stringMatcherCache");
+		stringMatcherCacheField.setAccessible(true);
+		Map<?, ?> cacheMap = (Map<?, ?>) stringMatcherCacheField.get(pathMatcher);
+
+		assertThat(cacheMap.size(), is(2));
+	}
 }
