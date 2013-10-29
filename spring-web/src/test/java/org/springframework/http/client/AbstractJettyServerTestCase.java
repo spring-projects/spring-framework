@@ -54,7 +54,6 @@ public class AbstractJettyServerTestCase {
 		handler.setContextPath("/");
 
 		handler.addServlet(new ServletHolder(new EchoServlet()), "/echo");
-		handler.addServlet(new ServletHolder(new EchoServlet()), "/echo");
 		handler.addServlet(new ServletHolder(new StatusServlet(200)), "/status/ok");
 		handler.addServlet(new ServletHolder(new StatusServlet(404)), "/status/notfound");
 		handler.addServlet(new ServletHolder(new MethodServlet("DELETE")), "/methods/delete");
