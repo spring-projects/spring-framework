@@ -30,7 +30,6 @@ import javax.websocket.WebSocketContainer;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.WebSocketHandlerAdapter;

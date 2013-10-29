@@ -16,11 +16,15 @@
 
 package org.springframework.web.socket.support;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.CollectionUtils;
-
-import java.io.Serializable;
-import java.util.*;
 
 /**
  * An {@link org.springframework.http.HttpHeaders} variant that adds support for
@@ -42,8 +46,6 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	public static final String SEC_WEBSOCKET_VERSION = "Sec-WebSocket-Version";
 
 	private final HttpHeaders headers;
-
-
 
 
 	/**

@@ -18,7 +18,6 @@ package org.springframework.web.socket.client;
 
 import java.net.URI;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;

@@ -16,19 +16,20 @@
 
 package org.springframework.web.socket.support;
 
-import org.eclipse.jetty.websocket.api.extensions.ExtensionConfig;
-import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.LinkedCaseInsensitiveMap;
-import org.springframework.util.StringUtils;
-
-import javax.websocket.Extension;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import javax.websocket.Extension;
+
+import org.eclipse.jetty.websocket.api.extensions.ExtensionConfig;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.util.StringUtils;
 
 /**
  * Represents a WebSocket extension as defined in the RFC 6455.
@@ -200,7 +201,6 @@ public class WebSocketExtension {
 
 		public WebSocketToStandardExtensionAdapter(final WebSocketExtension ext) {
 			this.name = ext.getName();
-			List<Parameter> params = new ArrayList<Parameter>();
 			for (final String paramName : ext.getParameters().keySet()) {
 				this.parameters.add(new Parameter() {
 					@Override

@@ -32,12 +32,12 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.support.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.FrameFormat;
+import org.springframework.web.socket.support.WebSocketExtension;
 
 /**
  * An abstract base class for use with HTTP transport based SockJS sessions.
@@ -68,8 +68,6 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	private InetSocketAddress remoteAddress;
 
 	private String acceptedProtocol;
-
-	private List<WebSocketExtension> extensions;
 
 
 	public AbstractHttpSockJsSession(String id, SockJsServiceConfig config,

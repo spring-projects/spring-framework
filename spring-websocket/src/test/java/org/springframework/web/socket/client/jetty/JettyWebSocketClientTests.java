@@ -28,7 +28,6 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.http.HttpHeaders;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.SocketUtils;
 import org.springframework.web.socket.WebSocketHandler;

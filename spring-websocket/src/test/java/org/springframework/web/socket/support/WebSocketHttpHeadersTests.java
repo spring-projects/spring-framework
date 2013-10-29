@@ -16,15 +16,14 @@
 
 package org.springframework.web.socket.support;
 
-import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.http.HttpHeaders;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertThat;
+import org.hamcrest.Matchers;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for WebSocketHttpHeaders.

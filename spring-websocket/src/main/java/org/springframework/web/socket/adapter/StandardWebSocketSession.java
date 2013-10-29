@@ -21,7 +21,6 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,9 +35,8 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.PingMessage;
 import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.support.WebSocketExtension;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.support.WebSocketHttpHeaders;
+import org.springframework.web.socket.support.WebSocketExtension;
 
 /**
  * A {@link WebSocketSession} for use with the standard WebSocket for Java API.
