@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
@@ -27,6 +28,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.NativeWebSocketSession;
@@ -87,6 +89,12 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession
 	public String getAcceptedProtocol() {
 		checkDelegateSessionInitialized();
 		return this.wsSession.getAcceptedProtocol();
+	}
+
+	@Override
+	public List<WebSocketExtension> getExtensions() {
+		checkDelegateSessionInitialized();
+		return this.wsSession.getExtensions();
 	}
 
 	private void checkDelegateSessionInitialized() {

@@ -17,6 +17,8 @@
 package org.springframework.web.socket.server.support;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,6 +36,7 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.adapter.JettyWebSocketHandlerAdapter;
 import org.springframework.web.socket.adapter.JettyWebSocketSession;
@@ -53,6 +56,8 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 	private static final String WS_HANDLER_ATTR_NAME = JettyRequestUpgradeStrategy.class.getName() + ".WS_LISTENER";
 
 	private WebSocketServerFactory factory;
+
+	private List<WebSocketExtension> availableExtensions;
 
 
 	/**
@@ -90,6 +95,17 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 	@Override
 	public String[] getSupportedVersions() {
 		return new String[] { String.valueOf(HandshakeRFC6455.VERSION) };
+	}
+
+	@Override
+	public List<WebSocketExtension> getAvailableExtensions(ServerHttpRequest request) {
+		if(this.availableExtensions == null) {
+			this.availableExtensions = new ArrayList<WebSocketExtension>();
+			for(String extensionName : this.factory.getExtensionFactory().getExtensionNames()) {
+				this.availableExtensions.add(new WebSocketExtension(extensionName));
+			}
+		}
+		return this.availableExtensions;
 	}
 
 	@Override

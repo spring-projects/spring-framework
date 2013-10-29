@@ -17,15 +17,18 @@
 package org.springframework.web.socket.server.support;
 
 import java.net.InetSocketAddress;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.websocket.Endpoint;
+import javax.websocket.Extension;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.adapter.StandardWebSocketHandlerAdapter;
 import org.springframework.web.socket.adapter.StandardWebSocketSession;
@@ -61,5 +64,13 @@ public abstract class AbstractStandardUpgradeStrategy implements RequestUpgradeS
 
 	protected abstract void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,
 			String selectedProtocol, Endpoint endpoint) throws HandshakeFailureException;
+
+	protected WebSocketExtension parseStandardExtension(Extension extension) {
+		Map<String, String> params = new HashMap<String,String>(extension.getParameters().size());
+		for(Extension.Parameter param : extension.getParameters()) {
+			params.put(param.getName(),param.getValue());
+		}
+		return new WebSocketExtension(extension.getName(),params);
+	}
 
 }

@@ -32,13 +32,15 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 
 /**
  * A default {@link HandshakeHandler} implementation. Performs initial validation of the
  * WebSocket handshake request -- possibly rejecting it through the appropriate HTTP
  * status code -- while also allowing sub-classes to override various parts of the
- * negotiation process (e.g. origin validation, sub-protocol negotiation, etc).
+ * negotiation process (e.g. origin validation, sub-protocol negotiation,
+ * extensions negotiation, etc).
  *
  * <p>
  * If the negotiation succeeds, the actual upgrade is delegated to a server-specific
@@ -188,6 +190,13 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 			logger.debug("Upgrading request, sub-protocol=" + subProtocol);
 		}
 
+		List<WebSocketExtension> requestedExtensions = WebSocketExtension
+				.parseHeaders(request.getHeaders().getSecWebSocketExtensions());
+
+		List<WebSocketExtension> filteredExtensions = filterRequestedExtensions(requestedExtensions,
+				this.requestUpgradeStrategy.getAvailableExtensions(request));
+		request.getHeaders().setSecWebSocketExtensions(WebSocketExtension.toStringList(filteredExtensions));
+
 		this.requestUpgradeStrategy.upgrade(request, response, subProtocol, wsHandler, attributes);
 
 		return true;
@@ -254,4 +263,27 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 		return null;
 	}
 
+	/**
+	 * Filter the list of WebSocket Extensions requested by the client.
+	 * Since the negotiation process happens during the upgrade phase within the server
+	 * implementation, one can customize the applied extensions only by filtering the
+	 * requested extensions by the client.
+	 *
+	 * <p>The default implementation of this method doesn't filter any of the extensions
+	 * requested by the client.
+	 * @param requestedExtensions the list of extensions requested by the client
+	 * @param supportedExtensions the list of extensions supported by the server
+	 * @return the filtered list of requested extensions
+	 */
+	protected List<WebSocketExtension> filterRequestedExtensions(List<WebSocketExtension> requestedExtensions,
+	                                                             List<WebSocketExtension> supportedExtensions) {
+
+		if (requestedExtensions != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Requested extension(s): " + requestedExtensions
+						+ ", supported extension(s): " + supportedExtensions);
+			}
+		}
+		return requestedExtensions;
+	}
 }
