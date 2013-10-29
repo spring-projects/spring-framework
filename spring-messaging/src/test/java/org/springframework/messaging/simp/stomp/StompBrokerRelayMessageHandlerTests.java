@@ -15,27 +15,26 @@
  */
 package org.springframework.messaging.simp.stomp;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.messaging.*;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
-import org.springframework.messaging.simp.SimpMessageType;
-import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.messaging.support.channel.ExecutorSubscribableChannel;
-import org.springframework.messaging.support.tcp.ReconnectStrategy;
-import org.springframework.messaging.support.tcp.TcpConnection;
-import org.springframework.messaging.support.tcp.TcpConnectionHandler;
-import org.springframework.messaging.support.tcp.TcpOperations;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureAdapter;
-import org.springframework.util.concurrent.ListenableFutureTask;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.tcp.ReconnectStrategy;
+import org.springframework.messaging.support.tcp.TcpConnection;
+import org.springframework.messaging.support.tcp.TcpConnectionHandler;
+import org.springframework.messaging.support.tcp.TcpOperations;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureTask;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for StompBrokerRelayMessageHandler.
@@ -169,12 +168,14 @@ public class StompBrokerRelayMessageHandlerTests {
 
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public boolean send(Message<?> message) {
 			this.messages.add((Message<byte[]>) message);
 			return true;
 		}
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public boolean send(Message<?> message, long timeout) {
 			this.messages.add((Message<byte[]>) message);
 			return true;

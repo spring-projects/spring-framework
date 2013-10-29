@@ -17,7 +17,13 @@
 package org.springframework.messaging.simp.handler;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -28,9 +34,18 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.core.AbstractMessageSendingTemplate;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.support.*;
+import org.springframework.messaging.handler.annotation.support.AnnotationExceptionHandlerMethodResolver;
+import org.springframework.messaging.handler.annotation.support.HeaderMethodArgumentResolver;
+import org.springframework.messaging.handler.annotation.support.HeadersMethodArgumentResolver;
+import org.springframework.messaging.handler.annotation.support.MessageMethodArgumentResolver;
+import org.springframework.messaging.handler.annotation.support.PathVariableMethodArgumentResolver;
+import org.springframework.messaging.handler.annotation.support.PayloadArgumentResolver;
 import org.springframework.messaging.handler.condition.DestinationPatternsMessageCondition;
-import org.springframework.messaging.handler.method.*;
+import org.springframework.messaging.handler.method.AbstractExceptionHandlerMethodResolver;
+import org.springframework.messaging.handler.method.AbstractMethodMessageHandler;
+import org.springframework.messaging.handler.method.HandlerMethod;
+import org.springframework.messaging.handler.method.HandlerMethodArgumentResolver;
+import org.springframework.messaging.handler.method.HandlerMethodReturnValueHandler;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -255,7 +270,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	@Override
-	protected Comparator getMappingComparator(final Message<?> message) {
+	protected Comparator<SimpMessageMappingInfo> getMappingComparator(final Message<?> message) {
 		return new Comparator<SimpMessageMappingInfo>() {
 			@Override
 			public int compare(SimpMessageMappingInfo info1, SimpMessageMappingInfo info2) {

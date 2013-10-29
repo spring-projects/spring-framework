@@ -16,20 +16,10 @@
 
 package org.springframework.messaging.support.tcp;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import org.springframework.messaging.Message;
 import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
-import org.springframework.util.concurrent.ListenableFutureCallbackRegistry;
 
-import reactor.core.composable.Deferred;
 import reactor.core.composable.Promise;
-import reactor.core.composable.spec.DeferredPromiseSpec;
-import reactor.function.Consumer;
-
 
 public class ReactorTcpConnection<P> implements TcpConnection<P> {
 

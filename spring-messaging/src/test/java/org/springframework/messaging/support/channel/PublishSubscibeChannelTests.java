@@ -34,7 +34,6 @@ import org.springframework.messaging.support.MessageBuilder;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Tests for {@link ExecutorSubscribableChannel}.
@@ -45,7 +44,6 @@ public class PublishSubscibeChannelTests {
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
-
 
 	private ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel();
 
@@ -118,7 +116,7 @@ public class PublishSubscibeChannelTests {
 		try {
 			this.channel.send(message);
 		}
-		catch(MessageDeliveryException actualException) {
+		catch (MessageDeliveryException actualException) {
 			assertThat((RuntimeException) actualException.getCause(), equalTo(ex));
 		}
 		verifyZeroInteractions(secondHandler);
@@ -127,6 +125,7 @@ public class PublishSubscibeChannelTests {
 	@Test
 	public void concurrentModification() throws Exception {
 		this.channel.subscribe(new MessageHandler() {
+
 			@Override
 			public void handleMessage(Message<?> message) throws MessagingException {
 				channel.unsubscribe(handler);

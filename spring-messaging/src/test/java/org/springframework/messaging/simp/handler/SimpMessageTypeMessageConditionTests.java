@@ -16,17 +16,13 @@
 
 package org.springframework.messaging.simp.handler;
 
-
 import org.junit.Test;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.handler.condition.DestinationPatternsMessageCondition;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
 
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for SimpMessageTypeMessageCondition.
@@ -34,7 +30,6 @@ import static org.junit.Assert.assertEquals;
  * @author Rossen Stoyanchev
  */
 public class SimpMessageTypeMessageConditionTests {
-
 
 	@Test
 	public void combineEmptySets() {
@@ -84,7 +79,6 @@ public class SimpMessageTypeMessageConditionTests {
 		assertEquals(-1, condition(SimpMessageType.MESSAGE).compareTo(condition(), message));
 		assertEquals(0, condition(SimpMessageType.MESSAGE).compareTo(condition(SimpMessageType.MESSAGE), message));
 	}
-
 
 	private Message<byte[]> message(SimpMessageType messageType) {
 		MessageBuilder<byte[]> builder = MessageBuilder.withPayload(new byte[0]);

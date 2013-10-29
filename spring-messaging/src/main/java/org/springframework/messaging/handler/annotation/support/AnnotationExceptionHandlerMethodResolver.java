@@ -17,16 +17,16 @@
 package org.springframework.messaging.handler.annotation.support;
 
 import java.lang.reflect.Method;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.springframework.core.ExceptionDepthComparator;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.method.AbstractExceptionHandlerMethodResolver;
 import org.springframework.messaging.handler.method.HandlerMethodSelector;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 
 
@@ -40,7 +40,6 @@ import org.springframework.util.ReflectionUtils.MethodFilter;
  * @since 4.0
  */
 public class AnnotationExceptionHandlerMethodResolver extends AbstractExceptionHandlerMethodResolver {
-
 
 	/**
 	 * A constructor that finds {@link MessageExceptionHandler} methods in the given type.

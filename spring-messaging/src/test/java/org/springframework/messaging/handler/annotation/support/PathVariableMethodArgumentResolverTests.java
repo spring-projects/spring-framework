@@ -28,7 +28,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.PathVariable;
-import org.springframework.messaging.simp.handler.SimpAnnotationMethodMessageHandler;
 import org.springframework.messaging.support.MessageBuilder;
 
 import static org.junit.Assert.*;
@@ -45,12 +44,12 @@ public class PathVariableMethodArgumentResolverTests {
 	private MethodParameter paramAnnotatedValue;
 	private MethodParameter paramNotAnnotated;
 
+
 	@Before
 	public void setup() throws Exception {
 		this.resolver = new PathVariableMethodArgumentResolver(new DefaultConversionService());
 
-		Method method = getClass().getDeclaredMethod("handleMessage",
-				String.class, String.class, String.class);
+		Method method = getClass().getDeclaredMethod("handleMessage", String.class, String.class, String.class);
 		this.paramAnnotated = new MethodParameter(method, 0);
 		this.paramAnnotatedValue = new MethodParameter(method, 1);
 		this.paramNotAnnotated = new MethodParameter(method, 2);
@@ -70,15 +69,15 @@ public class PathVariableMethodArgumentResolverTests {
 
 	@Test
 	public void resolveArgument() throws Exception {
-		Map<String,Object> pathParams = new HashMap<String,Object>();
-		pathParams.put("foo","bar");
-		pathParams.put("name","value");
-		Message<byte[]> message = MessageBuilder.withPayload(new byte[0])
-				.setHeader(PathVariableMethodArgumentResolver.PATH_TEMPLATE_VARIABLES_HEADER, pathParams).build();
+		Map<String, Object> pathParams = new HashMap<String, Object>();
+		pathParams.put("foo", "bar");
+		pathParams.put("name", "value");
+		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).setHeader(
+			PathVariableMethodArgumentResolver.PATH_TEMPLATE_VARIABLES_HEADER, pathParams).build();
 		Object result = this.resolver.resolveArgument(this.paramAnnotated, message);
-		assertEquals("bar",result);
+		assertEquals("bar", result);
 		result = this.resolver.resolveArgument(this.paramAnnotatedValue, message);
-		assertEquals("value",result);
+		assertEquals("value", result);
 	}
 
 	@Test(expected = MessageHandlingException.class)
@@ -88,9 +87,6 @@ public class PathVariableMethodArgumentResolverTests {
 	}
 
 	@SuppressWarnings("unused")
-	private void handleMessage(
-			@PathVariable String foo,
-			@PathVariable(value = "name") String param1,
-			String param3) {
+	private void handleMessage(@PathVariable String foo, @PathVariable(value = "name") String param1, String param3) {
 	}
 }

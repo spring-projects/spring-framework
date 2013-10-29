@@ -16,14 +16,21 @@
 
 package org.springframework.messaging.handler.condition;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.method.AbstractMethodMessageHandler;
 import org.springframework.util.AntPathMatcher;
-import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
-
-import java.util.*;
 
 /**
  * A {@link MessageCondition} for matching the destination of a Message against one or

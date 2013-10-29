@@ -16,8 +16,6 @@
 
 package org.springframework.messaging.handler.condition;
 
-import org.springframework.web.servlet.mvc.condition.RequestCondition;
-
 import java.util.Collection;
 import java.util.Iterator;
 
