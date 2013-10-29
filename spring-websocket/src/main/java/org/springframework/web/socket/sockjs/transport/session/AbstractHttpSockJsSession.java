@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -30,6 +32,7 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.support.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
@@ -65,6 +68,8 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	private InetSocketAddress remoteAddress;
 
 	private String acceptedProtocol;
+
+	private List<WebSocketExtension> extensions;
 
 
 	public AbstractHttpSockJsSession(String id, SockJsServiceConfig config,
@@ -114,6 +119,11 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 
 	protected void setRemoteAddress(InetSocketAddress remoteAddress) {
 		this.remoteAddress = remoteAddress;
+	}
+
+	@Override
+	public List<WebSocketExtension> getExtensions() {
+		return Collections.emptyList();
 	}
 
 	/**

@@ -24,8 +24,10 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.web.socket.AbstractHttpRequestTests;
+import org.springframework.web.socket.support.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.adapter.TextWebSocketHandlerAdapter;
+import org.springframework.web.socket.support.WebSocketHttpHeaders;
 
 import static org.mockito.Mockito.*;
 
@@ -57,19 +59,22 @@ public class DefaultHandshakeHandlerTests extends AbstractHttpRequestTests {
 
 		when(this.upgradeStrategy.getSupportedVersions()).thenReturn(new String[] { "13" });
 
+		WebSocketHttpHeaders headers = new WebSocketHttpHeaders(this.request.getHeaders());
+
 		this.servletRequest.setMethod("GET");
-		this.request.getHeaders().setUpgrade("WebSocket");
-		this.request.getHeaders().setConnection("Upgrade");
-		this.request.getHeaders().setSecWebSocketVersion("13");
-		this.request.getHeaders().setSecWebSocketKey("82/ZS2YHjEnUN97HLL8tbw==");
-		this.request.getHeaders().setSecWebSocketProtocol("STOMP");
+		headers.setUpgrade("WebSocket");
+		headers.setConnection("Upgrade");
+		headers.setSecWebSocketVersion("13");
+		headers.setSecWebSocketKey("82/ZS2YHjEnUN97HLL8tbw==");
+		headers.setSecWebSocketProtocol("STOMP");
 
 		WebSocketHandler handler = new TextWebSocketHandlerAdapter();
 		Map<String, Object> attributes = Collections.<String, Object>emptyMap();
 
 		this.handshakeHandler.doHandshake(this.request, this.response, handler, attributes);
 
-		verify(this.upgradeStrategy).upgrade(this.request, this.response, "STOMP", handler, attributes);
+		verify(this.upgradeStrategy).upgrade(this.request, this.response,
+				"STOMP", Collections.<WebSocketExtension>emptyList(), handler, attributes);
 	}
 
 }

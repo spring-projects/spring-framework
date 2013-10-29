@@ -20,9 +20,11 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.web.socket.support.WebSocketExtension;
 
 /**
  * A WebSocket session abstraction. Allows sending messages over a WebSocket connection
@@ -78,6 +80,12 @@ public interface WebSocketSession {
 	 * negotiated successfully.
 	 */
 	String getAcceptedProtocol();
+
+	/**
+	 * Return the negotiated extensions or {@code null} if none was specified or
+	 * negotiated successfully.
+	 */
+	List<WebSocketExtension> getExtensions();
 
 	/**
 	 * Return whether the connection is still open.

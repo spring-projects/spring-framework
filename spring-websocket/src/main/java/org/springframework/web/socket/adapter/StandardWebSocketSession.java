@@ -20,10 +20,14 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.websocket.CloseReason;
 import javax.websocket.CloseReason.CloseCodes;
+import javax.websocket.Extension;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.StringUtils;
@@ -32,7 +36,9 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.PingMessage;
 import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.support.WebSocketExtension;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.support.WebSocketHttpHeaders;
 
 /**
  * A {@link WebSocketSession} for use with the standard WebSocket for Java API.
@@ -48,22 +54,24 @@ public class StandardWebSocketSession extends AbstractWebSocketSesssion<javax.we
 
 	private final InetSocketAddress remoteAddress;
 
+	private List<WebSocketExtension> extensions;
+
 
 	/**
 	 * Class constructor.
 	 *
-	 * @param handshakeHeaders the headers of the handshake request
+	 * @param headers the headers of the handshake request
 	 * @param handshakeAttributes attributes from the HTTP handshake to make available
 	 *        through the WebSocket session
 	 * @param localAddress the address on which the request was received
 	 * @param remoteAddress the address of the remote client
 	 */
-	public StandardWebSocketSession(HttpHeaders handshakeHeaders, Map<String, Object> handshakeAttributes,
+	public StandardWebSocketSession(HttpHeaders headers, Map<String, Object> handshakeAttributes,
 			InetSocketAddress localAddress, InetSocketAddress remoteAddress) {
 
 		super(handshakeAttributes);
-		handshakeHeaders = (handshakeHeaders != null) ? handshakeHeaders : new HttpHeaders();
-		this.handshakeHeaders = HttpHeaders.readOnlyHttpHeaders(handshakeHeaders);
+		headers = (headers != null) ? headers : new HttpHeaders();
+		this.handshakeHeaders = HttpHeaders.readOnlyHttpHeaders(headers);
 		this.localAddress = localAddress;
 		this.remoteAddress = remoteAddress;
 	}
@@ -106,6 +114,19 @@ public class StandardWebSocketSession extends AbstractWebSocketSesssion<javax.we
 		checkNativeSessionInitialized();
 		String protocol = getNativeSession().getNegotiatedSubprotocol();
 		return StringUtils.isEmpty(protocol)? null : protocol;
+	}
+
+	@Override
+	public List<WebSocketExtension> getExtensions() {
+		checkNativeSessionInitialized();
+		if(this.extensions == null) {
+			List<Extension> source = getNativeSession().getNegotiatedExtensions();
+			this.extensions = new ArrayList<WebSocketExtension>(source.size());
+			for(Extension e : source) {
+				this.extensions.add(new WebSocketExtension.StandardToWebSocketExtensionAdapter(e));
+			}
+		}
+		return this.extensions;
 	}
 
 	@Override

@@ -45,7 +45,8 @@ public interface HandshakeHandler {
 	 *        {@link PerConnectionWebSocketHandler} for providing a handler with
 	 *        per-connection lifecycle.
 	 * @param attributes handshake request specific attributes to be set on the WebSocket
-	 *        session and thus made available to the {@link WebSocketHandler}
+	 *        session via {@link HandshakeInterceptor} and thus made available to the
+	 *        {@link WebSocketHandler};
 	 *
 	 * @return whether the handshake negotiation was successful or not. In either case the
 	 *         response status, headers, and body will have been updated to reflect the

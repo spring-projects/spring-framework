@@ -19,7 +19,9 @@ package org.springframework.web.bind.support;
 import java.io.IOException;
 import java.util.List;
 
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -79,8 +81,15 @@ public class WebRequestDataBinderIntegrationTests {
 		partsServlet = new PartsServlet();
 		partListServlet = new PartListServlet();
 
-		handler.addServlet(new ServletHolder(partsServlet), "/parts");
-		handler.addServlet(new ServletHolder(partListServlet), "/partlist");
+		MultipartConfigElement multipartConfig = new MultipartConfigElement("");
+
+		ServletHolder holder = new ServletHolder(partsServlet);
+		holder.getRegistration().setMultipartConfig(multipartConfig);
+		handler.addServlet(holder, "/parts");
+
+		holder = new ServletHolder(partListServlet);
+		holder.getRegistration().setMultipartConfig(multipartConfig);
+		handler.addServlet(holder, "/partlist");
 		jettyServer.setHandler(handler);
 		jettyServer.start();
 	}
@@ -178,7 +187,6 @@ public class WebRequestDataBinderIntegrationTests {
 
 	@SuppressWarnings("serial")
 	private static class PartsServlet extends AbstractStandardMultipartServlet<PartsBean> {
-
 	}
 
 	private static class PartListBean {
@@ -197,7 +205,6 @@ public class WebRequestDataBinderIntegrationTests {
 
 	@SuppressWarnings("serial")
 	private static class PartListServlet extends AbstractStandardMultipartServlet<PartListBean> {
-
 	}
 
 }

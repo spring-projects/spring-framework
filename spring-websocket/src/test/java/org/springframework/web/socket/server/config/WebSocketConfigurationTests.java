@@ -41,7 +41,7 @@ import static org.junit.Assert.*;
 
 
 /**
- * Test fixture for WebSocket Java config support.
+ * Integration tests for WebSocket Java server-side configuration.
  *
  * @author Rossen Stoyanchev
  */

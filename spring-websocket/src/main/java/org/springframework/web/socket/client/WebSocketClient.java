@@ -22,6 +22,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.support.WebSocketHttpHeaders;
 
 /**
  * Contract for initiating a WebSocket request. As an alternative considering using the
@@ -38,6 +39,7 @@ public interface WebSocketClient {
 	ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler,
 			String uriTemplate, Object... uriVariables);
 
-	ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler, HttpHeaders headers, URI uri);
+	ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler,
+			WebSocketHttpHeaders headers, URI uri);
 
 }

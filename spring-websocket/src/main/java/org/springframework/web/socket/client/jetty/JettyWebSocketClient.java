@@ -38,6 +38,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.JettyWebSocketHandlerAdapter;
 import org.springframework.web.socket.adapter.JettyWebSocketSession;
 import org.springframework.web.socket.client.AbstractWebSocketClient;
+import org.springframework.web.socket.support.WebSocketExtension;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -169,10 +170,16 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Sma
 
 	@Override
 	public ListenableFuture<WebSocketSession> doHandshakeInternal(WebSocketHandler wsHandler,
-			HttpHeaders headers, final URI uri, List<String> protocols, Map<String, Object> handshakeAttributes) {
+			HttpHeaders headers, final URI uri, List<String> protocols,
+			List<WebSocketExtension> extensions,  Map<String, Object> handshakeAttributes) {
 
 		final ClientUpgradeRequest request = new ClientUpgradeRequest();
 		request.setSubProtocols(protocols);
+
+		for (WebSocketExtension e : extensions) {
+			request.addExtensions(new WebSocketExtension.WebSocketToJettyExtensionConfigAdapter(e));
+		}
+
 		for (String header : headers.keySet()) {
 			request.setHeader(header, headers.get(header));
 		}

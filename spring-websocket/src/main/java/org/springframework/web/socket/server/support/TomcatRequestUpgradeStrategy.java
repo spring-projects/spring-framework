@@ -19,13 +19,14 @@ package org.springframework.web.socket.server.support;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.websocket.Endpoint;
+import javax.websocket.Extension;
 
 import org.apache.tomcat.websocket.server.WsServerContainer;
 import org.springframework.http.server.ServerHttpRequest;
@@ -58,7 +59,8 @@ public class TomcatRequestUpgradeStrategy extends AbstractStandardUpgradeStrateg
 
 	@Override
 	public void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,
-			String acceptedProtocol, Endpoint endpoint) throws HandshakeFailureException {
+			String selectedProtocol, List<Extension> selectedExtensions,
+			Endpoint endpoint) throws HandshakeFailureException {
 
 		Assert.isTrue(request instanceof ServletServerHttpRequest);
 		HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
@@ -71,7 +73,8 @@ public class TomcatRequestUpgradeStrategy extends AbstractStandardUpgradeStrateg
 		Map<String, String> pathParams = Collections.<String, String> emptyMap();
 
 		ServerEndpointRegistration endpointConfig = new ServerEndpointRegistration(path, endpoint);
-		endpointConfig.setSubprotocols(Arrays.asList(acceptedProtocol));
+		endpointConfig.setSubprotocols(Arrays.asList(selectedProtocol));
+		endpointConfig.setExtensions(selectedExtensions);
 
 		try {
 			getContainer(servletRequest).doUpgrade(servletRequest, servletResponse, endpointConfig, pathParams);
@@ -86,10 +89,8 @@ public class TomcatRequestUpgradeStrategy extends AbstractStandardUpgradeStrateg
 		}
 	}
 
-	public WsServerContainer getContainer(HttpServletRequest servletRequest) {
-		String attribute = "javax.websocket.server.ServerContainer";
-		ServletContext servletContext = servletRequest.getServletContext();
-		return (WsServerContainer) servletContext.getAttribute(attribute);
+	public WsServerContainer getContainer(HttpServletRequest request) {
+		return (WsServerContainer) super.getContainer(request);
 	}
 
 }

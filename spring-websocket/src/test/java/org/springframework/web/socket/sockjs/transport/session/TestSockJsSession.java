@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.support.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
 
@@ -58,6 +59,8 @@ public class TestSockJsSession extends AbstractSockJsSession {
 
 	private String subProtocol;
 
+	private List<WebSocketExtension> extensions = new ArrayList<>();
+
 
 	public TestSockJsSession(String sessionId, SockJsServiceConfig config,
 			WebSocketHandler wsHandler, Map<String, Object> attributes) {
@@ -80,61 +83,37 @@ public class TestSockJsSession extends AbstractSockJsSession {
 		return this.headers;
 	}
 
-	/**
-	 * @return the headers
-	 */
 	public HttpHeaders getHeaders() {
 		return this.headers;
 	}
 
-	/**
-	 * @param headers the headers to set
-	 */
 	public void setHeaders(HttpHeaders headers) {
 		this.headers = headers;
 	}
 
-	/**
-	 * @return the principal
-	 */
 	@Override
 	public Principal getPrincipal() {
 		return this.principal;
 	}
 
-	/**
-	 * @param principal the principal to set
-	 */
 	public void setPrincipal(Principal principal) {
 		this.principal = principal;
 	}
 
-	/**
-	 * @return the localAddress
-	 */
 	@Override
 	public InetSocketAddress getLocalAddress() {
 		return this.localAddress;
 	}
 
-	/**
-	 * @param remoteAddress the remoteAddress to set
-	 */
 	public void setLocalAddress(InetSocketAddress localAddress) {
 		this.localAddress = localAddress;
 	}
 
-	/**
-	 * @return the remoteAddress
-	 */
 	@Override
 	public InetSocketAddress getRemoteAddress() {
 		return this.remoteAddress;
 	}
 
-	/**
-	 * @param remoteAddress the remoteAddress to set
-	 */
 	public void setRemoteAddress(InetSocketAddress remoteAddress) {
 		this.remoteAddress = remoteAddress;
 	}
@@ -146,6 +125,15 @@ public class TestSockJsSession extends AbstractSockJsSession {
 
 	public void setAcceptedProtocol(String protocol) {
 		this.subProtocol = protocol;
+	}
+
+	@Override
+	public List<WebSocketExtension> getExtensions() {
+		return this.extensions;
+	}
+
+	public void setExtensions(List<WebSocketExtension> extensions) {
+		this.extensions = extensions;
 	}
 
 	public CloseStatus getCloseStatus() {

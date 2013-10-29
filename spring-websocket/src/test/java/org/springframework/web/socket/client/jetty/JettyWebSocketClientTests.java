@@ -36,6 +36,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.JettyWebSocketHandlerAdapter;
 import org.springframework.web.socket.adapter.JettyWebSocketSession;
 import org.springframework.web.socket.adapter.TextWebSocketHandlerAdapter;
+import org.springframework.web.socket.support.WebSocketHttpHeaders;
 
 import static org.junit.Assert.*;
 
@@ -80,7 +81,7 @@ public class JettyWebSocketClientTests {
 	@Test
 	public void doHandshake() throws Exception {
 
-		HttpHeaders headers = new HttpHeaders();
+		WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 		headers.setSecWebSocketProtocol(Arrays.asList("echo"));
 
 		this.wsSession = this.client.doHandshake(new TextWebSocketHandlerAdapter(), headers, new URI(this.wsUrl)).get();

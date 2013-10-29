@@ -51,6 +51,8 @@ public class TestWebSocketSession implements WebSocketSession {
 
 	private String protocol;
 
+	private List<WebSocketExtension> extensions = new ArrayList<WebSocketExtension>();
+
 	private boolean open;
 
 	private final List<WebSocketMessage<?>> messages = new ArrayList<>();
@@ -60,32 +62,20 @@ public class TestWebSocketSession implements WebSocketSession {
 	private HttpHeaders headers;
 
 
-	/**
-	 * @return the id
-	 */
 	@Override
 	public String getId() {
 		return this.id;
 	}
 
-	/**
-	 * @param id the id to set
-	 */
 	public void setId(String id) {
 		this.id = id;
 	}
 
-	/**
-	 * @return the uri
-	 */
 	@Override
 	public URI getUri() {
 		return this.uri;
 	}
 
-	/**
-	 * @param uri the uri to set
-	 */
 	public void setUri(URI uri) {
 		this.uri = uri;
 	}
@@ -96,105 +86,72 @@ public class TestWebSocketSession implements WebSocketSession {
 		return this.headers;
 	}
 
-	/**
-	 * @return the headers
-	 */
 	public HttpHeaders getHeaders() {
 		return this.headers;
 	}
 
-	/**
-	 * @param headers the headers to set
-	 */
 	public void setHeaders(HttpHeaders headers) {
 		this.headers = headers;
 	}
 
-	/**
-	 * @param attributes the attributes to set
-	 */
 	public void setHandshakeAttributes(Map<String, Object> attributes) {
 		this.attributes = attributes;
 	}
 
-	/**
-	 * @return the attributes
-	 */
 	@Override
 	public Map<String, Object> getHandshakeAttributes() {
 		return this.attributes;
 	}
 
-	/**
-	 * @return the principal
-	 */
 	@Override
 	public Principal getPrincipal() {
 		return this.principal;
 	}
 
-	/**
-	 * @param principal the principal to set
-	 */
 	public void setPrincipal(Principal principal) {
 		this.principal = principal;
 	}
 
-	/**
-	 * @return the localAddress
-	 */
 	@Override
 	public InetSocketAddress getLocalAddress() {
 		return this.localAddress;
 	}
 
-	/**
-	 * @param remoteAddress the remoteAddress to set
-	 */
 	public void setLocalAddress(InetSocketAddress localAddress) {
 		this.localAddress = localAddress;
 	}
 
-	/**
-	 * @return the remoteAddress
-	 */
 	@Override
 	public InetSocketAddress getRemoteAddress() {
 		return this.remoteAddress;
 	}
 
-	/**
-	 * @param remoteAddress the remoteAddress to set
-	 */
 	public void setRemoteAddress(InetSocketAddress remoteAddress) {
 		this.remoteAddress = remoteAddress;
 	}
 
-	/**
-	 * @return the subProtocol
-	 */
 	public String getAcceptedProtocol() {
 		return this.protocol;
 	}
 
-	/**
-	 * @param protocol the subProtocol to set
-	 */
 	public void setAcceptedProtocol(String protocol) {
 		this.protocol = protocol;
 	}
 
-	/**
-	 * @return the open
-	 */
+	@Override
+	public List<WebSocketExtension> getExtensions() {
+		return this.extensions;
+	}
+
+	public void setExtensions(List<WebSocketExtension> extensions) {
+		this.extensions = extensions;
+	}
+
 	@Override
 	public boolean isOpen() {
 		return this.open;
 	}
 
-	/**
-	 * @param open the open to set
-	 */
 	public void setOpen(boolean open) {
 		this.open = open;
 	}

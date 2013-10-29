@@ -20,8 +20,11 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jetty.websocket.api.extensions.ExtensionConfig;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.socket.BinaryMessage;
@@ -29,6 +32,7 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.PingMessage;
 import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.support.WebSocketExtension;
 import org.springframework.web.socket.WebSocketSession;
 
 /**
@@ -41,6 +45,8 @@ import org.springframework.web.socket.WebSocketSession;
 public class JettyWebSocketSession extends AbstractWebSocketSesssion<org.eclipse.jetty.websocket.api.Session> {
 
 	private HttpHeaders headers;
+
+	private List<WebSocketExtension> extensions;
 
 	private final Principal principal;
 
@@ -102,6 +108,19 @@ public class JettyWebSocketSession extends AbstractWebSocketSesssion<org.eclipse
 	public String getAcceptedProtocol() {
 		checkNativeSessionInitialized();
 		return getNativeSession().getUpgradeResponse().getAcceptedSubProtocol();
+	}
+
+	@Override
+	public List<WebSocketExtension> getExtensions() {
+		checkNativeSessionInitialized();
+		if(this.extensions == null) {
+			List<ExtensionConfig> source = getNativeSession().getUpgradeResponse().getExtensions();
+			this.extensions = new ArrayList<WebSocketExtension>(source.size());
+			for(ExtensionConfig e : source) {
+				this.extensions.add(new WebSocketExtension(e.getName(), e.getParameters()));
+			}
+		}
+		return this.extensions;
 	}
 
 	@Override

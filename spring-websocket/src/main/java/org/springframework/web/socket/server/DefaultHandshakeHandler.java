@@ -32,13 +32,16 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.socket.support.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.support.WebSocketHttpHeaders;
 
 /**
  * A default {@link HandshakeHandler} implementation. Performs initial validation of the
  * WebSocket handshake request -- possibly rejecting it through the appropriate HTTP
  * status code -- while also allowing sub-classes to override various parts of the
- * negotiation process (e.g. origin validation, sub-protocol negotiation, etc).
+ * negotiation process (e.g. origin validation, sub-protocol negotiation,
+ * extensions negotiation, etc).
  *
  * <p>
  * If the negotiation succeeds, the actual upgrade is delegated to a server-specific
@@ -142,8 +145,10 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 	public final boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response,
 			WebSocketHandler wsHandler, Map<String, Object> attributes) throws HandshakeFailureException {
 
+		WebSocketHttpHeaders headers = new WebSocketHttpHeaders(request.getHeaders());
+
 		if (logger.isDebugEnabled()) {
-			logger.debug("Initiating handshake for " + request.getURI() + ", headers=" + request.getHeaders());
+			logger.debug("Initiating handshake for " + request.getURI() + ", headers=" + headers);
 		}
 
 		try {
@@ -153,16 +158,16 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 				logger.debug("Only HTTP GET is allowed, current method is " + request.getMethod());
 				return false;
 			}
-			if (!"WebSocket".equalsIgnoreCase(request.getHeaders().getUpgrade())) {
+			if (!"WebSocket".equalsIgnoreCase(headers.getUpgrade())) {
 				handleInvalidUpgradeHeader(request, response);
 				return false;
 			}
-			if (!request.getHeaders().getConnection().contains("Upgrade") &&
-					!request.getHeaders().getConnection().contains("upgrade")) {
+			if (!headers.getConnection().contains("Upgrade") &&
+					!headers.getConnection().contains("upgrade")) {
 				handleInvalidConnectHeader(request, response);
 				return false;
 			}
-			if (!isWebSocketVersionSupported(request)) {
+			if (!isWebSocketVersionSupported(headers)) {
 				handleWebSocketVersionNotSupported(request, response);
 				return false;
 			}
@@ -170,7 +175,7 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 				response.setStatusCode(HttpStatus.FORBIDDEN);
 				return false;
 			}
-			String wsKey = request.getHeaders().getSecWebSocketKey();
+			String wsKey = headers.getSecWebSocketKey();
 			if (wsKey == null) {
 				logger.debug("Missing \"Sec-WebSocket-Key\" header");
 				response.setStatusCode(HttpStatus.BAD_REQUEST);
@@ -182,13 +187,17 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 					"Response update failed during upgrade to WebSocket, uri=" + request.getURI(), ex);
 		}
 
-		String subProtocol = selectProtocol(request.getHeaders().getSecWebSocketProtocol());
+		String subProtocol = selectProtocol(headers.getSecWebSocketProtocol());
+
+		List<WebSocketExtension> requested = headers.getSecWebSocketExtensions();
+		List<WebSocketExtension> supported = this.requestUpgradeStrategy.getSupportedExtensions(request);
+		List<WebSocketExtension> extensions = filterRequestedExtensions(request, requested, supported);
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Upgrading request, sub-protocol=" + subProtocol);
+			logger.debug("Upgrading request, sub-protocol=" + subProtocol + ", extensions=" + extensions);
 		}
 
-		this.requestUpgradeStrategy.upgrade(request, response, subProtocol, wsHandler, attributes);
+		this.requestUpgradeStrategy.upgrade(request, response, subProtocol, extensions, wsHandler, attributes);
 
 		return true;
 	}
@@ -205,8 +214,8 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 		response.getBody().write("\"Connection\" must be \"upgrade\".".getBytes("UTF-8"));
 	}
 
-	protected boolean isWebSocketVersionSupported(ServerHttpRequest request) {
-		String version = request.getHeaders().getSecWebSocketVersion();
+	protected boolean isWebSocketVersionSupported(WebSocketHttpHeaders httpHeaders) {
+		String version = httpHeaders.getSecWebSocketVersion();
 		String[] supportedVersions = getSupportedVerions();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Requested version=" + version + ", supported=" + Arrays.toString(supportedVersions));
@@ -229,7 +238,8 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 	protected void handleWebSocketVersionNotSupported(ServerHttpRequest request, ServerHttpResponse response) {
 		logger.debug("WebSocket version not supported " + request.getHeaders().get("Sec-WebSocket-Version"));
 		response.setStatusCode(HttpStatus.UPGRADE_REQUIRED);
-		response.getHeaders().setSecWebSocketVersion(StringUtils.arrayToCommaDelimitedString(getSupportedVerions()));
+		response.getHeaders().put(WebSocketHttpHeaders.SEC_WEBSOCKET_VERSION, Arrays.asList(
+				StringUtils.arrayToCommaDelimitedString(getSupportedVerions())));
 	}
 
 	protected boolean isValidOrigin(ServerHttpRequest request) {
@@ -254,4 +264,27 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 		return null;
 	}
 
+	/**
+	 * Filter the list of requested WebSocket extensions.
+	 * <p>
+	 * By default all request extensions are returned. The WebSocket server will further
+	 * compare the requested extensions against the list of supported extensions and
+	 * return only the ones that are both requested and supported.
+	 *
+	 * @param request the current request
+	 * @param requested the list of extensions requested by the client
+	 * @param supported the list of extensions supported by the server
+	 *
+	 * @return the selected extensions or an empty list
+	 */
+	protected List<WebSocketExtension> filterRequestedExtensions(ServerHttpRequest request,
+			List<WebSocketExtension> requested, List<WebSocketExtension> supported) {
+
+		if (requested != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Requested extension(s): " + requested + ", supported extension(s): " + supported);
+			}
+		}
+		return requested;
+	}
 }
