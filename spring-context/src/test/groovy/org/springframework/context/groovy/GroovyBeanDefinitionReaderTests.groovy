@@ -116,7 +116,6 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 
 		def p = appCtx.getBean("person")
 		assertTrue(p instanceof AdvisedPerson)
-		assertNotNull p
 	}
 
 	void testUseSpringNamespaceAsMethod() {
@@ -872,23 +871,26 @@ return appCtx
 		assertEquals "homer", marge.bean3.person
 		assertEquals "lisa", marge.bean3.bean1.person
 	}
-
 }
+
 
 class HolyGrailQuest {
 	void start() { println "lets begin" }
 }
-class KnightOfTheRoundTable {
-String name
-String leader
-KnightOfTheRoundTable(String n) {
-	  this.name = n
-}
-HolyGrailQuest quest
 
-void embarkOnQuest() {
-	   quest.start()
-}
+class KnightOfTheRoundTable {
+	String name
+	String leader
+
+	KnightOfTheRoundTable(String n) {
+  		this.name = n
+	}
+
+	HolyGrailQuest quest
+
+	void embarkOnQuest() {
+		quest.start()
+	}
 }
 
 // simple bean
@@ -898,6 +900,7 @@ class Bean1 {
 	Properties props
 	List children
 }
+
 // bean referencing other bean
 class Bean2 {
 	int age
@@ -908,6 +911,7 @@ class Bean2 {
 	List children
 	Bean1 parent
 }
+
 // bean with constructor args
 class Bean3 {
 	Bean3(String person, Bean1 bean1) {
@@ -918,6 +922,7 @@ class Bean3 {
 	Bean1 bean1
 	int age
 }
+
 // bean with factory method
 class Bean4 {
 	private Bean4() {}
@@ -926,6 +931,7 @@ class Bean4 {
 	}
 	String person
 }
+
 // bean with List-valued constructor arg
 class Bean5 {
 	Bean5(List<Bean1> people) {
@@ -933,6 +939,7 @@ class Bean5 {
 	}
 	List<Bean1> people
 }
+
 // bean with Map-valued constructor arg
 class Bean6 {
 	Bean6(Map<String, Bean1> peopleByName) {
@@ -940,17 +947,20 @@ class Bean6 {
 	}
 	Map<String, Bean1> peopleByName
 }
+
 // a factory bean
 class Bean1Factory {
 	Bean1 newInstance() {
 		return new Bean1()
 	}
 }
-class ScopeTest {}
+
+class ScopeTest {
+}
+
 class TestScope implements Scope {
 
 	int instanceCount
-
 
 	public Object remove(String name) {
 		 // do nothing
@@ -966,27 +976,29 @@ class TestScope implements Scope {
 	public Object get(String name, ObjectFactory<?> objectFactory) {
 		instanceCount++
 		objectFactory.getObject()
-
 	}
 
 	public Object resolveContextualObject(String s) {
 		return null;  // noop
 	}
 }
+
 class BirthdayCardSender {
-List peopleSentCards = []
-public void onBirthday(AdvisedPerson person) {
-	  peopleSentCards << person
+	List peopleSentCards = []
+
+	public void onBirthday(AdvisedPerson person) {
+ 		peopleSentCards << person
+	}
 }
-}
+
 @Component(value = "person")
 public class AdvisedPerson {
-int age;
-String name;
+	int age;
+	String name;
 
-public void birthday() {
-	  ++age;
-}
+	public void birthday() {
+		++age;
+	}
 }
 
 class SomeClass {
