@@ -23,9 +23,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Alef Arendsen
@@ -382,9 +383,10 @@ public class AntPathMatcherTests {
 		try {
 			pathMatcher.extractUriTemplateVariables("/web/{id:foo(bar)?}", "/web/foobar");
 			fail("Expected exception");
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException ex) {
 			assertTrue("Expected helpful message on the use of capturing groups",
-					e.getMessage().contains("The number of capturing groups in the pattern"));
+					ex.getMessage().contains("The number of capturing groups in the pattern"));
 		}
 	}
 
@@ -558,6 +560,38 @@ public class AntPathMatcherTests {
 
 		assertTrue(pathMatcher.match("/group/{groupName}/members", "/group/sales/members"));
 		assertTrue(pathMatcher.match("/group/{groupName}/members", "/group/  sales/members"));
+	}
+
+	@Test
+	public void testDefaultCacheSetting() {
+		match();
+		assertTrue(pathMatcher.stringMatcherCache.size() > 20);
+
+		for (int i = 0; i < 65536; i++) {
+			pathMatcher.match("test" + i, "test");
+		}
+		// Cache turned off because it went beyond the threshold
+		assertTrue(pathMatcher.stringMatcherCache.isEmpty());
+	}
+
+	@Test
+	public void testCacheSetToTrue() {
+		pathMatcher.setCachePatterns(true);
+		match();
+		assertTrue(pathMatcher.stringMatcherCache.size() > 20);
+
+		for (int i = 0; i < 65536; i++) {
+			pathMatcher.match("test" + i, "test");
+		}
+		// Cache keeps being alive due to the explicit cache setting
+		assertTrue(pathMatcher.stringMatcherCache.size() > 65536);
+	}
+
+	@Test
+	public void testCacheSetToFalse() {
+		pathMatcher.setCachePatterns(false);
+		match();
+		assertTrue(pathMatcher.stringMatcherCache.isEmpty());
 	}
 
 }
