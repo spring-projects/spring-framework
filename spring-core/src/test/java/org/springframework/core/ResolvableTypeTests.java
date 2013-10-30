@@ -520,6 +520,30 @@ public class ResolvableTypeTests {
 	}
 
 	@Test
+	public void resolveVariableGenericArray() throws Exception {
+		ResolvableType type = ResolvableType.forField(Fields.class.getField("variableTypeGenericArray"), TypedFields.class);
+		assertThat(type.getType().toString(), equalTo("T[]"));
+		assertThat(type.isArray(), equalTo(true));
+		assertThat(type.resolve(), equalTo((Class) String[].class));
+	}
+
+	@Test
+	public void resolveVariableGenericArrayUnknown() throws Exception {
+		ResolvableType type = ResolvableType.forField(Fields.class.getField("variableTypeGenericArray"));
+		assertThat(type.getType().toString(), equalTo("T[]"));
+		assertThat(type.isArray(), equalTo(true));
+		assertThat(type.resolve(), nullValue());
+	}
+
+	@Test
+	public void resolveVariableGenericArrayUnknownWithFallback() throws Exception {
+		ResolvableType type = ResolvableType.forField(Fields.class.getField("variableTypeGenericArray"));
+		assertThat(type.getType().toString(), equalTo("T[]"));
+		assertThat(type.isArray(), equalTo(true));
+		assertThat(type.resolve(Object.class), equalTo((Class) Object.class));
+	}
+
+	@Test
 	public void resolveWildcardTypeUpperBounds() throws Exception {
 		ResolvableType type = ResolvableType.forField(Fields.class.getField("wildcardType"));
 		assertThat(type.getGeneric().resolve(), equalTo((Class) Number.class));
@@ -1252,6 +1276,8 @@ public class ResolvableTypeTests {
 		private List<String> privateField;
 
 		public Map<Map<String, Integer>, Map<Byte, Long>> nested;
+
+		public T[] variableTypeGenericArray;
 
 	}
 

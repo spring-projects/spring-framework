@@ -144,6 +144,24 @@ public class GenericTypeResolverTests {
 		assertThat(resolved, equalTo(new Class[] { Object.class }));
 	}
 
+	@Test
+	public void getGenericsOnArrayFromParamCannotBeResolved() throws Exception {
+		// SPR-11044
+		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(
+				WithArrayBase.class.getDeclaredMethod("array", Object[].class), 0);
+		Class<?> resolved = GenericTypeResolver.resolveParameterType(methodParameter, WithArray.class);
+		assertThat(resolved, equalTo((Class) Object[].class));
+	}
+
+	@Test
+	public void getGenericsOnArrayFromReturnCannotBeResolved() throws Exception {
+		// SPR-11044
+		Class<?> resolved = GenericTypeResolver.resolveReturnType(
+				WithArrayBase.class.getDeclaredMethod("array", Object[].class),
+				WithArray.class);
+		assertThat(resolved, equalTo((Class) Object[].class));
+	}
+
 	public interface MyInterfaceType<T> {
 	}
 
@@ -277,6 +295,16 @@ public class GenericTypeResolverTests {
 	static class TypedTopLevelClass extends TopLevelClass<Integer> {
 		class TypedNested extends Nested<Long> {
 		}
+	}
+
+	static abstract class WithArrayBase<T> {
+
+		public abstract T[] array(T... args);
+
+	}
+
+	static abstract class WithArray<T> extends WithArrayBase<T> {
+
 	}
 
 }
