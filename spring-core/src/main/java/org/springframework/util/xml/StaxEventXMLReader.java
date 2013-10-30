@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,12 +51,12 @@ import org.springframework.util.StringUtils;
  * an {@code XMLEventReader}, and calls the corresponding methods on the SAX callback interfaces.
  *
  * @author Arjen Poutsma
+ * @since 3.0
  * @see XMLEventReader
  * @see #setContentHandler(org.xml.sax.ContentHandler)
  * @see #setDTDHandler(org.xml.sax.DTDHandler)
  * @see #setEntityResolver(org.xml.sax.EntityResolver)
  * @see #setErrorHandler(org.xml.sax.ErrorHandler)
- * @since 3.0
  */
 class StaxEventXMLReader extends AbstractStaxXMLReader {
 
@@ -70,11 +70,11 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 
 	private String encoding;
 
+
 	/**
 	 * Constructs a new instance of the {@code StaxEventXmlReader} that reads from the given
 	 * {@code XMLEventReader}. The supplied event reader must be in {@code XMLStreamConstants.START_DOCUMENT} or
 	 * {@code XMLStreamConstants.START_ELEMENT} state.
-	 *
 	 * @param reader the {@code XMLEventReader} to read from
 	 * @throws IllegalStateException if the reader is not at the start of a document or element
 	 */
@@ -89,17 +89,17 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 		catch (XMLStreamException ex) {
 			throw new IllegalStateException("Could not read first element: " + ex.getMessage());
 		}
-
 		this.reader = reader;
 	}
+
 
 	@Override
 	protected void parseInternal() throws SAXException, XMLStreamException {
 		boolean documentStarted = false;
 		boolean documentEnded = false;
 		int elementDepth = 0;
-		while (reader.hasNext() && elementDepth >= 0) {
-			XMLEvent event = reader.nextEvent();
+		while (this.reader.hasNext() && elementDepth >= 0) {
+			XMLEvent event = this.reader.nextEvent();
 			if (!event.isStartDocument() && !event.isEndDocument() && !documentStarted) {
 				handleStartDocument(event);
 				documentStarted = true;
@@ -165,42 +165,34 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 				this.encoding = startDocument.getCharacterEncodingScheme();
 			}
 		}
-
 		if (getContentHandler() != null) {
 			final Location location = event.getLocation();
 			getContentHandler().setDocumentLocator(new Locator2() {
-
 				@Override
 				public int getColumnNumber() {
-					return location != null ? location.getColumnNumber() : -1;
+					return (location != null ? location.getColumnNumber() : -1);
 				}
-
 				@Override
 				public int getLineNumber() {
-					return location != null ? location.getLineNumber() : -1;
+					return (location != null ? location.getLineNumber() : -1);
 				}
-
 				@Override
 				public String getPublicId() {
-					return location != null ? location.getPublicId() : null;
+					return (location != null ? location.getPublicId() : null);
 				}
-
 				@Override
 				public String getSystemId() {
-					return location != null ? location.getSystemId() : null;
+					return (location != null ? location.getSystemId() : null);
 				}
-
 				@Override
 				public String getXMLVersion() {
 					return xmlVersion;
 				}
-
 				@Override
 				public String getEncoding() {
 					return encoding;
 				}
 			});
-
 			getContentHandler().startDocument();
 		}
 	}
@@ -317,7 +309,6 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 
 	private Attributes getAttributes(StartElement event) {
 		AttributesImpl attributes = new AttributesImpl();
-
 		for (Iterator i = event.getAttributes(); i.hasNext();) {
 			Attribute attribute = (Attribute) i.next();
 			QName qName = attribute.getName();
@@ -329,8 +320,7 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 			if (type == null) {
 				type = "CDATA";
 			}
-			attributes
-					.addAttribute(namespace, qName.getLocalPart(), toQualifiedName(qName), type, attribute.getValue());
+			attributes.addAttribute(namespace, qName.getLocalPart(), toQualifiedName(qName), type, attribute.getValue());
 		}
 		if (hasNamespacePrefixesFeature()) {
 			for (Iterator i = event.getNamespaces(); i.hasNext();) {
