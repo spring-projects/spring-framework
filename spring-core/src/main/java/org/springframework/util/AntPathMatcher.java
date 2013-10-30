@@ -279,7 +279,7 @@ public class AntPathMatcher implements PathMatcher {
 		}
 		if (matcher == null) {
 			matcher = new AntPathStringMatcher(pattern);
-			if (cachePatterns == null && this.stringMatcherCache.size() == CACHE_TURNOFF_THRESHOLD) {
+			if (cachePatterns == null && this.stringMatcherCache.size() >= CACHE_TURNOFF_THRESHOLD) {
 				// Try to adapt to the runtime situation that we're encountering:
 				// There are obviously too many different paths coming in here...
 				// So let's turn off the cache since the patterns are unlikely to be reoccurring.
