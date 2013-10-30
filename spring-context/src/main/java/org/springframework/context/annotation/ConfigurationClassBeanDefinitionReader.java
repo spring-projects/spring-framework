@@ -26,13 +26,13 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.SetFactoryBean;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
@@ -49,6 +49,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
+import org.springframework.core.type.StandardMethodMetadata;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.StringUtils;
 
@@ -132,7 +133,7 @@ class ConfigurationClassBeanDefinitionReader {
 		if (configClass.isImported()) {
 			registerBeanDefinitionForImportedConfigurationClass(configClass);
 		}
-		for (BeanMethod beanMethod : configClass.getBeanMethods()) {
+		for (BeanMethod beanMethod : configClass.getBeanMethodsToDefine()) {
 			loadBeanDefinitionsForBeanMethod(beanMethod);
 		}
 		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
@@ -204,6 +205,12 @@ class ConfigurationClassBeanDefinitionReader {
 		// Has this effectively been overridden before (e.g. via XML)?
 		if (isOverriddenByExistingDefinition(beanMethod, beanName)) {
 			return;
+		}
+
+		// Sets the factory method now if possible
+		if (beanMethod.getMetadata() instanceof StandardMethodMetadata) {
+			StandardMethodMetadata smm = (StandardMethodMetadata) beanMethod.getMetadata();
+			beanDef.setResolvedFactoryMethod(smm.getIntrospectedMethod());
 		}
 
 		AnnotationConfigUtils.processCommonDefinitionAnnotations(beanDef, metadata);
@@ -337,11 +344,13 @@ class ConfigurationClassBeanDefinitionReader {
 		public ConfigurationClassBeanDefinition(RootBeanDefinition original, ConfigurationClass configClass) {
 			super(original);
 			this.annotationMetadata = configClass.getMetadata();
+			setResolvedFactoryMethod(original.getResolvedFactoryMethod());
 		}
 
 		private ConfigurationClassBeanDefinition(ConfigurationClassBeanDefinition original) {
 			super(original);
 			this.annotationMetadata = original.annotationMetadata;
+			setResolvedFactoryMethod(original.getResolvedFactoryMethod());
 		}
 
 		@Override
@@ -357,6 +366,11 @@ class ConfigurationClassBeanDefinitionReader {
 		@Override
 		public ConfigurationClassBeanDefinition cloneBeanDefinition() {
 			return new ConfigurationClassBeanDefinition(this);
+		}
+		
+		@Override
+		public void setResolvedFactoryMethod(Method method) {
+			super.setResolvedFactoryMethod(method);
 		}
 	}
 

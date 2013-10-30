@@ -244,8 +244,17 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 			return (candidate instanceof Method ? (Method) candidate : null);
 		}
 	}
-
-
+	
+	/**
+	 * Allow subclasses to set the resolved factory method.
+	 * @param method factory method to use.
+	 */
+	protected void setResolvedFactoryMethod(Method method) {
+		synchronized (this.constructorArgumentLock) {
+			this.resolvedConstructorOrFactoryMethod = method;
+		}
+	}
+	
 	public void registerExternallyManagedConfigMember(Member configMember) {
 		this.externallyManagedConfigMembers.add(configMember);
 	}

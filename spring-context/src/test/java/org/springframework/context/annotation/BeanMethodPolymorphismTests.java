@@ -79,6 +79,34 @@ public class BeanMethodPolymorphismTests {
 		// SPR-11025
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(SubConfigWithList.class);
 		assertThat(ctx.getBean(String.class), equalTo("overloaded5"));
+
+	}
+	
+	@Test
+	public void beanMethodOverloadingNotGreedyWithInheritance() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(NotGreedySubConfig.class);
+		assertThat(ctx.getBean(String.class), equalTo("overloaded"));
+	}
+	static @Configuration class NotGreedySuperConfig {
+		@Bean Integer anInt() { return 5; }
+		@Bean String aString(Integer dependency) { return "super"; }
+	}
+	static @Configuration class NotGreedySubConfig extends NotGreedySuperConfig {
+		
+		@Bean String aString() { return "overloaded"; }
+	}
+
+	@Test
+	public void beanMethodOverloadingNotBestMathcWithInheritance() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(NotBestMatchSubConfig.class);
+		assertThat(ctx.getBean(String.class), equalTo("overloaded5"));
+	}
+	static @Configuration class NotBestMathcSuperConfig {
+		@Bean String aString(Integer dependency) { return "super"; }
+	}
+	static @Configuration class NotBestMatchSubConfig extends NotBestMathcSuperConfig {
+		@Bean Integer anInt() { return 5; }
+		@Bean String aString(Number dependency) { return "overloaded"+dependency; }
 	}
 
 	/**
