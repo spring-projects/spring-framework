@@ -438,7 +438,8 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	protected void handleMatch(T mapping, HandlerMethod handlerMethod, String lookupDestination, Message<?> message) {
 
-		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod.createWithResolvedBean());
+		handlerMethod = handlerMethod.createWithResolvedBean();
+		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
 		invocable.setMessageMethodArgumentResolvers(this.argumentResolvers);
 
 		try {

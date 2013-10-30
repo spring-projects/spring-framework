@@ -35,6 +35,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.SubscribableChannel;
+import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.config.DelegatingWebSocketMessageBrokerConfiguration;
 import org.springframework.messaging.simp.config.MessageBrokerConfigurer;
@@ -70,7 +71,7 @@ public class SimpAnnotationMethodIntegrationTests extends AbstractWebSocketInteg
 				{new JettyWebSocketTestServer(), new JettyWebSocketClient()},
 				{new TomcatWebSocketTestServer(), new StandardWebSocketClient()}
 		});
-	};
+	}
 
 
 	@Override
@@ -137,6 +138,7 @@ public class SimpAnnotationMethodIntegrationTests extends AbstractWebSocketInteg
 	}
 
 
+	@SuppressWarnings("unused")
 	@IntegrationTestController
 	static class SimpleController {
 
@@ -146,8 +148,20 @@ public class SimpAnnotationMethodIntegrationTests extends AbstractWebSocketInteg
 		public void handle() {
 			this.latch.countDown();
 		}
+
+		@MessageMapping(value="/exception")
+		public void handleWithError() {
+			throw new IllegalArgumentException("Bad input");
+		}
+
+		@MessageExceptionHandler
+		public void handleException(IllegalArgumentException ex) {
+
+		}
+
 	}
 
+	@SuppressWarnings("unused")
 	@IntegrationTestController
 	static class IncrementController {
 
@@ -164,7 +178,7 @@ public class SimpAnnotationMethodIntegrationTests extends AbstractWebSocketInteg
 
 		private final int expected;
 
-		private final List<TextMessage> actual = new CopyOnWriteArrayList<TextMessage>();
+		private final List<TextMessage> actual = new CopyOnWriteArrayList<>();
 
 		private final CountDownLatch latch;
 
