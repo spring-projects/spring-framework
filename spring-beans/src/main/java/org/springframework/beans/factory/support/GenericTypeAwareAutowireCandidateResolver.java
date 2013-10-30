@@ -87,7 +87,12 @@ public class GenericTypeAwareAutowireCandidateResolver implements AutowireCandid
 			else {
 				Method resolvedFactoryMethod = rbd.getResolvedFactoryMethod();
 				if (resolvedFactoryMethod != null) {
-					targetType = ResolvableType.forMethodReturnType(resolvedFactoryMethod);
+					if (descriptor.getDependencyType().isAssignableFrom(resolvedFactoryMethod.getReturnType())) {
+						// Only use factory method metadata if the return type is actually expressive enough
+						// for our dependency. Otherwise, the returned instance type may have matched instead
+						// in case of a singleton instance having been registered with the container already.
+						targetType = ResolvableType.forMethodReturnType(resolvedFactoryMethod);
+					}
 				}
 			}
 		}

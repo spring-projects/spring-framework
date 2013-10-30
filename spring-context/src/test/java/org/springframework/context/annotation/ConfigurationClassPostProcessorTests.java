@@ -16,8 +16,10 @@
 
 package org.springframework.context.annotation;
 
+import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
@@ -31,8 +33,20 @@ import static org.junit.Assert.*;
 
 /**
  * @author Chris Beams
+ * @author Juergen Hoeller
  */
 public class ConfigurationClassPostProcessorTests {
+
+	private DefaultListableBeanFactory beanFactory;
+
+	@Before
+	public void setUp() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		QualifierAnnotationAutowireCandidateResolver acr = new QualifierAnnotationAutowireCandidateResolver();
+		acr.setBeanFactory(bf);
+		bf.setAutowireCandidateResolver(acr);
+		this.beanFactory = bf;
+	}
 
 	/**
 	 * Enhanced {@link Configuration} classes are only necessary for respecting
@@ -45,7 +59,6 @@ public class ConfigurationClassPostProcessorTests {
 	 */
 	@Test
 	public void testEnhancementIsPresentBecauseSingletonSemanticsAreRespected() {
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(SingletonBeanConfig.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
@@ -60,7 +73,6 @@ public class ConfigurationClassPostProcessorTests {
 	 */
 	@Test
 	public void testAlreadyLoadedConfigurationClasses() {
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		beanFactory.registerBeanDefinition("unloadedConfig",
 				new RootBeanDefinition(UnloadedConfig.class.getName(), null, null));
 		beanFactory.registerBeanDefinition("loadedConfig", new RootBeanDefinition(LoadedConfig.class));
@@ -76,7 +88,6 @@ public class ConfigurationClassPostProcessorTests {
 	 */
 	@Test
 	public void testPostProcessorIntrospectsInheritedDefinitionsCorrectly() {
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(SingletonBeanConfig.class));
 		beanFactory.registerBeanDefinition("parent", new RootBeanDefinition(TestBean.class));
 		beanFactory.registerBeanDefinition("child", new ChildBeanDefinition("parent"));
@@ -89,7 +100,6 @@ public class ConfigurationClassPostProcessorTests {
 
 	@Test
 	public void testPostProcessorOverridesNonApplicationBeanDefinitions() {
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
 		rbd.setRole(RootBeanDefinition.ROLE_SUPPORT);
 		beanFactory.registerBeanDefinition("bar", rbd);
@@ -103,7 +113,6 @@ public class ConfigurationClassPostProcessorTests {
 
 	@Test
 	public void testPostProcessorDoesNotOverrideRegularBeanDefinitions() {
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
 		rbd.setResource(new DescriptiveResource("XML or something"));
 		beanFactory.registerBeanDefinition("bar", rbd);
@@ -137,32 +146,62 @@ public class ConfigurationClassPostProcessorTests {
 
 	@Test
 	public void testGenericsBasedInjection() {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
-		bpp.setBeanFactory(bf);
-		bf.addBeanPostProcessor(bpp);
+		bpp.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(bpp);
 		RootBeanDefinition bd = new RootBeanDefinition(RepositoryInjectionBean.class);
 		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
-		bf.registerBeanDefinition("annotatedBean", bd);
-		bf.registerBeanDefinition("configClass", new RootBeanDefinition(RepositoryConfiguration.class));
+		beanFactory.registerBeanDefinition("annotatedBean", bd);
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RepositoryConfiguration.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
-		pp.postProcessBeanFactory(bf);
+		pp.postProcessBeanFactory(beanFactory);
 
-		RepositoryInjectionBean bean = (RepositoryInjectionBean) bf.getBean("annotatedBean");
-		assertSame(bf.getBean("stringRepo"), bean.stringRepository);
-		assertSame(bf.getBean("integerRepo"), bean.integerRepository);
+		RepositoryInjectionBean bean = (RepositoryInjectionBean) beanFactory.getBean("annotatedBean");
+		assertSame(beanFactory.getBean("stringRepo"), bean.stringRepository);
+		assertSame(beanFactory.getBean("integerRepo"), bean.integerRepository);
+	}
+
+	@Test
+	public void testGenericsBasedInjectionWithImplTypeAtInjectionPoint() {
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(SpecificRepositoryInjectionBean.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		beanFactory.registerBeanDefinition("annotatedBean", bd);
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(SpecificRepositoryConfiguration.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+		beanFactory.preInstantiateSingletons();
+
+		SpecificRepositoryInjectionBean bean = (SpecificRepositoryInjectionBean) beanFactory.getBean("annotatedBean");
+		assertSame(beanFactory.getBean("genericRepo"), bean.genericRepository);
+	}
+
+	@Test
+	public void testGenericsBasedInjectionWithFactoryBean() {
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(RepositoryFactoryBeanInjectionBean.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		beanFactory.registerBeanDefinition("annotatedBean", bd);
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RepositoryFactoryBeanConfiguration.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+		beanFactory.preInstantiateSingletons();
+
+		RepositoryFactoryBeanInjectionBean bean = (RepositoryFactoryBeanInjectionBean) beanFactory.getBean("annotatedBean");
+		assertSame(beanFactory.getBean("&repoFactoryBean"), bean.repositoryFactoryBean);
 	}
 
 	@Test
 	public void testGenericsBasedInjectionWithRawMatch() {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
-		bf.registerBeanDefinition("configClass", new RootBeanDefinition(RawMatchingConfiguration.class));
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RawMatchingConfiguration.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
-		pp.postProcessBeanFactory(bf);
+		pp.postProcessBeanFactory(beanFactory);
 
-		assertSame(bf.getBean("repo"), bf.getBean("repoConsumer"));
+		assertSame(beanFactory.getBean("repo"), beanFactory.getBean("repoConsumer"));
 	}
 
 
@@ -215,6 +254,29 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 
+	public static class GenericRepository<T> extends Repository<T> {
+	}
+
+
+	public static class RepositoryFactoryBean<T> implements FactoryBean<T> {
+
+		@Override
+		public T getObject() {
+			throw new IllegalStateException();
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return Object.class;
+		}
+
+		@Override
+		public boolean isSingleton() {
+			return false;
+		}
+	}
+
+
 	public static class RepositoryInjectionBean {
 
 		@Autowired
@@ -236,6 +298,40 @@ public class ConfigurationClassPostProcessorTests {
 		@Bean
 		public Repository<Integer> integerRepo() {
 			return new Repository<Integer>();
+		}
+	}
+
+
+	public static class SpecificRepositoryInjectionBean {
+
+		@Autowired
+		public GenericRepository<?> genericRepository;
+	}
+
+
+	@Configuration
+	public static class SpecificRepositoryConfiguration {
+
+		@Bean
+		public Repository<Object> genericRepo() {
+			return new GenericRepository<Object>();
+		}
+	}
+
+
+	public static class RepositoryFactoryBeanInjectionBean {
+
+		@Autowired
+		public RepositoryFactoryBean<?> repositoryFactoryBean;
+	}
+
+
+	@Configuration
+	public static class RepositoryFactoryBeanConfiguration {
+
+		@Bean
+		public RepositoryFactoryBean<Object> repoFactoryBean() {
+			return new RepositoryFactoryBean<>();
 		}
 	}
 
