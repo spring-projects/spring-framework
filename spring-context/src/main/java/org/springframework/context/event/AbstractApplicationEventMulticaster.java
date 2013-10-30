@@ -136,7 +136,7 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 	protected Collection<ApplicationListener> getApplicationListeners(ApplicationEvent event) {
 		Class<? extends ApplicationEvent> eventType = event.getClass();
 		Object source = event.getSource();
-		Class sourceType = (source == null ? null : source.getClass());
+		Class<?> sourceType = (source != null ? source.getClass() : null);
 		ListenerCacheKey cacheKey = new ListenerCacheKey(eventType, sourceType);
 		ListenerRetriever retriever = this.retrieverCache.get(cacheKey);
 		if (retriever != null) {
@@ -199,11 +199,11 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 	 */
 	private static class ListenerCacheKey {
 
-		private final Class eventType;
+		private final Class<?> eventType;
 
-		private final Class sourceType;
+		private final Class<?> sourceType;
 
-		public ListenerCacheKey(Class eventType, Class sourceType) {
+		public ListenerCacheKey(Class<?> eventType, Class<?> sourceType) {
 			this.eventType = eventType;
 			this.sourceType = sourceType;
 		}
@@ -214,14 +214,13 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 				return true;
 			}
 			ListenerCacheKey otherKey = (ListenerCacheKey) other;
-			return ObjectUtils.nullSafeEquals(this.eventType, otherKey.eventType)
-					&& ObjectUtils.nullSafeEquals(this.sourceType, otherKey.sourceType);
+			return ObjectUtils.nullSafeEquals(this.eventType, otherKey.eventType) &&
+					ObjectUtils.nullSafeEquals(this.sourceType, otherKey.sourceType);
 		}
 
 		@Override
 		public int hashCode() {
-			return ObjectUtils.nullSafeHashCode(this.eventType) * 29
-					+ ObjectUtils.nullSafeHashCode(this.sourceType);
+			return ObjectUtils.nullSafeHashCode(this.eventType) * 29 + ObjectUtils.nullSafeHashCode(this.sourceType);
 		}
 	}
 

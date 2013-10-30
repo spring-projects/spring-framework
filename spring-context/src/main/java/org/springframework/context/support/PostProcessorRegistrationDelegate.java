@@ -37,6 +37,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProce
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
@@ -369,8 +370,9 @@ class PostProcessorRegistrationDelegate {
 		@Override
 		public void postProcessBeforeDestruction(Object bean, String beanName) {
 			if (bean instanceof ApplicationListener) {
-				this.applicationContext.getApplicationEventMulticaster().removeApplicationListener((ApplicationListener) bean);
-				this.applicationContext.getApplicationEventMulticaster().removeApplicationListenerBean(beanName);
+				ApplicationEventMulticaster multicaster = this.applicationContext.getApplicationEventMulticaster();
+				multicaster.removeApplicationListener((ApplicationListener) bean);
+				multicaster.removeApplicationListenerBean(beanName);
 			}
 		}
 	}
