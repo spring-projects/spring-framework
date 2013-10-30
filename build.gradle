@@ -68,8 +68,8 @@ configure(allprojects) { project ->
 	repositories {
 		maven { url "http://repo.spring.io/libs-release" }
 		maven { url "http://repo.spring.io/milestone" }  // for AspectJ 1.8.0.M1
-		maven { url "https://repository.apache.org/content/repositories/releases" }  // tomcat 8 RC3
-		maven { url "https://repository.apache.org/content/repositories/snapshots" }  // tomcat-websocket-* snapshots
+		maven { url "https://repository.apache.org/content/repositories/releases" }  // tomcat 8
+		// maven { url "https://repository.apache.org/content/repositories/snapshots" }  // tomcat 8 snapshots
 		maven { url "https://maven.java.net/content/repositories/releases" }  // javax.websocket, tyrus
 		maven { url "https://oss.sonatype.org/content/repositories/snapshots" }  // javax.cache
 	}
@@ -406,8 +406,8 @@ project("spring-messaging") {
 		testCompile("org.eclipse.jetty:jetty-webapp:9.1.0.RC0") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
 		}
-		testCompile("org.apache.tomcat.embed:tomcat-embed-core:8.0.0-RC3")
-		testCompile("org.apache.tomcat.embed:tomcat-embed-logging-juli:8.0.0-RC3")
+		testCompile("org.apache.tomcat.embed:tomcat-embed-core:8.0.0-RC5")
+		testCompile("org.apache.tomcat.embed:tomcat-embed-logging-juli:8.0.0-RC5")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 	}
 
@@ -587,7 +587,7 @@ project("spring-websocket") {
 		optional(project(":spring-webmvc"))
 		optional("javax.servlet:javax.servlet-api:3.1.0")
 		optional("javax.websocket:javax.websocket-api:1.0")
-		optional("org.apache.tomcat:tomcat-websocket:8.0.0-RC3") {
+		optional("org.apache.tomcat:tomcat-websocket:8.0.0-RC5") {
 			exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
 			exclude group: "org.apache.tomcat", module: "tomcat-servlet-api"
 		}
@@ -602,7 +602,7 @@ project("spring-websocket") {
 		optional("org.eclipse.jetty.websocket:websocket-client:9.1.0.RC0")
 		optional("com.fasterxml.jackson.core:jackson-databind:2.2.0")
 		optional("org.codehaus.jackson:jackson-mapper-asl:1.9.12")
-		testCompile("org.apache.tomcat.embed:tomcat-embed-core:8.0.0-RC3")
+		testCompile("org.apache.tomcat.embed:tomcat-embed-core:8.0.0-RC5")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("log4j:log4j:1.2.17")
 	}
