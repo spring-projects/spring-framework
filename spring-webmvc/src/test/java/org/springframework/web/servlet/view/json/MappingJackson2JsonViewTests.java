@@ -247,7 +247,7 @@ public class MappingJackson2JsonViewTests {
 	public void filterSingleKeyModel() throws Exception {
 		view.setExtractValueFromSingleKeyModel(true);
 
-		Map<String, Object> model = new HashMap<String, Object>();
+		Map<String, Object> model = new HashMap<>();
 		TestBeanSimple bean = new TestBeanSimple();
 		model.put("foo", bean);
 
@@ -261,7 +261,7 @@ public class MappingJackson2JsonViewTests {
 	public void filterTwoKeyModel() throws Exception {
 		view.setExtractValueFromSingleKeyModel(true);
 
-		Map<String, Object> model = new HashMap<String, Object>();
+		Map<String, Object> model = new HashMap<>();
 		TestBeanSimple bean1 = new TestBeanSimple();
 		TestBeanSimple bean2 = new TestBeanSimple();
 		model.put("foo1", bean1);
@@ -282,6 +282,7 @@ public class MappingJackson2JsonViewTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	public static class TestBeanSimple {
 
 		private String value = "foo";
@@ -358,6 +359,7 @@ public class MappingJackson2JsonViewTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class DelegatingSerializerFactory extends BeanSerializerFactory {
 
 		protected DelegatingSerializerFactory(SerializerFactoryConfig config) {
