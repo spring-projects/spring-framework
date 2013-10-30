@@ -22,7 +22,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
@@ -39,6 +38,8 @@ import org.springframework.util.StringValueResolver;
 
 /**
  * Formats fields annotated with the {@link DateTimeFormat} annotation using Joda-Time.
+ *
+ * <p><b>NOTE:</b> Spring's Joda-Time support requires Joda-Time 2.x, as of Spring 4.0.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
@@ -103,8 +104,19 @@ public class JodaDateTimeFormatAnnotationFormatterFactory
 	}
 
 	@Override
-	public Parser<DateTime> getParser(DateTimeFormat annotation, Class<?> fieldType) {
-		return new DateTimeParser(getFormatter(annotation, fieldType));
+	public Parser<?> getParser(DateTimeFormat annotation, Class<?> fieldType) {
+		if (LocalDate.class.equals(fieldType)) {
+			return new LocalDateParser(getFormatter(annotation, fieldType));
+		}
+		else if (LocalTime.class.equals(fieldType)) {
+			return new LocalTimeParser(getFormatter(annotation, fieldType));
+		}
+		else if (LocalDateTime.class.equals(fieldType)) {
+			return new LocalDateTimeParser(getFormatter(annotation, fieldType));
+		}
+		else {
+			return new DateTimeParser(getFormatter(annotation, fieldType));
+		}
 	}
 
 	/**

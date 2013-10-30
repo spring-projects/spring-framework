@@ -38,6 +38,8 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
 /**
  * Configures Joda-Time's formatting system for use with Spring.
  *
+ * <p><b>NOTE:</b> Spring's Joda-Time support requires Joda-Time 2.x, as of Spring 4.0.
+ *
  * @author Keith Donald
  * @author Juergen Hoeller
  * @author Phillip Webb
@@ -165,17 +167,17 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 
 		addFormatterForFields(registry,
 				new ReadablePartialPrinter(dateFormatter),
-				new DateTimeParser(dateFormatter),
+				new LocalDateParser(dateFormatter),
 				LocalDate.class);
 
 		addFormatterForFields(registry,
 				new ReadablePartialPrinter(timeFormatter),
-				new DateTimeParser(timeFormatter),
+				new LocalTimeParser(timeFormatter),
 				LocalTime.class);
 
 		addFormatterForFields(registry,
 				new ReadablePartialPrinter(dateTimeFormatter),
-				new DateTimeParser(dateTimeFormatter),
+				new LocalDateTimeParser(dateTimeFormatter),
 				LocalDateTime.class);
 
 		addFormatterForFields(registry,
