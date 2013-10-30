@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
+
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -29,6 +30,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.BeanThatBroadcasts;
 import org.springframework.context.BeanThatListens;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.tests.sample.beans.TestBean;
@@ -134,6 +136,34 @@ public class ApplicationContextEventTests {
 		assertTrue(listener1.seenEvents.contains(event2));
 		assertTrue(listener1.seenEvents.contains(event3));
 		assertTrue(listener1.seenEvents.contains(event4));
+
+		context.close();
+	}
+
+	@Test
+	public void listenersInApplicationContextWithNestedChild() {
+		StaticApplicationContext context = new StaticApplicationContext();
+		RootBeanDefinition nestedChild = new RootBeanDefinition(StaticApplicationContext.class);
+		nestedChild.getPropertyValues().add("parent", context);
+		nestedChild.setInitMethodName("refresh");
+		context.registerBeanDefinition("nestedChild", nestedChild);
+		RootBeanDefinition listener1Def = new RootBeanDefinition(MyOrderedListener1.class);
+		listener1Def.setDependsOn(new String[] {"nestedChild"});
+		context.registerBeanDefinition("listener1", listener1Def);
+		context.refresh();
+
+		MyOrderedListener1 listener1 = context.getBean("listener1", MyOrderedListener1.class);
+		MyEvent event1 = new MyEvent(context);
+		context.publishEvent(event1);
+		assertTrue(listener1.seenEvents.contains(event1));
+
+		SimpleApplicationEventMulticaster multicaster = context.getBean(
+				AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME,
+				SimpleApplicationEventMulticaster.class);
+		assertFalse(multicaster.getApplicationListeners().isEmpty());
+
+		context.close();
+		assertTrue(multicaster.getApplicationListeners().isEmpty());
 	}
 
 	@Test
@@ -157,6 +187,8 @@ public class ApplicationContextEventTests {
 		assertTrue(MyNonSingletonListener.seenEvents.contains(event3));
 		assertTrue(MyNonSingletonListener.seenEvents.contains(event4));
 		MyNonSingletonListener.seenEvents.clear();
+
+		context.close();
 	}
 
 	@Test
@@ -171,6 +203,8 @@ public class ApplicationContextEventTests {
 		BeanThatBroadcasts broadcaster = context.getBean("broadcaster", BeanThatBroadcasts.class);
 		context.publishEvent(new MyEvent(context));
 		assertEquals("The event was not received by the listener", 2, broadcaster.receivedCount);
+
+		context.close();
 	}
 
 	@Test
@@ -180,10 +214,13 @@ public class ApplicationContextEventTests {
 		listenerDef.getPropertyValues().add("friends", new RootBeanDefinition(BeanThatListens.class));
 		context.registerBeanDefinition("listener", listenerDef);
 		context.refresh();
+
 		context.publishEvent(new MyEvent(this));
 		context.publishEvent(new MyEvent(this));
 		TestBean listener = context.getBean(TestBean.class);
 		assertEquals(3, ((BeanThatListens) listener.getFriends().iterator().next()).getEventCount());
+
+		context.close();
 	}
 
 

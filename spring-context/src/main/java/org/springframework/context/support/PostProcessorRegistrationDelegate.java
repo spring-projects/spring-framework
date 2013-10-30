@@ -31,12 +31,12 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
@@ -177,7 +177,7 @@ class PostProcessorRegistrationDelegate {
 	}
 
 	public static void registerBeanPostProcessors(
-			ConfigurableListableBeanFactory beanFactory, ConfigurableApplicationContext applicationContext) {
+			ConfigurableListableBeanFactory beanFactory, AbstractApplicationContext applicationContext) {
 
 		String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanPostProcessor.class, true, false);
 
@@ -319,15 +319,15 @@ class PostProcessorRegistrationDelegate {
 	 * BeanPostProcessor that detects beans which implement the ApplicationListener interface.
 	 * This catches beans that can't reliably be detected by getBeanNamesForType.
 	 */
-	private static class ApplicationListenerDetector implements MergedBeanDefinitionPostProcessor {
+	private static class ApplicationListenerDetector implements MergedBeanDefinitionPostProcessor, DestructionAwareBeanPostProcessor {
 
 		private static final Log logger = LogFactory.getLog(ApplicationListenerDetector.class);
 
-		private final ConfigurableApplicationContext applicationContext;
+		private final AbstractApplicationContext applicationContext;
 
 		private final Map<String, Boolean> singletonNames = new ConcurrentHashMap<String, Boolean>(64);
 
-		public ApplicationListenerDetector(ConfigurableApplicationContext applicationContext) {
+		public ApplicationListenerDetector(AbstractApplicationContext applicationContext) {
 			this.applicationContext = applicationContext;
 		}
 
@@ -364,6 +364,14 @@ class PostProcessorRegistrationDelegate {
 				}
 			}
 			return bean;
+		}
+
+		@Override
+		public void postProcessBeforeDestruction(Object bean, String beanName) {
+			if (bean instanceof ApplicationListener) {
+				this.applicationContext.getApplicationEventMulticaster().removeApplicationListener((ApplicationListener) bean);
+				this.applicationContext.getApplicationEventMulticaster().removeApplicationListenerBean(beanName);
+			}
 		}
 	}
 
