@@ -1321,6 +1321,40 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	public void testGenericsBasedFactoryBeanInjectionWithBeanDefinition() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(RepositoryFactoryBeanInjectionBean.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		bf.registerBeanDefinition("repoFactoryBean", new RootBeanDefinition(RepositoryFactoryBean.class));
+
+		RepositoryFactoryBeanInjectionBean bean = (RepositoryFactoryBeanInjectionBean) bf.getBean("annotatedBean");
+		RepositoryFactoryBean repoFactoryBean = bf.getBean("&repoFactoryBean", RepositoryFactoryBean.class);
+		assertSame(repoFactoryBean, bean.repositoryFactoryBean);
+	}
+
+	@Test
+	public void testGenericsBasedFactoryBeanInjectionWithSingletonBean() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(RepositoryFactoryBeanInjectionBean.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		bf.registerSingleton("repoFactoryBean", new RepositoryFactoryBean<>());
+
+		RepositoryFactoryBeanInjectionBean bean = (RepositoryFactoryBeanInjectionBean) bf.getBean("annotatedBean");
+		RepositoryFactoryBean repoFactoryBean = bf.getBean("&repoFactoryBean", RepositoryFactoryBean.class);
+		assertSame(repoFactoryBean, bean.repositoryFactoryBean);
+	}
+
+	@Test
 	public void testGenericsBasedFieldInjectionWithSimpleMatchAndMock() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
@@ -2180,6 +2214,25 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
+	public static class RepositoryFactoryBean<T> implements FactoryBean<T> {
+
+		@Override
+		public T getObject() {
+			throw new IllegalStateException();
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return Object.class;
+		}
+
+		@Override
+		public boolean isSingleton() {
+			return false;
+		}
+	}
+
+
 	public static class RepositoryFieldInjectionBean {
 
 		@Autowired
@@ -2294,6 +2347,13 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		@Autowired
 		public Map<String, Repository<String>> stringRepositoryMap;
+	}
+
+
+	public static class RepositoryFactoryBeanInjectionBean {
+
+		@Autowired
+		public RepositoryFactoryBean<?> repositoryFactoryBean;
 	}
 
 

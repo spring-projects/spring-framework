@@ -548,15 +548,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	public boolean isAutowireCandidate(String beanName, DependencyDescriptor descriptor)
 			throws NoSuchBeanDefinitionException {
 
-		// Consider FactoryBeans as autowiring candidates.
-		boolean isFactoryBean = (descriptor != null && descriptor.getDependencyType() != null &&
-				FactoryBean.class.isAssignableFrom(descriptor.getDependencyType()));
-		if (isFactoryBean) {
-			beanName = BeanFactoryUtils.transformedBeanName(beanName);
-		}
-
-		if (containsBeanDefinition(beanName)) {
-			return isAutowireCandidate(beanName, getMergedLocalBeanDefinition(beanName), descriptor);
+		String beanDefinitionName = BeanFactoryUtils.transformedBeanName(beanName);
+		if (containsBeanDefinition(beanDefinitionName)) {
+			return isAutowireCandidate(beanName, getMergedLocalBeanDefinition(beanDefinitionName), descriptor);
 		}
 		else if (containsSingleton(beanName)) {
 			return isAutowireCandidate(beanName, new RootBeanDefinition(getType(beanName)), descriptor);
@@ -579,7 +573,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * @return whether the bean should be considered as autowire candidate
 	 */
 	protected boolean isAutowireCandidate(String beanName, RootBeanDefinition mbd, DependencyDescriptor descriptor) {
-		resolveBeanClass(mbd, beanName);
+		String beanDefinitionName = BeanFactoryUtils.transformedBeanName(beanName);
+		resolveBeanClass(mbd, beanDefinitionName);
 		if (mbd.isFactoryMethodUnique) {
 			boolean resolve;
 			synchronized (mbd.constructorArgumentLock) {
@@ -590,7 +585,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 		return getAutowireCandidateResolver().isAutowireCandidate(
-				new BeanDefinitionHolder(mbd, beanName, getAliases(beanName)), descriptor);
+				new BeanDefinitionHolder(mbd, beanName, getAliases(beanDefinitionName)), descriptor);
 	}
 
 	@Override
