@@ -16,14 +16,10 @@
 
 package org.springframework.web.servlet.mvc.method;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.Set;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
@@ -94,16 +90,28 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	protected void handleMatch(RequestMappingInfo info, String lookupPath, HttpServletRequest request) {
 		super.handleMatch(info, lookupPath, request);
 
-		Set<String> patterns = info.getPatternsCondition().getPatterns();
-		String bestPattern = patterns.isEmpty() ? lookupPath : patterns.iterator().next();
-		request.setAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE, bestPattern);
+		String bestPattern;
+		Map<String, String> uriVariables;
+		Map<String, String> decodedUriVariables;
 
-		Map<String, String> uriVariables = getPathMatcher().extractUriTemplateVariables(bestPattern, lookupPath);
-		Map<String, String> decodedUriVariables = getUrlPathHelper().decodePathVariables(request, uriVariables);
+		Set<String> patterns = info.getPatternsCondition().getPatterns();
+		if (patterns.isEmpty()) {
+			bestPattern = lookupPath;
+			uriVariables = Collections.emptyMap();
+			decodedUriVariables = Collections.emptyMap();
+		}
+		else {
+			bestPattern = patterns.iterator().next();
+			uriVariables = getPathMatcher().extractUriTemplateVariables(bestPattern, lookupPath);
+			decodedUriVariables = getUrlPathHelper().decodePathVariables(request, uriVariables);
+		}
+
+		request.setAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE, bestPattern);
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, decodedUriVariables);
 
 		if (isMatrixVariableContentAvailable()) {
-			request.setAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, extractMatrixVariables(request, uriVariables));
+			Map<String, MultiValueMap<String, String>> matrixVars = extractMatrixVariables(request, uriVariables);
+			request.setAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, matrixVars);
 		}
 
 		if (!info.getProducesCondition().getProducibleMediaTypes().isEmpty()) {
