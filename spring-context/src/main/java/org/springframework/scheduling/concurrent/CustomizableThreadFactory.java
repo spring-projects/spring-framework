@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import java.util.concurrent.ThreadFactory;
 import org.springframework.util.CustomizableThreadCreator;
 
 /**
- * Implementation of the JDK 1.5 {@link java.util.concurrent.ThreadFactory}
- * interface, allowing for customizing the created threads (name, priority, etc).
+ * Implementation of the {@link java.util.concurrent.ThreadFactory} interface,
+ * allowing for customizing the created threads (name, priority, etc).
  *
  * <p>See the base class {@link org.springframework.util.CustomizableThreadCreator}
  * for details on the available configuration options.

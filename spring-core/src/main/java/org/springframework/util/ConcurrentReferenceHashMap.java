@@ -48,7 +48,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * references at any time, so it may appear that an unknown thread is silently removing
  * entries.
  *
- * <p>If not explicitly specified this implementation will use
+ * <p>If not explicitly specified, this implementation will use
  * {@linkplain SoftReference soft entry references}.
  *
  * @param <K> The key type
@@ -424,7 +424,6 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 			this.initialSize = 1 << calculateShift(initialCapacity, MAXIMUM_SEGMENT_SIZE);
 			setReferences(createReferenceArray(this.initialSize));
 		}
-
 
 		public Reference<K, V> getReference(Object key, int hash, Restructure restructure) {
 			if (restructure == Restructure.WHEN_NECESSARY) {
@@ -895,6 +894,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	 * The types of restructuring that can be performed.
 	 */
 	protected static enum Restructure {
+
 		WHEN_NECESSARY, NEVER
 	}
 

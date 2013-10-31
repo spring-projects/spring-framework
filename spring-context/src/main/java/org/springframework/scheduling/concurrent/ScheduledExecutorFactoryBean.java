@@ -31,7 +31,7 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that sets up
- * a JDK 1.5 {@link java.util.concurrent.ScheduledExecutorService}
+ * a {@link java.util.concurrent.ScheduledExecutorService}
  * (by default: a {@link java.util.concurrent.ScheduledThreadPoolExecutor})
  * and exposes it for bean references.
  *

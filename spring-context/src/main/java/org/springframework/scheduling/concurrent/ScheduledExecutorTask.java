@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ import java.util.concurrent.TimeUnit;
  * {@link Runnable} and a delay plus period. The period needs to be specified;
  * there is no point in a default for it.
  *
- * <p>The JDK 1.5 {@link java.util.concurrent.ScheduledExecutorService} does
- * not offer more sophisticated scheduling options such as cron expressions.
- * Consider using Quartz for such advanced needs.
+ * <p>The {@link java.util.concurrent.ScheduledExecutorService} does not offer
+ * more sophisticated scheduling options such as cron expressions.
+ * Consider using {@link ThreadPoolTaskScheduler} for such needs.
  *
  * <p>Note that the {@link java.util.concurrent.ScheduledExecutorService} mechanism
  * uses a {@link Runnable} instance that is shared between repeated executions,
