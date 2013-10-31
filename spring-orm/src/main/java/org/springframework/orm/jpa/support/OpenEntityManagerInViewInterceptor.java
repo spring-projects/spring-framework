@@ -93,8 +93,9 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 				EntityManagerHolder emHolder = new EntityManagerHolder(em);
 				TransactionSynchronizationManager.bindResource(getEntityManagerFactory(), emHolder);
 
-				asyncManager.registerCallableInterceptor(participateAttributeName,
-						new EntityManagerBindingCallableInterceptor(emHolder));
+				AsyncRequestInterceptor interceptor = new AsyncRequestInterceptor(getEntityManagerFactory(), emHolder);
+				asyncManager.registerCallableInterceptor(participateAttributeName, interceptor);
+				asyncManager.registerDeferredResultInterceptor(participateAttributeName, interceptor);
 			}
 			catch (PersistenceException ex) {
 				throw new DataAccessResourceFailureException("Could not create JPA EntityManager", ex);
@@ -154,36 +155,8 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 		if (asyncManager.getCallableInterceptor(key) == null) {
 			return false;
 		}
-		((EntityManagerBindingCallableInterceptor) asyncManager.getCallableInterceptor(key)).initializeThread();
+		((AsyncRequestInterceptor) asyncManager.getCallableInterceptor(key)).bindSession();
 		return true;
-	}
-
-
-	/**
-	 * Bind and unbind the Hibernate {@code Session} to the current thread.
-	 */
-	private class EntityManagerBindingCallableInterceptor extends CallableProcessingInterceptorAdapter {
-
-		private final EntityManagerHolder emHolder;
-
-
-		public EntityManagerBindingCallableInterceptor(EntityManagerHolder emHolder) {
-			this.emHolder = emHolder;
-		}
-
-		@Override
-		public <T> void preProcess(NativeWebRequest request, Callable<T> task) {
-			initializeThread();
-		}
-
-		@Override
-		public <T> void postProcess(NativeWebRequest request, Callable<T> task, Object concurrentResult) {
-			TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());
-		}
-
-		private void initializeThread() {
-			TransactionSynchronizationManager.bindResource(getEntityManagerFactory(), this.emHolder);
-		}
 	}
 
 }

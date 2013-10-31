@@ -18,13 +18,11 @@ package org.springframework.orm.hibernate3.support;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.transaction.TransactionManager;
 
 import org.hibernate.FlushMode;
@@ -35,11 +33,7 @@ import org.hibernate.engine.SessionFactoryImplementor;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.mock.web.test.MockFilterConfig;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockServletContext;
-import org.springframework.mock.web.test.PassThroughFilterChain;
+import org.springframework.mock.web.test.*;
 import org.springframework.orm.hibernate3.HibernateAccessor;
 import org.springframework.orm.hibernate3.HibernateTransactionManager;
 import org.springframework.orm.hibernate3.SessionFactoryUtils;
@@ -50,9 +44,11 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.async.AsyncWebRequest;
+import org.springframework.web.context.request.async.StandardServletAsyncWebRequest;
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.web.util.NestedServletException;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
@@ -79,6 +75,7 @@ public class OpenSessionInViewTests {
 	public void setup() {
 		this.sc = new MockServletContext();
 		this.request = new MockHttpServletRequest(sc);
+		this.request.setAsyncSupported(true);
 		this.response = new MockHttpServletResponse();
 		this.webRequest = new ServletWebRequest(this.request);
 	}
@@ -142,12 +139,10 @@ public class OpenSessionInViewTests {
 		interceptor.preHandle(this.webRequest);
 		assertTrue(TransactionSynchronizationManager.hasResource(sf));
 
-		AsyncWebRequest asyncWebRequest = mock(AsyncWebRequest.class);
-
+		AsyncWebRequest asyncWebRequest = new StandardServletAsyncWebRequest(this.request, this.response);
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.request);
 		asyncManager.setTaskExecutor(new SyncTaskExecutor());
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
-
 		asyncManager.startCallableProcessing(new Callable<String>() {
 			@Override
 			public String call() throws Exception {
@@ -166,13 +161,58 @@ public class OpenSessionInViewTests {
 		interceptor.postHandle(this.webRequest, null);
 		assertTrue(TransactionSynchronizationManager.hasResource(sf));
 
+		verify(session, never()).close();
+
 		interceptor.afterCompletion(this.webRequest, null);
 		assertFalse(TransactionSynchronizationManager.hasResource(sf));
 
 		verify(session).setFlushMode(FlushMode.MANUAL);
-		verify(asyncWebRequest, times(2)).addCompletionHandler(any(Runnable.class));
-		verify(asyncWebRequest).addTimeoutHandler(any(Runnable.class));
-		verify(asyncWebRequest).startAsync();
+		verify(session).close();
+	}
+
+	@Test
+	public void testOpenSessionInViewInterceptorAsyncTimeoutScenario() throws Exception {
+
+		// Initial request thread
+
+		final SessionFactory sf = mock(SessionFactory.class);
+		Session session = mock(Session.class);
+
+		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
+		interceptor.setSessionFactory(sf);
+
+		given(sf.openSession()).willReturn(session);
+		given(session.getSessionFactory()).willReturn(sf);
+
+		interceptor.preHandle(this.webRequest);
+		assertTrue(TransactionSynchronizationManager.hasResource(sf));
+
+		AsyncWebRequest asyncWebRequest = new StandardServletAsyncWebRequest(this.request, this.response);
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.request);
+		asyncManager.setTaskExecutor(new SyncTaskExecutor());
+		asyncManager.setAsyncWebRequest(asyncWebRequest);
+		asyncManager.startCallableProcessing(new Callable<String>() {
+			@Override
+			public String call() throws Exception {
+				return "anything";
+			}
+		});
+
+		interceptor.afterConcurrentHandlingStarted(this.webRequest);
+		assertFalse(TransactionSynchronizationManager.hasResource(sf));
+		verify(session, never()).close();
+
+		// Async request timeout
+
+		MockAsyncContext asyncContext = (MockAsyncContext) this.request.getAsyncContext();
+		for (AsyncListener listener : asyncContext.getListeners()) {
+			listener.onTimeout(new AsyncEvent(asyncContext));
+		}
+		for (AsyncListener listener : asyncContext.getListeners()) {
+			listener.onComplete(new AsyncEvent(asyncContext));
+		}
+
+		verify(session).close();
 	}
 
 	@Test
@@ -376,9 +416,7 @@ public class OpenSessionInViewTests {
 			}
 		};
 
-		AsyncWebRequest asyncWebRequest = mock(AsyncWebRequest.class);
-		given(asyncWebRequest.isAsyncStarted()).willReturn(true);
-
+		AsyncWebRequest asyncWebRequest = new StandardServletAsyncWebRequest(this.request, this.response);
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.request);
 		asyncManager.setTaskExecutor(new SyncTaskExecutor());
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
@@ -393,19 +431,89 @@ public class OpenSessionInViewTests {
 		filter.doFilter(this.request, this.response, filterChain);
 		assertFalse(TransactionSynchronizationManager.hasResource(sf));
 		assertEquals(1, count.get());
-
+		verify(session, never()).close();
 
 		// Async dispatch after concurrent handling produces result ...
 
+		this.request.setAsyncStarted(false);
 		assertFalse(TransactionSynchronizationManager.hasResource(sf));
 		filter.doFilter(this.request, this.response, filterChain);
 		assertFalse(TransactionSynchronizationManager.hasResource(sf));
 		assertEquals(2, count.get());
 
 		verify(session).setFlushMode(FlushMode.MANUAL);
-		verify(asyncWebRequest, times(2)).addCompletionHandler(any(Runnable.class));
-		verify(asyncWebRequest).addTimeoutHandler(any(Runnable.class));
-		verify(asyncWebRequest).startAsync();
+		verify(session).close();
+
+		wac.close();
+	}
+
+	@Test
+	public void testOpenSessionInViewFilterAsyncTimeoutScenario() throws Exception {
+
+		final SessionFactory sf = mock(SessionFactory.class);
+		Session session = mock(Session.class);
+
+		// Initial request during which concurrent handling starts..
+
+		given(sf.openSession()).willReturn(session);
+		given(session.getSessionFactory()).willReturn(sf);
+
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.setServletContext(sc);
+		wac.getDefaultListableBeanFactory().registerSingleton("sessionFactory", sf);
+		wac.refresh();
+		sc.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
+
+		MockFilterConfig filterConfig = new MockFilterConfig(wac.getServletContext(), "filter");
+		final OpenSessionInViewFilter filter = new OpenSessionInViewFilter();
+		filter.init(filterConfig);
+
+		final AtomicInteger count = new AtomicInteger(0);
+		final AsyncWebRequest asyncWebRequest = new StandardServletAsyncWebRequest(this.request, this.response);
+		final MockHttpServletRequest request = this.request;
+
+		final FilterChain filterChain = new FilterChain() {
+			@Override
+			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
+					throws NestedServletException {
+
+				assertTrue(TransactionSynchronizationManager.hasResource(sf));
+				count.incrementAndGet();
+
+				WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+				asyncManager.setTaskExecutor(new SyncTaskExecutor());
+				asyncManager.setAsyncWebRequest(asyncWebRequest);
+				try {
+					asyncManager.startCallableProcessing(new Callable<String>() {
+						@Override
+						public String call() throws Exception {
+							return "anything";
+						}
+					});
+				}
+				catch (Exception e) {
+					throw new NestedServletException("", e);
+				}
+			}
+		};
+
+		assertFalse(TransactionSynchronizationManager.hasResource(sf));
+		filter.doFilter(this.request, this.response, filterChain);
+		assertFalse(TransactionSynchronizationManager.hasResource(sf));
+		assertEquals(1, count.get());
+		verify(session, never()).close();
+
+		// Async request timeout ...
+
+		MockAsyncContext asyncContext = (MockAsyncContext) this.request.getAsyncContext();
+		for (AsyncListener listener : asyncContext.getListeners()) {
+			listener.onTimeout(new AsyncEvent(asyncContext));
+		}
+		for (AsyncListener listener : asyncContext.getListeners()) {
+			listener.onComplete(new AsyncEvent(asyncContext));
+		}
+
+		verify(session).close();
 
 		wac.close();
 	}
