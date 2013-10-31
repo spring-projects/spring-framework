@@ -567,7 +567,7 @@ public final class ResolvableType implements Serializable {
 			this.resolved = resolveClass();
 			this.isResolved = true;
 		}
-		return (this.resolved == null ? fallback : this.resolved);
+		return (this.resolved != null ? this.resolved : fallback);
 	}
 
 	private Class<?> resolveClass() {
@@ -576,7 +576,7 @@ public final class ResolvableType implements Serializable {
 		}
 		if (this.type instanceof GenericArrayType) {
 			Class<?> resolvedComponent = getComponentType().resolve();
-			return (resolvedComponent == null ? null : Array.newInstance(resolvedComponent, 0).getClass());
+			return (resolvedComponent != null ? Array.newInstance(resolvedComponent, 0).getClass() : null);
 		}
 		return resolveType().resolve();
 	}

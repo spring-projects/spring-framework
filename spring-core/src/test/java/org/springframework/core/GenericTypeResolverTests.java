@@ -138,10 +138,17 @@ public class GenericTypeResolverTests {
 	}
 
 	@Test
-	public void getGenericsCannotBeResovled() throws Exception {
+	public void getGenericsCannotBeResolved() throws Exception {
 		// SPR-11030
-		Class[] resolved = GenericTypeResolver.resolveTypeArguments(List.class, Iterable.class);
-		assertThat(resolved, equalTo(new Class[] { Object.class }));
+		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(List.class, Iterable.class);
+		assertNull(resolved);
+	}
+
+	@Test
+	public void getRawMapTypeCannotBeResolved() throws Exception {
+		// SPR-11052
+		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(Map.class, Map.class);
+		assertNull(resolved);
 	}
 
 	@Test
@@ -300,11 +307,9 @@ public class GenericTypeResolverTests {
 	static abstract class WithArrayBase<T> {
 
 		public abstract T[] array(T... args);
-
 	}
 
 	static abstract class WithArray<T> extends WithArrayBase<T> {
-
 	}
 
 }

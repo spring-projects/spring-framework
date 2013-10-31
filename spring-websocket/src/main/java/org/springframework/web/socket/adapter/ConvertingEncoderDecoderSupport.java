@@ -17,7 +17,6 @@
 package org.springframework.web.socket.adapter;
 
 import java.nio.ByteBuffer;
-
 import javax.websocket.DecodeException;
 import javax.websocket.Decoder;
 import javax.websocket.EncodeException;
@@ -65,10 +64,8 @@ import org.springframework.web.context.ContextLoader;
  *
  * @author Phillip Webb
  * @since 4.0
- *
- * @param <T> The type being converted to (for Encoder) or from (for Decoder)
- * @param <M> The WebSocket message type ({@link String} or {@link ByteBuffer})
- *
+ * @param <T> the type being converted to (for Encoder) or from (for Decoder)
+ * @param <M> the WebSocket message type ({@link String} or {@link ByteBuffer})
  * @see ConvertingEncoderDecoderSupport.BinaryEncoder
  * @see ConvertingEncoderDecoderSupport.BinaryDecoder
  * @see ConvertingEncoderDecoderSupport.TextEncoder
@@ -107,15 +104,13 @@ public abstract class ConvertingEncoderDecoderSupport<T, M> {
 	 */
 	protected ConversionService getConversionService() {
 		ApplicationContext applicationContext = getApplicationContext();
-		Assert.state(applicationContext != null,
-				"Unable to locate the Spring ApplicationContext");
+		Assert.state(applicationContext != null, "Unable to locate the Spring ApplicationContext");
 		try {
 			return applicationContext.getBean(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class);
 		}
 		catch (BeansException ex) {
-			throw new IllegalStateException(
-					"Unable to find ConversionService, please configure a '"
-							+ CONVERSION_SERVICE_BEAN_NAME + "' or override getConversionService()", ex);
+			throw new IllegalStateException("Unable to find ConversionService: please configure a '" +
+					CONVERSION_SERVICE_BEAN_NAME + "' or override the getConversionService() method", ex);
 		}
 	}
 
@@ -148,8 +143,12 @@ public abstract class ConvertingEncoderDecoderSupport<T, M> {
 	}
 
 	private Class<?>[] resolveTypeArguments() {
-		return GenericTypeResolver.resolveTypeArguments(getClass(),
-				ConvertingEncoderDecoderSupport.class);
+		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(getClass(), ConvertingEncoderDecoderSupport.class);
+		if (resolved == null) {
+			throw new IllegalStateException("ConvertingEncoderDecoderSupport's generic types T and M " +
+					"need to be substituted in subclass: " + getClass());
+		}
+		return resolved;
 	}
 
 	/**
@@ -185,12 +184,12 @@ public abstract class ConvertingEncoderDecoderSupport<T, M> {
 		}
 		catch (ConversionException ex) {
 			if (message instanceof String) {
-				throw new DecodeException((String) message, "Unable to decode " +
-						"websocket message using ConversionService", ex);
+				throw new DecodeException((String) message,
+						"Unable to decode websocket message using ConversionService", ex);
 			}
 			if (message instanceof ByteBuffer) {
-				throw new DecodeException((ByteBuffer) message, "Unable to decode " +
-						"websocket message using ConversionService", ex);
+				throw new DecodeException((ByteBuffer) message,
+						"Unable to decode websocket message using ConversionService", ex);
 			}
 			throw ex;
 		}
@@ -198,50 +197,43 @@ public abstract class ConvertingEncoderDecoderSupport<T, M> {
 
 
 	/**
-	 * A Binary {@link javax.websocket.Encoder.Binary javax.websocket.Encoder} that
-	 * delegates to Spring's conversion service. See
-	 * {@link ConvertingEncoderDecoderSupport} for details.
-	 *
-	 * @param <T> The type that this Encoder can convert to.
+	 * A binary {@link javax.websocket.Encoder.Binary javax.websocket.Encoder} that delegates
+	 * to Spring's conversion service. See {@link ConvertingEncoderDecoderSupport} for details.
+	 * @param <T> the type that this Encoder can convert to
 	 */
-	public static abstract class BinaryEncoder<T> extends
-			ConvertingEncoderDecoderSupport<T, ByteBuffer> implements Encoder.Binary<T> {
+	public static abstract class BinaryEncoder<T> extends ConvertingEncoderDecoderSupport<T, ByteBuffer>
+			implements Encoder.Binary<T> {
 	}
 
 
 	/**
-	 * A Binary {@link javax.websocket.Encoder.Binary javax.websocket.Encoder} that delegates
-	 * to Spring's conversion service. See {@link ConvertingEncoderDecoderSupport} for
-	 * details.
-	 *
-	 * @param <T> The type that this Decoder can convert from.
+	 * A binary {@link javax.websocket.Encoder.Binary javax.websocket.Encoder} that delegates
+	 * to Spring's conversion service. See {@link ConvertingEncoderDecoderSupport} for details.
+	 * @param <T> the type that this Decoder can convert from
 	 */
-	public static abstract class BinaryDecoder<T> extends
-			ConvertingEncoderDecoderSupport<T, ByteBuffer> implements Decoder.Binary<T> {
+	public static abstract class BinaryDecoder<T> extends ConvertingEncoderDecoderSupport<T, ByteBuffer>
+			implements Decoder.Binary<T> {
 	}
 
 
 	/**
-	 * A Text {@link javax.websocket.Encoder.Text javax.websocket.Encoder} that delegates
+	 * A text {@link javax.websocket.Encoder.Text javax.websocket.Encoder} that delegates
 	 * to Spring's conversion service. See {@link ConvertingEncoderDecoderSupport} for
 	 * details.
-	 *
-	 * @param <T> The type that this Encoder can convert to.
+	 * @param <T> the type that this Encoder can convert to
 	 */
-	public static abstract class TextEncoder<T> extends
-			ConvertingEncoderDecoderSupport<T, String> implements Encoder.Text<T> {
+	public static abstract class TextEncoder<T> extends ConvertingEncoderDecoderSupport<T, String>
+			implements Encoder.Text<T> {
 	}
 
 
 	/**
 	 * A Text {@link javax.websocket.Encoder.Text javax.websocket.Encoder} that delegates
-	 * to Spring's conversion service. See {@link ConvertingEncoderDecoderSupport} for
-	 * details.
-	 *
-	 * @param <T> The type that this Decoder can convert from.
+	 * to Spring's conversion service. See {@link ConvertingEncoderDecoderSupport} for details.
+	 * @param <T> the type that this Decoder can convert from
 	 */
-	public static abstract class TextDecoder<T> extends
-			ConvertingEncoderDecoderSupport<T, String> implements Decoder.Text<T> {
+	public static abstract class TextDecoder<T> extends ConvertingEncoderDecoderSupport<T, String>
+			implements Decoder.Text<T> {
 	}
 
 }

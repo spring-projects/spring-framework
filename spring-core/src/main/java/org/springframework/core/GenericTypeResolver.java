@@ -240,12 +240,12 @@ public abstract class GenericTypeResolver {
 	 * @return the resolved type of each argument, with the array size matching the
 	 * number of actual type arguments, or {@code null} if not resolvable
 	 */
-	public static Class[] resolveTypeArguments(Class<?> clazz, Class<?> genericIfc) {
+	public static Class<?>[] resolveTypeArguments(Class<?> clazz, Class<?> genericIfc) {
 		ResolvableType type = ResolvableType.forClass(clazz).as(genericIfc);
-		if (!type.hasGenerics()) {
+		if (!type.hasGenerics() || type.hasUnresolvableGenerics()) {
 			return null;
 		}
-		return type.resolveGenerics(Object.class);
+		return type.resolveGenerics();
 	}
 
 	/**
