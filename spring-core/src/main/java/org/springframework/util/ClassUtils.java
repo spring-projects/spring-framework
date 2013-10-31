@@ -778,8 +778,12 @@ public abstract class ClassUtils {
 	 * @return {@code true} if the method can be considered as user-declared; [@code false} otherwise
 	 */
 	public static boolean isUserLevelMethod(Method method) {
-		return (method.isBridge() ||
-				(!method.isSynthetic() && !method.getDeclaringClass().getName().equals("groovy.lang.GroovyObject")));
+		Assert.notNull(method, "Method must not be null");
+		return (method.isBridge() || (!method.isSynthetic() && !isGroovyObjectMethod(method)));
+	}
+
+	private static boolean isGroovyObjectMethod(Method method) {
+		return method.getDeclaringClass().getName().equals("groovy.lang.GroovyObject");
 	}
 
 	/**

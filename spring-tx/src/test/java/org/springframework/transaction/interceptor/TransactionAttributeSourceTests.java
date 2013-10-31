@@ -54,6 +54,16 @@ public final class TransactionAttributeSourceTests {
 		assertTrue(TransactionDefinition.PROPAGATION_SUPPORTS == ta.getPropagationBehavior());
 	}
 
+	@Test
+	public void testMatchAlwaysTransactionAttributeSourceWithNulls() throws Exception {
+		MatchAlwaysTransactionAttributeSource tas = new MatchAlwaysTransactionAttributeSource();
+		TransactionDefinition definition = tas.getTransactionAttribute(null, null);
+		assertEquals(TransactionDefinition.PROPAGATION_REQUIRED, definition.getPropagationBehavior());
+		assertEquals(TransactionDefinition.ISOLATION_DEFAULT, definition.getIsolationLevel());
+		assertEquals(TransactionDefinition.TIMEOUT_DEFAULT, definition.getTimeout());
+		assertFalse(definition.isReadOnly());
+	}
+
 	@SuppressWarnings("unchecked")
 	@Ignore // no longer works now that setMethodMap has been parameterized
 	@Test

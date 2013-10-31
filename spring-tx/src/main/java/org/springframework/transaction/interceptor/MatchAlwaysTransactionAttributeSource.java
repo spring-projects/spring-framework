@@ -53,7 +53,7 @@ public class MatchAlwaysTransactionAttributeSource implements TransactionAttribu
 
 	@Override
 	public TransactionAttribute getTransactionAttribute(Method method, Class<?> targetClass) {
-		return (ClassUtils.isUserLevelMethod(method) ? this.transactionAttribute : null);
+		return (method == null || ClassUtils.isUserLevelMethod(method) ? this.transactionAttribute : null);
 	}
 
 
