@@ -52,12 +52,13 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @since 3.1
  */
-public class HttpComponentsClientHttpRequestFactory
-		implements ClientHttpRequestFactory, DisposableBean {
+public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequestFactory, DisposableBean {
+
+	private CloseableHttpClient httpClient;
 
 	private int connectTimeout;
+
     private int socketTimeout;
-    private CloseableHttpClient httpClient;
 
 	private boolean bufferRequestBody = true;
 
@@ -79,6 +80,7 @@ public class HttpComponentsClientHttpRequestFactory
 		Assert.notNull(httpClient, "'httpClient' must not be null");
         this.httpClient = httpClient;
 	}
+
 
     /**
      * Set the {@code HttpClient} used for
@@ -118,7 +120,6 @@ public class HttpComponentsClientHttpRequestFactory
 
 	/**
 	 * Indicates whether this request factory should buffer the request body internally.
-	 *
 	 * <p>Default is {@code true}. When sending large amounts of data via POST or PUT, it is
 	 * recommended to change this property to {@code false}, so as not to run out of memory.
 	 */
@@ -126,20 +127,11 @@ public class HttpComponentsClientHttpRequestFactory
 		this.bufferRequestBody = bufferRequestBody;
 	}
 
-	/**
-	 * Indicates whether this request factory should buffer the request body internally.
-	 */
-	public boolean isBufferRequestBody() {
-		return bufferRequestBody;
-	}
-
-
 
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 		CloseableHttpClient client = getHttpClient();
-		Assert.state(client != null,
-				"Synchronous execution requires an HttpClient to be set");
+		Assert.state(client != null, "Synchronous execution requires an HttpClient to be set");
 		HttpUriRequest httpRequest = createHttpUriRequest(httpMethod, uri);
 		postProcessHttpRequest(httpRequest);
         HttpContext context = createHttpContext(httpMethod, uri);
@@ -159,13 +151,14 @@ public class HttpComponentsClientHttpRequestFactory
                             .setConnectTimeout(this.connectTimeout)
                             .setSocketTimeout(this.socketTimeout)
                             .build();
-                } else {
+                }
+				else {
                     config = RequestConfig.DEFAULT;
                 }
             }
             context.setAttribute(HttpClientContext.REQUEST_CONFIG, config);
         }
-		if (bufferRequestBody) {
+		if (this.bufferRequestBody) {
 			return new HttpComponentsClientHttpRequest(client, httpRequest, context);
 		}
 		else {
@@ -229,7 +222,7 @@ public class HttpComponentsClientHttpRequestFactory
 	 */
 	@Override
 	public void destroy() throws Exception {
-        httpClient.close();
+        this.httpClient.close();
     }
 
 }
