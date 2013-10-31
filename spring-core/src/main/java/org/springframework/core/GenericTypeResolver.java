@@ -231,7 +231,7 @@ public abstract class GenericTypeResolver {
 	 * @return the resolved type of the argument, or {@code null} if not resolvable
 	 */
 	public static Class<?> resolveTypeArgument(Class<?> clazz, Class<?> genericIfc) {
-		Class[] typeArgs = resolveTypeArguments(clazz, genericIfc);
+		Class<?>[] typeArgs = resolveTypeArguments(clazz, genericIfc);
 		if (typeArgs == null) {
 			return null;
 		}
@@ -246,21 +246,25 @@ public abstract class GenericTypeResolver {
 	 * Resolve the type arguments of the given generic interface against the given
 	 * target class which is assumed to implement the generic interface and possibly
 	 * declare concrete types for its type variables.
+	 * <p>Note: In Spring 3.2, this method doesn't return {@code null} in all scenarios
+	 * where it should. To be fixed in Spring 4.0; for client code, this just means it
+	 * might see {@code null} in a few more cases then where it now sees an array with
+	 * a single {@link Object} type.
 	 * @param clazz the target class to check against
 	 * @param genericIfc the generic interface or superclass to resolve the type argument from
 	 * @return the resolved type of each argument, with the array size matching the
 	 * number of actual type arguments, or {@code null} if not resolvable
 	 */
-	public static Class[] resolveTypeArguments(Class<?> clazz, Class<?> genericIfc) {
+	public static Class<?>[] resolveTypeArguments(Class<?> clazz, Class<?> genericIfc) {
 		return doResolveTypeArguments(clazz, clazz, genericIfc);
 	}
 
-	private static Class[] doResolveTypeArguments(Class<?> ownerClass, Class<?> classToIntrospect, Class<?> genericIfc) {
+	private static Class<?>[] doResolveTypeArguments(Class<?> ownerClass, Class<?> classToIntrospect, Class<?> genericIfc) {
 		while (classToIntrospect != null) {
 			if (genericIfc.isInterface()) {
 				Type[] ifcs = classToIntrospect.getGenericInterfaces();
 				for (Type ifc : ifcs) {
-					Class[] result = doResolveTypeArguments(ownerClass, ifc, genericIfc);
+					Class<?>[] result = doResolveTypeArguments(ownerClass, ifc, genericIfc);
 					if (result != null) {
 						return result;
 					}
@@ -268,7 +272,7 @@ public abstract class GenericTypeResolver {
 			}
 			else {
 				try {
-					Class[] result = doResolveTypeArguments(ownerClass, classToIntrospect.getGenericSuperclass(), genericIfc);
+					Class<?>[] result = doResolveTypeArguments(ownerClass, classToIntrospect.getGenericSuperclass(), genericIfc);
 					if (result != null) {
 						return result;
 					}
@@ -283,13 +287,13 @@ public abstract class GenericTypeResolver {
 		return null;
 	}
 
-	private static Class[] doResolveTypeArguments(Class<?> ownerClass, Type ifc, Class<?> genericIfc) {
+	private static Class<?>[] doResolveTypeArguments(Class<?> ownerClass, Type ifc, Class<?> genericIfc) {
 		if (ifc instanceof ParameterizedType) {
 			ParameterizedType paramIfc = (ParameterizedType) ifc;
 			Type rawType = paramIfc.getRawType();
 			if (genericIfc.equals(rawType)) {
 				Type[] typeArgs = paramIfc.getActualTypeArguments();
-				Class[] result = new Class[typeArgs.length];
+				Class<?>[] result = new Class[typeArgs.length];
 				for (int i = 0; i < typeArgs.length; i++) {
 					Type arg = typeArgs[i];
 					result[i] = extractClass(ownerClass, arg);
