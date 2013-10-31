@@ -35,8 +35,6 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator;
 
-import java.nio.ByteBuffer;
-
 /**
  * Adapts {@link WebSocketHandler} to the Jetty 9 WebSocket API.
  *

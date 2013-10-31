@@ -16,9 +16,6 @@
 
 package org.springframework.web.socket;
 
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
-
 /**
  * A message that can be handled or sent on a WebSocket connection.
  *
@@ -35,9 +32,9 @@ public interface WebSocketMessage<T> {
 	/**
 	 * When partial message support is available and requested via
 	 * {@link org.springframework.web.socket.WebSocketHandler#supportsPartialMessages()},
-	 * this method returns {@literal true} if the current message is the last part of
-	 * the complete WebSocket message sent by the client. Otherwise {@literal false}
-	 * is returned if partial message support is either not available or not enabled.
+	 * this method returns {@code true} if the current message is the last part of the
+	 * complete WebSocket message sent by the client. Otherwise {@code false} is returned
+	 * if partial message support is either not available or not enabled.
 	 */
 	boolean isLast();
 
