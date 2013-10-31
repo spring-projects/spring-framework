@@ -80,7 +80,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.oxm.GenericMarshaller;
 import org.springframework.oxm.GenericUnmarshaller;
 import org.springframework.oxm.MarshallingFailureException;
@@ -167,8 +166,6 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	private Class<?> mappedClass;
 
 	private ClassLoader beanClassLoader;
-
-	private ResourceLoader resourceLoader;
 
 	private final Object jaxbContextMonitor = new Object();
 
