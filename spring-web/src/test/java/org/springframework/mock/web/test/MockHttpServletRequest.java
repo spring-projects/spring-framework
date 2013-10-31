@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
@@ -52,11 +53,12 @@ import javax.servlet.http.Part;
 
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.util.StringUtils;
 
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletRequest} interface.
  *
- * <p>As of Spring 4.0, this set of mocks is entirely based on Servlet 3.0.
+ * <p>As of Spring 4.0, this set of mocks is designed on a Servlet 3.0 baseline.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -313,7 +315,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	@Override
 	public Enumeration<String> getAttributeNames() {
 		checkActive();
-		return Collections.enumeration(this.attributes.keySet());
+		return Collections.enumeration(new LinkedHashSet<String>(this.attributes.keySet()));
 	}
 
 	@Override
@@ -946,9 +948,17 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public StringBuffer getRequestURL() {
-		StringBuffer url = new StringBuffer(this.scheme);
-		url.append("://").append(this.serverName).append(':').append(this.serverPort);
-		url.append(getRequestURI());
+		StringBuffer url = new StringBuffer(this.scheme).append("://").append(this.serverName);
+
+		if (this.serverPort > 0
+				&& (("http".equalsIgnoreCase(scheme) && this.serverPort != 80) || ("https".equalsIgnoreCase(scheme) && this.serverPort != 443))) {
+			url.append(':').append(this.serverPort);
+		}
+
+		if (StringUtils.hasText(getRequestURI())) {
+			url.append(getRequestURI());
+		}
+
 		return url;
 	}
 

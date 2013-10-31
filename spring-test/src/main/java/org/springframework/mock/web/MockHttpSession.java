@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpSession} interface.
  *
- * <p>Compatible with Servlet 2.5 as well as Servlet 3.0.
+ * <p>As of Spring 4.0, this set of mocks is designed on a Servlet 3.0 baseline.
  *
  * <p>Used for testing the web framework; also useful for testing application
  * controllers.
