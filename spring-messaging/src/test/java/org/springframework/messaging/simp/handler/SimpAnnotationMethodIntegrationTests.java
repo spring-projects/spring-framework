@@ -138,7 +138,6 @@ public class SimpAnnotationMethodIntegrationTests extends AbstractWebSocketInteg
 	}
 
 
-	@SuppressWarnings("unused")
 	@IntegrationTestController
 	static class SimpleController {
 
@@ -161,7 +160,6 @@ public class SimpAnnotationMethodIntegrationTests extends AbstractWebSocketInteg
 
 	}
 
-	@SuppressWarnings("unused")
 	@IntegrationTestController
 	static class IncrementController {
 
