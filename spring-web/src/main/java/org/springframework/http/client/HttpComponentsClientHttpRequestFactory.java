@@ -74,27 +74,37 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	/**
 	 * Create a new instance of the {@code HttpComponentsClientHttpRequestFactory}
 	 * with the given {@link HttpClient} instance.
+	 * <p>
+	 * As of Spring Framework 4 the given client is expected to be of type
+	 * CloseableHttpClient (requiring HttpClient 4.3+).
+	 *
 	 * @param httpClient the HttpClient instance to use for this request factory
 	 */
-	public HttpComponentsClientHttpRequestFactory(CloseableHttpClient httpClient) {
+	public HttpComponentsClientHttpRequestFactory(HttpClient httpClient) {
 		Assert.notNull(httpClient, "'httpClient' must not be null");
-        this.httpClient = httpClient;
+		Assert.isInstanceOf(CloseableHttpClient.class, httpClient, "'httpClient' is not of type CloseableHttpClient");
+        this.httpClient = (CloseableHttpClient) httpClient;
 	}
 
 
     /**
      * Set the {@code HttpClient} used for
+	 * <p>
+	 * As of Spring Framework 4 the given client is expected to be of type
+	 * CloseableHttpClient (requiring HttpClient 4.3+).
+	 *
      * {@linkplain #createRequest(URI, HttpMethod) synchronous execution}.
      */
-    public void setHttpClient(CloseableHttpClient httpClient) {
-        this.httpClient = httpClient;
+    public void setHttpClient(HttpClient httpClient) {
+		Assert.isInstanceOf(CloseableHttpClient.class, httpClient, "'httpClient' is not of type CloseableHttpClient");
+        this.httpClient = (CloseableHttpClient) httpClient;
     }
 
     /**
 	 * Return the {@code HttpClient} used for
 	 * {@linkplain #createRequest(URI, HttpMethod) synchronous execution}.
 	 */
-	public CloseableHttpClient getHttpClient() {
+	public HttpClient getHttpClient() {
 		return this.httpClient;
 	}
 
@@ -130,7 +140,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
-		CloseableHttpClient client = getHttpClient();
+		CloseableHttpClient client = (CloseableHttpClient) getHttpClient();
 		Assert.state(client != null, "Synchronous execution requires an HttpClient to be set");
 		HttpUriRequest httpRequest = createHttpUriRequest(httpMethod, uri);
 		postProcessHttpRequest(httpRequest);
