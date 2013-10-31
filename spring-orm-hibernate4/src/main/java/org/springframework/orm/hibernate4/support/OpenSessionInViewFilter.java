@@ -16,14 +16,6 @@
 
 package org.springframework.orm.hibernate4.support;
 
-import java.io.IOException;
-import java.util.concurrent.Callable;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -33,12 +25,16 @@ import org.springframework.orm.hibernate4.SessionFactoryUtils;
 import org.springframework.orm.hibernate4.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.async.CallableProcessingInterceptorAdapter;
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * Servlet 2.3 Filter that binds a Hibernate Session to the thread for the entire
@@ -143,8 +139,9 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 				SessionHolder sessionHolder = new SessionHolder(session);
 				TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
 
-				asyncManager.registerCallableInterceptor(key,
-						new SessionBindingCallableInterceptor(sessionFactory, sessionHolder));
+				AsyncRequestInterceptor interceptor = new AsyncRequestInterceptor(sessionFactory, sessionHolder);
+				asyncManager.registerCallableInterceptor(key, interceptor);
+				asyncManager.registerDeferredResultInterceptor(key, interceptor);
 			}
 		}
 
@@ -216,37 +213,8 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 		if (asyncManager.getCallableInterceptor(key) == null) {
 			return false;
 		}
-		((SessionBindingCallableInterceptor) asyncManager.getCallableInterceptor(key)).initializeThread();
+		((AsyncRequestInterceptor) asyncManager.getCallableInterceptor(key)).bindSession();
 		return true;
 	}
 
-
-	/**
-	 * Bind and unbind the Hibernate {@code Session} to the current thread.
-	 */
-	private static class SessionBindingCallableInterceptor extends CallableProcessingInterceptorAdapter {
-
-		private final SessionFactory sessionFactory;
-
-		private final SessionHolder sessionHolder;
-
-		public SessionBindingCallableInterceptor(SessionFactory sessionFactory, SessionHolder sessionHolder) {
-			this.sessionFactory = sessionFactory;
-			this.sessionHolder = sessionHolder;
-		}
-
-		@Override
-		public <T> void preProcess(NativeWebRequest request, Callable<T> task) {
-			initializeThread();
-		}
-
-		@Override
-		public <T> void postProcess(NativeWebRequest request, Callable<T> task, Object concurrentResult) {
-			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
-		}
-
-		private void initializeThread() {
-			TransactionSynchronizationManager.bindResource(this.sessionFactory, this.sessionHolder);
-		}
-	}
 }

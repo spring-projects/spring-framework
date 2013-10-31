@@ -29,9 +29,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.context.request.AsyncWebRequestInterceptor;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.context.request.async.CallableProcessingInterceptorAdapter;
-import org.springframework.web.context.request.async.WebAsyncManager;
-import org.springframework.web.context.request.async.WebAsyncUtils;
+import org.springframework.web.context.request.async.*;
 
 /**
  * Spring web request interceptor that binds a Hibernate {@code Session} to the
@@ -172,8 +170,10 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements A
 				SessionHolder sessionHolder = new SessionHolder(session);
 				TransactionSynchronizationManager.bindResource(getSessionFactory(), sessionHolder);
 
-				asyncManager.registerCallableInterceptor(participateAttributeName,
-						new SessionBindingCallableInterceptor(sessionHolder));
+				AsyncRequestInterceptor asyncRequestInterceptor =
+						new AsyncRequestInterceptor(getSessionFactory(), sessionHolder);
+				asyncManager.registerCallableInterceptor(participateAttributeName, asyncRequestInterceptor);
+				asyncManager.registerDeferredResultInterceptor(participateAttributeName, asyncRequestInterceptor);
 			}
 			else {
 				// deferred close mode
@@ -268,34 +268,8 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements A
 		if (asyncManager.getCallableInterceptor(key) == null) {
 			return false;
 		}
-		((SessionBindingCallableInterceptor) asyncManager.getCallableInterceptor(key)).initializeThread();
+		((AsyncRequestInterceptor) asyncManager.getCallableInterceptor(key)).bindSession();
 		return true;
 	}
 
-
-	/**
-	 * Bind and unbind the Hibernate {@code Session} to the current thread.
-	 */
-	private class SessionBindingCallableInterceptor extends CallableProcessingInterceptorAdapter {
-
-		private final SessionHolder sessionHolder;
-
-		public SessionBindingCallableInterceptor(SessionHolder sessionHolder) {
-			this.sessionHolder = sessionHolder;
-		}
-
-		@Override
-		public <T> void preProcess(NativeWebRequest request, Callable<T> task) {
-			initializeThread();
-		}
-
-		@Override
-		public <T> void postProcess(NativeWebRequest request, Callable<T> task, Object concurrentResult) {
-			TransactionSynchronizationManager.unbindResource(getSessionFactory());
-		}
-
-		private void initializeThread() {
-			TransactionSynchronizationManager.bindResource(getSessionFactory(), this.sessionHolder);
-		}
-	}
 }
