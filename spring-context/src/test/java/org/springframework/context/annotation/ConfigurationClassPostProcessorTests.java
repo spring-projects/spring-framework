@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -193,6 +194,8 @@ public class ConfigurationClassPostProcessorTests {
 
 		RepositoryFactoryBeanInjectionBean bean = (RepositoryFactoryBeanInjectionBean) beanFactory.getBean("annotatedBean");
 		assertSame(beanFactory.getBean("&repoFactoryBean"), bean.repositoryFactoryBean);
+		assertSame(beanFactory.getBean("&repoFactoryBean"), bean.qualifiedRepositoryFactoryBean);
+		assertSame(beanFactory.getBean("&repoFactoryBean"), bean.prefixQualifiedRepositoryFactoryBean);
 	}
 
 	@Test
@@ -323,6 +326,14 @@ public class ConfigurationClassPostProcessorTests {
 
 		@Autowired
 		public RepositoryFactoryBean<?> repositoryFactoryBean;
+
+		@Autowired
+		@Qualifier("repoFactoryBean")
+		public RepositoryFactoryBean<?> qualifiedRepositoryFactoryBean;
+
+		@Autowired
+		@Qualifier("&repoFactoryBean")
+		public RepositoryFactoryBean<?> prefixQualifiedRepositoryFactoryBean;
 	}
 
 
