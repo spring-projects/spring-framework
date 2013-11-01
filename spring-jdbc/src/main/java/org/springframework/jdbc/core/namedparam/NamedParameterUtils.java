@@ -114,7 +114,7 @@ public abstract class NamedParameterUtils {
 						j++;
 						if (':' == statement[j] || '{' == statement[j]) {
 							throw new InvalidDataAccessApiUsageException("Parameter name contains invalid character '" +
-									statement[j] + "' at position " + i + " in statement " + sql);
+									statement[j] + "' at position " + i + " in statement: " + sql);
 						}
 					}
 					if (j >= statement.length) {
@@ -318,10 +318,10 @@ public abstract class NamedParameterUtils {
 		Object[] paramArray = new Object[parsedSql.getTotalParameterCount()];
 		if (parsedSql.getNamedParameterCount() > 0 && parsedSql.getUnnamedParameterCount() > 0) {
 			throw new InvalidDataAccessApiUsageException(
-					"You can't mix named and traditional ? placeholders. You have " +
+					"Not allowed to mix named and traditional ? placeholders. You have " +
 					parsedSql.getNamedParameterCount() + " named parameter(s) and " +
-					parsedSql.getUnnamedParameterCount() + " traditonal placeholder(s) in [" +
-					parsedSql.getOriginalSql() + "]");
+					parsedSql.getUnnamedParameterCount() + " traditional placeholder(s) in statement: " +
+					parsedSql.getOriginalSql());
 		}
 		List<String> paramNames = parsedSql.getParameterNames();
 		for (int i = 0; i < paramNames.size(); i++) {
