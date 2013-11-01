@@ -35,6 +35,7 @@ import org.springframework.core.NamedThreadLocal;
  * MessageSourceAccessor automatically use that Locale.
  *
  * @author Juergen Hoeller
+ * @author Nicholas Williams
  * @since 1.2
  * @see LocaleContext
  * @see org.springframework.context.support.MessageSourceAccessor
@@ -62,7 +63,8 @@ public abstract class LocaleContextHolder {
 	 * <i>not</i> exposing it as inheritable for child threads.
 	 * <p>The given LocaleContext may be a {@link TimeZoneAwareLocaleContext},
 	 * containing a locale with associated time zone information.
-	 * @param localeContext the current LocaleContext
+	 * @param localeContext the current LocaleContext,
+	 * or {@code null} to reset the thread-bound context
 	 * @see SimpleLocaleContext
 	 * @see SimpleTimeZoneAwareLocaleContext
 	 */
@@ -110,28 +112,43 @@ public abstract class LocaleContextHolder {
 	}
 
 	/**
-	 * Associate the given Locale with the current thread.
+	 * Associate the given Locale with the current thread,
+	 * preserving any TimeZone that may have been set already.
 	 * <p>Will implicitly create a LocaleContext for the given Locale,
 	 * <i>not</i> exposing it as inheritable for child threads.
 	 * @param locale the current Locale, or {@code null} to reset
-	 * the thread-bound context
-	 * @see SimpleLocaleContext#SimpleLocaleContext(java.util.Locale)
+	 * the locale part of thread-bound context
+	 * @see #setTimeZone(TimeZone)
+	 * @see SimpleLocaleContext#SimpleLocaleContext(Locale)
 	 */
 	public static void setLocale(Locale locale) {
 		setLocale(locale, false);
 	}
 
 	/**
-	 * Associate the given Locale with the current thread.
+	 * Associate the given Locale with the current thread,
+	 * preserving any TimeZone that may have been set already.
 	 * <p>Will implicitly create a LocaleContext for the given Locale.
 	 * @param locale the current Locale, or {@code null} to reset
-	 * the thread-bound context
+	 * the locale part of thread-bound context
 	 * @param inheritable whether to expose the LocaleContext as inheritable
 	 * for child threads (using an {@link InheritableThreadLocal})
-	 * @see SimpleLocaleContext#SimpleLocaleContext(java.util.Locale)
+	 * @see #setTimeZone(TimeZone, boolean)
+	 * @see SimpleLocaleContext#SimpleLocaleContext(Locale)
 	 */
 	public static void setLocale(Locale locale, boolean inheritable) {
-		LocaleContext localeContext = (locale != null ? new SimpleLocaleContext(locale) : null);
+		LocaleContext localeContext = getLocaleContext();
+		TimeZone timeZone = (localeContext instanceof TimeZoneAwareLocaleContext ?
+				((TimeZoneAwareLocaleContext) localeContext).getTimeZone() : null);
+		if (timeZone != null) {
+			localeContext = new SimpleTimeZoneAwareLocaleContext(locale, timeZone);
+		}
+		else if (locale != null) {
+			localeContext = new SimpleLocaleContext(locale);
+		}
+		else {
+			localeContext = null;
+		}
 		setLocaleContext(localeContext, inheritable);
 	}
 
@@ -158,6 +175,46 @@ public abstract class LocaleContextHolder {
 			}
 		}
 		return Locale.getDefault();
+	}
+
+	/**
+	 * Associate the given TimeZone with the current thread,
+	 * preserving any Locale that may have been set already.
+	 * <p>Will implicitly create a LocaleContext for the given Locale,
+	 * <i>not</i> exposing it as inheritable for child threads.
+	 * @param timeZone the current TimeZone, or {@code null} to reset
+	 * the time zone part of the thread-bound context
+	 * @see #setLocale(Locale)
+	 * @see SimpleTimeZoneAwareLocaleContext#SimpleTimeZoneAwareLocaleContext(Locale, TimeZone)
+	 */
+	public static void setTimeZone(TimeZone timeZone) {
+		setTimeZone(timeZone, false);
+	}
+
+	/**
+	 * Associate the given TimeZone with the current thread,
+	 * preserving any Locale that may have been set already.
+	 * <p>Will implicitly create a LocaleContext for the given Locale.
+	 * @param timeZone the current TimeZone, or {@code null} to reset
+	 * the time zone part of the thread-bound context
+	 * @param inheritable whether to expose the LocaleContext as inheritable
+	 * for child threads (using an {@link InheritableThreadLocal})
+	 * @see #setLocale(Locale, boolean)
+	 * @see SimpleTimeZoneAwareLocaleContext#SimpleTimeZoneAwareLocaleContext(Locale, TimeZone)
+	 */
+	public static void setTimeZone(TimeZone timeZone, boolean inheritable) {
+		LocaleContext localeContext = getLocaleContext();
+		Locale locale = (localeContext != null ? localeContext.getLocale() : null);
+		if (timeZone != null) {
+			localeContext = new SimpleTimeZoneAwareLocaleContext(locale, timeZone);
+		}
+		else if (locale != null) {
+			localeContext = new SimpleLocaleContext(locale);
+		}
+		else {
+			localeContext = null;
+		}
+		setLocaleContext(localeContext, inheritable);
 	}
 
 	/**
