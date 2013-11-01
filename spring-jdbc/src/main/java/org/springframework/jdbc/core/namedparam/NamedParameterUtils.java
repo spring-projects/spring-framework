@@ -113,11 +113,13 @@ public abstract class NamedParameterUtils {
 					while (j < statement.length && !('}' == statement[j])) {
 						j++;
 						if (':' == statement[j] || '{' == statement[j]) {
-							throw new InvalidDataAccessApiUsageException("Parameter name contains invalid character '" + statement[j] + "' at position " + i + " in statement " + sql);
+							throw new InvalidDataAccessApiUsageException("Parameter name contains invalid character '" +
+									statement[j] + "' at position " + i + " in statement " + sql);
 						}
 					}
 					if (j >= statement.length) {
-						throw new InvalidDataAccessApiUsageException("Non-terminated named parameter declaration at position " + i + " in statement " + sql);
+						throw new InvalidDataAccessApiUsageException(
+								"Non-terminated named parameter declaration at position " + i + " in statement: " + sql);
 					}
 					if (j - i > 3) {
 						parameter = sql.substring(i + 2, j);
@@ -166,8 +168,9 @@ public abstract class NamedParameterUtils {
 		return parsedSql;
 	}
 
-	private static int addNamedParameter(List<ParameterHolder> parameterList, int totalParameterCount, int escapes, int i, int j,
-			String parameter) {
+	private static int addNamedParameter(
+			List<ParameterHolder> parameterList, int totalParameterCount, int escapes, int i, int j, String parameter) {
+
 		parameterList.add(new ParameterHolder(parameter, i - escapes, j - escapes));
 		totalParameterCount++;
 		return totalParameterCount;
@@ -256,7 +259,7 @@ public abstract class NamedParameterUtils {
 			int[] indexes = parsedSql.getParameterIndexes(i);
 			int startIndex = indexes[0];
 			int endIndex = indexes[1];
-			actualSql.append(originalSql.substring(lastIndex, startIndex));
+			actualSql.append(originalSql, lastIndex, startIndex);
 			if (paramSource != null && paramSource.hasValue(paramName)) {
 				Object value = paramSource.getValue(paramName);
 				if (value instanceof SqlParameterValue) {
@@ -296,7 +299,7 @@ public abstract class NamedParameterUtils {
 			}
 			lastIndex = endIndex;
 		}
-		actualSql.append(originalSql.substring(lastIndex, originalSql.length()));
+		actualSql.append(originalSql, lastIndex, originalSql.length());
 		return actualSql.toString();
 	}
 
@@ -409,14 +412,11 @@ public abstract class NamedParameterUtils {
 		List<String> paramNames = parsedSql.getParameterNames();
 		List<SqlParameter> params = new LinkedList<SqlParameter>();
 		for (String paramName : paramNames) {
-			SqlParameter param = new SqlParameter(
-					paramName,
-					paramSource.getSqlType(paramName),
-					paramSource.getTypeName(paramName));
-			params.add(param);
+			params.add(new SqlParameter(paramName, paramSource.getSqlType(paramName), paramSource.getTypeName(paramName)));
 		}
 		return params;
 	}
+
 
 	//-------------------------------------------------------------------------
 	// Convenience methods operating on a plain SQL String
@@ -464,28 +464,32 @@ public abstract class NamedParameterUtils {
 		return buildValueArray(parsedSql, new MapSqlParameterSource(paramMap), null);
 	}
 
+
 	private static class ParameterHolder {
-		private String parameterName;
-		private int startIndex;
-		private int endIndex;
+
+		private final String parameterName;
+
+		private final int startIndex;
+
+		private final int endIndex;
 
 		public ParameterHolder(String parameterName, int startIndex, int endIndex) {
-			super();
 			this.parameterName = parameterName;
 			this.startIndex = startIndex;
 			this.endIndex = endIndex;
 		}
 
 		public String getParameterName() {
-			return parameterName;
+			return this.parameterName;
 		}
 
 		public int getStartIndex() {
-			return startIndex;
+			return this.startIndex;
 		}
 
 		public int getEndIndex() {
-			return endIndex;
+			return this.endIndex;
 		}
 	}
+
 }
