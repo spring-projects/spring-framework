@@ -27,6 +27,7 @@ import java.util.TimeZone;
  * a Locale but no TimeZone.
  *
  * @author Juergen Hoeller
+ * @author Nicholas Williams
  * @since 4.0
  * @see LocaleContextHolder#setLocaleContext
  * @see LocaleContextHolder#getTimeZone()
@@ -55,7 +56,7 @@ public class SimpleTimeZoneAwareLocaleContext extends SimpleLocaleContext implem
 
 	@Override
 	public String toString() {
-		return super.toString() + " " + this.timeZone.toString();
+		return super.toString() + " " + (this.timeZone != null ? this.timeZone.toString() : "-");
 	}
 
 }

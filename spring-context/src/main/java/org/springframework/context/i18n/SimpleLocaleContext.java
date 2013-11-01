@@ -49,7 +49,7 @@ public class SimpleLocaleContext implements LocaleContext {
 
 	@Override
 	public String toString() {
-		return this.locale.toString();
+		return (this.locale != null ? this.locale.toString() : "-");
 	}
 
 }
