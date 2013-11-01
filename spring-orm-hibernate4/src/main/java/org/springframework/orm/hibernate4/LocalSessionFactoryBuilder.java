@@ -18,7 +18,9 @@ package org.springframework.orm.hibernate4;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
+import java.util.Properties;
 import java.util.Set;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
@@ -29,10 +31,13 @@ import javax.transaction.TransactionManager;
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
 import org.hibernate.SessionFactory;
+import org.hibernate.cache.spi.RegionFactory;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
+import org.hibernate.cfg.Settings;
 import org.hibernate.engine.transaction.internal.jta.CMTTransactionFactory;
+import org.hibernate.service.ServiceRegistry;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -96,6 +101,8 @@ public class LocalSessionFactoryBuilder extends Configuration {
 
 
 	private final ResourcePatternResolver resourcePatternResolver;
+
+	private RegionFactory cacheRegionFactory;
 
 
 	/**
@@ -200,6 +207,18 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	}
 
 	/**
+	 * Set the Hibernate RegionFactory to use for the SessionFactory.
+	 * Allows for using a Spring-managed RegionFactory instance.
+	 * <p>Note: If this is set, the Hibernate settings should not define a
+	 * cache provider to avoid meaningless double configuration.
+	 * @see org.hibernate.cache.spi.RegionFactory
+	 */
+	public LocalSessionFactoryBuilder setCacheRegionFactory(RegionFactory cacheRegionFactory) {
+		this.cacheRegionFactory = cacheRegionFactory;
+		return this;
+	}
+
+	/**
 	 * Add the given annotated classes in a batch.
 	 * @see #addAnnotatedClass
 	 * @see #scanPackages
@@ -272,6 +291,24 @@ public class LocalSessionFactoryBuilder extends Configuration {
 		return false;
 	}
 
+
+	// Overridden methods from Hibernate's Configuration class
+
+	@Override
+	public Settings buildSettings(Properties props, ServiceRegistry serviceRegistry) throws HibernateException {
+		Settings settings = super.buildSettings(props, serviceRegistry);
+		if (this.cacheRegionFactory != null) {
+			try {
+				Method setRegionFactory = Settings.class.getDeclaredMethod("setRegionFactory", RegionFactory.class);
+				setRegionFactory.setAccessible(true);
+				setRegionFactory.invoke(settings, this.cacheRegionFactory);
+			}
+			catch (Exception ex) {
+				throw new IllegalStateException("Failed to invoke Hibernate's setRegionFactory method", ex);
+			}
+		}
+		return settings;
+	}
 
 	/**
 	 * Build the {@code SessionFactory}.
