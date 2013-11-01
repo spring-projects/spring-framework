@@ -27,6 +27,7 @@ import org.springframework.util.StringUtils;
  * representation.
  *
  * @author Juergen Hoeller
+ * @author Nicholas Williams
  * @since 3.0
  * @see java.util.TimeZone
  * @see ZoneIdEditor

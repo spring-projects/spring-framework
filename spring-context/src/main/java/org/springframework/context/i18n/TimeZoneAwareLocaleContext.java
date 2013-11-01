@@ -26,6 +26,7 @@ import java.util.TimeZone;
  * be able to produce a non-null TimeZone at the moment.
  *
  * @author Juergen Hoeller
+ * @author Nicholas Williams
  * @since 4.0
  * @see LocaleContextHolder#getTimeZone()
  */
