@@ -395,36 +395,43 @@ class ConstructorResolver {
 		}
 
 		if (factoryMethodToUse == null || argsToUse == null) {
-			// Need to determine the factory method...
-			// Try all methods with this name to see if they match the given arguments.
-			factoryClass = ClassUtils.getUserClass(factoryClass);
-			Method[] rawCandidates;
-
-			final Class factoryClazz = factoryClass;
-			if (System.getSecurityManager() != null) {
-				rawCandidates = AccessController.doPrivileged(new PrivilegedAction<Method[]>() {
-					@Override
-					public Method[] run() {
-						return (mbd.isNonPublicAccessAllowed() ?
-								ReflectionUtils.getAllDeclaredMethods(factoryClazz) : factoryClazz.getMethods());
-					}
-				});
+			Method[] candidates;
+			
+			if (factoryMethodToUse != null) {
+				candidates = new Method[] { factoryMethodToUse };
 			}
 			else {
-				rawCandidates = (mbd.isNonPublicAccessAllowed() ?
-						ReflectionUtils.getAllDeclaredMethods(factoryClazz) : factoryClazz.getMethods());
-			}
+				// Need to determine the factory method...
+				// Try all methods with this name to see if they match the given arguments.
+				factoryClass = ClassUtils.getUserClass(factoryClass);
+				Method[] rawCandidates;
 
-			List<Method> candidateSet = new ArrayList<Method>();
-			for (Method candidate : rawCandidates) {
-				if (Modifier.isStatic(candidate.getModifiers()) == isStatic &&
-						candidate.getName().equals(mbd.getFactoryMethodName()) &&
-						mbd.isFactoryMethod(candidate)) {
-					candidateSet.add(candidate);
+				final Class factoryClazz = factoryClass;
+				if (System.getSecurityManager() != null) {
+					rawCandidates = AccessController.doPrivileged(new PrivilegedAction<Method[]>() {
+						@Override
+						public Method[] run() {
+							return (mbd.isNonPublicAccessAllowed() ?
+									ReflectionUtils.getAllDeclaredMethods(factoryClazz) : factoryClazz.getMethods());
+						}
+					});
 				}
+				else {
+					rawCandidates = (mbd.isNonPublicAccessAllowed() ?
+							ReflectionUtils.getAllDeclaredMethods(factoryClazz) : factoryClazz.getMethods());
+				}
+
+				List<Method> candidateSet = new ArrayList<Method>();
+				for (Method candidate : rawCandidates) {
+					if (Modifier.isStatic(candidate.getModifiers()) == isStatic &&
+							candidate.getName().equals(mbd.getFactoryMethodName()) &&
+							mbd.isFactoryMethod(candidate)) {
+						candidateSet.add(candidate);
+					}
+				}
+				candidates = candidateSet.toArray(new Method[candidateSet.size()]);
+				AutowireUtils.sortFactoryMethods(candidates);
 			}
-			Method[] candidates = candidateSet.toArray(new Method[candidateSet.size()]);
-			AutowireUtils.sortFactoryMethods(candidates);
 
 			ConstructorArgumentValues resolvedValues = null;
 			boolean autowiring = (mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
