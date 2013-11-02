@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,10 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @since 2.5.2
+ * @deprecated as of Spring 4.0, since there are no fully supported versions
+ * of JBoss that this class works with anymore
  */
+@Deprecated
 public abstract class JBossWorkManagerUtils {
 
 	private static final String JBOSS_WORK_MANAGER_MBEAN_CLASS_NAME = "org.jboss.resource.work.JBossWorkManagerMBean";
@@ -69,7 +72,7 @@ public abstract class JBossWorkManagerUtils {
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException(
-					"Could not initialize JBossWorkManagerTaskExecutor because JBoss API is not available: " + ex);
+					"Could not initialize JBossWorkManagerTaskExecutor because JBoss API is not available", ex);
 		}
 	}
 

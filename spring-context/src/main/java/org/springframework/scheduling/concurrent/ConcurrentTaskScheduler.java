@@ -44,7 +44,8 @@ import org.springframework.util.ErrorHandler;
  * <p>Autodetects a JSR-236 {@link javax.enterprise.concurrent.ManagedScheduledExecutorService}
  * in order to use it for trigger-based scheduling if possible, instead of Spring's
  * local trigger management which ends up delegating to regular delay-based scheduling
- * against the {@code java.util.concurrent.ScheduledExecutorService} API.
+ * against the {@code java.util.concurrent.ScheduledExecutorService} API. For JSR-236 style
+ * lookup in a Java EE 7 environment, consider using {@link DefaultManagedTaskScheduler}.
  *
  * <p>Note that there is a pre-built {@link ThreadPoolTaskScheduler} that allows for
  * defining a {@link java.util.concurrent.ScheduledThreadPoolExecutor} in bean style,
@@ -58,21 +59,22 @@ import org.springframework.util.ErrorHandler;
  * @see java.util.concurrent.ScheduledExecutorService
  * @see java.util.concurrent.ScheduledThreadPoolExecutor
  * @see java.util.concurrent.Executors
+ * @see DefaultManagedTaskScheduler
  * @see ThreadPoolTaskScheduler
  */
 public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements TaskScheduler {
 
-	private static Class<?> managedScheduledExecutorService;
+	private static Class<?> managedScheduledExecutorServiceClass;
 
 	static {
 		try {
-			managedScheduledExecutorService = ClassUtils.forName(
+			managedScheduledExecutorServiceClass = ClassUtils.forName(
 					"javax.enterprise.concurrent.ManagedScheduledExecutorService",
 					ConcurrentTaskScheduler.class.getClassLoader());
 		}
 		catch (ClassNotFoundException ex) {
 			// JSR-236 API not available...
-			managedScheduledExecutorService = null;
+			managedScheduledExecutorServiceClass = null;
 		}
 	}
 
@@ -139,8 +141,8 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	public final void setScheduledExecutor(ScheduledExecutorService scheduledExecutor) {
 		if (scheduledExecutor != null) {
 			this.scheduledExecutor = scheduledExecutor;
-			this.enterpriseConcurrentScheduler = (managedScheduledExecutorService != null &&
-					managedScheduledExecutorService.isInstance(scheduledExecutor));
+			this.enterpriseConcurrentScheduler = (managedScheduledExecutorServiceClass != null &&
+					managedScheduledExecutorServiceClass.isInstance(scheduledExecutor));
 		}
 		else {
 			this.scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
