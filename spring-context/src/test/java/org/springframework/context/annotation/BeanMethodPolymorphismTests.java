@@ -19,10 +19,10 @@ package org.springframework.context.annotation;
 import java.lang.annotation.Inherited;
 import java.util.List;
 
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -74,7 +74,6 @@ public class BeanMethodPolymorphismTests {
 	}
 
 	@Test
-	@Ignore
 	public void beanMethodOverloadingWithInheritanceAndList() {
 		// SPR-11025
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(SubConfigWithList.class);

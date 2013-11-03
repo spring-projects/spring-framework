@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,7 +151,7 @@ class ConstructorResolver {
 			// Take specified constructors, if any.
 			Constructor[] candidates = chosenCtors;
 			if (candidates == null) {
-				Class beanClass = mbd.getBeanClass();
+				Class<?> beanClass = mbd.getBeanClass();
 				try {
 					candidates = (mbd.isNonPublicAccessAllowed() ?
 							beanClass.getDeclaredConstructors() : beanClass.getConstructors());
@@ -169,7 +169,7 @@ class ConstructorResolver {
 
 			for (int i = 0; i < candidates.length; i++) {
 				Constructor<?> candidate = candidates[i];
-				Class[] paramTypes = candidate.getParameterTypes();
+				Class<?>[] paramTypes = candidate.getParameterTypes();
 
 				if (constructorToUse != null && argsToUse.length > paramTypes.length) {
 					// Already found greedy constructor that can be satisfied ->
@@ -342,7 +342,7 @@ class ConstructorResolver {
 		this.beanFactory.initBeanWrapper(bw);
 
 		Object factoryBean;
-		Class factoryClass;
+		Class<?> factoryClass;
 		boolean isStatic;
 
 		String factoryBeanName = mbd.getFactoryBeanName();
@@ -400,7 +400,7 @@ class ConstructorResolver {
 			factoryClass = ClassUtils.getUserClass(factoryClass);
 			Method[] rawCandidates;
 
-			final Class factoryClazz = factoryClass;
+			final Class<?> factoryClazz = factoryClass;
 			if (System.getSecurityManager() != null) {
 				rawCandidates = AccessController.doPrivileged(new PrivilegedAction<Method[]>() {
 					@Override
@@ -447,7 +447,7 @@ class ConstructorResolver {
 
 			for (int i = 0; i < candidates.length; i++) {
 				Method candidate = candidates[i];
-				Class[] paramTypes = candidate.getParameterTypes();
+				Class<?>[] paramTypes = candidate.getParameterTypes();
 
 				if (paramTypes.length >= minNrOfArgs) {
 					ArgumentsHolder argsHolder;
@@ -505,7 +505,15 @@ class ConstructorResolver {
 						minTypeDiffWeight = typeDiffWeight;
 						ambiguousFactoryMethods = null;
 					}
-					else if (factoryMethodToUse != null && typeDiffWeight == minTypeDiffWeight) {
+					// Find out about ambiguity: In case of the same type difference weight
+					// for methods with the same number of parameters, collect such candidates
+					// and eventually raise an ambiguity exception.
+					// However, only perform that check in non-lenient constructor resolution mode,
+					// and explicitly ignore overridden methods (with the same parameter signature).
+					else if (factoryMethodToUse != null && typeDiffWeight == minTypeDiffWeight &&
+							!mbd.isLenientConstructorResolution() &&
+							paramTypes.length == factoryMethodToUse.getParameterTypes().length &&
+							!Arrays.equals(paramTypes, factoryMethodToUse.getParameterTypes())) {
 						if (ambiguousFactoryMethods == null) {
 							ambiguousFactoryMethods = new LinkedHashSet<Method>();
 							ambiguousFactoryMethods.add(factoryMethodToUse);
@@ -542,7 +550,7 @@ class ConstructorResolver {
 						"Invalid factory method '" + mbd.getFactoryMethodName() +
 						"': needs to have a non-void return type!");
 			}
-			else if (ambiguousFactoryMethods != null && !mbd.isLenientConstructorResolution()) {
+			else if (ambiguousFactoryMethods != null) {
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 						"Ambiguous factory method matches found in bean '" + beanName + "' " +
 						"(hint: specify index/type/name arguments for simple parameters to avoid type ambiguities): " +
@@ -647,7 +655,7 @@ class ConstructorResolver {
 	 */
 	private ArgumentsHolder createArgumentArray(
 			String beanName, RootBeanDefinition mbd, ConstructorArgumentValues resolvedValues,
-			BeanWrapper bw, Class[] paramTypes, String[] paramNames, Object methodOrCtor,
+			BeanWrapper bw, Class<?>[] paramTypes, String[] paramNames, Object methodOrCtor,
 			boolean autowiring) throws UnsatisfiedDependencyException {
 
 		String methodType = (methodOrCtor instanceof Constructor ? "constructor" : "factory method");
@@ -753,7 +761,7 @@ class ConstructorResolver {
 	private Object[] resolvePreparedArguments(
 			String beanName, RootBeanDefinition mbd, BeanWrapper bw, Member methodOrCtor, Object[] argsToResolve) {
 
-		Class[] paramTypes = (methodOrCtor instanceof Method ?
+		Class<?>[] paramTypes = (methodOrCtor instanceof Method ?
 				((Method) methodOrCtor).getParameterTypes() : ((Constructor) methodOrCtor).getParameterTypes());
 		TypeConverter converter = (this.beanFactory.getCustomTypeConverter() != null ?
 				this.beanFactory.getCustomTypeConverter() : bw);
@@ -825,7 +833,7 @@ class ConstructorResolver {
 			this.preparedArguments = args;
 		}
 
-		public int getTypeDifferenceWeight(Class[] paramTypes) {
+		public int getTypeDifferenceWeight(Class<?>[] paramTypes) {
 			// If valid arguments found, determine type difference weight.
 			// Try type difference weight on both the converted arguments and
 			// the raw arguments. If the raw weight is better, use it.
@@ -835,7 +843,7 @@ class ConstructorResolver {
 			return (rawTypeDiffWeight < typeDiffWeight ? rawTypeDiffWeight : typeDiffWeight);
 		}
 
-		public int getAssignabilityWeight(Class[] paramTypes) {
+		public int getAssignabilityWeight(Class<?>[] paramTypes) {
 			for (int i = 0; i < paramTypes.length; i++) {
 				if (!ClassUtils.isAssignableValue(paramTypes[i], this.arguments[i])) {
 					return Integer.MAX_VALUE;
