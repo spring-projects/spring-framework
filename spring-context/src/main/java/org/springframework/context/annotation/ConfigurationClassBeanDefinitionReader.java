@@ -310,6 +310,7 @@ class ConfigurationClassBeanDefinitionReader {
 
 		public ConfigurationClassBeanDefinition(ConfigurationClass configClass) {
 			this.annotationMetadata = configClass.getMetadata();
+			setLenientConstructorResolution(false);
 		}
 
 		public ConfigurationClassBeanDefinition(RootBeanDefinition original, ConfigurationClass configClass) {

@@ -16,17 +16,19 @@
 
 package org.springframework.context.annotation;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.lang.annotation.Inherited;
+import java.util.List;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Tests regarding overloading and overriding of bean methods.
@@ -42,22 +44,27 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
  * the most specific subclass bean method will always be the one that is invoked.
  *
  * @author Chris Beams
+ * @author Phillip Webb
  */
+@SuppressWarnings("resource")
 public class BeanMethodPolymorphismTests {
+
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
+
 
 	@Test
 	public void beanMethodOverloadingWithoutInheritance() {
+
 		@SuppressWarnings({ "hiding" })
 		@Configuration class Config {
 			@Bean String aString() { return "na"; }
 			@Bean String aString(Integer dependency) { return "na"; }
 		}
-		try {
-			new AnnotationConfigApplicationContext(Config.class);
-			fail("expected bean method overloading exception");
-		} catch (BeanDefinitionParsingException ex) {
-			assertTrue(ex.getMessage(), ex.getMessage().contains("2 overloaded @Bean methods named 'aString'"));
-		}
+
+		this.thrown.expect(BeanDefinitionParsingException.class);
+		this.thrown.expectMessage("overloaded @Bean methods named 'aString'");
+		new AnnotationConfigApplicationContext(Config.class);
 	}
 
 	@Test
@@ -65,12 +72,12 @@ public class BeanMethodPolymorphismTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(SubConfig.class);
 		assertThat(ctx.getBean(String.class), equalTo("overloaded5"));
 	}
-	static @Configuration class SuperConfig {
-		@Bean String aString() { return "super"; }
-	}
-	static @Configuration class SubConfig {
-		@Bean Integer anInt() { return 5; }
-		@Bean String aString(Integer dependency) { return "overloaded"+dependency; }
+
+	@Test
+	public void beanMethodOverloadingWithInheritanceAndList() {
+		// SPR-11025
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(SubConfigWithList.class);
+		assertThat(ctx.getBean(String.class), equalTo("overloaded5"));
 	}
 
 	/**
@@ -82,10 +89,6 @@ public class BeanMethodPolymorphismTests {
 	public void beanMethodShadowing() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ShadowConfig.class);
 		assertThat(ctx.getBean(String.class), equalTo("shadow"));
-	}
-	@Import(SubConfig.class)
-	static @Configuration class ShadowConfig {
-		@Bean String aString() { return "shadow"; }
 	}
 
 	/**
@@ -110,11 +113,63 @@ public class BeanMethodPolymorphismTests {
 		public TestBean testBean() {
 			return new TestBean();
 		}
+
 	}
 
 
 	@Configuration
 	static class Config extends BaseConfig {
+	}
+
+
+	@Configuration
+	static class SuperConfig {
+
+		@Bean
+		String aString() {
+			return "super";
+		}
+	}
+
+
+	@Configuration
+	static class SubConfig extends SuperConfig {
+
+		@Bean
+		Integer anInt() {
+			return 5;
+		}
+
+		@Bean
+		String aString(Integer dependency) {
+			return "overloaded" + dependency;
+		}
+	}
+
+
+	@Configuration
+	static class SubConfigWithList extends SuperConfig {
+
+		@Bean
+		Integer anInt() {
+			return 5;
+		}
+
+		@Bean
+		String aString(List<Integer> dependency) {
+			return "overloaded" + dependency.get(0);
+		}
+	}
+
+
+	@Configuration
+	@Import(SubConfig.class)
+	static class ShadowConfig {
+
+		@Bean
+		String aString() {
+			return "shadow";
+		}
 	}
 
 }
