@@ -16,14 +16,10 @@
 
 package org.springframework.context.annotation;
 
-import java.lang.annotation.Inherited;
 import java.util.List;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
-import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
@@ -34,50 +30,75 @@ import static org.junit.Assert.*;
  * Tests regarding overloading and overriding of bean methods.
  * Related to SPR-6618.
  *
- * Bean-annotated methods should be able to be overridden, just as any regular
- * method. This is straightforward.
- *
- * Bean-annotated methods should be able to be overloaded, though supporting this
- * is more subtle. Essentially, it must be unambiguous to the container which bean
- * method to call.  A simple way to think about this is that no one Configuration
- * class may declare two bean methods with the same name.  In the case of inheritance,
- * the most specific subclass bean method will always be the one that is invoked.
- *
  * @author Chris Beams
  * @author Phillip Webb
+ * @author Juergen Hoeller
  */
-@SuppressWarnings("resource")
 public class BeanMethodPolymorphismTests {
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
 
 	@Test
 	public void beanMethodOverloadingWithoutInheritance() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ConfigWithOverloading.class);
+		ctx.setAllowBeanDefinitionOverriding(false);
+		ctx.refresh();
+		assertThat(ctx.getBean(String.class), equalTo("regular"));
+	}
 
-		@SuppressWarnings({ "hiding" })
-		@Configuration class Config {
-			@Bean String aString() { return "na"; }
-			@Bean String aString(Integer dependency) { return "na"; }
-		}
+	@Test
+	public void beanMethodOverloadingWithoutInheritanceAndExtraDependency() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ConfigWithOverloading.class);
+		ctx.getDefaultListableBeanFactory().registerSingleton("anInt", 5);
+		ctx.setAllowBeanDefinitionOverriding(false);
+		ctx.refresh();
+		assertThat(ctx.getBean(String.class), equalTo("overloaded5"));
+	}
 
-		this.thrown.expect(BeanDefinitionParsingException.class);
-		this.thrown.expectMessage("overloaded @Bean methods named 'aString'");
-		new AnnotationConfigApplicationContext(Config.class);
+	@Test
+	public void beanMethodOverloadingWithAdditionalMetadata() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ConfigWithOverloadingAndAdditionalMetadata.class);
+		ctx.setAllowBeanDefinitionOverriding(false);
+		ctx.refresh();
+		assertFalse(ctx.getDefaultListableBeanFactory().containsSingleton("aString"));
+		assertThat(ctx.getBean(String.class), equalTo("regular"));
+		assertTrue(ctx.getDefaultListableBeanFactory().containsSingleton("aString"));
+	}
+
+	@Test
+	public void beanMethodOverloadingWithAdditionalMetadataButOtherMethodExecuted() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ConfigWithOverloadingAndAdditionalMetadata.class);
+		ctx.getDefaultListableBeanFactory().registerSingleton("anInt", 5);
+		ctx.setAllowBeanDefinitionOverriding(false);
+		ctx.refresh();
+		assertFalse(ctx.getDefaultListableBeanFactory().containsSingleton("aString"));
+		assertThat(ctx.getBean(String.class), equalTo("overloaded5"));
+		assertTrue(ctx.getDefaultListableBeanFactory().containsSingleton("aString"));
 	}
 
 	@Test
 	public void beanMethodOverloadingWithInheritance() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(SubConfig.class);
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(SubConfig.class);
+		ctx.setAllowBeanDefinitionOverriding(false);
+		ctx.refresh();
+		assertFalse(ctx.getDefaultListableBeanFactory().containsSingleton("aString"));
 		assertThat(ctx.getBean(String.class), equalTo("overloaded5"));
+		assertTrue(ctx.getDefaultListableBeanFactory().containsSingleton("aString"));
 	}
 
+	// SPR-11025
 	@Test
 	public void beanMethodOverloadingWithInheritanceAndList() {
-		// SPR-11025
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(SubConfigWithList.class);
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(SubConfigWithList.class);
+		ctx.setAllowBeanDefinitionOverriding(false);
+		ctx.refresh();
+		assertFalse(ctx.getDefaultListableBeanFactory().containsSingleton("aString"));
 		assertThat(ctx.getBean(String.class), equalTo("overloaded5"));
+		assertTrue(ctx.getDefaultListableBeanFactory().containsSingleton("aString"));
 	}
 
 	/**
@@ -91,11 +112,6 @@ public class BeanMethodPolymorphismTests {
 		assertThat(ctx.getBean(String.class), equalTo("shadow"));
 	}
 
-	/**
-	 * Tests that polymorphic Configuration classes need not explicitly redeclare the
-	 * {@link Configuration} annotation. This respects the {@link Inherited} nature
-	 * of the Configuration annotation, even though it's being detected via ASM.
-	 */
 	@Test
 	public void beanMethodsDetectedOnSuperClass() {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
@@ -123,6 +139,36 @@ public class BeanMethodPolymorphismTests {
 
 
 	@Configuration
+	static class ConfigWithOverloading {
+
+		@Bean
+		String aString() {
+			return "regular";
+		}
+
+		@Bean
+		String aString(Integer dependency) {
+			return "overloaded" + dependency;
+		}
+	}
+
+
+	@Configuration
+	static class ConfigWithOverloadingAndAdditionalMetadata {
+
+		@Bean @Lazy
+		String aString() {
+			return "regular";
+		}
+
+		@Bean
+		String aString(Integer dependency) {
+			return "overloaded" + dependency;
+		}
+	}
+
+
+	@Configuration
 	static class SuperConfig {
 
 		@Bean
@@ -140,7 +186,7 @@ public class BeanMethodPolymorphismTests {
 			return 5;
 		}
 
-		@Bean
+		@Bean @Lazy
 		String aString(Integer dependency) {
 			return "overloaded" + dependency;
 		}
@@ -155,7 +201,7 @@ public class BeanMethodPolymorphismTests {
 			return 5;
 		}
 
-		@Bean
+		@Bean @Lazy
 		String aString(List<Integer> dependency) {
 			return "overloaded" + dependency.get(0);
 		}

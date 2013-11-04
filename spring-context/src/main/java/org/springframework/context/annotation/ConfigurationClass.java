@@ -17,7 +17,6 @@
 package org.springframework.context.annotation;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -156,8 +155,8 @@ final class ConfigurationClass {
 	}
 
 	/**
-	 * Returns the configuration class that imported this class or {@code null} if
-	 * this configuration was not imported.
+	 * Return the configuration class that imported this class,
+	 * or {@code null} if this configuration was not imported.
 	 * @since 4.0
 	 * @see #isImported()
 	 */
@@ -182,7 +181,7 @@ final class ConfigurationClass {
 	}
 
 	public Set<ImportBeanDefinitionRegistrar> getImportBeanDefinitionRegistrars() {
-		return Collections.unmodifiableSet(importBeanDefinitionRegistrars);
+		return Collections.unmodifiableSet(this.importBeanDefinitionRegistrars);
 	}
 
 	public Map<String, Class<? extends BeanDefinitionReader>> getImportedResources() {
@@ -194,23 +193,6 @@ final class ConfigurationClass {
 		if (getMetadata().isAnnotated(Configuration.class.getName())) {
 			if (getMetadata().isFinal()) {
 				problemReporter.error(new FinalConfigurationProblem());
-			}
-		}
-
-		// An @Bean method may only be overloaded through inheritance. No single
-		// @Configuration class may declare two @Bean methods with the same name.
-		Map<String, Integer> methodNameCounts = new HashMap<String, Integer>();
-		for (BeanMethod beanMethod : this.beanMethods) {
-			String fqMethodName = beanMethod.getFullyQualifiedMethodName();
-			Integer currentCount = methodNameCounts.get(fqMethodName);
-			int newCount = (currentCount != null ? currentCount + 1 : 1);
-			methodNameCounts.put(fqMethodName, newCount);
-		}
-		for (String fqMethodName : methodNameCounts.keySet()) {
-			int count = methodNameCounts.get(fqMethodName);
-			if (count > 1) {
-				String shortMethodName = ConfigurationMethod.getShortMethodName(fqMethodName);
-				problemReporter.error(new BeanMethodOverloadingProblem(shortMethodName, count));
 			}
 		}
 
@@ -232,7 +214,7 @@ final class ConfigurationClass {
 
 	@Override
 	public String toString() {
-		return String.format("[ConfigurationClass:beanName=%s,resource=%s]", this.beanName, this.resource);
+		return "ConfigurationClass:beanName=" + this.beanName + ",resource=" + this.resource;
 	}
 
 
@@ -244,19 +226,6 @@ final class ConfigurationClass {
 		public FinalConfigurationProblem() {
 			super(String.format("@Configuration class '%s' may not be final. Remove the final modifier to continue.",
 					getSimpleName()), new Location(getResource(), getMetadata()));
-		}
-	}
-
-
-	/**
-	 * Bean methods on configuration classes may only be overloaded through inheritance.
-	 */
-	private class BeanMethodOverloadingProblem extends Problem {
-
-		public BeanMethodOverloadingProblem(String methodName, int count) {
-			super(String.format("@Configuration class '%s' has %s overloaded @Bean methods named '%s'. " +
-					"Only one @Bean method of a given name is allowed within each @Configuration class.",
-					getSimpleName(), count, methodName), new Location(getResource(), getMetadata()));
 		}
 	}
 

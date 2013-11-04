@@ -174,6 +174,7 @@ class ConfigurationClassBeanDefinitionReader {
 		if (this.conditionEvaluator.shouldSkip(beanMethod.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
 			return;
 		}
+
 		ConfigurationClass configClass = beanMethod.getConfigurationClass();
 		MethodMetadata metadata = beanMethod.getMetadata();
 
@@ -258,9 +259,12 @@ class ConfigurationClassBeanDefinitionReader {
 		BeanDefinition existingBeanDef = this.registry.getBeanDefinition(beanName);
 
 		// Is the existing bean definition one that was created from a configuration class?
-		// -> allow the current bean method to override, since both are at second-pass level
+		// -> allow the current bean method to override, since both are at second-pass level.
+		// However, if the bean method is an overloaded case on the same configuration class,
+		// preserve the existing bean definition.
 		if (existingBeanDef instanceof ConfigurationClassBeanDefinition) {
-			return false;
+			ConfigurationClassBeanDefinition ccbd = (ConfigurationClassBeanDefinition) existingBeanDef;
+			return (ccbd.getMetadata().getClassName().equals(beanMethod.getConfigurationClass().getMetadata().getClassName()));
 		}
 
 		// Has the existing bean definition bean marked as a framework-generated bean?
