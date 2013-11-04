@@ -17,11 +17,16 @@
 package org.springframework.web.socket.server.support;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.websocket.WebSocketContainer;
 
 import org.glassfish.tyrus.core.EndpointWrapper;
 import org.glassfish.tyrus.spi.SPIEndpoint;
 import org.glassfish.tyrus.websockets.WebSocketApplication;
 import org.springframework.util.ClassUtils;
+import org.springframework.web.socket.support.WebSocketExtension;
 
 
 /**
@@ -34,6 +39,14 @@ import org.springframework.util.ClassUtils;
  */
 public class GlassFish40RequestUpgradeStrategy extends AbstractGlassFishRequestUpgradeStrategy {
 
+	protected List<WebSocketExtension> getInstalledExtensions(WebSocketContainer container) {
+		try {
+			return super.getInstalledExtensions(container);
+		}
+		catch (UnsupportedOperationException e) {
+			return new ArrayList<WebSocketExtension>();
+		}
+	}
 
 	protected WebSocketApplication createTyrusEndpoint(EndpointWrapper endpoint) {
 		try {
