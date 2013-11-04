@@ -27,7 +27,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.BeansException;
+
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -90,7 +90,7 @@ import static org.springframework.context.annotation.AnnotationConfigUtils.*;
  * @since 3.0
  */
 public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor,
-		ResourceLoaderAware, BeanClassLoaderAware, EnvironmentAware, PriorityOrdered {
+		PriorityOrdered, ResourceLoaderAware, BeanClassLoaderAware, EnvironmentAware {
 
 	private static final String IMPORT_AWARE_PROCESSOR_BEAN_NAME =
 			ConfigurationClassPostProcessor.class.getName() + ".importAwareProcessor";
@@ -138,6 +138,10 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	};
 
 
+	@Override
+	public int getOrder() {
+		return Ordered.LOWEST_PRECEDENCE;  // within PriorityOrdered
+	}
 
 	/**
 	 * Set the {@link SourceExtractor} to use for generated bean definitions
@@ -318,7 +322,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					this.importBeanNameGenerator);
 		}
 
-		reader.loadBeanDefinitions(parser.getConfigurationClasses());
+		this.reader.loadBeanDefinitions(parser.getConfigurationClasses());
 
 		// Register the ImportRegistry as a bean in order to support ImportAware @Configuration classes
 		if (singletonRegistry != null) {
@@ -374,23 +378,23 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 	}
 
-	@Override
-	public int getOrder() {
-		return Ordered.LOWEST_PRECEDENCE;  // within PriorityOrdered
-	}
 
-
-	private static class ImportAwareBeanPostProcessor implements PriorityOrdered, BeanFactoryAware, BeanPostProcessor {
+	private static class ImportAwareBeanPostProcessor implements BeanPostProcessor, PriorityOrdered, BeanFactoryAware {
 
 		private BeanFactory beanFactory;
 
 		@Override
-		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		public int getOrder() {
+			return Ordered.HIGHEST_PRECEDENCE;
+		}
+
+		@Override
+		public void setBeanFactory(BeanFactory beanFactory) {
 			this.beanFactory = beanFactory;
 		}
 
 		@Override
-		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+		public Object postProcessBeforeInitialization(Object bean, String beanName)  {
 			if (bean instanceof ImportAware) {
 				ImportRegistry importRegistry = this.beanFactory.getBean(IMPORT_REGISTRY_BEAN_NAME, ImportRegistry.class);
 				String importingClass = importRegistry.getImportingClassFor(bean.getClass().getSuperclass().getName());
@@ -413,13 +417,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		@Override
-		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+		public Object postProcessAfterInitialization(Object bean, String beanName) {
 			return bean;
-		}
-
-		@Override
-		public int getOrder() {
-			return Ordered.HIGHEST_PRECEDENCE;
 		}
 	}
 
@@ -429,9 +428,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * {@link EnhancedConfiguration} beans are injected with the {@link BeanFactory}
 	 * before the {@link AutowiredAnnotationBeanPostProcessor} runs (SPR-10668).
 	 */
-	private static class EnhancedConfigurationBeanPostProcessor extends
-			InstantiationAwareBeanPostProcessorAdapter implements PriorityOrdered,
-			BeanFactoryAware {
+	private static class EnhancedConfigurationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
+			implements PriorityOrdered, BeanFactoryAware {
 
 		private BeanFactory beanFactory;
 
@@ -441,21 +439,18 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		@Override
-		public PropertyValues postProcessPropertyValues(PropertyValues pvs,
-				PropertyDescriptor[] pds, Object bean, String beanName)
-				throws BeansException {
+		public void setBeanFactory(BeanFactory beanFactory) {
+			this.beanFactory = beanFactory;
+		}
+
+		@Override
+		public PropertyValues postProcessPropertyValues(PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
 			// Inject the BeanFactory before AutowiredAnnotationBeanPostProcessor's
-			// postProcessPropertyValues method attempts to auto-wire other configuration
-			// beans.
+			// postProcessPropertyValues method attempts to auto-wire other configuration beans.
 			if (bean instanceof EnhancedConfiguration) {
 				((EnhancedConfiguration) bean).setBeanFactory(this.beanFactory);
 			}
 			return pvs;
-		}
-
-		@Override
-		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-			this.beanFactory = beanFactory;
 		}
 
 	}
