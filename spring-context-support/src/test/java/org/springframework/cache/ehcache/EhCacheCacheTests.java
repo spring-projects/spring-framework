@@ -20,7 +20,6 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.config.CacheConfiguration;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -74,6 +73,9 @@ public class EhCacheCacheTests {
 		assertNull(cache.get(key));
 		cache.put(key, value);
 		assertEquals(value, cache.get(key).get());
+		assertEquals(value, cache.get(key, String.class));
+		assertEquals(value, cache.get(key, Object.class));
+		assertEquals(value, cache.get(key, null));
 	}
 
 	@Test

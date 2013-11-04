@@ -84,6 +84,16 @@ public class JCacheCache implements Cache {
 
 	@Override
 	@SuppressWarnings("unchecked")
+	public <T> T get(Object key, Class<T> type) {
+		Object value = fromStoreValue(this.cache.get(key));
+		if (type != null && !type.isInstance(value)) {
+			throw new IllegalStateException("Cached value is not of required type [" + type.getName() + "]: " + value);
+		}
+		return (T) value;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
 	public void put(Object key, Object value) {
 		this.cache.put(key, toStoreValue(value));
 	}

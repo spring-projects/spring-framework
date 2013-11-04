@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,13 +39,33 @@ public interface Cache {
 	Object getNativeCache();
 
 	/**
-	 * Return the value to which this cache maps the specified key. Returns
-	 * {@code null} if the cache contains no mapping for this key.
-	 * @param key key whose associated value is to be returned.
+	 * Return the value to which this cache maps the specified key.
+	 * <p>Returns {@code null} if the cache contains no mapping for this key;
+	 * otherwise, the cached value (which may be {@code null} itself) will
+	 * be returned in a {@link ValueWrapper}.
+	 * @param key the key whose associated value is to be returned
 	 * @return the value to which this cache maps the specified key,
-	 * or {@code null} if the cache contains no mapping for this key
+	 * contained within a {@link ValueWrapper} which may also hold
+	 * a cached {@code null} value. A straight {@code null} being
+	 * returned means that the cache contains no mapping for this key.
+	 * @see #get(Object, Class)
 	 */
 	ValueWrapper get(Object key);
+
+	/**
+	 * Return the value to which this cache maps the specified key,
+	 * generically specifying a type that return value will be cast to.
+	 * <p>Note: This variant of {@code get} does not allow for differentiating
+	 * between a cached {@code null} value and no cache entry found at all.
+	 * Use the standard {@link #get(Object)} variant for that purpose instead.
+	 * @param key the key whose associated value is to be returned
+	 * @param type the required type of the returned value
+	 * @return the value to which this cache maps the specified key
+	 * (which may be {@code null} itself), or also {@code null} if
+	 * the cache contains no mapping for this key
+	 * @see #get(Object)
+	 */
+	<T> T get(Object key, Class<T> type);
 
 	/**
 	 * Associate the specified value with the specified key in this cache.

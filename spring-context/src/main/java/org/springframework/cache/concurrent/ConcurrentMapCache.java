@@ -16,12 +16,12 @@
 
 package org.springframework.cache.concurrent;
 
-import org.springframework.cache.Cache;
-import org.springframework.cache.support.SimpleValueWrapper;
-
 import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import org.springframework.cache.Cache;
+import org.springframework.cache.support.SimpleValueWrapper;
 
 /**
  * Simple {@link Cache} implementation based on the core JDK
@@ -101,6 +101,16 @@ public class ConcurrentMapCache implements Cache {
 	public ValueWrapper get(Object key) {
 		Object value = this.store.get(key);
 		return (value != null ? new SimpleValueWrapper(fromStoreValue(value)) : null);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T get(Object key, Class<T> type) {
+		Object value = fromStoreValue(this.store.get(key));
+		if (type != null && !type.isInstance(value)) {
+			throw new IllegalStateException("Cached value is not of required type [" + type.getName() + "]: " + value);
+		}
+		return (T) value;
 	}
 
 	@Override
