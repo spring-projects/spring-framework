@@ -4,7 +4,7 @@ buildscript {
 	}
 	dependencies {
 		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.4")
-		classpath("org.springframework.build.gradle:docbook-reference-plugin:0.2.7")
+		classpath("org.asciidoctor:asciidoctor-gradle-plugin:0.7.0")
 	}
 }
 
@@ -874,14 +874,28 @@ project("spring-aspects") {
 configure(rootProject) {
 	description = "Spring Framework"
 
-	apply plugin: "docbook-reference"
+    apply plugin: "asciidoctor"
 	apply plugin: "groovy"
+
 	// apply plugin: "detect-split-packages"
 	apply from: "${gradleScriptDir}/jdiff.gradle"
 
-	reference {
-		sourceDir = file("src/reference/docbook")
-		pdfFilename = "spring-framework-reference.pdf"
+	asciidoctor {
+		options = [
+				eruby: 'erubis',
+				attributes: [
+						copycss : '',
+						icons : 'font',
+						'source-highlighter': 'prettify',
+						sectanchors : '',
+						toc2: '',
+						idprefix: '',
+						idseparator: '-',
+						doctype: 'book',
+						'spring-version' : project.version,
+						revnumber : project.version
+				]
+		]
 	}
 
 	// TODO: DetectSplitPackagesPlugin fails in line 154 due to method not found on java.io.File.
@@ -953,7 +967,7 @@ configure(rootProject) {
 		}
 	}
 
-	task docsZip(type: Zip) {
+	task docsZip(type: Zip, dependsOn: 'asciidoctor') {
 		group = "Distribution"
 		baseName = "spring-framework"
 		classifier = "docs"
@@ -968,8 +982,10 @@ configure(rootProject) {
 			into "javadoc-api"
 		}
 
-		from (reference) {
-			into "spring-framework-reference"
+		from (asciidoctor.outputDir) {
+            exclude "build"
+            exclude "Guardfile"
+			into "spring-framework-reference/htmlsingle"
 		}
 	}
 
