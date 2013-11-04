@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,10 @@ import org.springframework.jca.work.WorkManagerTaskExecutor;
  * <p>This is the JBoss equivalent of the CommonJ
  * {@link org.springframework.scheduling.commonj.WorkManagerTaskExecutor}
  * adapter for WebLogic and WebSphere.
+ *
+ * <p><b>Note: This class does not work on JBoss 7 or higher.</b>
+ * There is no known immediate replacement, since JBoss does not want
+ * its JCA WorkManager to be exposed anymore.
  *
  * @author Juergen Hoeller
  * @since 2.5.2
