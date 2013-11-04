@@ -1,6 +1,6 @@
 = How to contribute to the reference
 
-The Spring reference now uses http://asciidoctor.org/[asciidoctor]. This document describes how to contribute documentation updates to the Spring reference.
+The Spring Framework reference now uses http://asciidoctor.org/[asciidoctor]. This document describes how to contribute documentation updates to the Spring Framework reference.
 
 == Building with Gradle
 
