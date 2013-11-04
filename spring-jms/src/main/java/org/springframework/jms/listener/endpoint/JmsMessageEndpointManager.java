@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.jms.listener.endpoint;
 import javax.jms.MessageListener;
 import javax.resource.ResourceException;
 
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.jca.endpoint.GenericMessageEndpointManager;
 import org.springframework.jms.support.destination.DestinationResolver;
 
@@ -45,7 +46,7 @@ import org.springframework.jms.support.destination.DestinationResolver;
  * @see JmsActivationSpecFactory
  * @see JmsMessageEndpointFactory
  */
-public class JmsMessageEndpointManager extends GenericMessageEndpointManager {
+public class JmsMessageEndpointManager extends GenericMessageEndpointManager implements BeanNameAware {
 
 	private final JmsMessageEndpointFactory endpointFactory = new JmsMessageEndpointFactory();
 
@@ -127,6 +128,14 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager {
 		this.activationSpecConfig = activationSpecConfig;
 	}
 
+	/**
+	 * Set the name of this message endpoint. Populated with the bean name
+	 * automatically when defined within Spring's bean factory.
+	 */
+	@Override
+	public void setBeanName(String beanName) {
+		this.endpointFactory.setBeanName(beanName);
+	}
 
 	@Override
 	public void afterPropertiesSet() throws ResourceException {
