@@ -165,7 +165,6 @@ final class ConfigurationClass {
 		return this.importedResources;
 	}
 
-
 	public void validate(ProblemReporter problemReporter) {
 		// A configuration class may not be final (CGLIB limitation)
 		if (getMetadata().isAnnotated(Configuration.class.getName())) {
@@ -196,7 +195,6 @@ final class ConfigurationClass {
 		}
 	}
 
-
 	@Override
 	public boolean equals(Object other) {
 		return (this == other || (other instanceof ConfigurationClass &&
@@ -210,7 +208,7 @@ final class ConfigurationClass {
 
 	@Override
 	public String toString() {
-		return String.format("[ConfigurationClass:beanName=%s,resource=%s]", this.beanName, this.resource);
+		return "ConfigurationClass:beanName=" + this.beanName + ",resource=" + this.resource;
 	}
 
 

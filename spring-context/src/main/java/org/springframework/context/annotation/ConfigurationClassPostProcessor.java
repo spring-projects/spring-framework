@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.Stack;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
@@ -85,7 +84,7 @@ import static org.springframework.context.annotation.AnnotationConfigUtils.*;
  * @since 3.0
  */
 public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor,
-		ResourceLoaderAware, BeanClassLoaderAware, EnvironmentAware, Ordered {
+		Ordered, ResourceLoaderAware, BeanClassLoaderAware, EnvironmentAware {
 
 	private static final String IMPORT_AWARE_PROCESSOR_BEAN_NAME =
 			ConfigurationClassPostProcessor.class.getName() + ".importAwareProcessor";
@@ -129,6 +128,10 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 	};
 
+
+	public int getOrder() {
+		return Ordered.HIGHEST_PRECEDENCE;
+	}
 
 	/**
 	 * Set the {@link SourceExtractor} to use for generated bean definitions
@@ -368,21 +371,21 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 	}
 
-	@Override
-	public int getOrder() {
-		return Ordered.HIGHEST_PRECEDENCE;
-	}
 
-
-	private static class ImportAwareBeanPostProcessor implements PriorityOrdered, BeanFactoryAware, BeanPostProcessor {
+	private static class ImportAwareBeanPostProcessor implements BeanPostProcessor, PriorityOrdered, BeanFactoryAware {
 
 		private BeanFactory beanFactory;
 
-		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		public int getOrder() {
+			return Ordered.HIGHEST_PRECEDENCE;
+		}
+
+		@Override
+		public void setBeanFactory(BeanFactory beanFactory) {
 			this.beanFactory = beanFactory;
 		}
 
-		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+		public Object postProcessBeforeInitialization(Object bean, String beanName)  {
 			if (bean instanceof ImportAware) {
 				ImportRegistry importRegistry = this.beanFactory.getBean(IMPORT_REGISTRY_BEAN_NAME, ImportRegistry.class);
 				String importingClass = importRegistry.getImportingClassFor(bean.getClass().getSuperclass().getName());
@@ -404,12 +407,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			return bean;
 		}
 
-		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+		public Object postProcessAfterInitialization(Object bean, String beanName) {
 			return bean;
-		}
-
-		public int getOrder() {
-			return Ordered.HIGHEST_PRECEDENCE;
 		}
 	}
 
