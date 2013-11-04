@@ -156,7 +156,7 @@ class ConfigurationClassBeanDefinitionReader {
 		ConfigurationClass configClass = beanMethod.getConfigurationClass();
 		MethodMetadata metadata = beanMethod.getMetadata();
 
-		RootBeanDefinition beanDef = new ConfigurationClassBeanDefinition(configClass);
+		ConfigurationClassBeanDefinition beanDef = new ConfigurationClassBeanDefinition(configClass);
 		beanDef.setResource(configClass.getResource());
 		beanDef.setSource(this.sourceExtractor.extractSource(metadata, configClass.getResource()));
 		if (metadata.isStatic()) {
@@ -188,9 +188,18 @@ class ConfigurationClassBeanDefinitionReader {
 
 		// has this already been overridden (e.g. via XML)?
 		if (this.registry.containsBeanDefinition(beanName)) {
-			BeanDefinition existingBeanDef = registry.getBeanDefinition(beanName);
-			// is the existing bean definition one that was created from a configuration class?
-			if (!(existingBeanDef instanceof ConfigurationClassBeanDefinition)) {
+			BeanDefinition existingBeanDef = this.registry.getBeanDefinition(beanName);
+			// Is the existing bean definition one that was created from a configuration class?
+			// -> allow the current bean method to override, since both are at second-pass level.
+			// However, if the bean method is an overloaded case on the same configuration class,
+			// preserve the existing bean definition.
+			if (existingBeanDef instanceof ConfigurationClassBeanDefinition) {
+				ConfigurationClassBeanDefinition ccbd = (ConfigurationClassBeanDefinition) existingBeanDef;
+				if (ccbd.getMetadata().getClassName().equals(beanMethod.getConfigurationClass().getMetadata().getClassName())) {
+					return;
+				}
+			}
+			else {
 				// no -> then it's an external override, probably XML
 				// overriding is legal, return immediately
 				if (logger.isDebugEnabled()) {
@@ -238,7 +247,7 @@ class ConfigurationClassBeanDefinitionReader {
 			beanDef.setDestroyMethodName(destroyMethodName);
 		}
 
-		// consider scoping
+		// Consider scoping
 		ScopedProxyMode proxyMode = ScopedProxyMode.NO;
 		AnnotationAttributes scope = attributesFor(metadata, Scope.class);
 		if (scope != null) {
@@ -249,7 +258,7 @@ class ConfigurationClassBeanDefinitionReader {
 			}
 		}
 
-		// replace the original bean definition with the target one, if necessary
+		// Replace the original bean definition with the target one, if necessary
 		BeanDefinition beanDefToRegister = beanDef;
 		if (proxyMode != ScopedProxyMode.NO) {
 			BeanDefinitionHolder proxyDef = ScopedProxyCreator.createScopedProxy(
@@ -259,7 +268,8 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Registering bean definition for @Bean method %s.%s()", configClass.getMetadata().getClassName(), beanName));
+			logger.debug(String.format("Registering bean definition for @Bean method %s.%s()",
+					configClass.getMetadata().getClassName(), beanName));
 		}
 
 		registry.registerBeanDefinition(beanName, beanDefToRegister);
