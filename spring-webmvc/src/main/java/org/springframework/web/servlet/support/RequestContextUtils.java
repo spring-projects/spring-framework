@@ -18,7 +18,6 @@ package org.springframework.web.servlet.support;
 
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
@@ -41,6 +40,7 @@ import org.springframework.web.servlet.ThemeResolver;
  * Locale, ThemeResolver, Theme, and MultipartResolver.
  *
  * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  * @since 03.03.2003
  * @see RequestContext
  * @see org.springframework.web.servlet.DispatcherServlet
@@ -160,7 +160,7 @@ public abstract class RequestContextUtils {
 	 * Return a read-only {@link Map} with "input" flash attributes saved on a
 	 * previous request.
 	 * @param request the current request
-	 * @return a read-only Map, or {@code null}
+	 * @return a read-only Map, or {@code null} if not found
 	 * @see FlashMap
 	 */
 	@SuppressWarnings("unchecked")
@@ -170,8 +170,8 @@ public abstract class RequestContextUtils {
 
 	/**
 	 * Return the "output" FlashMap with attributes to save for a subsequent request.
-	 * @param request current request
-	 * @return a {@link FlashMap} instance, never {@code null}
+	 * @param request the current request
+	 * @return a {@link FlashMap} instance (never {@code null} within a DispatcherServlet request)
 	 * @see FlashMap
 	 */
 	public static FlashMap getOutputFlashMap(HttpServletRequest request) {
@@ -182,6 +182,7 @@ public abstract class RequestContextUtils {
 	 * Return the FlashMapManager instance to save flash attributes with
 	 * before a redirect.
 	 * @param request the current request
+	 * @return a {@link FlashMapManager} instance (never {@code null} within a DispatcherServlet request)
 	 */
 	public static FlashMapManager getFlashMapManager(HttpServletRequest request) {
 		return (FlashMapManager) request.getAttribute(DispatcherServlet.FLASH_MAP_MANAGER_ATTRIBUTE);
