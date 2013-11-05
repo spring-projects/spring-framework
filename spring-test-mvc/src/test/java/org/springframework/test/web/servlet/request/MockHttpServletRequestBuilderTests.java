@@ -228,6 +228,19 @@ public class MockHttpServletRequestBuilderTests {
 		assertEquals("bar=baz", request.getParameter("foo"));
 	}
 
+	// SPR-11043
+
+	@Test
+	public void requestParameterFromQueryNull() throws Exception {
+		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/?foo");
+
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+		Map<String, String[]> parameterMap = request.getParameterMap();
+
+		assertArrayEquals(new String[]{null}, parameterMap.get("foo"));
+		assertEquals("foo", request.getQueryString());
+	}
+
 	@Test
 	public void acceptHeader() throws Exception {
 		this.builder.accept(MediaType.TEXT_HTML, MediaType.APPLICATION_XML);

@@ -593,9 +593,8 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 
 			for (Entry<String, List<String>> entry : this.uriComponents.getQueryParams().entrySet()) {
 				for (String value : entry.getValue()) {
-					request.addParameter(
-							UriUtils.decode(entry.getKey(), "UTF-8"),
-							UriUtils.decode(value, "UTF-8"));
+					value = (value != null) ? UriUtils.decode(value, "UTF-8") : null;
+					request.addParameter(UriUtils.decode(entry.getKey(), "UTF-8"), value);
 				}
 			}
 		}
