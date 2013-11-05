@@ -84,9 +84,9 @@ The footnote should x-ref to first section in that chapter but I can't find the 
       <classname>ApplicationContext</classname> interface are supplied
       out-of-the-box with Spring. In standalone applications it is common to
       create an instance of <link
-      xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/context/support/ClassPathXmlApplicationContext.html"
+      xl:href="http://static.springsource.org/spring/docs/current/javadoc-api/org/springframework/context/support/ClassPathXmlApplicationContext.html"
       ><classname>ClassPathXmlApplicationContext</classname></link> or <link
-      xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/context/support/FileSystemXmlApplicationContext.html"
+      xl:href="http://static.springsource.org/spring/docs/current/javadoc-api/org/springframework/context/support/FileSystemXmlApplicationContext.html"
       ><classname>FileSystemXmlApplicationContext</classname></link>.
       <!-- MLP: Beverly to review --> While XML has been the traditional format
       for defining configuration metadata you can instruct the container to use
@@ -1178,7 +1178,7 @@ cfg.postProcessBeanFactory(factory);</programlisting>
         a single ApplicationContext as a parent to WebApplicationContexts across
         WAR files. In this case you should look into using the utility class
         <link
-        xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html"
+        xl:href="http://static.springsource.org/spring/docs/current/javadoc-api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html"
         ><classname>ContextSingletonBeanFactoryLocator</classname></link>
         locator that is described in this <link
         xl:href="http://blog.springsource.com/2007/06/11/using-a-shared-parent-application-context-in-a-multi-war-spring-application/"

@@ -1005,28 +1005,28 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
               <entry>DELETE</entry>
 
               <entry><link
-              xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#delete(String,%20Object...)">delete</link></entry>
+              xl:href="http://static.springsource.org/spring/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html#delete(String,%20Object...)">delete</link></entry>
             </row>
 
             <row>
               <entry>GET</entry>
 
               <entry><link
-              xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#getForObject(String,%20Class,%20Object...)">getForObject</link></entry>
+              xl:href="http://static.springsource.org/spring/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html#getForObject(String,%20Class,%20Object...)">getForObject</link></entry>
             </row>
 
             <row>
               <entry></entry>
 
               <entry><link
-              xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#getForEntity(String,%20Class,%20Object...)">getForEntity</link></entry>
+              xl:href="http://static.springsource.org/spring/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html#getForEntity(String,%20Class,%20Object...)">getForEntity</link></entry>
             </row>
 
             <row>
               <entry>HEAD</entry>
 
               <entry><link
-              xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#headForHeaders(String,%20Object...)">headForHeaders(String
+              xl:href="http://static.springsource.org/spring/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html#headForHeaders(String,%20Object...)">headForHeaders(String
               url, String… urlVariables)</link></entry>
             </row>
 
@@ -1034,7 +1034,7 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
               <entry>OPTIONS</entry>
 
               <entry><link
-              xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#optionsForAllow(String,%20Object...)">optionsForAllow(String
+              xl:href="http://static.springsource.org/spring/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html#optionsForAllow(String,%20Object...)">optionsForAllow(String
               url, String… urlVariables)</link></entry>
             </row>
 
@@ -1042,7 +1042,7 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
               <entry>POST</entry>
 
               <entry><link
-              xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#postForLocation(String,%20Object,%20Object...)">postForLocation(String
+              xl:href="http://static.springsource.org/spring/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html#postForLocation(String,%20Object,%20Object...)">postForLocation(String
               url, Object request, String… urlVariables)</link></entry>
             </row>
 
@@ -1050,7 +1050,7 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
               <entry></entry>
 
               <entry><link
-              xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#postForObject(java.lang.String,%20java.lang.Object,%20java.lang.Class,%20java.lang.String...)">postForObject(String
+              xl:href="http://static.springsource.org/spring/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html#postForObject(java.lang.String,%20java.lang.Object,%20java.lang.Class,%20java.lang.String...)">postForObject(String
                   url, Object request, Class&lt;T&gt; responseType, String…
                   uriVariables)</link></entry>
             </row>
@@ -1059,7 +1059,7 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
               <entry>PUT</entry>
 
               <entry><link
-              xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#put(String,%20Object,%20Object...)">put(String
+              xl:href="http://static.springsource.org/spring/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html#put(String,%20Object,%20Object...)">put(String
               url, Object request, String…urlVariables)</link></entry>
             </row>
           </tbody>

@@ -768,7 +768,7 @@ public class Application {
                   This will make sure that only the registered classes are eligible for unmarshalling.
                 </para>
                 <para>
-                  Additionally, you can register <link xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/oxm/xstream/XStreamMarshaller.html#setConverters(com.thoughtworks.xstream.converters.ConverterMatcher[])">
+                  Additionally, you can register <link xl:href="http://static.springsource.org/spring/docs/current/javadoc-api/org/springframework/oxm/xstream/XStreamMarshaller.html#setConverters(com.thoughtworks.xstream.converters.ConverterMatcher[])">
                   custom converters</link> to make sure that only your supported classes can be unmarshalled.
                   You might want to add a <classname>CatchAllConverter</classname> as the last converter in the list,
                   in addition to converters that explicitly support the domain classes that should be supported.
