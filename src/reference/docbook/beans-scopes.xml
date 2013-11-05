@@ -99,7 +99,7 @@
     <para>As of Spring 3.0, a <emphasis>thread scope</emphasis> is available,
       but is not registered by default. For more information, see the
       documentation for <link
-      xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/context/support/SimpleThreadScope.html"
+      xl:href="http://static.springsource.org/spring/docs/current/javadoc-api/org/springframework/context/support/SimpleThreadScope.html"
       >SimpleThreadScope</link>. For instructions on how to register this or
       any other custom scope, see <xref
       linkend="beans-factory-scopes-custom-using"/>.</para>
