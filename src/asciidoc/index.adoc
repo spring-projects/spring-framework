@@ -14307,7 +14307,7 @@ Registered filters will be invoked through `MockFilterChain` from `spring-test` 
 
 [[spring-mvc-test-server-resources]]
 ====== Further Server-Side Test Examples
-The framework's own tests include  https://github.com/SpringSource/spring-framework/tree/master/spring-test-mvc/src/test/java/org/springframework/test/web/servlet/samples[many sample tests] intended to demonstrate how to use Spring MVC Test. Browse these examples for further ideas. Also the  https://github.com/SpringSource/spring-mvc-showcase[spring-mvc-showcase] has full test coverage based on Spring MVC Test.
+The framework's own tests include  https://github.com/SpringSource/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/servlet/samples[many sample tests] intended to demonstrate how to use Spring MVC Test. Browse these examples for further ideas. Also the  https://github.com/SpringSource/spring-mvc-showcase[spring-mvc-showcase] has full test coverage based on Spring MVC Test.
 
 [[spring-mvc-test-client]]
 ===== Client-Side REST Tests
@@ -14336,7 +14336,7 @@ Just like with server-side tests, the fluent API for client-side tests requires 
 
 [[spring-mvc-test-client-resources]]
 ====== Further Examples of Client-side REST Tests
-Spring MVC Test's own tests include  https://github.com/SpringSource/spring-framework/tree/master/spring-test-mvc/src/test/java/org/springframework/test/web/client/samples[example tests] of client-side REST tests.
+Spring MVC Test's own tests include  https://github.com/SpringSource/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/client/samples[example tests] of client-side REST tests.
 
 [[testing-examples-petclinic]]
 ==== PetClinic Example

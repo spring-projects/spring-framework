@@ -3583,7 +3583,7 @@ mockMvc.perform(get("/handle").accept(MediaType.APPLICATION_XML))
           <title>Further Server-Side Test Examples</title>
 
           <para>The framework's own tests include <link
-          xl:href="https://github.com/SpringSource/spring-framework/tree/master/spring-test-mvc/src/test/java/org/springframework/test/web/servlet/samples">many
+          xl:href="https://github.com/SpringSource/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/servlet/samples">many
           sample tests</link> intended to demonstrate how to use Spring MVC
           Test. Browse these examples for further ideas. Also the <link
           xl:href="https://github.com/SpringSource/spring-mvc-showcase">spring-mvc-showcase</link>
@@ -3641,7 +3641,7 @@ mockServer.verify();</programlisting>
           <title>Further Examples of Client-side REST Tests</title>
 
           <para>Spring MVC Test's own tests include <link
-          xl:href="https://github.com/SpringSource/spring-framework/tree/master/spring-test-mvc/src/test/java/org/springframework/test/web/client/samples">example
+          xl:href="https://github.com/SpringSource/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/client/samples">example
           tests</link> of client-side REST tests.</para>
         </section>
       </section>
