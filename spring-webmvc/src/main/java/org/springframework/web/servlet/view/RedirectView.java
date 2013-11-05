@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -251,15 +250,15 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 		return false;
 	}
 
+
 	/**
 	 * Convert model to request parameters and redirect to the given URL.
 	 * @see #appendQueryProperties
 	 * @see #sendRedirect
 	 */
 	@Override
-	protected void renderMergedOutputModel(
-			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response)
-			throws IOException {
+	protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request,
+			HttpServletResponse response) throws IOException {
 
 		String targetUrl = createTargetUrl(model, request);
 		targetUrl = updateTargetUrl(targetUrl, model, request, response);
@@ -269,10 +268,12 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			UriComponents uriComponents = UriComponentsBuilder.fromUriString(targetUrl).build();
 			flashMap.setTargetRequestPath(uriComponents.getPath());
 			flashMap.addTargetRequestParams(uriComponents.getQueryParams());
+			FlashMapManager flashMapManager = RequestContextUtils.getFlashMapManager(request);
+			if (flashMapManager == null) {
+				throw new IllegalStateException("FlashMapManager not found despite output FlashMap having been set");
+			}
+			flashMapManager.saveOutputFlashMap(flashMap, request, response);
 		}
-
-		FlashMapManager flashMapManager = RequestContextUtils.getFlashMapManager(request);
-		flashMapManager.saveOutputFlashMap(flashMap, request, response);
 
 		sendRedirect(request, response, targetUrl, this.http10Compatible);
 	}
@@ -305,7 +306,6 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			Map<String, String> variables = getCurrentRequestUriVariables(request);
 			targetUrl = replaceUriTemplateVariables(targetUrl.toString(), model, variables, enc);
 		}
-
 		if (this.exposeModelAttributes) {
 			appendQueryProperties(targetUrl, model, enc);
 		}
@@ -328,15 +328,17 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			throws UnsupportedEncodingException {
 
 		StringBuilder result = new StringBuilder();
-		Matcher m = URI_TEMPLATE_VARIABLE_PATTERN.matcher(targetUrl);
+		Matcher matcher = URI_TEMPLATE_VARIABLE_PATTERN.matcher(targetUrl);
 		int endLastMatch = 0;
-		while (m.find()) {
-			String name = m.group(1);
-			Object value = model.containsKey(name) ? model.remove(name) : currentUriVariables.get(name);
-			Assert.notNull(value, "Model has no value for '" + name + "'");
-			result.append(targetUrl.substring(endLastMatch, m.start()));
+		while (matcher.find()) {
+			String name = matcher.group(1);
+			Object value = (model.containsKey(name) ? model.remove(name) : currentUriVariables.get(name));
+			if (value == null) {
+				throw new IllegalArgumentException("Model has no value for key '" + name + "'");
+			}
+			result.append(targetUrl.substring(endLastMatch, matcher.start()));
 			result.append(UriUtils.encodePathSegment(value.toString(), encodingScheme));
-			endLastMatch = m.end();
+			endLastMatch = matcher.end();
 		}
 		result.append(targetUrl.substring(endLastMatch, targetUrl.length()));
 		return result;
@@ -345,7 +347,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	@SuppressWarnings("unchecked")
 	private Map<String, String> getCurrentRequestUriVariables(HttpServletRequest request) {
 		Map<String, String> uriVars =
-			(Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+				(Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 		return (uriVars != null) ? uriVars : Collections.<String, String> emptyMap();
 	}
 
@@ -442,7 +444,6 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 		if (isEligibleValue(value)) {
 			return true;
 		}
-
 		if (value.getClass().isArray()) {
 			int length = Array.getLength(value);
 			if (length == 0) {
@@ -456,7 +457,6 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			}
 			return true;
 		}
-
 		if (value instanceof Collection) {
 			Collection coll = (Collection) value;
 			if (coll.isEmpty()) {
@@ -469,7 +469,6 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			}
 			return true;
 		}
-
 		return false;
 	}
 
@@ -505,7 +504,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	 * @return the updated URL or the same as URL as the one passed in
 	 */
 	protected String updateTargetUrl(String targetUrl, Map<String, Object> model,
-								  HttpServletRequest request, HttpServletResponse response) {
+			HttpServletRequest request, HttpServletResponse response) {
 
 		RequestContext requestContext = null;
 		if (getWebApplicationContext() != null) {
@@ -517,14 +516,12 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 				requestContext = new RequestContext(request, response, wac.getServletContext(), model);
 			}
 		}
-
 		if (requestContext != null) {
 			RequestDataValueProcessor processor = requestContext.getRequestDataValueProcessor();
 			if (processor != null) {
 				targetUrl = processor.processUrl(request, targetUrl);
 			}
 		}
-
 		return targetUrl;
 	}
 
@@ -536,12 +533,10 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	 * @param http10Compatible whether to stay compatible with HTTP 1.0 clients
 	 * @throws IOException if thrown by response methods
 	 */
-	protected void sendRedirect(
-			HttpServletRequest request, HttpServletResponse response, String targetUrl, boolean http10Compatible)
-			throws IOException {
+	protected void sendRedirect(HttpServletRequest request, HttpServletResponse response,
+			String targetUrl, boolean http10Compatible) throws IOException {
 
 		String encodedRedirectURL = response.encodeRedirectURL(targetUrl);
-
 		if (http10Compatible) {
 			if (this.statusCode != null) {
 				response.setStatus(this.statusCode.value());
