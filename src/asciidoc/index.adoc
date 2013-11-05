@@ -1,7 +1,7 @@
 = Spring Framework Reference Documentation
 Rod Johnson; Juergen Hoeller; Keith Donald; Colin Sampaleanu; Rob Harrop; Thomas Risberg; Alef Arendsen; Darren Davison; Dmitriy Kopylenko; Mark Pollack; Thierry Templier; Erwin Vervaet; Portia Tung; Ben Hale; Adrian Colyer; John Lewis; Costin Leau; Mark Fisher; Sam Brannen; Ramnivas Laddad; Arjen Poutsma; Chris Beams; Tareq Abedrabbo; Andy Clement; Dave Syer; Oliver Gierke; Rossen Stoyanchev; Phillip Webb; Rob Winch
 
-Core support for dependency injection, transaction management, web applications, data access, messaging, testing and more.
+rCore support for dependency injection, transaction management, web applications, data access, messaging, testing and more.
 
 __Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically.__
     
@@ -17,7 +17,7 @@ This document is a reference guide to Spring Framework features. If you have any
 == Introduction to Spring Framework
 Spring Framework is a Java platform that provides comprehensive infrastructure support for developing Java applications. Spring handles the infrastructure so you can focus on your application.
 
-Spring enables you to build applications from “plain old Java objects” (POJOs) and to apply enterprise services non-invasively to POJOs. This capability applies to the Java SE programming model and to full and partial Java EE.
+Spring enables you to build applications from "plain old Java objects" (POJOs) and to apply enterprise services non-invasively to POJOs. This capability applies to the Java SE programming model and to full and partial Java EE.
 
 Examples of how you, as an application developer, can use the Spring platform advantage:
 
@@ -1005,7 +1005,7 @@ Finally, the adoption of the test-driven-development (TDD) approach to software 
 === Introduction to the Spring IoC container and beans
 This chapter covers the Spring Framework implementation of the Inversion of Control (IoC)  footnote:[See pass:specialcharacters,macros[<<background-ioc>>] ] principle. IoC is also known as __dependency injection__ (DI). It is a process whereby objects define their dependencies, that is, the other objects they work with, only through constructor arguments, arguments to a factory method, or properties that are set on the object instance after it is constructed or returned from a factory method. The container then __injects__ those dependencies when it creates the bean. This process is fundamentally the inverse, hence the name __Inversion of Control__ (IoC), of the bean itself controlling the instantiation or location of its dependencies by using direct construction of classes, or a mechanism such as the __Service Locator__ pattern.
 
-The `org.springframework.beans` and `org.springframework.context` packages are the basis for Spring Framework's IoC container. The `http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/BeanFactory.html[BeanFactory]` interface provides an advanced configuration mechanism capable of managing any type of object. `http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/context/ApplicationContext.html[ApplicationContext]` is a sub-interface of `BeanFactory`. It adds easier integration with Spring's AOP features; message resource handling (for use in internationalization), event publication; and application-layer specific contexts such as the `WebApplicationContext` for use in web applications.
+The `org.springframework.beans` and `org.springframework.context` packages are the basis for Spring Framework's IoC container. The http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/BeanFactory.html[BeanFactory] interface provides an advanced configuration mechanism capable of managing any type of object. http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/context/ApplicationContext.html[ApplicationContext] is a sub-interface of `BeanFactory`. It adds easier integration with Spring's AOP features; message resource handling (for use in internationalization), event publication; and application-layer specific contexts such as the `WebApplicationContext` for use in web applications.
 
 In short, the `BeanFactory` provides the configuration framework and basic functionality, and the `ApplicationContext` adds more enterprise-specific functionality. The `ApplicationContext` is a complete superset of the `BeanFactory`, and is used exclusively in this chapter in descriptions of Spring's IoC container.For more information on using the `BeanFactory` instead of the `ApplicationContext,` refer to <<beans-beanfactory>>.
 
@@ -1410,7 +1410,7 @@ public class DefaultServiceLocator {
 }
 ----
 
-This approach shows that the factory bean itself can be managed and configured through dependency injection (DI). See <<beans-factory-properties-detailed,<<beans-factory-properties-detailed,Dependencies and configuration in detail>>.>>
+This approach shows that the factory bean itself can be managed and configured through dependency injection (DI). See <<beans-factory-properties-detailed,Dependencies and configuration in detail>>.
 
 [NOTE]
 ====
@@ -1549,7 +1549,7 @@ As of Spring 3.0 you can also use the constructor parameter name for value disam
 </bean>
 ----
 
-Keep in mind that to make this work out of the box your code must be compiled with the debug flag enabled so that Spring can look up the parameter name from the constructor. If you can't compile your code with debug flag (or don't want to) you can use `http://download.oracle.com/javase/6/docs/api/java/beans/ConstructorProperties.html[@ConstructorProperties]` JDK annotation to explicitly name your constructor arguments. The sample class would then have to look as follows:
+Keep in mind that to make this work out of the box your code must be compiled with the debug flag enabled so that Spring can look up the parameter name from the constructor. If you can't compile your code with debug flag (or don't want to) you can use http://download.oracle.com/javase/6/docs/api/java/beans/ConstructorProperties.html[@ConstructorProperties] JDK annotation to explicitly name your constructor arguments. The sample class would then have to look as follows:
 
 [source,java]
 [subs="verbatim,quotes"]
@@ -4896,7 +4896,7 @@ A `WebApplicationContext` variant of `AnnotationConfigApplicationContext` is ava
 [[beans-java-bean-annotation]]
 ==== Using the @Bean annotation
 
-`@Bean` is a method-level annotation and a direct analog of the XML `<bean/>` element. The annotation supports some of the attributes offered by `<bean/>`, such as: `<<beans-factory-lifecycle-initializingbean,init-method>>`, `<<beans-factory-lifecycle-disposablebean,destroy-method>>`, `<<beans-factory-autowire,autowiring>>` and `name`.
+`@Bean` is a method-level annotation and a direct analog of the XML `<bean/>` element. The annotation supports some of the attributes offered by `<bean/>`, such as: <<beans-factory-lifecycle-initializingbean,init-method>>, <<beans-factory-lifecycle-disposablebean,destroy-method>>, <<beans-factory-autowire,autowiring>> and `name`.
 
 You can use the `@Bean` annotation in a `@Configuration`-annotated or in a `@Component`-annotated class.
 
@@ -4942,7 +4942,7 @@ Any classes defined with the `@Bean` annotation support the regular lifecycle ca
 
 The regular Spring <<beans-factory-nature,lifecycle>> callbacks are fully supported as well. If a bean implements `InitializingBean`, `DisposableBean`, or `Lifecycle`, their respective methods are called by the container.
 
-The standard set of `*Aware` interfaces such as `<<beans-beanfactory,BeanFactoryAware>>`, `<<beans-factory-aware,BeanNameAware>>`, `<<context-functionality-messagesource,MessageSourceAware>>`, `<<beans-factory-aware,ApplicationContextAware>>`, and so on are also fully supported.
+The standard set of `*Aware` interfaces such as <<beans-beanfactory,BeanFactoryAware>>, <<beans-factory-aware,BeanNameAware>>, <<context-functionality-messagesource,MessageSourceAware>>, <<beans-factory-aware,ApplicationContextAware>>, and so on are also fully supported.
 
 The `@Bean` annotation supports specifying arbitrary initialization and destruction callback methods, much like Spring XML's `init-method` and `destroy-method` attributes on the `bean` element:
 
@@ -15257,15 +15257,15 @@ The `@Transactional` annotation is metadata that specifies that an interface, cl
 These default settings can be changed; the various properties of the `@Transactional` annotation are summarized in the following table:
 
 [[tx-attransactional-properties]]
-.@Transactional properties
+.@
 |===
 | Property| Type| Description
 
-a| `<<tx-multiple-tx-mgrs-with-attransactional,value>>`
+a| <<tx-multiple-tx-mgrs-with-attransactional,value>>
 | String
 |  Optional qualifier specifying the transaction manager to be used.
 
-a| `<<tx-propagation,propagation>>`
+a| <<tx-propagation,propagation>>
 | enum: `Propagation`
 | Optional propagation setting.
 
@@ -25256,7 +25256,7 @@ This can be very valuable since you can then use interceptors to pre-process and
 === Handler mappings
 Using a handler mapping you can map incoming portlet requests to appropriate handlers. There are some handler mappings you can use out of the box, for example, the `PortletModeHandlerMapping`, but let's first examine the general concept of a `HandlerMapping`.
 
-Note: We are intentionally using the term “Handler” here instead of “Controller”. `DispatcherPortlet` is designed to be used with other ways to process requests than just Spring Portlet MVC’s own Controllers. A Handler is any Object that can handle portlet requests. Controllers are an example of Handlers, and they are of course the default. To use some other framework with `DispatcherPortlet`, a corresponding implementation of `HandlerAdapter` is all that is needed.
+Note: We are intentionally using the term "Handler" here instead of "Controller". `DispatcherPortlet` is designed to be used with other ways to process requests than just Spring Portlet MVC’s own Controllers. A Handler is any Object that can handle portlet requests. Controllers are an example of Handlers, and they are of course the default. To use some other framework with `DispatcherPortlet`, a corresponding implementation of `HandlerAdapter` is all that is needed.
 
 The functionality a basic `HandlerMapping` provides is the delivering of a `HandlerExecutionChain`, which must contain the handler that matches the incoming request, and may also contain a list of handler interceptors that are applied to the request. When a request comes in, the `DispatcherPortlet` will hand it over to the handler mapping to let it inspect the request and come up with an appropriate `HandlerExecutionChain`. Then the `DispatcherPortlet` will execute the handler and interceptors in the chain (if any). These concepts are all exactly the same as in Spring Web MVC.
 
@@ -25302,7 +25302,7 @@ The bean configuration for this mapping will look something like this:
 [source,xml]
 [subs="verbatim,quotes"]
 ----
-<bean class="org.springframework.web.portlet.handler.ParameterHandlerMapping”>
+<bean class="org.springframework.web.portlet.handler.ParameterHandlerMapping">
     <property name="parameterMap">
         <map>
             <entry key="add" value-ref="addItemHandler"/>
@@ -25432,7 +25432,7 @@ After the `PortletMultipartResolver` has finished doing its job, the request wil
 </form>
 ----
 
-As you can see, we've created a field named “file” that matches the property of the bean that holds the `byte[]` array. Furthermore we've added the encoding attribute ( `enctype="multipart/form-data"`), which is necessary to let the browser know how to encode the multipart fields (do not forget this!).
+As you can see, we've created a field named "file" that matches the property of the bean that holds the `byte[]` array. Furthermore we've added the encoding attribute ( `enctype="multipart/form-data"`), which is necessary to let the browser know how to encode the multipart fields (do not forget this!).
 
 Just as with any other property that's not automagically convertible to a string or primitive type, to be able to put binary data in your objects you have to register a custom editor with the `PortletRequestDataBinder`. There are a couple of editors available for handling files and setting the results on an object. There's a `StringMultipartFileEditor` capable of converting files to Strings (using a user-defined character set), and there is a `ByteArrayMultipartFileEditor` which converts files to byte arrays. They function analogous to the `CustomDateEditor`.
 
@@ -25877,7 +25877,7 @@ The process of deploying a Spring Portlet MVC application is no different than d
 
 Generally, the portal/portlet container runs in one webapp in your servlet container and your portlets run in another webapp in your servlet container. In order for the portlet container webapp to make calls into your portlet webapp it must make cross-context calls to a well-known servlet that provides access to the portlet services defined in your `portlet.xml` file.
 
-The JSR-168 specification does not specify exactly how this should happen, so each portlet container has its own mechanism for this, which usually involves some kind of “deployment process” that makes changes to the portlet webapp itself and then registers the portlets within the portlet container.
+The JSR-168 specification does not specify exactly how this should happen, so each portlet container has its own mechanism for this, which usually involves some kind of "deployment process" that makes changes to the portlet webapp itself and then registers the portlets within the portlet container.
 
 At a minimum, the `web.xml` file in your portlet webapp is modified to inject the well-known servlet that the portlet container will call. In some cases a single servlet will service all portlets in the webapp, in other cases there will be an instance of the servlet for each portlet.
 
@@ -31256,7 +31256,7 @@ Please note that in order to effect the automatic 'pickup' of any changes to dyn
 
 Find below an example of a Spring `org.springframework.validation.Validator` implemented using the Groovy dynamic language. (See <<validator>> for a discussion of the `Validator` interface.) 
 
-[source,grovy]
+[source,groovy]
 [subs="verbatim,quotes"]
 ----
 import org.springframework.validation.Validator
@@ -31628,7 +31628,7 @@ The caching abstraction allows one to use her own annotations to identify what m
 ----
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
-@Cacheable(value=“books”, key="#isbn")
+@Cacheable(value="books", key="#isbn")
 public @interface SlowService {
 }
 ----
