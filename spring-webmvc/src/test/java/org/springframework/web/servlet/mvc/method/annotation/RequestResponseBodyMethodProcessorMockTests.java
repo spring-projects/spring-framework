@@ -187,6 +187,12 @@ public class RequestResponseBodyMethodProcessorMockTests {
 		}
 	}
 
+	@Test(expected = HttpMediaTypeNotSupportedException.class)
+	public void resolveArgumentInvalidContentType() throws Exception {
+		this.servletRequest.setContentType("bad");
+		processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
+	}
+
 	@Test
 	public void resolveArgumentNotRequiredNoContent() throws Exception {
 		servletRequest.setContent(null);
