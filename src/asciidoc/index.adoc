@@ -2219,7 +2219,8 @@ If a bean is a dependency of another that usually means that one bean is set as 
 [source,xml]
 [subs="verbatim,quotes"]
 ----
-<bean id="beanOne" class="ExampleBean" depends-on="__manager__"/><bean id="__manager__" class="ManagerBean" />
+<bean id="beanOne" class="ExampleBean" depends-on="**manager**"/>
+<bean id="**manager**" class="ManagerBean" />
 ----
 
 To express a dependency on multiple beans, supply a list of bean names as the value of the `depends-on` attribute, with commas, whitespace and semicolons, used as valid delimiters:
@@ -2249,7 +2250,8 @@ In XML, this behavior is controlled by the `lazy-init` attribute on the `<bean/>
 [source,xml]
 [subs="verbatim,quotes"]
 ----
-<bean id="lazy" class="com.foo.ExpensiveToCreateBean" __lazy-init="true"__/><bean name="not.lazy" class="com.foo.AnotherBean"/>
+<bean id="lazy" class="com.foo.ExpensiveToCreateBean" **lazy-init="true"**/>
+<bean name="not.lazy" class="com.foo.AnotherBean"/>
 ----
 
 When the preceding configuration is consumed by an `ApplicationContext`, the bean named `lazy` is not eagerly pre-instantiated when the `ApplicationContext` is starting up, whereas the `not.lazy` bean is eagerly pre-instantiated.
@@ -3288,7 +3290,10 @@ If you work with an `ApplicationContext` interface programmatically, child bean 
 
 <bean id="inheritsWithDifferentClass"
       class="org.springframework.beans.DerivedTestBean"
-      __parent="inheritedTestBean"__ init-method="initialize"><property name="name" value="override"/><!-- the age property value of 1 will be inherited from  parent -->
+      **parent="inheritedTestBean"** init-method="initialize">
+
+  <property name="name" value="override"/>
+  <!-- the age property value of 1 will be inherited from  parent -->
 
 </bean>
 ----
@@ -3867,7 +3872,10 @@ Because autowiring by type may lead to multiple candidates, it is often necessar
 public class MovieRecommender {
 
   @Autowired
-  __@Qualifier("main")__ private MovieCatalog movieCatalog; // ...
+  **@Qualifier("main")**
+  private MovieCatalog movieCatalog;
+
+  // ...
 }
 ----
 
@@ -3883,7 +3891,13 @@ public class MovieRecommender {
   private CustomerPreferenceDao customerPreferenceDao;
 
   @Autowired
-  public void prepare(__@Qualifier("main")__ MovieCatalog movieCatalog, CustomerPreferenceDao customerPreferenceDao) { this.movieCatalog = movieCatalog; this.customerPreferenceDao = customerPreferenceDao; } // ...
+  public void prepare(**@Qualifier("main")**MovieCatalog movieCatalog,
+                      CustomerPreferenceDao customerPreferenceDao) {
+      this.movieCatalog = movieCatalog;
+      this.customerPreferenceDao = customerPreferenceDao;
+  }
+
+  // ...
 }
 ----
 
@@ -3904,11 +3918,15 @@ The corresponding bean definitions appear as follows. The bean with qualifier va
   <context:annotation-config/>
 
   <bean class="example.SimpleMovieCatalog">
-      __<qualifier value="main"/>__<!-- inject any dependencies required by this bean -->
+      **<qualifier value="main"/>**
+
+      <!-- inject any dependencies required by this bean -->
   </bean>
 
   <bean class="example.SimpleMovieCatalog">
-      __<qualifier value="action"/>__<!-- inject any dependencies required by this bean -->
+      **<qualifier value="action"/>**
+
+      <!-- inject any dependencies required by this bean -->
   </bean>
 
   <bean id="movieRecommender" class="example.MovieRecommender"/>
@@ -3937,8 +3955,10 @@ You can create your own custom qualifier annotations. Simply define an annotatio
 ----
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-__@Qualifier__
-public @interface Genre { String value();
+**@Qualifier**
+public @interface Genre {
+
+    String value();
 }
 ----
 
@@ -3950,7 +3970,16 @@ Then you can provide the custom qualifier on autowired fields and parameters:
 public class MovieRecommender {
 
   @Autowired
-  __@Genre("Action")__ private MovieCatalog actionCatalog; private MovieCatalog comedyCatalog; @Autowired public void setComedyCatalog(__@Genre("Comedy")__ MovieCatalog comedyCatalog) { this.comedyCatalog = comedyCatalog; } // ...
+  **@Genre("Action")**
+  private MovieCatalog actionCatalog;
+  private MovieCatalog comedyCatalog;
+
+  @Autowired
+  public void setComedyCatalog(**@Genre("Comedy")** MovieCatalog comedyCatalog) {
+    this.comedyCatalog = comedyCatalog;
+  }
+
+  // ...
 }
 ----
 
@@ -3971,11 +4000,13 @@ Next, provide the information for the candidate bean definitions. You can add `<
   <context:annotation-config/>
 
   <bean class="example.SimpleMovieCatalog">
-      __<qualifier type="Genre" value="Action"/>__<!-- inject any dependencies required by this bean -->
+      **<qualifier type="Genre" value="Action"/>**
+      <!-- inject any dependencies required by this bean -->
   </bean>
 
   <bean class="example.SimpleMovieCatalog">
-      __<qualifier type="example.Genre" value="Comedy"/>__<!-- inject any dependencies required by this bean -->
+      **_<qualifier type="example.Genre" value="Comedy"/>**
+      <!-- inject any dependencies required by this bean -->
   </bean>
 
   <bean id="movieRecommender" class="example.MovieRecommender"/>
@@ -4006,7 +4037,10 @@ Then add the annotation to the field or property to be autowired:
 public class MovieRecommender {
 
   @Autowired
-  __@Offline__ private MovieCatalog offlineCatalog; // ...
+  **@Offline**
+  private MovieCatalog offlineCatalog;
+
+  // ...
 }
 ----
 
@@ -4016,7 +4050,8 @@ Now the bean definition only needs a qualifier `type`:
 [subs="verbatim,quotes"]
 ----
 <bean class="example.SimpleMovieCatalog">
-  __<qualifier type="Offline"/>__<!-- inject any dependencies required by this bean -->
+  **<qualifier type="Offline"/>**
+  <!-- inject any dependencies required by this bean -->
 </bean>
 ----
 
@@ -4157,7 +4192,10 @@ public class SimpleMovieLister {
 
   private MovieFinder movieFinder;
 
-  __@Resource(name="myMovieFinder")__ public void setMovieFinder(MovieFinder movieFinder) { this.movieFinder = movieFinder; }
+  **@Resource(name="myMovieFinder")**
+  public void setMovieFinder(MovieFinder movieFinder) {
+    this.movieFinder = movieFinder;
+  }
 }
 ----
 
@@ -4170,7 +4208,10 @@ public class SimpleMovieLister {
 
   private MovieFinder movieFinder;
 
-  __@Resource__ public void setMovieFinder(MovieFinder movieFinder) { this.movieFinder = movieFinder; }
+  **@Resource**
+  public void setMovieFinder(MovieFinder movieFinder) {
+    this.movieFinder = movieFinder;
+  }
 }
 ----
 
@@ -4517,8 +4558,9 @@ The `@Qualifier` annotation is discussed in <<beans-autowired-annotation-qualifi
 [subs="verbatim,quotes"]
 ----
 @Component
-__@Qualifier("Action")__
-public class ActionMovieCatalog implements MovieCatalog { // ...
+**@Qualifier("Action")**
+public class ActionMovieCatalog implements MovieCatalog {
+  // ...
 }
 ----
 
@@ -4526,8 +4568,9 @@ public class ActionMovieCatalog implements MovieCatalog { // ...
 [subs="verbatim,quotes"]
 ----
 @Component
-__@Genre("Action")__
-public class ActionMovieCatalog implements MovieCatalog { // ...
+**@Genre("Action")**
+public class ActionMovieCatalog implements MovieCatalog {
+  // ...
 }
 ----
 
@@ -4535,8 +4578,9 @@ public class ActionMovieCatalog implements MovieCatalog { // ...
 [subs="verbatim,quotes"]
 ----
 @Component
-__@Offline__
-public class CachingMovieCatalog implements MovieCatalog { // ...
+**@Offline**
+public class CachingMovieCatalog implements MovieCatalog {
+  // ...
 }
 ----
 
@@ -5014,7 +5058,10 @@ The default scope is `singleton`, but you can override this with the `@Scope` an
 @Configuration
 public class MyConfiguration {
   @Bean
-  __@Scope("prototype")__ public Encryptor encryptor() { // ... }
+  **@Scope("prototype")**
+  public Encryptor encryptor() {
+    // ...
+  }
 }
 ----
 
@@ -5030,10 +5077,17 @@ If you port the scoped proxy example from the XML reference documentation (see p
 ----
 // an HTTP Session-scoped bean exposed as a proxy
 @Bean
-__@Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)__
-public UserPreferences userPreferences() { return new UserPreferences();
-} @Bean
-public Service userService() { UserService service = new SimpleUserService(); // a reference to the proxied userPreferences bean service.setUserPreferences(userPreferences()); return service;
+**@Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)**
+public UserPreferences userPreferences() {
+  return new UserPreferences();
+}
+
+@Bean
+public Service userService() {
+  UserService service = new SimpleUserService();
+  // a reference to the proxied userPreferences bean
+  service.setUserPreferences(userPreferences());
+  return service;
 }
 ----
 
@@ -6830,7 +6884,10 @@ public final class RegisterUserController extends SimpleFormController {
 
     protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder)
                         throws Exception {
-        __this.customPropertyEditorRegistrar.registerCustomEditors(binder);__ } // other methods to do with registering a User
+        **this.customPropertyEditorRegistrar.registerCustomEditors(binder);**
+    }
+
+    // other methods to do with registering a User
 }
 ----
 
@@ -7582,7 +7639,7 @@ To trigger validation of a @Controller input, simply annotate the input argument
 public class MyController {
 
     @RequestMapping("/foo", method=RequestMethod.POST)
-    public void processFoo(__@Valid__ Foo foo) { /* ... */ }
+    public void processFoo(**@Valid** Foo foo) { /* ... */ }
 ----
 
 Spring MVC will validate a @Valid object after binding so-long as an appropriate Validator has been configured.
@@ -7722,7 +7779,7 @@ The following code introduces the SpEL API to evaluate the literal string expres
 [subs="verbatim,quotes"]
 ----
 ExpressionParser parser = new SpelExpressionParser();
-Expression exp = parser.parseExpression("__'Hello World'__");
+Expression exp = parser.parseExpression("**\'Hello World'**");
 String message = (String) exp.getValue();
 ----
 
@@ -7740,7 +7797,7 @@ As an example of method invocation, we call the 'concat' method on the string li
 [subs="verbatim,quotes"]
 ----
 ExpressionParser parser = new SpelExpressionParser();
-Expression exp = parser.parseExpression("__'Hello World'.concat('!')__");
+Expression exp = parser.parseExpression("**\'Hello World'.concat(\'!')**");
 String message = (String) exp.getValue();
 ----
 
@@ -7754,7 +7811,8 @@ As an example of calling a JavaBean property, the String property 'Bytes' can be
 ExpressionParser parser = new SpelExpressionParser();
 
 // invokes 'getBytes()'
-Expression exp = parser.parseExpression("__'Hello World'.bytes__"); byte[] bytes = (byte[]) exp.getValue();
+Expression exp = parser.parseExpression("**\'Hello World'.bytes**");
+byte[] bytes = (byte[]) exp.getValue();
 ----
 
 SpEL also supports nested properties using standard 'dot' notation, i.e. prop1.prop2.prop3 and the setting of property values
@@ -7767,7 +7825,8 @@ Public fields may also be accessed.
 ExpressionParser parser = new SpelExpressionParser();
 
 // invokes 'getBytes().length'
-Expression exp = parser.parseExpression("__'Hello World'.bytes.length__"); int length = (Integer) exp.getValue();
+Expression exp = parser.parseExpression("**\'Hello World'.bytes.length**");
+int length = (Integer) exp.getValue();
 ----
 
 The String's constructor can be called instead of using a string literal.
@@ -7776,7 +7835,7 @@ The String's constructor can be called instead of using a string literal.
 [subs="verbatim,quotes"]
 ----
 ExpressionParser parser = new SpelExpressionParser();
-Expression exp = parser.parseExpression("__new String('hello world').toUpperCase()__");
+Expression exp = parser.parseExpression("**new String(\'hello world').toUpperCase()**");
 String message = exp.getValue(String.class);
 ----
 
@@ -7795,8 +7854,10 @@ c.set(1856, 7, 9);
 Inventor tesla = new Inventor("Nikola Tesla", c.getTime(), "Serbian");
 
 ExpressionParser parser = new SpelExpressionParser();
-Expression exp = parser.parseExpression("__name__");
-EvaluationContext context = new StandardEvaluationContext(tesla); String name = (String) exp.getValue(context);
+Expression exp = parser.parseExpression("**name**");
+
+EvaluationContext context = new StandardEvaluationContext(tesla);
+String name = (String) exp.getValue(context);
 ----
 
 In the last line, the value of the string variable 'name' will be set to "Nikola Tesla". The class StandardEvaluationContext is where you can specify which object the "name" property will be evaluated against.  This is the mechanism to use if the root object is unlikely to change, it can simply be set once in the evaluation context.  If the root object is likely to change repeatedly, it can be supplied on each call to `getValue`, as this next example shows:
@@ -7812,7 +7873,8 @@ c.set(1856, 7, 9);
 Inventor tesla = new Inventor("Nikola Tesla", c.getTime(), "Serbian");
 
 ExpressionParser parser = new SpelExpressionParser();
-Expression exp = parser.parseExpression("__name__"); String name = (String) exp.getValue(tesla);
+Expression exp = parser.parseExpression("**name**");
+String name = (String) exp.getValue(tesla);
 ----
 
 In this case the inventor `tesla` has been supplied directly to `getValue` and the expression evaluation infrastructure creates and manages a default evaluation context internally - it did not require one to be supplied.
@@ -9933,7 +9995,11 @@ When combining pointcut sub-expressions, '&&' is awkward within an XML document,
   <aop:aspect id="myAspect" ref="aBean">
 
     <aop:pointcut id="businessService"
-          expression="execution(* com.xyz.myapp.service.*.*(..)) __and__ this(service)"/><aop:before pointcut-ref="businessService" method="monitor"/> ... </aop:aspect></aop:config>
+          expression="execution(* com.xyz.myapp.service.*.*(..)) **and** this(service)"/>
+    <aop:before pointcut-ref="businessService" method="monitor"/>
+    ...
+  </aop:aspect>
+</aop:config>
 ----
 
 Note that pointcuts defined in this way are referred to by their XML id and cannot be used as named pointcuts to form composite pointcuts. The named pointcut support in the schema based definition style is thus more limited than that offered by the @AspectJ style.
@@ -10819,7 +10885,10 @@ The majority of AspectJ aspects are __singleton__ aspects. Configuration of thes
 [subs="verbatim,quotes"]
 ----
 <bean id="profiler" class="com.xyz.profiler.Profiler"
-      __factory-method="aspectOf"__><property name="profilingStrategy" ref="jamonProfilingStrategy"/></bean>
+      **factory-method="aspectOf"**>
+
+      <property name="profilingStrategy" ref="jamonProfilingStrategy"/>
+</bean>
 ----
 
 Non-singleton aspects are harder to configure: however it is possible to do so by creating prototype bean definitions and using the `@Configurable` support from `spring-aspects.jar` to configure the aspect instances once they have bean created by the AspectJ runtime.
@@ -10939,7 +11008,8 @@ http://www.springframework.org/schema/context
           class="foo.StubEntitlementCalculationService"/>
 
     <!-- this switches on the load-time weaving -->
-    __<context:load-time-weaver/>__</beans>
+    **<context:load-time-weaver/>**
+</beans>
 ----
 
 Now that all the required artifacts are in place - the aspect, the ' `META-INF/aop.xml`' file, and the Spring configuration -, let us create a simple driver class with a `main(..)` method to demonstrate the LTW in action.
@@ -11235,7 +11305,8 @@ In Tomcat 5.5.x, versions 5.5.20 or later, you should set __useSystemClassLoader
 <Context path="/myWebApp" docBase="/my/webApp/location">
     <Loader
         loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"
-            __useSystemClassLoaderAsParent="false"__/></Context>
+            **useSystemClassLoaderAsParent="false"**/>
+</Context>
 ----
 
 This setting is not needed on Tomcat 6 or higher.
@@ -12512,9 +12583,10 @@ The `org.springframework.test.util` package contains `ReflectionTestUtils`, whic
 * Spring's support for annotations such as `@Autowired`, `@Inject`, and `@Resource,` which provides dependency injection for `private` or `protected` fields, setter methods, and configuration methods.
 
 [[unit-testing-spring-mvc]]
-===== Spring MVCUnit testing Spring MVC Controllers
+===== Spring MVC
 The `org.springframework.test.web` package contains `ModelAndViewAssert`, which you can use in combination with JUnit, TestNG, or any other testing framework for unit tests dealing with Spring MVC `ModelAndView` objects.
 
+.Unit testing Spring MVC Controllers
 [TIP]
 ====
 
@@ -12602,84 +12674,126 @@ The `spring-jdbc` module provides support for configuring and launching an embed
 ===== Spring Testing Annotations
 The Spring Framework provides the following set of __Spring-specific__ annotations that you can use in your unit and integration tests in conjunction with the TestContext framework. Refer to the respective Javadoc for further information, including default attribute values, attribute aliases, and so on.
 
-* __@ContextConfiguration__
+* `@ContextConfiguration`
+
++
 
 Defines class-level metadata that is used to determine how to load and configure an `ApplicationContext` for integration tests. Specifically, `@ContextConfiguration` declares __either__ the application context resource `locations` __or__ the annotated `classes` that will be used to load the context.
 
++
+
 Resource locations are typically XML configuration files located in the classpath; whereas, annotated classes are typically `@Configuration` classes. However, resource locations can also refer to files in the file system, and annotated classes can be component classes, etc.
 
-[source,java]
-[subs="verbatim,quotes"]
-----
-__@ContextConfiguration__("/test-config.xml")
-public class XmlApplicationContextTests { // class body...
-}
-----
++
 
 [source,java]
 [subs="verbatim,quotes"]
 ----
-__@ContextConfiguration__(__classes__ = TestConfig.class)
-public class ConfigClassApplicationContextTests { // class body...
+**@ContextConfiguration**("/test-config.xml")
+public class XmlApplicationContextTests {
+  // class body...
 }
 ----
+
++
+
+[source,java]
+[subs="verbatim,quotes"]
+----
+**@ContextConfiguration**(**classes** = TestConfig.class)
+public class ConfigClassApplicationContextTests {
+  // class body...
+}
+----
+
++
 
 As an alternative or in addition to declaring resource locations or annotated classes, `@ContextConfiguration` may be used to declare `ApplicationContextInitializer` classes.
 
++
+
 [source,java]
 [subs="verbatim,quotes"]
 ----
-__@ContextConfiguration__(__initializers__ = CustomContextIntializer.class)
-public class ContextInitializerTests { // class body...
+**@ContextConfiguration**(**initializers** = CustomContextIntializer.class)
+public class ContextInitializerTests {
+  // class body...
 }
 ----
+
++
 
 `@ContextConfiguration` may optionally be used to declare the `ContextLoader` strategy as well. Note, however, that you typically do not need to explicitly configure the loader since the default loader supports either resource `locations` or annotated `classes` as well as `initializers`.
 
++
+
 [source,java]
 [subs="verbatim,quotes"]
 ----
-__@ContextConfiguration__(__locations__ = "/test-context.xml", __loader__ = CustomContextLoader.class)
-public class CustomLoaderXmlApplicationContextTests { // class body...
+**@ContextConfiguration**(**locations** = "/test-context.xml", **loader** = CustomContextLoader.class)
+public class CustomLoaderXmlApplicationContextTests {
+  // class body...
 }
 ----
+
++
 
 [NOTE]
 ====
 `@ContextConfiguration` provides support for __inheriting__ resource locations or configuration classes as well as context initializers declared by superclasses by default.
 ====
 
++
+
 See <<testcontext-ctx-management>> and the Javadoc for `@ContextConfiguration` for further details.
 
-* __@WebAppConfiguration__
+* `@WebAppConfiguration`
+
++
 
 A class-level annotation that is used to declare that the `ApplicationContext` loaded for an integration test should be a `WebApplicationContext`. The mere presence of `@WebAppConfiguration` on a test class ensures that a `WebApplicationContext` will be loaded for the test, using the default value of `"file:src/main/webapp"` for the path to the root of the web application (i.e., the __resource base path__). The resource base path is used behind the scenes to create a `MockServletContext` which serves as the `ServletContext` for the test's `WebApplicationContext`.
 
++
+
 [source,java]
 [subs="verbatim,quotes"]
 ----
 @ContextConfiguration
-__@WebAppConfiguration__
-public class WebAppTests { // class body...
+**@WebAppConfiguration**
+public class WebAppTests {
+  // class body...
 }
 ----
+
++
 
 To override the default, specify a different base resource path via the __implicit__ `value` attribute. Both `classpath:` and `file:` resource prefixes are supported. If no resource prefix is supplied the path is assumed to be a file system resource.
 
++
+
 [source,java]
 [subs="verbatim,quotes"]
 ----
 @ContextConfiguration
-__@WebAppConfiguration("classpath:test-web-resources")__
-public class WebAppTests { // class body...
+**@WebAppConfiguration("classpath:test-web-resources")**
+public class WebAppTests {
+  // class body...
 }
 ----
 
++
+
 Note that `@WebAppConfiguration` must be used in conjunction with `@ContextConfiguration`, either within a single test class or within a test class hierarchy. See the Javadoc for `@WebAppConfiguration` for further details.
 
-* __@ContextHierarchy__
++
+
+* `@ContextHierarchy`
+
++
 
 A class-level annotation that is used to define a hierarchy of `ApplicationContext` s for integration tests. `@ContextHierarchy` should be declared with a list of one or more `@ContextConfiguration` instances, each of which defines a level in the context hierarchy. The following examples demonstrate the use of `@ContextHierarchy` within a single test class; however, `@ContextHierarchy` can also be used within a test class hierarchy.
+
++
 
 [source,java]
 [subs="verbatim,quotes"]
@@ -12692,6 +12806,8 @@ public class ContextHierarchyTests {
     // class body...
 }
 ----
+
++
 
 [source,java]
 [subs="verbatim,quotes"]
@@ -12706,77 +12822,116 @@ public class WebIntegrationTests {
 }
 ----
 
++
+
 If you need to merge or override the configuration for a given level of the context hierarchy within a test class hierarchy, you must explicitly name that level by supplying the same value to the `name` attribute in `@ContextConfiguration` at each corresponding level in the class hierarchy. See <<testcontext-ctx-management-ctx-hierarchies>> and the Javadoc for `@ContextHierarchy` for further examples.
 
-* __@ActiveProfiles__
+* `@ActiveProfiles`
+
++
 
 A class-level annotation that is used to declare which __bean definition profiles__ should be active when loading an `ApplicationContext` for test classes.
 
-[source,java]
-[subs="verbatim,quotes"]
-----
-@ContextConfiguration
-__@ActiveProfiles__("dev")
-public class DeveloperTests { // class body...
-}
-----
++
 
 [source,java]
 [subs="verbatim,quotes"]
 ----
 @ContextConfiguration
-__@ActiveProfiles__({"dev", "integration"})
-public class DeveloperIntegrationTests { // class body...
+**@ActiveProfiles**("dev")
+public class DeveloperTests {
+  // class body...
 }
 ----
+
++
+
+[source,java]
+[subs="verbatim,quotes"]
+----
+@ContextConfiguration
+**@ActiveProfiles**({"dev", "integration"})
+public class DeveloperIntegrationTests {
+  // class body...
+}
+----
+
++
 
 [NOTE]
 ====
 `@ActiveProfiles` provides support for __inheriting__ active bean definition profiles declared by superclasses by default. It is also possible to resolve active bean definition profiles programmatically by implementing a custom `ActiveProfilesResolver` and registering it via the `resolver` attribute of `@ActiveProfiles`.
 ====
 
++
+
 See <<testcontext-ctx-management-env-profiles>> and the Javadoc for `@ActiveProfiles` for examples and further details.
 
-* __@DirtiesContext__
+* `@DirtiesContext`
+
++
 
 Indicates that the underlying Spring `ApplicationContext` has been __dirtied__ during the execution of a test (i.e., modified or corrupted in some manner — for example, by changing the state of a singleton bean) and should be closed, regardless of whether the test passed. When an application context is marked__dirty__, it is removed from the testing framework's cache and closed. As a consequence, the underlying Spring container will be rebuilt for any subsequent test that requires a context with the same configuration metadata.
 
++
+
 `@DirtiesContext` can be used as both a class-level and method-level annotation within the same test class. In such scenarios, the `ApplicationContext` is marked as __dirty__ after any such annotated method as well as after the entire class. If the `ClassMode` is set to `AFTER_EACH_TEST_METHOD`, the context is marked dirty after each test method in the class.
+
++
 
 The following examples explain when the context would be dirtied for various configuration scenarios:
 
-* After the current test class, when declared on a class with class mode set to `AFTER_CLASS` (i.e., the default class mode).
++
+
+** After the current test class, when declared on a class with class mode set to `AFTER_CLASS` (i.e., the default class mode).
+
++
 
 [source,java]
 [subs="verbatim,quotes"]
 ----
-__@DirtiesContext__
-public class ContextDirtyingTests { // some tests that result in the Spring container being dirtied
+**@DirtiesContext**
+public class ContextDirtyingTests {
+  // some tests that result in the Spring container being dirtied
 }
 ----
 
-* After each test method in the current test class, when declared on a class with class mode set to `AFTER_EACH_TEST_METHOD.`
++
+
+** After each test method in the current test class, when declared on a class with class mode set to `AFTER_EACH_TEST_METHOD.`
+
++
 
 [source,java]
 [subs="verbatim,quotes"]
 ----
-__@DirtiesContext__(__classMode__ = ClassMode.AFTER_EACH_TEST_METHOD)
-public class ContextDirtyingTests { // some tests that result in the Spring container being dirtied
+**@DirtiesContext**(**classMode** = ClassMode.AFTER_EACH_TEST_METHOD)
+public class ContextDirtyingTests {
+  // some tests that result in the Spring container being dirtied
 }
 ----
 
-* After the current test, when declared on a method.
++
+
+** After the current test, when declared on a method.
+
++
 
 [source,java]
 [subs="verbatim,quotes"]
 ----
-__@DirtiesContext__
+**@DirtiesContext**
 @Test
-public void testProcessWhichDirtiesAppCtx() { // some logic that results in the Spring container being dirtied
+public void testProcessWhichDirtiesAppCtx() {
+    // some logic that results in the Spring container being dirtied
 }
 ----
+
++
 
 If `@DirtiesContext` is used in a test whose context is configured as part of a context hierarchy via `@ContextHierarchy`, the `hierarchyMode` flag can be used to control how the context cache is cleared. By default an__exhaustive__ algorithm will be used that clears the context cache including not only the current level but also all other context hierarchies that share an ancestor context common to the current test; all `ApplicationContext` s that reside in a sub-hierarchy of the common ancestor context will be removed from the context cache and closed. If the __exhaustive__ algorithm is overkill for a particular use case, the simpler __current level__ algorithm can be specified instead, as seen below.
+
++
 
 [source,java]
 [subs="verbatim,quotes"]
@@ -12792,96 +12947,133 @@ public class BaseTests {
 public class ExtendedTests extends BaseTests {
 
     @Test
-    @DirtiesContext(__hierarchyMode = HierarchyMode.CURRENT_LEVEL__) public void test() { // some logic that results in the child context being dirtied }
+    @DirtiesContext(**hierarchyMode = HierarchyMode.CURRENT_LEVEL**)
+    public void test() {
+        // some logic that results in the child context being dirtied
+    }
 }
 ----
+
++
 
 For further details regarding the `EXHAUSTIVE` and `CURRENT_LEVEL` algorithms see the Javadoc for `DirtiesContext.HierarchyMode`.
 
-* __@TestExecutionListeners__
+* `@TestExecutionListeners`
+
++
 
 Defines class-level metadata for configuring which `TestExecutionListener` s should be registered with the `TestContextManager`. Typically, `@TestExecutionListeners` is used in conjunction with `@ContextConfiguration`.
 
++
+
 [source,java]
 [subs="verbatim,quotes"]
 ----
 @ContextConfiguration
-__@TestExecutionListeners__({CustomTestExecutionListener.class, AnotherTestExecutionListener.class})
-public class CustomTestExecutionListenerTests { // class body...
+**@TestExecutionListeners**({CustomTestExecutionListener.class, AnotherTestExecutionListener.class})
+public class CustomTestExecutionListenerTests {
+    // class body...
 }
 ----
+
++
 
 `@TestExecutionListeners` supports __inherited__ listeners by default. See the Javadoc for an example and further details.
 
-* __@TransactionConfiguration__
+* `@TransactionConfiguration`
+
++
 
 Defines class-level metadata for configuring transactional tests. Specifically, the bean name of the `PlatformTransactionManager` that should be used to drive transactions can be explicitly specified if there are multiple beans of type `PlatformTransactionManager` in the test's `ApplicationContext` and if the bean name of the desired `PlatformTransactionManager` is not "transactionManager". In addition, you can change the `defaultRollback` flag to `false`. Typically, `@TransactionConfiguration` is used in conjunction with `@ContextConfiguration`.
+
++
 
 [source,java]
 [subs="verbatim,quotes"]
 ----
 @ContextConfiguration
-__@TransactionConfiguration__(__transactionManager__ = "txMgr", __defaultRollback__ = false)
-public class CustomConfiguredTransactionalTests { // class body...
+**@TransactionConfiguration**(**transactionManager** = "txMgr", **defaultRollback** = false)
+public class CustomConfiguredTransactionalTests {
+    // class body...
 }
 ----
+
++
 
 [NOTE]
 ====
 If the default conventions are sufficient for your test configuration, you can avoid using `@TransactionConfiguration` altogether. In other words, if you have only one transaction manger — or if you have multiple transaction mangers but the transaction manager for tests is named "transactionManager" or specified via a `TransactionManagementConfigurer` — and if you want transactions to roll back automatically, then there is no need to annotate your test class with `@TransactionConfiguration`.
 ====
 
-* __@Rollback__
++
+
+* `@Rollback`
+
++
 
 Indicates whether the transaction for the annotated test method should be __rolled back__ after the test method has completed. If `true`, the transaction is rolled back; otherwise, the transaction is committed. Use `@Rollback` to override the default rollback flag configured at the class level.
 
++
+
 [source,java]
 [subs="verbatim,quotes"]
 ----
-__@Rollback__(false)
+**@Rollback**(false)
 @Test
-public void testProcessWithoutRollback() { // ...
+public void testProcessWithoutRollback() {
+    // ...
 }
 ----
 
-* __@BeforeTransaction__
+* `@BeforeTransaction`
+
++
 
 Indicates that the annotated `public void` method should be executed __before__ a transaction is started for test methods configured to run within a transaction via the `@Transactional` annotation.
 
++
+
 [source,java]
 [subs="verbatim,quotes"]
 ----
-__@BeforeTransaction
-__public void beforeTransaction() { // logic to be executed before a transaction is started
+**@BeforeTransaction**
+public void beforeTransaction() {
+    // logic to be executed before a transaction is started
 }
 ----
 
-* __@AfterTransaction__
+* `@AfterTransaction`
+
++
 
 Indicates that the annotated `public void` method should be executed __after__ a transaction has ended for test methods configured to run within a transaction via the `@Transactional` annotation.
+
++
 
 [source,java]
 [subs="verbatim,quotes"]
 ----
-__@AfterTransaction
-__public void afterTransaction() { // logic to be executed after a transaction has ended
+**@AfterTransaction**
+public void afterTransaction() {
+    // logic to be executed after a transaction has ended
 }
 ----
 
 [[integration-testing-annotations-standard]]
-===== Standard Annotation SupportJSR-250 Lifecycle Annotations
+===== Standard Annotation Support
 The following annotations are supported with standard semantics for all configurations of the Spring TestContext Framework. Note that these annotations are not specific to tests and can be used anywhere in the Spring Framework.
 
-* __@Autowired__
-* __@Qualifier__
-* __@Resource__ (javax.annotation) __if JSR-250 is present__
-* __@Inject__ (javax.inject) __if JSR-330 is present__
-* __@Named__ (javax.inject) __if JSR-330 is present__
-* __@PersistenceContext__ (javax.persistence) __if JPA is present__
-* __@PersistenceUnit__ (javax.persistence) __if JPA is present__
-* __@Required__
-* __@Transactional__
+* `@Autowired`
+* `@Qualifier`
+* `@Resource` (javax.annotation) `if JSR-250 is present`
+* `@Inject` (javax.inject) `if JSR-330 is present`
+* `@Named` (javax.inject) `if JSR-330 is present`
+* `@PersistenceContext` (javax.persistence) `if JPA is present`
+* `@PersistenceUnit` (javax.persistence) `if JPA is present`
+* `@Required`
+* `@Transactional`
 
+.JSR-250 Lifecycle Annotations
 [NOTE]
 ====
 In the Spring TestContext Framework `@PostConstruct` and `@PreDestroy` may be used with standard semantics on any application components configured in the `ApplicationContext`; however, these lifecycle annotations have limited usage within an actual test class.
@@ -12893,70 +13085,103 @@ If a method within a test class is annotated with `@PostConstruct`, that method 
 ===== Spring JUnit Testing Annotations
 The following annotations are __only__ supported when used in conjunction with the <<testcontext-junit4-runner,SpringJUnit4ClassRunner>> or the <<testcontext-support-classes-junit4,JUnit>> support classes.
 
-* __@IfProfileValue__
+* `@IfProfileValue`
+
++
 
 Indicates that the annotated test is enabled for a specific testing environment. If the configured `ProfileValueSource` returns a matching `value` for the provided `name`, the test is enabled. This annotation can be applied to an entire class or to individual methods. Class-level usage overrides method-level usage.
 
++
+
 [source,java]
 [subs="verbatim,quotes"]
 ----
-__@IfProfileValue__(__name__="java.vendor", __value__="Sun Microsystems Inc.")
+**@IfProfileValue**(**name**="java.vendor", **value**="Sun Microsystems Inc.")
 @Test
-public void testProcessWhichRunsOnlyOnSunJvm() { // some logic that should run only on Java VMs from Sun Microsystems
+public void testProcessWhichRunsOnlyOnSunJvm() {
+    // some logic that should run only on Java VMs from Sun Microsystems
 }
 ----
+
++
 
 Alternatively, you can configure `@IfProfileValue` with a list of `values` (with __OR__ semantics) to achieve TestNG-like support for __test groups__ in a JUnit environment. Consider the following example:
 
++
+
 [source,java]
 [subs="verbatim,quotes"]
 ----
-__@IfProfileValue__(__name__="test-groups", __values__={"unit-tests", "integration-tests"})
+**@IfProfileValue**(**name**="test-groups", **values**={"unit-tests", "integration-tests"})
 @Test
-public void testProcessWhichRunsForUnitOrIntegrationTestGroups() { // some logic that should run only for unit and integration test groups
+public void testProcessWhichRunsForUnitOrIntegrationTestGroups() {
+    // some logic that should run only for unit and integration test groups
 }
 ----
 
-* __@ProfileValueSourceConfiguration__
++
+
+* `@ProfileValueSourceConfiguration`
+
++
 
 Class-level annotation that specifies what type of `ProfileValueSource` to use when retrieving __profile values__ configured through the `@IfProfileValue` annotation. If `@ProfileValueSourceConfiguration` is not declared for a test, `SystemProfileValueSource` is used by default.
 
++
+
 [source,java]
 [subs="verbatim,quotes"]
 ----
-__@ProfileValueSourceConfiguration__(CustomProfileValueSource.class)
-public class CustomProfileValueSourceTests { // class body...
+**@ProfileValueSourceConfiguration**(CustomProfileValueSource.class)
+public class CustomProfileValueSourceTests {
+    // class body...
 }
 ----
 
-* __@Timed__
+* `@Timed`
+
++
 
 Indicates that the annotated test method must finish execution in a specified time period (in milliseconds). If the text execution time exceeds the specified time period, the test fails.
 
++
+
 The time period includes execution of the test method itself, any repetitions of the test (see `@Repeat`), as well as any __set up__ or __tear down__ of the test fixture.
+
++
 
 [source,java]
 [subs="verbatim,quotes"]
 ----
-__@Timed__(millis=1000)
-public void testProcessWithOneSecondTimeout() { // some logic that should not take longer than 1 second to execute
+**@Timed**(millis=1000)
+public void testProcessWithOneSecondTimeout() {
+    // some logic that should not take longer than 1 second to execute
 }
 ----
 
++
+
 Spring's `@Timed` annotation has different semantics than JUnit's `@Test(timeout=...)` support. Specifically, due to the manner in which JUnit handles test execution timeouts (that is, by executing the test method in a separate `Thread`), `@Test(timeout=...)` applies to __each iteration__ in the case of repetitions and preemptively fails the test if the test takes too long. Spring's `@Timed`, on the other hand, times the __total__ test execution time (including all repetitions) and does not preemptively fail the test but rather waits for the test to complete before failing.
 
-* __@Repeat__
+* `@Repeat`
+
++
 
 Indicates that the annotated test method must be executed repeatedly. The number of times that the test method is to be executed is specified in the annotation.
 
++
+
 The scope of execution to be repeated includes execution of the test method itself as well as any __set up__ or __tear down__ of the test fixture.
+
++
 
 [source,java]
 [subs="verbatim,quotes"]
 ----
-__@Repeat__(10)
+**@Repeat**(10)
 @Test
-public void testProcessRepeatedly() { // ...
+public void testProcessRepeatedly() {
+    // ...
 }
 ----
 
@@ -12974,39 +13199,49 @@ The core of the framework consists of the `TestContext` and `TestContextManager`
 
 * `TestContext`: Encapsulates the context in which a test is executed, agnostic of the actual testing framework in use, and provides context management and caching support for the test instance for which it is responsible. The `TestContext` also delegates to a `ContextLoader` (or `SmartContextLoader`) to load an `ApplicationContext` if requested.
 * `TestContextManager`: The main entry point into the __Spring TestContext Framework__, which manages a single `TestContext` and signals events to all registered `TestExecutionListener` s at well-defined test execution points:
-* prior to any __before class methods__ of a particular testing framework
-* test instance preparation
-* prior to any __before methods__ of a particular testing framework
-* after any __after methods__ of a particular testing framework
-* after any __after class methods__ of a particular testing framework
+** prior to any __before class methods__ of a particular testing framework
+** test instance preparation
+** prior to any __before methods__ of a particular testing framework
+** after any __after methods__ of a particular testing framework
+** after any __after class methods__ of a particular testing framework
 * `TestExecutionListener`: Defines a __listener__ API for reacting to test execution events published by the `TestContextManager` with which the listener is registered.
++
 
 Spring provides four `TestExecutionListener` implementations that are configured by default: `ServletTestExecutionListener`, `DependencyInjectionTestExecutionListener`, `DirtiesContextTestExecutionListener`, and `TransactionalTestExecutionListener`. Respectively, they support Servlet API mocks for a `WebApplicationContext`, dependency injection of the test instance, handling of the `@DirtiesContext` annotation, and transactional test execution with default rollback semantics.
 
 * `ContextLoader`: Strategy interface introduced in Spring 2.5 for loading an `ApplicationContext` for an integration test managed by the Spring TestContext Framework.
 
++
+
 As of Spring 3.1, implement `SmartContextLoader` instead of this interface in order to provide support for annotated classes and active bean definition profiles.
 
 * `SmartContextLoader`: Extension of the `ContextLoader` interface introduced in Spring 3.1.
 
++
+
 The `SmartContextLoader` SPI supersedes the `ContextLoader` SPI that was introduced in Spring 2.5. Specifically, a `SmartContextLoader` can choose to process resource `locations`, annotated `classes`, or context `initializers`. Furthermore, a `SmartContextLoader` can set active bean definition profiles in the context that it loads.
+
++
 
 Spring provides the following implementations:
 
-* `DelegatingSmartContextLoader`: one of two default loaders which delegates internally to an `AnnotationConfigContextLoader` or a `GenericXmlContextLoader` depending either on the configuration declared for the test class or on the presence of default locations or default configuration classes.
-* `WebDelegatingSmartContextLoader`: one of two default loaders which delegates internally to an `AnnotationConfigWebContextLoader` or a `GenericXmlWebContextLoader` depending either on the configuration declared for the test class or on the presence of default locations or default configuration classes. A web `ContextLoader` will only be used if `@WebAppConfiguration` is present on the test class.
-* `AnnotationConfigContextLoader`: loads a standard `ApplicationContext` from __annotated classes__.
-* `AnnotationConfigWebContextLoader`: loads a `WebApplicationContext` from __annotated classes__.
-* `GenericXmlContextLoader`: loads a standard `ApplicationContext` from XML __resource locations__.
-* `GenericXmlWebContextLoader`: loads a `WebApplicationContext` from XML __resource locations__.
-* `GenericPropertiesContextLoader`: loads a standard `ApplicationContext` from Java Properties files.
++
+
+** `DelegatingSmartContextLoader`: one of two default loaders which delegates internally to an `AnnotationConfigContextLoader` or a `GenericXmlContextLoader` depending either on the configuration declared for the test class or on the presence of default locations or default configuration classes.
+** `WebDelegatingSmartContextLoader`: one of two default loaders which delegates internally to an `AnnotationConfigWebContextLoader` or a `GenericXmlWebContextLoader` depending either on the configuration declared for the test class or on the presence of default locations or default configuration classes. A web `ContextLoader` will only be used if `@WebAppConfiguration` is present on the test class.
+** `AnnotationConfigContextLoader`: loads a standard `ApplicationContext` from __annotated classes__.
+** `AnnotationConfigWebContextLoader`: loads a `WebApplicationContext` from __annotated classes__.
+** `GenericXmlContextLoader`: loads a standard `ApplicationContext` from XML __resource locations__.
+** `GenericXmlWebContextLoader`: loads a `WebApplicationContext` from XML __resource locations__.
+** `GenericPropertiesContextLoader`: loads a standard `ApplicationContext` from Java Properties files.
 
 The following sections explain how to configure the `TestContext` framework through annotations and provide working examples of how to write unit and integration tests with the framework.
 
 [[testcontext-ctx-management]]
-===== Context management@Autowired ApplicationContext
+===== Context management
 Each `TestContext` provides context management and caching support for the test instance it is responsible for. Test instances do not automatically receive access to the configured `ApplicationContext`. However, if a test class implements the `ApplicationContextAware` interface, a reference to the `ApplicationContext` is supplied to the test instance. Note that `AbstractJUnit4SpringContextTests` and `AbstractTestNGSpringContextTests` implement `ApplicationContextAware` and therefore provide access to the `ApplicationContext` automatically.
 
+.@Autowired ApplicationContext
 [TIP]
 ====
 
@@ -13019,7 +13254,10 @@ As an alternative to implementing the `ApplicationContextAware` interface, you c
 @ContextConfiguration
 public class MyTest {
 
-    __@Autowired__ private ApplicationContext applicationContext; // class body...
+    **@Autowired**
+    private ApplicationContext applicationContext;
+
+    // class body...
 }
 ----
 
@@ -13029,9 +13267,13 @@ Similarly, if your test is configured to load a `WebApplicationContext`, you can
 [subs="verbatim,quotes"]
 ----
 @RunWith(SpringJUnit4ClassRunner.class)
-__@WebAppConfiguration__
+**@WebAppConfiguration**
 @ContextConfiguration
-public class MyWebAppTest {__@Autowired__ private WebApplicationContext wac; // class body...
+public class MyWebAppTest {
+    **@Autowired**
+    private WebApplicationContext wac;
+
+    // class body...
 }
 ----
 
@@ -13052,8 +13294,9 @@ To load an `ApplicationContext` for your tests using XML configuration files, an
 @RunWith(SpringJUnit4ClassRunner.class)
 // ApplicationContext will be loaded from "/app-config.xml" and
 // "/test-config.xml" in the root of the classpath
-__@ContextConfiguration(locations={"/app-config.xml", "/test-config.xml"})__
-public class MyTest { // class body...
+**@ContextConfiguration(locations={"/app-config.xml", "/test-config.xml"})**
+public class MyTest {
+    // class body...
 }
 ----
 
@@ -13063,8 +13306,9 @@ public class MyTest { // class body...
 [subs="verbatim,quotes"]
 ----
 @RunWith(SpringJUnit4ClassRunner.class)
-__@ContextConfiguration({"/app-config.xml", "/test-config.xml"})__
-public class MyTest { // class body...
+**@ContextConfiguration({"/app-config.xml", "/test-config.xml"})**
+public class MyTest {
+    // class body...
 }
 ----
 
@@ -13078,13 +13322,14 @@ package com.example;
 @RunWith(SpringJUnit4ClassRunner.class)
 // ApplicationContext will be loaded from
 // "classpath:/com/example/MyTest-context.xml"
-__@ContextConfiguration__
-public class MyTest { // class body...
+**@ContextConfiguration**
+public class MyTest {
+    // class body...
 }
 ----
 
 [[testcontext-ctx-management-javaconfig]]
-====== Context configuration with annotated classesAnnotated Classes
+====== Context configuration with annotated classes
 To load an `ApplicationContext` for your tests using __annotated classes__ (see <<beans-java>>), annotate your test class with `@ContextConfiguration` and configure the `classes` attribute with an array that contains references to annotated classes.
 
 [source,java]
@@ -13092,11 +13337,13 @@ To load an `ApplicationContext` for your tests using __annotated classes__ (see 
 ----
 @RunWith(SpringJUnit4ClassRunner.class)
 // ApplicationContext will be loaded from AppConfig and TestConfig
-__@ContextConfiguration(classes = {AppConfig.class, TestConfig.class})__
-public class MyTest { // class body...
+**@ContextConfiguration(classes = {AppConfig.class, TestConfig.class})**
+public class MyTest {
+    // class body...
 }
 ----
 
+.Annotated Classes
 [TIP]
 ====
 
@@ -13118,8 +13365,30 @@ If you omit the `classes` attribute from the `@ContextConfiguration` annotation,
 @RunWith(SpringJUnit4ClassRunner.class)
 // ApplicationContext will be loaded from the
 // static inner Config class
-__@ContextConfiguration__
-public class OrderServiceTest { @Configuration static class Config { // this bean will be injected into the OrderServiceTest class @Bean public OrderService orderService() { OrderService orderService = new OrderServiceImpl(); // set properties, etc. return orderService; } } @Autowired private OrderService orderService; @Test public void testOrderService() { // test the orderService } }
+**@ContextConfiguration**
+public class OrderServiceTest {
+
+    @Configuration
+    static class Config {
+
+        // this bean will be injected into the OrderServiceTest class
+        @Bean
+        public OrderService orderService() {
+            OrderService orderService = new OrderServiceImpl();
+            // set properties, etc.
+            return orderService;
+        }
+    }
+
+    @Autowired
+    private OrderService orderService;
+
+    @Test
+    public void testOrderService() {
+        // test the orderService
+    }
+
+}
 ----
 
 [[testcontext-ctx-management-mixed-config]]
@@ -13138,8 +13407,11 @@ To configure an `ApplicationContext` for your tests using context initializers, 
 @RunWith(SpringJUnit4ClassRunner.class)
 // ApplicationContext will be loaded from TestConfig
 // and initialized by TestAppCtxInitializer
-__@ContextConfiguration( classes = TestConfig.class, initializers = TestAppCtxInitializer.class)__
-public class MyTest { // class body...
+**@ContextConfiguration(
+    classes = TestConfig.class,
+    initializers = TestAppCtxInitializer.class)**
+public class MyTest {
+    // class body...
 }
 ----
 
@@ -13151,8 +13423,9 @@ It is also possible to omit the declaration of XML configuration files or annota
 @RunWith(SpringJUnit4ClassRunner.class)
 // ApplicationContext will be initialized by EntireAppInitializer
 // which presumably registers beans in the context
-__@ContextConfiguration(initializers = EntireAppInitializer.class)__
-public class MyTest { // class body...
+**@ContextConfiguration(initializers = EntireAppInitializer.class)**
+public class MyTest {
+    // class body...
 }
 ----
 
@@ -13170,12 +13443,16 @@ In the following example that uses XML resource locations, the `ApplicationConte
 @RunWith(SpringJUnit4ClassRunner.class)
 // ApplicationContext will be loaded from "/base-config.xml"
 // in the root of the classpath
-__@ContextConfiguration("/base-config.xml")__
-public class BaseTest { // class body...
-} // ApplicationContext will be loaded from "/base-config.xml" and
+**@ContextConfiguration("/base-config.xml")**
+public class BaseTest {
+    // class body...
+}
+
+// ApplicationContext will be loaded from "/base-config.xml" and
 // "/extended-config.xml" in the root of the classpath
-__@ContextConfiguration("/extended-config.xml")__
-public class ExtendedTest extends BaseTest { // class body...
+**@ContextConfiguration("/extended-config.xml")**
+public class ExtendedTest extends BaseTest {
+    // class body...
 }
 ----
 
@@ -13186,10 +13463,15 @@ Similarly, in the following example that uses annotated classes, the `Applicatio
 ----
 @RunWith(SpringJUnit4ClassRunner.class)
 // ApplicationContext will be loaded from BaseConfig
-__@ContextConfiguration(classes = BaseConfig.class)__
-public class BaseTest { // class body...
-} // ApplicationContext will be loaded from BaseConfig and ExtendedConfig__@ContextConfiguration(classes = ExtendedConfig.class)__
-public class ExtendedTest extends BaseTest { // class body...
+**@ContextConfiguration(classes = BaseConfig.class)**
+public class BaseTest {
+    // class body...
+}
+
+// ApplicationContext will be loaded from BaseConfig and ExtendedConfig
+**@ContextConfiguration(classes = ExtendedConfig.class)**
+public class ExtendedTest extends BaseTest {
+    // class body...
 }
 ----
 
@@ -13200,12 +13482,16 @@ In the following example that uses context initializers, the `ApplicationContext
 ----
 @RunWith(SpringJUnit4ClassRunner.class)
 // ApplicationContext will be initialized by BaseInitializer
-__@ContextConfiguration(initializers=BaseInitializer.class)__
-public class BaseTest { // class body...
-} // ApplicationContext will be initialized by BaseInitializer
+**@ContextConfiguration(initializers=BaseInitializer.class)**
+public class BaseTest {
+    // class body...
+}
+
+// ApplicationContext will be initialized by BaseInitializer
 // and ExtendedInitializer
-__@ContextConfiguration(initializers=ExtendedInitializer.class)__
-public class ExtendedTest extends BaseTest { // class body...
+**@ContextConfiguration(initializers=ExtendedInitializer.class)**
+public class ExtendedTest extends BaseTest {
+    // class body...
 }
 ----
 
@@ -13538,12 +13824,13 @@ public class WacTests {
 
 In this third example, we see that we can override the default resource semantics for both annotations by specifying a Spring resource prefix. Contrast the comments in this example with the previous example.
 
-.[[testcontext-ctx-management-web-mocks]]Working with Web MocksInjecting mocks
+.[[testcontext-ctx-management-web-mocks]]Working with Web Mocks
 --
 To provide comprehensive web testing support, Spring 3.2 introduces a new `ServletTestExecutionListener` that is enabled by default. When testing against a `WebApplicationContext` this <<testcontext-key-abstractions,TestExecutionListener>> sets up default thread-local state via Spring Web's `RequestContextHolder` before each test method and creates a `MockHttpServletRequest`, `MockHttpServletResponse`, and `ServletWebRequest` based on the base resource path configured via `@WebAppConfiguration`. `ServletTestExecutionListener` also ensures that the `MockHttpServletResponse` and `ServletWebRequest` can be injected into the test instance, and once the test is complete it cleans up thread-local state.
 
 Once you have a `WebApplicationContext` loaded for your test you might find that you need to interact with the web mocks — for example, to set up your test fixture or to perform assertions after invoking your web component. The following example demonstrates which mocks can be autowired into your test instance. Note that the `WebApplicationContext` and `MockServletContext` are both cached across the test suite; whereas, the other mocks are managed per test method by the `ServletTestExecutionListener`.
 
+.Injecting mocks
 [source,java]
 [subs="verbatim,quotes"]
 ----
@@ -13569,7 +13856,7 @@ public class WacTests {
 --
 
 [[testcontext-ctx-management-caching]]
-====== Context cachingTest suites and forked processes
+====== Context caching
 Once the TestContext framework loads an `ApplicationContext` (or `WebApplicationContext`) for a test, that context will be cached and reused for __all__ subsequent tests that declare the same unique context configuration within the same test suite. To understand how caching works, it is important to understand what is meant by __unique__ and __test suite__.
 
 An `ApplicationContext` can be __uniquely__ identified by the combination of configuration parameters that are used to load it. Consequently, the unique combination of configuration parameters are used to generate a __key__ under which the context is cached. The TestContext framework uses the following configuration parameters to build the context cache key:
@@ -13583,6 +13870,7 @@ An `ApplicationContext` can be __uniquely__ identified by the combination of con
 
 For example, if `TestClassA` specifies `{"app-config.xml", "test-config.xml"}` for the `locations` (or `value`) attribute of `@ContextConfiguration`, the TestContext framework will load the corresponding `ApplicationContext` and store it in a `static` context cache under a key that is based solely on those locations. So if `TestClassB` also defines `{"app-config.xml", "test-config.xml"}` for its locations (either explicitly or implicitly through inheritance) but does not define `@WebAppConfiguration`, a different `ContextLoader`, different active profiles, or different context initializers, then the same `ApplicationContext` will be shared by both test classes. This means that the setup cost for loading an application context is incurred only once (per test suite), and subsequent test execution is much faster.
 
+.Test suites and forked processes
 [NOTE]
 ====
 The Spring TestContext framework stores application contexts in a __static__ cache. This means that the context is literally stored in a `static` variable. In other words, if tests execute in separate processes the static cache will be cleared between each test execution, and this will effectively disable the caching mechanism.
@@ -13593,7 +13881,7 @@ To benefit from the caching mechanism, all tests must run within the same proces
 In the unlikely case that a test corrupts the application context and requires reloading — for example, by modifying a bean definition or the state of an application object — you can annotate your test class or test method with `@DirtiesContext` (see the discussion of `@DirtiesContext` in <<integration-testing-annotations-spring>>). This instructs Spring to remove the context from the cache and rebuild the application context before executing the next test. Note that support for the `@DirtiesContext` annotation is provided by the `DirtiesContextTestExecutionListener` which is enabled by default.
 
 [[testcontext-ctx-management-ctx-hierarchies]]
-====== Context hierarchiesSingle test class with context hierarchy
+====== Context hierarchies
 
 When writing integration tests that rely on a loaded Spring `ApplicationContext`, it is often sufficient to test against a single context; however, there are times when it is beneficial or even necessary to test against a hierarchy of `ApplicationContext` s. For example, if you are developing a Spring MVC web application you will typically have a root `WebApplicationContext` loaded via Spring's `ContextLoaderListener` and a child `WebApplicationContext` loaded via Spring's `DispatcherServlet`. This results in a parent-child context hierarchy where shared components and infrastructure configuration are declared in the root context and consumed in the child context by web-specific components. Another use case can be found in Spring Batch applications where you often have a parent context that provides configuration for shared batch infrastructure and a child context for the configuration of a specific batch job.
 
@@ -13601,9 +13889,10 @@ As of Spring Framework 3.2.2, it is possible to write integration tests that use
 
 The following JUnit-based examples demonstrate common configuration scenarios for integration tests that require the use of context hierarchies.
 
+.Single test class with context hierarchy
+--
 `ControllerIntegrationTests` represents a typical integration testing scenario for a Spring MVC web application by declaring a context hierarchy consisting of two levels, one for the __root__ WebApplicationContext (loaded using the `TestAppConfig` `@Configuration` class) and one for the __dispatcher servlet__ `WebApplicationContext` (loaded using the `WebConfig` `@Configuration` class). The `WebApplicationContext` that is __autowired__ into the test instance is the one for the child context (i.e., the lowest context in the hierarchy).
 
-.Class hierarchy with implicit parent context
 [source,java]
 [subs="verbatim,quotes"]
 ----
@@ -13622,9 +13911,13 @@ public class ControllerIntegrationTests {
 }
 ----
 
+--
+
+
+.Class hierarchy with implicit parent context
+--
 The following test classes define a context hierarchy within a test class hierarchy. `AbstractWebTests` declares the configuration for a root `WebApplicationContext` in a Spring-powered web application. Note, however, that `AbstractWebTests` does not declare `@ContextHierarchy`; consequently, subclasses of `AbstractWebTests` can optionally participate in a context hierarchy or simply follow the standard semantics for `@ContextConfiguration`. `SoapWebServiceTests` and `RestWebServiceTests` both extend `AbstractWebTests` and define a context hierarchy via `@ContextHierarchy`. The result is that three application contexts will be loaded (one for each declaration of `@ContextConfiguration`), and the application context loaded based on the configuration in `AbstractWebTests` will be set as the parent context for each of the contexts loaded for the concrete subclasses.
 
-.Class hierarchy with merged context hierarchy configuration
 [source,java]
 [subs="verbatim,quotes"]
 ----
@@ -13639,10 +13932,13 @@ public class SoapWebServiceTests extends AbstractWebTests {}
 @ContextHierarchy(@ContextConfiguration("/spring/rest-ws-config.xml")
 public class RestWebServiceTests extends AbstractWebTests {}
 ----
+--
 
+
+.Class hierarchy with merged context hierarchy configuration
+--
 The following classes demonstrate the use of __named__ hierarchy levels in order to __merge__ the configuration for specific levels in a context hierarchy. `BaseTests` defines two levels in the hierarchy, `parent` and `child`. `ExtendedTests` extends `BaseTests` and instructs the Spring TestContext Framework to merge the context configuration for the `child` hierarchy level, simply by ensuring that the names declared via `ContextConfiguration`'s `name` attribute are both `"child"`. The result is that three application contexts will be loaded: one for `"/app-config.xml"`, one for `"/user-config.xml"`, and one for `{"/user-config.xml", "/order-config.xml"}`. As with the previous example, the application context loaded from `"/app-config.xml"` will be set as the parent context for the contexts loaded from `"/user-config.xml"` and `{"/user-config.xml", "/order-config.xml"}`.
 
-.Class hierarchy with overridden context hierarchy configuration
 [source,java]
 [subs="verbatim,quotes"]
 ----
@@ -13658,7 +13954,10 @@ public class BaseTests {}
 )
 public class ExtendedTests extends BaseTests {}
 ----
+--
 
+.Class hierarchy with overridden context hierarchy configuration
+--
 In contrast to the previous example, this example demonstrates how to __override__ the configuration for a given named level in a context hierarchy by setting `ContextConfiguration`'s `inheritLocations` flag to `false`. Consequently, the application context for `ExtendedTests` will be loaded only from `"/test-user-config.xml"` and will have its parent set to the context loaded from `"/app-config.xml"`.
 
 [source,java]
@@ -13685,6 +13984,7 @@ public class ExtendedTests extends BaseTests {}
 ====
 If `@DirtiesContext` is used in a test whose context is configured as part of a context hierarchy, the `hierarchyMode` flag can be used to control how the context cache is cleared. For further details consult the discussion of `@DirtiesContext` in <<integration-testing-annotations-spring>> and the Javadoc for `@DirtiesContext`.
 ====
+--
 
 [[testcontext-fixture-di]]
 ===== Dependency injection of test fixtures
@@ -13716,8 +14016,17 @@ The first code listing shows a JUnit-based implementation of the test class that
 ----
 @RunWith(SpringJUnit4ClassRunner.class)
 // specifies the Spring configuration to load for this test fixture
-__@ContextConfiguration("repository-config.xml")__
-public class HibernateTitleRepositoryTests { // this instance will be dependency injected by type__@Autowired__ private HibernateTitleRepository titleRepository; @Test public void findById() { Title title = titleRepository.findById(new Long(10)); assertNotNull(title); }
+**@ContextConfiguration("repository-config.xml")**
+public class HibernateTitleRepositoryTests {
+    // this instance will be dependency injected by type
+    **@Autowired**
+    private HibernateTitleRepository titleRepository;
+
+    @Test
+    public void findById() {
+        Title title = titleRepository.findById(new Long(10));
+        assertNotNull(title);
+    }
 }
 ----
 
@@ -13728,8 +14037,21 @@ Alternatively, you can configure the class to use `@Autowired` for setter inject
 ----
 @RunWith(SpringJUnit4ClassRunner.class)
 // specifies the Spring configuration to load for this test fixture
-__@ContextConfiguration("repository-config.xml")__
-public class HibernateTitleRepositoryTests { // this instance will be dependency injected by type private HibernateTitleRepository titleRepository; __@Autowired__ public void setTitleRepository(HibernateTitleRepository titleRepository) { this.titleRepository = titleRepository; } @Test public void findById() { Title title = titleRepository.findById(new Long(10)); assertNotNull(title); }
+**@ContextConfiguration("repository-config.xml")**
+public class HibernateTitleRepositoryTests {
+    // this instance will be dependency injected by type
+    private HibernateTitleRepository titleRepository;
+
+    **@Autowired**
+    public void setTitleRepository(HibernateTitleRepository titleRepository) {
+        this.titleRepository = titleRepository;
+    }
+
+    @Test
+    public void findById() {
+        Title title = titleRepository.findById(new Long(10));
+        assertNotNull(title);
+    }
 }
 ----
 
@@ -13745,7 +14067,11 @@ The preceding code listings use the same XML context file referenced by the `@Co
            http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <!-- this bean will be injected into the HibernateTitleRepositoryTests class -->
-    <bean id="__titleRepository__" class="__com.foo.repository.hibernate.HibernateTitleRepository__"><property name="sessionFactory" ref="sessionFactory"/></bean><bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean"><!-- configuration elided for brevity -->
+    <bean id="**titleRepository**" class="**com.foo.repository.hibernate.HibernateTitleRepository**">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+        <!-- configuration elided for brevity -->
     </bean>
 
 </beans>
@@ -13762,7 +14088,11 @@ If you are extending from a Spring-provided test base class that happens to use 
 
     @Autowired
     @Override
-    public void setDataSource(__@Qualifier("myDataSource")__ DataSource dataSource) { __super__.setDataSource(dataSource); } // ...
+    public void setDataSource(**@Qualifier("myDataSource")** DataSource dataSource) {
+        **super**.setDataSource(dataSource);
+    }
+
+// ...
 ----
 
 The specified qualifier value indicates the specific `DataSource` bean to inject, narrowing the set of type matches to a specific bean. Its value is matched against `<qualifier>` declarations within the corresponding `<bean>` definitions. The bean name is used as a fallback qualifier value, so you may effectively also point to a specific bean by name there (as shown above, assuming that "myDataSource" is the bean id).
@@ -13876,7 +14206,7 @@ public class SessionScopedBeanTests {
 ----
 
 [[testcontext-tx]]
-===== Transaction managementAvoid false positives when testing ORM code
+===== Transaction management
 In the TestContext framework, transactions are managed by the `TransactionalTestExecutionListener`. Note that `TransactionalTestExecutionListener` is configured by default, even if you do not explicitly declare `@TestExecutionListeners` on your test class. To enable support for transactions, however, you must provide a `PlatformTransactionManager` bean in the application context loaded by `@ContextConfiguration` semantics. In addition, you must declare `@Transactional` either at the class or method level for your tests.
 
 For class-level transaction configuration (i.e., setting an explicit bean name for the transaction manager and the default rollback flag), see the `@TransactionConfiguration` entry in the <<integration-testing-annotations,annotation support>> section.
@@ -13900,12 +14230,41 @@ The following JUnit-based example displays a fictitious integration testing scen
 ----
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
-__@TransactionConfiguration(transactionManager="txMgr", defaultRollback=false)____@Transactional__
-public class FictitiousTransactionalTest { __@BeforeTransaction__ public void verifyInitialDatabaseState() { // logic to verify the initial state before a transaction is started } @Before public void setUpTestDataWithinTransaction() { // set up test data within the transaction } @Test // overrides the class-level defaultRollback setting __@Rollback(true)__ public void modifyDatabaseWithinTransaction() { // logic which uses the test data and modifies database state } @After public void tearDownWithinTransaction() { // execute "tear down" logic within the transaction }__@AfterTransaction__ public void verifyFinalDatabaseState() { // logic to verify the final state after transaction has rolled back } }
+**@TransactionConfiguration(transactionManager="txMgr", defaultRollback=false)
+@Transactional**
+public class FictitiousTransactionalTest {
+
+    **@BeforeTransaction**
+    public void verifyInitialDatabaseState() {
+        // logic to verify the initial state before a transaction is started
+    }
+
+    @Before
+    public void setUpTestDataWithinTransaction() {
+        // set up test data within the transaction
+    }
+
+    @Test
+    // overrides the class-level defaultRollback setting
+    **@Rollback(true)**
+    public void modifyDatabaseWithinTransaction() {
+        // logic which uses the test data and modifies database state
+    }
+
+    @After
+    public void tearDownWithinTransaction() {
+        // execute "tear down" logic within the transaction
+    }
+
+    **@AfterTransaction**
+    public void verifyFinalDatabaseState() {
+        // logic to verify the final state after transaction has rolled back
+    }
+
+}
 ----
 
-[[null]]
-
+.Avoid false positives when testing ORM code
 [NOTE]
 ====
 When you test application code that manipulates the state of the Hibernate session, make sure to __flush__ the underlying session within test methods that execute that code. Failing to flush the underlying session can produce __false positives__: your test may pass, but the same code throws an exception in a live, production environment. In the following Hibernate-based example test case, one method demonstrates a false positive, and the other method correctly exposes the results of flushing the session. Note that this applies to JPA and any other ORM frameworks that maintain an in-memory __unit of work__.
@@ -13945,16 +14304,20 @@ The `org.springframework.test.context.junit4` package provides support classes f
 
 * `AbstractJUnit4SpringContextTests`: Abstract base test class that integrates the __Spring TestContext Framework__ with explicit `ApplicationContext` testing support in a JUnit 4.5+ environment.
 
++
+
 When you extend `AbstractJUnit4SpringContextTests`, you can access the following `protected` instance variable:
 
-* `applicationContext`: Use this variable to perform explicit bean lookups or to test the state of the context as a whole.
+** `applicationContext`: Use this variable to perform explicit bean lookups or to test the state of the context as a whole.
+
 * `AbstractTransactionalJUnit4SpringContextTests`: Abstract __transactional__ extension of `AbstractJUnit4SpringContextTests` that also adds some convenience functionality for JDBC access. Expects a `javax.sql.DataSource` bean and a `PlatformTransactionManager` bean to be defined in the `ApplicationContext`. When you extend `AbstractTransactionalJUnit4SpringContextTests` you can access the following `protected` instance variables:
-* `applicationContext`: Inherited from the `AbstractJUnit4SpringContextTests` superclass. Use this variable to perform explicit bean lookups or to test the state of the context as a whole.
-* `jdbcTemplate`: Use this variable to execute SQL statements to query the database. Such queries can be used to confirm database state both __prior to__ and __after__ execution of database-related application code, and Spring ensures that such queries run in the scope of the same transaction as the application code. When used in conjunction with an ORM tool, be sure to avoid <<testcontext-tx-false-positives,false positives>>.
+** `applicationContext`: Inherited from the `AbstractJUnit4SpringContextTests` superclass. Use this variable to perform explicit bean lookups or to test the state of the context as a whole.
+** `jdbcTemplate`: Use this variable to execute SQL statements to query the database. Such queries can be used to confirm database state both __prior to__ and __after__ execution of database-related application code, and Spring ensures that such queries run in the scope of the same transaction as the application code. When used in conjunction with an ORM tool, be sure to avoid <<testcontext-tx-false-positives,false positives>>.
+
++
 
 [TIP]
 ====
-
 These classes are a convenience for extension. If you do not want your test classes to be tied to a Spring-specific class hierarchy — for example, if you want to directly extend the class you are testing — you can configure your own custom test classes by using `@RunWith(SpringJUnit4ClassRunner.class)`, `@ContextConfiguration`, `@TestExecutionListeners`, and so on.
 ====
 
@@ -13982,12 +14345,18 @@ The `org.springframework.test.context.testng` package provides support classes f
 
 * `AbstractTestNGSpringContextTests`: Abstract base test class that integrates the __Spring TestContext Framework__ with explicit `ApplicationContext` testing support in a TestNG environment.
 
++
+
 When you extend `AbstractTestNGSpringContextTests`, you can access the following `protected` instance variable:
 
-* `applicationContext`: Use this variable to perform explicit bean lookups or to test the state of the context as a whole.
-* `AbstractTransactionalTestNGSpringContextTests`: Abstract __transactional__ extension of `AbstractTestNGSpringContextTests` that adds some convenience functionality for JDBC access. Expects a `javax.sql.DataSource` bean and a `PlatformTransactionManager` bean to be defined in the `ApplicationContext`. When you extend `AbstractTransactionalTestNGSpringContextTests`, you can access the following `protected` instance variables:
-* `applicationContext`: Inherited from the `AbstractTestNGSpringContextTests` superclass. Use this variable to perform explicit bean lookups or to test the state of the context as a whole.
-* `jdbcTemplate`: Use this variable to execute SQL statements to query the database. Such queries can be used to confirm database state both __prior to__ and __after__ execution of database-related application code, and Spring ensures that such queries run in the scope of the same transaction as the application code. When used in conjunction with an ORM tool, be sure to avoid <<testcontext-tx-false-positives,false positives>>.
++
+
+** `applicationContext`: Use this variable to perform explicit bean lookups or to test the state of the context as a whole.
+** `AbstractTransactionalTestNGSpringContextTests`: Abstract __transactional__ extension of `AbstractTestNGSpringContextTests` that adds some convenience functionality for JDBC access. Expects a `javax.sql.DataSource` bean and a `PlatformTransactionManager` bean to be defined in the `ApplicationContext`. When you extend `AbstractTransactionalTestNGSpringContextTests`, you can access the following `protected` instance variables:
+** `applicationContext`: Inherited from the `AbstractTestNGSpringContextTests` superclass. Use this variable to perform explicit bean lookups or to test the state of the context as a whole.
+** `jdbcTemplate`: Use this variable to execute SQL statements to query the database. Such queries can be used to confirm database state both __prior to__ and __after__ execution of database-related application code, and Spring ensures that such queries run in the scope of the same transaction as the application code. When used in conjunction with an ORM tool, be sure to avoid <<testcontext-tx-false-positives,false positives>>.
+
++
 
 [TIP]
 ====
@@ -13996,8 +14365,9 @@ These classes are a convenience for extension. If you do not want your test clas
 ====
 
 [[spring-mvc-test-framework]]
-==== Spring MVC Test FrameworkStandalone project
+==== Spring MVC Test Framework
 
+.Standalone project
 ****
 Before inclusion in Spring Framework 3.2, the Spring MVC Test framework had already existed as a separate project on GitHub where it grew and evolved through actual use, feedback, and the contribution of many.
 
@@ -14025,7 +14395,6 @@ All other means of rendering including `@ResponseBody` methods and `View` types 
 Below is an example of a test requesting account information in JSON format:
 
 [source,java]
-[subs="verbatim,quotes"]
 ----
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -14348,8 +14717,25 @@ The PetClinic application, available from the <<new-in-3.0-samples,samples repos
 import static org.junit.Assert.assertEquals;
 // import ...
 
-__@ContextConfiguration__
-public abstract class AbstractClinicTests __extends AbstractTransactionalJUnit4SpringContextTests__ { __@Autowired__ protected Clinic clinic; @Test public void getVets() { Collection<Vet> vets = this.clinic.getVets(); assertEquals("JDBC query must show the same number of vets",__super.countRowsInTable("VETS")__, vets.size()); Vet v1 = EntityUtils.getById(vets, Vet.class, 2); assertEquals("Leary", v1.getLastName()); assertEquals(1, v1.getNrOfSpecialties()); assertEquals("radiology", (v1.getSpecialties().get(0)).getName()); // ... } // ...
+**@ContextConfiguration**
+public abstract class AbstractClinicTests **extends AbstractTransactionalJUnit4SpringContextTests** {
+
+    **@Autowired**
+    protected Clinic clinic;
+
+    @Test
+    public void getVets() {
+        Collection<Vet> vets = this.clinic.getVets();
+        assertEquals("JDBC query must show the same number of vets",
+            **super.countRowsInTable("VETS")**, vets.size());
+        Vet v1 = EntityUtils.getById(vets, Vet.class, 2);
+        assertEquals("Leary", v1.getLastName());
+        assertEquals(1, v1.getNrOfSpecialties());
+        assertEquals("radiology", (v1.getSpecialties().get(0)).getName());
+        // ...
+    }
+
+    // ...
 }
 ----
 
@@ -14367,7 +14753,7 @@ For example, the Hibernate implementation of the PetClinic tests contains the fo
 [source,java]
 [subs="verbatim,quotes"]
 ----
-__@ContextConfiguration__
+**@ContextConfiguration**
 public class HibernateClinicTests extends AbstractClinicTests { }
 ----
 
@@ -15118,8 +15504,16 @@ The ease-of-use afforded by the use of the `@Transactional` annotation is best i
 [subs="verbatim,quotes"]
 ----
 // the service class that we want to make transactional
-__@Transactional__
-public class DefaultFooService implements FooService { Foo getFoo(String fooName); Foo getFoo(String fooName, String barName); void insertFoo(Foo foo); void updateFoo(Foo foo);
+**@Transactional**
+public class DefaultFooService implements FooService {
+
+    Foo getFoo(String fooName);
+
+    Foo getFoo(String fooName, String barName);
+
+    void insertFoo(Foo foo);
+
+    void updateFoo(Foo foo);
 }
 ----
 
@@ -15642,7 +16036,11 @@ If there is no return value, use the convenient `TransactionCallbackWithoutResul
 [source,java]
 [subs="verbatim,quotes"]
 ----
-transactionTemplate.execute(new __TransactionCallbackWithoutResult__() { protected void doInTransactionWithoutResult(TransactionStatus status) { updateOperation1(); updateOperation2(); }
+transactionTemplate.execute(new **TransactionCallbackWithoutResult**() {
+    protected void doInTransactionWithoutResult(TransactionStatus status) {
+        updateOperation1();
+        updateOperation2();
+    }
 });
 ----
 
@@ -15658,7 +16056,9 @@ transactionTemplate.execute(new TransactionCallbackWithoutResult() {
       updateOperation1();
       updateOperation2();
     } catch (SomeBusinessExeption ex) {
-      __status.setRollbackOnly();__ } }
+      **status.setRollbackOnly();**
+    }
+  }
 });
 ----
 
@@ -15786,8 +16186,10 @@ The best way to guarantee that your Data Access Objects (DAOs) or repositories p
 [source,java]
 [subs="verbatim,quotes"]
 ----
-__@Repository__
-public class SomeMovieFinder implements MovieFinder { // ... }
+**@Repository**
+public class SomeMovieFinder implements MovieFinder {
+    // ...
+}
 ----
 
 Any DAO or repository implementation will need to access to a persistence resource, depending on the persistence technology used; for example, a JDBC-based repository will need access to a JDBC `DataSource`; a JPA-based repository will need access to an `EntityManager`. The easiest way to accomplish this is to have this resource dependency injected using one of the `@Autowired,`, `@Inject`, `@Resource` or `@PersistenceContext` annotations. Here is an example for a JPA repository:
@@ -16101,7 +16503,10 @@ public class JdbcCorporateEventDao implements CorporateEventDao {
     private JdbcTemplate jdbcTemplate;
 
     public void setDataSource(DataSource dataSource) {
-        __this.jdbcTemplate = new JdbcTemplate(dataSource);__ } // JDBC-backed implementations of the methods on the CorporateEventDao follow...
+        **this.jdbcTemplate = new JdbcTemplate(dataSource);**
+    }
+
+    // JDBC-backed implementations of the methods on the CorporateEventDao follow...
 }
 ----
 
@@ -16141,8 +16546,15 @@ An alternative to explicit configuration is to use component-scanning and annota
 [source,java]
 [subs="verbatim,quotes"]
 ----
-__@Repository__
-public class JdbcCorporateEventDao implements CorporateEventDao { private JdbcTemplate jdbcTemplate;__@Autowired__ public void setDataSource(DataSource dataSource) { __this.jdbcTemplate = new JdbcTemplate(dataSource);__ } // JDBC-backed implementations of the methods on the CorporateEventDao follow...
+**@Repository**
+public class JdbcCorporateEventDao implements CorporateEventDao {
+    private JdbcTemplate jdbcTemplate;
+    **@Autowired**
+    public void setDataSource(DataSource dataSource) {
+        **this.jdbcTemplate = new JdbcTemplate(dataSource);**
+    }
+
+    // JDBC-backed implementations of the methods on the CorporateEventDao follow...
 }
 ----
 
@@ -17774,7 +18186,9 @@ However, to get more control over the creation and deletion of existing data, th
 [subs="verbatim,quotes"]
 ----
 <jdbc:initialize-database data-source="dataSource"
-    __enabled="#{systemProperties.INITIALIZE_DATABASE}"__><jdbc:script location="..."/></jdbc:initialize-database>
+    **enabled="#{systemProperties.INITIALIZE_DATABASE}"**>
+    <jdbc:script location="..."/>
+</jdbc:initialize-database>
 ----
 
 The second option to control what happens with existing data is to be more tolerant of failures. To this end you can control the ability of the initializer to ignore certain errors in the SQL it executes from the scripts, e.g.
@@ -17782,7 +18196,9 @@ The second option to control what happens with existing data is to be more toler
 [source]
 [subs="verbatim,quotes"]
 ----
-<jdbc:initialize-database data-source="dataSource" __ignore-failures="DROPS"__><jdbc:script location="..."/></jdbc:initialize-database>
+<jdbc:initialize-database data-source="dataSource" **ignore-failures="DROPS"**>
+    <jdbc:script location="..."/>
+</jdbc:initialize-database>
 ----
 
 In this example we are saying we expect that sometimes the scripts will be run against an empty database and there are some DROP statements in the scripts which would therefore fail. So failed SQL `DROP` statements will be ignored, but other failures will cause an exception. This is useful if your SQL dialect doesn't support `DROP ... IF EXISTS` (or similar) but you want to unconditionally remove all test data before re-creating it. In that case the first script is usually a set of drops, followed by a set of `CREATE` statements.
@@ -18701,7 +19117,7 @@ For applications that rely on multiple persistence units locations, stored in va
 The default implementation allows customization of the `PersistenceUnitInfo` instances, before they are fed to the JPA provider, declaratively through its properties, which affect __all__ hosted units, or programmatically, through the `PersistenceUnitPostProcessor`, which allows persistence unit selection. If no `PersistenceUnitManager` is specified, one is created and used internally by `LocalContainerEntityManagerFactoryBean`.
 
 [[orm-jpa-straight]]
-==== Implementing DAOs based on plain JPAMethod- and field-level Injection
+==== Implementing DAOs based on plain JPA
 [NOTE]
 ====
 Although `EntityManagerFactory` instances are thread-safe, `EntityManager` instances are not. The injected JPA `EntityManager` behaves like an `EntityManager` fetched from an application server's JNDI environment, as defined by the JPA specification. It delegates all calls to the current transactional `EntityManager`, if any; otherwise, it falls back to a newly created `EntityManager` per operation, in effect making its usage thread-safe.
@@ -18787,6 +19203,7 @@ public class ProductDaoImpl implements ProductDao {
 
 The `@PersistenceContext` annotation has an optional attribute `type`, which defaults to `PersistenceContextType.TRANSACTION`. This default is what you need to receive a shared EntityManager proxy. The alternative, `PersistenceContextType.EXTENDED`, is a completely different affair: This results in a so-called extended EntityManager, which is __not thread-safe__ and hence must not be used in a concurrently accessed component such as a Spring-managed singleton bean. Extended EntityManagers are only supposed to be used in stateful components that, for example, reside in a session, with the lifecycle of the EntityManager not tied to a current transaction but rather being completely up to the application.
 
+.Method- and field-level Injection
 ****
 Annotations that indicate dependency injections (such as `@PersistenceUnit` and `@PersistenceContext`) can be applied on field or methods inside a class, hence the expressions __method-level injection__ and __field-level injection__. Field-level annotations are concise and easier to use while method-level allows for further processing of the injected dependency. In both cases the member visibility (public, protected, private) does not matter.
 
@@ -19092,7 +19509,7 @@ Marshallers could be configured more concisely using tags from the OXM namespace
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    __xmlns:oxm="http://www.springframework.org/schema/oxm"__xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd __http://www.springframework.org/schema/oxm http://www.springframework.org/schema/oxm/spring-oxm.xsd"__>
+    **xmlns:oxm="http://www.springframework.org/schema/oxm"** xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd **http://www.springframework.org/schema/oxm http://www.springframework.org/schema/oxm/spring-oxm.xsd"**>
 ----
 
 Currently, the following tags are available:
@@ -21453,7 +21870,9 @@ You can use the `@RequestPart` annotation instead of the `@RequestParam` annotat
 [subs="verbatim,quotes"]
 ----
 @RequestMapping(value="/someUrl", method = RequestMethod.POST)
-public String onSubmit(__@RequestPart("meta-data") MetaData metadata, @RequestPart("file-data") MultipartFile file__) { // ...
+public String onSubmit(**@RequestPart("meta-data") MetaData metadata,
+                       @RequestPart("file-data") MultipartFile file**) {
+    // ...
 
 }
 ----
@@ -31423,11 +31842,13 @@ Below are some examples of various SpEL declarations - if you are not familiar w
 [source,java]
 [subs="verbatim,quotes"]
 ----
-@Cacheable(value="books", __key="#isbn")__
-public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed) 
-@Cacheable(value="books", __key="#isbn.rawNumber"__)
+@Cacheable(value="books", **key="#isbn")**
 public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
-@Cacheable(value="books", __key="T(someType).hash(#isbn)"__)
+
+@Cacheable(value="books", **key="#isbn.rawNumber"**)
+public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
+
+@Cacheable(value="books", **key="T(someType).hash(#isbn)"**)
 public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 ----
 
@@ -33879,9 +34300,12 @@ Before...
 [source,xml]
 [subs="verbatim,quotes"]
 ----
-<bean id="__dataSource__" class="org.springframework.jndi.JndiObjectFactoryBean"> <property name="jndiName" value="jdbc/MyDataSource"/>
-</bean> <bean id="userDao" class="com.foo.JdbcUserDao"> <!-- Spring will do the cast automatically (as usual) -->
-    <property name="dataSource" ref="__dataSource__"/>
+<bean id="**dataSource**" class="org.springframework.jndi.JndiObjectFactoryBean">
+    <property name="jndiName" value="jdbc/MyDataSource"/>
+</bean>
+<bean id="userDao" class="com.foo.JdbcUserDao">
+    <!-- Spring will do the cast automatically (as usual) -->
+    <property name="dataSource" ref="**dataSource**"/>
 </bean>
 ----
 
@@ -33890,8 +34314,11 @@ After...
 [source,xml]
 [subs="verbatim,quotes"]
 ----
-<jee:jndi-lookup id="__dataSource__" jndi-name="jdbc/MyDataSource"/> <bean id="userDao" class="com.foo.JdbcUserDao"> <!-- Spring will do the cast automatically (as usual) -->
-    <property name="dataSource" ref="__dataSource__"/>
+<jee:jndi-lookup id="**dataSource**" jndi-name="jdbc/MyDataSource"/>
+
+<bean id="userDao" class="com.foo.JdbcUserDao">
+    <!-- Spring will do the cast automatically (as usual) -->
+    <property name="dataSource" ref="**dataSource**"/>
 </bean>
 ----
 
@@ -34414,7 +34841,9 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
 public class MyNamespaceHandler extends NamespaceHandlerSupport {
 
-    public void init() {__ registerBeanDefinitionParser("dateformat", new SimpleDateFormatBeanDefinitionParser()); __}
+    public void init() {
+      **registerBeanDefinitionParser("dateformat", new SimpleDateFormatBeanDefinitionParser());**
+    }
 }
 ----
 
