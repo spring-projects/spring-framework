@@ -111,7 +111,16 @@ public abstract class StaxUtils {
 	 * 1.4 {@link StAXSource}; {@code false} otherwise.
 	 */
 	public static boolean isStaxSource(Source source) {
-		return (source instanceof StaxSource || (jaxp14Available && Jaxp14StaxHandler.isStaxSource(source)));
+		return ((source instanceof StaxSource) || (jaxp14Available && Jaxp14StaxHandler.isStaxSource(source)));
+	}
+
+	/**
+	 * Indicate whether the given class is a StAX Source class.
+	 * @return {@code true} if {@code source} is a custom StAX source or JAXP
+	 * 1.4 {@link StAXSource} class; {@code false} otherwise.
+	 */
+	public static boolean isStaxSourceClass(Class<? extends Source> clazz) {
+		return (StaxSource.class.equals(clazz) || (jaxp14Available && Jaxp14StaxHandler.isStaxSourceClass(clazz)));
 	}
 
 
@@ -347,6 +356,10 @@ public abstract class StaxUtils {
 		private static boolean isStaxSource(Source source) {
 			return (source instanceof StAXSource);
 		}
+
+		private static boolean isStaxSourceClass(Class<? extends Source> clazz) {
+            return StAXSource.class.equals(clazz);
+        }
 
 		private static boolean isStaxResult(Result result) {
 			return (result instanceof StAXResult);
