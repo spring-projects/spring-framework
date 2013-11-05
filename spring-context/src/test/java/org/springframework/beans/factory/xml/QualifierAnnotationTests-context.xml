@@ -7,11 +7,19 @@
 
 	<context:annotation-config/>
 
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="properties">
+			<props>
+				<prop key="myProp">larry</prop>
+			</props>
+		</property>
+	</bean>
+
 	<bean id="larryBean" class="org.springframework.beans.factory.xml.QualifierAnnotationTests$Person">
 		<property name="name" value="LarryBean"/>
 	</bean>
 
-	<alias name="larryBean" alias="someAlias"/>
+	<alias name="${myProp}Bean" alias="someAlias"/>
 
 	<alias name="someAlias" alias="stooge"/>
 
