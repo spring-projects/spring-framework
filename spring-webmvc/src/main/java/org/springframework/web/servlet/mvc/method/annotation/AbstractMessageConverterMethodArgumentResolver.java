@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpInputMessage;
+import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -113,7 +114,14 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	protected <T> Object readWithMessageConverters(HttpInputMessage inputMessage,
 			MethodParameter methodParam, Type targetType) throws IOException, HttpMediaTypeNotSupportedException {
 
-		MediaType contentType = inputMessage.getHeaders().getContentType();
+		MediaType contentType;
+		try {
+			contentType = inputMessage.getHeaders().getContentType();
+		}
+		catch (InvalidMediaTypeException ex) {
+			throw new HttpMediaTypeNotSupportedException(ex.getMessage());
+		}
+
 		if (contentType == null) {
 			contentType = MediaType.APPLICATION_OCTET_STREAM;
 		}
