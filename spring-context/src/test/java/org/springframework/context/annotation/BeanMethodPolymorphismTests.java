@@ -37,6 +37,23 @@ import static org.junit.Assert.*;
 public class BeanMethodPolymorphismTests {
 
 	@Test
+	public void beanMethodDetectedOnSuperClass() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Config.class);
+		ctx.getBean("testBean", TestBean.class);
+	}
+
+	@Test
+	public void beanMethodOverriding() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(OverridingConfig.class);
+		ctx.setAllowBeanDefinitionOverriding(false);
+		ctx.refresh();
+		assertFalse(ctx.getDefaultListableBeanFactory().containsSingleton("testBean"));
+		assertEquals("overridden", ctx.getBean("testBean", TestBean.class).toString());
+		assertTrue(ctx.getDefaultListableBeanFactory().containsSingleton("testBean"));
+	}
+
+	@Test
 	public void beanMethodOverloadingWithoutInheritance() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigWithOverloading.class);
@@ -112,15 +129,6 @@ public class BeanMethodPolymorphismTests {
 		assertThat(ctx.getBean(String.class), equalTo("shadow"));
 	}
 
-	@Test
-	public void beanMethodsDetectedOnSuperClass() {
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(Config.class));
-		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
-		pp.postProcessBeanFactory(beanFactory);
-		beanFactory.getBean("testBean", TestBean.class);
-	}
-
 
 	@Configuration
 	static class BaseConfig {
@@ -129,12 +137,27 @@ public class BeanMethodPolymorphismTests {
 		public TestBean testBean() {
 			return new TestBean();
 		}
-
 	}
 
 
 	@Configuration
 	static class Config extends BaseConfig {
+	}
+
+
+	@Configuration
+	static class OverridingConfig extends BaseConfig {
+
+		@Bean @Lazy
+		@Override
+		public TestBean testBean() {
+			return new TestBean() {
+				@Override
+				public String toString() {
+					return "overridden";
+				}
+			};
+		}
 	}
 
 
