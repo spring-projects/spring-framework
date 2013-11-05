@@ -71,7 +71,7 @@ public final class MessageHeaders implements Map<String, Object>, Serializable {
 
 	private static volatile IdGenerator idGenerator = null;
 
-	private static volatile IdGenerator defaultIdGenerator = new AlternativeJdkIdGenerator();
+	private static final IdGenerator defaultIdGenerator = new AlternativeJdkIdGenerator();
 
 	/**
 	 * The key for the Message ID. This is an automatically generated UUID and
@@ -97,8 +97,7 @@ public final class MessageHeaders implements Map<String, Object>, Serializable {
 
 	public MessageHeaders(Map<String, Object> headers) {
 		this.headers = (headers != null) ? new HashMap<String, Object>(headers) : new HashMap<String, Object>();
-		IdGenerator generatorToUse = (idGenerator != null) ? idGenerator : defaultIdGenerator;
-		this.headers.put(ID, generatorToUse.generateId());
+		this.headers.put(ID, ((idGenerator != null) ? idGenerator : defaultIdGenerator).generateId());
 		this.headers.put(TIMESTAMP, new Long(System.currentTimeMillis()));
 	}
 
