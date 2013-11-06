@@ -3,6 +3,49 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
+Changes in version 3.2.5 (2013-11-06)
+-------------------------------------
+
+* fixed type prediction for generic factory method with conversion of method arguments (SPR-10411)
+* fixed GenericTypeResolver issues relating to ParameterizedType (SPR-10819)
+* allow indexed constructors to be used with @Autowire resolution (SPR-11019)
+* refined JavaConfig overrides algorithm (SPR-10988, SPR-10992)
+* fixed multiple calls to @Autowire setters when defining several beans of the same class (SPR-11027)
+* provided more lenient fallback checks for setter injection (SPR-10995)
+* allowed AnnotationConfigWebApplicationContext.register to be called multiple times (SPR-10852)
+* fixed various SpEL issues (SPR-9495, SPR-10452, SPR-10928, SPR-10884, SPR-10953, SPR-10716, SPR-10486, SPR-11031)
+* added XStream catch-all converter (SPR-10821)
+* fixed issue with AOP Advisor being silently skipped during creation (SPR-10430)
+* fixed use of configured prefix for Jackson message converters (SPR-10817)
+* fixed SimpleJdbcCall function return issues (SPR-10606)
+* protected against memory leak in AntPathMatcher (SPR-10803)
+* fixed memory leak in AbstractBeanFactory (SPR-10896)
+* fixed Ehcache RMI replication issue (SPR-10904)
+* fixed ArrayStoreException with ASM reading of enum subclass (SPR-10914)
+* prevented duplicate scan of @Import annotations (SPR-10918) 
+* fixed issues using non-shareable @Resource (SPR-10931)
+* ensured malformed content type is translated to 415 status code (SPR-10982)
+* fixed issues when converting a single element array to object (SPR-10996)
+* allow override of @ContextConfiguration initializer when using @ContextHierarchy (SPR-10997)
+* fixed issue with ordering of @PropertySource values (SPR-10820)
+* fixed parsing issues with JNDI variables (SPR-11039)
+* fixed MockHttpServletRequestBuilder handling parameter without value (SPR-11043)
+* fixed ClasspathXmlApplicationContext inherit/merge of parent context environment (SPR-11068)
+* fixed wrong translation of MS SQL error code (SPR-10902)
+* fixed JMSTemplate issues when used with Oracle AQ (SPR-10829)
+* fixed AbstractMethodMockingControl off-by-one error (SPR-10885)
+* fixed potential NPE with JaxB2Marshaller (SPR-10828)
+* fixed potential NPE with RestTemplate (SPR-10848)
+* fixed potential NPE in AbstractApplicationEventMulticaster (SPR-10945)
+* fixed potential NPE with RedirectView (SPR-10937)
+* fixed NPE with ExtendedBeanInfo on IBM J9 VM (SPR-10862)
+* improved subclassing support for RequestMappingHandlerMapping (SPR-10950)
+* made AnnotationConfigUtils.processCommonDefinitionAnnotations public (SPR-11032)
+* removed unnecessary char[] allocation with NamedParameterUtils (SPR-11042)
+* refined logging output (SPR-10974, SPR-11017)
+* minor documentation updates (SPR-10798, SPR-10850, SPR-10927)
+
+
 Changes in version 3.2.4 (2013-08-06)
 -------------------------------------
 
