@@ -335,7 +335,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 
 		String output = getOutput();
 
-		assertEquals("<input type=\"hidden\" name=\"key\" value=\"value\" />", getInputTag(output));
+		assertEquals("<div>\n<input type=\"hidden\" name=\"key\" value=\"value\" />\n</div>", getInputTag(output));
 		assertFormTagOpened(output);
 		assertFormTagClosed(output);
 	}
