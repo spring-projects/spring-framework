@@ -30,8 +30,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.handler.websocket.SubProtocolHandler;
 import org.springframework.messaging.simp.SimpMessageType;
-import org.springframework.messaging.simp.handler.MutableUserQueueSuffixResolver;
-import org.springframework.messaging.simp.handler.SimpleUserQueueSuffixResolver;
+import org.springframework.messaging.simp.handler.UserSessionRegistry;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
@@ -45,6 +44,7 @@ import org.springframework.web.socket.WebSocketSession;
  *
  * @author Rossen Stoyanchev
  * @author Andy Wilkinson
+ * @since 4.0
  */
 public class StompProtocolHandler implements SubProtocolHandler {
 
@@ -54,36 +54,30 @@ public class StompProtocolHandler implements SubProtocolHandler {
 	 */
 	public static final String CONNECTED_USER_HEADER = "user-name";
 
-	/**
-	 * A suffix unique to the current session that a client can use to append to
-	 * a destination to make it unique.
-	 *
-	 * @see {@link org.springframework.messaging.simp.handler.UserDestinationMessageHandler}
-	 */
-	public static final String QUEUE_SUFFIX_HEADER = "queue-suffix";
+	private static final Log logger = LogFactory.getLog(StompProtocolHandler.class);
 
-	private final Log logger = LogFactory.getLog(StompProtocolHandler.class);
 
 	private final StompDecoder stompDecoder = new StompDecoder();
 
 	private final StompEncoder stompEncoder = new StompEncoder();
 
-	private MutableUserQueueSuffixResolver queueSuffixResolver = new SimpleUserQueueSuffixResolver();
+	private UserSessionRegistry userSessionRegistry;
 
 
 	/**
-	 * Configure a resolver to use to maintain queue suffixes for user
+	 * Provide a registry with which to register active user session ids.
+	 *
 	 * @see {@link org.springframework.messaging.simp.handler.UserDestinationMessageHandler}
 	 */
-	public void setUserQueueSuffixResolver(MutableUserQueueSuffixResolver resolver) {
-		this.queueSuffixResolver = resolver;
+	public void setUserSessionRegistry(UserSessionRegistry registry) {
+		this.userSessionRegistry = registry;
 	}
 
 	/**
-	 * @return the resolver for queue suffixes for a user
+	 * @return the configured UserSessionRegistry.
 	 */
-	public MutableUserQueueSuffixResolver getUserQueueSuffixResolver() {
-		return this.queueSuffixResolver;
+	public UserSessionRegistry getUserSessionRegistry() {
+		return this.userSessionRegistry;
 	}
 
 	@Override
@@ -162,7 +156,7 @@ public class StompProtocolHandler implements SubProtocolHandler {
 		}
 
 		if (headers.getCommand() == StompCommand.CONNECTED) {
-			augmentConnectedHeaders(headers, session);
+			afterStompSessionConnected(headers, session);
 		}
 
 		if (StompCommand.MESSAGE.equals(headers.getCommand()) && (headers.getSubscriptionId() == null)) {
@@ -189,6 +183,7 @@ public class StompProtocolHandler implements SubProtocolHandler {
 					session.close(CloseStatus.PROTOCOL_ERROR);
 				}
 				catch (IOException e) {
+					// Ignore
 				}
 			}
 		}
@@ -216,15 +211,13 @@ public class StompProtocolHandler implements SubProtocolHandler {
 		}
 	}
 
-	private void augmentConnectedHeaders(StompHeaderAccessor headers, WebSocketSession session) {
+	private void afterStompSessionConnected(StompHeaderAccessor headers, WebSocketSession session) {
 		Principal principal = session.getPrincipal();
 		if (principal != null) {
 			headers.setNativeHeader(CONNECTED_USER_HEADER, principal.getName());
-			headers.setNativeHeader(QUEUE_SUFFIX_HEADER, session.getId());
-
-			if (this.queueSuffixResolver != null) {
+			if (this.userSessionRegistry != null) {
 				String suffix = session.getId();
-				this.queueSuffixResolver.addQueueSuffix(principal.getName(), session.getId(), suffix);
+				this.userSessionRegistry.registerSessionId(principal.getName(), session.getId());
 			}
 		}
 	}
@@ -242,8 +235,8 @@ public class StompProtocolHandler implements SubProtocolHandler {
 	@Override
 	public void afterSessionEnded(WebSocketSession session, CloseStatus closeStatus, MessageChannel outputChannel) {
 
-		if ((this.queueSuffixResolver != null) && (session.getPrincipal() != null)) {
-			this.queueSuffixResolver.removeQueueSuffix(session.getPrincipal().getName(), session.getId());
+		if ((this.userSessionRegistry != null) && (session.getPrincipal() != null)) {
+			this.userSessionRegistry.unregisterSessionId(session.getPrincipal().getName(), session.getId());
 		}
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);

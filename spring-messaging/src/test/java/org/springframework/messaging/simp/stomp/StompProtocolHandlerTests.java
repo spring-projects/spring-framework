@@ -28,9 +28,9 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.support.TestPrincipal;
 import org.springframework.web.socket.support.TestWebSocketSession;
 
 import static org.junit.Assert.*;
@@ -90,7 +90,6 @@ public class StompProtocolHandlerTests {
 		assertEquals("1.1", replyHeaders.getVersion());
 		assertArrayEquals(new long[] {0, 0}, replyHeaders.getHeartbeat());
 		assertEquals("joe", replyHeaders.getNativeHeader("user-name").get(0));
-		assertEquals("s1", replyHeaders.getNativeHeader("queue-suffix").get(0));
 	}
 
 	@Test

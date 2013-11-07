@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.messaging.handler.websocket.SubProtocolWebSocketHandler;
-import org.springframework.messaging.simp.handler.MutableUserQueueSuffixResolver;
+import org.springframework.messaging.simp.handler.UserSessionRegistry;
 import org.springframework.messaging.simp.stomp.StompProtocolHandler;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
@@ -54,15 +54,15 @@ public class ServletStompEndpointRegistry implements StompEndpointRegistry {
 
 
 	public ServletStompEndpointRegistry(WebSocketHandler webSocketHandler,
-			MutableUserQueueSuffixResolver userQueueSuffixResolver, TaskScheduler defaultSockJsTaskScheduler) {
+			UserSessionRegistry userSessionRegistry, TaskScheduler defaultSockJsTaskScheduler) {
 
 		Assert.notNull(webSocketHandler);
-		Assert.notNull(userQueueSuffixResolver);
+		Assert.notNull(userSessionRegistry);
 
 		this.webSocketHandler = webSocketHandler;
 		this.subProtocolWebSocketHandler = findSubProtocolWebSocketHandler(webSocketHandler);
 		this.stompHandler = new StompProtocolHandler();
-		this.stompHandler.setUserQueueSuffixResolver(userQueueSuffixResolver);
+		this.stompHandler.setUserSessionRegistry(userSessionRegistry);
 		this.sockJsScheduler = defaultSockJsTaskScheduler;
 	}
 

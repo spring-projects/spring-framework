@@ -35,9 +35,9 @@ import org.springframework.messaging.handler.websocket.SubProtocolWebSocketHandl
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.annotation.SubscribeEvent;
 import org.springframework.messaging.simp.handler.SimpAnnotationMethodMessageHandler;
-import org.springframework.messaging.simp.handler.MutableUserQueueSuffixResolver;
 import org.springframework.messaging.simp.handler.SimpleBrokerMessageHandler;
 import org.springframework.messaging.simp.handler.UserDestinationMessageHandler;
+import org.springframework.messaging.simp.handler.UserSessionRegistry;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -259,7 +259,7 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		SubscribableChannel channel = this.cxtSimpleBroker.getBean("brokerChannel", SubscribableChannel.class);
 		UserDestinationMessageHandler messageHandler = this.cxtSimpleBroker.getBean(UserDestinationMessageHandler.class);
 
-		this.cxtSimpleBroker.getBean(MutableUserQueueSuffixResolver.class).addQueueSuffix("joe", "s1", "s1");
+		this.cxtSimpleBroker.getBean(UserSessionRegistry.class).registerSessionId("joe", "s1");
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
 		headers.setDestination("/user/joe/foo");
@@ -274,7 +274,7 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		headers = StompHeaderAccessor.wrap(message);
 
 		assertEquals(SimpMessageType.MESSAGE, headers.getMessageType());
-		assertEquals("/foos1", headers.getDestination());
+		assertEquals("/foo-users1", headers.getDestination());
 	}
 
 	@Test

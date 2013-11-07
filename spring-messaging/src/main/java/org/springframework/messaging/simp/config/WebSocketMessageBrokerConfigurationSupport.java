@@ -68,8 +68,9 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 
 	@Bean
 	public HandlerMapping brokerWebSocketHandlerMapping() {
-		ServletStompEndpointRegistry registry = new ServletStompEndpointRegistry(subProtocolWebSocketHandler(),
-				userQueueSuffixResolver(), brokerDefaultSockJsTaskScheduler());
+
+		ServletStompEndpointRegistry registry = new ServletStompEndpointRegistry(
+				subProtocolWebSocketHandler(), userSessionRegistry(), brokerDefaultSockJsTaskScheduler());
 
 		registerStompEndpoints(registry);
 		AbstractHandlerMapping hm = registry.getHandlerMapping();
@@ -85,13 +86,13 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 	}
 
 	@Bean
-	public MutableUserQueueSuffixResolver userQueueSuffixResolver() {
-		return new SimpleUserQueueSuffixResolver();
+	public UserSessionRegistry userSessionRegistry() {
+		return new DefaultUserSessionRegistry();
 	}
 
 	/**
 	 * The default TaskScheduler to use if none is configured via
-	 * {@link SockJsServiceRegistration#setTaskScheduler()}, i.e.
+	 * {@link SockJsServiceRegistration#setTaskScheduler(org.springframework.scheduling.TaskScheduler)}, i.e.
 	 * <pre class="code">
 	 * &#064;Configuration
 	 * &#064;EnableWebSocketMessageBroker
@@ -137,8 +138,10 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 
 	@Bean
 	public SimpAnnotationMethodMessageHandler annotationMethodMessageHandler() {
+
 		SimpAnnotationMethodMessageHandler handler =
 				new SimpAnnotationMethodMessageHandler(brokerMessagingTemplate(), webSocketResponseChannel());
+
 		handler.setDestinationPrefixes(getMessageBrokerConfigurer().getAnnotationMethodDestinationPrefixes());
 		handler.setMessageConverter(simpMessageConverter());
 		webSocketRequestChannel().subscribe(handler);
@@ -185,8 +188,10 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 
 	@Bean
 	public UserDestinationMessageHandler userDestinationMessageHandler() {
+
 		UserDestinationMessageHandler handler = new UserDestinationMessageHandler(
-				brokerMessagingTemplate(), userQueueSuffixResolver());
+				brokerMessagingTemplate(), userDestinationResolver());
+
 		webSocketRequestChannel().subscribe(handler);
 		brokerChannel().subscribe(handler);
 		return handler;
@@ -195,6 +200,10 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 	@Bean
 	public SimpMessageSendingOperations brokerMessagingTemplate() {
 		SimpMessagingTemplate template = new SimpMessagingTemplate(brokerChannel());
+		String userDestinationPrefix = getMessageBrokerConfigurer().getUserDestinationPrefix();
+		if (userDestinationPrefix != null) {
+			template.setUserDestinationPrefix(userDestinationPrefix);
+		}
 		template.setMessageConverter(simpMessageConverter());
 		return template;
 	}
@@ -218,6 +227,16 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 		converters.add(new ByteArrayMessageConverter());
 
 		return new CompositeMessageConverter(converters, contentTypeResolver);
+	}
+
+	@Bean
+	public UserDestinationResolver userDestinationResolver() {
+		DefaultUserDestinationResolver resolver = new DefaultUserDestinationResolver(userSessionRegistry());
+		String prefix = getMessageBrokerConfigurer().getUserDestinationPrefix();
+		if (prefix != null) {
+			resolver.setUserDestinationPrefix(prefix);
+		}
+		return resolver;
 	}
 
 

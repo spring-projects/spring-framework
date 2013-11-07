@@ -108,7 +108,11 @@ public abstract class AbstractSubscriptionRegistry implements SubscriptionRegist
 		if (logger.isTraceEnabled()) {
 			logger.trace("Find subscriptions, destination=" + headers.getDestination());
 		}
-		return findSubscriptionsInternal(destination, message);
+		MultiValueMap<String, String> result = findSubscriptionsInternal(destination, message);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Found " + result.size() + " subscriptions");
+		}
+		return result;
 	}
 
 	protected abstract MultiValueMap<String, String> findSubscriptionsInternal(

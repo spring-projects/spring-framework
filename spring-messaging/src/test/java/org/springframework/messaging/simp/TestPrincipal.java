@@ -14,17 +14,44 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.simp.handler;
+package org.springframework.messaging.simp;
+
+import java.security.Principal;
 
 
 /**
+ * An implementation of {@link Principal} for testing.
+ *
  * @author Rossen Stoyanchev
- * @since 4.0
  */
-public interface MutableUserQueueSuffixResolver extends UserQueueSuffixResolver {
+public class TestPrincipal implements Principal {
 
-	void addQueueSuffix(String user, String sessionId, String suffix);
+	private String name;
 
-	void removeQueueSuffix(String user, String sessionId);
+	public TestPrincipal(String name) {
+		this.name = name;
+	}
+
+	@Override
+	public String getName() {
+		return this.name;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (!(obj instanceof TestPrincipal)) {
+			return false;
+		}
+		TestPrincipal p = (TestPrincipal) obj;
+		return this.name.equals(p.name);
+	}
+
+	@Override
+	public int hashCode() {
+		return this.name.hashCode();
+	}
 
 }

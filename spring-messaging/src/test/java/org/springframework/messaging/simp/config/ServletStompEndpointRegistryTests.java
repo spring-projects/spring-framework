@@ -24,8 +24,8 @@ import org.mockito.Mockito;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.handler.websocket.SubProtocolHandler;
 import org.springframework.messaging.handler.websocket.SubProtocolWebSocketHandler;
-import org.springframework.messaging.simp.handler.MutableUserQueueSuffixResolver;
-import org.springframework.messaging.simp.handler.SimpleUserQueueSuffixResolver;
+import org.springframework.messaging.simp.handler.DefaultUserSessionRegistry;
+import org.springframework.messaging.simp.handler.UserSessionRegistry;
 import org.springframework.messaging.simp.stomp.StompProtocolHandler;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
@@ -44,16 +44,16 @@ public class ServletStompEndpointRegistryTests {
 
 	private SubProtocolWebSocketHandler webSocketHandler;
 
-	private MutableUserQueueSuffixResolver queueSuffixResolver;
+	private UserSessionRegistry userSessionRegistry;
 
 
 	@Before
 	public void setup() {
 		MessageChannel channel = Mockito.mock(MessageChannel.class);
 		this.webSocketHandler = new SubProtocolWebSocketHandler(channel);
-		this.queueSuffixResolver = new SimpleUserQueueSuffixResolver();
+		this.userSessionRegistry = new DefaultUserSessionRegistry();
 		TaskScheduler taskScheduler = Mockito.mock(TaskScheduler.class);
-		this.registry = new ServletStompEndpointRegistry(webSocketHandler, queueSuffixResolver, taskScheduler);
+		this.registry = new ServletStompEndpointRegistry(webSocketHandler, userSessionRegistry, taskScheduler);
 	}
 
 
@@ -69,7 +69,7 @@ public class ServletStompEndpointRegistryTests {
 		assertNotNull(protocolHandlers.get("v12.stomp"));
 
 		StompProtocolHandler stompHandler = (StompProtocolHandler) protocolHandlers.get("v10.stomp");
-		assertSame(this.queueSuffixResolver, stompHandler.getUserQueueSuffixResolver());
+		assertSame(this.userSessionRegistry, stompHandler.getUserSessionRegistry());
 	}
 
 	@Test

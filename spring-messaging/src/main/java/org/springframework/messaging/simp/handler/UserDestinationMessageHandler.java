@@ -23,20 +23,19 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.core.MessageSendingOperations;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
-import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+
+import java.util.Set;
 
 
 /**
- * Supports destinations prefixed with "/user/{username}", transforms the
- * destination to a unique queue to which the user is subscribed, and then sends
- * the message for further processing.
- *
- * <p>The target destination has the prefix removed and a unique queue suffix,
- * resolved via {@link #setUserQueueSuffixResolver(UserQueueSuffixResolver)}, appended.
- * For example a destination such as "/user/john/queue/trade-confirmation" could
- * be transformed to "/queue/trade-confirmation/i9oqdfzo".
+ * Provides support for messages sent to "user" destinations, translating the
+ * destination to one or more user-specific destination(s) and then sending message(s)
+ * with the updated target destination using the provided messaging template.
+ * <p>
+ * See {@link UserDestinationResolver} for more details and examples.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -45,139 +44,66 @@ public class UserDestinationMessageHandler implements MessageHandler {
 
 	private static final Log logger = LogFactory.getLog(UserDestinationMessageHandler.class);
 
+
 	private final MessageSendingOperations<String> messagingTemplate;
 
-	private String destinationPrefix = "/user/";
-
-	private UserQueueSuffixResolver userQueueSuffixResolver = new SimpleUserQueueSuffixResolver();
+	private final UserDestinationResolver userDestinationResolver;
 
 
 	/**
+	 * Create an instance of the handler with the given messaging template and a
+	 * user destination resolver.
 	 *
-	 * @param messagingTemplate
-	 * @param resolver the resolver to use to find queue suffixes for a user
+	 * @param messagingTemplate a messaging template to use for sending messages
+	 *		with translated user destinations
+	 * @param userDestinationResolver the resolver to use to find queue suffixes for a user
 	 */
 	public UserDestinationMessageHandler(MessageSendingOperations<String> messagingTemplate,
-			UserQueueSuffixResolver userQueueSuffixResolver) {
+			UserDestinationResolver userDestinationResolver) {
 
 		Assert.notNull(messagingTemplate, "messagingTemplate is required");
-		Assert.notNull(userQueueSuffixResolver, "userQueueSuffixResolver is required");
+		Assert.notNull(userDestinationResolver, "destinationResolver is required");
 
 		this.messagingTemplate = messagingTemplate;
-		this.userQueueSuffixResolver = userQueueSuffixResolver;
+		this.userDestinationResolver = userDestinationResolver;
 	}
 
 	/**
-	 * <p>The default prefix is "/user".
-	 * @param prefix the prefix to set
+	 * Return the configured {@link UserDestinationResolver}.
 	 */
-	public void setDestinationPrefix(String prefix) {
-		Assert.hasText(prefix, "prefix is required");
-		this.destinationPrefix = prefix.endsWith("/") ? prefix : prefix + "/";
+	public UserDestinationResolver getUserDestinationResolver() {
+		return this.userDestinationResolver;
 	}
 
 	/**
-	 * @return the prefix
-	 */
-	public String getDestinationPrefix() {
-		return this.destinationPrefix;
-	}
-
-	/**
-	 * @return the resolver for queue suffixes for a user
-	 */
-	public UserQueueSuffixResolver getUserQueueSuffixResolver() {
-		return this.userQueueSuffixResolver;
-	}
-
-	/**
-	 * @return the messagingTemplate
+	 * Return the configured messaging template for sending messages with
+	 * translated destinations.
 	 */
 	public MessageSendingOperations<String> getMessagingTemplate() {
 		return this.messagingTemplate;
 	}
 
+
 	@Override
 	public void handleMessage(Message<?> message) throws MessagingException {
 
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		SimpMessageType messageType = headers.getMessageType();
-		String destination = headers.getDestination();
-
-		if (!SimpMessageType.MESSAGE.equals(messageType)) {
-			return;
-		}
-
-		if (!checkDestination(destination)) {
-			return;
-		}
-
 		if (logger.isTraceEnabled()) {
-			logger.trace("Processing message to destination " + destination);
+			logger.trace("Handling message " + message);
 		}
 
-		UserDestinationParser destinationParser = new UserDestinationParser(destination);
-		String user = destinationParser.getUser();
-
-		if (user == null) {
-			if (logger.isErrorEnabled()) {
-				logger.error("Ignoring message, expected destination pattern \"" + this.destinationPrefix
-						+ "{userId}/**\": " + destination);
-			}
+		Set<String> destinations = this.userDestinationResolver.resolveDestination(message);
+		if (CollectionUtils.isEmpty(destinations)) {
 			return;
 		}
 
-		for (String sessionId : this.userQueueSuffixResolver.getUserQueueSuffixes(user)) {
-
-			String targetDestination = destinationParser.getTargetDestination(sessionId);
+		for (String targetDestination : destinations) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Sending message to resolved user destination: " + targetDestination);
+			}
+			SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 			headers.setDestination(targetDestination);
 			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
-
-			if (logger.isTraceEnabled()) {
-				logger.trace("Sending message to resolved target destination " + targetDestination);
-			}
 			this.messagingTemplate.send(targetDestination, message);
-		}
-	}
-
-	private boolean checkDestination(String destination) {
-		if (destination != null) {
-			if (destination.startsWith(this.destinationPrefix)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-
-	private class UserDestinationParser {
-
-		private final String user;
-
-		private final String targetDestination;
-
-
-		public UserDestinationParser(String destination) {
-
-			int userStartIndex = destinationPrefix.length();
-			int userEndIndex = destination.indexOf('/', userStartIndex);
-
-			if (userEndIndex > 0) {
-				this.user = destination.substring(userStartIndex, userEndIndex);
-				this.targetDestination = destination.substring(userEndIndex);
-			}
-			else {
-				this.user = null;
-				this.targetDestination = null;
-			}
-		}
-
-		public String getUser() {
-			return this.user;
-		}
-
-		public String getTargetDestination(String sessionId) {
-			return (this.targetDestination != null) ? this.targetDestination + sessionId : null;
 		}
 	}
 
