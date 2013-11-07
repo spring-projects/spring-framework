@@ -1839,6 +1839,19 @@ public class SpelReproTests extends ExpressionTestCase {
 				equalTo((Object) "name"));
 	}
 
+	@Test
+	public void testOperatorEq_SPR9194() {
+		TestClass2 one = new TestClass2("abc");
+		TestClass2 two = new TestClass2("abc");
+		Map<String,TestClass2> map = new HashMap<String,TestClass2>();
+		map.put("one",one);
+		map.put("two",two);
+
+		SpelExpressionParser parser = new SpelExpressionParser();
+		Expression classNameExpression = parser.parseExpression("['one'] == ['two']");
+		assertTrue(classNameExpression.getValue(map,Boolean.class));
+	}
+
 
 	private static enum ABC {A, B, C}
 
@@ -1919,6 +1932,22 @@ public class SpelReproTests extends ExpressionTestCase {
 
 		public void setName(String name) {
 			this.name = name;
+		}
+
+	}
+
+	static class TestClass2 { // SPR-9194
+		String string;
+
+		public TestClass2(String string) {
+			this.string = string;
+		}
+
+		public boolean equals(Object o) {
+			if (o instanceof TestClass2) {
+				return string.equals(((TestClass2)o).string);
+			}
+			return false;
 		}
 
 	}
