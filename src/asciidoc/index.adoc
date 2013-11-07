@@ -595,10 +595,10 @@ This functionality is also available if you prefer to configure your components 
 public class RewardsTestDatabase {
 
     @Value("#{systemProperties.databaseName}")
-    public void setDatabaseName(String dbName) { … }
+    public void setDatabaseName(String dbName) { ... }
 
     @Value("#{strategyBean.databaseKeyGenerator}")
-    public void setKeyGenerator(KeyGenerator kg) { … }
+    public void setKeyGenerator(KeyGenerator kg) { ... }
 }
 ----
 
@@ -879,7 +879,7 @@ This section covers what's new in Spring Framework 3.2. See also <<migration-3.2
 The Spring MVC programming model now provides explicit Servlet 3 async support. `@RequestMapping` methods can return one of:
 
 * `java.util.concurrent.Callable` to complete processing in a separate thread managed by a task executor within Spring MVC.
-* `org.springframework.web.context.request.async.DeferredResult` to complete processing at a later time from a thread not known to Spring MVC — for example, in response to some external event (JMS, AMQP, etc.)
+* `org.springframework.web.context.request.async.DeferredResult` to complete processing at a later time from a thread not known to Spring MVC -- for example, in response to some external event (JMS, AMQP, etc.)
 * `org.springframework.web.context.request.async.AsyncTask` to wrap a `Callable` and customize the timeout value or the task executor to use.
 
 See <<mvc-ann-async>>.
@@ -12620,11 +12620,11 @@ The next few sections describe each goal and provide links to implementation and
 
 [[testing-ctx-management]]
 ===== Context management and caching
-The Spring TestContext Framework provides consistent loading of Spring `ApplicationContext` s and `WebApplicationContext` s as well as caching of those contexts. Support for the caching of loaded contexts is important, because startup time can become an issue — not because of the overhead of Spring itself, but because the objects instantiated by the Spring container take time to instantiate. For example, a project with 50 to 100 Hibernate mapping files might take 10 to 20 seconds to load the mapping files, and incurring that cost before running every test in every test fixture leads to slower overall test runs that reduce developer productivity.
+The Spring TestContext Framework provides consistent loading of Spring `ApplicationContext` s and `WebApplicationContext` s as well as caching of those contexts. Support for the caching of loaded contexts is important, because startup time can become an issue -- not because of the overhead of Spring itself, but because the objects instantiated by the Spring container take time to instantiate. For example, a project with 50 to 100 Hibernate mapping files might take 10 to 20 seconds to load the mapping files, and incurring that cost before running every test in every test fixture leads to slower overall test runs that reduce developer productivity.
 
-Test classes typically declare either an array of __resource locations__ for XML configuration metadata — often in the classpath — or an array of __annotated classes__ that is used to configure the application. These locations or classes are the same as or similar to those specified in `web.xml` or other deployment configuration files.
+Test classes typically declare either an array of __resource locations__ for XML configuration metadata -- often in the classpath -- or an array of __annotated classes__ that is used to configure the application. These locations or classes are the same as or similar to those specified in `web.xml` or other deployment configuration files.
 
-By default, once loaded, the configured `ApplicationContext` is reused for each test. Thus the setup cost is incurred only once per test suite, and subsequent test execution is much faster. In this context, the term __test suite__ means all tests run in the same JVM — for example, all tests run from an Ant, Maven, or Gradle build for a given project or module. In the unlikely case that a test corrupts the application context and requires reloading — for example, by modifying a bean definition or the state of an application object — the TestContext framework can be configured to reload the configuration and rebuild the application context before executing the next test.
+By default, once loaded, the configured `ApplicationContext` is reused for each test. Thus the setup cost is incurred only once per test suite, and subsequent test execution is much faster. In this context, the term __test suite__ means all tests run in the same JVM -- for example, all tests run from an Ant, Maven, or Gradle build for a given project or module. In the unlikely case that a test corrupts the application context and requires reloading -- for example, by modifying a bean definition or the state of an application object -- the TestContext framework can be configured to reload the configuration and rebuild the application context before executing the next test.
 
 See <<testcontext-ctx-management>> and <<testcontext-ctx-management-caching>> with the TestContext framework.
 
@@ -12642,11 +12642,11 @@ See dependency injection of test fixtures with the <<testcontext-fixture-di,Test
 
 [[testing-tx]]
 ===== Transaction management
-One common issue in tests that access a real database is their effect on the state of the persistence store. Even when you're using a development database, changes to the state may affect future tests. Also, many operations — such as inserting or modifying persistent data — cannot be performed (or verified) outside a transaction.
+One common issue in tests that access a real database is their effect on the state of the persistence store. Even when you're using a development database, changes to the state may affect future tests. Also, many operations -- such as inserting or modifying persistent data -- cannot be performed (or verified) outside a transaction.
 
 The TestContext framework addresses this issue. By default, the framework will create and roll back a transaction for each test. You simply write code that can assume the existence of a transaction. If you call transactionally proxied objects in your tests, they will behave correctly, according to their configured transactional semantics. In addition, if a test method deletes the contents of selected tables while running within the transaction managed for the test, the transaction will roll back by default, and the database will return to its state prior to execution of the test. Transactional support is provided to a test via a `PlatformTransactionManager` bean defined in the test's application context.
 
-If you want a transaction to commit — unusual, but occasionally useful when you want a particular test to populate or modify the database — the TestContext framework can be instructed to cause the transaction to commit instead of roll back via the <<integration-testing-annotations, `@TransactionConfiguration`>> and <<integration-testing-annotations, `@Rollback`>> annotations.
+If you want a transaction to commit -- unusual, but occasionally useful when you want a particular test to populate or modify the database -- the TestContext framework can be instructed to cause the transaction to commit instead of roll back via the <<integration-testing-annotations, `@TransactionConfiguration`>> and <<integration-testing-annotations, `@Rollback`>> annotations.
 
 See transaction management with the <<testcontext-tx,TestContext framework>>.
 
@@ -12871,7 +12871,7 @@ See <<testcontext-ctx-management-env-profiles>> and the Javadoc for `@ActiveProf
 
 +
 
-Indicates that the underlying Spring `ApplicationContext` has been __dirtied__ during the execution of a test (i.e., modified or corrupted in some manner — for example, by changing the state of a singleton bean) and should be closed, regardless of whether the test passed. When an application context is marked__dirty__, it is removed from the testing framework's cache and closed. As a consequence, the underlying Spring container will be rebuilt for any subsequent test that requires a context with the same configuration metadata.
+Indicates that the underlying Spring `ApplicationContext` has been __dirtied__ during the execution of a test (i.e., modified or corrupted in some manner -- for example, by changing the state of a singleton bean) and should be closed, regardless of whether the test passed. When an application context is marked__dirty__, it is removed from the testing framework's cache and closed. As a consequence, the underlying Spring container will be rebuilt for any subsequent test that requires a context with the same configuration metadata.
 
 +
 
@@ -13002,7 +13002,7 @@ public class CustomConfiguredTransactionalTests {
 
 [NOTE]
 ====
-If the default conventions are sufficient for your test configuration, you can avoid using `@TransactionConfiguration` altogether. In other words, if you have only one transaction manger — or if you have multiple transaction mangers but the transaction manager for tests is named "transactionManager" or specified via a `TransactionManagementConfigurer` — and if you want transactions to roll back automatically, then there is no need to annotate your test class with `@TransactionConfiguration`.
+If the default conventions are sufficient for your test configuration, you can avoid using `@TransactionConfiguration` altogether. In other words, if you have only one transaction manger -- or if you have multiple transaction mangers but the transaction manager for tests is named "transactionManager" or specified via a `TransactionManagementConfigurer` -- and if you want transactions to roll back automatically, then there is no need to annotate your test class with `@TransactionConfiguration`.
 ====
 
 +
@@ -13065,11 +13065,11 @@ The following annotations are supported with standard semantics for all configur
 
 * `@Autowired`
 * `@Qualifier`
-* `@Resource` (javax.annotation) `if JSR-250 is present`
-* `@Inject` (javax.inject) `if JSR-330 is present`
-* `@Named` (javax.inject) `if JSR-330 is present`
-* `@PersistenceContext` (javax.persistence) `if JPA is present`
-* `@PersistenceUnit` (javax.persistence) `if JPA is present`
+* `@Resource` (javax.annotation) _if JSR-250 is present_
+* `@Inject` (javax.inject) _if JSR-330 is present_
+* `@Named` (javax.inject) _if JSR-330 is present_
+* `@PersistenceContext` (javax.persistence) _if JPA is present_
+* `@PersistenceUnit` (javax.persistence) _if JPA is present_
 * `@Required`
 * `@Transactional`
 
@@ -13286,7 +13286,7 @@ The following sections explain how to configure an `ApplicationContext` via XML 
 
 [[testcontext-ctx-management-xml]]
 ====== Context configuration with XML resources
-To load an `ApplicationContext` for your tests using XML configuration files, annotate your test class with `@ContextConfiguration` and configure the `locations` attribute with an array that contains the resource locations of XML configuration metadata. A plain or relative path — for example `"context.xml"` — will be treated as a classpath resource that is relative to the package in which the test class is defined. A path starting with a slash is treated as an absolute classpath location, for example `"/org/example/config.xml"`. A path which represents a resource URL (i.e., a path prefixed with `classpath:`, `file:`, `http:`, etc.) will be used __as is__.
+To load an `ApplicationContext` for your tests using XML configuration files, annotate your test class with `@ContextConfiguration` and configure the `locations` attribute with an array that contains the resource locations of XML configuration metadata. A plain or relative path -- for example `"context.xml"` -- will be treated as a classpath resource that is relative to the package in which the test class is defined. A path starting with a slash is treated as an absolute classpath location, for example `"/org/example/config.xml"`. A path which represents a resource URL (i.e., a path prefixed with `classpath:`, `file:`, `http:`, etc.) will be used __as is__.
 
 [source,java]
 [subs="verbatim,quotes"]
@@ -13415,7 +13415,7 @@ public class MyTest {
 }
 ----
 
-It is also possible to omit the declaration of XML configuration files or annotated classes in `@ContextConfiguration` entirely and instead declare only `ApplicationContextInitializer` classes which are then responsible for registering beans in the context — for example, by programmatically loading bean definitions from XML files or configuration classes.
+It is also possible to omit the declaration of XML configuration files or annotated classes in `@ContextConfiguration` entirely and instead declare only `ApplicationContextInitializer` classes which are then responsible for registering beans in the context -- for example, by programmatically loading bean definitions from XML files or configuration classes.
 
 [source,java]
 [subs="verbatim,quotes"]
@@ -13716,7 +13716,7 @@ public class ProductionTransferServiceTest extends AbstractIntegrationTest {
 }
 ----
 
-Furthermore, it is sometimes necessary to resolve active profiles for tests __programmatically__ instead of declaratively — for example, based on:
+Furthermore, it is sometimes necessary to resolve active profiles for tests __programmatically__ instead of declaratively -- for example, based on:
 
 * the current operating system
 * whether tests are being executed on a continuous integration build server
@@ -13828,7 +13828,7 @@ In this third example, we see that we can override the default resource semantic
 --
 To provide comprehensive web testing support, Spring 3.2 introduces a new `ServletTestExecutionListener` that is enabled by default. When testing against a `WebApplicationContext` this <<testcontext-key-abstractions,TestExecutionListener>> sets up default thread-local state via Spring Web's `RequestContextHolder` before each test method and creates a `MockHttpServletRequest`, `MockHttpServletResponse`, and `ServletWebRequest` based on the base resource path configured via `@WebAppConfiguration`. `ServletTestExecutionListener` also ensures that the `MockHttpServletResponse` and `ServletWebRequest` can be injected into the test instance, and once the test is complete it cleans up thread-local state.
 
-Once you have a `WebApplicationContext` loaded for your test you might find that you need to interact with the web mocks — for example, to set up your test fixture or to perform assertions after invoking your web component. The following example demonstrates which mocks can be autowired into your test instance. Note that the `WebApplicationContext` and `MockServletContext` are both cached across the test suite; whereas, the other mocks are managed per test method by the `ServletTestExecutionListener`.
+Once you have a `WebApplicationContext` loaded for your test you might find that you need to interact with the web mocks -- for example, to set up your test fixture or to perform assertions after invoking your web component. The following example demonstrates which mocks can be autowired into your test instance. Note that the `WebApplicationContext` and `MockServletContext` are both cached across the test suite; whereas, the other mocks are managed per test method by the `ServletTestExecutionListener`.
 
 .Injecting mocks
 [source,java]
@@ -13878,7 +13878,7 @@ The Spring TestContext framework stores application contexts in a __static__ cac
 To benefit from the caching mechanism, all tests must run within the same process or test suite. This can be achieved by executing all tests as a group within an IDE. Similarly, when executing tests with a build framework such as Ant, Maven, or Gradle it is important to make sure that the build framework does not __fork__ between tests. For example, if the  http://maven.apache.org/plugins/maven-surefire-plugin/test-mojo.html#forkMode[forkMode] for the Maven Surefire plug-in is set to `always` or `pertest`, the TestContext framework will not be able to cache application contexts between test classes and the build process will run significantly slower as a result.
 ====
 
-In the unlikely case that a test corrupts the application context and requires reloading — for example, by modifying a bean definition or the state of an application object — you can annotate your test class or test method with `@DirtiesContext` (see the discussion of `@DirtiesContext` in <<integration-testing-annotations-spring>>). This instructs Spring to remove the context from the cache and rebuild the application context before executing the next test. Note that support for the `@DirtiesContext` annotation is provided by the `DirtiesContextTestExecutionListener` which is enabled by default.
+In the unlikely case that a test corrupts the application context and requires reloading -- for example, by modifying a bean definition or the state of an application object -- you can annotate your test class or test method with `@DirtiesContext` (see the discussion of `@DirtiesContext` in <<integration-testing-annotations-spring>>). This instructs Spring to remove the context from the cache and rebuild the application context before executing the next test. Note that support for the `@DirtiesContext` annotation is provided by the `DirtiesContextTestExecutionListener` which is enabled by default.
 
 [[testcontext-ctx-management-ctx-hierarchies]]
 ====== Context hierarchies
@@ -13988,7 +13988,7 @@ If `@DirtiesContext` is used in a test whose context is configured as part of a 
 
 [[testcontext-fixture-di]]
 ===== Dependency injection of test fixtures
-When you use the `DependencyInjectionTestExecutionListener` — which is configured by default — the dependencies of your test instances are__injected__ from beans in the application context that you configured with `@ContextConfiguration`. You may use setter injection, field injection, or both, depending on which annotations you choose and whether you place them on setter methods or fields. For consistency with the annotation support introduced in Spring 2.5 and 3.0, you can use Spring's `@Autowired` annotation or the `@Inject` annotation from JSR 300.
+When you use the `DependencyInjectionTestExecutionListener` -- which is configured by default -- the dependencies of your test instances are__injected__ from beans in the application context that you configured with `@ContextConfiguration`. You may use setter injection, field injection, or both, depending on which annotations you choose and whether you place them on setter methods or fields. For consistency with the annotation support introduced in Spring 2.5 and 3.0, you can use Spring's `@Autowired` annotation or the `@Inject` annotation from JSR 300.
 
 [TIP]
 ====
@@ -14318,12 +14318,12 @@ When you extend `AbstractJUnit4SpringContextTests`, you can access the following
 
 [TIP]
 ====
-These classes are a convenience for extension. If you do not want your test classes to be tied to a Spring-specific class hierarchy — for example, if you want to directly extend the class you are testing — you can configure your own custom test classes by using `@RunWith(SpringJUnit4ClassRunner.class)`, `@ContextConfiguration`, `@TestExecutionListeners`, and so on.
+These classes are a convenience for extension. If you do not want your test classes to be tied to a Spring-specific class hierarchy -- for example, if you want to directly extend the class you are testing -- you can configure your own custom test classes by using `@RunWith(SpringJUnit4ClassRunner.class)`, `@ContextConfiguration`, `@TestExecutionListeners`, and so on.
 ====
 
 [[testcontext-junit4-runner]]
 ====== Spring JUnit Runner
-The __Spring TestContext Framework__ offers full integration with JUnit 4.5+ through a custom runner (tested on JUnit 4.5 – 4.10). By annotating test classes with `@RunWith(SpringJUnit4ClassRunner.class)`, developers can implement standard JUnit-based unit and integration tests and simultaneously reap the benefits of the TestContext framework such as support for loading application contexts, dependency injection of test instances, transactional test method execution, and so on. The following code listing displays the minimal requirements for configuring a test class to run with the custom Spring Runner. `@TestExecutionListeners` is configured with an empty list in order to disable the default listeners, which otherwise would require an ApplicationContext to be configured through `@ContextConfiguration`.
+The __Spring TestContext Framework__ offers full integration with JUnit 4.5+ through a custom runner (tested on JUnit 4.5 -- 4.11). By annotating test classes with `@RunWith(SpringJUnit4ClassRunner.class)`, developers can implement standard JUnit-based unit and integration tests and simultaneously reap the benefits of the TestContext framework such as support for loading application contexts, dependency injection of test instances, transactional test method execution, and so on. The following code listing displays the minimal requirements for configuring a test class to run with the custom Spring Runner. `@TestExecutionListeners` is configured with an empty list in order to disable the default listeners, which otherwise would require an ApplicationContext to be configured through `@ContextConfiguration`.
 
 [source,java]
 [subs="verbatim,quotes"]
@@ -14361,7 +14361,7 @@ When you extend `AbstractTestNGSpringContextTests`, you can access the following
 [TIP]
 ====
 
-These classes are a convenience for extension. If you do not want your test classes to be tied to a Spring-specific class hierarchy — for example, if you want to directly extend the class you are testing — you can configure your own custom test classes by using `@ContextConfiguration`, `@TestExecutionListeners`, and so on, and by manually instrumenting your test class with a `TestContextManager`. See the source code of `AbstractTestNGSpringContextTests` for an example of how to instrument your test class.
+These classes are a convenience for extension. If you do not want your test classes to be tied to a Spring-specific class hierarchy -- for example, if you want to directly extend the class you are testing -- you can configure your own custom test classes by using `@ContextConfiguration`, `@TestExecutionListeners`, and so on, and by manually instrumenting your test class with a `TestContextManager`. See the source code of `AbstractTestNGSpringContextTests` for an example of how to instrument your test class.
 ====
 
 [[spring-mvc-test-framework]]
@@ -14742,9 +14742,9 @@ public abstract class AbstractClinicTests **extends AbstractTransactionalJUnit4S
 Notes:
 
 * This test case extends the `AbstractTransactionalJUnit4SpringContextTests` class, from which it inherits configuration for Dependency Injection (through the `DependencyInjectionTestExecutionListener`) and transactional behavior (through the `TransactionalTestExecutionListener`).
-* The `clinic` instance variable — the application object being tested — is set by Dependency Injection through `@Autowired` semantics.
+* The `clinic` instance variable -- the application object being tested -- is set by Dependency Injection through `@Autowired` semantics.
 * The `testGetVets()` method illustrates how you can use the inherited `countRowsInTable()` method to easily verify the number of rows in a given table, thus verifying correct behavior of the application code being tested. This allows for stronger tests and lessens dependency on the exact test data. For example, you can add additional rows in the database without breaking tests.
-* Like many integration tests that use a database, most of the tests in `AbstractClinicTests` depend on a minimum amount of data already in the database before the test cases run. Alternatively, you might choose to populate the database within the test fixture set up of your test cases — again, within the same transaction as the tests.
+* Like many integration tests that use a database, most of the tests in `AbstractClinicTests` depend on a minimum amount of data already in the database before the test cases run. Alternatively, you might choose to populate the database within the test fixture set up of your test cases -- again, within the same transaction as the tests.
 
 The PetClinic application supports three data access technologies: JDBC, Hibernate, and JPA. By declaring `@ContextConfiguration` without any specific resource locations, the `AbstractClinicTests` class will have its application context loaded from the default location, `AbstractClinicTests-context.xml`, which declares a common `DataSource`. Subclasses specify additional context locations that must declare a `PlatformTransactionManager` and a concrete implementation of `Clinic`.
 
@@ -14757,7 +14757,7 @@ For example, the Hibernate implementation of the PetClinic tests contains the fo
 public class HibernateClinicTests extends AbstractClinicTests { }
 ----
 
-In a large-scale application, the Spring configuration is often split across multiple files. Consequently, configuration locations are typically specified in a common base class for all application-specific integration tests. Such a base class may also add useful instance variables — populated by Dependency Injection, naturally — such as a `SessionFactory` in the case of an application using Hibernate.
+In a large-scale application, the Spring configuration is often split across multiple files. Consequently, configuration locations are typically specified in a common base class for all application-specific integration tests. Such a base class may also add useful instance variables -- populated by Dependency Injection, naturally -- such as a `SessionFactory` in the case of an application using Hibernate.
 
 As far as possible, you should have exactly the same Spring configuration files in your integration tests as in the deployed environment. One likely point of difference concerns database connection pooling and transaction infrastructure. If you are deploying to a full-blown application server, you will probably use its connection pool (available through JNDI) and JTA implementation. Thus in production you will use a `JndiObjectFactoryBean` or `<jee:jndi-lookup>` for the `DataSource` and `JtaTransactionManager`. JNDI and JTA will not be available in out-of-container integration tests, so you should use a combination like the Commons DBCP `BasicDataSource` and `DataSourceTransactionManager` or `HibernateTransactionManager` for them. You can factor out this variant behavior into a single XML file, having the choice between application server and a 'local' configuration separated from all other configuration, which will not vary between the test and production environments. In addition, it is advisable to use properties files for connection settings. See the PetClinic application for an example.
 
@@ -17931,12 +17931,12 @@ You can store images, other binary objects, and large chunks of text. These larg
 The `LobCreator/LobHandler` provides the following support for LOB input and output:
 
 * BLOB
-* byte[] – getBlobAsBytes and setBlobAsBytes
-* InputStream – getBlobAsBinaryStream and setBlobAsBinaryStream
+* byte[] -- getBlobAsBytes and setBlobAsBytes
+* InputStream -- getBlobAsBinaryStream and setBlobAsBinaryStream
 * CLOB
-* String – getClobAsString and setClobAsString
-* InputStream – getClobAsAsciiStream and setClobAsAsciiStream
-* Reader – getClobAsCharacterStream and setClobAsCharacterStream
+* String -- getClobAsString and setClobAsString
+* InputStream -- getClobAsAsciiStream and setClobAsAsciiStream
+* Reader -- getClobAsCharacterStream and setClobAsCharacterStream
 
 The next example shows how to create and insert a BLOB. Later you will see how to read it back from the database.
 
@@ -19871,7 +19871,7 @@ For more information about SWF, consult the Spring Web Flow website.
 
 Spring's web module includes many unique web support features:
 
-* __Clear separation of roles__. Each role — controller, validator, command object, form object, model object, `DispatcherServlet`, handler mapping, view resolver, and so on — can be fulfilled by a specialized object.
+* __Clear separation of roles__. Each role -- controller, validator, command object, form object, model object, `DispatcherServlet`, handler mapping, view resolver, and so on -- can be fulfilled by a specialized object.
 * __Powerful and straightforward configuration of both framework and application classes as JavaBeans__. This configuration capability includes easy referencing across contexts, such as from web controllers to business objects and validators.
 * __Adaptability, non-intrusiveness, and flexibility.__ Define any controller method signature you need, possibly using one of the parameter annotations (such as @RequestParam, @RequestHeader, @PathVariable, and more) for a given scenario.
 * __Reusable business code__,__ no need for duplication__. Use existing business objects as command or form objects instead of mirroring them to extend a particular framework base class.
@@ -20532,7 +20532,7 @@ The `Errors` or `BindingResult` parameters have to follow the model object that 
 [subs="verbatim,quotes"]
 ----
 @RequestMapping(method = RequestMethod.POST)
-public String processSubmit(**@ModelAttribute("pet") Pet pet**, Model model, **BindingResult result**) { … }
+public String processSubmit(**@ModelAttribute("pet") Pet pet**, Model model, **BindingResult result**) { ... }
 ----
 
 Note, that there is a `Model` parameter in between `Pet` and `BindingResult`. To get this working you have to reorder the parameters as follows:
@@ -20541,7 +20541,7 @@ Note, that there is a `Model` parameter in between `Pet` and `BindingResult`. To
 [subs="verbatim,quotes"]
 ----
 @RequestMapping(method = RequestMethod.POST)
-public String processSubmit(**@ModelAttribute("pet") Pet pet**, **BindingResult result**, Model model) { … }
+public String processSubmit(**@ModelAttribute("pet") Pet pet**, **BindingResult result**, Model model) { ... }
 ----
 
 [[mvc-ann-return-types]]
@@ -20732,7 +20732,7 @@ A controller can have any number of `@ModelAttribute` methods. All such methods 
 What happens when a model attribute name is not explicitly specified? In such cases a default name is assigned to the model attribute based on its type. For example if the method returns an object of type `Account`, the default name used is "account". You can change that through the value of the `@ModelAttribute` annotation. If adding attributes directly to the `Model`, use the appropriate overloaded `addAttribute(..)` method - i.e., with or without an attribute name.
 ====
 
-The `@ModelAttribute` annotation can be used on `@RequestMapping` methods as well. In that case the return value of the `@RequestMapping` method is interpreted as a model attribute rather than as a view name. The view name is derived from view name conventions instead much like for methods returning void — see <<mvc-coc-r2vnt>>.
+The `@ModelAttribute` annotation can be used on `@RequestMapping` methods as well. In that case the return value of the `@RequestMapping` method is interpreted as a model attribute rather than as a view name. The view name is derived from view name conventions instead much like for methods returning void -- see <<mvc-coc-r2vnt>>.
 
 [[mvc-ann-modelattrib-method-args]]
 ===== Using @ModelAttribute on a method argument
@@ -20750,8 +20750,8 @@ public String processSubmit(**@ModelAttribute Pet pet**) { }
 
 Given the above example where can the Pet instance come from? There are several options:
 
-* It may already be in the model due to use of `@SessionAttributes` — see <<mvc-ann-sessionattrib>>.
-* It may already be in the model due to an `@ModelAttribute` method in the same controller — as explained in the previous section.
+* It may already be in the model due to use of `@SessionAttributes` -- see <<mvc-ann-sessionattrib>>.
+* It may already be in the model due to an `@ModelAttribute` method in the same controller -- as explained in the previous section.
 * It may be retrieved based on a URI template variable and type converter (explained in more detail below).
 * It may be instantiated using its default constructor.
 
@@ -20768,7 +20768,7 @@ public String save(@ModelAttribute("account") Account account) {
 
 In this example the name of the model attribute (i.e. "account") matches the name of a URI template variable. If you register `Converter<String, Account>` that can turn the `String` account value into an `Account` instance, then the above example will work without the need for an `@ModelAttribute` method.
 
-The next step is data binding. The `WebDataBinder` class matches request parameter names — including query string parameters and form fields — to model attribute fields by name. Matching fields are populated after type conversion (from String to the target field type) has been applied where necessary. Data binding and validation are covered in <<validation>>. Customizing the data binding process for a controller level is covered in <<mvc-ann-webdatabinder>>.
+The next step is data binding. The `WebDataBinder` class matches request parameter names -- including query string parameters and form fields -- to model attribute fields by name. Matching fields are populated after type conversion (from String to the target field type) has been applied where necessary. Data binding and validation are covered in <<validation>>. Customizing the data binding process for a controller level is covered in <<mvc-ann-webdatabinder>>.
 
 As a result of data binding there may be errors such as missing required fields or type conversion errors. To check for such errors add a `BindingResult` argument immediately following the `@ModelAttribute` argument:
 
@@ -21490,7 +21490,7 @@ public class ContentController {
 
 [[mvc-flash-attributes]]
 === Using flash attributes
-Flash attributes provide a way for one request to store attributes intended for use in another. This is most commonly needed when redirecting — for example, the __Post/Redirect/Get__ pattern. Flash attributes are saved temporarily before the redirect (typically in the session) to be made available to the request after the redirect and removed immediately.
+Flash attributes provide a way for one request to store attributes intended for use in another. This is most commonly needed when redirecting -- for example, the __Post/Redirect/Get__ pattern. Flash attributes are saved temporarily before the redirect (typically in the session) to be made available to the request after the redirect and removed immediately.
 
 Spring MVC has two main abstractions in support of flash attributes. `FlashMap` is used to hold flash attributes while `FlashMapManager` is used to store, retrieve, and manage `FlashMap` instances.
 
@@ -21839,7 +21839,7 @@ public class FileUploadController {
 
 [[mvc-multipart-forms-non-browsers]]
 ==== Handling a file upload request from programmatic clients
-Multipart requests can also be submitted from non-browser clients in a RESTful service scenario. All of the above examples and configuration apply here as well. However, unlike browsers that typically submit files and simple form fields, a programmatic client can also send more complex data of a specific content type — for example a multipart request with a file and second part with JSON formatted data:
+Multipart requests can also be submitted from non-browser clients in a RESTful service scenario. All of the above examples and configuration apply here as well. However, unlike browsers that typically submit files and simple form fields, a programmatic client can also send more complex data of a specific content type -- for example a multipart request with a file and second part with JSON formatted data:
 
 [source]
 [subs="verbatim,quotes"]
@@ -22370,10 +22370,10 @@ This is the complete list of HttpMessageConverters set up by mvc:annotation-driv
 .. `ResourceHttpMessageConverter` converts to/from `org.springframework.core.io.Resource` for all media types.
 .. `SourceHttpMessageConverter` converts to/from a `javax.xml.transform.Source`.
 .. `FormHttpMessageConverter` converts form data to/from a `MultiValueMap<String, String>`.
-.. `Jaxb2RootElementHttpMessageConverter` converts Java objects to/from XML — added if JAXB2 is present on the classpath.
-.. `MappingJackson2HttpMessageConverter` (or `MappingJacksonHttpMessageConverter`) converts to/from JSON — added if Jackson 2 (or Jackson) is present on the classpath.
-.. `AtomFeedHttpMessageConverter` converts Atom feeds — added if Rome is present on the classpath.
-.. `RssChannelHttpMessageConverter` converts RSS feeds — added if Rome is present on the classpath.
+.. `Jaxb2RootElementHttpMessageConverter` converts Java objects to/from XML -- added if JAXB2 is present on the classpath.
+.. `MappingJackson2HttpMessageConverter` (or `MappingJacksonHttpMessageConverter`) converts to/from JSON -- added if Jackson 2 (or Jackson) is present on the classpath.
+.. `AtomFeedHttpMessageConverter` converts Atom feeds -- added if Rome is present on the classpath.
+.. `RssChannelHttpMessageConverter` converts RSS feeds -- added if Rome is present on the classpath.
 
 [[mvc-config-customize]]
 ==== Customizing the Provided Configuration
@@ -25648,7 +25648,7 @@ Spring Portlet MVC has the exact same hierarchy of __command controllers__ as Sp
 * `AbstractCommandController` - a command controller you can use to create your own command controller, capable of binding request parameters to a data object you specify. This class does not offer form functionality, it does however offer validation features and lets you specify in the controller itself what to do with the command object that has been filled with the parameters from the request.
 * `AbstractFormController` - an abstract controller offering form submission support. Using this controller you can model forms and populate them using a command object you retrieve in the controller. After a user has filled the form, `AbstractFormController` binds the fields, validates, and hands the object back to the controller to take appropriate action. Supported features are: invalid form submission (resubmission), validation, and normal form workflow. You implement methods to determine which views are used for form presentation and success. Use this controller if you need forms, but don't want to specify what views you're going to show the user in the application context.
 * `SimpleFormController` - a concrete `AbstractFormController` that provides even more support when creating a form with a corresponding command object. The `SimpleFormController` lets you specify a command object, a viewname for the form, a viewname for the page you want to show the user when form submission has succeeded, and more.
-* `AbstractWizardFormController` – a concrete `AbstractFormController` that provides a wizard-style interface for editing the contents of a command object across multiple display pages. Supports multiple user actions: finish, cancel, or page change, all of which are easily specified in request parameters from the view.
+* `AbstractWizardFormController` -- a concrete `AbstractFormController` that provides a wizard-style interface for editing the contents of a command object across multiple display pages. Supports multiple user actions: finish, cancel, or page change, all of which are easily specified in request parameters from the view.
 
 These command controllers are quite powerful, but they do require a detailed understanding of how they operate in order to use them efficiently. Carefully review the Javadocs for this entire hierarchy and then look at some sample implementations before you start using them.
 
@@ -27056,16 +27056,16 @@ RestTemplate provides higher level methods that correspond to each of the six ma
 |  http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#getForObject(String,%20Class,%20Object...)[getForObject] http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#getForEntity(String,%20Class,%20Object...)[getForEntity]
 
 | HEAD
-|  http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#headForHeaders(String,%20Object...)[headForHeaders(String url, String… urlVariables)]
+|  http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#headForHeaders(String,%20Object...)[headForHeaders(String url, String... urlVariables)]
 
 | OPTIONS
-|  http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#optionsForAllow(String,%20Object...)[optionsForAllow(String url, String… urlVariables)]
+|  http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#optionsForAllow(String,%20Object...)[optionsForAllow(String url, String... urlVariables)]
 
 | POST
-|  http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#postForLocation(String,%20Object,%20Object...)[postForLocation(String url, Object request, String… urlVariables)] http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#postForObject(java.lang.String,%20java.lang.Object,%20java.lang.Class,%20java.lang.String...)[postForObject(String url, Object request, Class<T> responseType, String… uriVariables)]
+|  http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#postForLocation(String,%20Object,%20Object...)[postForLocation(String url, Object request, String... urlVariables)] http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#postForObject(java.lang.String,%20java.lang.Object,%20java.lang.Class,%20java.lang.String...)[postForObject(String url, Object request, Class<T> responseType, String... uriVariables)]
 
 | PUT
-|  http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#put(String,%20Object,%20Object...)[put(String url, Object request, String…urlVariables)]
+|  http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#put(String,%20Object,%20Object...)[put(String url, Object request, String...urlVariables)]
 |===
 
 The names of `RestTemplate` methods follow a naming convention, the first part indicates what HTTP method is being invoked and the second part indicates what is returned. For example, the method `getForObject()` will perform a GET, convert the HTTP response into an object type of your choice and return that object. The method `postForLocation()` will do a POST, converting the given object into a HTTP request and return the response HTTP Location header where the newly created object can be found. In case of an exception processing the HTTP request, an exception of the type `RestClientException` will be thrown; this behavior can be changed by plugging in another `ResponseErrorHandler` implementation into the `RestTemplate`.
@@ -30718,7 +30718,7 @@ Future<String> returnSomething(int i) {
 public class SampleBeanImpl implements SampleBean {
 
   @Async
-  void doSomething() { … }
+  void doSomething() { ... }
 }
 
 public class SampleBeanInititalizer {
