@@ -16,9 +16,7 @@
 
 package org.springframework.web.socket.server.config;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
@@ -110,7 +108,7 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 		M mappings = createMappings();
 
 		if (this.sockJsServiceRegistration != null) {
-			SockJsService sockJsService = this.sockJsServiceRegistration.getSockJsService(getAllPrefixes());
+			SockJsService sockJsService = this.sockJsServiceRegistration.getSockJsService();
 			for (WebSocketHandler wsHandler : this.handlerMap.keySet()) {
 				for (String path : this.handlerMap.get(wsHandler)) {
 					String pathPattern = path.endsWith("/") ? path + "**" : path + "/**";
@@ -128,14 +126,6 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 		}
 
 		return mappings;
-	}
-
-	private final String[] getAllPrefixes() {
-		List<String> all = new ArrayList<String>();
-		for (List<String> prefixes: this.handlerMap.values()) {
-			all.addAll(prefixes);
-		}
-		return all.toArray(new String[all.size()]);
 	}
 
 	private HandshakeHandler getOrCreateHandshakeHandler() {

@@ -199,11 +199,8 @@ public class SockJsServiceRegistration {
 		return this;
 	}
 
-	protected SockJsService getSockJsService(String[] sockJsPrefixes) {
+	protected SockJsService getSockJsService() {
 		DefaultSockJsService service = createSockJsService();
-		if (sockJsPrefixes != null) {
-			service.setValidSockJsPrefixes(sockJsPrefixes);
-		}
 		if (this.clientLibraryUrl != null) {
 			service.setSockJsClientLibraryUrl(this.clientLibraryUrl);
 		}

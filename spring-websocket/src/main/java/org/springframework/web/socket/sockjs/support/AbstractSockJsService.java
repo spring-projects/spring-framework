@@ -18,15 +18,11 @@ package org.springframework.web.socket.sockjs.support;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -51,14 +47,6 @@ import org.springframework.web.socket.sockjs.SockJsService;
  * An abstract base class for {@link SockJsService} implementations that provides SockJS
  * path resolution and handling of static SockJS requests (e.g. "/info", "/iframe.html",
  * etc). Sub-classes must handle session URLs (i.e. transport-specific requests).
- * <p>
- * This service is unaware of the underlying HTTP request processing mechanism and URL
- * mappings but nevertheless needs to know the "SockJS path" for a given request, i.e. the
- * portion of the URL path that follows the SockJS prefix. In most cases, this can be
- * auto-detected since the <a href="https://github.com/sockjs/sockjs-client">SockJS
- * client</a> sends a "greeting URL" first. However it is recommended to configure
- * explicitly the expected SockJS prefixes via {@link #setValidSockJsPrefixes(String...)}
- * to eliminate any potential issues.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -90,10 +78,6 @@ public abstract class AbstractSockJsService implements SockJsService {
 
 	private final TaskScheduler taskScheduler;
 
-	private final List<String> validSockJsPrefixes = new ArrayList<String>();
-
-	private final List<String> knownSockJsPrefixes = new CopyOnWriteArrayList<String>();
-
 
 	public AbstractSockJsService(TaskScheduler scheduler) {
 		Assert.notNull(scheduler, "scheduler must not be null");
@@ -110,39 +94,6 @@ public abstract class AbstractSockJsService implements SockJsService {
 
 	public String getName() {
 		return this.name;
-	}
-
-	/**
-	 * Use this property to configure one or more prefixes that this SockJS service is
-	 * allowed to serve. The prefix (e.g. "/echo") is needed to extract the SockJS
-	 * specific portion of the URL (e.g. "${prefix}/info", "${prefix}/iframe.html", etc).
-	 *
-	 * <p>This property is not strictly required. In most cases, the SockJS path can be
-	 * auto-detected since the initial request from the SockJS client is of the form
-	 * "{prefix}/info". Assuming the SockJS service is mapped correctly (e.g. using
-	 * Ant-style pattern "/echo/**") this should work fine. This property can be used
-	 * to configure explicitly the prefixes this service is allowed to service.
-	 *
-	 * @param prefixes the prefixes to use; prefixes do not need to include the portions
-	 *        of the path that represent Servlet container context or Servlet path.
-	 */
-	public void setValidSockJsPrefixes(String... prefixes) {
-
-		this.validSockJsPrefixes.clear();
-		for (String prefix : prefixes) {
-			if (prefix.endsWith("/") && (prefix.length() > 1)) {
-				prefix = prefix.substring(0, prefix.length() - 1);
-			}
-			this.validSockJsPrefixes.add(prefix);
-		}
-
-		// sort with longest prefix at the top
-		Collections.sort(this.validSockJsPrefixes, Collections.reverseOrder(new Comparator<String>() {
-			@Override
-			public int compare(String o1, String o2) {
-				return new Integer(o1.length()).compareTo(new Integer(o2.length()));
-			}
-		}));
 	}
 
 	/**
@@ -308,12 +259,10 @@ public abstract class AbstractSockJsService implements SockJsService {
 	 */
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler wsHandler) throws SockJsException {
+			String sockJsPath, WebSocketHandler wsHandler) throws SockJsException {
 
-		String sockJsPath = getSockJsPath(request);
 		if (sockJsPath == null) {
-			logger.warn("Could not determine SockJS path for URL \"" + request.getURI().getPath() +
-					". Consider setting validSockJsPrefixes.");
+			logger.warn("No SockJS path provided, URI=\"" + request.getURI());
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
 		}
@@ -363,70 +312,6 @@ public abstract class AbstractSockJsService implements SockJsService {
 		catch (IOException ex) {
 			throw new SockJsException("Failed to write to the response", null, ex);
 		}
-	}
-
-	/**
-	 * Return the SockJS path or null if the path could not be determined.
-	 */
-	private String getSockJsPath(ServerHttpRequest request) {
-
-		String path = request.getURI().getPath();
-
-		// Try SockJS prefix hints
-		if (!this.validSockJsPrefixes.isEmpty()) {
-			for (String prefix : this.validSockJsPrefixes) {
-				int index = path.lastIndexOf(prefix);
-				if (index != -1) {
-					return path.substring(index + prefix.length());
-				}
-			}
-			return null;
-		}
-
-		// Try SockJS info request
-		if (path.endsWith("/info")) {
-			addKnownSockJsPrefix(path.substring(0, path.length() - "/info".length()));
-			return "/info";
-		}
-
-		// Have we seen this prefix before (following the initial /info request)?
-		String match = null;
-		for (String sockJsPath : this.knownSockJsPrefixes) {
-			if (path.startsWith(sockJsPath)) {
-				if ((match == null) || (match.length() < sockJsPath.length())) {
-					match = sockJsPath;
-				}
-			}
-		}
-		if (match != null) {
-			String result = path.substring(match.length());
-			Assert.isTrue(result.charAt(0)  == '/', "Invalid SockJS path extracted from incoming path \"" +
-					path + "\". The extracted SockJS path is \"" + result +
-					"\". It was extracted from these known SockJS prefixes " + this.knownSockJsPrefixes +
-					". Consider setting 'validSockJsPrefixes' on DefaultSockJsService.");
-			return result;
-		}
-
-		// Try SockJS greeting
-		String pathNoSlash = path.endsWith("/")  ? path.substring(0, path.length() - 1) : path;
-		String lastSegment = pathNoSlash.substring(pathNoSlash.lastIndexOf('/') + 1);
-
-		if (!isValidTransportType(lastSegment) && !lastSegment.startsWith("iframe")) {
-			addKnownSockJsPrefix(path);
-			return "";
-		}
-
-		return null;
-	}
-
-	private void addKnownSockJsPrefix(String path) {
-		if (this.knownSockJsPrefixes.size() > MAX_KNOWN_SOCKJS_PREFIX_COUNT) {
-			String removed = this.knownSockJsPrefixes.remove(0);
-			if (logger.isWarnEnabled()) {
-				logger.warn("MAX_KNOWN_SOCKJS_PREFIX_COUNT reached, removed prefix " + removed);
-			}
-		}
-		this.knownSockJsPrefixes.add(path);
 	}
 
 	/**

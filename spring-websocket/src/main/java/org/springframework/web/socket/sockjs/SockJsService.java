@@ -29,11 +29,6 @@ import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator
  * asynchronous support enabled through the ServletContext API or by adding an
  * {@code <async-support>true</async-support>} element to servlet and filter declarations
  * in web.xml.
- * <p>
- * The service can be integrated into any HTTP request handling mechanism (e.g. plain
- * Servlet, Spring MVC, or other). It is expected that it will be mapped, as expected
- * by the SockJS protocol, to a specific prefix (e.g. "/echo") including all sub-URLs
- * (i.e. Ant path pattern "/echo/**").
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -52,6 +47,7 @@ public interface SockJsService {
 	 *
 	 * @param request the current request
 	 * @param response the current response
+	 * @param sockJsPath the remainder of the path within the SockJS service prefix
 	 * @param handler the handler that will exchange messages with the SockJS client
 	 *
 	 * @throws SockJsException raised when request processing fails; generally, failed
@@ -64,7 +60,7 @@ public interface SockJsService {
 	 *         The former is automatically added when using
 	 *         {@link SockJsHttpRequestHandler}.
 	 */
-	void handleRequest(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler handler)
-			throws SockJsException;
+	void handleRequest(ServerHttpRequest request, ServerHttpResponse response, String sockJsPath,
+			WebSocketHandler handler) throws SockJsException;
 
 }

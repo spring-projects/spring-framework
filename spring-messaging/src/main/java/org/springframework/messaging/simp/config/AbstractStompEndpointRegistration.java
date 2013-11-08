@@ -147,7 +147,7 @@ public abstract class AbstractStompEndpointRegistration<M> implements StompEndpo
 		}
 
 		protected SockJsService getSockJsService() {
-			return super.getSockJsService(paths);
+			return super.getSockJsService();
 		}
 	}
 

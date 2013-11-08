@@ -52,82 +52,7 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 	}
 
 	@Test
-	public void getSockJsPathForGreetingRequest() throws Exception {
-
-		handleRequest("GET", "/a", HttpStatus.OK);
-		assertEquals("Welcome to SockJS!\n", this.servletResponse.getContentAsString());
-
-		handleRequest("GET", "/a/", HttpStatus.OK);
-		assertEquals("Welcome to SockJS!\n", this.servletResponse.getContentAsString());
-
-		this.service.setValidSockJsPrefixes("/b");
-
-		handleRequest("GET", "/a", HttpStatus.NOT_FOUND);
-		handleRequest("GET", "/a/", HttpStatus.NOT_FOUND);
-
-		handleRequest("GET", "/b", HttpStatus.OK);
-		assertEquals("Welcome to SockJS!\n", this.servletResponse.getContentAsString());
-	}
-
-	@Test
-	public void getSockJsPathForInfoRequest() throws Exception {
-
-		handleRequest("GET", "/a/info", HttpStatus.OK);
-
-		assertTrue(this.servletResponse.getContentAsString().startsWith("{\"entropy\":"));
-
-		handleRequest("GET", "/a/server/session/xhr", HttpStatus.OK);
-
-		assertEquals("session", this.service.sessionId);
-		assertEquals(TransportType.XHR.value(), this.service.transport);
-		assertSame(this.handler, this.service.handler);
-
-		this.service.setValidSockJsPrefixes("/b");
-
-		handleRequest("GET", "/a/info", HttpStatus.NOT_FOUND);
-		handleRequest("GET", "/b/info", HttpStatus.OK);
-
-		assertTrue(this.servletResponse.getContentAsString().startsWith("{\"entropy\":"));
-	}
-
-	@Test
-	public void getSockJsPathForTransportRequest() throws Exception {
-
-		// Info or greeting requests must be first so "/a" is cached as a known prefix
-		handleRequest("GET", "/a/info", HttpStatus.OK);
-		handleRequest("GET", "/a/server/session/xhr", HttpStatus.OK);
-
-		assertEquals("session", this.service.sessionId);
-		assertEquals(TransportType.XHR.value(), this.service.transport);
-		assertSame(this.handler, this.service.handler);
-	}
-
-	@Test
-	public void getSockJsPathForTransportRequestWithConfiguredPrefix() throws Exception {
-
-		this.service.setValidSockJsPrefixes("/a");
-		handleRequest("GET", "/a/server/session/xhr", HttpStatus.OK);
-
-		assertEquals("session", this.service.sessionId);
-		assertEquals(TransportType.XHR.value(), this.service.transport);
-		assertSame(this.handler, this.service.handler);
-	}
-
-	// SPR-10923
-
-	@Test
-	public void getSockJsPathWithPartlyMatchingServletPath() throws Exception {
-
-		this.service.setValidSockJsPrefixes("/snake");
-		handleRequest("GET", "/snakedemo/snake/info", HttpStatus.OK);
-
-		assertTrue(this.servletResponse.getContentAsString().startsWith("{\"entropy\":"));
-	}
-
-	@Test
 	public void validateRequest() throws Exception {
-
-		this.service.setValidSockJsPrefixes("/echo");
 
 		this.service.setWebSocketsEnabled(false);
 		handleRequest("GET", "/echo/server/session/websocket", HttpStatus.NOT_FOUND);
@@ -148,7 +73,7 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 	@Test
 	public void handleInfoGet() throws Exception {
 
-		handleRequest("GET", "/a/info", HttpStatus.OK);
+		handleRequest("GET", "/echo/info", HttpStatus.OK);
 
 		assertEquals("application/json;charset=UTF-8", this.servletResponse.getContentType());
 		assertEquals("*", this.servletResponse.getHeader("Access-Control-Allow-Origin"));
@@ -162,7 +87,7 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 
 		this.service.setSessionCookieNeeded(false);
 		this.service.setWebSocketsEnabled(false);
-		handleRequest("GET", "/a/info", HttpStatus.OK);
+		handleRequest("GET", "/echo/info", HttpStatus.OK);
 
 		body = this.servletResponse.getContentAsString();
 		assertEquals(",\"origins\":[\"*:*\"],\"cookie_needed\":false,\"websocket\":false}",
@@ -174,7 +99,7 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 
 		this.servletRequest.addHeader("Access-Control-Request-Headers", "Last-Modified");
 
-		handleRequest("OPTIONS", "/a/info", HttpStatus.NO_CONTENT);
+		handleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		this.response.flush();
 
 		assertEquals("*", this.servletResponse.getHeader("Access-Control-Allow-Origin"));
@@ -187,8 +112,7 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 	@Test
 	public void handleIframeRequest() throws Exception {
 
-		this.service.setValidSockJsPrefixes("/a");
-		handleRequest("GET", "/a/iframe.html", HttpStatus.OK);
+		handleRequest("GET", "/echo/iframe.html", HttpStatus.OK);
 
 		assertEquals("text/html;charset=UTF-8", this.servletResponse.getContentType());
 		assertTrue(this.servletResponse.getContentAsString().startsWith("<!DOCTYPE html>\n"));
@@ -202,17 +126,16 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 
 		this.servletRequest.addHeader("If-None-Match", "\"0da1ed070012f304e47b83c81c48ad620\"");
 
-		this.service.setValidSockJsPrefixes("/a");
-		handleRequest("GET", "/a/iframe.html", HttpStatus.NOT_MODIFIED);
+		handleRequest("GET", "/echo/iframe.html", HttpStatus.NOT_MODIFIED);
 	}
 
 	@Test
 	public void handleRawWebSocketRequest() throws Exception {
 
-		handleRequest("GET", "/a", HttpStatus.OK);
+		handleRequest("GET", "/echo", HttpStatus.OK);
 		assertEquals("Welcome to SockJS!\n", this.servletResponse.getContentAsString());
 
-		handleRequest("GET", "/a/websocket", HttpStatus.OK);
+		handleRequest("GET", "/echo/websocket", HttpStatus.OK);
 		assertNull("Raw WebSocket should not open a SockJS session", this.service.sessionId);
 		assertSame(this.handler, this.service.handler);
 	}
@@ -221,7 +144,8 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 	private void handleRequest(String httpMethod, String uri, HttpStatus httpStatus) throws IOException {
 		resetResponse();
 		setRequest(httpMethod, uri);
-		this.service.handleRequest(this.request, this.response, this.handler);
+		String sockJsPath = uri.substring("/echo".length());
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.handler);
 
 		assertEquals(httpStatus.value(), this.servletResponse.getStatus());
 	}
@@ -230,7 +154,7 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 	public void handleEmptyContentType() throws Exception {
 
 		servletRequest.setContentType("");
-		handleRequest("GET", "/a/info", HttpStatus.OK);
+		handleRequest("GET", "/echo/info", HttpStatus.OK);
 
 		assertEquals("Invalid/empty content should have been ignored", 200, this.servletResponse.getStatus());
 	}

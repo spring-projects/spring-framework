@@ -28,6 +28,7 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator;
 import org.springframework.web.socket.support.LoggingWebSocketHandlerDecorator;
@@ -81,11 +82,17 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler {
 		ServerHttpResponse response = new ServletServerHttpResponse(servletResponse);
 
 		try {
-			this.sockJsService.handleRequest(request, response, this.wsHandler);
+			this.sockJsService.handleRequest(request, response, getSockJsPath(servletRequest), this.wsHandler);
 		}
 		catch (Throwable t) {
 			throw new SockJsException("Uncaught failure in SockJS request, uri=" + request.getURI(), t);
 		}
+	}
+
+	private String getSockJsPath(HttpServletRequest servletRequest) {
+		String attribute = HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE;
+		String path = (String) servletRequest.getAttribute(attribute);
+		return ((path.length() > 0) && (path.charAt(0) != '/')) ? "/" + path : path;
 	}
 
 }
