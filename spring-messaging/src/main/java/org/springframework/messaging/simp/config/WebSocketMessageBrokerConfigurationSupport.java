@@ -16,24 +16,15 @@
 
 package org.springframework.messaging.simp.config;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.handler.websocket.SubProtocolWebSocketHandler;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.handler.*;
-import org.springframework.messaging.simp.handler.SimpAnnotationMethodMessageHandler;
+import org.springframework.messaging.support.channel.AbstractSubscribableChannel;
 import org.springframework.messaging.support.channel.ExecutorSubscribableChannel;
-import org.springframework.messaging.support.converter.ByteArrayMessageConverter;
-import org.springframework.messaging.support.converter.CompositeMessageConverter;
-import org.springframework.messaging.support.converter.DefaultContentTypeResolver;
-import org.springframework.messaging.support.converter.MappingJackson2MessageConverter;
-import org.springframework.messaging.support.converter.MessageConverter;
-import org.springframework.messaging.support.converter.StringMessageConverter;
+import org.springframework.messaging.support.converter.*;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.ClassUtils;
@@ -43,6 +34,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.config.SockJsServiceRegistration;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -118,12 +112,12 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 	}
 
 	@Bean
-	public SubscribableChannel webSocketRequestChannel() {
+	public AbstractSubscribableChannel webSocketRequestChannel() {
 		return new ExecutorSubscribableChannel(webSocketChannelExecutor());
 	}
 
 	@Bean
-	public SubscribableChannel webSocketResponseChannel() {
+	public AbstractSubscribableChannel webSocketResponseChannel() {
 		return new ExecutorSubscribableChannel(webSocketChannelExecutor());
 	}
 
@@ -209,7 +203,7 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 	}
 
 	@Bean
-	public SubscribableChannel brokerChannel() {
+	public AbstractSubscribableChannel brokerChannel() {
 		return new ExecutorSubscribableChannel(); // synchronous
 	}
 

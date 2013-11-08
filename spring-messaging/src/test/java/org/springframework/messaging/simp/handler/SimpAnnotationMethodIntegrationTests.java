@@ -34,7 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.config.DelegatingWebSocketMessageBrokerConfiguration;
@@ -42,6 +41,7 @@ import org.springframework.messaging.simp.config.MessageBrokerConfigurer;
 import org.springframework.messaging.simp.config.StompEndpointRegistry;
 import org.springframework.messaging.simp.config.WebSocketMessageBrokerConfigurer;
 import org.springframework.messaging.simp.stomp.StompCommand;
+import org.springframework.messaging.support.channel.AbstractSubscribableChannel;
 import org.springframework.messaging.support.channel.ExecutorSubscribableChannel;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.AbstractWebSocketIntegrationTests;
@@ -227,13 +227,13 @@ public class SimpAnnotationMethodIntegrationTests extends AbstractWebSocketInteg
 
 		@Override
 		@Bean
-		public SubscribableChannel webSocketRequestChannel() {
+		public AbstractSubscribableChannel webSocketRequestChannel() {
 			return new ExecutorSubscribableChannel(); // synchronous
 		}
 
 		@Override
 		@Bean
-		public SubscribableChannel webSocketResponseChannel() {
+		public AbstractSubscribableChannel webSocketResponseChannel() {
 			return new ExecutorSubscribableChannel(); // synchronous
 		}
 	}
