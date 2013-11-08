@@ -1,10 +1,9 @@
-
 /**
  *
  * The classes in this package make JDBC easier to use and
  * reduce the likelihood of common errors. In particular, they:
  * <ul>
- * <li>Simplify error handling, avoiding the need for try/catch/final
+ * <li>Simplify error handling, avoiding the need for try/catch/finally
  * blocks in application code.
  * <li>Present exceptions to application code in a generic hierarchy of
  * unchecked exceptions, enabling applications to catch data access
