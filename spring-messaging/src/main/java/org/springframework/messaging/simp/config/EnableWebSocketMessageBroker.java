@@ -49,7 +49,7 @@ import org.springframework.context.annotation.Import;
  * 	&#064;Bean
  * 	public void configureMessageBroker(MessageBrokerConfigurer configurer) {
  * 		configurer.enableStompBrokerRelay("/queue/", "/topic/");
- * 		configurer.setAnnotationMethodDestinationPrefixes("/app/");
+ * 		configurer.setApplicationDestinationPrefixes("/app/");
  * 	}
  * }
  * </pre>

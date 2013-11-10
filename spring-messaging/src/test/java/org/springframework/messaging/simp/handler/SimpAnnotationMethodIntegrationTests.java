@@ -217,7 +217,7 @@ public class SimpAnnotationMethodIntegrationTests extends AbstractWebSocketInteg
 
 		@Override
 		public void configureMessageBroker(MessageBrokerConfigurer configurer) {
-			configurer.setAnnotationMethodDestinationPrefixes("/app");
+			configurer.setApplicationDestinationPrefixes("/app");
 			configurer.enableSimpleBroker("/topic", "/queue");
 		}
 	}

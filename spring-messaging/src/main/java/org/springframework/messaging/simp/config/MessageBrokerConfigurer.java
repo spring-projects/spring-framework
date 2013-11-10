@@ -37,7 +37,7 @@ public class MessageBrokerConfigurer {
 
 	private StompBrokerRelayRegistration stompRelay;
 
-	private String[] annotationMethodDestinationPrefixes;
+	private String[] applicationDestinationPrefixes;
 
 	private String userDestinationPrefix;
 
@@ -67,10 +67,10 @@ public class MessageBrokerConfigurer {
 	}
 
 	/**
-	 * Configure one or more prefixes to filter destinations targeting annotated
-	 * application methods. For example destinations prefixed with "/app" may be processed
-	 * by annotated application methods while other destinations may target the message
-	 * broker (e.g. "/topic", "/queue").
+	 * Configure one or more prefixes to filter destinations targeting application
+	 * annotated methods. For example destinations prefixed with "/app" may be
+	 * processed by annotated methods while other destinations may target the
+	 * message broker (e.g. "/topic", "/queue").
 	 * <p>
 	 * When messages are processed, the matching prefix is removed from the destination in
 	 * order to form the lookup path. This means annotations should not contain the
@@ -78,8 +78,8 @@ public class MessageBrokerConfigurer {
 	 * <p>
 	 * Prefixes that do not have a trailing slash will have one automatically appended.
 	 */
-	public MessageBrokerConfigurer setAnnotationMethodDestinationPrefixes(String... destinationPrefixes) {
-		this.annotationMethodDestinationPrefixes = destinationPrefixes;
+	public MessageBrokerConfigurer setApplicationDestinationPrefixes(String... prefixes) {
+		this.applicationDestinationPrefixes = prefixes;
 		return this;
 	}
 
@@ -118,9 +118,9 @@ public class MessageBrokerConfigurer {
 		return (this.stompRelay != null) ? this.stompRelay.getMessageHandler() : null;
 	}
 
-	protected Collection<String> getAnnotationMethodDestinationPrefixes() {
-		return (this.annotationMethodDestinationPrefixes != null)
-				? Arrays.asList(this.annotationMethodDestinationPrefixes) : null;
+	protected Collection<String> getApplicationDestinationPrefixes() {
+		return (this.applicationDestinationPrefixes != null)
+				? Arrays.asList(this.applicationDestinationPrefixes) : null;
 	}
 
 	protected String getUserDestinationPrefix() {

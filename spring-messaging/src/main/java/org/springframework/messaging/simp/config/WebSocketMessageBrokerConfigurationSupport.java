@@ -136,7 +136,7 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 		SimpAnnotationMethodMessageHandler handler =
 				new SimpAnnotationMethodMessageHandler(brokerMessagingTemplate(), webSocketResponseChannel());
 
-		handler.setDestinationPrefixes(getMessageBrokerConfigurer().getAnnotationMethodDestinationPrefixes());
+		handler.setDestinationPrefixes(getMessageBrokerConfigurer().getApplicationDestinationPrefixes());
 		handler.setMessageConverter(simpMessageConverter());
 		webSocketRequestChannel().subscribe(handler);
 		return handler;
