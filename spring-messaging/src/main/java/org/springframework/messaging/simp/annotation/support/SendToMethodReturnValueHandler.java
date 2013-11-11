@@ -52,11 +52,54 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 
 	private final boolean annotationRequired;
 
+	private String defaultDestinationPrefix = "/topic";
+
+	private String defaultUserDestinationPrefix = "/queue";
+
 
 	public SendToMethodReturnValueHandler(SimpMessageSendingOperations messagingTemplate, boolean annotationRequired) {
 		Assert.notNull(messagingTemplate, "messagingTemplate is required");
 		this.messagingTemplate = messagingTemplate;
 		this.annotationRequired = annotationRequired;
+	}
+
+
+	/**
+	 * Configure a default prefix to add to message destinations in cases where a method
+	 * is not annotated with {@link SendTo @SendTo} or does not specify any destinations
+	 * through the annotation's value attribute.
+	 * <p>
+	 * By default, the prefix is set to "/topic".
+	 */
+	public void setDefaultDestinationPrefix(String defaultDestinationPrefix) {
+		this.defaultDestinationPrefix = defaultDestinationPrefix;
+	}
+
+	/**
+	 * Return the configured default destination prefix.
+	 * @see #setDefaultDestinationPrefix(String)
+	 */
+	public String getDefaultDestinationPrefix() {
+		return this.defaultDestinationPrefix;
+	}
+
+	/**
+	 * Configure a default prefix to add to message destinations in cases where a
+	 * method is annotated with {@link SendToUser @SendToUser} but does not specify
+	 * any destinations through the annotation's value attribute.
+	 * <p>
+	 * By default, the prefix is set to "/queue".
+	 */
+	public void setDefaultUserDestinationPrefix(String prefix) {
+		this.defaultUserDestinationPrefix = prefix;
+	}
+
+	/**
+	 * Return the configured default user destination prefix.
+	 * @see #setDefaultUserDestinationPrefix(String)
+	 */
+	public String getDefaultUserDestinationPrefix() {
+		return this.defaultUserDestinationPrefix;
 	}
 
 
@@ -88,26 +131,31 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 				throw new MissingSessionUserException(inputMessage);
 			}
 			String user = inputHeaders.getUser().getName();
-			for (String destination : getDestinations(sendToUser, inputHeaders.getDestination())) {
+			String[] destinations = getTargetDestinations(sendToUser, inputHeaders, this.defaultUserDestinationPrefix);
+			for (String destination : destinations) {
 				this.messagingTemplate.convertAndSendToUser(user, destination, returnValue, postProcessor);
 			}
 			return;
 		}
-
-		SendTo sendTo = returnType.getMethodAnnotation(SendTo.class);
-		if (sendTo != null) {
-			for (String destination : getDestinations(sendTo, inputHeaders.getDestination())) {
+		else {
+			SendTo sendTo = returnType.getMethodAnnotation(SendTo.class);
+			String[] destinations = getTargetDestinations(sendTo, inputHeaders, this.defaultDestinationPrefix);
+			for (String destination : getTargetDestinations(sendTo, inputHeaders, this.defaultDestinationPrefix)) {
 				this.messagingTemplate.convertAndSend(destination, returnValue, postProcessor);
 			}
-			return;
 		}
-
-		this.messagingTemplate.convertAndSend(inputHeaders.getDestination(), returnValue, postProcessor);
 	}
 
-	private String[] getDestinations(Annotation annot, String inputDestination) {
-		String[] destinations = (String[]) AnnotationUtils.getValue(annot);
-		return ObjectUtils.isEmpty(destinations) ? new String[] { inputDestination } : destinations;
+	protected String[] getTargetDestinations(Annotation annot, SimpMessageHeaderAccessor inputHeaders,
+			String defaultPrefix) {
+
+		if (annot != null) {
+			String[] value = (String[]) AnnotationUtils.getValue(annot);
+			if (!ObjectUtils.isEmpty(value)) {
+				return value;
+			}
+		}
+		return new String[] { defaultPrefix + inputHeaders.getDestination() };
 	}
 
 

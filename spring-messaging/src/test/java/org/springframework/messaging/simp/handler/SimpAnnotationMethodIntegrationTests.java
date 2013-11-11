@@ -102,7 +102,7 @@ public class SimpAnnotationMethodIntegrationTests extends AbstractWebSocketInteg
 				"id:subs1", "destination:/topic/increment").build();
 
 		TextMessage message2 = create(StompCommand.SEND).headers(
-				"destination:/app/topic/increment").body("5").build();
+				"destination:/app/increment").body("5").build();
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(1, message1, message2);
 		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
@@ -163,7 +163,7 @@ public class SimpAnnotationMethodIntegrationTests extends AbstractWebSocketInteg
 	@IntegrationTestController
 	static class IncrementController {
 
-		@MessageMapping(value="/topic/increment")
+		@MessageMapping(value="/increment")
 		public int handle(int i) {
 			return i + 1;
 		}
