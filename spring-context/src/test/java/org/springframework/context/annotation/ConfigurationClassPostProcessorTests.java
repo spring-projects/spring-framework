@@ -120,8 +120,8 @@ public class ConfigurationClassPostProcessorTests {
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(SingletonBeanConfig.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
-		Foo foo = beanFactory.getBean("foo", Foo.class);
-		TestBean bar = beanFactory.getBean("bar", TestBean.class);
+		beanFactory.getBean("foo", Foo.class);
+		beanFactory.getBean("bar", TestBean.class);
 	}
 
 	@Test

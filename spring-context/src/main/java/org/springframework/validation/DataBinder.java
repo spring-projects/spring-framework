@@ -127,8 +127,6 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	private SimpleTypeConverter typeConverter;
 
-	private BindException bindException;
-
 	private boolean ignoreUnknownFields = true;
 
 	private boolean ignoreInvalidFields = false;

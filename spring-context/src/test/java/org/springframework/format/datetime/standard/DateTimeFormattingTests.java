@@ -292,7 +292,6 @@ public class DateTimeFormattingTests {
 	}
 
 
-	@SuppressWarnings("unused")
 	public static class DateTimeBean {
 
 		private LocalDate localDate;

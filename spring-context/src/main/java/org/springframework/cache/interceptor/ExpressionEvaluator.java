@@ -36,6 +36,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
  *
  * @author Costin Leau
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 3.1
  */
 class ExpressionEvaluator {
@@ -61,7 +62,7 @@ class ExpressionEvaluator {
 	 * Create an {@link EvaluationContext} without a return value.
 	 * @see #createEvaluationContext(Collection, Method, Object[], Object, Class, Object)
 	 */
-	public EvaluationContext createEvaluationContext(Collection<Cache> caches,
+	public EvaluationContext createEvaluationContext(Collection<? extends Cache> caches,
 			Method method, Object[] args, Object target, Class<?> targetClass) {
 		return createEvaluationContext(caches, method, args, target, targetClass,
 				NO_RESULT);
@@ -77,9 +78,9 @@ class ExpressionEvaluator {
 	 * @param targetClass the target class
 	 * @param result the return value (can be {@code null}) or
 	 *        {@link #NO_RESULT} if there is no return at this time
-	 * @return the evalulation context
+	 * @return the evaluation context
 	 */
-	public EvaluationContext createEvaluationContext(Collection<Cache> caches,
+	public EvaluationContext createEvaluationContext(Collection<? extends Cache> caches,
 			Method method, Object[] args, Object target, Class<?> targetClass,
 			final Object result) {
 		CacheExpressionRootObject rootObject = new CacheExpressionRootObject(caches,

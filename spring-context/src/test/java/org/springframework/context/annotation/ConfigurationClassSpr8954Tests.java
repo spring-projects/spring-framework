@@ -19,10 +19,8 @@ package org.springframework.context.annotation;
 import java.util.Map;
 
 import org.junit.Test;
-
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -39,6 +37,7 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  * @author Oliver Gierke
  */
+@SuppressWarnings("resource")
 public class ConfigurationClassSpr8954Tests {
 
 	@Test

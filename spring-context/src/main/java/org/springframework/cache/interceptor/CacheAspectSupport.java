@@ -61,6 +61,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 3.1
  */
 public abstract class CacheAspectSupport implements InitializingBean {
@@ -148,7 +149,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		return ClassUtils.getQualifiedMethodName(specificMethod);
 	}
 
-	protected Collection<Cache> getCaches(CacheOperation operation) {
+	protected Collection<? extends Cache> getCaches(CacheOperation operation) {
 		Set<String> cacheNames = operation.getCacheNames();
 		Collection<Cache> caches = new ArrayList<Cache>(cacheNames.size());
 		for (String cacheName : cacheNames) {
@@ -346,7 +347,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 		private final Class<?> targetClass;
 
-		private final Collection<Cache> caches;
+		private final Collection<? extends Cache> caches;
 
 		public CacheOperationContext(CacheOperation operation, Method method,
 				Object[] args, Object target, Class<?> targetClass) {
@@ -408,7 +409,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 			return evaluator.createEvaluationContext(this.caches, this.method, this.args, this.target, this.targetClass, result);
 		}
 
-		protected Collection<Cache> getCaches() {
+		protected Collection<? extends Cache> getCaches() {
 			return this.caches;
 		}
 	}

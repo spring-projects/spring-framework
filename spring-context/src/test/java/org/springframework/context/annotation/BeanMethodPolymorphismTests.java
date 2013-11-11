@@ -20,9 +20,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.RootBeanDefinition;
-
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
@@ -34,6 +31,7 @@ import static org.junit.Assert.*;
  * @author Phillip Webb
  * @author Juergen Hoeller
  */
+@SuppressWarnings("resource")
 public class BeanMethodPolymorphismTests {
 
 	@Test

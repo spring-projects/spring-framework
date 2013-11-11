@@ -23,7 +23,6 @@ import static org.junit.Assert.assertThat;
 import java.lang.reflect.Method;
 
 import org.junit.Test;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.util.ReflectionUtils;
 
 /**

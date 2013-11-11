@@ -39,8 +39,6 @@ public final class DeclareParentsTests {
 
 	private ITestBean testBeanProxy;
 
-	private TestBean testBeanTarget;
-
 	private ApplicationContext ctx;
 
 	@Before
@@ -49,9 +47,6 @@ public final class DeclareParentsTests {
 
 		testBeanProxy = (ITestBean) ctx.getBean("testBean");
 		assertTrue(AopUtils.isAopProxy(testBeanProxy));
-
-		// we need the real target too, not just the proxy...
-		testBeanTarget = (TestBean) ((Advised) testBeanProxy).getTargetSource().getTarget();
 	}
 
 	@Test

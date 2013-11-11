@@ -22,10 +22,10 @@ import java.util.Map;
 
 import groovy.lang.DelegatingMetaClass;
 import groovy.lang.GroovyObject;
+
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.beans.factory.BeanCreationException;
@@ -61,6 +61,7 @@ import static org.mockito.BDDMockito.*;
  * @author Mark Fisher
  * @author Chris Beams
  */
+@SuppressWarnings("resource")
 public class GroovyScriptFactoryTests {
 
 	@Before

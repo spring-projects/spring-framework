@@ -25,14 +25,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.junit.Test;
-import org.springframework.stereotype.Service;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-
-import static org.junit.Assert.*;
 
 /**
  * Tests that @Import may be used both as a locally declared and meta-declared
@@ -42,6 +39,7 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  * @since 3.1
  */
+@SuppressWarnings("resource")
 public class ImportAnnotationDetectionTests {
 
 	@Test

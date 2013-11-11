@@ -1776,7 +1776,6 @@ public abstract class AbstractAopProxyTests {
 	protected static class TestStaticPointcutAdvice extends StaticMethodMatcherPointcutAdvisor {
 
 		private String pattern;
-		private int count;
 
 		public TestStaticPointcutAdvice(MethodInterceptor mi, String pattern) {
 			super(mi);
@@ -1784,9 +1783,7 @@ public abstract class AbstractAopProxyTests {
 		}
 		@Override
 		public boolean matches(Method m, Class<?> targetClass) {
-			boolean run = m.getName().indexOf(pattern) != -1;
-			if (run) ++count;
-			return run;
+			return m.getName().indexOf(pattern) != -1;
 		}
 	}
 

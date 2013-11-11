@@ -511,8 +511,6 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 */
 	private class ResourceElement extends LookupElement {
 
-		protected final boolean shareable;
-
 		public ResourceElement(Member member, PropertyDescriptor pd) {
 			super(member, pd);
 			AnnotatedElement ae = (AnnotatedElement) member;
@@ -539,7 +537,6 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			this.name = resourceName;
 			this.lookupType = resourceType;
 			this.mappedName = resource.mappedName();
-			this.shareable = resource.shareable();
 		}
 
 		@Override

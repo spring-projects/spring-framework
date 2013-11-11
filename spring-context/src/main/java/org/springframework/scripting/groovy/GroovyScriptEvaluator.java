@@ -1,7 +1,6 @@
 package org.springframework.scripting.groovy;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Map;
 
 import groovy.lang.Binding;
