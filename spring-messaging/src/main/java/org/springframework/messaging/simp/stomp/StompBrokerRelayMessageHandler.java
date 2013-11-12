@@ -306,15 +306,21 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 
 		if (sessionId == null) {
-			logger.error("No sessionId, ignoring message: " + message);
+			if (logger.isWarnEnabled()) {
+				logger.warn("No sessionId, ignoring message: " + message);
+			}
 			return;
 		}
 
 		if ((command != null) && command.requiresDestination() && !checkDestinationPrefix(destination)) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Ignoring message to destination=" + destination);
+			}
 			return;
 		}
 
 		if (SimpMessageType.CONNECT.equals(messageType)) {
+			logger.debug("Processing CONNECT in session=" + sessionId);
 			if (getVirtualHost() != null) {
 				headers.setHost(getVirtualHost());
 			}
@@ -335,7 +341,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		else {
 			StompConnectionHandler handler = this.connectionHandlers.get(sessionId);
 			if (handler == null) {
-				logger.warn("Connection for sessionId=" + sessionId + " not found. Ignoring message: " + message);
+				logger.warn("Connection for sessionId=" + sessionId + " not found. Ignoring message");
 				return;
 			}
 			handler.forward(message);
@@ -424,11 +430,15 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 		@Override
 		public void handleMessage(Message<byte[]> message) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Reading message for sessionId=" + this.sessionId + ", " + message);
-			}
 
 			StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
+			if (SimpMessageType.HEARTBEAT.equals(headers.getMessageType())) {
+				logger.trace("Received broker heartbeat");
+			}
+			else if (logger.isDebugEnabled()) {
+				logger.debug("Received broker message in session=" + this.sessionId);
+			}
+
 			if (StompCommand.CONNECTED == headers.getCommand()) {
 				afterStompConnected(headers);
 			}
@@ -500,7 +510,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 			if (!this.isStompConnected) {
 				if (logger.isWarnEnabled()) {
-					logger.warn("Connection to broker inactive or not ready, ignoring message=" + message);
+					logger.warn("Connection to broker inactive or not ready. Ignoring message");
 				}
 				return new ListenableFutureTask<Void>(new Callable<Void>() {
 					@Override
@@ -510,8 +520,14 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				});
 			}
 
-			if (logger.isTraceEnabled()) {
-				logger.trace("Forwarding message to broker: " + message);
+			if (logger.isDebugEnabled()) {
+				StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
+				if (SimpMessageType.HEARTBEAT.equals(headers.getMessageType())) {
+					logger.trace("Forwarding heartbeat to broker");
+				}
+				else {
+					logger.debug("Forwarding message to broker");
+				}
 			}
 
 			@SuppressWarnings("unchecked")
@@ -548,6 +564,10 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			}
 		}
 
+		@Override
+		public String toString() {
+			return "StompConnectionHandler{" + "sessionId=" + this.sessionId + "}";
+		}
 	}
 
 	private class SystemStompConnectionHandler extends StompConnectionHandler {

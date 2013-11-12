@@ -132,18 +132,12 @@ public abstract class AbstractBrokerMessageHandler
 
 	@Override
 	public final void handleMessage(Message<?> message) {
-
 		if (!this.running) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("STOMP broker relay not running. Ignoring message id=" + message.getHeaders().getId());
+				logger.trace("Message broker is not running. Ignoring message id=" + message.getHeaders().getId());
 			}
 			return;
 		}
-
-		if (logger.isTraceEnabled()) {
-			logger.trace("Handling message " + message);
-		}
-
 		handleMessageInternal(message);
 	}
 

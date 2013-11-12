@@ -120,10 +120,6 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 	private UserDestinationInfo getUserDestinationInfo(SimpMessageHeaderAccessor headers) {
 
 		String destination = headers.getDestination();
-		if (destination == null) {
-			logger.trace("Ignoring message, no destination");
-			return null;
-		}
 
 		String targetUser;
 		String targetDestination;
@@ -132,20 +128,18 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		SimpMessageType messageType = headers.getMessageType();
 
 		if (SimpMessageType.SUBSCRIBE.equals(messageType) || SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
-			if (user == null) {
-				logger.trace("Ignoring (un)subscribe message, no user information");
+			if (!checkDestination(destination, this.subscriptionDestinationPrefix)) {
 				return null;
 			}
-			if (!destination.startsWith(this.subscriptionDestinationPrefix)) {
-				logger.trace("Ignoring (un)subscribe message, not a \"user\" destination");
+			if (user == null) {
+				logger.warn("Ignoring message, no user information");
 				return null;
 			}
 			targetUser = user.getName();
 			targetDestination = destination.substring(this.destinationPrefix.length()-1);
 		}
 		else if (SimpMessageType.MESSAGE.equals(messageType)) {
-			if (!destination.startsWith(this.destinationPrefix)) {
-				logger.trace("Ignoring message, not a \"user\" destination");
+			if (!checkDestination(destination, this.destinationPrefix)) {
 				return null;
 			}
 			int startIndex = this.destinationPrefix.length();
@@ -156,11 +150,27 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 
 		}
 		else {
-			logger.trace("Ignoring message, not of the right message type");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Ignoring " + messageType + " message");
+			}
 			return null;
 		}
 
 		return new UserDestinationInfo(targetUser, targetDestination);
+	}
+
+	protected boolean checkDestination(String destination, String requiredPrefix) {
+		if (destination == null) {
+			logger.trace("Ignoring message, no destination");
+			return false;
+		}
+		if (!destination.startsWith(requiredPrefix)) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Ignoring message to " + destination + ", not a \"user\" destination");
+			}
+			return false;
+		}
+		return true;
 	}
 
 

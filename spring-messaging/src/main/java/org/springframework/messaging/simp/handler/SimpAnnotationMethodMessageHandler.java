@@ -296,13 +296,6 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	@Override
-	protected void handleNoMatch(Set<SimpMessageMappingInfo> set, String lookupDestination, Message<?> message) {
-		if (logger.isTraceEnabled()) {
-			logger.trace("No match for " + lookupDestination);
-		}
-	}
-
-	@Override
 	protected AbstractExceptionHandlerMethodResolver createExceptionHandlerMethodResolverFor(Class<?> beanType) {
 		return new AnnotationExceptionHandlerMethodResolver(beanType);
 	}

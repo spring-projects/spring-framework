@@ -97,20 +97,17 @@ public abstract class AbstractSubscriptionRegistry implements SubscriptionRegist
 	public final MultiValueMap<String, String> findSubscriptions(Message<?> message) {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 		if (!SimpMessageType.MESSAGE.equals(headers.getMessageType())) {
-			logger.error("Unexpected message type: " + message);
+			logger.trace("Ignoring message type " + headers.getMessageType());
 			return null;
 		}
 		String destination = headers.getDestination();
 		if (destination == null) {
-			logger.error("Ignoring destination. No destination in message: " + message);
+			logger.trace("Ignoring message, no destination");
 			return null;
-		}
-		if (logger.isTraceEnabled()) {
-			logger.trace("Find subscriptions, destination=" + headers.getDestination());
 		}
 		MultiValueMap<String, String> result = findSubscriptionsInternal(destination, message);
 		if (logger.isTraceEnabled()) {
-			logger.trace("Found " + result.size() + " subscriptions");
+			logger.trace("Found " + result.size() + " subscriptions for destination=" + headers.getDestination());
 		}
 		return result;
 	}

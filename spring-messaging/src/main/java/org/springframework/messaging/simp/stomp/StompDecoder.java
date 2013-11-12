@@ -69,14 +69,17 @@ public class StompDecoder {
 
 			decodedMessage = MessageBuilder.withPayload(payload)
 					.setHeaders(StompHeaderAccessor.create(stompCommand, headers)).build();
+
+			if (logger.isDebugEnabled()) {
+				logger.debug("Decoded " + decodedMessage);
+			}
 		}
 		else {
 			decodedMessage = MessageBuilder.withPayload(HEARTBEAT_PAYLOAD).setHeaders(
 					StompHeaderAccessor.create(SimpMessageType.HEARTBEAT)).build();
-		}
-
-		if (logger.isTraceEnabled()) {
-			logger.trace("Decoded " + decodedMessage);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Decoded heartbeat");
+			}
 		}
 
 		return decodedMessage;
@@ -101,7 +104,7 @@ public class StompDecoder {
 			if (headerStream.size() > 0) {
 				String header = new String(headerStream.toByteArray(), UTF8_CHARSET);
 				int colonIndex = header.indexOf(':');
-				if (colonIndex <= 0 || colonIndex == header.length() - 1) {
+				if ((colonIndex <= 0) || (colonIndex == header.length() - 1)) {
 					throw new StompConversionException(
 							"Illegal header: '" + header + "'. A header must be of the form <name>:<value");
 				}
@@ -148,7 +151,6 @@ public class StompDecoder {
 				}
 			}
 		}
-
 		throw new StompConversionException("Frame must be terminated with a null octect");
 	}
 

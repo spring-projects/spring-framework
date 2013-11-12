@@ -318,17 +318,21 @@ public abstract class AbstractMethodMessageHandler<T>
 	public void handleMessage(Message<?> message) throws MessagingException {
 
 		String destination = getDestination(message);
-		String lookupDestination = getLookupDestination(destination);
+		if (destination == null) {
+			logger.trace("Ignoring message, no destination");
+			return;
+		}
 
+		String lookupDestination = getLookupDestination(destination);
 		if (lookupDestination == null) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Ignoring message with destination=" + destination);
+				logger.trace("Ignoring message to destination=" + destination);
 			}
 			return;
 		}
 
-		if (logger.isTraceEnabled()) {
-			logger.trace("Handling message " + message);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Handling message, lookupDestination=" + lookupDestination);
 		}
 
 		message = MessageBuilder.fromMessage(message).setHeader(LOOKUP_DESTINATION_HEADER, lookupDestination).build();
@@ -438,6 +442,10 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	protected void handleMatch(T mapping, HandlerMethod handlerMethod, String lookupDestination, Message<?> message) {
 
+		if (logger.isDebugEnabled()) {
+			logger.debug("Message matched to " + handlerMethod);
+		}
+
 		handlerMethod = handlerMethod.createWithResolvedBean();
 		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
 		invocable.setMessageMethodArgumentResolvers(this.argumentResolvers);
@@ -495,7 +503,11 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	protected abstract AbstractExceptionHandlerMethodResolver createExceptionHandlerMethodResolverFor(Class<?> beanType);
 
-	protected abstract void handleNoMatch(Set<T> ts, String lookupDestination, Message<?> message);
+	protected void handleNoMatch(Set<T> ts, String lookupDestination, Message<?> message) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("No matching method found");
+		}
+	}
 
 
 	/**

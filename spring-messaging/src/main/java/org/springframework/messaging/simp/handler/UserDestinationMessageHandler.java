@@ -87,22 +87,15 @@ public class UserDestinationMessageHandler implements MessageHandler {
 	@Override
 	public void handleMessage(Message<?> message) throws MessagingException {
 
-		if (logger.isTraceEnabled()) {
-			logger.trace("Handling message " + message);
-		}
-
 		Set<String> destinations = this.userDestinationResolver.resolveDestination(message);
 		if (CollectionUtils.isEmpty(destinations)) {
 			return;
 		}
 
 		for (String targetDestination : destinations) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Sending message to resolved user destination: " + targetDestination);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Sending message to resolved destination=" + targetDestination);
 			}
-			SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-			headers.setDestination(targetDestination);
-			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
 			this.messagingTemplate.send(targetDestination, message);
 		}
 	}

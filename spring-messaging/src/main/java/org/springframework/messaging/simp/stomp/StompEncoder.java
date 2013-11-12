@@ -21,6 +21,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
@@ -53,9 +54,6 @@ public final class StompEncoder  {
 	 */
 	public byte[] encode(Message<byte[]> message) {
 		try {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Encoding " + message);
-			}
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream output = new DataOutputStream(baos);
 
@@ -90,7 +88,14 @@ public final class StompEncoder  {
 	private void writeHeaders(StompHeaderAccessor headers, Message<byte[]> message, DataOutputStream output)
 			throws IOException {
 
-		for (Entry<String, List<String>> entry : headers.toStompHeaderMap().entrySet()) {
+		Map<String,List<String>> stompHeaders = headers.toStompHeaderMap();
+		if (SimpMessageType.HEARTBEAT.equals(headers.getMessageType())) {
+			logger.trace("Encoded heartbeat");
+		}
+		else if (logger.isDebugEnabled()) {
+			logger.debug("Encoded STOMP command=" + headers.getCommand() + " headers=" + stompHeaders);
+		}
+		for (Entry<String, List<String>> entry : stompHeaders.entrySet()) {
 			byte[] key = getUtf8BytesEscapingIfNecessary(entry.getKey(), headers);
 			for (String value : entry.getValue()) {
 				output.write(key);
@@ -99,9 +104,9 @@ public final class StompEncoder  {
 				output.write(LF);
 			}
 		}
-		if (headers.getCommand() == StompCommand.SEND ||
-				headers.getCommand() == StompCommand.MESSAGE ||
-				headers.getCommand() == StompCommand.ERROR) {
+		if ((headers.getCommand() == StompCommand.SEND) || (headers.getCommand() == StompCommand.MESSAGE) ||
+				(headers.getCommand() == StompCommand.ERROR)) {
+
 			output.write("content-length:".getBytes(UTF8_CHARSET));
 			output.write(Integer.toString(message.getPayload().length).getBytes(UTF8_CHARSET));
 			output.write(LF);

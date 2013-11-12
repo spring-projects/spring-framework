@@ -113,18 +113,25 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 
 	@Bean
 	public AbstractSubscribableChannel webSocketRequestChannel() {
-		return new ExecutorSubscribableChannel(webSocketChannelExecutor());
+		return new ExecutorSubscribableChannel(webSocketRequestChannelExecutor());
+	}
+
+	@Bean
+	public ThreadPoolTaskExecutor webSocketRequestChannelExecutor() {
+		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+		executor.setThreadNamePrefix("WebSocketRequestChannel-");
+		return executor;
 	}
 
 	@Bean
 	public AbstractSubscribableChannel webSocketResponseChannel() {
-		return new ExecutorSubscribableChannel(webSocketChannelExecutor());
+		return new ExecutorSubscribableChannel(webSocketResponseChannelExecutor());
 	}
 
 	@Bean
-	public ThreadPoolTaskExecutor webSocketChannelExecutor() {
+	public ThreadPoolTaskExecutor webSocketResponseChannelExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-		executor.setThreadNamePrefix("BrokerWebSocketChannel-");
+		executor.setThreadNamePrefix("WebSocketResponseChannel-");
 		return executor;
 	}
 

@@ -59,9 +59,6 @@ class ChannelInterceptorChain {
 
 	public Message<?> preSend(Message<?> message, MessageChannel channel) {
 		UUID originalId = message.getHeaders().getId();
-		if (logger.isTraceEnabled()) {
-			logger.trace("preSend message id " + originalId);
-		}
 		for (ChannelInterceptor interceptor : this.interceptors) {
 			message = interceptor.preSend(message, channel);
 			if (message == null) {
@@ -71,9 +68,9 @@ class ChannelInterceptorChain {
 				return null;
 			}
 		}
-		if (logger.isTraceEnabled()) {
+		if (logger.isDebugEnabled()) {
 			if (!message.getHeaders().getId().equals(originalId)) {
-				logger.trace("preSend returned modified message " + message);
+				logger.debug("preSend returned modified message, new message id=" + message.getHeaders().getId());
 			}
 		}
 		return message;

@@ -23,7 +23,7 @@ import java.util.concurrent.Callable;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.StubMessageChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
@@ -47,16 +47,13 @@ public class StompBrokerRelayMessageHandlerTests {
 
 	private StubTcpOperations tcpClient;
 
-	private StubMessageChannel responseChannel;
-
 
 	@Before
 	public void setup() {
 
-		this.responseChannel = new StubMessageChannel();
 		this.tcpClient = new StubTcpOperations();
 
-		this.brokerRelay = new StompBrokerRelayMessageHandler(this.responseChannel, Arrays.asList("/topic"));
+		this.brokerRelay = new StompBrokerRelayMessageHandler(new StubMessageChannel(), Arrays.asList("/topic"));
 		this.brokerRelay.setTcpClient(tcpClient);
 	}
 
@@ -158,27 +155,6 @@ public class StompBrokerRelayMessageHandlerTests {
 
 		@Override
 		public void close() {
-		}
-	}
-
-
-	private static class StubMessageChannel implements MessageChannel {
-
-		private final List<Message<byte[]>> messages = new ArrayList<>();
-
-
-		@Override
-		@SuppressWarnings("unchecked")
-		public boolean send(Message<?> message) {
-			this.messages.add((Message<byte[]>) message);
-			return true;
-		}
-
-		@Override
-		@SuppressWarnings("unchecked")
-		public boolean send(Message<?> message, long timeout) {
-			this.messages.add((Message<byte[]>) message);
-			return true;
 		}
 	}
 

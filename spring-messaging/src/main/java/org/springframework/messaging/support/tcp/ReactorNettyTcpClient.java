@@ -18,6 +18,8 @@ package org.springframework.messaging.support.tcp;
 
 import java.net.InetSocketAddress;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -47,6 +49,8 @@ import reactor.tuple.Tuple2;
  * @since 4.0
  */
 public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
+
+	private final static Log logger = LogFactory.getLog(ReactorNettyTcpClient.class);
 
 	private Environment environment;
 
@@ -118,6 +122,12 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 					@Override
 					public void accept(Message<P> message) {
 						connectionHandler.handleMessage(message);
+					}
+				});
+				connection.when(Throwable.class, new Consumer<Throwable>() {
+					@Override
+					public void accept(Throwable t) {
+					 	logger.error("Exception on connection " + connectionHandler, t);
 					}
 				});
 				connectionHandler.afterConnected(new ReactorTcpConnection<P>(connection));

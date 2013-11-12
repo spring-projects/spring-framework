@@ -104,12 +104,15 @@ public class StompProtocolHandler implements SubProtocolHandler {
 			return;
 		}
 
-		if (logger.isTraceEnabled()) {
-			logger.trace("Message " + message);
-		}
-
 		try {
 			StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
+			if (SimpMessageType.HEARTBEAT.equals(headers.getMessageType())) {
+				logger.trace("Received heartbeat from client session=" + session.getId());
+			}
+			else {
+				logger.trace("Received message from client session=" + session.getId());
+			}
+
 			headers.setSessionId(session.getId());
 			headers.setUser(session.getPrincipal());
 

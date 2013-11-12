@@ -83,7 +83,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 		if (!checkDestinationPrefix(destination)) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Ingoring message with destination " + destination);
+				logger.trace("Ingoring message to destination=" + destination);
 			}
 			return;
 		}
@@ -113,13 +113,15 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	protected void sendMessageToSubscribers(String destination, Message<?> message) {
 		MultiValueMap<String,String> subscriptions = this.subscriptionRegistry.findSubscriptions(message);
+		if ((subscriptions.size() > 0) && logger.isDebugEnabled()) {
+			logger.debug("Sending message with destination=" + destination
+					+ " to " + subscriptions.size() + " subscriber(s)");
+		}
 		for (String sessionId : subscriptions.keySet()) {
 			for (String subscriptionId : subscriptions.get(sessionId)) {
-
 				SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 				headers.setSessionId(sessionId);
 				headers.setSubscriptionId(subscriptionId);
-
 				Object payload = message.getPayload();
 				Message<?> clientMessage = MessageBuilder.withPayload(payload).setHeaders(headers).build();
 				try {

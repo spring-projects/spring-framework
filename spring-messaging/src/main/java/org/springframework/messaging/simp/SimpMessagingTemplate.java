@@ -96,7 +96,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 		String destination = headers.getDestination();
 		destination = (destination != null) ? destination : getRequiredDefaultDestination();
-		doSend(getRequiredDefaultDestination(), message);
+		doSend(destination, message);
 	}
 
 	@Override
