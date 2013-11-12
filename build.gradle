@@ -386,8 +386,8 @@ project("spring-messaging") {
 		optional(project(":spring-websocket"))
 		optional(project(":spring-webmvc"))
 		optional("com.fasterxml.jackson.core:jackson-databind:2.2.2")
-		optional("org.projectreactor:reactor-core:1.0.0.BUILD-SNAPSHOT")
-		optional("org.projectreactor:reactor-tcp:1.0.0.BUILD-SNAPSHOT")
+		optional("org.projectreactor:reactor-core:1.0.0.RELEASE")
+		optional("org.projectreactor:reactor-tcp:1.0.0.RELEASE")
 		optional("org.eclipse.jetty.websocket:websocket-server:9.1.0.RC0") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
 		}
@@ -410,11 +410,6 @@ project("spring-messaging") {
 		testCompile("org.apache.tomcat.embed:tomcat-embed-logging-juli:8.0.0-RC5")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 	}
-
-	repositories {
-		maven { url "http://repo.spring.io/snapshot" }  // for reactor (until RC2)
-	}
-
 }
 
 project("spring-tx") {
