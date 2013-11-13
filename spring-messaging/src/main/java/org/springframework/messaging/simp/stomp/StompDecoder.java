@@ -29,9 +29,12 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * A decoder for STOMP frames.
+ * Decodes STOMP frames from a {@link ByteBuffer}. If the buffer does not contain
+ * enough data to form a complete STOMP frame, the buffer is reset and the value
+ * returned is {@code null} indicating that no message could be read.
  *
  * @author Andy Wilkinson
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
 public class StompDecoder {
@@ -45,15 +48,18 @@ public class StompDecoder {
 
 	/**
 	 * Decodes a STOMP frame in the given {@code buffer} into a {@link Message}.
+	 * If the given ByteBuffer contains partial STOMP frame content, the method
+	 * resets the buffer and returns {@code null}.
 	 *
 	 * @param buffer The buffer to decode the frame from
-	 * @return The decoded message
+	 *
+	 * @return The decoded message or {@code null}
 	 */
 	public Message<byte[]> decode(ByteBuffer buffer) {
-		skipLeadingEol(buffer);
 
 		Message<byte[]> decodedMessage = null;
 
+		skipLeadingEol(buffer);
 		buffer.mark();
 
 		String command = readCommand(buffer);
@@ -65,34 +71,38 @@ public class StompDecoder {
 			if (payload != null) {
 				StompCommand stompCommand = StompCommand.valueOf(command);
 				if ((payload.length > 0) && (!stompCommand.isBodyAllowed())) {
-					throw new StompConversionException(stompCommand +
-							" isn't allowed to have a body but has payload length=" + payload.length +
-							", headers=" + headers);
+					throw new StompConversionException(stompCommand + " shouldn't have but " +
+							"has a payload with length=" + payload.length + ", headers=" + headers);
 				}
-
 				decodedMessage = MessageBuilder.withPayload(payload)
 						.setHeaders(StompHeaderAccessor.create(stompCommand, headers)).build();
-
 				if (logger.isDebugEnabled()) {
 					logger.debug("Decoded " + decodedMessage);
 				}
-			} else {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Received incomplete frame. Resetting buffer");
+			}
+			else {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Received incomplete frame. Resetting buffer");
 				}
 				buffer.reset();
 			}
 		}
 		else {
-			decodedMessage = MessageBuilder.withPayload(HEARTBEAT_PAYLOAD).setHeaders(
-					StompHeaderAccessor.create(SimpMessageType.HEARTBEAT)).build();
 			if (logger.isTraceEnabled()) {
 				logger.trace("Decoded heartbeat");
 			}
+			decodedMessage = MessageBuilder.withPayload(HEARTBEAT_PAYLOAD).setHeaders(
+					StompHeaderAccessor.create(SimpMessageType.HEARTBEAT)).build();
 		}
-
 		return decodedMessage;
+	}
 
+	private void skipLeadingEol(ByteBuffer buffer) {
+		while (true) {
+			if (!isEol(buffer)) {
+				break;
+			}
+		}
 	}
 
 	private String readCommand(ByteBuffer buffer) {
@@ -143,17 +153,17 @@ public class StompDecoder {
 		String contentLengthString = headers.getFirst("content-length");
 		if (contentLengthString != null) {
 			int contentLength = Integer.valueOf(contentLengthString);
-			byte[] payload = new byte[contentLength];
 			if (buffer.remaining() > contentLength) {
+				byte[] payload = new byte[contentLength];
 				buffer.get(payload);
 				if (buffer.get() != 0) {
 					throw new StompConversionException("Frame must be terminated with a null octet");
 				}
-			} else {
+				return payload;
+			}
+			else {
 				return null;
 			}
-
-			return payload;
 		}
 		else {
 			ByteArrayOutputStream payload = new ByteArrayOutputStream();
@@ -168,14 +178,6 @@ public class StompDecoder {
 			}
 		}
 		return null;
-	}
-
-	private void skipLeadingEol(ByteBuffer buffer) {
-		while (true) {
-			if (!isEol(buffer)) {
-				break;
-			}
-		}
 	}
 
 	private boolean isEol(ByteBuffer buffer) {
