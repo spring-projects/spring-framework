@@ -92,9 +92,9 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * {@link #setUseSuffixPatternMatch(boolean) useSuffixPatternMatch}. The
 	 * default value is {@code false}.
 	 */
-	public void setUseRegisteredSuffixPatternMatch(boolean useRegsiteredSuffixPatternMatch) {
-		this.useRegisteredSuffixPatternMatch = useRegsiteredSuffixPatternMatch;
-		this.useSuffixPatternMatch = useRegsiteredSuffixPatternMatch ? true : this.useSuffixPatternMatch;
+	public void setUseRegisteredSuffixPatternMatch(boolean useRegisteredSuffixPatternMatch) {
+		this.useRegisteredSuffixPatternMatch = useRegisteredSuffixPatternMatch;
+		this.useSuffixPatternMatch = useRegisteredSuffixPatternMatch ? true : this.useSuffixPatternMatch;
 	}
 
 	/**
