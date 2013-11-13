@@ -159,6 +159,30 @@ public class StompCodecTests {
 	}
 
 	@Test
+	public void decodeFrameWithIncompleteHeader() {
+		assertIncompleteDecode("SEND\ndestination");
+		assertIncompleteDecode("SEND\ndestination:");
+		assertIncompleteDecode("SEND\ndestination:test");
+	}
+
+	@Test
+	public void decodeFrameWithoutNullOctetTerminator() {
+		assertIncompleteDecode("SEND\ndestination:test\n");
+		assertIncompleteDecode("SEND\ndestination:test\n\n");
+		assertIncompleteDecode("SEND\ndestination:test\n\nThe body");
+	}
+
+	@Test
+	public void decodeFrameWithInsufficientContent() {
+		assertIncompleteDecode("SEND\ncontent-length:23\n\nThe body of the mess");
+	}
+
+	@Test(expected=StompConversionException.class)
+	public void decodeFrameWithIncorrectTerminator() {
+		decode("SEND\ncontent-length:23\n\nThe body of the message*");
+	}
+
+	@Test
 	public void decodeHeartbeat() {
 		String frame = "\n";
 
@@ -219,10 +243,27 @@ public class StompCodecTests {
 		assertEquals("SEND\na:alpha\ncontent-length:12\n\nMessage body\0", new StompCodec().encoder().apply(frame).asString());
 	}
 
-	private Message<byte[]> decode(String stompFrame) {
-		this.decoder.apply(Buffer.wrap(stompFrame));
-		return consumer.arguments.get(0);
+	private void assertIncompleteDecode(String partialFrame) {
+		Buffer buffer = Buffer.wrap(partialFrame);
+		assertNull(decode(buffer));
+		assertEquals(0, buffer.position());
 	}
+
+	private Message<byte[]> decode(String stompFrame) {
+		Buffer buffer = Buffer.wrap(stompFrame);
+		return decode(buffer);
+	}
+
+	private Message<byte[]> decode(Buffer buffer) {
+		this.decoder.apply(buffer);
+		if (consumer.arguments.isEmpty()) {
+			return null;
+		} else {
+			return consumer.arguments.get(0);
+		}
+	}
+
+
 
 	private static final class ArgumentCapturingConsumer<T> implements Consumer<T> {
 

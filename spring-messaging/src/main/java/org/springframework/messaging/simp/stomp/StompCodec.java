@@ -53,6 +53,8 @@ public class StompCodec implements Codec<Buffer, Message<byte[]>, Message<byte[]
 					Message<byte[]> message = DECODER.decode(buffer.byteBuffer());
 					if (message != null) {
 						next.accept(message);
+					} else {
+						break;
 					}
 				}
 				return null;
