@@ -52,7 +52,9 @@ public class StompDecoder {
 	public Message<byte[]> decode(ByteBuffer buffer) {
 		skipLeadingEol(buffer);
 
-		Message<byte[]> decodedMessage;
+		Message<byte[]> decodedMessage = null;
+
+		buffer.mark();
 
 		String command = readCommand(buffer);
 
@@ -60,18 +62,25 @@ public class StompDecoder {
 			MultiValueMap<String, String> headers = readHeaders(buffer);
 			byte[] payload = readPayload(buffer, headers);
 
-			StompCommand stompCommand = StompCommand.valueOf(command);
-			if ((payload.length > 0) && (!stompCommand.isBodyAllowed())) {
-				throw new StompConversionException(stompCommand +
-						" isn't allowed to have a body but has payload length=" + payload.length +
-						", headers=" + headers);
-			}
+			if (payload != null) {
+				StompCommand stompCommand = StompCommand.valueOf(command);
+				if ((payload.length > 0) && (!stompCommand.isBodyAllowed())) {
+					throw new StompConversionException(stompCommand +
+							" isn't allowed to have a body but has payload length=" + payload.length +
+							", headers=" + headers);
+				}
 
-			decodedMessage = MessageBuilder.withPayload(payload)
-					.setHeaders(StompHeaderAccessor.create(stompCommand, headers)).build();
+				decodedMessage = MessageBuilder.withPayload(payload)
+						.setHeaders(StompHeaderAccessor.create(stompCommand, headers)).build();
 
-			if (logger.isDebugEnabled()) {
-				logger.debug("Decoded " + decodedMessage);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Decoded " + decodedMessage);
+				}
+			} else {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Received incomplete frame. Resetting buffer");
+				}
+				buffer.reset();
 			}
 		}
 		else {
@@ -105,8 +114,10 @@ public class StompDecoder {
 				String header = new String(headerStream.toByteArray(), UTF8_CHARSET);
 				int colonIndex = header.indexOf(':');
 				if ((colonIndex <= 0) || (colonIndex == header.length() - 1)) {
-					throw new StompConversionException(
-							"Illegal header: '" + header + "'. A header must be of the form <name>:<value");
+					if (buffer.remaining() > 0) {
+						throw new StompConversionException(
+								"Illegal header: '" + header + "'. A header must be of the form <name>:<value>");
+					}
 				}
 				else {
 					String headerName = unescape(header.substring(0, colonIndex));
@@ -133,10 +144,15 @@ public class StompDecoder {
 		if (contentLengthString != null) {
 			int contentLength = Integer.valueOf(contentLengthString);
 			byte[] payload = new byte[contentLength];
-			buffer.get(payload);
-			if (buffer.remaining() < 1 || buffer.get() != 0) {
-				throw new StompConversionException("Frame must be terminated with a null octect");
+			if (buffer.remaining() > contentLength) {
+				buffer.get(payload);
+				if (buffer.get() != 0) {
+					throw new StompConversionException("Frame must be terminated with a null octet");
+				}
+			} else {
+				return null;
 			}
+
 			return payload;
 		}
 		else {
@@ -151,7 +167,7 @@ public class StompDecoder {
 				}
 			}
 		}
-		throw new StompConversionException("Frame must be terminated with a null octect");
+		return null;
 	}
 
 	private void skipLeadingEol(ByteBuffer buffer) {
