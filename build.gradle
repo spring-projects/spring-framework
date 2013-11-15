@@ -71,7 +71,7 @@ configure(allprojects) { project ->
 		maven { url "https://repository.apache.org/content/repositories/releases" }  // tomcat 8
 		// maven { url "https://repository.apache.org/content/repositories/snapshots" }  // tomcat 8 snapshots
 		maven { url "https://maven.java.net/content/repositories/releases" }  // javax.websocket, tyrus
-		maven { url "https://oss.sonatype.org/content/repositories/snapshots" }  // javax.cache
+		maven { url "https://oss.sonatype.org/content/repositories/releases" }  // javax.cache
 	}
 
 	dependencies {
@@ -509,7 +509,7 @@ project("spring-context-support") {
 		optional(project(":spring-jdbc")) // for Quartz support
 		optional(project(":spring-tx")) // for Quartz support
 		optional("javax.mail:mail:1.4.7")
-		optional("javax.cache:cache-api:0.11-SNAPSHOT")
+		optional("javax.cache:cache-api:1.0.0-PFD")
 		optional("net.sf.ehcache:ehcache-core:2.6.5")
 		optional("org.quartz-scheduler:quartz:1.8.6") {
 			exclude group: "org.slf4j", module: "slf4j-log4j12"
