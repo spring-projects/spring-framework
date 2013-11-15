@@ -28,7 +28,9 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
 import org.springframework.beans.BeanUtils;
+import org.springframework.util.Assert;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -49,12 +51,19 @@ public class MockAsyncContext implements AsyncContext {
 
 	private long timeout = 10 * 1000L;	// 10 seconds is Tomcat's default
 
+	private final List<Runnable> dispatchHandlers = new ArrayList<Runnable>();
+
 
 	public MockAsyncContext(ServletRequest request, ServletResponse response) {
 		this.request = (HttpServletRequest) request;
 		this.response = (HttpServletResponse) response;
 	}
 
+
+	public void addDispatchHandler(Runnable handler) {
+		Assert.notNull(handler);
+		this.dispatchHandlers.add(handler);
+	}
 
 	@Override
 	public ServletRequest getRequest() {
@@ -84,6 +93,9 @@ public class MockAsyncContext implements AsyncContext {
 	@Override
 	public void dispatch(ServletContext context, String path) {
 		this.dispatchedPath = path;
+		for (Runnable r : this.dispatchHandlers) {
+			r.run();
+		}
 	}
 
 	public String getDispatchedPath() {

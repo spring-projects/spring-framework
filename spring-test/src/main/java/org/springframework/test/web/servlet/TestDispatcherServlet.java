@@ -25,13 +25,10 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.mock.web.MockAsyncContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.async.CallableProcessingInterceptorAdapter;
-import org.springframework.web.context.request.async.DeferredResult;
-import org.springframework.web.context.request.async.DeferredResultProcessingInterceptorAdapter;
-import org.springframework.web.context.request.async.WebAsyncManager;
-import org.springframework.web.context.request.async.WebAsyncUtils;
+import org.springframework.web.context.request.async.*;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.ModelAndView;
@@ -50,6 +47,7 @@ final class TestDispatcherServlet extends DispatcherServlet {
 
 	private static final String KEY = TestDispatcherServlet.class.getName() + ".interceptor";
 
+
 	/**
 	 * Create a new instance with the given web application context.
 	 */
@@ -57,37 +55,44 @@ final class TestDispatcherServlet extends DispatcherServlet {
 		super(webApplicationContext);
 	}
 
+
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-		CountDownLatch latch = registerAsyncInterceptors(request);
-		getMvcResult(request).setAsyncResultLatch(latch);
+		registerAsyncResultInterceptors(request);
 
 		super.service(request, response);
+
+		if (request.isAsyncStarted()) {
+			addAsyncResultLatch(request);
+		}
 	}
 
-	private CountDownLatch registerAsyncInterceptors(final HttpServletRequest servletRequest) {
-
-		final CountDownLatch asyncResultLatch = new CountDownLatch(1);
-
-		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(servletRequest);
-
+	private void registerAsyncResultInterceptors(final HttpServletRequest request) {
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 		asyncManager.registerCallableInterceptor(KEY, new CallableProcessingInterceptorAdapter() {
 			@Override
-			public <T> void postProcess(NativeWebRequest request, Callable<T> task, Object value) throws Exception {
-				getMvcResult(servletRequest).setAsyncResult(value);
-				asyncResultLatch.countDown();
+			public <T> void postProcess(NativeWebRequest r, Callable<T> task, Object value) throws Exception {
+				getMvcResult(request).setAsyncResult(value);
 			}
 		});
 		asyncManager.registerDeferredResultInterceptor(KEY, new DeferredResultProcessingInterceptorAdapter() {
 			@Override
-			public <T> void postProcess(NativeWebRequest request, DeferredResult<T> result, Object value) throws Exception {
-				getMvcResult(servletRequest).setAsyncResult(value);
-				asyncResultLatch.countDown();
+			public <T> void postProcess(NativeWebRequest r, DeferredResult<T> result, Object value) throws Exception {
+				getMvcResult(request).setAsyncResult(value);
 			}
 		});
+	}
 
-		return asyncResultLatch;
+	private void addAsyncResultLatch(HttpServletRequest request) {
+		final CountDownLatch latch = new CountDownLatch(1);
+		((MockAsyncContext) request.getAsyncContext()).addDispatchHandler(new Runnable() {
+			@Override
+			public void run() {
+				latch.countDown();
+			}
+		});
+		getMvcResult(request).setAsyncResultLatch(latch);
 	}
 
 	protected DefaultMvcResult getMvcResult(ServletRequest request) {
