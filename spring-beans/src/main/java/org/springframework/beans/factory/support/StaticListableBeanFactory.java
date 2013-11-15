@@ -277,6 +277,17 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	}
 
 	@Override
+	public String[] getBeanNamesForAnnotation(Class<? extends Annotation> annotationType) {
+		List<String> results = new ArrayList<String>();
+		for (String beanName : this.beans.keySet()) {
+			if (findAnnotationOnBean(beanName, annotationType) != null) {
+				results.add(beanName);
+			}
+		}
+		return results.toArray(new String[results.size()]);
+	}
+
+	@Override
 	public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType)
 			throws BeansException {
 
@@ -290,7 +301,9 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	}
 
 	@Override
-	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType) {
+	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
+			throws NoSuchBeanDefinitionException{
+
 		return AnnotationUtils.findAnnotation(getType(beanName), annotationType);
 	}
 

@@ -172,6 +172,9 @@ public class DefaultListableBeanFactoryTests {
 		assertTrue("prototype not instantiated", !DummyFactory.wasPrototypeCreated());
 		String[] beanNames = lbf.getBeanNamesForType(TestBean.class, true, false);
 		assertEquals(0, beanNames.length);
+		beanNames = lbf.getBeanNamesForAnnotation(SuppressWarnings.class);
+		assertEquals(0, beanNames.length);
+
 		assertFalse(lbf.containsSingleton("x1"));
 		assertTrue(lbf.containsBean("x1"));
 		assertTrue(lbf.containsBean("&x1"));
@@ -201,6 +204,9 @@ public class DefaultListableBeanFactoryTests {
 		assertTrue("prototype not instantiated", !DummyFactory.wasPrototypeCreated());
 		String[] beanNames = lbf.getBeanNamesForType(TestBean.class, true, false);
 		assertEquals(0, beanNames.length);
+		beanNames = lbf.getBeanNamesForAnnotation(SuppressWarnings.class);
+		assertEquals(0, beanNames.length);
+
 		assertFalse(lbf.containsSingleton("x1"));
 		assertTrue(lbf.containsBean("x1"));
 		assertTrue(lbf.containsBean("&x1"));
@@ -229,6 +235,9 @@ public class DefaultListableBeanFactoryTests {
 		assertTrue("prototype not instantiated", !DummyFactory.wasPrototypeCreated());
 		String[] beanNames = lbf.getBeanNamesForType(TestBean.class, true, false);
 		assertEquals(0, beanNames.length);
+		beanNames = lbf.getBeanNamesForAnnotation(SuppressWarnings.class);
+		assertEquals(0, beanNames.length);
+
 		assertFalse(lbf.containsSingleton("x1"));
 		assertTrue(lbf.containsBean("x1"));
 		assertTrue(lbf.containsBean("&x1"));

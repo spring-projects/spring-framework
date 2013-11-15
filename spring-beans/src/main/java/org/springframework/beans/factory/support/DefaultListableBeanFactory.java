@@ -488,6 +488,23 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	@Override
+	public String[] getBeanNamesForAnnotation(Class<? extends Annotation> annotationType) {
+		List<String> results = new ArrayList<String>();
+		for (String beanName : getBeanDefinitionNames()) {
+			BeanDefinition beanDefinition = getBeanDefinition(beanName);
+			if (!beanDefinition.isAbstract() && findAnnotationOnBean(beanName, annotationType) != null) {
+				results.add(beanName);
+			}
+		}
+		for (String beanName : getSingletonNames()) {
+			if (!results.contains(beanName) && findAnnotationOnBean(beanName, annotationType) != null) {
+				results.add(beanName);
+			}
+		}
+		return results.toArray(new String[results.size()]);
+	}
+
+	@Override
 	public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) {
 		Map<String, Object> results = new LinkedHashMap<String, Object>();
 		for (String beanName : getBeanDefinitionNames()) {
@@ -511,7 +528,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * if not found on the exposed bean reference (e.g. in case of a proxy).
 	 */
 	@Override
-	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType) {
+	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
+			throws NoSuchBeanDefinitionException{
+
 		A ann = null;
 		Class<?> beanType = getType(beanName);
 		if (beanType != null) {

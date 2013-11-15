@@ -239,6 +239,11 @@ class StubWebApplicationContext implements WebApplicationContext {
 	}
 
 	@Override
+	public String[] getBeanNamesForAnnotation(Class<? extends Annotation> annotationType) {
+		return this.beanFactory.getBeanNamesForAnnotation(annotationType);
+	}
+
+	@Override
 	public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType)
 			throws BeansException {
 
@@ -246,7 +251,9 @@ class StubWebApplicationContext implements WebApplicationContext {
 	}
 
 	@Override
-	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType) {
+	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
+			throws NoSuchBeanDefinitionException{
+
 		return this.beanFactory.findAnnotationOnBean(beanName, annotationType);
 	}
 
