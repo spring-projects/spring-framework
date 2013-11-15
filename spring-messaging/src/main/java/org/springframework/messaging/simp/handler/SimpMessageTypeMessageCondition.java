@@ -24,7 +24,6 @@ import org.springframework.util.Assert;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 
 /**
  * A message condition that checks the message type.
@@ -46,13 +45,6 @@ public class SimpMessageTypeMessageCondition extends AbstractMessageCondition<Si
 
 	/**
 	 * A constructor accepting a message type.
-	 */
-	public SimpMessageTypeMessageCondition() {
-		this.messageType = null;
-	}
-
-	/**
-	 * A constructor accepting a message type.
 	 *
 	 * @param messageType the message type to match messages to
 	 */
@@ -68,7 +60,7 @@ public class SimpMessageTypeMessageCondition extends AbstractMessageCondition<Si
 
 	@Override
 	protected Collection<?> getContent() {
-		return (this.messageType != null) ? Arrays.asList(messageType) : Collections.emptyList();
+		return Arrays.asList(messageType);
 	}
 
 	@Override
@@ -78,7 +70,7 @@ public class SimpMessageTypeMessageCondition extends AbstractMessageCondition<Si
 
 	@Override
 	public SimpMessageTypeMessageCondition combine(SimpMessageTypeMessageCondition other) {
-		return (this.messageType != null) ? this : other;
+		return other;
 	}
 
 	@Override
@@ -89,19 +81,22 @@ public class SimpMessageTypeMessageCondition extends AbstractMessageCondition<Si
 			return null;
 		}
 
-		return ((this.messageType != null) && this.messageType.equals(actualMessageType)) ? this : null;
+		return this;
 	}
 
 	@Override
 	public int compareTo(SimpMessageTypeMessageCondition other, Message<?> message) {
-		if ((this.messageType == null) && (other.messageType == null)) {
-			return 0;
-		}
-		if (this.messageType == null) {
-			return 1;
-		}
-		if (other.messageType == null) {
-			return -1;
+		Object actualMessageType = message.getHeaders().get(SimpMessageHeaderAccessor.MESSAGE_TYPE_HEADER);
+		if (actualMessageType != null) {
+			if (actualMessageType.equals(this.getMessageType()) && actualMessageType.equals(other.getMessageType())) {
+				return 0;
+			}
+			else if (actualMessageType.equals(this.getMessageType())) {
+				return -1;
+			}
+			else if (actualMessageType.equals(other.getMessageType())) {
+				return 1;
+			}
 		}
 		return 0;
 	}

@@ -32,23 +32,12 @@ import static org.junit.Assert.*;
 public class SimpMessageTypeMessageConditionTests {
 
 	@Test
-	public void combineEmptySets() {
-		SimpMessageTypeMessageCondition c1 = condition();
-		SimpMessageTypeMessageCondition c2 = condition();
-
-		assertNull(c1.combine(c2).getMessageType());
-	}
-
-	@Test
 	public void combine() {
-		SimpMessageType actual = condition().combine(condition()).getMessageType();
-		assertNull(actual);
-
-		actual = condition().combine(condition(SimpMessageType.SUBSCRIBE)).getMessageType();
+		SimpMessageType actual = condition(SimpMessageType.MESSAGE).combine(condition(SimpMessageType.SUBSCRIBE)).getMessageType();
 		assertEquals(SimpMessageType.SUBSCRIBE, actual);
 
-		actual = condition(SimpMessageType.SUBSCRIBE).combine(condition()).getMessageType();
-		assertEquals(SimpMessageType.SUBSCRIBE, actual);
+		actual = condition(SimpMessageType.MESSAGE).combine(condition(SimpMessageType.MESSAGE)).getMessageType();
+		assertEquals(SimpMessageType.MESSAGE, actual);
 
 		actual = condition(SimpMessageType.SUBSCRIBE).combine(condition(SimpMessageType.SUBSCRIBE)).getMessageType();
 		assertEquals(SimpMessageType.SUBSCRIBE, actual);
@@ -75,9 +64,8 @@ public class SimpMessageTypeMessageConditionTests {
 	@Test
 	public void compareTo() {
 		Message<byte[]> message = message(null);
-		assertEquals(1, condition().compareTo(condition(SimpMessageType.MESSAGE), message));
-		assertEquals(-1, condition(SimpMessageType.MESSAGE).compareTo(condition(), message));
 		assertEquals(0, condition(SimpMessageType.MESSAGE).compareTo(condition(SimpMessageType.MESSAGE), message));
+		assertEquals(0, condition(SimpMessageType.MESSAGE).compareTo(condition(SimpMessageType.SUBSCRIBE), message));
 	}
 
 	private Message<byte[]> message(SimpMessageType messageType) {
@@ -86,10 +74,6 @@ public class SimpMessageTypeMessageConditionTests {
 			builder.setHeader(SimpMessageHeaderAccessor.MESSAGE_TYPE_HEADER, messageType);
 		}
 		return builder.build();
-	}
-
-	private SimpMessageTypeMessageCondition condition() {
-		return new SimpMessageTypeMessageCondition();
 	}
 
 	private SimpMessageTypeMessageCondition condition(SimpMessageType messageType) {

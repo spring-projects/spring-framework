@@ -27,7 +27,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.handler.websocket.SubProtocolWebSocketHandler;
 import org.springframework.messaging.simp.SimpMessageType;
-import org.springframework.messaging.simp.annotation.SubscribeEvent;
+import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.simp.handler.SimpAnnotationMethodMessageHandler;
 import org.springframework.messaging.simp.handler.SimpleBrokerMessageHandler;
 import org.springframework.messaging.simp.handler.UserDestinationMessageHandler;
@@ -262,7 +262,7 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 	@Controller
 	static class TestController {
 
-		@SubscribeEvent("/foo")
+		@SubscribeMapping("/foo")
 		public String handleSubscribe() {
 			return "bar";
 		}

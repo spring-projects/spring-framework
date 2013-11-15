@@ -33,7 +33,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.annotation.SubscribeEvent;
+import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Controller;
 
@@ -121,7 +121,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 	@Test
 	public void bestMatchWildcard() {
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 		headers.setDestination("/pre/bestmatch/bar/path");
 		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 		this.messageHandler.handleMessage(message);
@@ -159,7 +159,6 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 	@Controller
 	@MessageMapping("/pre")
-	@SubscribeEvent("/pre")
 	private static class TestController {
 
 		private String method;
@@ -176,15 +175,15 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 		@MessageMapping("/message/{foo}/{name}")
 		public void messageMappingPathVariable(@PathVariable("foo") String param1,
-		                                       @PathVariable("name") String param2) {
+				@PathVariable("name") String param2) {
 			this.method = "messageMappingPathVariable";
 			this.arguments.put("foo", param1);
 			this.arguments.put("name", param2);
 		}
 
-		@SubscribeEvent("/sub/{foo}/{name}")
+		@SubscribeMapping("/sub/{foo}/{name}")
 		public void subscribeEventPathVariable(@PathVariable("foo") String param1,
-		                                       @PathVariable("name") String param2) {
+				@PathVariable("name") String param2) {
 			this.method = "subscribeEventPathVariable";
 			this.arguments.put("foo", param1);
 			this.arguments.put("name", param2);
@@ -201,9 +200,9 @@ public class SimpAnnotationMethodMessageHandlerTests {
 			this.arguments.put("foo", param1);
 		}
 
-		@MessageMapping("/bestmatch/**")
-		public void otherMatch() {
-			this.method = "otherMatch";
+		@MessageMapping("/bestmatch/*/*")
+		public void secondBestMatch() {
+			this.method = "secondBestMatch";
 		}
 
 		@MessageMapping("/binding/id/{id}")

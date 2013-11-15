@@ -25,14 +25,14 @@ import org.springframework.messaging.handler.method.HandlerMethodReturnValueHand
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.annotation.SendToUser;
-import org.springframework.messaging.simp.annotation.SubscribeEvent;
+import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 
 
 /**
  * A {@link HandlerMethodReturnValueHandler} for replying directly to a subscription. It
- * supports methods annotated with {@link SubscribeEvent} unless they're also annotated
+ * supports methods annotated with {@link org.springframework.messaging.simp.annotation.SubscribeMapping} unless they're also annotated
  * with {@link SendTo} or {@link SendToUser}.
  * <p>
  * The value returned from the method is converted, and turned to a {@link Message} and
@@ -55,7 +55,7 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		return ((returnType.getMethodAnnotation(SubscribeEvent.class) != null)
+		return ((returnType.getMethodAnnotation(SubscribeMapping.class) != null)
 				&& (returnType.getMethodAnnotation(SendTo.class) == null)
 				&& (returnType.getMethodAnnotation(SendToUser.class) == null));
 	}

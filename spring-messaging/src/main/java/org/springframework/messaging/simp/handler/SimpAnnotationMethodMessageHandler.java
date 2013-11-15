@@ -49,7 +49,7 @@ import org.springframework.messaging.handler.method.HandlerMethodReturnValueHand
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.annotation.SubscribeEvent;
+import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.simp.annotation.support.PrincipalMethodArgumentResolver;
 import org.springframework.messaging.simp.annotation.support.SendToMethodReturnValueHandler;
 import org.springframework.messaging.simp.annotation.support.SubscriptionMethodReturnValueHandler;
@@ -66,7 +66,7 @@ import org.springframework.util.PathMatcher;
 
 
 /**
- * A handler for messages delegating to {@link SubscribeEvent @SubscribeEvent} and
+ * A handler for messages delegating to {@link org.springframework.messaging.simp.annotation.SubscribeMapping @SubscribeMapping} and
  * {@link MessageMapping @MessageMapping} annotated methods.
  * <p>
  * Supports Ant-style path patterns as well as URI template variables in destinations.
@@ -214,22 +214,21 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	@Override
 	protected SimpMessageMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
 
-		MessageMapping messageMappingAnnot = AnnotationUtils.findAnnotation(method, MessageMapping.class);
-		if (messageMappingAnnot != null) {
-			SimpMessageMappingInfo result = createMessageMappingCondition(messageMappingAnnot);
-			MessageMapping typeAnnot = AnnotationUtils.findAnnotation(handlerType, MessageMapping.class);
+		MessageMapping typeAnnot = AnnotationUtils.findAnnotation(handlerType, MessageMapping.class);
+		MessageMapping messageAnnot = AnnotationUtils.findAnnotation(method, MessageMapping.class);
+		if (messageAnnot != null) {
+			SimpMessageMappingInfo result = createMessageMappingCondition(messageAnnot);
 			if (typeAnnot != null) {
 				result = createMessageMappingCondition(typeAnnot).combine(result);
 			}
 			return result;
 		}
 
-		SubscribeEvent subsribeAnnot = AnnotationUtils.findAnnotation(method, SubscribeEvent.class);
+		SubscribeMapping subsribeAnnot = AnnotationUtils.findAnnotation(method, SubscribeMapping.class);
 		if (subsribeAnnot != null) {
 			SimpMessageMappingInfo result = createSubscribeCondition(subsribeAnnot);
-			SubscribeEvent typeAnnot = AnnotationUtils.findAnnotation(handlerType, SubscribeEvent.class);
 			if (typeAnnot != null) {
-				result = createSubscribeCondition(typeAnnot).combine(result);
+				result = createMessageMappingCondition(typeAnnot).combine(result);
 			}
 			return result;
 		}
@@ -242,7 +241,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 				new DestinationPatternsMessageCondition(annotation.value()));
 	}
 
-	private SimpMessageMappingInfo createSubscribeCondition(SubscribeEvent annotation) {
+	private SimpMessageMappingInfo createSubscribeCondition(SubscribeMapping annotation) {
 		return new SimpMessageMappingInfo(SimpMessageTypeMessageCondition.SUBSCRIBE,
 				new DestinationPatternsMessageCondition(annotation.value()));
 	}
