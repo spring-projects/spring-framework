@@ -359,7 +359,8 @@ class ConfigurationClassParser {
 		try {
 			if (visited.add(sourceClass)) {
 				for (SourceClass annotation : sourceClass.getAnnotations()) {
-					if (!annotation.getMetadata().getClassName().startsWith("java") && !annotation.isAssignable(Import.class)) {
+					String annName = annotation.getMetadata().getClassName();
+					if (!annName.startsWith("java") && !annName.equals(Import.class.getName())) {
 						collectImports(annotation, imports, visited);
 					}
 				}
@@ -525,11 +526,11 @@ class ConfigurationClassParser {
 		try {
 			// Sanity test that we can read annotations, if not fall back to ASM
 			classType.getAnnotations();
+			return new SourceClass(classType);
 		}
 		catch (Throwable ex) {
 			return asSourceClass(classType.getName());
 		}
-		return new SourceClass(classType);
 	}
 
 	/**
@@ -549,7 +550,7 @@ class ConfigurationClassParser {
 	public SourceClass asSourceClass(String className) throws IOException, ClassNotFoundException {
 		if (className.startsWith("java")) {
 			// Never use ASM for core java types
-			return new SourceClass(this.resourceLoader.getClassLoader().loadClass( className));
+			return new SourceClass(this.resourceLoader.getClassLoader().loadClass(className));
 		}
 		return new SourceClass(this.metadataReaderFactory.getMetadataReader(className));
 	}
@@ -718,12 +719,18 @@ class ConfigurationClassParser {
 			return asSourceClass(((MetadataReader) this.source).getClassMetadata().getSuperClassName());
 		}
 
-		public Set<SourceClass> getAnnotations() throws IOException, ClassNotFoundException {
-			Set<SourceClass> annotations = new LinkedHashSet<SourceClass>();
-			for (String annotation : this.metadata.getAnnotationTypes()) {
-				annotations.add(getRelated(annotation));
+		public Set<SourceClass> getAnnotations() throws IOException {
+			Set<SourceClass> result = new LinkedHashSet<SourceClass>();
+			for (String className : this.metadata.getAnnotationTypes()) {
+				try {
+					result.add(getRelated(className));
+				}
+				catch (Throwable ex) {
+					// An annotation not present on the classpath is being ignored
+					// by the JVM's class loading -> ignore here as well.
+				}
 			}
-			return annotations;
+			return result;
 		}
 
 		public Collection<SourceClass> getAnnotationAttributes(String annotationType, String attribute)
@@ -734,11 +741,11 @@ class ConfigurationClassParser {
 				return Collections.emptySet();
 			}
 			String[] classNames = (String[]) annotationAttributes.get(attribute);
-			Set<SourceClass> rtn = new LinkedHashSet<SourceClass>();
+			Set<SourceClass> result = new LinkedHashSet<SourceClass>();
 			for (String className : classNames) {
-				rtn.add(getRelated(className));
+				result.add(getRelated(className));
 			}
-			return rtn;
+			return result;
 		}
 
 		private SourceClass getRelated(String className) throws IOException, ClassNotFoundException {
@@ -748,7 +755,11 @@ class ConfigurationClassParser {
 					return asSourceClass(clazz);
 				}
 				catch (ClassNotFoundException ex) {
-					// ignore
+					// Ignore -> fall back to ASM next, except for core java types.
+					if (className.startsWith("java")) {
+						throw ex;
+					}
+					return new SourceClass(metadataReaderFactory.getMetadataReader(className));
 				}
 			}
 			return asSourceClass(className);
