@@ -542,7 +542,7 @@ project("spring-web") {
 		optional(project(":spring-oxm")) // for MarshallingHttpMessageConverter
 		compile("aopalliance:aopalliance:1.0")
 		provided("javax.el:javax.el-api:2.2.4")
-		provided("com.sun.faces:jsf-api:2.1.7")
+		provided("javax.faces:javax.faces-api:2.2")
 		provided("javax.portlet:portlet-api:2.0")
 		provided("javax.servlet:javax.servlet-api:3.0.1")
 		provided("javax.servlet.jsp:jsp-api:2.1")
