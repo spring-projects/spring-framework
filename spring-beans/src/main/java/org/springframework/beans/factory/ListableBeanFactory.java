@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import org.springframework.beans.BeansException;
  * such manually registered singletons too. Of course, BeanFactory's {@code getBean}
  * does allow transparent access to such special beans as well. However, in typical
  * scenarios, all beans will be defined by external bean definitions anyway, so most
- * applications don't need to worry about this differentation.
+ * applications don't need to worry about this differentiation.
  *
  * <p><b>NOTE:</b> With the exception of {@code getBeanDefinitionCount}
  * and {@code containsBeanDefinition}, the methods in this interface
@@ -212,8 +212,8 @@ public interface ListableBeanFactory extends BeanFactory {
 			throws BeansException;
 
 	/**
-	 * Find all beans whose {@code Class} has the supplied {@link Annotation} type,
-	 * without creating any bean instances yet.
+	 * Find all names of beans whose {@code Class} has the supplied {@link Annotation}
+	 * type, without creating any bean instances yet.
 	 * @param annotationType the type of annotation to look for
 	 * @return the names of all matching beans
 	 * @since 4.0
@@ -237,7 +237,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * found on the given class itself.
 	 * @param beanName the name of the bean to look for annotations on
 	 * @param annotationType the annotation class to look for
-	 * @return the annotation of the given type found, or {@code null}
+	 * @return the annotation of the given type if found, or {@code null}
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 * @since 3.0
 	 */
