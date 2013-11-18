@@ -11,7 +11,7 @@ The Spring Framework is a lightweight solution and a potential one-stop-shop for
 
 Spring is designed to be non-intrusive, meaning that your domain logic code generally has no dependencies on the framework itself. In your integration layer (such as the data access layer), some dependencies on the data access technology and the Spring libraries will exist. However, it should be easy to isolate these dependencies from the rest of your code base.
 
-This document is a reference guide to Spring Framework features. If you have any requests, comments, or questions on this document, please post them on the user mailing list or on the support forums at  http://forum.springsource.org/[].
+This document is a reference guide to Spring Framework features. If you have any requests, comments, or questions on this document, please post them on the user mailing list or on the support forums at  http://forum.spring.io/[].
 
 [[overview]]
 == Introduction to Spring Framework
@@ -213,15 +213,15 @@ If you are using Maven for dependency management you don't even need to supply t
 
 That's it. Note the scope can be declared as runtime if you don't need to compile against Spring APIs, which is typically the case for basic dependency injection use cases.
 
-We used the Maven Central naming conventions in the example above, so that works with Maven Central or the SpringSource S3 Maven repository. To use the S3 Maven repository (e.g. for milestones or developer snapshots), you need to specify the repository location in your Maven configuration. For full releases:
+We used the Maven Central naming conventions in the example above, so that works with Maven Central or the SpringSource Maven repository. To use the Spring Maven repository (e.g. for milestones or developer snapshots), you need to specify the repository location in your Maven configuration. For full releases:
 
 [source,xml]
 [subs="verbatim,quotes"]
 ----
 <repositories>
    <repository>
-      <id>com.springsource.repository.maven.release</id>
-      <url>http://repo.springsource.org/release/</url>
+      <id>io.spring.repo.maven.release</id>
+      <url>https://repo.spring.io/release/</url>
       <snapshots><enabled>false</enabled></snapshots>
    </repository>
 </repositories>
@@ -234,8 +234,8 @@ For milestones:
 ----
 <repositories>
    <repository>
-      <id>com.springsource.repository.maven.milestone</id>
-      <url>http://repo.springsource.org/milestone/</url>
+      <id>io.spring.repo.maven.milestone</id>
+      <url>https://repo.spring.io/milestone/</url>
       <snapshots><enabled>false</enabled></snapshots>
    </repository>
 </repositories>
@@ -248,8 +248,8 @@ And for snapshots:
 ----
 <repositories>
    <repository>
-      <id>com.springsource.repository.maven.snapshot</id>
-      <url>http://repo.springsource.org/snapshot/</url>
+      <id>io.spring.repo.maven.snapshot</id>
+      <url>https://repo.spring.io/snapshot/</url>
       <snapshots><enabled>true</enabled></snapshots>
    </repository>
 </repositories>
@@ -491,7 +491,7 @@ The Spring reference documentation has also substantially been updated to reflec
 
 [[new-in-3.0-new-tutorial]]
 === New articles and tutorials
-There are many excellent articles and tutorials that show how to get started with Spring Framework 3 features. Read them at the http://www.springsource.org/documentation[Spring Documentation] page.
+There are many excellent articles and tutorials that show how to get started with Spring Framework 3 features. Read them at thehttps://spring.io/docs[Spring Documentation] page.
 
 The samples have been improved and updated to take advantage of the new features in Spring Framework 3. Additionally, the samples have been moved out of the source tree into a dedicated SVN https://anonsvn.springframework.org/svn/spring-samples/[repository] available at:
 
@@ -607,7 +607,7 @@ public class RewardsTestDatabase {
 
 [[new-java-configuration]]
 ===== Java based bean metadata
-Some core features from the  http://www.springsource.org/javaconfig[JavaConfig] project have been added to the Spring Framework now. This means that the following annotations are now directly supported:
+Some core features from the  JavaConfig project have been added to the Spring Framework now. This means that the following annotations are now directly supported:
 
 * @Configuration
 * @Bean
@@ -1005,7 +1005,7 @@ Finally, the adoption of the test-driven-development (TDD) approach to software 
 === Introduction to the Spring IoC container and beans
 This chapter covers the Spring Framework implementation of the Inversion of Control (IoC)  footnote:[See pass:specialcharacters,macros[<<background-ioc>>] ] principle. IoC is also known as __dependency injection__ (DI). It is a process whereby objects define their dependencies, that is, the other objects they work with, only through constructor arguments, arguments to a factory method, or properties that are set on the object instance after it is constructed or returned from a factory method. The container then __injects__ those dependencies when it creates the bean. This process is fundamentally the inverse, hence the name __Inversion of Control__ (IoC), of the bean itself controlling the instantiation or location of its dependencies by using direct construction of classes, or a mechanism such as the __Service Locator__ pattern.
 
-The `org.springframework.beans` and `org.springframework.context` packages are the basis for Spring Framework's IoC container. The http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/BeanFactory.html[BeanFactory] interface provides an advanced configuration mechanism capable of managing any type of object. http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/context/ApplicationContext.html[ApplicationContext] is a sub-interface of `BeanFactory`. It adds easier integration with Spring's AOP features; message resource handling (for use in internationalization), event publication; and application-layer specific contexts such as the `WebApplicationContext` for use in web applications.
+The `org.springframework.beans` and `org.springframework.context` packages are the basis for Spring Framework's IoC container. The http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/beans/factory/BeanFactory.html[BeanFactory] interface provides an advanced configuration mechanism capable of managing any type of object. http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/context/ApplicationContext.html[ApplicationContext] is a sub-interface of `BeanFactory`. It adds easier integration with Spring's AOP features; message resource handling (for use in internationalization), event publication; and application-layer specific contexts such as the `WebApplicationContext` for use in web applications.
 
 In short, the `BeanFactory` provides the configuration framework and basic functionality, and the `ApplicationContext` adds more enterprise-specific functionality. The `ApplicationContext` is a complete superset of the `BeanFactory`, and is used exclusively in this chapter in descriptions of Spring's IoC container.For more information on using the `BeanFactory` instead of the `ApplicationContext,` refer to <<beans-beanfactory>>.
 
@@ -1017,7 +1017,7 @@ The interface `org.springframework.context.ApplicationContext` represents the Sp
 
 Several implementations of the `ApplicationContext` interface are supplied out-of-the-box with Spring. In standalone applications it is common to create an instance of  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/context/support/ClassPathXmlApplicationContext.html[`ClassPathXmlApplicationContext`] or  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/context/support/FileSystemXmlApplicationContext.html[`FileSystemXmlApplicationContext`].  While XML has been the traditional format for defining configuration metadata you can instruct the container to use Java annotations or code as the metadata format by providing a small amount of XML configuration to declaratively enable support for these additional metadata formats.
 
-In most application scenarios, explicit user code is not required to instantiate one or more instances of a Spring IoC container. For example, in a web application scenario, a simple eight (or so) lines of boilerplate J2EE web descriptor XML in the `web.xml` file of the application will typically suffice (see <<context-create>>). If you are using the  http://www.springsource.com/produts/sts[SpringSource Tool Suite] Eclipse-powered development environment or  http://www.springsource.org/roo[Spring Roo] this boilerplate configuration can be easily created with few mouse clicks or keystrokes.
+In most application scenarios, explicit user code is not required to instantiate one or more instances of a Spring IoC container. For example, in a web application scenario, a simple eight (or so) lines of boilerplate J2EE web descriptor XML in the `web.xml` file of the application will typically suffice (see <<context-create>>). If you are using the  https://spring.io/tools/sts[SpringSource Tool Suite] Eclipse-powered development environment or  https://github.com/spring-projects/spring-roo[Spring Roo] this boilerplate configuration can be easily created with few mouse clicks or keystrokes.
 
 The following diagram is a high-level view of how Spring works. Your application classes are combined with configuration metadata so that after the `ApplicationContext` is created and initialized, you have a fully configured and executable system or application.
 
@@ -1038,7 +1038,7 @@ XML-based metadata is __not__ the only allowed form of configuration metadata. T
 For information about using other forms of metadata with the Spring container, see:
 
 * <<beans-annotation-config,Annotation-based configuration>>: Spring 2.5 introduced support for annotation-based configuration metadata.
-* <<beans-java,Java-based configuration>>: Starting with Spring 3.0, many features provided by the  http://www.springsource.org/javaconfig[Spring JavaConfig project] became part of the core Spring Framework. Thus you can define beans external to your application classes by using Java rather than XML files. To use these new features, see the `@Configuration`, `@Bean, @Import` and `@DependsOn` annotations.
+* <<beans-java,Java-based configuration>>: Starting with Spring 3.0, many features provided by the Spring JavaConfig project became part of the core Spring Framework. Thus you can define beans external to your application classes by using Java rather than XML files. To use these new features, see the `@Configuration`, `@Bean, @Import` and `@DependsOn` annotations.
 
 Spring configuration consists of at least one and typically more than one bean definition that the container must manage. XML-based configuration metadata shows these beans configured as `<bean/>` elements inside a top-level `<beans/>` element.
 
@@ -2768,7 +2768,7 @@ As of Spring 2.0, the bean scoping mechanism is extensible. You can define your 
 
 [[beans-factory-scopes-custom-creating]]
 ===== Creating a custom scope
-To integrate your custom scope(s) into the Spring container, you need to implement the `org.springframework.beans.factory.config.Scope` interface, which is described in this section. For an idea of how to implement your own scopes, see the `Scope` implementations that are supplied with the Spring Framework itself and the  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/config/Scope.html[Scope Javadoc], which explains the methods you need to implement in more detail.
+To integrate your custom scope(s) into the Spring container, you need to implement the `org.springframework.beans.factory.config.Scope` interface, which is described in this section. For an idea of how to implement your own scopes, see the `Scope` implementations that are supplied with the Spring Framework itself and the  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/beans/factory/config/Scope.html[Scope Javadoc], which explains the methods you need to implement in more detail.
 
 The `Scope` interface has four methods to get objects from the scope, remove them from the scope, and allow them to be destroyed.
 
@@ -3666,7 +3666,7 @@ As always, you can register them as individual bean definitions, but they can al
 </beans>
 ----
 
-(The implicitly registered post-processors include  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html[`AutowiredAnnotationBeanPostProcessor`],  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/CommonAnnotationBeanPostProcessor.html[`CommonAnnotationBeanPostProcessor`],  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html[`PersistenceAnnotationBeanPostProcessor`], as well as the aforementioned  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html[`RequiredAnnotationBeanPostProcessor`].)
+(The implicitly registered post-processors include  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html[`AutowiredAnnotationBeanPostProcessor`],  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/context/annotation/CommonAnnotationBeanPostProcessor.html[`CommonAnnotationBeanPostProcessor`],  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html[`PersistenceAnnotationBeanPostProcessor`], as well as the aforementioned  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html[`RequiredAnnotationBeanPostProcessor`].)
 
 [NOTE]
 ====
@@ -4159,7 +4159,7 @@ Finally, the bean definitions should contain matching qualifier values. This exa
 [[beans-custom-autowire-configurer]]
 ====  CustomAutowireConfigurer
 
-The  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/annotation/CustomAutowireConfigurer.html[`CustomAutowireConfigurer`] is a `BeanFactoryPostProcessor` that enables you to register your own custom qualifier annotation types even if they are not annotated with Spring's `@Qualifier` annotation.
+The  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/beans/factory/annotation/CustomAutowireConfigurer.html[`CustomAutowireConfigurer`] is a `BeanFactoryPostProcessor` that enables you to register your own custom qualifier annotation types even if they are not annotated with Spring's `@Qualifier` annotation.
 
 [source,xml]
 [subs="verbatim,quotes"]
@@ -4217,7 +4217,7 @@ public class SimpleMovieLister {
 
 [NOTE]
 ====
-The name provided with the annotation is resolved as a bean name by the `ApplicationContext` of which the `CommonAnnotationBeanPostProcessor` is aware. The names can be resolved through JNDI if you configure Spring's  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/jndi/support/SimpleJndiBeanFactory.html[`SimpleJndiBeanFactory`] explicitly. However, it is recommended that you rely on the default behavior and simply use Spring's JNDI lookup capabilities to preserve the level of indirection.
+The name provided with the annotation is resolved as a bean name by the `ApplicationContext` of which the `CommonAnnotationBeanPostProcessor` is aware. The names can be resolved through JNDI if you configure Spring's  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/jndi/support/SimpleJndiBeanFactory.html[`SimpleJndiBeanFactory`] explicitly. However, it is recommended that you rely on the default behavior and simply use Spring's JNDI lookup capabilities to preserve the level of indirection.
 ====
 
 In the exclusive case of `@Resource` usage with no explicit name specified, and similar to `@Autowired`, `@Resource` finds a primary type match instead of a specific named bean and resolves well-known resolvable dependencies: the `BeanFactory`, `ApplicationContext`, `ResourceLoader`, `ApplicationEventPublisher`, and `MessageSource` interfaces.
@@ -4275,7 +4275,7 @@ Most examples in this chapter use XML to specify the configuration metadata that
 
 [NOTE]
 ====
-Starting with Spring 3.0, many features provided by the  http://www.springsource.org/javaconfig[Spring JavaConfig project] are part of the core Spring Framework. This allows you to define beans using Java rather than using the traditional XML files. Take a look at the `@Configuration`, `@Bean`, `@Import`, and `@DependsOn` annotations for examples of how to use these new features.
+Starting with Spring 3.0, many features provided by the Spring JavaConfig project are part of the core Spring Framework. This allows you to define beans using Java rather than using the traditional XML files. Take a look at the `@Configuration`, `@Bean`, `@Import`, and `@DependsOn` annotations for examples of how to use these new features.
 ====
 
 [[beans-stereotype-annotations]]
@@ -4491,7 +4491,7 @@ public class MovieFinderImpl implements MovieFinder {
 
 [NOTE]
 ====
-If you do not want to rely on the default bean-naming strategy, you can provide a custom bean-naming strategy. First, implement the  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/support/BeanNameGenerator.html[`BeanNameGenerator`] interface, and be sure to include a default no-arg constructor. Then, provide the fully-qualified class name when configuring the scanner:
+If you do not want to rely on the default bean-naming strategy, you can provide a custom bean-naming strategy. First, implement the  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/beans/factory/support/BeanNameGenerator.html[`BeanNameGenerator`] interface, and be sure to include a default no-arg constructor. Then, provide the fully-qualified class name when configuring the scanner:
 ====
 
 [source,xml]
@@ -4523,7 +4523,7 @@ public class MovieFinderImpl implements MovieFinder {
 
 [NOTE]
 ====
-To provide a custom strategy for scope resolution rather than relying on the annotation-based approach, implement the  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/ScopeMetadataResolver.html[`ScopeMetadataResolver`] interface, and be sure to include a default no-arg constructor. Then, provide the fully-qualified class name when configuring the scanner:
+To provide a custom strategy for scope resolution rather than relying on the annotation-based approach, implement the  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/context/annotation/ScopeMetadataResolver.html[`ScopeMetadataResolver`] interface, and be sure to include a default no-arg constructor. Then, provide the fully-qualified class name when configuring the scanner:
 ====
 
 [source,xml]
@@ -5580,7 +5580,7 @@ Once configured for the `ApplicationContext`. Any bean within that `ApplicationC
 [[context-introduction]]
 === Additional Capabilities of the ApplicationContext
 
-As was discussed in the chapter introduction, the `org.springframework.beans.factory` package provides basic functionality for managing and manipulating beans, including in a programmatic way. The `org.springframework.context` package adds the  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/context/ApplicationContext.html[`ApplicationContext`] interface, which extends the `BeanFactory` interface, in addition to extending other interfaces to provide additional functionality in a more __application framework-oriented style__. Many people use the `ApplicationContext` in a completely declarative fashion, not even creating it programmatically, but instead relying on support classes such as `ContextLoader` to automatically instantiate an `ApplicationContext` as part of the normal startup process of a J2EE web application.
+As was discussed in the chapter introduction, the `org.springframework.beans.factory` package provides basic functionality for managing and manipulating beans, including in a programmatic way. The `org.springframework.context` package adds the  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/context/ApplicationContext.html[`ApplicationContext`] interface, which extends the `BeanFactory` interface, in addition to extending other interfaces to provide additional functionality in a more __application framework-oriented style__. Many people use the `ApplicationContext` in a completely declarative fashion, not even creating it programmatically, but instead relying on support classes such as `ContextLoader` to automatically instantiate an `ApplicationContext` as part of the normal startup process of a J2EE web application.
 
 To enhance `BeanFactory` functionality in a more framework-oriented style the context package also provides the following functionality:
 
@@ -5862,7 +5862,7 @@ Putting it all together, when the `sendEmail()` method of the `emailService` bea
 
 [NOTE]
 ====
-Spring's eventing mechanism is designed for simple communication between Spring beans within the same application context. However, for more sophisticated enterprise integration needs, the separately-maintained  http://springsource.org/spring-integration[Spring Integration] project provides complete support for building lightweight,  http://www.enterpriseintegrationpatterns.com[pattern-oriented], event-driven architectures that build upon the well-known Spring programming model.
+Spring's eventing mechanism is designed for simple communication between Spring beans within the same application context. However, for more sophisticated enterprise integration needs, the separately-maintained  http://projects.spring.io/spring-integration/[Spring Integration] project provides complete support for building lightweight,  http://www.enterpriseintegrationpatterns.com[pattern-oriented], event-driven architectures that build upon the well-known Spring programming model.
 ====
 
 [[context-functionality-resources]]
@@ -5910,7 +5910,7 @@ In Spring 2.5 and later, it is possible to deploy a Spring ApplicationContext as
 
 RAR deployment is ideal for application contexts that do not need HTTP entry points but rather consist only of message endpoints and scheduled jobs. Beans in such a context can use application server resources such as the JTA transaction manager and JNDI-bound JDBC DataSources and JMS ConnectionFactory instances, and may also register with the platform's JMX server - all through Spring's standard transaction management and JNDI and JMX support facilities. Application components can also interact with the application server's JCA WorkManager through Spring's `TaskExecutor` abstraction.
 
-Check out the JavaDoc of the  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/jca/context/SpringContextResourceAdapter.html[SpringContextResourceAdapter] class for the configuration details involved in RAR deployment.
+Check out the JavaDoc of the  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/jca/context/SpringContextResourceAdapter.html[SpringContextResourceAdapter] class for the configuration details involved in RAR deployment.
 
 __For a simple deployment of a Spring ApplicationContext as a J2EE RAR file:__ package all application classes into a RAR file, which is a standard JAR file with a different file extension. Add all required library JARs into the root of the RAR archive. Add a "META-INF/ra.xml" deployment descriptor (as shown in `SpringContextResourceAdapter` s JavaDoc) and the corresponding Spring XML bean definition file(s) (typically "META-INF/applicationContext.xml"), and drop the resulting RAR file into your application server's deployment directory.
 
@@ -6540,7 +6540,7 @@ Validation errors are reported to the `Errors` object passed to the validator. I
 === Resolving codes to error messages
 We've talked about databinding and validation. Outputting messages corresponding to validation errors is the last thing we need to discuss. In the example we've shown above, we rejected the `name` and the `age` field. If we're going to output the error messages by using a `MessageSource`, we will do so using the error code we've given when rejecting the field ('name' and 'age' in this case). When you call (either directly, or indirectly, using for example the `ValidationUtils` class) `rejectValue` or one of the other `reject` methods from the `Errors` interface, the underlying implementation will not only register the code you've passed in, but also a number of additional error codes. What error codes it registers is determined by the `MessageCodesResolver` that is used. By default, the `DefaultMessageCodesResolver` is used, which for example not only registers a message with the code you gave, but also messages that include the field name you passed to the reject method. So in case you reject a field using `rejectValue("age", "too.darn.old")`, apart from the `too.darn.old` code, Spring will also register `too.darn.old.age` and `too.darn.old.age.int` (so the first will include the field name and the second will include the type of the field); this is done as a convenience to aid developers in targeting error messages and suchlike.
 
-More information on the `MessageCodesResolver` and the default strategy can be found online with the Javadocs for  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/validation/MessageCodesResolver.html[MessageCodesResolver] and  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/validation/DefaultMessageCodesResolver.html[DefaultMessageCodesResolver] respectively.
+More information on the `MessageCodesResolver` and the default strategy can be found online with the Javadocs for  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/validation/MessageCodesResolver.html[MessageCodesResolver] and  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/validation/DefaultMessageCodesResolver.html[DefaultMessageCodesResolver] respectively.
 
 [[beans-beans]]
 === Bean manipulation and the BeanWrapper
@@ -21084,7 +21084,7 @@ With the above in mind, the following is the sequence of events for async reques
 
 The sequence of events for async request processing with a `DeferredResult` is the same in principal except it's up to the application to produce the asynchronous result from some thread: (1) Controller returns a `DeferredResult` and saves it in some in-memory queue or list where it can be accessed, (2) Spring MVC starts async processing, (3) the `DispatcherServlet` and all configured Filter's exit the request processing thread but the response remains open, (4) the application sets the `DeferredResult` from some thread and Spring MVC dispatches the request back to the Servlet container, (5) the `DispatcherServlet` is invoked again and processing resumes with the asynchronously produced result.
 
-Explaining the motivation for async request processing and when or why to use it are beyond the scope of this document. For further information you may wish to read http://blog.springsource.org/2012/05/06/spring-mvc-3-2-preview-introducing-servlet-3-async-support/[this blog post series].
+Explaining the motivation for async request processing and when or why to use it are beyond the scope of this document. For further information you may wish to read https://spring.io/blog/2012/05/06/spring-mvc-3-2-preview-introducing-servlet-3-async-support[this blog post series].
 
 [[mvc-ann-async-exceptions]]
 ===== Exception Handling for Async Requests
@@ -22399,7 +22399,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 }
 ----
 
-To customize the default configuration of `<mvc:annotation-driven />` check what attributes and sub-elements it supports. You can view the http://static.springsource.org/schema/mvc/spring-mvc.xsd[Spring MVC XML schema] or use the code completion feature of your IDE to discover what attributes and sub-elements are available. The sample below shows a subset of what is available:
+To customize the default configuration of `<mvc:annotation-driven />` check what attributes and sub-elements it supports. You can view the http://schema.spring.io/mvc/spring-mvc.xsd[Spring MVC XML schema] or use the code completion feature of your IDE to discover what attributes and sub-elements are available. The sample below shows a subset of what is available:
 
 [source,xml]
 [subs="verbatim,quotes"]
@@ -22738,7 +22738,7 @@ Or in XML:
 ==== More Spring Web MVC Resources
 See the following links and pointers for more resources about Spring Web MVC:
 
-* There are many excellent articles and tutorials that show how to build web applications with Spring MVC. Read them at the  http://www.springsource.org/documentation[Spring Documentation] page.
+* There are many excellent articles and tutorials that show how to build web applications with Spring MVC. Read them at the  https://spring.io/docs[Spring Documentation] page.
 * "Expert Spring Web MVC and Web Flow" by Seth Ladd and others (published by Apress) is an excellent hard copy source of Spring Web MVC goodness.
 
 [[mvc-config-advanced-java]]
@@ -23704,7 +23704,7 @@ Alternatively, you can specify velocity properties directly in the bean definiti
 </bean>
 ----
 
-Refer to the  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/ui/velocity/VelocityEngineFactory.html[API documentation] for Spring configuration of Velocity, or the Velocity documentation for examples and definitions of the `'velocity.properties'` file itself.
+Refer to the  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/ui/velocity/VelocityEngineFactory.html[API documentation] for Spring configuration of Velocity, or the Velocity documentation for examples and definitions of the `'velocity.properties'` file itself.
 
 [[views-freemarker]]
 ===== FreeMarker
@@ -24671,7 +24671,7 @@ Before diving into the integration specifics of each supported web framework, le
 
 One of the concepts (for want of a better word) espoused by (Spring's) lightweight application model is that of a layered architecture. Remember that in a 'classic' layered architecture, the web layer is but one of many layers; it serves as one of the entry points into a server side application and it delegates to service objects (facades) defined in a service layer to satisfy business specific (and presentation-technology agnostic) use cases. In Spring, these service objects, any other business-specific objects, data access objects, etc. exist in a distinct 'business context', which contains __no__ web or presentation layer objects (presentation objects such as Spring MVC controllers are typically configured in a distinct 'presentation context'). This section details how one configures a Spring container (a `WebApplicationContext`) that contains all of the 'business beans' in one's application.
 
-On to specifics: all that one need do is to declare a  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/context/ContextLoaderListener.html[`ContextLoaderListener`] in the standard Java EE servlet `web.xml` file of one's web application, and add a `contextConfigLocation`<context-param/> section (in the same file) that defines which set of Spring XML configuration files to load.
+On to specifics: all that one need do is to declare a  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/context/ContextLoaderListener.html[`ContextLoaderListener`] in the standard Java EE servlet `web.xml` file of one's web application, and add a `contextConfigLocation`<context-param/> section (in the same file) that defines which set of Spring XML configuration files to load.
 
 Find below the <listener/> configuration:
 
@@ -24694,7 +24694,7 @@ Find below the <context-param/> configuration:
 </context-param>
 ----
 
-If you don't specify the `contextConfigLocation` context parameter, the `ContextLoaderListener` will look for a file called `/WEB-INF/applicationContext.xml` to load. Once the context files are loaded, Spring creates a  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/context/WebApplicationContext.html[`WebApplicationContext`] object based on the bean definitions and stores it in the `ServletContext` of the web application.
+If you don't specify the `contextConfigLocation` context parameter, the `ContextLoaderListener` will look for a file called `/WEB-INF/applicationContext.xml` to load. Once the context files are loaded, Spring creates a  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/context/WebApplicationContext.html[`WebApplicationContext`] object based on the bean definitions and stores it in the `ServletContext` of the web application.
 
 All Java web frameworks are built on top of the Servlet API, and so one can use the following code snippet to get access to this 'business context' `ApplicationContext` created by the `ContextLoaderListener`.
 
@@ -24704,7 +24704,7 @@ All Java web frameworks are built on top of the Servlet API, and so one can use 
 WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);
 ----
 
-The  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/context/support/WebApplicationContextUtils.html[`WebApplicationContextUtils`] class is for convenience, so you don't have to remember the name of the `ServletContext` attribute. Its __getWebApplicationContext()__ method will return `null` if an object doesn't exist under the `WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE` key. Rather than risk getting `NullPointerExceptions` in your application, it's better to use the `getRequiredWebApplicationContext()` method. This method throws an exception when the `ApplicationContext` is missing.
+The  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/context/support/WebApplicationContextUtils.html[`WebApplicationContextUtils`] class is for convenience, so you don't have to remember the name of the `ServletContext` attribute. Its __getWebApplicationContext()__ method will return `null` if an object doesn't exist under the `WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE` key. Rather than risk getting `NullPointerExceptions` in your application, it's better to use the `getRequiredWebApplicationContext()` method. This method throws an exception when the `ApplicationContext` is missing.
 
 Once you have a reference to the `WebApplicationContext`, you can retrieve beans by their name or type. Most developers retrieve beans by name and then cast them to one of their implemented interfaces.
 
@@ -24725,7 +24725,7 @@ The key element in Spring's JSF integration is the JSF 1.1 `VariableResolver` me
 
 [[jsf-delegatingvariableresolver]]
 ==== DelegatingVariableResolver (JSF 1.1/1.2)
-The easiest way to integrate one's Spring middle-tier with one's JSF web layer is to use the  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/jsf/DelegatingVariableResolver.html[`DelegatingVariableResolver`] class. To configure this variable resolver in one's application, one will need to edit one's __faces-context.xml__ file. After the opening `<faces-config/>` element, add an `<application/>` element and a `<variable-resolver/>` element within it. The value of the variable resolver should reference Spring's `DelegatingVariableResolver`; for example:
+The easiest way to integrate one's Spring middle-tier with one's JSF web layer is to use the  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/jsf/DelegatingVariableResolver.html[`DelegatingVariableResolver`] class. To configure this variable resolver in one's application, one will need to edit one's __faces-context.xml__ file. After the opening `<faces-config/>` element, add an `<application/>` element and a `<variable-resolver/>` element within it. The value of the variable resolver should reference Spring's `DelegatingVariableResolver`; for example:
 
 [source,xml]
 [subs="verbatim,quotes"]
@@ -24797,7 +24797,7 @@ Configuration-wise, simply define `SpringBeanFacesELResolver` in your JSF 1.2 __
 
 [[jsf-facescontextutils]]
 ==== FacesContextUtils
-A custom `VariableResolver` works well when mapping one's properties to beans in__faces-config.xml__, but at times one may need to grab a bean explicitly. The  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/jsf/FacesContextUtils.html[`FacesContextUtils`] class makes this easy. It is similar to `WebApplicationContextUtils`, except that it takes a `FacesContext` parameter rather than a `ServletContext` parameter.
+A custom `VariableResolver` works well when mapping one's properties to beans in__faces-config.xml__, but at times one may need to grab a bean explicitly. The  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/jsf/FacesContextUtils.html[`FacesContextUtils`] class makes this easy. It is similar to `WebApplicationContextUtils`, except that it takes a `FacesContext` parameter rather than a `ServletContext` parameter.
 
 [source,java]
 [subs="verbatim,quotes"]
@@ -24823,7 +24823,7 @@ To integrate your Struts 1.x application with Spring, you have two options:
 
 [[struts-contextloaderplugin]]
 ==== ContextLoaderPlugin
-The  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/ContextLoaderPlugIn.html[`ContextLoaderPlugin`] is a Struts 1.1+ plug-in that loads a Spring context file for the Struts `ActionServlet`. This context refers to the root `WebApplicationContext` (loaded by the `ContextLoaderListener`) as its parent. The default name of the context file is the name of the mapped servlet, plus__-servlet.xml__. If `ActionServlet` is defined in web.xml as `<servlet-name>action</servlet-name>`, the default is __/WEB-INF/action-servlet.xml__.
+The  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/struts/ContextLoaderPlugIn.html[`ContextLoaderPlugin`] is a Struts 1.1+ plug-in that loads a Spring context file for the Struts `ActionServlet`. This context refers to the root `WebApplicationContext` (loaded by the `ContextLoaderListener`) as its parent. The default name of the context file is the name of the mapped servlet, plus__-servlet.xml__. If `ActionServlet` is defined in web.xml as `<servlet-name>action</servlet-name>`, the default is __/WEB-INF/action-servlet.xml__.
 
 To configure this plug-in, add the following XML to the plug-ins section near the bottom of your __struts-config.xml__ file:
 
@@ -24869,7 +24869,7 @@ You must define that Action's bean with the "/users" name in __action-servlet.xm
 
 [[struts-delegatingrequestprocessor]]
 ===== DelegatingRequestProcessor
-To configure the  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/DelegatingRequestProcessor.html[`DelegatingRequestProcessor`] in your __struts-config.xml__ file, override the "processorClass" property in the <controller> element. These lines follow the <action-mapping> element.
+To configure the  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/struts/DelegatingRequestProcessor.html[`DelegatingRequestProcessor`] in your __struts-config.xml__ file, override the "processorClass" property in the <controller> element. These lines follow the <action-mapping> element.
 
 [source,xml]
 [subs="verbatim,quotes"]
@@ -24893,12 +24893,12 @@ If you're using Struts' __modules__ feature, your bean names must contain the mo
 
 [NOTE]
 ====
-If you are using Tiles in your Struts application, you must configure your <controller> with the  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/DelegatingTilesRequestProcessor.html[`DelegatingTilesRequestProcessor`] instead.
+If you are using Tiles in your Struts application, you must configure your <controller> with the  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/struts/DelegatingTilesRequestProcessor.html[`DelegatingTilesRequestProcessor`] instead.
 ====
 
 [[struts-delegatingactionproxy]]
 ===== DelegatingActionProxy
-If you have a custom `RequestProcessor` and can't use the `DelegatingRequestProcessor` or `DelegatingTilesRequestProcessor` approaches, you can use the  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/DelegatingActionProxy.html[`DelegatingActionProxy`] as the type in your action-mapping.
+If you have a custom `RequestProcessor` and can't use the `DelegatingRequestProcessor` or `DelegatingTilesRequestProcessor` approaches, you can use the  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/struts/DelegatingActionProxy.html[`DelegatingActionProxy`] as the type in your action-mapping.
 
 [source,xml]
 [subs="verbatim,quotes"]
@@ -24923,7 +24923,7 @@ If you define your `Action` in a context file, the full feature set of Spring's 
 
 [[struts-actionsupport]]
 ==== ActionSupport Classes
-As previously mentioned, you can retrieve the `WebApplicationContext` from the `ServletContext` using the `WebApplicationContextUtils` class. An easier way is to extend Spring's `Action` classes for Struts. For example, instead of subclassing Struts' `Action` class, you can subclass Spring's  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/ActionSupport.html[`ActionSupport`] class.
+As previously mentioned, you can retrieve the `WebApplicationContext` from the `ServletContext` using the `WebApplicationContextUtils` class. An easier way is to extend Spring's `Action` classes for Struts. For example, instead of subclassing Struts' `Action` class, you can subclass Spring's  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/struts/ActionSupport.html[`ActionSupport`] class.
 
 The `ActionSupport` class provides additional convenience methods, like__getWebApplicationContext()__. Below is an example of how you might use this in an Action:
 
@@ -24949,10 +24949,10 @@ public class UserAction extends DispatchActionSupport {
 
 Spring includes subclasses for all of the standard Struts Actions - the Spring versions merely have __Support__ appended to the name:
 
-*  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/ActionSupport.html[`ActionSupport`],
-*  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/DispatchActionSupport.html[`DispatchActionSupport`],
-*  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/LookupDispatchActionSupport.html[`LookupDispatchActionSupport`] and
-*  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/MappingDispatchActionSupport.html[`MappingDispatchActionSupport`].
+*  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/struts/ActionSupport.html[`ActionSupport`],
+*  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/struts/DispatchActionSupport.html[`DispatchActionSupport`],
+*  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/struts/LookupDispatchActionSupport.html[`LookupDispatchActionSupport`] and
+*  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/struts/MappingDispatchActionSupport.html[`MappingDispatchActionSupport`].
 
 The recommended strategy is to use the approach that best suits your project. Subclassing makes your code more readable, and you know exactly how your dependencies are resolved. In contrast, using the `ContextLoaderPlugin` allows you to easily add new dependencies in your context XML file. Either way, Spring provides some nice options for integrating with Struts.
 
@@ -26589,7 +26589,7 @@ This is an example where we explicitly mention the `BeanNameUrlHandlerMapping` a
 
 [NOTE]
 ====
-Of course, this example doesn't show a flexible kind of security infrastructure. For more options as far as security is concerned, have a look at the Spring Security project at  http://static.springsource.org/spring-security/site/[].
+Of course, this example doesn't show a flexible kind of security infrastructure. For more options as far as security is concerned, have a look at the Spring Security project at  http://projects.spring.io/spring-security/[].
 ====
 
 [[remoting-httpinvoker]]
@@ -26988,7 +26988,7 @@ You may also wish to investigate the support provided by the  http://lingo.codeh
 
 [[remoting-amqp]]
 === AMQP
-Refer to the  http://static.springsource.org/spring-amqp/reference/html/amqp.html#remoting[Spring AMQP Reference Document 'Spring Remoting with AMQP' section] for more information.
+Refer to the http://docs.spring.io/spring-amqp/reference/html/amqp.html#remoting[Spring AMQP Reference Document 'Spring Remoting with AMQP' section] for more information.
 
 [[remoting-autodection-remote-interfaces]]
 === Auto-detection is not implemented for remote interfaces
@@ -30977,7 +30977,7 @@ Now we've set up two triggers, one running every 50 seconds with a starting dela
 </bean>
 ----
 
-More properties are available for the `SchedulerFactoryBean` for you to set, such as the calendars used by the job details, properties to customize Quartz with, etc. Have a look at the  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/quartz/SchedulerFactoryBean.html[SchedulerFactoryBean Javadoc] for more information.
+More properties are available for the `SchedulerFactoryBean` for you to set, such as the calendars used by the job details, properties to customize Quartz with, etc. Have a look at the  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/scheduling/quartz/SchedulerFactoryBean.html[SchedulerFactoryBean Javadoc] for more information.
 
 [[dynamic-language]]
 == Dynamic language support
@@ -32152,7 +32152,7 @@ This setup bootstraps ehcache library inside Spring IoC (through bean `ehcache`)
 [[cache-store-configuration-gemfire]]
 ==== GemFire-based  Cache
 
-GemFire is a memory-oriented/disk-backed, elastically scalable, continuously available, active (with built-in pattern-based subscription notifications), globally replicated database and provides fully-featured edge caching. For further information on how to use GemFire as a CacheManager (and more), please refer to the  http://static.springsource.org/spring-gemfire/docs/1.0.0.RELEASE/reference/html/[Spring GemFire reference documentation].
+GemFire is a memory-oriented/disk-backed, elastically scalable, continuously available, active (with built-in pattern-based subscription notifications), globally replicated database and provides fully-featured edge caching. For further information on how to use GemFire as a CacheManager (and more), please refer to the  http://docs.spring.io/spring-gemfire/docs/current/reference/htmlsingle/[Spring GemFire reference documentation].
 
 [[cache-store-configuration-noop]]
 ==== Dealing with caches without a backing store
@@ -33702,7 +33702,7 @@ This means greater convenience for users, as well as correct functionality for J
 
 [[migration-3.2-osgi-users]]
 === For OSGi users
-OSGi metadata is no longer published within individual Spring Framework jar MANIFEST.MF files. Please see this http://www.springsource.org/springframework-ebr[announcement] for more information about how users can get OSGi-ready versions of Spring Framework 3.2 jars.
+OSGi metadata is no longer published within individual Spring Framework jar MANIFEST.MF files. For more information about how users can get OSGi-ready versions of Spring Framework 3.2 jars.
 
 [[migration-3.2-compatibility-mvc-config]]
 === MVC Java Config and MVC Namespace
@@ -33737,41 +33737,41 @@ The `spring-test` module has been upgraded to depend on JUnit 4.11 ( `junit:juni
 
 [[migration-3.2-api-changes]]
 ==== JDiff reports
-Select JDiff reports are now being published to provide users with a convenient means of understanding what's changed between versions. Going forward these will be published between each minor version, e.g. from 3.1.3.RELEASE to 3.1.4.RELEASE; from the latest maintenance version to the latest GA release, e.g. http://static.springsource.org/spring-framework/docs/3.1.3.RELEASE_to_3.2.0.RELEASE[3.1.3.RELEASE to 3.2.0.RELEASE]; and in between each milestone and/or RC for users who are tracking next-generation development, e.g. http://static.springsource.org/spring-framework/docs/3.2.0.RC2_to_3.2.0.RELEASE[3.2.0.RC2 to 3.2.0.RELEASE].
+Select JDiff reports are now being published to provide users with a convenient means of understanding what's changed between versions. Going forward these will be published between each minor version, e.g. from 3.1.3.RELEASE to 3.1.4.RELEASE; from the latest maintenance version to the latest GA release, e.g. http://docs.spring.io/spring-framework/docs/3.1.3.RELEASE_to_3.2.0.RELEASE[3.1.3.RELEASE to 3.2.0.RELEASE]; and in between each milestone and/or RC for users who are tracking next-generation development, e.g. http://docs.spring.io/spring-framework/docs/3.2.0.RC2_to_3.2.0.RELEASE[3.2.0.RC2 to 3.2.0.RELEASE].
 
 [[migration-3.2-removals-and-deprecations]]
 ==== Deprecations
-The following packages and types have been wholly or partially deprecated in Spring Framework 3.2 and may be removed in a future version. Click through to the linked Javadoc for each item for exact details. See also the  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/deprecated-list.html[complete list of deprecations] in the framework.
+The following packages and types have been wholly or partially deprecated in Spring Framework 3.2 and may be removed in a future version. Click through to the linked Javadoc for each item for exact details. See also the  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/deprecated-list.html[complete list of deprecations] in the framework.
 
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/orm/ibatis/package-summary.html[org.springframework.orm.ibatis]
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/scheduling/backportconcurrent/package-summary.html[org.springframework.scheduling.backportconcurrent]
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/ejb/support/package-summary.html[org.springframework.ejb.support]
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/http/converter/xml/XmlAwareFormHttpMessageConverter.html[org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter]
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/jsf/DelegatingVariableResolver.html[org.springframework.web.jsf.DelegatingVariableResolver]
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/jsf/SpringBeanVariableResolver.html[org.springframework.web.jsf.SpringBeanVariableResolver]
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/ui/velocity/CommonsLoggingLogSystem.html[org.springframework.ui.velocity.CommonsLoggingLogSystem]
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/ui/velocity/VelocityEngineUtils.html[org.springframework.ui.velocity.VelocityEngineUtils]
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/beans/factory/config/BeanReferenceFactoryBean.html[org.springframework.beans.factory.config.BeanReferenceFactoryBean]
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/beans/factory/config/CommonsLogFactoryBean.html[org.springframework.beans.factory.config.CommonsLogFactoryBean]
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/instrument/classloading/oc4j/OC4JLoadTimeWeaver.html[org.springframework.beans.instrument.classloading.oc4j.OC4JLoadTimeWeaver]
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/transaction/jta/OC4JJtaTransactionManager.html[org.springframework.transaction.jta.OC4JJtaTransactionManager]
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/util/ExpressionEvaluationUtils.html[org.springframework.web.util.ExpressionEvaluationUtils]
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/servlet/mvc/annotation/AnnotationMethodHandlerAdapter.html[org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter]
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/servlet/mvc/annotation/AnnotationMethodHandlerExceptionResolver.html[org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver]
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/servlet/mvc/annotation/DefaultAnnotationHandlerMapping.html[org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping]
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/servlet/mvc/annotation/ServletAnnotationMappingUtils.html[org.springframework.web.servlet.mvc.annotation.ServletAnnotationMappingUtils]
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/jmx/support/MBeanRegistrationSupport.html[org.springframework.jmx.support.MBeanRegistrationSupport]
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/test/context/ContextConfigurationAttributes.html[org.springframework.test.context.ContextConfigurationAttributes]
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/test/context/junit4/AbstractTransactionalJUnit4SpringContextTests.html[org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests]: use of the `simpleJdbcTemplate` instance variable has been deprecated in favor of the new `jdbcTemplate` instance variable.
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/test/context/testng/AbstractTransactionalTestNGSpringContextTests.html[org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests]: use of the `simpleJdbcTemplate` instance variable has been deprecated in favor of the new `jdbcTemplate` instance variable.
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/test/jdbc/SimpleJdbcTestUtils.html[org.springframework.test.jdbc.SimpleJdbcTestUtils] has been deprecated in favor of `JdbcTestUtils` which now contains all of the functionality previously available in `SimpleJdbcTestUtils`.
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/servlet/view/ContentNegotiatingViewResolver.html[org.springframework.web.servlet.view.ContentNegotiatingViewResolver]
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/transaction/interceptor/TransactionAspectUtils.html[org.springframework.transaction.interceptor.TransactionAspectUtils]
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/http/HttpStatus.html[org.springframework.http.HttpStatus]
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/util/UriUtils.html[org.springframework.web.util.UriUtils]
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/orm/jpa/vendor/TopLinkJpaDialect.html[org.springframework.orm.jpa.vendor.TopLinkJpaDialect]
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/orm/jpa/vendor/TopLinkJpaVendorAdapter.html[org.springframework.orm.jpa.vendor.TopLinkJpaVendorAdapter]
-*  http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/util/CachingMapDecorator.html[org.springframework.orm.util.CachingMapDecorator]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/orm/ibatis/package-summary.html[org.springframework.orm.ibatis]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/scheduling/backportconcurrent/package-summary.html[org.springframework.scheduling.backportconcurrent]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/ejb/support/package-summary.html[org.springframework.ejb.support]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/http/converter/xml/XmlAwareFormHttpMessageConverter.html[org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/jsf/DelegatingVariableResolver.html[org.springframework.web.jsf.DelegatingVariableResolver]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/jsf/SpringBeanVariableResolver.html[org.springframework.web.jsf.SpringBeanVariableResolver]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/ui/velocity/CommonsLoggingLogSystem.html[org.springframework.ui.velocity.CommonsLoggingLogSystem]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/ui/velocity/VelocityEngineUtils.html[org.springframework.ui.velocity.VelocityEngineUtils]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/beans/factory/config/BeanReferenceFactoryBean.html[org.springframework.beans.factory.config.BeanReferenceFactoryBean]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/beans/factory/config/CommonsLogFactoryBean.html[org.springframework.beans.factory.config.CommonsLogFactoryBean]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/instrument/classloading/oc4j/OC4JLoadTimeWeaver.html[org.springframework.beans.instrument.classloading.oc4j.OC4JLoadTimeWeaver]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/transaction/jta/OC4JJtaTransactionManager.html[org.springframework.transaction.jta.OC4JJtaTransactionManager]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/util/ExpressionEvaluationUtils.html[org.springframework.web.util.ExpressionEvaluationUtils]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/servlet/mvc/annotation/AnnotationMethodHandlerAdapter.html[org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/servlet/mvc/annotation/AnnotationMethodHandlerExceptionResolver.html[org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/servlet/mvc/annotation/DefaultAnnotationHandlerMapping.html[org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/servlet/mvc/annotation/ServletAnnotationMappingUtils.html[org.springframework.web.servlet.mvc.annotation.ServletAnnotationMappingUtils]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/jmx/support/MBeanRegistrationSupport.html[org.springframework.jmx.support.MBeanRegistrationSupport]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/test/context/ContextConfigurationAttributes.html[org.springframework.test.context.ContextConfigurationAttributes]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/test/context/junit4/AbstractTransactionalJUnit4SpringContextTests.html[org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests]: use of the `simpleJdbcTemplate` instance variable has been deprecated in favor of the new `jdbcTemplate` instance variable.
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/test/context/testng/AbstractTransactionalTestNGSpringContextTests.html[org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests]: use of the `simpleJdbcTemplate` instance variable has been deprecated in favor of the new `jdbcTemplate` instance variable.
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/test/jdbc/SimpleJdbcTestUtils.html[org.springframework.test.jdbc.SimpleJdbcTestUtils] has been deprecated in favor of `JdbcTestUtils` which now contains all of the functionality previously available in `SimpleJdbcTestUtils`.
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/servlet/view/ContentNegotiatingViewResolver.html[org.springframework.web.servlet.view.ContentNegotiatingViewResolver]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/transaction/interceptor/TransactionAspectUtils.html[org.springframework.transaction.interceptor.TransactionAspectUtils]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/http/HttpStatus.html[org.springframework.http.HttpStatus]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/util/UriUtils.html[org.springframework.web.util.UriUtils]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/orm/jpa/vendor/TopLinkJpaDialect.html[org.springframework.orm.jpa.vendor.TopLinkJpaDialect]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/orm/jpa/vendor/TopLinkJpaVendorAdapter.html[org.springframework.orm.jpa.vendor.TopLinkJpaVendorAdapter]
+*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/util/CachingMapDecorator.html[org.springframework.orm.util.CachingMapDecorator]
 
 [[xsd-config]]
 == XML Schema-based configuration
@@ -33895,9 +33895,9 @@ The following XML Schema-based version is more concise and clearly expresses the
 
 [[xsd-config-body-schemas-util-frfb]]
 ====== Setting a bean property or constructor arg from a field value
-http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html[`FieldRetrievingFactoryBean`] is a `FactoryBean` which retrieves a `static` or non-static field value. It is typically used for retrieving `public` `static` `final` constants, which may then be used to set a property value or constructor arg for another bean.
+http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html[`FieldRetrievingFactoryBean`] is a `FactoryBean` which retrieves a `static` or non-static field value. It is typically used for retrieving `public` `static` `final` constants, which may then be used to set a property value or constructor arg for another bean.
 
-Find below an example which shows how a `static` field is exposed, by using the  http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html#setStaticField(java.lang.String)[`staticField`] property:
+Find below an example which shows how a `static` field is exposed, by using the  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html#setStaticField(java.lang.String)[`staticField`] property:
 
 [source,xml]
 [subs="verbatim,quotes"]
@@ -33930,7 +33930,7 @@ This does mean that there is no longer any choice in what the bean id is (so any
 </bean>
 ----
 
-It is also possible to access a non-static (instance) field of another bean, as described in the API documentation for the http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html[`FieldRetrievingFactoryBean`] class.
+It is also possible to access a non-static (instance) field of another bean, as described in the API documentation for the http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html[`FieldRetrievingFactoryBean`] class.
 
 Injecting enum values into beans as either property or constructor arguments is very easy to do in Spring, in that you don't actually have to __do__ anything or know anything about the Spring internals (or even about classes such as the `FieldRetrievingFactoryBean`). Let's look at an example to see how easy injecting an enum value is; consider this JDK 5 enum:
 
