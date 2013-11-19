@@ -1,23 +1,5 @@
 = Spring Framework Reference Documentation
-:author: Rod Johnson; Juergen Hoeller; Keith Donald; Colin Sampaleanu; Rob Harrop; +
-         Thomas Risberg; Alef Arendsen; Darren Davison; Dmitriy Kopylenko; +
-         Mark Pollack; Thierry Templier; Erwin Vervaet; Portia Tung; Ben Hale; +
-         Adrian Colyer; John Lewis; Costin Leau; Mark Fisher; Sam Brannen; +
-         Ramnivas Laddad; Arjen Poutsma; Chris Beams; Tareq Abedrabbo; Andy Clement; +
-         Dave Syer; Oliver Gierke; Rossen Stoyanchev; Phillip Webb; Rob Winch
-:doctype: book
-
-Core support for dependency injection, transaction management, web applications, data
-access, messaging, testing and more.
-
-__Copies of this document may be made for your own use and for distribution to others,
-provided that you do not charge any fee for such copies and further provided that each
-copy contains this Copyright Notice, whether distributed in print or electronically.__
-
-
-
-
-
+Rod Johnson; Juergen Hoeller; Keith Donald; Colin Sampaleanu; Rob Harrop; Thomas Risberg; Alef Arendsen; Darren Davison; Dmitriy Kopylenko; Mark Pollack; Thierry Templier; Erwin Vervaet; Portia Tung; Ben Hale; Adrian Colyer; John Lewis; Costin Leau; Mark Fisher; Sam Brannen; Ramnivas Laddad; Arjen Poutsma; Chris Beams; Tareq Abedrabbo; Andy Clement; Dave Syer; Oliver Gierke; Rossen Stoyanchev; Phillip Webb; Rob Winch
 
 
 
@@ -25,6 +7,9 @@ copy contains this Copyright Notice, whether distributed in print or electronica
 
 [[spring-introduction]]
 = Overview of Spring Framework
+
+[partintro]
+--
 The Spring Framework is a lightweight solution and a potential one-stop-shop for
 building your enterprise-ready applications. However, Spring is modular, allowing you to
 use only those parts that you need, without having to bring in the rest. You can use the
@@ -44,6 +29,7 @@ your code base.
 This document is a reference guide to Spring Framework features. If you have any
 requests, comments, or questions on this document, please post them on the user mailing
 list or on the support forums at http://forum.spring.io/[].
+--
 
 
 
@@ -71,7 +57,6 @@ Examples of how you, as an application developer, can use the Spring platform ad
 
 
 [[overview-dependency-injection]]
-
 === Dependency Injection and Inversion of Control
 
 [[background-ioc]]
@@ -339,7 +324,7 @@ there are some pros and cons between them. In general, pick one place or the oth
 your project; do not mix them. This is particularly important since EBR artifacts
 necessarily use a different naming convention than Maven Central artifacts.
 
-[[TABLE-ID]]
+[[dependency-comparison-of-maven-central-and-ebr-tbl]]
 .Comparison of Maven Central and SpringSource EBR Repositories
 |===
 | Feature| Maven Central| EBR
@@ -1700,6 +1685,8 @@ support (next to the existing AspectJ 1.6 support).
 
 [[spring-core]]
 = Core Technologies
+[partintro]
+--
 This part of the reference documentation covers all of those technologies that are
 absolutely integral to the Spring Framework.
 
@@ -1730,7 +1717,7 @@ testing will hopefully convince you of this as well.
 * <<aop>>
 * <<aop-api>>
 * <<testing>>
-
+--
 
 
 
@@ -11825,7 +11812,7 @@ In addition to standard relational operators SpEL supports the
         'instanceof' and regular expression based 'matches' operator.
 
 [source,java]
-[subs="verbatim,quotes"]
+[subs="none"]
 ----
 // evaluates to false
 boolean falseValue = parser.parseExpression("'xyz' instanceof T(int)").getValue(Boolean.class);
@@ -21078,6 +21065,8 @@ Consult the following resources for more information about testing:
 
 [[spring-data-tier]]
 = Data Access
+[partintro]
+--
 This part of the reference documentation is concerned with data access and the
 interaction between the data access layer and the business or service layer.
 
@@ -21090,7 +21079,7 @@ that the Spring Framework integrates with.
 * <<jdbc>>
 * <<orm>>
 * <<oxm>>
-
+--
 
 
 
@@ -28189,7 +28178,8 @@ within Web services.
 
 [[spring-web]]
 = The Web
-
+[partintro]
+--
 This part of the reference documentation covers the Spring Framework's support for the
 presentation tier (and specifically web-based presentation tiers).
 
@@ -28204,7 +28194,7 @@ This section concludes with coverage of Spring's MVC <<portlet,portlet framework
 * <<view>>
 * <<web-integration>>
 * <<portlet>>
-
+--
 
 
 
@@ -37535,6 +37525,8 @@ Some older portals have been known to corrupt the definition of the
 
 [[spring-integration]]
 = Integration
+[partintro]
+--
 This part of the reference documentation covers the Spring Framework's integration with
 a number of Java EE (and related) technologies.
 
@@ -37547,7 +37539,7 @@ a number of Java EE (and related) technologies.
 * <<scheduling>>
 * <<dynamic-language>>
 * <<cache>>
-
+--
 
 
 
@@ -38511,7 +38503,7 @@ Invoking RESTful services in Java is typically done using a helper class such as
 Commons `HttpClient`. For common REST operations this approach is too low level as shown
 below.
 
-[source]
+[source,java]
 [subs="verbatim,quotes"]
 ----
 String uri = "http://example.com/hotels/1/bookings";
@@ -38534,7 +38526,7 @@ RestTemplate provides higher level methods that correspond to each of the six ma
 methods that make invoking many RESTful services a one-liner and enforce REST best
 practices.
 
-[[TABLE-ID]]
+[[rest-overview-of-resttemplate-methods-tbl]]
 .Overview of RestTemplate methods
 [cols="1,3"]
 |===
