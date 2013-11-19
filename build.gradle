@@ -17,6 +17,7 @@ configure(allprojects) { project ->
 	ext.hsqldbVersion   = "1.8.0.10"
 	ext.junitVersion    = "4.11"
 	ext.slf4jVersion    = "1.6.1"
+	ext.jettyVersion    = "9.1.0.v20131115"
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
 	apply plugin: "propdeps"
@@ -388,10 +389,10 @@ project("spring-messaging") {
 		optional("com.fasterxml.jackson.core:jackson-databind:2.2.2")
 		optional("org.projectreactor:reactor-core:1.0.0.RELEASE")
 		optional("org.projectreactor:reactor-tcp:1.0.0.RELEASE")
-		optional("org.eclipse.jetty.websocket:websocket-server:9.1.0.RC0") {
+		optional("org.eclipse.jetty.websocket:websocket-server:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
 		}
-		optional("org.eclipse.jetty.websocket:websocket-client:9.1.0.RC0")
+		optional("org.eclipse.jetty.websocket:websocket-client:${jettyVersion}")
 		testCompile(project(":spring-test"))
 		testCompile("com.thoughtworks.xstream:xstream:1.4.4")
 		testCompile("commons-dbcp:commons-dbcp:1.2.2")
@@ -403,7 +404,7 @@ project("spring-messaging") {
 			exclude group: "org.springframework", module: "spring-context"
 		}
 		testCompile("org.apache.activemq:activemq-stomp:5.8.0")
-		testCompile("org.eclipse.jetty:jetty-webapp:9.1.0.RC0") {
+		testCompile("org.eclipse.jetty:jetty-webapp:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
 		}
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:8.0.0-RC5")
@@ -555,10 +556,10 @@ project("spring-web") {
 		optional("org.codehaus.jackson:jackson-mapper-asl:1.9.12")
 		optional("com.fasterxml.jackson.core:jackson-databind:2.2.2")
 		optional("taglibs:standard:1.1.2")
-		optional("org.eclipse.jetty:jetty-servlet:9.1.0.RC0") {
+		optional("org.eclipse.jetty:jetty-servlet:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
 		}
-		optional("org.eclipse.jetty:jetty-server:9.1.0.RC0") {
+		optional("org.eclipse.jetty:jetty-server:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
 		}
 		optional("log4j:log4j:1.2.17")
@@ -588,13 +589,13 @@ project("spring-websocket") {
 		}
 		optional("org.glassfish.tyrus:tyrus-websocket-core:1.2.1")
 		optional("org.glassfish.tyrus:tyrus-container-servlet:1.2.1")
-		optional("org.eclipse.jetty:jetty-webapp:9.1.0.RC0") {
+		optional("org.eclipse.jetty:jetty-webapp:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet"
 		}
-		optional("org.eclipse.jetty.websocket:websocket-server:9.1.0.RC0") {
+		optional("org.eclipse.jetty.websocket:websocket-server:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet"
 		}
-		optional("org.eclipse.jetty.websocket:websocket-client:9.1.0.RC0")
+		optional("org.eclipse.jetty.websocket:websocket-client:${jettyVersion}")
 		optional("com.fasterxml.jackson.core:jackson-databind:2.2.2")
 		optional("org.codehaus.jackson:jackson-mapper-asl:1.9.12")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:8.0.0-RC5")
@@ -686,10 +687,10 @@ project("spring-webmvc") {
 			exclude group: "xom", module: "xom"
 			exclude group: "xerces", module: "xercesImpl"
 		}
-		testCompile("org.eclipse.jetty:jetty-servlet:9.1.0.RC0") {
+		testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet"
 		}
-		testCompile("org.eclipse.jetty:jetty-server:9.1.0.RC0") {
+		testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet"
 		}
 		testCompile("javax.validation:validation-api:1.0.0.GA")
