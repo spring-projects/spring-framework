@@ -288,7 +288,7 @@ In general, Spring publishes its artifacts to four different places:
   files are in the same form as the community download (
   `org.springframework.*-<version>.jar`), and the dependencies are also in this "long"
   form, with external libraries (not from SpringSource) having the prefix
-  `com.springsource`. See the http://www.springsource.com/repository/app/faq[FAQ] for
+  `com.springsource`. See the http://ebr.springsource.com/repository/app/faq[FAQ] for
   more information.
 * In a public Maven repository hosted on Amazon S3 for development snapshots and
   milestone releases (a copy of the final releases is also held here). The jar file
@@ -356,7 +356,7 @@ necessarily use a different naming convention than Maven Central artifacts.
 
 | Search Utilities
 | Various
-| http://www.springsource.com/repository[http://www.springsource.com/repository]
+| http://ebr.springsource.com/repository/app/[http://ebr.springsource.com/repository/app/]
 
 | Integration with SpringSource Tools
 | Integration through STS with Maven dependency management
@@ -479,9 +479,9 @@ important):
 
 If you are managing your dependencies by hand, the URL in the repository declaration
 above is not browsable, but there is a user interface at
-http://www.springsource.com/repository[http://www.springsource.com/repository] that can
-be used to search for and download dependencies. It also has handy snippets of Maven and
-Ivy configuration that you can copy and paste if you are using those tools.
+http://ebr.springsource.com/repository/app/[http://ebr.springsource.com/repository/app/]
+that can be used to search for and download dependencies. It also has handy snippets of
+Maven and Ivy configuration that you can copy and paste if you are using those tools.
 
 [[overview-ivy-dependency-management]]
 ===== Ivy Dependency Management
@@ -788,7 +788,7 @@ by http://jira.springframework.org/[raising an issue].
 [[new-in-3.0-new-tutorial]]
 === New articles and tutorials
 There are many excellent articles and tutorials that show how to get started with Spring
-Framework 3 features. Read them at thehttps://spring.io/docs[Spring Documentation] page.
+Framework 3 features. Read them at the http://spring.io/docs[Spring Documentation] page.
 
 The samples have been improved and updated to take advantage of the new features in
 Spring Framework 3. Additionally, the samples have been moved out of the source tree
@@ -1085,7 +1085,7 @@ fully-qualified class names are given. See also <<migration-3.1>>
 [[new-in-3.1-cache-abstraction]]
 === Cache Abstraction
 * <<cache>>
-* http://blog.springsource.com/2011/02/23/spring-3-1-m1-caching/[Cache Abstraction]
+* http://spring.io/blog/2011/02/23/spring-3-1-m1-cache-abstraction/[Cache Abstraction]
   (SpringSource team blog)
 
 [[new-in-3.1-bean-definition-profiles]]
@@ -1574,7 +1574,7 @@ In most application scenarios, explicit user code is not required to instantiate
 more instances of a Spring IoC container. For example, in a web application scenario, a
 simple eight (or so) lines of boilerplate J2EE web descriptor XML in the `web.xml` file
 of the application will typically suffice (see <<context-create>>). If you are using the
- https://spring.io/tools/sts[SpringSource Tool Suite] Eclipse-powered development
+http://spring.io/tools/sts[SpringSource Tool Suite] Eclipse-powered development
 environment or  https://github.com/spring-projects/spring-roo[Spring Roo] this
 boilerplate configuration can be easily created with few mouse clicks or keystrokes.
 
@@ -3546,9 +3546,7 @@ The interested reader may also find the `ServiceLocatorFactoryBean` (in the
 ServiceLocatorFactoryBean is similar to that of another utility class,
 `ObjectFactoryCreatingFactoryBean`, but it allows you to specify your own lookup
 interface as opposed to a Spring-specific lookup interface. Consult the JavaDocs for
-these classes as well as this
-http://blog.arendsen.net/index.php/2006/10/05/on-the-servicelocatorfactorybean-dlas-and-the-sustainability-of-code-and-design/[blog
-entry] for additional information ServiceLocatorFactoryBean.
+these classes for additional information.
 ====
 
 [[beans-factory-arbitrary-method-replacement]]
@@ -22278,7 +22276,7 @@ developer.
 | Action| Spring| You
 
 | Define connection parameters.
-| ____
+|
 | X
 
 | Open the connection.
@@ -28847,7 +28845,7 @@ produced result.
 
 Explaining the motivation for async request processing and when or why to use it are
 beyond the scope of this document. For further information you may wish to read
-https://spring.io/blog/2012/05/06/spring-mvc-3-2-preview-introducing-servlet-3-async-support[this
+http://spring.io/blog/2012/05/07/spring-mvc-3-2-preview-introducing-servlet-3-async-support[this
 blog post series].
 
 [[mvc-ann-async-exceptions]]
@@ -31151,7 +31149,7 @@ Or in XML:
 See the following links and pointers for more resources about Spring Web MVC:
 
 * There are many excellent articles and tutorials that show how to build web
-  applications with Spring MVC. Read them at the  https://spring.io/docs[Spring
+  applications with Spring MVC. Read them at the  http://spring.io/docs[Spring
   Documentation] page.
 * "Expert Spring Web MVC and Web Flow" by Seth Ladd and others (published by Apress) is
   an excellent hard copy source of Spring Web MVC goodness.
@@ -33501,7 +33499,7 @@ object after the method returns.
 
 For an example of creating an Atom view please refer to Alef Arendsen's SpringSource
 Team Blog
-http://blog.springsource.com/2009/03/16/adding-an-atom-view-to-an-application-using-springs-rest-support/[entry].
+http://spring.io/blog/2009/03/16/adding-an-atom-view-to-an-application-using-spring-s-rest-support[entry].
 
 [[view-xml-marshalling]]
 === XML Marshalling View
@@ -33554,7 +33552,7 @@ For more information about SWF, consult the Spring Web Flow website.
 
 This chapter details Spring's integration with third party web frameworks such as
 http://java.sun.com/javaee/javaserverfaces/[JSF], http://struts.apache.org/[Struts],
-http://www.opensymphony.com/webwork/[WebWork], and
+http://en.wikipedia.org/wiki/WebWork[WebWork], and
 http://tapestry.apache.org/[Tapestry].
 
 One of the core value propositions of the Spring Framework is that of enabling
@@ -45949,44 +45947,44 @@ http://docs.spring.io/spring-framework/docs/3.2.0.RC2_to_3.2.0.RELEASE[3.2.0.RC2
 The following packages and types have been wholly or partially deprecated in Spring
 Framework 3.2 and may be removed in a future version. Click through to the linked
 Javadoc for each item for exact details. See also the
-http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/deprecated-list.html[complete
+http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/deprecated-list.html[complete
 list of deprecations] in the framework.
 
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/orm/ibatis/package-summary.html[org.springframework.orm.ibatis]
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/scheduling/backportconcurrent/package-summary.html[org.springframework.scheduling.backportconcurrent]
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/ejb/support/package-summary.html[org.springframework.ejb.support]
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/http/converter/xml/XmlAwareFormHttpMessageConverter.html[org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter]
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/jsf/DelegatingVariableResolver.html[org.springframework.web.jsf.DelegatingVariableResolver]
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/jsf/SpringBeanVariableResolver.html[org.springframework.web.jsf.SpringBeanVariableResolver]
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/ui/velocity/CommonsLoggingLogSystem.html[org.springframework.ui.velocity.CommonsLoggingLogSystem]
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/ui/velocity/VelocityEngineUtils.html[org.springframework.ui.velocity.VelocityEngineUtils]
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/beans/factory/config/BeanReferenceFactoryBean.html[org.springframework.beans.factory.config.BeanReferenceFactoryBean]
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/beans/factory/config/CommonsLogFactoryBean.html[org.springframework.beans.factory.config.CommonsLogFactoryBean]
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/instrument/classloading/oc4j/OC4JLoadTimeWeaver.html[org.springframework.beans.instrument.classloading.oc4j.OC4JLoadTimeWeaver]
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/transaction/jta/OC4JJtaTransactionManager.html[org.springframework.transaction.jta.OC4JJtaTransactionManager]
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/util/ExpressionEvaluationUtils.html[org.springframework.web.util.ExpressionEvaluationUtils]
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/servlet/mvc/annotation/AnnotationMethodHandlerAdapter.html[org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter]
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/servlet/mvc/annotation/AnnotationMethodHandlerExceptionResolver.html[org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver]
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/servlet/mvc/annotation/DefaultAnnotationHandlerMapping.html[org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping]
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/servlet/mvc/annotation/ServletAnnotationMappingUtils.html[org.springframework.web.servlet.mvc.annotation.ServletAnnotationMappingUtils]
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/jmx/support/MBeanRegistrationSupport.html[org.springframework.jmx.support.MBeanRegistrationSupport]
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/test/context/ContextConfigurationAttributes.html[org.springframework.test.context.ContextConfigurationAttributes]
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/test/context/junit4/AbstractTransactionalJUnit4SpringContextTests.html[org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests]:
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/orm/ibatis/package-summary.html[org.springframework.orm.ibatis]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/scheduling/backportconcurrent/package-summary.html[org.springframework.scheduling.backportconcurrent]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/ejb/support/package-summary.html[org.springframework.ejb.support]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/http/converter/xml/XmlAwareFormHttpMessageConverter.html[org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/jsf/DelegatingVariableResolver.html[org.springframework.web.jsf.DelegatingVariableResolver]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/jsf/SpringBeanVariableResolver.html[org.springframework.web.jsf.SpringBeanVariableResolver]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/ui/velocity/CommonsLoggingLogSystem.html[org.springframework.ui.velocity.CommonsLoggingLogSystem]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/ui/velocity/VelocityEngineUtils.html[org.springframework.ui.velocity.VelocityEngineUtils]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/beans/factory/config/BeanReferenceFactoryBean.html[org.springframework.beans.factory.config.BeanReferenceFactoryBean]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/beans/factory/config/CommonsLogFactoryBean.html[org.springframework.beans.factory.config.CommonsLogFactoryBean]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/instrument/classloading/oc4j/OC4JLoadTimeWeaver.html[org.springframework.beans.instrument.classloading.oc4j.OC4JLoadTimeWeaver]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/transaction/jta/OC4JJtaTransactionManager.html[org.springframework.transaction.jta.OC4JJtaTransactionManager]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/util/ExpressionEvaluationUtils.html[org.springframework.web.util.ExpressionEvaluationUtils]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/servlet/mvc/annotation/AnnotationMethodHandlerAdapter.html[org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/servlet/mvc/annotation/AnnotationMethodHandlerExceptionResolver.html[org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/servlet/mvc/annotation/DefaultAnnotationHandlerMapping.html[org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/servlet/mvc/annotation/ServletAnnotationMappingUtils.html[org.springframework.web.servlet.mvc.annotation.ServletAnnotationMappingUtils]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/jmx/support/MBeanRegistrationSupport.html[org.springframework.jmx.support.MBeanRegistrationSupport]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/test/context/ContextConfigurationAttributes.html[org.springframework.test.context.ContextConfigurationAttributes]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/test/context/junit4/AbstractTransactionalJUnit4SpringContextTests.html[org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests]:
   use of the `simpleJdbcTemplate` instance variable has been deprecated in favor of the
   new `jdbcTemplate` instance variable.
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/test/context/testng/AbstractTransactionalTestNGSpringContextTests.html[org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests]:
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/test/context/testng/AbstractTransactionalTestNGSpringContextTests.html[org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests]:
   use of the `simpleJdbcTemplate` instance variable has been deprecated in favor of the
   new `jdbcTemplate` instance variable.
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/test/jdbc/SimpleJdbcTestUtils.html[org.springframework.test.jdbc.SimpleJdbcTestUtils]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/test/jdbc/SimpleJdbcTestUtils.html[org.springframework.test.jdbc.SimpleJdbcTestUtils]
   has been deprecated in favor of `JdbcTestUtils` which now contains all of the
   functionality previously available in `SimpleJdbcTestUtils`.
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/servlet/view/ContentNegotiatingViewResolver.html[org.springframework.web.servlet.view.ContentNegotiatingViewResolver]
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/transaction/interceptor/TransactionAspectUtils.html[org.springframework.transaction.interceptor.TransactionAspectUtils]
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/http/HttpStatus.html[org.springframework.http.HttpStatus]
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/util/UriUtils.html[org.springframework.web.util.UriUtils]
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/orm/jpa/vendor/TopLinkJpaDialect.html[org.springframework.orm.jpa.vendor.TopLinkJpaDialect]
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/orm/jpa/vendor/TopLinkJpaVendorAdapter.html[org.springframework.orm.jpa.vendor.TopLinkJpaVendorAdapter]
-* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/util/CachingMapDecorator.html[org.springframework.orm.util.CachingMapDecorator]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/servlet/view/ContentNegotiatingViewResolver.html[org.springframework.web.servlet.view.ContentNegotiatingViewResolver]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/transaction/interceptor/TransactionAspectUtils.html[org.springframework.transaction.interceptor.TransactionAspectUtils]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/http/HttpStatus.html[org.springframework.http.HttpStatus]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/util/UriUtils.html[org.springframework.web.util.UriUtils]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/orm/jpa/vendor/TopLinkJpaDialect.html[org.springframework.orm.jpa.vendor.TopLinkJpaDialect]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/orm/jpa/vendor/TopLinkJpaVendorAdapter.html[org.springframework.orm.jpa.vendor.TopLinkJpaVendorAdapter]
+* http://docs.spring.io/spring/docs/3.2.0.RELEASE/javadoc-api/org/springframework/util/CachingMapDecorator.html[org.springframework.orm.util.CachingMapDecorator]
 
 [[xsd-config]]
 == XML Schema-based configuration
