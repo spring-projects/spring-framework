@@ -927,7 +927,7 @@ public class RewardsTestDatabase {
 
 [[new-java-configuration]]
 ===== Java based bean metadata
-Some core features from the  JavaConfig project have been added to the Spring Framework
+Some core features from the JavaConfig project have been added to the Spring Framework
 now. This means that the following annotations are now directly supported:
 
 * @Configuration
@@ -7647,7 +7647,7 @@ public class AppConfig {
 }
 ----
 
-Alternatively for XML configuration use the  `context:load-time-weaver` element:
+Alternatively for XML configuration use the `context:load-time-weaver` element:
 
 [source,xml]
 [subs="verbatim,quotes"]
@@ -10376,7 +10376,7 @@ will be enforced.
 
 For general information on JSR-303/JSR-349, see the http://beanvalidation.org/[Bean
 Validation website]. For information on the specific capabilities of the default
-reference implementation, see the  https://www.hibernate.org/412.html[Hibernate
+reference implementation, see the https://www.hibernate.org/412.html[Hibernate
 Validator] documentation. To learn how to setup a Bean Validation provider as a Spring
 bean, keep reading.
 
@@ -31149,7 +31149,7 @@ Or in XML:
 See the following links and pointers for more resources about Spring Web MVC:
 
 * There are many excellent articles and tutorials that show how to build web
-  applications with Spring MVC. Read them at the  http://spring.io/docs[Spring
+  applications with Spring MVC. Read them at the http://spring.io/docs[Spring
   Documentation] page.
 * "Expert Spring Web MVC and Web Flow" by Seth Ladd and others (published by Apress) is
   an excellent hard copy source of Spring Web MVC goodness.
@@ -31347,7 +31347,7 @@ page:
 where `form` is the tag name prefix you want to use for the tags from this library.
 
 [[view-jsp-formtaglib-formtag]]
-===== The  form tag
+===== The form tag
 
 This tag renders an HTML 'form' tag and exposes a binding path to inner tags for
 binding. It puts the command object in the `PageContext` so that the command object can
@@ -31436,7 +31436,7 @@ The preceding JSP assumes that the variable name of the form backing object is
 ----
 
 [[view-jsp-formtaglib-inputtag]]
-===== The  input tag
+===== The input tag
 
 This tag renders an HTML 'input' tag using the bound value and type='text' by default.
 For an example of this tag, see <<view-jsp-formtaglib-formtag>>. Starting with Spring
@@ -31444,7 +31444,7 @@ For an example of this tag, see <<view-jsp-formtaglib-formtag>>. Starting with S
 others.
 
 [[view-jsp-formtaglib-checkboxtag]]
-===== The  checkbox tag
+===== The checkbox tag
 
 This tag renders an HTML 'input' tag with type 'checkbox'.
 
@@ -31563,7 +31563,7 @@ telling Spring that "__the checkbox was visible in the form and I want my object
 which the form data will be bound to reflect the state of the checkbox no matter what__".
 
 [[view-jsp-formtaglib-checkboxestag]]
-===== The  checkboxes tag
+===== The checkboxes tag
 
 This tag renders multiple HTML 'input' tags with type 'checkbox'.
 
@@ -31598,7 +31598,7 @@ the label to be displayed. You can also use a custom object where you can provid
 property names for the value using "itemValue" and the label using "itemLabel".
 
 [[view-jsp-formtaglib-radiobuttontag]]
-===== The  radiobutton tag
+===== The radiobutton tag
 
 This tag renders an HTML 'input' tag with type 'radio'.
 
@@ -31616,7 +31616,7 @@ but with different values.
 ----
 
 [[view-jsp-formtaglib-radiobuttonstag]]
-===== The  radiobuttons tag
+===== The radiobuttons tag
 
 This tag renders multiple HTML 'input' tags with type 'radio'.
 
@@ -31638,7 +31638,7 @@ label using "itemLabel".
 ----
 
 [[view-jsp-formtaglib-passwordtag]]
-===== The  password tag
+===== The password tag
 
 This tag renders an HTML 'input' tag with type 'password' using the bound value.
 
@@ -31669,7 +31669,7 @@ true, like so.
 ----
 
 [[view-jsp-formtaglib-selecttag]]
-===== The  select tag
+===== The select tag
 
 This tag renders an HTML 'select' element. It supports data binding to the selected
 option as well as the use of nested `option` and `options` tags.
@@ -31702,7 +31702,7 @@ like:
 ----
 
 [[view-jsp-formtaglib-optiontag]]
-===== The  option tag
+===== The option tag
 
 This tag renders an HTML 'option'. It sets 'selected' as appropriate based on the bound
 value.
@@ -31743,7 +31743,7 @@ like:
 ----
 
 [[view-jsp-formtaglib-optionstag]]
-===== The  options tag
+===== The options tag
 
 This tag renders a list of HTML 'option' tags. It sets the 'selected' attribute as
 appropriate based on the bound value.
@@ -31794,7 +31794,7 @@ happen to be specified as well, the item value property will apply to the map ke
 the item label property will apply to the map value.
 
 [[view-jsp-formtaglib-textAreatag]]
-===== The  textarea tag
+===== The textarea tag
 
 This tag renders an HTML 'textarea'.
 
@@ -31809,7 +31809,7 @@ This tag renders an HTML 'textarea'.
 ----
 
 [[view-jsp-formtaglib-hiddeninputtag]]
-===== The  hidden tag
+===== The hidden tag
 
 This tag renders an HTML 'input' tag with type 'hidden' using the bound value. To submit
 an unbound hidden value, use the HTML `input` tag with type 'hidden'.
@@ -31831,7 +31831,7 @@ If we choose to submit the 'house' value as a hidden one, the HTML would look li
 ----
 
 [[view-jsp-formtaglib-errorstag]]
-===== The  errors tag
+===== The errors tag
 
 This tag renders field errors in an HTML 'span' tag. It provides access to the errors
 created in your controller or those that were created by any validators associated with
@@ -33134,7 +33134,7 @@ define a `ViewResolver` to map view names to the appropriate view class dependin
 which format you want your report rendered in.
 
 [[view-jasper-reports-configuration-resolver]]
-===== Configuring the  ViewResolver
+===== Configuring the ViewResolver
 
 Typically, you will use the `ResourceBundleViewResolver` to map view names to view
 classes and files in a properties file.
@@ -33152,7 +33152,7 @@ look for view mappings in the resource bundle with base name `views`. (The conte
 this file is described in the next section.)
 
 [[view-jasper-reports-configuration-views]]
-===== Configuring the  Views
+===== Configuring the Views
 
 The Spring Framework contains five different `View` implementations for JasperReports,
 four of which correspond to one of the four output formats supported by JasperReports,
@@ -33269,7 +33269,7 @@ So in the example above a request to URI /foo/myReport.pdf would be mapped to th
 using the `formatMappings` property of `JasperReportsMultiFormatView`.
 
 [[view-jasper-reports-model]]
-==== Populating the  ModelAndView
+==== Populating the ModelAndView
 
 In order to render your report correctly in the format you have chosen, you must supply
 Spring with all of the data needed to populate your report. For JasperReports this means
@@ -34638,7 +34638,7 @@ Portlet MVC uses. These bean scopes are described in detail in
 <<beans-factory-scopes-other>>
 
 [[portlet-dispatcher]]
-=== The  DispatcherPortlet
+=== The DispatcherPortlet
 
 Portlet MVC is a request-driven web MVC framework, designed around a portlet that
 dispatches requests to controllers and offers other functionality facilitating the
@@ -35253,7 +35253,7 @@ any other name, then the `DispatcherPortlet` will __not__ find your
 ====
 
 [[portlet-multipart-resolver]]
-==== Using the  PortletMultipartResolver
+==== Using the PortletMultipartResolver
 
 The following example shows how to use the `CommonsPortletMultipartResolver`:
 
@@ -36023,7 +36023,7 @@ such additional invocation context when using the RMI invoker, so you can for ex
 plug in security frameworks or custom security credentials here.
 
 [[remoting-rmi-server]]
-==== Exporting the service using the  RmiServiceExporter
+==== Exporting the service using the RmiServiceExporter
 
 Using the `RmiServiceExporter`, we can expose the interface of our AccountService object
 as RMI object. The interface can be accessed by using `RmiProxyFactoryBean`, or via
@@ -36113,7 +36113,7 @@ Hessian offers a binary HTTP-based remoting protocol. It is developed by Caucho 
 information about Hessian itself can be found at http://www.caucho.com[].
 
 [[remoting-caucho-protocols-hessian]]
-==== Wiring up the  DispatcherServlet for Hessian and co.
+==== Wiring up the DispatcherServlet for Hessian and co.
 
 Hessian communicates via HTTP and does so using a custom servlet. Using Spring's
 `DispatcherServlet` principles, as known from Spring Web MVC usage, you can easily wire
@@ -36147,7 +36147,7 @@ pointing to specific exporter beans. Each servlet name needs to match the bean n
 its target exporter in this case.
 
 [[remoting-caucho-protocols-hessian-server]]
-==== Exposing your beans by using the  HessianServiceExporter
+==== Exposing your beans by using the HessianServiceExporter
 
 In the newly created application context called `remoting-servlet.xml`, we'll create a
 `HessianServiceExporter` exporting your services:
@@ -37860,7 +37860,7 @@ Please refer to the Spring Javadoc of the various message listener containers fo
 description of the features supported by each implementation.
 
 [[jms-receiving-async-session-aware-message-listener]]
-==== The  SessionAwareMessageListener interface
+==== the SessionAwareMessageListener interface
 
 The `SessionAwareMessageListener` interface is a Spring-specific interface that provides
 a similar contract to the JMS `MessageListener` interface, but also provides the message
@@ -37893,7 +37893,7 @@ interface, when using the `SessionAwareMessageListener` interface, it is the
 responsibility of the client code to handle any exceptions thrown.
 
 [[jms-receiving-async-message-listener-adapter]]
-==== The  MessageListenerAdapter
+==== the MessageListenerAdapter
 
 The `MessageListenerAdapter` class is the final component in Spring's asynchronous
 messaging support: in a nutshell, it allows you to expose almost __any__ class as a MDP
@@ -38739,7 +38739,7 @@ attributes and operations, Spring JMX provides a comprehensive and extensible me
 for controlling the management interfaces of your beans.
 
 [[jmx-interface-assembler]]
-==== The  MBeanInfoAssembler Interface
+==== the MBeanInfoAssembler Interface
 
 Behind the scenes, the `MBeanExporter` delegates to an implementation of the
 `org.springframework.jmx.export.assembler.MBeanInfoAssembler` interface which is
@@ -38966,7 +38966,7 @@ metadata types:
 |===
 
 [[jmx-interface-autodetect]]
-==== The  AutodetectCapableMBeanInfoAssembler interface
+==== the AutodetectCapableMBeanInfoAssembler interface
 
 To simplify configuration even further, Spring introduces the
 `AutodetectCapableMBeanInfoAssembler` interface which extends the `MBeanInfoAssembler`
@@ -39129,7 +39129,7 @@ the `methodMappings` property of `MethodNameMBeanInfoAssembler` to map bean name
 lists of method names.
 
 [[jmx-naming]]
-=== Controlling the  ObjectNames for your beans
+=== Controlling the ObjectNames for your beans
 
 Behind the scenes, the `MBeanExporter` delegates to an implementation of the
 `ObjectNamingStrategy` to obtain `ObjectName` s for each of the beans it is registering.
@@ -39196,7 +39196,7 @@ If no entry in the `Properties` instance can be found then the bean key name is 
 the `ObjectName`.
 
 [[jmx-naming-metadata]]
-==== Using the  MetadataNamingStrategy
+==== Using the MetadataNamingStrategy
 
 The `MetadataNamingStrategy` uses the `objectName` property of the `ManagedResource`
 attribute on each bean to create the `ObjectName`. The code below shows the
@@ -40035,7 +40035,7 @@ public class MyRecordExtractor implements RecordExtractor {
 ----
 
 [[cci-using-template]]
-==== The  CciTemplate
+==== the CciTemplate
 
 The `CciTemplate` is the central class of the core CCI support package (
 `org.springframework.jca.cci.core`). It simplifies the use of CCI since it handles the
@@ -40943,7 +40943,7 @@ Find below the bean definitions for the above code:
 ----
 
 [[mail-usage-mime]]
-==== Using the  JavaMailSender and the MimeMessagePreparator
+==== Using the JavaMailSender and the MimeMessagePreparator
 
 Here is another implementation of `OrderManager` using the `MimeMessagePreparator`
 callback interface. Please note in this case that the `mailSender` property is of type
@@ -41437,7 +41437,7 @@ methods are for simple, periodic execution, but the method that accepts a Trigge
 much more flexible.
 
 [[scheduling-trigger-interface]]
-==== The  Trigger interface
+==== the Trigger interface
 
 The `Trigger` interface is essentially inspired by JSR-236, which, as of Spring 3.0, has
 not yet been officially implemented. The basic idea of the `Trigger` is that execution
@@ -41920,7 +41920,7 @@ of the job, respectively. By default, the name of the job matches the bean name 
 job detail bean (in the example above, this is `exampleJob`).__
 
 [[scheduling-quartz-method-invoking-job]]
-==== Using the  MethodInvokingJobDetailFactoryBean
+==== Using the MethodInvokingJobDetailFactoryBean
 
 Often you just need to invoke a method on a specific object. Using the
 `MethodInvokingJobDetailFactoryBean` you can do exactly this:
@@ -41984,7 +41984,7 @@ By default, jobs will run in a concurrent fashion.
 ====
 
 [[scheduling-quartz-cron]]
-==== Wiring up jobs using triggers and the  SchedulerFactoryBean
+==== Wiring up jobs using triggers and the SchedulerFactoryBean
 
 We've created job details and jobs. We've also reviewed the convenience bean that allows
 you to invoke a method on a specific object. Of course, we still need to schedule the
@@ -42878,7 +42878,7 @@ cases for the dynamic language support in Spring.
 [[dynamic-language-scenarios-controllers]]
 ==== Scripted Spring MVC Controllers
 One group of classes that may benefit from using dynamic-language-backed beans is that
-of Spring MVC controllers. In pure Spring MVC applications, the  navigational flow
+of Spring MVC controllers. In pure Spring MVC applications, the navigational flow
 through a web application is to a large extent determined by code encapsulated within
 your Spring MVC controllers. As the navigational flow and other presentation layer logic
 of a web application needs to be updated to respond to support issues or changing
@@ -43744,7 +43744,7 @@ Spring application. For the currently recommended usage patterns, please refer t
 For the currently recommended usage patterns for Hibernate see <<orm-hibernate>>
 
 [[orm-hibernate-template]]
-===== The  HibernateTemplate
+===== the HibernateTemplate
 
 The basic programming model for templating looks as follows, for methods that can be
 part of any custom data access object or business service. There are no restrictions on
@@ -45906,7 +45906,7 @@ will need to have a subset or all of `tiles-request-api`, `tiles-api`, `tiles-co
 
 [[migration-3.2-compatibility-spring-mvc-test]]
 === Spring MVC Test standalone project
-If migrating from the  https://github.com/SpringSource/spring-test-mvc[spring-test-mvc]
+If migrating from the https://github.com/SpringSource/spring-test-mvc[spring-test-mvc]
 standalone project to the `spring-test` module in Spring Framework 3.2, you will need to
 adjust the root package to be `org.springframework.test.web.servlet`.
 
@@ -46092,7 +46092,7 @@ legal and supported) style, followed immediately by an __after__ example showing
 equivalent in the new XML Schema-based style.
 
 [[xsd-config-body-schemas-util]]
-==== The  util schema
+==== the util schema
 
 First up is coverage of the `util` tags. As the name implies, the `util` tags deal with
 common, __utility__ configuration issues, such as configuring collections, referencing
@@ -46578,7 +46578,7 @@ If no `'set-class'` attribute is supplied, a `Set` implementation will be chosen
 container.
 
 [[xsd-config-body-schemas-jee]]
-==== The  jee schema
+==== the jee schema
 
 The `jee` tags deal with Java EE (Java Enterprise Edition)-related configuration issues,
 such as looking up a JNDI object and defining EJB references.
@@ -46817,7 +46817,7 @@ After...
 ----
 
 [[xsd-config-body-schemas-lang]]
-==== The  lang schema
+==== the lang schema
 
 The `lang` tags deal with exposing objects that have been written in a dynamic language
 such as JRuby or Groovy as beans in the Spring container.
@@ -46845,7 +46845,7 @@ __http://www.springframework.org/schema/lang http://www.springframework.org/sche
 ----
 
 [[xsd-config-body-schemas-jms]]
-==== The  jms schema
+==== the jms schema
 
 The `jms` tags deal with configuring JMS-related beans such as Spring's
 <<jms-mdp,MessageListenerContainers>>. These tags are detailed in the section of the
@@ -46871,7 +46871,7 @@ __http://www.springframework.org/schema/jms http://www.springframework.org/schem
 ----
 
 [[xsd-config-body-schemas-tx]]
-==== The  tx (transaction) schema
+==== the tx (transaction) schema
 
 The `tx` tags deal with configuring all of those beans in Spring's comprehensive support
 for transactions. These tags are covered in the chapter entitled <<transaction>>.
@@ -46916,7 +46916,7 @@ using AOP). The above XML snippet contains the relevant lines needed to referenc
 ====
 
 [[xsd-config-body-schemas-aop]]
-==== The  aop schema
+==== the aop schema
 
 The `aop` tags deal with configuring all things AOP in Spring: this includes Spring's
 own proxy-based AOP framework and Spring's integration with the AspectJ AOP framework.
@@ -46941,7 +46941,7 @@ __http://www.springframework.org/schema/aop http://www.springframework.org/schem
 ----
 
 [[xsd-config-body-schemas-context]]
-==== The  context schema
+==== the context schema
 
 The `context` tags deal with `ApplicationContext` configuration that relates to plumbing
 - that is, not usually beans that are important to an end-user but rather beans that do
@@ -47014,7 +47014,7 @@ This element is detailed in <<aop-atconfigurable>>.
 This element is detailed in <<jmx-context-mbeanexport>>.
 
 [[xsd-config-body-schemas-tool]]
-==== The  tool schema
+==== the tool schema
 
 The `tool` tags are for use when you want to add tooling-specific metadata to your
 custom configuration elements. This metadata can then be consumed by tools that are
@@ -47029,7 +47029,7 @@ to this review process, then do mail the Spring mailing list. The currently supp
 distribution.
 
 [[xsd-config-body-schemas-jdbc]]
-==== The  jdbc schema
+==== the jdbc schema
 
 The `jdbc` tags allow you to quickly configure an embedded database or initialize an
 existing data source. These tags are documented in <<jdbc-embedded-database-support>>
@@ -47053,7 +47053,7 @@ __http://www.springframework.org/schema/jdbc http://www.springframework.org/sche
 ----
 
 [[xsd-config-body-schemas-cache]]
-==== The  cache schema
+==== the cache schema
 
 The `cache` tags can be used to enable support for Spring's `@CacheEvict`, `@CachePut`
 and `@Caching` annotations. It it also supports declarative XML-based caching. See
@@ -47077,7 +47077,7 @@ __http://www.springframework.org/schema/cache http://www.springframework.org/sch
 ----
 
 [[xsd-config-body-schemas-beans]]
-==== The  beans schema
+==== the beans schema
 
 Last but not least we have the tags in the `beans` schema. These are the same tags that
 have been in Spring since the very dawn of the framework. Examples of the various tags
@@ -47833,7 +47833,7 @@ This appendix describes the `spring.tld` tag library.
 * <<spring.tld.eval>>
 
 [[spring.tld.bind]]
-=== The  bind tag
+=== the bind tag
 
 Provides BindStatus object for the given bind path. The HTML escaping flag participates
 in a page-wide or application-wide setting (i.e. by HtmlEscapeTag or a
@@ -47865,7 +47865,7 @@ in a page-wide or application-wide setting (i.e. by HtmlEscapeTag or a
 |===
 
 [[spring.tld.escapeBody]]
-=== The  escapeBody tag
+=== the escapeBody tag
 
 Escapes its enclosed body content, applying HTML escaping and/or JavaScript escaping.
 The HTML escaping flag participates in a page-wide or application-wide setting (i.e. by
@@ -47890,7 +47890,7 @@ HtmlEscapeTag or a "defaultHtmlEscape" context-param in web.xml).
 |===
 
 [[spring.tld.hasBindErrors]]
-=== The  hasBindErrors tag
+=== the hasBindErrors tag
 
 Provides Errors instance in case of bind errors. The HTML escaping flag participates in
 a page-wide or application-wide setting (i.e. by HtmlEscapeTag or a "defaultHtmlEscape"
@@ -47916,7 +47916,7 @@ context-param in web.xml).
 |===
 
 [[spring.tld.htmlEscape]]
-=== The  htmlEscape tag
+=== the htmlEscape tag
 
 Sets default HTML escape value for the current page. Overrides a "defaultHtmlEscape"
 context-param in web.xml, if any.
@@ -47934,7 +47934,7 @@ context-param in web.xml, if any.
 |===
 
 [[spring.tld.message]]
-=== The  message tag
+=== the message tag
 
 Retrieves the message with the given code, or text if code isn't resolvable. The HTML
 escaping flag participates in a page-wide or application-wide setting (i.e. by
@@ -48006,7 +48006,7 @@ HtmlEscapeTag or a "defaultHtmlEscape" context-param in web.xml).
 |===
 
 [[spring.tld.nestedPath]]
-=== The  nestedPath tag
+=== the nestedPath tag
 
 Sets a nested path to be used by the bind tag's path.
 
@@ -48024,7 +48024,7 @@ Sets a nested path to be used by the bind tag's path.
 |===
 
 [[spring.tld.theme]]
-=== The  theme tag
+=== the theme tag
 
 Retrieves the theme message with the given code, or text if code isn't resolvable. The
 HTML escaping flag participates in a page-wide or application-wide setting (i.e. by
@@ -48092,7 +48092,7 @@ HtmlEscapeTag or a "defaultHtmlEscape" context-param in web.xml).
 |===
 
 [[spring.tld.transform]]
-=== The  transform tag
+=== the transform tag
 
 Provides transformation of variables to Strings, using an appropriate custom
 PropertyEditor from BindTag (can only be used inside BindTag). The HTML escaping flag
@@ -48133,7 +48133,7 @@ participates in a page-wide or application-wide setting (i.e. by HtmlEscapeTag o
 |===
 
 [[spring.tld.url]]
-=== The  url tag
+=== the url tag
 
 Creates URLs with support for URI template variables, HTML/XML escaping, and Javascript
 escaping. Modeled after the JSTL c:url tag with backwards compatibility in mind.
@@ -48183,7 +48183,7 @@ escaping. Modeled after the JSTL c:url tag with backwards compatibility in mind.
 |===
 
 [[spring.tld.eval]]
-=== The  eval tag
+=== the eval tag
 
 Evaluates a Spring expression (SpEL) and either prints the result or assigns it to a
 variable.
@@ -48256,7 +48256,7 @@ This appendix describes the `spring-form.tld` tag library.
 * <<spring-form.tld.textarea>>
 
 [[spring-form.tld.checkbox]]
-=== The  checkbox tag
+=== the checkbox tag
 
 Renders an HTML 'input' tag with type 'checkbox'.
 
@@ -48404,7 +48404,7 @@ Renders an HTML 'input' tag with type 'checkbox'.
 |===
 
 [[spring-form.tld.checkboxes]]
-=== The  checkboxes tag
+=== the checkboxes tag
 
 Renders multiple HTML 'input' tags with type 'checkbox'.
 
@@ -48571,7 +48571,7 @@ Renders multiple HTML 'input' tags with type 'checkbox'.
 |===
 
 [[spring-form.tld.errors]]
-=== The  errors tag
+=== the errors tag
 
 Renders field errors in an HTML 'span' tag.
 
@@ -48688,7 +48688,7 @@ Renders field errors in an HTML 'span' tag.
 |===
 
 [[spring-form.tld.form]]
-=== The  form tag
+=== the form tag
 
 Renders an HTML 'form' tag and exposes a binding path to inner tags for binding.
 
@@ -48840,7 +48840,7 @@ Renders an HTML 'form' tag and exposes a binding path to inner tags for binding.
 |===
 
 [[spring-form.tld.hidden]]
-=== The  hidden tag
+=== the hidden tag
 
 Renders an HTML 'input' tag with type 'hidden' using the bound value.
 
@@ -48867,7 +48867,7 @@ Renders an HTML 'input' tag with type 'hidden' using the bound value.
 |===
 
 [[spring-form.tld.input]]
-=== The  input tag
+=== the input tag
 
 Renders an HTML 'input' tag with type 'text' using the bound value.
 
@@ -49036,7 +49036,7 @@ Renders an HTML 'input' tag with type 'text' using the bound value.
 |===
 
 [[spring-form.tld.label]]
-=== The  label tag
+=== the label tag
 
 Renders a form field label in an HTML 'label' tag.
 
@@ -49153,7 +49153,7 @@ Renders a form field label in an HTML 'label' tag.
 |===
 
 [[spring-form.tld.option]]
-=== The  option tag
+=== the option tag
 
 Renders a single HTML 'option'. Sets 'selected' as appropriate based on bound value.
 
@@ -49276,7 +49276,7 @@ Renders a single HTML 'option'. Sets 'selected' as appropriate based on bound va
 |===
 
 [[spring-form.tld.options]]
-=== The  options tag
+=== the options tag
 
 Renders a list of HTML 'option' tags. Sets 'selected' as appropriate based on bound value.
 
@@ -49404,7 +49404,7 @@ Renders a list of HTML 'option' tags. Sets 'selected' as appropriate based on bo
 |===
 
 [[spring-form.tld.password]]
-=== The  password tag
+=== the password tag
 
 Renders an HTML 'input' tag with type 'password' using the bound value.
 
@@ -49578,7 +49578,7 @@ Renders an HTML 'input' tag with type 'password' using the bound value.
 |===
 
 [[spring-form.tld.radiobutton]]
-=== The  radiobutton tag
+=== the radiobutton tag
 
 Renders an HTML 'input' tag with type 'radio'.
 
@@ -49726,7 +49726,7 @@ Renders an HTML 'input' tag with type 'radio'.
 |===
 
 [[spring-form.tld.radiobuttons]]
-=== The  radiobuttons tag
+=== the radiobuttons tag
 
 Renders multiple HTML 'input' tags with type 'radio'.
 
@@ -49892,7 +49892,7 @@ Renders multiple HTML 'input' tags with type 'radio'.
 |===
 
 [[spring-form.tld.select]]
-=== The  select tag
+=== the select tag
 
 Renders an HTML 'select' element. Supports databinding to the selected option.
 
@@ -50055,7 +50055,7 @@ Renders an HTML 'select' element. Supports databinding to the selected option.
 |===
 
 [[spring-form.tld.textarea]]
-=== The  textarea tag
+=== the textarea tag
 
 Renders an HTML 'textarea'.
 
