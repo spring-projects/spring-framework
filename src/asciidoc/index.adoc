@@ -34,7 +34,7 @@ your code base.
 
 This document is a reference guide to Spring Framework features. If you have any
 requests, comments, or questions on this document, please post them on the user mailing
-list or on the support forums at  http://forum.spring.io/[].
+list or on the support forums at http://forum.spring.io/[].
 
 [[overview]]
 == Introduction to Spring Framework
@@ -288,7 +288,7 @@ In general, Spring publishes its artifacts to four different places:
   files are in the same form as the community download (
   `org.springframework.*-<version>.jar`), and the dependencies are also in this "long"
   form, with external libraries (not from SpringSource) having the prefix
-  `com.springsource`. See the  http://www.springsource.com/repository/app/faq[FAQ] for
+  `com.springsource`. See the http://www.springsource.com/repository/app/faq[FAQ] for
   more information.
 * In a public Maven repository hosted on Amazon S3 for development snapshots and
   milestone releases (a copy of the final releases is also held here). The jar file
@@ -356,7 +356,7 @@ necessarily use a different naming convention than Maven Central artifacts.
 
 | Search Utilities
 | Various
-|  http://www.springsource.com/repository[http://www.springsource.com/repository]
+| http://www.springsource.com/repository[http://www.springsource.com/repository]
 
 | Integration with SpringSource Tools
 | Integration through STS with Maven dependency management
@@ -485,7 +485,7 @@ Ivy configuration that you can copy and paste if you are using those tools.
 
 [[overview-ivy-dependency-management]]
 ===== Ivy Dependency Management
-If you prefer to use  http://ant.apache.org/ivy[Ivy] to manage dependencies then there
+If you prefer to use http://ant.apache.org/ivy[Ivy] to manage dependencies then there
 are similar names and configuration options.
 
 To configure Ivy to point to the SpringSource EBR add the following resolvers to your
@@ -667,7 +667,7 @@ platform. Allegedly there is also a performance benefit because the bindings are
 compile-time not runtime.
 
 A more common choice amongst SLF4J users, which uses fewer steps and generates fewer
-dependencies, is to bind directly to  http://logback.qos.ch[Logback]. This removes the
+dependencies, is to bind directly to http://logback.qos.ch[Logback]. This removes the
 extra binding step because Logback implements SLF4J directly, so you only need to depend
 on two libraries not four ( `jcl-over-slf4j` and `logback`). If you do that you might
 also need to exclude the slf4j-api dependency from other external dependencies (not
@@ -675,7 +675,7 @@ Spring), because you only want one version of that API on the classpath.
 
 [[overview-logging-log4j]]
 ===== Using Log4J
-Many people use  http://logging.apache.org/log4j[Log4j] as a logging framework for
+Many people use http://logging.apache.org/log4j[Log4j] as a logging framework for
 configuration and management purposes. It's efficient and well-established, and in fact
 it's what we use at runtime when we build and test Spring. Spring also provides some
 utilities for configuring and initializing Log4j, so it has an optional compile-time
@@ -783,7 +783,7 @@ the changes and new features for Spring Framework 3.0. While every effort has be
 to ensure that there are no errors in this documentation, some errors may nevertheless
 have crept in. If you do spot any typos or even more serious errors, and you can spare a
 few cycles during lunch, please do bring the error to the attention of the Spring team
-by  http://jira.springframework.org/[raising an issue].
+by http://jira.springframework.org/[raising an issue].
 
 [[new-in-3.0-new-tutorial]]
 === New articles and tutorials
@@ -888,7 +888,7 @@ The Spring Expression Language was created to provide the Spring community a sin
 well supported expression language that can be used across all the products in the
 Spring portfolio. Its language features are driven by the requirements of the projects
 in the Spring portfolio, including tooling requirements for code completion support
-within the Eclipse based  http://www.springsource.com/products/sts[SpringSource Tool
+within the Eclipse based http://www.springsource.com/products/sts[SpringSource Tool
 Suite].
 
 The following is an example of how the Expression Language can be used to configure some
@@ -1085,27 +1085,27 @@ fully-qualified class names are given. See also <<migration-3.1>>
 [[new-in-3.1-cache-abstraction]]
 === Cache Abstraction
 * <<cache>>
-*  http://blog.springsource.com/2011/02/23/spring-3-1-m1-caching/[Cache Abstraction]
+* http://blog.springsource.com/2011/02/23/spring-3-1-m1-caching/[Cache Abstraction]
   (SpringSource team blog)
 
 [[new-in-3.1-bean-definition-profiles]]
 === Bean Definition Profiles
-*  http://blog.springsource.com/2011/02/11/spring-framework-3-1-m1-released/[XML
+* http://blog.springsource.com/2011/02/11/spring-framework-3-1-m1-released/[XML
   profiles] (SpringSource Team Blog)
-*  http://blog.springsource.com/2011/02/14/spring-3-1-m1-introducing-profile/[Introducing
+* http://blog.springsource.com/2011/02/14/spring-3-1-m1-introducing-profile/[Introducing
   @Profile] (SpringSource Team Blog)
 * See org.springframework.context.annotation.Configuration Javadoc
 * See org.springframework.context.annotation.Profile Javadoc
 
 [[new-in-3.1-environment-abstraction]]
 === Environment Abstraction
-*  http://blog.springsource.com/2011/02/11/spring-framework-3-1-m1-released/[Environment
+* http://blog.springsource.com/2011/02/11/spring-framework-3-1-m1-released/[Environment
   Abstraction] (SpringSource Team Blog)
 * See org.springframework.core.env.Environment Javadoc
 
 [[new-in-3.1-property-source-abstraction]]
 === PropertySource Abstraction
-*  http://blog.springsource.com/2011/02/15/spring-3-1-m1-unified-property-management/[Unified
+* http://blog.springsource.com/2011/02/15/spring-3-1-m1-unified-property-management/[Unified
   Property Management] (SpringSource Team Blog)
 * See org.springframework.core.env.Environment Javadoc
 * See org.springframework.core.env.PropertySource Javadoc
@@ -1141,7 +1141,7 @@ for configuring the Spring `TestContext`. In addition, a new `@ActiveProfiles`
 annotation has been introduced to support declarative configuration of active bean
 definition profiles in `ApplicationContext` integration tests.
 
-*  http://blog.springsource.com/2011/06/21/spring-3-1-m2-testing-with-configuration-classes-and-profiles/[Spring
+* http://blog.springsource.com/2011/06/21/spring-3-1-m2-testing-with-configuration-classes-and-profiles/[Spring
   3.1 M2: Testing with @Configuration Classes and Profiles] (SpringSource Team Blog)
 * See <<testcontext-framework>>
 * See <<testcontext-ctx-management-javaconfig>> and
@@ -1170,7 +1170,7 @@ The new `WebApplicationInitializer` builds atop Servlet 3.0's
 traditional web.xml.
 
 * See org.springframework.web.WebApplicationInitializer Javadoc
-*  http://bit.ly/lrDHja[Diff from Spring's Greenhouse reference application]
+* http://bit.ly/lrDHja[Diff from Spring's Greenhouse reference application]
   demonstrating migration from web.xml to `WebApplicationInitializer`
 
 [[new-in-3.1-servlet-3-multipart-resolver]]
@@ -1564,7 +1564,7 @@ Several implementations of the `ApplicationContext` interface are supplied
 out-of-the-box with Spring. In standalone applications it is common to create an
 instance of
 http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/context/support/ClassPathXmlApplicationContext.html[`ClassPathXmlApplicationContext`]
-or  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/context/support/FileSystemXmlApplicationContext.html[`FileSystemXmlApplicationContext`].
+or http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/context/support/FileSystemXmlApplicationContext.html[`FileSystemXmlApplicationContext`].
  While XML has been the traditional format for defining configuration metadata you can
 instruct the container to use Java annotations or code as the metadata format by
 providing a small amount of XML configuration to declaratively enable support for these
@@ -1733,7 +1733,7 @@ The following example shows the data access objects `daos.xml` file:
 
 In the preceding example, the service layer consists of the class `PetStoreServiceImpl`,
 and two data access objects of the type `SqlMapAccountDao` and SqlMapItemDao are based
-on the  http://ibatis.apache.org/[iBatis] Object/Relational mapping framework. The
+on the http://ibatis.apache.org/[iBatis] Object/Relational mapping framework. The
 `property name` element refers to the name of the JavaBean property, and the `ref`
 element refers to the name of another bean definition. This linkage between id and ref
 elements expresses the dependency between collaborating objects. For details of
@@ -2661,8 +2661,8 @@ XML configuration.
 ----
 
 The preceding XML is more succinct; however, typos are discovered at runtime rather than
-design time, unless you use an IDE such as  http://www.jetbrains.com/idea/[IntelliJ
-IDEA] or the  http://www.springsource.com/products/sts[SpringSource Tool Suite] (STS)
+design time, unless you use an IDE such as http://www.jetbrains.com/idea/[IntelliJ
+IDEA] or the http://www.springsource.com/products/sts[SpringSource Tool Suite] (STS)
 that support automatic property completion when you create bean definitions. Such IDE
 assistance is highly recommended.
 
@@ -9953,7 +9953,7 @@ The `number` package provides a NumberFormatter, CurrencyFormatter, and PercentF
 to format java.lang.Number objects using a java.text.NumberFormat. The `datetime`
 package provides a DateFormatter to format java.util.Date objects with a
 java.text.DateFormat. The `datetime.joda` package provides comprehensive datetime
-formatting support based on the  http://joda-time.sourceforge.net[Joda Time library].
+formatting support based on the http://joda-time.sourceforge.net[Joda Time library].
 
 Consider `DateFormatter` as an example `Formatter` implementation:
 
@@ -10376,7 +10376,7 @@ public class PersonForm {
 When an instance of this class is validated by a JSR-303 Validator, these constraints
 will be enforced.
 
-For general information on JSR-303/JSR-349, see the  http://beanvalidation.org/[Bean
+For general information on JSR-303/JSR-349, see the http://beanvalidation.org/[Bean
 Validation website]. For information on the specific capabilities of the default
 reference implementation, see the  https://www.hibernate.org/412.html[Hibernate
 Validator] documentation. To learn how to setup a Bean Validation provider as a Spring
@@ -11591,7 +11591,7 @@ System.out.println(name); // Elvis Presley
 [[expressions-operator-safe-navigation]]
 ==== Safe Navigation operator
 The Safe Navigation operator is used to avoid a `NullPointerException` and comes from
-the  http://groovy.codehaus.org/Operators#Operators-SafeNavigationOperator(%3F.)[Groovy]
+the http://groovy.codehaus.org/Operators#Operators-SafeNavigationOperator(%3F.)[Groovy]
 language. Typically when you have a reference to an object you might need to verify that
 it is not null before accessing methods or properties of the object. To avoid this, the
 safe navigation operator will simply return null instead of throwing an exception.
@@ -12224,7 +12224,7 @@ private void anyOldTransfer() {}// the pointcut signature
 
 The pointcut expression that forms the value of the `@Pointcut` annotation is a regular
 AspectJ 5 pointcut expression. For a full discussion of AspectJ's pointcut language, see
-the  http://www.eclipse.org/aspectj/doc/released/progguide/index.html[AspectJ
+the http://www.eclipse.org/aspectj/doc/released/progguide/index.html[AspectJ
 Programming Guide] (and for Java 5 based extensions, the
 http://www.eclipse.org/aspectj/doc/released/adk15notebook/index.html[AspectJ 5
 Developers Notebook]) or one of the books on AspectJ such as "Eclipse AspectJ" by Colyer
@@ -14165,7 +14165,7 @@ simple method executions (for example, field get or set join points, and so on).
 When using AspectJ, you have the choice of the AspectJ language syntax (also known as
 the "code style") or the @AspectJ annotation style. Clearly, if you are not using Java
 5+ then the choice has been made for you... use the code style. If aspects play a large
-role in your design, and you are able to use the  http://www.eclipse.org/ajdt/[AspectJ
+role in your design, and you are able to use the http://www.eclipse.org/ajdt/[AspectJ
 Development Tools (AJDT)] plugin for Eclipse, then the AspectJ language syntax is the
 preferred option: it is cleaner and simpler because the language was purposefully
 designed for writing aspects. If you are not using Eclipse, or have only a few aspects
@@ -14586,7 +14586,7 @@ available for use in the body of the constructors, then you need to define this 
 You can find out more information about the language semantics of the various pointcut
 types in AspectJ
 http://www.eclipse.org/aspectj/doc/next/progguide/semantics-joinPoints.html[in this
-appendix] of the  http://www.eclipse.org/aspectj/doc/next/progguide/index.html[AspectJ
+appendix] of the http://www.eclipse.org/aspectj/doc/next/progguide/index.html[AspectJ
 Programming Guide].
 ====
 
@@ -15157,14 +15157,14 @@ environment (summarized in the following table).
   Weblogic 10]
 | `WebLogicLoadTimeWeaver`
 
-| Running in  http://www-01.ibm.com/software/webservers/appserv/was/[IBM WebSphere
+| Running in http://www-01.ibm.com/software/webservers/appserv/was/[IBM WebSphere
   Application Server 7]
 | `WebSphereLoadTimeWeaver`
 
-| Running in  http://glassfish.dev.java.net/[GlassFish]
+| Running in http://glassfish.dev.java.net/[GlassFish]
 | `GlassFishLoadTimeWeaver`
 
-| Running in  http://www.jboss.org/jbossas/[JBoss AS]
+| Running in http://www.jboss.org/jbossas/[JBoss AS]
 | `JBossLoadTimeWeaver`
 
 | JVM started with Spring `InstrumentationSavingAgent` __(java
@@ -15172,7 +15172,7 @@ environment (summarized in the following table).
 | `InstrumentationLoadTimeWeaver`
 
 | Fallback, expecting the underlying ClassLoader to follow common conventions (e.g.
-  applicable to `TomcatInstrumentableClassLoader` and  http://www.caucho.com/[Resin])
+  applicable to `TomcatInstrumentableClassLoader` and http://www.caucho.com/[Resin])
 | `ReflectiveLoadTimeWeaver`
 |===
 
@@ -15328,7 +15328,7 @@ details about available context locations.
 Tomcat versions prior to 5.5.20 contained a bug in the XML configuration parsing that
 prevented usage of the `Loader` tag inside __server.xml__ configuration, regardless of
 whether a class loader is specified or whether it is the official or a custom one. See
-Tomcat's bugzilla for  http://issues.apache.org/bugzilla/show_bug.cgi?id=39704[more
+Tomcat's bugzilla for http://issues.apache.org/bugzilla/show_bug.cgi?id=39704[more
 details].
 
 In Tomcat 5.5.x, versions 5.5.20 or later, you should set
@@ -15395,12 +15395,12 @@ using this in application server environments (depending on your operation polic
 Additionally, the JDK agent will instrument the __entire__ VM which can prove expensive.
 
 For performance reasons, it is recommended to use this configuration only if your target
-environment (such as  http://www.eclipse.org/jetty/[Jetty]) does not have (or does not
+environment (such as http://www.eclipse.org/jetty/[Jetty]) does not have (or does not
 support) a dedicated LTW.
 
 [[aop-resources]]
 === Further Resources
-More information on AspectJ can be found on the  http://www.eclipse.org/aspectj[AspectJ
+More information on AspectJ can be found on the http://www.eclipse.org/aspectj[AspectJ
 website].
 
 The book __Eclipse AspectJ__ by Adrian Colyer et. al. (Addison-Wesley, 2005) provides a
@@ -17135,8 +17135,8 @@ configuration in testing scenarios without modification.
 The `org.springframework.mock.web` package contains a comprehensive set of Servlet API
 mock objects, targeted at usage with Spring's Web MVC framework, which are useful for
 testing web contexts and controllers. These mock objects are generally more convenient
-to use than dynamic mock objects such as  http://www.easymock.org[EasyMock] or existing
-Servlet API mock objects such as  http://www.mockobjects.com[MockObjects].
+to use than dynamic mock objects such as http://www.easymock.org[EasyMock] or existing
+Servlet API mock objects such as http://www.mockobjects.com[MockObjects].
 
 [[mock-objects-portlet]]
 ===== Portlet API
@@ -20192,24 +20192,24 @@ PetClinic application for an example.
 === Further Resources
 Consult the following resources for more information about testing:
 
-*  http://www.junit.org/[JUnit]: "__A programmer-oriented testing framework for Java__".
+* http://www.junit.org/[JUnit]: "__A programmer-oriented testing framework for Java__".
   Used by the Spring Framework in its test suite.
-*  http://testng.org/[TestNG]: A testing framework inspired by JUnit with added support
+* http://testng.org/[TestNG]: A testing framework inspired by JUnit with added support
   for Java 5 annotations, test groups, data-driven testing, distributed testing, etc.
-*  http://www.mockobjects.com/[MockObjects.com]: Web site dedicated to mock objects, a
+* http://www.mockobjects.com/[MockObjects.com]: Web site dedicated to mock objects, a
   technique for improving the design of code within test-driven development.
-*  http://en.wikipedia.org/wiki/Mock_Object["Mock Objects"]: Article in Wikipedia.
-*  http://www.easymock.org/[EasyMock]: Java library " __that provides Mock Objects for
+* http://en.wikipedia.org/wiki/Mock_Object["Mock Objects"]: Article in Wikipedia.
+* http://www.easymock.org/[EasyMock]: Java library " __that provides Mock Objects for
   interfaces (and objects through the class extension) by generating them on the fly
   using Java's proxy mechanism.__ " Used by the Spring Framework in its test suite.
-*  http://www.jmock.org/[JMock]: Library that supports test-driven development of Java
+* http://www.jmock.org/[JMock]: Library that supports test-driven development of Java
   code with mock objects.
-*  http://mockito.org/[Mockito]: Java mock library based on the
+* http://mockito.org/[Mockito]: Java mock library based on the
   http://xunitpatterns.com/Test%20Spy.html[test spy] pattern.
-*  http://dbunit.sourceforge.net/[DbUnit]: JUnit extension (also usable with Ant and
+* http://dbunit.sourceforge.net/[DbUnit]: JUnit extension (also usable with Ant and
   Maven) targeted for database-driven projects that, among other things, puts your
   database into a known state between test runs.
-*  http://grinder.sourceforge.net/[The Grinder]: Java load testing framework.
+* http://grinder.sourceforge.net/[The Grinder]: Java load testing framework.
 
 [[spring-data-tier]]
 = Data Access
@@ -20332,7 +20332,7 @@ Typically you need an application server's JTA capability only if your applicati
 to handle transactions across multiple resources, which is not a requirement for many
 applications. Many high-end applications use a single, highly scalable database (such as
 Oracle RAC) instead. Standalone transaction managers such as
-http://www.atomikos.com/[Atomikos Transactions] and  http://jotm.objectweb.org/[JOTM]
+http://www.atomikos.com/[Atomikos Transactions] and http://jotm.objectweb.org/[JOTM]
 are other options. Of course, you may need other application server capabilities such as
 Java Message Service (JMS) and J2EE Connector Architecture (JCA).
 
@@ -22123,12 +22123,12 @@ treats them as errors.
 === Further Resources
 For more information about the Spring Framework's transaction support:
 
-*  http://www.javaworld.com/javaworld/jw-01-2009/jw-01-spring-transactions.html[Distributed
+* http://www.javaworld.com/javaworld/jw-01-2009/jw-01-spring-transactions.html[Distributed
   transactions in Spring, with and without XA] is a JavaWorld presentation in which
   SpringSource's David Syer guides you through seven patterns for distributed
   transactions in Spring applications, three of them with XA and four without.
-*  http://www.infoq.com/minibooks/JTDS[Java Transaction Design Strategies] is a book
-  available from  http://www.infoq.com/[InfoQ] that provides a well-paced introduction
+* http://www.infoq.com/minibooks/JTDS[Java Transaction Design Strategies] is a book
+  available from http://www.infoq.com/[InfoQ] that provides a well-paced introduction
   to transactions in Java. It also includes side-by-side examples of how to configure
   and use transactions with both the Spring Framework and EJB3.
 
@@ -22769,7 +22769,7 @@ are the parameter names and the values are the parameter values.
 
 Another `SqlParameterSource` implementation is the `BeanPropertySqlParameterSource`
 class. This class wraps an arbitrary JavaBean (that is, an instance of a class that
-adheres to  http://java.sun.com/products/javabeans/docs/spec.html[the JavaBean
+adheres to http://java.sun.com/products/javabeans/docs/spec.html[the JavaBean
 conventions]), and uses the properties of the wrapped JavaBean as the source of named
 parameter values.
 
@@ -24576,8 +24576,8 @@ SqlTypeValue value = new AbstractSqlTypeValue() {
 [[jdbc-embedded-database-support]]
 === Embedded database support
 The `org.springframework.jdbc.datasource.embedded` package provides support for embedded
-Java database engines. Support for  http://www.hsqldb.org[HSQL],
-http://www.h2database.com[H2], and  http://db.apache.org/derby[Derby] is provided
+Java database engines. Support for http://www.hsqldb.org[HSQL],
+http://www.h2database.com[H2], and http://db.apache.org/derby[Derby] is provided
 natively. You can also use an extensible API to plug in new embedded database types and
 `DataSource` implementations.
 
@@ -24962,7 +24962,7 @@ exception hierarchies.
 
 [[orm-hibernate]]
 === Hibernate
-We will start with a coverage of  http://www.hibernate.org/[Hibernate 3] in a Spring
+We will start with a coverage of http://www.hibernate.org/[Hibernate 3] in a Spring
 environment, using it to demonstrate the approach that Spring takes towards integrating
 O/R mappers. This section will cover many issues in detail and show different variations
 of DAO implementations and transaction demarcation. Most of these patterns can be
@@ -26728,7 +26728,7 @@ interface. It can be wired up as follows:
 ==== Mapping
 Although it is possible to rely on Castor's default marshalling behavior, it might be
 necessary to have more control over it. This can be accomplished using a Castor mapping
-file. For more information, refer to  http://castor.codehaus.org/xml-mapping.html[Castor
+file. For more information, refer to http://castor.codehaus.org/xml-mapping.html[Castor
 XML Mapping].
 
 The mapping can be set using the `mappingLocation` resource property, indicated below
@@ -26797,7 +26797,7 @@ Infoset fidelity. It takes a different approach to that of most other O/X mappin
 frameworks, in that all classes that are generated from an XML Schema are all derived
 from `XmlObject`, and contain XML binding information in them.
 
-For more information on XMLBeans, refer to the  http://xmlbeans.apache.org/[__XMLBeans
+For more information on XMLBeans, refer to the http://xmlbeans.apache.org/[__XMLBeans
 web site __]. The Spring-WS integration classes reside in the
 `org.springframework.oxm.xmlbeans` package.
 
@@ -26857,7 +26857,7 @@ XML. After preparing the binding and compiling the classes, a JiBX binding compi
 enhances the class files, and adds code to handle converting instances of the classes
 from or to XML.
 
-For more information on JiBX, refer to the  http://jibx.sourceforge.net/[__JiBX web
+For more information on JiBX, refer to the http://jibx.sourceforge.net/[__JiBX web
 site__]. The Spring integration classes reside in the `org.springframework.oxm.jibx`
 package.
 
@@ -26918,7 +26918,7 @@ Available attributes are:
 XStream is a simple library to serialize objects to XML and back again. It does not
 require any mapping, and generates clean XML.
 
-For more information on XStream, refer to the  http://xstream.codehaus.org/[__XStream
+For more information on XStream, refer to the http://xstream.codehaus.org/[__XStream
 web site__]. The Spring integration classes reside in the
 `org.springframework.oxm.xstream` package.
 
@@ -27023,7 +27023,7 @@ For an explanation of this principle, refer to __Expert Spring Web MVC and Web F
 Seth Ladd and others; specifically see the section "A Look At Design," on page 117 of
 the first edition. Alternatively, see
 
-*  http://www.objectmentor.com/resources/articles/ocp.pdf[Bob Martin, The Open-Closed
+* http://www.objectmentor.com/resources/articles/ocp.pdf[Bob Martin, The Open-Closed
   Principle (PDF)]
 
 You cannot add advice to final methods when you use Spring MVC. For example, you cannot
@@ -27766,10 +27766,10 @@ configuration. For more information on placeholders see the Javadoc for
 
 [[mvc-ann-matrix-variables]]
 ===== Matrix Variables
-The URI specification  http://tools.ietf.org/html/rfc3986#section-3.3[RFC 3986] defines
+The URI specification http://tools.ietf.org/html/rfc3986#section-3.3[RFC 3986] defines
 the possibility of including name-value pairs within path segments. There is no specific
 term used in the spec. The general "URI path parameters" could be applied although the
-more unique  http://www.w3.org/DesignIssues/MatrixURIs.html["Matrix URIs"], originating
+more unique http://www.w3.org/DesignIssues/MatrixURIs.html["Matrix URIs"], originating
 from an old post by Tim Berners-Lee, is also frequently used and fairly well known.
 Within Spring MVC these are referred to as matrix variables.
 
@@ -29380,7 +29380,7 @@ server:
   representation of the user fred, and `http://www.example.com/users/fred.xml` requests
   an XML representation.
 * Use the same URI for the client to locate the resource, but set the `Accept` HTTP
-  request header to list the  http://en.wikipedia.org/wiki/Internet_media_type[media
+  request header to list the http://en.wikipedia.org/wiki/Internet_media_type[media
   types] that it understands. For example, an HTTP request for
   `http://www.example.com/users/fred` with an `Accept` header set to `application/pdf`
   requests a PDF representation of the user fred, while
@@ -29832,7 +29832,7 @@ request with a simple request parameter.
 Spring's built-in multipart support handles file uploads in web applications. You enable
 this multipart support with pluggable `MultipartResolver` objects, defined in the
 `org.springframework.web.multipart` package. Spring provides one `MultipartResolver`
-implementation for use with  http://jakarta.apache.org/commons/fileupload[__Commons
+implementation for use with http://jakarta.apache.org/commons/fileupload[__Commons
 FileUpload__] and another for use with Servlet 3.0 multipart request parsing.
 
 By default, Spring does no multipart handling, because some developers want to handle
@@ -30468,7 +30468,7 @@ properties that can be configured.
 
 [[mvc-etag]]
 === ETag support
-An  http://en.wikipedia.org/wiki/HTTP_ETag[ETag] (entity tag) is an HTTP response header
+An http://en.wikipedia.org/wiki/HTTP_ETag[ETag] (entity tag) is an HTTP response header
 returned by an HTTP/1.1 compliant web server used to determine change in content at a
 given URL. It can be considered to be the more sophisticated successor to the
 `Last-Modified` header. When a server returns a representation with an ETag header, the
@@ -32196,11 +32196,11 @@ per preparer name (as used in your Tiles definitions).
 
 [[view-velocity]]
 === Velocity & FreeMarker
-http://velocity.apache.org[Velocity] and  http://www.freemarker.org[FreeMarker] are two
+http://velocity.apache.org[Velocity] and http://www.freemarker.org[FreeMarker] are two
 templating languages that can be used as view technologies within Spring MVC
 applications. The languages are quite similar and serve similar needs and so are
 considered together in this section. For semantic and syntactic differences between the
-two languages, see the  http://www.freemarker.org[FreeMarker] web site.
+two languages, see the http://www.freemarker.org[FreeMarker] web site.
 
 [[view-velocity-dependencies]]
 ==== Dependencies
@@ -33553,7 +33553,7 @@ For more information about SWF, consult the Spring Web Flow website.
 ****
 
 This chapter details Spring's integration with third party web frameworks such as
-http://java.sun.com/javaee/javaserverfaces/[JSF],  http://struts.apache.org/[Struts],
+http://java.sun.com/javaee/javaserverfaces/[JSF], http://struts.apache.org/[Struts],
 http://www.opensymphony.com/webwork/[WebWork], and
 http://tapestry.apache.org/[Tapestry].
 
@@ -33678,7 +33678,7 @@ interface framework. As of Java EE 5, it is an official part of the Java EE umbr
 
 For a popular JSF runtime as well as for popular JSF component libraries, check out the
 http://myfaces.apache.org/[Apache MyFaces project]. The MyFaces project also provides
-common JSF extensions such as  http://myfaces.apache.org/orchestra/[MyFaces Orchestra]:
+common JSF extensions such as http://myfaces.apache.org/orchestra/[MyFaces Orchestra]:
 a Spring-based JSF extension that provides rich conversation scope support.
 
 [NOTE]
@@ -34001,11 +34001,11 @@ public class UserAction extends DispatchActionSupport {
 Spring includes subclasses for all of the standard Struts Actions - the Spring versions
 merely have __Support__ appended to the name:
 
-*  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/struts/ActionSupport.html[`ActionSupport`],
-*  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/struts/DispatchActionSupport.html[`DispatchActionSupport`],
-*  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/struts/LookupDispatchActionSupport.html[`LookupDispatchActionSupport`]
+* http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/struts/ActionSupport.html[`ActionSupport`],
+* http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/struts/DispatchActionSupport.html[`DispatchActionSupport`],
+* http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/struts/LookupDispatchActionSupport.html[`LookupDispatchActionSupport`]
   and
-*  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/struts/MappingDispatchActionSupport.html[`MappingDispatchActionSupport`].
+* http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/struts/MappingDispatchActionSupport.html[`MappingDispatchActionSupport`].
 
 The recommended strategy is to use the approach that best suits your project.
 Subclassing makes your code more readable, and you know exactly how your dependencies
@@ -34015,7 +34015,7 @@ integrating with Struts.
 
 [[webwork]]
 === WebWork 2.x
-From the  http://www.opensymphony.com/webwork/[WebWork homepage]:
+From the http://www.opensymphony.com/webwork/[WebWork homepage]:
 
 "__WebWork is a Java web-application development framework. It is built specifically
 with developer productivity and code simplicity in mind, providing robust support for
@@ -34040,7 +34040,7 @@ Now in the interests of adhering to the DRY (Don't Repeat Yourself) principle, i
 be foolish to document the Spring-WebWork integration in light of the fact that the
 WebWork team have already written such a writeup. Please consult the
 http://www.opensymphony.com/webwork/wikidocs/Spring.html[Spring-WebWork integration
-page] on the  http://wiki.opensymphony.com/display/WW/WebWork[WebWork wiki] for the full
+page] on the http://wiki.opensymphony.com/display/WW/WebWork[WebWork wiki] for the full
 lowdown.
 
 Note that the Spring-WebWork integration code was developed (and continues to be
@@ -34051,7 +34051,7 @@ http://forum.springframework.org/forumdisplay.php?f=25[Spring support forums], t
 
 [[tapestry]]
 === Tapestry 3.x and 4.x
-From the  http://tapestry.apache.org/[Tapestry homepage]:
+From the http://tapestry.apache.org/[Tapestry homepage]:
 
 "__Tapestry is an open-source framework for creating dynamic, robust, highly scalable
 web applications in Java. Tapestry complements and builds upon the standard Java Servlet
@@ -34082,7 +34082,7 @@ injection means afforded by Spring. The real beauty of the rest of this Spring-T
 integration is that the elegant and flexible design of Tapestry itself makes doing this
 dependency injection of Spring-managed beans a cinch. (Another nice thing is that this
 Spring-Tapestry integration code was written - and continues to be maintained - by the
-Tapestry creator  http://howardlewisship.com/blog/[Howard M. Lewis Ship], so hats off to
+Tapestry creator http://howardlewisship.com/blog/[Howard M. Lewis Ship], so hats off to
 him for what is really some silky smooth integration).
 
 [[tapestry-di]]
@@ -34527,10 +34527,10 @@ throughout the stack in this Tapestry application.
 Find below links to further resources about the various web frameworks described in this
 chapter.
 
-* The  http://java.sun.com/javaee/javaserverfaces/[JSF] homepage
-* The  http://struts.apache.org/[Struts] homepage
-* The  http://www.opensymphony.com/webwork/[WebWork] homepage
-* The  http://tapestry.apache.org/[Tapestry] homepage
+* The http://java.sun.com/javaee/javaserverfaces/[JSF] homepage
+* The http://struts.apache.org/[Struts] homepage
+* The http://www.opensymphony.com/webwork/[WebWork] homepage
+* The http://tapestry.apache.org/[Tapestry] homepage
 
 [[portlet]]
 == Portlet MVC Framework
@@ -36112,7 +36112,7 @@ will transparently create an invoker and remotely enable the account service thr
 [[remoting-caucho-protocols]]
 === Using Hessian or Burlap to remotely call services via HTTP
 Hessian offers a binary HTTP-based remoting protocol. It is developed by Caucho and more
-information about Hessian itself can be found at  http://www.caucho.com[].
+information about Hessian itself can be found at http://www.caucho.com[].
 
 [[remoting-caucho-protocols-hessian]]
 ==== Wiring up the  DispatcherServlet for Hessian and co.
@@ -36260,7 +36260,7 @@ this application context.
 ====
 Of course, this example doesn't show a flexible kind of security infrastructure. For
 more options as far as security is concerned, have a look at the Spring Security project
-at  http://projects.spring.io/spring-security/[].
+at http://projects.spring.io/spring-security/[].
 ====
 
 [[remoting-httpinvoker]]
@@ -36390,7 +36390,7 @@ Spring provides full support for standard Java web services APIs:
 * Accessing web services using JAX-WS
 
 In addition to stock support for JAX-WS in Spring Core, the Spring portfolio also
-features  http://www.springframework.org/spring-ws[Spring Web Services], a solution for
+features http://www.springframework.org/spring-ws[Spring Web Services], a solution for
 contract-first, document-driven web services - highly recommended for building modern,
 future-proof web services.
 
@@ -36851,28 +36851,28 @@ practices.
 | HTTP Method | RestTemplate Method
 
 | DELETE
-|  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html#delete(String,%20Object...)[delete]
+| http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html#delete(String,%20Object...)[delete]
 
 | GET
-|  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html#getForObject(String,%20Class,%20Object...)[getForObject]
+| http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html#getForObject(String,%20Class,%20Object...)[getForObject]
   http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html#getForEntity(String,%20Class,%20Object...)[getForEntity]
 
 | HEAD
-|  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html#headForHeaders(String,%20Object...)[headForHeaders(String
+| http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html#headForHeaders(String,%20Object...)[headForHeaders(String
   url, String... urlVariables)]
 
 | OPTIONS
-|  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html#optionsForAllow(String,%20Object...)[optionsForAllow(String
+| http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html#optionsForAllow(String,%20Object...)[optionsForAllow(String
   url, String... urlVariables)]
 
 | POST
-|  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html#postForLocation(String,%20Object,%20Object...)[postForLocation(String
+| http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html#postForLocation(String,%20Object,%20Object...)[postForLocation(String
   url, Object request, String... urlVariables)]
   http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html#postForObject(java.lang.String,%20java.lang.Object,%20java.lang.Class,%20java.lang.String...)[postForObject(String
   url, Object request, Class<T> responseType, String... uriVariables)]
 
 | PUT
-|  http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html#put(String,%20Object,%20Object...)[put(String
+| http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html#put(String,%20Object,%20Object...)[put(String
   url, Object request, String...urlVariables)]
 |===
 
@@ -39399,7 +39399,7 @@ To create an `MBeanServerConnection` to a remote JSR-160 enabled `MBeanServer` u
 JSR-160 permits extensions to the way in which communication is done between the client
 and the server. The examples above are using the mandatory RMI-based implementation
 required by the JSR-160 specification (IIOP and JRMP) and the (optional) JMXMP. By using
-other providers or JMX implementations (such as  http://mx4j.sourceforge.net[MX4J]) you
+other providers or JMX implementations (such as http://mx4j.sourceforge.net[MX4J]) you
 can take advantage of protocols like SOAP, Hessian, Burlap over simple HTTP or SSL and
 others:
 
@@ -39754,14 +39754,14 @@ you can accept the coupling to both Spring and JMX, then do so.
 === Further Resources
 This section contains links to further resources about JMX.
 
-* The  http://java.sun.com/products/JavaManagement/[JMX homepage] at Sun
-* The  http://jcp.org/aboutJava/communityprocess/final/jsr003/index3.html[JMX
+* The http://java.sun.com/products/JavaManagement/[JMX homepage] at Sun
+* The http://jcp.org/aboutJava/communityprocess/final/jsr003/index3.html[JMX
   specification] (JSR-000003)
-* The  http://jcp.org/aboutJava/communityprocess/final/jsr160/index.html[JMX Remote API
+* The http://jcp.org/aboutJava/communityprocess/final/jsr160/index.html[JMX Remote API
   specification] (JSR-000160)
-* The  http://mx4j.sourceforge.net/[MX4J homepage] (an Open Source implementation of
+* The http://mx4j.sourceforge.net/[MX4J homepage] (an Open Source implementation of
   various JMX specs)
-*  http://java.sun.com/developer/technicalArticles/J2SE/jmx.html[Getting Started with
+* http://java.sun.com/developer/technicalArticles/J2SE/jmx.html[Getting Started with
   JMX] - an introductory article from Sun.
 
 [[cci]]
@@ -40833,8 +40833,8 @@ For more information on Spring's transaction facilities, see the chapter entitle
 The following additional jars to be on the classpath of your application in order to be
 able to use the Spring Framework's email library.
 
-* The  http://java.sun.com/products/javamail/[JavaMail] `mail.jar` library
-* The  http://java.sun.com/products/javabeans/jaf/downloads/index.html[JAF]
+* The http://java.sun.com/products/javamail/[JavaMail] `mail.jar` library
+* The http://java.sun.com/products/javabeans/jaf/downloads/index.html[JAF]
   `activation.jar` library
 
 All of these libraries are freely available on the web.
@@ -41129,7 +41129,7 @@ using the Velocity template library to create email content.
 
 [[mail-templates-example]]
 ===== A Velocity-based example
-To use  http://velocity.apache.org[Velocity] to create your email template(s), you will
+To use http://velocity.apache.org[Velocity] to create your email template(s), you will
 need to have the Velocity libraries available on your classpath. You will also need to
 create one or more Velocity templates for the email content that your application needs.
 Find below the Velocity template that this example will be using. As you can see it is
@@ -43046,9 +43046,9 @@ in the Spring Framework.
 Find below links to further resources about the various dynamic languages described in
 this chapter.
 
-* The  http://jruby.codehaus.org/[JRuby] homepage
-* The  http://groovy.codehaus.org/[Groovy] homepage
-* The  http://www.beanshell.org/[BeanShell] homepage
+* The http://jruby.codehaus.org/[JRuby] homepage
+* The http://groovy.codehaus.org/[Groovy] homepage
+* The http://www.beanshell.org/[BeanShell] homepage
 
 Some of the more active members of the Spring community have also added support for a
 number of additional dynamic languages above and beyond the ones covered in this
@@ -43610,7 +43610,7 @@ we did in the example above by defining the target cache through the `cache:defi
 [[cache-store-configuration]]
 === Configuring the cache storage
 Out of the box, the cache abstraction provides integration with two storages - one on
-top of the JDK `ConcurrentMap` and one for  http://ehcache.org/[EhCache] library. To use
+top of the JDK `ConcurrentMap` and one for http://ehcache.org/[EhCache] library. To use
 them, one needs to simply declare an appropriate `CacheManager` - an entity that
 controls and manages `Cache` s and can be used to retrieve these for storage.
 
@@ -45952,41 +45952,41 @@ Javadoc for each item for exact details. See also the
 http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/deprecated-list.html[complete
 list of deprecations] in the framework.
 
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/orm/ibatis/package-summary.html[org.springframework.orm.ibatis]
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/scheduling/backportconcurrent/package-summary.html[org.springframework.scheduling.backportconcurrent]
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/ejb/support/package-summary.html[org.springframework.ejb.support]
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/http/converter/xml/XmlAwareFormHttpMessageConverter.html[org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter]
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/jsf/DelegatingVariableResolver.html[org.springframework.web.jsf.DelegatingVariableResolver]
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/jsf/SpringBeanVariableResolver.html[org.springframework.web.jsf.SpringBeanVariableResolver]
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/ui/velocity/CommonsLoggingLogSystem.html[org.springframework.ui.velocity.CommonsLoggingLogSystem]
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/ui/velocity/VelocityEngineUtils.html[org.springframework.ui.velocity.VelocityEngineUtils]
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/beans/factory/config/BeanReferenceFactoryBean.html[org.springframework.beans.factory.config.BeanReferenceFactoryBean]
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/beans/factory/config/CommonsLogFactoryBean.html[org.springframework.beans.factory.config.CommonsLogFactoryBean]
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/instrument/classloading/oc4j/OC4JLoadTimeWeaver.html[org.springframework.beans.instrument.classloading.oc4j.OC4JLoadTimeWeaver]
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/transaction/jta/OC4JJtaTransactionManager.html[org.springframework.transaction.jta.OC4JJtaTransactionManager]
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/util/ExpressionEvaluationUtils.html[org.springframework.web.util.ExpressionEvaluationUtils]
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/servlet/mvc/annotation/AnnotationMethodHandlerAdapter.html[org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter]
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/servlet/mvc/annotation/AnnotationMethodHandlerExceptionResolver.html[org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver]
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/servlet/mvc/annotation/DefaultAnnotationHandlerMapping.html[org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping]
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/servlet/mvc/annotation/ServletAnnotationMappingUtils.html[org.springframework.web.servlet.mvc.annotation.ServletAnnotationMappingUtils]
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/jmx/support/MBeanRegistrationSupport.html[org.springframework.jmx.support.MBeanRegistrationSupport]
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/test/context/ContextConfigurationAttributes.html[org.springframework.test.context.ContextConfigurationAttributes]
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/test/context/junit4/AbstractTransactionalJUnit4SpringContextTests.html[org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests]:
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/orm/ibatis/package-summary.html[org.springframework.orm.ibatis]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/scheduling/backportconcurrent/package-summary.html[org.springframework.scheduling.backportconcurrent]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/ejb/support/package-summary.html[org.springframework.ejb.support]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/http/converter/xml/XmlAwareFormHttpMessageConverter.html[org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/jsf/DelegatingVariableResolver.html[org.springframework.web.jsf.DelegatingVariableResolver]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/jsf/SpringBeanVariableResolver.html[org.springframework.web.jsf.SpringBeanVariableResolver]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/ui/velocity/CommonsLoggingLogSystem.html[org.springframework.ui.velocity.CommonsLoggingLogSystem]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/ui/velocity/VelocityEngineUtils.html[org.springframework.ui.velocity.VelocityEngineUtils]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/beans/factory/config/BeanReferenceFactoryBean.html[org.springframework.beans.factory.config.BeanReferenceFactoryBean]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/beans/factory/config/CommonsLogFactoryBean.html[org.springframework.beans.factory.config.CommonsLogFactoryBean]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/instrument/classloading/oc4j/OC4JLoadTimeWeaver.html[org.springframework.beans.instrument.classloading.oc4j.OC4JLoadTimeWeaver]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/transaction/jta/OC4JJtaTransactionManager.html[org.springframework.transaction.jta.OC4JJtaTransactionManager]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/util/ExpressionEvaluationUtils.html[org.springframework.web.util.ExpressionEvaluationUtils]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/servlet/mvc/annotation/AnnotationMethodHandlerAdapter.html[org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/servlet/mvc/annotation/AnnotationMethodHandlerExceptionResolver.html[org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/servlet/mvc/annotation/DefaultAnnotationHandlerMapping.html[org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/servlet/mvc/annotation/ServletAnnotationMappingUtils.html[org.springframework.web.servlet.mvc.annotation.ServletAnnotationMappingUtils]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/jmx/support/MBeanRegistrationSupport.html[org.springframework.jmx.support.MBeanRegistrationSupport]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/test/context/ContextConfigurationAttributes.html[org.springframework.test.context.ContextConfigurationAttributes]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/test/context/junit4/AbstractTransactionalJUnit4SpringContextTests.html[org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests]:
   use of the `simpleJdbcTemplate` instance variable has been deprecated in favor of the
   new `jdbcTemplate` instance variable.
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/test/context/testng/AbstractTransactionalTestNGSpringContextTests.html[org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests]:
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/test/context/testng/AbstractTransactionalTestNGSpringContextTests.html[org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests]:
   use of the `simpleJdbcTemplate` instance variable has been deprecated in favor of the
   new `jdbcTemplate` instance variable.
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/test/jdbc/SimpleJdbcTestUtils.html[org.springframework.test.jdbc.SimpleJdbcTestUtils]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/test/jdbc/SimpleJdbcTestUtils.html[org.springframework.test.jdbc.SimpleJdbcTestUtils]
   has been deprecated in favor of `JdbcTestUtils` which now contains all of the
   functionality previously available in `SimpleJdbcTestUtils`.
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/servlet/view/ContentNegotiatingViewResolver.html[org.springframework.web.servlet.view.ContentNegotiatingViewResolver]
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/transaction/interceptor/TransactionAspectUtils.html[org.springframework.transaction.interceptor.TransactionAspectUtils]
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/http/HttpStatus.html[org.springframework.http.HttpStatus]
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/util/UriUtils.html[org.springframework.web.util.UriUtils]
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/orm/jpa/vendor/TopLinkJpaDialect.html[org.springframework.orm.jpa.vendor.TopLinkJpaDialect]
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/orm/jpa/vendor/TopLinkJpaVendorAdapter.html[org.springframework.orm.jpa.vendor.TopLinkJpaVendorAdapter]
-*  http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/util/CachingMapDecorator.html[org.springframework.orm.util.CachingMapDecorator]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/servlet/view/ContentNegotiatingViewResolver.html[org.springframework.web.servlet.view.ContentNegotiatingViewResolver]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/transaction/interceptor/TransactionAspectUtils.html[org.springframework.transaction.interceptor.TransactionAspectUtils]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/http/HttpStatus.html[org.springframework.http.HttpStatus]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/web/util/UriUtils.html[org.springframework.web.util.UriUtils]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/orm/jpa/vendor/TopLinkJpaDialect.html[org.springframework.orm.jpa.vendor.TopLinkJpaDialect]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/orm/jpa/vendor/TopLinkJpaVendorAdapter.html[org.springframework.orm.jpa.vendor.TopLinkJpaVendorAdapter]
+* http://docs.spring.io/spring/docs/3.2.0.RELEAS/javadoc-api/org/springframework/util/CachingMapDecorator.html[org.springframework.orm.util.CachingMapDecorator]
 
 [[xsd-config]]
 == XML Schema-based configuration
@@ -47802,9 +47802,9 @@ http\://www.foo.com/schema/jcache/jcache.xsd=com/foo/jcache.xsd
 Find below links to further resources concerning XML Schema and the extensible XML
 support described in this chapter.
 
-* The  http://www.w3.org/TR/2004/REC-xmlschema-1-20041028/[XML Schema Part 1: Structures
+* The http://www.w3.org/TR/2004/REC-xmlschema-1-20041028/[XML Schema Part 1: Structures
   Second Edition]
-* The  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/[XML Schema Part 2: Datatypes
+* The http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/[XML Schema Part 2: Datatypes
   Second Edition]
 
 [[spring.tld]]
@@ -47818,7 +47818,7 @@ provides you with some tags for evaluating errors, setting themes and outputting
 internationalized messages.
 
 Please note that the various tags generated by this form tag library are compliant with
-the  http://www.w3.org/TR/xhtml1/[XHTML-1.0-Strict specification] and attendant
+the http://www.w3.org/TR/xhtml1/[XHTML-1.0-Strict specification] and attendant
 http://www.w3.org/TR/xhtml1/dtds.html#a_dtd_XHTML-1.0-Strict[DTD].
 
 This appendix describes the `spring.tld` tag library.
@@ -48237,7 +48237,7 @@ provides you with some tags for evaluating errors, setting themes and outputting
 internationalized messages.
 
 Please note that the various tags generated by this form tag library are compliant with
-the  http://www.w3.org/TR/xhtml1/[XHTML-1.0-Strict specification] and attendant
+the http://www.w3.org/TR/xhtml1/[XHTML-1.0-Strict specification] and attendant
 http://www.w3.org/TR/xhtml1/dtds.html#a_dtd_XHTML-1.0-Strict[DTD].
 
 This appendix describes the `spring-form.tld` tag library.
