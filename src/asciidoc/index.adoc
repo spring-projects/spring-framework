@@ -5,6 +5,7 @@
          Adrian Colyer; John Lewis; Costin Leau; Mark Fisher; Sam Brannen; +
          Ramnivas Laddad; Arjen Poutsma; Chris Beams; Tareq Abedrabbo; Andy Clement; +
          Dave Syer; Oliver Gierke; Rossen Stoyanchev; Phillip Webb; Rob Winch
+:doctype: book
 
 Core support for dependency injection, transaction management, web applications, data
 access, messaging, testing and more.
