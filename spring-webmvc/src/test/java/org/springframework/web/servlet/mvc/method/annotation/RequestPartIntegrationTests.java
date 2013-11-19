@@ -56,6 +56,8 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import javax.servlet.MultipartConfigElement;
+
 import static org.junit.Assert.*;
 
 /**
@@ -91,9 +93,8 @@ public class RequestPartIntegrationTests {
 		ServletHolder standardResolverServlet = new ServletHolder(DispatcherServlet.class);
 		standardResolverServlet.setInitParameter("contextConfigLocation", config.getName());
 		standardResolverServlet.setInitParameter("contextClass", AnnotationConfigWebApplicationContext.class.getName());
+		standardResolverServlet.getRegistration().setMultipartConfig(new MultipartConfigElement(""));
 		handler.addServlet(standardResolverServlet, "/standard-resolver/*");
-
-		// TODO: add Servlet 3.0 test case without MultipartResolver
 
 		server.setHandler(handler);
 		server.start();
@@ -123,7 +124,6 @@ public class RequestPartIntegrationTests {
 	}
 
 	@Test
-	@Ignore("jetty 6.1.9 doesn't support Servlet 3.0")
 	public void standardMultipartResolver() throws Exception {
 		testCreate(baseUrl + "/standard-resolver/test");
 	}
