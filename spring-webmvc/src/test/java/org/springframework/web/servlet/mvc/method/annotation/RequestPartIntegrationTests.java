@@ -19,13 +19,14 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.net.URI;
 import java.util.Arrays;
 
+import javax.servlet.MultipartConfigElement;
+
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -62,6 +63,7 @@ import static org.junit.Assert.*;
  * Test access to parts of a multipart request with {@link RequestPart}.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  */
 public class RequestPartIntegrationTests {
 
@@ -91,9 +93,8 @@ public class RequestPartIntegrationTests {
 		ServletHolder standardResolverServlet = new ServletHolder(DispatcherServlet.class);
 		standardResolverServlet.setInitParameter("contextConfigLocation", config.getName());
 		standardResolverServlet.setInitParameter("contextClass", AnnotationConfigWebApplicationContext.class.getName());
+		standardResolverServlet.getRegistration().setMultipartConfig(new MultipartConfigElement(""));
 		handler.addServlet(standardResolverServlet, "/standard-resolver/*");
-
-		// TODO: add Servlet 3.0 test case without MultipartResolver
 
 		server.setHandler(handler);
 		server.start();
@@ -123,7 +124,6 @@ public class RequestPartIntegrationTests {
 	}
 
 	@Test
-	@Ignore("jetty 6.1.9 doesn't support Servlet 3.0")
 	public void standardMultipartResolver() throws Exception {
 		testCreate(baseUrl + "/standard-resolver/test");
 	}

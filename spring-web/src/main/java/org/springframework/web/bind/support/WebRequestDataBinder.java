@@ -17,6 +17,8 @@
 package org.springframework.web.bind.support;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -24,6 +26,8 @@ import javax.servlet.http.Part;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.WebDataBinder;
@@ -119,7 +123,7 @@ public class WebRequestDataBinder extends WebDataBinder {
 			}
 			else if (ClassUtils.hasMethod(HttpServletRequest.class, "getParts")) {
 				HttpServletRequest serlvetRequest = ((NativeWebRequest) request).getNativeRequest(HttpServletRequest.class);
-				new Servlet3MultipartHelper().bindParts(serlvetRequest, mpvs);
+				new Servlet3MultipartHelper(isBindEmptyMultipartFiles()).bindParts(serlvetRequest, mpvs);
 			}
 		}
 		doBind(mpvs);
@@ -154,10 +158,30 @@ public class WebRequestDataBinder extends WebDataBinder {
 	 */
 	private static class Servlet3MultipartHelper {
 
+		private final boolean bindEmptyMultipartFiles;
+
+
+		public Servlet3MultipartHelper(boolean bindEmptyMultipartFiles) {
+			this.bindEmptyMultipartFiles = bindEmptyMultipartFiles;
+		}
+
+
 		public void bindParts(HttpServletRequest request, MutablePropertyValues mpvs) {
 			try {
-				for(Part part : request.getParts()) {
-					mpvs.add(part.getName(), part);
+				MultiValueMap<String, Part> map = new LinkedMultiValueMap<String, Part>();
+				for (Part part : request.getParts()) {
+					map.add(part.getName(), part);
+				}
+				for (Map.Entry<String, List<Part>> entry: map.entrySet()) {
+					if (entry.getValue().size() == 1) {
+						Part part = entry.getValue().get(0);
+						if (this.bindEmptyMultipartFiles || part.getSize() > 0) {
+							mpvs.add(entry.getKey(), part);
+						}
+					}
+					else {
+						mpvs.add(entry.getKey(), entry.getValue());
+					}
 				}
 			}
 			catch (IOException ex) {
