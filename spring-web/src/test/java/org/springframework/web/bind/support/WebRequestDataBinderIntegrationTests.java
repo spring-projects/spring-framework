@@ -21,7 +21,6 @@ import java.util.List;
 
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -38,7 +37,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.mock.web.test.MockMultipartFile;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.SocketUtils;
@@ -109,7 +107,7 @@ public class WebRequestDataBinderIntegrationTests {
 		partsServlet.setBean(bean);
 
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
-		MockMultipartFile firstPart = new MockMultipartFile("fileName", "aValue".getBytes());
+		Resource firstPart = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
 		parts.add("firstPart", firstPart);
 		parts.add("secondPart", "secondValue");
 
@@ -134,7 +132,7 @@ public class WebRequestDataBinderIntegrationTests {
 		template.postForLocation(baseUrl + "/partlist", parts);
 
 		assertNotNull(bean.getPartList());
-		assertEquals(parts.size(), bean.getPartList().size());
+		assertEquals(parts.get("partList").size(), bean.getPartList().size());
 	}
 
 
