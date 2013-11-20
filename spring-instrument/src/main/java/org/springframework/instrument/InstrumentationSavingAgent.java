@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,13 @@ public class InstrumentationSavingAgent {
 		instrumentation = inst;
 	}
 
+	/**
+	 * Save the {@link Instrumentation} interface exposed by the JVM.
+	 * <p>This method is required to dynamically load this Agent with the Attach API.
+	 */
+	public static void agentmain(String agentArgs, Instrumentation inst) {
+		instrumentation = inst;
+	}
 
 	/**
 	 * Return the {@link Instrumentation} interface exposed by the JVM.
@@ -48,8 +55,9 @@ public class InstrumentationSavingAgent {
 	 * {@link org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver#getInstrumentation()}
 	 * instead - which will work without the agent class in the classpath as well.
 	 * @return the {@code Instrumentation} instance previously saved when
-	 * the {@link #premain} method was called by the JVM; will be {@code null}
-	 * if this class was not used as Java agent when this JVM was started.
+	 * the {@link #premain} or {@link #agentmain} methods was called by the JVM; 
+	 * will be {@code null} if this class was not used as Java agent when this 
+	 * JVM was started or it wasn't installed as agent using the Attach API.
 	 * @see org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver#getInstrumentation()
 	 */
 	public static Instrumentation getInstrumentation() {
