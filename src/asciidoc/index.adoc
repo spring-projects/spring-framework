@@ -11872,10 +11872,10 @@ boolean falseValue = parser.parseExpression(expression).getValue(societyContext,
 
 [[expressions-operators-mathematical]]
 ===== Mathematical operators
-The addition operator can be used on numbers, strings and dates. Subtraction can be used
-on numbers and dates. Multiplication and division can be used only on numbers. Other
-mathematical operators supported are modulus (%) and exponential power (^). Standard
-operator precedence is enforced. These operators are demonstrated below.
+The addition operator can be used on both numbers and strings. Subtraction, multiplication
+and division can be used only on numbers. Other mathematical operators supported are
+modulus (%) and exponential power (^). Standard operator precedence is enforced. These
+operators are demonstrated below.
 
 [source,java]
 [subs="verbatim,quotes"]
