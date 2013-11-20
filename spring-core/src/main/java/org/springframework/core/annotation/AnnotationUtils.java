@@ -31,6 +31,7 @@ import java.util.WeakHashMap;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * General utility methods for working with annotations, handling bridge methods (which the compiler
@@ -525,6 +526,7 @@ public abstract class AnnotationUtils {
 	public static Object getValue(Annotation annotation, String attributeName) {
 		try {
 			Method method = annotation.annotationType().getDeclaredMethod(attributeName, new Class[0]);
+			ReflectionUtils.makeAccessible(method);
 			return method.invoke(annotation);
 		}
 		catch (Exception ex) {
@@ -585,7 +587,6 @@ public abstract class AnnotationUtils {
 
 	private static class AnnotationCollector<A extends Annotation> {
 
-
 		private final Class<? extends Annotation> containerAnnotationType;
 
 		private final Class<A> annotationType;
@@ -628,6 +629,7 @@ public abstract class AnnotationUtils {
 		private A[] getValue(Annotation annotation) {
 			try {
 				Method method = annotation.annotationType().getDeclaredMethod("value");
+				ReflectionUtils.makeAccessible(method);
 				return (A[]) method.invoke(annotation);
 			}
 			catch (Exception ex) {

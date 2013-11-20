@@ -29,10 +29,10 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.subpackage.NonPublicAnnotatedClass;
 import org.springframework.stereotype.Component;
 
 import static org.hamcrest.Matchers.*;
-
 import static org.junit.Assert.*;
 import static org.springframework.core.annotation.AnnotationUtils.*;
 
@@ -46,7 +46,7 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
 public class AnnotationUtilsTests {
 
 	@Test
-	public void testFindMethodAnnotationOnLeaf() throws SecurityException, NoSuchMethodException {
+	public void findMethodAnnotationOnLeaf() throws Exception {
 		Method m = Leaf.class.getMethod("annotatedOnLeaf", (Class[]) null);
 		assertNotNull(m.getAnnotation(Order.class));
 		assertNotNull(getAnnotation(m, Order.class));
@@ -54,7 +54,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void testFindMethodAnnotationOnRoot() throws SecurityException, NoSuchMethodException {
+	public void findMethodAnnotationOnRoot() throws Exception {
 		Method m = Leaf.class.getMethod("annotatedOnRoot", (Class[]) null);
 		assertNotNull(m.getAnnotation(Order.class));
 		assertNotNull(getAnnotation(m, Order.class));
@@ -62,7 +62,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void testFindMethodAnnotationOnRootButOverridden() throws SecurityException, NoSuchMethodException {
+	public void findMethodAnnotationOnRootButOverridden() throws Exception {
 		Method m = Leaf.class.getMethod("overrideWithoutNewAnnotation", (Class[]) null);
 		assertNull(m.getAnnotation(Order.class));
 		assertNull(getAnnotation(m, Order.class));
@@ -70,13 +70,13 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void testFindMethodAnnotationNotAnnotated() throws SecurityException, NoSuchMethodException {
+	public void findMethodAnnotationNotAnnotated() throws Exception {
 		Method m = Leaf.class.getMethod("notAnnotated", (Class[]) null);
 		assertNull(findAnnotation(m, Order.class));
 	}
 
 	@Test
-	public void testFindMethodAnnotationOnBridgeMethod() throws Exception {
+	public void findMethodAnnotationOnBridgeMethod() throws Exception {
 		Method m = SimpleFoo.class.getMethod("something", Object.class);
 		assertTrue(m.isBridge());
 		assertNull(m.getAnnotation(Order.class));
@@ -88,7 +88,7 @@ public class AnnotationUtilsTests {
 	}
 
 	// TODO consider whether we want this to handle annotations on interfaces
-	// public void testFindMethodAnnotationFromInterfaceImplementedByRoot()
+	// public void findMethodAnnotationFromInterfaceImplementedByRoot()
 	// throws Exception {
 	// Method m = Leaf.class.getMethod("fromInterfaceImplementedByRoot",
 	// (Class[]) null);
@@ -241,7 +241,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void testGetValueFromAnnotation() throws Exception {
+	public void getValueFromAnnotation() throws Exception {
 		Method method = SimpleFoo.class.getMethod("something", Object.class);
 		Order order = findAnnotation(method, Order.class);
 
@@ -250,7 +250,18 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void testGetDefaultValueFromAnnotation() throws Exception {
+	public void getValueFromNonPublicAnnotation() throws Exception {
+		Annotation[] declaredAnnotations = NonPublicAnnotatedClass.class.getDeclaredAnnotations();
+		assertEquals(1, declaredAnnotations.length);
+		Annotation annotation = declaredAnnotations[0];
+		assertNotNull(annotation);
+		assertEquals("NonPublicAnnotation", annotation.annotationType().getSimpleName());
+		assertEquals(42, AnnotationUtils.getValue(annotation, AnnotationUtils.VALUE));
+		assertEquals(42, AnnotationUtils.getValue(annotation));
+	}
+
+	@Test
+	public void getDefaultValueFromAnnotation() throws Exception {
 		Method method = SimpleFoo.class.getMethod("something", Object.class);
 		Order order = findAnnotation(method, Order.class);
 
@@ -259,34 +270,46 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void testGetDefaultValueFromAnnotationType() throws Exception {
+	public void getDefaultValueFromNonPublicAnnotation() throws Exception {
+		Annotation[] declaredAnnotations = NonPublicAnnotatedClass.class.getDeclaredAnnotations();
+		assertEquals(1, declaredAnnotations.length);
+		Annotation annotation = declaredAnnotations[0];
+		assertNotNull(annotation);
+		assertEquals("NonPublicAnnotation", annotation.annotationType().getSimpleName());
+		assertEquals(-1, AnnotationUtils.getDefaultValue(annotation, AnnotationUtils.VALUE));
+		assertEquals(-1, AnnotationUtils.getDefaultValue(annotation));
+	}
+
+	@Test
+	public void getDefaultValueFromAnnotationType() throws Exception {
 		assertEquals(Ordered.LOWEST_PRECEDENCE, AnnotationUtils.getDefaultValue(Order.class, AnnotationUtils.VALUE));
 		assertEquals(Ordered.LOWEST_PRECEDENCE, AnnotationUtils.getDefaultValue(Order.class));
 	}
 
 	@Test
-	public void testFindAnnotationFromInterface() throws Exception {
+	public void findAnnotationFromInterface() throws Exception {
 		Method method = ImplementsInterfaceWithAnnotatedMethod.class.getMethod("foo");
 		Order order = findAnnotation(method, Order.class);
 		assertNotNull(order);
 	}
 
 	@Test
-	public void testFindAnnotationFromInterfaceOnSuper() throws Exception {
+	public void findAnnotationFromInterfaceOnSuper() throws Exception {
 		Method method = SubOfImplementsInterfaceWithAnnotatedMethod.class.getMethod("foo");
 		Order order = findAnnotation(method, Order.class);
 		assertNotNull(order);
 	}
 
 	@Test
-	public void testFindAnnotationFromInterfaceWhenSuperDoesNotImplementMethod() throws Exception {
+	public void findAnnotationFromInterfaceWhenSuperDoesNotImplementMethod()
+			throws Exception {
 		Method method = SubOfAbstractImplementsInterfaceWithAnnotatedMethod.class.getMethod("foo");
 		Order order = findAnnotation(method, Order.class);
 		assertNotNull(order);
 	}
 
 	@Test
-	public void testGetRepeatableFromMethod() throws Exception {
+	public void getRepeatableFromMethod() throws Exception {
 		Method method = InterfaceWithRepeated.class.getMethod("foo");
 		Set<MyRepeatable> annotions = AnnotationUtils.getRepeatableAnnotation(method,
 				MyRepeatableContainer.class, MyRepeatable.class);
@@ -318,6 +341,7 @@ public class AnnotationUtilsTests {
 	@Meta2
 	static class ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface implements InterfaceWithMetaAnnotation {
 	}
+
 
 	public static interface AnnotatedInterface {
 
