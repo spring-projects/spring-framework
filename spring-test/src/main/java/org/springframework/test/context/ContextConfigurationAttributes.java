@@ -20,9 +20,9 @@ import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -68,21 +68,29 @@ public class ContextConfigurationAttributes {
 	 * @throws IllegalStateException if both the locations and value attributes have been declared
 	 */
 	private static String[] resolveLocations(Class<?> declaringClass, ContextConfiguration contextConfiguration) {
+		return resolveLocations(declaringClass, contextConfiguration.locations(), contextConfiguration.value());
+	}
+
+	/**
+	 * Resolve resource locations from the supplied {@code locations} and
+	 * {@code value} arrays, which correspond to attributes of the same names in
+	 * the {@link ContextConfiguration} annotation.
+	 *
+	 * @throws IllegalStateException if both the locations and value attributes have been declared
+	 */
+	private static String[] resolveLocations(Class<?> declaringClass, String[] locations, String[] value) {
 		Assert.notNull(declaringClass, "declaringClass must not be null");
 
-		String[] locations = contextConfiguration.locations();
-		String[] valueLocations = contextConfiguration.value();
-
-		if (!ObjectUtils.isEmpty(valueLocations) && !ObjectUtils.isEmpty(locations)) {
+		if (!ObjectUtils.isEmpty(value) && !ObjectUtils.isEmpty(locations)) {
 			String msg = String.format("Test class [%s] has been configured with @ContextConfiguration's 'value' %s "
 					+ "and 'locations' %s attributes. Only one declaration of resource "
 					+ "locations is permitted per @ContextConfiguration annotation.", declaringClass.getName(),
-				ObjectUtils.nullSafeToString(valueLocations), ObjectUtils.nullSafeToString(locations));
+				ObjectUtils.nullSafeToString(value), ObjectUtils.nullSafeToString(locations));
 			logger.error(msg);
 			throw new IllegalStateException(msg);
 		}
-		else if (!ObjectUtils.isEmpty(valueLocations)) {
-			locations = valueLocations;
+		else if (!ObjectUtils.isEmpty(value)) {
+			locations = value;
 		}
 
 		return locations;
@@ -99,6 +107,25 @@ public class ContextConfigurationAttributes {
 		this(declaringClass, resolveLocations(declaringClass, contextConfiguration), contextConfiguration.classes(),
 			contextConfiguration.inheritLocations(), contextConfiguration.initializers(),
 			contextConfiguration.inheritInitializers(), contextConfiguration.name(), contextConfiguration.loader());
+	}
+
+	/**
+	 * Construct a new {@link ContextConfigurationAttributes} instance for the
+	 * supplied {@link ContextConfiguration @ContextConfiguration} annotation and
+	 * the {@linkplain Class test class} that declared it.
+	 * @param declaringClass the test class that declared {@code @ContextConfiguration}
+	 * @param annAttrs the annotation attributes from which to retrieve the attributes
+	 */
+	@SuppressWarnings("unchecked")
+	public ContextConfigurationAttributes(Class<?> declaringClass, AnnotationAttributes annAttrs) {
+		this(
+			declaringClass,
+			resolveLocations(declaringClass, annAttrs.getStringArray("locations"), annAttrs.getStringArray("value")),
+			annAttrs.getClassArray("classes"),
+			annAttrs.getBoolean("inheritLocations"),
+			(Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>[]) annAttrs.getClassArray("initializers"),
+			annAttrs.getBoolean("inheritInitializers"), annAttrs.getString("name"),
+			(Class<? extends ContextLoader>) annAttrs.getClass("loader"));
 	}
 
 	/**

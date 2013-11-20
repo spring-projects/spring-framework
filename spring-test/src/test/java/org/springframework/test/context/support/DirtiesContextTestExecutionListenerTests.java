@@ -26,8 +26,8 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.TestContext;
 
-import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.*;
 import static org.springframework.test.annotation.DirtiesContext.HierarchyMode.*;
 
 /**
@@ -84,7 +84,7 @@ public class DirtiesContextTestExecutionListenerTests {
 		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(clazz);
 		when(testContext.getTestMethod()).thenReturn(clazz.getDeclaredMethod("clean"));
 		listener.afterTestMethod(testContext);
-		verify(testContext, times(0)).markApplicationContextDirty(any(HierarchyMode.class));
+		verify(testContext, times(0)).markApplicationContextDirty(EXHAUSTIVE);
 	}
 
 	@Test
@@ -93,7 +93,16 @@ public class DirtiesContextTestExecutionListenerTests {
 		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(clazz);
 		when(testContext.getTestMethod()).thenReturn(clazz.getDeclaredMethod("clean"));
 		listener.afterTestMethod(testContext);
-		verify(testContext, times(0)).markApplicationContextDirty(any(HierarchyMode.class));
+		verify(testContext, times(0)).markApplicationContextDirty(EXHAUSTIVE);
+	}
+
+	@Test
+	public void afterTestMethodForDirtiesContextViaMetaAnnotationWithOverrides() throws Exception {
+		Class<?> clazz = DirtiesContextViaMetaAnnotationWithOverrides.class;
+		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(clazz);
+		when(testContext.getTestMethod()).thenReturn(clazz.getDeclaredMethod("clean"));
+		listener.afterTestMethod(testContext);
+		verify(testContext, times(1)).markApplicationContextDirty(CURRENT_LEVEL);
 	}
 
 	// -------------------------------------------------------------------------
@@ -103,7 +112,7 @@ public class DirtiesContextTestExecutionListenerTests {
 		Class<?> clazz = getClass();
 		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(clazz);
 		listener.afterTestClass(testContext);
-		verify(testContext, times(0)).markApplicationContextDirty(any(HierarchyMode.class));
+		verify(testContext, times(0)).markApplicationContextDirty(EXHAUSTIVE);
 	}
 
 	@Test
@@ -127,7 +136,7 @@ public class DirtiesContextTestExecutionListenerTests {
 		Class<?> clazz = DirtiesContextDeclaredLocallyAfterClass.class;
 		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(clazz);
 		listener.afterTestClass(testContext);
-		verify(testContext, times(1)).markApplicationContextDirty(any(HierarchyMode.class));
+		verify(testContext, times(1)).markApplicationContextDirty(EXHAUSTIVE);
 	}
 
 	@Test
@@ -135,7 +144,23 @@ public class DirtiesContextTestExecutionListenerTests {
 		Class<?> clazz = DirtiesContextDeclaredViaMetaAnnotationAfterClass.class;
 		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(clazz);
 		listener.afterTestClass(testContext);
-		verify(testContext, times(1)).markApplicationContextDirty(any(HierarchyMode.class));
+		verify(testContext, times(1)).markApplicationContextDirty(EXHAUSTIVE);
+	}
+
+	@Test
+	public void afterTestClassForDirtiesContextDeclaredViaMetaAnnotationWithOverrides() throws Exception {
+		Class<?> clazz = DirtiesContextViaMetaAnnotationWithOverrides.class;
+		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(clazz);
+		listener.afterTestClass(testContext);
+		verify(testContext, times(1)).markApplicationContextDirty(CURRENT_LEVEL);
+	}
+
+	@Test
+	public void afterTestClassForDirtiesContextDeclaredViaMetaAnnotationWithOverridenAttributes() throws Exception {
+		Class<?> clazz = DirtiesContextViaMetaAnnotationWithOverridenAttributes.class;
+		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(clazz);
+		listener.afterTestClass(testContext);
+		verify(testContext, times(1)).markApplicationContextDirty(EXHAUSTIVE);
 	}
 
 	// -------------------------------------------------------------------------
@@ -156,22 +181,31 @@ public class DirtiesContextTestExecutionListenerTests {
 	static @interface MetaDirty {
 	}
 
-	@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+	@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 	@Retention(RetentionPolicy.RUNTIME)
 	static @interface MetaDirtyAfterEachTestMethod {
 	}
 
-	@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
+	@DirtiesContext(classMode = AFTER_CLASS)
 	@Retention(RetentionPolicy.RUNTIME)
 	static @interface MetaDirtyAfterClass {
 	}
 
-	@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+	@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 	static class DirtiesContextDeclaredLocallyAfterEachTestMethod {
 
 		void clean() {
 			/* no-op */
 		}
+	}
+
+	@DirtiesContext
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface MetaDirtyWithOverrides {
+
+		ClassMode classMode() default AFTER_EACH_TEST_METHOD;
+
+		HierarchyMode hierarchyMode() default HierarchyMode.CURRENT_LEVEL;
 	}
 
 	@MetaDirtyAfterEachTestMethod
@@ -182,7 +216,7 @@ public class DirtiesContextTestExecutionListenerTests {
 		}
 	}
 
-	@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
+	@DirtiesContext(classMode = AFTER_CLASS)
 	static class DirtiesContextDeclaredLocallyAfterClass {
 
 		void clean() {
@@ -192,6 +226,22 @@ public class DirtiesContextTestExecutionListenerTests {
 
 	@MetaDirtyAfterClass
 	static class DirtiesContextDeclaredViaMetaAnnotationAfterClass {
+
+		void clean() {
+			/* no-op */
+		}
+	}
+
+	@MetaDirtyWithOverrides
+	static class DirtiesContextViaMetaAnnotationWithOverrides {
+
+		void clean() {
+			/* no-op */
+		}
+	}
+
+	@MetaDirtyWithOverrides(classMode = AFTER_CLASS, hierarchyMode = EXHAUSTIVE)
+	static class DirtiesContextViaMetaAnnotationWithOverridenAttributes {
 
 		void clean() {
 			/* no-op */

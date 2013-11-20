@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.context.MetaAnnotationUtils.AnnotationDescriptor;
 import org.springframework.test.context.MetaAnnotationUtils.UntypedAnnotationDescriptor;
@@ -192,9 +193,9 @@ abstract class ContextLoaderUtils {
 	}
 
 	/**
-	 * Convenience method for creating a {@link ContextConfigurationAttributes} instance
-	 * from the supplied {@link ContextConfiguration} and declaring class and then adding
-	 * the attributes to the supplied list.
+	 * Convenience method for creating a {@link ContextConfigurationAttributes}
+	 * instance from the supplied {@link ContextConfiguration} annotation and
+	 * declaring class and then adding the attributes to the supplied list.
 	 */
 	private static void convertContextConfigToConfigAttributesAndAddToList(ContextConfiguration contextConfiguration,
 			Class<?> declaringClass, final List<ContextConfigurationAttributes> attributesList) {
@@ -205,6 +206,27 @@ abstract class ContextLoaderUtils {
 
 		ContextConfigurationAttributes attributes = new ContextConfigurationAttributes(declaringClass,
 			contextConfiguration);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Resolved context configuration attributes: " + attributes);
+		}
+		attributesList.add(attributes);
+	}
+
+	/**
+	 * Convenience method for creating a {@link ContextConfigurationAttributes}
+	 * instance from the supplied {@link AnnotationAttributes} and declaring
+	 * class and then adding the attributes to the supplied list.
+	 *
+	 * @since 4.0
+	 */
+	private static void convertAnnotationAttributesToConfigAttributesAndAddToList(AnnotationAttributes annAttrs,
+			Class<?> declaringClass, final List<ContextConfigurationAttributes> attributesList) {
+		if (logger.isTraceEnabled()) {
+			logger.trace(String.format("Retrieved @ContextConfiguration attributes [%s] for declaring class [%s].",
+				annAttrs, declaringClass.getName()));
+		}
+
+		ContextConfigurationAttributes attributes = new ContextConfigurationAttributes(declaringClass, annAttrs);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Resolved context configuration attributes: " + attributes);
 		}
@@ -243,6 +265,8 @@ abstract class ContextLoaderUtils {
 	 * <em>present</em> on the supplied class; or if a given class in the class hierarchy
 	 * declares both {@code @ContextConfiguration} and {@code @ContextHierarchy} as
 	 * top-level annotations.
+	 * @throws IllegalStateException if no class in the class hierarchy declares
+	 * {@code @ContextHierarchy}.
 	 *
 	 * @since 3.2.2
 	 * @see #buildContextHierarchyMap(Class)
@@ -251,6 +275,7 @@ abstract class ContextLoaderUtils {
 	@SuppressWarnings("unchecked")
 	static List<List<ContextConfigurationAttributes>> resolveContextHierarchyAttributes(Class<?> testClass) {
 		Assert.notNull(testClass, "Class must not be null");
+		Assert.state(findAnnotation(testClass, ContextHierarchy.class) != null, "@ContextHierarchy must be present");
 
 		final Class<ContextConfiguration> contextConfigType = ContextConfiguration.class;
 		final Class<ContextHierarchy> contextHierarchyType = ContextHierarchy.class;
@@ -263,17 +288,16 @@ abstract class ContextLoaderUtils {
 			contextConfigType.getName(), contextHierarchyType.getName(), testClass.getName()));
 
 		while (descriptor != null) {
-			Class<?> rootDeclaringClass = descriptor.getDeclaringClass();
-			Class<?> declaringClass = (descriptor.getStereotype() != null) ? descriptor.getStereotypeType()
-					: rootDeclaringClass;
+			Class<?> rootDeclaringClass = descriptor.getRootDeclaringClass();
+			Class<?> declaringClass = descriptor.getDeclaringClass();
 
 			boolean contextConfigDeclaredLocally = isAnnotationDeclaredLocally(contextConfigType, declaringClass);
 			boolean contextHierarchyDeclaredLocally = isAnnotationDeclaredLocally(contextHierarchyType, declaringClass);
 
 			if (contextConfigDeclaredLocally && contextHierarchyDeclaredLocally) {
-				String msg = String.format("Test class [%s] has been configured with both @ContextConfiguration "
+				String msg = String.format("Class [%s] has been configured with both @ContextConfiguration "
 						+ "and @ContextHierarchy. Only one of these annotations may be declared on a test class "
-						+ "or custom stereotype annotation.", rootDeclaringClass.getName());
+						+ "or custom stereotype annotation.", declaringClass.getName());
 				logger.error(msg);
 				throw new IllegalStateException(msg);
 			}
@@ -281,9 +305,8 @@ abstract class ContextLoaderUtils {
 			final List<ContextConfigurationAttributes> configAttributesList = new ArrayList<ContextConfigurationAttributes>();
 
 			if (contextConfigDeclaredLocally) {
-				ContextConfiguration contextConfiguration = getAnnotation(declaringClass, contextConfigType);
-				convertContextConfigToConfigAttributesAndAddToList(contextConfiguration, declaringClass,
-					configAttributesList);
+				convertAnnotationAttributesToConfigAttributesAndAddToList(descriptor.getAnnotationAttributes(),
+					declaringClass, configAttributesList);
 			}
 			else if (contextHierarchyDeclaredLocally) {
 				ContextHierarchy contextHierarchy = getAnnotation(declaringClass, contextHierarchyType);
@@ -293,7 +316,7 @@ abstract class ContextLoaderUtils {
 				}
 			}
 			else {
-				// This should theoretically actually never happen...
+				// This should theoretically never happen...
 				String msg = String.format("Test class [%s] has been configured with neither @ContextConfiguration "
 						+ "nor @ContextHierarchy as a class-level annotation.", rootDeclaringClass.getName());
 				logger.error(msg);
@@ -405,13 +428,9 @@ abstract class ContextLoaderUtils {
 			annotationType.getName(), testClass.getName()));
 
 		while (descriptor != null) {
-			Class<?> rootDeclaringClass = descriptor.getDeclaringClass();
-			Class<?> declaringClass = (descriptor.getStereotype() != null) ? descriptor.getStereotypeType()
-					: rootDeclaringClass;
-
-			convertContextConfigToConfigAttributesAndAddToList(descriptor.getAnnotation(), declaringClass,
-				attributesList);
-			descriptor = findAnnotationDescriptor(rootDeclaringClass.getSuperclass(), annotationType);
+			convertAnnotationAttributesToConfigAttributesAndAddToList(descriptor.getAnnotationAttributes(),
+				descriptor.getDeclaringClass(), attributesList);
+			descriptor = findAnnotationDescriptor(descriptor.getRootDeclaringClass().getSuperclass(), annotationType);
 		}
 
 		return attributesList;
@@ -489,20 +508,18 @@ abstract class ContextLoaderUtils {
 		final Set<String> activeProfiles = new HashSet<String>();
 
 		while (descriptor != null) {
-			Class<?> rootDeclaringClass = descriptor.getDeclaringClass();
-			Class<?> declaringClass = (descriptor.getStereotype() != null) ? descriptor.getStereotypeType()
-					: rootDeclaringClass;
+			Class<?> declaringClass = descriptor.getDeclaringClass();
 
-			ActiveProfiles annotation = descriptor.getAnnotation();
+			AnnotationAttributes annAttrs = descriptor.getAnnotationAttributes();
 			if (logger.isTraceEnabled()) {
-				logger.trace(String.format("Retrieved @ActiveProfiles [%s] for declaring class [%s].", annotation,
-					declaringClass.getName()));
+				logger.trace(String.format("Retrieved @ActiveProfiles attributes [%s] for declaring class [%s].",
+					annAttrs, declaringClass.getName()));
 			}
-			validateActiveProfilesConfiguration(declaringClass, annotation);
+			validateActiveProfilesConfiguration(declaringClass, annAttrs);
 
-			String[] profiles = annotation.profiles();
-			String[] valueProfiles = annotation.value();
-			Class<? extends ActiveProfilesResolver> resolverClass = annotation.resolver();
+			String[] profiles = annAttrs.getStringArray("profiles");
+			String[] valueProfiles = annAttrs.getStringArray("value");
+			Class<? extends ActiveProfilesResolver> resolverClass = annAttrs.getClass("resolver");
 
 			boolean resolverDeclared = !ActiveProfilesResolver.class.equals(resolverClass);
 			boolean valueDeclared = !ObjectUtils.isEmpty(valueProfiles);
@@ -538,17 +555,17 @@ abstract class ContextLoaderUtils {
 				}
 			}
 
-			descriptor = annotation.inheritProfiles() ? findAnnotationDescriptor(rootDeclaringClass.getSuperclass(),
-				annotationType) : null;
+			descriptor = annAttrs.getBoolean("inheritProfiles") ? findAnnotationDescriptor(
+				descriptor.getRootDeclaringClass().getSuperclass(), annotationType) : null;
 		}
 
 		return StringUtils.toStringArray(activeProfiles);
 	}
 
-	private static void validateActiveProfilesConfiguration(Class<?> declaringClass, ActiveProfiles annotation) {
-		String[] valueProfiles = annotation.value();
-		String[] profiles = annotation.profiles();
-		Class<? extends ActiveProfilesResolver> resolverClass = annotation.resolver();
+	private static void validateActiveProfilesConfiguration(Class<?> declaringClass, AnnotationAttributes annAttrs) {
+		String[] valueProfiles = annAttrs.getStringArray("value");
+		String[] profiles = annAttrs.getStringArray("profiles");
+		Class<? extends ActiveProfilesResolver> resolverClass = annAttrs.getClass("resolver");
 		boolean valueDeclared = !ObjectUtils.isEmpty(valueProfiles);
 		boolean profilesDeclared = !ObjectUtils.isEmpty(profiles);
 		boolean resolverDeclared = !ActiveProfilesResolver.class.equals(resolverClass);

@@ -125,6 +125,26 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	 * @since 4.0
 	 */
 	@Test
+	public void resolveActiveProfilesWithMetaAnnotationAndOverrides() {
+		String[] profiles = resolveActiveProfiles(MetaLocationsFooWithOverrides.class);
+		assertNotNull(profiles);
+		assertArrayEquals(new String[] { "foo" }, profiles);
+	}
+
+	/**
+	 * @since 4.0
+	 */
+	@Test
+	public void resolveActiveProfilesWithMetaAnnotationAndOverriddenAttributes() {
+		String[] profiles = resolveActiveProfiles(MetaLocationsFooWithOverriddenAttributes.class);
+		assertNotNull(profiles);
+		assertArrayEquals(new String[] { "foo1", "foo2" }, profiles);
+	}
+
+	/**
+	 * @since 4.0
+	 */
+	@Test
 	public void resolveActiveProfilesWithLocalAndInheritedMetaAnnotations() {
 		String[] profiles = resolveActiveProfiles(MetaLocationsBar.class);
 		assertNotNull(profiles);
@@ -254,6 +274,18 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
 	private static @interface MetaAnimalsConfig {
+	}
+
+	@ActiveProfiles
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	private static @interface MetaProfilesWithOverrides {
+
+		String[] profiles() default { "dog", "cat" };
+
+		Class<? extends ActiveProfilesResolver> resolver() default ActiveProfilesResolver.class;
+
+		boolean inheritProfiles() default false;
 	}
 
 	@MetaAnimalsConfig

@@ -21,13 +21,15 @@ import java.lang.reflect.Method;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.TestContext;
 import org.springframework.util.Assert;
 
-import static org.springframework.core.annotation.AnnotationUtils.*;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.*;
 
 /**
  * {@code TestExecutionListener} which provides support for marking the
@@ -81,24 +83,22 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 		Method testMethod = testContext.getTestMethod();
 		Assert.notNull(testMethod, "The test method of the supplied TestContext must not be null");
 
-		final Class<DirtiesContext> annotationType = DirtiesContext.class;
-
-		DirtiesContext methodDirtiesContextAnnotation = findAnnotation(testMethod, annotationType);
-		boolean methodDirtiesContext = methodDirtiesContextAnnotation != null;
-
-		DirtiesContext classDirtiesContextAnnotation = findAnnotation(testClass, annotationType);
-		boolean classDirtiesContext = classDirtiesContextAnnotation != null;
-		ClassMode classMode = classDirtiesContext ? classDirtiesContextAnnotation.classMode() : null;
+		final String annotationType = DirtiesContext.class.getName();
+		AnnotationAttributes methodAnnAttrs = AnnotatedElementUtils.getAnnotationAttributes(testMethod, annotationType);
+		AnnotationAttributes classAnnAttrs = AnnotatedElementUtils.getAnnotationAttributes(testClass, annotationType);
+		boolean methodDirtiesContext = methodAnnAttrs != null;
+		boolean classDirtiesContext = classAnnAttrs != null;
+		ClassMode classMode = classDirtiesContext ? classAnnAttrs.<ClassMode> getEnum("classMode") : null;
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("After test method: context [" + testContext + "], class dirties context ["
-					+ classDirtiesContext + "], class mode [" + classMode + "], method dirties context ["
-					+ methodDirtiesContext + "].");
+			logger.debug(String.format(
+				"After test method: context %s, class dirties context [%s], class mode [%s], method dirties context [%s].",
+				testContext, classDirtiesContext, classMode, methodDirtiesContext));
 		}
 
-		if (methodDirtiesContext || (classMode == ClassMode.AFTER_EACH_TEST_METHOD)) {
-			HierarchyMode hierarchyMode = methodDirtiesContext ? methodDirtiesContextAnnotation.hierarchyMode()
-					: classDirtiesContextAnnotation.hierarchyMode();
+		if (methodDirtiesContext || (classMode == AFTER_EACH_TEST_METHOD)) {
+			HierarchyMode hierarchyMode = methodDirtiesContext ? methodAnnAttrs.<HierarchyMode> getEnum("hierarchyMode")
+					: classAnnAttrs.<HierarchyMode> getEnum("hierarchyMode");
 			dirtyContext(testContext, hierarchyMode);
 		}
 	}
@@ -107,7 +107,7 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	 * If the test class of the supplied {@linkplain TestContext test context} is
 	 * annotated with {@link DirtiesContext &#064;DirtiesContext}, the
 	 * {@linkplain ApplicationContext application context} of the test context will
-	 * be {@linkplain TestContext#markApplicationContextDirty() marked as dirty} ,
+	 * be {@linkplain TestContext#markApplicationContextDirty() marked as dirty},
 	 * and the
 	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
 	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context will be set to
@@ -118,15 +118,16 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 		Class<?> testClass = testContext.getTestClass();
 		Assert.notNull(testClass, "The test class of the supplied TestContext must not be null");
 
-		final Class<DirtiesContext> annotationType = DirtiesContext.class;
+		final String annotationType = DirtiesContext.class.getName();
+		AnnotationAttributes annAttrs = AnnotatedElementUtils.getAnnotationAttributes(testClass, annotationType);
+		boolean dirtiesContext = annAttrs != null;
 
-		DirtiesContext dirtiesContextAnnotation = findAnnotation(testClass, annotationType);
-		boolean dirtiesContext = dirtiesContextAnnotation != null;
 		if (logger.isDebugEnabled()) {
-			logger.debug("After test class: context [" + testContext + "], dirtiesContext [" + dirtiesContext + "].");
+			logger.debug(String.format("After test class: context %s, dirtiesContext [%s].", testContext,
+				dirtiesContext));
 		}
 		if (dirtiesContext) {
-			HierarchyMode hierarchyMode = dirtiesContextAnnotation.hierarchyMode();
+			HierarchyMode hierarchyMode = annAttrs.<HierarchyMode> getEnum("hierarchyMode");
 			dirtyContext(testContext, hierarchyMode);
 		}
 	}

@@ -43,7 +43,7 @@ public class MetaAnnotationUtilsTests {
 			Class<? extends Annotation> stereotypeType) {
 		AnnotationDescriptor<Component> descriptor = findAnnotationDescriptor(startClass, Component.class);
 		assertNotNull(descriptor);
-		assertEquals(declaringClass, descriptor.getDeclaringClass());
+		assertEquals(declaringClass, descriptor.getRootDeclaringClass());
 		assertEquals(Component.class, descriptor.getAnnotationType());
 		assertEquals(name, descriptor.getAnnotation().value());
 		assertNotNull(descriptor.getStereotype());
@@ -57,7 +57,7 @@ public class MetaAnnotationUtilsTests {
 		UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(startClass, Service.class,
 			annotationType, Order.class, Transactional.class);
 		assertNotNull(descriptor);
-		assertEquals(declaringClass, descriptor.getDeclaringClass());
+		assertEquals(declaringClass, descriptor.getRootDeclaringClass());
 		assertEquals(annotationType, descriptor.getAnnotationType());
 		assertEquals(name, ((Component) descriptor.getAnnotation()).value());
 		assertNotNull(descriptor.getStereotype());
@@ -74,16 +74,16 @@ public class MetaAnnotationUtilsTests {
 	public void findAnnotationDescriptorWithInheritedAnnotationOnClass() throws Exception {
 		// Note: @Transactional is inherited
 		assertEquals(InheritedAnnotationClass.class,
-			findAnnotationDescriptor(InheritedAnnotationClass.class, Transactional.class).getDeclaringClass());
+			findAnnotationDescriptor(InheritedAnnotationClass.class, Transactional.class).getRootDeclaringClass());
 		assertEquals(InheritedAnnotationClass.class,
-			findAnnotationDescriptor(SubInheritedAnnotationClass.class, Transactional.class).getDeclaringClass());
+			findAnnotationDescriptor(SubInheritedAnnotationClass.class, Transactional.class).getRootDeclaringClass());
 	}
 
 	@Test
 	public void findAnnotationDescriptorWithInheritedAnnotationOnInterface() throws Exception {
 		// Note: @Transactional is inherited
 		assertEquals(InheritedAnnotationInterface.class,
-			findAnnotationDescriptor(InheritedAnnotationInterface.class, Transactional.class).getDeclaringClass());
+			findAnnotationDescriptor(InheritedAnnotationInterface.class, Transactional.class).getRootDeclaringClass());
 		assertNull(findAnnotationDescriptor(SubInheritedAnnotationInterface.class, Transactional.class));
 		assertNull(findAnnotationDescriptor(SubSubInheritedAnnotationInterface.class, Transactional.class));
 	}
@@ -92,16 +92,16 @@ public class MetaAnnotationUtilsTests {
 	public void findAnnotationDescriptorForNonInheritedAnnotationOnClass() throws Exception {
 		// Note: @Order is not inherited.
 		assertEquals(NonInheritedAnnotationClass.class,
-			findAnnotationDescriptor(NonInheritedAnnotationClass.class, Order.class).getDeclaringClass());
+			findAnnotationDescriptor(NonInheritedAnnotationClass.class, Order.class).getRootDeclaringClass());
 		assertEquals(NonInheritedAnnotationClass.class,
-			findAnnotationDescriptor(SubNonInheritedAnnotationClass.class, Order.class).getDeclaringClass());
+			findAnnotationDescriptor(SubNonInheritedAnnotationClass.class, Order.class).getRootDeclaringClass());
 	}
 
 	@Test
 	public void findAnnotationDescriptorForNonInheritedAnnotationOnInterface() throws Exception {
 		// Note: @Order is not inherited.
 		assertEquals(NonInheritedAnnotationInterface.class,
-			findAnnotationDescriptor(NonInheritedAnnotationInterface.class, Order.class).getDeclaringClass());
+			findAnnotationDescriptor(NonInheritedAnnotationInterface.class, Order.class).getRootDeclaringClass());
 		assertNull(findAnnotationDescriptor(SubNonInheritedAnnotationInterface.class, Order.class));
 	}
 
@@ -116,7 +116,7 @@ public class MetaAnnotationUtilsTests {
 		Class<Component> annotationType = Component.class;
 		AnnotationDescriptor<Component> descriptor = findAnnotationDescriptor(HasLocalAndMetaComponentAnnotation.class,
 			annotationType);
-		assertEquals(HasLocalAndMetaComponentAnnotation.class, descriptor.getDeclaringClass());
+		assertEquals(HasLocalAndMetaComponentAnnotation.class, descriptor.getRootDeclaringClass());
 		assertEquals(annotationType, descriptor.getAnnotationType());
 		assertNull(descriptor.getStereotype());
 		assertNull(descriptor.getStereotypeType());
@@ -159,10 +159,10 @@ public class MetaAnnotationUtilsTests {
 	public void findAnnotationDescriptorForTypesWithInheritedAnnotationOnClass() throws Exception {
 		// Note: @Transactional is inherited
 		assertEquals(InheritedAnnotationClass.class,
-			findAnnotationDescriptorForTypes(InheritedAnnotationClass.class, Transactional.class).getDeclaringClass());
+			findAnnotationDescriptorForTypes(InheritedAnnotationClass.class, Transactional.class).getRootDeclaringClass());
 		assertEquals(
 			InheritedAnnotationClass.class,
-			findAnnotationDescriptorForTypes(SubInheritedAnnotationClass.class, Transactional.class).getDeclaringClass());
+			findAnnotationDescriptorForTypes(SubInheritedAnnotationClass.class, Transactional.class).getRootDeclaringClass());
 	}
 
 	@Test
@@ -171,7 +171,7 @@ public class MetaAnnotationUtilsTests {
 		// Note: @Transactional is inherited
 		assertEquals(
 			InheritedAnnotationInterface.class,
-			findAnnotationDescriptorForTypes(InheritedAnnotationInterface.class, Transactional.class).getDeclaringClass());
+			findAnnotationDescriptorForTypes(InheritedAnnotationInterface.class, Transactional.class).getRootDeclaringClass());
 		assertNull(findAnnotationDescriptorForTypes(SubInheritedAnnotationInterface.class, Transactional.class));
 		assertNull(findAnnotationDescriptorForTypes(SubSubInheritedAnnotationInterface.class, Transactional.class));
 	}
@@ -181,9 +181,9 @@ public class MetaAnnotationUtilsTests {
 	public void findAnnotationDescriptorForTypesForNonInheritedAnnotationOnClass() throws Exception {
 		// Note: @Order is not inherited.
 		assertEquals(NonInheritedAnnotationClass.class,
-			findAnnotationDescriptorForTypes(NonInheritedAnnotationClass.class, Order.class).getDeclaringClass());
+			findAnnotationDescriptorForTypes(NonInheritedAnnotationClass.class, Order.class).getRootDeclaringClass());
 		assertEquals(NonInheritedAnnotationClass.class,
-			findAnnotationDescriptorForTypes(SubNonInheritedAnnotationClass.class, Order.class).getDeclaringClass());
+			findAnnotationDescriptorForTypes(SubNonInheritedAnnotationClass.class, Order.class).getRootDeclaringClass());
 	}
 
 	@Test
@@ -191,7 +191,7 @@ public class MetaAnnotationUtilsTests {
 	public void findAnnotationDescriptorForTypesForNonInheritedAnnotationOnInterface() throws Exception {
 		// Note: @Order is not inherited.
 		assertEquals(NonInheritedAnnotationInterface.class,
-			findAnnotationDescriptorForTypes(NonInheritedAnnotationInterface.class, Order.class).getDeclaringClass());
+			findAnnotationDescriptorForTypes(NonInheritedAnnotationInterface.class, Order.class).getRootDeclaringClass());
 		assertNull(findAnnotationDescriptorForTypes(SubNonInheritedAnnotationInterface.class, Order.class));
 	}
 
@@ -201,7 +201,7 @@ public class MetaAnnotationUtilsTests {
 		Class<Component> annotationType = Component.class;
 		UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(
 			HasLocalAndMetaComponentAnnotation.class, Transactional.class, annotationType, Order.class);
-		assertEquals(HasLocalAndMetaComponentAnnotation.class, descriptor.getDeclaringClass());
+		assertEquals(HasLocalAndMetaComponentAnnotation.class, descriptor.getRootDeclaringClass());
 		assertEquals(annotationType, descriptor.getAnnotationType());
 		assertNull(descriptor.getStereotype());
 		assertNull(descriptor.getStereotypeType());
@@ -211,6 +211,44 @@ public class MetaAnnotationUtilsTests {
 	public void findAnnotationDescriptorForTypesWithMetaComponentAnnotation() throws Exception {
 		Class<HasMetaComponentAnnotation> startClass = HasMetaComponentAnnotation.class;
 		assertComponentOnStereotypeForMultipleCandidateTypes(startClass, startClass, "meta1", Meta1.class);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void findAnnotationDescriptorForTypesWithMetaAnnotationWithDefaultAttributes() throws Exception {
+		Class<?> startClass = MetaConfigWithDefaultAttributesTestCase.class;
+		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
+
+		UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(startClass, Service.class,
+			ContextConfiguration.class, Order.class, Transactional.class);
+
+		assertNotNull(descriptor);
+		assertEquals(startClass, descriptor.getRootDeclaringClass());
+		assertEquals(annotationType, descriptor.getAnnotationType());
+		assertArrayEquals(new Class[] {}, ((ContextConfiguration) descriptor.getAnnotation()).value());
+		assertArrayEquals(new Class[] { MetaConfig.DevConfig.class, MetaConfig.ProductionConfig.class },
+			descriptor.getAnnotationAttributes().getClassArray("classes"));
+		assertNotNull(descriptor.getStereotype());
+		assertEquals(MetaConfig.class, descriptor.getStereotypeType());
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void findAnnotationDescriptorForTypesWithMetaAnnotationWithOverriddenAttributes() throws Exception {
+		Class<?> startClass = MetaConfigWithOverriddenAttributesTestCase.class;
+		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
+
+		UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(startClass, Service.class,
+			ContextConfiguration.class, Order.class, Transactional.class);
+
+		assertNotNull(descriptor);
+		assertEquals(startClass, descriptor.getRootDeclaringClass());
+		assertEquals(annotationType, descriptor.getAnnotationType());
+		assertArrayEquals(new Class[] {}, ((ContextConfiguration) descriptor.getAnnotation()).value());
+		assertArrayEquals(new Class[] { MetaAnnotationUtilsTests.class },
+			descriptor.getAnnotationAttributes().getClassArray("classes"));
+		assertNotNull(descriptor.getStereotype());
+		assertEquals(MetaConfig.class, descriptor.getStereotypeType());
 	}
 
 	@Test
@@ -277,6 +315,28 @@ public class MetaAnnotationUtilsTests {
 
 	static class SubClassWithLocalMetaAnnotationAndMetaAnnotatedInterface extends
 			ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface {
+	}
+
+	@ContextConfiguration
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface MetaConfig {
+
+		static class DevConfig {
+		}
+
+		static class ProductionConfig {
+		}
+
+
+		Class<?>[] classes() default { DevConfig.class, ProductionConfig.class };
+	}
+
+	@MetaConfig
+	public class MetaConfigWithDefaultAttributesTestCase {
+	}
+
+	@MetaConfig(classes = MetaAnnotationUtilsTests.class)
+	public class MetaConfigWithOverriddenAttributesTestCase {
 	}
 
 	// -------------------------------------------------------------------------
