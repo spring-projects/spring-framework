@@ -140,17 +140,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 
 	@Override
 	public String getApplicationName() {
-		if (this.servletContext == null) {
-			return "";
-		}
-		if (this.servletContext.getMajorVersion() == 2 && this.servletContext.getMinorVersion() < 5) {
-			String name = this.servletContext.getServletContextName();
-			return (name != null ? name : "");
-		}
-		else {
-			// Servlet 2.5 available
-			return this.servletContext.getContextPath();
-		}
+		return (this.servletContext != null ? this.servletContext.getContextPath() : "");
 	}
 
 	/**

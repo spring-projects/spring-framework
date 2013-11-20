@@ -19,9 +19,7 @@ package org.springframework.web.servlet;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.concurrent.Callable;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -617,23 +615,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			}
 			else {
 				// Generate default id...
-				ServletContext sc = getServletContext();
-				if (sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
-					// Servlet <= 2.4: resort to name specified in web.xml, if any.
-					String servletContextName = sc.getServletContextName();
-					if (servletContextName != null) {
-						wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + servletContextName +
-								"." + getServletName());
-					}
-					else {
-						wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + getServletName());
-					}
-				}
-				else {
-					// Servlet 2.5's getContextPath available!
-					wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX +
-							ObjectUtils.getDisplayString(sc.getContextPath()) + "/" + getServletName());
-				}
+				wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX +
+						ObjectUtils.getDisplayString(getServletContext().getContextPath()) + "/" + getServletName());
 			}
 		}
 
@@ -703,7 +686,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 				this.contextInitializers.add(initializer);
 			}
 		}
-		Collections.sort(this.contextInitializers, new AnnotationAwareOrderComparator());
+		AnnotationAwareOrderComparator.sort(this.contextInitializers);
 		for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : this.contextInitializers) {
 			initializer.initialize(wac);
 		}

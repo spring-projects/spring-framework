@@ -18,7 +18,6 @@ package org.springframework.web.context;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -368,15 +367,8 @@ public class ContextLoader {
 			}
 			else {
 				// Generate default id...
-				if (sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
-					// Servlet <= 2.4: resort to name specified in web.xml, if any.
-					wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX +
-							ObjectUtils.getDisplayString(sc.getServletContextName()));
-				}
-				else {
-					wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX +
-							ObjectUtils.getDisplayString(sc.getContextPath()));
-				}
+				wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX +
+						ObjectUtils.getDisplayString(sc.getContextPath()));
 			}
 		}
 
@@ -470,7 +462,7 @@ public class ContextLoader {
 	protected void customizeContext(ServletContext servletContext, ConfigurableWebApplicationContext applicationContext) {
 		List<Class<ApplicationContextInitializer<ConfigurableApplicationContext>>> initializerClasses =
 				determineContextInitializerClasses(servletContext);
-		if (initializerClasses.size() == 0) {
+		if (initializerClasses.isEmpty()) {
 			// no ApplicationContextInitializers have been declared -> nothing to do
 			return;
 		}
@@ -494,10 +486,10 @@ public class ContextLoader {
 
 		ConfigurableEnvironment env = applicationContext.getEnvironment();
 		if (env instanceof ConfigurableWebEnvironment) {
-			((ConfigurableWebEnvironment)env).initPropertySources(servletContext, null);
+			((ConfigurableWebEnvironment) env).initPropertySources(servletContext, null);
 		}
 
-		Collections.sort(initializerInstances, new AnnotationAwareOrderComparator());
+		AnnotationAwareOrderComparator.sort(initializerInstances);
 		for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : initializerInstances) {
 			initializer.initialize(applicationContext);
 		}
