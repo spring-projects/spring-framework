@@ -3,7 +3,7 @@ buildscript {
 		maven { url "http://repo.springsource.org/plugins-release" }
 	}
 	dependencies {
-		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.4")
+		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.5")
 		classpath("org.asciidoctor:asciidoctor-gradle-plugin:0.7.0")
 	}
 }
@@ -1077,7 +1077,7 @@ configure(rootProject) {
 
 	task wrapper(type: Wrapper) {
 		description = "Generates gradlew[.bat] scripts"
-		gradleVersion = "1.6"
+		gradleVersion = "1.8"
 
 		doLast() {
 			def gradleOpts = "-XX:MaxMetaspaceSize=1024m -Xmx1024m"
