@@ -3,7 +3,7 @@
 
 <properties version="1.0">
 
-	<entry key="tb.array[0].age">99</entry>
-	<entry key="tb.list[1].name">test</entry>
+	<entry key="tb.array[0].age"> 99 \t</entry>
+	<entry key="tb.list[1].name">\ttest\t </entry>
 
 </properties>

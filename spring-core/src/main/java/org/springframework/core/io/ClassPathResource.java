@@ -75,6 +75,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	public ClassPathResource(String path, ClassLoader classLoader) {
 		Assert.notNull(path, "Path must not be null");
 		String pathToUse = StringUtils.cleanPath(path);
+
 		if (pathToUse.startsWith("/")) {
 			pathToUse = pathToUse.substring(1);
 		}

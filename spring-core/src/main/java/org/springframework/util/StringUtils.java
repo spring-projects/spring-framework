@@ -31,6 +31,7 @@ import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.TreeSet;
 
+
 /**
  * Miscellaneous {@link String} utility methods.
  *
@@ -50,6 +51,7 @@ import java.util.TreeSet;
  * @author Rob Harrop
  * @author Rick Evans
  * @author Arjen Poutsma
+ * @author Samuel Teixeira
  * @since 16 April 2001
  * @see org.apache.commons.lang.StringUtils
  */
@@ -605,6 +607,7 @@ public abstract class StringUtils {
 	 * inner simple dots.
 	 * <p>The result is convenient for path comparison. For other uses,
 	 * notice that Windows separators ("\") are replaced by simple slashes.
+	 * <p>Extract the prefix "classpath:" from the given path
 	 * @param path the original path
 	 * @return the normalized path
 	 */
@@ -614,11 +617,17 @@ public abstract class StringUtils {
 		}
 		String pathToUse = replace(path, WINDOWS_FOLDER_SEPARATOR, FOLDER_SEPARATOR);
 
+		int prefixIndex = pathToUse.indexOf(":");
+		// Verify if the path inicialize with "classpath:"
+		// remove it if true
+		if (prefixIndex != -1 && pathToUse.substring(0, prefixIndex).equals("classpath")) {
+			pathToUse = pathToUse.substring(prefixIndex + 1);
+		}
+
 		// Strip prefix from path to analyze, to not treat it as part of the
 		// first path element. This is necessary to correctly parse paths like
 		// "file:core/../core/io/Resource.class", where the ".." should just
 		// strip the first "core" directory while keeping the "file:" prefix.
-		int prefixIndex = pathToUse.indexOf(":");
 		String prefix = "";
 		if (prefixIndex != -1) {
 			prefix = pathToUse.substring(0, prefixIndex + 1);
@@ -1171,5 +1180,4 @@ public abstract class StringUtils {
 	public static String arrayToCommaDelimitedString(Object[] arr) {
 		return arrayToDelimitedString(arr, ",");
 	}
-
 }

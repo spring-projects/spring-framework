@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import org.springframework.util.ObjectUtils;
  * can be detected and decrypted accordingly before processing them.
  *
  * @author Juergen Hoeller
+ * @author Samuel Teixeira
  * @since 02.10.2003
  * @see PropertyOverrideConfigurer
  * @see PropertyPlaceholderConfigurer
@@ -129,6 +130,7 @@ public abstract class PropertyResourceConfigurer extends PropertiesLoaderSupport
 	 * <p>The default implementation simply returns the original value.
 	 * Can be overridden in subclasses, for example to detect
 	 * encrypted values and decrypt them accordingly.
+	 *  <p>Remove \t and spaces with trim
 	 * @param originalValue the original value from the properties source
 	 * (properties file or local "properties")
 	 * @return the converted value, to be used for processing
@@ -138,7 +140,7 @@ public abstract class PropertyResourceConfigurer extends PropertiesLoaderSupport
 	 * @see #convertProperty(String, String)
 	 */
 	protected String convertPropertyValue(String originalValue) {
-		return originalValue;
+		return originalValue.trim().replaceAll("\\t", "");
 	}
 
 
