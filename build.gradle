@@ -816,7 +816,7 @@ project("spring-test") {
 		// "TestCase" classes are run by other test classes, not the build.
 		exclude "**/*TestCase.class"
 		// Generate TestNG reports alongside JUnit reports.
-		testReport true
+		getReports().getHtml().setEnabled(true)
 	}
 
 	test {
