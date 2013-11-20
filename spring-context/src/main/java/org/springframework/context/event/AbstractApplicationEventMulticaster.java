@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.OrderComparator;
@@ -160,10 +161,16 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 			if (!listenerBeans.isEmpty()) {
 				BeanFactory beanFactory = getBeanFactory();
 				for (String listenerBeanName : listenerBeans) {
-					ApplicationListener listener = beanFactory.getBean(listenerBeanName, ApplicationListener.class);
-					if (!allListeners.contains(listener) && supportsEvent(listener, eventType, sourceType)) {
-						retriever.applicationListenerBeans.add(listenerBeanName);
-						allListeners.add(listener);
+					try {
+						ApplicationListener listener = beanFactory.getBean(listenerBeanName, ApplicationListener.class);
+						if (!allListeners.contains(listener) && supportsEvent(listener, eventType, sourceType)) {
+							retriever.applicationListenerBeans.add(listenerBeanName);
+							allListeners.add(listener);
+						}
+					}
+					catch (NoSuchBeanDefinitionException ex) {
+						// Singleton listener instance (without backing bean definition) disappeared -
+						// probably in the middle of the destruction phase
 					}
 				}
 			}
@@ -252,9 +259,15 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 			if (!this.applicationListenerBeans.isEmpty()) {
 				BeanFactory beanFactory = getBeanFactory();
 				for (String listenerBeanName : this.applicationListenerBeans) {
-					ApplicationListener listener = beanFactory.getBean(listenerBeanName, ApplicationListener.class);
-					if (this.preFiltered || !allListeners.contains(listener)) {
-						allListeners.add(listener);
+					try {
+						ApplicationListener listener = beanFactory.getBean(listenerBeanName, ApplicationListener.class);
+						if (this.preFiltered || !allListeners.contains(listener)) {
+							allListeners.add(listener);
+						}
+					}
+					catch (NoSuchBeanDefinitionException ex) {
+						// Singleton listener instance (without backing bean definition) disappeared -
+						// probably in the middle of the destruction phase
 					}
 				}
 			}
