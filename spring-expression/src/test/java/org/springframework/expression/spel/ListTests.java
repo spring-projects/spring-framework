@@ -107,6 +107,14 @@ public class ListTests extends ExpressionTestCase {
 	public void testRelOperatorsBetween03() {
 		evaluate("42 between {32, 42}", "true", Boolean.class);
 	}
+	
+	@Test
+	public void testRelOperatorsBetween04() {
+		evaluate("new java.math.BigDecimal('1') between {new java.math.BigDecimal('1'),new java.math.BigDecimal('5')}", "true", Boolean.class);
+		evaluate("new java.math.BigDecimal('3') between {new java.math.BigDecimal('1'),new java.math.BigDecimal('5')}", "true", Boolean.class);
+		evaluate("new java.math.BigDecimal('5') between {new java.math.BigDecimal('1'),new java.math.BigDecimal('5')}", "true", Boolean.class);
+		evaluate("new java.math.BigDecimal('8') between {new java.math.BigDecimal('1'),new java.math.BigDecimal('5')}", "false", Boolean.class);
+	}
 
 	@Test
 	public void testRelOperatorsBetweenErrors02() {

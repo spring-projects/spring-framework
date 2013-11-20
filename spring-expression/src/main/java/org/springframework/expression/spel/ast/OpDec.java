@@ -16,6 +16,8 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.math.BigDecimal;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
@@ -58,7 +60,12 @@ public class OpDec extends Operator {
 
 		if (operandValue instanceof Number) {
 			Number op1 = (Number) operandValue;
-			if (op1 instanceof Double) {
+			if (op1 instanceof BigDecimal) {
+				BigDecimal bd = (BigDecimal) op1;
+				newValue = new TypedValue(bd.subtract(BigDecimal.ONE),
+						operandTypedValue.getTypeDescriptor());
+			}
+			else if (op1 instanceof Double) {
 				newValue = new TypedValue(op1.doubleValue() - 1.0d,
 						operandTypedValue.getTypeDescriptor());
 			}

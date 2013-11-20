@@ -16,23 +16,27 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.math.BigDecimal;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.util.NumberUtils;
 
 /**
  * The minus operator supports:
  * <ul>
+ * <li>subtraction of {@code BigDecimal}
  * <li>subtraction of doubles (floats are represented as doubles)
  * <li>subtraction of longs
  * <li>subtraction of integers
  * <li>subtraction of an int from a string of one character (effectively decreasing that
  * character), so 'd'-3='a'
  * </ul>
- * It can be used as a unary operator for numbers (double/long/int). The standard
- * promotions are performed when the operand types vary (double-int=double). For other
- * options it defers to the registered overloader.
+ * It can be used as a unary operator for numbers ({@code BigDecimal}/double/long/int). 
+ * The standard promotions are performed when the operand types vary (double-int=double).
+ * For other options it defers to the registered overloader.
  *
  * @author Andy Clement
  * @since 3.0
@@ -53,6 +57,11 @@ public class OpMinus extends Operator {
 			Object operand = leftOp.getValueInternal(state).getValue();
 			if (operand instanceof Number) {
 				Number n = (Number) operand;
+				if (operand instanceof BigDecimal) {
+					BigDecimal bdn = (BigDecimal) n;
+					return new TypedValue(bdn.negate());
+				}
+				
 				if (operand instanceof Double) {
 					return new TypedValue(0 - n.doubleValue());
 				}
@@ -76,18 +85,20 @@ public class OpMinus extends Operator {
 		if (left instanceof Number && right instanceof Number) {
 			Number op1 = (Number) left;
 			Number op2 = (Number) right;
+			if (op1 instanceof BigDecimal || op2 instanceof BigDecimal) {
+				BigDecimal bd1 = NumberUtils.convertNumberToTargetClass(op1, BigDecimal.class);
+				BigDecimal bd2 = NumberUtils.convertNumberToTargetClass(op2, BigDecimal.class);
+				return new TypedValue(bd1.subtract(bd2));
+			}
 			if (op1 instanceof Double || op2 instanceof Double) {
 				return new TypedValue(op1.doubleValue() - op2.doubleValue());
 			}
-
 			if (op1 instanceof Float || op2 instanceof Float) {
 				return new TypedValue(op1.floatValue() - op2.floatValue());
 			}
-
 			if (op1 instanceof Long || op2 instanceof Long) {
 				return new TypedValue(op1.longValue() - op2.longValue());
 			}
-
 			return new TypedValue(op1.intValue() - op2.intValue());
 		}
 		else if (left instanceof String && right instanceof Integer

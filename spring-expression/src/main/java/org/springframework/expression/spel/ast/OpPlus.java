@@ -16,6 +16,8 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.math.BigDecimal;
+
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
@@ -23,18 +25,20 @@ import org.springframework.expression.TypeConverter;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.util.Assert;
+import org.springframework.util.NumberUtils;
 
 /**
  * The plus operator will:
  * <ul>
+ * <li>add {@code BigDecimal}
  * <li>add doubles (floats are represented as doubles)
  * <li>add longs
  * <li>add integers
  * <li>concatenate strings
  * </ul>
- * It can be used as a unary operator for numbers (double/long/int). The standard
- * promotions are performed when the operand types vary (double+int=double). For other
- * options it defers to the registered overloader.
+ * It can be used as a unary operator for numbers ({@code BigDecimal}/double/long/int).
+ * The standard promotions are performed when the operand types vary (double+int=double).
+ * For other options it defers to the registered overloader.
  *
  * @author Andy Clement
  * @author Ivo Smid
@@ -56,8 +60,8 @@ public class OpPlus extends Operator {
 		if (rightOp == null) { // If only one operand, then this is unary plus
 			Object operandOne = leftOp.getValueInternal(state).getValue();
 			if (operandOne instanceof Number) {
-				if (operandOne instanceof Double || operandOne instanceof Long) {
-					return new TypedValue(operandOne);
+				if (operandOne instanceof Double || operandOne instanceof Long || operandOne instanceof BigDecimal) {
+					return new TypedValue(operandOne); 
 				}
 				if (operandOne instanceof Float) {
 					return new TypedValue(((Number) operandOne).floatValue());
@@ -76,6 +80,11 @@ public class OpPlus extends Operator {
 		if (operandOne instanceof Number && operandTwo instanceof Number) {
 			Number op1 = (Number) operandOne;
 			Number op2 = (Number) operandTwo;
+			if (op1 instanceof BigDecimal || op2 instanceof BigDecimal) {
+				BigDecimal bd1 = NumberUtils.convertNumberToTargetClass(op1, BigDecimal.class);
+				BigDecimal bd2 = NumberUtils.convertNumberToTargetClass(op2, BigDecimal.class);
+				return new TypedValue(bd1.add(bd2));
+			}
 			if (op1 instanceof Double || op2 instanceof Double) {
 				return new TypedValue(op1.doubleValue() + op2.doubleValue());
 			}

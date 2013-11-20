@@ -16,20 +16,24 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.math.BigDecimal;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.util.NumberUtils;
 
 /**
  * Implements the {@code multiply} operator.
  *
  * <p>Conversions and promotions are handled as defined in
  * <a href="http://java.sun.com/docs/books/jls/third_edition/html/conversions.html">Section
- * 5.6.2 of the Java Language Specification</a>:
+ * 5.6.2 of the Java Language Specification</a>, with the addiction of {@code BigDecimal} management:
  *
  * <p>If any of the operands is of a reference type, unboxing conversion (Section 5.1.8)
  * is performed. Then:<br>
+ * If either operand is of type {@code BigDecimal}, the other is converted to {@code BigDecimal}.<br>
  * If either operand is of type double, the other is converted to double.<br>
  * Otherwise, if either operand is of type float, the other is converted to float.<br>
  * Otherwise, if either operand is of type long, the other is converted to long.<br>
@@ -52,6 +56,7 @@ public class OpMultiply extends Operator {
 	 * for types not supported here.
 	 * <p>Supported operand types:
 	 * <ul>
+	 * <li>{@code BigDecimal}
 	 * <li>doubles
 	 * <li>longs
 	 * <li>integers
@@ -67,9 +72,14 @@ public class OpMultiply extends Operator {
 		if (operandOne instanceof Number && operandTwo instanceof Number) {
 			Number leftNumber = (Number) operandOne;
 			Number rightNumber = (Number) operandTwo;
+			if (leftNumber instanceof BigDecimal || rightNumber instanceof BigDecimal) {
+				BigDecimal bdLeft = NumberUtils.convertNumberToTargetClass(leftNumber, BigDecimal.class);
+				BigDecimal bdRight = NumberUtils.convertNumberToTargetClass(rightNumber, BigDecimal.class);
+				return new TypedValue(bdLeft.multiply(bdRight));
+			}
+			
 			if (leftNumber instanceof Double || rightNumber instanceof Double) {
-				return new TypedValue(leftNumber.doubleValue()
-						* rightNumber.doubleValue());
+				return new TypedValue(leftNumber.doubleValue() * rightNumber.doubleValue());
 			}
 
 			if (leftNumber instanceof Float || rightNumber instanceof Float) {
