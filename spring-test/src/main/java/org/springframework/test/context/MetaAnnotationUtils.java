@@ -18,6 +18,8 @@ package org.springframework.test.context;
 
 import java.lang.annotation.Annotation;
 
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -173,6 +175,7 @@ abstract class MetaAnnotationUtils {
 		private final Class<?> declaringClass;
 		private final Annotation stereotype;
 		private final T annotation;
+		private final AnnotationAttributes annotationAttributes;
 
 
 		public AnnotationDescriptor(Class<?> declaringClass, T annotation) {
@@ -186,6 +189,8 @@ abstract class MetaAnnotationUtils {
 			this.declaringClass = declaringClass;
 			this.stereotype = stereotype;
 			this.annotation = annotation;
+			this.annotationAttributes = AnnotatedElementUtils.getAnnotationAttributes(declaringClass,
+				annotation.annotationType().getName());
 		}
 
 		public Class<?> getDeclaringClass() {
@@ -198,6 +203,10 @@ abstract class MetaAnnotationUtils {
 
 		public Class<? extends Annotation> getAnnotationType() {
 			return this.annotation.annotationType();
+		}
+
+		public AnnotationAttributes getAnnotationAttributes() {
+			return this.annotationAttributes;
 		}
 
 		public Annotation getStereotype() {
