@@ -162,20 +162,28 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	@Override
 	public final String getMessage(MessageSourceResolvable resolvable, Locale locale)
 			throws NoSuchMessageException {
+				
+		getMessage(resolvable, resolvable.getArguments(), locale)
+		
+	}
+
+	@Override
+	public final String getMessage(MessageSourceResolvable resolvable, Object[] args, Locale locale)
+			throws NoSuchMessageException {
 
 		String[] codes = resolvable.getCodes();
 		if (codes == null) {
 			codes = new String[0];
 		}
 		for (String code : codes) {
-			String msg = getMessageInternal(code, resolvable.getArguments(), locale);
+			String msg = getMessageInternal(code, args, locale);
 			if (msg != null) {
 				return msg;
 			}
 		}
 		String defaultMessage = resolvable.getDefaultMessage();
 		if (defaultMessage != null) {
-			return renderDefaultMessage(defaultMessage, resolvable.getArguments(), locale);
+			return renderDefaultMessage(defaultMessage, args, locale);
 		}
 		if (codes.length > 0) {
 			String fallback = getDefaultMessage(codes[0]);
@@ -185,7 +193,6 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 		}
 		throw new NoSuchMessageException(codes.length > 0 ? codes[codes.length - 1] : null, locale);
 	}
-
 
 	/**
 	 * Resolve the given code and arguments as message in the given Locale,
