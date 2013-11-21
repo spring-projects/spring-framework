@@ -93,7 +93,7 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 		em.persist(p);
 
 		em.flush();
-		assertEquals("1 row must have been inserted", 1, countRowsInTable("person"));
+		assertEquals("1 row must have been inserted", 1, countRowsInTable(em, "person"));
 	}
 
 	public void testStateClean() {
@@ -122,14 +122,14 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 		setComplete();
 		endTransaction();	// Should rollback
 		assertEquals("Tx must have committed back",
-				1, countRowsInTable("person"));
+				1, countRowsInTable(em, "person"));
 
 		// Now clean up the database
 		startNewTransaction();
 		em.joinTransaction();
 		deleteAllPeopleUsingEntityManager(em);
 		assertEquals("People have been killed",
-				0, countRowsInTable("person"));
+				0, countRowsInTable(em, "person"));
 		setComplete();
 	}
 
@@ -143,7 +143,7 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 		doInstantiateAndSave(em);
 		endTransaction();	// Should rollback
 		assertEquals("Tx must have been rolled back",
-				0, countRowsInTable("person"));
+				0, countRowsInTable(em, "person"));
 	}
 
 	public void testCommitOccurs() {
@@ -154,7 +154,7 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 		setComplete();
 		endTransaction();	// Should rollback
 		assertEquals("Tx must have committed back",
-				1, countRowsInTable("person"));
+				1, countRowsInTable(em, "person"));
 
 		// Now clean up the database
 		deleteFromTables(new String[] { "person" });

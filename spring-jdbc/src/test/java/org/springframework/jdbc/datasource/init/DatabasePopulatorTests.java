@@ -28,6 +28,8 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import static org.hamcrest.Matchers.*;
+
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
@@ -59,8 +61,9 @@ public class DatabasePopulatorTests {
 
 	private void assertUsersDatabaseCreated(String... lastNames) {
 		for (String lastName : lastNames) {
-			assertEquals("Did not find user with last name [" + lastName + "].", 1,
-				jdbcTemplate.queryForInt("select count(0) from users where last_name = ?", lastName));
+			assertThat("Did not find user with last name [" + lastName + "].",
+				jdbcTemplate.queryForObject("select count(0) from users where last_name = ?", Integer.class, lastName),
+				equalTo(1));
 		}
 	}
 
@@ -131,8 +134,8 @@ public class DatabasePopulatorTests {
 			connection.close();
 		}
 
-		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Keith'"));
-		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Dave'"));
+		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Keith'", Integer.class), equalTo(1));
+		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Dave'", Integer.class), equalTo(1));
 	}
 
 	@Test
@@ -148,8 +151,8 @@ public class DatabasePopulatorTests {
 			connection.close();
 		}
 
-		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Keith'"));
-		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Dave'"));
+		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Keith'", Integer.class), equalTo(1));
+		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Dave'", Integer.class), equalTo(1));
 	}
 
 	@Test
@@ -165,8 +168,8 @@ public class DatabasePopulatorTests {
 			connection.close();
 		}
 
-		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Keith'"));
-		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Dave'"));
+		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Keith'", Integer.class), equalTo(1));
+		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Dave'", Integer.class), equalTo(1));
 	}
 
 	@Test
@@ -181,8 +184,8 @@ public class DatabasePopulatorTests {
 			connection.close();
 		}
 
-		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Keith'"));
-		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Dave'"));
+		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Keith'", Integer.class), equalTo(1));
+		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Dave'", Integer.class), equalTo(1));
 	}
 
 	@Test
@@ -198,8 +201,8 @@ public class DatabasePopulatorTests {
 			connection.close();
 		}
 
-		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Keith'"));
-		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Dave'"));
+		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Keith'", Integer.class), equalTo(1));
+		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Dave'", Integer.class), equalTo(1));
 	}
 
 	@Test
@@ -244,8 +247,8 @@ public class DatabasePopulatorTests {
 			connection.close();
 		}
 
-		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Keith'"));
-		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Dave'"));
+		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Keith'", Integer.class), equalTo(1));
+		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Dave'", Integer.class), equalTo(1));
 	}
 
 	/**

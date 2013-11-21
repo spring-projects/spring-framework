@@ -15,7 +15,7 @@ configure(allprojects) { project ->
 
 	ext.aspectjVersion  = "1.8.0.M1"
 	ext.groovyVersion   = "1.8.9"
-	ext.hsqldbVersion   = "1.8.0.10"
+	ext.hsqldbVersion   = "2.3.1"
 	ext.junitVersion    = "4.11"
 	ext.slf4jVersion    = "1.6.1"
 	ext.jettyVersion    = "9.1.0.v20131115"
@@ -495,7 +495,7 @@ project("spring-jdbc") {
 		optional(project(":spring-context")) // for JndiDataSourceLookup
 		compile(project(":spring-tx"))
 		optional("c3p0:c3p0:0.9.1.2")
-		optional("hsqldb:hsqldb:${hsqldbVersion}")
+		optional("org.hsqldb:hsqldb:${hsqldbVersion}")
 		optional("com.h2database:h2:1.0.71")
 		optional("org.apache.derby:derby:10.5.3.0_1")
 		optional("org.apache.derby:derbyclient:10.5.3.0_1")
@@ -528,7 +528,7 @@ project("spring-context-support") {
 		testCompile("org.apache.poi:poi:3.9")
 		testCompile("commons-beanutils:commons-beanutils:1.8.0") // for Velocity/JasperReports
 		testCompile("commons-digester:commons-digester:1.8.1") // for Velocity/JasperReports
-		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
+		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
 	}
 
 	// pick up **/*.types files in src/main
@@ -622,7 +622,7 @@ project("spring-orm") {
 		provided("javax.servlet:javax.servlet-api:3.0.1")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("commons-dbcp:commons-dbcp:1.2.2")
-		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
+		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
 		compile(project(":spring-core"))
 		compile(project(":spring-beans"))
 		optional(project(":spring-aop"))
@@ -790,7 +790,7 @@ project("spring-test") {
 		testCompile(project(":spring-webmvc-tiles3"))
 		testCompile("org.hibernate:hibernate-core:3.6.9.Final")
 		testCompile "org.slf4j:slf4j-jcl:${slf4jVersion}"
-		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
+		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
 		testCompile("org.hibernate:hibernate-validator:4.3.0.Final")
 		testCompile("org.codehaus.jackson:jackson-mapper-asl:1.9.12")
 		testCompile("com.fasterxml.jackson.core:jackson-databind:2.2.2")
@@ -918,7 +918,7 @@ configure(rootProject) {
 		testCompile("javax.inject:javax.inject:1")
 		testCompile("javax.resource:connector-api:1.5")
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
-		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
+		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
 	}
 
 	task api(type: Javadoc) {

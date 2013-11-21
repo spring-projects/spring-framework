@@ -134,7 +134,7 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 	 * @return the number of rows in the table
 	 */
 	protected int countRowsInTable(String tableName) {
-		return this.jdbcTemplate.queryForInt("SELECT COUNT(0) FROM " + tableName);
+		return this.jdbcTemplate.queryForObject("SELECT COUNT(0) FROM " + tableName, Integer.class);
 	}
 
 

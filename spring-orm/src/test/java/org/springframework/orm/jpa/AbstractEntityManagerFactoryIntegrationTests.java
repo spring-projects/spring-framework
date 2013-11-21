@@ -16,6 +16,9 @@
 
 package org.springframework.orm.jpa;
 
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+
 import org.springframework.test.jpa.AbstractJpaTests;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -81,6 +84,10 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests extends Abstr
 		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
 	}
 
+	protected int countRowsInTable(EntityManager em, String tableName) {
+		Query query = em.createNativeQuery("SELECT COUNT(0) FROM " + tableName);
+		return ((Number) query.getSingleResult()).intValue();
+	};
 
 	public enum Provider {
 		ECLIPSELINK, HIBERNATE, OPENJPA

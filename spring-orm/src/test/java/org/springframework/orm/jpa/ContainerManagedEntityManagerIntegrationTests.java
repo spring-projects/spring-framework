@@ -105,7 +105,7 @@ public class ContainerManagedEntityManagerIntegrationTests extends AbstractEntit
 
 	public void doInstantiateAndSave(EntityManager em) {
 		assertEquals("Should be no people from previous transactions",
-				0, countRowsInTable("person"));
+				0, countRowsInTable(em, "person"));
 		Person p = new Person();
 
 		p.setFirstName("Tony");
@@ -113,7 +113,7 @@ public class ContainerManagedEntityManagerIntegrationTests extends AbstractEntit
 		em.persist(p);
 
 		em.flush();
-		assertEquals("1 row must have been inserted", 1, countRowsInTable("person"));
+		assertEquals("1 row must have been inserted", 1, countRowsInTable(em, "person"));
 	}
 
 	public void testReuseInNewTransaction() {
@@ -132,7 +132,7 @@ public class ContainerManagedEntityManagerIntegrationTests extends AbstractEntit
 		setComplete();
 		endTransaction();	// Should rollback
 		assertEquals("Tx must have committed back",
-				1, countRowsInTable("person"));
+				1, countRowsInTable(em, "person"));
 
 		// Now clean up the database
 		deleteFromTables(new String[] { "person" });
@@ -143,7 +143,7 @@ public class ContainerManagedEntityManagerIntegrationTests extends AbstractEntit
 		doInstantiateAndSave(em);
 		endTransaction();	// Should rollback
 		assertEquals("Tx must have been rolled back",
-				0, countRowsInTable("person"));
+				0, countRowsInTable(em, "person"));
 	}
 
 	public void testCommitOccurs() {
@@ -152,7 +152,7 @@ public class ContainerManagedEntityManagerIntegrationTests extends AbstractEntit
 		setComplete();
 		endTransaction();	// Should rollback
 		assertEquals("Tx must have committed back",
-				1, countRowsInTable("person"));
+				1, countRowsInTable(em, "person"));
 
 		// Now clean up the database
 		deleteFromTables(new String[] { "person" });
