@@ -77,9 +77,22 @@ public enum TestGroup {
 		if (value == null || "".equals(value)) {
 			return Collections.emptySet();
 		}
-		if("ALL".equalsIgnoreCase(value)) {
+		if ("ALL".equalsIgnoreCase(value)) {
 			return EnumSet.allOf(TestGroup.class);
 		}
+		if (value.toUpperCase().startsWith("ALL-")) {
+			Set<TestGroup> groups = new HashSet<TestGroup>(EnumSet.allOf(TestGroup.class));
+			groups.removeAll(parseGroups(value.substring(4)));
+			return groups;
+		}
+		return parseGroups(value);
+	}
+
+	/**
+	 * @param value
+	 * @return
+	 */
+	private static Set<TestGroup> parseGroups(String value) {
 		Set<TestGroup> groups = new HashSet<TestGroup>();
 		for (String group : value.split(",")) {
 			try {
