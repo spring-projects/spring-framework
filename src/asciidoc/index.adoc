@@ -10335,9 +10335,9 @@ either of the Converter, ConverterFactory, or GenericConverter interfaces.
 <bean id="conversionService"
       class="org.springframework.context.support.ConversionServiceFactoryBean">
     <property name="converters">
-        <list>
+        <set>
             <bean class="example.MyCustomConverter"/>
-        </list>
+        </set>
     </property>
 </bean>
 ----
