@@ -69,7 +69,7 @@ public enum TestGroup {
 	CUSTOM_COMPILATION;
 
 	/**
-	 * Parse the specified comma separates string of groups.
+	 * Parse the specified comma separated string of groups.
 	 * @param value the comma separated string of groups
 	 * @return a set of groups
 	 */
@@ -88,10 +88,6 @@ public enum TestGroup {
 		return parseGroups(value);
 	}
 
-	/**
-	 * @param value
-	 * @return
-	 */
 	private static Set<TestGroup> parseGroups(String value) {
 		Set<TestGroup> groups = new HashSet<TestGroup>();
 		for (String group : value.split(",")) {
