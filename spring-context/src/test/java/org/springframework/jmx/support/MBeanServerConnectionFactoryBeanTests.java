@@ -37,7 +37,7 @@ import static org.junit.Assert.*;
  */
 public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTests {
 
-	private static final String SERVICE_URL = "service:jmx:jmxmp://localhost:9876";
+	private static final String SERVICE_URL = "service:jmx:jmxmp://localhost:9878";
 
 	private JMXServiceURL getServiceUrl() throws MalformedURLException {
 		return new JMXServiceURL(SERVICE_URL);
