@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.expression.spel;
 
 import static org.junit.Assert.assertEquals;
+import java.math.BigDecimal;
 
 import org.junit.Test;
 import org.springframework.expression.spel.ast.Operator;
@@ -26,6 +27,7 @@ import org.springframework.expression.spel.standard.SpelExpression;
  * Tests the evaluation of expressions using relational operators.
  *
  * @author Andy Clement
+ * @author Giovanni Dall'Oglio Risso
  */
 public class OperatorTests extends ExpressionTestCase {
 
@@ -41,6 +43,8 @@ public class OperatorTests extends ExpressionTestCase {
 
 	@Test
 	public void testLessThan() {
+
+		evaluate("5 < 5", false, Boolean.class);
 		evaluate("3 < 5", true, Boolean.class);
 		evaluate("5 < 3", false, Boolean.class);
 		evaluate("3L < 5L", true, Boolean.class);
@@ -49,6 +53,15 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("5.0d < 3.0d", false, Boolean.class);
 		evaluate("'abc' < 'def'",true,Boolean.class);
 		evaluate("'def' < 'abc'",false,Boolean.class);
+		evaluate("new java.math.BigDecimal('3') < new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("new java.math.BigDecimal('5') < new java.math.BigDecimal('3')", false, Boolean.class);
+		evaluate("3 < new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("new java.math.BigDecimal('3') < 5", true, Boolean.class);
+		evaluate("3L < new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("3.0d < new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("3L < new java.math.BigDecimal('3.1')", true, Boolean.class);
+		evaluate("3.0d < new java.math.BigDecimal('3.1')", true, Boolean.class);
+		evaluate("3.0d < new java.math.BigDecimal('3.0')", false, Boolean.class);
 
 		evaluate("3 lt 5", true, Boolean.class);
 		evaluate("5 lt 3", false, Boolean.class);
@@ -58,6 +71,15 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("5.0d Lt 3.0d", false, Boolean.class);
 		evaluate("'abc' LT 'def'",true,Boolean.class);
 		evaluate("'def' lt 'abc'",false,Boolean.class);
+		evaluate("new java.math.BigDecimal('3') lt new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("new java.math.BigDecimal('5') lt new java.math.BigDecimal('3')", false, Boolean.class);
+		evaluate("3 lt new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("new java.math.BigDecimal('3') lt 5", true, Boolean.class);
+		evaluate("3L lt new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("3.0d lt new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("3L lt new java.math.BigDecimal('3.1')", true, Boolean.class);
+		evaluate("3.0d lt new java.math.BigDecimal('3.1')", true, Boolean.class);
+		evaluate("3.0d lt new java.math.BigDecimal('3.0')", false, Boolean.class);
 	}
 
 	@Test
@@ -74,6 +96,16 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("'abc' <= 'def'",true,Boolean.class);
 		evaluate("'def' <= 'abc'",false,Boolean.class);
 		evaluate("'abc' <= 'abc'",true,Boolean.class);
+		evaluate("new java.math.BigDecimal('5') <= new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("new java.math.BigDecimal('3') <= new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("new java.math.BigDecimal('5') <= new java.math.BigDecimal('3')", false, Boolean.class);
+		evaluate("3 <= new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("new java.math.BigDecimal('3') <= 5", true, Boolean.class);
+		evaluate("3L <= new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("3.0d <= new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("3L <= new java.math.BigDecimal('3.1')", true, Boolean.class);
+		evaluate("3.0d <= new java.math.BigDecimal('3.1')", true, Boolean.class);
+		evaluate("3.0d <= new java.math.BigDecimal('3.0')", true, Boolean.class);
 
 		evaluate("3 le 5", true, Boolean.class);
 		evaluate("5 le 3", false, Boolean.class);
@@ -87,6 +119,16 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("'abc' Le 'def'",true,Boolean.class);
 		evaluate("'def' LE 'abc'",false,Boolean.class);
 		evaluate("'abc' le 'abc'",true,Boolean.class);
+		evaluate("new java.math.BigDecimal('5') le new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("new java.math.BigDecimal('3') le new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("new java.math.BigDecimal('5') le new java.math.BigDecimal('3')", false, Boolean.class);
+		evaluate("3 le new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("new java.math.BigDecimal('3') le 5", true, Boolean.class);
+		evaluate("3L le new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("3.0d le new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("3L le new java.math.BigDecimal('3.1')", true, Boolean.class);
+		evaluate("3.0d le new java.math.BigDecimal('3.1')", true, Boolean.class);
+		evaluate("3.0d le new java.math.BigDecimal('3.0')", true, Boolean.class);
 	}
 
 	@Test
@@ -97,6 +139,16 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("3.0f == 5.0f", false, Boolean.class);
 		evaluate("3.0f == 3.0f", true, Boolean.class);
 		evaluate("'abc' == null", false, Boolean.class);
+		evaluate("new java.math.BigDecimal('5') == new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("new java.math.BigDecimal('3') == new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("new java.math.BigDecimal('5') == new java.math.BigDecimal('3')", false, Boolean.class);
+		evaluate("3 == new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("new java.math.BigDecimal('3') == 5", false, Boolean.class);
+		evaluate("3L == new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("3.0d == new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("3L == new java.math.BigDecimal('3.1')", false, Boolean.class);
+		evaluate("3.0d == new java.math.BigDecimal('3.1')", false, Boolean.class);
+		evaluate("3.0d == new java.math.BigDecimal('3.0')", true, Boolean.class);
 
 		evaluate("3 eq 5", false, Boolean.class);
 		evaluate("5 eQ 3", false, Boolean.class);
@@ -104,6 +156,16 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("3.0f eq 5.0f", false, Boolean.class);
 		evaluate("3.0f EQ 3.0f", true, Boolean.class);
 		evaluate("'abc' EQ null", false, Boolean.class);
+		evaluate("new java.math.BigDecimal('5') eq new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("new java.math.BigDecimal('3') eq new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("new java.math.BigDecimal('5') eq new java.math.BigDecimal('3')", false, Boolean.class);
+		evaluate("3 eq new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("new java.math.BigDecimal('3') eq 5", false, Boolean.class);
+		evaluate("3L eq new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("3.0d eq new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("3L eq new java.math.BigDecimal('3.1')", false, Boolean.class);
+		evaluate("3.0d eq new java.math.BigDecimal('3.1')", false, Boolean.class);
+		evaluate("3.0d eq new java.math.BigDecimal('3.0')", true, Boolean.class);
 	}
 
 	@Test
@@ -113,12 +175,32 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("6 != 6", false, Boolean.class);
 		evaluate("3.0f != 5.0f", true, Boolean.class);
 		evaluate("3.0f != 3.0f", false, Boolean.class);
+		evaluate("new java.math.BigDecimal('5') != new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("new java.math.BigDecimal('3') != new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("new java.math.BigDecimal('5') != new java.math.BigDecimal('3')", true, Boolean.class);
+		evaluate("3 != new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("new java.math.BigDecimal('3') != 5", true, Boolean.class);
+		evaluate("3L != new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("3.0d != new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("3L != new java.math.BigDecimal('3.1')", true, Boolean.class);
+		evaluate("3.0d != new java.math.BigDecimal('3.1')", true, Boolean.class);
+		evaluate("3.0d != new java.math.BigDecimal('3.0')", false, Boolean.class);
 
 		evaluate("3 ne 5", true, Boolean.class);
 		evaluate("5 nE 3", true, Boolean.class);
 		evaluate("6 Ne 6", false, Boolean.class);
 		evaluate("3.0f NE 5.0f", true, Boolean.class);
 		evaluate("3.0f ne 3.0f", false, Boolean.class);
+		evaluate("new java.math.BigDecimal('5') ne new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("new java.math.BigDecimal('3') ne new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("new java.math.BigDecimal('5') ne new java.math.BigDecimal('3')", true, Boolean.class);
+		evaluate("3 ne new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("new java.math.BigDecimal('3') ne 5", true, Boolean.class);
+		evaluate("3L ne new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("3.0d ne new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("3L ne new java.math.BigDecimal('3.1')", true, Boolean.class);
+		evaluate("3.0d ne new java.math.BigDecimal('3.1')", true, Boolean.class);
+		evaluate("3.0d ne new java.math.BigDecimal('3.0')", false, Boolean.class);
 	}
 
 	@Test
@@ -135,11 +217,31 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("'abc' >= 'def'",false,Boolean.class);
 		evaluate("'def' >= 'abc'",true,Boolean.class);
 		evaluate("'abc' >= 'abc'",true,Boolean.class);
+		evaluate("new java.math.BigDecimal('5') >= new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("new java.math.BigDecimal('3') >= new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("new java.math.BigDecimal('5') >= new java.math.BigDecimal('3')", true, Boolean.class);
+		evaluate("3 >= new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("new java.math.BigDecimal('3') >= 5", false, Boolean.class);
+		evaluate("3L >= new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("3.0d >= new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("3L >= new java.math.BigDecimal('3.1')", false, Boolean.class);
+		evaluate("3.0d >= new java.math.BigDecimal('3.1')", false, Boolean.class);
+		evaluate("3.0d >= new java.math.BigDecimal('3.0')", true, Boolean.class);
 
 		evaluate("3 GE 5", false, Boolean.class);
 		evaluate("5 gE 3", true, Boolean.class);
 		evaluate("6 Ge 6", true, Boolean.class);
 		evaluate("3L ge 5L", false, Boolean.class);
+		evaluate("new java.math.BigDecimal('5') ge new java.math.BigDecimal('5')", true, Boolean.class);
+		evaluate("new java.math.BigDecimal('3') ge new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("new java.math.BigDecimal('5') ge new java.math.BigDecimal('3')", true, Boolean.class);
+		evaluate("3 ge new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("new java.math.BigDecimal('3') ge 5", false, Boolean.class);
+		evaluate("3L ge new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("3.0d ge new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("3L ge new java.math.BigDecimal('3.1')", false, Boolean.class);
+		evaluate("3.0d ge new java.math.BigDecimal('3.1')", false, Boolean.class);
+		evaluate("3.0d ge new java.math.BigDecimal('3.0')", true, Boolean.class);
 	}
 
 	@Test
@@ -152,11 +254,29 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("5.0d > 3.0d", true, Boolean.class);
 		evaluate("'abc' > 'def'",false,Boolean.class);
 		evaluate("'def' > 'abc'",true,Boolean.class);
+		evaluate("new java.math.BigDecimal('3') > new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("new java.math.BigDecimal('5') > new java.math.BigDecimal('3')", true, Boolean.class);
+		evaluate("3 > new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("new java.math.BigDecimal('3') > 5", false, Boolean.class);
+		evaluate("3L > new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("3.0d > new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("3L > new java.math.BigDecimal('3.1')", false, Boolean.class);
+		evaluate("3.0d > new java.math.BigDecimal('3.1')", false, Boolean.class);
+		evaluate("3.0d > new java.math.BigDecimal('3.0')", false, Boolean.class);
 
 		evaluate("3.0d gt 5.0d", false, Boolean.class);
 		evaluate("5.0d gT 3.0d", true, Boolean.class);
 		evaluate("'abc' Gt 'def'",false,Boolean.class);
 		evaluate("'def' GT 'abc'",true,Boolean.class);
+		evaluate("new java.math.BigDecimal('3') gt new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("new java.math.BigDecimal('5') gt new java.math.BigDecimal('3')", true, Boolean.class);
+		evaluate("3 gt new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("new java.math.BigDecimal('3') gt 5", false, Boolean.class);
+		evaluate("3L gt new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("3.0d gt new java.math.BigDecimal('5')", false, Boolean.class);
+		evaluate("3L gt new java.math.BigDecimal('3.1')", false, Boolean.class);
+		evaluate("3.0d gt new java.math.BigDecimal('3.1')", false, Boolean.class);
+		evaluate("3.0d gt new java.math.BigDecimal('3.0')", false, Boolean.class);
 	}
 
 	@Test
@@ -167,6 +287,32 @@ public class OperatorTests extends ExpressionTestCase {
 	@Test
 	public void testMultiplyDoubleDoubleGivesDouble() {
 		evaluate("3.0d * 5.0d", 15.0d, Double.class);
+	}
+
+	@Test
+	public void testMixedOperandsBigDecimal() {
+		evaluate("3 * new java.math.BigDecimal('5')", new BigDecimal("15"), BigDecimal.class);
+		evaluate("3L * new java.math.BigDecimal('5')", new BigDecimal("15"), BigDecimal.class);
+		evaluate("3.0d * new java.math.BigDecimal('5')", new BigDecimal("15.0"), BigDecimal.class);
+
+		evaluate("3 + new java.math.BigDecimal('5')", new BigDecimal("8"), BigDecimal.class);
+		evaluate("3L + new java.math.BigDecimal('5')", new BigDecimal("8"), BigDecimal.class);
+		evaluate("3.0d + new java.math.BigDecimal('5')", new BigDecimal("8.0"), BigDecimal.class);
+
+		evaluate("3 - new java.math.BigDecimal('5')", new BigDecimal("-2"), BigDecimal.class);
+		evaluate("3L - new java.math.BigDecimal('5')", new BigDecimal("-2"), BigDecimal.class);
+		evaluate("3.0d - new java.math.BigDecimal('5')", new BigDecimal("-2.0"), BigDecimal.class);
+
+		evaluate("3 / new java.math.BigDecimal('5')", new BigDecimal("1"), BigDecimal.class);
+		evaluate("3 / new java.math.BigDecimal('5.0')", new BigDecimal("0.6"), BigDecimal.class);
+		evaluate("3 / new java.math.BigDecimal('5.00')", new BigDecimal("0.60"), BigDecimal.class);
+		evaluate("3L / new java.math.BigDecimal('5.0')", new BigDecimal("0.6"), BigDecimal.class);
+		evaluate("3.0d / new java.math.BigDecimal('5.0')", new BigDecimal("0.6"), BigDecimal.class);
+
+		evaluate("5 % new java.math.BigDecimal('3')", new BigDecimal("2"), BigDecimal.class);
+		evaluate("3 % new java.math.BigDecimal('5')", new BigDecimal("3"), BigDecimal.class);
+		evaluate("3L % new java.math.BigDecimal('5')", new BigDecimal("3"), BigDecimal.class);
+		evaluate("3.0d % new java.math.BigDecimal('5')", new BigDecimal("3.0"), BigDecimal.class);
 	}
 
 	@Test
@@ -201,6 +347,7 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("7 + 2", "9", Integer.class);
 		evaluate("3.0f + 5.0f", 8.0f, Float.class);
 		evaluate("3.0d + 5.0d", 8.0d, Double.class);
+		evaluate("3 + new java.math.BigDecimal('5')", new BigDecimal("8"), BigDecimal.class);
 
 		evaluate("'ab' + 2", "ab2", String.class);
 		evaluate("2 + 'a'", "2a", String.class);
@@ -217,6 +364,7 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("+5d",5d,Double.class);
 		evaluate("+5L",5L,Long.class);
 		evaluate("+5",5,Integer.class);
+		evaluate("+new java.math.BigDecimal('5')", new BigDecimal("5"),BigDecimal.class);
 		evaluateAndCheckError("+'abc'",SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 
 		// string concatenation
@@ -240,6 +388,7 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("-5d",-5d,Double.class);
 		evaluate("-5L",-5L,Long.class);
 		evaluate("-5",-5,Integer.class);
+		evaluate("-new java.math.BigDecimal('5')", new BigDecimal("-5"),BigDecimal.class);
 		evaluateAndCheckError("-'abc'",SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 	}
 
@@ -249,6 +398,8 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("3L%2L",1L,Long.class);
 		evaluate("3.0f%2.0f",1f,Float.class);
 		evaluate("5.0d % 3.1d", 1.9d, Double.class);
+		evaluate("new java.math.BigDecimal('5') % new java.math.BigDecimal('3')", new BigDecimal("2"), BigDecimal.class);
+		evaluate("new java.math.BigDecimal('5') % 3", new BigDecimal("2"), BigDecimal.class);
 		evaluateAndCheckError("'abc'%'def'",SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 	}
 
@@ -258,6 +409,10 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("4L/2L",2L,Long.class);
 		evaluate("3.0f div 5.0f", 0.6f, Float.class);
 		evaluate("4L DIV 2L",2L,Long.class);
+		evaluate("new java.math.BigDecimal('3') / 5", new BigDecimal("1"), BigDecimal.class);
+		evaluate("new java.math.BigDecimal('3.0') / 5", new BigDecimal("0.6"), BigDecimal.class);
+		evaluate("new java.math.BigDecimal('3.00') / 5", new BigDecimal("0.60"), BigDecimal.class);
+		evaluate("new java.math.BigDecimal('3.00') / new java.math.BigDecimal('5.0000')", new BigDecimal("0.6000"), BigDecimal.class);
 		evaluateAndCheckError("'abc'/'def'",SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 	}
 
@@ -282,6 +437,18 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("3.0d * 5.0d", 15.0d, Double.class);
 		evaluate("3.0d / 5.0d", 0.6d, Double.class);
 		evaluate("6.0d % 3.5d", 2.5d, Double.class);
+	}
+
+
+	@Test
+	public void testBigDecimals() {
+		evaluate("3 + new java.math.BigDecimal('5')", new BigDecimal("8"), BigDecimal.class);
+		evaluate("3 - new java.math.BigDecimal('5')", new BigDecimal("-2"), BigDecimal.class);
+		evaluate("3 * new java.math.BigDecimal('5')", new BigDecimal("15"), BigDecimal.class);
+		evaluate("3 / new java.math.BigDecimal('5')", new BigDecimal("1"), BigDecimal.class);
+		evaluate("5 % new java.math.BigDecimal('3')", new BigDecimal("2"), BigDecimal.class);
+		evaluate("new java.math.BigDecimal('5') % 3", new BigDecimal("2"), BigDecimal.class);
+		evaluate("new java.math.BigDecimal('5') ^ 3", new BigDecimal("125"), BigDecimal.class);
 	}
 
 	@Test
@@ -335,6 +502,7 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("3.0d^2.0d",9.0d,Double.class);
 		evaluate("3L^2L",9L,Long.class);
 		evaluate("(2^32)^2",9223372036854775807L,Long.class);
+		evaluate("new java.math.BigDecimal('5') ^ 3", new BigDecimal("125"), BigDecimal.class);
 	}
 
 	@Test

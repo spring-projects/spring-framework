@@ -16,17 +16,22 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.math.BigDecimal;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.support.BooleanTypedValue;
+import org.springframework.util.NumberUtils;
 
 /**
  * Implements the less-than-or-equal operator.
  *
  * @author Andy Clement
+ * @author Giovanni Dall'Oglio Risso
  * @since 3.0
  */
 public class OpLE extends Operator {
+
 
 	public OpLE(int pos, SpelNodeImpl... operands) {
 		super("<=", pos, operands);
@@ -41,19 +46,28 @@ public class OpLE extends Operator {
 		if (left instanceof Number && right instanceof Number) {
 			Number leftNumber = (Number) left;
 			Number rightNumber = (Number) right;
+
+			if (leftNumber instanceof BigDecimal || rightNumber instanceof BigDecimal) {
+				BigDecimal leftBigDecimal = NumberUtils.convertNumberToTargetClass(leftNumber, BigDecimal.class);
+				BigDecimal rightBigDecimal = NumberUtils.convertNumberToTargetClass(rightNumber, BigDecimal.class);
+				return BooleanTypedValue.forValue(leftBigDecimal.compareTo(rightBigDecimal) <= 0);
+			}
+
 			if (leftNumber instanceof Double || rightNumber instanceof Double) {
 				return BooleanTypedValue.forValue(leftNumber.doubleValue() <= rightNumber.doubleValue());
 			}
-			else if (leftNumber instanceof Float || rightNumber instanceof Float) {
+
+			if (leftNumber instanceof Float || rightNumber instanceof Float) {
 				return BooleanTypedValue.forValue(leftNumber.floatValue() <= rightNumber.floatValue());
 			}
-			else if (leftNumber instanceof Long || rightNumber instanceof Long) {
+
+			if (leftNumber instanceof Long || rightNumber instanceof Long) {
 				return BooleanTypedValue.forValue(leftNumber.longValue() <= rightNumber.longValue());
 			}
-			else {
-				return BooleanTypedValue.forValue(leftNumber.intValue() <= rightNumber.intValue());
-			}
+
+			return BooleanTypedValue.forValue(leftNumber.intValue() <= rightNumber.intValue());
 		}
+
 		return BooleanTypedValue.forValue(state.getTypeComparator().compare(left, right) <= 0);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
  * Test usage of inline lists.
  *
  * @author Andy Clement
+ * @author Giovanni Dall'Oglio Risso
  * @since 3.0.4
  */
 public class ListTests extends ExpressionTestCase {
@@ -106,6 +107,14 @@ public class ListTests extends ExpressionTestCase {
 	@Test
 	public void testRelOperatorsBetween03() {
 		evaluate("42 between {32, 42}", "true", Boolean.class);
+	}
+
+	@Test
+	public void testRelOperatorsBetween04() {
+		evaluate("new java.math.BigDecimal('1') between {new java.math.BigDecimal('1'),new java.math.BigDecimal('5')}", "true", Boolean.class);
+		evaluate("new java.math.BigDecimal('3') between {new java.math.BigDecimal('1'),new java.math.BigDecimal('5')}", "true", Boolean.class);
+		evaluate("new java.math.BigDecimal('5') between {new java.math.BigDecimal('1'),new java.math.BigDecimal('5')}", "true", Boolean.class);
+		evaluate("new java.math.BigDecimal('8') between {new java.math.BigDecimal('1'),new java.math.BigDecimal('5')}", "false", Boolean.class);
 	}
 
 	@Test

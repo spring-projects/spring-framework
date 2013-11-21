@@ -26,6 +26,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +56,7 @@ import org.springframework.expression.spel.testresources.TestPerson;
  * @author Mark Fisher
  * @author Sam Brannen
  * @author Phillip Webb
+ * @author Giovanni Dall'Oglio Risso
  * @since 3.0
  */
 public class EvaluationTests extends ExpressionTestCase {
@@ -636,6 +638,7 @@ public class EvaluationTests extends ExpressionTestCase {
 
 	static class Spr9751 {
 		public String type = "hello";
+		public BigDecimal bd = new BigDecimal("2");
 		public double ddd = 2.0d;
 		public float fff = 3.0f;
 		public long lll = 66666L;
@@ -755,6 +758,13 @@ public class EvaluationTests extends ExpressionTestCase {
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		Expression e = null;
 
+		// BigDecimal
+		e = parser.parseExpression("bd++");
+		assertTrue(new BigDecimal("2").equals(helper.bd));
+		BigDecimal return_bd = e.getValue(ctx,BigDecimal.class);
+		assertTrue(new BigDecimal("2").equals(return_bd));
+		assertTrue(new BigDecimal("3").equals(helper.bd));
+
 		// double
 		e = parser.parseExpression("ddd++");
 		assertEquals(2.0d,helper.ddd,0d);
@@ -800,6 +810,14 @@ public class EvaluationTests extends ExpressionTestCase {
 		StandardEvaluationContext ctx = new StandardEvaluationContext(helper);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		Expression e = null;
+
+
+		// BigDecimal
+		e = parser.parseExpression("++bd");
+		assertTrue(new BigDecimal("2").equals(helper.bd));
+		BigDecimal return_bd = e.getValue(ctx,BigDecimal.class);
+		assertTrue(new BigDecimal("3").equals(return_bd));
+		assertTrue(new BigDecimal("3").equals(helper.bd));
 
 		// double
 		e = parser.parseExpression("++ddd");
@@ -907,6 +925,13 @@ public class EvaluationTests extends ExpressionTestCase {
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		Expression e = null;
 
+		// BigDecimal
+		e = parser.parseExpression("bd--");
+		assertTrue(new BigDecimal("2").equals(helper.bd));
+		BigDecimal return_bd = e.getValue(ctx,BigDecimal.class);
+		assertTrue(new BigDecimal("2").equals(return_bd));
+		assertTrue(new BigDecimal("1").equals(helper.bd));
+
 		// double
 		e = parser.parseExpression("ddd--");
 		assertEquals(2.0d,helper.ddd,0d);
@@ -952,6 +977,13 @@ public class EvaluationTests extends ExpressionTestCase {
 		StandardEvaluationContext ctx = new StandardEvaluationContext(helper);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		Expression e = null;
+
+		// BigDecimal
+		e = parser.parseExpression("--bd");
+		assertTrue(new BigDecimal("2").equals(helper.bd));
+		BigDecimal return_bd = e.getValue(ctx,BigDecimal.class);
+		assertTrue(new BigDecimal("1").equals(return_bd));
+		assertTrue(new BigDecimal("1").equals(helper.bd));
 
 		// double
 		e = parser.parseExpression("--ddd");

@@ -16,9 +16,12 @@
 
 package org.springframework.expression.spel.support;
 
+import java.math.BigDecimal;
+
 import org.springframework.expression.TypeComparator;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
+import org.springframework.util.NumberUtils;
 
 /**
  * A simple basic TypeComparator implementation. It supports comparison of numbers and
@@ -26,6 +29,7 @@ import org.springframework.expression.spel.SpelMessage;
  *
  * @author Andy Clement
  * @author Juergen Hoeller
+ * @author Giovanni Dall'Oglio Risso
  * @since 3.0
  */
 public class StandardTypeComparator implements TypeComparator {
@@ -45,27 +49,26 @@ public class StandardTypeComparator implements TypeComparator {
 		if (left instanceof Number && right instanceof Number) {
 			Number leftNumber = (Number) left;
 			Number rightNumber = (Number) right;
+
+			if (leftNumber instanceof BigDecimal || rightNumber instanceof BigDecimal) {
+				BigDecimal leftBigDecimal = NumberUtils.convertNumberToTargetClass(leftNumber, BigDecimal.class);
+				BigDecimal rightBigDecimal = NumberUtils.convertNumberToTargetClass(rightNumber, BigDecimal.class);
+				return leftBigDecimal.compareTo(rightBigDecimal);
+			}
+
 			if (leftNumber instanceof Double || rightNumber instanceof Double) {
-				double d1 = leftNumber.doubleValue();
-				double d2 = rightNumber.doubleValue();
-				return Double.compare(d1, d2);
+				return Double.compare(leftNumber.doubleValue(), rightNumber.doubleValue());
 			}
 
 			if (leftNumber instanceof Float || rightNumber instanceof Float) {
-				float f1 = leftNumber.floatValue();
-				float f2 = rightNumber.floatValue();
-				return Float.compare(f1, f2);
+				return Float.compare(leftNumber.floatValue(), rightNumber.floatValue());
 			}
 
 			if (leftNumber instanceof Long || rightNumber instanceof Long) {
-				Long l1 = leftNumber.longValue();
-				Long l2 = rightNumber.longValue();
-				return l1.compareTo(l2);
+				return Long.compare(leftNumber.longValue(), rightNumber.longValue());
 			}
 
-			Integer i1 = leftNumber.intValue();
-			Integer i2 = rightNumber.intValue();
-			return i1.compareTo(i2);
+			return Integer.compare(leftNumber.intValue(), rightNumber.intValue());
 		}
 
 		try {

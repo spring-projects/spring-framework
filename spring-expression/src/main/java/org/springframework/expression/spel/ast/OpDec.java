@@ -16,6 +16,8 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.math.BigDecimal;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
@@ -29,6 +31,7 @@ import org.springframework.util.Assert;
  * appropriate exceptions if the operand in question does not support decrement.
  *
  * @author Andy Clement
+ * @author Giovanni Dall'Oglio Risso
  * @since 3.2
  */
 public class OpDec extends Operator {
@@ -58,7 +61,11 @@ public class OpDec extends Operator {
 
 		if (operandValue instanceof Number) {
 			Number op1 = (Number) operandValue;
-			if (op1 instanceof Double) {
+			if (op1 instanceof BigDecimal) {
+				newValue = new TypedValue(((BigDecimal) op1).subtract(BigDecimal.ONE),
+						operandTypedValue.getTypeDescriptor());
+			}
+			else if (op1 instanceof Double) {
 				newValue = new TypedValue(op1.doubleValue() - 1.0d,
 						operandTypedValue.getTypeDescriptor());
 			}
@@ -79,7 +86,7 @@ public class OpDec extends Operator {
 						operandTypedValue.getTypeDescriptor());
 			}
 		}
-		if (newValue==null) {
+		if (newValue == null) {
 			try {
 				newValue = state.operate(Operation.SUBTRACT, returnValue.getValue(), 1);
 			}

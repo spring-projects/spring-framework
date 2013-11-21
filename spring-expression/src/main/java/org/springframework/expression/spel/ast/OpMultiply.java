@@ -16,20 +16,24 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.math.BigDecimal;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.util.NumberUtils;
 
 /**
  * Implements the {@code multiply} operator.
  *
  * <p>Conversions and promotions are handled as defined in
  * <a href="http://java.sun.com/docs/books/jls/third_edition/html/conversions.html">Section
- * 5.6.2 of the Java Language Specification</a>:
+ * 5.6.2 of the Java Language Specification</a>, with the addiction of {@code BigDecimal} management:
  *
  * <p>If any of the operands is of a reference type, unboxing conversion (Section 5.1.8)
  * is performed. Then:<br>
+ * If either operand is of type {@code BigDecimal}, the other is converted to {@code BigDecimal}.<br>
  * If either operand is of type double, the other is converted to double.<br>
  * Otherwise, if either operand is of type float, the other is converted to float.<br>
  * Otherwise, if either operand is of type long, the other is converted to long.<br>
@@ -37,9 +41,11 @@ import org.springframework.expression.spel.ExpressionState;
  *
  * @author Andy Clement
  * @author Sam Brannen
+ * @author Giovanni Dall'Oglio Risso
  * @since 3.0
  */
 public class OpMultiply extends Operator {
+
 
 	public OpMultiply(int pos, SpelNodeImpl... operands) {
 		super("*", pos, operands);
@@ -52,6 +58,7 @@ public class OpMultiply extends Operator {
 	 * for types not supported here.
 	 * <p>Supported operand types:
 	 * <ul>
+	 * <li>{@code BigDecimal}
 	 * <li>doubles
 	 * <li>longs
 	 * <li>integers
@@ -61,15 +68,20 @@ public class OpMultiply extends Operator {
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 
-		Object operandOne = getLeftOperand().getValueInternal(state).getValue();
-		Object operandTwo = getRightOperand().getValueInternal(state).getValue();
+		Object leftOperand = getLeftOperand().getValueInternal(state).getValue();
+		Object rightOperand = getRightOperand().getValueInternal(state).getValue();
 
-		if (operandOne instanceof Number && operandTwo instanceof Number) {
-			Number leftNumber = (Number) operandOne;
-			Number rightNumber = (Number) operandTwo;
+		if (leftOperand instanceof Number && rightOperand instanceof Number) {
+			Number leftNumber = (Number) leftOperand;
+			Number rightNumber = (Number) rightOperand;
+			if (leftNumber instanceof BigDecimal || rightNumber instanceof BigDecimal) {
+				BigDecimal leftBigDecimal = NumberUtils.convertNumberToTargetClass(leftNumber, BigDecimal.class);
+				BigDecimal rightBigDecimal = NumberUtils.convertNumberToTargetClass(rightNumber, BigDecimal.class);
+				return new TypedValue(leftBigDecimal.multiply(rightBigDecimal));
+			}
+
 			if (leftNumber instanceof Double || rightNumber instanceof Double) {
-				return new TypedValue(leftNumber.doubleValue()
-						* rightNumber.doubleValue());
+				return new TypedValue(leftNumber.doubleValue() * rightNumber.doubleValue());
 			}
 
 			if (leftNumber instanceof Float || rightNumber instanceof Float) {
@@ -82,16 +94,16 @@ public class OpMultiply extends Operator {
 
 			return new TypedValue(leftNumber.intValue() * rightNumber.intValue());
 		}
-		else if (operandOne instanceof String && operandTwo instanceof Integer) {
-			int repeats = (Integer) operandTwo;
+		else if (leftOperand instanceof String && rightOperand instanceof Integer) {
+			int repeats = (Integer) rightOperand;
 			StringBuilder result = new StringBuilder();
 			for (int i = 0; i < repeats; i++) {
-				result.append(operandOne);
+				result.append(leftOperand);
 			}
 			return new TypedValue(result.toString());
 		}
 
-		return state.operate(Operation.MULTIPLY, operandOne, operandTwo);
+		return state.operate(Operation.MULTIPLY, leftOperand, rightOperand);
 	}
 
 }
