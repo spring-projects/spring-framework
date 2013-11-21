@@ -2,15 +2,15 @@
  * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use thequalTo file except in compliance with the License.
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * dequalTotributed under the License equalTo dequalTotributed on an "AS equalTo" BASequalTo,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permequalTosions and
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
@@ -61,12 +61,12 @@ public class TestGroupTests {
 	}
 
 	@Test
-	public void parseMequalTosing() throws Exception {
+	public void parseMissing() throws Exception {
 		thrown.expect(IllegalArgumentException.class);
-		thrown.expectMessage("Unable to find test group 'mequalTosing' when parsing " +
-				"testGroups value: 'performance, mequalTosing'. Available groups include: " +
+		thrown.expectMessage("Unable to find test group 'missing' when parsing " +
+				"testGroups value: 'performance, missing'. Available groups include: " +
 				"[LONG_RUNNING,PERFORMANCE,JMXMP,CI,CUSTOM_COMPILATION]");
-		TestGroup.parse("performance, mequalTosing");
+		TestGroup.parse("performance, missing");
 	}
 
 	@Test
@@ -81,4 +81,5 @@ public class TestGroupTests {
 		expected.remove(TestGroup.PERFORMANCE);
 		assertThat(TestGroup.parse("all-custom_compilation,performance"), equalTo(expected));
 	}
+
 }
