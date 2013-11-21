@@ -43,6 +43,9 @@ public class OpGT extends Operator {
 			if (leftNumber instanceof Double || rightNumber instanceof Double) {
 				return BooleanTypedValue.forValue(leftNumber.doubleValue() > rightNumber.doubleValue());
 			}
+			else if (leftNumber instanceof Float || rightNumber instanceof Float) {
+				return BooleanTypedValue.forValue(leftNumber.floatValue() > rightNumber.floatValue());
+			}
 			else if (leftNumber instanceof Long || rightNumber instanceof Long) {
 				return BooleanTypedValue.forValue(leftNumber.longValue() > rightNumber.longValue());
 			}
