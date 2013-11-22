@@ -221,7 +221,6 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 		};
 		binding.setVariable("beans", beans);
 
-
 		int countBefore = getRegistry().getBeanDefinitionCount();
 		try {
 			GroovyShell shell = new GroovyShell(getResourceLoader().getClassLoader(), binding);
@@ -239,11 +238,11 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 
 	/**
 	 * Defines a set of beans for the given block or closure.
-	 * @param c the block or closure
+	 * @param closure the block or closure
 	 * @return this GroovyBeanDefinitionReader instance
 	 */
-	public GroovyBeanDefinitionReader beans(Closure c) {
-		return invokeBeanDefiningClosure(c);
+	public GroovyBeanDefinitionReader beans(Closure closure) {
+		return invokeBeanDefiningClosure(closure);
 	}
 
 	/**
@@ -433,7 +432,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	private GroovyBeanDefinitionWrapper invokeBeanDefiningMethod(String beanName, Object[] args) {
 		boolean hasClosureArgument = args[args.length - 1] instanceof Closure;
 		if (args[0] instanceof Class) {
-			Class beanClass = (args[0] instanceof Class ? (Class) args[0] : args[0].getClass());
+			Class<?> beanClass = (args[0] instanceof Class ? (Class) args[0] : args[0].getClass());
 			if (args.length >= 1) {
 				if (hasClosureArgument) {
 					if (args.length-1 != 1) {
@@ -593,7 +592,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			GroovyBeanDefinitionWrapper current = this.currentBeanDefinition;
 			try {
 				Closure callable = (Closure) value;
-				Class parameterType = callable.getParameterTypes()[0];
+				Class<?> parameterType = callable.getParameterTypes()[0];
 				if (parameterType.equals(Object.class)) {
 					this.currentBeanDefinition = new GroovyBeanDefinitionWrapper("");
 					callable.call(this.currentBeanDefinition);
@@ -689,7 +688,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 
 		private final String name;
 
-		private Object value;
+		public Object value;
 
 		public DeferredProperty(GroovyBeanDefinitionWrapper beanDefinition, String name, Object value) {
 			this.beanDefinition = beanDefinition;
