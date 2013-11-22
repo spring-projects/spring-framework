@@ -22,7 +22,6 @@ import static org.springframework.test.transaction.TransactionTestUtils.assertIn
 
 import org.hibernate.SessionFactory;
 import org.hibernate.exception.ConstraintViolationException;
-import org.hibernate.exception.GenericJDBCException;
 
 import org.junit.Before;
 import org.junit.Test;
