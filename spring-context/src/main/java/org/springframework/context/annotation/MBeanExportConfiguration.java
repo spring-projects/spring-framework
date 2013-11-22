@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,15 @@
 package org.springframework.context.annotation;
 
 import java.util.Map;
-
 import javax.management.MBeanServer;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.jmx.export.annotation.AnnotationMBeanExporter;
 import org.springframework.jmx.support.RegistrationPolicy;
@@ -38,8 +38,8 @@ import org.springframework.util.StringUtils;
 /**
  * {@code @Configuration} class that registers a {@link AnnotationMBeanExporter} bean.
  *
- * <p>This configuration class is automatically imported when using the @{@link
- * EnableMBeanExport} annotation. See its Javadoc for complete usage details.
+ * <p>This configuration class is automatically imported when using the
+ * @{@link EnableMBeanExport} annotation. See its javadoc for complete usage details.
  *
  * @author Phillip Webb
  * @author Chris Beams
@@ -47,11 +47,13 @@ import org.springframework.util.StringUtils;
  * @see EnableMBeanExport
  */
 @Configuration
-public class MBeanExportConfiguration implements ImportAware, BeanFactoryAware {
+public class MBeanExportConfiguration implements ImportAware, EnvironmentAware, BeanFactoryAware {
 
 	private static final String MBEAN_EXPORTER_BEAN_NAME = "mbeanExporter";
 
 	private AnnotationAttributes attributes;
+
+	private Environment environment;
 
 	private BeanFactory beanFactory;
 
@@ -60,14 +62,20 @@ public class MBeanExportConfiguration implements ImportAware, BeanFactoryAware {
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
 		Map<String, Object> map = importMetadata.getAnnotationAttributes(EnableMBeanExport.class.getName());
 		this.attributes = AnnotationAttributes.fromMap(map);
-		Assert.notNull(this.attributes, "@EnableMBeanExport is not present on " +
-				"importing class " + importMetadata.getClassName());
+		Assert.notNull(this.attributes,
+				"@EnableMBeanExport is not present on importing class " + importMetadata.getClassName());
 	}
 
 	@Override
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+	public void setEnvironment(Environment environment) {
+		this.environment = environment;
+	}
+
+	@Override
+	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
+
 
 	@Bean(name=MBEAN_EXPORTER_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
@@ -82,6 +90,9 @@ public class MBeanExportConfiguration implements ImportAware, BeanFactoryAware {
 	private void setupDomain(AnnotationMBeanExporter exporter) {
 		String defaultDomain = this.attributes.getString("defaultDomain");
 		if (StringUtils.hasText(defaultDomain)) {
+			if (this.environment != null) {
+				defaultDomain = this.environment.resolvePlaceholders(defaultDomain);
+			}
 			exporter.setDefaultDomain(defaultDomain);
 		}
 	}
@@ -89,11 +100,14 @@ public class MBeanExportConfiguration implements ImportAware, BeanFactoryAware {
 	private void setupServer(AnnotationMBeanExporter exporter) {
 		String server = this.attributes.getString("server");
 		if (StringUtils.hasText(server)) {
+			if (this.environment != null) {
+				server = this.environment.resolvePlaceholders(server);
+			}
 			exporter.setServer(this.beanFactory.getBean(server, MBeanServer.class));
 		}
 		else {
 			SpecificPlatform specificPlatform = SpecificPlatform.get();
-			if(specificPlatform != null) {
+			if (specificPlatform != null) {
 				exporter.setServer(specificPlatform.getMBeanServer());
 			}
 		}
@@ -135,7 +149,8 @@ public class MBeanExportConfiguration implements ImportAware, BeanFactoryAware {
 				server = getMBeanServerFactory().getObject();
 				Assert.isInstanceOf(MBeanServer.class, server);
 				return (MBeanServer) server;
-			} catch (Exception ex) {
+			}
+			catch (Exception ex) {
 				throw new IllegalStateException(ex);
 			}
 		}
@@ -145,11 +160,12 @@ public class MBeanExportConfiguration implements ImportAware, BeanFactoryAware {
 		public static SpecificPlatform get() {
 			ClassLoader classLoader = MBeanExportConfiguration.class.getClassLoader();
 			for (SpecificPlatform environment : values()) {
-				if(ClassUtils.isPresent(environment.identifyingClass, classLoader)) {
+				if (ClassUtils.isPresent(environment.identifyingClass, classLoader)) {
 					return environment;
 				}
 			}
 			return null;
 		}
 	}
+
 }
