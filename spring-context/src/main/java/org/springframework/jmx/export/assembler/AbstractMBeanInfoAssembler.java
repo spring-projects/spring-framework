@@ -91,7 +91,7 @@ public abstract class AbstractMBeanInfoAssembler implements MBeanInfoAssembler {
 	 * @return the bean class to expose
 	 * @see org.springframework.aop.support.AopUtils#getTargetClass(Object)
 	 */
-	protected Class getTargetClass(Object managedBean) {
+	protected Class<?> getTargetClass(Object managedBean) {
 		return AopUtils.getTargetClass(managedBean);
 	}
 

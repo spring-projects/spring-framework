@@ -60,7 +60,7 @@ public class TypeReference extends SpelNodeImpl {
 		return new TypedValue(clazz);
 	}
 
-	private Class makeArrayIfNecessary(Class clazz) {
+	private Class<?> makeArrayIfNecessary(Class<?> clazz) {
 		if (this.dimensions!=0) {
 			for (int i=0;i<this.dimensions;i++) {
 				Object o = Array.newInstance(clazz, 0);

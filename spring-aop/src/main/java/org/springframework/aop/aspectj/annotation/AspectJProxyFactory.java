@@ -50,7 +50,7 @@ import org.springframework.util.ClassUtils;
 public class AspectJProxyFactory extends ProxyCreatorSupport {
 
 	/** Cache for singleton aspect instances */
-	private static final Map<Class, Object> aspectCache = new HashMap<Class, Object>();
+	private static final Map<Class<?>, Object> aspectCache = new HashMap<Class<?>, Object>();
 
 	private final AspectJAdvisorFactory aspectFactory = new ReflectiveAspectJAdvisorFactory();
 
@@ -76,7 +76,7 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	 * Create a new {@code AspectJProxyFactory}.
 	 * No target, only interfaces. Must add interceptors.
 	 */
-	public AspectJProxyFactory(Class[] interfaces) {
+	public AspectJProxyFactory(Class<?>[] interfaces) {
 		setInterfaces(interfaces);
 	}
 
@@ -89,7 +89,7 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	 * @param aspectInstance the AspectJ aspect instance
 	 */
 	public void addAspect(Object aspectInstance) {
-		Class aspectClass = aspectInstance.getClass();
+		Class<?> aspectClass = aspectInstance.getClass();
 		String aspectName = aspectClass.getName();
 		AspectMetadata am = createAspectMetadata(aspectClass, aspectName);
 		if (am.getAjType().getPerClause().getKind() != PerClauseKind.SINGLETON) {
@@ -104,7 +104,7 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	 * Add an aspect of the supplied type to the end of the advice chain.
 	 * @param aspectClass the AspectJ aspect class
 	 */
-	public void addAspect(Class aspectClass) {
+	public void addAspect(Class<?> aspectClass) {
 		String aspectName = aspectClass.getName();
 		AspectMetadata am = createAspectMetadata(aspectClass, aspectName);
 		MetadataAwareAspectInstanceFactory instanceFactory = createAspectInstanceFactory(am, aspectClass, aspectName);
@@ -128,7 +128,7 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	/**
 	 * Create an {@link AspectMetadata} instance for the supplied aspect type.
 	 */
-	private AspectMetadata createAspectMetadata(Class aspectClass, String aspectName) {
+	private AspectMetadata createAspectMetadata(Class<?> aspectClass, String aspectName) {
 		AspectMetadata am = new AspectMetadata(aspectClass, aspectName);
 		if (!am.getAjType().isAspect()) {
 			throw new IllegalArgumentException("Class [" + aspectClass.getName() + "] is not a valid aspect type");
@@ -142,7 +142,7 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	 * a {@link PrototypeAspectInstanceFactory} is returned.
 	 */
 	private MetadataAwareAspectInstanceFactory createAspectInstanceFactory(
-			AspectMetadata am, Class aspectClass, String aspectName) {
+			AspectMetadata am, Class<?> aspectClass, String aspectName) {
 
 		MetadataAwareAspectInstanceFactory instanceFactory = null;
 		if (am.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
@@ -161,7 +161,7 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	 * Get the singleton aspect instance for the supplied aspect type. An instance
 	 * is created if one cannot be found in the instance cache.
 	 */
-	private Object getSingletonAspectInstance(Class aspectClass) {
+	private Object getSingletonAspectInstance(Class<?> aspectClass) {
 		synchronized (aspectCache) {
 			Object instance = aspectCache.get(aspectClass);
 			if (instance != null) {

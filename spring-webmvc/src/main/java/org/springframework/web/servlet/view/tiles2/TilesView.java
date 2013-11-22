@@ -18,6 +18,7 @@ package org.springframework.web.servlet.view.tiles2;
 
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -30,11 +31,9 @@ import org.apache.tiles.impl.BasicTilesContainer;
 import org.apache.tiles.servlet.context.ServletTilesApplicationContext;
 import org.apache.tiles.servlet.context.ServletTilesRequestContext;
 import org.apache.tiles.servlet.context.ServletUtil;
-
 import org.springframework.web.servlet.support.JstlUtils;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
-import org.springframework.web.util.WebUtils;
 
 /**
  * {@link org.springframework.web.servlet.View} implementation that retrieves a

@@ -94,7 +94,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 
 		if (bean instanceof FactoryBean && !BeanFactoryUtils.isFactoryDereference(name)) {
 			try {
-				return ((FactoryBean) bean).getObject();
+				return ((FactoryBean<?>) bean).getObject();
 			}
 			catch (Exception ex) {
 				throw new BeanCreationException(beanName, "FactoryBean threw exception on object creation", ex);
@@ -147,20 +147,20 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {
 		Object bean = getBean(name);
 		// In case of FactoryBean, return singleton status of created object.
-		return (bean instanceof FactoryBean && ((FactoryBean) bean).isSingleton());
+		return (bean instanceof FactoryBean && ((FactoryBean<?>) bean).isSingleton());
 	}
 
 	@Override
 	public boolean isPrototype(String name) throws NoSuchBeanDefinitionException {
 		Object bean = getBean(name);
 		// In case of FactoryBean, return prototype status of created object.
-		return ((bean instanceof SmartFactoryBean && ((SmartFactoryBean) bean).isPrototype()) ||
-				(bean instanceof FactoryBean && !((FactoryBean) bean).isSingleton()));
+		return ((bean instanceof SmartFactoryBean && ((SmartFactoryBean<?>) bean).isPrototype()) ||
+				(bean instanceof FactoryBean && !((FactoryBean<?>) bean).isSingleton()));
 	}
 
 	@Override
-	public boolean isTypeMatch(String name, Class targetType) throws NoSuchBeanDefinitionException {
-		Class type = getType(name);
+	public boolean isTypeMatch(String name, Class<?> targetType) throws NoSuchBeanDefinitionException {
+		Class<?> type = getType(name);
 		return (targetType == null || (type != null && targetType.isAssignableFrom(type)));
 	}
 
@@ -176,7 +176,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 
 		if (bean instanceof FactoryBean && !BeanFactoryUtils.isFactoryDereference(name)) {
 			// If it's a FactoryBean, we want to look at what it creates, not the factory class.
-			return ((FactoryBean) bean).getObjectType();
+			return ((FactoryBean<?>) bean).getObjectType();
 		}
 		return bean.getClass();
 	}
@@ -207,19 +207,19 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	}
 
 	@Override
-	public String[] getBeanNamesForType(Class type) {
+	public String[] getBeanNamesForType(Class<?> type) {
 		return getBeanNamesForType(type, true, true);
 	}
 
 	@Override
-	public String[] getBeanNamesForType(Class type, boolean includeNonSingletons, boolean includeFactoryBeans) {
+	public String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletons, boolean includeFactoryBeans) {
 		boolean isFactoryType = (type != null && FactoryBean.class.isAssignableFrom(type));
 		List<String> matches = new ArrayList<String>();
 		for (String name : this.beans.keySet()) {
 			Object beanInstance = this.beans.get(name);
 			if (beanInstance instanceof FactoryBean && !isFactoryType) {
 				if (includeFactoryBeans) {
-					Class objectType = ((FactoryBean) beanInstance).getObjectType();
+					Class<?> objectType = ((FactoryBean<?>) beanInstance).getObjectType();
 					if (objectType != null && (type == null || type.isAssignableFrom(objectType))) {
 						matches.add(name);
 					}
@@ -254,8 +254,8 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 			if (beanInstance instanceof FactoryBean && !isFactoryType) {
 				if (includeFactoryBeans) {
 					// Match object created by FactoryBean.
-					FactoryBean factory = (FactoryBean) beanInstance;
-					Class objectType = factory.getObjectType();
+					FactoryBean<?> factory = (FactoryBean<?>) beanInstance;
+					Class<?> objectType = factory.getObjectType();
 					if ((includeNonSingletons || factory.isSingleton()) &&
 							objectType != null && (type == null || type.isAssignableFrom(objectType))) {
 						matches.put(beanName, getBean(beanName, type));

@@ -32,8 +32,7 @@ public class TilesViewResolver extends UrlBasedViewResolver {
 
 
 	@Override
-	@SuppressWarnings("rawtypes")
-	protected Class getViewClass() {
+	protected Class<?> getViewClass() {
 		return TilesView.class;
 	}
 

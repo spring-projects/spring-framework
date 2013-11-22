@@ -60,7 +60,7 @@ abstract class AnnotationReadingVisitorUtils {
 				}
 				else if (value instanceof Type[]) {
 					Type[] array = (Type[]) value;
-					Object[] convArray = (classValuesAsString ? new String[array.length] : new Class[array.length]);
+					Object[] convArray = (classValuesAsString ? new String[array.length] : new Class<?>[array.length]);
 					for (int i = 0; i < array.length; i++) {
 						convArray[i] = (classValuesAsString ? array[i].getClassName() :
 								classLoader.loadClass(array[i].getClassName()));

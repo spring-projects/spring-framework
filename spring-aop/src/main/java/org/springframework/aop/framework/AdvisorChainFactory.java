@@ -36,6 +36,6 @@ public interface AdvisorChainFactory {
 	 * @return List of MethodInterceptors (may also include InterceptorAndDynamicMethodMatchers)
 	 */
 	List<Object> getInterceptorsAndDynamicInterceptionAdvice(
-			Advised config, Method method, Class targetClass);
+			Advised config, Method method, Class<?> targetClass);
 
 }

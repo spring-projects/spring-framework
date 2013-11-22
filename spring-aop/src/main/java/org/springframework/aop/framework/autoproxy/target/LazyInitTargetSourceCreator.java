@@ -60,7 +60,7 @@ public class LazyInitTargetSourceCreator extends AbstractBeanFactoryBasedTargetS
 
 	@Override
 	protected AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(
-			Class beanClass, String beanName) {
+			Class<?> beanClass, String beanName) {
 
 		if (getBeanFactory() instanceof ConfigurableListableBeanFactory) {
 			BeanDefinition definition =

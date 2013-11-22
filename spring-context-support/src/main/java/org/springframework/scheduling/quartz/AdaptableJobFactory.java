@@ -74,7 +74,7 @@ public class AdaptableJobFactory implements JobFactory {
 		Method getJobDetail = bundle.getClass().getMethod("getJobDetail");
 		Object jobDetail = ReflectionUtils.invokeMethod(getJobDetail, bundle);
 		Method getJobClass = jobDetail.getClass().getMethod("getJobClass");
-		Class jobClass = (Class) ReflectionUtils.invokeMethod(getJobClass, jobDetail);
+		Class<?> jobClass = (Class<?>) ReflectionUtils.invokeMethod(getJobClass, jobDetail);
 		return jobClass.newInstance();
 	}
 

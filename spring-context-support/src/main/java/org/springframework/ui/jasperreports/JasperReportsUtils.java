@@ -63,7 +63,7 @@ public abstract class JasperReportsUtils {
 			return (JRDataSource) value;
 		}
 		else if (value instanceof Collection) {
-			return new JRBeanCollectionDataSource((Collection) value);
+			return new JRBeanCollectionDataSource((Collection<?>) value);
 		}
 		else if (value instanceof Object[]) {
 			return new JRBeanArrayDataSource((Object[]) value);

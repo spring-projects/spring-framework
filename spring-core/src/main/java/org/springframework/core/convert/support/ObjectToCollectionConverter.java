@@ -52,7 +52,6 @@ final class ObjectToCollectionConverter implements ConditionalGenericConverter {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
 			return null;

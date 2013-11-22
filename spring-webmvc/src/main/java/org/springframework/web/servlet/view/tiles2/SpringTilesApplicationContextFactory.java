@@ -71,9 +71,9 @@ public class SpringTilesApplicationContextFactory extends AbstractTilesApplicati
 		public SpringWildcardServletTilesApplicationContext(ServletContext servletContext, Map<String, String> params) {
 			super(servletContext);
 			this.mergedInitParams = new LinkedHashMap<String, String>();
-			Enumeration initParamNames = servletContext.getInitParameterNames();
+			Enumeration<String> initParamNames = servletContext.getInitParameterNames();
 			while (initParamNames.hasMoreElements()) {
-				String initParamName = (String) initParamNames.nextElement();
+				String initParamName = initParamNames.nextElement();
 				this.mergedInitParams.put(initParamName, servletContext.getInitParameter(initParamName));
 			}
 			if (params != null) {

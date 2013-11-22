@@ -33,21 +33,21 @@ import org.springframework.util.Assert;
  */
 public class GenericApplicationListenerAdapter implements SmartApplicationListener {
 
-	private final ApplicationListener delegate;
+	private final ApplicationListener<ApplicationEvent> delegate;
 
 
 	/**
 	 * Create a new GenericApplicationListener for the given delegate.
 	 * @param delegate the delegate listener to be invoked
 	 */
-	public GenericApplicationListenerAdapter(ApplicationListener delegate) {
+	@SuppressWarnings("unchecked")
+	public GenericApplicationListenerAdapter(ApplicationListener<?> delegate) {
 		Assert.notNull(delegate, "Delegate listener must not be null");
-		this.delegate = delegate;
+		this.delegate = (ApplicationListener<ApplicationEvent>) delegate;
 	}
 
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void onApplicationEvent(ApplicationEvent event) {
 		this.delegate.onApplicationEvent(event);
 	}

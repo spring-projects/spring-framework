@@ -101,7 +101,7 @@ public class JCacheCacheManager extends AbstractTransactionSupportingCacheManage
 	protected Collection<Cache> loadCaches() {
 		Collection<Cache> caches = new LinkedHashSet<Cache>();
 		for (String cacheName : this.cacheManager.getCacheNames()) {
-			javax.cache.Cache jcache = this.cacheManager.getCache(cacheName);
+			javax.cache.Cache<Object, Object> jcache = this.cacheManager.getCache(cacheName);
 			caches.add(new JCacheCache(jcache, this.allowNullValues));
 		}
 		return caches;

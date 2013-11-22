@@ -55,11 +55,11 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	private static final String JBOSS_RESOURCE_PREFIX = "org.jboss.resource.adapter.jdbc.";
 
 
-	private Class wrappedConnectionClass;
+	private Class<?> wrappedConnectionClass;
 
-	private Class wrappedStatementClass;
+	private Class<?> wrappedStatementClass;
 
-	private Class wrappedResultSetClass;
+	private Class<?> wrappedResultSetClass;
 
 	private Method getUnderlyingConnectionMethod;
 

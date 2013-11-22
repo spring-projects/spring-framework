@@ -59,12 +59,12 @@ public class DelegatePerTargetObjectIntroductionInterceptor extends Introduction
 	 */
 	private final Map<Object, Object> delegateMap = new WeakHashMap<Object, Object>();
 
-	private Class defaultImplType;
+	private Class<?> defaultImplType;
 
-	private Class interfaceType;
+	private Class<?> interfaceType;
 
 
-	public DelegatePerTargetObjectIntroductionInterceptor(Class defaultImplType, Class interfaceType) {
+	public DelegatePerTargetObjectIntroductionInterceptor(Class<?> defaultImplType, Class<?> interfaceType) {
 		this.defaultImplType = defaultImplType;
 		this.interfaceType = interfaceType;
 		// cCeate a new delegate now (but don't store it in the map).

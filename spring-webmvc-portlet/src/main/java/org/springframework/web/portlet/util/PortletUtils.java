@@ -23,6 +23,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletContext;
@@ -203,7 +204,7 @@ public abstract class PortletUtils {
 	 * @return the value of the session attribute, newly created if not found
 	 * @throws IllegalArgumentException if the session attribute could not be instantiated
 	 */
-	public static Object getOrCreateSessionAttribute(PortletSession session, String name, Class clazz)
+	public static Object getOrCreateSessionAttribute(PortletSession session, String name, Class<?> clazz)
 			throws IllegalArgumentException {
 
 		return getOrCreateSessionAttribute(session, name, clazz, PortletSession.PORTLET_SCOPE);
@@ -221,7 +222,7 @@ public abstract class PortletUtils {
 	 * @return the value of the session attribute, newly created if not found
 	 * @throws IllegalArgumentException if the session attribute could not be instantiated
 	 */
-	public static Object getOrCreateSessionAttribute(PortletSession session, String name, Class clazz, int scope)
+	public static Object getOrCreateSessionAttribute(PortletSession session, String name, Class<?> clazz, int scope)
 			throws IllegalArgumentException {
 
 		Assert.notNull(session, "Session must not be null");
@@ -411,13 +412,13 @@ public abstract class PortletUtils {
 	 */
 	public static Map<String, Object> getParametersStartingWith(PortletRequest request, String prefix) {
 		Assert.notNull(request, "Request must not be null");
-		Enumeration paramNames = request.getParameterNames();
+		Enumeration<String> paramNames = request.getParameterNames();
 		Map<String, Object> params = new TreeMap<String, Object>();
 		if (prefix == null) {
 			prefix = "";
 		}
 		while (paramNames != null && paramNames.hasMoreElements()) {
-			String paramName = (String) paramNames.nextElement();
+			String paramName = paramNames.nextElement();
 			if ("".equals(prefix) || paramName.startsWith(prefix)) {
 				String unprefixed = paramName.substring(prefix.length());
 				String[] values = request.getParameterValues(paramName);
@@ -445,9 +446,9 @@ public abstract class PortletUtils {
 	 * @return the page specified in the request, or current page if not found
 	 */
 	public static int getTargetPage(PortletRequest request, String paramPrefix, int currentPage) {
-		Enumeration paramNames = request.getParameterNames();
+		Enumeration<String> paramNames = request.getParameterNames();
 		while (paramNames.hasMoreElements()) {
-			String paramName = (String) paramNames.nextElement();
+			String paramName = paramNames.nextElement();
 			if (paramName.startsWith(paramPrefix)) {
 				for (int i = 0; i < WebUtils.SUBMIT_IMAGE_SUFFIXES.length; i++) {
 					String suffix = WebUtils.SUBMIT_IMAGE_SUFFIXES[i];
@@ -472,9 +473,9 @@ public abstract class PortletUtils {
 	 */
 	public static void passAllParametersToRenderPhase(ActionRequest request, ActionResponse response) {
 		try {
-			Enumeration en = request.getParameterNames();
+			Enumeration<String> en = request.getParameterNames();
 			while (en.hasMoreElements()) {
-				String param = (String) en.nextElement();
+				String param = en.nextElement();
 				String values[] = request.getParameterValues(param);
 				response.setRenderParameter(param, values);
 			}

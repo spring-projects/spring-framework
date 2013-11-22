@@ -103,7 +103,7 @@ class ConfigurationClassEnhancer {
 	private Enhancer newEnhancer(Class<?> superclass) {
 		Enhancer enhancer = new Enhancer();
 		enhancer.setSuperclass(superclass);
-		enhancer.setInterfaces(new Class[] {EnhancedConfiguration.class});
+		enhancer.setInterfaces(new Class<?>[] {EnhancedConfiguration.class});
 		enhancer.setUseFactory(false);
 		enhancer.setCallbackFilter(CALLBACK_FILTER);
 		enhancer.setCallbackTypes(CALLBACK_FILTER.getCallbackTypes());

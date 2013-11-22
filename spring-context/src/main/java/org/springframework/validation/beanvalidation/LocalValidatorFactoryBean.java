@@ -261,7 +261,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		setTargetValidator(this.validatorFactory.getValidator());
 	}
 
-	private void configureParameterNameProviderIfPossible(Configuration configuration) {
+	private void configureParameterNameProviderIfPossible(Configuration<?> configuration) {
 		try {
 			Class<?> parameterNameProviderClass =
 					ClassUtils.forName("javax.validation.ParameterNameProvider", getClass().getClassLoader());
@@ -271,13 +271,13 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 					Configuration.class.getMethod("getDefaultParameterNameProvider"), configuration);
 			final ParameterNameDiscoverer discoverer = this.parameterNameDiscoverer;
 			Object parameterNameProvider = Proxy.newProxyInstance(getClass().getClassLoader(),
-					new Class[] {parameterNameProviderClass}, new InvocationHandler() {
+					new Class<?>[] {parameterNameProviderClass}, new InvocationHandler() {
 				@Override
 				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 					if (method.getName().equals("getParameterNames")) {
 						String[] result = null;
 						if (args[0] instanceof Constructor) {
-							result = discoverer.getParameterNames((Constructor) args[0]);
+							result = discoverer.getParameterNames((Constructor<?>) args[0]);
 						}
 						else if (args[0] instanceof Method) {
 							result = discoverer.getParameterNames((Method) args[0]);
@@ -320,7 +320,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	 * @param configuration the Configuration object, pre-populated with
 	 * settings driven by LocalValidatorFactoryBean's properties
 	 */
-	protected void postProcessConfiguration(Configuration configuration) {
+	protected void postProcessConfiguration(Configuration<?> configuration) {
 	}
 
 

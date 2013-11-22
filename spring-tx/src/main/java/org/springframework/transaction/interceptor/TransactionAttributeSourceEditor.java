@@ -59,7 +59,7 @@ public class TransactionAttributeSourceEditor extends PropertyEditorSupport {
 
 			// Now we have properties, process each one individually.
 			TransactionAttributeEditor tae = new TransactionAttributeEditor();
-			Enumeration propNames = props.propertyNames();
+			Enumeration<?> propNames = props.propertyNames();
 			while (propNames.hasMoreElements()) {
 				String name = (String) propNames.nextElement();
 				String value = props.getProperty(name);

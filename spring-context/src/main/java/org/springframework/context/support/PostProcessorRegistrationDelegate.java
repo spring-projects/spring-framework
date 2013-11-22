@@ -371,7 +371,7 @@ class PostProcessorRegistrationDelegate {
 		public void postProcessBeforeDestruction(Object bean, String beanName) {
 			if (bean instanceof ApplicationListener) {
 				ApplicationEventMulticaster multicaster = this.applicationContext.getApplicationEventMulticaster();
-				multicaster.removeApplicationListener((ApplicationListener) bean);
+				multicaster.removeApplicationListener((ApplicationListener<?>) bean);
 				multicaster.removeApplicationListenerBean(beanName);
 			}
 		}

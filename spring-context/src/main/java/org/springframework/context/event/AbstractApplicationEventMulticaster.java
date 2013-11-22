@@ -61,7 +61,7 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 
 
 	@Override
-	public void addApplicationListener(ApplicationListener listener) {
+	public void addApplicationListener(ApplicationListener<?> listener) {
 		synchronized (this.defaultRetriever) {
 			this.defaultRetriever.applicationListeners.add(listener);
 			this.retrieverCache.clear();
@@ -77,7 +77,7 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 	}
 
 	@Override
-	public void removeApplicationListener(ApplicationListener listener) {
+	public void removeApplicationListener(ApplicationListener<?> listener) {
 		synchronized (this.defaultRetriever) {
 			this.defaultRetriever.applicationListeners.remove(listener);
 			this.retrieverCache.clear();
@@ -120,7 +120,7 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 	 * @return a Collection of ApplicationListeners
 	 * @see org.springframework.context.ApplicationListener
 	 */
-	protected Collection<ApplicationListener> getApplicationListeners() {
+	protected Collection<ApplicationListener<?>> getApplicationListeners() {
 		synchronized (this.defaultRetriever) {
 			return this.defaultRetriever.getApplicationListeners();
 		}
@@ -134,7 +134,7 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 	 * @return a Collection of ApplicationListeners
 	 * @see org.springframework.context.ApplicationListener
 	 */
-	protected Collection<ApplicationListener> getApplicationListeners(ApplicationEvent event) {
+	protected Collection<ApplicationListener<?>> getApplicationListeners(ApplicationEvent event) {
 		Class<? extends ApplicationEvent> eventType = event.getClass();
 		Object source = event.getSource();
 		Class<?> sourceType = (source != null ? source.getClass() : null);
@@ -145,14 +145,14 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 		}
 		else {
 			retriever = new ListenerRetriever(true);
-			LinkedList<ApplicationListener> allListeners = new LinkedList<ApplicationListener>();
-			Set<ApplicationListener> listeners;
+			LinkedList<ApplicationListener<?>> allListeners = new LinkedList<ApplicationListener<?>>();
+			Set<ApplicationListener<?>> listeners;
 			Set<String> listenerBeans;
 			synchronized (this.defaultRetriever) {
-				listeners = new LinkedHashSet<ApplicationListener>(this.defaultRetriever.applicationListeners);
+				listeners = new LinkedHashSet<ApplicationListener<?>>(this.defaultRetriever.applicationListeners);
 				listenerBeans = new LinkedHashSet<String>(this.defaultRetriever.applicationListenerBeans);
 			}
-			for (ApplicationListener listener : listeners) {
+			for (ApplicationListener<?> listener : listeners) {
 				if (supportsEvent(listener, eventType, sourceType)) {
 					retriever.applicationListeners.add(listener);
 					allListeners.add(listener);
@@ -162,7 +162,7 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 				BeanFactory beanFactory = getBeanFactory();
 				for (String listenerBeanName : listenerBeans) {
 					try {
-						ApplicationListener listener = beanFactory.getBean(listenerBeanName, ApplicationListener.class);
+						ApplicationListener<?> listener = beanFactory.getBean(listenerBeanName, ApplicationListener.class);
 						if (!allListeners.contains(listener) && supportsEvent(listener, eventType, sourceType)) {
 							retriever.applicationListenerBeans.add(listenerBeanName);
 							allListeners.add(listener);
@@ -192,8 +192,8 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 	 * @return whether the given listener should be included in the
 	 * candidates for the given event type
 	 */
-	protected boolean supportsEvent(
-			ApplicationListener listener, Class<? extends ApplicationEvent> eventType, Class sourceType) {
+	protected boolean supportsEvent(ApplicationListener<?> listener,
+			Class<? extends ApplicationEvent> eventType, Class<?> sourceType) {
 
 		SmartApplicationListener smartListener = (listener instanceof SmartApplicationListener ?
 				(SmartApplicationListener) listener : new GenericApplicationListenerAdapter(listener));
@@ -239,28 +239,28 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 	 */
 	private class ListenerRetriever {
 
-		public final Set<ApplicationListener> applicationListeners;
+		public final Set<ApplicationListener<?>> applicationListeners;
 
 		public final Set<String> applicationListenerBeans;
 
 		private final boolean preFiltered;
 
 		public ListenerRetriever(boolean preFiltered) {
-			this.applicationListeners = new LinkedHashSet<ApplicationListener>();
+			this.applicationListeners = new LinkedHashSet<ApplicationListener<?>>();
 			this.applicationListenerBeans = new LinkedHashSet<String>();
 			this.preFiltered = preFiltered;
 		}
 
-		public Collection<ApplicationListener> getApplicationListeners() {
-			LinkedList<ApplicationListener> allListeners = new LinkedList<ApplicationListener>();
-			for (ApplicationListener listener : this.applicationListeners) {
+		public Collection<ApplicationListener<?>> getApplicationListeners() {
+			LinkedList<ApplicationListener<?>> allListeners = new LinkedList<ApplicationListener<?>>();
+			for (ApplicationListener<?> listener : this.applicationListeners) {
 				allListeners.add(listener);
 			}
 			if (!this.applicationListenerBeans.isEmpty()) {
 				BeanFactory beanFactory = getBeanFactory();
 				for (String listenerBeanName : this.applicationListenerBeans) {
 					try {
-						ApplicationListener listener = beanFactory.getBean(listenerBeanName, ApplicationListener.class);
+						ApplicationListener<?> listener = beanFactory.getBean(listenerBeanName, ApplicationListener.class);
 						if (this.preFiltered || !allListeners.contains(listener)) {
 							allListeners.add(listener);
 						}

@@ -69,7 +69,7 @@ public abstract class ObjectUtils {
 	 * @param declaredExceptions the exceptions declared in the throws clause
 	 * @return whether the given exception is compatible
 	 */
-	public static boolean isCompatibleWithThrowsClause(Throwable ex, Class[] declaredExceptions) {
+	public static boolean isCompatibleWithThrowsClause(Throwable ex, Class<?>[] declaredExceptions) {
 		if (!isCheckedException(ex)) {
 			return true;
 		}
@@ -218,7 +218,7 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return new Object[0];
 		}
-		Class wrapperType = Array.get(source, 0).getClass();
+		Class<?> wrapperType = Array.get(source, 0).getClass();
 		Object[] newArray = (Object[]) Array.newInstance(wrapperType, length);
 		for (int i = 0; i < length; i++) {
 			newArray[i] = Array.get(source, i);
@@ -286,7 +286,7 @@ public abstract class ObjectUtils {
 
 	/**
 	 * Return as hash code for the given object; typically the value of
-	 * {@code {@link Object#hashCode()}}. If the object is an array,
+	 * {@code Object#hashCode()}}. If the object is an array,
 	 * this method will delegate to any of the {@code nullSafeHashCode}
 	 * methods for arrays in this class. If the object is {@code null},
 	 * this method returns 0.

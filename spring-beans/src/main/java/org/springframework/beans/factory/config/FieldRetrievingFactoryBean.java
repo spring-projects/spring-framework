@@ -55,7 +55,7 @@ import org.springframework.util.StringUtils;
 public class FieldRetrievingFactoryBean
 		implements FactoryBean<Object>, BeanNameAware, BeanClassLoaderAware, InitializingBean {
 
-	private Class targetClass;
+	private Class<?> targetClass;
 
 	private Object targetObject;
 
@@ -78,14 +78,14 @@ public class FieldRetrievingFactoryBean
 	 * @see #setTargetObject
 	 * @see #setTargetField
 	 */
-	public void setTargetClass(Class targetClass) {
+	public void setTargetClass(Class<?> targetClass) {
 		this.targetClass = targetClass;
 	}
 
 	/**
 	 * Return the target class on which the field is defined.
 	 */
-	public Class getTargetClass() {
+	public Class<?> getTargetClass() {
 		return targetClass;
 	}
 
@@ -189,7 +189,7 @@ public class FieldRetrievingFactoryBean
 		}
 
 		// Try to get the exact method first.
-		Class targetClass = (this.targetObject != null) ? this.targetObject.getClass() : this.targetClass;
+		Class<?> targetClass = (this.targetObject != null) ? this.targetObject.getClass() : this.targetClass;
 		this.fieldObject = targetClass.getField(this.targetField);
 	}
 

@@ -44,7 +44,7 @@ public class BindingAwareModelMap extends ExtendedModelMap {
 
 	@Override
 	public void putAll(Map<? extends String, ?> map) {
-		for (Map.Entry entry : map.entrySet()) {
+		for (Map.Entry<? extends String, ?> entry : map.entrySet()) {
 			removeBindingResultIfNecessary(entry.getKey(), entry.getValue());
 		}
 		super.putAll(map);

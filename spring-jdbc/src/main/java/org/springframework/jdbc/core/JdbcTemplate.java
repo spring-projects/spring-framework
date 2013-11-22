@@ -371,7 +371,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	protected Connection createConnectionProxy(Connection con) {
 		return (Connection) Proxy.newProxyInstance(
 				ConnectionProxy.class.getClassLoader(),
-				new Class[] {ConnectionProxy.class},
+				new Class<?>[] {ConnectionProxy.class},
 				new CloseSuppressingInvocationHandler(con));
 	}
 

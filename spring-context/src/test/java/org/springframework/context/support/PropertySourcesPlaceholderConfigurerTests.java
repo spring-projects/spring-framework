@@ -177,6 +177,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 	}
 
 	@Test(expected=BeanDefinitionStoreException.class)
+	@SuppressWarnings("serial")
 	public void nestedUnresolvablePlaceholder() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("testBean",
@@ -192,6 +193,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void ignoredNestedUnresolvablePlaceholder() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("testBean",

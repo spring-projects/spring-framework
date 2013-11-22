@@ -161,6 +161,7 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 		}
 
 		@Override
+		@Deprecated
 		public void consumeContent() throws IOException {
 			throw new UnsupportedOperationException();
 		}

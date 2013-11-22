@@ -44,8 +44,9 @@ import org.springframework.util.ConcurrentReferenceHashMap;
 public abstract class GenericTypeResolver {
 
 	/** Cache from Class to TypeVariable Map */
-	private static final Map<Class, Map<TypeVariable, Type>> typeVariableCache =
-			new ConcurrentReferenceHashMap<Class, Map<TypeVariable,Type>>();
+	@SuppressWarnings("rawtypes")
+	private static final Map<Class<?>, Map<TypeVariable, Type>> typeVariableCache =
+			new ConcurrentReferenceHashMap<Class<?>, Map<TypeVariable, Type>>();
 
 
 	/**
@@ -256,6 +257,7 @@ public abstract class GenericTypeResolver {
 	 * @deprecated as of Spring 4.0 in favor of {@link ResolvableType}
 	 */
 	@Deprecated
+	@SuppressWarnings("rawtypes")
 	public static Class<?> resolveType(Type genericType, Map<TypeVariable, Type> map) {
 		return ResolvableType.forType(genericType, new TypeVariableMapVariableResolver(map)).resolve(Object.class);
 	}
@@ -267,6 +269,7 @@ public abstract class GenericTypeResolver {
 	 * @deprecated as of Spring 4.0 in favor of {@link ResolvableType}
 	 */
 	@Deprecated
+	@SuppressWarnings("rawtypes")
 	public static Map<TypeVariable, Type> getTypeVariableMap(Class<?> clazz) {
 		Map<TypeVariable, Type> typeVariableMap = typeVariableCache.get(clazz);
 		if (typeVariableMap == null) {
@@ -277,6 +280,7 @@ public abstract class GenericTypeResolver {
 		return typeVariableMap;
 	}
 
+	@SuppressWarnings("rawtypes")
 	private static void buildTypeVariableMap(ResolvableType type, Map<TypeVariable, Type> typeVariableMap) {
 		if (type != ResolvableType.NONE) {
 			if (type.getType() instanceof ParameterizedType) {
@@ -302,7 +306,7 @@ public abstract class GenericTypeResolver {
 	}
 
 
-	@SuppressWarnings("serial")
+	@SuppressWarnings({"serial", "rawtypes"})
 	private static class TypeVariableMapVariableResolver implements ResolvableType.VariableResolver {
 
 		private final Map<TypeVariable, Type> typeVariableMap;

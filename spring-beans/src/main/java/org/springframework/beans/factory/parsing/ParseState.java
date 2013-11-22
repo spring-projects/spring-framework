@@ -40,22 +40,23 @@ public final class ParseState {
 	/**
 	 * Internal {@link Stack} storage.
 	 */
-	private final Stack state;
+	private final Stack<Entry> state;
 
 
 	/**
 	 * Create a new {@code ParseState} with an empty {@link Stack}.
 	 */
 	public ParseState() {
-		this.state = new Stack();
+		this.state = new Stack<Entry>();
 	}
 
 	/**
 	 * Create a new {@code ParseState} whose {@link Stack} is a {@link Object#clone clone}
 	 * of that of the passed in {@code ParseState}.
 	 */
+	@SuppressWarnings("unchecked")
 	private ParseState(ParseState other) {
-		this.state = (Stack) other.state.clone();
+		this.state = (Stack<Entry>) other.state.clone();
 	}
 
 
@@ -78,7 +79,7 @@ public final class ParseState {
 	 * {@code null} if the {@link Stack} is empty.
 	 */
 	public Entry peek() {
-		return (Entry) (this.state.empty() ? null : this.state.peek());
+		return this.state.empty() ? null : this.state.peek();
 	}
 
 	/**

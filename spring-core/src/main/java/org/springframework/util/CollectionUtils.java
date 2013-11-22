@@ -47,7 +47,7 @@ public abstract class CollectionUtils {
 	 * @param collection the Collection to check
 	 * @return whether the given Collection is empty
 	 */
-	public static boolean isEmpty(Collection collection) {
+	public static boolean isEmpty(Collection<?> collection) {
 		return (collection == null || collection.isEmpty());
 	}
 
@@ -57,7 +57,7 @@ public abstract class CollectionUtils {
 	 * @param map the Map to check
 	 * @return whether the given Map is empty
 	 */
-	public static boolean isEmpty(Map map) {
+	public static boolean isEmpty(Map<?, ?> map) {
 		return (map == null || map.isEmpty());
 	}
 
@@ -70,8 +70,9 @@ public abstract class CollectionUtils {
 	 * @return the converted List result
 	 * @see ObjectUtils#toObjectArray(Object)
 	 */
-	public static List arrayToList(Object source) {
-		return Arrays.asList(ObjectUtils.toObjectArray(source));
+	@SuppressWarnings("unchecked")
+	public static <E> List<E> arrayToList(Object source) {
+		return (List<E>) Arrays.asList(ObjectUtils.toObjectArray(source));
 	}
 
 	/**
@@ -80,13 +81,13 @@ public abstract class CollectionUtils {
 	 * @param collection the target Collection to merge the array into
 	 */
 	@SuppressWarnings("unchecked")
-	public static void mergeArrayIntoCollection(Object array, Collection collection) {
+	public static <E> void mergeArrayIntoCollection(Object array, Collection<E> collection) {
 		if (collection == null) {
 			throw new IllegalArgumentException("Collection must not be null");
 		}
 		Object[] arr = ObjectUtils.toObjectArray(array);
 		for (Object elem : arr) {
-			collection.add(elem);
+			collection.add((E) elem);
 		}
 	}
 
@@ -99,19 +100,19 @@ public abstract class CollectionUtils {
 	 * @param map the target Map to merge the properties into
 	 */
 	@SuppressWarnings("unchecked")
-	public static void mergePropertiesIntoMap(Properties props, Map map) {
+	public static <K, V> void mergePropertiesIntoMap(Properties props, Map<K, V> map) {
 		if (map == null) {
 			throw new IllegalArgumentException("Map must not be null");
 		}
 		if (props != null) {
-			for (Enumeration en = props.propertyNames(); en.hasMoreElements();) {
+			for (Enumeration<?> en = props.propertyNames(); en.hasMoreElements();) {
 				String key = (String) en.nextElement();
 				Object value = props.getProperty(key);
 				if (value == null) {
 					// Potentially a non-String value...
 					value = props.get(key);
 				}
-				map.put(key, value);
+				map.put((K) key, (V) value);
 			}
 		}
 	}
@@ -123,7 +124,7 @@ public abstract class CollectionUtils {
 	 * @param element the element to look for
 	 * @return {@code true} if found, {@code false} else
 	 */
-	public static boolean contains(Iterator iterator, Object element) {
+	public static boolean contains(Iterator<?> iterator, Object element) {
 		if (iterator != null) {
 			while (iterator.hasNext()) {
 				Object candidate = iterator.next();
@@ -141,7 +142,7 @@ public abstract class CollectionUtils {
 	 * @param element the element to look for
 	 * @return {@code true} if found, {@code false} else
 	 */
-	public static boolean contains(Enumeration enumeration, Object element) {
+	public static boolean contains(Enumeration<?> enumeration, Object element) {
 		if (enumeration != null) {
 			while (enumeration.hasMoreElements()) {
 				Object candidate = enumeration.nextElement();
@@ -161,7 +162,7 @@ public abstract class CollectionUtils {
 	 * @param element the element to look for
 	 * @return {@code true} if found, {@code false} else
 	 */
-	public static boolean containsInstance(Collection collection, Object element) {
+	public static boolean containsInstance(Collection<?> collection, Object element) {
 		if (collection != null) {
 			for (Object candidate : collection) {
 				if (candidate == element) {
@@ -179,7 +180,7 @@ public abstract class CollectionUtils {
 	 * @param candidates the candidates to search for
 	 * @return whether any of the candidates has been found
 	 */
-	public static boolean containsAny(Collection source, Collection candidates) {
+	public static boolean containsAny(Collection<?> source, Collection<?> candidates) {
 		if (isEmpty(source) || isEmpty(candidates)) {
 			return false;
 		}
@@ -200,13 +201,14 @@ public abstract class CollectionUtils {
 	 * @param candidates the candidates to search for
 	 * @return the first present object, or {@code null} if not found
 	 */
-	public static Object findFirstMatch(Collection source, Collection candidates) {
+	@SuppressWarnings("unchecked")
+	public static <E> E findFirstMatch(Collection<?> source, Collection<E> candidates) {
 		if (isEmpty(source) || isEmpty(candidates)) {
 			return null;
 		}
 		for (Object candidate : candidates) {
 			if (source.contains(candidate)) {
-				return candidate;
+				return (E) candidate;
 			}
 		}
 		return null;
@@ -265,7 +267,7 @@ public abstract class CollectionUtils {
 	 * @return {@code true} if the collection contains a single reference or
 	 * multiple references to the same instance, {@code false} else
 	 */
-	public static boolean hasUniqueObject(Collection collection) {
+	public static boolean hasUniqueObject(Collection<?> collection) {
 		if (isEmpty(collection)) {
 			return false;
 		}
@@ -289,7 +291,7 @@ public abstract class CollectionUtils {
 	 * @return the common element type, or {@code null} if no clear
 	 * common type has been found (or the collection was empty)
 	 */
-	public static Class<?> findCommonElementType(Collection collection) {
+	public static Class<?> findCommonElementType(Collection<?> collection) {
 		if (isEmpty(collection)) {
 			return null;
 		}

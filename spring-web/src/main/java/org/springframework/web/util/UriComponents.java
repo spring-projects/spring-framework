@@ -39,6 +39,7 @@ import org.springframework.util.MultiValueMap;
  * @since 3.1
  * @see UriComponentsBuilder
  */
+@SuppressWarnings("serial")
 public abstract class UriComponents implements Serializable {
 
 	private static final String DEFAULT_ENCODING = "UTF-8";

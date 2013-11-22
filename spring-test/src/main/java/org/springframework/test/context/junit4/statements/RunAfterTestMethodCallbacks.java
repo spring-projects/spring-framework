@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.internal.runners.model.MultipleFailureException;
 import org.junit.runners.model.Statement;
 import org.springframework.test.context.TestContextManager;
 
@@ -100,6 +99,6 @@ public class RunAfterTestMethodCallbacks extends Statement {
 		if (errors.size() == 1) {
 			throw errors.get(0);
 		}
-		throw new MultipleFailureException(errors);
+		throw new org.junit.internal.runners.model.MultipleFailureException(errors);
 	}
 }

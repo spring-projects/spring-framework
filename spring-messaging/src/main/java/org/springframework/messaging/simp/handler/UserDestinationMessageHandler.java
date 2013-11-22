@@ -16,19 +16,16 @@
 
 package org.springframework.messaging.simp.handler;
 
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.core.MessageSendingOperations;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
-
-import java.util.Set;
-
 
 /**
  * Provides support for messages sent to "user" destinations, translating the

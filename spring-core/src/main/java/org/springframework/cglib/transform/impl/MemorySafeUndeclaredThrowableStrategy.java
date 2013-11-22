@@ -38,10 +38,10 @@ public class MemorySafeUndeclaredThrowableStrategy extends DefaultGeneratorStrat
 	};
 
 
-	private Class wrapper;
+	private Class<?> wrapper;
 
 
-	public MemorySafeUndeclaredThrowableStrategy(Class wrapper) {
+	public MemorySafeUndeclaredThrowableStrategy(Class<?> wrapper) {
 		this.wrapper = wrapper;
 	}
 

@@ -232,7 +232,7 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 		this.cronTrigger = cti;
 		*/
 
-		Class cronTriggerClass;
+		Class<?> cronTriggerClass;
 		Method jobKeyMethod;
 		try {
 			cronTriggerClass = getClass().getClassLoader().loadClass("org.quartz.impl.triggers.CronTriggerImpl");

@@ -32,6 +32,7 @@ import org.springframework.objenesis.ObjenesisStd;
  * @author Oliver Gierke
  * @since 4.0
  */
+@SuppressWarnings("serial")
 class ObjenesisCglibAopProxy extends CglibAopProxy {
 
 	private static final Log logger = LogFactory.getLog(ObjenesisCglibAopProxy.class);

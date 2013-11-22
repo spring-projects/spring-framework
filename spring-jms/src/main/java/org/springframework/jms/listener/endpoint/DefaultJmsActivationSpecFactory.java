@@ -73,7 +73,7 @@ public class DefaultJmsActivationSpecFactory extends StandardJmsActivationSpecFa
 	 * "ActivationSpecImpl" in the same package as the ResourceAdapter class.
 	 */
 	@Override
-	protected Class determineActivationSpecClass(ResourceAdapter adapter) {
+	protected Class<?> determineActivationSpecClass(ResourceAdapter adapter) {
 		String adapterClassName = adapter.getClass().getName();
 
 		if (adapterClassName.endsWith(RESOURCE_ADAPTER_SUFFIX)) {

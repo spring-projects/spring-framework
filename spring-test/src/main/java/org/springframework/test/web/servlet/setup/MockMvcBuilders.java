@@ -42,8 +42,8 @@ public class MockMvcBuilders {
 	 * application controllers in it. The context must have been configured with
 	 * a {@link ServletContext}.
 	 */
-	public static DefaultMockMvcBuilder<DefaultMockMvcBuilder<?>> webAppContextSetup(WebApplicationContext context) {
-		return new DefaultMockMvcBuilder<DefaultMockMvcBuilder<?>>(context);
+	public static <B extends DefaultMockMvcBuilder<B>> DefaultMockMvcBuilder<B> webAppContextSetup(WebApplicationContext context) {
+		return new DefaultMockMvcBuilder<B>(context);
 	}
 
 	/**

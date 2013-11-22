@@ -131,7 +131,7 @@ class JBossMCAdapter implements JBossClassLoaderAdapter {
 	public void addTransformer(ClassFileTransformer transformer) {
 		InvocationHandler adapter = new JBossMCTranslatorAdapter(transformer);
 		Object adapterInstance = Proxy.newProxyInstance(this.translatorClass.getClassLoader(),
-				new Class[] { this.translatorClass }, adapter);
+				new Class<?>[] { this.translatorClass }, adapter);
 
 		try {
 			addTranslator.invoke(target, adapterInstance);

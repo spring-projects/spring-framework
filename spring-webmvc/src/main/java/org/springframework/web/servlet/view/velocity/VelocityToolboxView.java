@@ -108,7 +108,7 @@ public class VelocityToolboxView extends VelocityView {
 		if (getToolboxConfigLocation() != null) {
 			ToolboxManager toolboxManager = ServletToolboxManager.getInstance(
 					getServletContext(), getToolboxConfigLocation());
-			Map toolboxContext = toolboxManager.getToolbox(velocityContext);
+			Map<?, ?> toolboxContext = toolboxManager.getToolbox(velocityContext);
 			velocityContext.setToolbox(toolboxContext);
 		}
 

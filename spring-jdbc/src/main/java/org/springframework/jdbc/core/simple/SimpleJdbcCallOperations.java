@@ -92,7 +92,7 @@ public interface SimpleJdbcCallOperations {
 	 * @param parameterName the name of the returned results and/or the name of the ref cursor parameter
 	 * @param rowMapper the RowMapper implementation that will map the data returned for each row
 	 * */
-	SimpleJdbcCallOperations returningResultSet(String parameterName, RowMapper rowMapper);
+	SimpleJdbcCallOperations returningResultSet(String parameterName, RowMapper<?> rowMapper);
 
 	/**
 	 * Turn off any processing of parameter meta data information obtained via JDBC.

@@ -106,7 +106,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * @return a List of objects, one per row of the ResultSet. Normally all these
 	 * will be of the same class, although it is possible to use different types.
 	 */
-	public List<T> execute(Object[] params, Map context) throws DataAccessException {
+	public List<T> execute(Object[] params, Map<?, ?> context) throws DataAccessException {
 		validateParameters(params);
 		RowMapper<T> rowMapper = newRowMapper(params, context);
 		return getJdbcTemplate().query(newPreparedStatementCreator(params), rowMapper);
@@ -126,7 +126,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * Convenient method to execute without parameters.
 	 * @param context the contextual information for object creation
 	 */
-	public List<T> execute(Map context) throws DataAccessException {
+	public List<T> execute(Map<?, ?> context) throws DataAccessException {
 		return execute((Object[]) null, context);
 	}
 
@@ -142,7 +142,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * @param p1 single int parameter
 	 * @param context the contextual information for object creation
 	 */
-	public List<T> execute(int p1, Map context) throws DataAccessException {
+	public List<T> execute(int p1, Map<?, ?> context) throws DataAccessException {
 		return execute(new Object[] {p1}, context);
 	}
 
@@ -160,7 +160,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * @param p2 second int parameter
 	 * @param context the contextual information for object creation
 	 */
-	public List<T> execute(int p1, int p2, Map context) throws DataAccessException {
+	public List<T> execute(int p1, int p2, Map<?, ?> context) throws DataAccessException {
 		return execute(new Object[] {p1, p2}, context);
 	}
 
@@ -178,7 +178,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * @param p1 single long parameter
 	 * @param context the contextual information for object creation
 	 */
-	public List<T> execute(long p1, Map context) throws DataAccessException {
+	public List<T> execute(long p1, Map<?, ?> context) throws DataAccessException {
 		return execute(new Object[] {p1}, context);
 	}
 
@@ -195,7 +195,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * @param p1 single String parameter
 	 * @param context the contextual information for object creation
 	 */
-	public List<T> execute(String p1, Map context) throws DataAccessException {
+	public List<T> execute(String p1, Map<?, ?> context) throws DataAccessException {
 		return execute(new Object[] {p1}, context);
 	}
 
@@ -219,7 +219,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * @return a List of objects, one per row of the ResultSet. Normally all these
 	 * will be of the same class, although it is possible to use different types.
 	 */
-	public List<T> executeByNamedParam(Map<String, ?> paramMap, Map context) throws DataAccessException {
+	public List<T> executeByNamedParam(Map<String, ?> paramMap, Map<?, ?> context) throws DataAccessException {
 		validateNamedParameters(paramMap);
 		ParsedSql parsedSql = getParsedSql();
 		MapSqlParameterSource paramSource = new MapSqlParameterSource(paramMap);
@@ -248,7 +248,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * choose to treat this as an error and throw an exception.
 	 * @see org.springframework.dao.support.DataAccessUtils#singleResult
 	 */
-	public T findObject(Object[] params, Map context) throws DataAccessException {
+	public T findObject(Object[] params, Map<?, ?> context) throws DataAccessException {
 		List<T> results = execute(params, context);
 		return DataAccessUtils.singleResult(results);
 	}
@@ -264,7 +264,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * Convenient method to find a single object given a single int parameter
 	 * and a context.
 	 */
-	public T findObject(int p1, Map context) throws DataAccessException {
+	public T findObject(int p1, Map<?, ?> context) throws DataAccessException {
 		return findObject(new Object[] {p1}, context);
 	}
 
@@ -279,7 +279,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * Convenient method to find a single object given two int parameters
 	 * and a context.
 	 */
-	public T findObject(int p1, int p2, Map context) throws DataAccessException {
+	public T findObject(int p1, int p2, Map<?, ?> context) throws DataAccessException {
 		return findObject(new Object[] {p1, p2}, context);
 	}
 
@@ -294,7 +294,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * Convenient method to find a single object given a single long parameter
 	 * and a context.
 	 */
-	public T findObject(long p1, Map context) throws DataAccessException {
+	public T findObject(long p1, Map<?, ?> context) throws DataAccessException {
 		return findObject(new Object[] {p1}, context);
 	}
 
@@ -309,7 +309,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * Convenient method to find a single object given a single String parameter
 	 * and a context.
 	 */
-	public T findObject(String p1, Map context) throws DataAccessException {
+	public T findObject(String p1, Map<?, ?> context) throws DataAccessException {
 		return findObject(new Object[] {p1}, context);
 	}
 
@@ -331,7 +331,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * @return a List of objects, one per row of the ResultSet. Normally all these
 	 * will be of the same class, although it is possible to use different types.
 	 */
-	public T findObjectByNamedParam(Map<String, ?> paramMap, Map context) throws DataAccessException {
+	public T findObjectByNamedParam(Map<String, ?> paramMap, Map<?, ?> context) throws DataAccessException {
 		List<T> results = executeByNamedParam(paramMap, context);
 		return DataAccessUtils.singleResult(results);
 	}
@@ -358,6 +358,6 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * but it can be useful for creating the objects of the result list.
 	 * @see #execute
 	 */
-	protected abstract RowMapper<T> newRowMapper(Object[] parameters, Map context);
+	protected abstract RowMapper<T> newRowMapper(Object[] parameters, Map<?, ?> context);
 
 }

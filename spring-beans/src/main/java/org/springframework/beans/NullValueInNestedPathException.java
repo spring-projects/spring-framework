@@ -33,7 +33,7 @@ public class NullValueInNestedPathException extends InvalidPropertyException {
 	 * @param beanClass the offending bean class
 	 * @param propertyName the offending property
 	 */
-	public NullValueInNestedPathException(Class beanClass, String propertyName) {
+	public NullValueInNestedPathException(Class<?> beanClass, String propertyName) {
 		super(beanClass, propertyName, "Value of nested property '" + propertyName + "' is null");
 	}
 
@@ -43,7 +43,7 @@ public class NullValueInNestedPathException extends InvalidPropertyException {
 	 * @param propertyName the offending property
 	 * @param msg the detail message
 	 */
-	public NullValueInNestedPathException(Class beanClass, String propertyName, String msg) {
+	public NullValueInNestedPathException(Class<?> beanClass, String propertyName, String msg) {
 		super(beanClass, propertyName, msg);
 	}
 

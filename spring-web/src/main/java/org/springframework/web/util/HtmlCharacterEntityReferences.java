@@ -82,7 +82,7 @@ class HtmlCharacterEntityReferences {
 		}
 
 		// Parse reference definition properties
-		Enumeration keys = entityReferences.propertyNames();
+		Enumeration<?> keys = entityReferences.propertyNames();
 		while (keys.hasMoreElements()) {
 			String key = (String) keys.nextElement();
 			int referredChar = Integer.parseInt(key);

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -354,6 +355,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * @see #configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext)
 	 * @see #applyInitializers(ConfigurableApplicationContext)
 	 */
+	@SuppressWarnings("unchecked")
 	public void setContextInitializers(ApplicationContextInitializer<ConfigurableApplicationContext>... contextInitializers) {
 		for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : contextInitializers) {
 			this.contextInitializers.add(initializer);

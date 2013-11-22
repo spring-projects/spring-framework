@@ -21,7 +21,6 @@ import java.util.Map;
 import org.quartz.Job;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
-
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -48,11 +47,11 @@ import org.springframework.context.ApplicationContextAware;
  * @see org.springframework.beans.factory.BeanNameAware
  * @see org.quartz.Scheduler#DEFAULT_GROUP
  */
-@SuppressWarnings("serial")
+@SuppressWarnings({ "serial", "rawtypes" })
 public class JobDetailBean extends JobDetail
 		implements BeanNameAware, ApplicationContextAware, InitializingBean {
 
-	private Class actualJobClass;
+	private Class<?> actualJobClass;
 
 	private String beanName;
 

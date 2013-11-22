@@ -65,7 +65,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 
 	private static final Log logger = LogFactory.getLog(DisposableBeanAdapter.class);
 
-	private static Class closeableInterface;
+	private static Class<?> closeableInterface;
 
 	static {
 		try {

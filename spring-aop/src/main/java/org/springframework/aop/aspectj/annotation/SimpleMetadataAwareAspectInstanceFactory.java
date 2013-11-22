@@ -40,7 +40,7 @@ public class SimpleMetadataAwareAspectInstanceFactory extends SimpleAspectInstan
 	 * @param aspectClass the aspect class
 	 * @param aspectName the aspect name
 	 */
-	public SimpleMetadataAwareAspectInstanceFactory(Class aspectClass, String aspectName) {
+	public SimpleMetadataAwareAspectInstanceFactory(Class<?> aspectClass, String aspectName) {
 		super(aspectClass);
 		this.metadata = new AspectMetadata(aspectClass, aspectName);
 	}

@@ -152,7 +152,7 @@ public class SpringPersistenceManagerProxyBean implements FactoryBean<Persistenc
 		}
 		this.proxy = (PersistenceManager) Proxy.newProxyInstance(
 				getPersistenceManagerFactory().getClass().getClassLoader(),
-				new Class[] {getPersistenceManagerInterface()}, new PersistenceManagerInvocationHandler());
+				new Class<?>[] {getPersistenceManagerInterface()}, new PersistenceManagerInvocationHandler());
 	}
 
 

@@ -41,7 +41,6 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
 import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
@@ -67,11 +66,11 @@ import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.ServletWebArgumentResolverAdapter;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
-import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.w3c.dom.Element;
 
 /**
@@ -409,6 +408,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return null;
 	}
 
+	@SuppressWarnings("deprecation")
 	private ManagedList<?> getMessageConverters(Element element, Object source, ParserContext parserContext) {
 		Element convertersElement = DomUtils.getChildElementByTagName(element, "message-converters");
 		ManagedList<? super Object> messageConverters = new ManagedList<Object>();
@@ -443,12 +443,13 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 				messageConverters.add(createConverterBeanDefinition(MappingJackson2HttpMessageConverter.class, source));
 			}
 			else if (jacksonPresent) {
-				messageConverters.add(createConverterBeanDefinition(MappingJacksonHttpMessageConverter.class, source));
+				messageConverters.add(createConverterBeanDefinition(org.springframework.http.converter.json.MappingJacksonHttpMessageConverter.class, source));
 			}
 		}
 		return messageConverters;
 	}
 
+	@SuppressWarnings("rawtypes")
 	private RootBeanDefinition createConverterBeanDefinition(
 			Class<? extends HttpMessageConverter> converterClass, Object source) {
 
@@ -495,6 +496,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	 * HandlerMethodArgumentResolver's configured in RequestMappingHandlerAdapter
 	 * after it is fully initialized.
 	 */
+	@SuppressWarnings("unused")
 	private static class CompositeUriComponentsContributorFactoryBean
 			implements InitializingBean, FactoryBean<CompositeUriComponentsContributor> {
 

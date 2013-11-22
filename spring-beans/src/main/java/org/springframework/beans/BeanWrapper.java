@@ -59,7 +59,7 @@ public interface BeanWrapper extends ConfigurablePropertyAccessor {
 	 * @return the type of the wrapped bean instance,
 	 * or {@code null} if no wrapped object has been set
 	 */
-	Class getWrappedClass();
+	Class<?> getWrappedClass();
 
 	/**
 	 * Obtain the PropertyDescriptors for the wrapped object

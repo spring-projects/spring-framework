@@ -173,7 +173,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	private DataSource nonTransactionalDataSource;
 
 
-    private Map schedulerContextMap;
+    private Map<? ,?> schedulerContextMap;
 
 	private ApplicationContext applicationContext;
 
@@ -208,7 +208,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * @see #setConfigLocation
 	 * @see #setQuartzProperties
 	 */
-	public void setSchedulerFactoryClass(Class schedulerFactoryClass) {
+	public void setSchedulerFactoryClass(Class<?> schedulerFactoryClass) {
 		if (schedulerFactoryClass == null || !SchedulerFactory.class.isAssignableFrom(schedulerFactoryClass)) {
 			throw new IllegalArgumentException("schedulerFactoryClass must implement [org.quartz.SchedulerFactory]");
 		}
@@ -313,7 +313,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * values (for example Spring-managed beans)
 	 * @see JobDetailBean#setJobDataAsMap
 	 */
-	public void setSchedulerContextAsMap(Map schedulerContextAsMap) {
+	public void setSchedulerContextAsMap(Map<?, ?> schedulerContextAsMap) {
 		this.schedulerContextMap = schedulerContextAsMap;
 	}
 

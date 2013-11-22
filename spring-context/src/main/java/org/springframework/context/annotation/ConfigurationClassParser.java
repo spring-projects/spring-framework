@@ -672,7 +672,7 @@ class ConfigurationClassParser {
 
 		public boolean isAssignable(Class<?> clazz) throws IOException {
 			if (this.source instanceof Class) {
-				return clazz.isAssignableFrom((Class) this.source);
+				return clazz.isAssignableFrom((Class<?>) this.source);
 			}
 			return new AssignableTypeFilter(clazz).match((MetadataReader) this.source, metadataReaderFactory);
 		}

@@ -26,26 +26,20 @@ configure(allprojects) { project ->
 	apply plugin: "test-source-set-dependencies"
 	apply from: "${gradleScriptDir}/ide.gradle"
 
-	[compileJava, compileTestJava]*.options*.compilerArgs = [
-		"-Xlint:serial",
-		"-Xlint:varargs",
-		"-Xlint:cast",
-		"-Xlint:classfile",
-		"-Xlint:dep-ann",
-		"-Xlint:divzero",
-		"-Xlint:empty",
-		"-Xlint:finally",
-		"-Xlint:overrides",
-		"-Xlint:path",
-		"-Xlint:processing",
-		"-Xlint:static",
-		"-Xlint:try",
-		"-Xlint:-options",     // intentionally disabled
-		"-Xlint:-fallthrough", // intentionally disabled
-		"-Xlint:-rawtypes",    // TODO enable and fix warnings
-		"-Xlint:-deprecation", // TODO enable and fix warnings
-		"-Xlint:-unchecked"    // TODO enable and fix warnings
+	compileJava.options*.compilerArgs = [
+		"-Xlint:serial", "-Xlint:varargs", "-Xlint:cast", "-Xlint:classfile",
+		"-Xlint:dep-ann", "-Xlint:divzero", "-Xlint:empty", "-Xlint:finally",
+		"-Xlint:overrides", "-Xlint:path", "-Xlint:processing", "-Xlint:static",
+		"-Xlint:try", "-Xlint:fallthrough", "-Xlint:rawtypes", "-Xlint:deprecation",
+		"-Xlint:unchecked", "-Xlint:-options", "-Werror"
 	]
+
+	compileTestJava.options*.compilerArgs = [
+		"-Xlint:serial", "-Xlint:varargs", "-Xlint:cast", "-Xlint:classfile",
+		"-Xlint:dep-ann", "-Xlint:divzero", "-Xlint:empty", "-Xlint:finally",
+		"-Xlint:overrides", "-Xlint:path", "-Xlint:processing", "-Xlint:static",
+		"-Xlint:try", "-Xlint:-fallthrough", "-Xlint:-rawtypes", "-Xlint:-deprecation",
+		"-Xlint:-unchecked", "-Xlint:-options"]
 
 	compileJava {
 		sourceCompatibility=1.6

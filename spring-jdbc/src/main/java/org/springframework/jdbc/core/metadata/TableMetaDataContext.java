@@ -239,7 +239,7 @@ public class TableMetaDataContext {
 		List<Object> values = new ArrayList<Object>();
 		// for parameter source lookups we need to provide caseinsensitive lookup support since the
 		// database metadata is not necessarily providing case sensitive column names
-		Map caseInsensitiveParameterNames =
+		Map<String, String> caseInsensitiveParameterNames =
 				SqlParameterSourceUtils.extractCaseInsensitiveParameterNames(parameterSource);
 		for (String column : this.tableColumns) {
 			if (parameterSource.hasValue(column)) {
@@ -259,7 +259,7 @@ public class TableMetaDataContext {
 						if (caseInsensitiveParameterNames.containsKey(lowerCaseName)) {
 							values.add(
 									SqlParameterSourceUtils.getTypedValue(parameterSource,
-											(String) caseInsensitiveParameterNames.get(lowerCaseName)));
+											caseInsensitiveParameterNames.get(lowerCaseName)));
 						}
 						else {
 							values.add(null);

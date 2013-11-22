@@ -87,7 +87,7 @@ import org.springframework.web.servlet.ModelAndView;
 public class ServletWrappingController extends AbstractController
 	implements BeanNameAware, InitializingBean, DisposableBean {
 
-	private Class servletClass;
+	private Class<?> servletClass;
 
 	private String servletName;
 
@@ -103,7 +103,7 @@ public class ServletWrappingController extends AbstractController
 	 * Needs to implement {@code javax.servlet.Servlet}.
 	 * @see javax.servlet.Servlet
 	 */
-	public void setServletClass(Class servletClass) {
+	public void setServletClass(Class<?> servletClass) {
 		this.servletClass = servletClass;
 	}
 
@@ -196,8 +196,9 @@ public class ServletWrappingController extends AbstractController
 		}
 
 		@Override
-		public Enumeration getInitParameterNames() {
-			return initParameters.keys();
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		public Enumeration<String> getInitParameterNames() {
+			return (Enumeration) initParameters.keys();
 		}
 	}
 

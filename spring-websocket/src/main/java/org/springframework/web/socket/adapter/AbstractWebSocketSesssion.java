@@ -86,7 +86,7 @@ public abstract class AbstractWebSocketSesssion<T> implements WebSocketSession, 
 	}
 
 	@Override
-	public final void sendMessage(WebSocketMessage message) throws IOException {
+	public final void sendMessage(WebSocketMessage<?> message) throws IOException {
 
 		checkNativeSessionInitialized();
 		Assert.isTrue(isOpen(), "Cannot send message after connection closed.");

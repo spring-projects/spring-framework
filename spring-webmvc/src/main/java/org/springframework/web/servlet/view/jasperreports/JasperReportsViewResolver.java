@@ -51,7 +51,7 @@ public class JasperReportsViewResolver extends UrlBasedViewResolver {
 	 * Requires the view class to be a subclass of {@link AbstractJasperReportsView}.
 	 */
 	@Override
-	protected Class requiredViewClass() {
+	protected Class<?> requiredViewClass() {
 		return AbstractJasperReportsView.class;
 	}
 

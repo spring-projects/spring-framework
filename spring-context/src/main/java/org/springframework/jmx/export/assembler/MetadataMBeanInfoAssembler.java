@@ -263,7 +263,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 		}
 
 		MBeanParameterInfo[] parameterInfo = new MBeanParameterInfo[params.length];
-		Class[] methodParameters = method.getParameterTypes();
+		Class<?>[] methodParameters = method.getParameterTypes();
 		for (int i = 0; i < params.length; i++) {
 			ManagedOperationParameter param = params[i];
 			parameterInfo[i] =

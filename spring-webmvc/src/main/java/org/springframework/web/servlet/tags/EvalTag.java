@@ -17,9 +17,9 @@
 package org.springframework.web.servlet.tags;
 
 import java.io.IOException;
+
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.el.VariableResolver;
 
 import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.context.expression.EnvironmentAccessor;
@@ -151,11 +151,12 @@ public class EvalTag extends HtmlEscapingAwareTag {
 	}
 
 
+	@SuppressWarnings("deprecation")
 	private static class JspPropertyAccessor implements PropertyAccessor {
 
 		private final PageContext pageContext;
 
-		private final VariableResolver variableResolver;
+		private final javax.servlet.jsp.el.VariableResolver variableResolver;
 
 		public JspPropertyAccessor(PageContext pageContext) {
 			this.pageContext = pageContext;

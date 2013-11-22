@@ -27,6 +27,7 @@ import java.lang.reflect.Constructor;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
@@ -61,6 +62,7 @@ import com.thoughtworks.xstream.io.xml.XppDriver;
 import com.thoughtworks.xstream.mapper.CannotResolveClassException;
 import com.thoughtworks.xstream.mapper.Mapper;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -68,7 +70,6 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import org.xml.sax.ext.LexicalHandler;
-
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.oxm.MarshallingFailureException;
@@ -480,7 +481,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 			for (Map.Entry<?, ?> entry : this.useAttributeFor.entrySet()) {
 				if (entry.getKey() instanceof String) {
 					if (entry.getValue() instanceof Class) {
-						xstream.useAttributeFor((String) entry.getKey(), (Class) entry.getValue());
+						xstream.useAttributeFor((String) entry.getKey(), (Class<?>) entry.getValue());
 					}
 					else {
 						throw new IllegalArgumentException(
@@ -493,7 +494,8 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 						xstream.useAttributeFor(key, (String) entry.getValue());
 					}
 					else if (entry.getValue() instanceof List) {
-						List listValue = (List) entry.getValue();
+						@SuppressWarnings("unchecked")
+						List<Object> listValue = (List<Object>) entry.getValue();
 						for (Object element : listValue) {
 							if (element instanceof String) {
 								xstream.useAttributeFor(key, (String) element);

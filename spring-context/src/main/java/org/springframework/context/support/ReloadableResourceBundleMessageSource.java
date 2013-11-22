@@ -330,9 +330,9 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 			Properties mergedProps = new Properties();
 			mergedHolder = new PropertiesHolder(mergedProps, -1);
 			for (int i = this.basenames.length - 1; i >= 0; i--) {
-				List filenames = calculateAllFilenames(this.basenames[i], locale);
+				List<String> filenames = calculateAllFilenames(this.basenames[i], locale);
 				for (int j = filenames.size() - 1; j >= 0; j--) {
-					String filename = (String) filenames.get(j);
+					String filename = filenames.get(j);
 					PropertiesHolder propHolder = getProperties(filename);
 					if (propHolder.getProperties() != null) {
 						mergedProps.putAll(propHolder.getProperties());

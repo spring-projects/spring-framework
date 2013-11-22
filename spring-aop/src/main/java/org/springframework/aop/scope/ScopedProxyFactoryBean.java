@@ -91,7 +91,7 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean<O
 		pf.copyFrom(this);
 		pf.setTargetSource(this.scopedTargetSource);
 
-		Class beanType = beanFactory.getType(this.targetBeanName);
+		Class<?> beanType = beanFactory.getType(this.targetBeanName);
 		if (beanType == null) {
 			throw new IllegalStateException("Cannot create scoped proxy for bean '" + this.targetBeanName +
 					"': Target type could not be determined at the time of proxy creation.");

@@ -544,10 +544,10 @@ public abstract class AbstractJdbcInsert {
 	 * @param batch array of Maps with parameter names and values to be used in batch insert
 	 * @return array of number of rows affected
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected int[] doExecuteBatch(Map<String, Object>[] batch) {
 		checkCompiled();
-		List<Object>[] batchValues = new ArrayList[batch.length];
+		List[] batchValues = new ArrayList[batch.length];
 		int i = 0;
 		for (Map<String, Object> args : batch) {
 			List<Object> values = matchInParameterValuesWithInsertColumns(args);
@@ -561,10 +561,10 @@ public abstract class AbstractJdbcInsert {
 	 * @param batch array of SqlParameterSource with parameter names and values to be used in insert
 	 * @return array of number of rows affected
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected int[] doExecuteBatch(SqlParameterSource[] batch) {
 		checkCompiled();
-		List<Object>[] batchValues = new ArrayList[batch.length];
+		List[] batchValues = new ArrayList[batch.length];
 		int i = 0;
 		for (SqlParameterSource parameterSource : batch) {
 			List<Object> values = matchInParameterValuesWithInsertColumns(parameterSource);

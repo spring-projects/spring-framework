@@ -42,7 +42,7 @@ class ContextTypeMatchClassLoader extends DecoratingClassLoader implements Smart
 
 	static {
 		try {
-			findLoadedClassMethod = ClassLoader.class.getDeclaredMethod("findLoadedClass", new Class[] {String.class});
+			findLoadedClassMethod = ClassLoader.class.getDeclaredMethod("findLoadedClass", new Class<?>[] {String.class});
 		}
 		catch (NoSuchMethodException ex) {
 			throw new IllegalStateException("Invalid [java.lang.ClassLoader] class: no 'findLoadedClass' method defined!");
@@ -59,12 +59,12 @@ class ContextTypeMatchClassLoader extends DecoratingClassLoader implements Smart
 	}
 
 	@Override
-	public Class loadClass(String name) throws ClassNotFoundException {
+	public Class<?> loadClass(String name) throws ClassNotFoundException {
 		return new ContextOverridingClassLoader(getParent()).loadClass(name);
 	}
 
 	@Override
-	public boolean isClassReloadable(Class clazz) {
+	public boolean isClassReloadable(Class<?> clazz) {
 		return (clazz.getClassLoader() instanceof ContextOverridingClassLoader);
 	}
 
@@ -96,7 +96,7 @@ class ContextTypeMatchClassLoader extends DecoratingClassLoader implements Smart
 		}
 
 		@Override
-		protected Class loadClassForOverriding(String name) throws ClassNotFoundException {
+		protected Class<?> loadClassForOverriding(String name) throws ClassNotFoundException {
 			byte[] bytes = bytesCache.get(name);
 			if (bytes == null) {
 				bytes = loadBytesForClass(name);

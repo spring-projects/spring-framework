@@ -188,7 +188,7 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 		this.handler.handleTransportError(this, ex);
 	}
 
-	public final synchronized void sendMessage(WebSocketMessage message) throws IOException {
+	public final synchronized void sendMessage(WebSocketMessage<?> message) throws IOException {
 		Assert.isTrue(!isClosed(), "Cannot send a message when session is closed");
 		Assert.isInstanceOf(TextMessage.class, message, "Expected text message: " + message);
 		sendMessageInternal(((TextMessage) message).getPayload());

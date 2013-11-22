@@ -1943,6 +1943,11 @@ public class SpelReproTests extends ExpressionTestCase {
 			this.string = string;
 		}
 
+		@Override
+		public int hashCode() {
+			return 0;
+		}
+
 		public boolean equals(Object o) {
 			if (o instanceof TestClass2) {
 				return string.equals(((TestClass2)o).string);

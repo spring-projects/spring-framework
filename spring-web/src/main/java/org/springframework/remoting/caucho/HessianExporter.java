@@ -33,8 +33,8 @@ import com.caucho.hessian.io.HessianOutput;
 import com.caucho.hessian.io.HessianRemoteResolver;
 import com.caucho.hessian.io.SerializerFactory;
 import com.caucho.hessian.server.HessianSkeleton;
-import org.apache.commons.logging.Log;
 
+import org.apache.commons.logging.Log;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.support.RemoteExporter;
 import org.springframework.util.Assert;
@@ -155,9 +155,11 @@ public class HessianExporter extends RemoteExporter implements InitializingBean 
 
 			if (this.debugLogger != null && this.debugLogger.isDebugEnabled()) {
 				PrintWriter debugWriter = new PrintWriter(new CommonsLogWriter(this.debugLogger));
+				@SuppressWarnings("resource")
 				HessianDebugInputStream dis = new HessianDebugInputStream(inputStream, debugWriter);
-				dis.startTop2();
+				@SuppressWarnings("resource")
 				HessianDebugOutputStream dos = new HessianDebugOutputStream(outputStream, debugWriter);
+				dis.startTop2();
 				dos.startTop2();
 				isToUse = dis;
 				osToUse = dos;

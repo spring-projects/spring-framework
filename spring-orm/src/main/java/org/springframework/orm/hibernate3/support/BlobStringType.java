@@ -72,7 +72,7 @@ public class BlobStringType extends AbstractLobType {
 	}
 
 	@Override
-	public Class returnedClass() {
+	public Class<?> returnedClass() {
 		return String.class;
 	}
 

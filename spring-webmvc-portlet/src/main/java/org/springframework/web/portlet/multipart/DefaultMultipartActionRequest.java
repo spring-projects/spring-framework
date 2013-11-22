@@ -109,9 +109,9 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 	@Override
 	public Enumeration<String> getParameterNames() {
 		Set<String> paramNames = new HashSet<String>();
-		Enumeration paramEnum = super.getParameterNames();
+		Enumeration<String> paramEnum = super.getParameterNames();
 		while (paramEnum.hasMoreElements()) {
-			paramNames.add((String) paramEnum.nextElement());
+			paramNames.add(paramEnum.nextElement());
 		}
 		paramNames.addAll(getMultipartParameters().keySet());
 		return Collections.enumeration(paramNames);

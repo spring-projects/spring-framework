@@ -577,7 +577,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			List<T> strategies = new ArrayList<T>(classNames.length);
 			for (String className : classNames) {
 				try {
-					Class clazz = ClassUtils.forName(className, DispatcherPortlet.class.getClassLoader());
+					Class<?> clazz = ClassUtils.forName(className, DispatcherPortlet.class.getClassLoader());
 					Object strategy = createDefaultStrategy(context, clazz);
 					strategies.add((T) strategy);
 				}
@@ -1143,7 +1143,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * (typically in case of problems creating an actual View object)
 	 * @see ViewResolver#resolveViewName
 	 */
-	protected View resolveViewName(String viewName, Map model, PortletRequest request) throws Exception {
+	protected View resolveViewName(String viewName, Map<String, ?> model, PortletRequest request) throws Exception {
 		for (ViewResolver viewResolver : this.viewResolvers) {
 			View view = viewResolver.resolveViewName(viewName, request.getLocale());
 			if (view != null) {
@@ -1163,7 +1163,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * @param response current portlet render/resource response
 	 * @throws Exception if there's a problem rendering the view
 	 */
-	protected void doRender(View view, Map model, PortletRequest request, MimeResponse response) throws Exception {
+	protected void doRender(View view, Map<String, ?> model, PortletRequest request, MimeResponse response) throws Exception {
 		// Expose Portlet ApplicationContext to view objects.
 		request.setAttribute(ViewRendererServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, getPortletApplicationContext());
 

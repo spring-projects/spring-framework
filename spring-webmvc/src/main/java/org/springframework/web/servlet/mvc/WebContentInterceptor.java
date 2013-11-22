@@ -117,7 +117,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 */
 	public void setCacheMappings(Properties cacheMappings) {
 		this.cacheMappings.clear();
-		Enumeration propNames = cacheMappings.propertyNames();
+		Enumeration<?> propNames = cacheMappings.propertyNames();
 		while (propNames.hasMoreElements()) {
 			String path = (String) propNames.nextElement();
 			this.cacheMappings.put(path, Integer.valueOf(cacheMappings.getProperty(path)));

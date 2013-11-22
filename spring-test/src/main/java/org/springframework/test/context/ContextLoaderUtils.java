@@ -588,7 +588,6 @@ abstract class ContextLoaderUtils {
 	 * taking into account context hierarchies declared via
 	 * {@link ContextHierarchy @ContextHierarchy} and
 	 * {@link ContextConfiguration @ContextConfiguration}.
-	 *
 	 * @param testClass the test class for which the {@code MergedContextConfiguration}
 	 * should be built (must not be {@code null})
 	 * @param defaultContextLoaderClassName the name of the default {@code ContextLoader}
@@ -599,7 +598,7 @@ abstract class ContextLoaderUtils {
 	 * @see #buildContextHierarchyMap(Class)
 	 * @see #buildMergedContextConfiguration(Class, List, String, MergedContextConfiguration, CacheAwareContextLoaderDelegate)
 	 */
-	@SuppressWarnings({ "javadoc", "unchecked" })
+	@SuppressWarnings({ "unchecked" })
 	static MergedContextConfiguration buildMergedContextConfiguration(Class<?> testClass,
 			String defaultContextLoaderClassName, CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
 

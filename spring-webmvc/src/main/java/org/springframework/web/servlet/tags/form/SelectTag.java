@@ -261,7 +261,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 */
 	private boolean forceMultiple() throws JspException {
 		BindStatus bindStatus = getBindStatus();
-		Class valueType = bindStatus.getValueType();
+		Class<?> valueType = bindStatus.getValueType();
 		if (valueType != null && typeRequiresMultiple(valueType)) {
 			return true;
 		}
@@ -278,7 +278,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 * Returns '{@code true}' for arrays, {@link Collection Collections}
 	 * and {@link Map Maps}.
 	 */
-	private static boolean typeRequiresMultiple(Class type) {
+	private static boolean typeRequiresMultiple(Class<?> type) {
 		return (type.isArray() || Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type));
 	}
 

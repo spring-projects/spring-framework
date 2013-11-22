@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+
 import javax.naming.NamingException;
 
 import commonj.work.Work;
@@ -176,11 +177,13 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 	}
 
 	@Override
+	@SuppressWarnings("rawtypes")
 	public boolean waitForAll(Collection workItems, long timeout) throws InterruptedException {
 		return this.workManager.waitForAll(workItems, timeout);
 	}
 
 	@Override
+	@SuppressWarnings("rawtypes")
 	public Collection waitForAny(Collection workItems, long timeout) throws InterruptedException {
 		return this.workManager.waitForAny(workItems, timeout);
 	}

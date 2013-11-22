@@ -239,7 +239,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	}
 
 	@Override
-	public Class predictBeanType(Class beanClass, String beanName) {
+	public Class<?> predictBeanType(Class<?> beanClass, String beanName) {
 		// We only apply special treatment to ScriptFactory implementations here.
 		if (!ScriptFactory.class.isAssignableFrom(beanClass)) {
 			return null;
@@ -254,9 +254,9 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 
 			ScriptFactory scriptFactory = this.scriptBeanFactory.getBean(scriptFactoryBeanName, ScriptFactory.class);
 			ScriptSource scriptSource = getScriptSource(scriptFactoryBeanName, scriptFactory.getScriptSourceLocator());
-			Class[] interfaces = scriptFactory.getScriptInterfaces();
+			Class<?>[] interfaces = scriptFactory.getScriptInterfaces();
 
-			Class scriptedType = scriptFactory.getScriptedObjectType(scriptSource);
+			Class<?> scriptedType = scriptFactory.getScriptedObjectType(scriptSource);
 			if (scriptedType != null) {
 				return scriptedType;
 			} else if (!ObjectUtils.isEmpty(interfaces)) {
@@ -287,7 +287,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	}
 
 	@Override
-	public Object postProcessBeforeInstantiation(Class beanClass, String beanName) {
+	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
 		// We only apply special treatment to ScriptFactory implementations here.
 		if (!ScriptFactory.class.isAssignableFrom(beanClass)) {
 			return null;
@@ -302,7 +302,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		ScriptSource scriptSource = getScriptSource(scriptFactoryBeanName, scriptFactory.getScriptSourceLocator());
 		boolean isFactoryBean = false;
 		try {
-			Class scriptedObjectType = scriptFactory.getScriptedObjectType(scriptSource);
+			Class<?> scriptedObjectType = scriptFactory.getScriptedObjectType(scriptSource);
 			// Returned type may be null if the factory is unable to determine the type.
 			if (scriptedObjectType != null) {
 				isFactoryBean = FactoryBean.class.isAssignableFrom(scriptedObjectType);
@@ -314,7 +314,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 
 		long refreshCheckDelay = resolveRefreshCheckDelay(bd);
 		if (refreshCheckDelay >= 0) {
-			Class[] interfaces = scriptFactory.getScriptInterfaces();
+			Class<?>[] interfaces = scriptFactory.getScriptInterfaces();
 			RefreshableScriptTargetSource ts = new RefreshableScriptTargetSource(this.scriptBeanFactory,
 					scriptedObjectBeanName, scriptFactory, scriptSource, isFactoryBean);
 			boolean proxyTargetClass = resolveProxyTargetClass(bd);
@@ -482,12 +482,12 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * @see org.springframework.cglib.proxy.InterfaceMaker
 	 * @see org.springframework.beans.BeanUtils#findPropertyType
 	 */
-	protected Class createConfigInterface(BeanDefinition bd, Class[] interfaces) {
+	protected Class<?> createConfigInterface(BeanDefinition bd, Class<?>[] interfaces) {
 		InterfaceMaker maker = new InterfaceMaker();
 		PropertyValue[] pvs = bd.getPropertyValues().getPropertyValues();
 		for (PropertyValue pv : pvs) {
 			String propertyName = pv.getName();
-			Class propertyType = BeanUtils.findPropertyType(propertyName, interfaces);
+			Class<?> propertyType = BeanUtils.findPropertyType(propertyName, interfaces);
 			String setterName = "set" + StringUtils.capitalize(propertyName);
 			Signature signature = new Signature(setterName, Type.VOID_TYPE, new Type[] { Type.getType(propertyType) });
 			maker.add(signature, new Type[0]);
@@ -515,7 +515,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * @return the merged interface as Class
 	 * @see java.lang.reflect.Proxy#getProxyClass
 	 */
-	protected Class createCompositeInterface(Class[] interfaces) {
+	protected Class<?> createCompositeInterface(Class<?>[] interfaces) {
 		return ClassUtils.createCompositeInterface(interfaces, this.beanClassLoader);
 	}
 
@@ -531,7 +531,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * @see org.springframework.scripting.ScriptFactory#getScriptedObject
 	 */
 	protected BeanDefinition createScriptedObjectBeanDefinition(BeanDefinition bd, String scriptFactoryBeanName,
-			ScriptSource scriptSource, Class[] interfaces) {
+			ScriptSource scriptSource, Class<?>[] interfaces) {
 
 		GenericBeanDefinition objectBd = new GenericBeanDefinition(bd);
 		objectBd.setFactoryBeanName(scriptFactoryBeanName);
@@ -550,7 +550,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * @return the generated proxy
 	 * @see RefreshableScriptTargetSource
 	 */
-	protected Object createRefreshableProxy(TargetSource ts, Class[] interfaces, boolean proxyTargetClass) {
+	protected Object createRefreshableProxy(TargetSource ts, Class<?>[] interfaces, boolean proxyTargetClass) {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTargetSource(ts);
 		ClassLoader classLoader = this.beanClassLoader;

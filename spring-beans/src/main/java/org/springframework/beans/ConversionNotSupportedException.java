@@ -34,7 +34,8 @@ public class ConversionNotSupportedException extends TypeMismatchException {
 	 * @param requiredType the required target type (or {@code null} if not known)
 	 * @param cause the root cause (may be {@code null})
 	 */
-	public ConversionNotSupportedException(PropertyChangeEvent propertyChangeEvent, Class requiredType, Throwable cause) {
+	public ConversionNotSupportedException(PropertyChangeEvent propertyChangeEvent,
+			Class<?> requiredType, Throwable cause) {
 		super(propertyChangeEvent, requiredType, cause);
 	}
 
@@ -44,7 +45,7 @@ public class ConversionNotSupportedException extends TypeMismatchException {
 	 * @param requiredType the required target type (or {@code null} if not known)
 	 * @param cause the root cause (may be {@code null})
 	 */
-	public ConversionNotSupportedException(Object value, Class requiredType, Throwable cause) {
+	public ConversionNotSupportedException(Object value, Class<?> requiredType, Throwable cause) {
 		super(value, requiredType, cause);
 	}
 

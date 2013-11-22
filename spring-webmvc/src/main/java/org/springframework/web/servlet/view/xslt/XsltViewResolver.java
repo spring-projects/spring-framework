@@ -118,7 +118,7 @@ public class XsltViewResolver extends UrlBasedViewResolver {
 
 
 	@Override
-	protected Class requiredViewClass() {
+	protected Class<?> requiredViewClass() {
 		return XsltView.class;
 	}
 

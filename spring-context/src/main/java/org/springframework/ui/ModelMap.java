@@ -89,7 +89,7 @@ public class ModelMap extends LinkedHashMap<String, Object> {
 	 */
 	public ModelMap addAttribute(Object attributeValue) {
 		Assert.notNull(attributeValue, "Model object must not be null");
-		if (attributeValue instanceof Collection && ((Collection) attributeValue).isEmpty()) {
+		if (attributeValue instanceof Collection && ((Collection<?>) attributeValue).isEmpty()) {
 			return this;
 		}
 		return addAttribute(Conventions.getVariableName(attributeValue), attributeValue);

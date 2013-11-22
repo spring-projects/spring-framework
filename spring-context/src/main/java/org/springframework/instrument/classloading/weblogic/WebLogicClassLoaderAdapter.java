@@ -43,7 +43,7 @@ class WebLogicClassLoaderAdapter {
 
 	private final ClassLoader classLoader;
 
-	private final Class wlPreProcessorClass;
+	private final Class<?> wlPreProcessorClass;
 
 	private final Method addPreProcessorMethod;
 
@@ -51,11 +51,11 @@ class WebLogicClassLoaderAdapter {
 
 	private final Method getParentMethod;
 
-	private final Constructor wlGenericClassLoaderConstructor;
+	private final Constructor<?> wlGenericClassLoaderConstructor;
 
 
 	public WebLogicClassLoaderAdapter(ClassLoader classLoader) {
-		Class wlGenericClassLoaderClass = null;
+		Class<?> wlGenericClassLoaderClass = null;
 		try {
 			wlGenericClassLoaderClass = classLoader.loadClass(GENERIC_CLASS_LOADER_NAME);
 			this.wlPreProcessorClass = classLoader.loadClass(CLASS_PRE_PROCESSOR_NAME);
@@ -81,7 +81,7 @@ class WebLogicClassLoaderAdapter {
 		try {
 			InvocationHandler adapter = new WebLogicClassPreProcessorAdapter(transformer, this.classLoader);
 			Object adapterInstance = Proxy.newProxyInstance(this.wlPreProcessorClass.getClassLoader(),
-					new Class[] {this.wlPreProcessorClass}, adapter);
+					new Class<?>[] {this.wlPreProcessorClass}, adapter);
 			this.addPreProcessorMethod.invoke(this.classLoader, adapterInstance);
 		}
 		catch (InvocationTargetException ex) {

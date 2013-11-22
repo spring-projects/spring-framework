@@ -18,6 +18,7 @@ package org.springframework.orm.jpa.vendor;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
@@ -32,11 +33,9 @@ import org.hibernate.dialect.MySQLDialect;
 import org.hibernate.dialect.Oracle9iDialect;
 import org.hibernate.dialect.PostgreSQLDialect;
 import org.hibernate.dialect.SQLServerDialect;
-import org.hibernate.dialect.SybaseDialect;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.ejb.HibernateEntityManagerFactory;
 import org.hibernate.ejb.HibernatePersistence;
-
 import org.springframework.orm.jpa.JpaDialect;
 
 /**
@@ -77,7 +76,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 			jpaProperties.put(Environment.DIALECT, getDatabasePlatform());
 		}
 		else if (getDatabase() != null) {
-			Class databaseDialectClass = determineDatabaseDialectClass(getDatabase());
+			Class<?> databaseDialectClass = determineDatabaseDialectClass(getDatabase());
 			if (databaseDialectClass != null) {
 				jpaProperties.put(Environment.DIALECT, databaseDialectClass.getName());
 			}
@@ -98,7 +97,8 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	 * @param database the target database
 	 * @return the Hibernate database dialect class, or {@code null} if none found
 	 */
-	protected Class determineDatabaseDialectClass(Database database) {
+	@SuppressWarnings("deprecation")
+	protected Class<?> determineDatabaseDialectClass(Database database) {
 		switch (database) {
 			case DB2: return DB2Dialect.class;
 			case DERBY: return DerbyDialect.class;
@@ -109,7 +109,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 			case ORACLE: return Oracle9iDialect.class;
 			case POSTGRESQL: return PostgreSQLDialect.class;
 			case SQL_SERVER: return SQLServerDialect.class;
-			case SYBASE: return SybaseDialect.class;
+			case SYBASE: return org.hibernate.dialect.SybaseDialect.class;
 			default: return null;
 		}
 	}

@@ -27,16 +27,16 @@ import org.springframework.aop.ClassFilter;
 @SuppressWarnings("serial")
 public class RootClassFilter implements ClassFilter, Serializable {
 
-	private Class clazz;
+	private Class<?> clazz;
 
-	// TODO inheritance
 
-	public RootClassFilter(Class clazz) {
+	public RootClassFilter(Class<?> clazz) {
 		this.clazz = clazz;
 	}
 
+
 	@Override
-	public boolean matches(Class candidate) {
+	public boolean matches(Class<?> candidate) {
 		return clazz.isAssignableFrom(candidate);
 	}
 

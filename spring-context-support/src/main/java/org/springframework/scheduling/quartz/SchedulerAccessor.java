@@ -382,7 +382,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 		}
 		else {
 			try {
-				Map jobDataMap = (Map) ReflectionUtils.invokeMethod(Trigger.class.getMethod("getJobDataMap"), trigger);
+				Map<?, ?> jobDataMap = (Map<?, ?>) ReflectionUtils.invokeMethod(Trigger.class.getMethod("getJobDataMap"), trigger);
 				return (JobDetail) jobDataMap.remove(JobDetailAwareTrigger.JOB_DETAIL_KEY);
 			}
 			catch (NoSuchMethodException ex) {

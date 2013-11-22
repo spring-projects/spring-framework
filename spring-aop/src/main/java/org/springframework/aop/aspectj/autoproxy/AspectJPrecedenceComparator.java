@@ -48,7 +48,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 2.0
  */
-class AspectJPrecedenceComparator implements Comparator {
+class AspectJPrecedenceComparator implements Comparator<Advisor> {
 
 	private static final int HIGHER_PRECEDENCE = -1;
 	private static final int SAME_PRECEDENCE = 0;
@@ -76,18 +76,10 @@ class AspectJPrecedenceComparator implements Comparator {
 
 
 	@Override
-	public int compare(Object o1, Object o2) {
-		if (!(o1 instanceof Advisor && o2 instanceof Advisor)) {
-			throw new IllegalArgumentException(
-					"AspectJPrecedenceComparator can only compare the order of Advisors, " +
-					"but was passed [" + o1 + "] and [" + o2 + "]");
-		}
-
-		Advisor advisor1 = (Advisor) o1;
-		Advisor advisor2 = (Advisor) o2;
-		int advisorPrecedence = this.advisorComparator.compare(advisor1, advisor2);
-		if (advisorPrecedence == SAME_PRECEDENCE && declaredInSameAspect(advisor1, advisor2)) {
-			advisorPrecedence = comparePrecedenceWithinAspect(advisor1, advisor2);
+	public int compare(Advisor o1, Advisor o2) {
+		int advisorPrecedence = this.advisorComparator.compare(o1, o2);
+		if (advisorPrecedence == SAME_PRECEDENCE && declaredInSameAspect(o1, o2)) {
+			advisorPrecedence = comparePrecedenceWithinAspect(o1, o2);
 		}
 		return advisorPrecedence;
 	}

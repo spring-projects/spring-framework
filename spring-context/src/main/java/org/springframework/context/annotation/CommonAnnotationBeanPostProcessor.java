@@ -604,7 +604,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 				}
 				if (StringUtils.hasLength(this.wsdlLocation)) {
 					try {
-						Constructor<?> ctor = this.lookupType.getConstructor(new Class[] {URL.class, QName.class});
+						Constructor<?> ctor = this.lookupType.getConstructor(new Class<?>[] {URL.class, QName.class});
 						WebServiceClient clientAnn = this.lookupType.getAnnotation(WebServiceClient.class);
 						if (clientAnn == null) {
 							throw new IllegalStateException("JAX-WS Service class [" + this.lookupType.getName() +

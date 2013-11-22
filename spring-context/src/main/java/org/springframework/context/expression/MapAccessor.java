@@ -35,13 +35,13 @@ public class MapAccessor implements PropertyAccessor {
 
 	@Override
 	public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
-		Map map = (Map) target;
+		Map<?, ?> map = (Map<?, ?>) target;
 		return map.containsKey(name);
 	}
 
 	@Override
 	public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-		Map map = (Map) target;
+		Map<?, ?> map = (Map<?, ?>) target;
 		Object value = map.get(name);
 		if (value == null && !map.containsKey(name)) {
 			throw new MapAccessException(name);
@@ -57,13 +57,13 @@ public class MapAccessor implements PropertyAccessor {
 	@Override
 	@SuppressWarnings("unchecked")
 	public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
-		Map map = (Map) target;
+		Map<Object, Object> map = (Map<Object, Object>) target;
 		map.put(name, newValue);
 	}
 
 	@Override
-	public Class[] getSpecificTargetClasses() {
-		return new Class[] {Map.class};
+	public Class<?>[] getSpecificTargetClasses() {
+		return new Class<?>[] {Map.class};
 	}
 
 

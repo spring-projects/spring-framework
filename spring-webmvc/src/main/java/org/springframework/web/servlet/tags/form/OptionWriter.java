@@ -135,7 +135,7 @@ class OptionWriter {
 		else if (this.optionSource instanceof Map) {
 			renderFromMap(tagWriter);
 		}
-		else if (this.optionSource instanceof Class && ((Class) this.optionSource).isEnum()) {
+		else if (this.optionSource instanceof Class && ((Class<?>) this.optionSource).isEnum()) {
 			renderFromEnum(tagWriter);
 		}
 		else {
@@ -158,8 +158,8 @@ class OptionWriter {
 	 * @see #renderOption(TagWriter, Object, Object, Object)
 	 */
 	private void renderFromMap(TagWriter tagWriter) throws JspException {
-		Map<?, ?> optionMap = (Map) this.optionSource;
-		for (Map.Entry entry : optionMap.entrySet()) {
+		Map<?, ?> optionMap = (Map<?, ?>) this.optionSource;
+		for (Map.Entry<?, ?> entry : optionMap.entrySet()) {
 			Object mapKey = entry.getKey();
 			Object mapValue = entry.getValue();
 			Object renderValue = (this.valueProperty != null ?
@@ -177,7 +177,7 @@ class OptionWriter {
 	 * @see #doRenderFromCollection(java.util.Collection, TagWriter)
 	 */
 	private void renderFromCollection(TagWriter tagWriter) throws JspException {
-		doRenderFromCollection((Collection) this.optionSource, tagWriter);
+		doRenderFromCollection((Collection<?>) this.optionSource, tagWriter);
 	}
 
 	/**
@@ -185,7 +185,7 @@ class OptionWriter {
 	 * @see #doRenderFromCollection(java.util.Collection, TagWriter)
 	 */
 	private void renderFromEnum(TagWriter tagWriter) throws JspException {
-		doRenderFromCollection(CollectionUtils.arrayToList(((Class) this.optionSource).getEnumConstants()), tagWriter);
+		doRenderFromCollection(CollectionUtils.arrayToList(((Class<?>) this.optionSource).getEnumConstants()), tagWriter);
 	}
 
 	/**
@@ -194,7 +194,7 @@ class OptionWriter {
 	 * when rendering the '{@code value}' of the '{@code option}' and the value of the
 	 * {@link #labelProperty} property is used when rendering the label.
 	 */
-	private void doRenderFromCollection(Collection optionCollection, TagWriter tagWriter) throws JspException {
+	private void doRenderFromCollection(Collection<?> optionCollection, TagWriter tagWriter) throws JspException {
 		for (Object item : optionCollection) {
 			BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(item);
 			Object value;

@@ -256,7 +256,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			ParamsRequestCondition condition = partialMatch.getParamsCondition();
 			if (!CollectionUtils.isEmpty(condition.getExpressions()) && (condition.getMatchingCondition(request) == null)) {
 				Set<String> expressions = new HashSet<String>();
-				for (NameValueExpression expr : condition.getExpressions()) {
+				for (NameValueExpression<String> expr : condition.getExpressions()) {
 					expressions.add(expr.toString());
 				}
 				return expressions;

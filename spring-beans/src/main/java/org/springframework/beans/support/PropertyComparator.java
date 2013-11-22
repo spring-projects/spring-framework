@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
 import org.springframework.util.StringUtils;
@@ -37,7 +36,7 @@ import org.springframework.util.StringUtils;
  * @since 19.05.2003
  * @see org.springframework.beans.BeanWrapper
  */
-public class PropertyComparator implements Comparator {
+public class PropertyComparator<T> implements Comparator<T> {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -73,7 +72,8 @@ public class PropertyComparator implements Comparator {
 
 
 	@Override
-	public int compare(Object o1, Object o2) {
+	@SuppressWarnings("unchecked")
+	public int compare(T o1, T o2) {
 		Object v1 = getPropertyValue(o1);
 		Object v2 = getPropertyValue(o2);
 		if (this.sortDefinition.isIgnoreCase() && (v1 instanceof String) && (v2 instanceof String)) {
@@ -86,7 +86,7 @@ public class PropertyComparator implements Comparator {
 		// Put an object with null property at the end of the sort result.
 		try {
 			if (v1 != null) {
-				result = (v2 != null ? ((Comparable) v1).compareTo(v2) : -1);
+				result = (v2 != null ? ((Comparable<Object>) v1).compareTo(v2) : -1);
 			}
 			else {
 				result = (v2 != null ? 1 : 0);
@@ -130,9 +130,9 @@ public class PropertyComparator implements Comparator {
 	 * @param sortDefinition the parameters to sort by
 	 * @throws java.lang.IllegalArgumentException in case of a missing propertyName
 	 */
-	public static void sort(List source, SortDefinition sortDefinition) throws BeansException {
+	public static void sort(List<?> source, SortDefinition sortDefinition) throws BeansException {
 		if (StringUtils.hasText(sortDefinition.getProperty())) {
-			Collections.sort(source, new PropertyComparator(sortDefinition));
+			Collections.sort(source, new PropertyComparator<Object>(sortDefinition));
 		}
 	}
 
@@ -146,7 +146,7 @@ public class PropertyComparator implements Comparator {
 	 */
 	public static void sort(Object[] source, SortDefinition sortDefinition) throws BeansException {
 		if (StringUtils.hasText(sortDefinition.getProperty())) {
-			Arrays.sort(source, new PropertyComparator(sortDefinition));
+			Arrays.sort(source, new PropertyComparator<Object>(sortDefinition));
 		}
 	}
 

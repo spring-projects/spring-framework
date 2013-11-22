@@ -53,8 +53,8 @@ public class BeanFactoryAccessor implements PropertyAccessor {
 	}
 
 	@Override
-	public Class[] getSpecificTargetClasses() {
-		return new Class[] {BeanFactory.class};
+	public Class<?>[] getSpecificTargetClasses() {
+		return new Class<?>[] {BeanFactory.class};
 	}
 
 }

@@ -66,7 +66,7 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	 * @param name the name of the bean
 	 * @param type the type that should be introspected by AspectJ
 	 */
-	public BeanFactoryAspectInstanceFactory(BeanFactory beanFactory, String name, Class type) {
+	public BeanFactoryAspectInstanceFactory(BeanFactory beanFactory, String name, Class<?> type) {
 		this.beanFactory = beanFactory;
 		this.name = name;
 		this.aspectMetadata = new AspectMetadata(type, name);

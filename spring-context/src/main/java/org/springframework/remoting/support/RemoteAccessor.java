@@ -36,7 +36,7 @@ package org.springframework.remoting.support;
  */
 public abstract class RemoteAccessor extends RemotingSupport {
 
-	private Class serviceInterface;
+	private Class<?> serviceInterface;
 
 
 	/**
@@ -45,7 +45,7 @@ public abstract class RemoteAccessor extends RemotingSupport {
 	 * <p>Typically required to be able to create a suitable service proxy,
 	 * but can also be optional if the lookup returns a typed proxy.
 	 */
-	public void setServiceInterface(Class serviceInterface) {
+	public void setServiceInterface(Class<?> serviceInterface) {
 		if (serviceInterface != null && !serviceInterface.isInterface()) {
 			throw new IllegalArgumentException("'serviceInterface' must be an interface");
 		}
@@ -55,7 +55,7 @@ public abstract class RemoteAccessor extends RemotingSupport {
 	/**
 	 * Return the interface of the service to access.
 	 */
-	public Class getServiceInterface() {
+	public Class<?> getServiceInterface() {
 		return this.serviceInterface;
 	}
 

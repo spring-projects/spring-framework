@@ -46,7 +46,7 @@ import org.springframework.beans.factory.SmartFactoryBean;
  * (which support placeholder parsing since Spring 2.5)
  */
 @Deprecated
-public class BeanReferenceFactoryBean implements SmartFactoryBean, BeanFactoryAware {
+public class BeanReferenceFactoryBean implements SmartFactoryBean<Object>, BeanFactoryAware {
 
 	private String targetBeanName;
 
@@ -86,7 +86,7 @@ public class BeanReferenceFactoryBean implements SmartFactoryBean, BeanFactoryAw
 	}
 
 	@Override
-	public Class getObjectType() {
+	public Class<?> getObjectType() {
 		if (this.beanFactory == null) {
 			return null;
 		}

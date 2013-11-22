@@ -128,7 +128,7 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 	}
 
 	@Override
-	public SimpleJdbcCall returningResultSet(String parameterName, RowMapper rowMapper) {
+	public SimpleJdbcCall returningResultSet(String parameterName, RowMapper<?> rowMapper) {
 		addDeclaredRowMapper(parameterName, rowMapper);
 		return this;
 	}

@@ -243,7 +243,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 	 */
 	private class LifecycleMetadata {
 
-		private final Class targetClass;
+		private final Class<?> targetClass;
 
 		private final Collection<LifecycleElement> initMethods;
 

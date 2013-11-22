@@ -82,7 +82,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void multicastEvent(final ApplicationEvent event) {
 		for (final ApplicationListener listener : getApplicationListeners(event)) {
 			Executor executor = getTaskExecutor();

@@ -18,6 +18,7 @@ package org.springframework.orm.jpa;
 
 import java.lang.reflect.Method;
 import java.util.Map;
+
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -34,7 +35,6 @@ import javax.persistence.TransactionRequiredException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -66,6 +66,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("unchecked")
 public abstract class EntityManagerFactoryUtils {
 
 	/**
@@ -85,7 +86,7 @@ public abstract class EntityManagerFactoryUtils {
 
 	static {
 		try {
-			@SuppressWarnings("unchecked")
+			@SuppressWarnings( "rawtypes" )
 			Class<Enum> synchronizationTypeClass = (Class<Enum>) ClassUtils.forName(
 					"javax.persistence.SynchronizationType", EntityManagerFactoryUtils.class.getClassLoader());
 			createEntityManagerWithSynchronizationTypeMethod = EntityManagerFactory.class.getMethod(
@@ -170,7 +171,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @throws DataAccessResourceFailureException if the EntityManager couldn't be obtained
 	 * @see JpaTransactionManager
 	 */
-	public static EntityManager getTransactionalEntityManager(EntityManagerFactory emf, Map properties)
+	public static EntityManager getTransactionalEntityManager(EntityManagerFactory emf, Map<?, ?> properties)
 			throws DataAccessResourceFailureException {
 		try {
 			return doGetTransactionalEntityManager(emf, properties, true);
@@ -193,7 +194,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @see #getTransactionalEntityManager(javax.persistence.EntityManagerFactory)
 	 * @see JpaTransactionManager
 	 */
-	public static EntityManager doGetTransactionalEntityManager(EntityManagerFactory emf, Map properties)
+	public static EntityManager doGetTransactionalEntityManager(EntityManagerFactory emf, Map<?, ?> properties)
 			throws PersistenceException {
 
 		return doGetTransactionalEntityManager(emf, properties, true);
@@ -215,7 +216,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @see JpaTransactionManager
 	 */
 	public static EntityManager doGetTransactionalEntityManager(
-			EntityManagerFactory emf, Map properties, boolean synchronizedWithTransaction) throws PersistenceException {
+			EntityManagerFactory emf, Map<?, ?> properties, boolean synchronizedWithTransaction) throws PersistenceException {
 
 		Assert.notNull(emf, "No EntityManagerFactory specified");
 

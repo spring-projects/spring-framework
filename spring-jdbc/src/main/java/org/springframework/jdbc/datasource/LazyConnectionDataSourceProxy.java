@@ -219,7 +219,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	public Connection getConnection() throws SQLException {
 		return (Connection) Proxy.newProxyInstance(
 				ConnectionProxy.class.getClassLoader(),
-				new Class[] {ConnectionProxy.class},
+				new Class<?>[] {ConnectionProxy.class},
 				new LazyConnectionInvocationHandler());
 	}
 
@@ -237,7 +237,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	public Connection getConnection(String username, String password) throws SQLException {
 		return (Connection) Proxy.newProxyInstance(
 				ConnectionProxy.class.getClassLoader(),
-				new Class[] {ConnectionProxy.class},
+				new Class<?>[] {ConnectionProxy.class},
 				new LazyConnectionInvocationHandler(username, password));
 	}
 
@@ -289,12 +289,12 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 				return System.identityHashCode(proxy);
 			}
 			else if (method.getName().equals("unwrap")) {
-				if (((Class) args[0]).isInstance(proxy)) {
+				if (((Class<?>) args[0]).isInstance(proxy)) {
 					return proxy;
 				}
 			}
 			else if (method.getName().equals("isWrapperFor")) {
-				if (((Class) args[0]).isInstance(proxy)) {
+				if (((Class<?>) args[0]).isInstance(proxy)) {
 					return true;
 				}
 			}

@@ -47,7 +47,7 @@ class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublis
 	private static final Method getDeliveryDelayMethod =
 			ClassUtils.getMethodIfAvailable(MessageProducer.class, "getDeliveryDelay");
 
-	private static Class completionListenerClass;
+	private static Class<?> completionListenerClass;
 
 	private static Method sendWithCompletionListenerMethod;
 
@@ -254,7 +254,7 @@ class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublis
 	public MessageProducer getProxyIfNecessary() {
 		if (completionListenerClass != null) {
 			return (MessageProducer) Proxy.newProxyInstance(CachedMessageProducer.class.getClassLoader(),
-					new Class[] {MessageProducer.class, QueueSender.class, TopicPublisher.class},
+					new Class<?>[] {MessageProducer.class, QueueSender.class, TopicPublisher.class},
 					new Jms2MessageProducerInvocationHandler());
 		}
 		else {

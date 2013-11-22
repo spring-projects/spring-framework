@@ -73,7 +73,7 @@ public abstract class SpelNodeImpl implements SpelNode {
 	/**
      * @return true if the next child is one of the specified classes
      */
-	protected boolean nextChildIs(Class... clazzes) {
+	protected boolean nextChildIs(Class<?>... clazzes) {
 		if (this.parent != null) {
 			SpelNodeImpl[] peers = this.parent.children;
 			for (int i = 0, max = peers.length; i < max; i++) {
@@ -82,8 +82,8 @@ public abstract class SpelNodeImpl implements SpelNode {
 						return false;
 					}
 
-					Class clazz = peers[i + 1].getClass();
-					for (Class desiredClazz : clazzes) {
+					Class<?> clazz = peers[i + 1].getClass();
+					for (Class<?> desiredClazz : clazzes) {
 						if (clazz.equals(desiredClazz)) {
 							return true;
 						}

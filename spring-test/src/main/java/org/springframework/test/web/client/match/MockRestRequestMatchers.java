@@ -132,6 +132,7 @@ public abstract class MockRestRequestMatchers {
 	/**
 	 * Assert request header values with the given Hamcrest matcher.
 	 */
+	@SuppressWarnings("unchecked")
 	public static RequestMatcher header(final String name, final Matcher<? super String>... matchers) {
 		return new RequestMatcher() {
 			@Override

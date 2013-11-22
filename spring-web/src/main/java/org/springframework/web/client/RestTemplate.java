@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.xml.transform.Source;
+
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -42,7 +44,6 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
 import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
@@ -148,11 +149,12 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	/**
 	 * Create a new instance of the {@link RestTemplate} using default settings.
 	 */
+	@SuppressWarnings("deprecation")
 	public RestTemplate() {
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
 		this.messageConverters.add(new StringHttpMessageConverter());
 		this.messageConverters.add(new ResourceHttpMessageConverter());
-		this.messageConverters.add(new SourceHttpMessageConverter());
+		this.messageConverters.add(new SourceHttpMessageConverter<Source>());
 		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 		if (romePresent) {
 			this.messageConverters.add(new AtomFeedHttpMessageConverter());
@@ -165,7 +167,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			this.messageConverters.add(new MappingJackson2HttpMessageConverter());
 		}
 		else if (jacksonPresent) {
-			this.messageConverters.add(new MappingJacksonHttpMessageConverter());
+			this.messageConverters.add(new org.springframework.http.converter.json.MappingJacksonHttpMessageConverter());
 		}
 	}
 
@@ -604,7 +606,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * Returns a response extractor for {@link ResponseEntity}.
 	 */
 	protected <T> ResponseExtractor<ResponseEntity<T>> responseEntityExtractor(Type responseType) {
-		return new ResponseEntityResponseExtractor(responseType);
+		return new ResponseEntityResponseExtractor<T>(responseType);
 	}
 
 	/**
@@ -627,12 +629,11 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public void doWithRequest(ClientHttpRequest request) throws IOException {
 			if (responseType != null) {
 				Class<?> responseClass = null;
 				if (responseType instanceof Class) {
-					responseClass = (Class) responseType;
+					responseClass = (Class<?>) responseType;
 				}
 
 				List<MediaType> allSupportedMediaTypes = new ArrayList<MediaType>();
@@ -644,7 +645,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 					}
 					else if (converter instanceof GenericHttpMessageConverter) {
 
-						GenericHttpMessageConverter genericConverter = (GenericHttpMessageConverter) converter;
+						GenericHttpMessageConverter<?> genericConverter = (GenericHttpMessageConverter<?>) converter;
 						if (genericConverter.canRead(responseType, null, null)) {
 							allSupportedMediaTypes.addAll(getSupportedMediaTypes(converter));
 						}
@@ -682,20 +683,19 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 */
 	private class HttpEntityRequestCallback extends AcceptHeaderRequestCallback {
 
-		private final HttpEntity requestEntity;
+		private final HttpEntity<?> requestEntity;
 
 		private HttpEntityRequestCallback(Object requestBody) {
 			this(requestBody, null);
 		}
 
-		@SuppressWarnings("unchecked")
 		private HttpEntityRequestCallback(Object requestBody, Type responseType) {
 			super(responseType);
 			if (requestBody instanceof HttpEntity) {
-				this.requestEntity = (HttpEntity) requestBody;
+				this.requestEntity = (HttpEntity<?>) requestBody;
 			}
 			else if (requestBody != null) {
-				this.requestEntity = new HttpEntity(requestBody);
+				this.requestEntity = new HttpEntity<Object>(requestBody);
 			}
 			else {
 				this.requestEntity = HttpEntity.EMPTY;
@@ -721,7 +721,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 				Class<?> requestType = requestBody.getClass();
 				HttpHeaders requestHeaders = requestEntity.getHeaders();
 				MediaType requestContentType = requestHeaders.getContentType();
-				for (HttpMessageConverter messageConverter : getMessageConverters()) {
+				for (HttpMessageConverter<?> messageConverter : getMessageConverters()) {
 					if (messageConverter.canWrite(requestType, requestContentType)) {
 						if (!requestHeaders.isEmpty()) {
 							httpRequest.getHeaders().putAll(requestHeaders);
@@ -736,7 +736,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 							}
 
 						}
-						messageConverter.write(requestBody, requestContentType, httpRequest);
+						((HttpMessageConverter<Object>) messageConverter).write(
+								requestBody, requestContentType, httpRequest);
 						return;
 					}
 				}

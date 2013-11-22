@@ -17,8 +17,7 @@
 package org.springframework.util.xml;
 
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.Location;
 import javax.xml.stream.XMLEventReader;
@@ -38,13 +37,12 @@ import javax.xml.stream.events.StartDocument;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.Locator2;
 import org.xml.sax.helpers.AttributesImpl;
-
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * SAX {@code XMLReader} that reads from a StAX {@code XMLEventReader}. Consumes {@code XMLEvents} from
@@ -58,13 +56,12 @@ import org.springframework.util.StringUtils;
  * @see #setEntityResolver(org.xml.sax.EntityResolver)
  * @see #setErrorHandler(org.xml.sax.ErrorHandler)
  */
+@SuppressWarnings("rawtypes")
 class StaxEventXMLReader extends AbstractStaxXMLReader {
 
 	private static final String DEFAULT_XML_VERSION = "1.0";
 
 	private final XMLEventReader reader;
-
-	private final Map<String, String> namespaces = new LinkedHashMap<String, String>();
 
 	private String xmlVersion = DEFAULT_XML_VERSION;
 

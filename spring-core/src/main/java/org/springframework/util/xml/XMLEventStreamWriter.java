@@ -19,6 +19,7 @@ package org.springframework.util.xml;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventFactory;
@@ -38,6 +39,7 @@ import org.springframework.util.Assert;
  * @since 3.0.5
  * @see StaxUtils#createEventStreamWriter(javax.xml.stream.XMLEventWriter, javax.xml.stream.XMLEventFactory)
  */
+@SuppressWarnings("rawtypes")
 class XMLEventStreamWriter implements XMLStreamWriter {
 
 	private static final String DEFAULT_ENCODING = "UTF-8";

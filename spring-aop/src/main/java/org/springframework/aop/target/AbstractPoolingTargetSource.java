@@ -53,6 +53,9 @@ import org.springframework.beans.factory.DisposableBean;
 public abstract class AbstractPoolingTargetSource extends AbstractPrototypeBasedTargetSource
 		implements PoolingConfig, DisposableBean {
 
+	private static final long serialVersionUID = 1L;
+
+
 	/** The maximum size of the pool */
 	private int maxSize = -1;
 

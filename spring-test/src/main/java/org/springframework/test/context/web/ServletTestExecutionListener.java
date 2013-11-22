@@ -70,7 +70,6 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 	 * @see #setUpRequestContextIfNecessary(TestContext)
 	 */
 	@Override
-	@SuppressWarnings("javadoc")
 	public void prepareTestInstance(TestContext testContext) throws Exception {
 		setUpRequestContextIfNecessary(testContext);
 	}
@@ -83,7 +82,6 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 	 * @see #setUpRequestContextIfNecessary(TestContext)
 	 */
 	@Override
-	@SuppressWarnings("javadoc")
 	public void beforeTestMethod(TestContext testContext) throws Exception {
 		setUpRequestContextIfNecessary(testContext);
 	}

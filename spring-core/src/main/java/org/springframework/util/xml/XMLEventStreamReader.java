@@ -17,6 +17,7 @@
 package org.springframework.util.xml;
 
 import java.util.Iterator;
+
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 import javax.xml.stream.Location;
@@ -38,6 +39,7 @@ import javax.xml.stream.events.XMLEvent;
  * @since 3.0
  * @see StaxUtils#createEventStreamReader(javax.xml.stream.XMLEventReader)
  */
+@SuppressWarnings("rawtypes")
 class XMLEventStreamReader extends AbstractXMLStreamReader {
 
 	private XMLEvent event;

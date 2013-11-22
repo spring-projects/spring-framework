@@ -97,7 +97,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 	 * <p>Default is to detect the type automatically, through a {@code getType}
 	 * call on the BeanFactory (or even a full {@code getBean} call as fallback).
 	 */
-	public void setTargetClass(Class targetClass) {
+	public void setTargetClass(Class<?> targetClass) {
 		this.targetClass = targetClass;
 	}
 

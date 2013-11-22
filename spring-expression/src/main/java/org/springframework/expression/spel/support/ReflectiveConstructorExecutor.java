@@ -46,7 +46,7 @@ class ReflectiveConstructorExecutor implements ConstructorExecutor {
 	public ReflectiveConstructorExecutor(Constructor<?> ctor, int[] argsRequiringConversion) {
 		this.ctor = ctor;
 		if (ctor.isVarArgs()) {
-			Class[] paramTypes = ctor.getParameterTypes();
+			Class<?>[] paramTypes = ctor.getParameterTypes();
 			this.varargsPosition = paramTypes.length - 1;
 		}
 		else {

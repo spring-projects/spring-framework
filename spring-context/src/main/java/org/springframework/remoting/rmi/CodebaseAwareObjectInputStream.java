@@ -100,7 +100,7 @@ public class CodebaseAwareObjectInputStream extends ConfigurableObjectInputStrea
 
 
 	@Override
-	protected Class resolveFallbackIfPossible(String className, ClassNotFoundException ex)
+	protected Class<?> resolveFallbackIfPossible(String className, ClassNotFoundException ex)
 			throws IOException, ClassNotFoundException {
 
 		// If codebaseUrl is set, try to load the class with the RMIClassLoader.

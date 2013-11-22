@@ -79,13 +79,11 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public <T> T getNativeRequest(Class<T> requiredType) {
 		return PortletUtils.getNativeRequest(getRequest(), requiredType);
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public <T> T getNativeResponse(Class<T> requiredType) {
 		return PortletUtils.getNativeResponse(getResponse(), requiredType);
 	}

@@ -271,14 +271,13 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 		if (isValidating() && object != null) {
 			// create a temporary xmlOptions just for validation
 			XmlOptions validateOptions = getXmlOptions() != null ? getXmlOptions() : new XmlOptions();
-			List errorsList = new ArrayList();
+			List<XmlError> errorsList = new ArrayList<XmlError>();
 			validateOptions.setErrorListener(errorsList);
 			if (!object.validate(validateOptions)) {
 				StringBuilder builder = new StringBuilder("Could not validate XmlObject :");
-				for (Object anErrorsList : errorsList) {
-					XmlError xmlError = (XmlError) anErrorsList;
-					if (xmlError instanceof XmlValidationError) {
-						builder.append(xmlError.toString());
+				for (XmlError error : errorsList) {
+					if (error instanceof XmlValidationError) {
+						builder.append(error.toString());
 					}
 				}
 				throw new ValidationFailureException("XMLBeans validation failure",

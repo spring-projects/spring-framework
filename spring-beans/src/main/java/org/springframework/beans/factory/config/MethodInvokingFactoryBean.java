@@ -121,7 +121,7 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 	}
 
 	@Override
-	protected Class resolveClassName(String className) throws ClassNotFoundException {
+	protected Class<?> resolveClassName(String className) throws ClassNotFoundException {
 		return ClassUtils.forName(className, this.beanClassLoader);
 	}
 

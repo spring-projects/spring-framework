@@ -40,7 +40,7 @@ public interface PropertyAccessor {
 	 * @return an array of classes that this resolver is suitable for (or null if a
 	 *         general resolver)
 	 */
-	Class[] getSpecificTargetClasses();
+	Class<?>[] getSpecificTargetClasses();
 
 	/**
 	 * Called to determine if a resolver instance is able to access a specified property

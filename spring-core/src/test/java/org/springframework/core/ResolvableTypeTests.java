@@ -1230,11 +1230,13 @@ public class ResolvableTypeTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	static class ExtendsList extends ArrayList<CharSequence> {
 
 	}
 
 
+	@SuppressWarnings("serial")
 	static class ExtendsMap extends HashMap<String, Integer> {
 
 	}

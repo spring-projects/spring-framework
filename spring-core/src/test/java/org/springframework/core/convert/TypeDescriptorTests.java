@@ -840,6 +840,7 @@ public class TypeDescriptorTests {
 
 	public PassDownGeneric<Integer> passDownGeneric = new PassDownGeneric<Integer>();
 
+	@SuppressWarnings("serial")
 	public static class PassDownGeneric<T> extends ArrayList<List<Set<T>>> {
 	}
 

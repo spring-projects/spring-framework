@@ -22,13 +22,14 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.util.Assert;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 
-public class GenericSqlQuery extends SqlQuery {
+public class GenericSqlQuery<T> extends SqlQuery<T> {
 
-	Class rowMapperClass;
+	Class<?> rowMapperClass;
 
-	RowMapper rowMapper;
+	RowMapper<?> rowMapper;
 
-	public void setRowMapperClass(Class rowMapperClass)
+	@SuppressWarnings("rawtypes")
+	public void setRowMapperClass(Class<? extends RowMapper> rowMapperClass)
 			throws IllegalAccessException, InstantiationException {
 		this.rowMapperClass = rowMapperClass;
 		if (!RowMapper.class.isAssignableFrom(rowMapperClass))
@@ -44,9 +45,10 @@ public class GenericSqlQuery extends SqlQuery {
 	}
 
 	@Override
-	protected RowMapper newRowMapper(Object[] parameters, Map context) {
+	@SuppressWarnings("unchecked")
+	protected RowMapper<T> newRowMapper(Object[] parameters, Map<?, ?> context) {
 		try {
-			return (RowMapper) rowMapperClass.newInstance();
+			return (RowMapper<T>) rowMapperClass.newInstance();
 		}
 		catch (InstantiationException e) {
 			throw new InvalidDataAccessResourceUsageException("Unable to instantiate RowMapper", e);

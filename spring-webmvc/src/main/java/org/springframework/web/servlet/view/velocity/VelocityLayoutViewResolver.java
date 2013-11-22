@@ -46,7 +46,7 @@ public class VelocityLayoutViewResolver extends VelocityViewResolver {
 	 * @see VelocityLayoutView
 	 */
 	@Override
-	protected Class requiredViewClass() {
+	protected Class<?> requiredViewClass() {
 		return VelocityLayoutView.class;
 	}
 

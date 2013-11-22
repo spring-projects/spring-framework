@@ -47,6 +47,11 @@ public class NopInterceptor implements MethodInterceptor {
 	}
 
 	@Override
+	public int hashCode() {
+		return 0;
+	}
+
+	@Override
 	public boolean equals(Object other) {
 		if (!(other instanceof NopInterceptor)) {
 			return false;
@@ -56,5 +61,6 @@ public class NopInterceptor implements MethodInterceptor {
 		}
 		return this.count == ((NopInterceptor) other).count;
 	}
+
 
 }

@@ -17,6 +17,7 @@
 package org.springframework.orm.hibernate3;
 
 import java.sql.Connection;
+
 import javax.sql.DataSource;
 
 import org.hibernate.ConnectionReleaseMode;
@@ -29,7 +30,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.impl.SessionImpl;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -475,6 +475,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
 
@@ -706,6 +707,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	protected void doCleanupAfterCompletion(Object transaction) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
 

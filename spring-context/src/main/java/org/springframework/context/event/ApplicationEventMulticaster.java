@@ -36,7 +36,7 @@ public interface ApplicationEventMulticaster {
 	 * Add a listener to be notified of all events.
 	 * @param listener the listener to add
 	 */
-	void addApplicationListener(ApplicationListener listener);
+	void addApplicationListener(ApplicationListener<?> listener);
 
 	/**
 	 * Add a listener bean to be notified of all events.
@@ -48,7 +48,7 @@ public interface ApplicationEventMulticaster {
 	 * Remove a listener from the notification list.
 	 * @param listener the listener to remove
 	 */
-	void removeApplicationListener(ApplicationListener listener);
+	void removeApplicationListener(ApplicationListener<?> listener);
 
 	/**
 	 * Remove a listener bean from the notification list.

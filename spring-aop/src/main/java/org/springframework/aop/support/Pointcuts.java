@@ -71,7 +71,7 @@ public abstract class Pointcuts {
 	 * @param args arguments to the method
 	 * @return whether there's a runtime match
 	 */
-	public static boolean matches(Pointcut pointcut, Method method, Class targetClass, Object[] args) {
+	public static boolean matches(Pointcut pointcut, Method method, Class<?> targetClass, Object[] args) {
 		Assert.notNull(pointcut, "Pointcut must not be null");
 		if (pointcut == Pointcut.TRUE) {
 			return true;
@@ -97,7 +97,7 @@ public abstract class Pointcuts {
 		public static SetterPointcut INSTANCE = new SetterPointcut();
 
 		@Override
-		public boolean matches(Method method, Class targetClass) {
+		public boolean matches(Method method, Class<?> targetClass) {
 			return method.getName().startsWith("set") &&
 				method.getParameterTypes().length == 1 &&
 				method.getReturnType() == Void.TYPE;
@@ -118,7 +118,7 @@ public abstract class Pointcuts {
 		public static GetterPointcut INSTANCE = new GetterPointcut();
 
 		@Override
-		public boolean matches(Method method, Class targetClass) {
+		public boolean matches(Method method, Class<?> targetClass) {
 			return method.getName().startsWith("get") &&
 				method.getParameterTypes().length == 0;
 		}

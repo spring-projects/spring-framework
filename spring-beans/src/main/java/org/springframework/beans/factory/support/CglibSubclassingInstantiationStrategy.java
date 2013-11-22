@@ -72,7 +72,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 	@Override
 	protected Object instantiateWithMethodInjection(
 			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
-			Constructor ctor, Object[] args) {
+			Constructor<?> ctor, Object[] args) {
 
 		return new CglibSubclassCreator(beanDefinition, owner).instantiate(ctor, args);
 	}
@@ -104,7 +104,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		 * Ignored if the ctor parameter is {@code null}.
 		 * @return new instance of the dynamically generated class
 		 */
-		public Object instantiate(Constructor ctor, Object[] args) {
+		public Object instantiate(Constructor<?> ctor, Object[] args) {
 			Enhancer enhancer = new Enhancer();
 			enhancer.setSuperclass(this.beanDefinition.getBeanClass());
 			enhancer.setCallbackFilter(new CallbackFilterImpl());

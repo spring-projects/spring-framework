@@ -127,11 +127,13 @@ public class AnnotatedBeanDefinitionReader {
 		registerBean(annotatedClass, null, (Class<? extends Annotation>[]) null);
 	}
 
-	public void registerBean(Class<?> annotatedClass, Class<? extends Annotation>... qualifiers) {
+	public void registerBean(Class<?> annotatedClass,
+			@SuppressWarnings("unchecked") Class<? extends Annotation>... qualifiers) {
 		registerBean(annotatedClass, null, qualifiers);
 	}
 
-	public void registerBean(Class<?> annotatedClass, String name, Class<? extends Annotation>... qualifiers) {
+	public void registerBean(Class<?> annotatedClass, String name,
+			@SuppressWarnings("unchecked") Class<? extends Annotation>... qualifiers) {
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
 		if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {
 			return;

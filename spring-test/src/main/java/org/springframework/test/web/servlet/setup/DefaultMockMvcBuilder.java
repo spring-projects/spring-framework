@@ -42,7 +42,7 @@ import org.springframework.web.servlet.DispatcherServlet;
  * @author Rob Winch
  * @since 3.2
  */
-public class DefaultMockMvcBuilder<Self extends DefaultMockMvcBuilder> extends MockMvcBuilderSupport
+public class DefaultMockMvcBuilder<B extends DefaultMockMvcBuilder<B>> extends MockMvcBuilderSupport
 		implements MockMvcBuilder {
 
 	private final WebApplicationContext webAppContext;
@@ -89,7 +89,7 @@ public class DefaultMockMvcBuilder<Self extends DefaultMockMvcBuilder> extends M
 	 * @param filters the filters to add
 	 */
 	@SuppressWarnings("unchecked")
-	public final <T extends Self> T addFilters(Filter... filters) {
+	public final <T extends B> T addFilters(Filter... filters) {
 		Assert.notNull(filters, "filters cannot be null");
 
 		for(Filter f : filters) {
@@ -121,7 +121,7 @@ public class DefaultMockMvcBuilder<Self extends DefaultMockMvcBuilder> extends M
 	 * @param urlPatterns URL patterns to map to; if empty, "/*" is used by default
 	 */
 	@SuppressWarnings("unchecked")
-	public final <T extends Self> T addFilter(Filter filter, String... urlPatterns) {
+	public final <T extends B> T addFilter(Filter filter, String... urlPatterns) {
 
 		Assert.notNull(filter, "filter cannot be null");
 		Assert.notNull(urlPatterns, "urlPatterns cannot be null");
@@ -148,7 +148,7 @@ public class DefaultMockMvcBuilder<Self extends DefaultMockMvcBuilder> extends M
 	 * .
 	 */
 	@SuppressWarnings("unchecked")
-	public final <T extends Self> T defaultRequest(RequestBuilder requestBuilder) {
+	public final <T extends B> T defaultRequest(RequestBuilder requestBuilder) {
 		this.defaultRequestBuilder = requestBuilder;
 		return (T) this;
 	}
@@ -162,7 +162,7 @@ public class DefaultMockMvcBuilder<Self extends DefaultMockMvcBuilder> extends M
 	 * {@link org.springframework.test.web.servlet.result.MockMvcResultMatchers}
 	 */
 	@SuppressWarnings("unchecked")
-	public final <T extends Self> T alwaysExpect(ResultMatcher resultMatcher) {
+	public final <T extends B> T alwaysExpect(ResultMatcher resultMatcher) {
 		this.globalResultMatchers.add(resultMatcher);
 		return (T) this;
 	}
@@ -176,7 +176,7 @@ public class DefaultMockMvcBuilder<Self extends DefaultMockMvcBuilder> extends M
 	 * {@link org.springframework.test.web.servlet.result.MockMvcResultHandlers}
 	 */
 	@SuppressWarnings("unchecked")
-	public final <T extends Self> T alwaysDo(ResultHandler resultHandler) {
+	public final <T extends B> T alwaysDo(ResultHandler resultHandler) {
 		this.globalResultHandlers.add(resultHandler);
 		return (T) this;
 	}
@@ -187,7 +187,7 @@ public class DefaultMockMvcBuilder<Self extends DefaultMockMvcBuilder> extends M
 	 * @see DispatcherServlet#setDispatchOptionsRequest(boolean)
 	 */
 	@SuppressWarnings("unchecked")
-	public final <T extends Self> T dispatchOptions(boolean dispatchOptions) {
+	public final <T extends B> T dispatchOptions(boolean dispatchOptions) {
 		this.dispatchOptions = dispatchOptions;
 		return (T) this;
 	}

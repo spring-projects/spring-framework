@@ -25,6 +25,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.management.DynamicMBean;
 import javax.management.JMException;
 import javax.management.MBeanException;
@@ -746,7 +747,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * @return whether the class qualifies as an MBean
 	 * @see org.springframework.jmx.support.JmxUtils#isMBean(Class)
 	 */
-	protected boolean isMBean(Class beanClass) {
+	protected boolean isMBean(Class<?> beanClass) {
 		return JmxUtils.isMBean(beanClass);
 	}
 
@@ -760,9 +761,9 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 */
 	@SuppressWarnings("unchecked")
 	protected DynamicMBean adaptMBeanIfPossible(Object bean) throws JMException {
-		Class targetClass = AopUtils.getTargetClass(bean);
+		Class<?> targetClass = AopUtils.getTargetClass(bean);
 		if (targetClass != bean.getClass()) {
-			Class ifc = JmxUtils.getMXBeanInterface(targetClass);
+			Class<Object> ifc = (Class<Object>) JmxUtils.getMXBeanInterface(targetClass);
 			if (ifc != null) {
 				if (!(ifc.isInstance(bean))) {
 					throw new NotCompliantMBeanException("Managed bean [" + bean +
@@ -771,7 +772,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 				return new StandardMBean(bean, ifc, true);
 			}
 			else {
-				ifc = JmxUtils.getMBeanInterface(targetClass);
+				ifc = (Class<Object>) JmxUtils.getMBeanInterface(targetClass);
 				if (ifc != null) {
 					if (!(ifc.isInstance(bean))) {
 						throw new NotCompliantMBeanException("Managed bean [" + bean +
@@ -848,7 +849,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	private void autodetectBeans(final AutodetectCapableMBeanInfoAssembler assembler) {
 		autodetect(new AutodetectCallback() {
 			@Override
-			public boolean include(Class beanClass, String beanName) {
+			public boolean include(Class<?> beanClass, String beanName) {
 				return assembler.includeBean(beanClass, beanName);
 			}
 		});
@@ -861,7 +862,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	private void autodetectMBeans() {
 		autodetect(new AutodetectCallback() {
 			@Override
-			public boolean include(Class beanClass, String beanName) {
+			public boolean include(Class<?> beanClass, String beanName) {
 				return isMBean(beanClass);
 			}
 		});
@@ -883,7 +884,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		for (String beanName : beanNames) {
 			if (!isExcluded(beanName) && !isBeanDefinitionAbstract(this.beanFactory, beanName)) {
 				try {
-					Class beanClass = this.beanFactory.getType(beanName);
+					Class<?> beanClass = this.beanFactory.getType(beanName);
 					if (beanClass != null && callback.include(beanClass, beanName)) {
 						boolean lazyInit = isBeanDefinitionLazyInit(this.beanFactory, beanName);
 						Object beanInstance = (!lazyInit ? this.beanFactory.getBean(beanName) : null);
@@ -1069,7 +1070,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		 * @param beanClass the class of the bean
 		 * @param beanName the name of the bean
 		 */
-		boolean include(Class beanClass, String beanName);
+		boolean include(Class<?> beanClass, String beanName);
 	}
 
 

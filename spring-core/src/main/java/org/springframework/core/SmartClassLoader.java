@@ -38,6 +38,6 @@ public interface SmartClassLoader {
 	 * @return whether the class should be expected to appear in a reloaded
 	 * version (with a different {@code Class} object) later on
 	 */
-	boolean isClassReloadable(Class clazz);
+	boolean isClassReloadable(Class<?> clazz);
 
 }

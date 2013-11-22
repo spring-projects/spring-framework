@@ -58,7 +58,7 @@ public class VelocityViewResolver extends AbstractTemplateViewResolver {
 	 * Requires {@link VelocityView}.
 	 */
 	@Override
-	protected Class requiredViewClass() {
+	protected Class<?> requiredViewClass() {
 		return VelocityView.class;
 	}
 

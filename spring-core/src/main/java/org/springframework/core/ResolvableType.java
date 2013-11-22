@@ -155,7 +155,7 @@ public final class ResolvableType implements Serializable {
 		if (rawType instanceof ParameterizedType) {
 			rawType = ((ParameterizedType) rawType).getRawType();
 		}
-		return (rawType instanceof Class ? (Class) rawType : null);
+		return (rawType instanceof Class ? (Class<?>) rawType : null);
 	}
 
 	/**
@@ -1060,11 +1060,11 @@ public final class ResolvableType implements Serializable {
 	@SuppressWarnings("serial")
 	private static class TypeVariablesVariableResolver implements VariableResolver {
 
-		private final TypeVariable[] typeVariables;
+		private final TypeVariable<?>[] typeVariables;
 
 		private final ResolvableType[] generics;
 
-		public TypeVariablesVariableResolver(TypeVariable[] typeVariables, ResolvableType[] generics) {
+		public TypeVariablesVariableResolver(TypeVariable<?>[] typeVariables, ResolvableType[] generics) {
 			Assert.isTrue(typeVariables.length == generics.length, "Mismatched number of generics specified");
 			this.typeVariables = typeVariables;
 			this.generics = generics;

@@ -63,7 +63,7 @@ public class LiteralExpression implements Expression {
 	}
 
 	@Override
-	public Class getValueType(EvaluationContext context) {
+	public Class<?> getValueType(EvaluationContext context) {
 		return String.class;
 	}
 
@@ -100,7 +100,7 @@ public class LiteralExpression implements Expression {
 	}
 
 	@Override
-	public Class getValueType() {
+	public Class<?> getValueType() {
 		return String.class;
 	}
 
@@ -122,12 +122,12 @@ public class LiteralExpression implements Expression {
 	}
 
 	@Override
-	public Class getValueType(Object rootObject) throws EvaluationException {
+	public Class<?> getValueType(Object rootObject) throws EvaluationException {
 		return String.class;
 	}
 
 	@Override
-	public Class getValueType(EvaluationContext context, Object rootObject) throws EvaluationException {
+	public Class<?> getValueType(EvaluationContext context, Object rootObject) throws EvaluationException {
 		return String.class;
 	}
 

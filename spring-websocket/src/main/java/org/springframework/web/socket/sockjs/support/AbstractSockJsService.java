@@ -53,8 +53,6 @@ import org.springframework.web.socket.sockjs.SockJsService;
  */
 public abstract class AbstractSockJsService implements SockJsService {
 
-	private static final int MAX_KNOWN_SOCKJS_PREFIX_COUNT = 100;
-
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private static final long ONE_YEAR = TimeUnit.DAYS.toSeconds(365);

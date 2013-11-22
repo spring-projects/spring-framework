@@ -168,7 +168,7 @@ public class MethodInvoker {
 		}
 
 		Object[] arguments = getArguments();
-		Class[] argTypes = new Class[arguments.length];
+		Class<?>[] argTypes = new Class<?>[arguments.length];
 		for (int i = 0; i < arguments.length; ++i) {
 			argTypes[i] = (arguments[i] != null ? arguments[i].getClass() : Object.class);
 		}
@@ -216,7 +216,7 @@ public class MethodInvoker {
 
 		for (Method candidate : candidates) {
 			if (candidate.getName().equals(targetMethod)) {
-				Class[] paramTypes = candidate.getParameterTypes();
+				Class<?>[] paramTypes = candidate.getParameterTypes();
 				if (paramTypes.length == argCount) {
 					int typeDiffWeight = getTypeDifferenceWeight(paramTypes, arguments);
 					if (typeDiffWeight < minTypeDiffWeight) {

@@ -61,13 +61,13 @@ public class BindStatus {
 
 	private Object value;
 
-	private Class valueType;
+	private Class<?> valueType;
 
 	private Object actualValue;
 
 	private PropertyEditor editor;
 
-	private List objectErrors;
+	private List<? extends ObjectError> objectErrors;
 
 	private String[] errorCodes;
 
@@ -161,7 +161,7 @@ public class BindStatus {
 	private void initErrorCodes() {
 		this.errorCodes = new String[this.objectErrors.size()];
 		for (int i = 0; i < this.objectErrors.size(); i++) {
-			ObjectError error = (ObjectError) this.objectErrors.get(i);
+			ObjectError error = this.objectErrors.get(i);
 			this.errorCodes[i] = error.getCode();
 		}
 	}
@@ -173,7 +173,7 @@ public class BindStatus {
 		if (this.errorMessages == null) {
 			this.errorMessages = new String[this.objectErrors.size()];
 			for (int i = 0; i < this.objectErrors.size(); i++) {
-				ObjectError error = (ObjectError) this.objectErrors.get(i);
+				ObjectError error = this.objectErrors.get(i);
 				this.errorMessages[i] = this.requestContext.getMessage(error, this.htmlEscape);
 			}
 		}
@@ -214,7 +214,7 @@ public class BindStatus {
 	 * '{@code getValue().getClass()}' since '{@code getValue()}' may
 	 * return '{@code null}'.
 	 */
-	public Class getValueType() {
+	public Class<?> getValueType() {
 		return this.valueType;
 	}
 
@@ -318,7 +318,7 @@ public class BindStatus {
 	 * @param valueClass the value class that an editor is needed for
 	 * @return the associated PropertyEditor, or {@code null} if none
 	 */
-	public PropertyEditor findEditor(Class valueClass) {
+	public PropertyEditor findEditor(Class<?> valueClass) {
 		return (this.bindingResult != null ? this.bindingResult.findEditor(this.expression, valueClass) : null);
 	}
 

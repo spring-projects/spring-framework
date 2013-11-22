@@ -21,6 +21,7 @@ import java.io.Reader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 
 import org.w3c.dom.Document;
@@ -146,7 +147,7 @@ public interface SqlXmlHandler {
 	 * @see java.sql.ResultSet#getSQLXML
 	 * @see java.sql.SQLXML#getSource
 	 */
-	Source getXmlAsSource(ResultSet rs, String columnName, Class sourceClass) throws SQLException;
+	Source getXmlAsSource(ResultSet rs, String columnName, Class<? extends Source> sourceClass) throws SQLException;
 
 	/**
 	 * Retrieve the given column as Source implemented using the specified source class
@@ -161,7 +162,7 @@ public interface SqlXmlHandler {
 	 * @see java.sql.ResultSet#getSQLXML
 	 * @see java.sql.SQLXML#getSource
 	 */
-	Source getXmlAsSource(ResultSet rs, int columnIndex, Class sourceClass) throws SQLException;
+	Source getXmlAsSource(ResultSet rs, int columnIndex, Class<? extends Source> sourceClass) throws SQLException;
 
 
 	//-------------------------------------------------------------------------
@@ -207,7 +208,7 @@ public interface SqlXmlHandler {
 	 * @see SqlXmlValue
 	 * @see java.sql.SQLXML#setResult(Class)
 	 */
-	SqlXmlValue newSqlXmlValue(Class resultClass, XmlResultProvider provider);
+	SqlXmlValue newSqlXmlValue(Class<? extends Result> resultClass, XmlResultProvider provider);
 
 	/**
 	 * Create a {@code SqlXmlValue} instance for the given XML data,

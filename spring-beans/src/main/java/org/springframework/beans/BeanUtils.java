@@ -336,7 +336,7 @@ public abstract class BeanUtils {
 			String methodName = signature.substring(0, firstParen);
 			String[] parameterTypeNames =
 					StringUtils.commaDelimitedListToStringArray(signature.substring(firstParen + 1, lastParen));
-			Class<?>[] parameterTypes = new Class[parameterTypeNames.length];
+			Class<?>[] parameterTypes = new Class<?>[parameterTypeNames.length];
 			for (int i = 0; i < parameterTypeNames.length; i++) {
 				String parameterTypeName = parameterTypeNames[i].trim();
 				try {

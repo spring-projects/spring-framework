@@ -89,7 +89,7 @@ public abstract class BshScriptUtils {
 
 		Object result = evaluateBshScript(scriptSource, scriptInterfaces, classLoader);
 		if (result instanceof Class) {
-			Class clazz = (Class) result;
+			Class<?> clazz = (Class<?>) result;
 			try {
 				return clazz.newInstance();
 			}
@@ -120,7 +120,7 @@ public abstract class BshScriptUtils {
 		interpreter.setClassLoader(classLoader);
 		Object result = interpreter.eval(scriptSource);
 		if (result instanceof Class) {
-			return (Class) result;
+			return (Class<?>) result;
 		}
 		else if (result != null) {
 			return result.getClass();

@@ -79,7 +79,7 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 
 	static {
 		defaultUriComponentsContributor = new CompositeUriComponentsContributor(
-				Arrays.asList(
+				Arrays.<Object> asList(
 						new PathVariableMethodArgumentResolver(),
 						new RequestParamMethodArgumentResolver(null, false)));
 	}
@@ -180,10 +180,10 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	 * class AddressController {
 	 *
 	 *   &#064;RequestMapping("/{country}")
-	 *   public HttpEntity<Void> getAddressesForCountry(&#064;PathVariable String country) { … }
+	 *   public HttpEntity<Void> getAddressesForCountry(&#064;PathVariable String country) { ... }
 	 *
 	 *   &#064;RequestMapping(value="/", method=RequestMethod.POST)
-	 *   public void addAddress(Address address) { … }
+	 *   public void addAddress(Address address) { ... }
 	 * }
 	 * </pre>
 	 *

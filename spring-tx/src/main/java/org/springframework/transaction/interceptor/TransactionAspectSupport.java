@@ -244,7 +244,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * @return the return value of the method, if any
 	 * @throws Throwable propagated from the target invocation
 	 */
-	protected Object invokeWithinTransaction(Method method, Class targetClass, final InvocationCallback invocation)
+	protected Object invokeWithinTransaction(Method method, Class<?> targetClass, final InvocationCallback invocation)
 			throws Throwable {
 
 		// If the transaction attribute is null, the method is non-transactional.
@@ -347,7 +347,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * @return a String representation identifying this method
 	 * @see org.springframework.util.ClassUtils#getQualifiedMethodName
 	 */
-	protected String methodIdentification(Method method, Class targetClass) {
+	protected String methodIdentification(Method method, Class<?> targetClass) {
 		String simpleMethodId = methodIdentification(method);
 		if (simpleMethodId != null) {
 			return simpleMethodId;
@@ -381,7 +381,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * {@link #createTransactionIfNecessary(PlatformTransactionManager, TransactionAttribute, String)}
 	 */
 	@Deprecated
-	protected TransactionInfo createTransactionIfNecessary(Method method, Class targetClass) {
+	protected TransactionInfo createTransactionIfNecessary(Method method, Class<?> targetClass) {
 		// If the transaction attribute is null, the method is non-transactional.
 		TransactionAttribute txAttr = getTransactionAttributeSource().getTransactionAttribute(method, targetClass);
 		PlatformTransactionManager tm = determineTransactionManager(txAttr);

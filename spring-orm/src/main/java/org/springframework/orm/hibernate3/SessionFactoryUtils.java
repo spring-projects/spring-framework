@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+
 import javax.sql.DataSource;
 import javax.transaction.Status;
 import javax.transaction.Transaction;
@@ -56,7 +57,6 @@ import org.hibernate.exception.DataException;
 import org.hibernate.exception.JDBCConnectionException;
 import org.hibernate.exception.LockAcquisitionException;
 import org.hibernate.exception.SQLGrammarException;
-
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessException;
@@ -513,6 +513,7 @@ public abstract class SessionFactoryUtils {
 	 * @param entityInterceptor Hibernate entity interceptor, or {@code null} if none
 	 * @return the new Session
 	 */
+	@SuppressWarnings("deprecation")
 	public static Session getNewSession(SessionFactory sessionFactory, Interceptor entityInterceptor) {
 		Assert.notNull(sessionFactory, "No SessionFactory specified");
 

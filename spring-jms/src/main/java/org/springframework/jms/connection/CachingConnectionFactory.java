@@ -250,7 +250,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 	 * @return the wrapped Session
 	 */
 	protected Session getCachedSessionProxy(Session target, LinkedList<Session> sessionList) {
-		List<Class> classes = new ArrayList<Class>(3);
+		List<Class<?>> classes = new ArrayList<Class<?>>(3);
 		classes.add(SessionProxy.class);
 		if (target instanceof QueueSession) {
 			classes.add(QueueSession.class);
@@ -260,7 +260,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		}
 		return (Session) Proxy.newProxyInstance(
 				SessionProxy.class.getClassLoader(),
-				classes.toArray(new Class[classes.size()]),
+				classes.toArray(new Class<?>[classes.size()]),
 				new CachedSessionInvocationHandler(target, sessionList));
 	}
 

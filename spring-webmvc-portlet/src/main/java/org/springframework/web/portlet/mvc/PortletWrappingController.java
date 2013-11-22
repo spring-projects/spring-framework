@@ -89,7 +89,7 @@ public class PortletWrappingController extends AbstractController
 
 	private PortletConfig portletConfig;
 
-	private Class portletClass;
+	private Class<?> portletClass;
 
 	private String portletName;
 
@@ -127,7 +127,7 @@ public class PortletWrappingController extends AbstractController
 	 * Needs to implement {@code javax.portlet.Portlet}.
 	 * @see javax.portlet.Portlet
 	 */
-	public void setPortletClass(Class portletClass) {
+	public void setPortletClass(Class<?> portletClass) {
 		this.portletClass = portletClass;
 	}
 

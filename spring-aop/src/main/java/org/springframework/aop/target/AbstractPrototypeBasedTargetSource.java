@@ -45,6 +45,9 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  */
 public abstract class AbstractPrototypeBasedTargetSource extends AbstractBeanFactoryBasedTargetSource {
 
+	private static final long serialVersionUID = 1L;
+
+
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		super.setBeanFactory(beanFactory);

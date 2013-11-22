@@ -52,12 +52,12 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @return the FactoryBean's object type,
 	 * or {@code null} if the type cannot be determined yet
 	 */
-	protected Class getTypeForFactoryBean(final FactoryBean factoryBean) {
+	protected Class<?> getTypeForFactoryBean(final FactoryBean<?> factoryBean) {
 		try {
 			if (System.getSecurityManager() != null) {
-				return AccessController.doPrivileged(new PrivilegedAction<Class>() {
+				return AccessController.doPrivileged(new PrivilegedAction<Class<?>>() {
 					@Override
-					public Class run() {
+					public Class<?> run() {
 						return factoryBean.getObjectType();
 					}
 				}, getAccessControlContext());
@@ -95,7 +95,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @throws BeanCreationException if FactoryBean object creation failed
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
-	protected Object getObjectFromFactoryBean(FactoryBean factory, String beanName, boolean shouldPostProcess) {
+	protected Object getObjectFromFactoryBean(FactoryBean<?> factory, String beanName, boolean shouldPostProcess) {
 		if (factory.isSingleton() && containsSingleton(beanName)) {
 			synchronized (getSingletonMutex()) {
 				Object object = this.factoryBeanObjectCache.get(beanName);
@@ -121,7 +121,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
 	private Object doGetObjectFromFactoryBean(
-			final FactoryBean factory, final String beanName, final boolean shouldPostProcess)
+			final FactoryBean<?> factory, final String beanName, final boolean shouldPostProcess)
 			throws BeanCreationException {
 
 		Object object;
@@ -192,12 +192,13 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @return the bean instance as FactoryBean
 	 * @throws BeansException if the given bean cannot be exposed as a FactoryBean
 	 */
-	protected FactoryBean getFactoryBean(String beanName, Object beanInstance) throws BeansException {
+	@SuppressWarnings("unchecked")
+	protected FactoryBean<Object> getFactoryBean(String beanName, Object beanInstance) throws BeansException {
 		if (!(beanInstance instanceof FactoryBean)) {
 			throw new BeanCreationException(beanName,
 					"Bean instance of type [" + beanInstance.getClass() + "] is not a FactoryBean");
 		}
-		return (FactoryBean) beanInstance;
+		return (FactoryBean<Object>) beanInstance;
 	}
 
 	/**

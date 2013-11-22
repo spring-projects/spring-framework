@@ -28,7 +28,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
-import javax.servlet.http.HttpSessionContext;
 
 import org.springframework.util.Assert;
 
@@ -138,7 +137,7 @@ public class MockHttpSession implements HttpSession {
 	}
 
 	@Override
-	public HttpSessionContext getSessionContext() {
+	public javax.servlet.http.HttpSessionContext getSessionContext() {
 		throw new UnsupportedOperationException("getSessionContext");
 	}
 
@@ -235,7 +234,7 @@ public class MockHttpSession implements HttpSession {
 	/**
 	 * Convenience method for asserting that this session has not been
 	 * {@linkplain #invalidate() invalidated}.
-	 * 
+	 *
 	 * @throws IllegalStateException if this session has been invalidated
 	 */
 	private void assertIsValid() {

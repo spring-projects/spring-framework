@@ -329,7 +329,7 @@ public class MessageListenerAdapter
 		if (delegate != this) {
 			if (delegate instanceof SessionAwareMessageListener) {
 				if (session != null) {
-					((SessionAwareMessageListener) delegate).onMessage(message, session);
+					((SessionAwareMessageListener<Message>) delegate).onMessage(message, session);
 					return;
 				}
 				else if (!(delegate instanceof MessageListener)) {

@@ -26,14 +26,14 @@ package org.springframework.core.type.filter;
  */
 public class AssignableTypeFilter extends AbstractTypeHierarchyTraversingFilter {
 
-	private final Class targetType;
+	private final Class<?> targetType;
 
 
 	/**
 	 * Create a new AssignableTypeFilter for the given type.
 	 * @param targetType the type to match
 	 */
-	public AssignableTypeFilter(Class targetType) {
+	public AssignableTypeFilter(Class<?> targetType) {
 		super(true, true);
 		this.targetType = targetType;
 	}
@@ -63,7 +63,7 @@ public class AssignableTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 		}
 		else if (typeName.startsWith("java.")) {
 			try {
-				Class clazz = getClass().getClassLoader().loadClass(typeName);
+				Class<?> clazz = getClass().getClassLoader().loadClass(typeName);
 				return Boolean.valueOf(this.targetType.isAssignableFrom(clazz));
 			}
 			catch (ClassNotFoundException ex) {

@@ -19,6 +19,7 @@ package org.springframework.util.xml;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.stream.Location;
@@ -29,10 +30,9 @@ import javax.xml.stream.events.Namespace;
 import javax.xml.stream.events.XMLEvent;
 import javax.xml.stream.util.XMLEventConsumer;
 
+import org.springframework.util.StringUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
-
-import org.springframework.util.StringUtils;
 
 /**
  * SAX {@code ContentHandler} that transforms callback calls to {@code XMLEvent}s
@@ -92,15 +92,15 @@ class StaxEventContentHandler extends AbstractStaxContentHandler {
 	protected void startElementInternal(QName name, Attributes atts, SimpleNamespaceContext namespaceContext)
 			throws XMLStreamException {
 
-		List attributes = getAttributes(atts);
-		List namespaces = createNamespaces(namespaceContext);
+		List<Attribute> attributes = getAttributes(atts);
+		List<Namespace> namespaces = createNamespaces(namespaceContext);
 		consumeEvent(this.eventFactory.createStartElement(name, attributes.iterator(),
 				(namespaces != null ? namespaces.iterator() : null)));
 	}
 
 	@Override
 	protected void endElementInternal(QName name, SimpleNamespaceContext namespaceContext) throws XMLStreamException {
-		List namespaces = createNamespaces(namespaceContext);
+		List<Namespace> namespaces = createNamespaces(namespaceContext);
 		consumeEvent(this.eventFactory.createEndElement(name, namespaces != null ? namespaces.iterator() : null));
 	}
 
@@ -136,8 +136,8 @@ class StaxEventContentHandler extends AbstractStaxContentHandler {
 		if (StringUtils.hasLength(defaultNamespaceUri)) {
 			namespaces.add(this.eventFactory.createNamespace(defaultNamespaceUri));
 		}
-		for (Iterator iterator = namespaceContext.getBoundPrefixes(); iterator.hasNext();) {
-			String prefix = (String) iterator.next();
+		for (Iterator<String> iterator = namespaceContext.getBoundPrefixes(); iterator.hasNext();) {
+			String prefix = iterator.next();
 			String namespaceUri = namespaceContext.getNamespaceURI(prefix);
 			namespaces.add(this.eventFactory.createNamespace(prefix, namespaceUri));
 		}

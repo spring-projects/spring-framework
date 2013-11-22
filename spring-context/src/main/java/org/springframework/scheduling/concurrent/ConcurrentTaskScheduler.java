@@ -160,7 +160,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 
 
 	@Override
-	public ScheduledFuture schedule(Runnable task, Trigger trigger) {
+	public ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
 		try {
 			if (this.enterpriseConcurrentScheduler) {
 				return new EnterpriseConcurrentTriggerScheduler().schedule(decorateTask(task, true), trigger);
@@ -176,7 +176,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	}
 
 	@Override
-	public ScheduledFuture schedule(Runnable task, Date startTime) {
+	public ScheduledFuture<?> schedule(Runnable task, Date startTime) {
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
 		try {
 			return this.scheduledExecutor.schedule(decorateTask(task, false), initialDelay, TimeUnit.MILLISECONDS);
@@ -187,7 +187,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	}
 
 	@Override
-	public ScheduledFuture scheduleAtFixedRate(Runnable task, Date startTime, long period) {
+	public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Date startTime, long period) {
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
 		try {
 			return this.scheduledExecutor.scheduleAtFixedRate(decorateTask(task, true), initialDelay, period, TimeUnit.MILLISECONDS);
@@ -198,7 +198,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	}
 
 	@Override
-	public ScheduledFuture scheduleAtFixedRate(Runnable task, long period) {
+	public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, long period) {
 		try {
 			return this.scheduledExecutor.scheduleAtFixedRate(decorateTask(task, true), 0, period, TimeUnit.MILLISECONDS);
 		}
@@ -208,7 +208,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	}
 
 	@Override
-	public ScheduledFuture scheduleWithFixedDelay(Runnable task, Date startTime, long delay) {
+	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Date startTime, long delay) {
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
 		try {
 			return this.scheduledExecutor.scheduleWithFixedDelay(decorateTask(task, true), initialDelay, delay, TimeUnit.MILLISECONDS);
@@ -219,7 +219,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	}
 
 	@Override
-	public ScheduledFuture scheduleWithFixedDelay(Runnable task, long delay) {
+	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, long delay) {
 		try {
 			return this.scheduledExecutor.scheduleWithFixedDelay(decorateTask(task, true), 0, delay, TimeUnit.MILLISECONDS);
 		}
@@ -243,7 +243,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	 */
 	private class EnterpriseConcurrentTriggerScheduler {
 
-		public ScheduledFuture schedule(Runnable task, final Trigger trigger) {
+		public ScheduledFuture<?> schedule(Runnable task, final Trigger trigger) {
 			ManagedScheduledExecutorService executor = (ManagedScheduledExecutorService) scheduledExecutor;
 			return executor.schedule(task, new javax.enterprise.concurrent.Trigger() {
 				@Override

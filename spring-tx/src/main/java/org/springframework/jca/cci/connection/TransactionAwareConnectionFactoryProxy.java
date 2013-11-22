@@ -108,7 +108,7 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 	protected Connection getTransactionAwareConnectionProxy(Connection target, ConnectionFactory cf) {
 		return (Connection) Proxy.newProxyInstance(
 				Connection.class.getClassLoader(),
-				new Class[] {Connection.class},
+				new Class<?>[] {Connection.class},
 				new TransactionAwareInvocationHandler(target, cf));
 	}
 

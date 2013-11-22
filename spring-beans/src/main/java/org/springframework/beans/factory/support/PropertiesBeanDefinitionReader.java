@@ -290,9 +290,9 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	public int registerBeanDefinitions(ResourceBundle rb, String prefix) throws BeanDefinitionStoreException {
 		// Simply create a map and call overloaded method.
 		Map<String, Object> map = new HashMap<String, Object>();
-		Enumeration keys = rb.getKeys();
+		Enumeration<String> keys = rb.getKeys();
 		while (keys.hasMoreElements()) {
-			String key = (String) keys.nextElement();
+			String key = keys.nextElement();
 			map.put(key, rb.getObject(key));
 		}
 		return registerBeanDefinitions(map, prefix);
@@ -309,7 +309,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * @throws BeansException in case of loading or parsing errors
 	 * @see #registerBeanDefinitions(java.util.Map, String, String)
 	 */
-	public int registerBeanDefinitions(Map map) throws BeansException {
+	public int registerBeanDefinitions(Map<?, ?> map) throws BeansException {
 		return registerBeanDefinitions(map, null);
 	}
 
@@ -324,7 +324,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * @return the number of bean definitions found
 	 * @throws BeansException in case of loading or parsing errors
 	 */
-	public int registerBeanDefinitions(Map map, String prefix) throws BeansException {
+	public int registerBeanDefinitions(Map<?, ?> map, String prefix) throws BeansException {
 		return registerBeanDefinitions(map, prefix, "Map " + map);
 	}
 
@@ -342,7 +342,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * @throws BeansException in case of loading or parsing errors
 	 * @see #registerBeanDefinitions(Map, String)
 	 */
-	public int registerBeanDefinitions(Map map, String prefix, String resourceDescription)
+	public int registerBeanDefinitions(Map<?, ?> map, String prefix, String resourceDescription)
 			throws BeansException {
 
 		if (prefix == null) {
@@ -413,7 +413,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		ConstructorArgumentValues cas = new ConstructorArgumentValues();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 
-		for (Map.Entry entry : map.entrySet()) {
+		for (Map.Entry<?, ?> entry : map.entrySet()) {
 			String key = StringUtils.trimWhitespace((String) entry.getKey());
 			if (key.startsWith(prefix + SEPARATOR)) {
 				String property = key.substring(prefix.length() + SEPARATOR.length());
@@ -502,7 +502,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * Reads the value of the entry. Correctly interprets bean references for
 	 * values that are prefixed with an asterisk.
 	 */
-	private Object readValue(Map.Entry entry) {
+	private Object readValue(Map.Entry<? ,?> entry) {
 		Object val = entry.getValue();
 		if (val instanceof String) {
 			String strVal = (String) val;

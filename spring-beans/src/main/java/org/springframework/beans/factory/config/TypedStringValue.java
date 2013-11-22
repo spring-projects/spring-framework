@@ -114,7 +114,7 @@ public class TypedStringValue implements BeanMetadataElement {
 		if (!(targetTypeValue instanceof Class)) {
 			throw new IllegalStateException("Typed String value does not carry a resolved target type");
 		}
-		return (Class) targetTypeValue;
+		return (Class<?>) targetTypeValue;
 	}
 
 	/**
@@ -131,7 +131,7 @@ public class TypedStringValue implements BeanMetadataElement {
 	public String getTargetTypeName() {
 		Object targetTypeValue = this.targetType;
 		if (targetTypeValue instanceof Class) {
-			return ((Class) targetTypeValue).getName();
+			return ((Class<?>) targetTypeValue).getName();
 		}
 		else {
 			return (String) targetTypeValue;

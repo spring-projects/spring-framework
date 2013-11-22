@@ -117,7 +117,7 @@ public class ManagedMap<K, V> extends LinkedHashMap<K, V> implements Mergeable, 
 			throw new IllegalArgumentException("Cannot merge with object of type [" + parent.getClass() + "]");
 		}
 		Map<K, V> merged = new ManagedMap<K, V>();
-		merged.putAll((Map) parent);
+		merged.putAll((Map<K, V>) parent);
 		merged.putAll(this);
 		return merged;
 	}

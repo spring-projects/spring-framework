@@ -30,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+
 import javax.activation.FileTypeMap;
 import javax.servlet.Filter;
 import javax.servlet.FilterRegistration;
@@ -44,7 +45,6 @@ import javax.servlet.descriptor.JspConfigDescriptor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -408,16 +408,19 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
+	@Deprecated
 	public Servlet getServlet(String name) {
 		return null;
 	}
 
 	@Override
+	@Deprecated
 	public Enumeration<Servlet> getServlets() {
 		return Collections.enumeration(new HashSet<Servlet>());
 	}
 
 	@Override
+	@Deprecated
 	public Enumeration<String> getServletNames() {
 		return Collections.enumeration(new HashSet<String>());
 	}
@@ -428,6 +431,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
+	@Deprecated
 	public void log(Exception ex, String message) {
 		logger.info(message, ex);
 	}

@@ -56,7 +56,7 @@ public class HttpEntity<T> {
 	/**
 	 * The empty {@code HttpEntity}, with no body or headers.
 	 */
-	public static final HttpEntity EMPTY = new HttpEntity();
+	public static final HttpEntity<?> EMPTY = new HttpEntity<Object>();
 
 
 	private final HttpHeaders headers;

@@ -140,7 +140,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 	 * allowing to add further interceptors before as well as after the existing
 	 * interceptors
 	 */
-	protected void extendInterceptors(List interceptors) {
+	protected void extendInterceptors(List<?> interceptors) {
 	}
 
 	/**

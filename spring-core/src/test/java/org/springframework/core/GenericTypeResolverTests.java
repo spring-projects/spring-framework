@@ -75,6 +75,7 @@ public class GenericTypeResolverTests {
 	}
 
 	@Test
+	@Deprecated
 	public void testResolveType() {
 		Method intMessageMethod = findMethod(MyTypeWithMethods.class, "readIntegerInputMessage", MyInterfaceType.class);
 		MethodParameter intMessageMethodParam = new MethodParameter(intMessageMethod, 0);
@@ -100,6 +101,7 @@ public class GenericTypeResolverTests {
 	}
 
 	@Test
+	@Deprecated
 	public void testGetTypeVariableMap() throws Exception {
 		Map<TypeVariable, Type> map;
 

@@ -133,7 +133,7 @@ public abstract class ReflectionUtils {
 	 * @return the Method object, or {@code null} if none found
 	 */
 	public static Method findMethod(Class<?> clazz, String name) {
-		return findMethod(clazz, name, new Class[0]);
+		return findMethod(clazz, name, new Class<?>[0]);
 	}
 
 	/**

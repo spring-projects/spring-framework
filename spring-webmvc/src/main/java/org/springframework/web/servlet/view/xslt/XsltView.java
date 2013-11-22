@@ -73,7 +73,7 @@ import org.springframework.web.util.WebUtils;
  */
 public class XsltView extends AbstractUrlBasedView {
 
-	private Class transformerFactoryClass;
+	private Class<?> transformerFactoryClass;
 
 	private String sourceKey;
 
@@ -97,7 +97,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 * <p>The default constructor of the specified class will be called
 	 * to build the TransformerFactory for this view.
 	 */
-	public void setTransformerFactoryClass(Class transformerFactoryClass) {
+	public void setTransformerFactoryClass(Class<?> transformerFactoryClass) {
 		Assert.isAssignable(TransformerFactory.class, transformerFactoryClass);
 		this.transformerFactoryClass = transformerFactoryClass;
 	}
@@ -195,7 +195,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 * @see #setTransformerFactoryClass
 	 * @see #getTransformerFactory()
 	 */
-	protected TransformerFactory newTransformerFactory(Class transformerFactoryClass) {
+	protected TransformerFactory newTransformerFactory(Class<?> transformerFactoryClass) {
 		if (transformerFactoryClass != null) {
 			try {
 				return (TransformerFactory) transformerFactoryClass.newInstance();
@@ -283,8 +283,8 @@ public class XsltView extends AbstractUrlBasedView {
 	 * {@link Reader}, {@link InputStream} and {@link Resource}.
 	 * @return the supported source types
 	 */
-	protected Class[] getSourceTypes() {
-		return new Class[] {Source.class, Document.class, Node.class, Reader.class, InputStream.class, Resource.class};
+	protected Class<?>[] getSourceTypes() {
+		return new Class<?>[] {Source.class, Document.class, Node.class, Reader.class, InputStream.class, Resource.class};
 	}
 
 	/**
@@ -362,7 +362,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 */
 	protected final void copyOutputProperties(Transformer transformer) {
 		if (this.outputProperties != null) {
-			Enumeration en = this.outputProperties.propertyNames();
+			Enumeration<?> en = this.outputProperties.propertyNames();
 			while (en.hasMoreElements()) {
 				String name = (String) en.nextElement();
 				transformer.setOutputProperty(name, this.outputProperties.getProperty(name));

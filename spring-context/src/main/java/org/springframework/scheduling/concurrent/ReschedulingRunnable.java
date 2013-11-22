@@ -49,7 +49,7 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 
 	private final ScheduledExecutorService executor;
 
-	private ScheduledFuture currentFuture;
+	private ScheduledFuture<?> currentFuture;
 
 	private Date scheduledExecutionTime;
 
@@ -63,7 +63,7 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 	}
 
 
-	public ScheduledFuture schedule() {
+	public ScheduledFuture<?> schedule() {
 		synchronized (this.triggerContextMonitor) {
 			this.scheduledExecutionTime = this.trigger.nextExecutionTime(this.triggerContext);
 			if (this.scheduledExecutionTime == null) {
@@ -112,7 +112,7 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 
 	@Override
 	public Object get() throws InterruptedException, ExecutionException {
-		ScheduledFuture curr;
+		ScheduledFuture<?> curr;
 		synchronized (this.triggerContextMonitor) {
 			curr = this.currentFuture;
 		}
@@ -121,7 +121,7 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 
 	@Override
 	public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-		ScheduledFuture curr;
+		ScheduledFuture<?> curr;
 		synchronized (this.triggerContextMonitor) {
 			curr = this.currentFuture;
 		}
@@ -130,7 +130,7 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 
 	@Override
 	public long getDelay(TimeUnit unit) {
-		ScheduledFuture curr;
+		ScheduledFuture<?> curr;
 		synchronized (this.triggerContextMonitor) {
 			curr = this.currentFuture;
 		}

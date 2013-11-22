@@ -41,7 +41,7 @@ public class QuickTargetSourceCreator extends AbstractBeanFactoryBasedTargetSour
 
 	@Override
 	protected final AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(
-			Class beanClass, String beanName) {
+			Class<?> beanClass, String beanName) {
 
 		if (beanName.startsWith(PREFIX_COMMONS_POOL)) {
 			CommonsPoolTargetSource cpts = new CommonsPoolTargetSource();

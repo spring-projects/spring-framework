@@ -70,7 +70,7 @@ public abstract class MappingSqlQueryWithParameters<T> extends SqlQuery<T> {
 	 * implementation of the mapRow() method.
 	 */
 	@Override
-	protected RowMapper<T> newRowMapper(Object[] parameters, Map context) {
+	protected RowMapper<T> newRowMapper(Object[] parameters, Map<?, ?> context) {
 		return new RowMapperImpl(parameters, context);
 	}
 
@@ -89,7 +89,7 @@ public abstract class MappingSqlQueryWithParameters<T> extends SqlQuery<T> {
 	 * Subclasses can simply not catch SQLExceptions, relying on the
 	 * framework to clean up.
 	 */
-	protected abstract T mapRow(ResultSet rs, int rowNum, Object[] parameters, Map context)
+	protected abstract T mapRow(ResultSet rs, int rowNum, Object[] parameters, Map<?, ?> context)
 			throws SQLException;
 
 
@@ -101,12 +101,12 @@ public abstract class MappingSqlQueryWithParameters<T> extends SqlQuery<T> {
 
 		private final Object[] params;
 
-		private final Map context;
+		private final Map<?, ?> context;
 
 		/**
 		 * Use an array results. More efficient if we know how many results to expect.
 		 */
-		public RowMapperImpl(Object[] parameters, Map context) {
+		public RowMapperImpl(Object[] parameters, Map<?, ?> context) {
 			this.params = parameters;
 			this.context = context;
 		}

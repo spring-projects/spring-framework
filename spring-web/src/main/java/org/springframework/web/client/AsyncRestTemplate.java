@@ -542,7 +542,6 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	 * be {@code null})
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
-	@SuppressWarnings("unchecked")
 	protected <T> ListenableFuture<T> doExecute(URI url, HttpMethod method, AsyncRequestCallback requestCallback,
 			ResponseExtractor<T> responseExtractor) throws RestClientException {
 

@@ -77,7 +77,6 @@ public class CustomScopeConfigurer implements BeanFactoryPostProcessor, BeanClas
 
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		if (this.scopes != null) {
 			for (Map.Entry<String, Object> entry : this.scopes.entrySet()) {
@@ -87,12 +86,12 @@ public class CustomScopeConfigurer implements BeanFactoryPostProcessor, BeanClas
 					beanFactory.registerScope(scopeKey, (Scope) value);
 				}
 				else if (value instanceof Class) {
-					Class scopeClass = (Class) value;
+					Class<?> scopeClass = (Class<?>) value;
 					Assert.isAssignable(Scope.class, scopeClass);
 					beanFactory.registerScope(scopeKey, (Scope) BeanUtils.instantiateClass(scopeClass));
 				}
 				else if (value instanceof String) {
-					Class scopeClass = ClassUtils.resolveClassName((String) value, this.beanClassLoader);
+					Class<?> scopeClass = ClassUtils.resolveClassName((String) value, this.beanClassLoader);
 					Assert.isAssignable(Scope.class, scopeClass);
 					beanFactory.registerScope(scopeKey, (Scope) BeanUtils.instantiateClass(scopeClass));
 				}

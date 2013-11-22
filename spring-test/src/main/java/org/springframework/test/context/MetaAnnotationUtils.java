@@ -26,7 +26,7 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
 
 /**
  * TODO Document MetaAnnotationUtils.
- * 
+ *
  * @author Sam Brannen
  * @since 4.0
  */
@@ -148,7 +148,7 @@ abstract class MetaAnnotationUtils {
 	 * Given the following example, if we are searching for the {@code @Transactional}
 	 * annotation <em>on</em> the {@code UserRepositoryTests} class, then the
 	 * properties of the {@code AnnotationDescriptor} would be as follows.
-	 * 
+	 *
 	 * <ul>
 	 * <li>declaringClass: {@code UserRepositoryTests} class object</li>
 	 * <li>stereotype: instance of the {@code RepositoryTests} annotation</li>
@@ -238,7 +238,7 @@ abstract class MetaAnnotationUtils {
 			throw new IllegalArgumentException(message);
 		}
 
-		for (Class clazz : annotationTypes) {
+		for (Class<?> clazz : annotationTypes) {
 			if (!Annotation.class.isAssignableFrom(clazz)) {
 				throw new IllegalArgumentException("Array elements must be of type Annotation");
 			}

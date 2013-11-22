@@ -114,10 +114,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	private static final ThreadLocal<Object> configTimeRegionFactoryHolder =
 			new ThreadLocal<Object>();
 
-	@SuppressWarnings("deprecation")
-	private static final ThreadLocal<org.hibernate.cache.CacheProvider> configTimeCacheProviderHolder =
-			new ThreadLocal<org.hibernate.cache.CacheProvider>();
-
 	private static final ThreadLocal<LobHandler> configTimeLobHandlerHolder =
 			new ThreadLocal<LobHandler>();
 

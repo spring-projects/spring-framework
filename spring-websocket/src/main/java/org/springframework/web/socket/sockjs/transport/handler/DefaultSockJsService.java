@@ -82,7 +82,7 @@ public class DefaultSockJsService extends AbstractSockJsService {
 
 	private final Map<String, AbstractSockJsSession> sessions = new ConcurrentHashMap<String, AbstractSockJsSession>();
 
-	private ScheduledFuture sessionCleanupTask;
+	private ScheduledFuture<?> sessionCleanupTask;
 
 
 	/**

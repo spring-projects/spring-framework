@@ -271,7 +271,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			for (Object part : entry.getValue()) {
 				if (part != null) {
 					writeBoundary(boundary, os);
-					HttpEntity entity = getEntity(part);
+					HttpEntity<?> entity = getEntity(part);
 					writePart(name, entity, os);
 					writeNewLine(os);
 				}
@@ -286,30 +286,29 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		writeNewLine(os);
 	}
 
-	@SuppressWarnings("unchecked")
-	private HttpEntity getEntity(Object part) {
+	private HttpEntity<?> getEntity(Object part) {
 		if (part instanceof HttpEntity) {
-			return (HttpEntity) part;
+			return (HttpEntity<?>) part;
 		}
 		else {
-			return new HttpEntity(part);
+			return new HttpEntity<Object>(part);
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	private void writePart(String name, HttpEntity partEntity, OutputStream os) throws IOException {
+	private void writePart(String name, HttpEntity<?> partEntity, OutputStream os) throws IOException {
 		Object partBody = partEntity.getBody();
 		Class<?> partType = partBody.getClass();
 		HttpHeaders partHeaders = partEntity.getHeaders();
 		MediaType partContentType = partHeaders.getContentType();
-		for (HttpMessageConverter messageConverter : partConverters) {
+		for (HttpMessageConverter<?> messageConverter : partConverters) {
 			if (messageConverter.canWrite(partType, partContentType)) {
 				HttpOutputMessage multipartOutputMessage = new MultipartHttpOutputMessage(os);
 				multipartOutputMessage.getHeaders().setContentDispositionFormData(name, getFilename(partBody));
 				if (!partHeaders.isEmpty()) {
 					multipartOutputMessage.getHeaders().putAll(partHeaders);
 				}
-				messageConverter.write(partBody, partContentType, multipartOutputMessage);
+				((HttpMessageConverter<Object>) messageConverter).write(partBody, partContentType, multipartOutputMessage);
 				return;
 			}
 		}

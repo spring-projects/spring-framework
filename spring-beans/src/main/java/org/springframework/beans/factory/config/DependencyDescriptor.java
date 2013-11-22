@@ -52,7 +52,7 @@ public class DependencyDescriptor implements Serializable {
 
 	private String methodName;
 
-	private Class[] parameterTypes;
+	private Class<?>[] parameterTypes;
 
 	private int parameterIndex;
 
@@ -267,12 +267,12 @@ public class DependencyDescriptor implements Serializable {
 					Type[] args = ((ParameterizedType) type).getActualTypeArguments();
 					Type arg = args[args.length - 1];
 					if (arg instanceof Class) {
-						return (Class) arg;
+						return (Class<?>) arg;
 					}
 					else if (arg instanceof ParameterizedType) {
 						arg = ((ParameterizedType) arg).getRawType();
 						if (arg instanceof Class) {
-							return (Class) arg;
+							return (Class<?>) arg;
 						}
 					}
 				}

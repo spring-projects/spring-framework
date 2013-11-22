@@ -31,7 +31,7 @@ public interface ControlFlow {
 	 * according to the current stack trace.
 	 * @param clazz the clazz to look for
 	 */
-	boolean under(Class clazz);
+	boolean under(Class<?> clazz);
 
 	/**
 	 * Detect whether we're under the given class and method,
@@ -39,7 +39,7 @@ public interface ControlFlow {
 	 * @param clazz the clazz to look for
 	 * @param methodName the name of the method to look for
 	 */
-	boolean under(Class clazz, String methodName);
+	boolean under(Class<?> clazz, String methodName);
 
 	/**
 	 * Detect whether the current stack trace contains the given token.

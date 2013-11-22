@@ -101,7 +101,7 @@ public class ManagedSet<E> extends LinkedHashSet<E> implements Mergeable, BeanMe
 			throw new IllegalArgumentException("Cannot merge with object of type [" + parent.getClass() + "]");
 		}
 		Set<E> merged = new ManagedSet<E>();
-		merged.addAll((Set) parent);
+		merged.addAll((Set<E>) parent);
 		merged.addAll(this);
 		return merged;
 	}

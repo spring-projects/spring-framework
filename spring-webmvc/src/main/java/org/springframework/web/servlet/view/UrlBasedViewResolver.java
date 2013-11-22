@@ -100,7 +100,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	public static final String FORWARD_URL_PREFIX = "forward:";
 
 
-	private Class viewClass;
+	private Class<?> viewClass;
 
 	private String prefix = "";
 
@@ -129,7 +129,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * (by default, AbstractUrlBasedView)
 	 * @see AbstractUrlBasedView
 	 */
-	public void setViewClass(Class viewClass) {
+	public void setViewClass(Class<?> viewClass) {
 		if (viewClass == null || !requiredViewClass().isAssignableFrom(viewClass)) {
 			throw new IllegalArgumentException(
 					"Given view class [" + (viewClass != null ? viewClass.getName() : null) +
@@ -141,7 +141,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	/**
 	 * Return the view class to be used to create views.
 	 */
-	protected Class getViewClass() {
+	protected Class<?> getViewClass() {
 		return this.viewClass;
 	}
 
@@ -150,7 +150,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * This implementation returns AbstractUrlBasedView.
 	 * @see AbstractUrlBasedView
 	 */
-	protected Class requiredViewClass() {
+	protected Class<?> requiredViewClass() {
 		return AbstractUrlBasedView.class;
 	}
 

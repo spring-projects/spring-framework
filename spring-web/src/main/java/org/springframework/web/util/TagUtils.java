@@ -92,7 +92,7 @@ public abstract class TagUtils {
 	 * or if the supplied {@code ancestorTagClass} is not type-assignable to
 	 * the {@link Tag} class
 	 */
-	public static boolean hasAncestorOfType(Tag tag, Class ancestorTagClass) {
+	public static boolean hasAncestorOfType(Tag tag, Class<?> ancestorTagClass) {
 		Assert.notNull(tag, "Tag cannot be null");
 		Assert.notNull(ancestorTagClass, "Ancestor tag class cannot be null");
 		if (!Tag.class.isAssignableFrom(ancestorTagClass)) {
@@ -125,7 +125,7 @@ public abstract class TagUtils {
 	 * type-assignable to the {@link Tag} class
 	 * @see #hasAncestorOfType(javax.servlet.jsp.tagext.Tag, Class)
 	 */
-	public static void assertHasAncestorOfType(Tag tag, Class ancestorTagClass, String tagName, String ancestorTagName) {
+	public static void assertHasAncestorOfType(Tag tag, Class<?> ancestorTagClass, String tagName, String ancestorTagName) {
 		Assert.hasText(tagName, "'tagName' must not be empty");
 		Assert.hasText(ancestorTagName, "'ancestorTagName' must not be empty");
 		if (!TagUtils.hasAncestorOfType(tag, ancestorTagClass)) {

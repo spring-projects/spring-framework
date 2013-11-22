@@ -18,6 +18,7 @@ package org.springframework.jdbc.core;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import javax.sql.rowset.CachedRowSet;
 import javax.sql.rowset.RowSetFactory;
 import javax.sql.rowset.RowSetProvider;
@@ -133,9 +134,27 @@ public class SqlRowSetResultSetExtractor implements ResultSetExtractor<SqlRowSet
 	 */
 	private static class SunCachedRowSetFactory implements CachedRowSetFactory {
 
+		private static final Class<?> IMPLEMENTATION_CLASS;
+		static {
+			try {
+				IMPLEMENTATION_CLASS = Class.forName("com.sun.rowset.CachedRowSetImpl");
+			}
+			catch (ClassNotFoundException ex) {
+				throw new IllegalStateException(ex);
+			}
+		}
+
 		@Override
 		public CachedRowSet createCachedRowSet() throws SQLException {
-			return new com.sun.rowset.CachedRowSetImpl();
+			try {
+				return (CachedRowSet) IMPLEMENTATION_CLASS.newInstance();
+			}
+			catch (InstantiationException ex) {
+				throw new IllegalStateException(ex);
+			}
+			catch (IllegalAccessException ex) {
+				throw new IllegalStateException(ex);
+			}
 		}
 	}
 

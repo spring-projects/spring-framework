@@ -140,7 +140,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 		else {
 			SendTo sendTo = returnType.getMethodAnnotation(SendTo.class);
 			String[] destinations = getTargetDestinations(sendTo, inputHeaders, this.defaultDestinationPrefix);
-			for (String destination : getTargetDestinations(sendTo, inputHeaders, this.defaultDestinationPrefix)) {
+			for (String destination : destinations) {
 				this.messagingTemplate.convertAndSend(destination, returnValue, postProcessor);
 			}
 		}

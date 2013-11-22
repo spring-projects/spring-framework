@@ -63,15 +63,15 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 			synchronized (beanDefinition.constructorArgumentLock) {
 				constructorToUse = (Constructor<?>) beanDefinition.resolvedConstructorOrFactoryMethod;
 				if (constructorToUse == null) {
-					final Class clazz = beanDefinition.getBeanClass();
+					final Class<?> clazz = beanDefinition.getBeanClass();
 					if (clazz.isInterface()) {
 						throw new BeanInstantiationException(clazz, "Specified class is an interface");
 					}
 					try {
 						if (System.getSecurityManager() != null) {
-							constructorToUse = AccessController.doPrivileged(new PrivilegedExceptionAction<Constructor>() {
+							constructorToUse = AccessController.doPrivileged(new PrivilegedExceptionAction<Constructor<?>>() {
 								@Override
-								public Constructor run() throws Exception {
+								public Constructor<?> run() throws Exception {
 									return clazz.getDeclaredConstructor((Class[]) null);
 								}
 							});
@@ -136,7 +136,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	 * Instantiation should use the given constructor and parameters.
 	 */
 	protected Object instantiateWithMethodInjection(RootBeanDefinition beanDefinition,
-			String beanName, BeanFactory owner, Constructor ctor, Object[] args) {
+			String beanName, BeanFactory owner, Constructor<?> ctor, Object[] args) {
 
 		throw new UnsupportedOperationException(
 				"Method Injection not supported in SimpleInstantiationStrategy");

@@ -111,7 +111,7 @@ public class OrderComparator implements Comparator<Object> {
 			sort((Object[]) value);
 		}
 		else if (value instanceof List) {
-			sort((List) value);
+			sort((List<?>) value);
 		}
 	}
 

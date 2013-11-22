@@ -31,9 +31,9 @@ import net.sf.ehcache.constructs.blocking.SelfPopulatingCache;
 import net.sf.ehcache.constructs.blocking.UpdatingCacheEntryFactory;
 import net.sf.ehcache.constructs.blocking.UpdatingSelfPopulatingCache;
 import net.sf.ehcache.event.CacheEventListener;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -85,6 +85,7 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 	private Ehcache cache;
 
 
+	@SuppressWarnings("deprecation")
 	public EhCacheFactoryBean() {
 		setMaxElementsInMemory(10000);
 		setMaxElementsOnDisk(10000000);

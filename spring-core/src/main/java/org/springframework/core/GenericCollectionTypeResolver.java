@@ -41,6 +41,7 @@ public abstract class GenericCollectionTypeResolver {
 	 * @param collectionClass the collection class to introspect
 	 * @return the generic type, or {@code null} if none
 	 */
+	@SuppressWarnings("rawtypes")
 	public static Class<?> getCollectionType(Class<? extends Collection> collectionClass) {
 		return ResolvableType.forClass(collectionClass).asCollection().resolveGeneric();
 	}
@@ -51,6 +52,7 @@ public abstract class GenericCollectionTypeResolver {
 	 * @param mapClass the map class to introspect
 	 * @return the generic type, or {@code null} if none
 	 */
+	@SuppressWarnings("rawtypes")
 	public static Class<?> getMapKeyType(Class<? extends Map> mapClass) {
 		return ResolvableType.forClass(mapClass).asMap().resolveGeneric(0);
 	}
@@ -61,6 +63,7 @@ public abstract class GenericCollectionTypeResolver {
 	 * @param mapClass the map class to introspect
 	 * @return the generic type, or {@code null} if none
 	 */
+	@SuppressWarnings("rawtypes")
 	public static Class<?> getMapValueType(Class<? extends Map> mapClass) {
 		return ResolvableType.forClass(mapClass).asMap().resolveGeneric(1);
 	}

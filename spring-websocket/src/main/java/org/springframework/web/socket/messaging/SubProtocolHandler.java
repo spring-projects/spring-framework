@@ -54,7 +54,7 @@ public interface SubProtocolHandler {
 	 * @param message the client message
 	 * @param outputChannel an output channel to send messages to
 	 */
-	void handleMessageFromClient(WebSocketSession session, WebSocketMessage message,
+	void handleMessageFromClient(WebSocketSession session, WebSocketMessage<?> message,
 			MessageChannel outputChannel) throws Exception;
 
 	/**

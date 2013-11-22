@@ -59,23 +59,23 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 		try {
 			TypeConverter typeConverter = context.getTypeConverter();
 			Class<?> type = context.getTypeLocator().findType(typename);
-			Constructor[] ctors = type.getConstructors();
+			Constructor<?>[] ctors = type.getConstructors();
 
-			Arrays.sort(ctors, new Comparator<Constructor>() {
+			Arrays.sort(ctors, new Comparator<Constructor<?>>() {
 				@Override
-				public int compare(Constructor c1, Constructor c2) {
+				public int compare(Constructor<?> c1, Constructor<?> c2) {
 					int c1pl = c1.getParameterTypes().length;
 					int c2pl = c2.getParameterTypes().length;
 					return (new Integer(c1pl)).compareTo(c2pl);
 				}
 			});
 
-			Constructor closeMatch = null;
+			Constructor<?> closeMatch = null;
 			int[] argsToConvert = null;
-			Constructor matchRequiringConversion = null;
+			Constructor<?> matchRequiringConversion = null;
 
-			for (Constructor ctor : ctors) {
-				Class[] paramTypes = ctor.getParameterTypes();
+			for (Constructor<?> ctor : ctors) {
+				Class<?>[] paramTypes = ctor.getParameterTypes();
 				List<TypeDescriptor> paramDescriptors = new ArrayList<TypeDescriptor>(paramTypes.length);
 				for (int i = 0; i < paramTypes.length; i++) {
 					paramDescriptors.add(new TypeDescriptor(new MethodParameter(ctor, i)));

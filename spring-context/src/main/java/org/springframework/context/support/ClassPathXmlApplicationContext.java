@@ -154,7 +154,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 	 * @see org.springframework.context.support.GenericApplicationContext
 	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
 	 */
-	public ClassPathXmlApplicationContext(String path, Class clazz) throws BeansException {
+	public ClassPathXmlApplicationContext(String path, Class<?> clazz) throws BeansException {
 		this(new String[] {path}, clazz);
 	}
 
@@ -168,7 +168,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 	 * @see org.springframework.context.support.GenericApplicationContext
 	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
 	 */
-	public ClassPathXmlApplicationContext(String[] paths, Class clazz) throws BeansException {
+	public ClassPathXmlApplicationContext(String[] paths, Class<?> clazz) throws BeansException {
 		this(paths, clazz, null);
 	}
 
@@ -184,7 +184,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 	 * @see org.springframework.context.support.GenericApplicationContext
 	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
 	 */
-	public ClassPathXmlApplicationContext(String[] paths, Class clazz, ApplicationContext parent)
+	public ClassPathXmlApplicationContext(String[] paths, Class<?> clazz, ApplicationContext parent)
 			throws BeansException {
 
 		super(parent);

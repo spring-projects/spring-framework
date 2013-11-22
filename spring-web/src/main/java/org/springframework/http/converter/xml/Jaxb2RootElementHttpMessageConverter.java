@@ -74,7 +74,7 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 				return unmarshaller.unmarshal(source);
 			}
 			else {
-				JAXBElement jaxbElement = unmarshaller.unmarshal(source, clazz);
+				JAXBElement<?> jaxbElement = unmarshaller.unmarshal(source, clazz);
 				return jaxbElement.getValue();
 			}
 		}
@@ -90,7 +90,7 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 	@Override
 	protected void writeToResult(Object o, HttpHeaders headers, Result result) throws IOException {
 		try {
-			Class clazz = ClassUtils.getUserClass(o);
+			Class<?> clazz = ClassUtils.getUserClass(o);
 			Marshaller marshaller = createMarshaller(clazz);
 			setCharset(headers.getContentType(), marshaller);
 			marshaller.marshal(o, result);

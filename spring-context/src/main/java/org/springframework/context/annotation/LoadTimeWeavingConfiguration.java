@@ -91,9 +91,12 @@ public class LoadTimeWeavingConfiguration implements ImportAware, BeanClassLoade
 					// No aop.xml present on the classpath -> treat as 'disabled'
 					break;
 				}
-				// aop.xml is present on the classpath -> fall through and enable
+				// aop.xml is present on the classpath -> enable
+				AspectJWeavingEnabler.enableAspectJWeaving(loadTimeWeaver, this.beanClassLoader);
+				break;
 			case ENABLED:
 				AspectJWeavingEnabler.enableAspectJWeaving(loadTimeWeaver, this.beanClassLoader);
+				break;
 		}
 
 		return loadTimeWeaver;

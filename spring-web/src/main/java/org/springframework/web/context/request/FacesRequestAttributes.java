@@ -217,7 +217,7 @@ public class FacesRequestAttributes implements RequestAttributes {
 		Object session = getExternalContext().getSession(true);
 		try {
 			// Both HttpSession and PortletSession have a getId() method.
-			Method getIdMethod = session.getClass().getMethod("getId", new Class[0]);
+			Method getIdMethod = session.getClass().getMethod("getId", new Class<?>[0]);
 			return ReflectionUtils.invokeMethod(getIdMethod, session).toString();
 		}
 		catch (NoSuchMethodException ex) {

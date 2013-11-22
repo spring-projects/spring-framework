@@ -128,7 +128,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private boolean allowEagerClassLoading = true;
 
 	/** Optional OrderComparator for dependency Lists and arrays */
-	private Comparator dependencyComparator;
+	private Comparator<Object> dependencyComparator;
 
 	/** Resolver to use for checking if a bean definition is an autowire candidate */
 	private AutowireCandidateResolver autowireCandidateResolver = new SimpleAutowireCandidateResolver();
@@ -215,14 +215,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * @see org.springframework.core.OrderComparator
 	 * @see org.springframework.core.annotation.AnnotationAwareOrderComparator
 	 */
-	public void setDependencyComparator(Comparator dependencyComparator) {
+	public void setDependencyComparator(Comparator<Object> dependencyComparator) {
 		this.dependencyComparator = dependencyComparator;
 	}
 
 	/**
 	 * Return the dependency comparator for this BeanFactory (may be {@code null}.
 	 */
-	public Comparator getDependencyComparator() {
+	public Comparator<Object> getDependencyComparator() {
 		return this.dependencyComparator;
 	}
 
@@ -898,7 +898,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
 			Object result = converter.convertIfNecessary(matchingBeans.values(), type);
 			if (this.dependencyComparator != null && result instanceof List) {
-				Collections.sort((List) result, this.dependencyComparator);
+				Collections.sort((List<?>) result, this.dependencyComparator);
 			}
 			return result;
 		}

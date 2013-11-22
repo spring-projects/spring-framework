@@ -263,7 +263,7 @@ public abstract class Assert {
 	 * @param message the exception message to use if the assertion fails
 	 * @throws IllegalArgumentException if the collection is {@code null} or has no elements
 	 */
-	public static void notEmpty(Collection collection, String message) {
+	public static void notEmpty(Collection<?> collection, String message) {
 		if (CollectionUtils.isEmpty(collection)) {
 			throw new IllegalArgumentException(message);
 		}
@@ -276,7 +276,7 @@ public abstract class Assert {
 	 * @param collection the collection to check
 	 * @throws IllegalArgumentException if the collection is {@code null} or has no elements
 	 */
-	public static void notEmpty(Collection collection) {
+	public static void notEmpty(Collection<?> collection) {
 		notEmpty(collection,
 				"[Assertion failed] - this collection must not be empty: it must contain at least 1 element");
 	}
@@ -289,7 +289,7 @@ public abstract class Assert {
 	 * @param message the exception message to use if the assertion fails
 	 * @throws IllegalArgumentException if the map is {@code null} or has no entries
 	 */
-	public static void notEmpty(Map map, String message) {
+	public static void notEmpty(Map<?, ?> map, String message) {
 		if (CollectionUtils.isEmpty(map)) {
 			throw new IllegalArgumentException(message);
 		}
@@ -302,7 +302,7 @@ public abstract class Assert {
 	 * @param map the map to check
 	 * @throws IllegalArgumentException if the map is {@code null} or has no entries
 	 */
-	public static void notEmpty(Map map) {
+	public static void notEmpty(Map<?, ?> map) {
 		notEmpty(map, "[Assertion failed] - this map must not be empty; it must contain at least one entry");
 	}
 

@@ -59,7 +59,7 @@ public class RollbackRuleAttribute implements Serializable{
 	 * @throws IllegalArgumentException if the supplied {@code clazz} is
 	 * not a {@code Throwable} type or is {@code null}
 	 */
-	public RollbackRuleAttribute(Class clazz) {
+	public RollbackRuleAttribute(Class<?> clazz) {
 		Assert.notNull(clazz, "'clazz' cannot be null.");
 		if (!Throwable.class.isAssignableFrom(clazz)) {
 			throw new IllegalArgumentException(
@@ -110,7 +110,7 @@ public class RollbackRuleAttribute implements Serializable{
 	}
 
 
-	private int getDepth(Class exceptionClass, int depth) {
+	private int getDepth(Class<?> exceptionClass, int depth) {
 		if (exceptionClass.getName().indexOf(this.exceptionName) != -1) {
 			// Found it!
 			return depth;

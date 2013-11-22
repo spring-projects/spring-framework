@@ -523,7 +523,7 @@ public abstract class AnnotationUtils {
 	 */
 	public static Object getValue(Annotation annotation, String attributeName) {
 		try {
-			Method method = annotation.annotationType().getDeclaredMethod(attributeName, new Class[0]);
+			Method method = annotation.annotationType().getDeclaredMethod(attributeName, new Class<?>[0]);
 			ReflectionUtils.makeAccessible(method);
 			return method.invoke(annotation);
 		}
@@ -574,7 +574,7 @@ public abstract class AnnotationUtils {
 	 */
 	public static Object getDefaultValue(Class<? extends Annotation> annotationType, String attributeName) {
 		try {
-			Method method = annotationType.getDeclaredMethod(attributeName, new Class[0]);
+			Method method = annotationType.getDeclaredMethod(attributeName, new Class<?>[0]);
 			return method.getDefaultValue();
 		}
 		catch (Exception ex) {

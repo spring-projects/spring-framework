@@ -29,9 +29,9 @@ import javax.naming.NamingException;
 @SuppressWarnings("serial")
 public class TypeMismatchNamingException extends NamingException {
 
-	private Class requiredType;
+	private Class<?> requiredType;
 
-	private Class actualType;
+	private Class<?> actualType;
 
 
 	/**
@@ -41,7 +41,7 @@ public class TypeMismatchNamingException extends NamingException {
 	 * @param requiredType the required type for the lookup
 	 * @param actualType the actual type that the lookup returned
 	 */
-	public TypeMismatchNamingException(String jndiName, Class requiredType, Class actualType) {
+	public TypeMismatchNamingException(String jndiName, Class<?> requiredType, Class<?> actualType) {
 		super("Object of type [" + actualType + "] available at JNDI location [" +
 				jndiName + "] is not assignable to [" + requiredType.getName() + "]");
 		this.requiredType = requiredType;
@@ -60,14 +60,14 @@ public class TypeMismatchNamingException extends NamingException {
 	/**
 	 * Return the required type for the lookup, if available.
 	 */
-	public final Class getRequiredType() {
+	public final Class<?> getRequiredType() {
 		return this.requiredType;
 	}
 
 	/**
 	 * Return the actual type that the lookup returned, if available.
 	 */
-	public final Class getActualType() {
+	public final Class<?> getActualType() {
 		return this.actualType;
 	}
 

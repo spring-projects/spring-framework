@@ -18,6 +18,7 @@ package org.springframework.validation.beanvalidation;
 
 import java.lang.reflect.Method;
 import java.util.Set;
+
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validation;
@@ -27,10 +28,6 @@ import javax.validation.ValidatorFactory;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.hibernate.validator.HibernateValidator;
-import org.hibernate.validator.method.MethodConstraintViolation;
-import org.hibernate.validator.method.MethodConstraintViolationException;
-import org.hibernate.validator.method.MethodValidator;
-
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.annotation.Validated;
@@ -113,7 +110,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Object invoke(MethodInvocation invocation) throws Throwable {
-		Class[] groups = determineValidationGroups(invocation);
+		Class<?>[] groups = determineValidationGroups(invocation);
 		if (forExecutablesMethod != null) {
 			Object executableValidator = ReflectionUtils.invokeMethod(forExecutablesMethod, this.validator);
 			Set<ConstraintViolation<?>> result = (Set<ConstraintViolation<?>>)
@@ -143,9 +140,9 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	 * @param invocation the current MethodInvocation
 	 * @return the applicable validation groups as a Class array
 	 */
-	protected Class[] determineValidationGroups(MethodInvocation invocation) {
+	protected Class<?>[] determineValidationGroups(MethodInvocation invocation) {
 		Validated valid = AnnotationUtils.findAnnotation(invocation.getThis().getClass(), Validated.class);
-		return (valid != null ? valid.value() : new Class[0]);
+		return (valid != null ? valid.value() : new Class<?>[0]);
 	}
 
 
@@ -158,23 +155,23 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 			return Validation.byProvider(HibernateValidator.class).configure().buildValidatorFactory();
 		}
 
-		public static Object invokeWithinValidation(MethodInvocation invocation, Validator validator, Class[] groups)
+		@SuppressWarnings("deprecation")
+		public static Object invokeWithinValidation(MethodInvocation invocation, Validator validator, Class<?>[] groups)
 				throws Throwable {
 
-			MethodValidator methodValidator = validator.unwrap(MethodValidator.class);
-			Set<MethodConstraintViolation<Object>> result = methodValidator.validateAllParameters(
+			org.hibernate.validator.method.MethodValidator methodValidator = validator.unwrap(org.hibernate.validator.method.MethodValidator.class);
+			Set<org.hibernate.validator.method.MethodConstraintViolation<Object>> result = methodValidator.validateAllParameters(
 					invocation.getThis(), invocation.getMethod(), invocation.getArguments(), groups);
 			if (!result.isEmpty()) {
-				throw new MethodConstraintViolationException(result);
+				throw new org.hibernate.validator.method.MethodConstraintViolationException(result);
 			}
 			Object returnValue = invocation.proceed();
 			result = methodValidator.validateReturnValue(
 					invocation.getThis(), invocation.getMethod(), returnValue, groups);
 			if (!result.isEmpty()) {
-				throw new MethodConstraintViolationException(result);
+				throw new org.hibernate.validator.method.MethodConstraintViolationException(result);
 			}
 			return returnValue;
 		}
 	}
-
 }

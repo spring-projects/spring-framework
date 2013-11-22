@@ -50,7 +50,7 @@ import org.springframework.jms.support.destination.DestinationResolver;
  */
 public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactory {
 
-	private Class activationSpecClass;
+	private Class<?> activationSpecClass;
 
 	private Map<String, String> defaultProperties;
 
@@ -61,7 +61,7 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 	 * Specify the fully-qualified ActivationSpec class name for the target
 	 * provider (e.g. "org.apache.activemq.ra.ActiveMQActivationSpec").
 	 */
-	public void setActivationSpecClass(Class activationSpecClass) {
+	public void setActivationSpecClass(Class<?> activationSpecClass) {
 		this.activationSpecClass = activationSpecClass;
 	}
 
@@ -93,7 +93,7 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 
 	@Override
 	public ActivationSpec createActivationSpec(ResourceAdapter adapter, JmsActivationSpecConfig config) {
-		Class activationSpecClassToUse = this.activationSpecClass;
+		Class<?> activationSpecClassToUse = this.activationSpecClass;
 		if (activationSpecClassToUse == null) {
 			activationSpecClassToUse = determineActivationSpecClass(adapter);
 			if (activationSpecClassToUse == null) {
@@ -118,7 +118,7 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 	 * if not determinable
 	 * @see #setActivationSpecClass
 	 */
-	protected Class determineActivationSpecClass(ResourceAdapter adapter) {
+	protected Class<?> determineActivationSpecClass(ResourceAdapter adapter) {
 		return null;
 	}
 

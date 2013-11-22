@@ -41,6 +41,7 @@ import org.springframework.jndi.JndiTemplate;
  * @author Juergen Hoeller
  * @since 4.0
  */
+@SuppressWarnings("serial")
 public class DefaultManagedAwareThreadFactory extends CustomizableThreadFactory implements InitializingBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());

@@ -13,20 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.core;
 
-
 /**
+ * Strategy interface that resolves a given name to a destination.
+ *
  * @author Mark Fisher
  * @since 4.0
  */
 public interface DestinationResolver<D> {
 
-
 	/**
-	 * @param name
-	 * @return
-	 * @throws DestinationResolutionException
+	 * Resolve the given {@code name} to a destination.
+	 * @param name the name to resolve
+	 * @return the destination (must not be {@code null})
+	 * @throws DestinationResolutionException if the name cannot be resolved
 	 */
 	D resolveDestination(String name) throws DestinationResolutionException;
 

@@ -129,7 +129,7 @@ public abstract class JdbcUtils {
 	 * @return the value object
 	 * @throws SQLException if thrown by the JDBC API
 	 */
-	public static Object getResultSetValue(ResultSet rs, int index, Class requiredType) throws SQLException {
+	public static Object getResultSetValue(ResultSet rs, int index, Class<?> requiredType) throws SQLException {
 		if (requiredType == null) {
 			return getResultSetValue(rs, index);
 		}

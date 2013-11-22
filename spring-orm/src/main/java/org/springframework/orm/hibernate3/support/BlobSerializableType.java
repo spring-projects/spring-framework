@@ -82,7 +82,7 @@ public class BlobSerializableType extends AbstractLobType {
 	}
 
 	@Override
-	public Class returnedClass() {
+	public Class<?> returnedClass() {
 		return Serializable.class;
 	}
 

@@ -32,7 +32,7 @@ public class NoRollbackRuleAttribute extends RollbackRuleAttribute {
 	 * @param clazz the {@code Throwable} class
 	 * @see RollbackRuleAttribute#RollbackRuleAttribute(Class)
 	 */
-	public NoRollbackRuleAttribute(Class clazz) {
+	public NoRollbackRuleAttribute(Class<?> clazz) {
 		super(clazz);
 	}
 

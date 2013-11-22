@@ -50,7 +50,7 @@ public class CustomAutowireConfigurer implements BeanFactoryPostProcessor, BeanC
 
 	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
-	private Set customQualifierTypes;
+	private Set<?> customQualifierTypes;
 
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
@@ -79,7 +79,7 @@ public class CustomAutowireConfigurer implements BeanFactoryPostProcessor, BeanC
 	 * does not require explicit registration.
 	 * @param customQualifierTypes the custom types to register
 	 */
-	public void setCustomQualifierTypes(Set customQualifierTypes) {
+	public void setCustomQualifierTypes(Set<?> customQualifierTypes) {
 		this.customQualifierTypes = customQualifierTypes;
 	}
 
@@ -99,13 +99,13 @@ public class CustomAutowireConfigurer implements BeanFactoryPostProcessor, BeanC
 			QualifierAnnotationAutowireCandidateResolver resolver =
 					(QualifierAnnotationAutowireCandidateResolver) dlbf.getAutowireCandidateResolver();
 			for (Object value : this.customQualifierTypes) {
-				Class customType = null;
+				Class<? extends Annotation> customType = null;
 				if (value instanceof Class) {
-					customType = (Class) value;
+					customType = (Class<? extends Annotation>) value;
 				}
 				else if (value instanceof String) {
 					String className = (String) value;
-					customType = ClassUtils.resolveClassName(className, this.beanClassLoader);
+					customType = (Class<? extends Annotation>) ClassUtils.resolveClassName(className, this.beanClassLoader);
 				}
 				else {
 					throw new IllegalArgumentException(

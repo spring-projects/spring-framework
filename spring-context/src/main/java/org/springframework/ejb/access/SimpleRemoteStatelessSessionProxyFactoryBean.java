@@ -62,7 +62,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBean extends SimpleRemoteSl
 	implements FactoryBean<Object>, BeanClassLoaderAware {
 
 	/** The business interface of the EJB we're proxying */
-	private Class businessInterface;
+	private Class<?> businessInterface;
 
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
@@ -80,14 +80,14 @@ public class SimpleRemoteStatelessSessionProxyFactoryBean extends SimpleRemoteSl
 	 * converted to Spring's generic RemoteAccessException.
 	 * @param businessInterface the business interface of the EJB
 	 */
-	public void setBusinessInterface(Class businessInterface) {
+	public void setBusinessInterface(Class<?> businessInterface) {
 		this.businessInterface = businessInterface;
 	}
 
 	/**
 	 * Return the business interface of the EJB we're proxying.
 	 */
-	public Class getBusinessInterface() {
+	public Class<?> getBusinessInterface() {
 		return this.businessInterface;
 	}
 

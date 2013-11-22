@@ -88,8 +88,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 	/**
 	 * Handle incoming WebSocket messages from clients.
 	 */
-	public void handleMessageFromClient(WebSocketSession session, WebSocketMessage webSocketMessage,
-			MessageChannel outputChannel) {
+	public void handleMessageFromClient(WebSocketSession session,
+			WebSocketMessage<?> webSocketMessage, MessageChannel outputChannel) {
 
 		Message<?> message;
 		try {

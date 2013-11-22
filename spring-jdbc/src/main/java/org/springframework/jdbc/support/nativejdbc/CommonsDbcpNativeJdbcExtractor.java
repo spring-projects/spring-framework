@@ -63,7 +63,7 @@ public class CommonsDbcpNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 			return null;
 		}
 		try {
-			Class classToAnalyze = obj.getClass();
+			Class<?> classToAnalyze = obj.getClass();
 			while (!Modifier.isPublic(classToAnalyze.getModifiers())) {
 				classToAnalyze = classToAnalyze.getSuperclass();
 				if (classToAnalyze == null) {

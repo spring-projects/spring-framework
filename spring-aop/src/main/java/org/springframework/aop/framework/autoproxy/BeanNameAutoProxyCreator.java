@@ -73,7 +73,7 @@ public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 	 * Identify as bean to proxy if the bean name is in the configured list of names.
 	 */
 	@Override
-	protected Object[] getAdvicesAndAdvisorsForBean(Class beanClass, String beanName, TargetSource targetSource) {
+	protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String beanName, TargetSource targetSource) {
 		if (this.beanNames != null) {
 			for (String mappedName : this.beanNames) {
 				if (FactoryBean.class.isAssignableFrom(beanClass)) {

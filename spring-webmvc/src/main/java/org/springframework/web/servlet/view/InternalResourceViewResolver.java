@@ -63,7 +63,7 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 	 * is present.
 	 */
 	public InternalResourceViewResolver() {
-		Class viewClass = requiredViewClass();
+		Class<?> viewClass = requiredViewClass();
 		if (viewClass.equals(InternalResourceView.class) && jstlPresent) {
 			viewClass = JstlView.class;
 		}
@@ -74,7 +74,7 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 	 * This resolver requires {@link InternalResourceView}.
 	 */
 	@Override
-	protected Class requiredViewClass() {
+	protected Class<?> requiredViewClass() {
 		return InternalResourceView.class;
 	}
 

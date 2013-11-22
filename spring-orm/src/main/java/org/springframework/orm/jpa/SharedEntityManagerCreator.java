@@ -73,7 +73,7 @@ public abstract class SharedEntityManagerCreator {
 	 * {@code createEntityManager} call (may be {@code null})
 	 * @return a shareable transaction EntityManager proxy
 	 */
-	public static EntityManager createSharedEntityManager(EntityManagerFactory emf, Map properties) {
+	public static EntityManager createSharedEntityManager(EntityManagerFactory emf, Map<?, ?> properties) {
 		return createSharedEntityManager(emf, properties, true);
 	}
 
@@ -87,11 +87,11 @@ public abstract class SharedEntityManagerCreator {
 	 * @return a shareable transaction EntityManager proxy
 	 */
 	public static EntityManager createSharedEntityManager(
-			EntityManagerFactory emf, Map properties, boolean synchronizedWithTransaction) {
+			EntityManagerFactory emf, Map<?, ?> properties, boolean synchronizedWithTransaction) {
 		Class<?> entityManagerInterface = (emf instanceof EntityManagerFactoryInfo ?
 				((EntityManagerFactoryInfo) emf).getEntityManagerInterface() : EntityManager.class);
-		return createSharedEntityManager(emf, properties, synchronizedWithTransaction, 
-				(entityManagerInterface == null ? NO_ENTITY_MANAGER_INTERFACES : 
+		return createSharedEntityManager(emf, properties, synchronizedWithTransaction,
+				(entityManagerInterface == null ? NO_ENTITY_MANAGER_INTERFACES :
 					new Class<?>[] { entityManagerInterface }));
 	}
 
@@ -105,7 +105,7 @@ public abstract class SharedEntityManagerCreator {
 	 * @return a shareable transactional EntityManager proxy
 	 */
 	public static EntityManager createSharedEntityManager(
-			EntityManagerFactory emf, Map properties, Class... entityManagerInterfaces) {
+			EntityManagerFactory emf, Map<?, ?> properties, Class<?>... entityManagerInterfaces) {
 
 		return createSharedEntityManager(emf, properties, true, entityManagerInterfaces);
 	}
@@ -121,14 +121,14 @@ public abstract class SharedEntityManagerCreator {
 	 * EntityManager. Allows the addition or specification of proprietary interfaces.
 	 * @return a shareable transactional EntityManager proxy
 	 */
-	public static EntityManager createSharedEntityManager(EntityManagerFactory emf, Map properties,
-			boolean synchronizedWithTransaction, Class... entityManagerInterfaces) {
+	public static EntityManager createSharedEntityManager(EntityManagerFactory emf, Map<?, ?> properties,
+			boolean synchronizedWithTransaction, Class<?>... entityManagerInterfaces) {
 
 		ClassLoader cl = null;
 		if (emf instanceof EntityManagerFactoryInfo) {
 			cl = ((EntityManagerFactoryInfo) emf).getBeanClassLoader();
 		}
-		Class[] ifcs = new Class[entityManagerInterfaces.length + 1];
+		Class<?>[] ifcs = new Class<?>[entityManagerInterfaces.length + 1];
 		System.arraycopy(entityManagerInterfaces, 0, ifcs, 0, entityManagerInterfaces.length);
 		ifcs[entityManagerInterfaces.length] = EntityManagerProxy.class;
 		return (EntityManager) Proxy.newProxyInstance(
@@ -149,14 +149,14 @@ public abstract class SharedEntityManagerCreator {
 
 		private final EntityManagerFactory targetFactory;
 
-		private final Map properties;
+		private final Map<?, ?> properties;
 
 		private final boolean synchronizedWithTransaction;
 
 		private transient volatile ClassLoader proxyClassLoader;
 
 		public SharedEntityManagerInvocationHandler(
-				EntityManagerFactory target, Map properties, boolean synchronizedWithTransaction) {
+				EntityManagerFactory target, Map<?, ?> properties, boolean synchronizedWithTransaction) {
 			this.targetFactory = target;
 			this.properties = properties;
 			this.synchronizedWithTransaction = synchronizedWithTransaction;
@@ -203,7 +203,7 @@ public abstract class SharedEntityManagerCreator {
 			}
 			else if (method.getName().equals("unwrap")) {
 				// JPA 2.0: handle unwrap method - could be a proxy match.
-				Class targetClass = (Class) args[0];
+				Class<?> targetClass = (Class<?>) args[0];
 				if (targetClass == null || targetClass.isInstance(proxy)) {
 					return proxy;
 				}
@@ -258,7 +258,7 @@ public abstract class SharedEntityManagerCreator {
 				if (result instanceof Query) {
 					Query query = (Query) result;
 					if (isNewEm) {
-						Class[] ifcs = ClassUtils.getAllInterfacesForClass(query.getClass(), this.proxyClassLoader);
+						Class<?>[] ifcs = ClassUtils.getAllInterfacesForClass(query.getClass(), this.proxyClassLoader);
 						result = Proxy.newProxyInstance(this.proxyClassLoader, ifcs,
 								new DeferredQueryInvocationHandler(query, target));
 						isNewEm = false;
@@ -317,7 +317,7 @@ public abstract class SharedEntityManagerCreator {
 			}
 			else if (method.getName().equals("unwrap")) {
 				// Handle JPA 2.0 unwrap method - could be a proxy match.
-				Class targetClass = (Class) args[0];
+				Class<?> targetClass = (Class<?>) args[0];
 				if (targetClass == null || targetClass.isInstance(proxy)) {
 					return proxy;
 				}

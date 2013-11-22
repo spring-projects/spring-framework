@@ -44,7 +44,7 @@ public class AspectJExpressionPointcutAdvisor extends AbstractGenericPointcutAdv
 		this.pointcut.setLocation(location);
 	}
 
-	public void setParameterTypes(Class[] types) {
+	public void setParameterTypes(Class<?>[] types) {
 		this.pointcut.setParameterTypes(types);
 	}
 

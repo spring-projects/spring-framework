@@ -80,6 +80,7 @@ import org.springframework.util.CollectionUtils;
  * @see LocalEntityManagerFactoryBean
  * @see LocalContainerEntityManagerFactoryBean
  */
+@SuppressWarnings("serial")
 public abstract class AbstractEntityManagerFactoryBean implements
 		FactoryBean<EntityManagerFactory>, BeanClassLoaderAware, BeanFactoryAware, BeanNameAware,
 		InitializingBean, DisposableBean, EntityManagerFactoryInfo, PersistenceExceptionTranslator, Serializable {
@@ -338,7 +339,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * @return proxy entity manager
 	 */
 	protected EntityManagerFactory createEntityManagerFactoryProxy(EntityManagerFactory emf) {
-		Set<Class> ifcs = new LinkedHashSet<Class>();
+		Set<Class<?>> ifcs = new LinkedHashSet<Class<?>>();
 		if (this.entityManagerFactoryInterface != null) {
 			ifcs.add(this.entityManagerFactoryInterface);
 		}
@@ -348,7 +349,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		ifcs.add(EntityManagerFactoryInfo.class);
 		try {
 			return (EntityManagerFactory) Proxy.newProxyInstance(
-					this.beanClassLoader, ifcs.toArray(new Class[ifcs.size()]),
+					this.beanClassLoader, ifcs.toArray(new Class<?>[ifcs.size()]),
 					new ManagedEntityManagerFactoryInvocationHandler(this));
 		}
 		catch (IllegalArgumentException ex) {
@@ -378,7 +379,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 			// JPA 2.1's createEntityManager(SynchronizationType, Map)
 			// Redirect to plain createEntityManager and add synchronization semantics through Spring proxy
 			EntityManager rawEntityManager = (args.length > 1 ?
-					this.nativeEntityManagerFactory.createEntityManager((Map) args[1]) :
+					this.nativeEntityManagerFactory.createEntityManager((Map<?, ?>) args[1]) :
 					this.nativeEntityManagerFactory.createEntityManager());
 			return ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager, this, true);
 		}
@@ -532,7 +533,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 				}
 				else if (method.getName().equals("unwrap")) {
 					// Handle JPA 2.1 unwrap method - could be a proxy match.
-					Class targetClass = (Class) args[0];
+					Class<?> targetClass = (Class<?>) args[0];
 					if (targetClass == null || targetClass.isInstance(proxy)) {
 						return proxy;
 					}

@@ -48,7 +48,7 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 
 	@Override
 	public List<Object> getInterceptorsAndDynamicInterceptionAdvice(
-			Advised config, Method method, Class targetClass) {
+			Advised config, Method method, Class<?> targetClass) {
 
 		// This is somewhat tricky... we have to process introductions first,
 		// but we need to preserve order in the ultimate list.
@@ -94,7 +94,7 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 	/**
 	 * Determine whether the Advisors contain matching introductions.
 	 */
-	private static boolean hasMatchingIntroductions(Advised config, Class targetClass) {
+	private static boolean hasMatchingIntroductions(Advised config, Class<?> targetClass) {
 		for (int i = 0; i < config.getAdvisors().length; i++) {
 			Advisor advisor = config.getAdvisors()[i];
 			if (advisor instanceof IntroductionAdvisor) {

@@ -196,7 +196,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	public void setCompleteAutoload(boolean completeAutoload) {
 		if (completeAutoload) {
 			try {
-				Class clazz = getClass().getClassLoader().loadClass(
+				Class<?> clazz = getClass().getClassLoader().loadClass(
 						"org.apache.tiles.extras.complete.CompleteAutoloadTilesInitializer");
 				this.tilesInitializer = (TilesInitializer) clazz.newInstance();
 			}
@@ -529,9 +529,9 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 			logger.debug("Registering Tiles 2.2 AttributeEvaluatorFactory for JSP 2.1");
 			try {
 				ClassLoader cl = TilesElActivator.class.getClassLoader();
-				Class aef = cl.loadClass("org.apache.tiles.evaluator.AttributeEvaluatorFactory");
-				Class baef = cl.loadClass("org.apache.tiles.evaluator.BasicAttributeEvaluatorFactory");
-				Constructor baefCtor = baef.getConstructor(AttributeEvaluator.class);
+				Class<?> aef = cl.loadClass("org.apache.tiles.evaluator.AttributeEvaluatorFactory");
+				Class<?> baef = cl.loadClass("org.apache.tiles.evaluator.BasicAttributeEvaluatorFactory");
+				Constructor<?> baefCtor = baef.getConstructor(AttributeEvaluator.class);
 				ELAttributeEvaluator evaluator = new ELAttributeEvaluator();
 				evaluator.setApplicationContext(container.getApplicationContext());
 				evaluator.init(new HashMap<String, String>());

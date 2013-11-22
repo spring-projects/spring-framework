@@ -62,7 +62,7 @@ public interface TaskScheduler {
 	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
 	 * @see org.springframework.scheduling.support.CronTrigger
 	 */
-	ScheduledFuture schedule(Runnable task, Trigger trigger);
+	ScheduledFuture<?> schedule(Runnable task, Trigger trigger);
 
 	/**
 	 * Schedule the given {@link Runnable}, invoking it at the specified execution time.
@@ -75,7 +75,7 @@ public interface TaskScheduler {
 	 * @throws org.springframework.core.task.TaskRejectedException if the given task was not accepted
 	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
 	 */
-	ScheduledFuture schedule(Runnable task, Date startTime);
+	ScheduledFuture<?> schedule(Runnable task, Date startTime);
 
 	/**
 	 * Schedule the given {@link Runnable}, invoking it at the specified execution time
@@ -90,7 +90,7 @@ public interface TaskScheduler {
 	 * @throws org.springframework.core.task.TaskRejectedException if the given task was not accepted
 	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
 	 */
-	ScheduledFuture scheduleAtFixedRate(Runnable task, Date startTime, long period);
+	ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Date startTime, long period);
 
 	/**
 	 * Schedule the given {@link Runnable}, starting as soon as possible and
@@ -103,7 +103,7 @@ public interface TaskScheduler {
 	 * @throws org.springframework.core.task.TaskRejectedException if the given task was not accepted
 	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
 	 */
-	ScheduledFuture scheduleAtFixedRate(Runnable task, long period);
+	ScheduledFuture<?> scheduleAtFixedRate(Runnable task, long period);
 
 	/**
 	 * Schedule the given {@link Runnable}, invoking it at the specified execution time
@@ -120,7 +120,7 @@ public interface TaskScheduler {
 	 * @throws org.springframework.core.task.TaskRejectedException if the given task was not accepted
 	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
 	 */
-	ScheduledFuture scheduleWithFixedDelay(Runnable task, Date startTime, long delay);
+	ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Date startTime, long delay);
 
 	/**
 	 * Schedule the given {@link Runnable}, starting as soon as possible and
@@ -134,6 +134,6 @@ public interface TaskScheduler {
 	 * @throws org.springframework.core.task.TaskRejectedException if the given task was not accepted
 	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
 	 */
-	ScheduledFuture scheduleWithFixedDelay(Runnable task, long delay);
+	ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, long delay);
 
 }

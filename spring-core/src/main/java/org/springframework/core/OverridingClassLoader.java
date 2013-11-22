@@ -55,8 +55,8 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 
 
 	@Override
-	protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
-		Class result = null;
+	protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+		Class<?> result = null;
 		if (isEligibleForOverriding(name)) {
 			result = loadClassForOverriding(name);
 		}
@@ -90,8 +90,8 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 	 * @return the Class object, or {@code null} if no class defined for that name
 	 * @throws ClassNotFoundException if the class for the given name couldn't be loaded
 	 */
-	protected Class loadClassForOverriding(String name) throws ClassNotFoundException {
-		Class result = findLoadedClass(name);
+	protected Class<?> loadClassForOverriding(String name) throws ClassNotFoundException {
+		Class<?> result = findLoadedClass(name);
 		if (result == null) {
 			byte[] bytes = loadBytesForClass(name);
 			if (bytes != null) {

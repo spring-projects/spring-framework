@@ -175,9 +175,9 @@ public abstract class PropertiesLoaderUtils {
 			clToUse = ClassUtils.getDefaultClassLoader();
 		}
 		Properties props = new Properties();
-		Enumeration urls = clToUse.getResources(resourceName);
+		Enumeration<URL> urls = clToUse.getResources(resourceName);
 		while (urls.hasMoreElements()) {
-			URL url = (URL) urls.nextElement();
+			URL url = urls.nextElement();
 			URLConnection con = url.openConnection();
 			ResourceUtils.useCachesIfNecessary(con);
 			InputStream is = con.getInputStream();

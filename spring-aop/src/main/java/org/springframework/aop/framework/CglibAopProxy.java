@@ -187,7 +187,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 			enhancer.setInterfaces(AopProxyUtils.completeProxiedInterfaces(this.advised));
 
 			Callback[] callbacks = getCallbacks(rootClass);
-			Class<?>[] types = new Class[callbacks.length];
+			Class<?>[] types = new Class<?>[callbacks.length];
 
 			for (int x = 0; x < types.length; x++) {
 				types[x] = callbacks[x].getClass();

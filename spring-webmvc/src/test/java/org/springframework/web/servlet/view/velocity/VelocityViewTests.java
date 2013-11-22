@@ -265,7 +265,7 @@ public class VelocityViewTests {
 
 		vv.setUrl(templateName);
 		vv.setApplicationContext(wac);
-		Map<String, Class> toolAttributes = new HashMap<String, Class>();
+		Map<String, Class<?>> toolAttributes = new HashMap<String, Class<?>>();
 		toolAttributes.put("math", MathTool.class);
 		vv.setToolAttributes(toolAttributes);
 		vv.setDateToolAttribute("dateTool");

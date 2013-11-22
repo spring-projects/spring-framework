@@ -60,7 +60,7 @@ public class PrioritizedParameterNameDiscoverer implements ParameterNameDiscover
 	}
 
 	@Override
-	public String[] getParameterNames(Constructor ctor) {
+	public String[] getParameterNames(Constructor<?> ctor) {
 		for (ParameterNameDiscoverer pnd : this.parameterNameDiscoverers) {
 			String[] result = pnd.getParameterNames(ctor);
 			if (result != null) {

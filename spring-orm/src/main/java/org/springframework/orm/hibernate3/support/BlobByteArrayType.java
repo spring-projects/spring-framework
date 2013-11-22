@@ -66,7 +66,7 @@ public class BlobByteArrayType extends AbstractLobType  {
 	}
 
 	@Override
-	public Class returnedClass() {
+	public Class<?> returnedClass() {
 		return byte[].class;
 	}
 

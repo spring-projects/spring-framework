@@ -240,7 +240,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 				return new RegexPatternTypeFilter(Pattern.compile(expression));
 			}
 			else if ("custom".equals(filterType)) {
-				Class filterClass = classLoader.loadClass(expression);
+				Class<?> filterClass = classLoader.loadClass(expression);
 				if (!TypeFilter.class.isAssignableFrom(filterClass)) {
 					throw new IllegalArgumentException(
 							"Class is not assignable to [" + TypeFilter.class.getName() + "]: " + expression);
@@ -257,7 +257,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Object instantiateUserDefinedStrategy(String className, Class strategyType, ClassLoader classLoader) {
+	private Object instantiateUserDefinedStrategy(String className, Class<?> strategyType, ClassLoader classLoader) {
 		Object result = null;
 		try {
 			result = classLoader.loadClass(className).newInstance();

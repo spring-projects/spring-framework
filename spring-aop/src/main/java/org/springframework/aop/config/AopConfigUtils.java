@@ -54,7 +54,7 @@ public abstract class AopConfigUtils {
 	/**
 	 * Stores the auto proxy creator classes in escalation order.
 	 */
-	private static final List<Class> APC_PRIORITY_LIST = new ArrayList<Class>();
+	private static final List<Class<?>> APC_PRIORITY_LIST = new ArrayList<Class<?>>();
 
 	/**
 	 * Setup the escalation list.
@@ -105,7 +105,7 @@ public abstract class AopConfigUtils {
 	}
 
 
-	private static BeanDefinition registerOrEscalateApcAsRequired(Class cls, BeanDefinitionRegistry registry, Object source) {
+	private static BeanDefinition registerOrEscalateApcAsRequired(Class<?> cls, BeanDefinitionRegistry registry, Object source) {
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 		if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
 			BeanDefinition apcDefinition = registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
@@ -126,13 +126,13 @@ public abstract class AopConfigUtils {
 		return beanDefinition;
 	}
 
-	private static int findPriorityForClass(Class clazz) {
+	private static int findPriorityForClass(Class<?> clazz) {
 		return APC_PRIORITY_LIST.indexOf(clazz);
 	}
 
 	private static int findPriorityForClass(String className) {
 		for (int i = 0; i < APC_PRIORITY_LIST.size(); i++) {
-			Class clazz = APC_PRIORITY_LIST.get(i);
+			Class<?> clazz = APC_PRIORITY_LIST.get(i);
 			if (clazz.getName().equals(className)) {
 				return i;
 			}

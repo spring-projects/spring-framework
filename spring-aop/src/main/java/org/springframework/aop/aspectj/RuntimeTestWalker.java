@@ -87,12 +87,12 @@ class RuntimeTestWalker {
 				new SubtypeSensitiveVarTypeTestVisitor().testsSubtypeSensitiveVars(this.runtimeTest));
 	}
 
-	public boolean testThisInstanceOfResidue(Class thisClass) {
+	public boolean testThisInstanceOfResidue(Class<?> thisClass) {
 		return (this.runtimeTest != null &&
 				new ThisInstanceOfResidueTestVisitor(thisClass).thisInstanceOfMatches(this.runtimeTest));
 	}
 
-	public boolean testTargetInstanceOfResidue(Class targetClass) {
+	public boolean testTargetInstanceOfResidue(Class<?> targetClass) {
 		return (this.runtimeTest != null &&
 				new TargetInstanceOfResidueTestVisitor(targetClass).targetInstanceOfMatches(this.runtimeTest));
 	}
@@ -169,11 +169,11 @@ class RuntimeTestWalker {
 
 	private static abstract class InstanceOfResidueTestVisitor extends TestVisitorAdapter {
 
-		private Class matchClass;
+		private Class<?> matchClass;
 		private boolean matches;
 		private int matchVarType;
 
-		public InstanceOfResidueTestVisitor(Class matchClass, boolean defaultMatches, int matchVarType) {
+		public InstanceOfResidueTestVisitor(Class<?> matchClass, boolean defaultMatches, int matchVarType) {
 			this.matchClass = matchClass;
 			this.matches = defaultMatches;
 			this.matchVarType = matchVarType;
@@ -192,7 +192,7 @@ class RuntimeTestWalker {
 				return;
 			}
 			try {
-				Class typeClass = ClassUtils.forName(type.getName(), this.matchClass.getClassLoader());
+				Class<?> typeClass = ClassUtils.forName(type.getName(), this.matchClass.getClassLoader());
 				// Don't use ReflectionType.isAssignableFrom() as it won't be aware of (Spring) mixins
 				this.matches = typeClass.isAssignableFrom(this.matchClass);
 			}
@@ -208,7 +208,7 @@ class RuntimeTestWalker {
 	 */
 	private static class TargetInstanceOfResidueTestVisitor extends InstanceOfResidueTestVisitor {
 
-		public TargetInstanceOfResidueTestVisitor(Class targetClass) {
+		public TargetInstanceOfResidueTestVisitor(Class<?> targetClass) {
 			super(targetClass, false, TARGET_VAR);
 		}
 
@@ -223,7 +223,7 @@ class RuntimeTestWalker {
 	 */
 	private static class ThisInstanceOfResidueTestVisitor extends InstanceOfResidueTestVisitor {
 
-		public ThisInstanceOfResidueTestVisitor(Class thisClass) {
+		public ThisInstanceOfResidueTestVisitor(Class<?> thisClass) {
 			super(thisClass, true, THIS_VAR);
 		}
 

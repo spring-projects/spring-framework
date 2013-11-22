@@ -148,6 +148,7 @@ public abstract class AbstractLobType implements UserType {
 	 * @see #nullSafeGetInternal
 	 */
 	@Override
+	@Deprecated
 	public final Object nullSafeGet(ResultSet rs, String[] names, Object owner)
 			throws HibernateException, SQLException {
 
@@ -171,6 +172,7 @@ public abstract class AbstractLobType implements UserType {
 	 * @see #nullSafeSetInternal
 	 */
 	@Override
+	@Deprecated
 	public final void nullSafeSet(PreparedStatement st, Object value, int index)
 			throws HibernateException, SQLException {
 

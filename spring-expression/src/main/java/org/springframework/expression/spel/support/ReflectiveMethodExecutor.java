@@ -45,7 +45,7 @@ class ReflectiveMethodExecutor implements MethodExecutor {
 	public ReflectiveMethodExecutor(Method theMethod, int[] argumentsRequiringConversion) {
 		this.method = theMethod;
 		if (theMethod.isVarArgs()) {
-			Class[] paramTypes = theMethod.getParameterTypes();
+			Class<?>[] paramTypes = theMethod.getParameterTypes();
 			this.varargsPosition = paramTypes.length - 1;
 		}
 		else {

@@ -46,6 +46,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 public class CatchAllConverter implements Converter {
 
 	@Override
+	@SuppressWarnings("rawtypes")
 	public boolean canConvert(Class type) {
 		return true;
 	}

@@ -131,7 +131,7 @@ public abstract class ExtendedEntityManagerCreator {
 	 * in any managed transaction
 	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
 	 */
-	public static EntityManager createContainerManagedEntityManager(EntityManagerFactory emf, Map properties) {
+	public static EntityManager createContainerManagedEntityManager(EntityManagerFactory emf, Map<?, ?> properties) {
 		return createContainerManagedEntityManager(emf, properties, true);
 	}
 
@@ -150,7 +150,7 @@ public abstract class ExtendedEntityManagerCreator {
 	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
 	 */
 	public static EntityManager createContainerManagedEntityManager(
-			EntityManagerFactory emf, Map properties, boolean synchronizedWithTransaction) {
+			EntityManagerFactory emf, Map<?, ?> properties, boolean synchronizedWithTransaction) {
 
 		Assert.notNull(emf, "EntityManagerFactory must not be null");
 		if (emf instanceof EntityManagerFactoryInfo) {
@@ -211,7 +211,7 @@ public abstract class ExtendedEntityManagerCreator {
 			boolean containerManaged, boolean synchronizedWithTransaction) {
 
 		Assert.notNull(rawEm, "EntityManager must not be null");
-		Set<Class> ifcs = new LinkedHashSet<Class>();
+		Set<Class<?>> ifcs = new LinkedHashSet<Class<?>>();
 		if (emIfc != null) {
 			ifcs.add(emIfc);
 		}
@@ -221,7 +221,7 @@ public abstract class ExtendedEntityManagerCreator {
 		ifcs.add(EntityManagerProxy.class);
 		return (EntityManager) Proxy.newProxyInstance(
 				(cl != null ? cl : ExtendedEntityManagerCreator.class.getClassLoader()),
-				ifcs.toArray(new Class[ifcs.size()]),
+				ifcs.toArray(new Class<?>[ifcs.size()]),
 				new ExtendedEntityManagerInvocationHandler(
 						rawEm, exceptionTranslator, jta, containerManaged, synchronizedWithTransaction));
 	}
@@ -285,7 +285,7 @@ public abstract class ExtendedEntityManagerCreator {
 			}
 			else if (method.getName().equals("unwrap")) {
 				// Handle JPA 2.0 unwrap method - could be a proxy match.
-				Class targetClass = (Class) args[0];
+				Class<?> targetClass = (Class<?>) args[0];
 				if (targetClass == null || targetClass.isInstance(proxy)) {
 					return proxy;
 				}

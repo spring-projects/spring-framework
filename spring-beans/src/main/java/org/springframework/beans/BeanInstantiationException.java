@@ -26,7 +26,7 @@ package org.springframework.beans;
 @SuppressWarnings("serial")
 public class BeanInstantiationException extends FatalBeanException {
 
-	private Class beanClass;
+	private Class<?> beanClass;
 
 
 	/**
@@ -34,7 +34,7 @@ public class BeanInstantiationException extends FatalBeanException {
 	 * @param beanClass the offending bean class
 	 * @param msg the detail message
 	 */
-	public BeanInstantiationException(Class beanClass, String msg) {
+	public BeanInstantiationException(Class<?> beanClass, String msg) {
 		this(beanClass, msg, null);
 	}
 
@@ -44,7 +44,7 @@ public class BeanInstantiationException extends FatalBeanException {
 	 * @param msg the detail message
 	 * @param cause the root cause
 	 */
-	public BeanInstantiationException(Class beanClass, String msg, Throwable cause) {
+	public BeanInstantiationException(Class<?> beanClass, String msg, Throwable cause) {
 		super("Could not instantiate bean class [" + beanClass.getName() + "]: " + msg, cause);
 		this.beanClass = beanClass;
 	}
@@ -52,7 +52,7 @@ public class BeanInstantiationException extends FatalBeanException {
 	/**
 	 * Return the offending bean class.
 	 */
-	public Class getBeanClass() {
+	public Class<?> getBeanClass() {
 		return beanClass;
 	}
 

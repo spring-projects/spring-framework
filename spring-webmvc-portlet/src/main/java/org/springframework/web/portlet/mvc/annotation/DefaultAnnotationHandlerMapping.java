@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+
 import javax.portlet.ActionRequest;
 import javax.portlet.ClientDataRequest;
 import javax.portlet.Event;
@@ -283,7 +284,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 		}
 
 		@Override
-		public int compareTo(Object other) {
+		public int compareTo(PortletRequestMappingPredicate other) {
 			return (other instanceof SpecialRequestTypePredicate ? -1 : compareParams(other));
 		}
 	}
@@ -300,7 +301,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 		}
 
 		@Override
-		public int compareTo(Object other) {
+		public int compareTo(PortletRequestMappingPredicate other) {
 			return (other instanceof SpecialRequestTypePredicate ? 1 : compareParams(other));
 		}
 	}
@@ -327,7 +328,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 		}
 
 		@Override
-		public int compareTo(Object other) {
+		public int compareTo(PortletRequestMappingPredicate other) {
 			if (other instanceof TypeLevelMappingPredicate) {
 				return 1;
 			}
@@ -371,7 +372,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 		}
 
 		@Override
-		public int compareTo(Object other) {
+		public int compareTo(PortletRequestMappingPredicate other) {
 			if (other instanceof TypeLevelMappingPredicate) {
 				return 1;
 			}
@@ -413,7 +414,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 		}
 
 		@Override
-		public int compareTo(Object other) {
+		public int compareTo(PortletRequestMappingPredicate other) {
 			if (other instanceof ResourceMappingPredicate) {
 				boolean hasResourceId = !"".equals(this.resourceId);
 				boolean otherHasResourceId = !"".equals(((ResourceMappingPredicate) other).resourceId);
@@ -454,7 +455,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 		}
 
 		@Override
-		public int compareTo(Object other) {
+		public int compareTo(PortletRequestMappingPredicate other) {
 			if (other instanceof EventMappingPredicate) {
 				boolean hasEventName = !"".equals(this.eventName);
 				boolean otherHasEventName = !"".equals(((EventMappingPredicate) other).eventName);

@@ -123,11 +123,11 @@ public class ReflectionHelper {
 				return Integer.MAX_VALUE;
 			}
 			if (argType != null) {
-				Class paramTypeClazz = paramType.getType();
+				Class<?> paramTypeClazz = paramType.getType();
 				if (paramTypeClazz.isPrimitive()) {
 					paramTypeClazz = Object.class;
 				}
-				Class superClass = argType.getClass().getSuperclass();
+				Class<?> superClass = argType.getClass().getSuperclass();
 				while (superClass != null) {
 					if (paramType.equals(superClass)) {
 						result = result + 2;
@@ -216,7 +216,7 @@ public class ReflectionHelper {
 		else {
 			// Now... we have the final argument in the method we are checking as a match and we have 0 or more other
 			// arguments left to pass to it.
-			Class varargsParameterType = expectedArgTypes.get(expectedArgTypes.size() - 1).getElementTypeDescriptor().getType();
+			Class<?> varargsParameterType = expectedArgTypes.get(expectedArgTypes.size() - 1).getElementTypeDescriptor().getType();
 
 			// All remaining parameters must be of this type or convertable to this type
 			for (int i = expectedArgTypes.size() - 1; i < suppliedArgTypes.size(); i++) {
@@ -319,7 +319,7 @@ public class ReflectionHelper {
 	public static void convertAllArguments(TypeConverter converter, Object[] arguments, Method method) throws SpelEvaluationException {
 		Integer varargsPosition = null;
 		if (method.isVarArgs()) {
-			Class[] paramTypes = method.getParameterTypes();
+			Class<?>[] paramTypes = method.getParameterTypes();
 			varargsPosition = paramTypes.length - 1;
 		}
 		for (int argPosition = 0; argPosition < arguments.length; argPosition++) {
@@ -361,7 +361,7 @@ public class ReflectionHelper {
 	 * @param args the arguments to be setup ready for the invocation
 	 * @return a repackaged array of arguments where any varargs setup has been done
 	 */
-	public static Object[] setupArgumentsForVarargsInvocation(Class[] requiredParameterTypes, Object... args) {
+	public static Object[] setupArgumentsForVarargsInvocation(Class<?>[] requiredParameterTypes, Object... args) {
 		// Check if array already built for final argument
 		int parameterCount = requiredParameterTypes.length;
 		int argumentCount = args.length;

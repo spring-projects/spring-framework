@@ -172,7 +172,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 		}
 		else if (isPartCollection(parameter)) {
 			assertIsMultipartRequest(servletRequest);
-			arg = new ArrayList(servletRequest.getParts());
+			arg = new ArrayList<Object>(servletRequest.getParts());
 		}
 		else {
 			arg = null;
@@ -243,7 +243,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 			builder.queryParam(name);
 		}
 		else if (value instanceof Collection) {
-			for (Object v : (Collection) value) {
+			for (Object v : (Collection<?>) value) {
 				v = formatUriValue(conversionService, TypeDescriptor.nested(parameter, 1), v);
 				builder.queryParam(name, v);
 			}

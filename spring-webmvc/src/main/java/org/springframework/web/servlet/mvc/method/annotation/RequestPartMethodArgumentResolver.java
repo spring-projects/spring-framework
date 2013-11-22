@@ -137,7 +137,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 		}
 		else if (isPartCollection(parameter)) {
 			assertIsMultipartRequest(servletRequest);
-			arg = new ArrayList(servletRequest.getParts());
+			arg = new ArrayList<Object>(servletRequest.getParts());
 		}
 		else {
 			try {

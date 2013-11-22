@@ -33,7 +33,7 @@ public class EnvironmentAccessor implements PropertyAccessor {
 
 	@Override
 	public Class<?>[] getSpecificTargetClasses() {
-		return new Class[] { Environment.class };
+		return new Class<?>[] { Environment.class };
 	}
 
 	/**

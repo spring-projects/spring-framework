@@ -253,7 +253,7 @@ public final class WebAsyncManager {
 	 * @see #getConcurrentResult()
 	 * @see #getConcurrentResultContext()
 	 */
-	@SuppressWarnings({"unchecked" })
+	@SuppressWarnings({"unchecked", "rawtypes" })
 	public void startCallableProcessing(final Callable<?> callable, Object... processingContext) throws Exception {
 		Assert.notNull(callable, "Callable must not be null");
 		startCallableProcessing(new WebAsyncTask(callable), processingContext);

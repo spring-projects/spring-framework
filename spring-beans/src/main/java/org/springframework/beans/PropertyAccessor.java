@@ -86,7 +86,7 @@ public interface PropertyAccessor {
 	 * @throws PropertyAccessException if the property was valid but the
 	 * accessor method failed
 	 */
-	Class getPropertyType(String propertyName) throws BeansException;
+	Class<?> getPropertyType(String propertyName) throws BeansException;
 
 	/**
 	 * Return a type descriptor for the specified property:

@@ -49,7 +49,7 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	 * @param persistentClass the persistent class
 	 * @param identifier the ID of the object that should have been retrieved
 	 */
-	public ObjectRetrievalFailureException(Class persistentClass, Object identifier) {
+	public ObjectRetrievalFailureException(Class<?> persistentClass, Object identifier) {
 		this(persistentClass, identifier,
 				"Object of class [" + persistentClass.getName() + "] with identifier [" + identifier + "]: not found",
 				null);
@@ -64,7 +64,7 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	 * @param cause the source exception
 	 */
 	public ObjectRetrievalFailureException(
-			Class persistentClass, Object identifier, String msg, Throwable cause) {
+			Class<?> persistentClass, Object identifier, String msg, Throwable cause) {
 
 		super(msg, cause);
 		this.persistentClass = persistentClass;
@@ -104,8 +104,8 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	 * Return the persistent class of the object that was not found.
 	 * If no Class was specified, this method returns null.
 	 */
-	public Class getPersistentClass() {
-		return (this.persistentClass instanceof Class ? (Class) this.persistentClass : null);
+	public Class<?> getPersistentClass() {
+		return (this.persistentClass instanceof Class ? (Class<?>) this.persistentClass : null);
 	}
 
 	/**
@@ -114,7 +114,7 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	 */
 	public String getPersistentClassName() {
 		if (this.persistentClass instanceof Class) {
-			return ((Class) this.persistentClass).getName();
+			return ((Class<?>) this.persistentClass).getName();
 		}
 		return (this.persistentClass != null ? this.persistentClass.toString() : null);
 	}

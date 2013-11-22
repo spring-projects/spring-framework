@@ -32,7 +32,6 @@ import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -76,7 +75,7 @@ public class CachedIntrospectionResults {
 	 * Needs to be a WeakHashMap with WeakReferences as values to allow
 	 * for proper garbage collection in case of multiple class loaders.
 	 */
-	static final Map<Class, Object> classCache = new WeakHashMap<Class, Object>();
+	static final Map<Class<?>, Object> classCache = new WeakHashMap<Class<?>, Object>();
 
 
 	/**
@@ -107,7 +106,7 @@ public class CachedIntrospectionResults {
 	 */
 	public static void clearClassLoader(ClassLoader classLoader) {
 		synchronized (classCache) {
-			for (Iterator<Class> it = classCache.keySet().iterator(); it.hasNext();) {
+			for (Iterator<Class<?>> it = classCache.keySet().iterator(); it.hasNext();) {
 				Class<?> beanClass = it.next();
 				if (isUnderneathClassLoader(beanClass.getClassLoader(), classLoader)) {
 					it.remove();
@@ -130,6 +129,7 @@ public class CachedIntrospectionResults {
 	 * @return the corresponding CachedIntrospectionResults
 	 * @throws BeansException in case of introspection failure
 	 */
+	@SuppressWarnings("unchecked")
 	static CachedIntrospectionResults forClass(Class<?> beanClass) throws BeansException {
 		CachedIntrospectionResults results;
 		Object value;
@@ -137,8 +137,8 @@ public class CachedIntrospectionResults {
 			value = classCache.get(beanClass);
 		}
 		if (value instanceof Reference) {
-			Reference ref = (Reference) value;
-			results = (CachedIntrospectionResults) ref.get();
+			Reference<CachedIntrospectionResults> ref = (Reference<CachedIntrospectionResults>) value;
+			results = ref.get();
 		}
 		else {
 			results = (CachedIntrospectionResults) value;

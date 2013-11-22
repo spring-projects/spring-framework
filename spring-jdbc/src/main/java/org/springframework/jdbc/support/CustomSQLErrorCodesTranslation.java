@@ -32,7 +32,7 @@ public class CustomSQLErrorCodesTranslation {
 
 	private String[] errorCodes = new String[0];
 
-	private Class exceptionClass;
+	private Class<?> exceptionClass;
 
 
 	/**
@@ -52,7 +52,7 @@ public class CustomSQLErrorCodesTranslation {
 	/**
 	 * Set the exception class for the specified error codes.
 	 */
-	public void setExceptionClass(Class exceptionClass) {
+	public void setExceptionClass(Class<?> exceptionClass) {
 		if (!DataAccessException.class.isAssignableFrom(exceptionClass)) {
 			throw new IllegalArgumentException("Invalid exception class [" + exceptionClass +
 					"]: needs to be a subclass of [org.springframework.dao.DataAccessException]");
@@ -63,7 +63,7 @@ public class CustomSQLErrorCodesTranslation {
 	/**
 	 * Return the exception class for the specified error codes.
 	 */
-	public Class getExceptionClass() {
+	public Class<?> getExceptionClass() {
 		return this.exceptionClass;
 	}
 

@@ -278,7 +278,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	protected Connection getCloseSuppressingConnectionProxy(Connection target) {
 		return (Connection) Proxy.newProxyInstance(
 				ConnectionProxy.class.getClassLoader(),
-				new Class[] {ConnectionProxy.class},
+				new Class<?>[] {ConnectionProxy.class},
 				new CloseSuppressingInvocationHandler(target));
 	}
 
@@ -307,12 +307,12 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 				return System.identityHashCode(proxy);
 			}
 			else if (method.getName().equals("unwrap")) {
-				if (((Class) args[0]).isInstance(proxy)) {
+				if (((Class<?>) args[0]).isInstance(proxy)) {
 					return proxy;
 				}
 			}
 			else if (method.getName().equals("isWrapperFor")) {
-				if (((Class) args[0]).isInstance(proxy)) {
+				if (((Class<?>) args[0]).isInstance(proxy)) {
 					return true;
 				}
 			}

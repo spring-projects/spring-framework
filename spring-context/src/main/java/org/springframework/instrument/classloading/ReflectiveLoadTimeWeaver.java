@@ -98,14 +98,14 @@ public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 		this.classLoader = classLoader;
 		this.addTransformerMethod = ClassUtils.getMethodIfAvailable(
 				this.classLoader.getClass(), ADD_TRANSFORMER_METHOD_NAME,
-				new Class[] {ClassFileTransformer.class});
+				new Class<?>[] {ClassFileTransformer.class});
 		if (this.addTransformerMethod == null) {
 			throw new IllegalStateException(
 					"ClassLoader [" + classLoader.getClass().getName() + "] does NOT provide an " +
 					"'addTransformer(ClassFileTransformer)' method.");
 		}
 		this.getThrowawayClassLoaderMethod = ClassUtils.getMethodIfAvailable(
-				this.classLoader.getClass(), GET_THROWAWAY_CLASS_LOADER_METHOD_NAME, new Class[0]);
+				this.classLoader.getClass(), GET_THROWAWAY_CLASS_LOADER_METHOD_NAME, new Class<?>[0]);
 		// getThrowawayClassLoader method is optional
 		if (this.getThrowawayClassLoaderMethod == null) {
 			if (logger.isInfoEnabled()) {

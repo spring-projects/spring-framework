@@ -249,14 +249,14 @@ class InstantiationModelAwarePointcutAdvisorImpl
 		}
 
 		@Override
-		public boolean matches(Method method, Class targetClass) {
+		public boolean matches(Method method, Class<?> targetClass) {
 			// We're either instantiated and matching on declared pointcut, or uninstantiated matching on either pointcut
 			return (isAspectMaterialized() && this.declaredPointcut.matches(method, targetClass)) ||
 					this.preInstantiationPointcut.getMethodMatcher().matches(method, targetClass);
 		}
 
 		@Override
-		public boolean matches(Method method, Class targetClass, Object[] args) {
+		public boolean matches(Method method, Class<?> targetClass, Object[] args) {
 			// This can match only on declared pointcut.
 			return (isAspectMaterialized() && this.declaredPointcut.matches(method, targetClass));
 		}

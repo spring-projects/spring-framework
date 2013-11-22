@@ -23,13 +23,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLXML;
+
+import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 
-import org.w3c.dom.Document;
-
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.w3c.dom.Document;
 
 /**
  * Default implementation of the {@link SqlXmlHandler} interface.
@@ -81,14 +82,12 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public Source getXmlAsSource(ResultSet rs, String columnName, Class sourceClass) throws SQLException {
+	public Source getXmlAsSource(ResultSet rs, String columnName, Class<? extends Source> sourceClass) throws SQLException {
 		return rs.getSQLXML(columnName).getSource(sourceClass != null ? sourceClass : DOMSource.class);
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public Source getXmlAsSource(ResultSet rs, int columnIndex, Class sourceClass) throws SQLException {
+	public Source getXmlAsSource(ResultSet rs, int columnIndex, Class<? extends Source> sourceClass) throws SQLException {
 		return rs.getSQLXML(columnIndex).getSource(sourceClass != null ? sourceClass : DOMSource.class);
 	}
 
@@ -128,10 +127,9 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 	}
 
 	@Override
-	public SqlXmlValue newSqlXmlValue(final Class resultClass, final XmlResultProvider provider) {
+	public SqlXmlValue newSqlXmlValue(final Class<? extends Result> resultClass, final XmlResultProvider provider) {
 		return new AbstractJdbc4SqlXmlValue() {
 			@Override
-			@SuppressWarnings("unchecked")
 			protected void provideXml(SQLXML xmlObject) throws SQLException, IOException {
 				provider.provideXml(xmlObject.setResult(resultClass));
 			}

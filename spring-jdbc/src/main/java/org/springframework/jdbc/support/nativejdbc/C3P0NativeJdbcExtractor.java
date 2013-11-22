@@ -63,7 +63,7 @@ public class C3P0NativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 	public C3P0NativeJdbcExtractor() {
 		try {
-			this.getRawConnectionMethod = getClass().getMethod("getRawConnection", new Class[] {Connection.class});
+			this.getRawConnectionMethod = getClass().getMethod("getRawConnection", new Class<?>[] {Connection.class});
 		}
 		catch (NoSuchMethodException ex) {
 			throw new IllegalStateException("Internal error in C3P0NativeJdbcExtractor: " + ex.getMessage());

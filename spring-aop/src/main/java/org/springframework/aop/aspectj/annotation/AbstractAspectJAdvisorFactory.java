@@ -37,11 +37,9 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.AjType;
 import org.aspectj.lang.reflect.AjTypeSystem;
 import org.aspectj.lang.reflect.PerClauseKind;
-
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.core.PrioritizedParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.StringUtils;
 
@@ -67,11 +65,11 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	 * (there <i>should</i> only be one anyway...)
 	 */
 	@SuppressWarnings("unchecked")
-	protected static AspectJAnnotation findAspectJAnnotationOnMethod(Method method) {
-		Class<? extends Annotation>[] classesToLookFor = new Class[] {
+	protected static AspectJAnnotation<?> findAspectJAnnotationOnMethod(Method method) {
+		Class<?>[] classesToLookFor = new Class<?>[] {
 				Before.class, Around.class, After.class, AfterReturning.class, AfterThrowing.class, Pointcut.class};
-		for (Class<? extends Annotation> c : classesToLookFor) {
-			AspectJAnnotation foundAnnotation = findAnnotation(method, c);
+		for (Class<?> c : classesToLookFor) {
+			AspectJAnnotation<?> foundAnnotation = findAnnotation(method, (Class<Annotation>) c);
 			if (foundAnnotation != null) {
 				return foundAnnotation;
 			}
@@ -156,7 +154,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	 * formal parameters for the pointcut.
 	 */
 	protected AspectJExpressionPointcut createPointcutExpression(
-			Method annotatedMethod, Class declarationScope, String[] pointcutParameterNames) {
+			Method annotatedMethod, Class<?> declarationScope, String[] pointcutParameterNames) {
 
 		Class<?> [] pointcutParameterTypes = new Class<?>[0];
 		if (pointcutParameterNames != null) {
@@ -210,8 +208,8 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
 		private static final String[] EXPRESSION_PROPERTIES = new String[] {"value", "pointcut"};
 
-		private static Map<Class, AspectJAnnotationType> annotationTypes =
-				new HashMap<Class, AspectJAnnotationType>();
+		private static Map<Class<?>, AspectJAnnotationType> annotationTypes =
+				new HashMap<Class<?>, AspectJAnnotationType>();
 
 		static {
 			annotationTypes.put(Pointcut.class,AspectJAnnotationType.AtPointcut);
@@ -245,7 +243,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		}
 
 		private AspectJAnnotationType determineAnnotationType(A annotation) {
-			for (Class type : annotationTypes.keySet()) {
+			for (Class<?> type : annotationTypes.keySet()) {
 				if (type.isInstance(annotation)) {
 					return annotationTypes.get(type);
 				}
@@ -307,7 +305,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 			if (method.getParameterTypes().length == 0) {
 				return new String[0];
 			}
-			AspectJAnnotation annotation = findAspectJAnnotationOnMethod(method);
+			AspectJAnnotation<?> annotation = findAspectJAnnotationOnMethod(method);
 			if (annotation == null) {
 				return null;
 			}
@@ -325,7 +323,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		}
 
 		@Override
-		public String[] getParameterNames(Constructor ctor) {
+		public String[] getParameterNames(Constructor<?> ctor) {
 			throw new UnsupportedOperationException("Spring AOP cannot handle constructor advice");
 		}
 	}

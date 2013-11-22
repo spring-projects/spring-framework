@@ -44,7 +44,7 @@ public class AbstractTemplateViewResolver extends UrlBasedViewResolver {
 
 
 	@Override
-	protected Class requiredViewClass() {
+	protected Class<?> requiredViewClass() {
 		return AbstractTemplateView.class;
 	}
 

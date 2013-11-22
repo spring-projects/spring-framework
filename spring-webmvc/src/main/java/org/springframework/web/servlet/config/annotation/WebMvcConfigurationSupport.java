@@ -45,7 +45,6 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
 import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
@@ -527,6 +526,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * Subclasses can call this method from {@link #configureMessageConverters(List)}.
 	 * @param messageConverters the list to add the default message converters to
 	 */
+	@SuppressWarnings("deprecation")
 	protected final void addDefaultHttpMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
 		StringHttpMessageConverter stringConverter = new StringHttpMessageConverter();
 		stringConverter.setWriteAcceptCharset(false);
@@ -547,7 +547,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			messageConverters.add(new MappingJackson2HttpMessageConverter());
 		}
 		else if (jacksonPresent) {
-			messageConverters.add(new MappingJacksonHttpMessageConverter());
+			messageConverters.add(new org.springframework.http.converter.json.MappingJacksonHttpMessageConverter());
 		}
 	}
 

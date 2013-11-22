@@ -68,7 +68,7 @@ public class ConfigurableObjectInputStream extends ObjectInputStream {
 
 
 	@Override
-	protected Class resolveClass(ObjectStreamClass classDesc) throws IOException, ClassNotFoundException {
+	protected Class<?> resolveClass(ObjectStreamClass classDesc) throws IOException, ClassNotFoundException {
 		try {
 			if (this.classLoader != null) {
 				// Use the specified ClassLoader to resolve local classes.
@@ -85,13 +85,13 @@ public class ConfigurableObjectInputStream extends ObjectInputStream {
 	}
 
 	@Override
-	protected Class resolveProxyClass(String[] interfaces) throws IOException, ClassNotFoundException {
+	protected Class<?> resolveProxyClass(String[] interfaces) throws IOException, ClassNotFoundException {
 		if (!this.acceptProxyClasses) {
 			throw new NotSerializableException("Not allowed to accept serialized proxy classes");
 		}
 		if (this.classLoader != null) {
 			// Use the specified ClassLoader to resolve local proxy classes.
-			Class[] resolvedInterfaces = new Class[interfaces.length];
+			Class<?>[] resolvedInterfaces = new Class<?>[interfaces.length];
 			for (int i = 0; i < interfaces.length; i++) {
 				try {
 					resolvedInterfaces[i] = ClassUtils.forName(interfaces[i], this.classLoader);
@@ -113,7 +113,7 @@ public class ConfigurableObjectInputStream extends ObjectInputStream {
 				return super.resolveProxyClass(interfaces);
 			}
 			catch (ClassNotFoundException ex) {
-				Class[] resolvedInterfaces = new Class[interfaces.length];
+				Class<?>[] resolvedInterfaces = new Class<?>[interfaces.length];
 				for (int i = 0; i < interfaces.length; i++) {
 					resolvedInterfaces[i] = resolveFallbackIfPossible(interfaces[i], ex);
 				}
@@ -131,7 +131,7 @@ public class ConfigurableObjectInputStream extends ObjectInputStream {
 	 * @param ex the original exception thrown when attempting to load the class
 	 * @return the newly resolved class (never {@code null})
 	 */
-	protected Class resolveFallbackIfPossible(String className, ClassNotFoundException ex)
+	protected Class<?> resolveFallbackIfPossible(String className, ClassNotFoundException ex)
 			throws IOException, ClassNotFoundException{
 
 		throw ex;

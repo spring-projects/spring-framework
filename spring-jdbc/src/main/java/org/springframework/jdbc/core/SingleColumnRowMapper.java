@@ -121,7 +121,7 @@ public class SingleColumnRowMapper<T> implements RowMapper<T> {
 	 * @see org.springframework.jdbc.support.JdbcUtils#getResultSetValue(java.sql.ResultSet, int, Class)
 	 * @see #getColumnValue(java.sql.ResultSet, int)
 	 */
-	protected Object getColumnValue(ResultSet rs, int index, Class requiredType) throws SQLException {
+	protected Object getColumnValue(ResultSet rs, int index, Class<?> requiredType) throws SQLException {
 		if (requiredType != null) {
 			return JdbcUtils.getResultSetValue(rs, index, requiredType);
 		}
@@ -164,18 +164,18 @@ public class SingleColumnRowMapper<T> implements RowMapper<T> {
 	 * @see #getColumnValue(java.sql.ResultSet, int, Class)
 	 */
 	@SuppressWarnings("unchecked")
-	protected Object convertValueToRequiredType(Object value, Class requiredType) {
+	protected Object convertValueToRequiredType(Object value, Class<?> requiredType) {
 		if (String.class.equals(requiredType)) {
 			return value.toString();
 		}
 		else if (Number.class.isAssignableFrom(requiredType)) {
 			if (value instanceof Number) {
 				// Convert original Number to target Number class.
-				return NumberUtils.convertNumberToTargetClass(((Number) value), requiredType);
+				return NumberUtils.convertNumberToTargetClass(((Number) value), (Class<Number>) requiredType);
 			}
 			else {
 				// Convert stringified value to target Number class.
-				return NumberUtils.parseNumber(value.toString(), requiredType);
+				return NumberUtils.parseNumber(value.toString(),(Class<Number>) requiredType);
 			}
 		}
 		else {

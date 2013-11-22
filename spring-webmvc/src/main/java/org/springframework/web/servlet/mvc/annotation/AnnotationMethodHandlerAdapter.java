@@ -35,6 +35,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -42,10 +43,10 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.xml.transform.Source;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -53,7 +54,6 @@ import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.Ordered;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -68,7 +68,6 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
-import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -201,8 +200,10 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		// See SPR-7316
 		StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
 		stringHttpMessageConverter.setWriteAcceptCharset(false);
-		this.messageConverters = new HttpMessageConverter[]{new ByteArrayHttpMessageConverter(), stringHttpMessageConverter,
-				new SourceHttpMessageConverter(), new XmlAwareFormHttpMessageConverter()};
+		this.messageConverters = new HttpMessageConverter<?>[] {
+			new ByteArrayHttpMessageConverter(), stringHttpMessageConverter,
+			new SourceHttpMessageConverter<Source>(),
+			new org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter() };
 	}
 
 
@@ -467,7 +468,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 * Build a HandlerMethodResolver for the given handler type.
 	 */
 	private ServletHandlerMethodResolver getMethodResolver(Object handler) {
-		Class handlerClass = ClassUtils.getUserClass(handler);
+		Class<?> handlerClass = ClassUtils.getUserClass(handler);
 		ServletHandlerMethodResolver resolver = this.methodResolverCache.get(handlerClass);
 		if (resolver == null) {
 			synchronized (this.methodResolverCache) {
@@ -781,7 +782,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		}
 
 		@Override
-		protected void raiseMissingParameterException(String paramName, Class paramType) throws Exception {
+		protected void raiseMissingParameterException(String paramName, Class<?> paramType) throws Exception {
 			throw new MissingServletRequestParameterException(paramName, paramType.getSimpleName());
 		}
 
@@ -830,7 +831,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		}
 
 		@Override
-		protected Object resolveCookieValue(String cookieName, Class paramType, NativeWebRequest webRequest)
+		protected Object resolveCookieValue(String cookieName, Class<?> paramType, NativeWebRequest webRequest)
 				throws Exception {
 
 			HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
@@ -848,7 +849,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 
 		@Override
 		@SuppressWarnings({"unchecked"})
-		protected String resolvePathVariable(String pathVarName, Class paramType, NativeWebRequest webRequest)
+		protected String resolvePathVariable(String pathVarName, Class<?> paramType, NativeWebRequest webRequest)
 				throws Exception {
 
 			HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
@@ -911,7 +912,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		}
 
 		@SuppressWarnings("unchecked")
-		public ModelAndView getModelAndView(Method handlerMethod, Class handlerType, Object returnValue,
+		public ModelAndView getModelAndView(Method handlerMethod, Class<?> handlerType, Object returnValue,
 				ExtendedModelMap implicitModel, ServletWebRequest webRequest) throws Exception {
 
 			ResponseStatus responseStatusAnn = AnnotationUtils.findAnnotation(handlerMethod, ResponseStatus.class);
@@ -966,7 +967,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 				return new ModelAndView().addAllObjects(implicitModel);
 			}
 			else if (returnValue instanceof Map) {
-				return new ModelAndView().addAllObjects(implicitModel).addAllObjects((Map) returnValue);
+				return new ModelAndView().addAllObjects(implicitModel).addAllObjects((Map<String, ?>) returnValue);
 			}
 			else if (returnValue instanceof String) {
 				return new ModelAndView((String) returnValue).addAllObjects(implicitModel);
@@ -1009,7 +1010,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			HttpInputMessage inputMessage = createHttpInputMessage(webRequest);
 			HttpOutputMessage outputMessage = createHttpOutputMessage(webRequest);
 			if (responseEntity instanceof ResponseEntity && outputMessage instanceof ServerHttpResponse) {
-				((ServerHttpResponse) outputMessage).setStatusCode(((ResponseEntity) responseEntity).getStatusCode());
+				((ServerHttpResponse) outputMessage).setStatusCode(((ResponseEntity<?>) responseEntity).getStatusCode());
 			}
 			HttpHeaders entityHeaders = responseEntity.getHeaders();
 			if (!entityHeaders.isEmpty()) {
@@ -1025,7 +1026,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			}
 		}
 
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		private void writeWithMessageConverters(Object returnValue,
 				HttpInputMessage inputMessage, HttpOutputMessage outputMessage)
 				throws IOException, HttpMediaTypeNotAcceptableException {

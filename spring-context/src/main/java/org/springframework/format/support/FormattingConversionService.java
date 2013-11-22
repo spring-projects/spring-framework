@@ -206,12 +206,13 @@ public class FormattingConversionService extends GenericConversionService
 
 		private Class<? extends Annotation> annotationType;
 
-        private AnnotationFormatterFactory annotationFormatterFactory;
+		@SuppressWarnings("rawtypes")
+		private AnnotationFormatterFactory annotationFormatterFactory;
 
 		private Class<?> fieldType;
 
 		public AnnotationPrinterConverter(Class<? extends Annotation> annotationType,
-				AnnotationFormatterFactory annotationFormatterFactory, Class<?> fieldType) {
+				AnnotationFormatterFactory<?> annotationFormatterFactory, Class<?> fieldType) {
 			this.annotationType = annotationType;
 			this.annotationFormatterFactory = annotationFormatterFactory;
 			this.fieldType = fieldType;
@@ -254,6 +255,7 @@ public class FormattingConversionService extends GenericConversionService
 
 		private Class<? extends Annotation> annotationType;
 
+		@SuppressWarnings("rawtypes")
 		private AnnotationFormatterFactory annotationFormatterFactory;
 
 		private Class<?> fieldType;

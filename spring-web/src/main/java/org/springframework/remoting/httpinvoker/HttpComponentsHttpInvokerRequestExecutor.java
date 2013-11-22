@@ -28,15 +28,7 @@ import org.apache.http.NoHttpResponseException;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.apache.http.params.CoreConnectionPNames;
-
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.remoting.support.RemoteInvocationResult;
@@ -58,6 +50,7 @@ import org.springframework.util.StringUtils;
  * @since 3.1
  * @see org.springframework.remoting.httpinvoker.SimpleHttpInvokerRequestExecutor
  */
+@SuppressWarnings("deprecation")
 public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvokerRequestExecutor {
 
 	private static final int DEFAULT_MAX_TOTAL_CONNECTIONS = 100;
@@ -74,15 +67,16 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	 * {@link HttpClient} that uses a default {@link org.apache.http.impl.conn.PoolingClientConnectionManager}.
 	 */
 	public HttpComponentsHttpInvokerRequestExecutor() {
-		SchemeRegistry schemeRegistry = new SchemeRegistry();
-		schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-		schemeRegistry.register(new Scheme("https", 443, SSLSocketFactory.getSocketFactory()));
+		org.apache.http.conn.scheme.SchemeRegistry schemeRegistry = new org.apache.http.conn.scheme.SchemeRegistry();
+		schemeRegistry.register(new org.apache.http.conn.scheme.Scheme("http", 80, org.apache.http.conn.scheme.PlainSocketFactory.getSocketFactory()));
+		schemeRegistry.register(new org.apache.http.conn.scheme.Scheme("https", 443, org.apache.http.conn.ssl.SSLSocketFactory.getSocketFactory()));
 
-		PoolingClientConnectionManager connectionManager = new PoolingClientConnectionManager(schemeRegistry);
+		org.apache.http.impl.conn.PoolingClientConnectionManager connectionManager =
+				new org.apache.http.impl.conn.PoolingClientConnectionManager(schemeRegistry);
 		connectionManager.setMaxTotal(DEFAULT_MAX_TOTAL_CONNECTIONS);
 		connectionManager.setDefaultMaxPerRoute(DEFAULT_MAX_CONNECTIONS_PER_ROUTE);
 
-		this.httpClient = new DefaultHttpClient(connectionManager);
+		this.httpClient = new org.apache.http.impl.client.DefaultHttpClient(connectionManager);
 		setReadTimeout(DEFAULT_READ_TIMEOUT_MILLISECONDS);
 	}
 
@@ -117,7 +111,7 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	 */
 	public void setConnectTimeout(int timeout) {
 		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
-		getHttpClient().getParams().setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, timeout);
+		getHttpClient().getParams().setIntParameter(org.apache.http.params.CoreConnectionPNames.CONNECTION_TIMEOUT, timeout);
 	}
 
 	/**
@@ -128,7 +122,7 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	 */
 	public void setReadTimeout(int timeout) {
 		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
-		getHttpClient().getParams().setIntParameter(CoreConnectionPNames.SO_TIMEOUT, timeout);
+		getHttpClient().getParams().setIntParameter(org.apache.http.params.CoreConnectionPNames.SO_TIMEOUT, timeout);
 	}
 
 

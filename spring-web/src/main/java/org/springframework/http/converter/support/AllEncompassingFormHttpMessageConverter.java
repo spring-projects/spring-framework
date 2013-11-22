@@ -15,9 +15,10 @@
  */
 package org.springframework.http.converter.support;
 
+import javax.xml.transform.Source;
+
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.util.ClassUtils;
@@ -43,8 +44,9 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 			ClassUtils.isPresent("javax.xml.bind.Binder", AllEncompassingFormHttpMessageConverter.class.getClassLoader());
 
 
+	@SuppressWarnings("deprecation")
 	public AllEncompassingFormHttpMessageConverter() {
-		addPartConverter(new SourceHttpMessageConverter());
+		addPartConverter(new SourceHttpMessageConverter<Source>());
 		if (jaxb2Present) {
 			addPartConverter(new Jaxb2RootElementHttpMessageConverter());
 		}
@@ -52,7 +54,7 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 			addPartConverter(new MappingJackson2HttpMessageConverter());
 		}
 		else if (jacksonPresent) {
-			addPartConverter(new MappingJacksonHttpMessageConverter());
+			addPartConverter(new org.springframework.http.converter.json.MappingJacksonHttpMessageConverter());
 		}
 	}
 

@@ -32,12 +32,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.xml.transform.Source;
 
 import org.springframework.core.ExceptionDepthComparator;
 import org.springframework.core.GenericTypeResolver;
@@ -51,7 +53,6 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
-import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.ui.Model;
@@ -96,8 +97,9 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	private WebArgumentResolver[] customArgumentResolvers;
 
 	private HttpMessageConverter<?>[] messageConverters =
-			new HttpMessageConverter[] {new ByteArrayHttpMessageConverter(), new StringHttpMessageConverter(),
-					new SourceHttpMessageConverter(), new XmlAwareFormHttpMessageConverter()};
+			new HttpMessageConverter<?>[] {new ByteArrayHttpMessageConverter(), new StringHttpMessageConverter(),
+			new SourceHttpMessageConverter<Source>(),
+			new org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter()};
 
 
 	/**
@@ -415,7 +417,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes", "resource" })
 	private ModelAndView handleResponseBody(Object returnValue, ServletWebRequest webRequest)
 			throws ServletException, IOException {
 

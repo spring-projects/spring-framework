@@ -115,7 +115,7 @@ public abstract class NumberUtils {
 	 * @param number the number we tried to convert
 	 * @param targetClass the target class we tried to convert to
 	 */
-	private static void raiseOverflowException(Number number, Class targetClass) {
+	private static void raiseOverflowException(Number number, Class<?> targetClass) {
 		throw new IllegalArgumentException("Could not convert number [" + number + "] of type [" +
 				number.getClass().getName() + "] to target class [" + targetClass.getName() + "]: overflow");
 	}

@@ -213,7 +213,7 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 	protected Connection getCloseSuppressingConnectionProxy(Connection target) {
 		return (Connection) Proxy.newProxyInstance(
 				Connection.class.getClassLoader(),
-				new Class[] {Connection.class},
+				new Class<?>[] {Connection.class},
 				new CloseSuppressingInvocationHandler(target));
 	}
 

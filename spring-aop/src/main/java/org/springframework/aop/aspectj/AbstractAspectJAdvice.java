@@ -119,9 +119,9 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	/** Non-null if after returning advice binds the return value */
 	private String returningName = null;
 
-	private Class discoveredReturningType = Object.class;
+	private Class<?> discoveredReturningType = Object.class;
 
-	private Class discoveredThrowingType = Object.class;
+	private Class<?> discoveredThrowingType = Object.class;
 
 	/**
 	 * Index for thisJoinPoint argument (currently only
@@ -253,7 +253,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		if (argumentNames != null) {
 			if (aspectJAdviceMethod.getParameterTypes().length == argumentNames.length + 1) {
 				// May need to add implicit join point arg name...
-				Class firstArgType = aspectJAdviceMethod.getParameterTypes()[0];
+				Class<?> firstArgType = aspectJAdviceMethod.getParameterTypes()[0];
 				if (firstArgType == JoinPoint.class ||
 						firstArgType == ProceedingJoinPoint.class ||
 						firstArgType == JoinPoint.StaticPart.class) {
@@ -292,7 +292,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		}
 	}
 
-	protected Class getDiscoveredReturningType() {
+	protected Class<?> getDiscoveredReturningType() {
 		return this.discoveredReturningType;
 	}
 
@@ -326,7 +326,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		}
 	}
 
-	protected Class getDiscoveredThrowingType() {
+	protected Class<?> getDiscoveredThrowingType() {
 		return this.discoveredThrowingType;
 	}
 
@@ -364,7 +364,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		}
 
 		int numUnboundArgs = this.adviceInvocationArgumentCount;
-		Class[] parameterTypes = this.aspectJAdviceMethod.getParameterTypes();
+		Class<?>[] parameterTypes = this.aspectJAdviceMethod.getParameterTypes();
 		if (maybeBindJoinPoint(parameterTypes[0]) || maybeBindProceedingJoinPoint(parameterTypes[0])) {
 			numUnboundArgs--;
 		}
@@ -380,7 +380,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		this.argumentsIntrospected = true;
 	}
 
-	private boolean maybeBindJoinPoint(Class candidateParameterType) {
+	private boolean maybeBindJoinPoint(Class<?> candidateParameterType) {
 		if (candidateParameterType.equals(JoinPoint.class)) {
 			this.joinPointArgumentIndex = 0;
 			return true;
@@ -390,7 +390,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		}
 	}
 
-	private boolean maybeBindProceedingJoinPoint(Class candidateParameterType) {
+	private boolean maybeBindProceedingJoinPoint(Class<?> candidateParameterType) {
 		if (candidateParameterType.equals(ProceedingJoinPoint.class)) {
 			if (!supportsProceedingJoinPoint()) {
 				throw new IllegalArgumentException("ProceedingJoinPoint is only supported for around advice");
@@ -407,7 +407,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		return false;
 	}
 
-	private boolean maybeBindJoinPointStaticPart(Class candidateParameterType) {
+	private boolean maybeBindJoinPointStaticPart(Class<?> candidateParameterType) {
 		if (candidateParameterType.equals(JoinPoint.StaticPart.class)) {
 			this.joinPointStaticPartArgumentIndex = 0;
 			return true;
@@ -509,8 +509,8 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			numParametersToRemove++;
 		}
 		String[] pointcutParameterNames = new String[this.argumentNames.length - numParametersToRemove];
-		Class[] pointcutParameterTypes = new Class[pointcutParameterNames.length];
-		Class[] methodParameterTypes = this.aspectJAdviceMethod.getParameterTypes();
+		Class<?>[] pointcutParameterTypes = new Class<?>[pointcutParameterNames.length];
+		Class<?>[] methodParameterTypes = this.aspectJAdviceMethod.getParameterTypes();
 
 		int index = 0;
 		for (int i = 0; i < this.argumentNames.length; i++) {
@@ -679,7 +679,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		}
 
 		@Override
-		public boolean matches(Method method, Class targetClass) {
+		public boolean matches(Method method, Class<?> targetClass) {
 			return !this.adviceMethod.equals(method);
 		}
 

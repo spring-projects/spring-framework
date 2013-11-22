@@ -107,7 +107,7 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 			ReflectionUtils.makeAccessible(getIncludeSynonyms);
 			originalValueForIncludeSynonyms = (Boolean) getIncludeSynonyms.invoke(con);
 
-			setIncludeSynonyms = con.getClass().getMethod("setIncludeSynonyms", new Class[] {boolean.class});
+			setIncludeSynonyms = con.getClass().getMethod("setIncludeSynonyms", new Class<?>[] {boolean.class});
 			ReflectionUtils.makeAccessible(setIncludeSynonyms);
 			setIncludeSynonyms.invoke(con, Boolean.TRUE);
 		}

@@ -140,7 +140,7 @@ public abstract class BridgeMethodResolver {
 	 */
 	private static Method findGenericDeclaration(Method bridgeMethod) {
 		// Search parent types for method that has same signature as bridge.
-		Class superclass = bridgeMethod.getDeclaringClass().getSuperclass();
+		Class<?> superclass = bridgeMethod.getDeclaringClass().getSuperclass();
 		while (superclass != null && !Object.class.equals(superclass)) {
 			Method method = searchForMatch(superclass, bridgeMethod);
 			if (method != null && !method.isBridge()) {
@@ -150,8 +150,8 @@ public abstract class BridgeMethodResolver {
 		}
 
 		// Search interfaces.
-		Class[] interfaces = ClassUtils.getAllInterfacesForClass(bridgeMethod.getDeclaringClass());
-		for (Class ifc : interfaces) {
+		Class<?>[] interfaces = ClassUtils.getAllInterfacesForClass(bridgeMethod.getDeclaringClass());
+		for (Class<?> ifc : interfaces) {
 			Method method = searchForMatch(ifc, bridgeMethod);
 			if (method != null && !method.isBridge()) {
 				return method;
@@ -170,13 +170,13 @@ public abstract class BridgeMethodResolver {
 	private static boolean isResolvedTypeMatch(
 			Method genericMethod, Method candidateMethod, Class<?> declaringClass) {
 		Type[] genericParameters = genericMethod.getGenericParameterTypes();
-		Class[] candidateParameters = candidateMethod.getParameterTypes();
+		Class<?>[] candidateParameters = candidateMethod.getParameterTypes();
 		if (genericParameters.length != candidateParameters.length) {
 			return false;
 		}
 		for (int i = 0; i < candidateParameters.length; i++) {
 			ResolvableType genericParameter = ResolvableType.forMethodParameter(genericMethod, i, declaringClass);
-			Class candidateParameter = candidateParameters[i];
+			Class<?> candidateParameter = candidateParameters[i];
 			if (candidateParameter.isArray()) {
 				// An array type: compare the component type.
 				if (!candidateParameter.getComponentType().equals(genericParameter.getComponentType().resolve(Object.class))) {
@@ -196,7 +196,7 @@ public abstract class BridgeMethodResolver {
 	 * that of the supplied {@link Method}, then this matching {@link Method} is returned,
 	 * otherwise {@code null} is returned.
 	 */
-	private static Method searchForMatch(Class type, Method bridgeMethod) {
+	private static Method searchForMatch(Class<?> type, Method bridgeMethod) {
 		return ReflectionUtils.findMethod(type, bridgeMethod.getName(), bridgeMethod.getParameterTypes());
 	}
 

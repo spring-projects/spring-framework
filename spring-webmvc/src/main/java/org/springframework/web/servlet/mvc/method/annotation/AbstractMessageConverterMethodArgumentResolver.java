@@ -132,7 +132,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 
 		for (HttpMessageConverter<?> converter : this.messageConverters) {
 			if (converter instanceof GenericHttpMessageConverter) {
-				GenericHttpMessageConverter genericConverter = (GenericHttpMessageConverter) converter;
+				GenericHttpMessageConverter<?> genericConverter = (GenericHttpMessageConverter<?>) converter;
 				if (genericConverter.canRead(targetType, contextClass, contentType)) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Reading [" + targetType + "] as \"" +

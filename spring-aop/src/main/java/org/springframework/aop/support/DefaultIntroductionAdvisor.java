@@ -43,7 +43,7 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 
 	private final Advice advice;
 
-	private final Set<Class> interfaces = new HashSet<Class>();
+	private final Set<Class<?>> interfaces = new HashSet<Class<?>>();
 
 	private int order = Integer.MAX_VALUE;
 
@@ -68,11 +68,11 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 		Assert.notNull(advice, "Advice must not be null");
 		this.advice = advice;
 		if (introductionInfo != null) {
-			Class[] introducedInterfaces = introductionInfo.getInterfaces();
+			Class<?>[] introducedInterfaces = introductionInfo.getInterfaces();
 			if (introducedInterfaces.length == 0) {
 				throw new IllegalArgumentException("IntroductionAdviceSupport implements no interfaces");
 			}
-			for (Class ifc : introducedInterfaces) {
+			for (Class<?> ifc : introducedInterfaces) {
 				addInterface(ifc);
 			}
 		}
@@ -83,7 +83,7 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 	 * @param advice the Advice to apply
 	 * @param intf the interface to introduce
 	 */
-	public DefaultIntroductionAdvisor(DynamicIntroductionAdvice advice, Class intf) {
+	public DefaultIntroductionAdvisor(DynamicIntroductionAdvice advice, Class<?> intf) {
 		Assert.notNull(advice, "Advice must not be null");
 		this.advice = advice;
 		addInterface(intf);
@@ -94,7 +94,7 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 	 * Add the specified interface to the list of interfaces to introduce.
 	 * @param intf the interface to introduce
 	 */
-	public void addInterface(Class intf) {
+	public void addInterface(Class<?> intf) {
 		Assert.notNull(intf, "Interface must not be null");
 		if (!intf.isInterface()) {
 			throw new IllegalArgumentException("Specified class [" + intf.getName() + "] must be an interface");
@@ -103,13 +103,13 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 	}
 
 	@Override
-	public Class[] getInterfaces() {
-		return this.interfaces.toArray(new Class[this.interfaces.size()]);
+	public Class<?>[] getInterfaces() {
+		return this.interfaces.toArray(new Class<?>[this.interfaces.size()]);
 	}
 
 	@Override
 	public void validateInterfaces() throws IllegalArgumentException {
-		for (Class ifc : this.interfaces) {
+		for (Class<?> ifc : this.interfaces) {
 			if (this.advice instanceof DynamicIntroductionAdvice &&
 					!((DynamicIntroductionAdvice) this.advice).implementsInterface(ifc)) {
 			 throw new IllegalArgumentException("DynamicIntroductionAdvice [" + this.advice + "] " +
@@ -145,7 +145,7 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 	}
 
 	@Override
-	public boolean matches(Class clazz) {
+	public boolean matches(Class<?> clazz) {
 		return true;
 	}
 

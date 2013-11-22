@@ -77,16 +77,16 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public T extractData(ClientHttpResponse response) throws IOException {
 		if (!hasMessageBody(response)) {
 			return null;
 		}
 		MediaType contentType = getContentType(response);
 
-		for (HttpMessageConverter messageConverter : this.messageConverters) {
+		for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
 			if (messageConverter instanceof GenericHttpMessageConverter) {
-				GenericHttpMessageConverter genericMessageConverter = (GenericHttpMessageConverter) messageConverter;
+				GenericHttpMessageConverter<?> genericMessageConverter = (GenericHttpMessageConverter<?>) messageConverter;
 				if (genericMessageConverter.canRead(this.responseType, null, contentType)) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Reading [" + this.responseType + "] as \"" +
@@ -101,7 +101,7 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 						logger.debug("Reading [" + this.responseClass.getName() + "] as \"" +
 								contentType + "\" using [" + messageConverter + "]");
 					}
-					return (T) messageConverter.read(this.responseClass, response);
+					return (T) messageConverter.read((Class) this.responseClass, response);
 				}
 			}
 		}

@@ -24,7 +24,6 @@ import java.net.URL;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.spi.ClassLoadHelper;
-
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -73,6 +72,7 @@ public class ResourceLoaderClassLoadHelper implements ClassLoadHelper {
 	}
 
 	@Override
+	@SuppressWarnings("rawtypes")
 	public Class loadClass(String name) throws ClassNotFoundException {
 		return this.resourceLoader.getClassLoader().loadClass(name);
 	}

@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractJaxb2HttpMessageConverter<T> extends AbstractXmlHttpMessageConverter<T> {
 
-	private final ConcurrentMap<Class, JAXBContext> jaxbContexts = new ConcurrentHashMap<Class, JAXBContext>(64);
+	private final ConcurrentMap<Class<?>, JAXBContext> jaxbContexts = new ConcurrentHashMap<Class<?>, JAXBContext>(64);
 
 
 	/**
@@ -44,7 +44,7 @@ public abstract class AbstractJaxb2HttpMessageConverter<T> extends AbstractXmlHt
 	 * @return the {@code Marshaller}
 	 * @throws HttpMessageConversionException in case of JAXB errors
 	 */
-	protected final Marshaller createMarshaller(Class clazz) {
+	protected final Marshaller createMarshaller(Class<?> clazz) {
 		try {
 			JAXBContext jaxbContext = getJaxbContext(clazz);
 			return jaxbContext.createMarshaller();
@@ -61,7 +61,7 @@ public abstract class AbstractJaxb2HttpMessageConverter<T> extends AbstractXmlHt
 	 * @return the {@code Unmarshaller}
 	 * @throws HttpMessageConversionException in case of JAXB errors
 	 */
-	protected final Unmarshaller createUnmarshaller(Class clazz) throws JAXBException {
+	protected final Unmarshaller createUnmarshaller(Class<?> clazz) throws JAXBException {
 		try {
 			JAXBContext jaxbContext = getJaxbContext(clazz);
 			return jaxbContext.createUnmarshaller();
@@ -78,7 +78,7 @@ public abstract class AbstractJaxb2HttpMessageConverter<T> extends AbstractXmlHt
 	 * @return the {@code JAXBContext}
 	 * @throws HttpMessageConversionException in case of JAXB errors
 	 */
-	protected final JAXBContext getJaxbContext(Class clazz) {
+	protected final JAXBContext getJaxbContext(Class<?> clazz) {
 		Assert.notNull(clazz, "'clazz' must not be null");
 		JAXBContext jaxbContext = this.jaxbContexts.get(clazz);
 		if (jaxbContext == null) {

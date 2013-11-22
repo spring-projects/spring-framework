@@ -76,7 +76,7 @@ public abstract class QuartzJobBean implements Job {
 
 	static {
 		try {
-			Class jobExecutionContextClass =
+			Class<?> jobExecutionContextClass =
 					QuartzJobBean.class.getClassLoader().loadClass("org.quartz.JobExecutionContext");
 			getSchedulerMethod = jobExecutionContextClass.getMethod("getScheduler");
 			getMergedJobDataMapMethod = jobExecutionContextClass.getMethod("getMergedJobDataMap");
@@ -97,7 +97,7 @@ public abstract class QuartzJobBean implements Job {
 		try {
 			// Reflectively adapting to differences between Quartz 1.x and Quartz 2.0...
 			Scheduler scheduler = (Scheduler) ReflectionUtils.invokeMethod(getSchedulerMethod, context);
-			Map mergedJobDataMap = (Map) ReflectionUtils.invokeMethod(getMergedJobDataMapMethod, context);
+			Map<?, ?> mergedJobDataMap = (Map<?, ?>) ReflectionUtils.invokeMethod(getMergedJobDataMapMethod, context);
 
 			BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);
 			MutablePropertyValues pvs = new MutablePropertyValues();

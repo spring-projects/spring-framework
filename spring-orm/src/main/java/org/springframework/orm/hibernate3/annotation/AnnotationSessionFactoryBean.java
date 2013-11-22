@@ -17,6 +17,7 @@
 package org.springframework.orm.hibernate3.annotation;
 
 import java.io.IOException;
+
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
@@ -24,7 +25,6 @@ import javax.persistence.MappedSuperclass;
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
 import org.hibernate.cfg.Configuration;
-
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -81,7 +81,7 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	private static final String PACKAGE_INFO_SUFFIX = ".package-info";
 
 
-	private Class[] annotatedClasses;
+	private Class<?>[] annotatedClasses;
 
 	private String[] annotatedPackages;
 
@@ -101,7 +101,7 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	 * class-level JDK 1.5+ annotation metadata.
 	 * @see org.hibernate.cfg.Configuration#addAnnotatedClass(Class)
 	 */
-	public void setAnnotatedClasses(Class[] annotatedClasses) {
+	public void setAnnotatedClasses(Class<?>[] annotatedClasses) {
 		this.annotatedClasses = annotatedClasses;
 	}
 
@@ -150,7 +150,7 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	@Override
 	protected void postProcessMappings(Configuration config) throws HibernateException {
 		if (this.annotatedClasses != null) {
-			for (Class annotatedClass : this.annotatedClasses) {
+			for (Class<?> annotatedClass : this.annotatedClasses) {
 				config.addAnnotatedClass(annotatedClass);
 			}
 		}

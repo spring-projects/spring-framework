@@ -26,7 +26,7 @@ package org.springframework.beans;
 @SuppressWarnings("serial")
 public class InvalidPropertyException extends FatalBeanException {
 
-	private Class beanClass;
+	private Class<?> beanClass;
 
 	private String propertyName;
 
@@ -37,7 +37,7 @@ public class InvalidPropertyException extends FatalBeanException {
 	 * @param propertyName the offending property
 	 * @param msg the detail message
 	 */
-	public InvalidPropertyException(Class beanClass, String propertyName, String msg) {
+	public InvalidPropertyException(Class<?> beanClass, String propertyName, String msg) {
 		this(beanClass, propertyName, msg, null);
 	}
 
@@ -48,7 +48,7 @@ public class InvalidPropertyException extends FatalBeanException {
 	 * @param msg the detail message
 	 * @param cause the root cause
 	 */
-	public InvalidPropertyException(Class beanClass, String propertyName, String msg, Throwable cause) {
+	public InvalidPropertyException(Class<?> beanClass, String propertyName, String msg, Throwable cause) {
 		super("Invalid property '" + propertyName + "' of bean class [" + beanClass.getName() + "]: " + msg, cause);
 		this.beanClass = beanClass;
 		this.propertyName = propertyName;
@@ -57,7 +57,7 @@ public class InvalidPropertyException extends FatalBeanException {
 	/**
 	 * Return the offending bean class.
 	 */
-	public Class getBeanClass() {
+	public Class<?> getBeanClass() {
 		return beanClass;
 	}
 

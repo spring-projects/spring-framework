@@ -48,7 +48,7 @@ import org.springframework.context.ApplicationEventPublisherAware;
 public class EventPublicationInterceptor
 		implements MethodInterceptor, ApplicationEventPublisherAware, InitializingBean {
 
-	private Constructor applicationEventClassConstructor;
+	private Constructor<?> applicationEventClassConstructor;
 
 	private ApplicationEventPublisher applicationEventPublisher;
 
@@ -62,14 +62,14 @@ public class EventPublicationInterceptor
 	 * {@code null} or if it is not an {@code ApplicationEvent} subclass or
 	 * if it does not expose a constructor that takes a single {@code Object} argument
 	 */
-	public void setApplicationEventClass(Class applicationEventClass) {
+	public void setApplicationEventClass(Class<?> applicationEventClass) {
 		if (ApplicationEvent.class.equals(applicationEventClass) ||
 			!ApplicationEvent.class.isAssignableFrom(applicationEventClass)) {
 			throw new IllegalArgumentException("applicationEventClass needs to extend ApplicationEvent");
 		}
 		try {
 			this.applicationEventClassConstructor =
-					applicationEventClass.getConstructor(new Class[] {Object.class});
+					applicationEventClass.getConstructor(new Class<?>[] {Object.class});
 		}
 		catch (NoSuchMethodException ex) {
 			throw new IllegalArgumentException("applicationEventClass [" +

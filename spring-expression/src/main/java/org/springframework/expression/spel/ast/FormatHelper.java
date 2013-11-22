@@ -66,7 +66,7 @@ public class FormatHelper {
 		StringBuilder fmtd = new StringBuilder();
 		if (clazz.isArray()) {
 			int dims = 1;
-			Class baseClass = clazz.getComponentType();
+			Class<?> baseClass = clazz.getComponentType();
 			while (baseClass.isArray()) {
 				baseClass = baseClass.getComponentType();
 				dims++;
