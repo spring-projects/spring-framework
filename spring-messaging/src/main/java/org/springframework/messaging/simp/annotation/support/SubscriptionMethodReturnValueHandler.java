@@ -47,6 +47,10 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 	private final MessageSendingOperations<String> messagingTemplate;
 
 
+	/**
+	 * @param messagingTemplate a messaging template for sending messages directly
+	 *	to clients, e.g. in response to a subscription
+	 */
 	public SubscriptionMethodReturnValueHandler(MessageSendingOperations<String> messagingTemplate) {
 		Assert.notNull(messagingTemplate, "messagingTemplate is required");
 		this.messagingTemplate = messagingTemplate;

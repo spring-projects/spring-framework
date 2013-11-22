@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.handler.websocket;
+package org.springframework.web.socket.messaging;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -40,10 +40,15 @@ import org.springframework.web.socket.WebSocketSession;
 
 
 /**
- * A {@link WebSocketHandler} that delegates messages to a {@link SubProtocolHandler}
- * based on the sub-protocol value requested by the client through the
- * {@code Sec-WebSocket-Protocol} request header A default handler can also be configured
- * to use if the client does not request a specific sub-protocol.
+ * An implementation of {@link WebSocketHandler} that delegates incoming WebSocket
+ * messages to a {@link SubProtocolHandler} along with a {@link MessageChannel} to
+ * which the sub-protocol handler can send messages from WebSocket clients to
+ * the application.
+ * <p>
+ * Also an implementation of {@link MessageHandler} that finds the WebSocket
+ * session associated with the {@link Message} and passes it, along with the message,
+ * to the sub-protocol handler to send messages from the application back to the
+ * client.
  *
  * @author Rossen Stoyanchev
  * @author Andy Wilkinson
@@ -54,7 +59,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler, MessageHan
 
 	private final Log logger = LogFactory.getLog(SubProtocolWebSocketHandler.class);
 
-	private final MessageChannel outputChannel;
+	private final MessageChannel clientOutboundChannel;
 
 	private final Map<String, SubProtocolHandler> protocolHandlers =
 			new TreeMap<String, SubProtocolHandler>(String.CASE_INSENSITIVE_ORDER);
@@ -64,12 +69,9 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler, MessageHan
 	private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<String, WebSocketSession>();
 
 
-	/**
-	 * @param outputChannel
-	 */
-	public SubProtocolWebSocketHandler(MessageChannel outputChannel) {
-		Assert.notNull(outputChannel, "outputChannel is required");
-		this.outputChannel = outputChannel;
+	public SubProtocolWebSocketHandler(MessageChannel clientOutboundChannel) {
+		Assert.notNull(clientOutboundChannel, "clientOutboundChannel is required");
+		this.clientOutboundChannel = clientOutboundChannel;
 	}
 
 
@@ -141,7 +143,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler, MessageHan
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 		this.sessions.put(session.getId(), session);
-		findProtocolHandler(session).afterSessionStarted(session, this.outputChannel);
+		findProtocolHandler(session).afterSessionStarted(session, this.clientOutboundChannel);
 	}
 
 	protected final SubProtocolHandler findProtocolHandler(WebSocketSession session) {
@@ -172,7 +174,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler, MessageHan
 
 	@Override
 	public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
-		findProtocolHandler(session).handleMessageFromClient(session, message, this.outputChannel);
+		findProtocolHandler(session).handleMessageFromClient(session, message, this.clientOutboundChannel);
 	}
 
 	@Override
@@ -221,7 +223,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler, MessageHan
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
 		this.sessions.remove(session.getId());
-		findProtocolHandler(session).afterSessionEnded(session, closeStatus, this.outputChannel);
+		findProtocolHandler(session).afterSessionEnded(session, closeStatus, this.clientOutboundChannel);
 	}
 
 	@Override

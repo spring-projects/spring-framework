@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.simp.stomp;
+package org.springframework.web.socket.messaging;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -29,6 +29,9 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.TestPrincipal;
+import org.springframework.messaging.simp.stomp.StompCommand;
+import org.springframework.messaging.simp.stomp.StompDecoder;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.support.TestWebSocketSession;
@@ -37,13 +40,13 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Test fixture for {@link StompProtocolHandler} tests.
+ * Test fixture for {@link StompSubProtocolHandler} tests.
  *
  * @author Rossen Stoyanchev
  */
-public class StompProtocolHandlerTests {
+public class StompSubProtocolHandlerTests {
 
-	private StompProtocolHandler stompHandler;
+	private StompSubProtocolHandler stompHandler;
 
 	private TestWebSocketSession session;
 
@@ -54,7 +57,7 @@ public class StompProtocolHandlerTests {
 
 	@Before
 	public void setup() {
-		this.stompHandler = new StompProtocolHandler();
+		this.stompHandler = new StompSubProtocolHandler();
 		this.channel = Mockito.mock(MessageChannel.class);
 		this.messageCaptor = ArgumentCaptor.forClass(Message.class);
 

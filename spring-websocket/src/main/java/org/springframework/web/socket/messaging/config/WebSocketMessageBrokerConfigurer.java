@@ -14,20 +14,30 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.simp.config;
+package org.springframework.web.socket.messaging.config;
+
+
+import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 
 /**
- * Provides methods for configuring STOMP protocol handlers at specific URL paths.
+ * Defines methods for configuring message handling with simple messaging
+ * protocols (e.g. STOMP) from WebSocket clients. Typically used to customize
+ * the configuration provided via
+ * {@link EnableWebSocketMessageBroker @EnableWebSocketMessageBroker}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface StompEndpointRegistry {
-
+public interface WebSocketMessageBrokerConfigurer {
 
 	/**
-	 * Expose a STOMP endpoint at the specified URL path (or paths_.
+	 * Configure STOMP over WebSocket endpoints.
 	 */
-	StompEndpointRegistration addEndpoint(String... paths);
+	void registerStompEndpoints(StompEndpointRegistry registry);
+
+	/**
+	 * Configure message broker options.
+	 */
+	void configureMessageBroker(MessageBrokerRegistry registry);
 
 }

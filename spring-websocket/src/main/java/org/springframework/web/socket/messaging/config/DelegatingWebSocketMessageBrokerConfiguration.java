@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.simp.config;
+package org.springframework.web.socket.messaging.config;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.util.CollectionUtils;
 
 
 /**
- * A {@link WebSocketMessageBrokerConfiguration} extension that detects beans of type
- * {@link WebSocketMessageBrokerConfigurer} and delegates to all of them allowing callback
- * style customization of the configuration provided in
- * {@link WebSocketMessageBrokerConfigurationSupport}.
+ * A {@link WebSocketMessageBrokerConfigurationSupport} extension that detects beans of type
+ * {@link WebSocketMessageBrokerConfigurer}
+ * and delegates to all of them allowing callback style customization of the
+ * configuration provided in {@link WebSocketMessageBrokerConfigurationSupport}.
  *
  * <p>This class is typically imported via {@link EnableWebSocketMessageBroker}.
  *
@@ -49,6 +50,7 @@ public class DelegatingWebSocketMessageBrokerConfiguration extends WebSocketMess
 		this.configurers.addAll(configurers);
 	}
 
+
 	@Override
 	protected void registerStompEndpoints(StompEndpointRegistry registry) {
 		for (WebSocketMessageBrokerConfigurer c : this.configurers) {
@@ -57,9 +59,9 @@ public class DelegatingWebSocketMessageBrokerConfiguration extends WebSocketMess
 	}
 
 	@Override
-	protected void configureMessageBroker(MessageBrokerConfigurer configurer) {
+	protected void configureMessageBroker(MessageBrokerRegistry registry) {
 		for (WebSocketMessageBrokerConfigurer c : this.configurers) {
-			c.configureMessageBroker(configurer);
+			c.configureMessageBroker(registry);
 		}
 	}
 

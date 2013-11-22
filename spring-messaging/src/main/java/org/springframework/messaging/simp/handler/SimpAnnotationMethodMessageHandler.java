@@ -79,7 +79,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	private final SimpMessageSendingOperations brokerTemplate;
 
-	private final SimpMessageSendingOperations webSocketResponseTemplate;
+	private final SimpMessageSendingOperations clientMessagingTemplate;
 
 	private MessageConverter messageConverter;
 
@@ -90,15 +90,15 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	/**
 	 * @param brokerTemplate a messaging template to send application messages to the broker
-	 * @param webSocketResponseChannel the channel for messages to WebSocket clients
+	 * @param clientOutboundChannel the channel for messages to clients (e.g. WebSocket clients)
 	 */
 	public SimpAnnotationMethodMessageHandler(SimpMessageSendingOperations brokerTemplate,
-			MessageChannel webSocketResponseChannel) {
+			MessageChannel clientOutboundChannel) {
 
 		Assert.notNull(brokerTemplate, "brokerTemplate is required");
-		Assert.notNull(webSocketResponseChannel, "webSocketReplyChannel is required");
+		Assert.notNull(clientOutboundChannel, "clientOutboundChannel is required");
 		this.brokerTemplate = brokerTemplate;
-		this.webSocketResponseTemplate = new SimpMessagingTemplate(webSocketResponseChannel);
+		this.clientMessagingTemplate = new SimpMessagingTemplate(clientOutboundChannel);
 
 		Collection<MessageConverter> converters = new ArrayList<MessageConverter>();
 		converters.add(new StringMessageConverter());
@@ -117,7 +117,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	public void setMessageConverter(MessageConverter converter) {
 		this.messageConverter = converter;
 		if (converter != null) {
-			((AbstractMessageSendingTemplate<?>) this.webSocketResponseTemplate).setMessageConverter(converter);
+			((AbstractMessageSendingTemplate<?>) this.clientMessagingTemplate).setMessageConverter(converter);
 		}
 	}
 
@@ -194,7 +194,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 		// Annotation-based return value types
 		handlers.add(new SendToMethodReturnValueHandler(this.brokerTemplate, true));
-		handlers.add(new SubscriptionMethodReturnValueHandler(this.webSocketResponseTemplate));
+		handlers.add(new SubscriptionMethodReturnValueHandler(this.clientMessagingTemplate));
 
 		// custom return value types
 		handlers.addAll(getCustomReturnValueHandlers());

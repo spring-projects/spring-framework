@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.simp.handler;
+package org.springframework.web.socket.messaging;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -36,10 +36,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.simp.config.DelegatingWebSocketMessageBrokerConfiguration;
-import org.springframework.messaging.simp.config.MessageBrokerConfigurer;
-import org.springframework.messaging.simp.config.StompEndpointRegistry;
-import org.springframework.messaging.simp.config.WebSocketMessageBrokerConfigurer;
+import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.support.channel.AbstractSubscribableChannel;
 import org.springframework.messaging.support.channel.ExecutorSubscribableChannel;
@@ -52,10 +49,13 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.TextWebSocketHandlerAdapter;
 import org.springframework.web.socket.client.endpoint.StandardWebSocketClient;
 import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
+import org.springframework.web.socket.messaging.config.DelegatingWebSocketMessageBrokerConfiguration;
+import org.springframework.web.socket.messaging.config.StompEndpointRegistry;
+import org.springframework.web.socket.messaging.config.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.server.HandshakeHandler;
 
 import static org.junit.Assert.*;
-import static org.springframework.messaging.simp.stomp.StompTextMessageBuilder.*;
+import static org.springframework.web.socket.messaging.StompTextMessageBuilder.*;
 
 
 /**
@@ -216,7 +216,7 @@ public class SimpAnnotationMethodIntegrationTests extends AbstractWebSocketInteg
 		}
 
 		@Override
-		public void configureMessageBroker(MessageBrokerConfigurer configurer) {
+		public void configureMessageBroker(MessageBrokerRegistry configurer) {
 			configurer.setApplicationDestinationPrefixes("/app");
 			configurer.enableSimpleBroker("/topic", "/queue");
 		}
@@ -227,13 +227,13 @@ public class SimpAnnotationMethodIntegrationTests extends AbstractWebSocketInteg
 
 		@Override
 		@Bean
-		public AbstractSubscribableChannel webSocketRequestChannel() {
+		public AbstractSubscribableChannel clientInboundChannel() {
 			return new ExecutorSubscribableChannel(); // synchronous
 		}
 
 		@Override
 		@Bean
-		public AbstractSubscribableChannel webSocketResponseChannel() {
+		public AbstractSubscribableChannel clientOutboundChannel() {
 			return new ExecutorSubscribableChannel(); // synchronous
 		}
 	}

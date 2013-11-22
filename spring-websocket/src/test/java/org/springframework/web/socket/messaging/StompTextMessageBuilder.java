@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.simp.stomp;
+package org.springframework.web.socket.messaging;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.web.socket.TextMessage;
 
 

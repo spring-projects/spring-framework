@@ -22,7 +22,7 @@ import org.springframework.util.Assert;
 
 
 /**
- * A helper class for configuring a relay to an external STOMP message broker.
+ * Registration class for configuring a {@link StompBrokerRelayMessageHandler}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -44,8 +44,8 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 	private boolean autoStartup = true;
 
 
-	public StompBrokerRelayRegistration(MessageChannel webSocketReplyChannel, String[] destinationPrefixes) {
-		super(webSocketReplyChannel, destinationPrefixes);
+	public StompBrokerRelayRegistration(MessageChannel clientOutboundChannel, String[] destinationPrefixes) {
+		super(clientOutboundChannel, destinationPrefixes);
 	}
 
 
@@ -124,18 +124,23 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 
 
 	protected StompBrokerRelayMessageHandler getMessageHandler() {
+
 		StompBrokerRelayMessageHandler handler =
-				new StompBrokerRelayMessageHandler(getWebSocketReplyChannel(), getDestinationPrefixes());
+				new StompBrokerRelayMessageHandler(getClientOutboundChannel(), getDestinationPrefixes());
+
 		handler.setRelayHost(this.relayHost);
 		handler.setRelayPort(this.relayPort);
 		handler.setSystemLogin(this.applicationLogin);
 		handler.setSystemPasscode(this.applicationPasscode);
+
 		if (this.systemHeartbeatSendInterval != null) {
 			handler.setSystemHeartbeatSendInterval(this.systemHeartbeatSendInterval);
 		}
+
 		if (this.systemHeartbeatReceiveInterval != null) {
 			handler.setSystemHeartbeatReceiveInterval(this.systemHeartbeatReceiveInterval);
 		}
+
 		handler.setAutoStartup(this.autoStartup);
 		return handler;
 	}

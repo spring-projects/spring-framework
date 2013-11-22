@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.simp.config;
+package org.springframework.web.socket.messaging.config;
 
-
+import org.springframework.web.socket.server.HandshakeHandler;
+import org.springframework.web.socket.server.config.SockJsServiceRegistration;
 
 /**
- * Defines callback methods to configure broker-backed messaging over WebSocket via
- * {@link EnableWebSocketMessageBroker @EnableWebSocketMessageBroker}.
+ * A contract for configuring a STOMP over WebSocket endpoint.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface WebSocketMessageBrokerConfigurer {
+public interface StompWebSocketEndpointRegistration {
 
 	/**
-	 * Configure STOMP protocol handling over WebSocket at a specific URL.
+	 * Enable SockJS fallback options.
 	 */
-	void registerStompEndpoints(StompEndpointRegistry registry);
+	SockJsServiceRegistration withSockJS();
 
 	/**
-	 * Configure message broker options.
+	 * Configure the HandshakeHandler to use.
 	 */
-	void configureMessageBroker(MessageBrokerConfigurer configurer);
+	StompWebSocketEndpointRegistration setHandshakeHandler(HandshakeHandler handshakeHandler);
 
 }

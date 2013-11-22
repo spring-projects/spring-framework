@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
-import org.springframework.http.MediaType;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageType;
@@ -146,7 +145,7 @@ public class StompHeaderAccessorTests {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.MESSAGE);
 		headers.setSubscriptionId("s1");
 		headers.setDestination("/d");
-		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.setContentType(MimeTypeUtils.APPLICATION_JSON);
 
 		Map<String, List<String>> actual = headers.toNativeHeaderMap();
 

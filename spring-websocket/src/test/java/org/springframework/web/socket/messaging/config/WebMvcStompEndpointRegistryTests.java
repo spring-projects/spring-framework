@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.simp.config;
+package org.springframework.web.socket.messaging.config;
 
 import java.util.Map;
 
@@ -22,25 +22,26 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.handler.websocket.SubProtocolHandler;
-import org.springframework.messaging.handler.websocket.SubProtocolWebSocketHandler;
 import org.springframework.messaging.simp.handler.DefaultUserSessionRegistry;
 import org.springframework.messaging.simp.handler.UserSessionRegistry;
-import org.springframework.messaging.simp.stomp.StompProtocolHandler;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.socket.messaging.StompSubProtocolHandler;
+import org.springframework.web.socket.messaging.SubProtocolHandler;
+import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 
 /**
- * Test fixture for {@link ServletStompEndpointRegistry}.
+ * Test fixture for {@link WebMvcStompEndpointRegistry}.
  *
  * @author Rossen Stoyanchev
  */
-public class ServletStompEndpointRegistryTests {
+public class WebMvcStompEndpointRegistryTests {
 
-	private ServletStompEndpointRegistry registry;
+	private WebMvcStompEndpointRegistry registry;
 
 	private SubProtocolWebSocketHandler webSocketHandler;
 
@@ -53,7 +54,7 @@ public class ServletStompEndpointRegistryTests {
 		this.webSocketHandler = new SubProtocolWebSocketHandler(channel);
 		this.userSessionRegistry = new DefaultUserSessionRegistry();
 		TaskScheduler taskScheduler = Mockito.mock(TaskScheduler.class);
-		this.registry = new ServletStompEndpointRegistry(webSocketHandler, userSessionRegistry, taskScheduler);
+		this.registry = new WebMvcStompEndpointRegistry(webSocketHandler, userSessionRegistry, taskScheduler);
 	}
 
 
@@ -68,7 +69,7 @@ public class ServletStompEndpointRegistryTests {
 		assertNotNull(protocolHandlers.get("v11.stomp"));
 		assertNotNull(protocolHandlers.get("v12.stomp"));
 
-		StompProtocolHandler stompHandler = (StompProtocolHandler) protocolHandlers.get("v10.stomp");
+		StompSubProtocolHandler stompHandler = (StompSubProtocolHandler) protocolHandlers.get("v10.stomp");
 		assertSame(this.userSessionRegistry, stompHandler.getUserSessionRegistry());
 	}
 

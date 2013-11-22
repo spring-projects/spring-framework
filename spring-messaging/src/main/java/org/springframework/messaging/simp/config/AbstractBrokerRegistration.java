@@ -19,6 +19,7 @@ package org.springframework.messaging.simp.config;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.handler.AbstractBrokerMessageHandler;
@@ -32,25 +33,25 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractBrokerRegistration {
 
-	private final MessageChannel webSocketReplyChannel;
+	private final MessageChannel clientOutboundChannel;
 
-	private final String[] destinationPrefixes;
+	private final List<String> destinationPrefixes;
 
 
-	public AbstractBrokerRegistration(MessageChannel webSocketReplyChannel, String[] destinationPrefixes) {
-		Assert.notNull(webSocketReplyChannel, "");
-		this.webSocketReplyChannel = webSocketReplyChannel;
-		this.destinationPrefixes = destinationPrefixes;
+	public AbstractBrokerRegistration(MessageChannel clientOutboundChannel, String[] destinationPrefixes) {
+		Assert.notNull(clientOutboundChannel, "'clientOutboundChannel' is required");
+		this.clientOutboundChannel = clientOutboundChannel;
+		this.destinationPrefixes = (destinationPrefixes != null)
+				? Arrays.<String>asList(destinationPrefixes) : Collections.<String>emptyList();
 	}
 
 
-	protected MessageChannel getWebSocketReplyChannel() {
-		return this.webSocketReplyChannel;
+	protected MessageChannel getClientOutboundChannel() {
+		return this.clientOutboundChannel;
 	}
 
 	protected Collection<String> getDestinationPrefixes() {
-		return (this.destinationPrefixes != null)
-				? Arrays.<String>asList(this.destinationPrefixes) : Collections.<String>emptyList();
+		return this.destinationPrefixes;
 	}
 
 	protected abstract AbstractBrokerMessageHandler getMessageHandler();

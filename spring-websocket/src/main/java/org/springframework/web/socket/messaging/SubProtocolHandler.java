@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.handler.websocket;
+package org.springframework.web.socket.messaging;
 
 import java.util.List;
 

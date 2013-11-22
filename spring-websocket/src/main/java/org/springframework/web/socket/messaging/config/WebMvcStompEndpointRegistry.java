@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.simp.config;
+package org.springframework.web.socket.messaging.config;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import org.springframework.messaging.handler.websocket.SubProtocolWebSocketHandler;
 import org.springframework.messaging.simp.handler.UserSessionRegistry;
-import org.springframework.messaging.simp.stomp.StompProtocolHandler;
+import org.springframework.web.socket.messaging.StompSubProtocolHandler;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
@@ -31,42 +27,47 @@ import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import org.springframework.web.socket.support.WebSocketHandlerDecorator;
 
 
 /**
- * A helper class for configuring STOMP protocol handling over WebSocket.
+ * A registry for STOMP over WebSocket endpoints that maps the endpoints with a
+ * {@link SimpleUrlHandlerMapping} for use in Spring MVC.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class ServletStompEndpointRegistry implements StompEndpointRegistry {
+public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 
 	private final WebSocketHandler webSocketHandler;
 
 	private final SubProtocolWebSocketHandler subProtocolWebSocketHandler;
 
-	private final StompProtocolHandler stompHandler;
+	private final StompSubProtocolHandler stompHandler;
 
-	private final List<ServletStompEndpointRegistration> registrations = new ArrayList<ServletStompEndpointRegistration>();
+	private final List<WebMvcStompWebSocketEndpointRegistration> registrations =
+			new ArrayList<WebMvcStompWebSocketEndpointRegistration>();
 
 	private final TaskScheduler sockJsScheduler;
 
+	private int order = 1;
 
-	public ServletStompEndpointRegistry(WebSocketHandler webSocketHandler,
+
+	public WebMvcStompEndpointRegistry(WebSocketHandler webSocketHandler,
 			UserSessionRegistry userSessionRegistry, TaskScheduler defaultSockJsTaskScheduler) {
 
 		Assert.notNull(webSocketHandler);
 		Assert.notNull(userSessionRegistry);
 
 		this.webSocketHandler = webSocketHandler;
-		this.subProtocolWebSocketHandler = findSubProtocolWebSocketHandler(webSocketHandler);
-		this.stompHandler = new StompProtocolHandler();
+		this.subProtocolWebSocketHandler = unwrapSubProtocolWebSocketHandler(webSocketHandler);
+		this.stompHandler = new StompSubProtocolHandler();
 		this.stompHandler.setUserSessionRegistry(userSessionRegistry);
 		this.sockJsScheduler = defaultSockJsTaskScheduler;
 	}
 
-	private static SubProtocolWebSocketHandler findSubProtocolWebSocketHandler(WebSocketHandler webSocketHandler) {
+	private static SubProtocolWebSocketHandler unwrapSubProtocolWebSocketHandler(WebSocketHandler webSocketHandler) {
 
 		WebSocketHandler actual = (webSocketHandler instanceof WebSocketHandlerDecorator) ?
 				((WebSocketHandlerDecorator) webSocketHandler).getLastHandler() : webSocketHandler;
@@ -79,12 +80,30 @@ public class ServletStompEndpointRegistry implements StompEndpointRegistry {
 
 
 	@Override
-	public StompEndpointRegistration addEndpoint(String... paths) {
+	public StompWebSocketEndpointRegistration addEndpoint(String... paths) {
+
 		this.subProtocolWebSocketHandler.addProtocolHandler(this.stompHandler);
-		ServletStompEndpointRegistration r = new ServletStompEndpointRegistration(
-				paths, this.webSocketHandler, this.sockJsScheduler);
-		this.registrations.add(r);
-		return r;
+		Set<String> subProtocols = this.subProtocolWebSocketHandler.getSupportedProtocols();
+
+		WebMvcStompWebSocketEndpointRegistration registration = new WebMvcStompWebSocketEndpointRegistration(
+				paths, this.webSocketHandler, subProtocols, this.sockJsScheduler);
+		this.registrations.add(registration);
+
+		return registration;
+	}
+
+	/**
+	 * Set the order for the resulting {@link SimpleUrlHandlerMapping} relative to
+	 * other handler mappings configured in Spring MVC.
+	 * <p>
+	 * The default value is 1.
+	 */
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+	public int getOrder() {
+		return this.order;
 	}
 
 	/**
@@ -92,7 +111,7 @@ public class ServletStompEndpointRegistry implements StompEndpointRegistry {
 	 */
 	protected AbstractHandlerMapping getHandlerMapping() {
 		Map<String, Object> urlMap = new LinkedHashMap<String, Object>();
-		for (ServletStompEndpointRegistration registration : this.registrations) {
+		for (WebMvcStompWebSocketEndpointRegistration registration : this.registrations) {
 			MultiValueMap<HttpRequestHandler, String> mappings = registration.getMappings();
 			for (HttpRequestHandler httpHandler : mappings.keySet()) {
 				for (String pattern : mappings.get(httpHandler)) {
@@ -102,6 +121,7 @@ public class ServletStompEndpointRegistry implements StompEndpointRegistry {
 		}
 		SimpleUrlHandlerMapping hm = new SimpleUrlHandlerMapping();
 		hm.setUrlMap(urlMap);
+		hm.setOrder(this.order);
 		return hm;
 	}
 

@@ -146,9 +146,9 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	private static class TestSimpAnnotationMethodMessageHandler extends SimpAnnotationMethodMessageHandler {
 
 		public TestSimpAnnotationMethodMessageHandler(SimpMessageSendingOperations brokerTemplate,
-				MessageChannel webSocketResponseChannel) {
+				MessageChannel clientOutboundChannel) {
 
-			super(brokerTemplate, webSocketResponseChannel);
+			super(brokerTemplate, clientOutboundChannel);
 		}
 
 		public void registerHandler(Object handler) {

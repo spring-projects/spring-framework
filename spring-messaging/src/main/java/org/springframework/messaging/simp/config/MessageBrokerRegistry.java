@@ -20,18 +20,19 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.simp.handler.AbstractBrokerMessageHandler;
+import org.springframework.messaging.simp.handler.SimpleBrokerMessageHandler;
+import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.util.Assert;
 
 /**
- * A helper class for configuring message broker options.
+ * A registry for configuring message broker options.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class MessageBrokerConfigurer {
+public class MessageBrokerRegistry {
 
-	private final MessageChannel webSocketResponseChannel;
+	private final MessageChannel clientOutboundChannel;
 
 	private SimpleBrokerRegistration simpleBroker;
 
@@ -42,9 +43,9 @@ public class MessageBrokerConfigurer {
 	private String userDestinationPrefix;
 
 
-	public MessageBrokerConfigurer(MessageChannel webSocketResponseChannel) {
-		Assert.notNull(webSocketResponseChannel);
-		this.webSocketResponseChannel = webSocketResponseChannel;
+	public MessageBrokerRegistry(MessageChannel clientOutboundChannel) {
+		Assert.notNull(clientOutboundChannel);
+		this.clientOutboundChannel = clientOutboundChannel;
 	}
 
 	/**
@@ -52,7 +53,7 @@ public class MessageBrokerConfigurer {
 	 * destinations targeting the broker (e.g. destinations prefixed with "/topic").
 	 */
 	public SimpleBrokerRegistration enableSimpleBroker(String... destinationPrefixes) {
-		this.simpleBroker = new SimpleBrokerRegistration(this.webSocketResponseChannel, destinationPrefixes);
+		this.simpleBroker = new SimpleBrokerRegistration(this.clientOutboundChannel, destinationPrefixes);
 		return this.simpleBroker;
 	}
 
@@ -62,7 +63,7 @@ public class MessageBrokerConfigurer {
 	 * destinations.
 	 */
 	public StompBrokerRelayRegistration enableStompBrokerRelay(String... destinationPrefixes) {
-		this.stompRelay = new StompBrokerRelayRegistration(this.webSocketResponseChannel, destinationPrefixes);
+		this.stompRelay = new StompBrokerRelayRegistration(this.clientOutboundChannel, destinationPrefixes);
 		return this.stompRelay;
 	}
 
@@ -78,7 +79,7 @@ public class MessageBrokerConfigurer {
 	 * <p>
 	 * Prefixes that do not have a trailing slash will have one automatically appended.
 	 */
-	public MessageBrokerConfigurer setApplicationDestinationPrefixes(String... prefixes) {
+	public MessageBrokerRegistry setApplicationDestinationPrefixes(String... prefixes) {
 		this.applicationDestinationPrefixes = prefixes;
 		return this;
 	}
@@ -97,24 +98,24 @@ public class MessageBrokerConfigurer {
 	 * <p>
 	 * The default prefix used to identify such destinations is "/user/".
 	 */
-	public MessageBrokerConfigurer setUserDestinationPrefix(String destinationPrefix) {
+	public MessageBrokerRegistry setUserDestinationPrefix(String destinationPrefix) {
 		this.userDestinationPrefix = destinationPrefix;
 		return this;
 	}
 
 
-	protected AbstractBrokerMessageHandler getSimpleBroker() {
+	protected SimpleBrokerMessageHandler getSimpleBroker() {
 		initSimpleBrokerIfNecessary();
 		return (this.simpleBroker != null) ? this.simpleBroker.getMessageHandler() : null;
 	}
 
 	protected void initSimpleBrokerIfNecessary() {
 		if ((this.simpleBroker == null) && (this.stompRelay == null)) {
-			this.simpleBroker = new SimpleBrokerRegistration(this.webSocketResponseChannel, null);
+			this.simpleBroker = new SimpleBrokerRegistration(this.clientOutboundChannel, null);
 		}
 	}
 
-	protected AbstractBrokerMessageHandler getStompBrokerRelay() {
+	protected StompBrokerRelayMessageHandler getStompBrokerRelay() {
 		return (this.stompRelay != null) ? this.stompRelay.getMessageHandler() : null;
 	}
 

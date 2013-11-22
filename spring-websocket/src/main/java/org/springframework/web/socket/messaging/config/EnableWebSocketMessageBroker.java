@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.springframework.messaging.simp.config;
+package org.springframework.web.socket.messaging.config;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -47,9 +47,9 @@ import org.springframework.context.annotation.Import;
  * 	}
  *
  * 	&#064;Bean
- * 	public void configureMessageBroker(MessageBrokerConfigurer configurer) {
- * 		configurer.enableStompBrokerRelay("/queue/", "/topic/");
- * 		configurer.setApplicationDestinationPrefixes("/app/");
+ * 	public void configureMessageBroker(MessageBrokerRegistry registry) {
+ * 		registry.enableStompBrokerRelay("/queue/", "/topic/");
+ * 		registry.setApplicationDestinationPrefixes("/app/");
  * 	}
  * }
  * </pre>
@@ -62,4 +62,5 @@ import org.springframework.context.annotation.Import;
 @Documented
 @Import(DelegatingWebSocketMessageBrokerConfiguration.class)
 public @interface EnableWebSocketMessageBroker {
+
 }

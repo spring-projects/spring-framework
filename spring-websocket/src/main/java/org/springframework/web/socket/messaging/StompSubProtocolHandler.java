@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.simp.stomp;
+package org.springframework.web.socket.messaging;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -28,9 +28,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.handler.websocket.SubProtocolHandler;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.handler.UserSessionRegistry;
+import org.springframework.messaging.simp.stomp.*;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
@@ -46,7 +46,7 @@ import org.springframework.web.socket.WebSocketSession;
  * @author Andy Wilkinson
  * @since 4.0
  */
-public class StompProtocolHandler implements SubProtocolHandler {
+public class StompSubProtocolHandler implements SubProtocolHandler {
 
 	/**
 	 * The name of the header set on the CONNECTED frame indicating the name of the user
@@ -54,7 +54,7 @@ public class StompProtocolHandler implements SubProtocolHandler {
 	 */
 	public static final String CONNECTED_USER_HEADER = "user-name";
 
-	private static final Log logger = LogFactory.getLog(StompProtocolHandler.class);
+	private static final Log logger = LogFactory.getLog(StompSubProtocolHandler.class);
 
 
 	private final StompDecoder stompDecoder = new StompDecoder();
@@ -174,7 +174,7 @@ public class StompProtocolHandler implements SubProtocolHandler {
 
 		try {
 			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
-			byte[] bytes = this.stompEncoder.encode((Message<byte[]>)message);
+			byte[] bytes = this.stompEncoder.encode((Message<byte[]>) message);
 			session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
 		}
 		catch (Throwable t) {
@@ -219,7 +219,6 @@ public class StompProtocolHandler implements SubProtocolHandler {
 		if (principal != null) {
 			headers.setNativeHeader(CONNECTED_USER_HEADER, principal.getName());
 			if (this.userSessionRegistry != null) {
-				String suffix = session.getId();
 				this.userSessionRegistry.registerSessionId(principal.getName(), session.getId());
 			}
 		}

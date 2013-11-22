@@ -85,6 +85,13 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 	}
 
 	/**
+	 * Return the HandshakeHandler.
+	 */
+	public HandshakeHandler getHandshakeHandler() {
+		return this.handshakeHandler;
+	}
+
+	/**
 	 * Configure one or more WebSocket handshake request interceptors.
 	 */
 	public void setHandshakeInterceptors(List<HandshakeInterceptor> interceptors) {

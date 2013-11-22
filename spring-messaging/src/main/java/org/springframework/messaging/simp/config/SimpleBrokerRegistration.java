@@ -21,7 +21,7 @@ import org.springframework.messaging.simp.handler.SimpleBrokerMessageHandler;
 
 
 /**
- * A simple message broker alternative providing a simple getting started option.
+ * Registration class for configuring a {@link SimpleBrokerMessageHandler}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -29,15 +29,13 @@ import org.springframework.messaging.simp.handler.SimpleBrokerMessageHandler;
 public class SimpleBrokerRegistration extends AbstractBrokerRegistration {
 
 
-	public SimpleBrokerRegistration(MessageChannel webSocketReplyChannel, String[] destinationPrefixes) {
-		super(webSocketReplyChannel, destinationPrefixes);
+	public SimpleBrokerRegistration(MessageChannel clientOutboundChannel, String[] destinationPrefixes) {
+		super(clientOutboundChannel, destinationPrefixes);
 	}
 
 	@Override
 	protected SimpleBrokerMessageHandler getMessageHandler() {
-		SimpleBrokerMessageHandler handler =
-				new SimpleBrokerMessageHandler(getWebSocketReplyChannel(), getDestinationPrefixes());
-		return handler;
+		return new SimpleBrokerMessageHandler(getClientOutboundChannel(), getDestinationPrefixes());
 	}
 
 }

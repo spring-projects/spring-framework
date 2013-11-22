@@ -25,7 +25,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.handler.websocket.SubProtocolWebSocketHandler;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.simp.handler.SimpAnnotationMethodMessageHandler;
@@ -35,7 +34,6 @@ import org.springframework.messaging.simp.handler.UserSessionRegistry;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.messaging.simp.stomp.StompTextMessageBuilder;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.channel.AbstractSubscribableChannel;
 import org.springframework.messaging.support.channel.ExecutorSubscribableChannel;
@@ -43,24 +41,19 @@ import org.springframework.messaging.support.converter.CompositeMessageConverter
 import org.springframework.messaging.support.converter.DefaultContentTypeResolver;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MimeTypeUtils;
-import org.springframework.web.servlet.HandlerMapping;
-import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.support.TestWebSocketSession;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.Assert.*;
 
 
 /**
- * Test fixture for {@link WebSocketMessageBrokerConfigurationSupport}.
+ * Test fixture for {@link AbstractMessageBrokerConfiguration}.
  *
  * @author Rossen Stoyanchev
  */
-public class WebSocketMessageBrokerConfigurationSupportTests {
+public class MessageBrokerConfigurationTests {
 
 	private AnnotationConfigApplicationContext cxtSimpleBroker;
 
@@ -71,29 +64,19 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 	public void setupOnce() {
 
 		this.cxtSimpleBroker = new AnnotationConfigApplicationContext();
-		this.cxtSimpleBroker.register(TestWebSocketMessageBrokerConfiguration.class, TestSimpleMessageBrokerConfig.class);
+		this.cxtSimpleBroker.register(TestMessageBrokerConfiguration.class);
 		this.cxtSimpleBroker.refresh();
 
 		this.cxtStompBroker = new AnnotationConfigApplicationContext();
-		this.cxtStompBroker.register(TestWebSocketMessageBrokerConfiguration.class, TestStompMessageBrokerConfig.class);
+		this.cxtStompBroker.register(TestStompMessageBrokerConfig.class);
 		this.cxtStompBroker.refresh();
 	}
 
-	@Test
-	public void handlerMapping() {
-
-		SimpleUrlHandlerMapping hm = (SimpleUrlHandlerMapping) this.cxtSimpleBroker.getBean(HandlerMapping.class);
-		assertEquals(1, hm.getOrder());
-
-		Map<String, Object> handlerMap = hm.getHandlerMap();
-		assertEquals(1, handlerMap.size());
-		assertNotNull(handlerMap.get("/simpleBroker"));
-	}
 
 	@Test
-	public void webSocketRequestChannel() {
+	public void clientInboundChannel() {
 
-		TestChannel channel = this.cxtSimpleBroker.getBean("webSocketRequestChannel", TestChannel.class);
+		TestChannel channel = this.cxtSimpleBroker.getBean("clientInboundChannel", TestChannel.class);
 		List<MessageHandler> handlers = channel.handlers;
 
 		assertEquals(3, handlers.size());
@@ -103,8 +86,8 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 	}
 
 	@Test
-	public void webSocketRequestChannelWithStompBroker() {
-		TestChannel channel = this.cxtStompBroker.getBean("webSocketRequestChannel", TestChannel.class);
+	public void clientInboundChannelWithStompBroker() {
+		TestChannel channel = this.cxtStompBroker.getBean("clientInboundChannel", TestChannel.class);
 		List<MessageHandler> values = channel.handlers;
 
 		assertEquals(3, values.size());
@@ -114,34 +97,9 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 	}
 
 	@Test
-	public void webSocketRequestChannelSendMessage() throws Exception {
+	public void clientOutboundChannelUsedByAnnotatedMethod() {
 
-		TestChannel channel = this.cxtSimpleBroker.getBean("webSocketRequestChannel", TestChannel.class);
-		SubProtocolWebSocketHandler webSocketHandler = this.cxtSimpleBroker.getBean(SubProtocolWebSocketHandler.class);
-
-		TextMessage textMessage = StompTextMessageBuilder.create(StompCommand.SEND).headers("destination:/foo").build();
-		webSocketHandler.handleMessage(new TestWebSocketSession(), textMessage);
-
-		Message<?> message = channel.messages.get(0);
-		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-
-		assertEquals(SimpMessageType.MESSAGE, headers.getMessageType());
-		assertEquals("/foo", headers.getDestination());
-	}
-
-	@Test
-	public void webSocketResponseChannel() {
-		TestChannel channel = this.cxtSimpleBroker.getBean("webSocketResponseChannel", TestChannel.class);
-		List<MessageHandler> values = channel.handlers;
-
-		assertEquals(1, values.size());
-		assertTrue(values.get(0) instanceof SubProtocolWebSocketHandler);
-	}
-
-	@Test
-	public void webSocketResponseChannelUsedByAnnotatedMethod() {
-
-		TestChannel channel = this.cxtSimpleBroker.getBean("webSocketResponseChannel", TestChannel.class);
+		TestChannel channel = this.cxtSimpleBroker.getBean("clientOutboundChannel", TestChannel.class);
 		SimpAnnotationMethodMessageHandler messageHandler = this.cxtSimpleBroker.getBean(SimpAnnotationMethodMessageHandler.class);
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
@@ -161,8 +119,8 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 	}
 
 	@Test
-	public void webSocketResponseChannelUsedBySimpleBroker() {
-		TestChannel channel = this.cxtSimpleBroker.getBean("webSocketResponseChannel", TestChannel.class);
+	public void clientOutboundChannelUsedBySimpleBroker() {
+		TestChannel channel = this.cxtSimpleBroker.getBean("clientOutboundChannel", TestChannel.class);
 		SimpleBrokerMessageHandler broker = this.cxtSimpleBroker.getBean(SimpleBrokerMessageHandler.class);
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
@@ -252,7 +210,7 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 	@Test
 	public void messageConverter() {
 		CompositeMessageConverter messageConverter = this.cxtStompBroker.getBean(
-				"simpMessageConverter", CompositeMessageConverter.class);
+				"brokerMessageConverter", CompositeMessageConverter.class);
 
 		DefaultContentTypeResolver resolver = (DefaultContentTypeResolver) messageConverter.getContentTypeResolver();
 		assertEquals(MimeTypeUtils.APPLICATION_JSON, resolver.getDefaultMimeType());
@@ -275,50 +233,26 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 	}
 
 	@Configuration
-	static class TestSimpleMessageBrokerConfig implements WebSocketMessageBrokerConfigurer {
-
-		@Override
-		public void registerStompEndpoints(StompEndpointRegistry registry) {
-			registry.addEndpoint("/simpleBroker");
-		}
-
-		@Override
-		public void configureMessageBroker(MessageBrokerConfigurer configurer) {
-			// SimpleBroker used by default
-		}
+	static class TestMessageBrokerConfiguration extends AbstractMessageBrokerConfiguration {
 
 		@Bean
 		public TestController subscriptionController() {
 			return new TestController();
 		}
-	}
-
-	@Configuration
-	static class TestStompMessageBrokerConfig implements WebSocketMessageBrokerConfigurer {
 
 		@Override
-		public void registerStompEndpoints(StompEndpointRegistry registry) {
-			registry.addEndpoint("/stompBrokerRelay");
+		protected void configureMessageBroker(MessageBrokerRegistry registry) {
 		}
-
-		@Override
-		public void configureMessageBroker(MessageBrokerConfigurer configurer) {
-			configurer.enableStompBrokerRelay("/topic", "/queue").setAutoStartup(false);
-		}
-	}
-
-	@Configuration
-	static class TestWebSocketMessageBrokerConfiguration extends DelegatingWebSocketMessageBrokerConfiguration {
 
 		@Override
 		@Bean
-		public AbstractSubscribableChannel webSocketRequestChannel() {
+		public AbstractSubscribableChannel clientInboundChannel() {
 			return new TestChannel();
 		}
 
 		@Override
 		@Bean
-		public AbstractSubscribableChannel webSocketResponseChannel() {
+		public AbstractSubscribableChannel clientOutboundChannel() {
 			return new TestChannel();
 		}
 
@@ -327,6 +261,16 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 			return new TestChannel();
 		}
 	}
+
+	@Configuration
+	static class TestStompMessageBrokerConfig extends TestMessageBrokerConfiguration {
+
+		@Override
+		public void configureMessageBroker(MessageBrokerRegistry registry) {
+			registry.enableStompBrokerRelay("/topic", "/queue").setAutoStartup(false);
+		}
+	}
+
 
 	private static class TestChannel extends ExecutorSubscribableChannel {
 
