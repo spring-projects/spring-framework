@@ -23,13 +23,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
+
 import javax.ejb.TransactionAttributeType;
 
 import static org.junit.Assert.*;
-import org.junit.Test;
 
+import org.junit.Test;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RollbackRuleAttribute;
@@ -41,6 +43,7 @@ import org.springframework.util.SerializationTestUtils;
 /**
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class AnnotationTransactionAttributeSourceTests {
 
@@ -250,6 +253,57 @@ public class AnnotationTransactionAttributeSourceTests {
 		assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute) actual).getRollbackRules());
 
 		assertTrue(actual.isReadOnly());
+	}
+
+	@Test
+	public void customClassAttributeWithReadOnlyOverrideOnInterface() throws Exception {
+		Method method = TestBean9.class.getMethod("getAge", (Class[]) null);
+
+		Transactional annotation = AnnotationUtils.findAnnotation(method, Transactional.class);
+		assertNull("AnnotationUtils.findAnnotation should not find @Transactional for TestBean9.getAge()", annotation);
+		annotation = AnnotationUtils.findAnnotation(TestBean9.class, Transactional.class);
+		assertNotNull("AnnotationUtils.findAnnotation failed to find @Transactional for TestBean9", annotation);
+
+		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
+		TransactionAttribute txAttribute = atas.getTransactionAttribute(method, TestBean9.class);
+		// SpringTransactionAnnotationParser currently uses
+		// AnnotatedElementUtils.getAnnotationAttributes() which does not support
+		// meta-annotations on interfaces.
+		assertNull("Retrieved TransactionAttribute for TestBean9", txAttribute);
+
+		// RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
+		// rbta.getRollbackRules().add(new RollbackRuleAttribute(Exception.class));
+		// rbta.getRollbackRules().add(new NoRollbackRuleAttribute(IOException.class));
+		// assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute)
+		// txAttribute).getRollbackRules());
+		//
+		// assertTrue(txAttribute.isReadOnly());
+	}
+
+	@Test
+	public void customMethodAttributeWithReadOnlyOverrideOnInterface() throws Exception {
+		Method method = TestBean10.class.getMethod("getAge", (Class[]) null);
+
+		Transactional annotation = AnnotationUtils.findAnnotation(method, Transactional.class);
+		assertNotNull("AnnotationUtils.findAnnotation failed to find @Transactional for TestBean10.getAge()",
+			annotation);
+		annotation = AnnotationUtils.findAnnotation(TestBean10.class, Transactional.class);
+		assertNull("AnnotationUtils.findAnnotation should not find @Transactional for TestBean10", annotation);
+
+		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
+		TransactionAttribute txAttribute = atas.getTransactionAttribute(method, TestBean10.class);
+		// SpringTransactionAnnotationParser currently uses
+		// AnnotatedElementUtils.getAnnotationAttributes() which does not support
+		// meta-annotations on interfaces.
+		assertNull("Retrieved TransactionAttribute for TestBean10", txAttribute);
+
+		// RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
+		// rbta.getRollbackRules().add(new RollbackRuleAttribute(Exception.class));
+		// rbta.getRollbackRules().add(new NoRollbackRuleAttribute(IOException.class));
+		// assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute)
+		// txAttribute).getRollbackRules());
+		//
+		// assertTrue(txAttribute.isReadOnly());
 	}
 
 	@Test
@@ -593,7 +647,35 @@ public class AnnotationTransactionAttributeSourceTests {
 
 	public static class TestBean8 {
 
+		@TxWithAttribute(readOnly = true)
+		public int getAge() {
+			return 10;
+		}
+	}
+
+	@TxWithAttribute(readOnly = true)
+	public static interface TestInterface9 {
+
+		public int getAge();
+	}
+
+	public static class TestBean9 implements TestInterface9 {
+
+		@Override
+		public int getAge() {
+			return 10;
+		}
+	}
+
+	public static interface TestInterface10 {
+
 		@TxWithAttribute(readOnly=true)
+		public int getAge();
+	}
+
+	public static class TestBean10 implements TestInterface10 {
+
+		@Override
 		public int getAge() {
 			return 10;
 		}
