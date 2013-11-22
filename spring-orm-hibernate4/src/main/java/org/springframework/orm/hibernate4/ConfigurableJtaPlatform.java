@@ -17,6 +17,7 @@
 package org.springframework.orm.hibernate4;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import javax.transaction.Status;
@@ -136,8 +137,15 @@ class ConfigurableJtaPlatform implements InvocationHandler {
 
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-		Method targetMethod = getClass().getMethod(method.getName(), method.getParameterTypes());
-		return targetMethod.invoke(this, args);
+		try {
+			return getClass().getMethod(method.getName(), method.getParameterTypes()).invoke(this, args);
+		}
+		catch (InvocationTargetException ex) {
+			throw ex.getTargetException();
+		}
+		catch (Throwable ex) {
+			throw new IllegalStateException("Failed to delegate to corresponding implementation method", ex);
+		}
 	}
 
 	/**
