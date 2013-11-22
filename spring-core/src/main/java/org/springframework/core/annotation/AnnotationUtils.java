@@ -34,16 +34,19 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * General utility methods for working with annotations, handling bridge methods (which the compiler
- * generates for generic declarations) as well as super methods (for optional &quot;annotation inheritance&quot;).
- * Note that none of this is provided by the JDK's introspection facilities themselves.
+ * General utility methods for working with annotations, handling bridge methods
+ * (which the compiler generates for generic declarations) as well as super methods
+ * (for optional &quot;annotation inheritance&quot;). Note that none of this is
+ * provided by the JDK's introspection facilities themselves.
  *
- * <p>As a general rule for runtime-retained annotations (e.g. for transaction control, authorization or service
- * exposure), always use the lookup methods on this class (e.g., {@link #findAnnotation(Method, Class)}, {@link
- * #getAnnotation(Method, Class)}, and {@link #getAnnotations(Method)}) instead of the plain annotation lookup
- * methods in the JDK. You can still explicitly choose between lookup on the given class level only ({@link
- * #getAnnotation(Method, Class)}) and lookup in the entire inheritance hierarchy of the given method ({@link
- * #findAnnotation(Method, Class)}).
+ * <p>As a general rule for runtime-retained annotations (e.g. for transaction
+ * control, authorization, or service exposure), always use the lookup methods
+ * on this class (e.g., {@link #findAnnotation(Method, Class)},
+ * {@link #getAnnotation(Method, Class)}, and {@link #getAnnotations(Method)})
+ * instead of the plain annotation lookup methods in the JDK. You can still
+ * explicitly choose between a <em>get</em> lookup on the given class level only
+ * ({@link #getAnnotation(Method, Class)}) and a <em>find</em> lookup in the entire
+ * inheritance hierarchy of the given method ({@link #findAnnotation(Method, Class)}).
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -165,9 +168,11 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * Get a single {@link Annotation} of {@code annotationType} from the supplied {@link Method},
-	 * traversing its super methods if no annotation can be found on the given method itself.
-	 * <p>Annotations on methods are not inherited by default, so we need to handle this explicitly.
+	 * Find a single {@link Annotation} of {@code annotationType} from the supplied
+	 * {@link Method}, traversing its super methods (i.e., from super classes and
+	 * interfaces) if no annotation can be found on the given method itself.
+	 * <p>Annotations on methods are not inherited by default, so we need to handle
+	 * this explicitly.
 	 * @param method the method to look for annotations on
 	 * @param annotationType the annotation class to look for
 	 * @return the annotation found, or {@code null} if none found
@@ -235,16 +240,23 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * Find a single {@link Annotation} of {@code annotationType} from the supplied {@link Class},
-	 * traversing its interfaces and superclasses if no annotation can be found on the given class itself.
-	 * <p>This method explicitly handles class-level annotations which are not declared as
-	 * {@link java.lang.annotation.Inherited inherited} <i>as well as annotations on interfaces</i>.
-	 * <p>The algorithm operates as follows: Searches for an annotation on the given class and returns
-	 * it if found. Else searches all interfaces that the given class declares, returning the annotation
-	 * from the first matching candidate, if any. Else proceeds with introspection of the superclass
-	 * of the given class, checking the superclass itself; if no annotation found there, proceeds
-	 * with the interfaces that the superclass declares. Recursing up through the entire superclass
-	 * hierarchy if no match is found.
+	 * Find a single {@link Annotation} of {@code annotationType} from the supplied
+	 * {@link Class}, traversing its annotations, interfaces, and superclasses if
+	 * no annotation can be found on the given class itself.
+	 * <p>This method explicitly handles class-level annotations which are not
+	 * declared as {@link java.lang.annotation.Inherited inherited} <i>as well
+	 * as meta-annotations and annotations on interfaces</i>.
+	 * <p>The algorithm operates as follows:
+	 * <ol>
+	 * <li>Search for an annotation on the given class and return it if found.
+	 * <li>Recursively search through all interfaces that the given class
+	 * declares, returning the annotation from the first matching candidate, if any.
+	 * <li>Recursively search through all annotations that the given class
+	 * declares, returning the annotation from the first matching candidate, if any.
+	 * <li>Proceed with introspection of the superclass hierarchy of the given
+	 * class by returning to step #1 with the superclass as the class to look for
+	 * annotations on.
+	 * </ol>
 	 * @param clazz the class to look for annotations on
 	 * @param annotationType the annotation class to look for
 	 * @return the annotation found, or {@code null} if none found
@@ -301,23 +313,9 @@ public abstract class AnnotationUtils {
 		if (clazz == null || clazz.equals(Object.class)) {
 			return null;
 		}
-
-		// Declared locally?
 		if (isAnnotationDeclaredLocally(annotationType, clazz)) {
 			return clazz;
 		}
-
-		// Declared on a stereotype annotation (i.e., as a meta-annotation)?
-		if (!Annotation.class.isAssignableFrom(clazz)) {
-			for (Annotation stereotype : clazz.getAnnotations()) {
-				Class<?> declaringClass = findAnnotationDeclaringClass(annotationType, stereotype.annotationType());
-				if (declaringClass != null) {
-					return declaringClass;
-				}
-			}
-		}
-
-		// Declared on a superclass?
 		return findAnnotationDeclaringClass(annotationType, clazz.getSuperclass());
 	}
 
