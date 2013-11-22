@@ -23,12 +23,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
-
 import javax.ejb.TransactionAttributeType;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -39,6 +37,8 @@ import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute
 import org.springframework.transaction.interceptor.TransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
 import org.springframework.util.SerializationTestUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Colin Sampaleanu
@@ -257,7 +257,7 @@ public class AnnotationTransactionAttributeSourceTests {
 
 	@Test
 	public void customClassAttributeWithReadOnlyOverrideOnInterface() throws Exception {
-		Method method = TestBean9.class.getMethod("getAge", (Class[]) null);
+		Method method = TestInterface9.class.getMethod("getAge", (Class[]) null);
 
 		Transactional annotation = AnnotationUtils.findAnnotation(method, Transactional.class);
 		assertNull("AnnotationUtils.findAnnotation should not find @Transactional for TestBean9.getAge()", annotation);
@@ -265,45 +265,37 @@ public class AnnotationTransactionAttributeSourceTests {
 		assertNotNull("AnnotationUtils.findAnnotation failed to find @Transactional for TestBean9", annotation);
 
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
-		TransactionAttribute txAttribute = atas.getTransactionAttribute(method, TestBean9.class);
-		// SpringTransactionAnnotationParser currently uses
-		// AnnotatedElementUtils.getAnnotationAttributes() which does not support
-		// meta-annotations on interfaces.
-		assertNull("Retrieved TransactionAttribute for TestBean9", txAttribute);
+		TransactionAttribute actual = atas.getTransactionAttribute(method, TestBean9.class);
+		assertNotNull("Retrieved TransactionAttribute for TestBean9", actual);
 
-		// RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
-		// rbta.getRollbackRules().add(new RollbackRuleAttribute(Exception.class));
-		// rbta.getRollbackRules().add(new NoRollbackRuleAttribute(IOException.class));
-		// assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute)
-		// txAttribute).getRollbackRules());
-		//
-		// assertTrue(txAttribute.isReadOnly());
+		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
+		rbta.getRollbackRules().add(new RollbackRuleAttribute(Exception.class));
+		rbta.getRollbackRules().add(new NoRollbackRuleAttribute(IOException.class));
+		assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute) actual).getRollbackRules());
+
+		assertTrue(actual.isReadOnly());
 	}
 
 	@Test
 	public void customMethodAttributeWithReadOnlyOverrideOnInterface() throws Exception {
-		Method method = TestBean10.class.getMethod("getAge", (Class[]) null);
+		Method method = TestInterface10.class.getMethod("getAge", (Class[]) null);
 
 		Transactional annotation = AnnotationUtils.findAnnotation(method, Transactional.class);
 		assertNotNull("AnnotationUtils.findAnnotation failed to find @Transactional for TestBean10.getAge()",
-			annotation);
+				annotation);
 		annotation = AnnotationUtils.findAnnotation(TestBean10.class, Transactional.class);
 		assertNull("AnnotationUtils.findAnnotation should not find @Transactional for TestBean10", annotation);
 
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
-		TransactionAttribute txAttribute = atas.getTransactionAttribute(method, TestBean10.class);
-		// SpringTransactionAnnotationParser currently uses
-		// AnnotatedElementUtils.getAnnotationAttributes() which does not support
-		// meta-annotations on interfaces.
-		assertNull("Retrieved TransactionAttribute for TestBean10", txAttribute);
+		TransactionAttribute actual = atas.getTransactionAttribute(method, TestBean10.class);
+		assertNotNull("Retrieved TransactionAttribute for TestBean10", actual);
 
-		// RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
-		// rbta.getRollbackRules().add(new RollbackRuleAttribute(Exception.class));
-		// rbta.getRollbackRules().add(new NoRollbackRuleAttribute(IOException.class));
-		// assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute)
-		// txAttribute).getRollbackRules());
-		//
-		// assertTrue(txAttribute.isReadOnly());
+		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
+		rbta.getRollbackRules().add(new RollbackRuleAttribute(Exception.class));
+		rbta.getRollbackRules().add(new NoRollbackRuleAttribute(IOException.class));
+		assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute) actual).getRollbackRules());
+
+		assertTrue(actual.isReadOnly());
 	}
 
 	@Test
