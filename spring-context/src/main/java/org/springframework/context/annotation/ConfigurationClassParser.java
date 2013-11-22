@@ -424,8 +424,7 @@ class ConfigurationClassParser {
 					}
 					else {
 						// candidate class not an ImportSelector or ImportBeanDefinitionRegistrar -> process it as a @Configuration class
-						this.importStack.registerImport(importingClassMetadata.getClassName(),
-								candidate.getMetadata().getClassName());
+						this.importStack.registerImport(importingClassMetadata, candidate.getMetadata().getClassName());
 						processConfigurationClass(candidate.asConfigClass(configClass));
 					}
 				}
@@ -558,7 +557,7 @@ class ConfigurationClassParser {
 
 	interface ImportRegistry {
 
-		String getImportingClassFor(String importedClass);
+		AnnotationMetadata getImportingClassFor(String importedClass);
 
 	}
 
@@ -566,14 +565,14 @@ class ConfigurationClassParser {
 	@SuppressWarnings("serial")
 	private static class ImportStack extends Stack<ConfigurationClass> implements ImportRegistry {
 
-		private final Map<String, String> imports = new HashMap<String, String>();
+		private final Map<String, AnnotationMetadata> imports = new HashMap<String, AnnotationMetadata>();
 
-		public void registerImport(String importingClass, String importedClass) {
+		public void registerImport(AnnotationMetadata importingClass, String importedClass) {
 			this.imports.put(importedClass, importingClass);
 		}
 
 		@Override
-		public String getImportingClassFor(String importedClass) {
+		public AnnotationMetadata getImportingClassFor(String importedClass) {
 			return this.imports.get(importedClass);
 		}
 
