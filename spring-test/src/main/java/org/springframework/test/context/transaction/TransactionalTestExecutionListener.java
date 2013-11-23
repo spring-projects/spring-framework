@@ -33,6 +33,8 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
@@ -524,21 +526,25 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * {@code @TransactionConfiguration} will be used instead.
 	 * @param testContext the test context for which the configuration
 	 * attributes should be retrieved
-	 * @return a new TransactionConfigurationAttributes instance
+	 * @return the TransactionConfigurationAttributes instance for this listener,
+	 * potentially cached
 	 */
-	private TransactionConfigurationAttributes retrieveConfigurationAttributes(TestContext testContext) {
+	TransactionConfigurationAttributes retrieveConfigurationAttributes(TestContext testContext) {
 		if (this.configurationAttributes == null) {
 			Class<?> clazz = testContext.getTestClass();
-			TransactionConfiguration config = findAnnotation(clazz, TransactionConfiguration.class);
+
+			AnnotationAttributes ann = AnnotatedElementUtils.getAnnotationAttributes(clazz,
+				TransactionConfiguration.class.getName());
 			if (logger.isDebugEnabled()) {
-				logger.debug("Retrieved @TransactionConfiguration [" + config + "] for test class [" + clazz + "]");
+				logger.debug("Retrieved @TransactionConfiguration attributes [" + ann + "] for test class [" + clazz
+						+ "]");
 			}
 
 			String transactionManagerName;
 			boolean defaultRollback;
-			if (config != null) {
-				transactionManagerName = config.transactionManager();
-				defaultRollback = config.defaultRollback();
+			if (ann != null) {
+				transactionManagerName = ann.getString("transactionManager");
+				defaultRollback = ann.getBoolean("defaultRollback");
 			}
 			else {
 				transactionManagerName = DEFAULT_TRANSACTION_MANAGER_NAME;
