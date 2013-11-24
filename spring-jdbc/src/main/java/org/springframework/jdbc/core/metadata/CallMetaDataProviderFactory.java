@@ -61,9 +61,9 @@ public class CallMetaDataProviderFactory {
 		);
 
 	/**
-	 * Create a CallMetaDataProvider based on the database metedata
-	 * @param dataSource used to retrieve metedata
-	 * @param context the class that holds configuration and metedata
+	 * Create a CallMetaDataProvider based on the database metadata
+	 * @param dataSource used to retrieve metadata
+	 * @param context the class that holds configuration and metadata
 	 * @return instance of the CallMetaDataProvider implementation to be used
 	 */
 	static public CallMetaDataProvider createMetaDataProvider(DataSource dataSource, final CallMetaDataContext context) {

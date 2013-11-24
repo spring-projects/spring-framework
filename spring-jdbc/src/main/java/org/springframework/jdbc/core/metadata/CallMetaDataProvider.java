@@ -41,7 +41,7 @@ public interface CallMetaDataProvider {
 
 	/**
 	 * Initialize the database specific management of procedure column meta data.
-	 * This is only called for databases that are supported. This initalization
+	 * This is only called for databases that are supported. This initialization
 	 * can be turned off by specifying that column meta data should not be used.
 	 * @param databaseMetaData used to retrieve database specific information
 	 * @param catalogName name of catalog to use or null

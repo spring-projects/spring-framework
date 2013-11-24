@@ -48,7 +48,7 @@ public class ServletContextAwareProcessor implements BeanPostProcessor {
 	/**
 	 * Create a new ServletContextAwareProcessor without an initial context or config.
 	 * When this constructor is used the {@link #getServletContext()} and/or
-	 * {@link #getServletConfig()} methods should be overriden.
+	 * {@link #getServletConfig()} methods should be overridden.
 	 */
 	protected ServletContextAwareProcessor() {
 	}
