@@ -90,7 +90,7 @@ public class ServerEndpointRegistration extends ServerEndpointConfig.Configurato
 
 	/**
 	 * Create a new {@link ServerEndpointRegistration} instance from an
-	 * {@code javax.webscoket.Endpoint} instance.
+	 * {@code javax.websocket.Endpoint} instance.
 	 * @param path the endpoint path
 	 * @param endpoint the endpoint instance
 	 */

@@ -70,7 +70,7 @@ import org.springframework.web.servlet.ViewResolver;
  * with the view's {@linkplain View#getContentType() content type}). The most compatible view is returned.
  *
  * <p>Additionally, this view resolver exposes the {@link #setDefaultViews(List) defaultViews} property, allowing you to
- * override the views provided by the view resolvers. Note that these default views are offered as candicates, and
+ * override the views provided by the view resolvers. Note that these default views are offered as candidates, and
  * still need have the content type requested (via file extension, parameter, or {@code Accept} header, described above).
  * You can also set the {@linkplain #setDefaultContentType(MediaType) default content type} directly, which will be
  * returned when the other mechanisms ({@code Accept} header, file extension or parameter) do not result in a match.

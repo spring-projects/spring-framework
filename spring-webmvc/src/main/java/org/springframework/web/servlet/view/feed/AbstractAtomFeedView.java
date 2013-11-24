@@ -96,7 +96,7 @@ public abstract class AbstractAtomFeedView extends AbstractFeedView<Feed> {
 	 * @param request in case we need locale etc. Shouldn't look at attributes.
 	 * @param response in case we need to set cookies. Shouldn't write to it.
 	 * @return the feed entries to be added to the feed
-	 * @throws Exception any exception that occured during document building
+	 * @throws Exception any exception that occurred during document building
 	 * @see Entry
 	 */
 	protected abstract List<Entry> buildFeedEntries(

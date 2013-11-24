@@ -340,7 +340,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 				try {
 					tables.close();
 				} catch (SQLException e) {
-					logger.warn("Error while closing table meta data reults" + e.getMessage());
+					logger.warn("Error while closing table meta data results" + e.getMessage());
 				}
 			}
 		}
@@ -379,7 +379,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	}
 
 	/**
-	 * Method supporting the metedata processing for a table's columns
+	 * Method supporting the metadata processing for a table's columns
 	 */
 	private void processTableColumns(DatabaseMetaData databaseMetaData, TableMetaData tmd) {
 		ResultSet tableColumns = null;

@@ -295,7 +295,7 @@ public class ResourceServlet extends HttpServletBean {
 	 * to allow for message resolution etc that influences JSP contents,
 	 * assuming that those background resources might have changed on restart.
 	 * <p>Returns the startup time of this servlet if the file that corresponds
-	 * to the target resource URL coudln't be resolved (for example, because
+	 * to the target resource URL couldn't be resolved (for example, because
 	 * the WAR is not expanded).
 	 * @see #determineResourceUrl
 	 * @see #getFileTimestamp

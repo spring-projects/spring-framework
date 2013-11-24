@@ -82,7 +82,7 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 
 	/**
 	 * Prepare a builder from the host, port, scheme, and path of
-	 * an HttpSevletRequest.
+	 * an HttpServletRequest.
 	 */
 	public static ServletUriComponentsBuilder fromRequestUri(HttpServletRequest request) {
 		ServletUriComponentsBuilder builder = fromRequest(request);

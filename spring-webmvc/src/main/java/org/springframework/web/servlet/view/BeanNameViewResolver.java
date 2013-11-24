@@ -38,7 +38,7 @@ import org.springframework.web.servlet.ViewResolver;
  * application beans - such a separation will make this clear.
  *
  * <p>This ViewResolver does not support internationalization.
- * Conside ResourceBundleViewResolver if you need to apply different
+ * Consider ResourceBundleViewResolver if you need to apply different
  * view resources per locale.
  *
  * <p>Note: This ViewResolver implements the Ordered interface to allow for

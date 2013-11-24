@@ -73,7 +73,7 @@ public class VelocityToolboxView extends VelocityView {
 	 * to automatically load a Velocity Tools toolbox definition file and expose
 	 * all defined tools in the specified scopes. If no config location is
 	 * specified, no toolbox will be loaded and exposed.
-	 * <p>The specfied location string needs to refer to a ServletContext
+	 * <p>The specified location string needs to refer to a ServletContext
 	 * resource, as expected by ServletToolboxManager which is part of
 	 * the view package of Velocity Tools.
 	 * @see org.apache.velocity.tools.view.servlet.ServletToolboxManager#getInstance

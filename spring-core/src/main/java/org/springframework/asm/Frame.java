@@ -585,7 +585,7 @@ final class Frame {
         }
         // pushes the type on the output stack
         outputStack[outputStackTop++] = type;
-        // updates the maximun height reached by the output stack, if needed
+        // updates the maximum height reached by the output stack, if needed
         int top = owner.inputStackTop + outputStackTop;
         if (top > owner.outputStackMax) {
             owner.outputStackMax = top;

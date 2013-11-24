@@ -83,7 +83,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 		if (!checkDestinationPrefix(destination)) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Ingoring message to destination=" + destination);
+				logger.trace("Ignoring message to destination=" + destination);
 			}
 			return;
 		}

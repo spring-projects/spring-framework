@@ -70,7 +70,7 @@ public class ParsedSql {
 
 	/**
 	 * Return all of the parameters (bind variables) in the parsed SQL statement.
-	 * Repeated occurences of the same parameter name are included here.
+	 * Repeated occurrences of the same parameter name are included here.
 	 */
 	List<String> getParameterNames() {
 		return this.parameterNames;
@@ -89,7 +89,7 @@ public class ParsedSql {
 
 	/**
 	 * Set the count of named parameters in the SQL statement.
-	 * Each parameter name counts once; repeated occurences do not count here.
+	 * Each parameter name counts once; repeated occurrences do not count here.
 	 */
 	void setNamedParameterCount(int namedParameterCount) {
 		this.namedParameterCount = namedParameterCount;
@@ -97,7 +97,7 @@ public class ParsedSql {
 
 	/**
 	 * Return the count of named parameters in the SQL statement.
-	 * Each parameter name counts once; repeated occurences do not count here.
+	 * Each parameter name counts once; repeated occurrences do not count here.
 	 */
 	int getNamedParameterCount() {
 		return this.namedParameterCount;
@@ -119,7 +119,7 @@ public class ParsedSql {
 
 	/**
 	 * Set the total count of all of the parameters in the SQL statement.
-	 * Repeated occurences of the same parameter name do count here.
+	 * Repeated occurrences of the same parameter name do count here.
 	 */
 	void setTotalParameterCount(int totalParameterCount) {
 		this.totalParameterCount = totalParameterCount;
@@ -127,7 +127,7 @@ public class ParsedSql {
 
 	/**
 	 * Return the total count of all of the parameters in the SQL statement.
-	 * Repeated occurences of the same parameter name do count here.
+	 * Repeated occurrences of the same parameter name do count here.
 	 */
 	int getTotalParameterCount() {
 		return this.totalParameterCount;

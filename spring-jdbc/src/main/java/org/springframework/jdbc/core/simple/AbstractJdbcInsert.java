@@ -311,7 +311,7 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Method to check whether we are allowd to make any configuration changes at this time.
+	 * Method to check whether we are allowed to make any configuration changes at this time.
 	 * If the class has been compiled, then no further changes to the configuration are allowed.
 	 */
 	protected void checkIfConfigurationModificationIsAllowed() {
@@ -450,12 +450,12 @@ public abstract class AbstractJdbcInsert {
 						"The getGeneratedKeys feature is not supported by this database");
 			}
 			if (getGeneratedKeyNames().length < 1) {
-				throw new InvalidDataAccessApiUsageException("Generated Key Name(s) not specificed. " +
+				throw new InvalidDataAccessApiUsageException("Generated Key Name(s) not specified. " +
 						"Using the generated keys features requires specifying the name(s) of the generated column(s)");
 			}
 			if (getGeneratedKeyNames().length > 1) {
 				throw new InvalidDataAccessApiUsageException(
-						"Current database only supports retreiving the key for a single column. There are " +
+						"Current database only supports retrieving the key for a single column. There are " +
 						getGeneratedKeyNames().length  + " columns specified: " + Arrays.asList(getGeneratedKeyNames()));
 			}
 			// This is a hack to be able to get the generated key from a database that doesn't support
@@ -615,9 +615,9 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Match the provided in parameter values with regitered parameters and parameters defined
+	 * Match the provided in parameter values with registered parameters and parameters defined
 	 * via metadata processing.
-	 * @param parameterSource the parameter vakues provided as a {@link SqlParameterSource}
+	 * @param parameterSource the parameter values provided as a {@link SqlParameterSource}
 	 * @return Map with parameter names and values
 	 */
 	protected List<Object> matchInParameterValuesWithInsertColumns(SqlParameterSource parameterSource) {
