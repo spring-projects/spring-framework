@@ -264,7 +264,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 * an object of {@link #getSourceTypes() supported type}.
 	 * @param model the merged model Map
 	 * @return the XSLT Source object (or {@code null} if none found)
-	 * @throws Exception if an error occured during locating the source
+	 * @throws Exception if an error occurred during locating the source
 	 * @see #setSourceKey
 	 * @see #convertSource
 	 */

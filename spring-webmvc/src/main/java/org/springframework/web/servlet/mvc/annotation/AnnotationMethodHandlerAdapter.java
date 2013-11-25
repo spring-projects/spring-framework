@@ -513,7 +513,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	}
 
 	/**
-	 * Template method for creating a new HttpOuputMessage instance.
+	 * Template method for creating a new HttpOutputMessage instance.
 	 * <p>The default implementation creates a standard {@link ServletServerHttpResponse}.
 	 * This can be overridden for custom {@code HttpOutputMessage} implementations
 	 * @param servletResponse current HTTP response
@@ -1197,7 +1197,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 * sorting a list with this comparator will result in:
 	 * <ul>
 	 * <li>RHIs with {@linkplain AnnotationMethodHandlerAdapter.RequestSpecificMappingInfo#matchedPatterns better matched paths}
-	 * take prescedence over those with a weaker match (as expressed by the {@linkplain PathMatcher#getPatternComparator(String)
+	 * take precedence over those with a weaker match (as expressed by the {@linkplain PathMatcher#getPatternComparator(String)
 	 * path pattern comparator}.) Typically, this means that patterns without wild cards and uri templates
 	 * will be ordered before those without.</li>
 	 * <li>RHIs with one single {@linkplain RequestMappingInfo#methods request method} will be

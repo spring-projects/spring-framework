@@ -42,7 +42,7 @@ import org.springframework.transaction.support.TransactionSynchronizationUtils;
  *
  * <p>This listener container variant is built for repeated polling attempts,
  * each invoking the {@link #receiveAndExecute} method. The MessageConsumer used
- * may be reobtained fo reach attempt or cached inbetween attempts; this is up
+ * may be reobtained fo reach attempt or cached in between attempts; this is up
  * to the concrete implementation. The receive timeout for each attempt can be
  * configured through the {@link #setReceiveTimeout "receiveTimeout"} property.
  *

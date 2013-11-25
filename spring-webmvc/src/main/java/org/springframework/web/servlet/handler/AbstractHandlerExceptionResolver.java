@@ -189,7 +189,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	}
 
 	/**
-	 * Build a log message for the given exception, occured during processing the given request.
+	 * Build a log message for the given exception, occurred during processing the given request.
 	 * @param ex the exception that got thrown during handler execution
 	 * @param request current HTTP request (useful for obtaining metadata)
 	 * @return the log message to use

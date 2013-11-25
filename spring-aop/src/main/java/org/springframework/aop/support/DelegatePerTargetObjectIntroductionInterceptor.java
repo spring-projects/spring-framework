@@ -67,7 +67,7 @@ public class DelegatePerTargetObjectIntroductionInterceptor extends Introduction
 	public DelegatePerTargetObjectIntroductionInterceptor(Class<?> defaultImplType, Class<?> interfaceType) {
 		this.defaultImplType = defaultImplType;
 		this.interfaceType = interfaceType;
-		// cCeate a new delegate now (but don't store it in the map).
+		// Create a new delegate now (but don't store it in the map).
 		// We do this for two reasons:
 		// 1) to fail early if there is a problem instantiating delegates
 		// 2) to populate the interface map once and once only

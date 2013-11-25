@@ -211,7 +211,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	}
 
 	/**
-	 * Return whether 'must-revaliate' is added to every Cache-Control header.
+	 * Return whether 'must-revalidate' is added to every Cache-Control header.
 	 */
 	public boolean isAlwaysMustRevalidate() {
 		return alwaysMustRevalidate;

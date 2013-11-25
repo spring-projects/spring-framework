@@ -40,7 +40,7 @@ public interface SimpleJdbcInsertOperations {
 	SimpleJdbcInsertOperations withTableName(String tableName);
 
 	/**
-	 * Specify the shema name, if any, to be used for the insert.
+	 * Specify the schema name, if any, to be used for the insert.
 	 * @param schemaName the name of the schema
 	 * @return the instance of this SimpleJdbcInsert
 	 */

@@ -276,7 +276,7 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 		private final Class<? extends E> elementClass;
 
 		public ReflectiveElementFactory(Class<? extends E> elementClass) {
-			Assert.notNull(elementClass, "Element clas must not be null");
+			Assert.notNull(elementClass, "Element class must not be null");
 			Assert.isTrue(!elementClass.isInterface(), "Element class must not be an interface type");
 			Assert.isTrue(!Modifier.isAbstract(elementClass.getModifiers()), "Element class cannot be an abstract class");
 			this.elementClass = elementClass;

@@ -91,7 +91,7 @@ public abstract class AbstractFeedView<T extends WireFeed> extends AbstractView 
 	 * @param feed the feed to add entries to
 	 * @param request in case we need locale etc. Shouldn't look at attributes.
 	 * @param response in case we need to set cookies. Shouldn't write to it.
-	 * @throws Exception any exception that occured during building
+	 * @throws Exception any exception that occurred during building
 	 */
 	protected abstract void buildFeedEntries(Map<String, Object> model, T feed,
 			HttpServletRequest request, HttpServletResponse response) throws Exception;

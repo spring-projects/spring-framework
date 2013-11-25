@@ -68,7 +68,7 @@ public class CompositeIterator<E> implements Iterator<E> {
 				return iterator.next();
 			}
 		}
-		throw new NoSuchElementException("Exhaused all iterators");
+		throw new NoSuchElementException("Exhausted all iterators");
 	}
 
 	@Override
