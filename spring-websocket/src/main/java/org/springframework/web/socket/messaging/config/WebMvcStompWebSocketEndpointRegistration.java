@@ -18,6 +18,8 @@ package org.springframework.web.socket.messaging.config;
 
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -41,6 +43,8 @@ import org.springframework.web.socket.sockjs.transport.handler.WebSocketTranspor
  * @since 4.0
  */
 public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketEndpointRegistration {
+	
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final String[] paths;
 
@@ -67,8 +71,13 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 		this.subProtocols = subProtocols.toArray(new String[subProtocols.size()]);
 		this.sockJsTaskScheduler = sockJsTaskScheduler;
 
-		this.handshakeHandler = new DefaultHandshakeHandler();
-		updateHandshakeHandler();
+		try {
+			this.handshakeHandler = new DefaultHandshakeHandler();
+			updateHandshakeHandler();
+		}
+		catch (IllegalStateException e) {
+			logger.error("Caught exception during handshakeHandler setup", e);
+		}
 	}
 
 	private void updateHandshakeHandler() {
@@ -97,8 +106,10 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 	@Override
 	public SockJsServiceRegistration withSockJS() {
 		this.registration = new StompSockJsServiceRegistration(this.sockJsTaskScheduler);
-		WebSocketTransportHandler transportHandler = new WebSocketTransportHandler(this.handshakeHandler);
-		this.registration.setTransportHandlerOverrides(transportHandler);
+		if (this.handshakeHandler != null) {
+			WebSocketTransportHandler transportHandler = new WebSocketTransportHandler(this.handshakeHandler);
+			this.registration.setTransportHandlerOverrides(transportHandler);
+		}
 		return this.registration;
 	}
 
