@@ -16,12 +16,7 @@
 
 package org.springframework.web.socket.messaging;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
@@ -37,6 +32,7 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.support.SubProtocolCapable;
 
 
 /**
@@ -55,7 +51,7 @@ import org.springframework.web.socket.WebSocketSession;
  *
  * @since 4.0
  */
-public class SubProtocolWebSocketHandler implements WebSocketHandler, MessageHandler {
+public class SubProtocolWebSocketHandler implements SubProtocolCapable, WebSocketHandler, MessageHandler {
 
 	private final Log logger = LogFactory.getLog(SubProtocolWebSocketHandler.class);
 
@@ -136,8 +132,8 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler, MessageHan
 	/**
 	 * Return all supported protocols.
 	 */
-	public Set<String> getSupportedProtocols() {
-		return this.protocolHandlers.keySet();
+	public List<String> getSubProtocols() {
+		return new ArrayList<String>(this.protocolHandlers.keySet());
 	}
 
 	@Override

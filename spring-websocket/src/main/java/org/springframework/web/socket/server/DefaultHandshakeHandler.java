@@ -32,8 +32,10 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.socket.support.SubProtocolCapable;
 import org.springframework.web.socket.support.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.support.WebSocketHandlerDecorator;
 import org.springframework.web.socket.support.WebSocketHttpHeaders;
 
 /**
@@ -122,10 +124,16 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 	}
 
 	/**
-	 * Use this property to configure a list of sub-protocols that are supported.
-	 * The first protocol that matches what the client requested is selected.
-	 * If no protocol matches or this property is not configured, then the
-	 * response will not contain a Sec-WebSocket-Protocol header.
+	 * Use this property to configure the list of supported sub-protocols.
+	 * The first configured sub-protocol that matches a client-requested sub-protocol
+	 * is accepted. If there are no matches the response will not contain a
+	 * {@literal Sec-WebSocket-Protocol} header.
+	 * <p>
+	 * Note that if the WebSocketHandler passed in at runtime is an instance of
+	 * {@link SubProtocolCapable} then there is not need to explicitly configure
+	 * this property. That is certainly the case with the built-in STOMP over
+	 * WebSocket support. Therefore this property should be configured explicitly
+	 * only if the WebSocketHandler does not implement {@code SubProtocolCapable}.
 	 */
 	public void setSupportedProtocols(String... protocols) {
 		this.supportedProtocols.clear();
@@ -187,7 +195,10 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 					"Response update failed during upgrade to WebSocket, uri=" + request.getURI(), ex);
 		}
 
-		String subProtocol = selectProtocol(headers.getSecWebSocketProtocol());
+		String subProtocol = selectProtocol(headers.getSecWebSocketProtocol(), wsHandler);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Selected sub-protocol: '" + subProtocol + "'");
+		}
 
 		List<WebSocketExtension> requested = headers.getSecWebSocketExtensions();
 		List<WebSocketExtension> supported = this.requestUpgradeStrategy.getSupportedExtensions(request);
@@ -246,22 +257,58 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 		return true;
 	}
 
-	protected String selectProtocol(List<String> requestedProtocols) {
+	/**
+	 * Perform the sub-protocol negotiation based on requested and supported sub-protocols.
+	 * For the list of supported sub-protocols, this method first checks if the target
+	 * WebSocketHandler is a {@link SubProtocolCapable} and then also checks if any
+	 * sub-protocols have been explicitly configured with
+	 * {@link #setSupportedProtocols(String...)}.
+	 *
+	 * @param requestedProtocols the requested sub-protocols
+	 * @param webSocketHandler the WebSocketHandler that will be used
+	 * @return the selected protocols or {@code null}
+	 *
+	 * @see #determineHandlerSupportedProtocols(org.springframework.web.socket.WebSocketHandler)
+	 */
+	protected String selectProtocol(List<String> requestedProtocols, WebSocketHandler webSocketHandler) {
 		if (requestedProtocols != null) {
+			List<String> handlerProtocols = determineHandlerSupportedProtocols(webSocketHandler);
 			if (logger.isDebugEnabled()) {
-				logger.debug("Requested sub-protocol(s): " + requestedProtocols
-						+ ", supported sub-protocol(s): " + this.supportedProtocols);
+				logger.debug("Requested sub-protocol(s): " + requestedProtocols +
+						", WebSocketHandler supported sub-protocol(s): " + handlerProtocols +
+						", configured sub-protocol(s): " + this.supportedProtocols);
 			}
 			for (String protocol : requestedProtocols) {
+				if (handlerProtocols.contains(protocol.toLowerCase())) {
+					return protocol;
+				}
 				if (this.supportedProtocols.contains(protocol.toLowerCase())) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Selected sub-protocol: '" + protocol + "'");
-					}
 					return protocol;
 				}
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Determine the sub-protocols supported by the given WebSocketHandler by checking
+	 * whether it is an instance of {@link SubProtocolCapable}.
+	 *
+	 * @param handler the handler to check
+	 * @return a list of supported protocols or an empty list
+	 */
+	protected final List<String> determineHandlerSupportedProtocols(WebSocketHandler handler) {
+		List<String> subProtocols = null;
+		if (handler instanceof SubProtocolCapable) {
+			subProtocols = ((SubProtocolCapable) handler).getSubProtocols();
+		}
+		else if (handler instanceof WebSocketHandlerDecorator) {
+			WebSocketHandler lastHandler = ((WebSocketHandlerDecorator) handler).getLastHandler();
+			if (lastHandler instanceof SubProtocolCapable) {
+				subProtocols = ((SubProtocolCapable) lastHandler).getSubProtocols();;
+			}
+		}
+		return (subProtocols != null) ? subProtocols : Collections.<String>emptyList();
 	}
 
 	/**

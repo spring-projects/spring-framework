@@ -17,7 +17,6 @@
 package org.springframework.web.socket.messaging.config;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -62,7 +61,7 @@ public class WebMvcStompEndpointRegistrationTests {
 
 
 		WebMvcStompWebSocketEndpointRegistration registration = new WebMvcStompWebSocketEndpointRegistration(
-				new String[] {"/foo"}, this.wsHandler, Collections.<String>emptySet(), this.scheduler);
+				new String[] {"/foo"}, this.wsHandler, this.scheduler);
 
 		MultiValueMap<HttpRequestHandler, String> mappings = registration.getMappings();
 		assertEquals(1, mappings.size());
@@ -78,7 +77,7 @@ public class WebMvcStompEndpointRegistrationTests {
 		DefaultHandshakeHandler handshakeHandler = new DefaultHandshakeHandler();
 
 		WebMvcStompWebSocketEndpointRegistration registration = new WebMvcStompWebSocketEndpointRegistration(
-				new String[] {"/foo"}, this.wsHandler, Collections.<String>emptySet(), this.scheduler);
+				new String[] {"/foo"}, this.wsHandler, this.scheduler);
 
 		registration.setHandshakeHandler(handshakeHandler);
 
@@ -99,7 +98,7 @@ public class WebMvcStompEndpointRegistrationTests {
 		DefaultHandshakeHandler handshakeHandler = new DefaultHandshakeHandler();
 
 		WebMvcStompWebSocketEndpointRegistration registration = new WebMvcStompWebSocketEndpointRegistration(
-				new String[] {"/foo"}, this.wsHandler, Collections.<String>emptySet(), this.scheduler);
+				new String[] {"/foo"}, this.wsHandler, this.scheduler);
 
 		registration.setHandshakeHandler(handshakeHandler);
 		registration.withSockJS();

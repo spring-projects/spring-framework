@@ -83,10 +83,9 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 	public StompWebSocketEndpointRegistration addEndpoint(String... paths) {
 
 		this.subProtocolWebSocketHandler.addProtocolHandler(this.stompHandler);
-		Set<String> subProtocols = this.subProtocolWebSocketHandler.getSupportedProtocols();
 
 		WebMvcStompWebSocketEndpointRegistration registration = new WebMvcStompWebSocketEndpointRegistration(
-				paths, this.webSocketHandler, subProtocols, this.sockJsScheduler);
+				paths, this.webSocketHandler, this.sockJsScheduler);
 		this.registrations.add(registration);
 
 		return registration;

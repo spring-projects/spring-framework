@@ -46,8 +46,6 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 
 	private final WebSocketHandler webSocketHandler;
 
-	private final String[] subProtocols;
-
 	private final TaskScheduler sockJsTaskScheduler;
 
 	private HandshakeHandler handshakeHandler;
@@ -56,28 +54,14 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 
 
 	public WebMvcStompWebSocketEndpointRegistration(String[] paths, WebSocketHandler webSocketHandler,
-			Set<String> subProtocols, TaskScheduler sockJsTaskScheduler) {
+			TaskScheduler sockJsTaskScheduler) {
 
 		Assert.notEmpty(paths, "No paths specified");
 		Assert.notNull(webSocketHandler, "'webSocketHandler' is required");
-		Assert.notNull(subProtocols, "'subProtocols' is required");
 
 		this.paths = paths;
 		this.webSocketHandler = webSocketHandler;
-		this.subProtocols = subProtocols.toArray(new String[subProtocols.size()]);
 		this.sockJsTaskScheduler = sockJsTaskScheduler;
-
-		this.handshakeHandler = new DefaultHandshakeHandler();
-		updateHandshakeHandler();
-	}
-
-	private void updateHandshakeHandler() {
-		if (handshakeHandler instanceof DefaultHandshakeHandler) {
-			DefaultHandshakeHandler defaultHandshakeHandler = (DefaultHandshakeHandler) handshakeHandler;
-			if (ObjectUtils.isEmpty(defaultHandshakeHandler.getSupportedProtocols())) {
-				defaultHandshakeHandler.setSupportedProtocols(this.subProtocols);
-			}
-		}
 	}
 
 	/**
@@ -87,7 +71,6 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 	public StompWebSocketEndpointRegistration setHandshakeHandler(HandshakeHandler handshakeHandler) {
 		Assert.notNull(handshakeHandler, "'handshakeHandler' must not be null");
 		this.handshakeHandler = handshakeHandler;
-		updateHandshakeHandler();
 		return this;
 	}
 
@@ -97,8 +80,10 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 	@Override
 	public SockJsServiceRegistration withSockJS() {
 		this.registration = new StompSockJsServiceRegistration(this.sockJsTaskScheduler);
-		WebSocketTransportHandler transportHandler = new WebSocketTransportHandler(this.handshakeHandler);
-		this.registration.setTransportHandlerOverrides(transportHandler);
+		if (this.handshakeHandler != null) {
+			WebSocketTransportHandler transportHandler = new WebSocketTransportHandler(this.handshakeHandler);
+			this.registration.setTransportHandlerOverrides(transportHandler);
+		}
 		return this.registration;
 	}
 
@@ -114,8 +99,9 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 		}
 		else {
 			for (String path : this.paths) {
-				WebSocketHttpRequestHandler handler =
-						new WebSocketHttpRequestHandler(this.webSocketHandler, this.handshakeHandler);
+				WebSocketHttpRequestHandler handler = (this.handshakeHandler != null) ?
+						new WebSocketHttpRequestHandler(this.webSocketHandler, this.handshakeHandler) :
+						new WebSocketHttpRequestHandler(this.webSocketHandler);
 				mappings.add(handler, path);
 			}
 		}
