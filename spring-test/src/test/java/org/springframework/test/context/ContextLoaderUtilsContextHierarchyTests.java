@@ -55,13 +55,9 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextLoad
 		resolveContextHierarchyAttributes(SingleTestClassWithContextConfigurationAndContextHierarchyOnSingleMetaAnnotation.class);
 	}
 
-	@Test
+	@Test(expected = IllegalStateException.class)
 	public void resolveContextHierarchyAttributesForSingleTestClassWithImplicitSingleLevelContextHierarchy() {
-		List<List<ContextConfigurationAttributes>> hierarchyAttributes = resolveContextHierarchyAttributes(BareAnnotations.class);
-		assertEquals(1, hierarchyAttributes.size());
-		List<ContextConfigurationAttributes> configAttributesList = hierarchyAttributes.get(0);
-		assertEquals(1, configAttributesList.size());
-		debugConfigAttributes(configAttributesList);
+		resolveContextHierarchyAttributes(BareAnnotations.class);
 	}
 
 	@Test
@@ -98,8 +94,8 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextLoad
 		debugConfigAttributes(configAttributesList);
 		assertAttributes(configAttributesList.get(0), testClass, new String[] { "A.xml" }, EMPTY_CLASS_ARRAY,
 			ContextLoader.class, true);
-		assertAttributes(configAttributesList.get(1), testClass, new String[] { "B.xml" },
-			EMPTY_CLASS_ARRAY, ContextLoader.class, true);
+		assertAttributes(configAttributesList.get(1), testClass, new String[] { "B.xml" }, EMPTY_CLASS_ARRAY,
+			ContextLoader.class, true);
 		assertAttributes(configAttributesList.get(2), testClass, new String[] { "C.xml" }, EMPTY_CLASS_ARRAY,
 			ContextLoader.class, true);
 	}
@@ -154,36 +150,39 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextLoad
 			EMPTY_CLASS_ARRAY, ContextLoader.class, true);
 	}
 
-	@Test
-	public void resolveContextHierarchyAttributesForTestClassHierarchyWithBareContextConfigurationInSubclass() {
-		List<List<ContextConfigurationAttributes>> hierarchyAttributes = resolveContextHierarchyAttributes(TestClass2WithBareContextConfigurationInSubclass.class);
+	private void assertOneTwo(List<List<ContextConfigurationAttributes>> hierarchyAttributes) {
 		assertEquals(2, hierarchyAttributes.size());
 
 		List<ContextConfigurationAttributes> configAttributesListClassLevel1 = hierarchyAttributes.get(0);
+		List<ContextConfigurationAttributes> configAttributesListClassLevel2 = hierarchyAttributes.get(1);
 		debugConfigAttributes(configAttributesListClassLevel1);
+		debugConfigAttributes(configAttributesListClassLevel2);
+
 		assertEquals(1, configAttributesListClassLevel1.size());
 		assertThat(configAttributesListClassLevel1.get(0).getLocations()[0], equalTo("one.xml"));
 
-		List<ContextConfigurationAttributes> configAttributesListClassLevel2 = hierarchyAttributes.get(1);
-		debugConfigAttributes(configAttributesListClassLevel2);
 		assertEquals(1, configAttributesListClassLevel2.size());
 		assertThat(configAttributesListClassLevel2.get(0).getLocations()[0], equalTo("two.xml"));
 	}
 
 	@Test
 	public void resolveContextHierarchyAttributesForTestClassHierarchyWithBareContextConfigurationInSuperclass() {
-		List<List<ContextConfigurationAttributes>> hierarchyAttributes = resolveContextHierarchyAttributes(TestClass2WithBareContextConfigurationInSuperclass.class);
-		assertEquals(2, hierarchyAttributes.size());
+		assertOneTwo(resolveContextHierarchyAttributes(TestClass2WithBareContextConfigurationInSuperclass.class));
+	}
 
-		List<ContextConfigurationAttributes> configAttributesListClassLevel1 = hierarchyAttributes.get(0);
-		debugConfigAttributes(configAttributesListClassLevel1);
-		assertEquals(1, configAttributesListClassLevel1.size());
-		assertThat(configAttributesListClassLevel1.get(0).getLocations()[0], equalTo("one.xml"));
+	@Test
+	public void resolveContextHierarchyAttributesForTestClassHierarchyWithBareContextConfigurationInSubclass() {
+		assertOneTwo(resolveContextHierarchyAttributes(TestClass2WithBareContextConfigurationInSubclass.class));
+	}
 
-		List<ContextConfigurationAttributes> configAttributesListClassLevel2 = hierarchyAttributes.get(1);
-		debugConfigAttributes(configAttributesListClassLevel2);
-		assertEquals(1, configAttributesListClassLevel2.size());
-		assertThat(configAttributesListClassLevel2.get(0).getLocations()[0], equalTo("two.xml"));
+	@Test
+	public void resolveContextHierarchyAttributesForTestClassHierarchyWithBareMetaContextConfigWithOverridesInSuperclass() {
+		assertOneTwo(resolveContextHierarchyAttributes(TestClass2WithBareMetaContextConfigWithOverridesInSuperclass.class));
+	}
+
+	@Test
+	public void resolveContextHierarchyAttributesForTestClassHierarchyWithBareMetaContextConfigWithOverridesInSubclass() {
+		assertOneTwo(resolveContextHierarchyAttributes(TestClass2WithBareMetaContextConfigWithOverridesInSubclass.class));
 	}
 
 	@Test
@@ -408,7 +407,7 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextLoad
 
 	@ContextConfiguration("two.xml")
 	private static class TestClass2WithBareContextConfigurationInSubclass extends
-			TestClass1WithBareContextConfigurationInSuperclass {
+			TestClass1WithBareContextConfigurationInSubclass {
 	}
 
 	@ContextHierarchy({//
@@ -567,6 +566,33 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextLoad
 	@ContextHierarchyC
 	private static class TestClass3WithSingleLevelContextHierarchyFromMetaAnnotation extends
 			TestClass2WithSingleLevelContextHierarchyFromMetaAnnotation {
+	}
+
+	// -------------------------------------------------------------------------
+
+	@ContextConfiguration
+	@Retention(RetentionPolicy.RUNTIME)
+	private static @interface ContextConfigWithOverrides {
+
+		String[] locations() default "A.xml";
+	}
+
+	@ContextConfigWithOverrides(locations = "one.xml")
+	private static class TestClass1WithBareMetaContextConfigWithOverridesInSuperclass {
+	}
+
+	@ContextHierarchy(@ContextConfiguration(locations = "two.xml"))
+	private static class TestClass2WithBareMetaContextConfigWithOverridesInSuperclass extends
+			TestClass1WithBareMetaContextConfigWithOverridesInSuperclass {
+	}
+
+	@ContextHierarchy(@ContextConfiguration(locations = "one.xml"))
+	private static class TestClass1WithBareMetaContextConfigWithOverridesInSubclass {
+	}
+
+	@ContextConfigWithOverrides(locations = "two.xml")
+	private static class TestClass2WithBareMetaContextConfigWithOverridesInSubclass extends
+			TestClass1WithBareMetaContextConfigWithOverridesInSubclass {
 	}
 
 }

@@ -194,9 +194,9 @@ abstract class ContextLoaderUtils {
 	}
 
 	/**
-	 * Convenience method for creating a {@link ContextConfigurationAttributes} instance
-	 * from the supplied {@link ContextConfiguration} and declaring class and then adding
-	 * the attributes to the supplied list.
+	 * Convenience method for creating a {@link ContextConfigurationAttributes}
+	 * instance from the supplied {@link ContextConfiguration} annotation and
+	 * declaring class and then adding the attributes to the supplied list.
 	 */
 	private static void convertContextConfigToConfigAttributesAndAddToList(ContextConfiguration contextConfiguration,
 			Class<?> declaringClass, final List<ContextConfigurationAttributes> attributesList) {
@@ -215,10 +215,12 @@ abstract class ContextLoaderUtils {
 
 	/**
 	 * Convenience method for creating a {@link ContextConfigurationAttributes}
-	 * instance from the supplied {@link ContextConfiguration} attributes and
-	 * declaring class and then adding the attributes to the supplied list.
+	 * instance from the supplied {@link AnnotationAttributes} and declaring
+	 * class and then adding the attributes to the supplied list.
+	 *
+	 * @since 4.0
 	 */
-	private static void convertContextConfigToConfigAttributesAndAddToList(AnnotationAttributes annAttrs,
+	private static void convertAnnotationAttributesToConfigAttributesAndAddToList(AnnotationAttributes annAttrs,
 			Class<?> declaringClass, final List<ContextConfigurationAttributes> attributesList) {
 		if (logger.isTraceEnabled()) {
 			logger.trace(String.format("Retrieved @ContextConfiguration attributes [%s] for declaring class [%s].",
@@ -264,6 +266,8 @@ abstract class ContextLoaderUtils {
 	 * <em>present</em> on the supplied class; or if a given class in the class hierarchy
 	 * declares both {@code @ContextConfiguration} and {@code @ContextHierarchy} as
 	 * top-level annotations.
+	 * @throws IllegalStateException if no class in the class hierarchy declares
+	 * {@code @ContextHierarchy}.
 	 *
 	 * @since 3.2.2
 	 * @see #buildContextHierarchyMap(Class)
@@ -272,6 +276,7 @@ abstract class ContextLoaderUtils {
 	@SuppressWarnings("unchecked")
 	static List<List<ContextConfigurationAttributes>> resolveContextHierarchyAttributes(Class<?> testClass) {
 		Assert.notNull(testClass, "Class must not be null");
+		Assert.state(findAnnotation(testClass, ContextHierarchy.class) != null, "@ContextHierarchy must be present");
 
 		final Class<ContextConfiguration> contextConfigType = ContextConfiguration.class;
 		final Class<ContextHierarchy> contextHierarchyType = ContextHierarchy.class;
@@ -302,8 +307,9 @@ abstract class ContextLoaderUtils {
 			final List<ContextConfigurationAttributes> configAttributesList = new ArrayList<ContextConfigurationAttributes>();
 
 			if (contextConfigDeclaredLocally) {
-				ContextConfiguration contextConfiguration = getAnnotation(declaringClass, contextConfigType);
-				convertContextConfigToConfigAttributesAndAddToList(contextConfiguration, declaringClass,
+				AnnotationAttributes annAttrs = AnnotatedElementUtils.getAnnotationAttributes(rootDeclaringClass,
+					contextConfigType.getName());
+				convertAnnotationAttributesToConfigAttributesAndAddToList(annAttrs, declaringClass,
 					configAttributesList);
 			}
 			else if (contextHierarchyDeclaredLocally) {
@@ -314,7 +320,7 @@ abstract class ContextLoaderUtils {
 				}
 			}
 			else {
-				// This should theoretically actually never happen...
+				// This should theoretically never happen...
 				String msg = String.format("Test class [%s] has been configured with neither @ContextConfiguration "
 						+ "nor @ContextHierarchy as a class-level annotation.", rootDeclaringClass.getName());
 				logger.error(msg);
@@ -432,8 +438,7 @@ abstract class ContextLoaderUtils {
 
 			AnnotationAttributes annAttrs = AnnotatedElementUtils.getAnnotationAttributes(rootDeclaringClass,
 				annotationType.getName());
-
-			convertContextConfigToConfigAttributesAndAddToList(annAttrs, declaringClass, attributesList);
+			convertAnnotationAttributesToConfigAttributesAndAddToList(annAttrs, declaringClass, attributesList);
 			descriptor = findAnnotationDescriptor(rootDeclaringClass.getSuperclass(), annotationType);
 		}
 
