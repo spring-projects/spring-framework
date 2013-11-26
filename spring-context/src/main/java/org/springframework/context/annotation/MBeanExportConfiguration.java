@@ -89,20 +89,20 @@ public class MBeanExportConfiguration implements ImportAware, EnvironmentAware, 
 
 	private void setupDomain(AnnotationMBeanExporter exporter) {
 		String defaultDomain = this.attributes.getString("defaultDomain");
+		if (defaultDomain != null && this.environment != null) {
+			defaultDomain = this.environment.resolvePlaceholders(defaultDomain);
+		}
 		if (StringUtils.hasText(defaultDomain)) {
-			if (this.environment != null) {
-				defaultDomain = this.environment.resolvePlaceholders(defaultDomain);
-			}
 			exporter.setDefaultDomain(defaultDomain);
 		}
 	}
 
 	private void setupServer(AnnotationMBeanExporter exporter) {
 		String server = this.attributes.getString("server");
+		if (server != null && this.environment != null) {
+			server = this.environment.resolvePlaceholders(server);
+		}
 		if (StringUtils.hasText(server)) {
-			if (this.environment != null) {
-				server = this.environment.resolvePlaceholders(server);
-			}
 			exporter.setServer(this.beanFactory.getBean(server, MBeanServer.class));
 		}
 		else {
