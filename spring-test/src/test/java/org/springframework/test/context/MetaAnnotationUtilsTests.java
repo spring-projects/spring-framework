@@ -214,6 +214,44 @@ public class MetaAnnotationUtilsTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
+	public void findAnnotationDescriptorForTypesWithMetaAnnotationWithDefaultAttributes() throws Exception {
+		Class<?> startClass = MetaConfigWithDefaultAttributesTestCase.class;
+		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
+
+		UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(startClass, Service.class,
+			ContextConfiguration.class, Order.class, Transactional.class);
+
+		assertNotNull(descriptor);
+		assertEquals(startClass, descriptor.getDeclaringClass());
+		assertEquals(annotationType, descriptor.getAnnotationType());
+		assertArrayEquals(new Class[] {}, ((ContextConfiguration) descriptor.getAnnotation()).value());
+		assertArrayEquals(new Class[] { MetaConfig.DevConfig.class, MetaConfig.ProductionConfig.class },
+			descriptor.getAnnotationAttributes().getClassArray("classes"));
+		assertNotNull(descriptor.getStereotype());
+		assertEquals(MetaConfig.class, descriptor.getStereotypeType());
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void findAnnotationDescriptorForTypesWithMetaAnnotationWithOverriddenAttributes() throws Exception {
+		Class<?> startClass = MetaConfigWithOverriddenAttributesTestCase.class;
+		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
+
+		UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(startClass, Service.class,
+			ContextConfiguration.class, Order.class, Transactional.class);
+
+		assertNotNull(descriptor);
+		assertEquals(startClass, descriptor.getDeclaringClass());
+		assertEquals(annotationType, descriptor.getAnnotationType());
+		assertArrayEquals(new Class[] {}, ((ContextConfiguration) descriptor.getAnnotation()).value());
+		assertArrayEquals(new Class[] { MetaAnnotationUtilsTests.class },
+			descriptor.getAnnotationAttributes().getClassArray("classes"));
+		assertNotNull(descriptor.getStereotype());
+		assertEquals(MetaConfig.class, descriptor.getStereotypeType());
+	}
+
+	@Test
 	public void findAnnotationDescriptorForTypesForInterfaceWithMetaAnnotation() {
 		Class<InterfaceWithMetaAnnotation> startClass = InterfaceWithMetaAnnotation.class;
 		assertComponentOnStereotypeForMultipleCandidateTypes(startClass, startClass, "meta1", Meta1.class);
@@ -277,6 +315,28 @@ public class MetaAnnotationUtilsTests {
 
 	static class SubClassWithLocalMetaAnnotationAndMetaAnnotatedInterface extends
 			ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface {
+	}
+
+	@ContextConfiguration
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface MetaConfig {
+
+		static class DevConfig {
+		}
+
+		static class ProductionConfig {
+		}
+
+
+		Class<?>[] classes() default { DevConfig.class, ProductionConfig.class };
+	}
+
+	@MetaConfig
+	public class MetaConfigWithDefaultAttributesTestCase {
+	}
+
+	@MetaConfig(classes = MetaAnnotationUtilsTests.class)
+	public class MetaConfigWithOverriddenAttributesTestCase {
 	}
 
 	// -------------------------------------------------------------------------
