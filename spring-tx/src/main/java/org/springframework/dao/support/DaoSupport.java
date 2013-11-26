@@ -31,7 +31,6 @@ import org.springframework.beans.factory.InitializingBean;
  * @author Juergen Hoeller
  * @since 1.2.2
  * @see org.springframework.jdbc.core.support.JdbcDaoSupport
- * @see org.springframework.orm.jdo.support.JdoDaoSupport
  */
 public abstract class DaoSupport implements InitializingBean {
 

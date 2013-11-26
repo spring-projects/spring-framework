@@ -23,7 +23,9 @@ import org.springframework.util.Assert;
 
 /**
  * Registry for {@link ListenableFutureCallback} instances.
- * <p>Inspired by {@link com.google.common.util.concurrent.ExecutionList}.
+ *
+ * <p>Inspired by {@code com.google.common.util.concurrent.ExecutionList}.
+ *
  * @author Arjen Poutsma
  * @since 4.0
  */

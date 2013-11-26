@@ -34,7 +34,7 @@ import static org.springframework.context.weaving.AspectJWeavingEnabler.*;
  * {@code @Configuration} class that registers a {@link LoadTimeWeaver} bean.
  *
  * <p>This configuration class is automatically imported when using the
- * @{@link EnableLoadTimeWeaving} annotation. See {@code @EnableLoadTimeWeaving}
+ * {@link EnableLoadTimeWeaving} annotation. See {@code @EnableLoadTimeWeaving}
  * javadoc for complete usage details.
  *
  * @author Chris Beams

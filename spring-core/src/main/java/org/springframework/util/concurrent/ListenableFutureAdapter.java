@@ -22,7 +22,7 @@ import java.util.concurrent.ExecutionException;
  * Abstract class that adapts a {@link ListenableFuture} parameterized over S into a
  * {@code ListenableFuture} parameterized over T. All methods are delegated to the
  * adaptee, where {@link #get()}, {@link #get(long, java.util.concurrent.TimeUnit)}, and
- * {@link ListenableFutureCallback#onSuccess(Object)} call {@@link #adapt(Object)} on the
+ * {@link ListenableFutureCallback#onSuccess(Object)} call {@link #adapt(Object)} on the
  * adaptee's result.
  *
  * @param <T> the type of this {@code Future}

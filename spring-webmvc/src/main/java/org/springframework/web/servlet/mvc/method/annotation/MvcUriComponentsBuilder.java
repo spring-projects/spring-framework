@@ -205,7 +205,7 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	 *
 	 * </pre>
 	 *
-	 * The above  supports {@codce @PathVariable} and {@code @RequestParam} method parameters.
+	 * The above  supports {@code @PathVariable} and {@code @RequestParam} method parameters.
 	 * Any other arguments can be provided as {@literal null} and will be ignored.
 	 * <p>
 	 * Additional (custom) argument types can be supported through an implementation

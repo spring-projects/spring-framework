@@ -34,15 +34,13 @@ import org.springframework.util.StringUtils;
  * and rendering them in the UI form.
  *
  * <p>In web MVC code, this editor will typically be registered with
- * {@code binder.registerCustomEditor} calls in a custom
- * {@code initBinder} method.
+ * {@code binder.registerCustomEditor} calls.
  *
  * @author Juergen Hoeller
  * @since 06.06.2003
  * @see Number
  * @see java.text.NumberFormat
  * @see org.springframework.validation.DataBinder#registerCustomEditor
- * @see org.springframework.web.servlet.mvc.BaseCommandController#initBinder
  */
 public class CustomNumberEditor extends PropertyEditorSupport {
 

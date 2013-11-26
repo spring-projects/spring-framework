@@ -39,7 +39,7 @@ import org.springframework.util.StringUtils;
  * {@code @Configuration} class that registers a {@link AnnotationMBeanExporter} bean.
  *
  * <p>This configuration class is automatically imported when using the
- * @{@link EnableMBeanExport} annotation. See its javadoc for complete usage details.
+ * {@link EnableMBeanExport} annotation. See its javadoc for complete usage details.
  *
  * @author Phillip Webb
  * @author Chris Beams

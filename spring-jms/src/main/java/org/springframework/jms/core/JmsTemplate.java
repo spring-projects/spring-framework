@@ -46,8 +46,8 @@ import org.springframework.util.ReflectionUtils;
  *
  * <p>If you want to use dynamic destination creation, you must specify
  * the type of JMS destination to create, using the "pubSubDomain" property.
- * For other operations, this is not necessary, in contrast to when working
- * with {@link JmsTemplate102}. Point-to-Point (Queues) is the default domain.
+ * For other operations, this is not necessary. Point-to-Point (Queues) is the default
+ * domain.
  *
  * <p>Default settings for JMS Sessions are "not transacted" and "auto-acknowledge".
  * As defined by the J2EE specification, the transaction and acknowledgement

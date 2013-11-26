@@ -103,7 +103,7 @@ public final class ResolvableType implements Serializable {
 	private TypeProvider typeProvider;
 
 	/**
-	 * The {@link VariableResolver} to use or {@code null} if no resolver is available.
+	 * The {@code VariableResolver} to use or {@code null} if no resolver is available.
 	 */
 	private final VariableResolver variableResolver;
 

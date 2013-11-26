@@ -100,10 +100,10 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 	 * Set the HttpInvokerRequestExecutor implementation to use for executing
 	 * remote invocations.
 	 * <p>Default is {@link SimpleHttpInvokerRequestExecutor}. Alternatively,
-	 * consider using {@link CommonsHttpInvokerRequestExecutor} for more
+	 * consider using {@link HttpComponentsHttpInvokerRequestExecutor} for more
 	 * sophisticated needs.
 	 * @see SimpleHttpInvokerRequestExecutor
-	 * @see CommonsHttpInvokerRequestExecutor
+	 * @see HttpComponentsHttpInvokerRequestExecutor
 	 */
 	public void setHttpInvokerRequestExecutor(HttpInvokerRequestExecutor httpInvokerRequestExecutor) {
 		this.httpInvokerRequestExecutor = httpInvokerRequestExecutor;

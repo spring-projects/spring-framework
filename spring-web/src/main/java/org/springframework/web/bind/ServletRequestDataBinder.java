@@ -31,10 +31,6 @@ import org.springframework.web.util.WebUtils;
  * which include specifying allowed/required fields, and registering custom
  * property editors.
  *
- * <p>Used by Spring Web MVC's BaseCommandController and MultiActionController.
- * Note that BaseCommandController and its subclasses allow for easy customization
- * of the binder instances that they use through overriding {@code initBinder}.
- *
  * <p>Can also be used for manual data binding in custom web controllers:
  * for example, in a plain Controller implementation or in a MultiActionController
  * handler method. Simply instantiate a ServletRequestDataBinder for each binding
@@ -59,7 +55,6 @@ import org.springframework.web.util.WebUtils;
  * @see #setAllowedFields
  * @see #setRequiredFields
  * @see #setFieldMarkerPrefix
- * @see org.springframework.web.servlet.mvc.BaseCommandController#initBinder
  */
 public class ServletRequestDataBinder extends WebDataBinder {
 
@@ -99,7 +94,6 @@ public class ServletRequestDataBinder extends WebDataBinder {
 	 * @param request request with parameters to bind (can be multipart)
 	 * @see org.springframework.web.multipart.MultipartHttpServletRequest
 	 * @see org.springframework.web.multipart.MultipartFile
-	 * @see #bindMultipartFiles
 	 * @see #bind(org.springframework.beans.PropertyValues)
 	 */
 	public void bind(ServletRequest request) {

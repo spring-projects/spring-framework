@@ -22,7 +22,7 @@ import java.util.concurrent.Future;
  * Extends the {@link Future} interface with the capability to accept completion
  * callbacks. If the future has already completed when the callback is added, the
  * callback will be triggered immediately.
- * <p>Inspired by {@link com.google.common.util.concurrent.ListenableFuture}.
+ * <p>Inspired by {@code com.google.common.util.concurrent.ListenableFuture}.
 
  * @author Arjen Poutsma
  * @since 4.0
@@ -33,7 +33,6 @@ public interface ListenableFuture<T> extends Future<T> {
 	 * Registers the given callback to this {@code ListenableFuture}. The callback will
 	 * be triggered when this {@code Future} is complete or, if it is already complete,
 	 * immediately.
-	 *
 	 * @param callback the callback to register
 	 */
 	void addCallback(ListenableFutureCallback<? super T> callback);

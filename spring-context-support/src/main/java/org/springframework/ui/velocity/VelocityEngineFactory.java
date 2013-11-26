@@ -53,8 +53,8 @@ import org.springframework.util.StringUtils;
  * to the Spring application context.
  *
  * <p>If "overrideLogging" is true (the default), the VelocityEngine will be
- * configured to log via Commons Logging, that is, using the Spring-provided
- * {@link CommonsLoggingLogSystem} as log system.
+ * configured to log via Commons Logging, that is, using
+ * {@link CommonsLogLogChute} as log system.
  *
  * <p>The simplest way to use this class is to specify a
  * {@link #setResourceLoaderPath(String) "resourceLoaderPath"}; the
@@ -66,7 +66,6 @@ import org.springframework.util.StringUtils;
  * @see #setResourceLoaderPath
  * @see #setOverrideLogging
  * @see #createVelocityEngine
- * @see CommonsLoggingLogSystem
  * @see VelocityEngineFactoryBean
  * @see org.springframework.web.servlet.view.velocity.VelocityConfigurer
  * @see org.apache.velocity.app.VelocityEngine

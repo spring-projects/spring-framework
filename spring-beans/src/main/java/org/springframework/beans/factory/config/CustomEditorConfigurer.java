@@ -91,8 +91,6 @@ import org.springframework.util.ClassUtils;
  * @see ConfigurableBeanFactory#addPropertyEditorRegistrar
  * @see ConfigurableBeanFactory#registerCustomEditor
  * @see org.springframework.validation.DataBinder#registerCustomEditor
- * @see org.springframework.web.servlet.mvc.BaseCommandController#setPropertyEditorRegistrars
- * @see org.springframework.web.servlet.mvc.BaseCommandController#initBinder
  */
 public class CustomEditorConfigurer implements BeanFactoryPostProcessor, Ordered {
 

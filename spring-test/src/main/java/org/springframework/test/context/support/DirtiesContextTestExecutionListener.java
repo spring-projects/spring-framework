@@ -72,7 +72,7 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	 * mode} is set to {@link ClassMode#AFTER_EACH_TEST_METHOD
 	 * AFTER_EACH_TEST_METHOD}, the {@linkplain ApplicationContext application
 	 * context} of the test context will be
-	 * {@linkplain TestContext#markApplicationContextDirty() marked as dirty} and the
+	 * {@linkplain TestContext#markApplicationContextDirty marked as dirty} and the
 	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE}
 	 * in the test context will be set to {@code true}.
 	 */
@@ -107,7 +107,7 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	 * If the test class of the supplied {@linkplain TestContext test context} is
 	 * annotated with {@link DirtiesContext &#064;DirtiesContext}, the
 	 * {@linkplain ApplicationContext application context} of the test context will
-	 * be {@linkplain TestContext#markApplicationContextDirty() marked as dirty},
+	 * be {@linkplain TestContext#markApplicationContextDirty marked as dirty},
 	 * and the
 	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
 	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context will be set to

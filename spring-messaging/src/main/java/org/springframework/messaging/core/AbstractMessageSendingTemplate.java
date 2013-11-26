@@ -54,7 +54,7 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	/**
 	 * Set the {@link MessageConverter} that is to be used to convert
 	 * between Messages and objects for this template.
-	 * <p>The default is {@link SimplePayloadMessageConverter}.
+	 * <p>The default is {@link SimpleMessageConverter}.
 	 */
 	public void setMessageConverter(MessageConverter messageConverter) {
 		Assert.notNull(messageConverter, "'messageConverter' must not be null");

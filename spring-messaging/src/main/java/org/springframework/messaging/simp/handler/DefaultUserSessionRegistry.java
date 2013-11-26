@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
- * A default thread-safe implementation of {@link @UserSessionRegistry}.
+ * A default thread-safe implementation of {@link UserSessionRegistry}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

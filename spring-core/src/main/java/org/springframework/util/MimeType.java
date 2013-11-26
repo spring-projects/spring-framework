@@ -33,17 +33,15 @@ import java.util.TreeSet;
  * other Internet protocols including HTTP. This class however does not contain support
  * the q-parameters used in HTTP content negotiation. Those can be found in the sub-class
  * {@code org.springframework.http.MediaType} in the {@code spring-web} module.
- * <p>
- * Consists of a {@linkplain #getType() type} and a {@linkplain #getSubtype() subtype}.
+ *
+ * <p>Consists of a {@linkplain #getType() type} and a {@linkplain #getSubtype() subtype}.
  * Also has functionality to parse media types from a string using
- * {@link #parseMimeType(String)}, or multiple comma-separated media types using
- * {@link #parseMimeTypes(String)}.
+ * {@link #valueOf(String)}. For more parsing options see {@link MimeTypeUtils}.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  * @since 4.0
- *
  * @see MimeTypeUtils
  */
 public class MimeType implements Comparable<MimeType>, Serializable {
@@ -324,10 +322,12 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 
 	/**
 	 * Indicate whether this {@code MediaType} is compatible with the given media type.
-	 * <p>For instance, {@code text/*} is compatible with {@code text/plain}, {@code text/html}, and vice versa.
-	 * In effect, this method is similar to {@link #includes(MediaType)}, except that it <b>is</b> symmetric.
+	 * <p>For instance, {@code text/*} is compatible with {@code text/plain},
+	 * {@code text/html}, and vice versa. In effect, this method is similar to
+	 * {@link #includes}, except that it <b>is</b> symmetric.
 	 * @param other the reference media type with which to compare
-	 * @return {@code true} if this media type is compatible with the given media type; {@code false} otherwise
+	 * @return {@code true} if this media type is compatible with the given media type;
+	 * {@code false} otherwise
 	 */
 	public boolean isCompatibleWith(MimeType other) {
 		if (other == null) {
@@ -369,7 +369,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	/**
 	 * Compares this {@code MediaType} to another alphabetically.
 	 * @param other media type to compare to
-	 * @see #sortBySpecificity(List)
+	 * @see MimeTypeUtils#sortBySpecificity(List)
 	 */
 	@Override
 	public int compareTo(MimeType other) {
@@ -459,7 +459,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * Parse the given String value into a {@code MimeType} object,
 	 * with this method name following the 'valueOf' naming convention
 	 * (as supported by {@link org.springframework.core.convert.ConversionService}.
-	 * @see #parseMimeType(String)
+	 * @see MimeTypeUtils#parseMimeType(String)
 	 */
 	public static MimeType valueOf(String value) {
 		return MimeTypeUtils.parseMimeType(value);

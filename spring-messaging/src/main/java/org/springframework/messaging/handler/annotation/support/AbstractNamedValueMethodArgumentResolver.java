@@ -19,6 +19,7 @@ package org.springframework.messaging.handler.annotation.support;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -37,20 +38,20 @@ import org.springframework.util.ClassUtils;
  * Abstract base class for resolving method arguments from a named value. Message headers,
  * and path variables are examples of named values. Each may have a name, a required flag,
  * and a default value.
- * <p>
- * Subclasses define how to do the following:
+ *
+ * <p>Subclasses define how to do the following:
  * <ul>
  * <li>Obtain named value information for a method parameter
  * <li>Resolve names into argument values
  * <li>Handle missing argument values when argument values are required
  * <li>Optionally handle a resolved value
  * </ul>
- * <p>
- * A default value string can contain ${...} placeholders and Spring Expression Language
- * #{...} expressions. For this to work a {@link ConfigurableBeanFactory} must be supplied
- * to the class constructor.
- * <p>
- * A {@link ConversionService} may be used to apply type conversion to the resolved
+ *
+ * <p>A default value string can contain ${...} placeholders and Spring Expression
+ * Language {@code #{...}} expressions. For this to work a {@link ConfigurableBeanFactory}
+ * must be supplied to the class constructor.
+ *
+ * <p>A {@link ConversionService} may be used to apply type conversion to the resolved
  * argument value if it doesn't match the method parameter type.
  *
  * @author Rossen Stoyanchev
@@ -70,12 +71,11 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 	/**
 	 * Constructor with a {@link ConversionService} and a {@link BeanFactory}.
-	 *
 	 * @param cs conversion service for converting values to match the
-	 *        target method parameter type
-	 * @param beanFactory a bean factory to use for resolving ${...} placeholder and
-	 *        #{...} SpEL expressions in default values, or {@code null} if default values
-	 *        are not expected to contain expressions
+	 * target method parameter type
+	 * @param beanFactory a bean factory to use for resolving {@code ${...}} placeholder
+	 * and {@code #{...}} SpEL expressions in default values, or {@code null} if default
+	 * values are not expected to contain expressions
 	 */
 	protected AbstractNamedValueMethodArgumentResolver(ConversionService cs, ConfigurableBeanFactory beanFactory) {
 		this.conversionService = (cs != null) ? cs : new DefaultConversionService();
@@ -154,7 +154,6 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * @param parameter the method parameter to resolve to an argument value
 	 * @param message the current request
 	 * @param name the name of the value being resolved
-	 *
 	 * @return the resolved argument. May be {@code null}
 	 * @throws Exception in case of errors
 	 */
@@ -180,7 +179,6 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * Invoked when a named value is required, but
 	 * {@link #resolveArgumentInternal(MethodParameter, Message, String)} returned {@code null} and
 	 * there is no default value. Subclasses typically throw an exception in this case.
-	 *
 	 * @param name the name for the value
 	 * @param parameter the method parameter
 	 * @param message the message being processed
@@ -208,7 +206,6 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 	/**
 	 * Invoked after a value is resolved.
-	 *
 	 * @param arg the resolved argument value
 	 * @param name the argument name
 	 * @param parameter the argument parameter type

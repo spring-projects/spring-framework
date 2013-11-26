@@ -49,10 +49,6 @@ import org.springframework.web.socket.support.LoggingWebSocketHandlerDecorator;
  * {@link HttpServletResponse} to {@link ServerHttpRequest} and {@link ServerHttpResponse}
  * respectively.
  *
- * <p>The {@link #applyDefaultDecorators(WebSocketHandler)} method decorates the given
- * WebSocketHandler with a logging and exception handling decorators. This method can
- * be overridden to change that.
- *
  * @author Rossen Stoyanchev
  * @since 4.0
  */

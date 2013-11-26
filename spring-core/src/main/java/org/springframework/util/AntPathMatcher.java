@@ -261,8 +261,8 @@ public class AntPathMatcher implements PathMatcher {
 	/**
 	 * Build or retrieve an {@link AntPathStringMatcher} for the given pattern.
 	 * <p>The default implementation checks this AntPathMatcher's internal cache
-	 * (see {@link #setCachePatterns}, creating a new AntPathStringMatcher instance
-	 * through {@link AntPathStringMatcher#AntPathStringMatcher(String)} if none found.
+	 * (see {@link #setCachePatterns}), creating a new AntPathStringMatcher instance
+	 * if no cached copy is found.
 	 * When encountering too many patterns to cache at runtime (the threshold is 65536),
 	 * it turns the default cache off, assuming that arbitrary permutations of patterns
 	 * are coming in, with little chance for encountering a reoccurring pattern.

@@ -70,8 +70,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * <p>The "preInterceptors" and "postInterceptors" properties can be set to add
  * additional interceptors to the mix, like
  * {@link org.springframework.aop.interceptor.PerformanceMonitorInterceptor} or
- * {@link org.springframework.orm.hibernate3.HibernateInterceptor} /
- * {@link org.springframework.orm.jdo.JdoInterceptor}.
+ * {@link org.springframework.orm.hibernate3.HibernateInterceptor}.
  *
  * <p><b>HINT:</b> This class is often used with parent / child bean definitions.
  * Typically, you will define the transaction manager and default transaction

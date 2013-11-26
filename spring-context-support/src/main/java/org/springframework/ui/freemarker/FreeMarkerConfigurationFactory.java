@@ -194,7 +194,6 @@ public class FreeMarkerConfigurationFactory {
 	 * @see org.springframework.context.ApplicationContext#getResource
 	 * @see freemarker.template.Configuration#setDirectoryForTemplateLoading
 	 * @see SpringTemplateLoader
-	 * @see #setTemplateLoaders
 	 */
 	public void setTemplateLoaderPaths(String... templateLoaderPaths) {
 		this.templateLoaderPaths = templateLoaderPaths;

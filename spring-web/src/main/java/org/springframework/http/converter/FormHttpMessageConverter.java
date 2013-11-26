@@ -63,7 +63,7 @@ import org.springframework.util.StringUtils;
  * LinkedMultiValueMap&lt;String, Object&gt;(); parts.add("field 1", "value 1"); parts.add("file", new
  * ClassPathResource("myFile.jpg")); template.postForLocation("http://example.com/myFileUpload", parts); </pre>
  *
- * <p>Some methods in this class were inspired by {@link org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity}.
+ * <p>Some methods in this class were inspired by {@code org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity}.
  *
  * @author Arjen Poutsma
  * @see MultiValueMap

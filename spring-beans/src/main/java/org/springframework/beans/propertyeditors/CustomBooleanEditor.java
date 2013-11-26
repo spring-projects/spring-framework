@@ -29,13 +29,11 @@ import org.springframework.util.StringUtils;
  * them in the UI form.
  *
  * <p>In web MVC code, this editor will typically be registered with
- * {@code binder.registerCustomEditor} calls in an implementation
- * of BaseCommandController's {@code initBinder} method.
+ * {@code binder.registerCustomEditor} calls.
  *
  * @author Juergen Hoeller
  * @since 10.06.2003
  * @see org.springframework.validation.DataBinder#registerCustomEditor
- * @see org.springframework.web.servlet.mvc.BaseCommandController#initBinder
  */
 public class CustomBooleanEditor extends PropertyEditorSupport {
 

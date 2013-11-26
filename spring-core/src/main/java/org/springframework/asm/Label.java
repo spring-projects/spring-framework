@@ -35,7 +35,7 @@ package org.springframework.asm;
  * designates the <i>instruction</i> that is just after. Note however that there
  * can be other elements between a label and the instruction it designates (such
  * as other labels, stack map frames, line numbers, etc.).
- * 
+ *
  * @author Eric Bruneton
  */
 public class Label {
@@ -111,13 +111,13 @@ public class Label {
      * Field used to associate user information to a label. Warning: this field
      * is used by the ASM tree package. In order to use it with the ASM tree
      * package you must override the
-     * {@link org.objectweb.asm.tree.MethodNode#getLabelNode} method.
+     * {@code org.objectweb.asm.tree.MethodNode#getLabelNode} method.
      */
     public Object info;
 
     /**
      * Flags that indicate the status of this label.
-     * 
+     *
      * @see #DEBUG
      * @see #RESOLVED
      * @see #RESIZED
@@ -170,7 +170,7 @@ public class Label {
      * represented by the Label object that corresponds to the first instruction
      * of this basic block. Each node also stores the list of its successors in
      * the graph, as a linked list of Edge objects.
-     * 
+     *
      * The control flow analysis algorithms used to compute the maximum stack
      * size or the stack map frames are similar and use two steps. The first
      * step, during the visit of each instruction, builds information about the
@@ -182,7 +182,7 @@ public class Label {
      * information about the input frame of each basic block, from the input
      * state of the first basic block (known from the method signature), and by
      * the using the previously computed relative output frames.
-     * 
+     *
      * The algorithm used to compute the maximum stack size only computes the
      * relative output and absolute input stack heights, while the algorithm
      * used to compute stack map frames computes relative output frames and
@@ -192,10 +192,10 @@ public class Label {
     /**
      * Start of the output stack relatively to the input stack. The exact
      * semantics of this field depends on the algorithm that is used.
-     * 
+     *
      * When only the maximum stack size is computed, this field is the number of
      * elements in the input stack.
-     * 
+     *
      * When the stack map frames are completely computed, this field is the
      * offset of the first output stack element relatively to the top of the
      * input stack. This offset is always negative or null. A null offset means
@@ -240,7 +240,7 @@ public class Label {
      * main loop of the fix point algorithm used in the second step of the
      * control flow analysis algorithms. It is also used in
      * {@link #visitSubroutine} to avoid using a recursive method.
-     * 
+     *
      * @see MethodWriter#visitMaxs
      */
     Label next;
@@ -264,7 +264,7 @@ public class Label {
      * from the start of the method's bytecode. <i>This method is intended for
      * {@link Attribute} sub classes, and is normally not needed by class
      * generators or adapters.</i>
-     * 
+     *
      * @return the offset corresponding to this label.
      * @throws IllegalStateException
      *             if this label is not resolved yet.
@@ -282,7 +282,7 @@ public class Label {
      * position of the label is known, the offset is computed and written
      * directly. Otherwise, a null offset is written and a new forward reference
      * is declared for this label.
-     * 
+     *
      * @param owner
      *            the code writer that calls this method.
      * @param out
@@ -320,7 +320,7 @@ public class Label {
      * for a true forward reference, i.e. only if this label is not resolved
      * yet. For backward references, the offset of the reference can be, and
      * must be, computed and stored directly.
-     * 
+     *
      * @param sourcePosition
      *            the position of the referencing instruction. This position
      *            will be used to compute the offset of this forward reference.
@@ -348,7 +348,7 @@ public class Label {
      * when this label is added to the bytecode of the method, i.e. when its
      * position becomes known. This method fills in the blanks that where left
      * in the bytecode by each forward reference previously added to this label.
-     * 
+     *
      * @param owner
      *            the code writer that calls this method.
      * @param position
@@ -416,7 +416,7 @@ public class Label {
      * isolated label or for the first label in a series of successive labels,
      * this method returns the label itself. For other labels it returns the
      * first label of the series.
-     * 
+     *
      * @return the first label of the series to which this label belongs.
      */
     Label getFirst() {
@@ -429,7 +429,7 @@ public class Label {
 
     /**
      * Returns true is this basic block belongs to the given subroutine.
-     * 
+     *
      * @param id
      *            a subroutine id.
      * @return true is this basic block belongs to the given subroutine.
@@ -444,7 +444,7 @@ public class Label {
     /**
      * Returns true if this basic block and the given one belong to a common
      * subroutine.
-     * 
+     *
      * @param block
      *            another basic block.
      * @return true if this basic block and the given one belong to a common
@@ -464,7 +464,7 @@ public class Label {
 
     /**
      * Marks this basic block as belonging to the given subroutine.
-     * 
+     *
      * @param id
      *            a subroutine id.
      * @param nbSubroutines
@@ -483,7 +483,7 @@ public class Label {
      * blocks as belonging to this subroutine. This method follows the control
      * flow graph to find all the blocks that are reachable from the current
      * block WITHOUT following any JSR target.
-     * 
+     *
      * @param JSR
      *            a JSR block that jumps to this subroutine. If this JSR is not
      *            null it is added to the successor of the RET blocks found in
@@ -550,7 +550,7 @@ public class Label {
 
     /**
      * Returns a string representation of this label.
-     * 
+     *
      * @return a string representation of this label.
      */
     @Override

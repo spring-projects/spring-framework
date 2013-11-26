@@ -23,7 +23,7 @@ import org.springframework.web.socket.sockjs.transport.session.SockJsServiceConf
 
 /**
  * @author Rossen Stoyanchev
- * @sicne 4.0
+ * @since 4.0
  */
 public abstract class TransportHandlerSupport {
 

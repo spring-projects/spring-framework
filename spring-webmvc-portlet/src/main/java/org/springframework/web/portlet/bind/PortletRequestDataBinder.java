@@ -32,10 +32,6 @@ import org.springframework.web.portlet.util.PortletUtils;
  * which include specifying allowed/required fields, and registering custom
  * property editors.
  *
- * <p>Used by Spring Portlet MVC's BaseCommandController.
- * Note that BaseCommandController and its subclasses allow for easy customization
- * of the binder instances that they use through overriding {@code initBinder}.
- *
  * <p>Can also be used for manual data binding in custom web controllers:
  * for example, in a plain Portlet Controller implementation. Simply instantiate
  * a PortletRequestDataBinder for each binding process, and invoke {@code bind}
@@ -61,7 +57,6 @@ import org.springframework.web.portlet.util.PortletUtils;
  * @see #setAllowedFields
  * @see #setRequiredFields
  * @see #setFieldMarkerPrefix
- * @see org.springframework.web.portlet.mvc.BaseCommandController#initBinder
  */
 public class PortletRequestDataBinder extends WebDataBinder {
 
@@ -101,7 +96,6 @@ public class PortletRequestDataBinder extends WebDataBinder {
 	 * @param request request with parameters to bind (can be multipart)
 	 * @see org.springframework.web.portlet.multipart.MultipartActionRequest
 	 * @see org.springframework.web.multipart.MultipartFile
-	 * @see #bindMultipartFiles
 	 * @see #bind(org.springframework.beans.PropertyValues)
 	 */
 	public void bind(PortletRequest request) {

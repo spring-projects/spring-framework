@@ -29,7 +29,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * A default implementation of {@link @UserDestinationResolver}.
+ * A default implementation of {@link UserDestinationResolver}.
  * <p>
  * Resolves messages sent to destination patterns "/user/{user-name}/**" as well as
  * subscriptions to destinations "/user/queue/**" where the "/user/" prefix used to

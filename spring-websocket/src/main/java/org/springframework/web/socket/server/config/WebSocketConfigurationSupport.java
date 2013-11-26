@@ -45,7 +45,7 @@ public class WebSocketConfigurationSupport {
 
 	/**
 	 * The default TaskScheduler to use if none is configured via
-	 * {@link SockJsServiceRegistration#setTaskScheduler()}, i.e.
+	 * {@link SockJsServiceRegistration#setTaskScheduler}, i.e.
 	 * <pre class="code">
 	 * &#064;Configuration
 	 * &#064;EnableWebSocket

@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
 /**
  * Abstract class that adapts a {@link Future} parameterized over S into a {@code
  * Future} parameterized over T. All methods are delegated to the adaptee, where {@link
- * #get()} and {@link #get(long, TimeUnit)} call {@@link #adapt(Object)} on the adaptee's
+ * #get()} and {@link #get(long, TimeUnit)} call {@link #adapt(Object)} on the adaptee's
  * result.
  *
  * @param <T> the type of this {@code Future}

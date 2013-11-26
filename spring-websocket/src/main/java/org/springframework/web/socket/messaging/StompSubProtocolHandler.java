@@ -66,8 +66,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 
 	/**
 	 * Provide a registry with which to register active user session ids.
-	 *
-	 * @see {@link org.springframework.messaging.simp.handler.UserDestinationMessageHandler}
+	 * @see org.springframework.messaging.simp.handler.UserDestinationMessageHandler
 	 */
 	public void setUserSessionRegistry(UserSessionRegistry registry) {
 		this.userSessionRegistry = registry;

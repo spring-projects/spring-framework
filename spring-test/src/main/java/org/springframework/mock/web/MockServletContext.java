@@ -182,7 +182,7 @@ public class MockServletContext implements ServletContext {
 	 * Create a new MockServletContext using the supplied resource base path and
 	 * resource loader.
 	 * <p>Registers a {@link MockRequestDispatcher} for the Servlet named
-	 * {@value #COMMON_DEFAULT_SERVLET_NAME}.
+	 * {@literal 'default'}.
 	 * @param resourceBasePath the root directory of the WAR (should not end with a slash)
 	 * @param resourceLoader the ResourceLoader to use (or null for the default)
 	 * @see #registerNamedDispatcher
@@ -383,7 +383,7 @@ public class MockServletContext implements ServletContext {
 
 	/**
 	 * Get the name of the <em>default</em> {@code Servlet}.
-	 * <p>Defaults to {@value #COMMON_DEFAULT_SERVLET_NAME}.
+	 * <p>Defaults to {@literal 'default'}.
 	 * @see #setDefaultServletName
 	 */
 	public String getDefaultServletName() {

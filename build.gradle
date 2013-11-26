@@ -93,8 +93,9 @@ configure(allprojects) { project ->
 		"http://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
 		"http://ehcache.org/apidocs/",
 		"http://quartz-scheduler.org/api/2.1.7/",
-		"http://jackson.codehaus.org/1.9.12/javadoc/",
-		"http://fasterxml.github.com/jackson-core/javadoc/2.2.2/",
+		"http://jackson.codehaus.org/1.9.4/javadoc/",
+		"http://fasterxml.github.com/jackson-core/javadoc/2.2.0/",
+		"http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs"
 	] as String[]
 }
 

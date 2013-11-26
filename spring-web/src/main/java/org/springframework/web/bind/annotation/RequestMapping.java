@@ -161,7 +161,7 @@ import java.util.concurrent.Callable;
  *
  * <p>The following return types are supported for handler methods:
  * <ul>
- * <li>A {@link ModelAndView} object (Servlet MVC or Portlet MVC),
+ * <li>A {@code ModelAndView} object (Servlet MVC or Portlet MVC),
  * with the model implicitly enriched with command objects and the results
  * of {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
  * <li>A {@link org.springframework.ui.Model Model} object, with the view name

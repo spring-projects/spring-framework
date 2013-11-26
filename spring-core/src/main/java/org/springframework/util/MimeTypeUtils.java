@@ -28,15 +28,13 @@ import java.util.Map;
 
 import org.springframework.util.MimeType.SpecificityComparator;
 
-
-
 /**
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class MimeTypeUtils {
+public abstract class MimeTypeUtils {
 
 	/**
 	 * Public constant mime type that includes all media ranges (i.e. "&#42;/&#42;").
@@ -44,7 +42,7 @@ public class MimeTypeUtils {
 	public static final MimeType ALL;
 
 	/**
-	 * A String equivalent of {@link MediaType#ALL}.
+	 * A String equivalent of {@link MimeTypeUtils#ALL}.
 	 */
 	public static final String ALL_VALUE = "*/*";
 
@@ -54,7 +52,7 @@ public class MimeTypeUtils {
 	public final static MimeType APPLICATION_ATOM_XML;
 
 	/**
-	 * A String equivalent of {@link MimeType#APPLICATION_ATOM_XML}.
+	 * A String equivalent of {@link MimeTypeUtils#APPLICATION_ATOM_XML}.
 	 */
 	public final static String APPLICATION_ATOM_XML_VALUE = "application/atom+xml";
 
@@ -64,7 +62,7 @@ public class MimeTypeUtils {
 	public final static MimeType APPLICATION_FORM_URLENCODED;
 
 	/**
-	 * A String equivalent of {@link MimeType#APPLICATION_FORM_URLENCODED}.
+	 * A String equivalent of {@link MimeTypeUtils#APPLICATION_FORM_URLENCODED}.
 	 */
 	public final static String APPLICATION_FORM_URLENCODED_VALUE = "application/x-www-form-urlencoded";
 
@@ -74,7 +72,7 @@ public class MimeTypeUtils {
 	public final static MimeType APPLICATION_JSON;
 
 	/**
-	 * A String equivalent of {@link MimeType#APPLICATION_JSON}.
+	 * A String equivalent of {@link MimeTypeUtils#APPLICATION_JSON}.
 	 */
 	public final static String APPLICATION_JSON_VALUE = "application/json";
 
@@ -84,7 +82,7 @@ public class MimeTypeUtils {
 	public final static MimeType APPLICATION_OCTET_STREAM;
 
 	/**
-	 * A String equivalent of {@link MimeType#APPLICATION_OCTET_STREAM}.
+	 * A String equivalent of {@link MimeTypeUtils#APPLICATION_OCTET_STREAM}.
 	 */
 	public final static String APPLICATION_OCTET_STREAM_VALUE = "application/octet-stream";
 
@@ -94,7 +92,7 @@ public class MimeTypeUtils {
 	public final static MimeType APPLICATION_XHTML_XML;
 
 	/**
-	 * A String equivalent of {@link MimeType#APPLICATION_XHTML_XML}.
+	 * A String equivalent of {@link MimeTypeUtils#APPLICATION_XHTML_XML}.
 	 */
 	public final static String APPLICATION_XHTML_XML_VALUE = "application/xhtml+xml";
 
@@ -104,7 +102,7 @@ public class MimeTypeUtils {
 	public final static MimeType APPLICATION_XML;
 
 	/**
-	 * A String equivalent of {@link MimeType#APPLICATION_XML}.
+	 * A String equivalent of {@link MimeTypeUtils#APPLICATION_XML}.
 	 */
 	public final static String APPLICATION_XML_VALUE = "application/xml";
 
@@ -114,7 +112,7 @@ public class MimeTypeUtils {
 	public final static MimeType IMAGE_GIF;
 
 	/**
-	 * A String equivalent of {@link MimeType#IMAGE_GIF}.
+	 * A String equivalent of {@link MimeTypeUtils#IMAGE_GIF}.
 	 */
 	public final static String IMAGE_GIF_VALUE = "image/gif";
 
@@ -124,7 +122,7 @@ public class MimeTypeUtils {
 	public final static MimeType IMAGE_JPEG;
 
 	/**
-	 * A String equivalent of {@link MimeType#IMAGE_JPEG}.
+	 * A String equivalent of {@link MimeTypeUtils#IMAGE_JPEG}.
 	 */
 	public final static String IMAGE_JPEG_VALUE = "image/jpeg";
 
@@ -134,7 +132,7 @@ public class MimeTypeUtils {
 	public final static MimeType IMAGE_PNG;
 
 	/**
-	 * A String equivalent of {@link MimeType#IMAGE_PNG}.
+	 * A String equivalent of {@link MimeTypeUtils#IMAGE_PNG}.
 	 */
 	public final static String IMAGE_PNG_VALUE = "image/png";
 
@@ -144,7 +142,7 @@ public class MimeTypeUtils {
 	public final static MimeType MULTIPART_FORM_DATA;
 
 	/**
-	 * A String equivalent of {@link MimeType#MULTIPART_FORM_DATA}.
+	 * A String equivalent of {@link MimeTypeUtils#MULTIPART_FORM_DATA}.
 	 */
 	public final static String MULTIPART_FORM_DATA_VALUE = "multipart/form-data";
 
@@ -154,7 +152,7 @@ public class MimeTypeUtils {
 	public final static MimeType TEXT_HTML;
 
 	/**
-	 * A String equivalent of {@link MimeType#TEXT_HTML}.
+	 * A String equivalent of {@link MimeTypeUtils#TEXT_HTML}.
 	 */
 	public final static String TEXT_HTML_VALUE = "text/html";
 
@@ -164,7 +162,7 @@ public class MimeTypeUtils {
 	public final static MimeType TEXT_PLAIN;
 
 	/**
-	 * A String equivalent of {@link MimeType#TEXT_PLAIN}.
+	 * A String equivalent of {@link MimeTypeUtils#TEXT_PLAIN}.
 	 */
 	public final static String TEXT_PLAIN_VALUE = "text/plain";
 
@@ -174,7 +172,7 @@ public class MimeTypeUtils {
 	public final static MimeType TEXT_XML;
 
 	/**
-	 * A String equivalent of {@link MimeType#TEXT_XML}.
+	 * A String equivalent of {@link MimeTypeUtils#TEXT_XML}.
 	 */
 	public final static String TEXT_XML_VALUE = "text/xml";
 
@@ -294,16 +292,16 @@ public class MimeTypeUtils {
 	 * <p>
 	 * Given two mime types:
 	 * <ol>
-	 * <li>if either mime type has a {@linkplain #isWildcardType() wildcard type}, then
-	 * the mime type without the wildcard is ordered before the other.</li>
-	 * <li>if the two mime types have different {@linkplain #getType() types}, then
-	 * they are considered equal and remain their current order.</li>
-	 * <li>if either mime type has a {@linkplain #isWildcardSubtype() wildcard subtype}
+	 * <li>if either mime type has a {@linkplain MimeType#isWildcardType() wildcard type},
+	 * then the mime type without the wildcard is ordered before the other.</li>
+	 * <li>if the two mime types have different {@linkplain MimeType#getType() types},
+	 * then they are considered equal and remain their current order.</li>
+	 * <li>if either mime type has a {@linkplain MimeType#isWildcardSubtype() wildcard subtype}
 	 * , then the mime type without the wildcard is sorted before the other.</li>
-	 * <li>if the two mime types have different {@linkplain #getSubtype() subtypes},
+	 * <li>if the two mime types have different {@linkplain MimeType#getSubtype() subtypes},
 	 * then they are considered equal and remain their current order.</li>
 	 * <li>if the two mime types have a different amount of
-	 * {@linkplain #getParameter(String) parameters}, then the mime type with the most
+	 * {@linkplain MimeType#getParameter(String) parameters}, then the mime type with the most
 	 * parameters is ordered before the other.</li>
 	 * </ol>
 	 * <p>
