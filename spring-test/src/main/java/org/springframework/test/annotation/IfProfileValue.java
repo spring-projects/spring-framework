@@ -27,21 +27,22 @@ import java.lang.annotation.Target;
  * <p>
  * Test annotation to indicate that a test is enabled for a specific testing
  * profile or environment. If the configured {@link ProfileValueSource} returns
- * a matching {@link #value() value} for the provided {@link #name() name}, the
- * test will be enabled.
+ * a matching {@link #value} for the provided {@link #name}, the test will be
+ * enabled.
  * </p>
  * <p>
- * Note: {@code &#064;IfProfileValue} can be applied at the class level,
- * the method level, or both. {@code &#064;IfProfileValue} at the class
- * level overrides method-level usage of {@code &#064;IfProfileValue} for
- * any methods within that class.
- * </p>
- * <p>
- * Examples: when using {@link SystemProfileValueSource} as the
- * {@link ProfileValueSource} implementation, you can configure a test method to
- * run only on Java VMs from Sun Microsystems as follows:
+ * Note: {@code @IfProfileValue} can be applied at the class level, the method
+ * level, or both. {@code @IfProfileValue} at the class level overrides
+ * method-level usage of {@code @IfProfileValue} for any methods within that
+ * class.
  * </p>
  *
+ * <h3>Examples</h3>
+ * <p>
+ * When using {@link SystemProfileValueSource} as the {@link ProfileValueSource}
+ * implementation, you can configure a test method to run only on Java VMs from
+ * Sun Microsystems as follows:
+ * </p>
  * <pre class="code">
  * &#064;IfProfileValue(name = &quot;java.vendor&quot;, value = &quot;Sun Microsystems Inc.&quot;)
  * public void testSomething() {
@@ -49,10 +50,10 @@ import java.lang.annotation.Target;
  * }
  * </pre>
  * <p>
- * You can alternatively configure {@code &#064;IfProfileValue} with
- * <em>OR</em> semantics for multiple {@link #values() values} as follows
- * (assuming a {@link ProfileValueSource} has been appropriately configured for
- * the &quot;test-groups&quot; name):
+ * You can alternatively configure {@code @IfProfileValue} with <em>OR</em>
+ * semantics for multiple {@link #values() values} as follows (assuming a
+ * {@link ProfileValueSource} has been appropriately configured for the
+ * &quot;test-groups&quot; name):
  * </p>
  *
  * <pre class="code">
