@@ -17,6 +17,7 @@
 package org.springframework.web.socket.messaging.config;
 
 
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 
 /**
@@ -34,6 +35,22 @@ public interface WebSocketMessageBrokerConfigurer {
 	 * Configure STOMP over WebSocket endpoints.
 	 */
 	void registerStompEndpoints(StompEndpointRegistry registry);
+
+	/**
+	 * Configure the {@link org.springframework.messaging.MessageChannel} used for
+	 * incoming messages from WebSocket clients. By default the channel is backed
+	 * by a thread pool of size 1. It is recommended to customize thread pool
+	 * settings for production use.
+	 */
+	void configureClientInboundChannel(ChannelRegistration registration);
+
+	/**
+	 * Configure the {@link org.springframework.messaging.MessageChannel} used for
+	 * incoming messages from WebSocket clients. By default the channel is backed
+	 * by a thread pool of size 1. It is recommended to customize thread pool
+	 * settings for production use.
+	 */
+	void configureClientOutboundChannel(ChannelRegistration registration);
 
 	/**
 	 * Configure message broker options.

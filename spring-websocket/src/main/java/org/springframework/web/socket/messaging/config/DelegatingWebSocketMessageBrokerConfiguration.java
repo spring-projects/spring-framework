@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.util.CollectionUtils;
 
@@ -55,6 +56,20 @@ public class DelegatingWebSocketMessageBrokerConfiguration extends WebSocketMess
 	protected void registerStompEndpoints(StompEndpointRegistry registry) {
 		for (WebSocketMessageBrokerConfigurer c : this.configurers) {
 			c.registerStompEndpoints(registry);
+		}
+	}
+
+	@Override
+	protected void configureClientInboundChannel(ChannelRegistration registration) {
+		for (WebSocketMessageBrokerConfigurer c : this.configurers) {
+			c.configureClientInboundChannel(registration);
+		}
+	}
+
+	@Override
+	protected void configureClientOutboundChannel(ChannelRegistration registration) {
+		for (WebSocketMessageBrokerConfigurer c : this.configurers) {
+			c.configureClientOutboundChannel(registration);
 		}
 	}
 

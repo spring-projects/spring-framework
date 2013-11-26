@@ -36,13 +36,17 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.channel.AbstractSubscribableChannel;
+import org.springframework.messaging.support.channel.ChannelInterceptor;
+import org.springframework.messaging.support.channel.ChannelInterceptorAdapter;
 import org.springframework.messaging.support.channel.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.converter.CompositeMessageConverter;
 import org.springframework.messaging.support.converter.DefaultContentTypeResolver;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MimeTypeUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -59,6 +63,8 @@ public class MessageBrokerConfigurationTests {
 
 	private AnnotationConfigApplicationContext cxtStompBroker;
 
+	private AnnotationConfigApplicationContext cxtCustomizedChannelConfig;
+
 
 	@Before
 	public void setupOnce() {
@@ -70,6 +76,10 @@ public class MessageBrokerConfigurationTests {
 		this.cxtStompBroker = new AnnotationConfigApplicationContext();
 		this.cxtStompBroker.register(TestStompMessageBrokerConfig.class);
 		this.cxtStompBroker.refresh();
+
+		this.cxtCustomizedChannelConfig = new AnnotationConfigApplicationContext();
+		this.cxtCustomizedChannelConfig.register(CustomizedChannelConfig.class);
+		this.cxtCustomizedChannelConfig.refresh();
 	}
 
 
@@ -94,6 +104,22 @@ public class MessageBrokerConfigurationTests {
 		assertTrue(values.contains(cxtStompBroker.getBean(SimpAnnotationMethodMessageHandler.class)));
 		assertTrue(values.contains(cxtStompBroker.getBean(UserDestinationMessageHandler.class)));
 		assertTrue(values.contains(cxtStompBroker.getBean(StompBrokerRelayMessageHandler.class)));
+	}
+
+	@Test
+	public void clientInboundChannelCustomized() {
+
+		AbstractSubscribableChannel channel = this.cxtCustomizedChannelConfig.getBean(
+				"clientInboundChannel", AbstractSubscribableChannel.class);
+
+		assertEquals(1, channel.getInterceptors().size());
+
+		ThreadPoolTaskExecutor taskExecutor = this.cxtCustomizedChannelConfig.getBean(
+				"clientInboundChannelExecutor", ThreadPoolTaskExecutor.class);
+
+		assertEquals(11, taskExecutor.getCorePoolSize());
+		assertEquals(12, taskExecutor.getMaxPoolSize());
+		assertEquals(13, taskExecutor.getKeepAliveSeconds());
 	}
 
 	@Test
@@ -146,6 +172,22 @@ public class MessageBrokerConfigurationTests {
 		assertEquals(SimpMessageType.MESSAGE, headers.getMessageType());
 		assertEquals("/foo", headers.getDestination());
 		assertEquals("bar", new String((byte[]) message.getPayload()));
+	}
+
+	@Test
+	public void clientOutboundChannelCustomized() {
+
+		AbstractSubscribableChannel channel = this.cxtCustomizedChannelConfig.getBean(
+				"clientOutboundChannel", AbstractSubscribableChannel.class);
+
+		assertEquals(2, channel.getInterceptors().size());
+
+		ThreadPoolTaskExecutor taskExecutor = this.cxtCustomizedChannelConfig.getBean(
+				"clientOutboundChannelExecutor", ThreadPoolTaskExecutor.class);
+
+		assertEquals(21, taskExecutor.getCorePoolSize());
+		assertEquals(22, taskExecutor.getMaxPoolSize());
+		assertEquals(23, taskExecutor.getKeepAliveSeconds());
 	}
 
 	@Test
@@ -208,6 +250,22 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
+	public void brokerChannelCustomized() {
+
+		AbstractSubscribableChannel channel = this.cxtCustomizedChannelConfig.getBean(
+				"brokerChannel", AbstractSubscribableChannel.class);
+
+		assertEquals(3, channel.getInterceptors().size());
+
+		ThreadPoolTaskExecutor taskExecutor = this.cxtCustomizedChannelConfig.getBean(
+				"brokerChannelExecutor", ThreadPoolTaskExecutor.class);
+
+		assertEquals(31, taskExecutor.getCorePoolSize());
+		assertEquals(32, taskExecutor.getMaxPoolSize());
+		assertEquals(33, taskExecutor.getKeepAliveSeconds());
+	}
+
+	@Test
 	public void messageConverter() {
 		CompositeMessageConverter messageConverter = this.cxtStompBroker.getBean(
 				"brokerMessageConverter", CompositeMessageConverter.class);
@@ -240,14 +298,15 @@ public class MessageBrokerConfigurationTests {
 			return new TestController();
 		}
 
-		@Override
-		protected void configureMessageBroker(MessageBrokerRegistry registry) {
-		}
 
 		@Override
 		@Bean
 		public AbstractSubscribableChannel clientInboundChannel() {
 			return new TestChannel();
+		}
+
+		@Override
+		protected void configureClientInboundChannel(ChannelRegistration registration) {
 		}
 
 		@Override
@@ -257,9 +316,18 @@ public class MessageBrokerConfigurationTests {
 		}
 
 		@Override
+		protected void configureClientOutboundChannel(ChannelRegistration registration) {
+		}
+
+		@Override
 		public AbstractSubscribableChannel brokerChannel() {
 			return new TestChannel();
 		}
+
+		@Override
+		protected void configureMessageBroker(MessageBrokerRegistry registry) {
+		}
+
 	}
 
 	@Configuration
@@ -268,6 +336,32 @@ public class MessageBrokerConfigurationTests {
 		@Override
 		public void configureMessageBroker(MessageBrokerRegistry registry) {
 			registry.enableStompBrokerRelay("/topic", "/queue").setAutoStartup(false);
+		}
+	}
+
+	@Configuration
+	static class CustomizedChannelConfig extends AbstractMessageBrokerConfiguration {
+
+		private ChannelInterceptor interceptor = new ChannelInterceptorAdapter();
+
+
+		@Override
+		protected void configureClientInboundChannel(ChannelRegistration registration) {
+			registration.setInterceptors(this.interceptor);
+			registration.taskExecutor().corePoolSize(11).maxPoolSize(12).keepAliveSeconds(13).queueCapacity(14);
+		}
+
+		@Override
+		protected void configureClientOutboundChannel(ChannelRegistration registration) {
+			registration.setInterceptors(this.interceptor, this.interceptor);
+			registration.taskExecutor().corePoolSize(21).maxPoolSize(22).keepAliveSeconds(23).queueCapacity(24);
+		}
+
+		@Override
+		protected void configureMessageBroker(MessageBrokerRegistry registry) {
+			registry.configureBrokerChannel().setInterceptors(this.interceptor, this.interceptor, this.interceptor);
+			registry.configureBrokerChannel().taskExecutor()
+					.corePoolSize(31).maxPoolSize(32).keepAliveSeconds(33).queueCapacity(34);
 		}
 	}
 

@@ -27,6 +27,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -119,20 +120,29 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 	@Configuration
 	static class TestSimpleMessageBrokerConfig implements WebSocketMessageBrokerConfigurer {
 
+		@Bean
+		public TestController subscriptionController() {
+			return new TestController();
+		}
+
 		@Override
 		public void registerStompEndpoints(StompEndpointRegistry registry) {
 			registry.addEndpoint("/simpleBroker");
 		}
 
 		@Override
-		public void configureMessageBroker(MessageBrokerRegistry configurer) {
+		public void configureClientInboundChannel(ChannelRegistration registration) {
+		}
+
+		@Override
+		public void configureClientOutboundChannel(ChannelRegistration registration) {
+		}
+
+		@Override
+		public void configureMessageBroker(MessageBrokerRegistry registry) {
 			// SimpleBroker used by default
 		}
 
-		@Bean
-		public TestController subscriptionController() {
-			return new TestController();
-		}
 	}
 
 	@Configuration

@@ -42,6 +42,8 @@ public class MessageBrokerRegistry {
 
 	private String userDestinationPrefix;
 
+	private ChannelRegistration brokerChannelRegistration = new ChannelRegistration();
+
 
 	public MessageBrokerRegistry(MessageChannel clientOutboundChannel) {
 		Assert.notNull(clientOutboundChannel);
@@ -103,6 +105,17 @@ public class MessageBrokerRegistry {
 		return this;
 	}
 
+	/**
+	 * Customize the channel used to send messages from the application to the message
+	 * broker. By default messages from the application to the message broker are sent
+	 * synchronously, which means application code sending a message will find out
+	 * if the message cannot be sent through an exception. However, this can be changed
+	 * if the broker channel is configured here with task executor properties.
+	 */
+	public ChannelRegistration configureBrokerChannel() {
+		return this.brokerChannelRegistration;
+	}
+
 
 	protected SimpleBrokerMessageHandler getSimpleBroker() {
 		initSimpleBrokerIfNecessary();
@@ -126,5 +139,9 @@ public class MessageBrokerRegistry {
 
 	protected String getUserDestinationPrefix() {
 		return this.userDestinationPrefix;
+	}
+
+	protected ChannelRegistration getBrokerChannelRegistration() {
+		return this.brokerChannelRegistration;
 	}
 }

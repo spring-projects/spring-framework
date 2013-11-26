@@ -59,6 +59,10 @@ public abstract class AbstractMessageBrokerConfiguration {
 			"com.fasterxml.jackson.databind.ObjectMapper", AbstractMessageBrokerConfiguration.class.getClassLoader());
 
 
+	private ChannelRegistration clientInboundChannelRegistration;
+
+	private ChannelRegistration clientOutboundChannelRegistration;
+
 	private MessageBrokerRegistry brokerRegistry;
 
 
@@ -68,6 +72,98 @@ public abstract class AbstractMessageBrokerConfiguration {
 	protected AbstractMessageBrokerConfiguration() {
 	}
 
+
+	@Bean
+	public AbstractSubscribableChannel clientInboundChannel() {
+		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientInboundChannelExecutor());
+		ChannelRegistration r = getClientInboundChannelRegistration();
+		if (r.hasInterceptors()) {
+			channel.setInterceptors(r.getInterceptors());
+		}
+		return channel;
+	}
+
+	@Bean
+	public ThreadPoolTaskExecutor clientInboundChannelExecutor() {
+		TaskExecutorRegistration r = getClientInboundChannelRegistration().getTaskExecutorRegistration();
+		ThreadPoolTaskExecutor executor = (r != null) ? r.getTaskExecutor() : new ThreadPoolTaskExecutor();
+		executor.setThreadNamePrefix("ClientInboundChannel-");
+		return executor;
+	}
+
+	protected final ChannelRegistration getClientInboundChannelRegistration() {
+		if (this.clientInboundChannelRegistration == null) {
+			ChannelRegistration registration = new ChannelRegistration();
+			configureClientInboundChannel(registration);
+			this.clientInboundChannelRegistration = registration;
+		}
+		return this.clientInboundChannelRegistration;
+	}
+
+
+	/**
+	 * A hook for sub-classes to customize the message channel for inbound messages
+	 * from WebSocket clients.
+	 */
+	protected abstract void configureClientInboundChannel(ChannelRegistration registration);
+
+
+	@Bean
+	public AbstractSubscribableChannel clientOutboundChannel() {
+		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientOutboundChannelExecutor());
+		ChannelRegistration r = getClientOutboundChannelRegistration();
+		if (r.hasInterceptors()) {
+			channel.setInterceptors(r.getInterceptors());
+		}
+		return channel;
+	}
+
+	@Bean
+	public ThreadPoolTaskExecutor clientOutboundChannelExecutor() {
+		TaskExecutorRegistration r = getClientOutboundChannelRegistration().getTaskExecutorRegistration();
+		ThreadPoolTaskExecutor executor = (r != null) ? r.getTaskExecutor() : new ThreadPoolTaskExecutor();
+		executor.setThreadNamePrefix("ClientOutboundChannel-");
+		return executor;
+	}
+
+	protected final ChannelRegistration getClientOutboundChannelRegistration() {
+		if (this.clientOutboundChannelRegistration == null) {
+			ChannelRegistration registration = new ChannelRegistration();
+			configureClientOutboundChannel(registration);
+			this.clientOutboundChannelRegistration = registration;
+		}
+		return this.clientOutboundChannelRegistration;
+	}
+
+	/**
+	 * A hook for sub-classes to customize the message channel for messages from
+	 * the application or message broker to WebSocket clients.
+	 */
+	protected abstract void configureClientOutboundChannel(ChannelRegistration registration);
+
+	@Bean
+	public AbstractSubscribableChannel brokerChannel() {
+		ChannelRegistration r = getBrokerRegistry().getBrokerChannelRegistration();
+		ExecutorSubscribableChannel channel;
+		if (r.hasTaskExecutor()) {
+			channel = new ExecutorSubscribableChannel(); // synchronous by default
+		}
+		else {
+			channel = new ExecutorSubscribableChannel(brokerChannelExecutor());
+		}
+		if (r.hasInterceptors()) {
+			channel.setInterceptors(r.getInterceptors());
+		}
+		return channel;
+	}
+
+	@Bean
+	public ThreadPoolTaskExecutor brokerChannelExecutor() {
+		TaskExecutorRegistration r = getBrokerRegistry().getBrokerChannelRegistration().getTaskExecutorRegistration();
+		ThreadPoolTaskExecutor executor = (r != null) ? r.getTaskExecutor() : new ThreadPoolTaskExecutor();
+		executor.setThreadNamePrefix("BrokerChannel-");
+		return executor;
+	}
 
 	/**
 	 * An accessor for the {@link MessageBrokerRegistry} that ensures its one-time creation
@@ -87,36 +183,6 @@ public abstract class AbstractMessageBrokerConfiguration {
 	 * provided {@link MessageBrokerRegistry} instance.
 	 */
 	protected abstract void configureMessageBroker(MessageBrokerRegistry registry);
-
-
-	@Bean
-	public AbstractSubscribableChannel clientInboundChannel() {
-		return new ExecutorSubscribableChannel(clientInboundChannelExecutor());
-	}
-
-	@Bean
-	public ThreadPoolTaskExecutor clientInboundChannelExecutor() {
-		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-		executor.setThreadNamePrefix("ClientInboundChannel-");
-		return executor;
-	}
-
-	@Bean
-	public AbstractSubscribableChannel clientOutboundChannel() {
-		return new ExecutorSubscribableChannel(clientOutboundChannelExecutor());
-	}
-
-	@Bean
-	public ThreadPoolTaskExecutor clientOutboundChannelExecutor() {
-		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-		executor.setThreadNamePrefix("ClientOutboundChannel-");
-		return executor;
-	}
-
-	@Bean
-	public AbstractSubscribableChannel brokerChannel() {
-		return new ExecutorSubscribableChannel(); // synchronous
-	}
 
 
 	@Bean

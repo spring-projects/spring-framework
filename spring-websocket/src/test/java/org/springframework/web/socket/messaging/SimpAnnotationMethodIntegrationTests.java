@@ -36,6 +36,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.support.channel.AbstractSubscribableChannel;
@@ -213,6 +214,14 @@ public class SimpAnnotationMethodIntegrationTests extends AbstractWebSocketInteg
 		@Override
 		public void registerStompEndpoints(StompEndpointRegistry registry) {
 			registry.addEndpoint("/ws").setHandshakeHandler(this.handshakeHandler);
+		}
+
+		@Override
+		public void configureClientInboundChannel(ChannelRegistration registration) {
+		}
+
+		@Override
+		public void configureClientOutboundChannel(ChannelRegistration registration) {
 		}
 
 		@Override
