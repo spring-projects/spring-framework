@@ -416,15 +416,18 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 		if (rollbackAnnotation != null) {
 			boolean rollbackOverride = rollbackAnnotation.value();
 			if (logger.isDebugEnabled()) {
-				logger.debug("Method-level @Rollback(" + rollbackOverride + ") overrides default rollback [" + rollback
-						+ "] for test context " + testContext);
+				logger.debug(String.format(
+					"Method-level @Rollback(%s) overrides default rollback [%s] for test context %s.",
+					rollbackOverride,
+					rollback, testContext));
 			}
 			rollback = rollbackOverride;
 		}
 		else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("No method-level @Rollback override: using default rollback [" + rollback
-						+ "] for test context " + testContext);
+				logger.debug(String.format(
+					"No method-level @Rollback override: using default rollback [%s] for test context %s.", rollback,
+					testContext));
 			}
 		}
 		return rollback;

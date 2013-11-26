@@ -21,6 +21,7 @@ import java.lang.annotation.RetentionPolicy;
 
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.TestContext;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -126,6 +127,12 @@ public class TransactionalTestExecutionListenerTests {
 		assertEquals(defaultRollback, attributes.isDefaultRollback());
 	}
 
+	private void assertIsRollback(Class<?> clazz, boolean rollback) throws NoSuchMethodException, Exception {
+		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(clazz);
+		when(testContext.getTestMethod()).thenReturn(clazz.getDeclaredMethod("test"));
+		assertEquals(rollback, listener.isRollback(testContext));
+	}
+
 	@Test
 	public void beforeTestMethodWithTransactionalDeclaredOnClassLocally() throws Exception {
 		assertBeforeTestMethodWithTransactionalTestMethod(TransactionalDeclaredOnClassLocallyTestCase.class);
@@ -212,6 +219,26 @@ public class TransactionalTestExecutionListenerTests {
 			"overriddenTxMgr", true);
 	}
 
+	@Test
+	public void isRollbackWithMissingRollback() throws Exception {
+		assertIsRollback(MissingRollbackTestCase.class, true);
+	}
+
+	@Test
+	public void isRollbackWithEmptyRollback() throws Exception {
+		assertIsRollback(EmptyRollbackTestCase.class, true);
+	}
+
+	@Test
+	public void isRollbackWithExplicitValue() throws Exception {
+		assertIsRollback(RollbackWithExplicitValueTestCase.class, false);
+	}
+
+	@Test
+	public void isRollbackViaMetaAnnotation() throws Exception {
+		assertIsRollback(RollbackViaMetaAnnotationTestCase.class, false);
+	}
+
 
 	// -------------------------------------------------------------------------
 
@@ -242,6 +269,11 @@ public class TransactionalTestExecutionListenerTests {
 	private static @interface MetaTxConfig {
 
 		String transactionManager() default "metaTxMgr";
+	}
+
+	@Rollback(false)
+	@Retention(RetentionPolicy.RUNTIME)
+	private static @interface Commit {
 	}
 
 	private static abstract class Invocable {
@@ -424,6 +456,33 @@ public class TransactionalTestExecutionListenerTests {
 
 	@MetaTxConfig(transactionManager = "overriddenTxMgr")
 	static class TransactionConfigurationViaMetaAnnotationWithOverrideTestCase {
+	}
+
+	static class MissingRollbackTestCase {
+
+		public void test() {
+		}
+	}
+
+	static class EmptyRollbackTestCase {
+
+		@Rollback
+		public void test() {
+		}
+	}
+
+	static class RollbackWithExplicitValueTestCase {
+
+		@Rollback(false)
+		public void test() {
+		}
+	}
+
+	static class RollbackViaMetaAnnotationTestCase {
+
+		@Commit
+		public void test() {
+		}
 	}
 
 }
