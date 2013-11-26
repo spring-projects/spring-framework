@@ -110,6 +110,17 @@ abstract class AbstractContextLoaderUtilsTests {
 	public static @interface MetaLocationsFooConfig {
 	}
 
+	@ContextConfiguration
+	@ActiveProfiles
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	public static @interface MetaLocationsFooConfigWithOverrides {
+
+		String[] locations() default "/foo.xml";
+
+		String[] profiles() default "foo";
+	}
+
 	@ContextConfiguration("/bar.xml")
 	@ActiveProfiles(profiles = "bar")
 	@Retention(RetentionPolicy.RUNTIME)
@@ -123,6 +134,14 @@ abstract class AbstractContextLoaderUtilsTests {
 
 	@MetaLocationsBarConfig
 	static class MetaLocationsBar extends MetaLocationsFoo {
+	}
+
+	@MetaLocationsFooConfigWithOverrides
+	static class MetaLocationsFooWithOverrides {
+	}
+
+	@MetaLocationsFooConfigWithOverrides(locations = { "foo1.xml", "foo2.xml" }, profiles = { "foo1", "foo2" })
+	static class MetaLocationsFooWithOverriddenAttributes {
 	}
 
 	@ContextConfiguration(locations = "/foo.xml", inheritLocations = false)

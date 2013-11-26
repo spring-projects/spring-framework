@@ -31,6 +31,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.context.MetaAnnotationUtils.AnnotationDescriptor;
 import org.springframework.test.context.MetaAnnotationUtils.UntypedAnnotationDescriptor;
@@ -493,16 +495,17 @@ abstract class ContextLoaderUtils {
 			Class<?> declaringClass = (descriptor.getStereotype() != null) ? descriptor.getStereotypeType()
 					: rootDeclaringClass;
 
-			ActiveProfiles annotation = descriptor.getAnnotation();
+			AnnotationAttributes annAttrs = AnnotatedElementUtils.getAnnotationAttributes(rootDeclaringClass,
+				annotationType.getName());
 			if (logger.isTraceEnabled()) {
-				logger.trace(String.format("Retrieved @ActiveProfiles [%s] for declaring class [%s].", annotation,
-					declaringClass.getName()));
+				logger.trace(String.format("Retrieved @ActiveProfiles attributes [%s] for declaring class [%s].",
+					annAttrs, declaringClass.getName()));
 			}
-			validateActiveProfilesConfiguration(declaringClass, annotation);
+			validateActiveProfilesConfiguration(declaringClass, annAttrs);
 
-			String[] profiles = annotation.profiles();
-			String[] valueProfiles = annotation.value();
-			Class<? extends ActiveProfilesResolver> resolverClass = annotation.resolver();
+			String[] profiles = annAttrs.getStringArray("profiles");
+			String[] valueProfiles = annAttrs.getStringArray("value");
+			Class<? extends ActiveProfilesResolver> resolverClass = annAttrs.getClass("resolver");
 
 			boolean resolverDeclared = !ActiveProfilesResolver.class.equals(resolverClass);
 			boolean valueDeclared = !ObjectUtils.isEmpty(valueProfiles);
@@ -538,17 +541,17 @@ abstract class ContextLoaderUtils {
 				}
 			}
 
-			descriptor = annotation.inheritProfiles() ? findAnnotationDescriptor(rootDeclaringClass.getSuperclass(),
-				annotationType) : null;
+			descriptor = annAttrs.getBoolean("inheritProfiles") ? findAnnotationDescriptor(
+				rootDeclaringClass.getSuperclass(), annotationType) : null;
 		}
 
 		return StringUtils.toStringArray(activeProfiles);
 	}
 
-	private static void validateActiveProfilesConfiguration(Class<?> declaringClass, ActiveProfiles annotation) {
-		String[] valueProfiles = annotation.value();
-		String[] profiles = annotation.profiles();
-		Class<? extends ActiveProfilesResolver> resolverClass = annotation.resolver();
+	private static void validateActiveProfilesConfiguration(Class<?> declaringClass, AnnotationAttributes annAttrs) {
+		String[] valueProfiles = annAttrs.getStringArray("value");
+		String[] profiles = annAttrs.getStringArray("profiles");
+		Class<? extends ActiveProfilesResolver> resolverClass = annAttrs.getClass("resolver");
 		boolean valueDeclared = !ObjectUtils.isEmpty(valueProfiles);
 		boolean profilesDeclared = !ObjectUtils.isEmpty(profiles);
 		boolean resolverDeclared = !ActiveProfilesResolver.class.equals(resolverClass);
