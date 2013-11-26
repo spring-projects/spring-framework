@@ -418,8 +418,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format(
 					"Method-level @Rollback(%s) overrides default rollback [%s] for test context %s.",
-					rollbackOverride,
-					rollback, testContext));
+					rollbackOverride, rollback, testContext));
 			}
 			rollback = rollbackOverride;
 		}
@@ -536,18 +535,18 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 		if (this.configurationAttributes == null) {
 			Class<?> clazz = testContext.getTestClass();
 
-			AnnotationAttributes ann = AnnotatedElementUtils.getAnnotationAttributes(clazz,
+			AnnotationAttributes annAttrs = AnnotatedElementUtils.getAnnotationAttributes(clazz,
 				TransactionConfiguration.class.getName());
 			if (logger.isDebugEnabled()) {
-				logger.debug("Retrieved @TransactionConfiguration attributes [" + ann + "] for test class [" + clazz
-						+ "]");
+				logger.debug(String.format("Retrieved @TransactionConfiguration attributes [%s] for test class [%s].",
+					annAttrs, clazz));
 			}
 
 			String transactionManagerName;
 			boolean defaultRollback;
-			if (ann != null) {
-				transactionManagerName = ann.getString("transactionManager");
-				defaultRollback = ann.getBoolean("defaultRollback");
+			if (annAttrs != null) {
+				transactionManagerName = annAttrs.getString("transactionManager");
+				defaultRollback = annAttrs.getBoolean("defaultRollback");
 			}
 			else {
 				transactionManagerName = DEFAULT_TRANSACTION_MANAGER_NAME;
@@ -557,8 +556,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 			TransactionConfigurationAttributes configAttributes = new TransactionConfigurationAttributes(
 				transactionManagerName, defaultRollback);
 			if (logger.isDebugEnabled()) {
-				logger.debug("Retrieved TransactionConfigurationAttributes " + configAttributes + " for class ["
-						+ clazz + "]");
+				logger.debug(String.format("Retrieved TransactionConfigurationAttributes %s for class [%s].",
+					configAttributes, clazz));
 			}
 			this.configurationAttributes = configAttributes;
 		}

@@ -28,6 +28,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.test.context.MetaAnnotationUtils.AnnotationDescriptor;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -172,6 +174,7 @@ public class TestContextManager {
 	 * @param clazz the test class for which the listeners should be retrieved
 	 * @return an array of TestExecutionListeners for the specified class
 	 */
+	@SuppressWarnings("unchecked")
 	private TestExecutionListener[] retrieveTestExecutionListeners(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 		Class<TestExecutionListeners> annotationType = TestExecutionListeners.class;
@@ -196,14 +199,17 @@ public class TestContextManager {
 				Class<?> declaringClass = (descriptor.getStereotype() != null) ? descriptor.getStereotypeType()
 						: rootDeclaringClass;
 
-				TestExecutionListeners testExecutionListeners = declaringClass.getAnnotation(annotationType);
+				AnnotationAttributes annAttrs = AnnotatedElementUtils.getAnnotationAttributes(rootDeclaringClass,
+					TestExecutionListeners.class.getName());
+
 				if (logger.isTraceEnabled()) {
-					logger.trace("Retrieved @TestExecutionListeners [" + testExecutionListeners
-							+ "] for declaring class [" + declaringClass + "].");
+					logger.trace(String.format(
+						"Retrieved @TestExecutionListeners attributes [%s] for declaring class [%s].", annAttrs,
+						declaringClass));
 				}
 
-				Class<? extends TestExecutionListener>[] valueListenerClasses = testExecutionListeners.value();
-				Class<? extends TestExecutionListener>[] listenerClasses = testExecutionListeners.listeners();
+				Class<? extends TestExecutionListener>[] valueListenerClasses = (Class<? extends TestExecutionListener>[]) annAttrs.getClassArray("value");
+				Class<? extends TestExecutionListener>[] listenerClasses = (Class<? extends TestExecutionListener>[]) annAttrs.getClassArray("listeners");
 				if (!ObjectUtils.isEmpty(valueListenerClasses) && !ObjectUtils.isEmpty(listenerClasses)) {
 					String msg = String.format(
 						"Test class [%s] has been configured with @TestExecutionListeners' 'value' [%s] "
@@ -221,7 +227,7 @@ public class TestContextManager {
 					classesList.addAll(0, Arrays.<Class<? extends TestExecutionListener>> asList(listenerClasses));
 				}
 
-				descriptor = (testExecutionListeners.inheritListeners() ? findAnnotationDescriptor(
+				descriptor = (annAttrs.getBoolean("inheritListeners") ? findAnnotationDescriptor(
 					rootDeclaringClass.getSuperclass(), annotationType) : null);
 			}
 		}
