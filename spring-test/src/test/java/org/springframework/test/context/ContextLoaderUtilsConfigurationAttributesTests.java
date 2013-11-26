@@ -84,6 +84,24 @@ public class ContextLoaderUtilsConfigurationAttributesTests extends AbstractCont
 	}
 
 	@Test
+	public void resolveConfigAttributesWithMetaAnnotationAndLocationsAndOverrides() {
+		List<ContextConfigurationAttributes> attributesList = resolveContextConfigurationAttributes(MetaLocationsFooWithOverrides.class);
+		assertNotNull(attributesList);
+		assertEquals(1, attributesList.size());
+		assertAttributes(attributesList.get(0), MetaLocationsFooConfigWithOverrides.class, new String[] { "/foo.xml" },
+			EMPTY_CLASS_ARRAY, ContextLoader.class, true);
+	}
+
+	@Test
+	public void resolveConfigAttributesWithMetaAnnotationAndLocationsAndOverriddenAttributes() {
+		List<ContextConfigurationAttributes> attributesList = resolveContextConfigurationAttributes(MetaLocationsFooWithOverriddenAttributes.class);
+		assertNotNull(attributesList);
+		assertEquals(1, attributesList.size());
+		assertAttributes(attributesList.get(0), MetaLocationsFooConfigWithOverrides.class, new String[] { "foo1.xml",
+			"foo2.xml" }, EMPTY_CLASS_ARRAY, ContextLoader.class, true);
+	}
+
+	@Test
 	public void resolveConfigAttributesWithMetaAnnotationAndLocationsInClassHierarchy() {
 		List<ContextConfigurationAttributes> attributesList = resolveContextConfigurationAttributes(MetaLocationsBar.class);
 		assertNotNull(attributesList);

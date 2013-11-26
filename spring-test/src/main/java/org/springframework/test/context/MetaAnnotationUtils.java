@@ -18,6 +18,8 @@ package org.springframework.test.context;
 
 import java.lang.annotation.Annotation;
 
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -124,7 +126,7 @@ abstract class MetaAnnotationUtils {
 	 * <p>
 	 * If the annotation is used as a meta-annotation, the descriptor also includes
 	 * the {@linkplain #getStereotype() stereotype} on which the annotation is
-	 * present. In such cases, the <em>declaring class</em> is not directly
+	 * present. In such cases, the <em>root declaring class</em> is not directly
 	 * annotated with the annotation but rather indirectly via the stereotype.
 	 *
 	 * <p>
@@ -133,6 +135,7 @@ abstract class MetaAnnotationUtils {
 	 * properties of the {@code AnnotationDescriptor} would be as follows.
 	 *
 	 * <ul>
+	 * <li>rootDeclaringClass: {@code TransactionalTests} class object</li>
 	 * <li>declaringClass: {@code TransactionalTests} class object</li>
 	 * <li>stereotype: {@code null}</li>
 	 * <li>annotation: instance of the {@code Transactional} annotation</li>
@@ -150,7 +153,8 @@ abstract class MetaAnnotationUtils {
 	 * properties of the {@code AnnotationDescriptor} would be as follows.
 	 *
 	 * <ul>
-	 * <li>declaringClass: {@code UserRepositoryTests} class object</li>
+	 * <li>rootDeclaringClass: {@code UserRepositoryTests} class object</li>
+	 * <li>declaringClass: {@code RepositoryTests} class object</li>
 	 * <li>stereotype: instance of the {@code RepositoryTests} annotation</li>
 	 * <li>annotation: instance of the {@code Transactional} annotation</li>
 	 * </ul>
@@ -170,22 +174,31 @@ abstract class MetaAnnotationUtils {
 	 */
 	public static class AnnotationDescriptor<T extends Annotation> {
 
+		private final Class<?> rootDeclaringClass;
 		private final Class<?> declaringClass;
 		private final Annotation stereotype;
 		private final T annotation;
+		private final AnnotationAttributes annotationAttributes;
 
 
-		public AnnotationDescriptor(Class<?> declaringClass, T annotation) {
-			this(declaringClass, null, annotation);
+		public AnnotationDescriptor(Class<?> rootDeclaringClass, T annotation) {
+			this(rootDeclaringClass, null, annotation);
 		}
 
-		public AnnotationDescriptor(Class<?> declaringClass, Annotation stereotype, T annotation) {
-			Assert.notNull(declaringClass, "declaringClass must not be null");
+		public AnnotationDescriptor(Class<?> rootDeclaringClass, Annotation stereotype, T annotation) {
+			Assert.notNull(rootDeclaringClass, "rootDeclaringClass must not be null");
 			Assert.notNull(annotation, "annotation must not be null");
 
-			this.declaringClass = declaringClass;
+			this.rootDeclaringClass = rootDeclaringClass;
+			this.declaringClass = (stereotype != null) ? stereotype.annotationType() : rootDeclaringClass;
 			this.stereotype = stereotype;
 			this.annotation = annotation;
+			this.annotationAttributes = AnnotatedElementUtils.getAnnotationAttributes(rootDeclaringClass,
+				annotation.annotationType().getName());
+		}
+
+		public Class<?> getRootDeclaringClass() {
+			return this.rootDeclaringClass;
 		}
 
 		public Class<?> getDeclaringClass() {
@@ -198,6 +211,10 @@ abstract class MetaAnnotationUtils {
 
 		public Class<? extends Annotation> getAnnotationType() {
 			return this.annotation.annotationType();
+		}
+
+		public AnnotationAttributes getAnnotationAttributes() {
+			return this.annotationAttributes;
 		}
 
 		public Annotation getStereotype() {
@@ -214,6 +231,7 @@ abstract class MetaAnnotationUtils {
 		@Override
 		public String toString() {
 			return new ToStringCreator(this)//
+			.append("rootDeclaringClass", rootDeclaringClass)//
 			.append("declaringClass", declaringClass)//
 			.append("stereotype", stereotype)//
 			.append("annotation", annotation)//

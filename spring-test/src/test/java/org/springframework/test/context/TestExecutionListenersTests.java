@@ -16,13 +16,13 @@
 
 package org.springframework.test.context;
 
-import static org.junit.Assert.assertEquals;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import org.junit.Test;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
+
+import static org.junit.Assert.*;
 
 /**
  * <p>
@@ -114,6 +114,29 @@ public class TestExecutionListenersTests {
 			testContextManager.getTestExecutionListeners().size());
 	}
 
+	@Test
+	public void verifyNumListenersRegisteredViaMetaAnnotationWithOverrides() throws Exception {
+		TestContextManager testContextManager = new TestContextManager(MetaWithOverridesExampleTestCase.class);
+		assertEquals("Num registered TELs for MetaWithOverridesExampleTestCase.", 3,
+			testContextManager.getTestExecutionListeners().size());
+	}
+
+	@Test
+	public void verifyNumListenersRegisteredViaMetaAnnotationWithInheritedListenersWithOverrides() throws Exception {
+		TestContextManager testContextManager = new TestContextManager(
+			MetaInheritedListenersWithOverridesExampleTestCase.class);
+		assertEquals("Num registered TELs for MetaInheritedListenersWithOverridesExampleTestCase.", 5,
+			testContextManager.getTestExecutionListeners().size());
+	}
+
+	@Test
+	public void verifyNumListenersRegisteredViaMetaAnnotationWithNonInheritedListenersWithOverrides() throws Exception {
+		TestContextManager testContextManager = new TestContextManager(
+			MetaNonInheritedListenersWithOverridesExampleTestCase.class);
+		assertEquals("Num registered TELs for MetaNonInheritedListenersWithOverridesExampleTestCase.", 8,
+			testContextManager.getTestExecutionListeners().size());
+	}
+
 	@Test(expected = IllegalStateException.class)
 	public void verifyDuplicateListenersConfigThrowsException() throws Exception {
 		new TestContextManager(DuplicateListenersConfigExampleTestCase.class);
@@ -174,6 +197,32 @@ public class TestExecutionListenersTests {
 	static @interface MetaNonInheritedListeners {
 	}
 
+	@TestExecutionListeners
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface MetaListenersWithOverrides {
+
+		Class<? extends TestExecutionListener>[] listeners() default { FooTestExecutionListener.class,
+			BarTestExecutionListener.class };
+	}
+
+	@TestExecutionListeners
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface MetaInheritedListenersWithOverrides {
+
+		Class<? extends TestExecutionListener>[] listeners() default QuuxTestExecutionListener.class;
+
+		boolean inheritListeners() default true;
+	}
+
+	@TestExecutionListeners
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface MetaNonInheritedListenersWithOverrides {
+
+		Class<? extends TestExecutionListener>[] listeners() default QuuxTestExecutionListener.class;
+
+		boolean inheritListeners() default false;
+	}
+
 	@MetaListeners
 	static class MetaExampleTestCase {
 	}
@@ -184,6 +233,28 @@ public class TestExecutionListenersTests {
 
 	@MetaNonInheritedListeners
 	static class MetaNonInheritedListenersExampleTestCase extends MetaInheritedListenersExampleTestCase {
+	}
+
+	@MetaListenersWithOverrides(listeners = {//
+	FooTestExecutionListener.class,//
+		BarTestExecutionListener.class,//
+		BazTestExecutionListener.class //
+	})
+	static class MetaWithOverridesExampleTestCase {
+	}
+
+	@MetaInheritedListenersWithOverrides(listeners = { FooTestExecutionListener.class, BarTestExecutionListener.class })
+	static class MetaInheritedListenersWithOverridesExampleTestCase extends MetaWithOverridesExampleTestCase {
+	}
+
+	@MetaNonInheritedListenersWithOverrides(listeners = {//
+	FooTestExecutionListener.class,//
+		BarTestExecutionListener.class,//
+		BazTestExecutionListener.class //
+	},//
+	inheritListeners = true)
+	static class MetaNonInheritedListenersWithOverridesExampleTestCase extends
+			MetaInheritedListenersWithOverridesExampleTestCase {
 	}
 
 	static class FooTestExecutionListener extends AbstractTestExecutionListener {
