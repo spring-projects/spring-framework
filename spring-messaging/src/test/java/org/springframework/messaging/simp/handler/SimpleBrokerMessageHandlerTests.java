@@ -26,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
@@ -43,7 +44,13 @@ public class SimpleBrokerMessageHandlerTests {
 	private SimpleBrokerMessageHandler messageHandler;
 
 	@Mock
-	private MessageChannel clientChannel;
+	private SubscribableChannel clientInboundChannel;
+
+	@Mock
+	private MessageChannel clientOutboundChannel;
+
+	@Mock
+	private SubscribableChannel brokerChannel;
 
 	@Captor
 	ArgumentCaptor<Message<?>> messageCaptor;
@@ -52,7 +59,8 @@ public class SimpleBrokerMessageHandlerTests {
 	@Before
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
-		this.messageHandler = new SimpleBrokerMessageHandler(this.clientChannel, Collections.<String>emptyList());
+		this.messageHandler = new SimpleBrokerMessageHandler(this.clientInboundChannel,
+				this.clientOutboundChannel, this.brokerChannel, Collections.<String>emptyList());
 	}
 
 
@@ -72,7 +80,7 @@ public class SimpleBrokerMessageHandlerTests {
 		this.messageHandler.handleMessage(createMessage("/foo", "message1"));
 		this.messageHandler.handleMessage(createMessage("/bar", "message2"));
 
-		verify(this.clientChannel, times(6)).send(this.messageCaptor.capture());
+		verify(this.clientOutboundChannel, times(6)).send(this.messageCaptor.capture());
 		assertCapturedMessage("sess1", "sub1", "/foo");
 		assertCapturedMessage("sess1", "sub2", "/foo");
 		assertCapturedMessage("sess2", "sub1", "/foo");
@@ -105,7 +113,7 @@ public class SimpleBrokerMessageHandlerTests {
 		this.messageHandler.handleMessage(createMessage("/foo", "message1"));
 		this.messageHandler.handleMessage(createMessage("/bar", "message2"));
 
-		verify(this.clientChannel, times(3)).send(this.messageCaptor.capture());
+		verify(this.clientOutboundChannel, times(3)).send(this.messageCaptor.capture());
 		assertCapturedMessage(sess2, "sub1", "/foo");
 		assertCapturedMessage(sess2, "sub2", "/foo");
 		assertCapturedMessage(sess2, "sub3", "/bar");
@@ -121,7 +129,7 @@ public class SimpleBrokerMessageHandlerTests {
 		Message<String> connectMessage = createConnectMessage(sess1);
 		this.messageHandler.handleMessage(connectMessage);
 
-		verify(this.clientChannel, times(1)).send(this.messageCaptor.capture());
+		verify(this.clientOutboundChannel, times(1)).send(this.messageCaptor.capture());
 		Message<?> connectAckMessage = this.messageCaptor.getValue();
 
 		SimpMessageHeaderAccessor connectAckHeaders = SimpMessageHeaderAccessor.wrap(connectAckMessage);

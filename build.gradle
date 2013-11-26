@@ -598,6 +598,8 @@ project("spring-websocket") {
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:8.0.0-RC5")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("log4j:log4j:1.2.17")
+		testCompile("org.projectreactor:reactor-core:1.0.0.RELEASE")
+		testCompile("org.projectreactor:reactor-tcp:1.0.0.RELEASE")
 	}
 }
 

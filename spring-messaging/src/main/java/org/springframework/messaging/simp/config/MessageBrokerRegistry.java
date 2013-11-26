@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.handler.SimpleBrokerMessageHandler;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.util.Assert;
@@ -32,11 +33,13 @@ import org.springframework.util.Assert;
  */
 public class MessageBrokerRegistry {
 
+	private final SubscribableChannel clientInboundChannel;
+
 	private final MessageChannel clientOutboundChannel;
 
-	private SimpleBrokerRegistration simpleBroker;
+	private SimpleBrokerRegistration simpleBrokerRegistration;
 
-	private StompBrokerRelayRegistration stompRelay;
+	private StompBrokerRelayRegistration brokerRelayRegistration;
 
 	private String[] applicationDestinationPrefixes;
 
@@ -45,8 +48,10 @@ public class MessageBrokerRegistry {
 	private ChannelRegistration brokerChannelRegistration = new ChannelRegistration();
 
 
-	public MessageBrokerRegistry(MessageChannel clientOutboundChannel) {
+	public MessageBrokerRegistry(SubscribableChannel clientInboundChannel, MessageChannel clientOutboundChannel) {
+		Assert.notNull(clientInboundChannel);
 		Assert.notNull(clientOutboundChannel);
+		this.clientInboundChannel = clientInboundChannel;
 		this.clientOutboundChannel = clientOutboundChannel;
 	}
 
@@ -55,8 +60,9 @@ public class MessageBrokerRegistry {
 	 * destinations targeting the broker (e.g. destinations prefixed with "/topic").
 	 */
 	public SimpleBrokerRegistration enableSimpleBroker(String... destinationPrefixes) {
-		this.simpleBroker = new SimpleBrokerRegistration(this.clientOutboundChannel, destinationPrefixes);
-		return this.simpleBroker;
+		this.simpleBrokerRegistration = new SimpleBrokerRegistration(
+				this.clientInboundChannel, this.clientOutboundChannel, destinationPrefixes);
+		return this.simpleBrokerRegistration;
 	}
 
 	/**
@@ -65,8 +71,9 @@ public class MessageBrokerRegistry {
 	 * destinations.
 	 */
 	public StompBrokerRelayRegistration enableStompBrokerRelay(String... destinationPrefixes) {
-		this.stompRelay = new StompBrokerRelayRegistration(this.clientOutboundChannel, destinationPrefixes);
-		return this.stompRelay;
+		this.brokerRelayRegistration = new StompBrokerRelayRegistration(
+				this.clientInboundChannel, this.clientOutboundChannel, destinationPrefixes);
+		return this.brokerRelayRegistration;
 	}
 
 	/**
@@ -113,19 +120,21 @@ public class MessageBrokerRegistry {
 	}
 
 
-	protected SimpleBrokerMessageHandler getSimpleBroker() {
-		initSimpleBrokerIfNecessary();
-		return (this.simpleBroker != null) ? this.simpleBroker.getMessageHandler() : null;
-	}
-
-	protected void initSimpleBrokerIfNecessary() {
-		if ((this.simpleBroker == null) && (this.stompRelay == null)) {
-			this.simpleBroker = new SimpleBrokerRegistration(this.clientOutboundChannel, null);
+	protected SimpleBrokerMessageHandler getSimpleBroker(SubscribableChannel brokerChannel) {
+		if ((this.simpleBrokerRegistration == null) && (this.brokerRelayRegistration == null)) {
+			enableSimpleBroker();
 		}
+		if (this.simpleBrokerRegistration != null) {
+			return this.simpleBrokerRegistration.getMessageHandler(brokerChannel);
+		}
+		return null;
 	}
 
-	protected StompBrokerRelayMessageHandler getStompBrokerRelay() {
-		return (this.stompRelay != null) ? this.stompRelay.getMessageHandler() : null;
+	protected StompBrokerRelayMessageHandler getStompBrokerRelay(SubscribableChannel brokerChannel) {
+		if (this.brokerRelayRegistration != null) {
+			return this.brokerRelayRegistration.getMessageHandler(brokerChannel);
+		}
+		return null;
 	}
 
 	protected Collection<String> getApplicationDestinationPrefixes() {

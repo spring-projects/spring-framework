@@ -17,6 +17,7 @@
 package org.springframework.messaging.simp.config;
 
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.handler.SimpleBrokerMessageHandler;
 
 /**
@@ -28,14 +29,17 @@ import org.springframework.messaging.simp.handler.SimpleBrokerMessageHandler;
 public class SimpleBrokerRegistration extends AbstractBrokerRegistration {
 
 
-	public SimpleBrokerRegistration(MessageChannel clientOutboundChannel, String[] destinationPrefixes) {
-		super(clientOutboundChannel, destinationPrefixes);
+	public SimpleBrokerRegistration(SubscribableChannel clientInboundChannel,
+			MessageChannel clientOutboundChannel, String[] destinationPrefixes) {
+
+		super(clientInboundChannel, clientOutboundChannel, destinationPrefixes);
 	}
 
 
 	@Override
-	protected SimpleBrokerMessageHandler getMessageHandler() {
-		return new SimpleBrokerMessageHandler(getClientOutboundChannel(), getDestinationPrefixes());
+	protected SimpleBrokerMessageHandler getMessageHandler(SubscribableChannel brokerChannel) {
+		return new SimpleBrokerMessageHandler(getClientInboundChannel(),
+				getClientOutboundChannel(), brokerChannel, getDestinationPrefixes());
 	}
 
 }

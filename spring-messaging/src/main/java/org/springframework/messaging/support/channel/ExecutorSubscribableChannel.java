@@ -62,7 +62,7 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 	}
 
 	@Override
-	protected boolean hasSubscription(MessageHandler handler) {
+	public boolean hasSubscription(MessageHandler handler) {
 		return this.handlers.contains(handler);
 	}
 

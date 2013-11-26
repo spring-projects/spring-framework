@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.web.socket.support.TestWebSocketSession;
 
 import static org.mockito.Mockito.*;
@@ -45,14 +46,17 @@ public class SubProtocolWebSocketHandlerTests {
 
 	@Mock SubProtocolHandler defaultHandler;
 
-	@Mock MessageChannel channel;
+	@Mock MessageChannel inClientChannel;
+
+	@Mock
+	SubscribableChannel outClientChannel;
 
 
 	@Before
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
 
-		this.webSocketHandler = new SubProtocolWebSocketHandler(this.channel);
+		this.webSocketHandler = new SubProtocolWebSocketHandler(this.inClientChannel, this.outClientChannel);
 		when(stompHandler.getSupportedProtocols()).thenReturn(Arrays.asList("v10.stomp", "v11.stomp", "v12.stomp"));
 		when(mqttHandler.getSupportedProtocols()).thenReturn(Arrays.asList("MQTT"));
 
@@ -67,8 +71,8 @@ public class SubProtocolWebSocketHandlerTests {
 		this.session.setAcceptedProtocol("v12.sToMp");
 		this.webSocketHandler.afterConnectionEstablished(session);
 
-		verify(this.stompHandler).afterSessionStarted(session, this.channel);
-		verify(this.mqttHandler, times(0)).afterSessionStarted(session, this.channel);
+		verify(this.stompHandler).afterSessionStarted(session, this.inClientChannel);
+		verify(this.mqttHandler, times(0)).afterSessionStarted(session, this.inClientChannel);
 	}
 
 	@Test
@@ -77,7 +81,7 @@ public class SubProtocolWebSocketHandlerTests {
 		this.session.setAcceptedProtocol("v12.sToMp");
 		this.webSocketHandler.afterConnectionEstablished(session);
 
-		verify(this.stompHandler).afterSessionStarted(session, this.channel);
+		verify(this.stompHandler).afterSessionStarted(session, this.inClientChannel);
 	}
 
 	@Test(expected=IllegalStateException.class)
@@ -94,9 +98,9 @@ public class SubProtocolWebSocketHandlerTests {
 		this.webSocketHandler.setDefaultProtocolHandler(defaultHandler);
 		this.webSocketHandler.afterConnectionEstablished(session);
 
-		verify(this.defaultHandler).afterSessionStarted(session, this.channel);
-		verify(this.stompHandler, times(0)).afterSessionStarted(session, this.channel);
-		verify(this.mqttHandler, times(0)).afterSessionStarted(session, this.channel);
+		verify(this.defaultHandler).afterSessionStarted(session, this.inClientChannel);
+		verify(this.stompHandler, times(0)).afterSessionStarted(session, this.inClientChannel);
+		verify(this.mqttHandler, times(0)).afterSessionStarted(session, this.inClientChannel);
 	}
 
 	@Test
@@ -105,9 +109,9 @@ public class SubProtocolWebSocketHandlerTests {
 		this.webSocketHandler.setDefaultProtocolHandler(defaultHandler);
 		this.webSocketHandler.afterConnectionEstablished(session);
 
-		verify(this.defaultHandler).afterSessionStarted(session, this.channel);
-		verify(this.stompHandler, times(0)).afterSessionStarted(session, this.channel);
-		verify(this.mqttHandler, times(0)).afterSessionStarted(session, this.channel);
+		verify(this.defaultHandler).afterSessionStarted(session, this.inClientChannel);
+		verify(this.stompHandler, times(0)).afterSessionStarted(session, this.inClientChannel);
+		verify(this.mqttHandler, times(0)).afterSessionStarted(session, this.inClientChannel);
 	}
 
 	@Test
@@ -115,7 +119,7 @@ public class SubProtocolWebSocketHandlerTests {
 		this.webSocketHandler.setProtocolHandlers(Arrays.asList(stompHandler));
 		this.webSocketHandler.afterConnectionEstablished(session);
 
-		verify(this.stompHandler).afterSessionStarted(session, this.channel);
+		verify(this.stompHandler).afterSessionStarted(session, this.inClientChannel);
 	}
 
 	@Test(expected=IllegalStateException.class)

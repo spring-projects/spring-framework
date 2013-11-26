@@ -43,7 +43,7 @@ public abstract class AbstractSubscribableChannel extends AbstractMessageChannel
 	/**
 	 * Whether the given {@link MessageHandler} is already subscribed.
 	 */
-	protected abstract boolean hasSubscription(MessageHandler handler);
+	public abstract boolean hasSubscription(MessageHandler handler);
 
 	/**
 	 * Subscribe the given {@link MessageHandler}.

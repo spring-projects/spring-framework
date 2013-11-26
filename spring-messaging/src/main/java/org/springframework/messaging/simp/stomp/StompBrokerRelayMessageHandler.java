@@ -21,10 +21,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageDeliveryException;
-import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.*;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.handler.AbstractBrokerMessageHandler;
@@ -77,7 +74,11 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 
-	private final MessageChannel messageChannel;
+	private final SubscribableChannel clientInboundChannel;
+
+	private final MessageChannel clientOutboundChannel;
+
+	private final SubscribableChannel brokerChannel;
 
 	private String relayHost = "127.0.0.1";
 
@@ -100,14 +101,28 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 
 	/**
-	 * @param messageChannel the channel to send messages from the STOMP broker to
+	 * Create a StompBrokerRelayMessageHandler instance with the given message channels
+	 * and destination prefixes.
+	 *
+	 * @param clientInChannel the channel for receiving messages from clients (e.g. WebSocket clients)
+	 * @param clientOutChannel the channel for sending messages to clients (e.g. WebSocket clients)
+	 * @param brokerChannel the channel for the application to send messages to the broker
 	 * @param destinationPrefixes the broker supported destination prefixes; destinations
 	 * that do not match the given prefix are ignored.
 	 */
-	public StompBrokerRelayMessageHandler(MessageChannel messageChannel, Collection<String> destinationPrefixes) {
+	public StompBrokerRelayMessageHandler(SubscribableChannel clientInChannel, MessageChannel clientOutChannel,
+			SubscribableChannel brokerChannel, Collection<String> destinationPrefixes) {
+
 		super(destinationPrefixes);
-		Assert.notNull(messageChannel, "MessageChannel must not be null");
-		this.messageChannel = messageChannel;
+
+		Assert.notNull(clientInChannel, "'clientInChannel' must not be null");
+		Assert.notNull(clientOutChannel, "'clientOutChannel' must not be null");
+		Assert.notNull(brokerChannel, "'brokerChannel' must not be null");
+
+
+		this.clientInboundChannel = clientInChannel;
+		this.clientOutboundChannel = clientOutChannel;
+		this.brokerChannel = brokerChannel;
 	}
 
 
@@ -242,6 +257,9 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	@Override
 	protected void startInternal() {
 
+		this.clientInboundChannel.subscribe(this);
+		this.brokerChannel.subscribe(this);
+
 		if (this.tcpClient == null) {
 			this.tcpClient = new ReactorNettyTcpClient<byte[]>(this.relayHost, this.relayPort, new StompCodec());
 		}
@@ -265,6 +283,10 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	@Override
 	protected void stopInternal() {
+
+		this.clientInboundChannel.unsubscribe(this);
+		this.brokerChannel.unsubscribe(this);
+
 		for (StompConnectionHandler handler : this.connectionHandlers.values()) {
 			try {
 				handler.resetTcpConnection();
@@ -416,7 +438,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 		protected void sendMessageToClient(Message<?> message) {
 			if (this.isRemoteClientSession) {
-				StompBrokerRelayMessageHandler.this.messageChannel.send(message);
+				StompBrokerRelayMessageHandler.this.clientOutboundChannel.send(message);
 			}
 		}
 

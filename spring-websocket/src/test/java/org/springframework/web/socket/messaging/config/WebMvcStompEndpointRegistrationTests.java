@@ -51,7 +51,8 @@ public class WebMvcStompEndpointRegistrationTests {
 
 	@Before
 	public void setup() {
-		this.wsHandler = new SubProtocolWebSocketHandler(new ExecutorSubscribableChannel());
+		this.wsHandler = new SubProtocolWebSocketHandler(
+				new ExecutorSubscribableChannel(), new ExecutorSubscribableChannel());
 		this.scheduler = Mockito.mock(TaskScheduler.class);
 	}
 

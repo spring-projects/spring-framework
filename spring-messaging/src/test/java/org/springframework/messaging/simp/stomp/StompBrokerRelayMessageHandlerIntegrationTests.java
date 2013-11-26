@@ -32,10 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageDeliveryException;
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.*;
 import org.springframework.messaging.simp.BrokerAvailabilityEvent;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
@@ -92,7 +89,8 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 	}
 
 	private void createAndStartRelay() throws InterruptedException {
-		this.relay = new StompBrokerRelayMessageHandler(this.responseChannel, Arrays.asList("/queue/", "/topic/"));
+		this.relay = new StompBrokerRelayMessageHandler(new StubMessageChannel(),
+				this.responseChannel, new StubMessageChannel(), Arrays.asList("/queue/", "/topic/"));
 		this.relay.setRelayPort(this.port);
 		this.relay.setApplicationEventPublisher(this.eventPublisher);
 		this.relay.setSystemHeartbeatReceiveInterval(0);

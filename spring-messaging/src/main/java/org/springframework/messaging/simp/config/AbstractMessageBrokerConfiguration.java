@@ -47,7 +47,7 @@ import java.util.List;
  * into any application component to send messages.
  * <p>
  * Sub-classes are responsible for the part of the configuration that feed messages
- * to and from the client inbound/outbound channels (e.g. STOMP over WebSokcet).
+ * to and from the client inbound/outbound channels (e.g. STOMP over WebSocket).
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -86,7 +86,7 @@ public abstract class AbstractMessageBrokerConfiguration {
 	public ThreadPoolTaskExecutor clientInboundChannelExecutor() {
 		TaskExecutorRegistration r = getClientInboundChannelRegistration().getTaskExecutorRegistration();
 		ThreadPoolTaskExecutor executor = (r != null) ? r.getTaskExecutor() : new ThreadPoolTaskExecutor();
-		executor.setThreadNamePrefix("ClientInboundChannel-");
+		executor.setThreadNamePrefix("clientInboundChannel-");
 		return executor;
 	}
 
@@ -121,7 +121,7 @@ public abstract class AbstractMessageBrokerConfiguration {
 	public ThreadPoolTaskExecutor clientOutboundChannelExecutor() {
 		TaskExecutorRegistration r = getClientOutboundChannelRegistration().getTaskExecutorRegistration();
 		ThreadPoolTaskExecutor executor = (r != null) ? r.getTaskExecutor() : new ThreadPoolTaskExecutor();
-		executor.setThreadNamePrefix("ClientOutboundChannel-");
+		executor.setThreadNamePrefix("clientOutboundChannel-");
 		return executor;
 	}
 
@@ -160,7 +160,7 @@ public abstract class AbstractMessageBrokerConfiguration {
 	public ThreadPoolTaskExecutor brokerChannelExecutor() {
 		TaskExecutorRegistration r = getBrokerRegistry().getBrokerChannelRegistration().getTaskExecutorRegistration();
 		ThreadPoolTaskExecutor executor = (r != null) ? r.getTaskExecutor() : new ThreadPoolTaskExecutor();
-		executor.setThreadNamePrefix("BrokerChannel-");
+		executor.setThreadNamePrefix("brokerChannel-");
 		return executor;
 	}
 
@@ -170,7 +170,7 @@ public abstract class AbstractMessageBrokerConfiguration {
 	 */
 	protected final MessageBrokerRegistry getBrokerRegistry() {
 		if (this.brokerRegistry == null) {
-			MessageBrokerRegistry registry = new MessageBrokerRegistry(clientOutboundChannel());
+			MessageBrokerRegistry registry = new MessageBrokerRegistry(clientInboundChannel(), clientOutboundChannel());
 			configureMessageBroker(registry);
 			this.brokerRegistry = registry;
 		}
@@ -187,45 +187,30 @@ public abstract class AbstractMessageBrokerConfiguration {
 	@Bean
 	public SimpAnnotationMethodMessageHandler simpAnnotationMethodMessageHandler() {
 
-		SimpAnnotationMethodMessageHandler handler =
-				new SimpAnnotationMethodMessageHandler(brokerMessagingTemplate(), clientOutboundChannel());
+		SimpAnnotationMethodMessageHandler handler = new SimpAnnotationMethodMessageHandler(
+				clientInboundChannel(), clientOutboundChannel(), brokerMessagingTemplate());
 
 		handler.setDestinationPrefixes(getBrokerRegistry().getApplicationDestinationPrefixes());
 		handler.setMessageConverter(brokerMessageConverter());
-		clientInboundChannel().subscribe(handler);
 		return handler;
 	}
 
 	@Bean
 	public AbstractBrokerMessageHandler simpleBrokerMessageHandler() {
-		SimpleBrokerMessageHandler handler = getBrokerRegistry().getSimpleBroker();
-		if (handler != null) {
-			clientInboundChannel().subscribe(handler);
-			brokerChannel().subscribe(handler);
-			return handler;
-		}
-		return noopBroker;
+		SimpleBrokerMessageHandler handler = getBrokerRegistry().getSimpleBroker(brokerChannel());
+		return (handler != null) ? handler : noopBroker;
 	}
 
 	@Bean
 	public AbstractBrokerMessageHandler stompBrokerRelayMessageHandler() {
-		AbstractBrokerMessageHandler handler = getBrokerRegistry().getStompBrokerRelay();
-		if (handler != null) {
-			clientInboundChannel().subscribe(handler);
-			brokerChannel().subscribe(handler);
-			return handler;
-		}
-		return noopBroker;
+		AbstractBrokerMessageHandler handler = getBrokerRegistry().getStompBrokerRelay(brokerChannel());
+		return (handler != null) ? handler : noopBroker;
 	}
 
 	@Bean
 	public UserDestinationMessageHandler userDestinationMessageHandler() {
-
 		UserDestinationMessageHandler handler = new UserDestinationMessageHandler(
-				brokerMessagingTemplate(), userDestinationResolver());
-
-		clientInboundChannel().subscribe(handler);
-		brokerChannel().subscribe(handler);
+				clientInboundChannel(), clientOutboundChannel(), brokerChannel(), userDestinationResolver());
 		return handler;
 	}
 

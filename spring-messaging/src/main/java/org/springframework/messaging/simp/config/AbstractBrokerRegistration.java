@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.handler.AbstractBrokerMessageHandler;
 import org.springframework.util.Assert;
 
@@ -33,18 +34,30 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractBrokerRegistration {
 
+	private final SubscribableChannel clientInboundChannel;
+
 	private final MessageChannel clientOutboundChannel;
 
 	private final List<String> destinationPrefixes;
 
 
-	public AbstractBrokerRegistration(MessageChannel clientOutboundChannel, String[] destinationPrefixes) {
+	public AbstractBrokerRegistration(SubscribableChannel clientInboundChannel,
+			MessageChannel clientOutboundChannel, String[] destinationPrefixes) {
+
+		Assert.notNull(clientOutboundChannel, "'clientInboundChannel' must not be null");
 		Assert.notNull(clientOutboundChannel, "'clientOutboundChannel' must not be null");
+
+		this.clientInboundChannel = clientInboundChannel;
 		this.clientOutboundChannel = clientOutboundChannel;
+
 		this.destinationPrefixes = (destinationPrefixes != null)
 				? Arrays.<String>asList(destinationPrefixes) : Collections.<String>emptyList();
 	}
 
+
+	protected SubscribableChannel getClientInboundChannel() {
+		return this.clientInboundChannel;
+	}
 
 	protected MessageChannel getClientOutboundChannel() {
 		return this.clientOutboundChannel;
@@ -54,6 +67,6 @@ public abstract class AbstractBrokerRegistration {
 		return this.destinationPrefixes;
 	}
 
-	protected abstract AbstractBrokerMessageHandler getMessageHandler();
+	protected abstract AbstractBrokerMessageHandler getMessageHandler(SubscribableChannel brokerChannel);
 
 }

@@ -46,7 +46,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.MimeTypeUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -319,6 +318,7 @@ public class MessageBrokerConfigurationTests {
 		}
 
 		@Override
+		@Bean
 		public AbstractSubscribableChannel brokerChannel() {
 			return new TestChannel();
 		}
@@ -334,7 +334,7 @@ public class MessageBrokerConfigurationTests {
 
 		@Override
 		public void configureMessageBroker(MessageBrokerRegistry registry) {
-			registry.enableStompBrokerRelay("/topic", "/queue").setAutoStartup(false);
+			registry.enableStompBrokerRelay("/topic", "/queue").setAutoStartup(true);
 		}
 	}
 

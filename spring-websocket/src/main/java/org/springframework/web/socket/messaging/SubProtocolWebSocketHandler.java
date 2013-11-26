@@ -21,10 +21,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.MessagingException;
+import org.springframework.context.SmartLifecycle;
+import org.springframework.messaging.*;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -50,11 +48,14 @@ import org.springframework.web.socket.support.SubProtocolCapable;
  *
  * @since 4.0
  */
-public class SubProtocolWebSocketHandler implements SubProtocolCapable, WebSocketHandler, MessageHandler {
+public class SubProtocolWebSocketHandler
+		implements SubProtocolCapable, WebSocketHandler, MessageHandler, SmartLifecycle {
 
 	private final Log logger = LogFactory.getLog(SubProtocolWebSocketHandler.class);
 
-	private final MessageChannel clientOutboundChannel;
+	private final MessageChannel clientInboundChannel;
+
+	private final SubscribableChannel clientOutboundChannel;
 
 	private final Map<String, SubProtocolHandler> protocolHandlers =
 			new TreeMap<String, SubProtocolHandler>(String.CASE_INSENSITIVE_ORDER);
@@ -63,9 +64,15 @@ public class SubProtocolWebSocketHandler implements SubProtocolCapable, WebSocke
 
 	private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<String, WebSocketSession>();
 
+	private Object lifecycleMonitor = new Object();
 
-	public SubProtocolWebSocketHandler(MessageChannel clientOutboundChannel) {
+	private volatile boolean running = false;
+
+
+	public SubProtocolWebSocketHandler(MessageChannel clientInboundChannel, SubscribableChannel clientOutboundChannel) {
+		Assert.notNull(clientInboundChannel, "ClientInboundChannel must not be null");
 		Assert.notNull(clientOutboundChannel, "ClientOutboundChannel must not be null");
+		this.clientInboundChannel = clientInboundChannel;
 		this.clientOutboundChannel = clientOutboundChannel;
 	}
 
@@ -81,6 +88,11 @@ public class SubProtocolWebSocketHandler implements SubProtocolCapable, WebSocke
 			addProtocolHandler(handler);
 		}
 	}
+
+	public List<SubProtocolHandler> getProtocolHandlers() {
+		return new ArrayList<SubProtocolHandler>(protocolHandlers.values());
+	}
+
 
 	/**
 	 * Register a sub-protocol handler.
@@ -101,9 +113,9 @@ public class SubProtocolWebSocketHandler implements SubProtocolCapable, WebSocke
 	}
 
 	/**
-	 * @return the configured sub-protocol handlers
+	 * Return the sub-protocols keyed by protocol name.
 	 */
-	public Map<String, SubProtocolHandler> getProtocolHandlers() {
+	public Map<String, SubProtocolHandler> getProtocolHandlerMap() {
 		return this.protocolHandlers;
 	}
 
@@ -134,9 +146,50 @@ public class SubProtocolWebSocketHandler implements SubProtocolCapable, WebSocke
 	}
 
 	@Override
+	public boolean isAutoStartup() {
+		return true;
+	}
+
+	@Override
+	public int getPhase() {
+		return Integer.MAX_VALUE;
+	}
+
+	@Override
+	public final boolean isRunning() {
+		synchronized (this.lifecycleMonitor) {
+			return this.running;
+		}
+	}
+
+	@Override
+	public final void start() {
+		synchronized (this.lifecycleMonitor) {
+			this.clientOutboundChannel.subscribe(this);
+			this.running = true;
+		}
+	}
+
+	@Override
+	public final void stop() {
+		synchronized (this.lifecycleMonitor) {
+			this.running = false;
+			this.clientOutboundChannel.unsubscribe(this);
+		}
+	}
+
+	@Override
+	public final void stop(Runnable callback) {
+		synchronized (this.lifecycleMonitor) {
+			stop();
+			callback.run();
+		}
+	}
+
+	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 		this.sessions.put(session.getId(), session);
-		findProtocolHandler(session).afterSessionStarted(session, this.clientOutboundChannel);
+		findProtocolHandler(session).afterSessionStarted(session, this.clientInboundChannel);
 	}
 
 	protected final SubProtocolHandler findProtocolHandler(WebSocketSession session) {
@@ -167,7 +220,7 @@ public class SubProtocolWebSocketHandler implements SubProtocolCapable, WebSocke
 
 	@Override
 	public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
-		findProtocolHandler(session).handleMessageFromClient(session, message, this.clientOutboundChannel);
+		findProtocolHandler(session).handleMessageFromClient(session, message, this.clientInboundChannel);
 	}
 
 	@Override
@@ -216,7 +269,7 @@ public class SubProtocolWebSocketHandler implements SubProtocolCapable, WebSocke
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
 		this.sessions.remove(session.getId());
-		findProtocolHandler(session).afterSessionEnded(session, closeStatus, this.clientOutboundChannel);
+		findProtocolHandler(session).afterSessionEnded(session, closeStatus, this.clientInboundChannel);
 	}
 
 	@Override

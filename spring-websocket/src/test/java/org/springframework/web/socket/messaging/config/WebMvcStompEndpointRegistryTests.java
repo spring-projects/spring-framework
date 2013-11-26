@@ -22,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.handler.DefaultUserSessionRegistry;
 import org.springframework.messaging.simp.handler.UserSessionRegistry;
 import org.springframework.scheduling.TaskScheduler;
@@ -49,8 +50,9 @@ public class WebMvcStompEndpointRegistryTests {
 
 	@Before
 	public void setup() {
-		MessageChannel channel = Mockito.mock(MessageChannel.class);
-		this.webSocketHandler = new SubProtocolWebSocketHandler(channel);
+		MessageChannel inChannel = Mockito.mock(MessageChannel.class);
+		SubscribableChannel outChannel = Mockito.mock(SubscribableChannel.class);
+		this.webSocketHandler = new SubProtocolWebSocketHandler(inChannel, outChannel);
 		this.userSessionRegistry = new DefaultUserSessionRegistry();
 		TaskScheduler taskScheduler = Mockito.mock(TaskScheduler.class);
 		this.registry = new WebMvcStompEndpointRegistry(webSocketHandler, userSessionRegistry, taskScheduler);
@@ -62,7 +64,7 @@ public class WebMvcStompEndpointRegistryTests {
 
 		this.registry.addEndpoint("/stomp");
 
-		Map<String, SubProtocolHandler> protocolHandlers = webSocketHandler.getProtocolHandlers();
+		Map<String, SubProtocolHandler> protocolHandlers = webSocketHandler.getProtocolHandlerMap();
 		assertEquals(3, protocolHandlers.size());
 		assertNotNull(protocolHandlers.get("v10.stomp"));
 		assertNotNull(protocolHandlers.get("v11.stomp"));

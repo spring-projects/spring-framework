@@ -17,6 +17,7 @@
 package org.springframework.messaging.simp.config;
 
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.util.Assert;
 
@@ -43,8 +44,10 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 	private boolean autoStartup = true;
 
 
-	public StompBrokerRelayRegistration(MessageChannel clientOutboundChannel, String[] destinationPrefixes) {
-		super(clientOutboundChannel, destinationPrefixes);
+	public StompBrokerRelayRegistration(SubscribableChannel clientInboundChannel,
+			MessageChannel clientOutboundChannel, String[] destinationPrefixes) {
+
+		super(clientInboundChannel, clientOutboundChannel, destinationPrefixes);
 	}
 
 
@@ -119,10 +122,10 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 	}
 
 
-	protected StompBrokerRelayMessageHandler getMessageHandler() {
+	protected StompBrokerRelayMessageHandler getMessageHandler(SubscribableChannel brokerChannel) {
 
-		StompBrokerRelayMessageHandler handler =
-				new StompBrokerRelayMessageHandler(getClientOutboundChannel(), getDestinationPrefixes());
+		StompBrokerRelayMessageHandler handler = new StompBrokerRelayMessageHandler(getClientInboundChannel(),
+				getClientOutboundChannel(), brokerChannel, getDestinationPrefixes());
 
 		handler.setRelayHost(this.relayHost);
 		handler.setRelayPort(this.relayPort);

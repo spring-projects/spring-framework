@@ -53,9 +53,7 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 
 	@Bean
 	public WebSocketHandler subProtocolWebSocketHandler() {
-		SubProtocolWebSocketHandler handler = new SubProtocolWebSocketHandler(clientInboundChannel());
-		clientOutboundChannel().subscribe(handler);
-		return handler;
+		return new SubProtocolWebSocketHandler(clientInboundChannel(), clientOutboundChannel());
 	}
 
 	/**

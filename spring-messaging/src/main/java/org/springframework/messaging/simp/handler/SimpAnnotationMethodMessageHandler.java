@@ -27,11 +27,13 @@ import java.util.Set;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.core.AbstractMessageSendingTemplate;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.support.AnnotationExceptionHandlerMethodResolver;
@@ -54,6 +56,7 @@ import org.springframework.messaging.simp.annotation.support.PrincipalMethodArgu
 import org.springframework.messaging.simp.annotation.support.SendToMethodReturnValueHandler;
 import org.springframework.messaging.simp.annotation.support.SubscriptionMethodReturnValueHandler;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.channel.AbstractSubscribableChannel;
 import org.springframework.messaging.support.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.support.converter.CompositeMessageConverter;
 import org.springframework.messaging.support.converter.MessageConverter;
@@ -74,11 +77,14 @@ import org.springframework.util.PathMatcher;
  * @author Brian Clozel
  * @since 4.0
  */
-public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHandler<SimpMessageMappingInfo> {
+public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHandler<SimpMessageMappingInfo>
+		implements SmartLifecycle {
 
-	private final SimpMessageSendingOperations brokerTemplate;
+	private final SubscribableChannel clientInboundChannel;
 
 	private final SimpMessageSendingOperations clientMessagingTemplate;
+
+	private final SimpMessageSendingOperations brokerTemplate;
 
 	private MessageConverter messageConverter;
 
@@ -86,18 +92,29 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
+	private Object lifecycleMonitor = new Object();
+
+	private volatile boolean running = false;
+
 
 	/**
-	 * @param brokerTemplate a messaging template to send application messages to the broker
+	 * Create an instance of SimpAnnotationMethodMessageHandler with the given
+	 * message channels and broker messaging template.
+	 *
+	 * @param clientInboundChannel the channel for receiving messages from clients (e.g. WebSocket clients)
 	 * @param clientOutboundChannel the channel for messages to clients (e.g. WebSocket clients)
+	 * @param brokerTemplate a messaging template to send application messages to the broker
 	 */
-	public SimpAnnotationMethodMessageHandler(SimpMessageSendingOperations brokerTemplate,
-			MessageChannel clientOutboundChannel) {
+	public SimpAnnotationMethodMessageHandler(SubscribableChannel clientInboundChannel,
+			MessageChannel clientOutboundChannel, SimpMessageSendingOperations brokerTemplate) {
 
-		Assert.notNull(brokerTemplate, "BrokerTemplate must not be null");
-		Assert.notNull(clientOutboundChannel, "ClientOutboundChannel must not be null");
-		this.brokerTemplate = brokerTemplate;
+		Assert.notNull(clientInboundChannel, "clientInboundChannel must not be null");
+		Assert.notNull(clientOutboundChannel, "clientOutboundChannel must not be null");
+		Assert.notNull(brokerTemplate, "brokerTemplate must not be null");
+
+		this.clientInboundChannel = clientInboundChannel;
 		this.clientMessagingTemplate = new SimpMessagingTemplate(clientOutboundChannel);
+		this.brokerTemplate = brokerTemplate;
 
 		Collection<MessageConverter> converters = new ArrayList<MessageConverter>();
 		converters.add(new StringMessageConverter());
@@ -159,6 +176,46 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		return this.pathMatcher;
 	}
 
+	@Override
+	public boolean isAutoStartup() {
+		return true;
+	}
+
+	@Override
+	public int getPhase() {
+		return Integer.MAX_VALUE;
+	}
+
+	@Override
+	public final boolean isRunning() {
+		synchronized (this.lifecycleMonitor) {
+			return this.running;
+		}
+	}
+
+	@Override
+	public final void start() {
+		synchronized (this.lifecycleMonitor) {
+			this.clientInboundChannel.subscribe(this);
+			this.running = true;
+		}
+	}
+
+	@Override
+	public final void stop() {
+		synchronized (this.lifecycleMonitor) {
+			this.running = false;
+			this.clientInboundChannel.unsubscribe(this);
+		}
+	}
+
+	@Override
+	public final void stop(Runnable callback) {
+		synchronized (this.lifecycleMonitor) {
+			stop();
+			callback.run();
+		}
+	}
 
 	protected List<HandlerMethodArgumentResolver> initArgumentResolvers() {
 

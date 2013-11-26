@@ -53,7 +53,8 @@ public class StompBrokerRelayMessageHandlerTests {
 
 		this.tcpClient = new StubTcpOperations();
 
-		this.brokerRelay = new StompBrokerRelayMessageHandler(new StubMessageChannel(), Arrays.asList("/topic"));
+		this.brokerRelay = new StompBrokerRelayMessageHandler(new StubMessageChannel(),
+				new StubMessageChannel(), new StubMessageChannel(), Arrays.asList("/topic"));
 		this.brokerRelay.setTcpClient(tcpClient);
 	}
 

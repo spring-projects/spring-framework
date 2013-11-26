@@ -25,6 +25,7 @@ import org.mockito.Mockito;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -53,9 +54,9 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 	@Before
 	public void setup() {
-		MessageChannel channel = Mockito.mock(MessageChannel.class);
+		SubscribableChannel channel = Mockito.mock(SubscribableChannel.class);
 		SimpMessageSendingOperations brokerTemplate = new SimpMessagingTemplate(channel);
-		this.messageHandler = new TestSimpAnnotationMethodMessageHandler(brokerTemplate, channel);
+		this.messageHandler = new TestSimpAnnotationMethodMessageHandler(brokerTemplate, channel, channel);
 		this.messageHandler.setApplicationContext(new StaticApplicationContext());
 		this.messageHandler.afterPropertiesSet();
 
@@ -145,9 +146,9 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	private static class TestSimpAnnotationMethodMessageHandler extends SimpAnnotationMethodMessageHandler {
 
 		public TestSimpAnnotationMethodMessageHandler(SimpMessageSendingOperations brokerTemplate,
-				MessageChannel clientOutboundChannel) {
+				SubscribableChannel clientInboundChannel, MessageChannel clientOutboundChannel) {
 
-			super(brokerTemplate, clientOutboundChannel);
+			super(clientInboundChannel, clientOutboundChannel, brokerTemplate);
 		}
 
 		public void registerHandler(Object handler) {

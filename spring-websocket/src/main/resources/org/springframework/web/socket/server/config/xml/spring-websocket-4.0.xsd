@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!--
+  ~ Copyright 2002-2013 the original author or authors.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<xsd:schema xmlns="http://www.springframework.org/schema/websocket"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:beans="http://www.springframework.org/schema/beans"
+            targetNamespace="http://www.springframework.org/schema/websocket"
+            elementFormDefault="qualified"
+            attributeFormDefault="unqualified">
+
+    <xsd:import namespace="http://www.springframework.org/schema/beans"
+                schemaLocation="http://www.springframework.org/schema/beans/spring-beans-4.0.xsd" />
+
+    <xsd:complexType name="mapping">
+        <xsd:attribute name="path" type="xsd:string" use="required">
+        </xsd:attribute>
+        <xsd:attribute name="handler" type="xsd:string" use="required">
+        </xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:complexType name="handshake-handler">
+        <xsd:attribute name="ref" type="xsd:string" use="required">
+        </xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:complexType name="handshake-interceptors">
+        <xsd:sequence>
+            <xsd:choice maxOccurs="unbounded">
+                <xsd:element ref="beans:bean">
+                    <xsd:annotation>
+                        <xsd:documentation><![CDATA[
+		An HandshakeInterceptor bean definition.
+										]]></xsd:documentation>
+                    </xsd:annotation>
+                </xsd:element>
+                <xsd:element ref="beans:ref">
+                    <xsd:annotation>
+                        <xsd:documentation><![CDATA[
+		A reference to a HandshakeInterceptor bean.
+										]]></xsd:documentation>
+                    </xsd:annotation>
+                </xsd:element>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="sockjs-service">
+        <xsd:sequence>
+            <xsd:element name="transport-handlers" minOccurs="0" maxOccurs="1">
+                <xsd:complexType>
+                <xsd:sequence>
+                    <xsd:choice maxOccurs="unbounded">
+                        <xsd:element ref="beans:bean">
+                            <xsd:annotation>
+                                <xsd:documentation><![CDATA[
+		An TransportHandler bean definition.
+										]]></xsd:documentation>
+                            </xsd:annotation>
+                        </xsd:element>
+                        <xsd:element ref="beans:ref">
+                            <xsd:annotation>
+                                <xsd:documentation><![CDATA[
+		A reference to a TransportHandler bean.
+										]]></xsd:documentation>
+                            </xsd:annotation>
+                        </xsd:element>
+                    </xsd:choice>
+                </xsd:sequence>
+                <xsd:attribute name="register-defaults" type="xsd:boolean" default="true">
+                </xsd:attribute>
+                </xsd:complexType>
+
+            </xsd:element>
+
+        </xsd:sequence>
+        <xsd:attribute name="name" type="xsd:string">
+        </xsd:attribute>
+        <xsd:attribute name="client-library-url" type="xsd:string">
+        </xsd:attribute>
+        <xsd:attribute name="stream-bytes-limit" type="xsd:long">
+        </xsd:attribute>
+        <xsd:attribute name="session-cookie-needed" type="xsd:boolean">
+        </xsd:attribute>
+        <xsd:attribute name="heartbeat-time" type="xsd:long">
+        </xsd:attribute>
+        <xsd:attribute name="disconnect-delay" type="xsd:long">
+        </xsd:attribute>
+        <xsd:attribute name="http-message-cache-size" type="xsd:long">
+        </xsd:attribute>
+        <xsd:attribute name="websocket-enabled" type="xsd:boolean">
+        </xsd:attribute>
+        <xsd:attribute name="task-scheduler" type="xsd:string">
+        </xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:complexType name="stomp-broker-relay">
+        <xsd:attribute name="prefix" type="xsd:string"></xsd:attribute>
+        <xsd:attribute name="relay-host" type="xsd:string"></xsd:attribute>
+        <xsd:attribute name="relay-port" type="xsd:integer"></xsd:attribute>
+        <xsd:attribute name="system-login" type="xsd:string"></xsd:attribute>
+        <xsd:attribute name="system-passcode" type="xsd:string"></xsd:attribute>
+        <xsd:attribute name="system-heartbeat-send-interval" type="xsd:long"></xsd:attribute>
+        <xsd:attribute name="system-heartbeat-receive-interval" type="xsd:long"></xsd:attribute>
+        <xsd:attribute name="auto-startup" type="xsd:boolean"></xsd:attribute>
+        <xsd:attribute name="virtual-host" type="xsd:string"></xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:complexType name="simple-broker">
+        <xsd:attribute name="prefix" type="xsd:string"></xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:complexType name="channel">
+        <xsd:sequence>
+            <xsd:element name="executor" type="channel-executor" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="interceptors" type="channel-interceptors" minOccurs="0" maxOccurs="1"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="channel-executor">
+        <xsd:attribute name="core-pool-size" type="xsd:int" use="optional">
+        </xsd:attribute>
+        <xsd:attribute name="max-pool-size" type="xsd:int" use="optional">
+        </xsd:attribute>
+        <xsd:attribute name="keep-alive-seconds" type="xsd:int" use="optional">
+        </xsd:attribute>
+        <xsd:attribute name="queue-capacity" type="xsd:int" use="optional">
+        </xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:complexType name="channel-interceptors">
+        <xsd:sequence>
+            <xsd:choice maxOccurs="unbounded">
+                <xsd:element ref="beans:bean">
+                    <xsd:annotation>
+                        <xsd:documentation><![CDATA[
+		A ChannelInterceptor bean definition.
+										]]></xsd:documentation>
+                    </xsd:annotation>
+                </xsd:element>
+                <xsd:element ref="beans:ref">
+                    <xsd:annotation>
+                        <xsd:documentation><![CDATA[
+		A reference to a ChannelInterceptor bean.
+										]]></xsd:documentation>
+                    </xsd:annotation>
+                </xsd:element>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- Elements definitions -->
+
+    <xsd:element name="handlers">
+        <xsd:annotation>
+            <xsd:documentation><![CDATA[
+
+
+                    ]]></xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="mapping" type="mapping" minOccurs="1" maxOccurs="unbounded" />
+                <xsd:element name="handshake-handler" type="handshake-handler" minOccurs="0" maxOccurs="1" />
+                <xsd:element name="handshake-interceptors" type="handshake-interceptors" minOccurs="0" maxOccurs="1"/>
+                <xsd:element name="sockjs" type="sockjs-service" minOccurs="0" maxOccurs="1"/>
+            </xsd:sequence>
+            <xsd:attribute name="order" type="xsd:integer"></xsd:attribute>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="message-broker">
+        <xsd:annotation>
+            <xsd:documentation><![CDATA[
+
+
+                    ]]></xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="stomp-endpoint" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:sequence>
+                            <xsd:element name="handshake-handler" type="handshake-handler" minOccurs="0" maxOccurs="1" />
+                            <xsd:element name="sockjs" type="sockjs-service" minOccurs="0" maxOccurs="1"/>
+                        </xsd:sequence>
+                        <xsd:attribute name="path" type="xsd:string"></xsd:attribute>
+                    </xsd:complexType>
+                </xsd:element>
+                <xsd:choice>
+                    <xsd:element name="simple-broker" type="simple-broker" />
+                    <xsd:element name="stomp-broker-relay" type="stomp-broker-relay" />
+                </xsd:choice>
+                <xsd:element name="client-inbound-channel" type="channel" minOccurs="0" maxOccurs="1" />
+                <xsd:element name="client-outbound-channel" type="channel" minOccurs="0" maxOccurs="1" />
+                <xsd:element name="broker-channel" type="channel" minOccurs="0" maxOccurs="1" />
+            </xsd:sequence>
+            <xsd:attribute name="application-destination-prefix" type="xsd:string" />
+            <xsd:attribute name="user-destination-prefix" type="xsd:string" />
+            <xsd:attribute name="order" type="xsd:integer" />
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>

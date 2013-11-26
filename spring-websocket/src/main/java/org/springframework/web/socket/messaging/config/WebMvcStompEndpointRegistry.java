@@ -55,8 +55,10 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 
 	public WebMvcStompEndpointRegistry(WebSocketHandler webSocketHandler,
 			UserSessionRegistry userSessionRegistry, TaskScheduler defaultSockJsTaskScheduler) {
+
 		Assert.notNull(webSocketHandler);
 		Assert.notNull(userSessionRegistry);
+
 		this.webSocketHandler = webSocketHandler;
 		this.subProtocolWebSocketHandler = unwrapSubProtocolWebSocketHandler(webSocketHandler);
 		this.stompHandler = new StompSubProtocolHandler();

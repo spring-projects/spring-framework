@@ -20,6 +20,7 @@ import java.util.Collection;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
@@ -34,23 +35,49 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
-	private final MessageChannel messageChannel;
+	private final SubscribableChannel clientInboundChannel;
+
+	private final MessageChannel clientOutboundChannel;
+
+	private final SubscribableChannel brokerChannel;
 
 	private SubscriptionRegistry subscriptionRegistry = new DefaultSubscriptionRegistry();
 
 
 	/**
-	 * @param messageChannel the channel to broadcast messages to
+	 * Create a SimpleBrokerMessageHandler instance with the given message channels
+	 * and destination prefixes.
+	 *
+	 * @param clientInboundChannel the channel for receiving messages from clients (e.g. WebSocket clients)
+	 * @param clientOutboundChannel the channel for sending messages to clients (e.g. WebSocket clients)
+	 * @param brokerChannel the channel for the application to send messages to the broker
 	 */
-	public SimpleBrokerMessageHandler(MessageChannel messageChannel, Collection<String> destinationPrefixes) {
+	public SimpleBrokerMessageHandler(SubscribableChannel clientInboundChannel, MessageChannel clientOutboundChannel,
+			SubscribableChannel brokerChannel, Collection<String> destinationPrefixes) {
+
 		super(destinationPrefixes);
-		Assert.notNull(messageChannel, "MessageChannel must not be null");
-		this.messageChannel = messageChannel;
+
+		Assert.notNull(clientInboundChannel, "'clientInboundChannel' must not be null");
+		Assert.notNull(clientOutboundChannel, "'clientOutboundChannel' must not be null");
+		Assert.notNull(brokerChannel, "'brokerChannel' must not be null");
+
+
+		this.clientInboundChannel = clientInboundChannel;
+		this.clientOutboundChannel = clientOutboundChannel;
+		this.brokerChannel = brokerChannel;
 	}
 
 
-	public MessageChannel getMessageChannel() {
-		return this.messageChannel;
+	public SubscribableChannel getClientInboundChannel() {
+		return this.clientInboundChannel;
+	}
+
+	public MessageChannel getClientOutboundChannel() {
+		return this.clientOutboundChannel;
+	}
+
+	public SubscribableChannel getBrokerChannel() {
+		return this.brokerChannel;
 	}
 
 	public void setSubscriptionRegistry(SubscriptionRegistry subscriptionRegistry) {
@@ -66,11 +93,15 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	@Override
 	public void startInternal() {
 		publishBrokerAvailableEvent();
+		this.clientInboundChannel.subscribe(this);
+		this.brokerChannel.subscribe(this);
 	}
 
 	@Override
 	public void stopInternal() {
 		publishBrokerUnavailableEvent();
+		this.clientInboundChannel.unsubscribe(this);
+		this.brokerChannel.unsubscribe(this);
 	}
 
 	@Override
@@ -106,7 +137,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 			replyHeaders.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, message);
 
 			Message<byte[]> connectAck = MessageBuilder.withPayload(EMPTY_PAYLOAD).setHeaders(replyHeaders).build();
-			this.messageChannel.send(connectAck);
+			this.clientOutboundChannel.send(connectAck);
 		}
 	}
 
@@ -124,7 +155,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 				Object payload = message.getPayload();
 				Message<?> clientMessage = MessageBuilder.withPayload(payload).setHeaders(headers).build();
 				try {
-					this.messageChannel.send(clientMessage);
+					this.clientOutboundChannel.send(clientMessage);
 				}
 				catch (Throwable ex) {
 					logger.error("Failed to send message to destination=" + destination +

@@ -20,10 +20,10 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.MessagingException;
+import org.springframework.context.SmartLifecycle;
+import org.springframework.messaging.*;
 import org.springframework.messaging.core.MessageSendingOperations;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -37,28 +37,46 @@ import org.springframework.util.CollectionUtils;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class UserDestinationMessageHandler implements MessageHandler {
+public class UserDestinationMessageHandler implements MessageHandler, SmartLifecycle {
 
 	private static final Log logger = LogFactory.getLog(UserDestinationMessageHandler.class);
 
 
-	private final MessageSendingOperations<String> messagingTemplate;
+	private final SubscribableChannel clientInboundChannel;
+
+	private final MessageChannel clientOutboundChannel;
+
+	private final SubscribableChannel brokerChannel;
+
+	private final MessageSendingOperations<String> brokerMessagingTemplate;
 
 	private final UserDestinationResolver userDestinationResolver;
+
+	private Object lifecycleMonitor = new Object();
+
+	private volatile boolean running = false;
 
 
 	/**
 	 * Create an instance of the handler with the given messaging template and a
 	 * user destination resolver.
-	 * @param messagingTemplate a messaging template to use for sending messages
-	 * with translated user destinations
+	 * @param clientInChannel the channel for receiving messages from clients (e.g. WebSocket clients)
+	 * @param clientOutChannel the channel for sending messages to clients (e.g. WebSocket clients)
+	 * @param brokerChannel the channel for sending messages with translated user destinations
 	 * @param userDestinationResolver the resolver to use to find queue suffixes for a user
 	 */
-	public UserDestinationMessageHandler(MessageSendingOperations<String> messagingTemplate,
-			UserDestinationResolver userDestinationResolver) {
-		Assert.notNull(messagingTemplate, "MessagingTemplate must not be null");
+	public UserDestinationMessageHandler(SubscribableChannel clientInChannel, MessageChannel clientOutChannel,
+			SubscribableChannel brokerChannel, UserDestinationResolver userDestinationResolver) {
+
+		Assert.notNull(clientInChannel, "'clientInChannel' must not be null");
+		Assert.notNull(clientOutChannel, "'clientOutChannel' must not be null");
+		Assert.notNull(brokerChannel, "'brokerChannel' must not be null");
 		Assert.notNull(userDestinationResolver, "DestinationResolver must not be null");
-		this.messagingTemplate = messagingTemplate;
+
+		this.clientInboundChannel = clientInChannel;
+		this.clientOutboundChannel = clientOutChannel;
+		this.brokerChannel = brokerChannel;
+		this.brokerMessagingTemplate = new SimpMessagingTemplate(brokerChannel);
 		this.userDestinationResolver = userDestinationResolver;
 	}
 
@@ -73,10 +91,52 @@ public class UserDestinationMessageHandler implements MessageHandler {
 	 * Return the configured messaging template for sending messages with
 	 * translated destinations.
 	 */
-	public MessageSendingOperations<String> getMessagingTemplate() {
-		return this.messagingTemplate;
+	public MessageSendingOperations<String> getBrokerMessagingTemplate() {
+		return this.brokerMessagingTemplate;
 	}
 
+	@Override
+	public boolean isAutoStartup() {
+		return true;
+	}
+
+	@Override
+	public int getPhase() {
+		return Integer.MAX_VALUE;
+	}
+
+	@Override
+	public final boolean isRunning() {
+		synchronized (this.lifecycleMonitor) {
+			return this.running;
+		}
+	}
+
+	@Override
+	public final void start() {
+		synchronized (this.lifecycleMonitor) {
+			this.clientInboundChannel.subscribe(this);
+			this.brokerChannel.subscribe(this);
+			this.running = true;
+		}
+	}
+
+	@Override
+	public final void stop() {
+		synchronized (this.lifecycleMonitor) {
+			this.running = false;
+			this.clientInboundChannel.unsubscribe(this);
+			this.brokerChannel.unsubscribe(this);
+		}
+	}
+
+	@Override
+	public final void stop(Runnable callback) {
+		synchronized (this.lifecycleMonitor) {
+			stop();
+			callback.run();
+		}
+	}
 
 	@Override
 	public void handleMessage(Message<?> message) throws MessagingException {
@@ -90,7 +150,7 @@ public class UserDestinationMessageHandler implements MessageHandler {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Sending message to resolved destination=" + targetDestination);
 			}
-			this.messagingTemplate.send(targetDestination, message);
+			this.brokerMessagingTemplate.send(targetDestination, message);
 		}
 	}
 

@@ -24,9 +24,11 @@ import java.util.List;
  *
  * @author Rossen Stoyanchev
  */
-public class StubMessageChannel implements MessageChannel {
+public class StubMessageChannel implements SubscribableChannel {
 
 	private final List<Message<byte[]>> messages = new ArrayList<>();
+
+	private final List<MessageHandler> handlers = new ArrayList<>();
 
 
 	public List<Message<byte[]>> getMessages() {
@@ -47,4 +49,15 @@ public class StubMessageChannel implements MessageChannel {
 		return true;
 	}
 
+	@Override
+	public boolean subscribe(MessageHandler handler) {
+		this.handlers.add(handler);
+		return true;
+	}
+
+	@Override
+	public boolean unsubscribe(MessageHandler handler) {
+		this.handlers.remove(handler);
+		return true;
+	}
 }

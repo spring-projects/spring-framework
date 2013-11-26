@@ -1,0 +1,40 @@
+<!--
+  ~ Copyright 2002-2013 the original author or authors.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:websocket="http://www.springframework.org/schema/websocket"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+
+    <websocket:message-broker order="2">
+        <websocket:stomp-endpoint path="/foo">
+            <websocket:handshake-handler ref="myHandler" />
+            <websocket:sockjs />
+        </websocket:stomp-endpoint>
+        <websocket:stomp-broker-relay
+                prefix="/topic,/queue"
+                relay-host="relayhost"
+                relay-port="1234"
+                system-login="login"
+                system-passcode="pass"
+                system-heartbeat-send-interval="5000"
+                system-heartbeat-receive-interval="5000"
+                virtual-host="spring.io"/>
+    </websocket:message-broker>
+
+    <bean id="myHandler" class="org.springframework.web.socket.server.config.xml.TestWebSocketHandler" />
+</beans>
