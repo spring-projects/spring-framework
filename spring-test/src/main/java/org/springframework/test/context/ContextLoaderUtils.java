@@ -31,7 +31,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.context.MetaAnnotationUtils.AnnotationDescriptor;
@@ -307,10 +306,8 @@ abstract class ContextLoaderUtils {
 			final List<ContextConfigurationAttributes> configAttributesList = new ArrayList<ContextConfigurationAttributes>();
 
 			if (contextConfigDeclaredLocally) {
-				AnnotationAttributes annAttrs = AnnotatedElementUtils.getAnnotationAttributes(rootDeclaringClass,
-					contextConfigType.getName());
-				convertAnnotationAttributesToConfigAttributesAndAddToList(annAttrs, declaringClass,
-					configAttributesList);
+				convertAnnotationAttributesToConfigAttributesAndAddToList(descriptor.getAnnotationAttributes(),
+					declaringClass, configAttributesList);
 			}
 			else if (contextHierarchyDeclaredLocally) {
 				ContextHierarchy contextHierarchy = getAnnotation(declaringClass, contextHierarchyType);
@@ -436,9 +433,8 @@ abstract class ContextLoaderUtils {
 			Class<?> declaringClass = (descriptor.getStereotype() != null) ? descriptor.getStereotypeType()
 					: rootDeclaringClass;
 
-			AnnotationAttributes annAttrs = AnnotatedElementUtils.getAnnotationAttributes(rootDeclaringClass,
-				annotationType.getName());
-			convertAnnotationAttributesToConfigAttributesAndAddToList(annAttrs, declaringClass, attributesList);
+			convertAnnotationAttributesToConfigAttributesAndAddToList(descriptor.getAnnotationAttributes(),
+				declaringClass, attributesList);
 			descriptor = findAnnotationDescriptor(rootDeclaringClass.getSuperclass(), annotationType);
 		}
 
@@ -521,8 +517,7 @@ abstract class ContextLoaderUtils {
 			Class<?> declaringClass = (descriptor.getStereotype() != null) ? descriptor.getStereotypeType()
 					: rootDeclaringClass;
 
-			AnnotationAttributes annAttrs = AnnotatedElementUtils.getAnnotationAttributes(rootDeclaringClass,
-				annotationType.getName());
+			AnnotationAttributes annAttrs = descriptor.getAnnotationAttributes();
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Retrieved @ActiveProfiles attributes [%s] for declaring class [%s].",
 					annAttrs, declaringClass.getName()));
