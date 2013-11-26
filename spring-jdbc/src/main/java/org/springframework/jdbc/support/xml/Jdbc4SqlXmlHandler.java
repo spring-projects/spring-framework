@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLXML;
-
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.w3c.dom.Document;
+
+import org.springframework.dao.DataAccessResourceFailureException;
 
 /**
  * Default implementation of the {@link SqlXmlHandler} interface.
@@ -83,12 +83,14 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 
 	@Override
 	public Source getXmlAsSource(ResultSet rs, String columnName, Class<? extends Source> sourceClass) throws SQLException {
-		return rs.getSQLXML(columnName).getSource(sourceClass != null ? sourceClass : DOMSource.class);
+		SQLXML xmlObject = rs.getSQLXML(columnName);
+		return (sourceClass != null ? xmlObject.getSource(sourceClass) : xmlObject.getSource(DOMSource.class));
 	}
 
 	@Override
 	public Source getXmlAsSource(ResultSet rs, int columnIndex, Class<? extends Source> sourceClass) throws SQLException {
-		return rs.getSQLXML(columnIndex).getSource(sourceClass != null ? sourceClass : DOMSource.class);
+		SQLXML xmlObject = rs.getSQLXML(columnIndex);
+		return (sourceClass != null ? xmlObject.getSource(sourceClass) : xmlObject.getSource(DOMSource.class));
 	}
 
 
