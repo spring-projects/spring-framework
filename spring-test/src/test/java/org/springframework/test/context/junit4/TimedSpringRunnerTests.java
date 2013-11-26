@@ -16,8 +16,6 @@
 
 package org.springframework.test.context.junit4;
 
-import static org.junit.Assert.*;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -28,8 +26,8 @@ import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.JUnit4;
 import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+
+import static org.junit.Assert.*;
 
 /**
  * Verifies proper handling of the following in conjunction with the
@@ -47,18 +45,18 @@ public class TimedSpringRunnerTests {
 
 	@Test
 	public void timedTests() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
+		// Assume.group(TestGroup.PERFORMANCE);
 		Class<TimedSpringRunnerTestCase> testClass = TimedSpringRunnerTestCase.class;
 		TrackingRunListener listener = new TrackingRunListener();
 		RunNotifier notifier = new RunNotifier();
 		notifier.addListener(listener);
 
 		new SpringJUnit4ClassRunner(testClass).run(notifier);
-		assertEquals("Verifying number of tests started for test class [" + testClass + "].", 6,
+		assertEquals("Verifying number of tests started for test class [" + testClass + "].", 7,
 			listener.getTestStartedCount());
-		assertEquals("Verifying number of failures for test class [" + testClass + "].", 4,
+		assertEquals("Verifying number of failures for test class [" + testClass + "].", 5,
 			listener.getTestFailureCount());
-		assertEquals("Verifying number of tests finished for test class [" + testClass + "].", 6,
+		assertEquals("Verifying number of tests finished for test class [" + testClass + "].", 7,
 			listener.getTestFinishedCount());
 	}
 
@@ -101,6 +99,13 @@ public class TimedSpringRunnerTests {
 			Thread.sleep(20);
 		}
 
+		// Should Fail due to timeout.
+		@Test
+		@MetaTimedWithOverride(millis = 10)
+		public void springTimeoutWithSleepAndMetaAnnotationAndOverride() throws Exception {
+			Thread.sleep(20);
+		}
+
 		// Should Fail due to duplicate configuration.
 		@Test(timeout = 200)
 		@Timed(millis = 200)
@@ -112,6 +117,13 @@ public class TimedSpringRunnerTests {
 	@Timed(millis = 10)
 	@Retention(RetentionPolicy.RUNTIME)
 	private static @interface MetaTimed {
+	}
+
+	@Timed(millis = 1000)
+	@Retention(RetentionPolicy.RUNTIME)
+	private static @interface MetaTimedWithOverride {
+
+		long millis() default 1000;
 	}
 
 }

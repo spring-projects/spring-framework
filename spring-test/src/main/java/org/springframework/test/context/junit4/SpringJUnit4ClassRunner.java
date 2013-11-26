@@ -34,6 +34,8 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.annotation.ProfileValueUtils;
 import org.springframework.test.annotation.Repeat;
@@ -411,8 +413,9 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * @return the timeout, or {@code 0} if none was specified.
 	 */
 	protected long getSpringTimeout(FrameworkMethod frameworkMethod) {
-		Timed timedAnnotation = AnnotationUtils.getAnnotation(frameworkMethod.getMethod(), Timed.class);
-		return (timedAnnotation != null && timedAnnotation.millis() > 0 ? timedAnnotation.millis() : 0);
+		AnnotationAttributes ann = AnnotatedElementUtils.getAnnotationAttributes(frameworkMethod.getMethod(),
+			Timed.class.getName());
+		return (ann != null && ann.getNumber("millis").intValue() > 0 ? ann.getNumber("millis").intValue() : 0);
 	}
 
 	/**
