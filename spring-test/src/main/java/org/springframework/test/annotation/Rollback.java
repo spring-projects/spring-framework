@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,23 +17,24 @@
 package org.springframework.test.annotation;
 
 import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+
 /**
- * Test annotation to indicate whether or not the transaction for the annotated
- * test method should be <em>rolled back</em> after the test method has
- * completed. If {@code true}, the transaction will be rolled back;
+ * Test annotation used to indicate whether or not the transaction for the
+ * annotated test method should be <em>rolled back</em> after the test method
+ * has completed. If {@code true}, the transaction will be rolled back;
  * otherwise, the transaction will be committed.
  *
  * @author Sam Brannen
  * @since 2.5
  */
 @Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Retention(RUNTIME)
+@Target({ METHOD, ANNOTATION_TYPE })
 public @interface Rollback {
 
 	/**
