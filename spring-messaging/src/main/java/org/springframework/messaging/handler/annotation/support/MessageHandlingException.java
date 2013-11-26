@@ -19,7 +19,6 @@ package org.springframework.messaging.handler.annotation.support;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
-
 /**
  * Thrown when the handling of a message results in an unrecoverable exception.
  *

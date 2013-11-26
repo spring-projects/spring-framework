@@ -20,7 +20,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.web.socket.sockjs.transport.session.SockJsServiceConfig;
 
-
 /**
  * @author Rossen Stoyanchev
  * @since 4.0

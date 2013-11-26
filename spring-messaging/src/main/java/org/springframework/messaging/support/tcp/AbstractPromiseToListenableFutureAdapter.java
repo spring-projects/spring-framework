@@ -46,8 +46,7 @@ abstract class AbstractPromiseToListenableFutureAdapter<S, T> implements Listena
 
 
 	protected AbstractPromiseToListenableFutureAdapter(Promise<S> promise) {
-
-		Assert.notNull(promise, "promise is required");
+		Assert.notNull(promise, "Promise must not be null");
 		this.promise = promise;
 
 		this.promise.onSuccess(new Consumer<S>() {

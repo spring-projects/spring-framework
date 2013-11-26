@@ -20,7 +20,6 @@ import java.lang.annotation.Target;
 
 import org.springframework.context.annotation.Import;
 
-
 /**
  * Add this annotation to an {@code @Configuration} class to configure
  * processing WebSocket requests:

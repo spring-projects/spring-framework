@@ -85,7 +85,7 @@ public class AnnotatedEndpointConnectionManager extends ConnectionManagerSupport
 	 * By default {@link SimpleAsyncTaskExecutor} is used.
 	 */
 	public void setTaskExecutor(TaskExecutor taskExecutor) {
-		Assert.notNull(taskExecutor, "taskExecutor is required");
+		Assert.notNull(taskExecutor, "TaskExecutor must not be null");
 		this.taskExecutor = taskExecutor;
 	}
 

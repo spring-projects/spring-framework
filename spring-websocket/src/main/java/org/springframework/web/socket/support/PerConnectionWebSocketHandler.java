@@ -34,16 +34,14 @@ import org.springframework.web.socket.WebSocketSession;
  * A {@link WebSocketHandler} that initializes and destroys a {@link WebSocketHandler}
  * instance for each WebSocket connection and delegates all other methods to it.
  *
- * <p>
- * Essentially create an instance of this class once, providing the type of
+ * <p>Essentially create an instance of this class once, providing the type of
  * {@link WebSocketHandler} class to create for each connection, and then pass it to any
  * API method that expects a {@link WebSocketHandler}.
  *
- * <p>
- * If initializing the target {@link WebSocketHandler} type requires a Spring BeanFctory,
- * then the {@link #setBeanFactory(BeanFactory)} property accordingly. Simply declaring
- * this class as a Spring bean will do that. Otherwise, {@link WebSocketHandler} instances
- * of the target type will be created using the default constructor.
+ * <p>If initializing the target {@link WebSocketHandler} type requires a Spring
+ * BeanFctory, then the {@link #setBeanFactory(BeanFactory)} property accordingly. Simply
+ * declaring this class as a Spring bean will do that. Otherwise, {@link WebSocketHandler}
+ * instances of the target type will be created using the default constructor.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

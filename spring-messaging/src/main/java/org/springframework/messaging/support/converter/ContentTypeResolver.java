@@ -19,7 +19,6 @@ package org.springframework.messaging.support.converter;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.MimeType;
 
-
 /**
  * Resolve the content type for a message given a set of {@link MessageHeaders}.
  *

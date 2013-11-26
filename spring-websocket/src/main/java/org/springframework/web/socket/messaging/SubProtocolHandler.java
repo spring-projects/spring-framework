@@ -24,7 +24,6 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-
 /**
  * A contract for handling WebSocket messages as part of a higher level protocol, referred
  * to as "sub-protocol" in the WebSocket RFC specification. Handles both
@@ -49,7 +48,6 @@ public interface SubProtocolHandler {
 
 	/**
 	 * Handle the given {@link WebSocketMessage} received from a client.
-	 *
 	 * @param session the client session
 	 * @param message the client message
 	 * @param outputChannel an output channel to send messages to
@@ -60,7 +58,6 @@ public interface SubProtocolHandler {
 	/**
 	 * Handle the given {@link Message} to the client associated with the given WebSocket
 	 * session.
-	 *
 	 * @param session the client session
 	 * @param message the client message
 	 */
@@ -68,14 +65,12 @@ public interface SubProtocolHandler {
 
 	/**
 	 * Resolve the session id from the given message or return {@code null}.
-	 *
 	 * @param message the message to resolve the session id from
 	 */
 	String resolveSessionId(Message<?> message);
 
 	/**
 	 * Invoked after a {@link WebSocketSession} has started.
-	 *
 	 * @param session the client session
 	 * @param outputChannel a channel
 	 */
@@ -83,7 +78,6 @@ public interface SubProtocolHandler {
 
 	/**
 	 * Invoked after a {@link WebSocketSession} has ended.
-	 *
 	 * @param session the client session
 	 * @param closeStatus the reason why the session was closed
 	 * @param outputChannel a channel

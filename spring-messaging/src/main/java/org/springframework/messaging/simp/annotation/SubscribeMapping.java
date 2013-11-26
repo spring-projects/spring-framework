@@ -22,20 +22,19 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 /**
  * Annotation for mapping subscription messages onto specific handler methods based
  * on the destination of a subscription. Supported with STOMP over WebSocket only
  * (e.g. STOMP SUBSCRIBE frame).
- * <p>
- * This is a method-level annotations that can be combined with a type-level
+ *
+ * <p>This is a method-level annotations that can be combined with a type-level
  * {@link org.springframework.messaging.handler.annotation.MessageMapping @MessageMapping}
- * <p>
- * Supports the same method arguments as
+ *
+ * <p>Supports the same method arguments as
  * {@link org.springframework.messaging.handler.annotation.MessageMapping}, however
  * subscription messages typically do not have a body.
- * <p>
- * The return value also follows the same rules as for
+ *
+ * <p>The return value also follows the same rules as for
  * {@link org.springframework.messaging.handler.annotation.MessageMapping} except if
  * the method is not annotated with
  * {@link org.springframework.messaging.handler.annotation.SendTo} or {@link SendToUser},
@@ -52,8 +51,7 @@ public @interface SubscribeMapping {
 
 	/**
 	 * Destination-based mapping expressed by this annotation.
-	 * <p>
-	 * For STOMP over WebSocket messages: this is the destination of the STOMP message
+	 * <p>For STOMP over WebSocket messages: this is the destination of the STOMP message
 	 * (e.g. "/positions"). Ant-style path patterns (e.g. "/price.stock.*") are supported
 	 * and so are path template variables (e.g. "/price.stock.{ticker}"").
 	 */

@@ -30,7 +30,6 @@ import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
 
-
 /**
  * A {@link WebSocketHandlerRegistry} that maps {@link WebSocketHandler}s to URLs for use
  * in a Servlet container.

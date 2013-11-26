@@ -31,7 +31,6 @@ import org.springframework.web.socket.sockjs.SockJsService;
  */
 public interface TransportHandler {
 
-
 	/**
 	 * @return the transport type supported by this handler
 	 */

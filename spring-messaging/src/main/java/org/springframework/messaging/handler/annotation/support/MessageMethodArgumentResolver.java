@@ -20,7 +20,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.method.HandlerMethodArgumentResolver;
 
-
 /**
  * A {@link HandlerMethodArgumentResolver} for {@link Message} parameters.
  *

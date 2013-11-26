@@ -38,7 +38,6 @@ public interface SockJsServiceConfig {
 	 * closed. After that client will open a new request. Setting this value to
 	 * one effectively disables streaming and will make streaming transports to
 	 * behave like polling transports.
-	 *
 	 * <p>The default value is 128K (i.e. 128 * 1024).
 	 */
 	int getStreamBytesLimit();
@@ -47,7 +46,6 @@ public interface SockJsServiceConfig {
 	 * The amount of time in milliseconds when the server has not sent any
 	 * messages and after which the server should send a heartbeat frame to the
 	 * client in order to keep the connection from breaking.
-	 *
 	 * <p>The default value is 25,000 (25 seconds).
 	 */
 	long getHeartbeatTime();
@@ -67,12 +65,10 @@ public interface SockJsServiceConfig {
 	 * The number of server-to-client messages that a session can cache while waiting for
 	 * the next HTTP polling request from the client. All HTTP transports use this
 	 * property since even streaming transports recycle HTTP requests periodically.
-	 * <p>
-	 * The amount of time between HTTP requests should be relatively brief and will not
+	 * <p>The amount of time between HTTP requests should be relatively brief and will not
 	 * exceed the allows disconnect delay (see
 	 * {@link AbstractSockJsService#setDisconnectDelay(long)}, 5 seconds by default.
-	 * <p>
-	 * The default size is 100.
+	 * <p>The default size is 100.
 	 */
 	int getHttpMessageCacheSize();
 

@@ -39,7 +39,7 @@ public abstract class AbstractBrokerRegistration {
 
 
 	public AbstractBrokerRegistration(MessageChannel clientOutboundChannel, String[] destinationPrefixes) {
-		Assert.notNull(clientOutboundChannel, "'clientOutboundChannel' is required");
+		Assert.notNull(clientOutboundChannel, "'clientOutboundChannel' must not be null");
 		this.clientOutboundChannel = clientOutboundChannel;
 		this.destinationPrefixes = (destinationPrefixes != null)
 				? Arrays.<String>asList(destinationPrefixes) : Collections.<String>emptyList();

@@ -16,7 +16,6 @@
 
 package org.springframework.messaging.support.tcp;
 
-
 /**
  * A simple strategy for making reconnect attempts at a fixed interval.
  *
@@ -34,6 +33,7 @@ public class FixedIntervalReconnectStrategy implements ReconnectStrategy {
 	public FixedIntervalReconnectStrategy(long interval) {
 		this.interval = interval;
 	}
+
 
 	@Override
 	public Long getTimeToNextAttempt(int attemptCount) {

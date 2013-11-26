@@ -18,7 +18,6 @@ package org.springframework.messaging.support.tcp;
 
 import reactor.core.composable.Promise;
 
-
 /**
  * A Promise-to-ListenableFutureAdapter where the source and the target from the Promise and
  * the ListenableFuture respectively are of the same type.
@@ -29,13 +28,14 @@ import reactor.core.composable.Promise;
 class PassThroughPromiseToListenableFutureAdapter<T> extends AbstractPromiseToListenableFutureAdapter<T, T> {
 
 
-    public PassThroughPromiseToListenableFutureAdapter(Promise<T> promise) {
-        super(promise);
-    }
+	public PassThroughPromiseToListenableFutureAdapter(Promise<T> promise) {
+		super(promise);
+	}
 
-    @Override
-    protected T adapt(T result) {
-        return result;
-    }
+
+	@Override
+	protected T adapt(T result) {
+		return result;
+	}
 
 }

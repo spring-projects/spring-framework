@@ -26,7 +26,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
-
 /**
  * A convenience wrapper class for invoking a list of {@link ChannelInterceptor}s.
  *

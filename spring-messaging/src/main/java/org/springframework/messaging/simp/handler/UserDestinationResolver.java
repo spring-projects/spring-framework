@@ -20,13 +20,12 @@ import org.springframework.messaging.Message;
 
 import java.util.Set;
 
-
 /**
  * A strategy for resolving unique, user destinations per session. User destinations
  * provide a user with the ability to subscribe to a queue unique to their session
  * as well others with the ability to send messages to those queues.
- * <p>
- * For example when a user attempts to subscribe to "/user/queue/position-updates",
+ *
+ * <p>For example when a user attempts to subscribe to "/user/queue/position-updates",
  * the destination may be resolved to "/queue/position-updates-useri9oqdfzo" yielding a
  * unique queue name that does not collide with any other user attempting to do the same.
  * Subsequently when messages are sent to "/user/{username}/queue/position-updates",
@@ -43,11 +42,9 @@ public interface UserDestinationResolver {
 	 * Resolve the destination of the message to one or more user/session-specific target
 	 * destinations. If the user has multiple sessions, the method may return more than
 	 * one target destinations.
-	 *
 	 * @param message the message to resolve
-	 *
 	 * @return the resolved unique user destinations or an empty Set if the message
-	 * 		destination is not recognized as a user destination
+	 * destination is not recognized as a user destination
 	 */
 	Set<String> resolveDestination(Message<?> message);
 

@@ -416,12 +416,10 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Set whether to throw a NoHandlerFoundException when no Handler was found for this request.
 	 * This exception can then be caught with a HandlerExceptionResolver or an
 	 * {@code @ExceptionHandler} controller method.
-	 *
 	 * <p>Note that if
 	 * {@link org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler}
 	 * is used, then requests will always be forwarded to the default servlet and
 	 * a NoHandlerFoundException would never be thrown in that case.
-	 *
 	 * <p>Default is "false", meaning the DispatcherServlet sends a NOT_FOUND error
 	 * through the Servlet response.
 	 * @since 4.0

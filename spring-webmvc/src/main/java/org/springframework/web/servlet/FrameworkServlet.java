@@ -1056,10 +1056,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * Spring Beans inside an existing {@link WebApplicationContext} rather than
 	 * {@link #findWebApplicationContext() finding} a
 	 * {@link org.springframework.web.context.ContextLoaderListener bootstrapped} context.
-	 *
 	 * <p>Primarily added to support use in embedded servlet containers, this method is not
 	 * intended to be called directly.
-	 *
 	 * @since 4.0
 	 */
 	@Override

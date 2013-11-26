@@ -22,7 +22,6 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Header;
 
-
 /**
  * Resolves method parameters annotated with {@link Header @Header}.
  *

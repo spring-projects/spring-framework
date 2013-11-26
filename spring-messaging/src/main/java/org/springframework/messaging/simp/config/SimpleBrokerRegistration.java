@@ -19,7 +19,6 @@ package org.springframework.messaging.simp.config;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.handler.SimpleBrokerMessageHandler;
 
-
 /**
  * Registration class for configuring a {@link SimpleBrokerMessageHandler}.
  *
@@ -32,6 +31,7 @@ public class SimpleBrokerRegistration extends AbstractBrokerRegistration {
 	public SimpleBrokerRegistration(MessageChannel clientOutboundChannel, String[] destinationPrefixes) {
 		super(clientOutboundChannel, destinationPrefixes);
 	}
+
 
 	@Override
 	protected SimpleBrokerMessageHandler getMessageHandler() {

@@ -64,8 +64,8 @@ public class HandlerMethod {
 	 * Create an instance from a bean instance and a method.
 	 */
 	public HandlerMethod(Object bean, Method method) {
-		Assert.notNull(bean, "bean is required");
-		Assert.notNull(method, "method is required");
+		Assert.notNull(bean, "bean must not be null");
+		Assert.notNull(method, "method must not be null");
 		this.bean = bean;
 		this.beanFactory = null;
 		this.method = method;
@@ -78,8 +78,8 @@ public class HandlerMethod {
 	 * @throws NoSuchMethodException when the method cannot be found
 	 */
 	public HandlerMethod(Object bean, String methodName, Class<?>... parameterTypes) throws NoSuchMethodException {
-		Assert.notNull(bean, "bean is required");
-		Assert.notNull(methodName, "method is required");
+		Assert.notNull(bean, "bean must not be null");
+		Assert.notNull(methodName, "method must not be null");
 		this.bean = bean;
 		this.beanFactory = null;
 		this.method = bean.getClass().getMethod(methodName, parameterTypes);
@@ -93,9 +93,9 @@ public class HandlerMethod {
 	 * re-create the {@code HandlerMethod} with an initialized the bean.
 	 */
 	public HandlerMethod(String beanName, BeanFactory beanFactory, Method method) {
-		Assert.hasText(beanName, "beanName is required");
-		Assert.notNull(beanFactory, "beanFactory is required");
-		Assert.notNull(method, "method is required");
+		Assert.hasText(beanName, "beanName must not be null");
+		Assert.notNull(beanFactory, "beanFactory must not be null");
+		Assert.notNull(method, "method must not be null");
 		Assert.isTrue(beanFactory.containsBean(beanName),
 				"Bean factory [" + beanFactory + "] does not contain bean [" + beanName + "]");
 		this.bean = beanName;
@@ -109,7 +109,7 @@ public class HandlerMethod {
 	 * Copy constructor for use in sub-classes.
 	 */
 	protected HandlerMethod(HandlerMethod handlerMethod) {
-		Assert.notNull(handlerMethod, "HandlerMethod is required");
+		Assert.notNull(handlerMethod, "HandlerMethod must not be null");
 		this.bean = handlerMethod.bean;
 		this.beanFactory = handlerMethod.beanFactory;
 		this.method = handlerMethod.method;
@@ -121,8 +121,8 @@ public class HandlerMethod {
 	 * Re-create HandlerMethod with the resolved handler.
 	 */
 	private HandlerMethod(HandlerMethod handlerMethod, Object handler) {
-		Assert.notNull(handlerMethod, "handlerMethod is required");
-		Assert.notNull(handler, "handler is required");
+		Assert.notNull(handlerMethod, "handlerMethod must not be null");
+		Assert.notNull(handler, "handler must not be null");
 		this.bean = handler;
 		this.beanFactory = handlerMethod.beanFactory;
 		this.method = handlerMethod.method;

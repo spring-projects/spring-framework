@@ -27,7 +27,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Utility class used to collect all annotation values including those declared on meta-annotations.
+ * Utility class used to collect all annotation values including those declared on
+ * meta-annotations.
  *
  * @author Phillip Webb
  * @author Juergen Hoeller

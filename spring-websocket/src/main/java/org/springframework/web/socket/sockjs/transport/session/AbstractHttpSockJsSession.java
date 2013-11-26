@@ -128,7 +128,6 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	 * Unlike WebSocket where sub-protocol negotiation is part of the
 	 * initial handshake, in HTTP transports the same negotiation must
 	 * be emulated and the selected protocol set through this setter.
-	 *
 	 * @param protocol the sub-protocol to set
 	 */
 	public void setAcceptedProtocol(String protocol) {

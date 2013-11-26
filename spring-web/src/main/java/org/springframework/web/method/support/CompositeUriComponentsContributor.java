@@ -48,7 +48,6 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 	 * by the same class, the most convenient option is to obtain the configured
 	 * {@code HandlerMethodArgumentResolvers} in {@code RequestMappingHandlerAdapter} and
 	 * provide that to this constructor.
-	 *
 	 * @param contributors a collection of {@link UriComponentsContributor}
 	 *        or {@link HandlerMethodArgumentResolver}s.
 	 */
@@ -62,15 +61,13 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 	 * by the same class, the most convenient option is to obtain the configured
 	 * {@code HandlerMethodArgumentResolvers} in the {@code RequestMappingHandlerAdapter}
 	 * and provide that to this constructor.
-	 * <p>
-	 * If the {@link ConversionService} argument is {@code null},
+	 * <p>If the {@link ConversionService} argument is {@code null},
 	 * {@link org.springframework.format.support.DefaultFormattingConversionService}
 	 * will be used by default.
-	 *
 	 * @param contributors a collection of {@link UriComponentsContributor}
-	 *        or {@link HandlerMethodArgumentResolver}s.
+	 * or {@link HandlerMethodArgumentResolver}s.
 	 * @param conversionService a ConversionService to use when method argument values
-	 *        need to be formatted as Strings before being added to the URI
+	 * need to be formatted as Strings before being added to the URI
 	 */
 	public CompositeUriComponentsContributor(Collection<?> contributors, ConversionService conversionService) {
 

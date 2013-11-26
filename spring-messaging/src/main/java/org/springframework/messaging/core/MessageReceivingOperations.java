@@ -18,7 +18,6 @@ package org.springframework.messaging.core;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
-
 /**
  * A set of operations receiving messages from a destination.
  *

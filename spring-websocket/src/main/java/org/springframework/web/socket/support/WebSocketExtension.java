@@ -48,8 +48,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Brian Clozel
  * @since 4.0
- * @see <a href="https://tools.ietf.org/html/rfc6455#section-9">
- *     WebSocket Protocol Extensions, RFC 6455 - Section 9</a>
+ * @see <a href="https://tools.ietf.org/html/rfc6455#section-9">WebSocket Protocol Extensions, RFC 6455 - Section 9</a>
  */
 public class WebSocketExtension {
 
@@ -60,7 +59,6 @@ public class WebSocketExtension {
 
 	/**
 	 * Create a WebSocketExtension with the given name.
-	 *
 	 * @param name the name of the extension
 	 */
 	public WebSocketExtension(String name) {
@@ -69,7 +67,6 @@ public class WebSocketExtension {
 
 	/**
 	 * Create a WebSocketExtension with the given name and parameters.
-	 *
 	 * @param name the name of the extension
 	 * @param parameters the parameters
 	 */

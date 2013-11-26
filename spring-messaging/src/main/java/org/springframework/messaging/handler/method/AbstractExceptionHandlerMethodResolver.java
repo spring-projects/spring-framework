@@ -46,7 +46,7 @@ public abstract class AbstractExceptionHandlerMethodResolver {
 	 * Protected constructor accepting exception-to-method mappings.
 	 */
 	protected AbstractExceptionHandlerMethodResolver(Map<Class<? extends Throwable>, Method> mappedMethods) {
-		Assert.notNull(mappedMethods, "'mappedMethods' is required");
+		Assert.notNull(mappedMethods, "Mapped Methods must not be null");
 		this.mappedMethods.putAll(mappedMethods);
 	}
 

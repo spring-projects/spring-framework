@@ -57,7 +57,6 @@ import java.util.*;
  *
  * @since 4.0
  */
-
 public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 
 	/**
@@ -90,9 +89,7 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	 * resulting builder contains the current request information up to and including
 	 * the Servlet mapping plus any type-level request mapping. If the controller
 	 * contains multiple mappings, the first one is used.
-	 *
 	 * @param controllerType the controller to create a URI for
-	 *
 	 * @return a UriComponentsBuilder instance
 	 */
 	public static UriComponentsBuilder fromController(Class<?> controllerType) {
@@ -106,18 +103,14 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	 * method name and the number of argument values. If that results in a clash
 	 * (i.e. overloaded methods with the same number of parameters), use
 	 * {@link #fromMethod(java.lang.reflect.Method, Object...)} instead.
-	 * <p>
-	 * The argument values are used to prepare the URI for example expanding
+	 * <p>The argument values are used to prepare the URI for example expanding
 	 * path variables, or adding query parameters. Any other arguments not
 	 * relevant to the URI can be provided as {@literal null} and will be ignored.
-	 * <p>
-	 * Additional (custom) argument types can be supported through an implementation
+	 * <p>Additional (custom) argument types can be supported through an implementation
 	 * of {@link org.springframework.web.method.support.UriComponentsContributor}.
-	 *
 	 * @param controllerType the target controller type
 	 * @param methodName the target method name
 	 * @param argumentValues argument values matching to method parameters
-	 *
 	 * @return a UriComponentsBuilder instance
 	 */
 	public static UriComponentsBuilder fromMethodName(Class<?> controllerType,
@@ -147,13 +140,10 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	 * prepare the URI for example expanding path variables, or adding request
 	 * parameters. Any other arguments not relevant to the URL can be provided as
 	 * {@literal null} and will be ignored.
-	 * <p>
-	 * Additional (custom) argument types can be supported through an implementation
+	 * <p>Additional (custom) argument types can be supported through an implementation
 	 * of {@link org.springframework.web.method.support.UriComponentsContributor}.
-	 *
 	 * @param method the target controller method
 	 * @param argumentValues argument values matching to method parameters
-	 *
 	 * @return a UriComponentsBuilder instance
 	 */
 	public static UriComponentsBuilder fromMethod(Method method, Object... argumentValues) {
@@ -172,8 +162,7 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	/**
 	 * Create a {@link UriComponents} by invoking a method on a "mock" controller, similar
 	 * to how test frameworks provide mock objects and record method invocations.
-	 * <p>
-	 * For example given this controller:
+	 * <p>For example given this controller:
 	 *
 	 * <pre class="code">
 	 * &#064;RequestMapping("/people/{id}/addresses")
@@ -207,13 +196,10 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	 *
 	 * The above  supports {@code @PathVariable} and {@code @RequestParam} method parameters.
 	 * Any other arguments can be provided as {@literal null} and will be ignored.
-	 * <p>
-	 * Additional (custom) argument types can be supported through an implementation
+	 * <p>Additional (custom) argument types can be supported through an implementation
 	 * of {@link org.springframework.web.method.support.UriComponentsContributor}.
-	 *
 	 * @param methodInvocationInfo either the value returned from a "mock" controller
-	 * 		invocation or the "mock" controller itself after an invocation
-	 *
+	 * invocation or the "mock" controller itself after an invocation
 	 * @return a UriComponents instance
 	 */
 	public static UriComponentsBuilder fromMethodCall(Object methodInvocationInfo) {
@@ -320,15 +306,12 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	 * on the controller is invoked, the supplied argument values are remembered
 	 * and the result can then be used to prepare a URL to the method via
 	 * {@link #fromMethodCall(Object)}.
-	 * <p>
-	 * This is a shorthand version of {@link #controller(Class)} intended for
+	 * <p>This is a shorthand version of {@link #controller(Class)} intended for
 	 * inline use as follows:
-	 *
 	 * <pre>
 	 * UriComponentsBuilder builder = MvcUriComponentsBuilder.fromMethodCall(
 	 * 		on(FooController.class).getFoo(1)).build();
 	 * </pre>
-	 *
 	 * @param controllerType the target controller
 	 */
 	public static <T> T on(Class<T> controllerType) {
@@ -340,10 +323,8 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	 * on the controller is invoked, the supplied argument values are remembered
 	 * and the result can then be used to prepare a URL to the method via
 	 * {@link #fromMethodCall(Object)}.
-	 * <p>
-	 * This is a longer version of {@link #on(Class)} for use with void controller
+	 * <p>This is a longer version of {@link #on(Class)} for use with void controller
 	 * methods as well as for creating multiple links in succession.
-	 *
 	 * <pre>
 	 * FooController fooController = controller(FooController.class);
 	 *
@@ -353,7 +334,6 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	 * fooController.saveFoo(2, null);
 	 * builder = MvcUriComponentsBuilder.fromMethodCall(fooController);
 	 * </pre>
-	 *
 	 * @param controllerType the target controller
 	 */
 	public static <T> T controller(Class<T> controllerType) {

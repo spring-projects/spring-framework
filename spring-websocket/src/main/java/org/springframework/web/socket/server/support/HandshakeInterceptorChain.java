@@ -27,7 +27,6 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
-
 /**
  * A helper class that assists with invoking a list of handshake interceptors.
  *

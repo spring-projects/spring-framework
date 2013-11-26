@@ -30,7 +30,6 @@ import org.springframework.util.MimeTypeUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * Provides essential configuration for handling messages with simple messaging
  * protocols such as STOMP.
@@ -278,12 +277,15 @@ public abstract class AbstractMessageBrokerConfiguration {
 		@Override
 		protected void startInternal() {
 		}
+
 		@Override
 		protected void stopInternal() {
 		}
+
 		@Override
 		protected void handleMessageInternal(Message<?> message) {
 		}
+
 	};
 
 }

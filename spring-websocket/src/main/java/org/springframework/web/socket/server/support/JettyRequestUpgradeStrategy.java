@@ -80,7 +80,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 	 * {@link WebSocketServerFactory#getPolicy()}.
 	 */
 	public JettyRequestUpgradeStrategy(WebSocketServerFactory factory) {
-		Assert.notNull(factory, "WebSocketServerFactory is required");
+		Assert.notNull(factory, "WebSocketServerFactory must not be null");
 		this.factory = factory;
 		this.factory.setCreator(new WebSocketCreator() {
 

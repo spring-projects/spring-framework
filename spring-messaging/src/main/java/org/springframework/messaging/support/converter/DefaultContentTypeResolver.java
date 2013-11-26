@@ -19,7 +19,6 @@ package org.springframework.messaging.support.converter;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.MimeType;
 
-
 /**
  * A default {@link ContentTypeResolver} that checks the
  * {@link MessageHeaders#CONTENT_TYPE} header or falls back to a default, if a default is

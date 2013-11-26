@@ -18,7 +18,6 @@ package org.springframework.web.socket.adapter;
 
 import org.springframework.web.socket.WebSocketSession;
 
-
 /**
  * A {@link WebSocketSession} that exposes the underlying, native WebSocketSession
  * through a getter.
@@ -27,7 +26,6 @@ import org.springframework.web.socket.WebSocketSession;
  * @since 4.0
  */
 public interface NativeWebSocketSession extends WebSocketSession {
-
 
 	/**
 	 * Return the underlying native WebSocketSession, if available.

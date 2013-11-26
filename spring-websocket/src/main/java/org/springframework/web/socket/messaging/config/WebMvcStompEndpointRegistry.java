@@ -30,7 +30,6 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import org.springframework.web.socket.support.WebSocketHandlerDecorator;
 
-
 /**
  * A registry for STOMP over WebSocket endpoints that maps the endpoints with a
  * {@link SimpleUrlHandlerMapping} for use in Spring MVC.
@@ -56,10 +55,8 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 
 	public WebMvcStompEndpointRegistry(WebSocketHandler webSocketHandler,
 			UserSessionRegistry userSessionRegistry, TaskScheduler defaultSockJsTaskScheduler) {
-
 		Assert.notNull(webSocketHandler);
 		Assert.notNull(userSessionRegistry);
-
 		this.webSocketHandler = webSocketHandler;
 		this.subProtocolWebSocketHandler = unwrapSubProtocolWebSocketHandler(webSocketHandler);
 		this.stompHandler = new StompSubProtocolHandler();
@@ -68,34 +65,27 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 	}
 
 	private static SubProtocolWebSocketHandler unwrapSubProtocolWebSocketHandler(WebSocketHandler webSocketHandler) {
-
 		WebSocketHandler actual = (webSocketHandler instanceof WebSocketHandlerDecorator) ?
 				((WebSocketHandlerDecorator) webSocketHandler).getLastHandler() : webSocketHandler;
-
 		Assert.isInstanceOf(SubProtocolWebSocketHandler.class, actual,
 						"No SubProtocolWebSocketHandler found: " + webSocketHandler);
-
 		return (SubProtocolWebSocketHandler) actual;
 	}
 
 
 	@Override
 	public StompWebSocketEndpointRegistration addEndpoint(String... paths) {
-
 		this.subProtocolWebSocketHandler.addProtocolHandler(this.stompHandler);
-
 		WebMvcStompWebSocketEndpointRegistration registration = new WebMvcStompWebSocketEndpointRegistration(
 				paths, this.webSocketHandler, this.sockJsScheduler);
 		this.registrations.add(registration);
-
 		return registration;
 	}
 
 	/**
 	 * Set the order for the resulting {@link SimpleUrlHandlerMapping} relative to
 	 * other handler mappings configured in Spring MVC.
-	 * <p>
-	 * The default value is 1.
+	 * <p>The default value is 1.
 	 */
 	public void setOrder(int order) {
 		this.order = order;

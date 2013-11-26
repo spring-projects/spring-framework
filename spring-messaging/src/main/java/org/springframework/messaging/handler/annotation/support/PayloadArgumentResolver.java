@@ -25,13 +25,11 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
-
 /**
  * A resolver to extract and convert the payload of a message using a
  * {@link MessageConverter}.
  *
- * <p>
- * This {@link HandlerMethodArgumentResolver} should be ordered last as it supports all
+ * <p>This {@link HandlerMethodArgumentResolver} should be ordered last as it supports all
  * types and does not require the {@link Payload} annotation.
  *
  * @author Rossen Stoyanchev
@@ -43,7 +41,7 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 
 
 	public PayloadArgumentResolver(MessageConverter messageConverter) {
-		Assert.notNull(messageConverter, "converter is required");
+		Assert.notNull(messageConverter, "converter must not be null");
 		this.converter = messageConverter;
 	}
 

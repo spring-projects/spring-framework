@@ -30,7 +30,6 @@ import org.springframework.web.socket.support.WebSocketHttpHeaders;
  *
  * @author Rossen Stoyanchev
  * @since 4.0
- *
  * @see WebSocketConnectionManager
  */
 public interface WebSocketClient {

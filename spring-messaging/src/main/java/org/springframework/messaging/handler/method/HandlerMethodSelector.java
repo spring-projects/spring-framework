@@ -39,7 +39,6 @@ public abstract class HandlerMethodSelector {
 	/**
 	 * Selects handler methods for the given handler type. Callers of this method define handler methods
 	 * of interest through the {@link MethodFilter} parameter.
-	 *
 	 * @param handlerType the handler type to search handler methods on
 	 * @param handlerMethodFilter a {@link MethodFilter} to help recognize handler methods of interest
 	 * @return the selected methods, or an empty set

@@ -21,7 +21,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 
-
 /**
  * Configuration support for WebSocket request handling.
  *
@@ -29,7 +28,6 @@ import org.springframework.web.servlet.handler.AbstractHandlerMapping;
  * @since 4.0
  */
 public class WebSocketConfigurationSupport {
-
 
 	@Bean
 	public HandlerMapping webSocketHandlerMapping() {

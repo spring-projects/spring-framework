@@ -64,7 +64,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.PathMatcher;
 
-
 /**
  * A handler for messages delegating to {@link org.springframework.messaging.simp.annotation.SubscribeMapping @SubscribeMapping} and
  * {@link MessageMapping @MessageMapping} annotated methods.
@@ -95,8 +94,8 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	public SimpAnnotationMethodMessageHandler(SimpMessageSendingOperations brokerTemplate,
 			MessageChannel clientOutboundChannel) {
 
-		Assert.notNull(brokerTemplate, "brokerTemplate is required");
-		Assert.notNull(clientOutboundChannel, "clientOutboundChannel is required");
+		Assert.notNull(brokerTemplate, "BrokerTemplate must not be null");
+		Assert.notNull(clientOutboundChannel, "ClientOutboundChannel must not be null");
 		this.brokerTemplate = brokerTemplate;
 		this.clientMessagingTemplate = new SimpMessagingTemplate(clientOutboundChannel);
 
@@ -111,7 +110,6 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	 * from serialize form with a specific MIME type to an Object matching the target
 	 * method parameter. The converter is also used when sending message to the message
 	 * broker.
-	 *
 	 * @see CompositeMessageConverter
 	 */
 	public void setMessageConverter(MessageConverter converter) {
@@ -131,8 +129,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	/**
 	 * Configure a {@link ConversionService} to use when resolving method arguments, for
 	 * example message header values.
-	 * <p>
-	 * By default an instance of {@link DefaultFormattingConversionService} is used.
+	 * <p>By default an instance of {@link DefaultFormattingConversionService} is used.
 	 */
 	public void setConversionService(ConversionService conversionService) {
 		this.conversionService = conversionService;
@@ -148,8 +145,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	/**
 	 * Set the PathMatcher implementation to use for matching destinations
 	 * against configured destination patterns.
-	 * <p>
-	 * By default AntPathMatcher is used
+	 * <p>By default AntPathMatcher is used
 	 */
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		Assert.notNull(pathMatcher, "PathMatcher must not be null");

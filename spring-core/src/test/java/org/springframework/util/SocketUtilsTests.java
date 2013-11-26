@@ -27,7 +27,6 @@ import static org.springframework.util.SocketUtils.*;
  * Unit tests for {@link SocketUtils}.
  *
  * @author Sam Brannen
- * @since 4.0
  */
 public class SocketUtilsTests {
 

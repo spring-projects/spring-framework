@@ -24,7 +24,6 @@ import java.lang.annotation.Target;
 
 import org.springframework.messaging.Message;
 
-
 /**
  * Annotation for mapping a {@link Message} onto message-handling methods by matching
  * to the message destination. This annotation can also be used on the type-level in
@@ -32,8 +31,8 @@ import org.springframework.messaging.Message;
  * annotations including method-level
  * {@link org.springframework.messaging.simp.annotation.SubscribeMapping @SubscribeMapping}
  * annotations.
- * <p>
- * Handler methods which are annotated with this annotation are allowed to have
+ *
+ * <p>Handler methods which are annotated with this annotation are allowed to have
  * flexible signatures. They may have arguments of the following types, in arbitrary
  * order:
  * <ul>
@@ -62,12 +61,12 @@ import org.springframework.messaging.Message;
  * 	WebSocket session on which the message was received. Regular HTTP-based
  * 	authentication (e.g. Spring Security based) can be used to secure the
  * 	HTTP handshake that initiates WebSocket sessions.</li>
- * </ul>
- * <p>
- * By default the return value is wrapped as a message and sent to the destination
+ * </ul
+ * >
+ * <p>By default the return value is wrapped as a message and sent to the destination
  * specified with an {@link SendTo} method-level annotation.
- * <p>
- * STOMP over WebSocket: an {@link SendTo} annotation is not strictly required --
+ *
+ * <p>STOMP over WebSocket: an {@link SendTo} annotation is not strictly required --
  * by default the message will be sent to the same destination as the incoming
  * message but with an additional prefix ("/topic" by default). It is also possible
  * to use {@link org.springframework.messaging.simp.annotation.SendToUser} to
@@ -87,8 +86,7 @@ public @interface MessageMapping {
 
 	/**
 	 * Destination-based mapping expressed by this annotation.
-	 * <p>
-	 * For STOMP over WebSocket messages: this is the destination of the STOMP message
+	 * <p>For STOMP over WebSocket messages: this is the destination of the STOMP message
 	 * (e.g. "/positions"). Ant-style path patterns (e.g. "/price.stock.*") are supported
 	 * and so are path template variables (e.g. "/price.stock.{ticker}"").
 	 */

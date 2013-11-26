@@ -33,8 +33,8 @@ public class ListenableFutureTask<T> extends FutureTask<T>
 			new ListenableFutureCallbackRegistry<T>();
 
 	/**
-	 * Creates a new {@code ListenableFutureTask} that will, upon running, execute the given
-	 * {@link Callable}.
+	 * Creates a new {@code ListenableFutureTask} that will, upon running, execute the
+	 * given {@link Callable}.
 	 * @param callable the callable task
 	 */
 	public ListenableFutureTask(Callable<T> callable) {

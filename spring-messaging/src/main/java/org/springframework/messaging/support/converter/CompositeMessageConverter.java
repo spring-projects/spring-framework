@@ -24,7 +24,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
 
-
 /**
  * A {@link MessageConverter} that delegates to a list of other converters to invoke until
  * one of them returns a non-null value.
@@ -52,8 +51,8 @@ public class CompositeMessageConverter implements MessageConverter {
 	 * the given {@link ContentTypeResolver}.
 	 */
 	public CompositeMessageConverter(Collection<MessageConverter> converters, ContentTypeResolver resolver) {
-		Assert.notEmpty(converters, "converters is required");
-		Assert.notNull(resolver, "contentTypeResolver is required");
+		Assert.notEmpty(converters, "Converters must not be null");
+		Assert.notNull(resolver, "ContentTypeResolver must not be null");
 		this.converters = new ArrayList<MessageConverter>(converters);
 		this.contentTypeResolver = resolver;
 		applyContentTypeResolver(converters, resolver);

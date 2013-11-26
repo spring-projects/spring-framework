@@ -98,7 +98,6 @@ public abstract class MockMvcResultMatchers {
 	/**
 	 * Asserts the request was forwarded to the given URL.
 	 * This methods accepts {@link org.springframework.util.AntPathMatcher} expressions.
-	 *
 	 * @param urlPattern an AntPath expression to match against
 	 * @see org.springframework.util.AntPathMatcher
 	 * @since 4.0
@@ -133,7 +132,6 @@ public abstract class MockMvcResultMatchers {
 	/**
 	 * Asserts the request was redirected to the given URL.
 	 * This methods accepts {@link org.springframework.util.AntPathMatcher} expressions.
-	 *
 	 * @param expectedUrl an AntPath expression to match against
 	 * @see org.springframework.util.AntPathMatcher
 	 * @since 4.0

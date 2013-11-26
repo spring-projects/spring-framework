@@ -22,7 +22,6 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.core.MessagePostProcessor;
 import org.springframework.messaging.core.MessageSendingOperations;
 
-
 /**
  * A specialization of {@link MessageSendingOperations} with methods for use with
  * the Spring Framework support for simple messaging protocols (like STOMP).
@@ -34,19 +33,24 @@ public interface SimpMessageSendingOperations extends MessageSendingOperations<S
 
 	/**
 	 * Send a message to a specific user.
-	 *
 	 * @param user the user that should receive the message.
 	 * @param destination the destination to send the message to.
 	 * @param payload the payload to send
 	 */
 	void convertAndSendToUser(String user, String destination, Object payload) throws MessagingException;
 
+	/**
+	 * Send a message to a specific user.
+	 * @param user the user that should receive the message.
+	 * @param destination the destination to send the message to.
+	 * @param payload the payload to send
+	 * @param headers the message headers
+	 */
 	void convertAndSendToUser(String user, String destination, Object payload, Map<String, Object> headers)
 			throws MessagingException;
 
 	/**
 	 * Send a message to a specific user.
-	 *
 	 * @param user the user that should receive the message.
 	 * @param destination the destination to send the message to.
 	 * @param payload the payload to send
@@ -55,6 +59,14 @@ public interface SimpMessageSendingOperations extends MessageSendingOperations<S
 	void convertAndSendToUser(String user, String destination, Object payload,
 			MessagePostProcessor postProcessor) throws MessagingException;
 
+	/**
+	 * Send a message to a specific user.
+	 * @param user the user that should receive the message.
+	 * @param destination the destination to send the message to.
+	 * @param payload the payload to send
+	 * @param headers the message headers
+	 * @param postProcessor a postProcessor to post-process or modify the created message
+	 */
 	void convertAndSendToUser(String user, String destination, Object payload, Map<String, Object> headers,
 			MessagePostProcessor postProcessor) throws MessagingException;
 

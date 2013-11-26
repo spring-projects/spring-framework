@@ -59,7 +59,6 @@ public final class DestinationPatternsMessageCondition
 	/**
 	 * Additional constructor with flags for using suffix pattern (.*) and
 	 * trailing slash matches.
-	 *
 	 * @param patterns the URL patterns to use; if 0, the condition will match to every request.
 	 * @param pathMatcher for path matching with patterns
 	 */
@@ -140,12 +139,10 @@ public final class DestinationPatternsMessageCondition
 	 * Check if any of the patterns match the given Message destination and return an instance
 	 * that is guaranteed to contain matching patterns, sorted via
 	 * {@link org.springframework.util.PathMatcher#getPatternComparator(String)}.
-	 *
 	 * @param message the message to match to
-	 *
 	 * @return the same instance if the condition contains no patterns;
-	 * 		or a new condition with sorted matching patterns;
-	 * 		or {@code null} either if a destination can not be extracted or there is no match
+	 * or a new condition with sorted matching patterns;
+	 * or {@code null} either if a destination can not be extracted or there is no match
 	 */
 	@Override
 	public DestinationPatternsMessageCondition getMatchingCondition(Message<?> message) {
@@ -180,7 +177,6 @@ public final class DestinationPatternsMessageCondition
 	 * {@link org.springframework.util.PathMatcher#getPatternComparator(String)}.
 	 * If all compared patterns match equally, but one instance has more patterns,
 	 * it is considered a closer match.
-	 *
 	 * <p>It is assumed that both instances have been obtained via
 	 * {@link #getMatchingCondition(Message)} to ensure they
 	 * contain only patterns that match the request and are sorted with

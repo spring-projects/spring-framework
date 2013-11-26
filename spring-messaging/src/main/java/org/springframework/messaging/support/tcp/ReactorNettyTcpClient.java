@@ -85,7 +85,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	public ListenableFuture<Void> connect(final TcpConnectionHandler<P> connectionHandler,
 			final ReconnectStrategy reconnectStrategy) {
 
-		Assert.notNull(reconnectStrategy, "'reconnectStrategy' is required");
+		Assert.notNull(reconnectStrategy, "ReconnectStrategy must not be null");
 
 		Stream<TcpConnection<Message<P>, Message<P>>> stream =
 				this.tcpClient.open(new Reconnect() {

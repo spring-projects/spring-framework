@@ -45,8 +45,7 @@ import org.springframework.web.socket.support.WebSocketHttpHeaders;
  * negotiation process (e.g. origin validation, sub-protocol negotiation,
  * extensions negotiation, etc).
  *
- * <p>
- * If the negotiation succeeds, the actual upgrade is delegated to a server-specific
+ * <p>If the negotiation succeeds, the actual upgrade is delegated to a server-specific
  * {@link RequestUpgradeStrategy}, which will update the response as necessary and
  * initialize the WebSocket. Currently supported servers are Tomcat 7 and 8, Jetty 9, and
  * Glassfish 4.
@@ -76,11 +75,9 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 	private final List<String> supportedProtocols = new ArrayList<String>();
 
 
-
 	/**
 	 * Default constructor that auto-detects and instantiates a
 	 * {@link RequestUpgradeStrategy} suitable for the runtime container.
-	 *
 	 * @throws IllegalStateException if no {@link RequestUpgradeStrategy} can be found.
 	 */
 	public DefaultHandshakeHandler() {
@@ -123,13 +120,13 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 		this.requestUpgradeStrategy = upgradeStrategy;
 	}
 
+
 	/**
 	 * Use this property to configure the list of supported sub-protocols.
 	 * The first configured sub-protocol that matches a client-requested sub-protocol
 	 * is accepted. If there are no matches the response will not contain a
 	 * {@literal Sec-WebSocket-Protocol} header.
-	 * <p>
-	 * Note that if the WebSocketHandler passed in at runtime is an instance of
+	 * <p>Note that if the WebSocketHandler passed in at runtime is an instance of
 	 * {@link SubProtocolCapable} then there is not need to explicitly configure
 	 * this property. That is certainly the case with the built-in STOMP over
 	 * WebSocket support. Therefore this property should be configured explicitly
@@ -263,11 +260,9 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 	 * WebSocketHandler is a {@link SubProtocolCapable} and then also checks if any
 	 * sub-protocols have been explicitly configured with
 	 * {@link #setSupportedProtocols(String...)}.
-	 *
 	 * @param requestedProtocols the requested sub-protocols
 	 * @param webSocketHandler the WebSocketHandler that will be used
 	 * @return the selected protocols or {@code null}
-	 *
 	 * @see #determineHandlerSupportedProtocols(org.springframework.web.socket.WebSocketHandler)
 	 */
 	protected String selectProtocol(List<String> requestedProtocols, WebSocketHandler webSocketHandler) {
@@ -293,7 +288,6 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 	/**
 	 * Determine the sub-protocols supported by the given WebSocketHandler by checking
 	 * whether it is an instance of {@link SubProtocolCapable}.
-	 *
 	 * @param handler the handler to check
 	 * @return a list of supported protocols or an empty list
 	 */
@@ -313,15 +307,12 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 
 	/**
 	 * Filter the list of requested WebSocket extensions.
-	 * <p>
-	 * By default all request extensions are returned. The WebSocket server will further
+	 * <p>By default all request extensions are returned. The WebSocket server will further
 	 * compare the requested extensions against the list of supported extensions and
 	 * return only the ones that are both requested and supported.
-	 *
 	 * @param request the current request
 	 * @param requested the list of extensions requested by the client
 	 * @param supported the list of extensions supported by the server
-	 *
 	 * @return the selected extensions or an empty list
 	 */
 	protected List<WebSocketExtension> filterRequestedExtensions(ServerHttpRequest request,

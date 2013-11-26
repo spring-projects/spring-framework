@@ -19,7 +19,6 @@ package org.springframework.messaging.support.converter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
-
 /**
  * A converter to turn the payload of a {@link Message} from serialized form to a typed
  * Object and vice versa. The {@link MessageHeaders#CONTENT_TYPE} message header may be
@@ -35,15 +34,12 @@ public interface MessageConverter {
 	 * Convert the payload of a {@link Message} from serialized form to a typed Object of
 	 * the specified target class. The {@link MessageHeaders#CONTENT_TYPE} header should
 	 * indicate the MIME type to convert from.
-	 * <p>
-	 * If the converter does not support the specified media type or cannot perform the
+	 * <p>If the converter does not support the specified media type or cannot perform the
 	 * conversion, it should return {@code null}.
-	 *
 	 * @param message the input message
 	 * @param targetClass the target class for the conversion
-	 *
 	 * @return the result of the conversion or {@code null} if the converter cannot
-	 *         perform the conversion
+	 * perform the conversion
 	 */
 	Object fromMessage(Message<?> message, Class<?> targetClass);
 
@@ -53,15 +49,12 @@ public interface MessageConverter {
 	 * may contain a {@link MessageHeaders#CONTENT_TYPE} header to specify the target
 	 * media type for the conversion and it may contain additional headers to be added to
 	 * the message.
-	 * <p>
-	 * If the converter does not support the specified media type or cannot perform the
+	 * <p>If the converter does not support the specified media type or cannot perform the
 	 * conversion, it should return {@code null}.
-	 *
 	 * @param payload the Object to convert
 	 * @param header optional headers for the message, may be {@code null}
-	 *
 	 * @return the new message or {@code null} if the converter does not support the
-	 *         Object type or the target media type
+	 * Object type or the target media type
 	 */
 	Message<?> toMessage(Object payload, MessageHeaders header);
 

@@ -24,15 +24,14 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.Assert;
 
-
 /**
  * A base class for working with message headers in simple messaging protocols that
  * support basic messaging patterns. Provides uniform access to specific values common
  * across protocols such as a destination, message type (e.g. publish, subscribe, etc),
  * session id, and others.
- * <p>
- * Use one of the static factory method in this class, then call getters and setters, and
- * at the end if necessary call {@link #toMap()} to obtain the updated headers.
+ *
+ * <p>Use one of the static factory method in this class, then call getters and setters,
+ * and at the end if necessary call {@link #toMap()} to obtain the updated headers.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -58,7 +57,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	 */
 	protected SimpMessageHeaderAccessor(SimpMessageType messageType, Map<String, List<String>> externalSourceHeaders) {
 		super(externalSourceHeaders);
-		Assert.notNull(messageType, "messageType is required");
+		Assert.notNull(messageType, "MessageType must not be null");
 		setHeader(MESSAGE_TYPE_HEADER, messageType);
 	}
 
@@ -104,7 +103,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	}
 
 	public void setDestination(String destination) {
-		Assert.notNull(destination, "destination is required");
+		Assert.notNull(destination, "Destination must not be null");
 		setHeader(DESTINATION_HEADER, destination);
 	}
 

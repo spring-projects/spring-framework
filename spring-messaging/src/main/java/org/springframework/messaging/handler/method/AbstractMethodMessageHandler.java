@@ -41,8 +41,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Also supports discovering and invoking exception handling methods to process
  * exceptions raised during message handling.
  *
- * @param <T> the type of the Object that contains information mapping
- *           a {@link HandlerMethod} to incoming messages
+ * @param <T> the type of the Object that contains information mapping a
+ * {@link HandlerMethod} to incoming messages
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -80,8 +80,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * matching part is removed from destination before performing a lookup for a matching
 	 * message handling method. Prefixes without a trailing slash will have one appended
 	 * automatically.
-	 * <p>
-	 * By default the list of prefixes is empty in which case all destinations match.
+	 * <p>By default the list of prefixes is empty in which case all destinations match.
 	 */
 	public void setDestinationPrefixes(Collection<String> prefixes) {
 		this.destinationPrefixes.clear();
@@ -103,7 +102,6 @@ public abstract class AbstractMethodMessageHandler<T>
 	/**
 	 * Sets the list of custom {@code HandlerMethodArgumentResolver}s that will be used
 	 * after resolvers for supported argument type.
-	 *
 	 * @param customArgumentResolvers the list of resolvers; never {@code null}.
 	 */
 	public void setCustomArgumentResolvers(List<HandlerMethodArgumentResolver> customArgumentResolvers) {
@@ -118,7 +116,6 @@ public abstract class AbstractMethodMessageHandler<T>
 	/**
 	 * Set the list of custom {@code HandlerMethodReturnValueHandler}s that will be used
 	 * after return value handlers for known types.
-	 *
 	 * @param customReturnValueHandlers the list of custom return value handlers, never {@code null}.
 	 */
 	public void setCustomReturnValueHandlers(List<HandlerMethodReturnValueHandler> customReturnValueHandlers) {
@@ -202,8 +199,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	/**
 	 * Return the list of argument resolvers to use. Invoked only if the resolvers
 	 * have not already been set via {@link #setArgumentResolvers(java.util.List)}.
-	 * <p>
-	 * Sub-classes should also take into account custom argument types configured via
+	 * <p>Sub-classes should also take into account custom argument types configured via
 	 * {@link #setCustomArgumentResolvers(java.util.List)}.
 	 */
 	protected abstract List<? extends HandlerMethodArgumentResolver> initArgumentResolvers();
@@ -211,9 +207,8 @@ public abstract class AbstractMethodMessageHandler<T>
 	/**
 	 * Return the list of return value handlers to use. Invoked only if the return
 	 * value handlers have not already been set via {@link #setReturnValueHandlers(java.util.List)}.
-	 * <p>
-	 * Sub-classes should also take into account custom return value types configured via
-	 * {@link #setCustomReturnValueHandlers(java.util.List)}.
+	 * <p>Sub-classes should also take into account custom return value types configured
+	 * via {@link #setCustomReturnValueHandlers(java.util.List)}.
 	 */
 	protected abstract List<? extends HandlerMethodReturnValueHandler> initReturnValueHandlers();
 
@@ -226,7 +221,6 @@ public abstract class AbstractMethodMessageHandler<T>
 	/**
 	 * Detect if the given handler has any methods that can handle messages and if
 	 * so register it with the extracted mapping information.
-	 *
 	 * @param handler the handler to check, either an instance of a Spring bean name
 	 */
 	protected final void detectHandlerMethods(Object handler) {
@@ -251,10 +245,8 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	/**
 	 * Provide the mapping for a handler method.
-	 *
 	 * @param method the method to provide a mapping for
 	 * @param handlerType the handler type, possibly a sub-type of the method's declaring class
-	 *
 	 * @return the mapping, or {@code null} if the method is not mapped
 	 */
 	protected abstract T getMappingForMethod(Method method, Class<?> handlerType);
@@ -262,11 +254,9 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	/**
 	 * Register a handler method and its unique mapping.
-	 *
 	 * @param handler the bean name of the handler or the handler instance
 	 * @param method the method to register
 	 * @param mapping the mapping conditions associated with the handler method
-	 *
 	 * @throws IllegalStateException if another method was already registered
 	 * under the same mapping
 	 */
@@ -345,9 +335,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	/**
 	 * Find if the given destination matches any of the configured allowed destination
 	 * prefixes and if a match is found return the destination with the prefix removed.
-	 * <p>
-	 * If no destination prefixes are configured, the destination is returned as is.
-	 *
+	 * <p>If no destination prefixes are configured, the destination is returned as is.
 	 * @return the destination to use to find matching message handling methods
 	 * 		or {@code null} if the destination does not match
 	 */
@@ -422,10 +410,8 @@ public abstract class AbstractMethodMessageHandler<T>
 	/**
 	 * Check if a mapping matches the current message and return a possibly
 	 * new mapping with conditions relevant to the current request.
-	 *
 	 * @param mapping the mapping to get a match for
 	 * @param message the message being handled
-	 *
 	 * @return the match or {@code null} if there is no match
 	 */
 	protected abstract T getMatchingMapping(T mapping, Message<?> message);
@@ -433,7 +419,6 @@ public abstract class AbstractMethodMessageHandler<T>
 	/**
 	 * Return a comparator for sorting matching mappings.
 	 * The returned comparator should sort 'better' matches higher.
-	 *
 	 * @param message the current Message
 	 * @return the comparator, never {@code null}
 	 */

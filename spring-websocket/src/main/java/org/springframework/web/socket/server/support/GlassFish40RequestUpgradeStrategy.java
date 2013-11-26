@@ -28,7 +28,6 @@ import org.glassfish.tyrus.websockets.WebSocketApplication;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.socket.support.WebSocketExtension;
 
-
 /**
  * Extension of the {@link AbstractGlassFishRequestUpgradeStrategy} that provides support
  * for only GlassFish 4.0.

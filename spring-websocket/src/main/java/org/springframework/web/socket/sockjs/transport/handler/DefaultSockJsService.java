@@ -56,7 +56,6 @@ import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.session.AbstractSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.SockJsServiceConfig;
 
-
 /**
  * A default implementation of {@link SockJsService} adding support for transport handling
  * and session management. See {@link AbstractSockJsService} base class for important
@@ -87,11 +86,10 @@ public class DefaultSockJsService extends AbstractSockJsService {
 
 	/**
 	 * Create an instance with default {@link TransportHandler transport handler} types.
-	 *
 	 * @param taskScheduler a task scheduler for heart-beat messages and removing
-	 *        timed-out sessions; the provided TaskScheduler should be declared as a
-	 *        Spring bean to ensure it is initialized at start up and shut down when the
-	 *        application stops.
+	 * timed-out sessions; the provided TaskScheduler should be declared as a
+	 * Spring bean to ensure it is initialized at start up and shut down when the
+	 * application stops.
 	 */
 	public DefaultSockJsService(TaskScheduler taskScheduler) {
 		this(taskScheduler, null);
@@ -100,15 +98,14 @@ public class DefaultSockJsService extends AbstractSockJsService {
 	/**
 	 * Create an instance by overriding or replacing completely the default
 	 * {@link TransportHandler transport handler} types.
-	 *
 	 * @param taskScheduler a task scheduler for heart-beat messages and removing
-	 *        timed-out sessions; the provided TaskScheduler should be declared as a
-	 *        Spring bean to ensure it is initialized at start up and shut down when the
-	 *        application stops.
+	 * timed-out sessions; the provided TaskScheduler should be declared as a
+	 * Spring bean to ensure it is initialized at start up and shut down when the
+	 * application stops.
 	 * @param transportHandlers the transport handlers to use (replaces the default ones);
-	 *        can be {@code null} if you don't want to install the default ones.
+	 * can be {@code null} if you don't want to install the default ones.
 	 * @param transportHandlerOverrides zero or more overrides to the default transport
-	 *        handler types.
+	 * handler types.
 	 */
 	public DefaultSockJsService(TaskScheduler taskScheduler, Collection<TransportHandler> transportHandlers,
 			TransportHandler... transportHandlerOverrides) {

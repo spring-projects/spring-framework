@@ -50,17 +50,14 @@ public class UserDestinationMessageHandler implements MessageHandler {
 	/**
 	 * Create an instance of the handler with the given messaging template and a
 	 * user destination resolver.
-	 *
 	 * @param messagingTemplate a messaging template to use for sending messages
-	 *		with translated user destinations
+	 * with translated user destinations
 	 * @param userDestinationResolver the resolver to use to find queue suffixes for a user
 	 */
 	public UserDestinationMessageHandler(MessageSendingOperations<String> messagingTemplate,
 			UserDestinationResolver userDestinationResolver) {
-
-		Assert.notNull(messagingTemplate, "messagingTemplate is required");
-		Assert.notNull(userDestinationResolver, "destinationResolver is required");
-
+		Assert.notNull(messagingTemplate, "MessagingTemplate must not be null");
+		Assert.notNull(userDestinationResolver, "DestinationResolver must not be null");
 		this.messagingTemplate = messagingTemplate;
 		this.userDestinationResolver = userDestinationResolver;
 	}

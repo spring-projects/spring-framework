@@ -90,8 +90,7 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 	 * Set the interval, in milliseconds, at which the "system" relay session will,
 	 * in the absence of any other data being sent, send a heartbeat to the STOMP broker.
 	 * A value of zero will prevent heartbeats from being sent to the broker.
-	 * <p>
-	 * The default value is 10000.
+	 * <p>The default value is 10000.
 	 */
 	public StompBrokerRelayRegistration setSystemHeartbeatSendInterval(long systemHeartbeatSendInterval) {
 		this.systemHeartbeatSendInterval = systemHeartbeatSendInterval;
@@ -103,8 +102,7 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 	 * expects, in the absence of any other data, to receive a heartbeat from the STOMP
 	 * broker. A value of zero will configure the relay session to expect not to receive
 	 * heartbeats from the broker.
-	 * <p>
-	 * The default value is 10000.
+	 * <p>The default value is 10000.
 	 */
 	public StompBrokerRelayRegistration setSystemHeartbeatReceiveInterval(long heartbeatReceiveInterval) {
 		this.systemHeartbeatReceiveInterval = heartbeatReceiveInterval;
@@ -114,8 +112,7 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 	/**
 	 * Configure whether the {@link StompBrokerRelayMessageHandler} should start
 	 * automatically when the Spring ApplicationContext is refreshed.
-	 * <p>
-	 * The default setting is {@code true}.
+	 * <p>The default setting is {@code true}.
 	 */
 	public StompBrokerRelayRegistration setAutoStartup(boolean autoStartup) {
 		this.autoStartup = autoStartup;

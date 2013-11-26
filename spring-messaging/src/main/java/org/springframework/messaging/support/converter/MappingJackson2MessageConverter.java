@@ -33,7 +33,6 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-
 /**
  * A Jackson 2 based {@link MessageConverter} implementation.
  *

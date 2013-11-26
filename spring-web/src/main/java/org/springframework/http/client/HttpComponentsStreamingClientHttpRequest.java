@@ -39,11 +39,11 @@ import org.springframework.http.StreamingHttpOutputMessage;
  * {@link ClientHttpRequest} implementation that uses Apache HttpComponents HttpClient to
  * execute requests.
  *
- * <p>Created via the {@link org.springframework.http.client.HttpComponentsClientHttpRequestFactory}.
+ * <p>Created via the
+ * {@link org.springframework.http.client.HttpComponentsClientHttpRequestFactory}.
  *
  * @author Arjen Poutsma
- * @see org.springframework.http.client.HttpComponentsClientHttpRequestFactory#createRequest(java.net.URI,
- *      org.springframework.http.HttpMethod)
+ * @see org.springframework.http.client.HttpComponentsClientHttpRequestFactory#createRequest(java.net.URI, org.springframework.http.HttpMethod)
  * @since 4.0
  */
 final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpRequest

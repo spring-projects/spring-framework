@@ -63,8 +63,8 @@ public class GenericTypeAwareAutowireCandidateResolver implements AutowireCandid
 	}
 
 	/**
-	 * Match the given dependency type with its generic type information
-	 * against the given candidate bean definition.
+	 * Match the given dependency type with its generic type information against the given
+	 * candidate bean definition.
 	 */
 	protected boolean checkGenericTypeMatch(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
 		ResolvableType dependencyType = descriptor.getResolvableType();
@@ -124,8 +124,8 @@ public class GenericTypeAwareAutowireCandidateResolver implements AutowireCandid
 
 
 	/**
-	 * This implementation always returns {@code null},
-	 * leaving suggested value support up to subclasses.
+	 * This implementation always returns {@code null}, leaving suggested value support up
+	 * to subclasses.
 	 */
 	@Override
 	public Object getSuggestedValue(DependencyDescriptor descriptor) {
@@ -133,8 +133,8 @@ public class GenericTypeAwareAutowireCandidateResolver implements AutowireCandid
 	}
 
 	/**
-	 * This implementation always returns {@code null},
-	 * leaving lazy resolution support up to subclasses.
+	 * This implementation always returns {@code null}, leaving lazy resolution support up
+	 * to subclasses.
 	 */
 	@Override
 	public Object getLazyResolutionProxyIfNecessary(DependencyDescriptor descriptor, String beanName) {

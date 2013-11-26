@@ -34,7 +34,6 @@ import org.springframework.core.NestedRuntimeException;
 @SuppressWarnings("serial")
 public class HandshakeFailureException extends NestedRuntimeException {
 
-
 	/**
 	 * Constructor with message and root cause.
 	 */

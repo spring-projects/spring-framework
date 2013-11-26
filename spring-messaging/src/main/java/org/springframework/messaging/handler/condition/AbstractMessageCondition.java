@@ -28,7 +28,6 @@ import java.util.Iterator;
  */
 public abstract class AbstractMessageCondition<T extends AbstractMessageCondition<T>> implements MessageCondition<T> {
 
-
 	/**
 	 * @return the collection of objects the message condition is composed of
 	 * 		(e.g. destination patterns), never {@code null}

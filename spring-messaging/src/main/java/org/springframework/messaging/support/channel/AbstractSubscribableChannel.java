@@ -19,7 +19,6 @@ package org.springframework.messaging.support.channel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 
-
 /**
  * Abstract base class for {@link SubscribableChannel} implementations.
  *

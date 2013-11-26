@@ -30,9 +30,7 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.simp.BrokerAvailabilityEvent;
 import org.springframework.util.CollectionUtils;
 
-
 /**
- *
  * @author Rossen Stoyanchev
  * @since 4.0
  */

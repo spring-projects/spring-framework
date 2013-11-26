@@ -26,7 +26,6 @@ import org.springframework.messaging.core.MessagePostProcessor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 
-
 /**
  * A specialization of {@link AbstractMessageSendingTemplate} that adds String-based
  * destinations as a message header.
@@ -44,8 +43,12 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	private volatile long sendTimeout = -1;
 
 
+	/**
+	 * Create a new {@link SimpMessagingTemplate} instance.
+	 * @param messageChannel the message channel (must not be {@code null})
+	 */
 	public SimpMessagingTemplate(MessageChannel messageChannel) {
-		Assert.notNull(messageChannel, "messageChannel is required");
+		Assert.notNull(messageChannel, "MessageChannel must not be null");
 		this.messageChannel = messageChannel;
 	}
 
@@ -56,7 +59,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	 * @see org.springframework.messaging.simp.handler.UserDestinationMessageHandler
 	 */
 	public void setUserDestinationPrefix(String prefix) {
-		Assert.notNull(prefix, "userDestinationPrefix is required");
+		Assert.notNull(prefix, "UserDestinationPrefix must not be null");
 		this.userDestinationPrefix = prefix;
 	}
 
@@ -101,7 +104,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 	@Override
 	protected void doSend(String destination, Message<?> message) {
-		Assert.notNull(destination, "destination is required");
+		Assert.notNull(destination, "Destination must not be null");
 
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 		headers.setDestination(destination);
@@ -146,8 +149,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	@Override
 	public void convertAndSendToUser(String user, String destination, Object payload, Map<String, Object> headers,
 			MessagePostProcessor postProcessor) throws MessagingException {
-
-		Assert.notNull(user, "user is required");
+		Assert.notNull(user, "User must not be null");
 		super.convertAndSend(this.userDestinationPrefix + user + destination, payload, headers, postProcessor);
 	}
 

@@ -30,7 +30,6 @@ import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler
 import org.springframework.web.socket.sockjs.SockJsHttpRequestHandler;
 import org.springframework.web.socket.sockjs.SockJsService;
 
-
 /**
  * A helper class for configuring {@link WebSocketHandler} request handling
  * including SockJS fallback options.

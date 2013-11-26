@@ -84,7 +84,7 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Sma
 	 * By default {@link SimpleAsyncTaskExecutor} is used.
 	 */
 	public void setTaskExecutor(AsyncListenableTaskExecutor taskExecutor) {
-		Assert.notNull(taskExecutor, "taskExecutor is required");
+		Assert.notNull(taskExecutor, "TaskExecutor must not be null");
 		this.taskExecutor = taskExecutor;
 	}
 
@@ -200,7 +200,7 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Sma
 
 	/**
 	 * @return the user to make available through {@link WebSocketSession#getPrincipal()};
-	 *         by default this method returns {@code null}
+	 * by default this method returns {@code null}
 	 */
 	protected Principal getUser() {
 		return null;

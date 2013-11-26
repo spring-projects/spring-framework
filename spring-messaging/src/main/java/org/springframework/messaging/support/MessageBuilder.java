@@ -51,11 +51,11 @@ public final class MessageBuilder<T> {
 		this.headerAccessor = new MessageHeaderAccessor(originalMessage);
 	}
 
+
 	/**
 	 * Create a builder for a new {@link Message} instance pre-populated with all of the
 	 * headers copied from the provided message. The payload of the provided Message will
 	 * also be used as the payload for the new message.
-	 *
 	 * @param message the Message from which the payload and all headers will be copied
 	 */
 	public static <T> MessageBuilder<T> fromMessage(Message<T> message) {
@@ -65,7 +65,6 @@ public final class MessageBuilder<T> {
 
 	/**
 	 * Create a builder for a new {@link Message} instance with the provided payload.
-	 *
 	 * @param payload the payload for the new message
 	 */
 	public static <T> MessageBuilder<T> withPayload(T payload) {
@@ -78,7 +77,7 @@ public final class MessageBuilder<T> {
 	 * @param headerAccessor the headers for the message
 	 */
 	public MessageBuilder<T> setHeaders(MessageHeaderAccessor headerAccessor) {
-		Assert.notNull(headerAccessor, "headerAccessor is required");
+		Assert.notNull(headerAccessor, "HeaderAccessor must not be null");
 		this.headerAccessor = headerAccessor;
 		return this;
 	}

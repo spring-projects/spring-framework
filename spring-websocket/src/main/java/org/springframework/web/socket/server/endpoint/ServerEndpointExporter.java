@@ -73,7 +73,6 @@ public class ServerEndpointExporter implements InitializingBean, BeanPostProcess
 	 * Explicitly list annotated endpoint types that should be registered on startup. This
 	 * can be done if you wish to turn off a Servlet container's scan for endpoints, which
 	 * goes through all 3rd party jars in the, and rely on Spring configuration instead.
-	 *
 	 * @param annotatedEndpointClasses {@link ServerEndpoint}-annotated types
  	 */
 	public void setAnnotatedEndpointClasses(Class<?>... annotatedEndpointClasses) {
@@ -83,11 +82,8 @@ public class ServerEndpointExporter implements InitializingBean, BeanPostProcess
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
-
 		this.applicationContext = applicationContext;
-
 		this.serverContainer = getServerContainer();
-
 		Map<String, Object> beans = applicationContext.getBeansWithAnnotation(ServerEndpoint.class);
 		for (String beanName : beans.keySet()) {
 			Class<?> beanType = applicationContext.getType(beanName);
@@ -99,7 +95,6 @@ public class ServerEndpointExporter implements InitializingBean, BeanPostProcess
 	}
 
 	protected ServerContainer getServerContainer() {
-
 		Class<?> servletContextClass;
 		try {
 			servletContextClass = Class.forName("javax.servlet.ServletContext");
@@ -122,7 +117,6 @@ public class ServerEndpointExporter implements InitializingBean, BeanPostProcess
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-
 		Assert.state(this.serverContainer != null, "javax.websocket.server.ServerContainer not available");
 
 		List<Class<?>> allClasses = new ArrayList<Class<?>>(this.annotatedEndpointClasses);

@@ -23,11 +23,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 /**
  * Annotation for handling exceptions from message-handling methods within specific
  * handler methods.
- *
  *
  * @author Rossen Stoyanchev
  * @since 4.0

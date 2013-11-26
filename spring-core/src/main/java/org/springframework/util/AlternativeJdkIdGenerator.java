@@ -22,9 +22,9 @@ import java.util.Random;
 import java.util.UUID;
 
 /**
- * A variation of {@link UUID#randomUUID()} that uses {@link SecureRandom} only for
- * the initial seed and {@link Random} thereafter. This provides better performance
- * in exchange for less securely random id's.
+ * A variation of {@link UUID#randomUUID()} that uses {@link SecureRandom} only for the
+ * initial seed and {@link Random} thereafter. This provides better performance in
+ * exchange for less securely random id's.
  *
  * @author Rossen Stoyanchev
  * @author Rob Winch

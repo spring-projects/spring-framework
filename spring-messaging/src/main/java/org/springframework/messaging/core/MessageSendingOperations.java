@@ -20,7 +20,6 @@ import java.util.Map;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
-
 /**
  * A set of operations sending messages to a destination.
  *

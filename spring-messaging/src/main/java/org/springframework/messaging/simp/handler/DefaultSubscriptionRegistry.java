@@ -227,7 +227,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 
 		public SessionSubscriptionInfo(String sessionId) {
-			Assert.notNull(sessionId, "sessionId is required");
+			Assert.notNull(sessionId, "sessionId must not be null");
 			this.sessionId = sessionId;
 		}
 

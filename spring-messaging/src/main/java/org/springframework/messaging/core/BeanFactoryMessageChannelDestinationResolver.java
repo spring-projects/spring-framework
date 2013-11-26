@@ -21,8 +21,10 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.util.Assert;
 
-
 /**
+ * {@link DestinationResolver} that resolves against named beans contained in a
+ * {@link BeanFactory}.
+ *
  * @author Mark Fisher
  * @since 4.0
  */
@@ -36,7 +38,6 @@ public class BeanFactoryMessageChannelDestinationResolver implements Destination
 	 * <p>The BeanFactory to access must be set via <code>setBeanFactory</code>.
 	 * This will happen automatically if this resolver is defined within an
 	 * ApplicationContext thereby receiving the callback upon initialization.
-	 *
 	 * @see #setBeanFactory
 	 */
 	public BeanFactoryMessageChannelDestinationResolver() {
@@ -51,7 +52,6 @@ public class BeanFactoryMessageChannelDestinationResolver implements Destination
 	 * replaced by the {@link BeanFactory} that creates it (c.f. the
 	 * {@link BeanFactoryAware} contract). So only use this constructor if you
 	 * are instantiating this object explicitly rather than defining a bean.
-	 *
 	 * @param beanFactory the bean factory to be used to lookup {@link MessageChannel}s.
 	 */
 	public BeanFactoryMessageChannelDestinationResolver(BeanFactory beanFactory) {
@@ -62,7 +62,7 @@ public class BeanFactoryMessageChannelDestinationResolver implements Destination
 
 	@Override
 	public MessageChannel resolveDestination(String name) {
-		Assert.state(this.beanFactory != null, "BeanFactory is required");
+		Assert.state(this.beanFactory != null, "BeanFactory must not be null");
 		try {
 			return this.beanFactory.getBean(name, MessageChannel.class);
 		}

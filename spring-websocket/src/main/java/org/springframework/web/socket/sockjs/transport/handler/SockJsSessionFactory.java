@@ -33,11 +33,9 @@ public interface SockJsSessionFactory {
 
 	/**
 	 * Create a new SockJS session.
-	 *
 	 * @param sessionId the ID of the session
 	 * @param wsHandler the underlying {@link WebSocketHandler}
 	 * @param attributes handshake request specific attributes
-	 *
 	 * @return a new session, never {@code null}
 	 */
 	AbstractSockJsSession createSession(String sessionId, WebSocketHandler wsHandler, Map<String, Object> attributes);

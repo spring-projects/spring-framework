@@ -23,7 +23,6 @@ import org.codehaus.jackson.io.JsonStringEncoder;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.util.Assert;
 
-
 /**
  * A Jackson 1.x codec for encoding and decoding SockJS messages.
  *
@@ -40,7 +39,7 @@ public class JacksonSockJsMessageCodec extends AbstractSockJsMessageCodec {
 	}
 
 	public JacksonSockJsMessageCodec(ObjectMapper objectMapper) {
-		Assert.notNull(objectMapper, "objectMapper is required");
+		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 		this.objectMapper = objectMapper;
 	}
 

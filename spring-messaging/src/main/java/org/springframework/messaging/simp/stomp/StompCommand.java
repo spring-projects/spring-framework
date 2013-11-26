@@ -23,9 +23,7 @@ import java.util.Map;
 
 import org.springframework.messaging.simp.SimpMessageType;
 
-
 /**
- *
  * @author Rossen Stoyanchev
  * @since 4.0
  */

@@ -32,13 +32,12 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StringUtils;
 
-
 /**
  * Can be used to prepare headers for a new STOMP message, or to access and/or modify
  * STOMP-specific headers of an existing message.
- * <p>
- * Use one of the static factory method in this class, then call getters and setters, and
- * at the end if necessary call {@link #toMap()} to obtain the updated headers
+ *
+ * <p>Use one of the static factory method in this class, then call getters and setters,
+ * and at the end if necessary call {@link #toMap()} to obtain the updated headers
  * or call {@link #toNativeHeaderMap()} to obtain only the STOMP-specific headers.
  *
  * @author Rossen Stoyanchev
@@ -101,7 +100,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 
 		super(command.getMessageType(), externalSourceHeaders);
 
-		Assert.notNull(command, "command is required");
+		Assert.notNull(command, "Command must not be null");
 		setHeader(COMMAND_HEADER, command);
 
 		if (externalSourceHeaders != null) {

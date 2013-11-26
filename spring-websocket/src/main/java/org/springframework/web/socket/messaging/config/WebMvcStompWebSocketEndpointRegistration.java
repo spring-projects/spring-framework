@@ -16,23 +16,18 @@
 
 package org.springframework.web.socket.messaging.config;
 
-import java.util.Set;
-
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.server.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.config.SockJsServiceRegistration;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
 import org.springframework.web.socket.sockjs.SockJsHttpRequestHandler;
 import org.springframework.web.socket.sockjs.SockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
-
 
 /**
  * An abstract base class class for configuring STOMP over WebSocket/SockJS endpoints.
@@ -57,7 +52,7 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 			TaskScheduler sockJsTaskScheduler) {
 
 		Assert.notEmpty(paths, "No paths specified");
-		Assert.notNull(webSocketHandler, "'webSocketHandler' is required");
+		Assert.notNull(webSocketHandler, "WebSocketHandler must not be null");
 
 		this.paths = paths;
 		this.webSocketHandler = webSocketHandler;

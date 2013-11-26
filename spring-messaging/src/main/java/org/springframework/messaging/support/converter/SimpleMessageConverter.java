@@ -24,8 +24,8 @@ import org.springframework.util.ClassUtils;
 /**
  * A simple converter that simply unwraps the message payload as long as it matches the
  * expected target class. Or reversely, simply wraps the payload in a message.
- * <p>
- * Note that this converter ignores any content type information that may be present in
+ *
+ * <p>Note that this converter ignores any content type information that may be present in
  * message headers and should not be used if payload conversion is actually required.
  *
  * @author Rossen Stoyanchev

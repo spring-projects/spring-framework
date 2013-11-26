@@ -26,7 +26,6 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
-
 /**
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -45,7 +44,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 */
 	public SimpleBrokerMessageHandler(MessageChannel messageChannel, Collection<String> destinationPrefixes) {
 		super(destinationPrefixes);
-		Assert.notNull(messageChannel, "messageChannel is required");
+		Assert.notNull(messageChannel, "MessageChannel must not be null");
 		this.messageChannel = messageChannel;
 	}
 
@@ -55,7 +54,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	}
 
 	public void setSubscriptionRegistry(SubscriptionRegistry subscriptionRegistry) {
-		Assert.notNull(subscriptionRegistry, "subscriptionRegistry is required");
+		Assert.notNull(subscriptionRegistry, "SubscriptionRegistry must not be null");
 		this.subscriptionRegistry = subscriptionRegistry;
 	}
 

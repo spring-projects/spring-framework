@@ -33,8 +33,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * {@code javax.script} (JSR-223) based implementation of
- * Spring's {@link ScriptEvaluator} strategy interface.
+ * {@code javax.script} (JSR-223) based implementation of Spring's {@link ScriptEvaluator}
+ * strategy interface.
  *
  * @author Juergen Hoeller
  * @author Costin Leau

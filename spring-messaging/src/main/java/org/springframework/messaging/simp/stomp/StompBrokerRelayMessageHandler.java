@@ -39,7 +39,6 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.util.concurrent.ListenableFutureTask;
 
-
 /**
  * A {@link MessageHandler} that handles messages by forwarding them to a STOMP broker.
  * For each new {@link SimpMessageType#CONNECT CONNECT} message, an independent TCP
@@ -49,8 +48,8 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * sends messages back on the TCP connection, those messages are enriched with the session
  * id of the client and sent back downstream through the {@link MessageChannel} provided
  * to the constructor.
- * <p>
- * This class also automatically opens a default "system" TCP connection to the message
+ *
+ * <p>This class also automatically opens a default "system" TCP connection to the message
  * broker that is used for sending messages that originate from the server application (as
  * opposed to from a client). Such messages are recognized because they are not associated
  * with any client and therefore do not have a session id header. The "system" connection
@@ -103,11 +102,11 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	/**
 	 * @param messageChannel the channel to send messages from the STOMP broker to
 	 * @param destinationPrefixes the broker supported destination prefixes; destinations
-	 *        that do not match the given prefix are ignored.
+	 * that do not match the given prefix are ignored.
 	 */
 	public StompBrokerRelayMessageHandler(MessageChannel messageChannel, Collection<String> destinationPrefixes) {
 		super(destinationPrefixes);
-		Assert.notNull(messageChannel, "messageChannel is required");
+		Assert.notNull(messageChannel, "MessageChannel must not be null");
 		this.messageChannel = messageChannel;
 	}
 
@@ -145,10 +144,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	 * Set the interval, in milliseconds, at which the "system" connection will, in the
 	 * absence of any other data being sent, send a heartbeat to the STOMP broker. A value
 	 * of zero will prevent heartbeats from being sent to the broker.
-	 * <p>
-	 * The default value is 10000.
-	 * <p>
-	 * See class-level documentation for more information on the "system" connection.
+	 * <p>The default value is 10000.
+	 * <p>See class-level documentation for more information on the "system" connection.
 	 */
 	public void setSystemHeartbeatSendInterval(long systemHeartbeatSendInterval) {
 		this.systemHeartbeatSendInterval = systemHeartbeatSendInterval;
@@ -167,10 +164,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	 * expects, in the absence of any other data, to receive a heartbeat from the STOMP
 	 * broker. A value of zero will configure the connection to expect not to receive
 	 * heartbeats from the broker.
-	 * <p>
-	 * The default value is 10000.
-	 * <p>
-	 * See class-level documentation for more information on the "system" connection.
+	 * <p>The default value is 10000.
+	 * <p>See class-level documentation for more information on the "system" connection.
 	 */
 	public void setSystemHeartbeatReceiveInterval(long heartbeatReceiveInterval) {
 		this.systemHeartbeatReceiveInterval = heartbeatReceiveInterval;
@@ -187,8 +182,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	/**
 	 * Set the login for the "system" connection used to send messages to the STOMP
 	 * broker without having a client session (e.g. REST/HTTP request handling method).
-	 * <p>
-	 * See class-level documentation for more information on the "system" connection.
+	 * <p>See class-level documentation for more information on the "system" connection.
 	 */
 	public void setSystemLogin(String systemLogin) {
 		Assert.hasText(systemLogin, "systemLogin must not be empty");
@@ -205,8 +199,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	/**
 	 * Set the passcode for the "system" connection used to send messages to the STOMP
 	 * broker without having a client session (e.g. REST/HTTP request handling method).
-	 * <p>
-	 * See class-level documentation for more information on the "system" connection.
+	 * <p>See class-level documentation for more information on the "system" connection.
 	 */
 	public void setSystemPasscode(String systemPasscode) {
 		this.systemPasscode = systemPasscode;
@@ -225,8 +218,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	 * the STOMP broker. This may be useful for example in a cloud environment where the
 	 * actual host to which the TCP connection is established is different from the host
 	 * providing the cloud-based STOMP service.
-	 * <p>
-	 * By default this property is not set.
+	 * <p>By default this property is not set.
 	 */
 	public void setVirtualHost(String virtualHost) {
 		this.virtualHost = virtualHost;
@@ -374,8 +366,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		private StompConnectionHandler(String sessionId, StompHeaderAccessor connectHeaders,
 				boolean isRemoteClientSession) {
 
-			Assert.notNull(sessionId, "sessionId is required");
-			Assert.notNull(connectHeaders, "connectHeaders is required");
+			Assert.notNull(sessionId, "SessionId must not be null");
+			Assert.notNull(connectHeaders, "ConnectHeaders must not be null");
 
 			this.sessionId = sessionId;
 			this.connectHeaders = connectHeaders;

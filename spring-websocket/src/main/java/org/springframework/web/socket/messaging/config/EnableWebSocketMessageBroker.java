@@ -20,7 +20,6 @@ import java.lang.annotation.Target;
 
 import org.springframework.context.annotation.Import;
 
-
 /**
  * Add this annotation to an {@code @Configuration} class to enable broker-backed
  * messaging over WebSocket using a higher-level messaging sub-protocol.

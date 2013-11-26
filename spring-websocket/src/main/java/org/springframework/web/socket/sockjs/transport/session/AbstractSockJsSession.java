@@ -73,9 +73,9 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 	public AbstractSockJsSession(String id, SockJsServiceConfig config,
 			WebSocketHandler wsHandler, Map<String, Object> handshakeAttributes) {
 
-		Assert.notNull(id, "sessionId is required");
-		Assert.notNull(config, "sockJsConfig is required");
-		Assert.notNull(wsHandler, "webSocketHandler is required");
+		Assert.notNull(id, "SessionId must not be null");
+		Assert.notNull(config, "SockJsConfig must not be null");
+		Assert.notNull(wsHandler, "WebSocketHandler must not be null");
 
 		this.id = id;
 		this.config = config;
@@ -208,7 +208,6 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 
 	/**
 	 * {@inheritDoc}
-	 *
 	 * <p>Performs cleanup and notifies the {@link WebSocketHandler}.
 	 */
 	@Override

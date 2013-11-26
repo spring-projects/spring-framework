@@ -34,7 +34,6 @@ import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.support.SubProtocolCapable;
 
-
 /**
  * An implementation of {@link WebSocketHandler} that delegates incoming WebSocket
  * messages to a {@link SubProtocolHandler} along with a {@link MessageChannel} to
@@ -66,7 +65,7 @@ public class SubProtocolWebSocketHandler implements SubProtocolCapable, WebSocke
 
 
 	public SubProtocolWebSocketHandler(MessageChannel clientOutboundChannel) {
-		Assert.notNull(clientOutboundChannel, "clientOutboundChannel is required");
+		Assert.notNull(clientOutboundChannel, "ClientOutboundChannel must not be null");
 		this.clientOutboundChannel = clientOutboundChannel;
 	}
 
@@ -74,7 +73,6 @@ public class SubProtocolWebSocketHandler implements SubProtocolCapable, WebSocke
 	/**
 	 * Configure one or more handlers to use depending on the sub-protocol requested by
 	 * the client in the WebSocket handshake request.
-	 *
 	 * @param protocolHandlers the sub-protocol handlers to use
 	 */
 	public void setProtocolHandlers(List<SubProtocolHandler> protocolHandlers) {
@@ -112,7 +110,6 @@ public class SubProtocolWebSocketHandler implements SubProtocolCapable, WebSocke
 	/**
 	 * Set the {@link SubProtocolHandler} to use when the client did not request a
 	 * sub-protocol.
-	 *
 	 * @param defaultProtocolHandler the default handler
 	 */
 	public void setDefaultProtocolHandler(SubProtocolHandler defaultProtocolHandler) {

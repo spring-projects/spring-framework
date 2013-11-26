@@ -61,7 +61,6 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 
 	/**
 	 * Decorate the WebSocketHandler provided to the class constructor.
-	 *
 	 * <p>By default {@link LoggingWebSocketHandlerDecorator} is added.
 	 */
 	protected WebSocketHandler decorateWebSocketHandler(WebSocketHandler handler) {

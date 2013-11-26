@@ -46,7 +46,6 @@ public interface SubscriptionRegistry {
 
 	/**
 	 * Find all subscriptions that should receive the given message.
-	 *
 	 * @param message the message
 	 * @return a {@link MultiValueMap} from sessionId to subscriptionId's, possibly empty.
 	 */

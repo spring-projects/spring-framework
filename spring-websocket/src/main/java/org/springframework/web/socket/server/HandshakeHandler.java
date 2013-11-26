@@ -35,26 +35,22 @@ import org.springframework.web.socket.support.PerConnectionWebSocketHandler;
  */
 public interface HandshakeHandler {
 
-
 	/**
 	 * Initiate the handshake.
-	 *
 	 * @param request the current request
 	 * @param response the current response
 	 * @param wsHandler the handler to process WebSocket messages; see
-	 *        {@link PerConnectionWebSocketHandler} for providing a handler with
-	 *        per-connection lifecycle.
+	 * {@link PerConnectionWebSocketHandler} for providing a handler with
+	 * per-connection lifecycle.
 	 * @param attributes handshake request specific attributes to be set on the WebSocket
-	 *        session via {@link HandshakeInterceptor} and thus made available to the
-	 *        {@link WebSocketHandler};
-	 *
+	 * session via {@link HandshakeInterceptor} and thus made available to the
+	 * {@link WebSocketHandler};
 	 * @return whether the handshake negotiation was successful or not. In either case the
-	 *         response status, headers, and body will have been updated to reflect the
-	 *         result of the negotiation
-	 *
+	 * response status, headers, and body will have been updated to reflect the
+	 * result of the negotiation
 	 * @throws HandshakeFailureException thrown when handshake processing failed to
-	 *         complete due to an internal, unrecoverable error, i.e. a server error as
-	 *         opposed to a failure to successfully negotiate the handshake.
+	 * complete due to an internal, unrecoverable error, i.e. a server error as
+	 * opposed to a failure to successfully negotiate the handshake.
 	 */
 	boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
 			Map<String, Object> attributes) throws HandshakeFailureException;

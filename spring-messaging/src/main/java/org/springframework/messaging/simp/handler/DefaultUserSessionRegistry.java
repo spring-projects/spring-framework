@@ -46,10 +46,8 @@ public class DefaultUserSessionRegistry implements UserSessionRegistry {
 
 	@Override
 	public void registerSessionId(String user, String sessionId) {
-
-		Assert.notNull(user, "'user' is required");
-		Assert.notNull(user, "'sessionId' is required");
-
+		Assert.notNull(user, "User must not be null");
+		Assert.notNull(sessionId, "Session ID must not be null");
 		synchronized (this.lock) {
 			Set<String> set = this.userSessionIds.get(user);
 			if (set == null) {
@@ -62,10 +60,8 @@ public class DefaultUserSessionRegistry implements UserSessionRegistry {
 
 	@Override
 	public void unregisterSessionId(String userName, String sessionId) {
-
-		Assert.notNull(userName, "'userName' is required");
-		Assert.notNull(userName, "'sessionId' is required");
-
+		Assert.notNull(userName, "User Name must not be null");
+		Assert.notNull(sessionId, "Session ID must not be null");
 		synchronized (lock) {
 			Set<String> set = this.userSessionIds.get(userName);
 			if (set != null) {

@@ -29,7 +29,6 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.web.socket.sockjs.SockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
 
-
 /**
  * Base class for {@link WebSocketHandlerRegistration}s that gathers all the configuration
  * options but allows sub-classes to put together the actual HTTP request mappings.
@@ -53,6 +52,7 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 	public AbstractWebSocketHandlerRegistration(TaskScheduler defaultTaskScheduler) {
 		this.sockJsTaskScheduler = defaultTaskScheduler;
 	}
+
 
 	@Override
 	public WebSocketHandlerRegistration addHandler(WebSocketHandler handler, String... paths) {

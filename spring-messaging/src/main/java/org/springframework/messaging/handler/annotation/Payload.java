@@ -24,7 +24,6 @@ import java.lang.annotation.Target;
 
 import org.springframework.messaging.support.converter.MessageConverter;
 
-
 /**
  * Annotation that binds a method parameter to the payload of a message. The payload may
  * be passed through a {@link MessageConverter} to convert it from serialized form with a
@@ -43,16 +42,14 @@ public @interface Payload {
 	 * This attribute may or may not be supported depending on whether the message being
 	 * handled contains a non-primitive Object as its payload or is in serialized form
 	 * and requires message conversion.
-	 * <p>
-	 * When processing STOMP over WebSocket messages this attribute is not supported.
+	 * <p>When processing STOMP over WebSocket messages this attribute is not supported.
 	 */
 	String value() default "";
 
 	/**
 	 * Whether payload content is required.
-	 * <p>
-	 * Default is {@code true}, leading to an exception if there is no payload. Switch to
-	 * {@code false} to have {@code null} passed when there is no payload.
+	 * <p>Default is {@code true}, leading to an exception if there is no payload. Switch
+	 * to {@code false} to have {@code null} passed when there is no payload.
 	 */
 	boolean required() default true;
 

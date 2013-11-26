@@ -7,7 +7,6 @@ import java.util.List;
  *
  * @author Rossen Stoyanchev
  * @since 4.0
- *
  * @see <a href="http://tools.ietf.org/html/rfc6455#section-1.9">RFC-6455 section 1.9</a>
  */
 public interface SubProtocolCapable {

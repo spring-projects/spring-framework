@@ -53,7 +53,6 @@ import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.endpoint.ServerEndpointRegistration;
 import org.springframework.web.socket.server.endpoint.ServletServerContainerFactoryBean;
 
-
 /**
  * GlassFish support for upgrading a request during a WebSocket handshake. To modify
  * properties of the underlying {@link javax.websocket.server.ServerContainer} you can use

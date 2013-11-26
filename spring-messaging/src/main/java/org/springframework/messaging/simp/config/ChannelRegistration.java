@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
 /**
  * A registration class for customizing the configuration for a
  * {@link org.springframework.messaging.MessageChannel}.

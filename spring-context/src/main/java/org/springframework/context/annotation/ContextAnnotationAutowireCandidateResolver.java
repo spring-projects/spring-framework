@@ -29,9 +29,10 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 
 /**
- * Complete implementation of the {@link org.springframework.beans.factory.support.AutowireCandidateResolver}
- * strategy interface, providing support for qualifier annotations as well as for lazy resolution driven
- * by the {@link Lazy} annotation in the {@code context.annotation} package.
+ * Complete implementation of the
+ * {@link org.springframework.beans.factory.support.AutowireCandidateResolver} strategy
+ * interface, providing support for qualifier annotations as well as for lazy resolution
+ * driven by the {@link Lazy} annotation in the {@code context.annotation} package.
  *
  * @author Juergen Hoeller
  * @since 4.0

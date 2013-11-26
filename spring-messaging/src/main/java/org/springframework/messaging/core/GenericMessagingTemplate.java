@@ -31,7 +31,6 @@ import org.springframework.messaging.PollableChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 
-
 /**
  * A messaging template for sending to and/or receiving messages from a
  * {@link MessageChannel}.

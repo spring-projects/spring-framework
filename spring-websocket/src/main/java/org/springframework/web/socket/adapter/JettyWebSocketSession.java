@@ -52,8 +52,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSesssion<org.eclipse
 
 
 	/**
-	 * Class constructor.
-	 *
+	 * Create a new {@link JettyWebSocketSession} instance.
 	 * @param principal the user associated with the session, or {@code null}
 	 * @param handshakeAttributes attributes from the HTTP handshake to make available
 	 *        through the WebSocket session

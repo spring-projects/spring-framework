@@ -42,7 +42,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 public abstract class AbstractHttpReceivingTransportHandler
 		extends TransportHandlerSupport implements TransportHandler {
 
-
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
 			WebSocketHandler wsHandler, WebSocketSession wsSession) throws SockJsException {

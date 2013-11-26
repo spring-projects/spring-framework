@@ -18,7 +18,6 @@ package org.springframework.messaging.core;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
-
 /**
  * A {@link MessageReceivingOperations} that can resolve a String-based destinations.
  *

@@ -27,7 +27,6 @@ public final class TextMessage extends AbstractWebSocketMessage<String> {
 
 	/**
 	 * Create a new text WebSocket message from the given CharSequence payload.
-	 *
 	 * @param payload the non-null payload
 	 */
 	public TextMessage(CharSequence payload) {
@@ -39,7 +38,6 @@ public final class TextMessage extends AbstractWebSocketMessage<String> {
 	 * full or partial message content. When the {@code isLast} boolean flag is set
 	 * to {@code false} the message is sent as partial content and more partial
 	 * messages will be expected until the boolean flag is set to {@code true}.
-	 *
 	 * @param payload the non-null payload
 	 * @param isLast whether this the last part of a series of partial messages
 	 */

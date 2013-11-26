@@ -20,7 +20,6 @@ import org.glassfish.tyrus.core.EndpointWrapper;
 import org.glassfish.tyrus.core.TyrusEndpoint;
 import org.glassfish.tyrus.websockets.WebSocketApplication;
 
-
 /**
  * Extension of the {@link AbstractGlassFishRequestUpgradeStrategy} that provides support
  * for GlassFish 4.0.1 and beyond.

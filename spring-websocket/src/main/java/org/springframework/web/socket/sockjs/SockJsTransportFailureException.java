@@ -16,7 +16,6 @@
 
 package org.springframework.web.socket.sockjs;
 
-
 /**
  * Indicates a serious failure that occurred in the SockJS implementation as opposed to in
  * user code (e.g. IOException while writing to the response). When this exception is
@@ -27,7 +26,6 @@ package org.springframework.web.socket.sockjs;
  */
 @SuppressWarnings("serial")
 public class SockJsTransportFailureException extends SockJsException {
-
 
 	public SockJsTransportFailureException(String message, String sessionId, Throwable cause) {
 		super(message, sessionId, cause);

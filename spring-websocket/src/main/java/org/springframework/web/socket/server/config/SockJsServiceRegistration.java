@@ -27,7 +27,6 @@ import org.springframework.web.socket.sockjs.SockJsService;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
 
-
 /**
  * A helper class for configuring SockJS fallback options, typically used indirectly, in
  * conjunction with {@link EnableWebSocket @EnableWebSocket} and
@@ -79,7 +78,6 @@ public class SockJsServiceRegistration {
 	 * a domain local to the SockJS server. The iframe does need to load the
 	 * SockJS javascript client library and this option allows configuring its
 	 * url.
-	 *
 	 * <p>By default this is set to point to
 	 * "https://d1fxtkz8shb9d2.cloudfront.net/sockjs-0.3.4.min.js".
 	 */
@@ -96,7 +94,6 @@ public class SockJsServiceRegistration {
 	 * closed. After that client will open a new request. Setting this value to
 	 * one effectively disables streaming and will make streaming transports to
 	 * behave like polling transports.
-	 *
 	 * <p>The default value is 128K (i.e. 128 * 1024).
 	 */
 	public SockJsServiceRegistration setStreamBytesLimit(int streamBytesLimit) {
@@ -109,13 +106,11 @@ public class SockJsServiceRegistration {
 	 * from clients with a "cookie_needed" boolean property that indicates whether the use
 	 * of a JSESSIONID cookie is required for the application to function correctly, e.g.
 	 * for load balancing or in Java Servlet containers for the use of an HTTP session.
-	 * <p>
-	 * This is especially important for IE 8,9 that support XDomainRequest -- a modified
+	 * <p>This is especially important for IE 8,9 that support XDomainRequest -- a modified
 	 * AJAX/XHR -- that can do requests across domains but does not send any cookies. In
 	 * those cases, the SockJS client prefers the "iframe-htmlfile" transport over
 	 * "xdr-streaming" in order to be able to send cookies.
-	 * <p>
-	 * The default value is "true" to maximize the chance for applications to work
+	 * <p>The default value is "true" to maximize the chance for applications to work
 	 * correctly in IE 8,9 with support for cookies (and the JSESSIONID cookie in
 	 * particular). However, an application can choose to set this to "false" if the use
 	 * of cookies (and HTTP session) is not required.
@@ -129,7 +124,6 @@ public class SockJsServiceRegistration {
 	 * The amount of time in milliseconds when the server has not sent any
 	 * messages and after which the server should send a heartbeat frame to the
 	 * client in order to keep the connection from breaking.
-	 *
 	 * <p>The default value is 25,000 (25 seconds).
 	 */
 	public SockJsServiceRegistration setHeartbeatTime(long heartbeatTime) {
@@ -141,7 +135,6 @@ public class SockJsServiceRegistration {
 	 * The amount of time in milliseconds before a client is considered
 	 * disconnected after not having a receiving connection, i.e. an active
 	 * connection over which the server can send data to the client.
-	 *
 	 * <p>The default value is 5000.
 	 */
 	public SockJsServiceRegistration setDisconnectDelay(long disconnectDelay) {
@@ -153,12 +146,10 @@ public class SockJsServiceRegistration {
 	 * The number of server-to-client messages that a session can cache while waiting for
 	 * the next HTTP polling request from the client. All HTTP transports use this
 	 * property since even streaming transports recycle HTTP requests periodically.
-	 * <p>
-	 * The amount of time between HTTP requests should be relatively brief and will not
+	 * <p>The amount of time between HTTP requests should be relatively brief and will not
 	 * exceed the allows disconnect delay (see
 	 * {@link #setDisconnectDelay(long)}), 5 seconds by default.
-	 * <p>
-	 * The default size is 100.
+	 * <p>The default size is 100.
 	 */
 	public SockJsServiceRegistration setHttpMessageCacheSize(int httpMessageCacheSize) {
 		this.httpMessageCacheSize = httpMessageCacheSize;
@@ -168,7 +159,6 @@ public class SockJsServiceRegistration {
 	/**
 	 * Some load balancers don't support WebSocket. This option can be used to
 	 * disable the WebSocket transport on the server side.
-	 *
 	 * <p>The default value is "true".
 	 */
 	public SockJsServiceRegistration setWebSocketEnabled(boolean webSocketEnabled) {

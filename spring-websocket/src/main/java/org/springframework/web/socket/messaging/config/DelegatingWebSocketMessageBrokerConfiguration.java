@@ -25,7 +25,6 @@ import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.util.CollectionUtils;
 
-
 /**
  * A {@link WebSocketMessageBrokerConfigurationSupport} extension that detects beans of type
  * {@link WebSocketMessageBrokerConfigurer}

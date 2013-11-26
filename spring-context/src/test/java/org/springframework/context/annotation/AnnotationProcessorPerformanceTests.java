@@ -119,7 +119,7 @@ public class AnnotationProcessorPerformanceTests {
 
 	@Test
 	public void testPrototypeCreationWithOverriddenAutowiredPropertiesIsFastEnough() {
-		Assume.group(TestGroup.PERFORMANCE);
+		// Assume.group(TestGroup.PERFORMANCE);
 		Assume.notLogging(factoryLog);
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ctx);
@@ -138,7 +138,7 @@ public class AnnotationProcessorPerformanceTests {
 			assertSame(spouse, tb.getSpouse());
 		}
 		sw.stop();
-		//System.out.println(sw.getTotalTimeMillis());
+		System.out.println(sw.getTotalTimeMillis());
 		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 4500);
 	}
 

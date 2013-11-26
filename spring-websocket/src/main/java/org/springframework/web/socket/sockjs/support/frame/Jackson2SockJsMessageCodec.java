@@ -24,7 +24,6 @@ import org.springframework.util.Assert;
 import com.fasterxml.jackson.core.io.JsonStringEncoder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-
 /**
  * A Jackson 2 codec for encoding and decoding SockJS messages.
  *
@@ -41,7 +40,7 @@ public class Jackson2SockJsMessageCodec extends AbstractSockJsMessageCodec {
 	}
 
 	public Jackson2SockJsMessageCodec(ObjectMapper objectMapper) {
-		Assert.notNull(objectMapper, "objectMapper is required");
+		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 		this.objectMapper = objectMapper;
 	}
 

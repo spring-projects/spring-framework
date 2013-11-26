@@ -19,9 +19,7 @@ package org.springframework.messaging.simp.annotation.support;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
-
 /**
- *
  * @author Rossen Stoyanchev
  * @since 4.0
  */

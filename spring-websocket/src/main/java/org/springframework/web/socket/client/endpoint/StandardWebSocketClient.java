@@ -76,12 +76,13 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 		this.webSocketContainer = webSocketContainer;
 	}
 
+
 	/**
 	 * Set a {@link TaskExecutor} to use to open the connection.
 	 * By default {@link SimpleAsyncTaskExecutor} is used.
 	 */
 	public void setTaskExecutor(AsyncListenableTaskExecutor taskExecutor) {
-		Assert.notNull(taskExecutor, "taskExecutor is required");
+		Assert.notNull(taskExecutor, "TaskExecutor must not be null");
 		this.taskExecutor = taskExecutor;
 	}
 

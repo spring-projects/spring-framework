@@ -20,9 +20,8 @@ import java.beans.PropertyEditorSupport;
 import java.time.ZoneId;
 
 /**
- * Editor for {@code java.time.ZoneId}, translating zone ID Strings into
- * {@code ZoneId} objects. Exposes the {@code TimeZone} ID as a text
- * representation.
+ * Editor for {@code java.time.ZoneId}, translating zone ID Strings into {@code ZoneId}
+ * objects. Exposes the {@code TimeZone} ID as a text representation.
  *
  * @author Nicholas Williams
  * @since 4.0

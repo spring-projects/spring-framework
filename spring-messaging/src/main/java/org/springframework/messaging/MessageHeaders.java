@@ -100,6 +100,7 @@ public final class MessageHeaders implements Map<String, Object>, Serializable {
 		this.headers.put(TIMESTAMP, new Long(System.currentTimeMillis()));
 	}
 
+
 	public UUID getId() {
 		return this.get(ID, UUID.class);
 	}
@@ -109,12 +110,12 @@ public final class MessageHeaders implements Map<String, Object>, Serializable {
 	}
 
 	public Object getReplyChannel() {
-        return this.get(REPLY_CHANNEL);
-    }
+		return this.get(REPLY_CHANNEL);
+	}
 
-    public Object getErrorChannel() {
-        return this.get(ERROR_CHANNEL);
-    }
+	public Object getErrorChannel() {
+		return this.get(ERROR_CHANNEL);
+	}
 
 	@SuppressWarnings("unchecked")
 	public <T> T get(Object key, Class<T> type) {

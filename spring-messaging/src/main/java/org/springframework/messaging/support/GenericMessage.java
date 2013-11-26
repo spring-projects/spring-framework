@@ -31,7 +31,6 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Mark Fisher
  * @since 4.0
- *
  * @see MessageBuilder
  */
 public class GenericMessage<T> implements Message<T>, Serializable {
@@ -46,7 +45,6 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 
 	/**
 	 * Create a new message with the given payload.
-	 *
 	 * @param payload the message payload
 	 */
 	public GenericMessage(T payload) {
@@ -56,7 +54,6 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 	/**
 	 * Create a new message with the given payload. The provided map will be used to
 	 * populate the message headers
-	 *
 	 * @param payload the message payload
 	 * @param headers message headers
 	 * @see MessageHeaders

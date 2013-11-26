@@ -29,7 +29,7 @@ import javax.net.ServerSocketFactory;
  * for finding available ports on {@code localhost}.
  *
  * <p>Within this class, a TCP port refers to a port for a {@link ServerSocket};
- * whereas, a UDP port refers to a port for a {@link DatagramSocket}. 
+ * whereas, a UDP port refers to a port for a {@link DatagramSocket}.
  *
  * @author Sam Brannen
  * @author Ben Hale
@@ -37,7 +37,7 @@ import javax.net.ServerSocketFactory;
  * @author Gunnar Hillert
  * @since 4.0
  */
-public final class SocketUtils {
+public abstract class SocketUtils {
 
 	/**
 	 * The default minimum value for port ranges used when finding an available
@@ -51,13 +51,14 @@ public final class SocketUtils {
 	 */
 	public static final int PORT_RANGE_MAX = 65535;
 
+
 	private static final Random random = new Random(System.currentTimeMillis());
 
 
 	/**
 	 * Although {@code SocketUtils} consists solely of static utility methods,
 	 * this constructor is intentionally {@code public}.
-	 * 
+	 *
 	 * <h4>Rationale</h4>
 	 *
 	 * <p>Static methods from this class may be invoked from within XML
@@ -81,10 +82,10 @@ public final class SocketUtils {
 		/* no-op */
 	}
 
+
 	/**
 	 * Find an available TCP port randomly selected from the range
 	 * [{@value #PORT_RANGE_MIN}, {@value #PORT_RANGE_MAX}].
-	 *
 	 * @return an available TCP port number
 	 * @throws IllegalStateException if no available port could be found
 	 */
@@ -95,7 +96,6 @@ public final class SocketUtils {
 	/**
 	 * Find an available TCP port randomly selected from the range
 	 * [{@code minPort}, {@value #PORT_RANGE_MAX}].
-	 *
 	 * @param minPort the minimum port number
 	 * @return an available TCP port number
 	 * @throws IllegalStateException if no available port could be found
@@ -107,7 +107,6 @@ public final class SocketUtils {
 	/**
 	 * Find an available TCP port randomly selected from the range
 	 * [{@code minPort}, {@code maxPort}].
-	 *
 	 * @param minPort the minimum port number
 	 * @param maxPort the maximum port number
 	 * @return an available TCP port number
@@ -120,7 +119,6 @@ public final class SocketUtils {
 	/**
 	 * Find the requested number of available TCP ports, each randomly selected
 	 * from the range [{@value #PORT_RANGE_MIN}, {@value #PORT_RANGE_MAX}].
-	 *
 	 * @param numRequested the number of available ports to find
 	 * @return a sorted set of available TCP port numbers
 	 * @throws IllegalStateException if the requested number of available ports could not be found
@@ -132,7 +130,6 @@ public final class SocketUtils {
 	/**
 	 * Find the requested number of available TCP ports, each randomly selected
 	 * from the range [{@code minPort}, {@code maxPort}].
-	 *
 	 * @param numRequested the number of available ports to find
 	 * @param minPort the minimum port number
 	 * @param maxPort the maximum port number
@@ -146,7 +143,6 @@ public final class SocketUtils {
 	/**
 	 * Find an available UDP port randomly selected from the range
 	 * [{@value #PORT_RANGE_MIN}, {@value #PORT_RANGE_MAX}].
-	 *
 	 * @return an available UDP port number
 	 * @throws IllegalStateException if no available port could be found
 	 */
@@ -157,7 +153,6 @@ public final class SocketUtils {
 	/**
 	 * Find an available UDP port randomly selected from the range
 	 * [{@code minPort}, {@value #PORT_RANGE_MAX}].
-	 *
 	 * @param minPort the minimum port number
 	 * @return an available UDP port number
 	 * @throws IllegalStateException if no available port could be found
@@ -169,7 +164,6 @@ public final class SocketUtils {
 	/**
 	 * Find an available UDP port randomly selected from the range
 	 * [{@code minPort}, {@code maxPort}].
-	 *
 	 * @param minPort the minimum port number
 	 * @param maxPort the maximum port number
 	 * @return an available UDP port number
@@ -182,7 +176,6 @@ public final class SocketUtils {
 	/**
 	 * Find the requested number of available UDP ports, each randomly selected
 	 * from the range [{@value #PORT_RANGE_MIN}, {@value #PORT_RANGE_MAX}].
-	 *
 	 * @param numRequested the number of available ports to find
 	 * @return a sorted set of available UDP port numbers
 	 * @throws IllegalStateException if the requested number of available ports could not be found
@@ -194,7 +187,6 @@ public final class SocketUtils {
 	/**
 	 * Find the requested number of available UDP ports, each randomly selected
 	 * from the range [{@code minPort}, {@code maxPort}].
-	 *
 	 * @param numRequested the number of available ports to find
 	 * @param minPort the minimum port number
 	 * @param maxPort the maximum port number
@@ -247,7 +239,6 @@ public final class SocketUtils {
 		/**
 		 * Find a pseudo-random port number within the range
 		 * [{@code minPort}, {@code maxPort}].
-		 *
 		 * @param minPort the minimum port number
 		 * @param maxPort the maximum port number
 		 * @return a random port number within the specified range
@@ -260,7 +251,6 @@ public final class SocketUtils {
 		/**
 		 * Find an available port for this {@code SocketType}, randomly selected
 		 * from the range [{@code minPort}, {@code maxPort}].
-		 *
 		 * @param minPort the minimum port number
 		 * @param maxPort the maximum port number
 		 * @return an available port number for this socket type
@@ -289,7 +279,6 @@ public final class SocketUtils {
 		/**
 		 * Find the requested number of available ports for this {@code SocketType},
 		 * each randomly selected from the range [{@code minPort}, {@code maxPort}].
-		 *
 		 * @param numRequested the number of available ports to find
 		 * @param minPort the minimum port number
 		 * @param maxPort the maximum port number

@@ -60,7 +60,6 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	/**
 	 * Create an instance that wraps the given pre-existing HttpHeaders and also
 	 * propagate all changes to it.
-	 *
 	 * @param headers the HTTP headers to wrap
 	 */
 	public WebSocketHttpHeaders(HttpHeaders headers) {

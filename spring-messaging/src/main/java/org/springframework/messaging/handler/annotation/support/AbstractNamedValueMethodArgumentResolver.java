@@ -33,7 +33,6 @@ import org.springframework.messaging.handler.method.HandlerMethodArgumentResolve
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
-
 /**
  * Abstract base class for resolving method arguments from a named value. Message headers,
  * and path variables are examples of named values. Each may have a name, a required flag,

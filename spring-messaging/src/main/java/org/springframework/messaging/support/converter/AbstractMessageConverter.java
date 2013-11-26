@@ -29,7 +29,6 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
-
 /**
  * Abstract base class for {@link MessageConverter} implementations including support for
  * common properties and a partial implementation of the conversion methods mainly to
@@ -63,7 +62,7 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 	 * @param supportedMimeTypes the supported MIME types
 	 */
 	protected AbstractMessageConverter(Collection<MimeType> supportedMimeTypes) {
-		Assert.notNull(supportedMimeTypes, "'supportedMimeTypes' is required");
+		Assert.notNull(supportedMimeTypes, "SupportedMimeTypes must not be null");
 		this.supportedMimeTypes = new ArrayList<MimeType>(supportedMimeTypes);
 	}
 
@@ -77,8 +76,7 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 
 	/**
 	 * Configure the {@link ContentTypeResolver} to use.
-	 * <p>
-	 * The default value is {@code null}. However when {@link CompositeMessageConverter}
+	 * <p>The default value is {@code null}. However when {@link CompositeMessageConverter}
 	 * is used it configures all of its delegates with a default resolver.
 	 */
 	public void setContentTypeResolver(ContentTypeResolver resolver) {
@@ -95,15 +93,13 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 	/**
 	 * Configure the preferred serialization class to use (byte[] or String) when
 	 * converting an Object payload to a {@link Message}.
-	 * <p>
-	 * The default value is byte[].
-	 *
-	 * @param clazz either byte[] or String
+	 * <p>The default value is byte[].
+	 * @param payloadClass either byte[] or String
 	 */
-	public void setSerializedPayloadClass(Class<?> clazz) {
-		Assert.isTrue(byte[].class.equals(clazz) || String.class.equals(clazz),
-				"Payload class must be byte[] or String: " + clazz);
-		this.serializedPayloadClass = clazz;
+	public void setSerializedPayloadClass(Class<?> payloadClass) {
+		Assert.isTrue(byte[].class.equals(payloadClass) || String.class.equals(payloadClass),
+				"Payload class must be byte[] or String: " + payloadClass);
+		this.serializedPayloadClass = payloadClass;
 	}
 
 	/**
@@ -117,10 +113,8 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 	 * Returns the default content type for the payload. Called when
 	 * {@link #toMessage(Object, MessageHeaders)} is invoked without message headers or
 	 * without a content type header.
-	 * <p>
-	 * By default, this returns the first element of the {@link #getSupportedMimeTypes()
+	 * <p>By default, this returns the first element of the {@link #getSupportedMimeTypes()
 	 * supportedMimeTypes}, if any. Can be overridden in sub-classes.
-	 *
 	 * @param payload the payload being converted to message
 	 * @return the content type, or {@code null} if not known
 	 */
@@ -131,7 +125,6 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 
 	/**
 	 * Whether the given class is supported by this converter.
-	 *
 	 * @param clazz the class to test for support
 	 * @return {@code true} if supported; {@code false} otherwise
 	 */

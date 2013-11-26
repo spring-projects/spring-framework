@@ -58,7 +58,6 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 	/**
 	 * Set whether to auto-connect to the remote endpoint after this connection manager
 	 * has been initialized and the Spring context has been refreshed.
-	 *
 	 * <p>Default is "false".
 	 */
 	public void setAutoStartup(boolean autoStartup) {

@@ -41,7 +41,7 @@ public class SockJsFrame {
 
 
 	private SockJsFrame(String content) {
-		Assert.notNull("content is required");
+		Assert.notNull("Content must not be null");
 		this.content = content;
 	}
 

@@ -65,7 +65,6 @@ public class AsyncHttpAccessor {
 	/**
 	 * Create a new {@link AsyncClientHttpRequest} via this template's {@link
 	 * AsyncClientHttpRequestFactory}.
-	 *
 	 * @param url the URL to connect to
 	 * @param method the HTTP method to execute (GET, POST, etc.)
 	 * @return the created request

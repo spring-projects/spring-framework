@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
 
 /**
  * Asynchronous extension of the {@link HttpComponentsClientHttpRequestFactory}. Uses
-  * <a href="http://hc.apache.org/httpcomponents-asyncclient-dev/">Apache HttpComponents
+ * <a href="http://hc.apache.org/httpcomponents-asyncclient-dev/">Apache HttpComponents
  * HttpAsyncClient 4.0</a> to create requests.
  *
  * @author Arjen Poutsma

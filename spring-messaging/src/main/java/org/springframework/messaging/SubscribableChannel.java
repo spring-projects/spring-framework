@@ -16,7 +16,6 @@
 
 package org.springframework.messaging;
 
-
 /**
  * Interface for any MessageChannel implementation that accepts subscribers.
  * The subscribers must implement the {@link MessageHandler} interface and
@@ -30,14 +29,14 @@ public interface SubscribableChannel extends MessageChannel {
 	/**
 	 * Register a {@link MessageHandler} as a subscriber to this channel.
 	 * @return {@code true} if the channel was not already subscribed to the specified
-	 *         handler
+	 * handler
 	 */
 	boolean subscribe(MessageHandler handler);
 
 	/**
 	 * Remove a {@link MessageHandler} from the subscribers of this channel.
 	 * @return {@code true} if the channel was previously subscribed to the specified
-	 *         handler
+	 * handler
 	 */
 	boolean unsubscribe(MessageHandler handler);
 

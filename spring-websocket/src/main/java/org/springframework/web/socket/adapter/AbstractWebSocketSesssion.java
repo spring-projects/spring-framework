@@ -46,9 +46,8 @@ public abstract class AbstractWebSocketSesssion<T> implements WebSocketSession, 
 
 	/**
 	 * Class constructor
-	 *
 	 * @param handshakeAttributes attributes from the HTTP handshake to make available
-	 *        through the WebSocket session
+	 * through the WebSocket session
 	 */
 	public AbstractWebSocketSesssion(Map<String, Object> handshakeAttributes) {
 		this.handshakeAttributes = handshakeAttributes;

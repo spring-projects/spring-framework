@@ -23,13 +23,11 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.method.HandlerMethodArgumentResolver;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 
-
 /**
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public class PrincipalMethodArgumentResolver implements HandlerMethodArgumentResolver {
-
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {

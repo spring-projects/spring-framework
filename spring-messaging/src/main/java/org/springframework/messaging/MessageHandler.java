@@ -32,11 +32,9 @@ public interface MessageHandler {
 	 * message, but fails to do so, a {@code MessageHandlingException} is
 	 * thrown. In the last case it is recommended to treat the message as tainted
 	 * and go into an error scenario.
-	 * <p>
-	 * When the handling results in a failure of another message being sent
+	 * <p>When the handling results in a failure of another message being sent
 	 * (e.g. a "reply" message), that failure  will trigger a
 	 * {@code MessageDeliveryException}.
-	 *
 	 * @param message the message to be handled
 	 * reply related to the handling of the message
 	 */

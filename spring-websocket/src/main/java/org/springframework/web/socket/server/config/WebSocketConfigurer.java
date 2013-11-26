@@ -18,7 +18,6 @@ package org.springframework.web.socket.server.config;
 
 import org.springframework.web.socket.WebSocketHandler;
 
-
 /**
  * Defines callback methods to configure the WebSocket request handling
  * via {@link EnableWebSocket @EnableWebSocket}.
@@ -27,7 +26,6 @@ import org.springframework.web.socket.WebSocketHandler;
  * @since 4.0
  */
 public interface WebSocketConfigurer {
-
 
 	/**
 	 * Register {@link WebSocketHandler}s including SockJS fallback options if desired.

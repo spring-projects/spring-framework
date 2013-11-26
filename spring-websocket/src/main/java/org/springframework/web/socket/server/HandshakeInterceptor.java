@@ -23,7 +23,6 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 
-
 /**
  * Interceptor for WebSocket handshake requests. Can be used to inspect the handshake
  * request and response as well as to pass attributes to the target
@@ -39,13 +38,11 @@ public interface HandshakeInterceptor {
 
 	/**
 	 * Invoked before the handshake is processed.
-	 *
 	 * @param request the current request
 	 * @param response the current response
 	 * @param wsHandler the target WebSocket handler
 	 * @param attributes attributes to make available via
-	 *        {@link WebSocketSession#getHandshakeAttributes()}
-	 *
+	 * {@link WebSocketSession#getHandshakeAttributes()}
 	 * @return whether to proceed with the handshake {@code true} or abort {@code false}
 	 */
 	boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
@@ -54,7 +51,6 @@ public interface HandshakeInterceptor {
 	/**
 	 * Invoked after the handshake is done. The response status and headers indicate the
 	 * results of the handshake, i.e. whether it was successful or not.
-	 *
 	 * @param request the current request
 	 * @param response the current response
 	 * @param wsHandler the target WebSocket handler

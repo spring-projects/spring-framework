@@ -29,7 +29,6 @@ import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 
-
 /**
  * A {@link HandlerMethodReturnValueHandler} for replying directly to a subscription. It
  * supports methods annotated with {@link org.springframework.messaging.simp.annotation.SubscribeMapping} unless they're also annotated
@@ -49,10 +48,10 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 
 	/**
 	 * @param messagingTemplate a messaging template for sending messages directly
-	 *	to clients, e.g. in response to a subscription
+	 * to clients, e.g. in response to a subscription
 	 */
 	public SubscriptionMethodReturnValueHandler(MessageSendingOperations<String> messagingTemplate) {
-		Assert.notNull(messagingTemplate, "messagingTemplate is required");
+		Assert.notNull(messagingTemplate, "messagingTemplate must not be null");
 		this.messagingTemplate = messagingTemplate;
 	}
 

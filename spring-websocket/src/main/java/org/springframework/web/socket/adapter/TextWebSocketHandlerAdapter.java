@@ -39,7 +39,7 @@ public class TextWebSocketHandlerAdapter extends WebSocketHandlerAdapter {
 		try {
 			session.close(CloseStatus.NOT_ACCEPTABLE.withReason("Binary messages not supported"));
 		}
-		catch (IOException e) {
+		catch (IOException ex) {
 			// ignore
 		}
 	}

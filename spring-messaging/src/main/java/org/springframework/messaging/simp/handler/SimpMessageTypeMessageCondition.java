@@ -45,11 +45,10 @@ public class SimpMessageTypeMessageCondition extends AbstractMessageCondition<Si
 
 	/**
 	 * A constructor accepting a message type.
-	 *
 	 * @param messageType the message type to match messages to
 	 */
 	public SimpMessageTypeMessageCondition(SimpMessageType messageType) {
-		Assert.notNull(messageType, "'messageType' is required");
+		Assert.notNull(messageType, "MessageType must not be null");
 		this.messageType = messageType;
 	}
 

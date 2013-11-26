@@ -216,7 +216,6 @@ abstract class ContextLoaderUtils {
 	 * Convenience method for creating a {@link ContextConfigurationAttributes}
 	 * instance from the supplied {@link AnnotationAttributes} and declaring
 	 * class and then adding the attributes to the supplied list.
-	 *
 	 * @since 4.0
 	 */
 	private static void convertAnnotationAttributesToConfigAttributesAndAddToList(AnnotationAttributes annAttrs,

@@ -24,7 +24,6 @@ import java.lang.annotation.Target;
 
 import org.springframework.messaging.Message;
 
-
 /**
  * Annotation that indicates a method's return value should be converted to
  * a {@link Message} and sent to the specified destination.

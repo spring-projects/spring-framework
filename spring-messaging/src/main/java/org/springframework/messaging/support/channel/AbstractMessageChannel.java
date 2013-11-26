@@ -28,7 +28,6 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
-
 /**
  * Abstract base class for {@link MessageChannel} implementations.
  *

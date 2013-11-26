@@ -21,8 +21,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
 /**
- * {@link ParameterNameDiscoverer} implementation which uses JDK 8's
- * reflection facilities for introspecting parameter names.
+ * {@link ParameterNameDiscoverer} implementation which uses JDK 8's reflection facilities
+ * for introspecting parameter names.
  *
  * @author Juergen Hoeller
  * @since 4.0

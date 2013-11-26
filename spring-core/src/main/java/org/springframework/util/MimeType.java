@@ -171,7 +171,8 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	}
 
 	/**
-	 * Checks the given token string for illegal characters, as defined in RFC 2616, section 2.2.
+	 * Checks the given token string for illegal characters, as defined in RFC 2616,
+	 * section 2.2.
 	 * @throws IllegalArgumentException in case of illegal characters
 	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-2.2">HTTP 1.1, section 2.2</a>
 	 */
@@ -214,15 +215,17 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	}
 
 	/**
-	 * Indicates whether the {@linkplain #getType() type} is the wildcard character {@code &#42;} or not.
+	 * Indicates whether the {@linkplain #getType() type} is the wildcard character
+	 * {@code &#42;} or not.
 	 */
 	public boolean isWildcardType() {
 		return WILDCARD_TYPE.equals(getType());
 	}
 
 	/**
-	 * Indicates whether the {@linkplain #getSubtype() subtype} is the wildcard character {@code &#42;}
-	 * or the wildcard character followed by a sufiix (e.g. {@code &#42;+xml}), or not.
+	 * Indicates whether the {@linkplain #getSubtype() subtype} is the wildcard character
+	 * {@code &#42;} or the wildcard character followed by a sufiix (e.g.
+	 * {@code &#42;+xml}), or not.
 	 * @return whether the subtype is {@code &#42;}
 	 */
 	public boolean isWildcardSubtype() {
@@ -230,8 +233,8 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	}
 
 	/**
-	 * Indicates whether this media type is concrete, i.e. whether neither the type or subtype is a wildcard
-	 * character {@code &#42;}.
+	 * Indicates whether this media type is concrete, i.e. whether neither the type or
+	 * subtype is a wildcard character {@code &#42;}.
 	 * @return whether this media type is concrete
 	 */
 	public boolean isConcrete() {
@@ -280,10 +283,12 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 
 	/**
 	 * Indicate whether this {@code MediaType} includes the given media type.
-	 * <p>For instance, {@code text/*} includes {@code text/plain} and {@code text/html}, and {@code application/*+xml}
-	 * includes {@code application/soap+xml}, etc. This method is <b>not</b> symmetric.
+	 * <p>For instance, {@code text/*} includes {@code text/plain} and {@code text/html},
+	 * and {@code application/*+xml} includes {@code application/soap+xml}, etc. This
+	 * method is <b>not</b> symmetric.
 	 * @param other the reference media type with which to compare
-	 * @return {@code true} if this media type includes the given media type; {@code false} otherwise
+	 * @return {@code true} if this media type includes the given media type;
+	 *         {@code false} otherwise
 	 */
 	public boolean includes(MimeType other) {
 		if (other == null) {

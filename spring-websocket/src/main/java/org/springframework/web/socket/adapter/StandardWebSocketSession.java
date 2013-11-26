@@ -57,16 +57,14 @@ public class StandardWebSocketSession extends AbstractWebSocketSesssion<javax.we
 
 	/**
 	 * Class constructor.
-	 *
 	 * @param headers the headers of the handshake request
 	 * @param handshakeAttributes attributes from the HTTP handshake to make available
-	 *        through the WebSocket session
+	 * through the WebSocket session
 	 * @param localAddress the address on which the request was received
 	 * @param remoteAddress the address of the remote client
 	 */
 	public StandardWebSocketSession(HttpHeaders headers, Map<String, Object> handshakeAttributes,
 			InetSocketAddress localAddress, InetSocketAddress remoteAddress) {
-
 		super(handshakeAttributes);
 		headers = (headers != null) ? headers : new HttpHeaders();
 		this.handshakeHeaders = HttpHeaders.readOnlyHttpHeaders(headers);

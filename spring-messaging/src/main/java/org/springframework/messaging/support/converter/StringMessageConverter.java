@@ -22,7 +22,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.MimeType;
 
-
 /**
  * A {@link MessageConverter} that supports MIME type "text/plain" with the
  * payload converted to and from a String.

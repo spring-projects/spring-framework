@@ -24,7 +24,6 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.config.SockJsServiceRegistration;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 
-
 /**
  * Extends {@link AbstractMessageBrokerConfiguration} and adds configuration for
  * receiving and responding to STOMP messages from WebSocket clients.

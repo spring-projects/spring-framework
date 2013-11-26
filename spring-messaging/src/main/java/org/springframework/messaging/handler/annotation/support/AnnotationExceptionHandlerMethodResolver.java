@@ -29,7 +29,6 @@ import org.springframework.messaging.handler.method.AbstractExceptionHandlerMeth
 import org.springframework.messaging.handler.method.HandlerMethodSelector;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 
-
 /**
  * A sub-class of {@link AbstractExceptionHandlerMethodResolver} that looks for
  * {@link MessageExceptionHandler}-annotated methods in a given class. The actual

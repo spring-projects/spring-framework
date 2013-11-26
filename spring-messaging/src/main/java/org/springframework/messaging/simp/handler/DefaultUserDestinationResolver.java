@@ -30,8 +30,8 @@ import java.util.Set;
 
 /**
  * A default implementation of {@link UserDestinationResolver}.
- * <p>
- * Resolves messages sent to destination patterns "/user/{user-name}/**" as well as
+ *
+ * <p>Resolves messages sent to destination patterns "/user/{user-name}/**" as well as
  * subscriptions to destinations "/user/queue/**" where the "/user/" prefix used to
  * recognize such destinations is customizable via
  * {@link #setUserDestinationPrefix(String)}.
@@ -54,24 +54,21 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 	/**
 	 * Create an instance that will access user session id information through
 	 * the provided registry.
-	 *
 	 * @param userSessionRegistry the registry, never {@code null}
 	 */
 	public DefaultUserDestinationResolver(UserSessionRegistry userSessionRegistry) {
-		Assert.notNull(userSessionRegistry, "'userSessionRegistry' is required");
+		Assert.notNull(userSessionRegistry, "'userSessionRegistry' must not be null");
 		this.userSessionRegistry = userSessionRegistry;
 	}
 
 	/**
 	 * The prefix used to identify user destinations. Any destinations that do not
 	 * start with the given prefix are not be resolved.
-	 * <p>
-	 * The default value is "/user/".
-	 *
+	 * <p>The default value is "/user/".
 	 * @param prefix the prefix to use
 	 */
 	public void setUserDestinationPrefix(String prefix) {
-		Assert.hasText(prefix, "prefix is required");
+		Assert.hasText(prefix, "prefix must not be empty");
 		this.destinationPrefix = prefix.endsWith("/") ? prefix : prefix + "/";
 		this.subscriptionDestinationPrefix = this.destinationPrefix + "queue/";
 	}
@@ -79,8 +76,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 	/**
 	 * Return the prefix used to identify user destinations. Any destinations that do not
 	 * start with the given prefix are not be resolved.
-	 * <p>
-	 * By default "/user/queue/".
+	 * <p>By default "/user/queue/".
 	 */
 	public String getDestinationPrefix() {
 		return this.destinationPrefix;
@@ -88,8 +84,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 
 	/**
 	 * Return the prefix used to identify user destinations for (un)subscribe messages.
-	 * <p>
-	 * By default "/user/queue/".
+	 * <p>By default "/user/queue/".
 	 */
 	public String getSubscriptionDestinationPrefix() {
 		return this.subscriptionDestinationPrefix;
