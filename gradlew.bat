@@ -9,7 +9,7 @@
 if "%OS%"=="Windows_NT" setlocal
 
 @rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
-set GRADLE_OPTS=-XX:MaxPermSize=1024m -Xmx1024m -XX:MaxHeapSize=256m %GRADLE_OPTS%
+set GRADLE_OPTS=-XX:MaxPermSize=2048m -Xmx2048m -XX:MaxHeapSize=4096m %GRADLE_OPTS%
 set DEFAULT_JVM_OPTS=
 
 set DIRNAME=%~dp0
@@ -71,6 +71,8 @@ set CMD_LINE_ARGS=%$
 @rem Setup the command line
 
 set CLASSPATH=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar
+set GRADLE_OPTS=-XX:MaxPermSize=512m -Xmx512m -XX:MaxHeapSize=512m %GRADLE_OPTS%
+
 
 @rem Execute Gradle
 "%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" org.gradle.wrapper.GradleWrapperMain %CMD_LINE_ARGS%
