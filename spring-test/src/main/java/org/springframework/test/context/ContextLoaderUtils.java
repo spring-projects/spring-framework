@@ -214,6 +214,25 @@ abstract class ContextLoaderUtils {
 	}
 
 	/**
+	 * Convenience method for creating a {@link ContextConfigurationAttributes}
+	 * instance from the supplied {@link ContextConfiguration} attributes and
+	 * declaring class and then adding the attributes to the supplied list.
+	 */
+	private static void convertContextConfigToConfigAttributesAndAddToList(AnnotationAttributes annAttrs,
+			Class<?> declaringClass, final List<ContextConfigurationAttributes> attributesList) {
+		if (logger.isTraceEnabled()) {
+			logger.trace(String.format("Retrieved @ContextConfiguration attributes [%s] for declaring class [%s].",
+				annAttrs, declaringClass.getName()));
+		}
+
+		ContextConfigurationAttributes attributes = new ContextConfigurationAttributes(declaringClass, annAttrs);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Resolved context configuration attributes: " + attributes);
+		}
+		attributesList.add(attributes);
+	}
+
+	/**
 	 * Resolve the list of lists of {@linkplain ContextConfigurationAttributes context
 	 * configuration attributes} for the supplied {@linkplain Class test class} and its
 	 * superclasses, taking into account context hierarchies declared via
@@ -411,8 +430,10 @@ abstract class ContextLoaderUtils {
 			Class<?> declaringClass = (descriptor.getStereotype() != null) ? descriptor.getStereotypeType()
 					: rootDeclaringClass;
 
-			convertContextConfigToConfigAttributesAndAddToList(descriptor.getAnnotation(), declaringClass,
-				attributesList);
+			AnnotationAttributes annAttrs = AnnotatedElementUtils.getAnnotationAttributes(rootDeclaringClass,
+				annotationType.getName());
+
+			convertContextConfigToConfigAttributesAndAddToList(annAttrs, declaringClass, attributesList);
 			descriptor = findAnnotationDescriptor(rootDeclaringClass.getSuperclass(), annotationType);
 		}
 
