@@ -23,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.CollectionUtils;
 
-
 /**
  * A variation of {@link WebSocketConfigurationSupport} that detects implementations of
  * {@link WebSocketConfigurer} in Spring configuration and invokes them in order to

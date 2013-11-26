@@ -19,7 +19,6 @@ package org.springframework.context.annotation.spr10546.scanpackage;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.spr10546.ParentConfig;
 
-
 /**
  * Note the name of {@link AEnclosingConfig} is chosen to help ensure scanning picks up
  * the enclosing configuration prior to {@link ChildConfig} to demonstrate this can happen

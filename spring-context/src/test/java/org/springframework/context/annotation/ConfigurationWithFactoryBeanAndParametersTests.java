@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 
-
 /**
  * Test case cornering the bug initially raised with SPR-8762, in which a
  * NullPointerException would be raised if a FactoryBean-returning @Bean method also

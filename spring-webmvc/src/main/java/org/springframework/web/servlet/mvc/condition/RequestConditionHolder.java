@@ -21,7 +21,6 @@ import java.util.Collections;
 
 import javax.servlet.http.HttpServletRequest;
 
-
 /**
  * A holder for a {@link RequestCondition} useful when the type of the request
  * condition is not known ahead of time, e.g. custom condition. Since this

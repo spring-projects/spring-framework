@@ -20,7 +20,6 @@ import java.util.Map;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 
-
 /**
  * Base class for a messaging template that can resolve String-based destinations.
  *

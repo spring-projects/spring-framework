@@ -23,7 +23,6 @@ import junit.framework.TestCase;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.tests.sample.beans.TestBean;
 
-
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller

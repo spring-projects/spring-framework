@@ -39,7 +39,6 @@ import org.springframework.web.socket.sockjs.transport.handler.WebSocketTranspor
 
 import static org.junit.Assert.*;
 
-
 /**
  * Integration tests for WebSocket Java server-side configuration.
  *

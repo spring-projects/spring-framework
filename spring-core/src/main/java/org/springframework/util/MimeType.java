@@ -27,7 +27,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeSet;
 
-
 /**
  * Represents a MIME Type, as originally defined in RFC 2046 and subsequently used in
  * other Internet protocols including HTTP. This class however does not contain support

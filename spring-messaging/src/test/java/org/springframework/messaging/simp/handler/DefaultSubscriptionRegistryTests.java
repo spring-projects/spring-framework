@@ -30,7 +30,6 @@ import org.springframework.util.MultiValueMap;
 
 import static org.junit.Assert.*;
 
-
 /**
  * Test fixture for {@link DefaultSubscriptionRegistry}.
  *

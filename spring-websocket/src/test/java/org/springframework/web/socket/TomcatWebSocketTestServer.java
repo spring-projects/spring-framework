@@ -29,7 +29,6 @@ import org.springframework.util.SocketUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
-
 /**
  * Tomcat based {@link WebSocketTestServer}.
  *

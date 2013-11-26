@@ -39,7 +39,6 @@ import org.springframework.test.web.Person;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
-
 /**
  * Examples of defining expectations on XML request content with XMLUnit.
  *

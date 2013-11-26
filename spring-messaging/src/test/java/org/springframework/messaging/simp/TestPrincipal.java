@@ -18,7 +18,6 @@ package org.springframework.messaging.simp;
 
 import java.security.Principal;
 
-
 /**
  * An implementation of {@link Principal} for testing.
  *

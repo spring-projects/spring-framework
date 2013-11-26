@@ -29,7 +29,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
-
 /**
  * Unit tests for {@link PropertyPathFactoryBean}.
  *

@@ -23,7 +23,6 @@ import javax.servlet.ServletContext;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.web.context.ServletContextAware;
 
-
 /**
  * Subclass of {@link PropertyPlaceholderConfigurer} that resolves placeholders as
  * ServletContext init parameters (that is, {@code web.xml} context-param

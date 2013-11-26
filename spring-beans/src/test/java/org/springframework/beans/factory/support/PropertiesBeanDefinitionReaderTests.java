@@ -20,7 +20,6 @@ import junit.framework.TestCase;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.sample.beans.TestBean;
 
-
 /**
  * @author Rob Harrop
  */

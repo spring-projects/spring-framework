@@ -32,7 +32,6 @@ import org.springframework.tests.aop.interceptor.NopInterceptor;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
 
-
 /**
  * @author Rod Johnson
  * @author Chris Beams

@@ -30,7 +30,6 @@ import org.springframework.tests.sample.beans.Person;
 import org.springframework.tests.sample.beans.SerializablePerson;
 import org.springframework.util.SerializationTestUtils;
 
-
 /**
  * @author Rod Johnson
  * @author Chris Beams

@@ -9,7 +9,6 @@ import java.rmi.RemoteException;
 
 import org.springframework.aop.ThrowsAdvice;
 
-
 @SuppressWarnings("serial")
 public class MyThrowsHandler extends MethodCounter implements ThrowsAdvice {
 	// Full method signature

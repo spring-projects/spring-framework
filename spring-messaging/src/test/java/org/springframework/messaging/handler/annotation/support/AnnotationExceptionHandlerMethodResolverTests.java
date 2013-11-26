@@ -28,7 +28,6 @@ import org.springframework.util.ClassUtils;
 
 import static org.junit.Assert.*;
 
-
 /**
  * Test fixture for {@link AnnotationExceptionHandlerMethodResolver} tests.
  *

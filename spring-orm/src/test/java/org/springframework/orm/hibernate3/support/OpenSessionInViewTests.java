@@ -53,7 +53,6 @@ import org.springframework.web.util.NestedServletException;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
-
 /**
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev

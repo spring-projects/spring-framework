@@ -32,7 +32,6 @@ import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.HandlerMethodSelector;
 
-
 /**
  * Discovers annotated exception handling methods in a given class type, including all
  * super types, and helps to resolve an Exception to a method that can handle it. The

@@ -45,7 +45,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.sample.beans.HasMap;
 import org.springframework.tests.sample.beans.TestBean;
 
-
 /**
  * Tests for collections in XML bean definitions.
  *

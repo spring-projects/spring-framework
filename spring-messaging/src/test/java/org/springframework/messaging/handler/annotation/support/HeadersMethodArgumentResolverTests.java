@@ -32,7 +32,6 @@ import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 
 import static org.junit.Assert.*;
 
-
 /**
  * Test fixture for {@link HeadersMethodArgumentResolver} tests.
  *

@@ -27,7 +27,6 @@ import org.springframework.aop.framework.AopConfigException;
 import test.aop.PerTargetAspect;
 import org.springframework.tests.sample.beans.TestBean;
 
-
 /**
  * @author Rod Johnson
  * @author Chris Beams

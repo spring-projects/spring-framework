@@ -26,7 +26,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.tests.sample.beans.TestBean;
 
-
 /**
  * Simple factory to allow testing of FactoryBean support in AbstractBeanFactory.
  * Depending on whether its singleton property is set, it will return a singleton

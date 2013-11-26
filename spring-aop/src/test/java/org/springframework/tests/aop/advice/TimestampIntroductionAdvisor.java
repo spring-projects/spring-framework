@@ -20,7 +20,6 @@ import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.tests.aop.interceptor.TimestampIntroductionInterceptor;
 
-
 /**
  *
  * @author Rod Johnson

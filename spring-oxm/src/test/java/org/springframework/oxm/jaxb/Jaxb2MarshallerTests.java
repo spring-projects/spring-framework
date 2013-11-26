@@ -51,7 +51,6 @@ import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
 
-
 import static org.junit.Assert.*;
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 import static org.mockito.BDDMockito.*;

@@ -22,7 +22,6 @@ import org.junit.Test;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-
 /**
  * Tests the evaluation of expressions that access variables and functions (lambda/java).
  *

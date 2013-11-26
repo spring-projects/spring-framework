@@ -47,7 +47,6 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 
-
 /**
  * Test fixture for {@link WebSocketMessageBrokerConfigurationSupport}.
  *

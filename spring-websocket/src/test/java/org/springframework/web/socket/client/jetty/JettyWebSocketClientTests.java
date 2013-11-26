@@ -39,7 +39,6 @@ import org.springframework.web.socket.support.WebSocketHttpHeaders;
 
 import static org.junit.Assert.*;
 
-
 /**
  * Tests for {@link JettyWebSocketClient}.
  * @author Rossen Stoyanchev

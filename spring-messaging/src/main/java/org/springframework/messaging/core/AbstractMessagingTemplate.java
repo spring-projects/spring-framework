@@ -20,7 +20,6 @@ import java.util.Map;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
-
 /**
  * Base class for a messaging template that send and receive messages.
  *

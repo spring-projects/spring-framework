@@ -33,7 +33,6 @@ import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
-
 /**
  * Test fixture for {@link WebMvcStompEndpointRegistry}.
  *

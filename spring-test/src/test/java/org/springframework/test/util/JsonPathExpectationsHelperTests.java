@@ -21,7 +21,6 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-
 /**
  * Test fixture for {@link JsonPathExpectationsHelper}.
  *

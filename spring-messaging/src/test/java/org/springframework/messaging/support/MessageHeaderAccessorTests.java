@@ -25,7 +25,6 @@ import org.springframework.messaging.MessageHeaders;
 
 import static org.junit.Assert.*;
 
-
 /**
  * Test fixture for {@link MessageHeaderAccessor}.
  *

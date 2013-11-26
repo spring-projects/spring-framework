@@ -18,7 +18,6 @@ package org.springframework.jdbc.datasource.embedded;
 
 import java.sql.Driver;
 
-
 /**
  * DataSourceFactory helper that allows essential JDBC connection properties to be configured consistently,
  * independent of the actual DataSource implementation.

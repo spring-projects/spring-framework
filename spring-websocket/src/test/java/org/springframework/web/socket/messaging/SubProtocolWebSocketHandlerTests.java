@@ -27,7 +27,6 @@ import org.springframework.web.socket.support.TestWebSocketSession;
 
 import static org.mockito.Mockito.*;
 
-
 /**
  * Test fixture for {@link SubProtocolWebSocketHandler}.
  *

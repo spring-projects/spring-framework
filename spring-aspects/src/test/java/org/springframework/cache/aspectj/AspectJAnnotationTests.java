@@ -28,7 +28,6 @@ import org.springframework.cache.config.CacheableService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 
-
 /**
  * @author Costin Leau
  */

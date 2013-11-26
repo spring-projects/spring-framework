@@ -51,7 +51,6 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-
 /**
  * Test fixture for {@link AbstractMessageBrokerConfiguration}.
  *

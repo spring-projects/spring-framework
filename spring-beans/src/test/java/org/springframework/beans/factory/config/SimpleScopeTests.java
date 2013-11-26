@@ -30,7 +30,6 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.beans.TestBean;
 
-
 /**
  * Simple test to illustrate and verify scope usage.
  *

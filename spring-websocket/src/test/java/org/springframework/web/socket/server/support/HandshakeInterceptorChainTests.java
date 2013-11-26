@@ -29,7 +29,6 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 
 import static org.mockito.Mockito.*;
 
-
 /**
  * Test fixture for {@link HandshakeInterceptorChain}.
  *

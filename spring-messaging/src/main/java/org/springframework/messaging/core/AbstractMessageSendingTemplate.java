@@ -26,7 +26,6 @@ import org.springframework.messaging.support.converter.MessageConverter;
 import org.springframework.messaging.support.converter.SimpleMessageConverter;
 import org.springframework.util.Assert;
 
-
 /**
  * Base class for templates that support sending messages.
  *

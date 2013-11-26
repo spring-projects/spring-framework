@@ -31,7 +31,6 @@ import org.springframework.util.MimeType;
 
 import static org.junit.Assert.*;
 
-
 /**
  * Test fixture for {@link MappingJackson2MessageConverter}.
  *

@@ -35,7 +35,6 @@ import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.core.env.StandardEnvironmentTests;
 import org.springframework.stereotype.Component;
 
-
 /**
  * Tests integration between Environment and SecurityManagers. See SPR-9970.
  *

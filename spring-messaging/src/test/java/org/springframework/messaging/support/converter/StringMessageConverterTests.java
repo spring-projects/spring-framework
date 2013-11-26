@@ -30,7 +30,6 @@ import org.springframework.util.MimeTypeUtils;
 
 import static org.junit.Assert.*;
 
-
 /**
  * Test fixture for {@link StringMessageConverter}.
  *

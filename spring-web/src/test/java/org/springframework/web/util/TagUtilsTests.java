@@ -23,7 +23,6 @@ import javax.servlet.jsp.tagext.TagSupport;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-
 /**
  * Unit tests for the {@link TagUtils} class.
  *

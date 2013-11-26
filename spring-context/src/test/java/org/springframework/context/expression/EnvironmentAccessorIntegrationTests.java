@@ -28,7 +28,6 @@ import org.springframework.mock.env.MockPropertySource;
 
 import org.springframework.tests.sample.beans.TestBean;
 
-
 /**
  * Integration tests for {@link EnvironmentAccessor}, which is registered with
  * SpEL for all {@link AbstractApplicationContext} implementations via

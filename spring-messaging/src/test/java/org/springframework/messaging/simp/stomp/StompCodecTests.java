@@ -31,7 +31,6 @@ import reactor.io.Buffer;
 
 import static org.junit.Assert.*;
 
-
 /**
  * Test fixture for {@link StompCodec}.
  *

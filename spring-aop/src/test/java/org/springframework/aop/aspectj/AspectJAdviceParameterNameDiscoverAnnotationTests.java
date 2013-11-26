@@ -22,7 +22,6 @@ import java.lang.annotation.RetentionPolicy;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.Test;
 
-
 /**
  * Additional parameter name discover tests that need Java 5.
  * Yes this will re-run the tests from the superclass, but that

@@ -21,7 +21,6 @@ import java.io.Serializable;
 import org.springframework.tests.sample.beans.IndexedTestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
-
 /**
  * Simple bean used to check constructor dependency checking.
  *

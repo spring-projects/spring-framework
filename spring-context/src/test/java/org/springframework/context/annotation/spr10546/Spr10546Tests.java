@@ -27,7 +27,6 @@ import org.springframework.context.annotation.spr10546.scanpackage.AEnclosingCon
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
-
 /**
  *
  * @author Rob Winch

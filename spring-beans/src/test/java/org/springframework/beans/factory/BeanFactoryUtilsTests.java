@@ -39,7 +39,6 @@ import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.tests.sample.beans.factory.DummyFactory;
 import org.springframework.util.ObjectUtils;
 
-
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller

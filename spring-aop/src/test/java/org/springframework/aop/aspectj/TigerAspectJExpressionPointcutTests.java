@@ -31,7 +31,6 @@ import test.annotation.EmptySpringAnnotation;
 import test.annotation.transaction.Tx;
 import org.springframework.tests.sample.beans.TestBean;
 
-
 /**
  * Java5-specific {@link AspectJExpressionPointcutTests}.
  *

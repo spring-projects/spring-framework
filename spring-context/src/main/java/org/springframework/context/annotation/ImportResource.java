@@ -25,7 +25,6 @@ import java.lang.annotation.Target;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 
-
 /**
  * Indicates one or more resources containing bean definitions to import.
  *

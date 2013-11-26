@@ -38,8 +38,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.beans.TestBean;
 
-
-
 /**
  * Unit tests for {@link PropertyPlaceholderConfigurer}.
  *

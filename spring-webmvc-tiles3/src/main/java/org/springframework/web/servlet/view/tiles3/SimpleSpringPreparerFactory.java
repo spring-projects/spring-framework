@@ -25,7 +25,6 @@ import org.apache.tiles.preparer.ViewPreparer;
 import org.apache.tiles.preparer.factory.NoSuchPreparerException;
 import org.springframework.web.context.WebApplicationContext;
 
-
 /**
  * Tiles3 {@link org.apache.tiles.preparer.PreparerFactory} implementation
  * that expects preparer class names and builds preparer instances for those,

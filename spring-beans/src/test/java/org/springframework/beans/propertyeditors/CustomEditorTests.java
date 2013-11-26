@@ -50,7 +50,6 @@ import org.springframework.tests.sample.beans.IndexedTestBean;
 import org.springframework.tests.sample.beans.NumberTestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
-
 /**
  * Unit tests for the various PropertyEditors in Spring.
  *

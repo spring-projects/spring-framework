@@ -18,7 +18,6 @@ package org.springframework.context.support;
 
 import org.springframework.beans.factory.BeanNameAware;
 
-
 public class Logic implements BeanNameAware {
 
 	private String name;

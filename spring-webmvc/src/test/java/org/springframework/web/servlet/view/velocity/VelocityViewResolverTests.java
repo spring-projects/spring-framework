@@ -13,7 +13,6 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.InternalResourceView;
 import org.springframework.web.servlet.view.RedirectView;
 
-
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller

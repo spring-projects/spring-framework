@@ -44,7 +44,6 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 
 	private final List imports = new LinkedList();
 
-
 	@Override
 	public void defaultsRegistered(DefaultsDefinition defaultsDefinition) {
 		this.defaults.add(defaultsDefinition);

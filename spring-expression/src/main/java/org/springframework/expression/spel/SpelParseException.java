@@ -17,7 +17,6 @@ package org.springframework.expression.spel;
 
 import org.springframework.expression.ParseException;
 
-
 /**
  * Root exception for Spring EL related exceptions. Rather than holding a hard coded
  * string indicating the problem, it records a message key and the inserts for the

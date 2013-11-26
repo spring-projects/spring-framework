@@ -27,7 +27,6 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 
 import static org.junit.Assert.*;
 
-
 /**
  * @author Rossen Stoyanchev
  */

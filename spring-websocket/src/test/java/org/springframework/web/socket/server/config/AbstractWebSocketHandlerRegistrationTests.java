@@ -37,7 +37,6 @@ import org.springframework.web.socket.sockjs.transport.handler.WebSocketTranspor
 
 import static org.junit.Assert.*;
 
-
 /**
  * Test fixture for {@link AbstractWebSocketHandlerRegistration}.
  *

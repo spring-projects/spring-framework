@@ -33,7 +33,6 @@ import org.springframework.core.io.ClassPathResource;
 
 import org.springframework.tests.sample.beans.TestBean;
 
-
 /**
  * System tests covering use of AspectJ {@link Aspect}s in conjunction with {@link Configuration} classes.
  * {@link Bean} methods may return aspects, or Configuration classes may themselves be annotated with Aspect.

@@ -19,7 +19,6 @@ package test.mixin;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 
-
 /**
  * Mixin to provide stateful locking functionality.
  * Test/demonstration of AOP mixin support rather than a

@@ -26,7 +26,6 @@ import org.springframework.tests.aop.interceptor.NopInterceptor;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
-
 /**
  * @author Rod Johnson
  * @author Chris Beams

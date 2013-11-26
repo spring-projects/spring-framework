@@ -20,7 +20,6 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.util.Assert;
 
-
 /**
  * Registration class for configuring a {@link StompBrokerRelayMessageHandler}.
  *

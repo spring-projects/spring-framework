@@ -28,7 +28,6 @@ import org.springframework.core.convert.support.DefaultConversionService;
 
 import static org.junit.Assert.*;
 
-
 /**
  * @author Arjen Poutsma
  * @author Juergen Hoeller

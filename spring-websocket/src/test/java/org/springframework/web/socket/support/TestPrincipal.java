@@ -18,7 +18,6 @@ package org.springframework.web.socket.support;
 
 import java.security.Principal;
 
-
 /**
  * An implementation of {@link Principal} for testing.
  *

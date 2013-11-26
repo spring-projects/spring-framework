@@ -27,7 +27,6 @@ import org.springframework.messaging.MessageHeaders;
 
 import static org.junit.Assert.*;
 
-
 /**
  * @author Mark Fisher
  */

@@ -64,7 +64,6 @@ final class ConfigurationClass {
 	private final Set<ImportBeanDefinitionRegistrar> importBeanDefinitionRegistrars =
 			new LinkedHashSet<ImportBeanDefinitionRegistrar>();
 
-
 	/**
 	 * Create a new {@link ConfigurationClass} with the given name.
 	 * @param metadataReader reader used to parse the underlying {@link Class}

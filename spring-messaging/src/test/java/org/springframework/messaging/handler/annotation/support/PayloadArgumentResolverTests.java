@@ -29,7 +29,6 @@ import org.springframework.messaging.support.converter.StringMessageConverter;
 
 import static org.junit.Assert.*;
 
-
 /**
  * Test fixture for {@link PayloadArgumentResolver}.
  *

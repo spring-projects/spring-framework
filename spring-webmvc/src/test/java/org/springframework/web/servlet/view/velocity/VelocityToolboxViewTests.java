@@ -23,7 +23,6 @@ import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 
-
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller

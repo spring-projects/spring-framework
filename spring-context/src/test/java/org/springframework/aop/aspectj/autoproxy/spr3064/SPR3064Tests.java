@@ -26,7 +26,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-
 /**
  * @author Adrian Colyer
  * @author Chris Beams

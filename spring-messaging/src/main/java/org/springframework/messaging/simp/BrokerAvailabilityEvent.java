@@ -18,7 +18,6 @@ package org.springframework.messaging.simp;
 
 import org.springframework.context.ApplicationEvent;
 
-
 /**
  * Event raised when a broker's availabilty changes
  *

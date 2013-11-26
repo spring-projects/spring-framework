@@ -25,7 +25,6 @@ import org.springframework.context.annotation.Import;
 
 import org.springframework.tests.sample.beans.TestBean;
 
-
 /**
  * TCK-style unit tests for handling circular use of the {@link Import} annotation. Explore
  * subclass hierarchy for specific concrete implementations.

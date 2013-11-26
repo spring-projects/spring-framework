@@ -25,7 +25,6 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 
-
 /**
  * Unit tests covering cases where a user defines an invalid Configuration
  * class, e.g.: forgets to annotate with {@link Configuration} or declares

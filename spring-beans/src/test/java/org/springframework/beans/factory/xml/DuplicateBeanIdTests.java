@@ -25,8 +25,6 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.sample.beans.TestBean;
 
-
-
 /**
  * With Spring 3.1, bean id attributes (and all other id attributes across the
  * core schemas) are no longer typed as xsd:id, but as xsd:string.  This allows

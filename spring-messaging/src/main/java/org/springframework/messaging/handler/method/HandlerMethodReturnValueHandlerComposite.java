@@ -26,7 +26,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 
-
 /**
  * @author Rossen Stoyanchev
  * @since 4.0

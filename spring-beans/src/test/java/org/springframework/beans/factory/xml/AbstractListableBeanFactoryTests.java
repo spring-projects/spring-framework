@@ -21,7 +21,6 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.tests.sample.beans.TestBean;
 
-
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller

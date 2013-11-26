@@ -34,7 +34,6 @@ import org.springframework.tests.sample.beans.MustBeInitialized;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.tests.sample.beans.factory.DummyFactory;
 
-
 /**
  * Subclasses must implement setUp() to initialize bean factory
  * and any other variables they need.

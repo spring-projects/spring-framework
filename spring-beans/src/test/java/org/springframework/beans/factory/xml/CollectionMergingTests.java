@@ -29,7 +29,6 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.sample.beans.TestBean;
 
-
 /**
  * Unit and integration tests for the collection merging support.
  *

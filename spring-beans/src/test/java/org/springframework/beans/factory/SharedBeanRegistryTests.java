@@ -26,7 +26,6 @@ import org.springframework.beans.factory.support.DefaultSingletonBeanRegistry;
 import org.springframework.tests.sample.beans.DerivedTestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
-
 /**
  * @author Juergen Hoeller
  * @author Chris Beams

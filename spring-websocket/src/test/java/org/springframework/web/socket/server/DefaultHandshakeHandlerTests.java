@@ -35,7 +35,6 @@ import org.springframework.web.socket.support.WebSocketHttpHeaders;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
-
 /**
  * Test fixture for {@link DefaultHandshakeHandler}.
  *

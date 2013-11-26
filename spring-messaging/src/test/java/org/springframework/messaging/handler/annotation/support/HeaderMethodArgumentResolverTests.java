@@ -31,7 +31,6 @@ import org.springframework.messaging.support.MessageBuilder;
 
 import static org.junit.Assert.*;
 
-
 /**
  * Test fixture for {@link HeaderMethodArgumentResolver} tests.
  *

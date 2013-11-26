@@ -23,7 +23,6 @@ import java.util.List;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.web.socket.TextMessage;
 
-
 /**
  * A builder for creating WebSocket messages with STOMP frame content.
  *

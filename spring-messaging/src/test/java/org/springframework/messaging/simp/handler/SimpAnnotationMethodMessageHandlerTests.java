@@ -39,7 +39,6 @@ import org.springframework.stereotype.Controller;
 
 import static org.junit.Assert.*;
 
-
 /**
  * Test fixture for {@link SimpAnnotationMethodMessageHandler}.
  * @author Rossen Stoyanchev

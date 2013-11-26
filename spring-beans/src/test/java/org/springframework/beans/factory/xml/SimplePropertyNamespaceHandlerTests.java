@@ -25,7 +25,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
-
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller

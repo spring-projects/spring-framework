@@ -25,7 +25,6 @@ import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryT
 
 import test.aop.PerTargetAspect;
 
-
 /**
  * @since 2.0
  * @author Rod Johnson

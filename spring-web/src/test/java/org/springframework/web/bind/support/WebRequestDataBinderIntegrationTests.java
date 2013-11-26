@@ -45,7 +45,6 @@ import org.springframework.web.context.request.ServletWebRequest;
 
 import static org.junit.Assert.*;
 
-
 /**
  * @author Brian Clozel
  */

@@ -52,7 +52,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.beans.IndexedTestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
-
 /**
  * Unit tests for various {@link PropertyResourceConfigurer} implementations including:
  * {@link PropertyPlaceholderConfigurer}, {@link PropertyOverrideConfigurer} and

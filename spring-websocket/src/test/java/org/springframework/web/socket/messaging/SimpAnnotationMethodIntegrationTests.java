@@ -58,7 +58,6 @@ import org.springframework.web.socket.server.HandshakeHandler;
 import static org.junit.Assert.*;
 import static org.springframework.web.socket.messaging.StompTextMessageBuilder.*;
 
-
 /**
  * Integration tests with annotated message-handling methods.
  * @author Rossen Stoyanchev
