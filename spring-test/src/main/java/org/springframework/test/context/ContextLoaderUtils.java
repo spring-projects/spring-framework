@@ -288,17 +288,16 @@ abstract class ContextLoaderUtils {
 			contextConfigType.getName(), contextHierarchyType.getName(), testClass.getName()));
 
 		while (descriptor != null) {
-			Class<?> rootDeclaringClass = descriptor.getDeclaringClass();
-			Class<?> declaringClass = (descriptor.getStereotype() != null) ? descriptor.getStereotypeType()
-					: rootDeclaringClass;
+			Class<?> rootDeclaringClass = descriptor.getRootDeclaringClass();
+			Class<?> declaringClass = descriptor.getDeclaringClass();
 
 			boolean contextConfigDeclaredLocally = isAnnotationDeclaredLocally(contextConfigType, declaringClass);
 			boolean contextHierarchyDeclaredLocally = isAnnotationDeclaredLocally(contextHierarchyType, declaringClass);
 
 			if (contextConfigDeclaredLocally && contextHierarchyDeclaredLocally) {
-				String msg = String.format("Test class [%s] has been configured with both @ContextConfiguration "
+				String msg = String.format("Class [%s] has been configured with both @ContextConfiguration "
 						+ "and @ContextHierarchy. Only one of these annotations may be declared on a test class "
-						+ "or custom stereotype annotation.", rootDeclaringClass.getName());
+						+ "or custom stereotype annotation.", declaringClass.getName());
 				logger.error(msg);
 				throw new IllegalStateException(msg);
 			}
@@ -429,13 +428,9 @@ abstract class ContextLoaderUtils {
 			annotationType.getName(), testClass.getName()));
 
 		while (descriptor != null) {
-			Class<?> rootDeclaringClass = descriptor.getDeclaringClass();
-			Class<?> declaringClass = (descriptor.getStereotype() != null) ? descriptor.getStereotypeType()
-					: rootDeclaringClass;
-
 			convertAnnotationAttributesToConfigAttributesAndAddToList(descriptor.getAnnotationAttributes(),
-				declaringClass, attributesList);
-			descriptor = findAnnotationDescriptor(rootDeclaringClass.getSuperclass(), annotationType);
+				descriptor.getDeclaringClass(), attributesList);
+			descriptor = findAnnotationDescriptor(descriptor.getRootDeclaringClass().getSuperclass(), annotationType);
 		}
 
 		return attributesList;
@@ -513,9 +508,7 @@ abstract class ContextLoaderUtils {
 		final Set<String> activeProfiles = new HashSet<String>();
 
 		while (descriptor != null) {
-			Class<?> rootDeclaringClass = descriptor.getDeclaringClass();
-			Class<?> declaringClass = (descriptor.getStereotype() != null) ? descriptor.getStereotypeType()
-					: rootDeclaringClass;
+			Class<?> declaringClass = descriptor.getDeclaringClass();
 
 			AnnotationAttributes annAttrs = descriptor.getAnnotationAttributes();
 			if (logger.isTraceEnabled()) {
@@ -563,7 +556,7 @@ abstract class ContextLoaderUtils {
 			}
 
 			descriptor = annAttrs.getBoolean("inheritProfiles") ? findAnnotationDescriptor(
-				rootDeclaringClass.getSuperclass(), annotationType) : null;
+				descriptor.getRootDeclaringClass().getSuperclass(), annotationType) : null;
 		}
 
 		return StringUtils.toStringArray(activeProfiles);

@@ -28,7 +28,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.test.context.MetaAnnotationUtils.AnnotationDescriptor;
 import org.springframework.util.Assert;
@@ -181,7 +180,6 @@ public class TestContextManager {
 		List<Class<? extends TestExecutionListener>> classesList = new ArrayList<Class<? extends TestExecutionListener>>();
 
 		AnnotationDescriptor<TestExecutionListeners> descriptor = findAnnotationDescriptor(clazz, annotationType);
-
 		boolean defaultListeners = false;
 
 		// Use defaults?
@@ -195,13 +193,9 @@ public class TestContextManager {
 		else {
 			// Traverse the class hierarchy...
 			while (descriptor != null) {
-				Class<?> rootDeclaringClass = descriptor.getDeclaringClass();
-				Class<?> declaringClass = (descriptor.getStereotype() != null) ? descriptor.getStereotypeType()
-						: rootDeclaringClass;
+				Class<?> declaringClass = descriptor.getDeclaringClass();
 
-				AnnotationAttributes annAttrs = AnnotatedElementUtils.getAnnotationAttributes(rootDeclaringClass,
-					TestExecutionListeners.class.getName());
-
+				AnnotationAttributes annAttrs = descriptor.getAnnotationAttributes();
 				if (logger.isTraceEnabled()) {
 					logger.trace(String.format(
 						"Retrieved @TestExecutionListeners attributes [%s] for declaring class [%s].", annAttrs,
@@ -212,7 +206,7 @@ public class TestContextManager {
 				Class<? extends TestExecutionListener>[] listenerClasses = (Class<? extends TestExecutionListener>[]) annAttrs.getClassArray("listeners");
 				if (!ObjectUtils.isEmpty(valueListenerClasses) && !ObjectUtils.isEmpty(listenerClasses)) {
 					String msg = String.format(
-						"Test class [%s] has been configured with @TestExecutionListeners' 'value' [%s] "
+						"Class [%s] has been configured with @TestExecutionListeners' 'value' [%s] "
 								+ "and 'listeners' [%s] attributes. Use one or the other, but not both.",
 						declaringClass, ObjectUtils.nullSafeToString(valueListenerClasses),
 						ObjectUtils.nullSafeToString(listenerClasses));
@@ -228,7 +222,7 @@ public class TestContextManager {
 				}
 
 				descriptor = (annAttrs.getBoolean("inheritListeners") ? findAnnotationDescriptor(
-					rootDeclaringClass.getSuperclass(), annotationType) : null);
+					descriptor.getRootDeclaringClass().getSuperclass(), annotationType) : null);
 			}
 		}
 

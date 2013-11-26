@@ -43,7 +43,7 @@ public class OverriddenMetaAnnotationAttributesTests {
 		AnnotationDescriptor<ContextConfiguration> descriptor = findAnnotationDescriptor(declaringClass,
 			ContextConfiguration.class);
 		assertNotNull(descriptor);
-		assertEquals(declaringClass, descriptor.getDeclaringClass());
+		assertEquals(declaringClass, descriptor.getRootDeclaringClass());
 		assertEquals(MetaValueConfig.class, descriptor.getStereotypeType());
 		assertEquals(ContextConfiguration.class, descriptor.getAnnotationType());
 		assertNotNull(descriptor.getStereotype());
@@ -59,7 +59,7 @@ public class OverriddenMetaAnnotationAttributesTests {
 		AnnotationDescriptor<ContextConfiguration> descriptor = findAnnotationDescriptor(declaringClass,
 			ContextConfiguration.class);
 		assertNotNull(descriptor);
-		assertEquals(declaringClass, descriptor.getDeclaringClass());
+		assertEquals(declaringClass, descriptor.getRootDeclaringClass());
 		assertEquals(MetaValueConfig.class, descriptor.getStereotypeType());
 		assertEquals(ContextConfiguration.class, descriptor.getAnnotationType());
 		assertNotNull(descriptor.getStereotype());
@@ -84,7 +84,7 @@ public class OverriddenMetaAnnotationAttributesTests {
 		AnnotationDescriptor<ContextConfiguration> descriptor = findAnnotationDescriptor(declaringClass,
 			ContextConfiguration.class);
 		assertNotNull(descriptor);
-		assertEquals(declaringClass, descriptor.getDeclaringClass());
+		assertEquals(declaringClass, descriptor.getRootDeclaringClass());
 		assertEquals(MetaLocationsConfig.class, descriptor.getStereotypeType());
 		assertEquals(ContextConfiguration.class, descriptor.getAnnotationType());
 		assertNotNull(descriptor.getStereotype());
@@ -101,7 +101,7 @@ public class OverriddenMetaAnnotationAttributesTests {
 		AnnotationDescriptor<ContextConfiguration> descriptor = findAnnotationDescriptor(declaringClass,
 			ContextConfiguration.class);
 		assertNotNull(descriptor);
-		assertEquals(declaringClass, descriptor.getDeclaringClass());
+		assertEquals(declaringClass, descriptor.getRootDeclaringClass());
 		assertEquals(MetaLocationsConfig.class, descriptor.getStereotypeType());
 		assertEquals(ContextConfiguration.class, descriptor.getAnnotationType());
 		assertNotNull(descriptor.getStereotype());
