@@ -269,7 +269,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 	private CacheStatus inspectCacheables(Collection<CacheOperationContext> cacheables) {
 		Map<CacheOperationContext, Object> cacheUpdates = new LinkedHashMap<CacheOperationContext, Object>(cacheables.size());
-		boolean updateRequired = false;
+		boolean cacheHit = false;
 		Object retVal = null;
 
 		if (!cacheables.isEmpty()) {
@@ -288,20 +288,16 @@ public abstract class CacheAspectSupport implements InitializingBean {
 					}
 					// add op/key (in case an update is discovered later on)
 					cacheUpdates.put(context, key);
-					boolean localCacheHit = false;
 					// check whether the cache needs to be inspected or not (the method will be invoked anyway)
-					if (!updateRequired) {
+					if (!cacheHit) {
 						for (Cache cache : context.getCaches()) {
 							Cache.ValueWrapper wrapper = cache.get(key);
 							if (wrapper != null) {
 								retVal = wrapper.get();
-								localCacheHit = true;
+								cacheHit = true;
 								break;
 							}
 						}
-					}
-					if (!localCacheHit) {
-						updateRequired = true;
 					}
 				}
 				else {
@@ -313,7 +309,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 			// return a status only if at least one cacheable matched
 			if (atLeastOnePassed) {
-				return new CacheStatus(cacheUpdates, updateRequired, retVal);
+				return new CacheStatus(cacheUpdates, !cacheHit, retVal);
 			}
 		}
 
