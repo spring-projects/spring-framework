@@ -261,7 +261,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		for (CacheOperationContext context : contexts) {
 			if (isConditionPassing(context, result)) {
 				Object key = generateKey(context, result);
-				if (!whenNotInCache || findInCaches(context, key) == null) {
+				if (!whenNotInCache || findInAnyCaches(contexts, key) == null) {
 					putRequests.add(new CachePutRequest(context, key));
 				}
 			}
@@ -278,6 +278,16 @@ public abstract class CacheAspectSupport implements InitializingBean {
 			}
 		}
 		return result;
+	}
+
+	private Cache.ValueWrapper  findInAnyCaches(Collection<CacheOperationContext> contexts, Object key) {
+		for (CacheOperationContext context : contexts) {
+			ValueWrapper wrapper = findInCaches(context, key);
+			if (wrapper != null) {
+				return wrapper;
+			}
+		}
+		return null;
 	}
 
 	private Cache.ValueWrapper findInCaches(CacheOperationContext context, Object key) {
