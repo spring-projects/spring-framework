@@ -787,6 +787,41 @@ project("spring-aspects") {
 	}
 }
 
+project("spring-framework-bom") {
+	description = "Spring Framework (Bill of Materials)"
+
+	configurations.archives.artifacts.clear()
+	artifacts {
+		// work around GRADLE-2406 by attaching text artifact
+		archives(file("spring-framework-bom.txt"))
+	}
+
+	install {
+		repositories.mavenInstaller {
+			pom.whenConfigured {
+				packaging = "pom"
+				withXml {
+					asNode().children().last() + {
+						delegate.dependencyManagement {
+							delegate.dependencies {
+								parent.subprojects.sort { "$it.name" }.each { p ->
+									if (p.hasProperty("merge") && p.merge.into == null && p != project) {
+										delegate.dependency {
+											delegate.groupId(p.group)
+											delegate.artifactId(p.name)
+											delegate.version(p.version)
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 configure(rootProject) {
 	description = "Spring Framework"
 
