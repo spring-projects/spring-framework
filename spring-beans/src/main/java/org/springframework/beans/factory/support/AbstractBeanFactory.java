@@ -286,8 +286,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				String[] dependsOn = mbd.getDependsOn();
 				if (dependsOn != null) {
 					for (String dependsOnBean : dependsOn) {
-						getBean(dependsOnBean);
+						if (isDependent(beanName, dependsOnBean)) {
+							throw new BeanCreationException("Circular depends-on relationship between '" +
+									beanName + "' and '" + dependsOnBean + "'");
+						}
 						registerDependentBean(dependsOnBean, beanName);
+						getBean(dependsOnBean);
 					}
 				}
 

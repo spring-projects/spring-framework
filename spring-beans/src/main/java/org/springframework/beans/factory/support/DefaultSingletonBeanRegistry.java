@@ -413,6 +413,28 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 	/**
+	 * Determine whether the specified dependent bean has been registered as
+	 * dependent on the given bean or on any of its transitive dependencies.
+	 * @param beanName the name of the bean to check
+	 * @param dependentBeanName the name of the dependent bean
+	 */
+	protected boolean isDependent(String beanName, String dependentBeanName) {
+		Set<String> dependentBeans = this.dependentBeanMap.get(beanName);
+		if (dependentBeans == null) {
+			return false;
+		}
+		if (dependentBeans.contains(dependentBeanName)) {
+			return true;
+		}
+		for (String transitiveDependency : dependentBeans) {
+			if (isDependent(transitiveDependency, dependentBeanName)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Determine whether a dependent bean has been registered for the given name.
 	 * @param beanName the name of the bean to check
 	 */

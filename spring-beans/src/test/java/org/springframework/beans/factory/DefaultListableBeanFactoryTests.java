@@ -1219,8 +1219,8 @@ public class DefaultListableBeanFactoryTests {
 		}
 		catch (UnsatisfiedDependencyException ex) {
 			// expected
-			assertTrue(ex.getMessage().indexOf("rod") != -1);
-			assertTrue(ex.getMessage().indexOf("rod2") != -1);
+			assertTrue(ex.getMessage().contains("rod"));
+			assertTrue(ex.getMessage().contains("rod2"));
 		}
 	}
 
@@ -1288,6 +1288,51 @@ public class DefaultListableBeanFactoryTests {
 		DependenciesBean bean = (DependenciesBean)
 				lbf.autowire(DependenciesBean.class, AutowireCapableBeanFactory.AUTOWIRE_BY_NAME, false);
 		assertNull(bean.getSpouse());
+	}
+
+	@Test
+	public void testDependsOnCycle() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		bd1.setDependsOn(new String[] {"tb2"});
+		lbf.registerBeanDefinition("tb1", bd1);
+		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
+		bd2.setDependsOn(new String[] {"tb1"});
+		lbf.registerBeanDefinition("tb2", bd2);
+		try {
+			lbf.preInstantiateSingletons();
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			// expected
+			assertTrue(ex.getMessage().contains("Circular"));
+			assertTrue(ex.getMessage().contains("'tb2'"));
+			assertTrue(ex.getMessage().contains("'tb1'"));
+		}
+	}
+
+	@Test
+	public void testImplicitDependsOnCycle() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		bd1.setDependsOn(new String[] {"tb2"});
+		lbf.registerBeanDefinition("tb1", bd1);
+		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
+		bd2.setDependsOn(new String[] {"tb3"});
+		lbf.registerBeanDefinition("tb2", bd2);
+		RootBeanDefinition bd3 = new RootBeanDefinition(TestBean.class);
+		bd3.setDependsOn(new String[] {"tb1"});
+		lbf.registerBeanDefinition("tb3", bd3);
+		try {
+			lbf.preInstantiateSingletons();
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			// expected
+			assertTrue(ex.getMessage().contains("Circular"));
+			assertTrue(ex.getMessage().contains("'tb3'"));
+			assertTrue(ex.getMessage().contains("'tb1'"));
+		}
 	}
 
 	@Test(expected=NoSuchBeanDefinitionException.class)
@@ -2174,7 +2219,7 @@ public class DefaultListableBeanFactoryTests {
 		AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
 		beanDefinition.setScope("he put himself so low could hardly look me in the face");
 
-		final DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		factory.registerBeanDefinition("testBean", beanDefinition);
 		factory.getBean("testBean");
 	}
@@ -2186,8 +2231,7 @@ public class DefaultListableBeanFactoryTests {
 		RootBeanDefinition parent = new RootBeanDefinition();
 		parent.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 
-		AbstractBeanDefinition child = BeanDefinitionBuilder
-				.childBeanDefinition("parent").getBeanDefinition();
+		AbstractBeanDefinition child = BeanDefinitionBuilder.childBeanDefinition("parent").getBeanDefinition();
 		child.setBeanClass(TestBean.class);
 		child.setScope(theChildScope);
 
