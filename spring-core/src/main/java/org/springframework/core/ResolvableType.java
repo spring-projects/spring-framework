@@ -690,7 +690,8 @@ public final class ResolvableType implements Serializable {
 	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(this.type);
-		hashCode = hashCode * 31 + ObjectUtils.nullSafeHashCode(this.variableResolver);
+		hashCode = hashCode * 31 + ObjectUtils.nullSafeHashCode(
+				this.variableResolver == null ? null : this.variableResolver.getSource());
 		hashCode = hashCode * 31 + ObjectUtils.nullSafeHashCode(this.componentType);
 		return hashCode;
 	}
