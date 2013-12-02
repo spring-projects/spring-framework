@@ -316,46 +316,48 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware, 
 			this.cacheName = this.beanName;
 		}
 
-		// Fetch cache region: If none with the given name exists,
-		// create one on the fly.
-		Ehcache rawCache;
-		boolean cacheExists = this.cacheManager.cacheExists(cacheName);
-		if (cacheExists) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Using existing EhCache cache region '" + this.cacheName + "'");
+		synchronized (this.cacheManager) {
+			// Fetch cache region: If none with the given name exists,
+			// create one on the fly.
+			Ehcache rawCache;
+			boolean cacheExists = this.cacheManager.cacheExists(this.cacheName);
+			if (cacheExists) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Using existing EhCache cache region '" + this.cacheName + "'");
+				}
+				rawCache = this.cacheManager.getEhcache(this.cacheName);
 			}
-			rawCache = this.cacheManager.getEhcache(this.cacheName);
-		}
-		else {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Creating new EhCache cache region '" + this.cacheName + "'");
+			else {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Creating new EhCache cache region '" + this.cacheName + "'");
+				}
+				rawCache = createCache();
 			}
-			rawCache = createCache();
-		}
 
-		if (this.cacheEventListeners != null) {
-			for (CacheEventListener listener : this.cacheEventListeners) {
-				rawCache.getCacheEventNotificationService().registerListener(listener);
+			if (this.cacheEventListeners != null) {
+				for (CacheEventListener listener : this.cacheEventListeners) {
+					rawCache.getCacheEventNotificationService().registerListener(listener);
+				}
 			}
-		}
-		if (this.statisticsEnabled) {
-			rawCache.setStatisticsEnabled(true);
-		}
-		if (this.sampledStatisticsEnabled) {
-			rawCache.setSampledStatisticsEnabled(true);
-		}
-		if (this.disabled) {
-			rawCache.setDisabled(true);
-		}
+			if (this.statisticsEnabled) {
+				rawCache.setStatisticsEnabled(true);
+			}
+			if (this.sampledStatisticsEnabled) {
+				rawCache.setSampledStatisticsEnabled(true);
+			}
+			if (this.disabled) {
+				rawCache.setDisabled(true);
+			}
 
-		if (!cacheExists) {
-			this.cacheManager.addCache(rawCache);
+			if (!cacheExists) {
+				this.cacheManager.addCache(rawCache);
+			}
+			Ehcache decoratedCache = decorateCache(rawCache);
+			if (decoratedCache != rawCache) {
+				this.cacheManager.replaceCacheWithDecoratedCache(rawCache, decoratedCache);
+			}
+			this.cache = decoratedCache;
 		}
-		Ehcache decoratedCache = decorateCache(rawCache);
-		if (decoratedCache != rawCache) {
-			this.cacheManager.replaceCacheWithDecoratedCache(rawCache, decoratedCache);
-		}
-		this.cache = decoratedCache;
 	}
 
 	/**
