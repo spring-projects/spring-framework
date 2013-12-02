@@ -31,9 +31,9 @@ import net.sf.ehcache.constructs.blocking.SelfPopulatingCache;
 import net.sf.ehcache.constructs.blocking.UpdatingCacheEntryFactory;
 import net.sf.ehcache.constructs.blocking.UpdatingSelfPopulatingCache;
 import net.sf.ehcache.event.CacheEventListener;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -230,46 +230,48 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 			this.cacheManager = CacheManager.getInstance();
 		}
 
-		// Fetch cache region: If none with the given name exists, create one on the fly.
-		Ehcache rawCache;
-		boolean cacheExists = this.cacheManager.cacheExists(cacheName);
-		if (cacheExists) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Using existing EhCache cache region '" + cacheName + "'");
+		synchronized (this.cacheManager) {
+			// Fetch cache region: If none with the given name exists, create one on the fly.
+			Ehcache rawCache;
+			boolean cacheExists = this.cacheManager.cacheExists(cacheName);
+			if (cacheExists) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Using existing EhCache cache region '" + cacheName + "'");
+				}
+				rawCache = this.cacheManager.getEhcache(cacheName);
 			}
-			rawCache = this.cacheManager.getEhcache(cacheName);
-		}
-		else {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Creating new EhCache cache region '" + cacheName + "'");
+			else {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Creating new EhCache cache region '" + cacheName + "'");
+				}
+				rawCache = createCache();
+				rawCache.setBootstrapCacheLoader(this.bootstrapCacheLoader);
 			}
-			rawCache = createCache();
-			rawCache.setBootstrapCacheLoader(this.bootstrapCacheLoader);
-		}
 
-		if (this.cacheEventListeners != null) {
-			for (CacheEventListener listener : this.cacheEventListeners) {
-				rawCache.getCacheEventNotificationService().registerListener(listener);
+			if (this.cacheEventListeners != null) {
+				for (CacheEventListener listener : this.cacheEventListeners) {
+					rawCache.getCacheEventNotificationService().registerListener(listener);
+				}
 			}
-		}
-		if (this.statisticsEnabled) {
-			rawCache.setStatisticsEnabled(true);
-		}
-		if (this.sampledStatisticsEnabled) {
-			rawCache.setSampledStatisticsEnabled(true);
-		}
-		if (this.disabled) {
-			rawCache.setDisabled(true);
-		}
+			if (this.statisticsEnabled) {
+				rawCache.setStatisticsEnabled(true);
+			}
+			if (this.sampledStatisticsEnabled) {
+				rawCache.setSampledStatisticsEnabled(true);
+			}
+			if (this.disabled) {
+				rawCache.setDisabled(true);
+			}
 
-		if (!cacheExists) {
-			this.cacheManager.addCache(rawCache);
+			if (!cacheExists) {
+				this.cacheManager.addCache(rawCache);
+			}
+			Ehcache decoratedCache = decorateCache(rawCache);
+			if (decoratedCache != rawCache) {
+				this.cacheManager.replaceCacheWithDecoratedCache(rawCache, decoratedCache);
+			}
+			this.cache = decoratedCache;
 		}
-		Ehcache decoratedCache = decorateCache(rawCache);
-		if (decoratedCache != rawCache) {
-			this.cacheManager.replaceCacheWithDecoratedCache(rawCache, decoratedCache);
-		}
-		this.cache = decoratedCache;
 	}
 
 	/**
