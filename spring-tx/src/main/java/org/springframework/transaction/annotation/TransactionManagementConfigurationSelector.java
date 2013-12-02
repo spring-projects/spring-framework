@@ -32,8 +32,7 @@ import org.springframework.transaction.config.TransactionManagementConfigUtils;
  * @see ProxyTransactionManagementConfiguration
  * @see TransactionManagementConfigUtils#TRANSACTION_ASPECT_CONFIGURATION_CLASS_NAME
  */
-public class TransactionManagementConfigurationSelector
-		extends AdviceModeImportSelector<EnableTransactionManagement> {
+public class TransactionManagementConfigurationSelector extends AdviceModeImportSelector<EnableTransactionManagement> {
 
 	/**
 	 * {@inheritDoc}

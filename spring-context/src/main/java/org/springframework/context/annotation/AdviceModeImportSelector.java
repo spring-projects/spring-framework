@@ -60,7 +60,7 @@ public abstract class AdviceModeImportSelector<A extends Annotation> implements 
 	 */
 	@Override
 	public final String[] selectImports(AnnotationMetadata importingClassMetadata) {
-		Class<?> annoType = GenericTypeResolver.resolveTypeArgument(this.getClass(), AdviceModeImportSelector.class);
+		Class<?> annoType = GenericTypeResolver.resolveTypeArgument(getClass(), AdviceModeImportSelector.class);
 		AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(importingClassMetadata, annoType);
 		Assert.notNull(attributes, String.format(
 				"@%s is not present on importing class '%s' as expected",
