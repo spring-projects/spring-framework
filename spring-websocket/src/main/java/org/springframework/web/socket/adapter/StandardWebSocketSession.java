@@ -36,7 +36,7 @@ import org.springframework.web.socket.PingMessage;
 import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.support.WebSocketExtension;
+import org.springframework.web.socket.WebSocketExtension;
 
 /**
  * A {@link WebSocketSession} for use with the standard WebSocket for Java API.

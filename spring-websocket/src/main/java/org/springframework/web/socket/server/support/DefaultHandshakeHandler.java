@@ -38,7 +38,7 @@ import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.socket.support.SubProtocolCapable;
-import org.springframework.web.socket.support.WebSocketExtension;
+import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.support.WebSocketHandlerDecorator;
 import org.springframework.web.socket.support.WebSocketHttpHeaders;
 

@@ -38,7 +38,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.JettyWebSocketHandlerAdapter;
 import org.springframework.web.socket.adapter.JettyWebSocketSession;
 import org.springframework.web.socket.client.AbstractWebSocketClient;
-import org.springframework.web.socket.support.WebSocketExtension;
+import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 

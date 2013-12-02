@@ -40,7 +40,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.StandardWebSocketHandlerAdapter;
 import org.springframework.web.socket.adapter.StandardWebSocketSession;
 import org.springframework.web.socket.client.AbstractWebSocketClient;
-import org.springframework.web.socket.support.WebSocketExtension;
+import org.springframework.web.socket.WebSocketExtension;
 
 /**
  * Initiates WebSocket requests to a WebSocket server programatically through the standard

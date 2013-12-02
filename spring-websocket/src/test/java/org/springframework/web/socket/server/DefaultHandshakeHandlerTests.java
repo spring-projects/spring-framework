@@ -28,7 +28,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.support.SubProtocolCapable;
-import org.springframework.web.socket.support.WebSocketExtension;
+import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.adapter.TextWebSocketHandlerAdapter;
 import org.springframework.web.socket.support.WebSocketHttpHeaders;

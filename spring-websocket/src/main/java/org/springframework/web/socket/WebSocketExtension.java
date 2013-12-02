@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.support;
+package org.springframework.web.socket;
 
 import java.util.ArrayList;
 import java.util.Collections;

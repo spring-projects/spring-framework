@@ -20,12 +20,11 @@ import java.util.List;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
-import org.springframework.web.socket.support.WebSocketExtension;
 
 import static org.junit.Assert.*;
 
 /**
- * Test fixture for {@link org.springframework.web.socket.support.WebSocketExtension}
+ * Test fixture for {@link WebSocketExtension}
  * @author Brian Clozel
  */
 public class WebSocketExtensionTests {

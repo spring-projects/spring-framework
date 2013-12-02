@@ -26,7 +26,7 @@ import org.glassfish.tyrus.core.EndpointWrapper;
 import org.glassfish.tyrus.spi.SPIEndpoint;
 import org.glassfish.tyrus.websockets.WebSocketApplication;
 import org.springframework.util.ClassUtils;
-import org.springframework.web.socket.support.WebSocketExtension;
+import org.springframework.web.socket.WebSocketExtension;
 
 /**
  * Extension of the {@link AbstractGlassFishRequestUpgradeStrategy} that provides support

@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.socket.WebSocketExtension;
 
 /**
  * An {@link org.springframework.http.HttpHeaders} variant that adds support for
