@@ -28,11 +28,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.socket.server.support.ServerEndpointExporter;
+import org.springframework.web.socket.server.support.ServerEndpointRegistration;
 
 import static org.mockito.Mockito.*;
 
 /**
- * Test fixture for {@link ServerEndpointExporter}.
+ * Test fixture for {@link org.springframework.web.socket.server.support.ServerEndpointExporter}.
  *
  * @author Rossen Stoyanchev
  */

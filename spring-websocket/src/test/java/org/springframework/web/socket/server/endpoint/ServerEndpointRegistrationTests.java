@@ -26,11 +26,12 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.socket.server.support.ServerEndpointRegistration;
 
 import static org.junit.Assert.*;
 
 /**
- * Test fixture for {@link ServerEndpointRegistration}.
+ * Test fixture for {@link org.springframework.web.socket.server.support.ServerEndpointRegistration}.
  *
  * @author Rossen Stoyanchev
  */

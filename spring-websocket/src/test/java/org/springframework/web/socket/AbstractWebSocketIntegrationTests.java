@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.socket.client.WebSocketClient;
-import org.springframework.web.socket.server.DefaultHandshakeHandler;
+import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.socket.server.support.JettyRequestUpgradeStrategy;
 import org.springframework.web.socket.server.support.TomcatRequestUpgradeStrategy;

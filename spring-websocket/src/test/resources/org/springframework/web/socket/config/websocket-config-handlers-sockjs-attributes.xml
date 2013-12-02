@@ -1,0 +1,34 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:websocket="http://www.springframework.org/schema/websocket"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+
+    <websocket:handlers >
+        <websocket:mapping path="/test" handler="testHandler"/>
+        <websocket:sockjs task-scheduler="testTaskScheduler"
+                          name="testSockJsService"
+                          websocket-enabled="false"
+                          session-cookie-needed="false"
+                          stream-bytes-limit="2048"
+                          disconnect-delay="256"
+                          http-message-cache-size="1024"
+                          heartbeat-time="20">
+            <websocket:transport-handlers register-defaults="false">
+                <bean class="org.springframework.web.socket.sockjs.transport.handler.XhrPollingTransportHandler"/>
+                <ref bean="xhrStreamingTransportHandler"/>
+            </websocket:transport-handlers>
+        </websocket:sockjs>
+    </websocket:handlers>
+
+    <bean id="testHandler"
+          class="org.springframework.web.socket.config.TestWebSocketHandler"/>
+
+    <bean id="xhrStreamingTransportHandler"
+          class="org.springframework.web.socket.sockjs.transport.handler.XhrStreamingTransportHandler"/>
+
+    <bean id="testTaskScheduler"
+          class="org.springframework.web.socket.config.TestTaskScheduler"/>
+
+</beans>

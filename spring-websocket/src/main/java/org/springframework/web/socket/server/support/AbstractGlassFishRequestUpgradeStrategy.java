@@ -50,8 +50,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.server.HandshakeFailureException;
-import org.springframework.web.socket.server.endpoint.ServerEndpointRegistration;
-import org.springframework.web.socket.server.endpoint.ServletServerContainerFactoryBean;
 
 /**
  * GlassFish support for upgrading a request during a WebSocket handshake. To modify

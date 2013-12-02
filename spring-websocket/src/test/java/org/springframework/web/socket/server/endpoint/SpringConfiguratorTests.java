@@ -29,6 +29,7 @@ import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.socket.server.support.SpringConfigurator;
 
 import static org.junit.Assert.*;
 

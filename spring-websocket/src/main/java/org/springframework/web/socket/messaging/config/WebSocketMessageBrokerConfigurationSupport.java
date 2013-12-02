@@ -21,7 +21,7 @@ import org.springframework.messaging.simp.config.AbstractMessageBrokerConfigurat
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.server.config.SockJsServiceRegistration;
+import org.springframework.web.socket.config.SockJsServiceRegistration;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 
 /**

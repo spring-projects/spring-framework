@@ -14,27 +14,8 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.messaging.config;
-
-import org.springframework.web.socket.server.HandshakeHandler;
-import org.springframework.web.socket.config.SockJsServiceRegistration;
-
 /**
- * A contract for configuring a STOMP over WebSocket endpoint.
- *
- * @author Rossen Stoyanchev
- * @since 4.0
+ * Configuration support for WebSocket request handling.
  */
-public interface StompWebSocketEndpointRegistration {
+package org.springframework.web.socket.config;
 
-	/**
-	 * Enable SockJS fallback options.
-	 */
-	SockJsServiceRegistration withSockJS();
-
-	/**
-	 * Configure the HandshakeHandler to use.
-	 */
-	StompWebSocketEndpointRegistration setHandshakeHandler(HandshakeHandler handshakeHandler);
-
-}

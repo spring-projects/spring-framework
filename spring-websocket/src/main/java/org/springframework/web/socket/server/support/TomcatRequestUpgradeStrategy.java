@@ -35,8 +35,6 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.server.HandshakeFailureException;
-import org.springframework.web.socket.server.endpoint.ServerEndpointRegistration;
-import org.springframework.web.socket.server.endpoint.ServletServerContainerFactoryBean;
 
 /**
  * Tomcat support for upgrading an {@link HttpServletRequest} during a WebSocket

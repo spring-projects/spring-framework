@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.web.socket.AbstractHttpRequestTests;
+import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.support.SubProtocolCapable;
 import org.springframework.web.socket.support.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
@@ -36,7 +37,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 /**
- * Test fixture for {@link DefaultHandshakeHandler}.
+ * Test fixture for {@link org.springframework.web.socket.server.support.DefaultHandshakeHandler}.
  *
  * @author Rossen Stoyanchev
  */
