@@ -20,6 +20,11 @@ import java.util.List;
 
 import org.junit.Test;
 
+import org.springframework.aop.Pointcut;
+import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
+import org.springframework.aop.interceptor.SimpleTraceInterceptor;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
+
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
@@ -125,6 +130,16 @@ public class BeanMethodPolymorphismTests {
 	public void beanMethodShadowing() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ShadowConfig.class);
 		assertThat(ctx.getBean(String.class), equalTo("shadow"));
+	}
+
+	@Test
+	public void beanMethodThroughAopProxy() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(Config.class);
+		ctx.register(AnnotationAwareAspectJAutoProxyCreator.class);
+		ctx.register(TestAdvisor.class);
+		ctx.refresh();
+		ctx.getBean("testBean", TestBean.class);
 	}
 
 
@@ -236,6 +251,14 @@ public class BeanMethodPolymorphismTests {
 		@Bean
 		String aString() {
 			return "shadow";
+		}
+	}
+
+
+	public static class TestAdvisor extends DefaultPointcutAdvisor {
+
+		public TestAdvisor() {
+			super(new SimpleTraceInterceptor());
 		}
 	}
 
