@@ -59,10 +59,10 @@ import org.springframework.util.ReflectionUtils;
 class ConfigurationClassEnhancer {
 
 	private static final Callback[] CALLBACKS = new Callback[] {
-		new BeanMethodInterceptor(),
-		new DisposableBeanMethodInterceptor(),
-		new BeanFactoryAwareMethodInterceptor(),
-		NoOp.INSTANCE
+			new BeanMethodInterceptor(),
+			new DisposableBeanMethodInterceptor(),
+			new BeanFactoryAwareMethodInterceptor(),
+			NoOp.INSTANCE
 	};
 
 	private static final ConditionalCallbackFilter CALLBACK_FILTER = new ConditionalCallbackFilter(CALLBACKS);
@@ -137,7 +137,6 @@ class ConfigurationClassEnhancer {
 	}
 
 
-
 	/**
 	 * Marker interface to be implemented by all @Configuration CGLIB subclasses.
 	 * Facilitates idempotent behavior for {@link ConfigurationClassEnhancer#enhance(Class)}
@@ -160,6 +159,7 @@ class ConfigurationClassEnhancer {
 	 * @see ConditionalCallbackFilter
 	 */
 	private static interface ConditionalCallback extends Callback {
+
 		boolean isMatch(Method candidateMethod);
 	}
 
@@ -178,24 +178,23 @@ class ConfigurationClassEnhancer {
 			this.callbacks = callbacks;
 			this.callbackTypes = new Class<?>[callbacks.length];
 			for (int i = 0; i < callbacks.length; i++) {
-				callbackTypes[i] = callbacks[i].getClass();
+				this.callbackTypes[i] = callbacks[i].getClass();
 			}
 		}
 
 		@Override
 		public int accept(Method method) {
-			for (int i = 0; i < callbacks.length; i++) {
-				if (!(callbacks[i] instanceof ConditionalCallback) ||
-						((ConditionalCallback) callbacks[i]).isMatch(method)) {
+			for (int i = 0; i < this.callbacks.length; i++) {
+				if (!(this.callbacks[i] instanceof ConditionalCallback) ||
+						((ConditionalCallback) this.callbacks[i]).isMatch(method)) {
 					return i;
 				}
 			}
-			throw new IllegalStateException("No callback available for method "
-					+ method.getName());
+			throw new IllegalStateException("No callback available for method " + method.getName());
 		}
 
 		public Class<?>[] getCallbackTypes() {
-			return callbackTypes;
+			return this.callbackTypes;
 		}
 	}
 
@@ -209,23 +208,22 @@ class ConfigurationClassEnhancer {
 	private static class DisposableBeanMethodInterceptor implements MethodInterceptor, ConditionalCallback {
 
 		@Override
-		public boolean isMatch(Method candidateMethod) {
-			return candidateMethod.getName().equals("destroy")
-					&& candidateMethod.getParameterTypes().length == 0
-					&& DisposableBean.class.isAssignableFrom(candidateMethod.getDeclaringClass());
-		}
-
-		@Override
 		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
 			Enhancer.registerStaticCallbacks(obj.getClass(), null);
-			// does the actual (non-CGLIB) superclass actually implement DisposableBean?
-			// if so, call its dispose() method. If not, just exit.
+			// Does the actual (non-CGLIB) superclass actually implement DisposableBean?
+			// If so, call its dispose() method. If not, just exit.
 			if (DisposableBean.class.isAssignableFrom(obj.getClass().getSuperclass())) {
 				return proxy.invokeSuper(obj, args);
 			}
 			return null;
 		}
 
+		@Override
+		public boolean isMatch(Method candidateMethod) {
+			return candidateMethod.getName().equals("destroy") &&
+					candidateMethod.getParameterTypes().length == 0 &&
+					DisposableBean.class.isAssignableFrom(candidateMethod.getDeclaringClass());
+		}
 	}
 
 
@@ -238,25 +236,25 @@ class ConfigurationClassEnhancer {
 	private static class BeanFactoryAwareMethodInterceptor implements MethodInterceptor, ConditionalCallback {
 
 		@Override
+		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
+			Field field = obj.getClass().getDeclaredField(BEAN_FACTORY_FIELD);
+			Assert.state(field != null, "Unable to find generated BeanFactory field");
+			field.set(obj, args[0]);
+
+			// Does the actual (non-CGLIB) superclass actually implement BeanFactoryAware?
+			// If so, call its setBeanFactory() method. If not, just exit.
+			if (BeanFactoryAware.class.isAssignableFrom(obj.getClass().getSuperclass())) {
+				return proxy.invokeSuper(obj, args);
+			}
+			return null;
+		}
+
+		@Override
 		public boolean isMatch(Method candidateMethod) {
 			return candidateMethod.getName().equals("setBeanFactory") &&
 					candidateMethod.getParameterTypes().length == 1 &&
 					candidateMethod.getParameterTypes()[0].equals(BeanFactory.class) &&
 					BeanFactoryAware.class.isAssignableFrom(candidateMethod.getDeclaringClass());
-		}
-
-		@Override
-		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
-			Field field = obj.getClass().getDeclaredField(BEAN_FACTORY_FIELD);
-			Assert.state(field != null, "Unable to find generated bean factory field");
-			field.set(obj, args[0]);
-
-			// does the actual (non-CGLIB) superclass actually implement BeanFactoryAware?
-			// if so, call its setBeanFactory() method. If not, just exit.
-			if (BeanFactoryAware.class.isAssignableFrom(obj.getClass().getSuperclass())) {
-				return proxy.invokeSuper(obj, args);
-			}
-			return null;
 		}
 	}
 
@@ -268,11 +266,6 @@ class ConfigurationClassEnhancer {
 	 * @see ConfigurationClassEnhancer
 	 */
 	private static class BeanMethodInterceptor implements MethodInterceptor, ConditionalCallback {
-
-		@Override
-		public boolean isMatch(Method candidateMethod) {
-			return BeanAnnotationHelper.isBeanAnnotated(candidateMethod);
-		}
 
 		/**
 		 * Enhance a {@link Bean @Bean} method to check the supplied BeanFactory for the
@@ -288,7 +281,7 @@ class ConfigurationClassEnhancer {
 			ConfigurableBeanFactory beanFactory = getBeanFactory(enhancedConfigInstance);
 			String beanName = BeanAnnotationHelper.determineBeanNameFor(beanMethod);
 
-			// determine whether this bean is a scoped-proxy
+			// Determine whether this bean is a scoped-proxy
 			Scope scope = AnnotationUtils.findAnnotation(beanMethod, Scope.class);
 			if (scope != null && scope.proxyMode() != ScopedProxyMode.NO) {
 				String scopedBeanName = ScopedProxyCreator.getTargetBeanName(beanName);
@@ -297,28 +290,28 @@ class ConfigurationClassEnhancer {
 				}
 			}
 
-			// to handle the case of an inter-bean method reference, we must explicitly check the
-			// container for already cached instances
+			// To handle the case of an inter-bean method reference, we must explicitly check the
+			// container for already cached instances.
 
-			// first, check to see if the requested bean is a FactoryBean. If so, create a subclass
+			// First, check to see if the requested bean is a FactoryBean. If so, create a subclass
 			// proxy that intercepts calls to getObject() and returns any cached bean instance.
-			// this ensures that the semantics of calling a FactoryBean from within @Bean methods
+			// This ensures that the semantics of calling a FactoryBean from within @Bean methods
 			// is the same as that of referring to a FactoryBean within XML. See SPR-6602.
 			if (factoryContainsBean(beanFactory, BeanFactory.FACTORY_BEAN_PREFIX + beanName) &&
 					factoryContainsBean(beanFactory, beanName)) {
 				Object factoryBean = beanFactory.getBean(BeanFactory.FACTORY_BEAN_PREFIX + beanName);
 				if (factoryBean instanceof ScopedProxyFactoryBean) {
-					// pass through - scoped proxy factory beans are a special case and should not
+					// Pass through - scoped proxy factory beans are a special case and should not
 					// be further proxied
 				}
 				else {
-					// it is a candidate FactoryBean - go ahead with enhancement
+					// It is a candidate FactoryBean - go ahead with enhancement
 					return enhanceFactoryBean(factoryBean.getClass(), beanFactory, beanName);
 				}
 			}
 
 			if (isCurrentlyInvokedFactoryMethod(beanMethod) && !beanFactory.containsSingleton(beanName)) {
-				// the factory is calling the bean method in order to instantiate and register the bean
+				// The factory is calling the bean method in order to instantiate and register the bean
 				// (i.e. via a getBean() call) -> invoke the super implementation of the method to actually
 				// create the bean instance.
 				if (BeanFactoryPostProcessor.class.isAssignableFrom(beanMethod.getReturnType())) {
@@ -333,7 +326,7 @@ class ConfigurationClassEnhancer {
 				return cglibMethodProxy.invokeSuper(enhancedConfigInstance, beanMethodArgs);
 			}
 			else {
-				// the user (i.e. not the factory) is requesting this bean through a
+				// The user (i.e. not the factory) is requesting this bean through a
 				// call to the bean method, direct or indirect. The bean may have already been
 				// marked as 'in creation' in certain autowiring scenarios; if so, temporarily
 				// set the in-creation status to false in order to avoid an exception.
@@ -390,6 +383,7 @@ class ConfigurationClassEnhancer {
 		 */
 		private Object enhanceFactoryBean(Class<?> fbClass, final ConfigurableBeanFactory beanFactory,
 				final String beanName) throws InstantiationException, IllegalAccessException {
+
 			Enhancer enhancer = new Enhancer();
 			enhancer.setSuperclass(fbClass);
 			enhancer.setUseFactory(false);
@@ -412,6 +406,11 @@ class ConfigurationClassEnhancer {
 			Assert.state(beanFactory != null, "BeanFactory has not been injected into @Configuration class");
 			Assert.state(beanFactory instanceof ConfigurableBeanFactory, "Injected BeanFactory is not a ConfigurableBeanFactory");
 			return (ConfigurableBeanFactory) beanFactory;
+		}
+
+		@Override
+		public boolean isMatch(Method candidateMethod) {
+			return BeanAnnotationHelper.isBeanAnnotated(candidateMethod);
 		}
 	}
 
