@@ -223,8 +223,7 @@ class ConfigurationClassParser {
 
 		// process any @PropertySource annotations
 		for (AnnotationAttributes propertySource : AnnotationConfigUtils.attributesForRepeatable(
-				sourceClass.getMetadata(), PropertySources.class,
-				org.springframework.context.annotation.PropertySource.class)) {
+				sourceClass.getMetadata(), PropertySources.class, org.springframework.context.annotation.PropertySource.class)) {
 			processPropertySource(propertySource);
 		}
 
@@ -246,7 +245,7 @@ class ConfigurationClassParser {
 		}
 
 		// process any @Import annotations
-		processImports(configClass, getImports(sourceClass), true);
+		processImports(configClass, sourceClass, getImports(sourceClass), true);
 
 		// process any @ImportResource annotations
 		if (sourceClass.getMetadata().isAnnotated(ImportResource.class.getName())) {
@@ -378,7 +377,7 @@ class ConfigurationClassParser {
 			try {
 				ConfigurationClass configClass = deferredImport.getConfigurationClass();
 				String[] imports = deferredImport.getImportSelector().selectImports(configClass.getMetadata());
-				processImports(configClass, asSourceClasses(imports), false);
+				processImports(configClass, asSourceClass(configClass), asSourceClasses(imports), false);
 			}
 			catch (Exception ex) {
 				throw new BeanDefinitionStoreException("Failed to load bean class: ", ex);
@@ -387,10 +386,10 @@ class ConfigurationClassParser {
 		this.deferredImportSelectors.clear();
 	}
 
-	private void processImports(ConfigurationClass configClass, Collection<SourceClass> sourceClasses, boolean checkForCircularImports)
-			throws IOException {
+	private void processImports(ConfigurationClass configClass, SourceClass currentSourceClass,
+			Collection<SourceClass> importCandidates, boolean checkForCircularImports) throws IOException {
 
-		if (sourceClasses.isEmpty()) {
+		if (importCandidates.isEmpty()) {
 			return;
 		}
 		if (checkForCircularImports && this.importStack.contains(configClass)) {
@@ -398,9 +397,8 @@ class ConfigurationClassParser {
 		}
 		else {
 			this.importStack.push(configClass);
-			AnnotationMetadata importingClassMetadata = configClass.getMetadata();
 			try {
-				for (SourceClass candidate : sourceClasses) {
+				for (SourceClass candidate : importCandidates) {
 					if (candidate.isAssignable(ImportSelector.class)) {
 						// the candidate class is an ImportSelector -> delegate to it to determine imports
 						Class<?> candidateClass = candidate.loadClass();
@@ -410,9 +408,9 @@ class ConfigurationClassParser {
 							this.deferredImportSelectors.add(new DeferredImportSelectorHolder(configClass, (DeferredImportSelector) selector));
 						}
 						else {
-							String[] importClassNames = selector.selectImports(importingClassMetadata);
+							String[] importClassNames = selector.selectImports(currentSourceClass.getMetadata());
 							Collection<SourceClass> importSourceClasses = asSourceClasses(importClassNames);
-							processImports(configClass, importSourceClasses, false);
+							processImports(configClass, currentSourceClass, importSourceClasses, false);
 						}
 					}
 					else if (candidate.isAssignable(ImportBeanDefinitionRegistrar.class)) {
@@ -420,11 +418,11 @@ class ConfigurationClassParser {
 						Class<?> candidateClass = candidate.loadClass();
 						ImportBeanDefinitionRegistrar registrar = BeanUtils.instantiateClass(candidateClass, ImportBeanDefinitionRegistrar.class);
 						invokeAwareMethods(registrar);
-						configClass.addImportBeanDefinitionRegistrar(registrar);
+						configClass.addImportBeanDefinitionRegistrar(registrar, currentSourceClass.getMetadata());
 					}
 					else {
 						// candidate class not an ImportSelector or ImportBeanDefinitionRegistrar -> process it as a @Configuration class
-						this.importStack.registerImport(importingClassMetadata, candidate.getMetadata().getClassName());
+						this.importStack.registerImport(currentSourceClass.getMetadata(), candidate.getMetadata().getClassName());
 						processConfigurationClass(candidate.asConfigClass(configClass));
 					}
 				}
@@ -485,8 +483,7 @@ class ConfigurationClassParser {
 		return propertySources;
 	}
 
-	private PropertySource<?> collatePropertySources(String name,
-			List<PropertySource<?>> propertySources) {
+	private PropertySource<?> collatePropertySources(String name, List<PropertySource<?>> propertySources) {
 		if (propertySources.size() == 1) {
 			return propertySources.get(0);
 		}
@@ -558,7 +555,6 @@ class ConfigurationClassParser {
 	interface ImportRegistry {
 
 		AnnotationMetadata getImportingClassFor(String importedClass);
-
 	}
 
 

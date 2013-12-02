@@ -53,6 +53,17 @@ public class EnableTransactionManagementTests {
 	}
 
 	@Test
+	public void transactionProxyIsCreatedWithEnableOnSuperclass() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(InheritedEnableTxConfig.class, TxManagerConfig.class);
+		ctx.refresh();
+		TransactionalTestBean bean = ctx.getBean(TransactionalTestBean.class);
+		assertThat("testBean is not a proxy", AopUtils.isAopProxy(bean), is(true));
+		Map<?,?> services = ctx.getBeansWithAnnotation(Service.class);
+		assertThat("Stereotype annotation not visible", services.containsKey("testBean"), is(true));
+	}
+
+	@Test
 	public void txManagerIsResolvedOnInvocationOfTransactionalMethod() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(EnableTxConfig.class, TxManagerConfig.class);
@@ -94,6 +105,11 @@ public class EnableTransactionManagementTests {
 	@Configuration
 	@EnableTransactionManagement
 	static class EnableTxConfig {
+	}
+
+
+	@Configuration
+	static class InheritedEnableTxConfig extends EnableTxConfig {
 	}
 
 

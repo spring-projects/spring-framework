@@ -136,7 +136,7 @@ class ConfigurationClassBeanDefinitionReader {
 			loadBeanDefinitionsForBeanMethod(beanMethod);
 		}
 		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
-		loadBeanDefinitionsFromRegistrars(configClass.getMetadata(), configClass.getImportBeanDefinitionRegistrars());
+		loadBeanDefinitionsFromRegistrars(configClass.getImportBeanDefinitionRegistrars());
 	}
 
 	private void removeBeanDefinition(ConfigurationClass configClass) {
@@ -314,11 +314,9 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 	}
 
-	private void loadBeanDefinitionsFromRegistrars(AnnotationMetadata importingClassMetadata,
-			Set<ImportBeanDefinitionRegistrar> importBeanDefinitionRegistrars) {
-
-		for (ImportBeanDefinitionRegistrar registrar : importBeanDefinitionRegistrars) {
-			registrar.registerBeanDefinitions(importingClassMetadata, this.registry);
+	private void loadBeanDefinitionsFromRegistrars(Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> registrars) {
+		for (Map.Entry<ImportBeanDefinitionRegistrar, AnnotationMetadata> entry : registrars.entrySet()) {
+			entry.getKey().registerBeanDefinitions(entry.getValue(), this.registry);
 		}
 	}
 
