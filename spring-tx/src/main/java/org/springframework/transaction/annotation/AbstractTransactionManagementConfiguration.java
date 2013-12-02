@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Abstract base {@code @Configuration} class providing common structure for enabling
@@ -38,26 +39,25 @@ import org.springframework.util.Assert;
 public abstract class AbstractTransactionManagementConfiguration implements ImportAware {
 
 	protected AnnotationAttributes enableTx;
+
 	protected PlatformTransactionManager txManager;
+
 
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
 		this.enableTx = AnnotationAttributes.fromMap(
 				importMetadata.getAnnotationAttributes(EnableTransactionManagement.class.getName(), false));
 		Assert.notNull(this.enableTx,
-				"@EnableTransactionManagement is not present on importing class " +
-				importMetadata.getClassName());
+				"@EnableTransactionManagement is not present on importing class " + importMetadata.getClassName());
 	}
 
 	@Autowired(required=false)
 	void setConfigurers(Collection<TransactionManagementConfigurer> configurers) {
-		if (configurers == null || configurers.isEmpty()) {
+		if (CollectionUtils.isEmpty(configurers)) {
 			return;
 		}
-
 		if (configurers.size() > 1) {
-			throw new IllegalStateException("only one TransactionManagementConfigurer may exist");
+			throw new IllegalStateException("Only one TransactionManagementConfigurer may exist");
 		}
-
 		TransactionManagementConfigurer configurer = configurers.iterator().next();
 		this.txManager = configurer.annotationDrivenTransactionManager();
 	}

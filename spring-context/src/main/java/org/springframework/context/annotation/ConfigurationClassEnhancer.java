@@ -50,14 +50,14 @@ import org.springframework.util.Assert;
  */
 class ConfigurationClassEnhancer {
 
-	private static final Log logger = LogFactory.getLog(ConfigurationClassEnhancer.class);
-
-	private static final CallbackFilter CALLBACK_FILTER = new ConfigurationClassCallbackFilter();
-
 	private static final Callback DISPOSABLE_BEAN_METHOD_INTERCEPTOR = new DisposableBeanMethodInterceptor();
 
 	private static final Class<?>[] CALLBACK_TYPES =
 			{BeanMethodInterceptor.class, DisposableBeanMethodInterceptor.class, NoOp.class};
+
+	private static final CallbackFilter CALLBACK_FILTER = new ConfigurationClassCallbackFilter();
+
+	private static final Log logger = LogFactory.getLog(ConfigurationClassEnhancer.class);
 
 	private final Callback[] callbackInstances;
 
@@ -103,7 +103,7 @@ class ConfigurationClassEnhancer {
 	private Enhancer newEnhancer(Class<?> superclass) {
 		Enhancer enhancer = new Enhancer();
 		enhancer.setSuperclass(superclass);
-		enhancer.setInterfaces(new Class[] {EnhancedConfiguration.class});
+		enhancer.setInterfaces(new Class<?>[] {EnhancedConfiguration.class});
 		enhancer.setUseFactory(false);
 		enhancer.setCallbackFilter(CALLBACK_FILTER);
 		enhancer.setCallbackTypes(CALLBACK_TYPES);
@@ -116,11 +116,11 @@ class ConfigurationClassEnhancer {
 	 */
 	private Class<?> createClass(Enhancer enhancer) {
 		Class<?> subclass = enhancer.createClass();
-		// registering callbacks statically (as opposed to threadlocal) is critical for usage in an OSGi env (SPR-5932)
+		// Registering callbacks statically (as opposed to thread-local)
+		// is critical for usage in an OSGi environment (SPR-5932)...
 		Enhancer.registerStaticCallbacks(subclass, this.callbackInstances);
 		return subclass;
 	}
-
 
 
 	/**
@@ -192,8 +192,8 @@ class ConfigurationClassEnhancer {
 
 		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
 			Enhancer.registerStaticCallbacks(obj.getClass(), null);
-			// does the actual (non-CGLIB) superclass actually implement DisposableBean?
-			// if so, call its dispose() method. If not, just exit.
+			// Does the actual (non-CGLIB) superclass actually implement DisposableBean?
+			// If so, call its dispose() method. If not, just exit.
 			if (DisposableBean.class.isAssignableFrom(obj.getClass().getSuperclass())) {
 				return proxy.invokeSuper(obj, args);
 			}
@@ -242,7 +242,7 @@ class ConfigurationClassEnhancer {
 
 			String beanName = BeanAnnotationHelper.determineBeanNameFor(beanMethod);
 
-			// determine whether this bean is a scoped-proxy
+			// Determine whether this bean is a scoped-proxy
 			Scope scope = AnnotationUtils.findAnnotation(beanMethod, Scope.class);
 			if (scope != null && scope.proxyMode() != ScopedProxyMode.NO) {
 				String scopedBeanName = ScopedProxyCreator.getTargetBeanName(beanName);
@@ -251,27 +251,27 @@ class ConfigurationClassEnhancer {
 				}
 			}
 
-			// to handle the case of an inter-bean method reference, we must explicitly check the
-			// container for already cached instances
+			// To handle the case of an inter-bean method reference, we must explicitly check the
+			// container for already cached instances.
 
-			// first, check to see if the requested bean is a FactoryBean. If so, create a subclass
+			// First, check to see if the requested bean is a FactoryBean. If so, create a subclass
 			// proxy that intercepts calls to getObject() and returns any cached bean instance.
-			// this ensures that the semantics of calling a FactoryBean from within @Bean methods
+			// This ensures that the semantics of calling a FactoryBean from within @Bean methods
 			// is the same as that of referring to a FactoryBean within XML. See SPR-6602.
 			if (factoryContainsBean(BeanFactory.FACTORY_BEAN_PREFIX + beanName) && factoryContainsBean(beanName)) {
 				Object factoryBean = this.beanFactory.getBean(BeanFactory.FACTORY_BEAN_PREFIX + beanName);
 				if (factoryBean instanceof ScopedProxyFactoryBean) {
-					// pass through - scoped proxy factory beans are a special case and should not
+					// Pass through - scoped proxy factory beans are a special case and should not
 					// be further proxied
 				}
 				else {
-					// it is a candidate FactoryBean - go ahead with enhancement
+					// It is a candidate FactoryBean - go ahead with enhancement
 					return enhanceFactoryBean(factoryBean.getClass(), beanName);
 				}
 			}
 
 			if (isCurrentlyInvokedFactoryMethod(beanMethod) && !this.beanFactory.containsSingleton(beanName)) {
-				// the factory is calling the bean method in order to instantiate and register the bean
+				// The factory is calling the bean method in order to instantiate and register the bean
 				// (i.e. via a getBean() call) -> invoke the super implementation of the method to actually
 				// create the bean instance.
 				if (BeanFactoryPostProcessor.class.isAssignableFrom(beanMethod.getReturnType())) {
@@ -286,7 +286,7 @@ class ConfigurationClassEnhancer {
 				return cglibMethodProxy.invokeSuper(enhancedConfigInstance, beanMethodArgs);
 			}
 			else {
-				// the user (i.e. not the factory) is requesting this bean through a
+				// The user (i.e. not the factory) is requesting this bean through a
 				// call to the bean method, direct or indirect. The bean may have already been
 				// marked as 'in creation' in certain autowiring scenarios; if so, temporarily
 				// set the in-creation status to false in order to avoid an exception.
@@ -303,7 +303,6 @@ class ConfigurationClassEnhancer {
 					}
 				}
 			}
-
 		}
 
 		/**
