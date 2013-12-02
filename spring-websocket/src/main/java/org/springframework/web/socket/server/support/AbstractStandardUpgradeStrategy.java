@@ -32,6 +32,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.util.Assert;
 import org.springframework.web.socket.support.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.adapter.StandardWebSocketHandlerAdapter;
@@ -64,7 +65,11 @@ public abstract class AbstractStandardUpgradeStrategy implements RequestUpgradeS
 
 	protected ServerContainer getContainer(HttpServletRequest request) {
 		ServletContext servletContext = request.getServletContext();
-		return (ServerContainer) servletContext.getAttribute("javax.websocket.server.ServerContainer");
+		String attrName = "javax.websocket.server.ServerContainer";
+		ServerContainer container = (ServerContainer) servletContext.getAttribute(attrName);
+		Assert.notNull(container, "No 'javax.websocket.server.ServerContainer' ServletContext attribute. " +
+				"Are you running in a Servlet container that supports JSR-356?");
+		return container;
 	}
 
 	protected List<WebSocketExtension> getInstalledExtensions(WebSocketContainer container) {
