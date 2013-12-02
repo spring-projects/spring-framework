@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,9 @@ import org.springframework.util.ClassUtils;
  */
 public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConverter {
 
+	private static final boolean jaxb2Present =
+			ClassUtils.isPresent("javax.xml.bind.Binder", AllEncompassingFormHttpMessageConverter.class.getClassLoader());
+
 	private static final boolean jackson2Present =
 			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", AllEncompassingFormHttpMessageConverter.class.getClassLoader()) &&
 					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", AllEncompassingFormHttpMessageConverter.class.getClassLoader());
@@ -38,9 +41,6 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 	private static final boolean jacksonPresent =
 			ClassUtils.isPresent("org.codehaus.jackson.map.ObjectMapper", AllEncompassingFormHttpMessageConverter.class.getClassLoader()) &&
 					ClassUtils.isPresent("org.codehaus.jackson.JsonGenerator", AllEncompassingFormHttpMessageConverter.class.getClassLoader());
-
-	private static final boolean jaxb2Present =
-			ClassUtils.isPresent("javax.xml.bind.Binder", AllEncompassingFormHttpMessageConverter.class.getClassLoader());
 
 
 	public AllEncompassingFormHttpMessageConverter() {
