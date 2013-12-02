@@ -41,6 +41,7 @@ import org.springframework.messaging.support.converter.DefaultContentTypeResolve
 import org.springframework.messaging.support.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.support.converter.StringMessageConverter;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StringUtils;
@@ -111,41 +112,45 @@ public class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		handlerMappingDef.getPropertyValues().add("order", order);
 		handlerMappingDef.getPropertyValues().add("urlMap", urlMap);
 
-		String channelName = "clientInboundChannel";
+		String beanName = "clientInboundChannel";
 		Element channelElem = DomUtils.getChildElementByTagName(element, "client-inbound-channel");
-		RuntimeBeanReference clientInChannel = getMessageChannel(channelName, channelElem, parserCxt, source);
+		RuntimeBeanReference clientInChannel = getMessageChannel(beanName, channelElem, parserCxt, source);
 
-		channelName = "clientOutboundChannel";
+		beanName = "clientOutboundChannel";
 		channelElem = DomUtils.getChildElementByTagName(element, "client-outbound-channel");
-		RuntimeBeanReference clientOutChannel = getMessageChannel(channelName, channelElem, parserCxt, source);
+		RuntimeBeanReference clientOutChannel = getMessageChannel(beanName, channelElem, parserCxt, source);
 
-		RootBeanDefinition userSessionRegistryDef = new RootBeanDefinition(DefaultUserSessionRegistry.class);
-		String userSessionRegistryName = registerBeanDef(userSessionRegistryDef, parserCxt, source);
-		RuntimeBeanReference userSessionRegistry = new RuntimeBeanReference(userSessionRegistryName);
+		RootBeanDefinition beanDef = new RootBeanDefinition(DefaultUserSessionRegistry.class);
+		beanName = registerBeanDef(beanDef, parserCxt, source);
+		RuntimeBeanReference userSessionRegistry = new RuntimeBeanReference(beanName);
 
-		RuntimeBeanReference subProtocolWebSocketHandler = registerSubProtocolWebSocketHandler(
+		RuntimeBeanReference subProtocolWsHandler = registerSubProtocolWebSocketHandler(
 				clientInChannel, clientOutChannel, userSessionRegistry, parserCxt, source);
 
-		List<Element> stompEndpointElements = DomUtils.getChildElementsByTagName(element, "stomp-endpoint");
-		for(Element stompEndpointElement : stompEndpointElements) {
+		for(Element stompEndpointElem : DomUtils.getChildElementsByTagName(element, "stomp-endpoint")) {
 
-			RuntimeBeanReference requestHandler = registerHttpRequestHandler(
-					stompEndpointElement, subProtocolWebSocketHandler, parserCxt, source);
+			RuntimeBeanReference httpRequestHandler = registerHttpRequestHandler(
+					stompEndpointElem, subProtocolWsHandler, parserCxt, source);
 
-			List<String> paths = Arrays.asList(stompEndpointElement.getAttribute("path").split(","));
+			String pathAttribute = stompEndpointElem.getAttribute("path");
+			Assert.state(StringUtils.hasText(pathAttribute), "Invalid <stomp-endpoint> (no path mapping)");
+
+			List<String> paths = Arrays.asList(pathAttribute.split(","));
 			for(String path : paths) {
-				if (DomUtils.getChildElementByTagName(stompEndpointElement, "sockjs") != null) {
+				path = path.trim();
+				Assert.state(StringUtils.hasText(path), "Invalid <stomp-endpoint> path attribute: " + pathAttribute);
+				if (DomUtils.getChildElementByTagName(stompEndpointElem, "sockjs") != null) {
 					path = path.endsWith("/") ? path + "**" : path + "/**";
 				}
-				urlMap.put(path, requestHandler);
+				urlMap.put(path, httpRequestHandler);
 			}
 		}
 
 		registerBeanDef(handlerMappingDef, parserCxt, source);
 
-		channelName = "brokerChannel";
+		beanName = "brokerChannel";
 		channelElem = DomUtils.getChildElementByTagName(element, "broker-channel");
-		RuntimeBeanReference brokerChannel = getMessageChannel(channelName, channelElem, parserCxt, source);
+		RuntimeBeanReference brokerChannel = getMessageChannel(beanName, channelElem, parserCxt, source);
 		registerMessageBroker(element, clientInChannel, clientOutChannel, brokerChannel, parserCxt, source);
 
 		RuntimeBeanReference messageConverter = registerBrokerMessageConverter(parserCxt, source);
@@ -156,7 +161,7 @@ public class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 				messageConverter, messagingTemplate, parserCxt, source);
 
 		RuntimeBeanReference userDestinationResolver = registerUserDestinationResolver(element,
-				userSessionRegistryDef, parserCxt, source);
+				userSessionRegistry, parserCxt, source);
 
 		registerUserDestinationMessageHandler(clientInChannel, clientOutChannel, brokerChannel,
 				userDestinationResolver, parserCxt, source);
@@ -320,7 +325,8 @@ public class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 				mpvs.add("virtualHost",virtualHost);
 			}
 
-			RootBeanDefinition messageBrokerDef = new RootBeanDefinition(StompBrokerRelayMessageHandler.class, cavs, mpvs);
+			Class<?> handlerType = StompBrokerRelayMessageHandler.class;
+			RootBeanDefinition messageBrokerDef = new RootBeanDefinition(handlerType, cavs, mpvs);
 			registerBeanDef(messageBrokerDef, parserCxt, source);
 		}
 
@@ -386,10 +392,10 @@ public class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	private RuntimeBeanReference registerUserDestinationResolver(Element messageBrokerElement,
-			BeanDefinition userSessionRegistryDef, ParserContext parserCxt, Object source) {
+			RuntimeBeanReference userSessionRegistry, ParserContext parserCxt, Object source) {
 
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
-		cavs.addIndexedArgumentValue(0, userSessionRegistryDef);
+		cavs.addIndexedArgumentValue(0, userSessionRegistry);
 		RootBeanDefinition userDestinationResolverDef =
 				new RootBeanDefinition(DefaultUserDestinationResolver.class, cavs, null);
 		String prefix = messageBrokerElement.getAttribute("user-destination-prefix");

@@ -21,7 +21,7 @@
 		http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
 
     <websocket:message-broker application-destination-prefix="/app" user-destination-prefix="/personal">
-        <websocket:stomp-endpoint path="/foo,/bar">
+        <websocket:stomp-endpoint path=" /foo,/bar">
             <websocket:handshake-handler ref="myHandler" />
         </websocket:stomp-endpoint>
         <websocket:stomp-endpoint path="/test,/sockjs">

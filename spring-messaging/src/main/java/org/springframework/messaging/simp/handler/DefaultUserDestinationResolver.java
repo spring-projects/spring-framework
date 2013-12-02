@@ -90,6 +90,13 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		return this.subscriptionDestinationPrefix;
 	}
 
+	/**
+	 * Return the configured {@link UserSessionRegistry}.
+	 */
+	public UserSessionRegistry getUserSessionRegistry() {
+		return this.userSessionRegistry;
+	}
+
 	@Override
 	public Set<String> resolveDestination(Message<?> message) {
 

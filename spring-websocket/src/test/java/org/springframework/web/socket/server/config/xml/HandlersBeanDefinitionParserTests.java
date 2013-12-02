@@ -64,7 +64,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Test fixture for HandlersBeanDefinitionParser.
- * See test configuration files websocket-config-handlers*.xml.
+ * See test configuration files websocket-config-handlers-*.xml.
  *
  * @author Brian Clozel
  */
@@ -227,6 +227,7 @@ public class HandlersBeanDefinitionParserTests {
 }
 
 class TestWebSocketHandler implements WebSocketHandler {
+
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {}
 

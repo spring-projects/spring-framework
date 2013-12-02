@@ -192,7 +192,7 @@
         </xsd:annotation>
         <xsd:complexType>
             <xsd:sequence>
-                <xsd:element name="stomp-endpoint" maxOccurs="unbounded">
+                <xsd:element name="stomp-endpoint" minOccurs="1" maxOccurs="unbounded">
                     <xsd:complexType>
                         <xsd:sequence>
                             <xsd:element name="handshake-handler" type="handshake-handler" minOccurs="0" maxOccurs="1" />

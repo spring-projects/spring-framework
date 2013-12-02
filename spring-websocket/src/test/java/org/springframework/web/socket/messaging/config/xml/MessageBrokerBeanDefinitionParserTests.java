@@ -35,6 +35,7 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.messaging.StompSubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
 import org.springframework.web.socket.sockjs.SockJsHttpRequestHandler;
@@ -47,7 +48,9 @@ import java.util.Map;
 import static org.junit.Assert.*;
 
 /**
- * Test fixture for the configuration in websocket-config-broker*.xml test files.
+ * Test fixture for MessageBrokerBeanDefinitionParser.
+ * See test configuration files websocket-config-broker-*.xml.
+ *
  * @author Brian Clozel
  */
 public class MessageBrokerBeanDefinitionParserTests {
@@ -82,6 +85,10 @@ public class MessageBrokerBeanDefinitionParserTests {
 		SubProtocolWebSocketHandler subProtocolWsHandler = (SubProtocolWebSocketHandler) wsHandler;
 		assertEquals(Arrays.asList("v10.stomp", "v11.stomp", "v12.stomp"), subProtocolWsHandler.getSubProtocols());
 
+		StompSubProtocolHandler stompHandler =
+				(StompSubProtocolHandler) subProtocolWsHandler.getProtocolHandlerMap().get("v12.stomp");
+		assertNotNull(stompHandler);
+
 		httpRequestHandler = (HttpRequestHandler) suhm.getUrlMap().get("/test/**");
 		assertNotNull(httpRequestHandler);
 		assertThat(httpRequestHandler, Matchers.instanceOf(SockJsHttpRequestHandler.class));
@@ -91,11 +98,19 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertThat(wsHandler, Matchers.instanceOf(SubProtocolWebSocketHandler.class));
 		assertNotNull(sockJsHttpRequestHandler.getSockJsService());
 
+		UserSessionRegistry userSessionRegistry = this.appContext.getBean(UserSessionRegistry.class);
+		assertNotNull(userSessionRegistry);
+
 		UserDestinationResolver userDestResolver = this.appContext.getBean(UserDestinationResolver.class);
 		assertNotNull(userDestResolver);
 		assertThat(userDestResolver, Matchers.instanceOf(DefaultUserDestinationResolver.class));
 		DefaultUserDestinationResolver defaultUserDestResolver = (DefaultUserDestinationResolver) userDestResolver;
 		assertEquals("/personal/", defaultUserDestResolver.getDestinationPrefix());
+
+		assertSame(stompHandler.getUserSessionRegistry(), defaultUserDestResolver.getUserSessionRegistry());
+
+		UserDestinationMessageHandler userDestHandler = this.appContext.getBean(UserDestinationMessageHandler.class);
+		assertNotNull(userDestHandler);
 
 		List<Class<? extends MessageHandler>> subscriberTypes =
 				Arrays.<Class<? extends MessageHandler>>asList(SimpAnnotationMethodMessageHandler.class,
