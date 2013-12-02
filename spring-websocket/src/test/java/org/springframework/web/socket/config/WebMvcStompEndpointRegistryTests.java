@@ -14,28 +14,29 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.messaging.config;
+package org.springframework.web.socket.config;
 
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.handler.DefaultUserSessionRegistry;
 import org.springframework.messaging.simp.handler.UserSessionRegistry;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.socket.config.annotation.WebMvcStompEndpointRegistry;
 import org.springframework.web.socket.messaging.StompSubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 /**
- * Test fixture for {@link WebMvcStompEndpointRegistry}.
+ * Test fixture for {@link org.springframework.web.socket.config.annotation.WebMvcStompEndpointRegistry}.
  *
  * @author Rossen Stoyanchev
  */

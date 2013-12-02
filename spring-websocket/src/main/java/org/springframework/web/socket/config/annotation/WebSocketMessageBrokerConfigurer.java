@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.messaging.config;
+package org.springframework.web.socket.config.annotation;
 
 
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -24,7 +24,7 @@ import org.springframework.messaging.simp.config.MessageBrokerRegistry;
  * Defines methods for configuring message handling with simple messaging
  * protocols (e.g. STOMP) from WebSocket clients. Typically used to customize
  * the configuration provided via
- * {@link EnableWebSocketMessageBroker @EnableWebSocketMessageBroker}.
+ * {@link org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker @EnableWebSocketMessageBroker}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

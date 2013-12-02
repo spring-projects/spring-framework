@@ -50,9 +50,9 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.TextWebSocketHandlerAdapter;
 import org.springframework.web.socket.client.endpoint.StandardWebSocketClient;
 import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
-import org.springframework.web.socket.messaging.config.DelegatingWebSocketMessageBrokerConfiguration;
-import org.springframework.web.socket.messaging.config.StompEndpointRegistry;
-import org.springframework.web.socket.messaging.config.WebSocketMessageBrokerConfigurer;
+import org.springframework.web.socket.config.annotation.DelegatingWebSocketMessageBrokerConfiguration;
+import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
+import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.server.HandshakeHandler;
 
 import static org.junit.Assert.*;

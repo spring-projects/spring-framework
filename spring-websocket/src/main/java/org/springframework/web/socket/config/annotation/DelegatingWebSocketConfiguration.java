@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.config;
+package org.springframework.web.socket.config.annotation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,10 +39,9 @@ public class DelegatingWebSocketConfiguration extends WebSocketConfigurationSupp
 
 	@Autowired(required = false)
 	public void setConfigurers(List<WebSocketConfigurer> configurers) {
-		if (CollectionUtils.isEmpty(configurers)) {
-			return;
+		if (!CollectionUtils.isEmpty(configurers)) {
+			this.configurers.addAll(configurers);
 		}
-		this.configurers.addAll(configurers);
 	}
 
 

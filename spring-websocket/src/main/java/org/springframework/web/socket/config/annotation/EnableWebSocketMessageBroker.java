@@ -10,7 +10,8 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.springframework.web.socket.config;
+
+package org.springframework.web.socket.config.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -21,33 +22,35 @@ import java.lang.annotation.Target;
 import org.springframework.context.annotation.Import;
 
 /**
- * Add this annotation to an {@code @Configuration} class to configure
- * processing WebSocket requests:
+ * Add this annotation to an {@code @Configuration} class to enable broker-backed
+ * messaging over WebSocket using a higher-level messaging sub-protocol.
  *
  * <pre class="code">
  * &#064;Configuration
- * &#064;EnableWebSocket
+ * &#064;EnableWebSocketMessageBroker
  * public class MyWebSocketConfig {
  *
  * }
  * </pre>
- * <p>Customize the imported configuration by implementing the
- * {@link WebSocketConfigurer} interface:
+ * <p>
+ * Customize the imported configuration by implementing the
+ * {@link WebSocketMessageBrokerConfigurer} interface:
  *
  * <pre class="code">
  * &#064;Configuration
- * &#064;EnableWebSocket
- * public class MyConfiguration implements WebSocketConfigurer {
+ * &#064;EnableWebSocketMessageBroker
+ * public class MyConfiguration implements implements WebSocketMessageBrokerConfigurer {
  *
  * 	&#064;Override
- * 	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
- * 		registry.addHandler(echoWebSocketHandler(), "/echo").withSockJS();
+ * 	public void registerStompEndpoints(StompEndpointRegistry registry) {
+ * 		registry.addEndpoint("/portfolio").withSockJS();
  * 	}
  *
- *	&#064;Bean
- *	public WebSocketHandler echoWebSocketHandler() {
- *		return new EchoWebSocketHandler();
- *	}
+ * 	&#064;Bean
+ * 	public void configureMessageBroker(MessageBrokerRegistry registry) {
+ * 		registry.enableStompBrokerRelay("/queue/", "/topic/");
+ * 		registry.setApplicationDestinationPrefixes("/app/");
+ * 	}
  * }
  * </pre>
  *
@@ -57,6 +60,7 @@ import org.springframework.context.annotation.Import;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import(DelegatingWebSocketConfiguration.class)
-public @interface EnableWebSocket {
+@Import(DelegatingWebSocketMessageBrokerConfiguration.class)
+public @interface EnableWebSocketMessageBroker {
+
 }

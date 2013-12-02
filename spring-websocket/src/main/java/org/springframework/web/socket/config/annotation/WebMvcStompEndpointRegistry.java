@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.messaging.config;
+package org.springframework.web.socket.config.annotation;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.messaging.simp.handler.UserSessionRegistry;
-import org.springframework.web.socket.messaging.StompSubProtocolHandler;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
@@ -27,6 +29,7 @@ import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.messaging.StompSubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import org.springframework.web.socket.support.WebSocketHandlerDecorator;
 
@@ -98,9 +101,9 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 	}
 
 	/**
-	 * Returns a handler mapping with the mapped ViewControllers; or {@code null} in case of no registrations.
+	 * Return a handler mapping with the mapped ViewControllers; or {@code null} in case of no registrations.
 	 */
-	protected AbstractHandlerMapping getHandlerMapping() {
+	public AbstractHandlerMapping getHandlerMapping() {
 		Map<String, Object> urlMap = new LinkedHashMap<String, Object>();
 		for (WebMvcStompWebSocketEndpointRegistration registration : this.registrations) {
 			MultiValueMap<HttpRequestHandler, String> mappings = registration.getMappings();

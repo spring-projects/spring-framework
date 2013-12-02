@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.messaging.config;
+package org.springframework.web.socket.config.annotation;
 
 /**
  * A contract for registering STOMP over WebSocket endpoints.

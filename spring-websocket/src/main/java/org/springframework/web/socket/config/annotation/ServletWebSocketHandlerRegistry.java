@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.config;
+package org.springframework.web.socket.config.annotation;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -51,16 +51,17 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 
 	@Override
 	public WebSocketHandlerRegistration addHandler(WebSocketHandler webSocketHandler, String... paths) {
-		ServletWebSocketHandlerRegistration r = new ServletWebSocketHandlerRegistration(this.sockJsTaskScheduler);
-		r.addHandler(webSocketHandler, paths);
-		this.registrations.add(r);
-		return r;
+		ServletWebSocketHandlerRegistration registration =
+				new ServletWebSocketHandlerRegistration(this.sockJsTaskScheduler);
+		registration.addHandler(webSocketHandler, paths);
+		this.registrations.add(registration);
+		return registration;
 	}
 
 	/**
-	 * Returns a {@link HandlerMapping} with mapped {@link HttpRequestHandler}s.
+	 * Return a {@link HandlerMapping} with mapped {@link HttpRequestHandler}s.
 	 */
-	AbstractHandlerMapping getHandlerMapping() {
+	public AbstractHandlerMapping getHandlerMapping() {
 		Map<String, Object> urlMap = new LinkedHashMap<String, Object>();
 		for (ServletWebSocketHandlerRegistration registration : this.registrations) {
 			MultiValueMap<HttpRequestHandler, String> mappings = registration.getMappings();

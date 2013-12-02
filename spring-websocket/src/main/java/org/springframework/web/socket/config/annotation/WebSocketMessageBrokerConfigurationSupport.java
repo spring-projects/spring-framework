@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.messaging.config;
+package org.springframework.web.socket.config.annotation;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.simp.config.AbstractMessageBrokerConfiguration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.config.SockJsServiceRegistration;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 
 /**
@@ -37,16 +36,13 @@ import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
  */
 public abstract class WebSocketMessageBrokerConfigurationSupport extends AbstractMessageBrokerConfiguration {
 
-
 	protected WebSocketMessageBrokerConfigurationSupport() {
 	}
 
 	@Bean
 	public HandlerMapping stompWebSocketHandlerMapping() {
-
 		WebMvcStompEndpointRegistry registry = new WebMvcStompEndpointRegistry(
 				subProtocolWebSocketHandler(), userSessionRegistry(), messageBrokerSockJsTaskScheduler());
-
 		registerStompEndpoints(registry);
 		return registry.getHandlerMapping();
 	}

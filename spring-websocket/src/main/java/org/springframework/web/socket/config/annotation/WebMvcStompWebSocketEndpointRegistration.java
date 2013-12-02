@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.messaging.config;
+package org.springframework.web.socket.config.annotation;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
@@ -23,7 +23,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
-import org.springframework.web.socket.config.SockJsServiceRegistration;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
 import org.springframework.web.socket.sockjs.SockJsHttpRequestHandler;
 import org.springframework.web.socket.sockjs.SockJsService;
@@ -82,7 +81,7 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 		return this.registration;
 	}
 
-	protected final MultiValueMap<HttpRequestHandler, String> getMappings() {
+	public final MultiValueMap<HttpRequestHandler, String> getMappings() {
 		MultiValueMap<HttpRequestHandler, String> mappings = new LinkedMultiValueMap<HttpRequestHandler, String>();
 		if (this.registration != null) {
 			SockJsService sockJsService = this.registration.getSockJsService();

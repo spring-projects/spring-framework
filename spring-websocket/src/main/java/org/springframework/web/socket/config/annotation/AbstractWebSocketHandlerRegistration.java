@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.config;
+package org.springframework.web.socket.config.annotation;
 
 import java.util.Arrays;
 
@@ -103,8 +103,7 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 		return this.sockJsServiceRegistration;
 	}
 
-	final M getMappings() {
-
+	public final M getMappings() {
 		M mappings = createMappings();
 
 		if (this.sockJsServiceRegistration != null) {

@@ -26,6 +26,7 @@ import org.mockito.Mockito;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.adapter.TextWebSocketHandlerAdapter;
+import org.springframework.web.socket.config.annotation.AbstractWebSocketHandlerRegistration;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
@@ -38,7 +39,7 @@ import org.springframework.web.socket.sockjs.transport.handler.WebSocketTranspor
 import static org.junit.Assert.*;
 
 /**
- * Test fixture for {@link AbstractWebSocketHandlerRegistration}.
+ * Test fixture for {@link org.springframework.web.socket.config.annotation.AbstractWebSocketHandlerRegistration}.
  *
  * @author Rossen Stoyanchev
  */

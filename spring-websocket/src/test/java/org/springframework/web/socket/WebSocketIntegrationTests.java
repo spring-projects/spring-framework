@@ -31,9 +31,9 @@ import org.springframework.web.socket.adapter.WebSocketHandlerAdapter;
 import org.springframework.web.socket.client.endpoint.StandardWebSocketClient;
 import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
-import org.springframework.web.socket.config.EnableWebSocket;
-import org.springframework.web.socket.config.WebSocketConfigurer;
-import org.springframework.web.socket.config.WebSocketHandlerRegistry;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
+import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
+import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.support.WebSocketHttpHeaders;
 
 import static org.junit.Assert.*;

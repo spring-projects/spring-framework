@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.messaging.config;
+package org.springframework.web.socket.config;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,10 +23,12 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
 import org.springframework.messaging.support.channel.ExecutorSubscribableChannel;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.socket.config.annotation.WebMvcStompWebSocketEndpointRegistration;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
@@ -38,7 +40,7 @@ import org.springframework.web.socket.sockjs.transport.handler.WebSocketTranspor
 import static org.junit.Assert.*;
 
 /**
- * Test fixture for {@link WebMvcStompWebSocketEndpointRegistration}.
+ * Test fixture for {@link org.springframework.web.socket.config.annotation.WebMvcStompWebSocketEndpointRegistration}.
  *
  * @author Rossen Stoyanchev
  */

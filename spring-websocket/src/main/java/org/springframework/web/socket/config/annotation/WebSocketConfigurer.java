@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.config;
+package org.springframework.web.socket.config.annotation;
 
 import org.springframework.web.socket.WebSocketHandler;
 
 /**
  * Defines callback methods to configure the WebSocket request handling
- * via {@link EnableWebSocket @EnableWebSocket}.
+ * via {@link org.springframework.web.socket.config.annotation.EnableWebSocket @EnableWebSocket}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

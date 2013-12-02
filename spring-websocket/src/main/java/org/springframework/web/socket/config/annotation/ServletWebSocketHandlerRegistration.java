@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.config;
+package org.springframework.web.socket.config.annotation;
 
 import java.util.Arrays;
 
@@ -39,7 +39,6 @@ import org.springframework.web.socket.sockjs.SockJsService;
  */
 public class ServletWebSocketHandlerRegistration
 		extends AbstractWebSocketHandlerRegistration<MultiValueMap<HttpRequestHandler, String>> {
-
 
 	public ServletWebSocketHandlerRegistration(TaskScheduler sockJsTaskScheduler) {
 		super(sockJsTaskScheduler);

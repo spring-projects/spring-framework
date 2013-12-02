@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.config;
+package org.springframework.web.socket.config.annotation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,7 +29,7 @@ import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsServ
 
 /**
  * A helper class for configuring SockJS fallback options, typically used indirectly, in
- * conjunction with {@link EnableWebSocket @EnableWebSocket} and
+ * conjunction with {@link org.springframework.web.socket.config.annotation.EnableWebSocket @EnableWebSocket} and
  * {@link WebSocketConfigurer}.
  *
  * @author Rossen Stoyanchev
