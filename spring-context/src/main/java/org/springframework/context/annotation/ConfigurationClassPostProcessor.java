@@ -60,7 +60,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -236,8 +235,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			throw new IllegalStateException(
 					"postProcessBeanFactory already called for this post-processor against " + beanFactory);
 		}
-		this.factoriesPostProcessed.add((factoryId));
-		if (!this.registriesPostProcessed.contains((factoryId))) {
+		this.factoriesPostProcessed.add(factoryId);
+		if (!this.registriesPostProcessed.contains(factoryId)) {
 			// BeanDefinitionRegistryPostProcessor hook apparently not supported...
 			// Simply call processConfigurationClasses lazily at this point then.
 			processConfigBeanDefinitions((BeanDefinitionRegistry) beanFactory);
@@ -372,36 +371,25 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	}
 
 
-	private static class ImportAwareBeanPostProcessor implements BeanPostProcessor, PriorityOrdered, BeanFactoryAware {
+	private static class ImportAwareBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware, PriorityOrdered {
 
 		private BeanFactory beanFactory;
+
+		public void setBeanFactory(BeanFactory beanFactory) {
+			this.beanFactory = beanFactory;
+		}
 
 		public int getOrder() {
 			return Ordered.HIGHEST_PRECEDENCE;
 		}
 
 		@Override
-		public void setBeanFactory(BeanFactory beanFactory) {
-			this.beanFactory = beanFactory;
-		}
-
 		public Object postProcessBeforeInitialization(Object bean, String beanName)  {
 			if (bean instanceof ImportAware) {
 				ImportRegistry importRegistry = this.beanFactory.getBean(IMPORT_REGISTRY_BEAN_NAME, ImportRegistry.class);
-				String importingClass = importRegistry.getImportingClassFor(bean.getClass().getSuperclass().getName());
+				AnnotationMetadata importingClass = importRegistry.getImportingClassFor(bean.getClass().getSuperclass().getName());
 				if (importingClass != null) {
-					try {
-						AnnotationMetadata metadata =
-								new SimpleMetadataReaderFactory().getMetadataReader(importingClass).getAnnotationMetadata();
-						((ImportAware) bean).setImportMetadata(metadata);
-					}
-					catch (IOException ex) {
-						// should never occur -> at this point we know the class is present anyway
-						throw new IllegalStateException(ex);
-					}
-				}
-				else {
-					// no importing class was found
+					((ImportAware) bean).setImportMetadata(importingClass);
 				}
 			}
 			return bean;
