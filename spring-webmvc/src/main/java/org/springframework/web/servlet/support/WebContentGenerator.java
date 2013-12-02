@@ -28,7 +28,6 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
-import org.springframework.web.servlet.mvc.LastModified;
 
 /**
  * Convenient superclass for any kind of web content generator,
@@ -204,7 +203,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * programmatically do a lastModified calculation as described in
 	 * {@link WebRequest#checkNotModified(long)}. Default is "false",
 	 * effectively relying on whether the handler implements
-	 * {@link LastModified} or not.
+	 * {@link org.springframework.web.servlet.mvc.LastModified} or not.
 	 */
 	public void setAlwaysMustRevalidate(boolean mustRevalidate) {
 		this.alwaysMustRevalidate = mustRevalidate;

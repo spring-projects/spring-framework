@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.scheduling.config;
 
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.support.CronTrigger;
 
 /**
@@ -26,13 +25,13 @@ import org.springframework.scheduling.support.CronTrigger;
  *
  * @author Chris Beams
  * @since 3.2
- * @see Scheduled#cron()
+ * @see org.springframework.scheduling.annotation.Scheduled#cron()
  * @see ScheduledTaskRegistrar#setCronTasksList(java.util.List)
  * @see org.springframework.scheduling.TaskScheduler
  */
 public class CronTask extends TriggerTask {
 
-	private String expression;
+	private final String expression;
 
 
 	/**
@@ -54,7 +53,9 @@ public class CronTask extends TriggerTask {
 		this.expression = cronTrigger.getExpression();
 	}
 
+
 	public String getExpression() {
-		return expression;
+		return this.expression;
 	}
+
 }

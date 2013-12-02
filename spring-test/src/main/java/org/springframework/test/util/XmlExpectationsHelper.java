@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,8 @@
 
 package org.springframework.test.util;
 
-import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
-
 import java.io.StringReader;
 import java.util.Map;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Source;
@@ -29,10 +26,11 @@ import javax.xml.transform.dom.DOMSource;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.hamcrest.Matcher;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
+
+import static org.springframework.test.util.MatcherAssertionErrors.*;
 
 /**
  * A helper class for assertions on XML content.
@@ -73,15 +71,12 @@ public class XmlExpectationsHelper {
 	 * Parse the expected and actual content strings as XML and assert that the
 	 * two are "similar" -- i.e. they contain the same elements and attributes
 	 * regardless of order.
-	 *
 	 * <p>Use of this method assumes the
 	 * <a href="http://xmlunit.sourceforge.net/">XMLUnit<a/> library is available.
-	 *
 	 * @param expected the expected XML content
 	 * @param actual the actual XML content
-	 *
-	 * @see MockMvcResultMatchers#xpath(String, Object...)
-	 * @see MockMvcResultMatchers#xpath(String, Map, Object...)
+	 * @see org.springframework.test.web.servlet.result.MockMvcResultMatchers#xpath(String, Object...)
+	 * @see org.springframework.test.web.servlet.result.MockMvcResultMatchers#xpath(String, Map, Object...)
 	 */
 	public void assertXmlEqual(String expected, String actual) throws Exception {
 
