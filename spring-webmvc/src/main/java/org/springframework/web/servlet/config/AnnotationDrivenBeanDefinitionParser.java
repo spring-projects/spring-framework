@@ -161,8 +161,9 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		handlerMappingDef.getPropertyValues().add("order", 0);
 		handlerMappingDef.getPropertyValues().add("contentNegotiationManager", contentNegotiationManager);
 		String methodMappingName = parserContext.getReaderContext().registerWithGeneratedName(handlerMappingDef);
-		if (element.hasAttribute("enableMatrixVariables")) {
-			Boolean enableMatrixVariables = Boolean.valueOf(element.getAttribute("enableMatrixVariables"));
+		if (element.hasAttribute("enable-matrix-variables") || element.hasAttribute("enableMatrixVariables")) {
+			Boolean enableMatrixVariables = Boolean.valueOf(element.getAttribute(
+					element.hasAttribute("enable-matrix-variables") ? "enable-matrix-variables" : "enableMatrixVariables"));
 			handlerMappingDef.getPropertyValues().add("removeSemicolonContent", !enableMatrixVariables);
 		}
 
@@ -191,8 +192,9 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		handlerAdapterDef.getPropertyValues().add("contentNegotiationManager", contentNegotiationManager);
 		handlerAdapterDef.getPropertyValues().add("webBindingInitializer", bindingDef);
 		handlerAdapterDef.getPropertyValues().add("messageConverters", messageConverters);
-		if (element.hasAttribute("ignoreDefaultModelOnRedirect")) {
-			Boolean ignoreDefaultModel = Boolean.valueOf(element.getAttribute("ignoreDefaultModelOnRedirect"));
+		if (element.hasAttribute("ignore-default-model-on-redirect") || element.hasAttribute("ignoreDefaultModelOnRedirect")) {
+			Boolean ignoreDefaultModel = Boolean.valueOf(element.getAttribute(
+					element.hasAttribute("ignore-default-model-on-redirect") ? "ignore-default-model-on-redirect" : "ignoreDefaultModelOnRedirect"));
 			handlerAdapterDef.getPropertyValues().add("ignoreDefaultModelOnRedirect", ignoreDefaultModel);
 		}
 		if (argumentResolvers != null) {

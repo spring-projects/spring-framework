@@ -80,7 +80,7 @@
 							</xsd:element>
 						</xsd:sequence>
 					</xsd:complexType>
-				</xsd:element>			
+				</xsd:element>
 				<xsd:element name="return-value-handlers" minOccurs="0">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
@@ -100,7 +100,7 @@
 							</xsd:element>
 						</xsd:sequence>
 					</xsd:complexType>
-				</xsd:element>			
+				</xsd:element>
 				<xsd:element name="async-support" minOccurs="0">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
@@ -233,7 +233,7 @@
 					</xsd:appinfo>
 				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="enableMatrixVariables" type="xsd:boolean">
+			<xsd:attribute name="enable-matrix-variables" type="xsd:boolean">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	Matrix variables can appear in any path segment, each matrix variable separated with a ";" (semicolon).
@@ -244,11 +244,11 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="ignoreDefaultModelOnRedirect" type="xsd:boolean">
+			<xsd:attribute name="ignore-default-model-on-redirect" type="xsd:boolean">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	By default the content of the "default" model is used both during rendering and redirect scenarios. 
-	Alternatively a controller method can declare a RedirectAttributes argument and use it to provide attributes for a redirect. 
+	By default the content of the "default" model is used both during rendering and redirect scenarios.
+	Alternatively a controller method can declare a RedirectAttributes argument and use it to provide attributes for a redirect.
 	Setting this flag to true ensures the "default" model is never used in a redirect scenario even if a RedirectAttributes argument is not declared.
 	Setting it to false means the "default" model may be used in a redirect if the controller method doesn't declare a RedirectAttributes argument.
 	The default setting is false but new applications should consider setting it to true.

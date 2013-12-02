@@ -185,7 +185,19 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testCustomValidator() throws Exception {
-		loadBeanDefinitions("mvc-config-custom-validator.xml", 13);
+		doTestCustomValidator("mvc-config-custom-validator.xml");
+	}
+
+	@Test
+	public void testCustomValidator32() throws Exception {
+		doTestCustomValidator("mvc-config-custom-validator-32.xml");
+	}
+
+	/**
+	 * @throws Exception
+	 */
+	private void doTestCustomValidator(String xml) throws Exception {
+		loadBeanDefinitions(xml, 13);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
