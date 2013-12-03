@@ -264,7 +264,6 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 				cavs.addIndexedArgumentValue(1, handshakeHandler);
 			}
 			httpRequestHandlerDef = new RootBeanDefinition(WebSocketHttpRequestHandler.class, cavs, null);
-			// TODO: httpRequestHandlerDef.getPropertyValues().add("handshakeInterceptors", ...);
 		}
 
 		String httpRequestHandlerBeanName = registerBeanDef(httpRequestHandlerDef, parserCxt, source);

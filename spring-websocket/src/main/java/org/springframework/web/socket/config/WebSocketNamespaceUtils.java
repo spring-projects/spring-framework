@@ -65,8 +65,6 @@ class WebSocketNamespaceUtils {
 		if (sockJsElement != null) {
 			ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 
-			// TODO: polish the way constructor arguments are set
-
 			String customTaskSchedulerName = sockJsElement.getAttribute("scheduler");
 			if (!customTaskSchedulerName.isEmpty()) {
 				cavs.addIndexedArgumentValue(0, new RuntimeBeanReference(customTaskSchedulerName));
