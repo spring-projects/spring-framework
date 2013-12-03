@@ -165,6 +165,7 @@ public class GlassFishRequestUpgradeStrategy extends AbstractStandardUpgradeStra
 
 		RequestContext wsRequest = RequestContext.Builder.create().
 				requestURI(URI.create(wsApp.getPath())).requestPath(wsApp.getPath()).
+				userPrincipal(request.getUserPrincipal()).
 				connection(connection).secure(request.isSecure()).build();
 
 		for (String header : headers.keySet()) {
