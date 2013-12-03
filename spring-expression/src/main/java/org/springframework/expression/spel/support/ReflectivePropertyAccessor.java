@@ -22,8 +22,11 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.core.MethodParameter;
@@ -49,6 +52,17 @@ import org.springframework.util.StringUtils;
  * @since 3.0
  */
 public class ReflectivePropertyAccessor implements PropertyAccessor {
+
+	private static final Set<Class<?>> BOOLEAN_TYPES;
+	static {
+		Set<Class<?>> booleanTypes = new HashSet<Class<?>>();
+		booleanTypes.add(Boolean.class);
+		booleanTypes.add(Boolean.TYPE);
+		BOOLEAN_TYPES = Collections.unmodifiableSet(booleanTypes);
+	}
+
+	private static final Set<Class<?>> ANY_TYPES = Collections.emptySet();
+
 
 	private final Map<CacheKey, InvokerPair> readerCache = new ConcurrentHashMap<CacheKey, InvokerPair>(64);
 
@@ -314,8 +328,13 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 * Find a getter method for the specified property.
 	 */
 	protected Method findGetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
-		return findMethodForProperty(getPropertyMethodSuffixes(propertyName),
-				new String[] { "get", "is" }, clazz, mustBeStatic, 0);
+		Method method = findMethodForProperty(getPropertyMethodSuffixes(propertyName),
+				 "get", clazz, mustBeStatic, 0, ANY_TYPES);
+		if (method == null) {
+			method = findMethodForProperty(getPropertyMethodSuffixes(propertyName),
+					 "is", clazz, mustBeStatic, 0, BOOLEAN_TYPES);
+		}
+		return method;
 	}
 
 	/**
@@ -323,20 +342,19 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 */
 	protected Method findSetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
 		return findMethodForProperty(getPropertyMethodSuffixes(propertyName),
-				new String[] { "set" }, clazz, mustBeStatic, 1);
+				"set", clazz, mustBeStatic, 1, ANY_TYPES);
 	}
 
-	private Method findMethodForProperty(String[] methodSuffixes, String[] prefixes, Class<?> clazz,
-			boolean mustBeStatic, int numberOfParams) {
+	private Method findMethodForProperty(String[] methodSuffixes, String prefix, Class<?> clazz,
+			boolean mustBeStatic, int numberOfParams, Set<Class<?>> requiredReturnTypes) {
 		Method[] methods = getSortedClassMethods(clazz);
 		for (String methodSuffix : methodSuffixes) {
-			for (String prefix : prefixes) {
-				for (Method method : methods) {
-					if (method.getName().equals(prefix + methodSuffix)
-							&& method.getParameterTypes().length == numberOfParams
-							&& (!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
-						return method;
-					}
+			for (Method method : methods) {
+				if (method.getName().equals(prefix + methodSuffix)
+						&& method.getParameterTypes().length == numberOfParams
+						&& (!mustBeStatic || Modifier.isStatic(method.getModifiers()))
+						&& (requiredReturnTypes.isEmpty() || requiredReturnTypes.contains(method.getReturnType()))) {
+					return method;
 				}
 			}
 		}
