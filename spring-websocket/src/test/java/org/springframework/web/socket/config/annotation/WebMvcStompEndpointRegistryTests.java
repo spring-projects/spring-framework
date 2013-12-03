@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.config;
+package org.springframework.web.socket.config.annotation;
 
 import java.util.Map;
 
