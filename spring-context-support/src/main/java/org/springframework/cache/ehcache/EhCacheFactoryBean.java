@@ -321,6 +321,7 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware, 
 			// create one on the fly.
 			Ehcache rawCache;
 			boolean cacheExists = this.cacheManager.cacheExists(this.cacheName);
+
 			if (cacheExists) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Using existing EhCache cache region '" + this.cacheName + "'");
@@ -339,6 +340,12 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware, 
 					rawCache.getCacheEventNotificationService().registerListener(listener);
 				}
 			}
+
+			// Needs to happen after listener registration but before setStatisticsEnabled
+			if (!cacheExists) {
+				this.cacheManager.addCache(rawCache);
+			}
+
 			if (this.statisticsEnabled) {
 				rawCache.setStatisticsEnabled(true);
 			}
@@ -349,9 +356,6 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware, 
 				rawCache.setDisabled(true);
 			}
 
-			if (!cacheExists) {
-				this.cacheManager.addCache(rawCache);
-			}
 			Ehcache decoratedCache = decorateCache(rawCache);
 			if (decoratedCache != rawCache) {
 				this.cacheManager.replaceCacheWithDecoratedCache(rawCache, decoratedCache);
