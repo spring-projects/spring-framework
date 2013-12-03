@@ -490,18 +490,23 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 * @throws TypeMismatchException if type conversion failed
 	 */
 	public Object convertForProperty(Object value, String propertyName) throws TypeMismatchException {
-		PropertyDescriptor pd = getCachedIntrospectionResults().getPropertyDescriptor(propertyName);
+		CachedIntrospectionResults cachedIntrospectionResults = getCachedIntrospectionResults();
+		PropertyDescriptor pd = cachedIntrospectionResults.getPropertyDescriptor(propertyName);
+		TypeDescriptor td = cachedIntrospectionResults.getTypeDescriptor(pd);
 		if (pd == null) {
 			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 					"No property '" + propertyName + "' found");
 		}
-		return convertForProperty(propertyName, null, value, pd);
+		if (td == null) {
+			td = new TypeDescriptor(property(pd));
+			cachedIntrospectionResults.putTypeDescriptor(pd, td);
+		}
+		return convertForProperty(propertyName, null, value, pd, td);
 	}
 
-	private Object convertForProperty(String propertyName, Object oldValue, Object newValue, PropertyDescriptor pd)
+	private Object convertForProperty(String propertyName, Object oldValue, Object newValue, PropertyDescriptor pd, TypeDescriptor td)
 			throws TypeMismatchException {
-
-		return convertIfNecessary(propertyName, oldValue, newValue, pd.getPropertyType(), new TypeDescriptor(property(pd)));
+		return convertIfNecessary(propertyName, oldValue, newValue, pd.getPropertyType(), td);
 	}
 
 	private Property property(PropertyDescriptor pd) {
@@ -1107,7 +1112,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 								}
 							}
 						}
-						valueToApply = convertForProperty(propertyName, oldValue, originalValue, pd);
+						valueToApply = convertForProperty(propertyName, oldValue, originalValue, pd, new TypeDescriptor(property(pd)));
 					}
 					pv.getOriginalPropertyValue().conversionNecessary = (valueToApply != originalValue);
 				}

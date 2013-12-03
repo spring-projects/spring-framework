@@ -22,6 +22,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -32,6 +33,7 @@ import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -216,6 +218,9 @@ public class CachedIntrospectionResults {
 	/** PropertyDescriptor objects keyed by property name String */
 	private final Map<String, PropertyDescriptor> propertyDescriptorCache;
 
+	/** TypeDescriptor objects keyed by PropertyDescriptor */
+	private final Map<PropertyDescriptor, TypeDescriptor> typeDescriptorCache;
+
 
 	/**
 	 * Create a new CachedIntrospectionResults instance for the given class.
@@ -273,6 +278,8 @@ public class CachedIntrospectionResults {
 				pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
 				this.propertyDescriptorCache.put(pd.getName(), pd);
 			}
+
+			this.typeDescriptorCache = new HashMap<PropertyDescriptor, TypeDescriptor>();
 		}
 		catch (IntrospectionException ex) {
 			throw new FatalBeanException("Failed to obtain BeanInfo for class [" + beanClass.getName() + "]", ex);
@@ -319,6 +326,14 @@ public class CachedIntrospectionResults {
 		catch (IntrospectionException ex) {
 			throw new FatalBeanException("Failed to re-introspect class [" + beanClass.getName() + "]", ex);
 		}
+	}
+
+	TypeDescriptor getTypeDescriptor(PropertyDescriptor pd) {
+		return this.typeDescriptorCache.get(pd);
+	}
+
+	void putTypeDescriptor(PropertyDescriptor pd, TypeDescriptor td) {
+		this.typeDescriptorCache.put(pd, td);
 	}
 
 }
