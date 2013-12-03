@@ -163,21 +163,27 @@ public class GlassFishRequestUpgradeStrategy extends AbstractStandardUpgradeStra
 
 		Connection connection = createConnection(upgradeHandler, response);
 
-		RequestContext wsRequest = RequestContext.Builder.create().
+		RequestContext requestContext = RequestContext.Builder.create().
 				requestURI(URI.create(wsApp.getPath())).requestPath(wsApp.getPath()).
 				userPrincipal(request.getUserPrincipal()).
 				connection(connection).secure(request.isSecure()).build();
 
 		for (String header : headers.keySet()) {
-			wsRequest.getHeaders().put(header, headers.get(header));
+			requestContext.getHeaders().put(header, headers.get(header));
 		}
 
-		return WebSocketEngine.getEngine().upgrade(connection, wsRequest, new WebSocketEngine.WebSocketHolderListener() {
-			@Override
-			public void onWebSocketHolder(WebSocketEngine.WebSocketHolder webSocketHolder) {
-				upgradeHandler.setWebSocketHolder(webSocketHolder);
-			}
-		});
+		boolean upgraded = WebSocketEngine.getEngine().upgrade(connection, requestContext,
+				new WebSocketEngine.WebSocketHolderListener() {
+					@Override
+					public void onWebSocketHolder(WebSocketEngine.WebSocketHolder webSocketHolder) {
+						upgradeHandler.setWebSocketHolder(webSocketHolder);
+					}
+				});
+
+		// Glassfish bug ?? (see same line in TyrusServletFilter.doFilter)
+		response.flushBuffer();
+
+		return upgraded;
 	}
 
 	private WebSocketApplication createTyrusEndpoint(HttpServletRequest request,
