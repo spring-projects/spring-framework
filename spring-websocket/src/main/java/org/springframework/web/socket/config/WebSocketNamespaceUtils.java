@@ -67,7 +67,7 @@ class WebSocketNamespaceUtils {
 
 			// TODO: polish the way constructor arguments are set
 
-			String customTaskSchedulerName = sockJsElement.getAttribute("task-scheduler");
+			String customTaskSchedulerName = sockJsElement.getAttribute("scheduler");
 			if (!customTaskSchedulerName.isEmpty()) {
 				cavs.addIndexedArgumentValue(0, new RuntimeBeanReference(customTaskSchedulerName));
 			}
@@ -126,7 +126,7 @@ class WebSocketNamespaceUtils {
 			if (!attrValue.isEmpty()) {
 				sockJsServiceDef.getPropertyValues().add("disconnectDelay", Long.valueOf(attrValue));
 			}
-			attrValue = sockJsElement.getAttribute("http-message-cache-size");
+			attrValue = sockJsElement.getAttribute("message-cache-size");
 			if (!attrValue.isEmpty()) {
 				sockJsServiceDef.getPropertyValues().add("httpMessageCacheSize", Integer.valueOf(attrValue));
 			}

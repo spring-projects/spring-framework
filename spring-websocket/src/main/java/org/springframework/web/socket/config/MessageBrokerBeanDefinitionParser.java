@@ -304,25 +304,25 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			if(!relayPort.isEmpty()) {
 				mpvs.add("relayPort", Integer.valueOf(relayPort));
 			}
-			String systemLogin = brokerRelayElem.getAttribute("system-login");
-			if(!systemLogin.isEmpty()) {
-				mpvs.add("systemLogin",systemLogin);
+			String attrValue = brokerRelayElem.getAttribute("login");
+			if(!attrValue.isEmpty()) {
+				mpvs.add("systemLogin",attrValue);
 			}
-			String systemPasscode = brokerRelayElem.getAttribute("system-passcode");
-			if(!systemPasscode.isEmpty()) {
-				mpvs.add("systemPasscode",systemPasscode);
+			attrValue = brokerRelayElem.getAttribute("passcode");
+			if(!attrValue.isEmpty()) {
+				mpvs.add("systemPasscode", attrValue);
 			}
-			String systemHeartbeatSendInterval = brokerRelayElem.getAttribute("system-heartbeat-send-interval");
-			if(!systemHeartbeatSendInterval.isEmpty()) {
-				mpvs.add("systemHeartbeatSendInterval",Long.parseLong(systemHeartbeatSendInterval));
+			attrValue = brokerRelayElem.getAttribute("heartbeat-send-interval");
+			if(!attrValue.isEmpty()) {
+				mpvs.add("systemHeartbeatSendInterval", Long.parseLong(attrValue));
 			}
-			String systemHeartbeatReceiveInterval = brokerRelayElem.getAttribute("system-heartbeat-receive-interval");
-			if(!systemHeartbeatReceiveInterval.isEmpty()) {
-				mpvs.add("systemHeartbeatReceiveInterval",Long.parseLong(systemHeartbeatReceiveInterval));
+			attrValue = brokerRelayElem.getAttribute("heartbeat-receive-interval");
+			if(!attrValue.isEmpty()) {
+				mpvs.add("systemHeartbeatReceiveInterval", Long.parseLong(attrValue));
 			}
-			String virtualHost = brokerRelayElem.getAttribute("virtual-host");
-			if(!virtualHost.isEmpty()) {
-				mpvs.add("virtualHost",virtualHost);
+			attrValue = brokerRelayElem.getAttribute("virtual-host");
+			if(!attrValue.isEmpty()) {
+				mpvs.add("virtualHost", attrValue);
 			}
 
 			Class<?> handlerType = StompBrokerRelayMessageHandler.class;

@@ -9,14 +9,8 @@
             <websocket:handshake-handler ref="myHandler"/>
             <websocket:sockjs/>
         </websocket:stomp-endpoint>
-        <websocket:stomp-broker-relay
-                prefix="/topic,/queue"
-                relay-host="relayhost"
-                relay-port="1234"
-                system-login="login"
-                system-passcode="pass"
-                system-heartbeat-send-interval="5000"
-                system-heartbeat-receive-interval="5000"
+        <websocket:stomp-broker-relay prefix="/topic,/queue" relay-host="relayhost" relay-port="1234"
+                login="login" passcode="pass" heartbeat-send-interval="5000" heartbeat-receive-interval="5000"
                 virtual-host="spring.io"/>
     </websocket:message-broker>
 

@@ -100,11 +100,11 @@
         </xsd:attribute>
         <xsd:attribute name="disconnect-delay" type="xsd:long">
         </xsd:attribute>
-        <xsd:attribute name="http-message-cache-size" type="xsd:long">
+        <xsd:attribute name="message-cache-size" type="xsd:long">
         </xsd:attribute>
         <xsd:attribute name="websocket-enabled" type="xsd:boolean">
         </xsd:attribute>
-        <xsd:attribute name="task-scheduler" type="xsd:string">
+        <xsd:attribute name="scheduler" type="xsd:string">
         </xsd:attribute>
     </xsd:complexType>
 
@@ -112,10 +112,10 @@
         <xsd:attribute name="prefix" type="xsd:string"></xsd:attribute>
         <xsd:attribute name="relay-host" type="xsd:string"></xsd:attribute>
         <xsd:attribute name="relay-port" type="xsd:integer"></xsd:attribute>
-        <xsd:attribute name="system-login" type="xsd:string"></xsd:attribute>
-        <xsd:attribute name="system-passcode" type="xsd:string"></xsd:attribute>
-        <xsd:attribute name="system-heartbeat-send-interval" type="xsd:long"></xsd:attribute>
-        <xsd:attribute name="system-heartbeat-receive-interval" type="xsd:long"></xsd:attribute>
+        <xsd:attribute name="login" type="xsd:string"></xsd:attribute>
+        <xsd:attribute name="passcode" type="xsd:string"></xsd:attribute>
+        <xsd:attribute name="heartbeat-send-interval" type="xsd:long"></xsd:attribute>
+        <xsd:attribute name="heartbeat-receive-interval" type="xsd:long"></xsd:attribute>
         <xsd:attribute name="auto-startup" type="xsd:boolean"></xsd:attribute>
         <xsd:attribute name="virtual-host" type="xsd:string"></xsd:attribute>
     </xsd:complexType>

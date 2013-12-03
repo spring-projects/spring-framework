@@ -7,14 +7,9 @@
 
     <websocket:handlers >
         <websocket:mapping path="/test" handler="testHandler"/>
-        <websocket:sockjs task-scheduler="testTaskScheduler"
-                          name="testSockJsService"
-                          websocket-enabled="false"
-                          session-cookie-needed="false"
-                          stream-bytes-limit="2048"
-                          disconnect-delay="256"
-                          http-message-cache-size="1024"
-                          heartbeat-time="20">
+        <websocket:sockjs name="testSockJsService" scheduler="testTaskScheduler" websocket-enabled="false"
+                session-cookie-needed="false" stream-bytes-limit="2048" disconnect-delay="256"
+                message-cache-size="1024" heartbeat-time="20">
             <websocket:transport-handlers register-defaults="false">
                 <bean class="org.springframework.web.socket.sockjs.transport.handler.XhrPollingTransportHandler"/>
                 <ref bean="xhrStreamingTransportHandler"/>
