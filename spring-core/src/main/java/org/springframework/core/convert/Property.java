@@ -245,10 +245,10 @@ public final class Property {
 	public int hashCode() {
 		final int prime = 31;
 		int hashCode = 1;
-		hashCode = prime * hashCode + ObjectUtils.nullSafeHashCode(objectType);
-		hashCode = prime * hashCode + ObjectUtils.nullSafeHashCode(readMethod);
-		hashCode = prime * hashCode + ObjectUtils.nullSafeHashCode(writeMethod);
-		hashCode = prime * hashCode + ObjectUtils.nullSafeHashCode(name);
+		hashCode = prime * hashCode + ObjectUtils.nullSafeHashCode(this.objectType);
+		hashCode = prime * hashCode + ObjectUtils.nullSafeHashCode(this.readMethod);
+		hashCode = prime * hashCode + ObjectUtils.nullSafeHashCode(this.writeMethod);
+		hashCode = prime * hashCode + ObjectUtils.nullSafeHashCode(this.name);
 		return hashCode;
 	}
 
@@ -265,10 +265,10 @@ public final class Property {
 		}
 		Property other = (Property) obj;
 		boolean equals = true;
-		equals &= ObjectUtils.nullSafeEquals(objectType, other.objectType);
-		equals &= ObjectUtils.nullSafeEquals(readMethod, other.readMethod);
-		equals &= ObjectUtils.nullSafeEquals(writeMethod, other.writeMethod);
-		equals &= ObjectUtils.nullSafeEquals(name, other.name);
+		equals &= ObjectUtils.nullSafeEquals(this.objectType, other.objectType);
+		equals &= ObjectUtils.nullSafeEquals(this.readMethod, other.readMethod);
+		equals &= ObjectUtils.nullSafeEquals(this.writeMethod, other.writeMethod);
+		equals &= ObjectUtils.nullSafeEquals(this.name, other.name);
 		return equals;
 	}
 }
