@@ -23,11 +23,13 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
+import org.springframework.util.SocketUtils;
 
 import static org.junit.Assert.*;
 
@@ -37,15 +39,26 @@ import static org.junit.Assert.*;
  */
 public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTests {
 
-	private static final String SERVICE_URL = "service:jmx:jmxmp://localhost:9878";
 
-	private JMXServiceURL getServiceUrl() throws MalformedURLException {
-		return new JMXServiceURL(SERVICE_URL);
+	private String serviceUrl;
+
+
+	@Before
+	public void getUrl() {
+		int port = SocketUtils.findAvailableTcpPort(9800, 9900);
+		this.serviceUrl =  "service:jmx:jmxmp://localhost:" + port;
+		System.out.println(port);
+	}
+
+
+	private JMXServiceURL getJMXServiceUrl() throws MalformedURLException {
+		return new JMXServiceURL(serviceUrl);
 	}
 
 	private JMXConnectorServer getConnectorServer() throws Exception {
-		return JMXConnectorServerFactory.newJMXConnectorServer(getServiceUrl(), null, getServer());
+		return JMXConnectorServerFactory.newJMXConnectorServer(getJMXServiceUrl(), null, getServer());
 	}
+
 
 	@Test
 	public void testTestValidConnection() throws Exception {
@@ -55,7 +68,7 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 
 		try {
 			MBeanServerConnectionFactoryBean bean = new MBeanServerConnectionFactoryBean();
-			bean.setServiceUrl(SERVICE_URL);
+			bean.setServiceUrl(serviceUrl);
 			bean.afterPropertiesSet();
 
 			try {
@@ -87,7 +100,7 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 	public void testTestWithLazyConnection() throws Exception {
 		Assume.group(TestGroup.JMXMP);
 		MBeanServerConnectionFactoryBean bean = new MBeanServerConnectionFactoryBean();
-		bean.setServiceUrl(SERVICE_URL);
+		bean.setServiceUrl(serviceUrl);
 		bean.setConnectOnStartup(false);
 		bean.afterPropertiesSet();
 
@@ -110,7 +123,7 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 	@Test
 	public void testWithLazyConnectionAndNoAccess() throws Exception {
 		MBeanServerConnectionFactoryBean bean = new MBeanServerConnectionFactoryBean();
-		bean.setServiceUrl(SERVICE_URL);
+		bean.setServiceUrl(serviceUrl);
 		bean.setConnectOnStartup(false);
 		bean.afterPropertiesSet();
 
