@@ -1852,6 +1852,17 @@ public class SpelReproTests extends ExpressionTestCase {
 		assertTrue(classNameExpression.getValue(map,Boolean.class));
 	}
 
+	@Test
+	public void SPR_11142() throws Exception {
+		SpelExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		SPR11142 rootObject = new SPR11142();
+		Expression expression = parser.parseExpression("something");
+		thrown.expect(SpelEvaluationException.class);
+		thrown.expectMessage("property 'something' cannot be found");
+		expression.getValue(context, rootObject);
+	}
+
 
 	private static enum ABC {A, B, C}
 
@@ -1953,6 +1964,14 @@ public class SpelReproTests extends ExpressionTestCase {
 				return string.equals(((TestClass2)o).string);
 			}
 			return false;
+		}
+
+	}
+
+	static class SPR11142 {
+
+		public String isSomething() {
+			return "";
 		}
 
 	}
