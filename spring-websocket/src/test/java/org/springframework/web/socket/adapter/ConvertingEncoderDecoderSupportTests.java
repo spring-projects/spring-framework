@@ -39,12 +39,13 @@ import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.socket.ContextLoaderTestUtils;
+import org.springframework.web.socket.adapter.standard.ConvertingEncoderDecoderSupport;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Test for {@link ConvertingEncoderDecoderSupport}.
+ * Test for {@link org.springframework.web.socket.adapter.standard.ConvertingEncoderDecoderSupport}.
  *
  * @author Phillip Webb
  */

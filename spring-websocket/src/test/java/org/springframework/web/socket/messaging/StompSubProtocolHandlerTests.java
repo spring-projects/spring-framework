@@ -34,7 +34,7 @@ import org.springframework.messaging.simp.stomp.StompDecoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.support.TestWebSocketSession;
+import org.springframework.web.socket.handler.TestWebSocketSession;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;

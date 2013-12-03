@@ -24,7 +24,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
-import org.springframework.web.socket.support.TestWebSocketSession;
+import org.springframework.web.socket.handler.TestWebSocketSession;
 
 import static org.mockito.Mockito.*;
 

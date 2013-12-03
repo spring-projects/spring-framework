@@ -23,9 +23,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.websocket.Extension;
-
-import org.eclipse.jetty.websocket.api.extensions.ExtensionConfig;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -176,65 +173,5 @@ public class WebSocketExtension {
 		}
 		return str.toString();
 	}
-
-
-	// Standard WebSocketExtension adapters
-
-	public static class StandardToWebSocketExtensionAdapter extends WebSocketExtension {
-
-		public StandardToWebSocketExtensionAdapter(Extension ext) {
-			super(ext.getName());
-			for (Extension.Parameter p : ext.getParameters()) {
-				super.getParameters().put(p.getName(), p.getValue());
-			}
-		}
-	}
-
-	public static class WebSocketToStandardExtensionAdapter implements Extension {
-
-		private final String name;
-
-		private final List<Parameter> parameters = new ArrayList<Parameter>();
-
-		public WebSocketToStandardExtensionAdapter(final WebSocketExtension ext) {
-			this.name = ext.getName();
-			for (final String paramName : ext.getParameters().keySet()) {
-				this.parameters.add(new Parameter() {
-					@Override
-					public String getName() {
-						return paramName;
-					}
-					@Override
-					public String getValue() {
-						return ext.getParameters().get(paramName);
-					}
-				});
-			}
-		}
-
-		@Override
-		public String getName() {
-			return name;
-		}
-
-		@Override
-		public List<Parameter> getParameters() {
-			return this.parameters;
-		}
-	}
-
-	// Jetty WebSocketExtension adapters
-
-	public static class WebSocketToJettyExtensionConfigAdapter extends ExtensionConfig {
-
-		public WebSocketToJettyExtensionConfigAdapter(WebSocketExtension extension) {
-			super(extension.getName());
-			for (Map.Entry<String,String> p : extension.getParameters().entrySet()) {
-				super.setParameter(p.getKey(), p.getValue());
-			}
-		}
-	}
-
-
 
 }

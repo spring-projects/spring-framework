@@ -27,11 +27,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
-import org.springframework.web.socket.support.SubProtocolCapable;
+import org.springframework.web.socket.SubProtocolCapable;
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.adapter.TextWebSocketHandlerAdapter;
-import org.springframework.web.socket.support.WebSocketHttpHeaders;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
@@ -72,7 +72,7 @@ public class DefaultHandshakeHandlerTests extends AbstractHttpRequestTests {
 		headers.setSecWebSocketKey("82/ZS2YHjEnUN97HLL8tbw==");
 		headers.setSecWebSocketProtocol("STOMP");
 
-		WebSocketHandler handler = new TextWebSocketHandlerAdapter();
+		WebSocketHandler handler = new TextWebSocketHandler();
 		Map<String, Object> attributes = Collections.<String, Object>emptyMap();
 		this.handshakeHandler.doHandshake(this.request, this.response, handler, attributes);
 
@@ -125,7 +125,7 @@ public class DefaultHandshakeHandlerTests extends AbstractHttpRequestTests {
 	}
 
 
-	private static class SubProtocolCapableHandler extends TextWebSocketHandlerAdapter implements SubProtocolCapable {
+	private static class SubProtocolCapableHandler extends TextWebSocketHandler implements SubProtocolCapable {
 
 		private final List<String> subProtocols;
 

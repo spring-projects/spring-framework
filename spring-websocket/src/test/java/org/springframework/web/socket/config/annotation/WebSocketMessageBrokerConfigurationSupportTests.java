@@ -42,12 +42,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.config.annotation.DelegatingWebSocketMessageBrokerConfiguration;
-import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
-import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.messaging.StompTextMessageBuilder;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
-import org.springframework.web.socket.support.TestWebSocketSession;
+import org.springframework.web.socket.handler.TestWebSocketSession;
 
 import static org.junit.Assert.*;
 

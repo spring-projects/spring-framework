@@ -26,15 +26,14 @@ import org.junit.runners.Parameterized;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.adapter.TextWebSocketHandlerAdapter;
-import org.springframework.web.socket.adapter.WebSocketHandlerAdapter;
-import org.springframework.web.socket.client.endpoint.StandardWebSocketClient;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
+import org.springframework.web.socket.handler.AbstractWebSocketHandler;
+import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
-import org.springframework.web.socket.support.WebSocketHttpHeaders;
 
 import static org.junit.Assert.*;
 
@@ -67,7 +66,7 @@ public class WebSocketIntegrationTests extends  AbstractWebSocketIntegrationTest
 		headers.setSecWebSocketProtocol("foo");
 
 		WebSocketSession session = this.webSocketClient.doHandshake(
-				new WebSocketHandlerAdapter(), headers, new URI(getWsBaseUrl() + "/ws")).get();
+				new AbstractWebSocketHandler() {}, headers, new URI(getWsBaseUrl() + "/ws")).get();
 
 		assertEquals("foo", session.getAcceptedProtocol());
 	}
@@ -92,7 +91,7 @@ public class WebSocketIntegrationTests extends  AbstractWebSocketIntegrationTest
 		}
 	}
 
-	private static class TestServerWebSocketHandler extends TextWebSocketHandlerAdapter {
+	private static class TestServerWebSocketHandler extends TextWebSocketHandler {
 	}
 
 }

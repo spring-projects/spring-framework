@@ -31,7 +31,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.WebSocketExtension;
-import org.springframework.web.socket.support.WebSocketHttpHeaders;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**

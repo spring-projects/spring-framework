@@ -33,26 +33,26 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.socket.SubProtocolCapable;
+import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
-import org.springframework.web.socket.support.SubProtocolCapable;
-import org.springframework.web.socket.WebSocketExtension;
-import org.springframework.web.socket.support.WebSocketHandlerDecorator;
-import org.springframework.web.socket.support.WebSocketHttpHeaders;
+import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 
 /**
- * A default {@link org.springframework.web.socket.server.HandshakeHandler} implementation. Performs initial validation of the
- * WebSocket handshake request -- possibly rejecting it through the appropriate HTTP
- * status code -- while also allowing sub-classes to override various parts of the
- * negotiation process (e.g. origin validation, sub-protocol negotiation,
+ * A default {@link org.springframework.web.socket.server.HandshakeHandler} implementation.
+ * Performs initial validation of the WebSocket handshake request -- possibly rejecting it
+ * through the appropriate HTTP status code -- while also allowing sub-classes to override
+ * various parts of the negotiation process (e.g. origin validation, sub-protocol negotiation,
  * extensions negotiation, etc).
  *
  * <p>If the negotiation succeeds, the actual upgrade is delegated to a server-specific
- * {@link org.springframework.web.socket.server.RequestUpgradeStrategy}, which will update the response as necessary and
- * initialize the WebSocket. Currently supported servers are Tomcat 7 and 8, Jetty 9, and
- * Glassfish 4.
+ * {@link org.springframework.web.socket.server.RequestUpgradeStrategy}, which will update
+ * the response as necessary and initialize the WebSocket. Currently supported servers are
+ * Tomcat 7 and 8, Jetty 9, and GlassFish 4.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -61,17 +61,14 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 
 	protected Log logger = LogFactory.getLog(getClass());
 
-	private static final boolean tomcatWsPresent = ClassUtils.isPresent(
-			"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", HandshakeHandler.class.getClassLoader());
-
 	private static final boolean jettyWsPresent = ClassUtils.isPresent(
-			"org.eclipse.jetty.websocket.server.WebSocketServerFactory", HandshakeHandler.class.getClassLoader());
+			"org.eclipse.jetty.websocket.server.WebSocketServerFactory", DefaultHandshakeHandler.class.getClassLoader());
+
+	private static final boolean tomcatWsPresent = ClassUtils.isPresent(
+			"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", DefaultHandshakeHandler.class.getClassLoader());
 
 	private static final boolean glassFishWsPresent = ClassUtils.isPresent(
-			"org.glassfish.tyrus.servlet.TyrusHttpUpgradeHandler", HandshakeHandler.class.getClassLoader());
-
-	private static final boolean glassFish40WsPresent = ClassUtils.isPresent(
-			"org.glassfish.tyrus.server.TyrusEndpoint", HandshakeHandler.class.getClassLoader());
+			"org.glassfish.tyrus.servlet.TyrusHttpUpgradeHandler", DefaultHandshakeHandler.class.getClassLoader());
 
 
 	private final RequestUpgradeStrategy requestUpgradeStrategy;
@@ -90,29 +87,24 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 
 	private static RequestUpgradeStrategy initRequestUpgradeStrategy() {
 		String className;
-		if (tomcatWsPresent) {
-			className = "org.springframework.web.socket.server.support.TomcatRequestUpgradeStrategy";
+		if (jettyWsPresent) {
+			className = "org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy";
 		}
-		else if (jettyWsPresent) {
-			className = "org.springframework.web.socket.server.support.JettyRequestUpgradeStrategy";
+		else if (tomcatWsPresent) {
+			className = "org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrategy";
 		}
 		else if (glassFishWsPresent) {
-			if (glassFish40WsPresent) {
-				className = "org.springframework.web.socket.server.support.GlassFish40RequestUpgradeStrategy";
-			}
-			else {
-				className = "org.springframework.web.socket.server.support.GlassFishRequestUpgradeStrategy";
-			}
+			className = "org.springframework.web.socket.server.standard.GlassFishRequestUpgradeStrategy";
 		}
 		else {
-			throw new IllegalStateException("No suitable " + RequestUpgradeStrategy.class.getSimpleName());
+			throw new IllegalStateException("No suitable default RequestUpgradeStrategy found");
 		}
 		try {
 			Class<?> clazz = ClassUtils.forName(className, DefaultHandshakeHandler.class.getClassLoader());
 			return (RequestUpgradeStrategy) BeanUtils.instantiateClass(clazz.getConstructor());
 		}
-		catch (Throwable t) {
-			throw new IllegalStateException("Failed to instantiate " + className, t);
+		catch (Throwable ex) {
+			throw new IllegalStateException("Failed to instantiate RequestUpgradeStrategy: " + className, ex);
 		}
 	}
 

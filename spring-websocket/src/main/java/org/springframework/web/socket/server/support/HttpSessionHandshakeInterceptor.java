@@ -19,11 +19,11 @@ package org.springframework.web.socket.server.support;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Map;
-
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;

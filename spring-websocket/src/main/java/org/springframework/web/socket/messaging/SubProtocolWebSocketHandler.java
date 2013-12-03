@@ -16,21 +16,32 @@
 
 package org.springframework.web.socket.messaging;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.SmartLifecycle;
-import org.springframework.messaging.*;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.SubProtocolCapable;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.support.SubProtocolCapable;
 
 /**
  * An implementation of {@link WebSocketHandler} that delegates incoming WebSocket
@@ -45,11 +56,10 @@ import org.springframework.web.socket.support.SubProtocolCapable;
  *
  * @author Rossen Stoyanchev
  * @author Andy Wilkinson
- *
  * @since 4.0
  */
 public class SubProtocolWebSocketHandler
-		implements SubProtocolCapable, WebSocketHandler, MessageHandler, SmartLifecycle {
+		implements WebSocketHandler, SubProtocolCapable, MessageHandler, SmartLifecycle {
 
 	private final Log logger = LogFactory.getLog(SubProtocolWebSocketHandler.class);
 

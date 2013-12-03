@@ -28,10 +28,10 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureTask;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.adapter.WebSocketHandlerAdapter;
-import org.springframework.web.socket.support.LoggingWebSocketHandlerDecorator;
-import org.springframework.web.socket.support.WebSocketHandlerDecorator;
-import org.springframework.web.socket.support.WebSocketHttpHeaders;
+import org.springframework.web.socket.handler.AbstractWebSocketHandler;
+import org.springframework.web.socket.handler.LoggingWebSocketHandlerDecorator;
+import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.junit.Assert.*;
@@ -45,11 +45,11 @@ public class WebSocketConnectionManagerTests {
 
 	@Test
 	public void openConnection() throws Exception {
-
 		List<String> subprotocols = Arrays.asList("abc");
 
 		TestLifecycleWebSocketClient client = new TestLifecycleWebSocketClient(false);
-		WebSocketHandler handler = new WebSocketHandlerAdapter();
+		WebSocketHandler handler = new AbstractWebSocketHandler() {
+		};
 
 		WebSocketConnectionManager manager = new WebSocketConnectionManager(client, handler , "/path/{id}", "123");
 		manager.setSubProtocols(subprotocols);
@@ -69,9 +69,9 @@ public class WebSocketConnectionManagerTests {
 
 	@Test
 	public void syncClientLifecycle() throws Exception {
-
 		TestLifecycleWebSocketClient client = new TestLifecycleWebSocketClient(false);
-		WebSocketHandler handler = new WebSocketHandlerAdapter();
+		WebSocketHandler handler = new AbstractWebSocketHandler() {
+		};
 		WebSocketConnectionManager manager = new WebSocketConnectionManager(client, handler , "/a");
 
 		manager.startInternal();
@@ -85,7 +85,8 @@ public class WebSocketConnectionManagerTests {
 	public void dontSyncClientLifecycle() throws Exception {
 
 		TestLifecycleWebSocketClient client = new TestLifecycleWebSocketClient(true);
-		WebSocketHandler handler = new WebSocketHandlerAdapter();
+		WebSocketHandler handler = new AbstractWebSocketHandler() {
+		};
 		WebSocketConnectionManager manager = new WebSocketConnectionManager(client, handler , "/a");
 
 		manager.startInternal();

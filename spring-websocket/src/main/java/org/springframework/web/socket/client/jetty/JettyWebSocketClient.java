@@ -35,16 +35,17 @@ import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.adapter.JettyWebSocketHandlerAdapter;
-import org.springframework.web.socket.adapter.JettyWebSocketSession;
+import org.springframework.web.socket.adapter.jetty.JettyWebSocketHandlerAdapter;
+import org.springframework.web.socket.adapter.jetty.JettyWebSocketSession;
+import org.springframework.web.socket.adapter.jetty.WebSocketToJettyExtensionConfigAdapter;
 import org.springframework.web.socket.client.AbstractWebSocketClient;
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * Initiates WebSocket requests to a WebSocket server programatically through the Jetty
- * WebSocket API.
+ * Initiates WebSocket requests to a WebSocket server programmatically
+ * through the Jetty WebSocket API.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -177,7 +178,7 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Sma
 		request.setSubProtocols(protocols);
 
 		for (WebSocketExtension e : extensions) {
-			request.addExtensions(new WebSocketExtension.WebSocketToJettyExtensionConfigAdapter(e));
+			request.addExtensions(new WebSocketToJettyExtensionConfigAdapter(e));
 		}
 
 		for (String header : headers.keySet()) {

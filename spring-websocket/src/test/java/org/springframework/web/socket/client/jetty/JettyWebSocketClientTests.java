@@ -32,10 +32,10 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.SocketUtils;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.adapter.JettyWebSocketHandlerAdapter;
-import org.springframework.web.socket.adapter.JettyWebSocketSession;
-import org.springframework.web.socket.adapter.TextWebSocketHandlerAdapter;
-import org.springframework.web.socket.support.WebSocketHttpHeaders;
+import org.springframework.web.socket.adapter.jetty.JettyWebSocketHandlerAdapter;
+import org.springframework.web.socket.adapter.jetty.JettyWebSocketSession;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 
 import static org.junit.Assert.*;
 
@@ -59,7 +59,7 @@ public class JettyWebSocketClientTests {
 
 		int port = SocketUtils.findAvailableTcpPort();
 
-		this.server = new TestJettyWebSocketServer(port, new TextWebSocketHandlerAdapter());
+		this.server = new TestJettyWebSocketServer(port, new TextWebSocketHandler());
 		this.server.start();
 
 		this.client = new JettyWebSocketClient();
@@ -82,7 +82,7 @@ public class JettyWebSocketClientTests {
 		WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 		headers.setSecWebSocketProtocol(Arrays.asList("echo"));
 
-		this.wsSession = this.client.doHandshake(new TextWebSocketHandlerAdapter(), headers, new URI(this.wsUrl)).get();
+		this.wsSession = this.client.doHandshake(new TextWebSocketHandler(), headers, new URI(this.wsUrl)).get();
 
 		assertEquals(this.wsUrl, this.wsSession.getUri().toString());
 		assertEquals("echo", this.wsSession.getAcceptedProtocol());

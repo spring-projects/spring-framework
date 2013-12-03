@@ -25,8 +25,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.adapter.TextWebSocketHandlerAdapter;
-import org.springframework.web.socket.config.annotation.AbstractWebSocketHandlerRegistration;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
@@ -59,7 +58,7 @@ public class AbstractWebSocketHandlerRegistrationTests {
 	@Test
 	public void minimal() {
 
-		WebSocketHandler wsHandler = new TextWebSocketHandlerAdapter();
+		WebSocketHandler wsHandler = new TextWebSocketHandler();
 		this.registration.addHandler(wsHandler, "/foo", "/bar");
 
 		List<Mapping> mappings = this.registration.getMappings();
@@ -77,7 +76,7 @@ public class AbstractWebSocketHandlerRegistrationTests {
 	@Test
 	public void interceptors() {
 
-		WebSocketHandler wsHandler = new TextWebSocketHandlerAdapter();
+		WebSocketHandler wsHandler = new TextWebSocketHandler();
 		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor();
 
 		this.registration.addHandler(wsHandler, "/foo").addInterceptors(interceptor);
@@ -94,7 +93,7 @@ public class AbstractWebSocketHandlerRegistrationTests {
 	@Test
 	public void interceptorsPassedToSockJsRegistration() {
 
-		WebSocketHandler wsHandler = new TextWebSocketHandlerAdapter();
+		WebSocketHandler wsHandler = new TextWebSocketHandler();
 		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor();
 
 		this.registration.addHandler(wsHandler, "/foo").addInterceptors(interceptor).withSockJS();
@@ -112,7 +111,7 @@ public class AbstractWebSocketHandlerRegistrationTests {
 	@Test
 	public void handshakeHandler() {
 
-		WebSocketHandler wsHandler = new TextWebSocketHandlerAdapter();
+		WebSocketHandler wsHandler = new TextWebSocketHandler();
 		HandshakeHandler handshakeHandler = new DefaultHandshakeHandler();
 
 		this.registration.addHandler(wsHandler, "/foo").setHandshakeHandler(handshakeHandler);
@@ -129,7 +128,7 @@ public class AbstractWebSocketHandlerRegistrationTests {
 	@Test
 	public void handshakeHandlerPassedToSockJsRegistration() {
 
-		WebSocketHandler wsHandler = new TextWebSocketHandlerAdapter();
+		WebSocketHandler wsHandler = new TextWebSocketHandler();
 		HandshakeHandler handshakeHandler = new DefaultHandshakeHandler();
 
 		this.registration.addHandler(wsHandler, "/foo").setHandshakeHandler(handshakeHandler).withSockJS();

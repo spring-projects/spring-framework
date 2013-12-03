@@ -23,7 +23,7 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.adapter.TextWebSocketHandlerAdapter;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.sockjs.transport.session.SockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.session.WebSocketServerSockJsSession;
 
@@ -42,7 +42,7 @@ import org.springframework.web.socket.sockjs.transport.session.WebSocketServerSo
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class SockJsWebSocketHandler extends TextWebSocketHandlerAdapter {
+public class SockJsWebSocketHandler extends TextWebSocketHandler {
 
 	private final SockJsServiceConfig sockJsServiceConfig;
 

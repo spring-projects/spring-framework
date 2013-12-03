@@ -15,9 +15,7 @@
  */
 
 /**
- * Classes adapting Spring's WebSocket API classes to and from WebSocket
- * implementations. Also contains convenient base classes for
- * {@link org.springframework.web.socket.WebSocketHandler} implementations.
+ * Classes adapting Spring's WebSocket API to and from WebSocket providers.
  */
 package org.springframework.web.socket.adapter;
 

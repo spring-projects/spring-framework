@@ -21,7 +21,7 @@ import java.util.Map;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.support.PerConnectionWebSocketHandler;
+import org.springframework.web.socket.handler.PerConnectionWebSocketHandler;
 
 /**
  * Contract for processing a WebSocket handshake request.

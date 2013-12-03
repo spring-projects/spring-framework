@@ -35,8 +35,8 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
-import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator;
-import org.springframework.web.socket.support.LoggingWebSocketHandlerDecorator;
+import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator;
+import org.springframework.web.socket.handler.LoggingWebSocketHandlerDecorator;
 
 /**
  * A {@link HttpRequestHandler} for processing WebSocket handshake requests.

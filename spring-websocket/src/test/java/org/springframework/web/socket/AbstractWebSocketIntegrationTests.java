@@ -31,8 +31,8 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
-import org.springframework.web.socket.server.support.JettyRequestUpgradeStrategy;
-import org.springframework.web.socket.server.support.TomcatRequestUpgradeStrategy;
+import org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy;
+import org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrategy;
 
 /**
  * Base class for WebSocket integration tests.

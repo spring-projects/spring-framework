@@ -30,8 +30,8 @@ import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator;
-import org.springframework.web.socket.support.LoggingWebSocketHandlerDecorator;
+import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator;
+import org.springframework.web.socket.handler.LoggingWebSocketHandlerDecorator;
 
 /**
  * An {@link HttpRequestHandler} that allows mapping a {@link SockJsService} to requests

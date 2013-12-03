@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
@@ -35,7 +36,7 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
  */
 public class HandshakeInterceptorChain {
 
-	private static final Log logger = LogFactory.getLog(WebSocketHttpRequestHandler.class);
+	private static final Log logger = LogFactory.getLog(HandshakeInterceptorChain.class);
 
 	private final List<HandshakeInterceptor> interceptors;
 

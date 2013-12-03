@@ -31,12 +31,9 @@ import org.springframework.web.socket.AbstractWebSocketIntegrationTests;
 import org.springframework.web.socket.JettyWebSocketTestServer;
 import org.springframework.web.socket.TomcatWebSocketTestServer;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.adapter.WebSocketHandlerAdapter;
-import org.springframework.web.socket.client.endpoint.StandardWebSocketClient;
+import org.springframework.web.socket.handler.AbstractWebSocketHandler;
+import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
-import org.springframework.web.socket.config.annotation.EnableWebSocket;
-import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
-import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
 
@@ -68,7 +65,7 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 	public void registerWebSocketHandler() throws Exception {
 
 		WebSocketSession session = this.webSocketClient.doHandshake(
-				new WebSocketHandlerAdapter(), getWsBaseUrl() + "/ws").get();
+				new AbstractWebSocketHandler() {}, getWsBaseUrl() + "/ws").get();
 
 		TestWebSocketHandler serverHandler = this.wac.getBean(TestWebSocketHandler.class);
 		assertTrue(serverHandler.connectLatch.await(2, TimeUnit.SECONDS));
@@ -80,7 +77,7 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 	public void registerWebSocketHandlerWithSockJS() throws Exception {
 
 		WebSocketSession session = this.webSocketClient.doHandshake(
-				new WebSocketHandlerAdapter(), getWsBaseUrl() + "/sockjs/websocket").get();
+				new AbstractWebSocketHandler() {}, getWsBaseUrl() + "/sockjs/websocket").get();
 
 		TestWebSocketHandler serverHandler = this.wac.getBean(TestWebSocketHandler.class);
 		assertTrue(serverHandler.connectLatch.await(2, TimeUnit.SECONDS));
@@ -113,7 +110,7 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 		}
 	}
 
-	private static class TestWebSocketHandler extends WebSocketHandlerAdapter {
+	private static class TestWebSocketHandler extends AbstractWebSocketHandler {
 
 		private CountDownLatch connectLatch = new CountDownLatch(1);
 

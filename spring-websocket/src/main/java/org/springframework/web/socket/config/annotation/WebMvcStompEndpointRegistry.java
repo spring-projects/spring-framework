@@ -31,7 +31,7 @@ import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.messaging.StompSubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
-import org.springframework.web.socket.support.WebSocketHandlerDecorator;
+import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
 
 /**
  * A registry for STOMP over WebSocket endpoints that maps the endpoints with a

@@ -21,11 +21,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.adapter.jetty.JettyWebSocketHandlerAdapter;
+import org.springframework.web.socket.adapter.jetty.JettyWebSocketSession;
 
 import static org.mockito.Mockito.*;
 
 /**
- * Test fixture for {@link JettyWebSocketHandlerAdapter}.
+ * Test fixture for {@link org.springframework.web.socket.adapter.jetty.JettyWebSocketHandlerAdapter}.
  *
  * @author Rossen Stoyanchev
  */

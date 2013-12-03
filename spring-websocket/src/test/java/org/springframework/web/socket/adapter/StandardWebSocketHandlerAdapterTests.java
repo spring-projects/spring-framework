@@ -25,13 +25,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.adapter.standard.StandardWebSocketHandlerAdapter;
+import org.springframework.web.socket.adapter.standard.StandardWebSocketSession;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Test fixture for {@link StandardWebSocketHandlerAdapter}.
+ * Test fixture for {@link org.springframework.web.socket.adapter.standard.StandardWebSocketHandlerAdapter}.
  *
  * @author Rossen Stoyanchev
  */

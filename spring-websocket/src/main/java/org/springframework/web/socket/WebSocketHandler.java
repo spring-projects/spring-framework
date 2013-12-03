@@ -24,7 +24,7 @@ package org.springframework.web.socket;
  * the exception is logged and the session closed with
  * {@link CloseStatus#SERVER_ERROR SERVER_ERROR(1011)}. The exception handling
  * strategy is provided by
- * {@link org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator
+ * {@link org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator
  * ExceptionWebSocketHandlerDecorator} and it can be customized or replaced by decorating
  * the {@link WebSocketHandler} with a different decorator.
  *

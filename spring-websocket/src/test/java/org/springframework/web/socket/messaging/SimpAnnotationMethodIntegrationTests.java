@@ -47,8 +47,8 @@ import org.springframework.web.socket.JettyWebSocketTestServer;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.TomcatWebSocketTestServer;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.adapter.TextWebSocketHandlerAdapter;
-import org.springframework.web.socket.client.endpoint.StandardWebSocketClient;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
+import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
 import org.springframework.web.socket.config.annotation.DelegatingWebSocketMessageBrokerConfiguration;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -170,7 +170,7 @@ public class SimpAnnotationMethodIntegrationTests extends AbstractWebSocketInteg
 	}
 
 
-	private static class TestClientWebSocketHandler extends TextWebSocketHandlerAdapter {
+	private static class TestClientWebSocketHandler extends TextWebSocketHandler {
 
 		private final TextMessage[] messagesToSend;
 
