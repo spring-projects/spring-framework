@@ -82,30 +82,30 @@ public class TimedSpringRunnerTests {
 		}
 
 		// Should Fail due to timeout.
-		@Test(timeout = 10)
+		@Test(timeout = 100)
 		public void jUnitTimeoutWithSleep() throws Exception {
-			Thread.sleep(20);
+			Thread.sleep(200);
 		}
 
 		// Should Fail due to timeout.
 		@Test
-		@Timed(millis = 10)
+		@Timed(millis = 100)
 		public void springTimeoutWithSleep() throws Exception {
-			Thread.sleep(20);
+			Thread.sleep(200);
 		}
 
 		// Should Fail due to timeout.
 		@Test
 		@MetaTimed
 		public void springTimeoutWithSleepAndMetaAnnotation() throws Exception {
-			Thread.sleep(20);
+			Thread.sleep(200);
 		}
 
 		// Should Fail due to timeout.
 		@Test
-		@MetaTimedWithOverride(millis = 10)
+		@MetaTimedWithOverride(millis = 100)
 		public void springTimeoutWithSleepAndMetaAnnotationAndOverride() throws Exception {
-			Thread.sleep(20);
+			Thread.sleep(200);
 		}
 
 		// Should Fail due to duplicate configuration.
@@ -116,7 +116,7 @@ public class TimedSpringRunnerTests {
 		}
 	}
 
-	@Timed(millis = 10)
+	@Timed(millis = 100)
 	@Retention(RetentionPolicy.RUNTIME)
 	private static @interface MetaTimed {
 	}
