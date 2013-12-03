@@ -96,16 +96,18 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 		int port = request.getServerPort();
 		String host = request.getServerName();
 
-		String xForwardedHostHeader = request.getHeader("X-Forwarded-Host");
+		String header = request.getHeader("X-Forwarded-Host");
 
-		if (StringUtils.hasText(xForwardedHostHeader)) {
-			if (StringUtils.countOccurrencesOf(xForwardedHostHeader, ":") == 1) {
-				String[] hostAndPort = StringUtils.split(xForwardedHostHeader, ":");
+		if (StringUtils.hasText(header)) {
+			String[] hosts = StringUtils.commaDelimitedListToStringArray(header);
+			String hostToUse = hosts[0];
+			if (hostToUse.contains(":")) {
+				String[] hostAndPort = StringUtils.split(hostToUse, ":");
 				host  = hostAndPort[0];
 				port = Integer.parseInt(hostAndPort[1]);
 			}
 			else {
-				host = xForwardedHostHeader;
+				host = hostToUse;
 			}
 		}
 

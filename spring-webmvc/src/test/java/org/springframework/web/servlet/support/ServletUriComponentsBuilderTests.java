@@ -107,6 +107,15 @@ public class ServletUriComponentsBuilderTests {
 		assertEquals(443, result.getPort());
 	}
 
+	// SPR-11140
+
+	@Test
+	public void fromRequestWithForwardedHostMultiValuedHeader() {
+		this.request.addHeader("X-Forwarded-Host", "a.example.org, b.example.org, c.example.org");
+
+		assertEquals("a.example.org", ServletUriComponentsBuilder.fromRequest(this.request).build().getHost());
+	}
+
 	@Test
 	public void fromContextPath() {
 		request.setRequestURI("/mvc-showcase/data/param");
