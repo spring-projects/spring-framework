@@ -40,7 +40,6 @@ import static org.springframework.test.util.MatcherAssertionErrors.*;
  */
 public class XmlExpectationsHelper {
 
-
 	/**
 	 * Parse the content as {@link Node} and apply a {@link Matcher}.
 	 */
@@ -54,8 +53,7 @@ public class XmlExpectationsHelper {
 		factory.setNamespaceAware(true);
 		DocumentBuilder documentBuilder = factory.newDocumentBuilder();
 		InputSource inputSource = new InputSource(new StringReader(xml));
-		Document document = documentBuilder.parse(inputSource);
-		return document;
+		return documentBuilder.parse(inputSource);
 	}
 
 	/**
@@ -79,7 +77,6 @@ public class XmlExpectationsHelper {
 	 * @see org.springframework.test.web.servlet.result.MockMvcResultMatchers#xpath(String, Map, Object...)
 	 */
 	public void assertXmlEqual(String expected, String actual) throws Exception {
-
 		XMLUnit.setIgnoreWhitespace(true);
 		XMLUnit.setIgnoreComments(true);
 		XMLUnit.setIgnoreAttributeOrder(true);
