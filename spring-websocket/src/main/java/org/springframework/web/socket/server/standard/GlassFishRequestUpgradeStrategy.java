@@ -126,8 +126,7 @@ public class GlassFishRequestUpgradeStrategy extends AbstractStandardUpgradeStra
 		Assert.isTrue(response instanceof ServletServerHttpResponse);
 		HttpServletResponse servletResponse = ((ServletServerHttpResponse) response).getServletResponse();
 
-		WebSocketApplication webSocketApplication = createTyrusEndpoint(servletRequest,
-				endpoint, selectedProtocol, selectedExtensions);
+		WebSocketApplication webSocketApplication = createTyrusEndpoint(endpoint, selectedProtocol, selectedExtensions);
 
 		WebSocketEngine webSocketEngine = WebSocketEngine.getEngine();
 
@@ -158,7 +157,7 @@ public class GlassFishRequestUpgradeStrategy extends AbstractStandardUpgradeStra
 			upgradeHandler = request.upgrade(TyrusHttpUpgradeHandler.class);
 		}
 		catch (ServletException ex) {
-			throw new HandshakeFailureException("Unable to create UpgradeHandler", ex);
+			throw new HandshakeFailureException("Unable to create TyrusHttpUpgradeHandler", ex);
 		}
 
 		Connection connection = createConnection(upgradeHandler, response);
@@ -180,14 +179,14 @@ public class GlassFishRequestUpgradeStrategy extends AbstractStandardUpgradeStra
 					}
 				});
 
-		// Glassfish bug ?? (see same line in TyrusServletFilter.doFilter)
+		// GlassFish bug ?? (see same line in TyrusServletFilter.doFilter)
 		response.flushBuffer();
 
 		return upgraded;
 	}
 
-	private WebSocketApplication createTyrusEndpoint(HttpServletRequest request,
-			Endpoint endpoint, String selectedProtocol, List<Extension> selectedExtensions) {
+	private WebSocketApplication createTyrusEndpoint(Endpoint endpoint, String selectedProtocol,
+			List<Extension> selectedExtensions) {
 
 		// Shouldn't matter for processing but must be unique
 		String endpointPath = "/" + random.nextLong();

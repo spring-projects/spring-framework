@@ -26,21 +26,21 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.SubProtocolCapable;
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.WebSocketHttpHeaders;
+import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
 import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
-import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
-import org.springframework.web.socket.WebSocketHttpHeaders;
 
 /**
  * A default {@link org.springframework.web.socket.server.HandshakeHandler} implementation.
@@ -77,7 +77,7 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 
 
 	/**
-	 * Default constructor that auto-detects and instantiates a
+	 * Default constructor that autodetects and instantiates a
 	 * {@link RequestUpgradeStrategy} suitable for the runtime container.
 	 * @throws IllegalStateException if no {@link RequestUpgradeStrategy} can be found.
 	 */
@@ -101,7 +101,7 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 		}
 		try {
 			Class<?> clazz = ClassUtils.forName(className, DefaultHandshakeHandler.class.getClassLoader());
-			return (RequestUpgradeStrategy) BeanUtils.instantiateClass(clazz.getConstructor());
+			return (RequestUpgradeStrategy) clazz.newInstance();
 		}
 		catch (Throwable ex) {
 			throw new IllegalStateException("Failed to instantiate RequestUpgradeStrategy: " + className, ex);
@@ -109,11 +109,12 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 	}
 
 	/**
-	 * A constructor that accepts a runtime specific {@link RequestUpgradeStrategy}.
-	 * @param upgradeStrategy the upgrade strategy
+	 * A constructor that accepts a runtime-specific {@link RequestUpgradeStrategy}.
+	 * @param requestUpgradeStrategy the upgrade strategy to use
 	 */
-	public DefaultHandshakeHandler(RequestUpgradeStrategy upgradeStrategy) {
-		this.requestUpgradeStrategy = upgradeStrategy;
+	public DefaultHandshakeHandler(RequestUpgradeStrategy requestUpgradeStrategy) {
+		Assert.notNull(requestUpgradeStrategy, "RequestUpgradeStrategy must not be null");
+		this.requestUpgradeStrategy = requestUpgradeStrategy;
 	}
 
 
@@ -141,6 +142,7 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 	public String[] getSupportedProtocols() {
 		return this.supportedProtocols.toArray(new String[this.supportedProtocols.size()]);
 	}
+
 
 	@Override
 	public final boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response,
@@ -220,7 +222,7 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 
 	protected boolean isWebSocketVersionSupported(WebSocketHttpHeaders httpHeaders) {
 		String version = httpHeaders.getSecWebSocketVersion();
-		String[] supportedVersions = getSupportedVerions();
+		String[] supportedVersions = getSupportedVersions();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Requested version=" + version + ", supported=" + Arrays.toString(supportedVersions));
 		}
@@ -230,20 +232,22 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 			}
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Version=" + version + " is not a supported version");
+			logger.debug("Version " + version + " is not a supported WebSocket version");
 		}
 		return false;
 	}
 
-	protected String[] getSupportedVerions() {
+	protected String[] getSupportedVersions() {
 		return this.requestUpgradeStrategy.getSupportedVersions();
 	}
 
 	protected void handleWebSocketVersionNotSupported(ServerHttpRequest request, ServerHttpResponse response) {
-		logger.debug("WebSocket version not supported " + request.getHeaders().get("Sec-WebSocket-Version"));
+		if (logger.isDebugEnabled()) {
+			logger.debug("WebSocket version not supported: " + request.getHeaders().get("Sec-WebSocket-Version"));
+		}
 		response.setStatusCode(HttpStatus.UPGRADE_REQUIRED);
 		response.getHeaders().put(WebSocketHttpHeaders.SEC_WEBSOCKET_VERSION, Arrays.asList(
-				StringUtils.arrayToCommaDelimitedString(getSupportedVerions())));
+				StringUtils.arrayToCommaDelimitedString(getSupportedVersions())));
 	}
 
 	protected boolean isValidOrigin(ServerHttpRequest request) {
@@ -321,4 +325,5 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 		}
 		return requested;
 	}
+
 }
