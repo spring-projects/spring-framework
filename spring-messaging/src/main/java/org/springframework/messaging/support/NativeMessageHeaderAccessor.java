@@ -27,9 +27,19 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
 /**
- * An extension of {@link MessageHeaderAccessor} that also provides read/write access to
- * message headers from an external message source. Native message headers are kept
- * in a {@link MultiValueMap} under the key {@link #NATIVE_HEADERS}.
+ * An extension of {@link MessageHeaderAccessor} that also stores and provides read/write
+ * access to message headers from an external source -- e.g. a Spring {@link Message}
+ * created to represent a STOMP message received from a STOMP client or message broker.
+ * Native message headers are kept in a {@link MultiValueMap} under the key
+ * {@link #NATIVE_HEADERS}.
+ * <p>
+ * This class is not intended for direct use but is rather expected to be consumed
+ * through sub-classes such as
+ * {@link org.springframework.messaging.simp.stomp.StompHeaderAccessor StompHeaderAccessor}.
+ * Such sub-classes may provide factory methods to translate message headers from
+ * an external messaging source (e.g. STOMP) to Spring {@link Message} headers and
+ * reversely to translate Spring {@link Message} headers to a message to send to an
+ * external source.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -71,14 +81,6 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		}
 		return null;
 	}
-
-	/**
-	 * Create {@link NativeMessageHeaderAccessor} from the headers of an existing message.
-	 */
-	public static NativeMessageHeaderAccessor wrap(Message<?> message) {
-		return new NativeMessageHeaderAccessor(message);
-	}
-
 
 	@Override
 	public Map<String, Object> toMap() {

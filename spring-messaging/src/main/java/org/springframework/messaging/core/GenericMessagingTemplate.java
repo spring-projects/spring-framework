@@ -32,10 +32,11 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 
 /**
- * A messaging template for sending to and/or receiving messages from a
- * {@link MessageChannel}.
+ * A messaging template that resolves destinations names to {@link MessageChannel}'s
+ * to send and receive messages from.
  *
  * @author Mark Fisher
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
 public class GenericMessagingTemplate extends AbstractDestinationResolvingMessagingTemplate<MessageChannel>
@@ -49,7 +50,7 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 
 
 	/**
-	 * Specify the timeout value to use for send operations.
+	 * Configure the timeout value to use for send operations.
 	 *
 	 * @param sendTimeout the send timeout in milliseconds
 	 */
@@ -58,7 +59,14 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 	}
 
 	/**
-	 * Specify the timeout value to use for receive operations.
+	 * Return the configured send operation timeout value.
+	 */
+	public long getSendTimeout() {
+		return this.sendTimeout;
+	}
+
+	/**
+	 * Configure the timeout value to use for receive operations.
 	 *
 	 * @param receiveTimeout the receive timeout in milliseconds
 	 */
@@ -67,12 +75,23 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 	}
 
 	/**
-	 * Specify whether or not an attempt to send on the reply channel throws an exception
-	 * if no receiving thread will actually receive the reply. This can occur
-	 * if the receiving thread has already timed out, or will never call receive()
-	 * because it caught an exception, or has already received a reply.
-	 * (default false - just a WARN log is emitted in these cases).
-	 * @param throwExceptionOnLateReply TRUE or FALSE.
+	 * Return the configured receive operation timeout value.
+	 */
+	public long getReceiveTimeout() {
+		return this.receiveTimeout;
+	}
+
+	/**
+	 * Whether the thread sending a reply should have an exception raised if the
+	 * receiving thread isn't going to receive the reply either because it timed out,
+	 * or because it already received a reply, or because it got an exception while
+	 * sending the request message.
+	 * <p>
+	 * The default value is {@code false} in which case only a WARN message is logged.
+	 * If set to {@code true} a {@link MessageDeliveryException} is raised in addition
+	 * to the log message.
+	 *
+	 * @param throwExceptionOnLateReply whether to throw an exception or not
 	 */
 	public void setThrowExceptionOnLateReply(boolean throwExceptionOnLateReply) {
 		this.throwExceptionOnLateReply = throwExceptionOnLateReply;
@@ -85,88 +104,91 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 
 
 	@Override
-	protected final void doSend(MessageChannel destination, Message<?> message) {
-		Assert.notNull(destination, "channel must not be null");
+	protected final void doSend(MessageChannel channel, Message<?> message) {
+
+		Assert.notNull(channel, "channel must not be null");
+
 		long timeout = this.sendTimeout;
-		boolean sent = (timeout >= 0)
-				? destination.send(message, timeout)
-				: destination.send(message);
+		boolean sent = (timeout >= 0) ? channel.send(message, timeout) : channel.send(message);
+
 		if (!sent) {
 			throw new MessageDeliveryException(message,
-					"failed to send message to channel '" + destination + "' within timeout: " + timeout);
+					"failed to send message to channel '" + channel + "' within timeout: " + timeout);
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected final <P> Message<P> doReceive(MessageChannel destination) {
-		Assert.state(destination instanceof PollableChannel,
-				"The 'destination' must be a PollableChannel for receive operations.");
+	protected final Message<?> doReceive(MessageChannel channel) {
 
-		Assert.notNull(destination, "channel must not be null");
+		Assert.notNull(channel, "'channel' is required");
+		Assert.state(channel instanceof PollableChannel, "A PollableChannel is required to receive messages.");
+
 		long timeout = this.receiveTimeout;
-		Message<?> message = (timeout >= 0)
-				? ((PollableChannel) destination).receive(timeout)
-				: ((PollableChannel) destination).receive();
-		if (message == null && this.logger.isTraceEnabled()) {
-			this.logger.trace("failed to receive message from channel '" + destination + "' within timeout: " + timeout);
+		Message<?> message = (timeout >= 0) ?
+				((PollableChannel) channel).receive(timeout) : ((PollableChannel) channel).receive();
+
+		if ((message == null) && this.logger.isTraceEnabled()) {
+			this.logger.trace("Failed to receive message from channel '" + channel + "' within timeout: " + timeout);
 		}
-		return (Message<P>) message;
+
+		return message;
 	}
 
 	@Override
-	protected final <S, R> Message<R> doSendAndReceive(MessageChannel destination, Message<S> requestMessage) {
+	protected final Message<?> doSendAndReceive(MessageChannel channel, Message<?> requestMessage) {
+
+		Assert.notNull(channel, "'channel' is required");
+
 		Object originalReplyChannelHeader = requestMessage.getHeaders().getReplyChannel();
 		Object originalErrorChannelHeader = requestMessage.getHeaders().getErrorChannel();
-		TemporaryReplyChannel replyChannel = new TemporaryReplyChannel(this.receiveTimeout, this.throwExceptionOnLateReply);
+
+		TemporaryReplyChannel tempReplyChannel = new TemporaryReplyChannel();
+
 		requestMessage = MessageBuilder.fromMessage(requestMessage)
-				.setReplyChannel(replyChannel)
-				.setErrorChannel(replyChannel)
-				.build();
+				.setReplyChannel(tempReplyChannel)
+				.setErrorChannel(tempReplyChannel).build();
+
 		try {
-			this.doSend(destination, requestMessage);
+			this.doSend(channel, requestMessage);
 		}
 		catch (RuntimeException e) {
-			replyChannel.setClientWontReceive(true);
+			tempReplyChannel.setSendFailed(true);
 			throw e;
 		}
-		Message<R> reply = this.doReceive(replyChannel);
-		if (reply != null) {
-			reply = MessageBuilder.fromMessage(reply)
+
+		Message<?> replyMessage = this.doReceive(tempReplyChannel);
+		if (replyMessage != null) {
+			replyMessage = MessageBuilder.fromMessage(replyMessage)
 					.setHeader(MessageHeaders.REPLY_CHANNEL, originalReplyChannelHeader)
 					.setHeader(MessageHeaders.ERROR_CHANNEL, originalErrorChannelHeader)
 					.build();
 		}
-		return reply;
+
+		return replyMessage;
 	}
 
 
-	private static class TemporaryReplyChannel implements PollableChannel {
+	/**
+	 * A temporary channel for receiving a single reply message.
+	 */
+	private class TemporaryReplyChannel implements PollableChannel {
 
-		private static final Log logger = LogFactory.getLog(TemporaryReplyChannel.class);
+		private final Log logger = LogFactory.getLog(TemporaryReplyChannel.class);
 
-		private volatile Message<?> message;
+		private volatile Message<?> replyMessage;
 
-		private final long receiveTimeout;
+		private final CountDownLatch replyLatch = new CountDownLatch(1);
 
-		private final CountDownLatch latch = new CountDownLatch(1);
+		private volatile boolean hasReceived;
 
-		private final boolean throwExceptionOnLateReply;
+		private volatile boolean hasTimedOut;
 
-		private volatile boolean clientTimedOut;
-
-		private volatile boolean clientWontReceive;
-
-		private volatile boolean clientHasReceived;
+		private volatile boolean hasSendFailed;
 
 
-		public TemporaryReplyChannel(long receiveTimeout, boolean throwExceptionOnLateReply) {
-			this.receiveTimeout = receiveTimeout;
-			this.throwExceptionOnLateReply = throwExceptionOnLateReply;
-		}
-
-		public void setClientWontReceive(boolean clientWontReceive) {
-			this.clientWontReceive = clientWontReceive;
+		public void setSendFailed(boolean hasSendError) {
+			this.hasSendFailed = hasSendError;
 		}
 
 
@@ -178,23 +200,23 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 		@Override
 		public Message<?> receive(long timeout) {
 			try {
-				if (this.receiveTimeout < 0) {
-					this.latch.await();
-					this.clientHasReceived = true;
+				if (GenericMessagingTemplate.this.receiveTimeout < 0) {
+					this.replyLatch.await();
+					this.hasReceived = true;
 				}
 				else {
-					if (this.latch.await(this.receiveTimeout, TimeUnit.MILLISECONDS)) {
-						this.clientHasReceived = true;
+					if (this.replyLatch.await(GenericMessagingTemplate.this.receiveTimeout, TimeUnit.MILLISECONDS)) {
+						this.hasReceived = true;
 					}
 					else {
-						this.clientTimedOut = true;
+						this.hasTimedOut = true;
 					}
 				}
 			}
 			catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
-			return this.message;
+			return this.replyMessage;
 		}
 
 		@Override
@@ -204,27 +226,31 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 
 		@Override
 		public boolean send(Message<?> message, long timeout) {
-			this.message = message;
-			this.latch.countDown();
-			if (this.clientTimedOut || this.clientHasReceived || this.clientWontReceive) {
-				String exceptionMessage = "";
-				if (this.clientTimedOut) {
-					exceptionMessage = "Reply message being sent, but the receiving thread has already timed out";
-				}
-				else if (this.clientHasReceived) {
-					exceptionMessage = "Reply message being sent, but the receiving thread has already received a reply";
-				}
-				else if (this.clientWontReceive) {
-					exceptionMessage = "Reply message being sent, but the receiving thread has already caught an exception and won't receive";
-				}
 
+			this.replyMessage = message;
+			this.replyLatch.countDown();
+
+			String errorDescription = null;
+			if (this.hasTimedOut) {
+				errorDescription = "Reply message received but the receiving thread has exited due to a timeout";
+			}
+			else if (this.hasReceived) {
+				errorDescription = "Reply message received but the receiving thread has already received a reply";
+			}
+			else if (this.hasSendFailed) {
+				errorDescription = "Reply message received but the receiving thread has exited due to " +
+						"an exception while sending the request message";
+			}
+
+			if (errorDescription != null) {
 				if (logger.isWarnEnabled()) {
-					logger.warn(exceptionMessage + ":" + message);
+					logger.warn(errorDescription + ":" + message);
 				}
-				if (this.throwExceptionOnLateReply) {
-					throw new MessageDeliveryException(message, exceptionMessage);
+				if (GenericMessagingTemplate.this.throwExceptionOnLateReply) {
+					throw new MessageDeliveryException(message, errorDescription);
 				}
 			}
+
 			return true;
 		}
 	}

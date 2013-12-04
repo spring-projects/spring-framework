@@ -21,7 +21,9 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
 /**
- * Base class for a messaging template that send and receive messages.
+ * An extension of {@link AbstractMessageSendingTemplate} that adds support for
+ * receive as well as request-reply style operations as defined by
+ * {@link MessageReceivingOperations} and {@link MessageRequestReplyOperations}.
  *
  * @author Mark Fisher
  * @author Rossen Stoyanchev
@@ -32,16 +34,16 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageSendin
 
 
 	@Override
-	public <P> Message<P> receive() {
+	public Message<?> receive() {
 		return this.receive(getRequiredDefaultDestination());
 	}
 
 	@Override
-	public <P> Message<P> receive(D destination) {
+	public Message<?> receive(D destination) {
 		return this.doReceive(destination);
 	}
 
-	protected abstract <P> Message<P> doReceive(D destination);
+	protected abstract Message<?> doReceive(D destination);
 
 
 	@Override
@@ -71,7 +73,7 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageSendin
 		return this.doSendAndReceive(destination, requestMessage);
 	}
 
-	protected abstract <S, R> Message<R> doSendAndReceive(D destination, Message<S> requestMessage);
+	protected abstract Message<?> doSendAndReceive(D destination, Message<?> requestMessage);
 
 
 	@Override
@@ -117,7 +119,7 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageSendin
 			requestMessage = postProcessor.postProcessMessage(requestMessage);
 		}
 		Message<?> replyMessage = this.sendAndReceive(destination, requestMessage);
-		return (T) getMessageConverter().fromMessage(replyMessage, targetClass);
+		return (replyMessage != null) ? (T) getMessageConverter().fromMessage(replyMessage, targetClass) : null;
 	}
 
 }

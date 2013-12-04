@@ -21,6 +21,7 @@ import java.util.Map;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHandlingException;
 import org.springframework.messaging.handler.annotation.PathVariable;
 import org.springframework.messaging.handler.annotation.ValueConstants;
 

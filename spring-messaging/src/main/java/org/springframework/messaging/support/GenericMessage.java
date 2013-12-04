@@ -26,11 +26,12 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Base Message class defining common properties such as id, payload, and headers.
- * Once created this object is immutable.
+ * An implementation of {@link Message} with a generic payload.
+ * Once created, a GenericMessage is immutable.
  *
  * @author Mark Fisher
  * @since 4.0
+ *
  * @see MessageBuilder
  */
 public class GenericMessage<T> implements Message<T>, Serializable {
@@ -45,18 +46,18 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 
 	/**
 	 * Create a new message with the given payload.
-	 * @param payload the message payload
+	 *
+	 * @param payload the message payload, never {@code null}
 	 */
 	public GenericMessage(T payload) {
 		this(payload, null);
 	}
 
 	/**
-	 * Create a new message with the given payload. The provided map will be used to
-	 * populate the message headers
-	 * @param payload the message payload
+	 * Create a new message with the given payload and headers.
+	 *
+	 * @param payload the message payload, never {@code null}
 	 * @param headers message headers
-	 * @see MessageHeaders
 	 */
 	public GenericMessage(T payload, Map<String, Object> headers) {
 		Assert.notNull(payload, "payload must not be null");
@@ -88,7 +89,7 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 			sb.append("[Payload ").append(this.payload.getClass().getSimpleName());
 			sb.append(" content=").append(this.payload).append("]");
 		}
-		sb.append("[Headers=" + this.headers + "]");
+		sb.append("[Headers=").append(this.headers).append("]");
 		return sb.toString();
 	}
 
@@ -102,11 +103,8 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 		}
 		if (obj != null && obj instanceof GenericMessage<?>) {
 			GenericMessage<?> other = (GenericMessage<?>) obj;
-			if (!this.headers.getId().equals(other.headers.getId())) {
-				return false;
-			}
-			return this.headers.equals(other.headers)
-					&& this.payload.equals(other.payload);
+			return (this.headers.getId().equals(other.headers.getId()) &&
+					this.headers.equals(other.headers) && this.payload.equals(other.payload));
 		}
 		return false;
 	}

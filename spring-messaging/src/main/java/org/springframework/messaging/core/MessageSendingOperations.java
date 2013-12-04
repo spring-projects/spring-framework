@@ -21,9 +21,9 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
 /**
- * A set of operations sending messages to a destination.
+ * Operations for sending messages to a destination.
  *
- * @param <D> the type of destination to which messages can be sent
+ * @param <D> the type of destination to send messages to
  *
  * @author Mark Fisher
  * @author Rossen Stoyanchev
@@ -31,22 +31,87 @@ import org.springframework.messaging.MessagingException;
  */
 public interface MessageSendingOperations<D> {
 
+	/**
+	 * Send a message to a default destination.
+	 *
+	 * @param message the message to send
+	 */
 	void send(Message<?> message) throws MessagingException;
 
+	/**
+	 * Send a message to the given destination.
+	 *
+	 * @param destination the target destination
+	 * @param message the message to send
+	 */
 	void send(D destination, Message<?> message) throws MessagingException;
 
+	/**
+	 * Convert the given Object to serialized form, possibly using a
+	 * {@link org.springframework.messaging.support.converter.MessageConverter},
+	 * wrap it as a message and send it to a default destination.
+	 *
+	 * @param payload the Object to use as payload
+	 */
 	void convertAndSend(Object payload) throws MessagingException;
 
+	/**
+	 * Convert the given Object to serialized form, possibly using a
+	 * {@link org.springframework.messaging.support.converter.MessageConverter},
+	 * wrap it as a message and send it to the given destination.
+	 *
+	 * @param destination the target destination
+	 * @param payload the Object to use as payload
+	 */
 	void convertAndSend(D destination, Object payload) throws MessagingException;
 
+	/**
+	 * Convert the given Object to serialized form, possibly using a
+	 * {@link org.springframework.messaging.support.converter.MessageConverter},
+	 * wrap it as a message with the given headers and send it to
+	 * a default destination.
+	 *
+	 * @param destination the target destination
+	 * @param payload the Object to use as payload
+	 * @param headers headers for the message to send
+	 */
 	void convertAndSend(D destination, Object payload, Map<String, Object> headers) throws MessagingException;
 
+	/**
+	 * Convert the given Object to serialized form, possibly using a
+	 * {@link org.springframework.messaging.support.converter.MessageConverter},
+	 * wrap it as a message, apply the given post processor, and send
+	 * the resulting message to a default destination.
+	 *
+	 * @param payload the Object to use as payload
+	 * @param postProcessor the post processor to apply to the message
+	 */
 	void convertAndSend(Object payload, MessagePostProcessor postProcessor) throws MessagingException;
 
-	void convertAndSend(D destination, Object payload,
-			MessagePostProcessor postProcessor) throws MessagingException;
+	/**
+	 * Convert the given Object to serialized form, possibly using a
+	 * {@link org.springframework.messaging.support.converter.MessageConverter},
+	 * wrap it as a message, apply the given post processor, and send
+	 * the resulting message to the given destination.
+	 *
+	 * @param destination the target destination
+	 * @param payload the Object to use as payload
+	 * @param postProcessor the post processor to apply to the message
+	 */
+	void convertAndSend(D destination, Object payload, MessagePostProcessor postProcessor) throws MessagingException;
 
-	void convertAndSend(D destination, Object payload, Map<String, Object> headers,
-			MessagePostProcessor postProcessor) throws MessagingException;
+	/**
+	 * Convert the given Object to serialized form, possibly using a
+	 * {@link org.springframework.messaging.support.converter.MessageConverter},
+	 * wrap it as a message with the given headers, apply the given post processor,
+	 * and send the resulting message to the given destination.
+	 *
+	 * @param destination the target destination
+	 * @param payload the Object to use as payload
+	 * @param headers headers for the message to send
+	 * @param postProcessor the post processor to apply to the message
+	 */
+	void convertAndSend(D destination, Object payload, Map<String, Object> headers, MessagePostProcessor postProcessor)
+			throws MessagingException;
 
 }

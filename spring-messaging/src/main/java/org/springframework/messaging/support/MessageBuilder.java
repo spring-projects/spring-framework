@@ -23,12 +23,14 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.util.Assert;
 
 /**
- * A builder for creating {@link GenericMessage} or {@link ErrorMessage} if the payload is
- * {@link Throwable}.
+ * A builder for creating a {@link GenericMessage} (or {@link ErrorMessage} if
+ * the payload is of type {@link Throwable}).
  *
  * @author Arjen Poutsma
  * @author Mark Fisher
+ * @author Rossen Stoyanchev
  * @since 4.0
+ *
  * @see GenericMessage
  * @see ErrorMessage
  */
@@ -56,6 +58,7 @@ public final class MessageBuilder<T> {
 	 * Create a builder for a new {@link Message} instance pre-populated with all of the
 	 * headers copied from the provided message. The payload of the provided Message will
 	 * also be used as the payload for the new message.
+	 *
 	 * @param message the Message from which the payload and all headers will be copied
 	 */
 	public static <T> MessageBuilder<T> fromMessage(Message<T> message) {

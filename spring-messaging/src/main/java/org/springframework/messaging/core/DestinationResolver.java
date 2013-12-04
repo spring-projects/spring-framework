@@ -17,18 +17,20 @@
 package org.springframework.messaging.core;
 
 /**
- * Strategy interface that resolves a given name to a destination.
+ * Strategy for resolving a String destination name into an actual destination
+ * of type {@code <D>}.
  *
  * @author Mark Fisher
  * @since 4.0
  */
 public interface DestinationResolver<D> {
 
+
 	/**
-	 * Resolve the given {@code name} to a destination.
-	 * @param name the name to resolve
-	 * @return the destination (must not be {@code null})
-	 * @throws DestinationResolutionException if the name cannot be resolved
+	 * Resolve the given destination name.
+	 *
+	 * @param name the destination name to resolve
+	 * @return the destination, never {@code null}
 	 */
 	D resolveDestination(String name) throws DestinationResolutionException;
 

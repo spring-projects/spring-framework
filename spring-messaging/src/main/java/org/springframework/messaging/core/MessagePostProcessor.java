@@ -19,22 +19,23 @@ package org.springframework.messaging.core;
 import org.springframework.messaging.Message;
 
 /**
- * To be used with MessagingTemplate's send method that converts an object to a message.
- * It allows for further modification of the message after it has been processed
- * by the converter.
- *
- * <p>This is often implemented as an anonymous class within a method implementation.
+ * A contract for processing a {@link Message} after it has been created, either
+ * returning a modified (effectively new) message or returning the same.
  *
  * @author Mark Fisher
+ * @author Rossen Stoyanchev
  * @since 4.0
+ *
+ * @see MessageSendingOperations
+ * @see MessageRequestReplyOperations
  */
 public interface MessagePostProcessor {
 
 	/**
-	 * Apply a MessagePostProcessor to the message. The returned message is
-	 * typically a modified version of the original.
-	 * @param message the message returned from the MessageConverter
-	 * @return the modified version of the Message
+	 * Process the given message.
+	 *
+	 * @param message the message to process
+	 * @return a new or the same message, never {@code null}
 	 */
 	Message<?> postProcessMessage(Message<?> message);
 

@@ -27,7 +27,7 @@ import org.springframework.messaging.support.converter.SimpleMessageConverter;
 import org.springframework.util.Assert;
 
 /**
- * Base class for templates that support sending messages.
+ * Abstract base class for implementations of {@link MessageSendingOperations}.
  *
  * @author Mark Fisher
  * @author Rossen Stoyanchev
@@ -42,18 +42,30 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	private volatile MessageConverter converter = new SimpleMessageConverter();
 
 
+	/**
+	 * Configure the default destination to use in send methods that don't have
+	 * a destination argument. If a default destination is not configured, send methods
+	 * without a destination argument will raise an exception if invoked.
+	 *
+	 * @param defaultDestination the default destination
+	 */
 	public void setDefaultDestination(D defaultDestination) {
 		this.defaultDestination = defaultDestination;
 	}
 
+	/**
+	 * Return the configured default destination.
+	 */
 	public D getDefaultDestination() {
 		return this.defaultDestination;
 	}
 
 	/**
-	 * Set the {@link MessageConverter} that is to be used to convert
-	 * between Messages and objects for this template.
-	 * <p>The default is {@link SimpleMessageConverter}.
+	 * Set the {@link MessageConverter} to use in {@code convertAndSend} methods.
+	 * <p>
+	 * By default {@link SimpleMessageConverter} is used.
+	 *
+	 * @param messageConverter the message converter to use
 	 */
 	public void setMessageConverter(MessageConverter messageConverter) {
 		Assert.notNull(messageConverter, "'messageConverter' must not be null");
@@ -61,7 +73,7 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	}
 
 	/**
-	 * @return the configured {@link MessageConverter}
+	 * Return the configured {@link MessageConverter}.
 	 */
 	public MessageConverter getMessageConverter() {
 		return this.converter;
@@ -74,9 +86,7 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	}
 
 	protected final D getRequiredDefaultDestination() {
-		Assert.state(this.defaultDestination != null,
-				"No 'defaultDestination' specified for MessagingTemplate. "
-				+ "Unable to invoke method without an explicit destination argument.");
+		Assert.state(this.defaultDestination != null, "No 'defaultDestination' configured.");
 		return this.defaultDestination;
 	}
 
@@ -89,8 +99,8 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 
 
 	@Override
-	public void convertAndSend(Object message) throws MessagingException {
-		this.convertAndSend(getRequiredDefaultDestination(), message);
+	public void convertAndSend(Object payload) throws MessagingException {
+		this.convertAndSend(getRequiredDefaultDestination(), payload);
 	}
 
 	@Override

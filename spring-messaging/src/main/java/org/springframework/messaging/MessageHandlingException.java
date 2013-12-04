@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.handler.annotation.support;
+package org.springframework.messaging;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
 /**
- * Thrown when the handling of a message results in an unrecoverable exception.
+ * Exception that indicates an error occurred during message handling.
  *
- * @author Rossen Stoyanchev
+ * @author Mark Fisher
  * @since 4.0
  */
 public class MessageHandlingException extends MessagingException {
@@ -30,12 +30,12 @@ public class MessageHandlingException extends MessagingException {
 	private static final long serialVersionUID = 690969923668400297L;
 
 
-	public MessageHandlingException(Message<?> message, String description, Throwable cause) {
-		super(message, description, cause);
-	}
-
 	public MessageHandlingException(Message<?> message, String description) {
 		super(message, description);
+	}
+
+	public MessageHandlingException(Message<?> message, String description, Throwable cause) {
+		super(message, description, cause);
 	}
 
 }

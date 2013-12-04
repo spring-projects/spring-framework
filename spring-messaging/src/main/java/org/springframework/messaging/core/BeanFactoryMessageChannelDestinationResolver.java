@@ -22,37 +22,38 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.util.Assert;
 
 /**
- * {@link DestinationResolver} that resolves against named beans contained in a
- * {@link BeanFactory}.
+ * An implementation of {@link DestinationResolver} that interprets a destination
+ * name as the bean name of a {@link MessageChannel} and looks up the bean in
+ * the configured {@link BeanFactory}.
  *
  * @author Mark Fisher
  * @since 4.0
  */
-public class BeanFactoryMessageChannelDestinationResolver implements DestinationResolver<MessageChannel>, BeanFactoryAware {
+public class BeanFactoryMessageChannelDestinationResolver
+		implements DestinationResolver<MessageChannel>, BeanFactoryAware {
 
 	private volatile BeanFactory beanFactory;
 
+
 	/**
-	 * Create a new instance of the {@link
-	 * BeanFactoryMessageChannelDestinationResolver} class.
-	 * <p>The BeanFactory to access must be set via <code>setBeanFactory</code>.
-	 * This will happen automatically if this resolver is defined within an
-	 * ApplicationContext thereby receiving the callback upon initialization.
-	 * @see #setBeanFactory
+	 * A default constructor that can be used when the resolver itself is configured
+	 * as a Spring bean and will have the {@code BeanFactory} injected as a result
+	 * of ing having implemented {@link BeanFactoryAware}.
 	 */
 	public BeanFactoryMessageChannelDestinationResolver() {
+	}
 
+
+	@Override
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		this.beanFactory = beanFactory;
 	}
 
 	/**
-	 * Create a new instance of the {@link
-	 * BeanFactoryMessageChannelDestinationResolver} class.
-	 * <p>Use of this constructor is redundant if this object is being created
-	 * by a Spring IoC container as the supplied {@link BeanFactory} will be
-	 * replaced by the {@link BeanFactory} that creates it (c.f. the
-	 * {@link BeanFactoryAware} contract). So only use this constructor if you
-	 * are instantiating this object explicitly rather than defining a bean.
-	 * @param beanFactory the bean factory to be used to lookup {@link MessageChannel}s.
+	 * A constructor that accepts a {@link BeanFactory} useful if instantiating this
+	 * resolver manually rather than having it defined as a Spring-managed bean.
+	 *
+	 * @param beanFactory the bean factory to perform lookups against
 	 */
 	public BeanFactoryMessageChannelDestinationResolver(BeanFactory beanFactory) {
 		Assert.notNull(beanFactory, "beanFactory must not be null");
@@ -62,19 +63,14 @@ public class BeanFactoryMessageChannelDestinationResolver implements Destination
 
 	@Override
 	public MessageChannel resolveDestination(String name) {
-		Assert.state(this.beanFactory != null, "BeanFactory must not be null");
+		Assert.state(this.beanFactory != null, "No BeanFactory configured");
 		try {
 			return this.beanFactory.getBean(name, MessageChannel.class);
 		}
 		catch (BeansException e) {
 			throw new DestinationResolutionException(
-					"failed to look up MessageChannel bean with name '" + name + "'", e);
+					"Failed to find MessageChannel bean with name '" + name + "'", e);
 		}
-	}
-
-	@Override
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		this.beanFactory = beanFactory;
 	}
 
 }

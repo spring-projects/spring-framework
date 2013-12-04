@@ -44,7 +44,7 @@ public class MessageHeaderAccessorTests {
 		Map<String, Object> original = new HashMap<>();
 		original.put("foo", "bar");
 		original.put("bar", "baz");
-		GenericMessage<String> message = new GenericMessage<>("p", original);
+		GenericMessage<String> message = new GenericMessage<>("payload", original);
 
 		MessageHeaderAccessor headers = new MessageHeaderAccessor(message);
 		Map<String, Object> actual = headers.toMap();
@@ -61,7 +61,7 @@ public class MessageHeaderAccessorTests {
 		Map<String, Object> original = new HashMap<>();
 		original.put("foo", "bar");
 		original.put("bar", "baz");
-		GenericMessage<String> message = new GenericMessage<>("p", original);
+		GenericMessage<String> message = new GenericMessage<>("payload", original);
 
 		MessageHeaderAccessor headers = new MessageHeaderAccessor(message);
 		headers.setHeader("foo", "BAR");

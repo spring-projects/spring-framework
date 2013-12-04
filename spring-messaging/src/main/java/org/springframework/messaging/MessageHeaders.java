@@ -38,29 +38,34 @@ import org.springframework.util.IdGenerator;
 
 /**
  * The headers for a {@link Message}
- *
- * <p><b>IMPORTANT</b>: This class is immutable. Any mutating operation
- * (e.g., put(..), putAll(..) etc.) will throw {@link UnsupportedOperationException}.
- *
- * <p>To create MessageHeaders instance use fluent
- * {@link org.springframework.messaging.support.MessageBuilder MessageBuilder} API
+ * <p>
+ * <b>IMPORTANT</b>: This class is immutable. Any mutating operation such as
+ * {@code put(..)}, {@code putAll(..)} and others will throw
+ * {@link UnsupportedOperationException}.
+ * <p>
+ * One way to create message headers is to use the
+ * {@link org.springframework.messaging.support.MessageBuilder MessageBuilder}:
  * <pre class="code">
  * MessageBuilder.withPayload("foo").setHeader("key1", "value1").setHeader("key2", "value2");
  * </pre>
- * or create an instance of GenericMessage passing payload as {@link Object} and headers as a regular {@link Map}
+ * A second option is to create {@link org.springframework.messaging.support.GenericMessage}
+ * passing a payload as {@link Object} and headers as a {@link Map java.util.Map}:
  * <pre class="code">
  * Map headers = new HashMap();
  * headers.put("key1", "value1");
  * headers.put("key2", "value2");
  * new GenericMessage("foo", headers);
  * </pre>
+ * A third option is to use {@link org.springframework.messaging.support.MessageHeaderAccessor}
+ * or one of its sub-classes to create specific categories of headers.
  *
  * @author Arjen Poutsma
  * @author Mark Fisher
  * @author Gary Russell
- * @author Rossen Stoyanchev
  * @since 4.0
+ *
  * @see org.springframework.messaging.support.MessageBuilder
+ * @see org.springframework.messaging.support.MessageHeaderAccessor
  */
 public final class MessageHeaders implements Map<String, Object>, Serializable {
 
@@ -124,8 +129,8 @@ public final class MessageHeaders implements Map<String, Object>, Serializable {
 			return null;
 		}
 		if (!type.isAssignableFrom(value.getClass())) {
-			throw new IllegalArgumentException("Incorrect type specified for header '" + key + "'. Expected [" + type
-					+ "] but actual type is [" + value.getClass() + "]");
+			throw new IllegalArgumentException("Incorrect type specified for header '" +
+					key + "'. Expected [" + type + "] but actual type is [" + value.getClass() + "]");
 		}
 		return (T) value;
 	}

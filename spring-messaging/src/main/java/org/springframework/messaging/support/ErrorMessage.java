@@ -19,12 +19,12 @@ package org.springframework.messaging.support;
 import java.util.Map;
 
 /**
- * A message implementation that accepts a {@link Throwable} payload.
- * Once created this object is immutable.
+ * A {@link GenericMessage} with a {@link Throwable} payload.
  *
  * @author Mark Fisher
  * @author Oleg Zhurakousky
  * @since 4.0
+ *
  * @see MessageBuilder
  */
 public class ErrorMessage extends GenericMessage<Throwable> {
@@ -32,10 +32,21 @@ public class ErrorMessage extends GenericMessage<Throwable> {
 	private static final long serialVersionUID = -5470210965279837728L;
 
 
+	/**
+	 * Create a new message with the given payload.
+	 *
+	 * @param payload the message payload, never {@code null}
+	 */
 	public ErrorMessage(Throwable payload) {
 		super(payload);
 	}
 
+	/**
+	 * Create a new message with the given payload and headers.
+	 *
+	 * @param payload the message payload, never {@code null}
+	 * @param headers message headers
+	 */
 	public ErrorMessage(Throwable payload, Map<String, Object> headers) {
 		super(payload, headers);
 	}

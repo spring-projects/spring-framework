@@ -17,7 +17,7 @@
 package org.springframework.messaging;
 
 /**
- * Base interface for any component that handles Messages.
+ * Contract for handling a {@link Message}.
  *
  * @author Mark Fisher
  * @author Iwein Fuld
@@ -26,17 +26,9 @@ package org.springframework.messaging;
 public interface MessageHandler {
 
 	/**
-	 * Handles the message if possible. If the handler cannot deal with the
-	 * message this will result in a {@code MessageRejectedException} e.g.
-	 * in case of a Selective Consumer. When a consumer tries to handle a
-	 * message, but fails to do so, a {@code MessageHandlingException} is
-	 * thrown. In the last case it is recommended to treat the message as tainted
-	 * and go into an error scenario.
-	 * <p>When the handling results in a failure of another message being sent
-	 * (e.g. a "reply" message), that failure  will trigger a
-	 * {@code MessageDeliveryException}.
+	 * Handle the given message.
+	 *
 	 * @param message the message to be handled
-	 * reply related to the handling of the message
 	 */
 	void handleMessage(Message<?> message) throws MessagingException;
 

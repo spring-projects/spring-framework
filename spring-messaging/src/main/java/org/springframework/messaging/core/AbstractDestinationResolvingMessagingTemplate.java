@@ -21,14 +21,20 @@ import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 
 /**
- * Base class for a messaging template that can resolve String-based destinations.
+ * An extension of {@link AbstractMessagingTemplate} that adds operations for sending
+ * messages to a resolvable destination name as defined by the following interfaces:
+ * <ul>
+ *     <li>{@link DestinationResolvingMessageSendingOperations}</li>
+ *     <li>{@link DestinationResolvingMessageReceivingOperations}</li>
+ *     <li>{@link DestinationResolvingMessageRequestReplyOperations}</li>
+ * </ul>
  *
  * @author Mark Fisher
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractDestinationResolvingMessagingTemplate<D> extends
-		AbstractMessagingTemplate<D> implements
+public abstract class AbstractDestinationResolvingMessagingTemplate<D> extends AbstractMessagingTemplate<D>
+		implements
 		DestinationResolvingMessageSendingOperations<D>,
 		DestinationResolvingMessageReceivingOperations<D>,
 		DestinationResolvingMessageRequestReplyOperations<D> {
@@ -36,19 +42,36 @@ public abstract class AbstractDestinationResolvingMessagingTemplate<D> extends
 	private volatile DestinationResolver<D> destinationResolver;
 
 
+	/**
+	 * Configure the {@link DestinationResolver} to use to resolve String destination
+	 * names into actual destinations of type {@code <D>}.
+	 * <p>
+	 * This field does not have a default setting. If not configured, methods that
+	 * require resolving a destination name will raise an {@link IllegalArgumentException}.
+	 *
+	 * @param destinationResolver the destination resolver to use
+	 */
 	public void setDestinationResolver(DestinationResolver<D> destinationResolver) {
+		Assert.notNull(destinationResolver, "'destinationResolver' is required");
 		this.destinationResolver = destinationResolver;
+	}
+
+	/**
+	 * Return the configured destination resolver.
+	 */
+	public DestinationResolver<D> getDestinationResolver() {
+		return this.destinationResolver;
 	}
 
 
 	@Override
-	public <P> void send(String destinationName, Message<P> message) {
+	public void send(String destinationName, Message<?> message) {
 		D destination = resolveDestination(destinationName);
 		this.doSend(destination, message);
 	}
 
 	protected final D resolveDestination(String destinationName) {
-		Assert.notNull(destinationResolver, "destinationResolver is required when passing a name only");
+		Assert.state(this.destinationResolver != null, "destinationResolver is required to resolve destination names");
 		return this.destinationResolver.resolveDestination(destinationName);
 	}
 
@@ -79,7 +102,7 @@ public abstract class AbstractDestinationResolvingMessagingTemplate<D> extends
 	}
 
 	@Override
-	public <P> Message<P> receive(String destinationName) {
+	public Message<?> receive(String destinationName) {
 		D destination = resolveDestination(destinationName);
 		return super.receive(destination);
 	}
