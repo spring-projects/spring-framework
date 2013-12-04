@@ -1477,19 +1477,6 @@ matching for incoming requests. For more details, see the Javadoc of
 http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/servlet/mvc/method/annotation/RequestMappingHandlerMapping.html#setUseRegisteredSuffixPatternMatch(boolean)[RequestMappingHandlerMapping.setUseRegisteredSuffixPatternMatch].
 
 
-
-
-[[new-in-3.2-webmvc-controller-advice]]
-=== @ControllerAdvice annotation
-Classes annotated with `@ControllerAdvice` can contain `@ExceptionHandler`,
-`@InitBinder`, and `@ModelAttribute` methods and those will apply to `@RequestMapping`
-methods across controller hierarchies as opposed to the controller hierarchy within
-which they are declared. `@ControllerAdvice` is a component annotation allowing
-implementation classes to be auto-detected through classpath scanning.
-
-
-
-
 [[new-in-3.2-matrix-variables]]
 === Matrix variables
 A new `@MatrixVariable` annotation adds support for extracting matrix variables from the
@@ -29570,9 +29557,8 @@ A controller can have any number of `@ModelAttribute` methods. All such methods 
 invoked before `@RequestMapping` methods of the same controller.
 
 `@ModelAttribute` methods can also be defined in an `@ControllerAdvice`-annotated class
-and such methods apply to all controllers. The `@ControllerAdvice` annotation is a
-component annotation allowing implementation classes to be autodetected through
-classpath scanning.
+and such methods apply to many controllers. See the <<mvc-ann-controller-advice>> section
+for more details.
 
 [TIP]
 ====
@@ -29910,7 +29896,7 @@ the `FormattingConversionService` (see <<format>>).
 To customize request parameter binding with PropertyEditors through Spring's
 `WebDataBinder`, you can use `@InitBinder`-annotated methods within your controller,
 `@InitBinder` methods within an `@ControllerAdvice` class, or provide a custom
-`WebBindingInitializer`.
+`WebBindingInitializer`. See the <<mvc-ann-controller-advice>> section for more details.
 
 [[mvc-ann-initbinder]]
 ====== Customizing data binding with @InitBinder
@@ -29969,15 +29955,9 @@ PropertyEditors required by several of the PetClinic controllers.
 </bean>
 ----
 
-[[mvc-ann-initbinder-advice]]
-====== Customizing data binding with externalized @InitBinder methods
-
 `@InitBinder` methods can also be defined in an `@ControllerAdvice`-annotated class in
-which case they apply to all controllers. This provides an alternative to using a
-`WebBindingInitializer`.
-
-The `@ControllerAdvice` annotation is a component annotation allowing implementation
-classes to be autodetected through classpath scanning.
+which case they apply to matching controllers. This provides an alternative to using a
+`WebBindingInitializer`. See the <<mvc-ann-controller-advice>> section for more details.
 
 
 [[mvc-ann-lastmodified]]
@@ -30013,7 +29993,39 @@ returning `null`. The former sets the response status to 304 before it returns `
 The latter, in combination with the former, causes Spring MVC to do no further
 processing of the request.
 
+[[mvc-ann-controller-advice]]
+===== Assisting Controllers with the @ControllerAdvice annotation
+The `@ControllerAdvice` annotation is a component annotation allowing implementation
+classes to be autodetected through classpath scanning. It is automatically enabled when
+using the MVC namespace or the MVC Java config.
 
+Classes annotated with `@ControllerAdvice` can contain `@ExceptionHandler`,
+`@InitBinder`, and `@ModelAttribute` annotated methods and those will apply to
+`@RequestMapping` methods across controller hierarchies as opposed to the controller
+hierarchy within which they are declared.
+
+The `@ControllerAdvice` annotation can also target a subset of controllers with its
+attributes:
+
+[source,java]
+[subs="verbatim,quotes"]
+----
+// Target all Controllers annotated with @RestController
+@ControllerAdvice(annotations = RestController.class)
+public class AnnotationAdvice {}
+
+// Target all Controllers within specific packages
+@ControllerAdvice("org.example.controllers")
+public class BasePackageAdvice {}
+
+// Target all Controllers assignable to specific classes
+@ControllerAdvice(assignableTypes = {ControllerInterface.class, AbstractController.class})
+public class AssignableTypesAdvice {}
+----
+
+Check out the
+http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/bind/annotation/ControllerAdvice.html[@ControllerAdvice
+documentation] for more details.
 
 [[mvc-ann-async]]
 ==== Asynchronous Request Processing
@@ -31371,9 +31383,8 @@ functionally equivalent to the exception mapping feature from the Servlet API, b
 also possible to implement more finely grained mappings of exceptions from different
 handlers. The `@ExceptionHandler` annotation on the other hand can be used on methods
 that should be invoked to handle an exception. Such methods may be defined locally
-within an `@Controller` or may apply globally to all `@RequestMapping` methods when
-defined within an `@ControllerAdvice` class. The following sections explain this in more
-detail.
+within an `@Controller` or may apply to many `@Controller` classes when defined within an
+`@ControllerAdvice` class. The following sections explain this in more detail.
 
 
 
@@ -31391,11 +31402,8 @@ You can do that with `@ExceptionHandler` methods. When declared within a control
 methods apply to exceptions raised by `@RequestMapping` methods of that contoroller (or
 any of its sub-classes). You can also declare an `@ExceptionHandler` method within an
 `@ControllerAdvice` class in which case it handles exceptions from `@RequestMapping`
-methods from any controller. The `@ControllerAdvice` annotation is a component
-annotation, which can be used with classpath scanning. It is automatically enabled when
-using the MVC namespace and the MVC Java config, or otherwise depending on whether the
-`ExceptionHandlerExceptionResolver` is configured or not. Below is an example of a
-controller-local `@ExceptionHandler` method:
+methods from many controllers. Below is an example of a controller-local
+`@ExceptionHandler` method:
 
 [source,java]
 [subs="verbatim,quotes"]
