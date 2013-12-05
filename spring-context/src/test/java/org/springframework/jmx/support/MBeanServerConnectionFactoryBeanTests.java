@@ -47,7 +47,6 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 	public void getUrl() {
 		int port = SocketUtils.findAvailableTcpPort(9800, 9900);
 		this.serviceUrl =  "service:jmx:jmxmp://localhost:" + port;
-		System.out.println(port);
 	}
 
 
