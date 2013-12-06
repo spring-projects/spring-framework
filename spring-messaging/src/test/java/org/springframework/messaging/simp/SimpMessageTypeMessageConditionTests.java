@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.simp.handler;
+package org.springframework.messaging.simp;
 
 import org.junit.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.simp.SimpMessageTypeMessageCondition;
 import org.springframework.messaging.support.MessageBuilder;
 
 import static org.junit.Assert.*;

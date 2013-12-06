@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.simp;
+package org.springframework.messaging.simp.broker;
 
 import org.springframework.context.ApplicationEvent;
 

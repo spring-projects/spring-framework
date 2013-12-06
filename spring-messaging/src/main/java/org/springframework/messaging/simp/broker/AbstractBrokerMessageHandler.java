@@ -28,7 +28,6 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.simp.BrokerAvailabilityEvent;
 import org.springframework.util.CollectionUtils;
 
 /**
