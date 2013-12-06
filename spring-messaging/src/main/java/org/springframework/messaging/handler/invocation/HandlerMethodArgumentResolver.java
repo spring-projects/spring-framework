@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.handler.support;
+package org.springframework.messaging.handler.invocation;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
@@ -43,7 +43,7 @@ public interface HandlerMethodArgumentResolver {
 	 * have previously been passed to
 	 * {@link #supportsParameter(org.springframework.core.MethodParameter)}
 	 * and it must have returned {@code true}
-	 * @param message
+	 * @param message the currently processed message
 	 * @return the resolved argument value, or {@code null}.
 	 * @throws Exception in case of errors with the preparation of argument values
 	 */

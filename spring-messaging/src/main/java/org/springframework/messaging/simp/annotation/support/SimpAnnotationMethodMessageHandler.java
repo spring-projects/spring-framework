@@ -47,11 +47,11 @@ import org.springframework.messaging.handler.annotation.support.HeadersMethodArg
 import org.springframework.messaging.handler.annotation.support.MessageMethodArgumentResolver;
 import org.springframework.messaging.handler.annotation.support.PathVariableMethodArgumentResolver;
 import org.springframework.messaging.handler.annotation.support.PayloadArgumentResolver;
-import org.springframework.messaging.handler.support.AbstractExceptionHandlerMethodResolver;
-import org.springframework.messaging.handler.support.AbstractMethodMessageHandler;
+import org.springframework.messaging.handler.invocation.AbstractExceptionHandlerMethodResolver;
+import org.springframework.messaging.handler.invocation.AbstractMethodMessageHandler;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
-import org.springframework.messaging.handler.support.HandlerMethodArgumentResolver;
-import org.springframework.messaging.handler.support.HandlerMethodReturnValueHandler;
+import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
+import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.SimpMessagingTemplate;

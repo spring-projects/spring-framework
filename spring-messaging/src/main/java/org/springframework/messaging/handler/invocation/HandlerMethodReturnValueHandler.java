@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.handler.support;
+package org.springframework.messaging.handler.invocation;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;

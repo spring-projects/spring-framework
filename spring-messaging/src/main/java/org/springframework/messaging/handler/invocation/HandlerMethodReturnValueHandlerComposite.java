@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.handler.support;
+package org.springframework.messaging.handler.invocation;
 
 import java.util.ArrayList;
 import java.util.Collections;
