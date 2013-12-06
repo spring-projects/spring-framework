@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ public interface HandlerMethodArgumentResolver {
 	/**
 	 * Whether the given {@linkplain MethodParameter method parameter} is
 	 * supported by this resolver.
-	 *
 	 * @param parameter the method parameter to check
 	 * @return {@code true} if this resolver supports the supplied parameter;
 	 * {@code false} otherwise
@@ -46,7 +45,6 @@ public interface HandlerMethodArgumentResolver {
 	 * request. A {@link WebDataBinderFactory} provides a way to create
 	 * a {@link WebDataBinder} instance when needed for data binding and
 	 * type conversion purposes.
-	 *
 	 * @param parameter the method parameter to resolve. This parameter must
 	 * have previously been passed to
 	 * {@link #supportsParameter(org.springframework.core.MethodParameter)}
@@ -57,9 +55,7 @@ public interface HandlerMethodArgumentResolver {
 	 * @return the resolved argument value, or {@code null}.
 	 * @throws Exception in case of errors with the preparation of argument values
 	 */
-	Object resolveArgument(MethodParameter parameter,
-						   ModelAndViewContainer mavContainer,
-						   NativeWebRequest webRequest,
-						   WebDataBinderFactory binderFactory) throws Exception;
+	Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception;
 
 }
