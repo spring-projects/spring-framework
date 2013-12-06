@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.simp.handler;
+package org.springframework.messaging.simp.annotation.support;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

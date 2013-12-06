@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.simp.handler;
+package org.springframework.messaging.simp.user;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

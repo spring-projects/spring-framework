@@ -24,6 +24,10 @@ import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.util.MultiValueMap;
 
 /**
+ * Abstract base class for implementations of {@link SubscriptionRegistry} that
+ * looks up information in messages but delegates to abstract methods for the
+ * actual storage and retrieval.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */

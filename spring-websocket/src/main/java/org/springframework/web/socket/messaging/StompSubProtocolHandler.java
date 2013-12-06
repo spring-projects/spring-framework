@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.SimpMessageType;
-import org.springframework.messaging.simp.handler.UserSessionRegistry;
+import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.messaging.simp.stomp.*;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
@@ -66,7 +66,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 
 	/**
 	 * Provide a registry with which to register active user session ids.
-	 * @see org.springframework.messaging.simp.handler.UserDestinationMessageHandler
+	 * @see org.springframework.messaging.simp.user.UserDestinationMessageHandler
 	 */
 	public void setUserSessionRegistry(UserSessionRegistry registry) {
 		this.userSessionRegistry = registry;

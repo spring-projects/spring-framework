@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.simp.handler;
+package org.springframework.messaging.simp.user;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,11 +22,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.junit.Test;
+import org.springframework.messaging.simp.user.DefaultUserSessionRegistry;
 
 import static org.junit.Assert.*;
 
 /**
- * Test fixture for {@link DefaultUserSessionRegistry}
+ * Test fixture for {@link org.springframework.messaging.simp.user.DefaultUserSessionRegistry}
  *
  * @author Rossen Stoyanchev
  * @since 4.0

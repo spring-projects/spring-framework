@@ -36,7 +36,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
  * @author Rossen Stoyanchev
  * @since 4.0
  * @see org.springframework.messaging.handler.annotation.SendTo
- * @see org.springframework.messaging.simp.handler.UserDestinationMessageHandler
+ * @see org.springframework.messaging.simp.user.UserDestinationMessageHandler
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

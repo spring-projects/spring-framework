@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.simp.handler;
+package org.springframework.messaging.simp.user;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,13 +28,17 @@ import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.TestPrincipal;
+import org.springframework.messaging.simp.user.DefaultUserDestinationResolver;
+import org.springframework.messaging.simp.user.DefaultUserSessionRegistry;
+import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
+import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.messaging.support.MessageBuilder;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 /**
- * Unit tests for {@link UserDestinationMessageHandler}.
+ * Unit tests for {@link org.springframework.messaging.simp.user.UserDestinationMessageHandler}.
  */
 public class UserDestinationMessageHandlerTests {
 

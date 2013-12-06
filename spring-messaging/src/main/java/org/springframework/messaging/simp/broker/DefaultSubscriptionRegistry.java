@@ -31,6 +31,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
+ * A default, simple in-memory implementation of {@link SubscriptionRegistry}.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */

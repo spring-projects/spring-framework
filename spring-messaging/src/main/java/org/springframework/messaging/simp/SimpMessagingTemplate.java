@@ -57,7 +57,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	/**
 	 * Configure the prefix to use for destinations targeting a specific user.
 	 * <p>The default value is "/user/".
-	 * @see org.springframework.messaging.simp.handler.UserDestinationMessageHandler
+	 * @see org.springframework.messaging.simp.user.UserDestinationMessageHandler
 	 */
 	public void setUserDestinationPrefix(String prefix) {
 		Assert.notNull(prefix, "UserDestinationPrefix must not be null");

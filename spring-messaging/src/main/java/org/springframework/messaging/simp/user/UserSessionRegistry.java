@@ -1,4 +1,4 @@
-package org.springframework.messaging.simp.handler;
+package org.springframework.messaging.simp.user;
 
 import java.util.Set;
 

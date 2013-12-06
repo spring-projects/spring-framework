@@ -24,11 +24,10 @@ import org.mockito.Mockito;
 
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
-import org.springframework.messaging.simp.handler.DefaultUserSessionRegistry;
-import org.springframework.messaging.simp.handler.UserSessionRegistry;
+import org.springframework.messaging.simp.user.DefaultUserSessionRegistry;
+import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
-import org.springframework.web.socket.config.annotation.WebMvcStompEndpointRegistry;
 import org.springframework.web.socket.messaging.StompSubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
