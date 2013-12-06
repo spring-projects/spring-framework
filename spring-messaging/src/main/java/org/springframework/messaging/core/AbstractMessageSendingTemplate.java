@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.core;
 
 import java.util.Map;
@@ -22,8 +23,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.support.converter.MessageConverter;
-import org.springframework.messaging.support.converter.SimpleMessageConverter;
+import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.converter.SimpleMessageConverter;
 import org.springframework.util.Assert;
 
 /**
@@ -46,8 +47,6 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	 * Configure the default destination to use in send methods that don't have
 	 * a destination argument. If a default destination is not configured, send methods
 	 * without a destination argument will raise an exception if invoked.
-	 *
-	 * @param defaultDestination the default destination
 	 */
 	public void setDefaultDestination(D defaultDestination) {
 		this.defaultDestination = defaultDestination;
@@ -62,9 +61,7 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 
 	/**
 	 * Set the {@link MessageConverter} to use in {@code convertAndSend} methods.
-	 * <p>
-	 * By default {@link SimpleMessageConverter} is used.
-	 *
+	 * <p>By default, {@link SimpleMessageConverter} is used.
 	 * @param messageConverter the message converter to use
 	 */
 	public void setMessageConverter(MessageConverter messageConverter) {

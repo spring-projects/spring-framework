@@ -356,7 +356,7 @@
 
     <xsd:complexType name="channel-interceptors">
         <xsd:annotation>
-            <xsd:documentation source="java:org.springframework.messaging.support.channel.ChannelInterceptor"><![CDATA[
+            <xsd:documentation source="java:org.springframework.messaging.support.ChannelInterceptor"><![CDATA[
         List of ChannelInterceptor beans to be used with this channel.
         Empty by default.
                 ]]></xsd:documentation>

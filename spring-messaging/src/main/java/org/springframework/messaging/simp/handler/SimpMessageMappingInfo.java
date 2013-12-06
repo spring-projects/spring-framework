@@ -17,14 +17,14 @@
 package org.springframework.messaging.simp.handler;
 
 import org.springframework.messaging.Message;
-import org.springframework.messaging.handler.condition.DestinationPatternsMessageCondition;
-import org.springframework.messaging.handler.condition.MessageCondition;
+import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
+import org.springframework.messaging.handler.MessageCondition;
 
 /**
  * Encapsulates the following request mapping conditions:
  * <ol>
- * 	<li>{@link SimpMessageTypeMessageCondition}
- * 	<li>{@link DestinationPatternsMessageCondition}
+ * <li>{@link SimpMessageTypeMessageCondition}
+ * <li>{@link DestinationPatternsMessageCondition}
  * </ol>
  *
  * @author Rossen Stoyanchev

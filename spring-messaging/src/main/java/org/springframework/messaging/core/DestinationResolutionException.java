@@ -28,22 +28,10 @@ import org.springframework.messaging.MessagingException;
 @SuppressWarnings("serial")
 public class DestinationResolutionException extends MessagingException {
 
-
-	/**
-	 * Create an instance with the given description only.
-	 *
-	 * @param description the description
-	 */
 	public DestinationResolutionException(String description) {
 		super(description);
 	}
 
-	/**
-	 * Create an instance with the given description and original cause.
-	 *
-	 * @param description the description
-	 * @param cause the root cause
-	 */
 	public DestinationResolutionException(String description, Throwable cause) {
 		super(description, cause);
 	}

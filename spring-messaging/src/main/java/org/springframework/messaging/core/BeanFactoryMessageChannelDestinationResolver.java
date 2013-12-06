@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.core;
 
 import org.springframework.beans.BeansException;
@@ -32,7 +33,7 @@ import org.springframework.util.Assert;
 public class BeanFactoryMessageChannelDestinationResolver
 		implements DestinationResolver<MessageChannel>, BeanFactoryAware {
 
-	private volatile BeanFactory beanFactory;
+	private BeanFactory beanFactory;
 
 
 	/**
@@ -43,20 +44,19 @@ public class BeanFactoryMessageChannelDestinationResolver
 	public BeanFactoryMessageChannelDestinationResolver() {
 	}
 
-
-	@Override
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		this.beanFactory = beanFactory;
-	}
-
 	/**
 	 * A constructor that accepts a {@link BeanFactory} useful if instantiating this
 	 * resolver manually rather than having it defined as a Spring-managed bean.
-	 *
 	 * @param beanFactory the bean factory to perform lookups against
 	 */
 	public BeanFactoryMessageChannelDestinationResolver(BeanFactory beanFactory) {
 		Assert.notNull(beanFactory, "beanFactory must not be null");
+		this.beanFactory = beanFactory;
+	}
+
+
+	@Override
+	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
@@ -67,9 +67,9 @@ public class BeanFactoryMessageChannelDestinationResolver
 		try {
 			return this.beanFactory.getBean(name, MessageChannel.class);
 		}
-		catch (BeansException e) {
+		catch (BeansException ex) {
 			throw new DestinationResolutionException(
-					"Failed to find MessageChannel bean with name '" + name + "'", e);
+					"Failed to find MessageChannel bean with name '" + name + "'", ex);
 		}
 	}
 

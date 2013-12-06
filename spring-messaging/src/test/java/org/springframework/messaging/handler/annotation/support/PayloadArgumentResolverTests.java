@@ -24,8 +24,8 @@ import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.messaging.support.converter.MessageConverter;
-import org.springframework.messaging.support.converter.StringMessageConverter;
+import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.converter.StringMessageConverter;
 
 import static org.junit.Assert.*;
 

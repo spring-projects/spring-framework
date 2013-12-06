@@ -26,7 +26,7 @@ package org.springframework.messaging;
 @SuppressWarnings("serial")
 public class MessagingException extends RuntimeException {
 
-	private volatile Message<?> failedMessage;
+	private final Message<?> failedMessage;
 
 
 	public MessagingException(Message<?> message) {
@@ -62,10 +62,6 @@ public class MessagingException extends RuntimeException {
 
 	public Message<?> getFailedMessage() {
 		return this.failedMessage;
-	}
-
-	public void setFailedMessage(Message<?> message) {
-		this.failedMessage = message;
 	}
 
 }

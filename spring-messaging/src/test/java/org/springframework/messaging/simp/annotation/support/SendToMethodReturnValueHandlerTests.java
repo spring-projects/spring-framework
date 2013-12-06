@@ -35,7 +35,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.messaging.support.converter.MessageConverter;
+import org.springframework.messaging.converter.MessageConverter;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;

@@ -27,7 +27,6 @@ public interface MessageHandler {
 
 	/**
 	 * Handle the given message.
-	 *
 	 * @param message the message to be handled
 	 */
 	void handleMessage(Message<?> message) throws MessagingException;

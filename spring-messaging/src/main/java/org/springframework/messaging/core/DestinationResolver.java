@@ -25,10 +25,8 @@ package org.springframework.messaging.core;
  */
 public interface DestinationResolver<D> {
 
-
 	/**
 	 * Resolve the given destination name.
-	 *
 	 * @param name the destination name to resolve
 	 * @return the destination, never {@code null}
 	 */

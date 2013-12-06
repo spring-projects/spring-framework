@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.core;
 
 import java.util.Map;
@@ -27,14 +28,12 @@ import org.springframework.messaging.MessagingException;
  * @author Mark Fisher
  * @author Rossen Stoyanchev
  * @since 4.0
- *
  * @see DestinationResolver
  */
 public interface DestinationResolvingMessageSendingOperations<D> extends MessageSendingOperations<D> {
 
 	/**
 	 * Resolve the given destination name to a destination and send a message to it.
-	 *
 	 * @param destinationName the destination name to resolve
 	 * @param message the message to send
 	 */
@@ -43,9 +42,8 @@ public interface DestinationResolvingMessageSendingOperations<D> extends Message
 	/**
 	 * Resolve the given destination name to a destination, convert the payload Object
 	 * to serialized form, possibly using a
-	 * {@link org.springframework.messaging.support.converter.MessageConverter},
+	 * {@link org.springframework.messaging.converter.MessageConverter},
 	 * wrap it as a message and send it to the resolved destination.
-
 	 * @param destinationName the destination name to resolve
    	 * @param payload the Object to use as payload
 	 */
@@ -54,10 +52,9 @@ public interface DestinationResolvingMessageSendingOperations<D> extends Message
 	/**
 	 * Resolve the given destination name to a destination, convert the payload
 	 * Object to serialized form, possibly using a
-	 * {@link org.springframework.messaging.support.converter.MessageConverter},
+	 * {@link org.springframework.messaging.converter.MessageConverter},
 	 * wrap it as a message with the given headers and send it to the resolved
 	 * destination.
-
 	 * @param destinationName the destination name to resolve
 	 * @param payload the Object to use as payload
  	 * @param headers headers for the message to send
@@ -68,10 +65,9 @@ public interface DestinationResolvingMessageSendingOperations<D> extends Message
 	/**
 	 * Resolve the given destination name to a destination, convert the payload
 	 * Object to serialized form, possibly using a
-	 * {@link org.springframework.messaging.support.converter.MessageConverter},
+	 * {@link org.springframework.messaging.converter.MessageConverter},
 	 * wrap it as a message, apply the given post processor, and send the resulting
 	 * message to the resolved destination.
-
 	 * @param destinationName the destination name to resolve
 	 * @param payload the Object to use as payload
 	 * @param postProcessor the post processor to apply to the message
@@ -82,10 +78,9 @@ public interface DestinationResolvingMessageSendingOperations<D> extends Message
 	/**
 	 * Resolve the given destination name to a destination, convert the payload
 	 * Object to serialized form, possibly using a
-	 * {@link org.springframework.messaging.support.converter.MessageConverter},
+	 * {@link org.springframework.messaging.converter.MessageConverter},
 	 * wrap it as a message with the given headers, apply the given post processor,
 	 * and send the resulting message to the resolved destination.
-
 	 * @param destinationName the destination name to resolve
 	 * @param payload the Object to use as payload
 	 * @param headers headers for the message to send

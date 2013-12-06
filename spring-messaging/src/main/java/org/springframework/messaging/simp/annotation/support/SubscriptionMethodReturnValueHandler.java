@@ -21,7 +21,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.core.MessagePostProcessor;
 import org.springframework.messaging.core.MessageSendingOperations;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.handler.method.HandlerMethodReturnValueHandler;
+import org.springframework.messaging.handler.support.HandlerMethodReturnValueHandler;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.annotation.SendToUser;
@@ -33,8 +33,8 @@ import org.springframework.util.Assert;
  * A {@link HandlerMethodReturnValueHandler} for replying directly to a subscription. It
  * supports methods annotated with {@link org.springframework.messaging.simp.annotation.SubscribeMapping} unless they're also annotated
  * with {@link SendTo} or {@link SendToUser}.
- * <p>
- * The value returned from the method is converted, and turned to a {@link Message} and
+ *
+ * <p>The value returned from the method is converted, and turned to a {@link Message} and
  * then enriched with the sessionId, subscriptionId, and destination of the input message.
  * The message is then sent directly back to the connected client.
  *

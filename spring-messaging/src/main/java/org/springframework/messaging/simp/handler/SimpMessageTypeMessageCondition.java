@@ -17,7 +17,7 @@
 package org.springframework.messaging.simp.handler;
 
 import org.springframework.messaging.Message;
-import org.springframework.messaging.handler.condition.AbstractMessageCondition;
+import org.springframework.messaging.handler.AbstractMessageCondition;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.util.Assert;

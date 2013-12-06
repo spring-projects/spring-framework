@@ -25,10 +25,8 @@ package org.springframework.messaging;
  */
 public interface SubscribableChannel extends MessageChannel {
 
-
 	/**
 	 * Register a message handler.
-	 *
 	 * @return {@code true} if the handler was subscribed or {@code false} if it
 	 * was already subscribed.
 	 */
@@ -36,7 +34,6 @@ public interface SubscribableChannel extends MessageChannel {
 
 	/**
 	 * Un-register a message handler.
-	 *
 	 * @return {@code true} if the handler was un-registered, or {@code false}
 	 * if was not registered.
 	 */

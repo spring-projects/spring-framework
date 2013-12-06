@@ -24,11 +24,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import org.springframework.messaging.support.channel.ExecutorSubscribableChannel;
+import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpRequestHandler;
-import org.springframework.web.socket.config.annotation.WebMvcStompWebSocketEndpointRegistration;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;

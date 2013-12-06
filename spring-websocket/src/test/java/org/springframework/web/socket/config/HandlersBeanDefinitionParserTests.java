@@ -16,14 +16,21 @@
 
 package org.springframework.web.socket.config;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ScheduledFuture;
+
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.messaging.support.ChannelInterceptorAdapter;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -34,10 +41,10 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
+import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
 import org.springframework.web.socket.sockjs.SockJsHttpRequestHandler;
 import org.springframework.web.socket.sockjs.SockJsService;
@@ -51,16 +58,7 @@ import org.springframework.web.socket.sockjs.transport.handler.XhrPollingTranspo
 import org.springframework.web.socket.sockjs.transport.handler.XhrReceivingTransportHandler;
 import org.springframework.web.socket.sockjs.transport.handler.XhrStreamingTransportHandler;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ScheduledFuture;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for HandlersBeanDefinitionParser.
@@ -71,7 +69,6 @@ import static org.junit.Assert.assertTrue;
 public class HandlersBeanDefinitionParserTests {
 
 	private GenericWebApplicationContext appContext;
-
 
 	@Before
 	public void setup() {
@@ -115,6 +112,7 @@ public class HandlersBeanDefinitionParserTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void websocketHandlersAttributes() {
 		loadBeanDefinitions("websocket-config-handlers-attributes.xml");
 		HandlerMapping handlerMapping = appContext.getBean(HandlerMapping.class);
@@ -249,23 +247,23 @@ class FooWebSocketHandler extends TestWebSocketHandler { }
 class TestHandshakeHandler implements HandshakeHandler {
 	@Override
 	public boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response,
-	                           WebSocketHandler wsHandler, Map<String, Object> attributes)
-			throws HandshakeFailureException {
+			WebSocketHandler wsHandler, Map<String, Object> attributes) throws HandshakeFailureException {
 		return false;
 	}
 }
 
+class TestChannelInterceptor extends ChannelInterceptorAdapter { }
+
 class FooTestInterceptor implements HandshakeInterceptor {
 	@Override
 	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
-	                               WebSocketHandler wsHandler, Map<String, Object> attributes)
-			throws Exception {
+			WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
 		return false;
 	}
 
 	@Override
 	public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response,
-	                           WebSocketHandler wsHandler, Exception exception) {
+			WebSocketHandler wsHandler, Exception exception) {
 	}
 }
 

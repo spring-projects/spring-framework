@@ -22,7 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.messaging.support.converter.MessageConverter;
+import org.springframework.messaging.converter.MessageConverter;
 
 /**
  * Annotation that binds a method parameter to the payload of a message. The payload may

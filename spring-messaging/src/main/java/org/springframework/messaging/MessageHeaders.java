@@ -21,7 +21,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,6 +32,7 @@ import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.AlternativeJdkIdGenerator;
 import org.springframework.util.IdGenerator;
 
@@ -63,7 +63,6 @@ import org.springframework.util.IdGenerator;
  * @author Mark Fisher
  * @author Gary Russell
  * @since 4.0
- *
  * @see org.springframework.messaging.support.MessageBuilder
  * @see org.springframework.messaging.support.MessageHeaderAccessor
  */
@@ -93,8 +92,6 @@ public final class MessageHeaders implements Map<String, Object>, Serializable {
 
 	public static final String CONTENT_TYPE = "contentType";
 
-	public static final List<String> HEADER_NAMES = Arrays.asList(ID, TIMESTAMP);
-
 
 	private final Map<String, Object> headers;
 
@@ -102,7 +99,7 @@ public final class MessageHeaders implements Map<String, Object>, Serializable {
 	public MessageHeaders(Map<String, Object> headers) {
 		this.headers = (headers != null) ? new HashMap<String, Object>(headers) : new HashMap<String, Object>();
 		this.headers.put(ID, ((idGenerator != null) ? idGenerator : defaultIdGenerator).generateId());
-		this.headers.put(TIMESTAMP, new Long(System.currentTimeMillis()));
+		this.headers.put(TIMESTAMP, System.currentTimeMillis());
 	}
 
 
@@ -199,31 +196,31 @@ public final class MessageHeaders implements Map<String, Object>, Serializable {
 	// Unsupported operations
 
 	/**
-	 * Since MessageHeaders are immutable the call to this method will result in {@link UnsupportedOperationException}
+	 * Since MessageHeaders are immutable, the call to this method will result in {@link UnsupportedOperationException}.
 	 */
 	public Object put(String key, Object value) {
-		throw new UnsupportedOperationException("MessageHeaders is immutable.");
+		throw new UnsupportedOperationException("MessageHeaders is immutable");
 	}
 
 	/**
-	 * Since MessageHeaders are immutable the call to this method will result in {@link UnsupportedOperationException}
+	 * Since MessageHeaders are immutable, the call to this method will result in {@link UnsupportedOperationException}.
 	 */
 	public void putAll(Map<? extends String, ? extends Object> t) {
-		throw new UnsupportedOperationException("MessageHeaders is immutable.");
+		throw new UnsupportedOperationException("MessageHeaders is immutable");
 	}
 
 	/**
-	 * Since MessageHeaders are immutable the call to this method will result in {@link UnsupportedOperationException}
+	 * Since MessageHeaders are immutable, the call to this method will result in {@link UnsupportedOperationException}.
 	 */
 	public Object remove(Object key) {
-		throw new UnsupportedOperationException("MessageHeaders is immutable.");
+		throw new UnsupportedOperationException("MessageHeaders is immutable");
 	}
 
 	/**
-	 * Since MessageHeaders are immutable the call to this method will result in {@link UnsupportedOperationException}
+	 * Since MessageHeaders are immutable, the call to this method will result in {@link UnsupportedOperationException}.
 	 */
 	public void clear() {
-		throw new UnsupportedOperationException("MessageHeaders is immutable.");
+		throw new UnsupportedOperationException("MessageHeaders is immutable");
 	}
 
 	// Serialization methods

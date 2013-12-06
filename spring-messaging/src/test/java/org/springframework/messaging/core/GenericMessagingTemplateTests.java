@@ -16,15 +16,21 @@
 
 package org.springframework.messaging.core;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.messaging.*;
-import org.springframework.messaging.support.GenericMessage;
-import org.springframework.messaging.support.channel.ExecutorSubscribableChannel;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageDeliveryException;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.SubscribableChannel;
+import org.springframework.messaging.support.ExecutorSubscribableChannel;
+import org.springframework.messaging.support.GenericMessage;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import static junit.framework.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
@@ -45,9 +51,7 @@ public class GenericMessagingTemplateTests {
 
 	@Before
 	public void setup() {
-
 		this.template = new GenericMessagingTemplate();
-
 		this.executor = new ThreadPoolTaskExecutor();
 		this.executor.afterPropertiesSet();
 	}
@@ -55,7 +59,6 @@ public class GenericMessagingTemplateTests {
 
 	@Test
 	public void sendAndReceive() {
-
 		SubscribableChannel channel = new ExecutorSubscribableChannel(this.executor);
 		channel.subscribe(new MessageHandler() {
 			@Override
@@ -72,7 +75,6 @@ public class GenericMessagingTemplateTests {
 
 	@Test
 	public void sendAndReceiveTimeout() throws InterruptedException {
-
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		this.template.setReceiveTimeout(1);

@@ -27,10 +27,10 @@ import org.springframework.messaging.StubMessageChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.messaging.support.tcp.ReconnectStrategy;
-import org.springframework.messaging.support.tcp.TcpConnection;
-import org.springframework.messaging.support.tcp.TcpConnectionHandler;
-import org.springframework.messaging.support.tcp.TcpOperations;
+import org.springframework.messaging.tcp.ReconnectStrategy;
+import org.springframework.messaging.tcp.TcpConnection;
+import org.springframework.messaging.tcp.TcpConnectionHandler;
+import org.springframework.messaging.tcp.TcpOperations;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureTask;
 

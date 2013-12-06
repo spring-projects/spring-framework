@@ -28,6 +28,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.support.AbstractSubscribableChannel;
+import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageType;
@@ -36,15 +38,13 @@ import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.messaging.support.channel.AbstractSubscribableChannel;
-import org.springframework.messaging.support.channel.ExecutorSubscribableChannel;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.handler.TestWebSocketSession;
 import org.springframework.web.socket.messaging.StompTextMessageBuilder;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
-import org.springframework.web.socket.handler.TestWebSocketSession;
 
 import static org.junit.Assert.*;
 

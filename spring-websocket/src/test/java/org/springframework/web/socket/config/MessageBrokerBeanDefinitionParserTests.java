@@ -16,33 +16,39 @@
 
 package org.springframework.web.socket.config;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.converter.CompositeMessageConverter;
+import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.handler.*;
+import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
+import org.springframework.messaging.simp.handler.DefaultUserDestinationResolver;
+import org.springframework.messaging.simp.handler.SimpleBrokerMessageHandler;
+import org.springframework.messaging.simp.handler.UserDestinationMessageHandler;
+import org.springframework.messaging.simp.handler.UserDestinationResolver;
+import org.springframework.messaging.simp.handler.UserSessionRegistry;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
-import org.springframework.messaging.support.channel.AbstractSubscribableChannel;
-import org.springframework.messaging.support.converter.CompositeMessageConverter;
-import org.springframework.messaging.support.converter.MessageConverter;
+import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
 import org.springframework.web.socket.messaging.StompSubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
 import org.springframework.web.socket.sockjs.SockJsHttpRequestHandler;
-import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
-
-import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.Assert.*;
 

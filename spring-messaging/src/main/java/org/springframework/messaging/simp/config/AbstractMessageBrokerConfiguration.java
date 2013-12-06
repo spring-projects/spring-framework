@@ -16,19 +16,31 @@
 
 package org.springframework.messaging.simp.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.converter.ByteArrayMessageConverter;
+import org.springframework.messaging.converter.CompositeMessageConverter;
+import org.springframework.messaging.converter.DefaultContentTypeResolver;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.handler.*;
-import org.springframework.messaging.support.channel.AbstractSubscribableChannel;
-import org.springframework.messaging.support.channel.ExecutorSubscribableChannel;
-import org.springframework.messaging.support.converter.*;
+import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
+import org.springframework.messaging.simp.handler.AbstractBrokerMessageHandler;
+import org.springframework.messaging.simp.handler.DefaultUserDestinationResolver;
+import org.springframework.messaging.simp.handler.DefaultUserSessionRegistry;
+import org.springframework.messaging.simp.handler.SimpleBrokerMessageHandler;
+import org.springframework.messaging.simp.handler.UserDestinationMessageHandler;
+import org.springframework.messaging.simp.handler.UserDestinationResolver;
+import org.springframework.messaging.simp.handler.UserSessionRegistry;
+import org.springframework.messaging.support.AbstractSubscribableChannel;
+import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeTypeUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Provides essential configuration for handling messages with simple messaging

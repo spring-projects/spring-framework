@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.core;
 
 import org.springframework.messaging.Message;
@@ -26,49 +27,42 @@ import org.springframework.messaging.MessagingException;
  * @author Mark Fisher
  * @author Rossen Stoyanchev
  * @since 4.0
- *
  * @see GenericMessagingTemplate
  */
 public interface MessageReceivingOperations<D> {
 
 	/**
 	 * Receive a message from a default destination.
-	 *
 	 * @return the received message, possibly {@code null} if the message could not
-	 *	be received, for example due to a timeout
+	 * be received, for example due to a timeout
 	 */
 	Message<?> receive() throws MessagingException;
 
 	/**
 	 * Receive a message from the given destination.
-	 *
 	 * @param destination the target destination
 	 * @return the received message, possibly {@code null} if the message could not
-	 *	be received, for example due to a timeout
+	 * be received, for example due to a timeout
 	 */
 	Message<?> receive(D destination) throws MessagingException;
 
 	/**
 	 * Receive a message from a default destination and convert its payload to the
 	 * specified target class.
-	 *
 	 * @param targetClass the target class to convert the payload to
 	 * @return the converted payload of the reply message, possibly {@code null} if
-	 *	the message could not be received, for example due to a timeout
+	 * the message could not be received, for example due to a timeout
 	 */
 	<T> T receiveAndConvert(Class<T> targetClass) throws MessagingException;
 
 	/**
 	 * Receive a message from the given destination and convert its payload to the
 	 * specified target class.
-	 *
 	 * @param destination the target destination
 	 * @param targetClass the target class to convert the payload to
 	 * @return the converted payload of the reply message, possibly {@code null} if
-	 *	the message could not be received, for example due to a timeout
+	 * the message could not be received, for example due to a timeout
 	 */
 	<T> T receiveAndConvert(D destination, Class<T> targetClass) throws MessagingException;
 
 }
-
-

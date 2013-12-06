@@ -25,7 +25,6 @@ package org.springframework.messaging;
 @SuppressWarnings("serial")
 public class MessageDeliveryException extends MessagingException {
 
-
 	public MessageDeliveryException(String description) {
 		super(description);
 	}

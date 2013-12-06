@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.core;
 
 import org.springframework.messaging.Message;
@@ -25,14 +26,12 @@ import org.springframework.messaging.MessagingException;
  * @author Mark Fisher
  * @author Rossen Stoyanchev
  * @since 4.0
- *
  * @see DestinationResolver
  */
 public interface DestinationResolvingMessageReceivingOperations<D> extends MessageReceivingOperations<D> {
 
 	/**
 	 * Resolve the given destination name and receive a message from it.
-	 *
 	 * @param destinationName the destination name to resolve
 	 */
 	Message<?> receive(String destinationName) throws MessagingException;
@@ -40,7 +39,6 @@ public interface DestinationResolvingMessageReceivingOperations<D> extends Messa
 	/**
 	 * Resolve the given destination name, receive a message from it, convert the
 	 * payload to the specified target type.
-	 *
 	 * @param destinationName the destination name to resolve
 	 * @param targetClass the target class for the converted payload
 	 */

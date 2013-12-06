@@ -36,12 +36,13 @@ import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
 import org.springframework.stereotype.Controller;
 
 import static org.junit.Assert.*;
 
 /**
- * Test fixture for {@link SimpAnnotationMethodMessageHandler}.
+ * Test fixture for {@link org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler}.
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  */

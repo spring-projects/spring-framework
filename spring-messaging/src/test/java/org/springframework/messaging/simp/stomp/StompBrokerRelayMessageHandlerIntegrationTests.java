@@ -30,13 +30,18 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.messaging.*;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageDeliveryException;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.StubMessageChannel;
 import org.springframework.messaging.simp.BrokerAvailabilityEvent;
 import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.messaging.support.channel.ExecutorSubscribableChannel;
 import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
 
@@ -341,13 +346,11 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		private final Message<?>[] actual;
 
-
 		public MessageExchange(Message<?> message, MessageMatcher... expected) {
 			this.message = message;
 			this.expected = expected;
 			this.actual = new Message<?>[expected.length];
 		}
-
 
 		public boolean isDone() {
 			for (int i=0 ; i < actual.length; i++) {

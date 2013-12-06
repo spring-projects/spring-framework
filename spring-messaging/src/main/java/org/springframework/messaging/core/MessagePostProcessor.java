@@ -25,7 +25,6 @@ import org.springframework.messaging.Message;
  * @author Mark Fisher
  * @author Rossen Stoyanchev
  * @since 4.0
- *
  * @see MessageSendingOperations
  * @see MessageRequestReplyOperations
  */
@@ -33,9 +32,9 @@ public interface MessagePostProcessor {
 
 	/**
 	 * Process the given message.
-	 *
 	 * @param message the message to process
-	 * @return a new or the same message, never {@code null}
+	 * @return a post-processed variant of the message,
+	 * or simply the incoming message; never {@code null}
 	 */
 	Message<?> postProcessMessage(Message<?> message);
 

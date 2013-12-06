@@ -34,7 +34,7 @@ import java.lang.annotation.Target;
  * @author Brian Clozel
  * @since 4.0
  * @see org.springframework.messaging.handler.annotation.MessageMapping
- * @see org.springframework.messaging.simp.handler.SimpAnnotationMethodMessageHandler
+ * @see org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)

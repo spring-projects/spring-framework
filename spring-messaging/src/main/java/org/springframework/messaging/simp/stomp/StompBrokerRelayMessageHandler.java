@@ -21,23 +21,26 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.messaging.*;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageDeliveryException;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.handler.AbstractBrokerMessageHandler;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.messaging.support.tcp.FixedIntervalReconnectStrategy;
-import org.springframework.messaging.support.tcp.ReactorNettyTcpClient;
-import org.springframework.messaging.support.tcp.TcpConnection;
-import org.springframework.messaging.support.tcp.TcpConnectionHandler;
-import org.springframework.messaging.support.tcp.TcpOperations;
+import org.springframework.messaging.tcp.FixedIntervalReconnectStrategy;
+import org.springframework.messaging.tcp.TcpConnection;
+import org.springframework.messaging.tcp.TcpConnectionHandler;
+import org.springframework.messaging.tcp.TcpOperations;
+import org.springframework.messaging.tcp.reactor.ReactorNettyTcpClient;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.util.concurrent.ListenableFutureTask;
 
 /**
- * A {@link MessageHandler} that handles messages by forwarding them to a STOMP broker.
+ * A {@link org.springframework.messaging.MessageHandler} that handles messages by forwarding them to a STOMP broker.
  * For each new {@link SimpMessageType#CONNECT CONNECT} message, an independent TCP
  * connection to the broker is opened and used exclusively for all messages from the
  * client that originated the CONNECT message. Messages from the same client are

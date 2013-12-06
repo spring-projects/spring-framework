@@ -29,7 +29,7 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.ValueConstants;
-import org.springframework.messaging.handler.method.HandlerMethodArgumentResolver;
+import org.springframework.messaging.handler.support.HandlerMethodArgumentResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 

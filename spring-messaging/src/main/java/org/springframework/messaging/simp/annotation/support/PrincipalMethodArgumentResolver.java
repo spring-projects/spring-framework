@@ -20,7 +20,7 @@ import java.security.Principal;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.handler.method.HandlerMethodArgumentResolver;
+import org.springframework.messaging.handler.support.HandlerMethodArgumentResolver;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 
 /**

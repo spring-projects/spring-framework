@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.core;
 
 import java.util.Map;
@@ -34,8 +35,7 @@ import org.springframework.util.Assert;
  * @since 4.0
  */
 public abstract class AbstractDestinationResolvingMessagingTemplate<D> extends AbstractMessagingTemplate<D>
-		implements
-		DestinationResolvingMessageSendingOperations<D>,
+		implements DestinationResolvingMessageSendingOperations<D>,
 		DestinationResolvingMessageReceivingOperations<D>,
 		DestinationResolvingMessageRequestReplyOperations<D> {
 
@@ -45,10 +45,8 @@ public abstract class AbstractDestinationResolvingMessagingTemplate<D> extends A
 	/**
 	 * Configure the {@link DestinationResolver} to use to resolve String destination
 	 * names into actual destinations of type {@code <D>}.
-	 * <p>
-	 * This field does not have a default setting. If not configured, methods that
+	 * <p>This field does not have a default setting. If not configured, methods that
 	 * require resolving a destination name will raise an {@link IllegalArgumentException}.
-	 *
 	 * @param destinationResolver the destination resolver to use
 	 */
 	public void setDestinationResolver(DestinationResolver<D> destinationResolver) {

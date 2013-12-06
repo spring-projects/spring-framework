@@ -16,11 +16,11 @@
 
 package org.springframework.messaging.simp.config;
 
-import org.springframework.messaging.support.channel.ChannelInterceptor;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import org.springframework.messaging.support.ChannelInterceptor;
 
 /**
  * A registration class for customizing the configuration for a

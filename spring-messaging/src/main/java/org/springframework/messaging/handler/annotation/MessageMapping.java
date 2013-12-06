@@ -39,7 +39,7 @@ import org.springframework.messaging.Message;
  * 	<li>{@link Message} to get access to the complete message being processed.</li>
  * 	<li>{@link Payload}-annotated method arguments to extract the payload of
  * 	a message and optionally convert it using a
- * 	{@link org.springframework.messaging.support.converter.MessageConverter}.
+ * 	{@link org.springframework.messaging.converter.MessageConverter}.
  * 	The presence of the annotation is not required since it is assumed by default
  * 	for method arguments that are not annotated.</li>
  * 	<li>{@link Header}-annotated method arguments to extract a specific
@@ -72,12 +72,12 @@ import org.springframework.messaging.Message;
  * to use {@link org.springframework.messaging.simp.annotation.SendToUser} to
  * have the message directed to a specific user only if connected.
  * Also the return value is converted with a
- * {@link org.springframework.messaging.support.converter.MessageConverter}.
+ * {@link org.springframework.messaging.converter.MessageConverter}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  *
- * @see org.springframework.messaging.simp.handler.SimpAnnotationMethodMessageHandler
+ * @see org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
