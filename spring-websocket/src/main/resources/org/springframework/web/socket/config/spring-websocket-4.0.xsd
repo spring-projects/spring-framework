@@ -294,7 +294,7 @@
 
     <xsd:complexType name="simple-broker">
         <xsd:annotation>
-            <xsd:documentation source="java:org.springframework.messaging.simp.handler.SimpleBrokerMessageHandler"><![CDATA[
+            <xsd:documentation source="java:org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler"><![CDATA[
         Configures a SimpleBrokerMessageHandler that handles messages as a simple message broker implementation.
                 ]]></xsd:documentation>
         </xsd:annotation>

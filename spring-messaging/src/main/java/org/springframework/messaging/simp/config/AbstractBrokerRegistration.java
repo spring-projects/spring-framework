@@ -23,7 +23,7 @@ import java.util.List;
 
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
-import org.springframework.messaging.simp.handler.AbstractBrokerMessageHandler;
+import org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler;
 import org.springframework.util.Assert;
 
 /**

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.simp.handler;
+package org.springframework.messaging.simp.broker;
 
 import org.springframework.messaging.Message;
 import org.springframework.util.MultiValueMap;

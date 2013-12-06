@@ -32,7 +32,7 @@ import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
 import org.springframework.messaging.simp.handler.DefaultUserDestinationResolver;
-import org.springframework.messaging.simp.handler.SimpleBrokerMessageHandler;
+import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
 import org.springframework.messaging.simp.handler.UserDestinationMessageHandler;
 import org.springframework.messaging.simp.handler.UserDestinationResolver;
 import org.springframework.messaging.simp.handler.UserSessionRegistry;

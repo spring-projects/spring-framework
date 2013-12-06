@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.simp.handler;
+package org.springframework.messaging.simp.broker;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -32,6 +32,9 @@ import org.springframework.messaging.simp.BrokerAvailabilityEvent;
 import org.springframework.util.CollectionUtils;
 
 /**
+ * Abstract base class for a {@link MessageHandler} that manages subscriptions and
+ * propagates messages to subscribers.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */

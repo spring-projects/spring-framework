@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.simp.handler;
+package org.springframework.messaging.simp.broker;
 
 import java.util.Collection;
 
@@ -28,6 +28,10 @@ import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
 /**
+ * A "simple" message broker that recognizes the message types defined in
+ * {@link SimpMessageType}, keeps track of subscriptions with the help of a
+ * {@link SubscriptionRegistry} and sends messages to subscribers.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */

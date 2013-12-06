@@ -18,7 +18,7 @@ package org.springframework.messaging.simp.config;
 
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
-import org.springframework.messaging.simp.handler.SimpleBrokerMessageHandler;
+import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
 
 /**
  * Registration class for configuring a {@link SimpleBrokerMessageHandler}.
