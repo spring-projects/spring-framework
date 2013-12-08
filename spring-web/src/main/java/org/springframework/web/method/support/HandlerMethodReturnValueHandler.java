@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ public interface HandlerMethodReturnValueHandler {
 	/**
 	 * Whether the given {@linkplain MethodParameter method return type} is
 	 * supported by this handler.
-	 *
 	 * @param returnType the method return type to check
 	 * @return {@code true} if this handler supports the supplied return type;
 	 * {@code false} otherwise
@@ -43,7 +42,6 @@ public interface HandlerMethodReturnValueHandler {
 	 * setting a view or setting the
 	 * {@link ModelAndViewContainer#setRequestHandled} flag to {@code true}
 	 * to indicate the response has been handled directly.
-	 *
 	 * @param returnValue the value returned from the handler method
 	 * @param returnType the type of the return value. This type must have
 	 * previously been passed to
@@ -53,9 +51,7 @@ public interface HandlerMethodReturnValueHandler {
 	 * @param webRequest the current request
 	 * @throws Exception if the return value handling results in an error
 	 */
-	void handleReturnValue(Object returnValue,
-						   MethodParameter returnType,
-						   ModelAndViewContainer mavContainer,
-						   NativeWebRequest webRequest) throws Exception;
+	void handleReturnValue(Object returnValue, MethodParameter returnType,
+			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception;
 
 }
