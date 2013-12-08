@@ -234,16 +234,15 @@ public class MediaType extends MimeType implements Serializable {
 	 * Create a new {@code MediaType} for the given type, subtype, and character set.
 	 * @param type the primary type
 	 * @param subtype the subtype
-	 * @param charSet the character set
+	 * @param charset the character set
 	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
 	 */
-	public MediaType(String type, String subtype, Charset charSet) {
-		super(type, subtype, charSet);
+	public MediaType(String type, String subtype, Charset charset) {
+		super(type, subtype, charset);
 	}
 
 	/**
 	 * Create a new {@code MediaType} for the given type, subtype, and quality value.
-	 *
 	 * @param type the primary type
 	 * @param subtype the subtype
 	 * @param qualityValue the quality value
@@ -274,6 +273,7 @@ public class MediaType extends MimeType implements Serializable {
 	public MediaType(String type, String subtype, Map<String, String> parameters) {
 		super(type, subtype, parameters);
 	}
+
 
 	protected void checkParameters(String attribute, String value) {
 		super.checkParameters(attribute, value);
@@ -343,6 +343,7 @@ public class MediaType extends MimeType implements Serializable {
 		return new MediaType(this, params);
 	}
 
+
 	/**
 	 * Parse the given String value into a {@code MediaType} object,
 	 * with this method name following the 'valueOf' naming convention
@@ -360,7 +361,6 @@ public class MediaType extends MimeType implements Serializable {
 	 * @throws InvalidMediaTypeException if the string cannot be parsed
 	 */
 	public static MediaType parseMediaType(String mediaType) {
-
 		MimeType type;
 		try {
 			type = MimeTypeUtils.parseMimeType(mediaType);
@@ -368,7 +368,6 @@ public class MediaType extends MimeType implements Serializable {
 		catch (InvalidMimeTypeException ex) {
 			throw new InvalidMediaTypeException(ex);
 		}
-
 		try {
 			return new MediaType(type.getType(), type.getSubtype(), type.getParameters());
 		}
@@ -412,18 +411,18 @@ public class MediaType extends MimeType implements Serializable {
 	 * Sorts the given list of {@code MediaType} objects by specificity.
 	 * <p>Given two media types:
 	 * <ol>
-	 *   <li>if either media type has a {@linkplain #isWildcardType() wildcard type}, then the media type without the
-	 *   wildcard is ordered before the other.</li>
-	 *   <li>if the two media types have different {@linkplain #getType() types}, then they are considered equal and
-	 *   remain their current order.</li>
-	 *   <li>if either media type has a {@linkplain #isWildcardSubtype() wildcard subtype}, then the media type without
-	 *   the wildcard is sorted before the other.</li>
-	 *   <li>if the two media types have different {@linkplain #getSubtype() subtypes}, then they are considered equal
-	 *   and remain their current order.</li>
-	 *   <li>if the two media types have different {@linkplain #getQualityValue() quality value}, then the media type
-	 *   with the highest quality value is ordered before the other.</li>
-	 *   <li>if the two media types have a different amount of {@linkplain #getParameter(String) parameters}, then the
-	 *   media type with the most parameters is ordered before the other.</li>
+	 * <li>if either media type has a {@linkplain #isWildcardType() wildcard type}, then the media type without the
+	 * wildcard is ordered before the other.</li>
+	 * <li>if the two media types have different {@linkplain #getType() types}, then they are considered equal and
+	 * remain their current order.</li>
+	 * <li>if either media type has a {@linkplain #isWildcardSubtype() wildcard subtype}, then the media type without
+	 * the wildcard is sorted before the other.</li>
+	 * <li>if the two media types have different {@linkplain #getSubtype() subtypes}, then they are considered equal
+	 * and remain their current order.</li>
+	 * <li>if the two media types have different {@linkplain #getQualityValue() quality value}, then the media type
+	 * with the highest quality value is ordered before the other.</li>
+	 * <li>if the two media types have a different amount of {@linkplain #getParameter(String) parameters}, then the
+	 * media type with the most parameters is ordered before the other.</li>
 	 * </ol>
 	 * <p>For example:
 	 * <blockquote>audio/basic &lt; audio/* &lt; *&#047;*</blockquote>
@@ -445,18 +444,18 @@ public class MediaType extends MimeType implements Serializable {
 	 * Sorts the given list of {@code MediaType} objects by quality value.
 	 * <p>Given two media types:
 	 * <ol>
-	 *   <li>if the two media types have different {@linkplain #getQualityValue() quality value}, then the media type
-	 *   with the highest quality value is ordered before the other.</li>
-	 *   <li>if either media type has a {@linkplain #isWildcardType() wildcard type}, then the media type without the
-	 *   wildcard is ordered before the other.</li>
-	 *   <li>if the two media types have different {@linkplain #getType() types}, then they are considered equal and
-	 *   remain their current order.</li>
-	 *   <li>if either media type has a {@linkplain #isWildcardSubtype() wildcard subtype}, then the media type without
-	 *   the wildcard is sorted before the other.</li>
-	 *   <li>if the two media types have different {@linkplain #getSubtype() subtypes}, then they are considered equal
-	 *   and remain their current order.</li>
-	 *   <li>if the two media types have a different amount of {@linkplain #getParameter(String) parameters}, then the
-	 *   media type with the most parameters is ordered before the other.</li>
+	 * <li>if the two media types have different {@linkplain #getQualityValue() quality value}, then the media type
+	 * with the highest quality value is ordered before the other.</li>
+	 * <li>if either media type has a {@linkplain #isWildcardType() wildcard type}, then the media type without the
+	 * wildcard is ordered before the other.</li>
+	 * <li>if the two media types have different {@linkplain #getType() types}, then they are considered equal and
+	 * remain their current order.</li>
+	 * <li>if either media type has a {@linkplain #isWildcardSubtype() wildcard subtype}, then the media type without
+	 * the wildcard is sorted before the other.</li>
+	 * <li>if the two media types have different {@linkplain #getSubtype() subtypes}, then they are considered equal
+	 * and remain their current order.</li>
+	 * <li>if the two media types have a different amount of {@linkplain #getParameter(String) parameters}, then the
+	 * media type with the most parameters is ordered before the other.</li>
 	 * </ol>
 	 * @param mediaTypes the list of media types to be sorted
 	 * @see #getQualityValue()
@@ -523,6 +522,7 @@ public class MediaType extends MimeType implements Serializable {
 			}
 		}
 	};
+
 
 	/**
 	 * Comparator used by {@link #sortBySpecificity(List)}.
