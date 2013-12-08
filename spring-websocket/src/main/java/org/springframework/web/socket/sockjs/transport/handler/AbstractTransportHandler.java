@@ -16,28 +16,34 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
-import java.util.Map;
+import java.nio.charset.Charset;
 
-import org.springframework.web.socket.WebSocketHandler;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
-import org.springframework.web.socket.sockjs.transport.session.AbstractSockJsSession;
 
 /**
- * A factory for creating a SockJS session. {@link TransportHandler}s typically also serve
- * as SockJS session factories.
- *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface SockJsSessionFactory {
+public abstract class AbstractTransportHandler implements TransportHandler {
 
-	/**
-	 * Create a new SockJS session.
-	 * @param sessionId the ID of the session
-	 * @param wsHandler the underlying {@link WebSocketHandler}
-	 * @param attributes handshake request specific attributes
-	 * @return a new session, never {@code null}
-	 */
-	AbstractSockJsSession createSession(String sessionId, WebSocketHandler wsHandler, Map<String, Object> attributes);
+	protected static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
+
+	protected final Log logger = LogFactory.getLog(this.getClass());
+
+	private SockJsServiceConfig serviceConfig;
+
+
+	@Override
+	public void initialize(SockJsServiceConfig serviceConfig) {
+		this.serviceConfig = serviceConfig;
+	}
+
+	public SockJsServiceConfig getServiceConfig() {
+		return this.serviceConfig;
+	}
 
 }

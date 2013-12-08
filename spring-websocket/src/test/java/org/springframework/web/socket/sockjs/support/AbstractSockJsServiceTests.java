@@ -54,10 +54,10 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 	@Test
 	public void validateRequest() throws Exception {
 
-		this.service.setWebSocketsEnabled(false);
+		this.service.setWebSocketEnabled(false);
 		handleRequest("GET", "/echo/server/session/websocket", HttpStatus.NOT_FOUND);
 
-		this.service.setWebSocketsEnabled(true);
+		this.service.setWebSocketEnabled(true);
 		handleRequest("GET", "/echo/server/session/websocket", HttpStatus.OK);
 
 		handleRequest("GET", "/echo//", HttpStatus.NOT_FOUND);
@@ -86,7 +86,7 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 				body.substring(body.indexOf(',')));
 
 		this.service.setSessionCookieNeeded(false);
-		this.service.setWebSocketsEnabled(false);
+		this.service.setWebSocketEnabled(false);
 		handleRequest("GET", "/echo/info", HttpStatus.OK);
 
 		body = this.servletResponse.getContentAsString();
@@ -186,11 +186,6 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 			this.sessionId = sessionId;
 			this.transport = transport;
 			this.handler = handler;
-		}
-
-		@Override
-		protected boolean isValidTransportType(String transportType) {
-			return TransportType.fromValue(transportType) != null;
 		}
 	}
 

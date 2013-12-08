@@ -28,7 +28,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsMessageDeliveryException;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
-import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
+import org.springframework.web.socket.sockjs.frame.SockJsFrame;
 import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator;
 
 import static org.junit.Assert.*;

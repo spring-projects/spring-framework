@@ -18,8 +18,9 @@ package org.springframework.web.socket.sockjs.transport.session;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.web.socket.sockjs.support.frame.Jackson2SockJsMessageCodec;
-import org.springframework.web.socket.sockjs.support.frame.SockJsMessageCodec;
+import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
+import org.springframework.web.socket.sockjs.frame.Jackson2SockJsMessageCodec;
+import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
 
 /**
  * @author Rossen Stoyanchev

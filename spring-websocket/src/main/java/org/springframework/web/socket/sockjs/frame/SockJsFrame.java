@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.sockjs.support.frame;
+package org.springframework.web.socket.sockjs.frame;
 
 import java.nio.charset.Charset;
 
@@ -28,6 +28,8 @@ import org.springframework.util.Assert;
  */
 public class SockJsFrame {
 
+	private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
+
 	private static final SockJsFrame openFrame = new SockJsFrame("o");
 
 	private static final SockJsFrame heartbeatFrame = new SockJsFrame("h");
@@ -35,15 +37,6 @@ public class SockJsFrame {
 	private static final SockJsFrame closeGoAwayFrame = closeFrame(3000, "Go away!");
 
 	private static final SockJsFrame closeAnotherConnectionOpenFrame = closeFrame(2010, "Another connection still open");
-
-
-	private final String content;
-
-
-	private SockJsFrame(String content) {
-		Assert.notNull("Content must not be null");
-		this.content = content;
-	}
 
 
 	public static SockJsFrame openFrame() {
@@ -72,26 +65,21 @@ public class SockJsFrame {
 	}
 
 
+	private final String content;
+
+
+	public SockJsFrame(String content) {
+		Assert.notNull("Content must not be null");
+		this.content = content;
+	}
+
+
 	public String getContent() {
 		return this.content;
 	}
 
 	public byte[] getContentBytes() {
-		return this.content.getBytes(Charset.forName("UTF-8"));
-	}
-
-	@Override
-	public String toString() {
-		String result = this.content;
-		if (result.length() > 80) {
-			result = result.substring(0, 80) + "...(truncated)";
-		}
-		return "SockJsFrame content='" + result.replace("\n", "\\n").replace("\r", "\\r") + "'";
-	}
-
-	@Override
-	public int hashCode() {
-		return this.content.hashCode();
+		return this.content.getBytes(UTF8_CHARSET);
 	}
 
 	@Override
@@ -105,34 +93,18 @@ public class SockJsFrame {
 		return this.content.equals(((SockJsFrame) other).content);
 	}
 
-
-	public interface FrameFormat {
-
-		SockJsFrame format(SockJsFrame frame);
+	@Override
+	public int hashCode() {
+		return this.content.hashCode();
 	}
 
-	public static class DefaultFrameFormat implements FrameFormat {
-
-		private final String format;
-
-		public DefaultFrameFormat(String format) {
-			Assert.notNull(format, "format must not be null");
-			this.format = format;
+	@Override
+	public String toString() {
+		String result = this.content;
+		if (result.length() > 80) {
+			result = result.substring(0, 80) + "...(truncated)";
 		}
-
-		/**
-		 * @param frame the SockJs frame.
-		 * @return new SockJsFrame instance with the formatted content
-		 */
-		@Override
-		public SockJsFrame format(SockJsFrame frame) {
-			String content = String.format(this.format, preProcessContent(frame.getContent()));
-			return new SockJsFrame(content);
-		}
-
-		protected String preProcessContent(String content) {
-			return content;
-		}
+		return "SockJsFrame content='" + result.replace("\n", "\\n").replace("\r", "\\r") + "'";
 	}
 
 }

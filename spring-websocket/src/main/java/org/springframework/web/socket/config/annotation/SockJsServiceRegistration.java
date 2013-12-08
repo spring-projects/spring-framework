@@ -21,11 +21,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.web.socket.sockjs.SockJsService;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
+import org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsService;
 
 /**
  * A helper class for configuring SockJS fallback options, typically used indirectly, in
@@ -190,7 +192,8 @@ public class SockJsServiceRegistration {
 	}
 
 	protected SockJsService getSockJsService() {
-		DefaultSockJsService service = createSockJsService();
+		TransportHandlingSockJsService service = createSockJsService();
+		service.setHandshakeInterceptors(this.interceptors);
 		if (this.clientLibraryUrl != null) {
 			service.setSockJsClientLibraryUrl(this.clientLibraryUrl);
 		}
@@ -204,21 +207,26 @@ public class SockJsServiceRegistration {
 			service.setHeartbeatTime(this.heartbeatTime);
 		}
 		if (this.disconnectDelay != null) {
-			service.setDisconnectDelay(this.heartbeatTime);
+			service.setDisconnectDelay(this.disconnectDelay);
 		}
 		if (this.httpMessageCacheSize != null) {
 			service.setHttpMessageCacheSize(this.httpMessageCacheSize);
 		}
 		if (this.webSocketEnabled != null) {
-			service.setWebSocketsEnabled(this.webSocketEnabled);
+			service.setWebSocketEnabled(this.webSocketEnabled);
 		}
-		service.setHandshakeInterceptors(this.interceptors);
 		return service;
 	}
 
-	private DefaultSockJsService createSockJsService() {
-		return new DefaultSockJsService(this.taskScheduler, this.transportHandlers,
-				this.transportHandlerOverrides.toArray(new TransportHandler[this.transportHandlerOverrides.size()]));
+	private TransportHandlingSockJsService createSockJsService() {
+		if (!this.transportHandlers.isEmpty()) {
+			Assert.state(this.transportHandlerOverrides.isEmpty(),
+					"Specify either TransportHandlers or TransportHandler overrides, not both");
+			return new TransportHandlingSockJsService(this.taskScheduler, this.transportHandlers);
+		}
+		else {
+			return new DefaultSockJsService(this.taskScheduler, this.transportHandlerOverrides);
+		}
 	}
 
 }

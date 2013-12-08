@@ -14,34 +14,36 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.sockjs.support.frame;
+package org.springframework.web.socket.sockjs.frame;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.codehaus.jackson.io.JsonStringEncoder;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.core.io.JsonStringEncoder;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.util.Assert;
 
 /**
- * A Jackson 1.x codec for encoding and decoding SockJS messages.
+ * A Jackson 2.x codec for encoding and decoding SockJS messages.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class JacksonSockJsMessageCodec extends AbstractSockJsMessageCodec {
+public class Jackson2SockJsMessageCodec extends AbstractSockJsMessageCodec {
 
 	private final ObjectMapper objectMapper;
 
 
-	public JacksonSockJsMessageCodec() {
+	public Jackson2SockJsMessageCodec() {
 		this.objectMapper = new ObjectMapper();
 	}
 
-	public JacksonSockJsMessageCodec(ObjectMapper objectMapper) {
+	public Jackson2SockJsMessageCodec(ObjectMapper objectMapper) {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 		this.objectMapper = objectMapper;
 	}
+
 
 	@Override
 	public String[] decode(String content) throws IOException {

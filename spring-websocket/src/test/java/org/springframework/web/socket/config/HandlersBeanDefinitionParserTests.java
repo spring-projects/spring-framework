@@ -46,8 +46,9 @@ import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
-import org.springframework.web.socket.sockjs.SockJsHttpRequestHandler;
 import org.springframework.web.socket.sockjs.SockJsService;
+import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
+import org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.EventSourceTransportHandler;
 import org.springframework.web.socket.sockjs.transport.handler.HtmlFileTransportHandler;
@@ -150,7 +151,7 @@ public class HandlersBeanDefinitionParserTests {
 	}
 
 	@Test
-	public void sockJSSupport() {
+	public void sockJsSupport() {
 		loadBeanDefinitions("websocket-config-handlers-sockjs.xml");
 		SimpleUrlHandlerMapping handlerMapping = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(handlerMapping);
@@ -182,7 +183,7 @@ public class HandlersBeanDefinitionParserTests {
 	}
 
 	@Test
-	public void sockJSAttributesSupport() {
+	public void sockJsAttributesSupport() {
 		loadBeanDefinitions("websocket-config-handlers-sockjs-attributes.xml");
 		SimpleUrlHandlerMapping handlerMapping = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(handlerMapping);
@@ -191,8 +192,8 @@ public class HandlersBeanDefinitionParserTests {
 		checkDelegateHandlerType(handler.getWebSocketHandler(), TestWebSocketHandler.class);
 		SockJsService sockJsService = handler.getSockJsService();
 		assertNotNull(sockJsService);
-		assertThat(sockJsService, Matchers.instanceOf(DefaultSockJsService.class));
-		DefaultSockJsService defaultSockJsService = (DefaultSockJsService) sockJsService;
+		assertThat(sockJsService, Matchers.instanceOf(TransportHandlingSockJsService.class));
+		TransportHandlingSockJsService defaultSockJsService = (TransportHandlingSockJsService) sockJsService;
 		assertThat(defaultSockJsService.getTaskScheduler(), Matchers.instanceOf(TestTaskScheduler.class));
 		assertThat(defaultSockJsService.getTransportHandlers().values(), Matchers.containsInAnyOrder(
 				Matchers.instanceOf(XhrPollingTransportHandler.class),

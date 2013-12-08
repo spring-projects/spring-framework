@@ -24,13 +24,12 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 
 /**
- * Interceptor for WebSocket handshake requests. Can be used to inspect the handshake
- * request and response as well as to pass attributes to the target
+ * Interceptor for WebSocket handshake requests. Can be used to inspect the
+ * handshake request and response as well as to pass attributes to the target
  * {@link WebSocketHandler}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
- *
  * @see org.springframework.web.socket.server.support.WebSocketHttpRequestHandler
  * @see org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService
  */

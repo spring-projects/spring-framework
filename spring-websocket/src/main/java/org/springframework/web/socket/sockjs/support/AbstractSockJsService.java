@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.InvalidMediaTypeException;
@@ -53,10 +54,16 @@ import org.springframework.web.socket.sockjs.SockJsService;
  */
 public abstract class AbstractSockJsService implements SockJsService {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
 	private static final long ONE_YEAR = TimeUnit.DAYS.toSeconds(365);
 
+	private static final Random random = new Random();
+
+
+	protected final Log logger = LogFactory.getLog(getClass());
+
+	private final TaskScheduler taskScheduler;
 
 	private String name = "SockJSService@" + ObjectUtils.getIdentityHexString(this);
 
@@ -72,13 +79,11 @@ public abstract class AbstractSockJsService implements SockJsService {
 
 	private int httpMessageCacheSize = 100;
 
-	private boolean webSocketsEnabled = true;
-
-	private final TaskScheduler taskScheduler;
+	private boolean webSocketEnabled = true;
 
 
 	public AbstractSockJsService(TaskScheduler scheduler) {
-		Assert.notNull(scheduler, "scheduler must not be null");
+		Assert.notNull(scheduler, "TaskScheduler must not be null");
 		this.taskScheduler = scheduler;
 	}
 
@@ -223,21 +228,22 @@ public abstract class AbstractSockJsService implements SockJsService {
 	}
 
 	/**
-	 * Some load balancers don't support websockets. This option can be used to
+	 * Some load balancers don't support WebSocket. This option can be used to
 	 * disable the WebSocket transport on the server side.
 	 * <p>The default value is "true".
 	 */
-	public void setWebSocketsEnabled(boolean webSocketsEnabled) {
-		this.webSocketsEnabled = webSocketsEnabled;
+	public void setWebSocketEnabled(boolean webSocketEnabled) {
+		this.webSocketEnabled = webSocketEnabled;
 	}
 
 	/**
 	 * Whether WebSocket transport is enabled.
-	 * @see #setWebSocketsEnabled(boolean)
+	 * @see #setWebSocketEnabled(boolean)
 	 */
 	public boolean isWebSocketEnabled() {
-		return this.webSocketsEnabled;
+		return this.webSocketEnabled;
 	}
+
 
 	/**
 	 * {@inheritDoc}
@@ -249,18 +255,24 @@ public abstract class AbstractSockJsService implements SockJsService {
 			String sockJsPath, WebSocketHandler wsHandler) throws SockJsException {
 
 		if (sockJsPath == null) {
-			logger.warn("No SockJS path provided, URI=\"" + request.getURI());
+			if (logger.isWarnEnabled()) {
+				logger.warn("No SockJS path provided, URI=\"" + request.getURI());
+			}
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
 		}
 
-		logger.debug(request.getMethod() + " with SockJS path [" + sockJsPath + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug(request.getMethod() + " with SockJS path [" + sockJsPath + "]");
+		}
 
 		try {
 			request.getHeaders();
 		}
 		catch (InvalidMediaTypeException ex) {
-			logger.warn("Invalid media type ignored: " + ex.getMediaType());
+			if (logger.isWarnEnabled()) {
+				logger.warn("Invalid media type ignored: " + ex.getMediaType());
+			}
 		}
 
 		try {
@@ -275,12 +287,16 @@ public abstract class AbstractSockJsService implements SockJsService {
 				this.iframeHandler.handle(request, response);
 			}
 			else if (sockJsPath.equals("/websocket")) {
-				handleRawWebSocketRequest(request, response, wsHandler);
+				if (isWebSocketEnabled()) {
+					handleRawWebSocketRequest(request, response, wsHandler);
+				}
 			}
 			else {
 				String[] pathSegments = StringUtils.tokenizeToStringArray(sockJsPath.substring(1), "/");
 				if (pathSegments.length != 3) {
-					logger.warn("Expected \"/{server}/{session}/{transport}\" but got \"" + sockJsPath + "\"");
+					if (logger.isWarnEnabled()) {
+						logger.warn("Expected \"/{server}/{session}/{transport}\" but got \"" + sockJsPath + "\"");
+					}
 					response.setStatusCode(HttpStatus.NOT_FOUND);
 					return;
 				}
@@ -301,27 +317,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 		}
 	}
 
-	/**
-	 * Validate whether the given transport String extracted from the URL is a valid
-	 * SockJS transport type (regardless of whether a transport handler is configured).
-	 */
-	protected abstract boolean isValidTransportType(String transportType);
-
-	/**
-	 * Handle request for raw WebSocket communication, i.e. without any SockJS message framing.
-	 */
-	protected abstract void handleRawWebSocketRequest(ServerHttpRequest request,
-			ServerHttpResponse response, WebSocketHandler webSocketHandler) throws IOException;
-
-	/**
-	 * Handle a SockJS session URL (i.e. transport-specific request).
-	 */
-	protected abstract void handleTransportRequest(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler webSocketHandler, String sessionId, String transport) throws SockJsException;
-
-
 	protected boolean validateRequest(String serverId, String sessionId, String transport) {
-
 		if (!StringUtils.hasText(serverId) || !StringUtils.hasText(sessionId) || !StringUtils.hasText(transport)) {
 			logger.warn("Empty server, session, or transport value");
 			return false;
@@ -341,8 +337,21 @@ public abstract class AbstractSockJsService implements SockJsService {
 		return true;
 	}
 
-	protected void addCorsHeaders(ServerHttpRequest request, ServerHttpResponse response, HttpMethod... httpMethods) {
 
+	/**
+	 * Handle request for raw WebSocket communication, i.e. without any SockJS message framing.
+	 */
+	protected abstract void handleRawWebSocketRequest(ServerHttpRequest request,
+			ServerHttpResponse response, WebSocketHandler webSocketHandler) throws IOException;
+
+	/**
+	 * Handle a SockJS session URL (i.e. transport-specific request).
+	 */
+	protected abstract void handleTransportRequest(ServerHttpRequest request, ServerHttpResponse response,
+			WebSocketHandler webSocketHandler, String sessionId, String transport) throws SockJsException;
+
+
+	protected void addCorsHeaders(ServerHttpRequest request, ServerHttpResponse response, HttpMethod... httpMethods) {
 		String origin = request.getHeaders().getFirst("origin");
 		origin = ((origin == null) || origin.equals("null")) ? "*" : origin;
 
@@ -371,10 +380,10 @@ public abstract class AbstractSockJsService implements SockJsService {
 		response.getHeaders().setCacheControl("no-store, no-cache, must-revalidate, max-age=0");
 	}
 
-	protected void sendMethodNotAllowed(ServerHttpResponse response, List<HttpMethod> httpMethods) {
+	protected void sendMethodNotAllowed(ServerHttpResponse response, HttpMethod... httpMethods) {
 		logger.debug("Sending Method Not Allowed (405)");
 		response.setStatusCode(HttpStatus.METHOD_NOT_ALLOWED);
-		response.getHeaders().setAllow(new HashSet<HttpMethod>(httpMethods));
+		response.getHeaders().setAllow(new HashSet<HttpMethod>(Arrays.asList(httpMethods)));
 	}
 
 
@@ -384,8 +393,6 @@ public abstract class AbstractSockJsService implements SockJsService {
 	}
 
 
-	private static final Random random = new Random();
-
 	private final SockJsRequestHandler infoHandler = new SockJsRequestHandler() {
 
 		private static final String INFO_CONTENT =
@@ -393,26 +400,20 @@ public abstract class AbstractSockJsService implements SockJsService {
 
 		@Override
 		public void handle(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
-
 			if (HttpMethod.GET.equals(request.getMethod())) {
-
-				response.getHeaders().setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
-
+				response.getHeaders().setContentType(new MediaType("application", "json", UTF8_CHARSET));
 				addCorsHeaders(request, response);
 				addNoCacheHeaders(response);
-
 				String content = String.format(INFO_CONTENT, random.nextInt(), isSessionCookieNeeded(), isWebSocketEnabled());
 				response.getBody().write(content.getBytes());
 			}
 			else if (HttpMethod.OPTIONS.equals(request.getMethod())) {
-
 				response.setStatusCode(HttpStatus.NO_CONTENT);
-
 				addCorsHeaders(request, response, HttpMethod.OPTIONS, HttpMethod.GET);
 				addCacheHeaders(response);
 			}
 			else {
-				sendMethodNotAllowed(response, Arrays.asList(HttpMethod.OPTIONS, HttpMethod.GET));
+				sendMethodNotAllowed(response, HttpMethod.OPTIONS, HttpMethod.GET);
 			}
 		}
 	};
@@ -439,14 +440,13 @@ public abstract class AbstractSockJsService implements SockJsService {
 
 		@Override
 		public void handle(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
-
 			if (!HttpMethod.GET.equals(request.getMethod())) {
-				sendMethodNotAllowed(response, Arrays.asList(HttpMethod.GET));
+				sendMethodNotAllowed(response, HttpMethod.GET);
 				return;
 			}
 
 			String content = String.format(IFRAME_CONTENT, getSockJsClientLibraryUrl());
-			byte[] contentBytes = content.getBytes(Charset.forName("UTF-8"));
+			byte[] contentBytes = content.getBytes(UTF8_CHARSET);
 			StringBuilder builder = new StringBuilder("\"0");
 			DigestUtils.appendMd5DigestAsHex(contentBytes, builder);
 			builder.append('"');
@@ -458,7 +458,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 				return;
 			}
 
-			response.getHeaders().setContentType(new MediaType("text", "html", Charset.forName("UTF-8")));
+			response.getHeaders().setContentType(new MediaType("text", "html", UTF8_CHARSET));
 			response.getHeaders().setContentLength(contentBytes.length);
 
 			addCacheHeaders(response);

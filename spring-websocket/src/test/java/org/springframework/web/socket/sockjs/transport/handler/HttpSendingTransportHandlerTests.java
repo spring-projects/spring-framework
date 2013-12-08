@@ -20,18 +20,19 @@ import java.sql.Date;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
-import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.FrameFormat;
+import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
+import org.springframework.web.socket.sockjs.frame.SockJsFrame;
 import org.springframework.web.socket.sockjs.transport.session.AbstractSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.PollingSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.StubSockJsServiceConfig;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 /**
@@ -64,7 +65,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 	public void handleRequestXhr() throws Exception {
 
 		XhrPollingTransportHandler transportHandler = new XhrPollingTransportHandler();
-		transportHandler.setSockJsServiceConfiguration(this.sockJsConfig);
+		transportHandler.initialize(this.sockJsConfig);
 
 		AbstractSockJsSession session = transportHandler.createSession("1", this.webSocketHandler, null);
 		transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);
@@ -91,7 +92,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 	public void jsonpTransport() throws Exception {
 
 		JsonpPollingTransportHandler transportHandler = new JsonpPollingTransportHandler();
-		transportHandler.setSockJsServiceConfiguration(this.sockJsConfig);
+		transportHandler.initialize(this.sockJsConfig);
 		PollingSockJsSession session = transportHandler.createSession("1", this.webSocketHandler, null);
 
 		transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);
@@ -113,7 +114,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 	public void handleRequestXhrStreaming() throws Exception {
 
 		XhrStreamingTransportHandler transportHandler = new XhrStreamingTransportHandler();
-		transportHandler.setSockJsServiceConfiguration(this.sockJsConfig);
+		transportHandler.initialize(this.sockJsConfig);
 		AbstractSockJsSession session = transportHandler.createSession("1", this.webSocketHandler, null);
 
 		transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);
@@ -127,7 +128,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 	public void htmlFileTransport() throws Exception {
 
 		HtmlFileTransportHandler transportHandler = new HtmlFileTransportHandler();
-		transportHandler.setSockJsServiceConfiguration(this.sockJsConfig);
+		transportHandler.initialize(this.sockJsConfig);
 		StreamingSockJsSession session = transportHandler.createSession("1", this.webSocketHandler, null);
 
 		transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);
@@ -149,7 +150,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 	public void eventSourceTransport() throws Exception {
 
 		EventSourceTransportHandler transportHandler = new EventSourceTransportHandler();
-		transportHandler.setSockJsServiceConfiguration(this.sockJsConfig);
+		transportHandler.initialize(this.sockJsConfig);
 		StreamingSockJsSession session = transportHandler.createSession("1", this.webSocketHandler, null);
 
 		transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);
@@ -167,7 +168,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 
 		SockJsFrame frame = SockJsFrame.openFrame();
 
-		FrameFormat format = new XhrPollingTransportHandler().getFrameFormat(this.request);
+		SockJsFrameFormat format = new XhrPollingTransportHandler().getFrameFormat(this.request);
 		SockJsFrame formatted = format.format(frame);
 		assertEquals(frame.getContent() + "\n", formatted.getContent());
 

@@ -23,8 +23,9 @@ import java.util.Map;
 
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
-import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
+import org.springframework.web.socket.sockjs.frame.SockJsFrame;
 
 /**
  * @author Rossen Stoyanchev

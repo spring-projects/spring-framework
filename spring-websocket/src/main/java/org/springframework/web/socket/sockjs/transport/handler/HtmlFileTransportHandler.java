@@ -17,7 +17,6 @@
 package org.springframework.web.socket.sockjs.transport.handler;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -28,12 +27,12 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
-import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.DefaultFrameFormat;
-import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.FrameFormat;
+import org.springframework.web.socket.sockjs.frame.DefaultSockJsFrameFormat;
+import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
+import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJsSession;
-import org.springframework.web.socket.sockjs.transport.session.SockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSession;
 import org.springframework.web.util.JavaScriptUtils;
 
@@ -84,14 +83,14 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 
 	@Override
 	protected MediaType getContentType() {
-		return new MediaType("text", "html", Charset.forName("UTF-8"));
+		return new MediaType("text", "html", UTF8_CHARSET);
 	}
 
 	@Override
-	public StreamingSockJsSession createSession(String sessionId, WebSocketHandler wsHandler,
+	public StreamingSockJsSession createSession(String sessionId, WebSocketHandler handler,
 			Map<String, Object> attributes) {
 
-		return new HtmlFileStreamingSockJsSession(sessionId, getSockJsServiceConfig(), wsHandler, attributes);
+		return new HtmlFileStreamingSockJsSession(sessionId, getServiceConfig(), handler, attributes);
 	}
 
 	@Override
@@ -115,8 +114,8 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 	}
 
 	@Override
-	protected FrameFormat getFrameFormat(ServerHttpRequest request) {
-		return new DefaultFrameFormat("<script>\np(\"%s\");\n</script>\r\n") {
+	protected SockJsFrameFormat getFrameFormat(ServerHttpRequest request) {
+		return new DefaultSockJsFrameFormat("<script>\np(\"%s\");\n</script>\r\n") {
 			@Override
 			protected String preProcessContent(String content) {
 				return JavaScriptUtils.javaScriptEscape(content);

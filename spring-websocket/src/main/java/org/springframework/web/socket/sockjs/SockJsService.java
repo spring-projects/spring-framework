@@ -24,15 +24,15 @@ import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator
 /**
  * The main entry point for processing HTTP requests from SockJS clients.
  *
- * <p>In a Servlet 3+ container, {@link SockJsHttpRequestHandler} can be used to invoke this
- * service. The processing servlet, as well as all filters involved, must have
- * asynchronous support enabled through the ServletContext API or by adding an
+ * <p>In a Servlet 3+ container, {@link org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler}
+ * can be used to invoke this service. The processing servlet, as well as all filters involved,
+ * must have asynchronous support enabled through the ServletContext API or by adding an
  * {@code <async-support>true</async-support>} element to servlet and filter declarations
  * in web.xml.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
- * @see SockJsHttpRequestHandler
+ * @see org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler
  */
 public interface SockJsService {
 
@@ -53,7 +53,7 @@ public interface SockJsService {
 	 * exceptions from the WebSocketHandler can be handled internally or through
 	 * {@link ExceptionWebSocketHandlerDecorator} or some alternative decorator.
 	 * The former is automatically added when using
-	 * {@link SockJsHttpRequestHandler}.
+	 * {@link org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler}.
 	 */
 	void handleRequest(ServerHttpRequest request, ServerHttpResponse response, String sockJsPath,
 			WebSocketHandler handler) throws SockJsException;

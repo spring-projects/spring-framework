@@ -17,19 +17,21 @@
 package org.springframework.web.socket.sockjs.transport.session;
 
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
-import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
-import org.springframework.web.socket.sockjs.support.frame.SockJsMessageCodec;
+import org.springframework.web.socket.sockjs.frame.SockJsFrame;
+import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
+import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 
 /**
  * A SockJS session for use with polling HTTP transports.
  *
  * @author Rossen Stoyanchev
+ * @since 4.0
  */
 public class PollingSockJsSession extends AbstractHttpSockJsSession {
-
 
 	public PollingSockJsSession(String sessionId, SockJsServiceConfig config,
 			WebSocketHandler wsHandler, Map<String, Object> attributes) {
@@ -40,10 +42,10 @@ public class PollingSockJsSession extends AbstractHttpSockJsSession {
 
 	@Override
 	protected void flushCache() throws SockJsTransportFailureException {
-
 		cancelHeartbeat();
-		String[] messages = getMessageCache().toArray(new String[getMessageCache().size()]);
-		getMessageCache().clear();
+		BlockingQueue<String> messageCache = getMessageCache();
+		String[] messages = messageCache.toArray(new String[messageCache.size()]);
+		messageCache.clear();
 
 		SockJsMessageCodec messageCodec = getSockJsServiceConfig().getMessageCodec();
 		SockJsFrame frame = SockJsFrame.messageFrame(messageCodec, messages);

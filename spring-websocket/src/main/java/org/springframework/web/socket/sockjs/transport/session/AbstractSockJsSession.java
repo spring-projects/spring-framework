@@ -28,23 +28,25 @@ import java.util.concurrent.ScheduledFuture;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
-import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.sockjs.SockJsMessageDeliveryException;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
-import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
+import org.springframework.web.socket.sockjs.frame.SockJsFrame;
+import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
+import org.springframework.web.socket.sockjs.transport.SockJsSession;
 
 /**
- * An abstract base class SockJS sessions implementing {@link WebSocketSession}.
+ * An abstract base class SockJS sessions implementing {@link SockJsSession}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractSockJsSession implements WebSocketSession {
+public abstract class AbstractSockJsSession implements SockJsSession {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -68,20 +70,21 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 	/**
 	 * @param id the session ID
 	 * @param config SockJS service configuration options
-	 * @param wsHandler the recipient of SockJS messages
+	 * @param handler the recipient of SockJS messages
 	 */
 	public AbstractSockJsSession(String id, SockJsServiceConfig config,
-			WebSocketHandler wsHandler, Map<String, Object> handshakeAttributes) {
+			WebSocketHandler handler, Map<String, Object> handshakeAttributes) {
 
 		Assert.notNull(id, "SessionId must not be null");
 		Assert.notNull(config, "SockJsConfig must not be null");
-		Assert.notNull(wsHandler, "WebSocketHandler must not be null");
+		Assert.notNull(handler, "WebSocketHandler must not be null");
 
 		this.id = id;
 		this.config = config;
-		this.handler = wsHandler;
+		this.handler = handler;
 		this.handshakeAttributes = handshakeAttributes;
 	}
+
 
 	@Override
 	public String getId() {
@@ -119,10 +122,7 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 	 */
 	public abstract boolean isActive();
 
-	/**
-	 * Return the time since the session was last active, or otherwise if the
-	 * session is new, the time since the session was created.
-	 */
+	@Override
 	public long getTimeSinceLastActive() {
 		if (isNew()) {
 			return (System.currentTimeMillis() - this.timeCreated);
@@ -156,8 +156,8 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 					undelivered.remove(0);
 				}
 			}
-			catch (Throwable t) {
-				throw new SockJsMessageDeliveryException(this.id, undelivered, t);
+			catch (Throwable ex) {
+				throw new SockJsMessageDeliveryException(this.id, undelivered, ex);
 			}
 		}
 	}
@@ -235,8 +235,8 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 				try {
 					this.handler.afterConnectionClosed(this, status);
 				}
-				catch (Throwable t) {
-					logger.error("Unhandled error for " + this, t);
+				catch (Throwable ex) {
+					logger.error("Unhandled error for " + this, ex);
 				}
 			}
 		}
@@ -302,7 +302,7 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 	}
 
 	protected void scheduleHeartbeat() {
-		Assert.state(this.config.getTaskScheduler() != null, "heartbeatScheduler not configured");
+		Assert.state(this.config.getTaskScheduler() != null, "No TaskScheduler configured for heartbeat");
 		cancelHeartbeat();
 		if (!isActive()) {
 			return;
@@ -313,7 +313,7 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 				try {
 					sendHeartbeat();
 				}
-				catch (Throwable t) {
+				catch (Throwable ex) {
 					// ignore
 				}
 			}

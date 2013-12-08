@@ -16,12 +16,9 @@
 
 package org.springframework.web.socket.config;
 
-import java.util.Collections;
-
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.ManagedList;
@@ -30,6 +27,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
+import org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
 
 /**
@@ -63,46 +61,28 @@ class WebSocketNamespaceUtils {
 		Element sockJsElement = DomUtils.getChildElementByTagName(element, "sockjs");
 
 		if (sockJsElement != null) {
-			ConstructorArgumentValues cavs = new ConstructorArgumentValues();
+			RootBeanDefinition sockJsServiceDef = new RootBeanDefinition(DefaultSockJsService.class);
+			sockJsServiceDef.setSource(source);
 
+			Object scheduler;
 			String customTaskSchedulerName = sockJsElement.getAttribute("scheduler");
 			if (!customTaskSchedulerName.isEmpty()) {
-				cavs.addIndexedArgumentValue(0, new RuntimeBeanReference(customTaskSchedulerName));
+				scheduler = new RuntimeBeanReference(customTaskSchedulerName);
 			}
 			else {
-				cavs.addIndexedArgumentValue(0, registerSockJsTaskScheduler(sockJsSchedulerName, parserContext, source));
+				scheduler = registerSockJsTaskScheduler(sockJsSchedulerName, parserContext, source);
 			}
+			sockJsServiceDef.getConstructorArgumentValues().addIndexedArgumentValue(0, scheduler);
 
 			Element transportHandlersElement = DomUtils.getChildElementByTagName(sockJsElement, "transport-handlers");
-			boolean registerDefaults = true;
 			if (transportHandlersElement != null) {
 				String registerDefaultsAttribute = transportHandlersElement.getAttribute("register-defaults");
-				registerDefaults = !registerDefaultsAttribute.equals("false");
+				if (registerDefaultsAttribute.equals("false")) {
+					sockJsServiceDef.setBeanClass(TransportHandlingSockJsService.class);
+				}
+				ManagedList<?> transportHandlersList = parseBeanSubElements(transportHandlersElement, parserContext);
+				sockJsServiceDef.getConstructorArgumentValues().addIndexedArgumentValue(1, transportHandlersList);
 			}
-
-			ManagedList<?> transportHandlersList = parseBeanSubElements(transportHandlersElement, parserContext);
-
-			if (registerDefaults) {
-				cavs.addIndexedArgumentValue(1, Collections.emptyList());
-				if (transportHandlersList.isEmpty()) {
-					cavs.addIndexedArgumentValue(2, new ConstructorArgumentValues.ValueHolder(null));
-				}
-				else {
-					cavs.addIndexedArgumentValue(2, transportHandlersList);
-				}
-			}
-			else {
-				if (transportHandlersList.isEmpty()) {
-					cavs.addIndexedArgumentValue(1, new ConstructorArgumentValues.ValueHolder(null));
-				}
-				else {
-					cavs.addIndexedArgumentValue(1, transportHandlersList);
-				}
-				cavs.addIndexedArgumentValue(2, new ConstructorArgumentValues.ValueHolder(null));
-			}
-
-			RootBeanDefinition sockJsServiceDef = new RootBeanDefinition(DefaultSockJsService.class, cavs, null);
-			sockJsServiceDef.setSource(source);
 
 			String attrValue = sockJsElement.getAttribute("name");
 			if (!attrValue.isEmpty()) {
@@ -110,7 +90,7 @@ class WebSocketNamespaceUtils {
 			}
 			attrValue = sockJsElement.getAttribute("websocket-enabled");
 			if (!attrValue.isEmpty()) {
-				sockJsServiceDef.getPropertyValues().add("webSocketsEnabled", Boolean.valueOf(attrValue));
+				sockJsServiceDef.getPropertyValues().add("webSocketEnabled", Boolean.valueOf(attrValue));
 			}
 			attrValue = sockJsElement.getAttribute("session-cookie-needed");
 			if (!attrValue.isEmpty()) {

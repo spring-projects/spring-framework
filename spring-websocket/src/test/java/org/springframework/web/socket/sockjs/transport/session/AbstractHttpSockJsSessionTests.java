@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -29,9 +30,10 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
-import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.DefaultFrameFormat;
-import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.FrameFormat;
+import org.springframework.web.socket.sockjs.frame.DefaultSockJsFrameFormat;
+import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
+import org.springframework.web.socket.sockjs.frame.SockJsFrame;
+import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJsSessionTests.TestAbstractHttpSockJsSession;
 
 import static org.junit.Assert.*;
@@ -52,7 +54,7 @@ public class AbstractHttpSockJsSessionTests extends BaseAbstractSockJsSessionTes
 
 	protected MockHttpServletResponse servletResponse;
 
-	private FrameFormat frameFormat;
+	private SockJsFrameFormat frameFormat;
 
 
 	@Before
@@ -60,7 +62,7 @@ public class AbstractHttpSockJsSessionTests extends BaseAbstractSockJsSessionTes
 
 		super.setUp();
 
-		this.frameFormat = new DefaultFrameFormat("%s");
+		this.frameFormat = new DefaultSockJsFrameFormat("%s");
 
 		this.servletResponse = new MockHttpServletResponse();
 		this.response = new ServletServerHttpResponse(this.servletResponse);

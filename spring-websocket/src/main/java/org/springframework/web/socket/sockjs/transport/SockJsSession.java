@@ -14,29 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.sockjs.transport.handler;
+package org.springframework.web.socket.sockjs.transport;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.web.socket.sockjs.transport.session.SockJsServiceConfig;
+import org.springframework.web.socket.WebSocketSession;
 
 /**
+ * SockJS extension of Spring's standard {@link WebSocketSession}.
+ *
+ * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class TransportHandlerSupport {
+public interface SockJsSession extends WebSocketSession {
 
-	protected final Log logger = LogFactory.getLog(this.getClass());
-
-	private SockJsServiceConfig sockJsServiceConfig;
-
-
-	public void setSockJsServiceConfiguration(SockJsServiceConfig sockJsConfig) {
-		this.sockJsServiceConfig = sockJsConfig;
-	}
-
-	public SockJsServiceConfig getSockJsServiceConfig() {
-		return this.sockJsServiceConfig;
-	}
+	/**
+	 * Return the time (in ms) since the session was last active, or otherwise
+	 * if the session is new, then the time since the session was created.
+	 */
+	long getTimeSinceLastActive();
 
 }

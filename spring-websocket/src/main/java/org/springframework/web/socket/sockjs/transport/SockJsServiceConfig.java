@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.sockjs.transport.session;
+package org.springframework.web.socket.sockjs.transport;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.socket.sockjs.SockJsService;
-import org.springframework.web.socket.sockjs.support.AbstractSockJsService;
-import org.springframework.web.socket.sockjs.support.frame.SockJsMessageCodec;
+import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
 
 /**
  * Provides transport handling code with access to the {@link SockJsService} configuration
@@ -29,6 +28,11 @@ import org.springframework.web.socket.sockjs.support.frame.SockJsMessageCodec;
  * @since 4.0
  */
 public interface SockJsServiceConfig {
+
+	/**
+	 * A scheduler instance to use for scheduling heart-beat messages.
+	 */
+	TaskScheduler getTaskScheduler();
 
 	/**
 	 * Streaming transports save responses on the client side and don't free
@@ -51,25 +55,21 @@ public interface SockJsServiceConfig {
 	long getHeartbeatTime();
 
 	/**
-	 * A scheduler instance to use for scheduling heart-beat messages.
+	 * The number of server-to-client messages that a session can cache while waiting for
+	 * the next HTTP polling request from the client. All HTTP transports use this
+	 * property since even streaming transports recycle HTTP requests periodically.
+	 * <p>The amount of time between HTTP requests should be relatively brief and will not
+	 * exceed the allows disconnect delay (see
+	 * {@link org.springframework.web.socket.sockjs.support.AbstractSockJsService#setDisconnectDelay(long)},
+	 * 5 seconds by default.
+	 * <p>The default size is 100.
 	 */
-	TaskScheduler getTaskScheduler();
+	int getHttpMessageCacheSize();
 
 	/**
 	 * The codec to use for encoding and decoding SockJS messages.
 	 * @exception IllegalStateException if no {@link SockJsMessageCodec} is available
 	 */
 	SockJsMessageCodec getMessageCodec();
-
-	/**
-	 * The number of server-to-client messages that a session can cache while waiting for
-	 * the next HTTP polling request from the client. All HTTP transports use this
-	 * property since even streaming transports recycle HTTP requests periodically.
-	 * <p>The amount of time between HTTP requests should be relatively brief and will not
-	 * exceed the allows disconnect delay (see
-	 * {@link AbstractSockJsService#setDisconnectDelay(long)}, 5 seconds by default.
-	 * <p>The default size is 100.
-	 */
-	int getHttpMessageCacheSize();
 
 }

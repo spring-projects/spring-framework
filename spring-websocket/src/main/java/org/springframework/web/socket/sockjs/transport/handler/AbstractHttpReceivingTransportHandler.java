@@ -17,8 +17,9 @@
 package org.springframework.web.socket.sockjs.transport.handler;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.Arrays;
+
+import com.fasterxml.jackson.databind.JsonMappingException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,12 +27,9 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.sockjs.SockJsException;
-import org.springframework.web.socket.sockjs.transport.TransportHandler;
+import org.springframework.web.socket.sockjs.transport.SockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJsSession;
-
-import com.fasterxml.jackson.databind.JsonMappingException;
 
 /**
  * Base class for HTTP transport handlers that receive messages via HTTP POST.
@@ -39,12 +37,11 @@ import com.fasterxml.jackson.databind.JsonMappingException;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractHttpReceivingTransportHandler
-		extends TransportHandlerSupport implements TransportHandler {
+public abstract class AbstractHttpReceivingTransportHandler extends AbstractTransportHandler {
 
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler wsHandler, WebSocketSession wsSession) throws SockJsException {
+			WebSocketHandler wsHandler, SockJsSession wsSession) throws SockJsException {
 
 		Assert.notNull(wsSession, "No session");
 		AbstractHttpSockJsSession sockJsSession = (AbstractHttpSockJsSession) wsSession;
@@ -55,22 +52,22 @@ public abstract class AbstractHttpReceivingTransportHandler
 	protected void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
 			WebSocketHandler wsHandler, AbstractHttpSockJsSession sockJsSession) throws SockJsException {
 
-		String[] messages = null;
+		String[] messages;
 		try {
 			messages = readMessages(request);
 		}
 		catch (JsonMappingException ex) {
-			logger.error("Failed to read message: " + ex.getMessage());
+			logger.error("Failed to read message", ex);
 			handleReadError(response, "Payload expected.", sockJsSession.getId());
 			return;
 		}
 		catch (IOException ex) {
-			logger.error("Failed to read message: " + ex.getMessage());
+			logger.error("Failed to read message", ex);
 			handleReadError(response, "Broken JSON encoding.", sockJsSession.getId());
 			return;
 		}
-		catch (Throwable t) {
-			logger.error("Failed to read message: " + t.getMessage());
+		catch (Throwable ex) {
+			logger.error("Failed to read message", ex);
 			handleReadError(response, "Failed to read message(s)", sockJsSession.getId());
 			return;
 		}
@@ -85,7 +82,7 @@ public abstract class AbstractHttpReceivingTransportHandler
 		}
 
 		response.setStatusCode(getResponseStatus());
-		response.getHeaders().setContentType(new MediaType("text", "plain", Charset.forName("UTF-8")));
+		response.getHeaders().setContentType(new MediaType("text", "plain", UTF8_CHARSET));
 
 		sockJsSession.delegateMessages(messages);
 	}

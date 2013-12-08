@@ -24,11 +24,12 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
+import org.springframework.web.socket.sockjs.transport.SockJsSession;
+import org.springframework.web.socket.sockjs.transport.SockJsSessionFactory;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.session.AbstractSockJsSession;
@@ -44,8 +45,8 @@ import org.springframework.web.socket.sockjs.transport.session.WebSocketServerSo
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class WebSocketTransportHandler extends TransportHandlerSupport
-		implements TransportHandler, SockJsSessionFactory, HandshakeHandler {
+public class WebSocketTransportHandler extends AbstractTransportHandler
+		implements SockJsSessionFactory, HandshakeHandler {
 
 	private final HandshakeHandler handshakeHandler;
 
@@ -66,24 +67,24 @@ public class WebSocketTransportHandler extends TransportHandlerSupport
 	}
 
 	@Override
-	public AbstractSockJsSession createSession(String sessionId, WebSocketHandler wsHandler,
+	public AbstractSockJsSession createSession(String sessionId, WebSocketHandler handler,
 			Map<String, Object> attributes) {
 
-		return new WebSocketServerSockJsSession(sessionId, getSockJsServiceConfig(), wsHandler, attributes);
+		return new WebSocketServerSockJsSession(sessionId, getServiceConfig(), handler, attributes);
 	}
 
 	@Override
 	public void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler wsHandler, WebSocketSession wsSession) throws SockJsException {
+			WebSocketHandler wsHandler, SockJsSession wsSession) throws SockJsException {
 
 		WebSocketServerSockJsSession sockJsSession = (WebSocketServerSockJsSession) wsSession;
 		try {
-			wsHandler = new SockJsWebSocketHandler(getSockJsServiceConfig(), wsHandler, sockJsSession);
+			wsHandler = new SockJsWebSocketHandler(getServiceConfig(), wsHandler, sockJsSession);
 			this.handshakeHandler.doHandshake(request, response, wsHandler, Collections.<String, Object>emptyMap());
 		}
-		catch (Throwable t) {
-			sockJsSession.tryCloseWithSockJsTransportError(t, CloseStatus.SERVER_ERROR);
-			throw new SockJsTransportFailureException("WebSocket handshake failure", wsSession.getId(), t);
+		catch (Throwable ex) {
+			sockJsSession.tryCloseWithSockJsTransportError(ex, CloseStatus.SERVER_ERROR);
+			throw new SockJsTransportFailureException("WebSocket handshake failure", wsSession.getId(), ex);
 		}
 	}
 

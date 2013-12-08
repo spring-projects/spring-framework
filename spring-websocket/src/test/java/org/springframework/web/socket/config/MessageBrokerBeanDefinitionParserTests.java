@@ -48,7 +48,7 @@ import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
 import org.springframework.web.socket.messaging.StompSubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
-import org.springframework.web.socket.sockjs.SockJsHttpRequestHandler;
+import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
 
 import static org.junit.Assert.*;
 

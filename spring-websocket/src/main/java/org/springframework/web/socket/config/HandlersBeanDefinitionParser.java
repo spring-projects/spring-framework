@@ -33,9 +33,8 @@ import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
-import org.springframework.web.socket.config.WebSocketNamespaceUtils;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
-import org.springframework.web.socket.sockjs.SockJsHttpRequestHandler;
+import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
 
 /**
  * A {@link BeanDefinitionParser} that provides the configuration for the
@@ -129,7 +128,6 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 
 		@Override
 		public ManagedMap<String, Object> createMappings(Element mappingElement, ParserContext parserContext) {
-
 			ManagedMap<String, Object> urlMap = new ManagedMap<String, Object>();
 			Object source = parserContext.extractSource(mappingElement);
 

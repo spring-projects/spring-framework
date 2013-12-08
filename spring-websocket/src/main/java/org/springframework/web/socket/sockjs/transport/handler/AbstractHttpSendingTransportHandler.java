@@ -25,11 +25,11 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.sockjs.SockJsException;
-import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
-import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.FrameFormat;
-import org.springframework.web.socket.sockjs.transport.TransportHandler;
+import org.springframework.web.socket.sockjs.frame.SockJsFrame;
+import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
+import org.springframework.web.socket.sockjs.transport.SockJsSession;
+import org.springframework.web.socket.sockjs.transport.SockJsSessionFactory;
 import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJsSession;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
@@ -40,13 +40,12 @@ import org.springframework.web.util.UriUtils;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractHttpSendingTransportHandler extends TransportHandlerSupport
-		implements TransportHandler, SockJsSessionFactory {
-
+public abstract class AbstractHttpSendingTransportHandler extends AbstractTransportHandler
+		implements SockJsSessionFactory {
 
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler wsHandler, WebSocketSession wsSession) throws SockJsException {
+			WebSocketHandler wsHandler, SockJsSession wsSession) throws SockJsException {
 
 		AbstractHttpSockJsSession sockJsSession = (AbstractHttpSockJsSession) wsSession;
 
@@ -95,7 +94,7 @@ public abstract class AbstractHttpSendingTransportHandler extends TransportHandl
 
 	protected abstract MediaType getContentType();
 
-	protected abstract FrameFormat getFrameFormat(ServerHttpRequest request);
+	protected abstract SockJsFrameFormat getFrameFormat(ServerHttpRequest request);
 
 	protected final String getCallbackParam(ServerHttpRequest request) {
 		String query = request.getURI().getQuery();

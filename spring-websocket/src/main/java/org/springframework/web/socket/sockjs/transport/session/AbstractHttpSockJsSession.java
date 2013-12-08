@@ -32,12 +32,13 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
-import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
-import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.FrameFormat;
-import org.springframework.web.socket.WebSocketExtension;
+import org.springframework.web.socket.sockjs.frame.SockJsFrame;
+import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
+import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 
 /**
  * An abstract base class for use with HTTP transport based SockJS sessions.
@@ -47,8 +48,6 @@ import org.springframework.web.socket.WebSocketExtension;
  */
 public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 
-	private FrameFormat frameFormat;
-
 	private final BlockingQueue<String> messageCache;
 
 	private ServerHttpRequest request;
@@ -56,6 +55,8 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	private ServerHttpResponse response;
 
 	private ServerHttpAsyncRequestControl asyncRequestControl;
+
+	private SockJsFrameFormat frameFormat;
 
 	private URI uri;
 
@@ -88,17 +89,9 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		return this.handshakeHeaders;
 	}
 
-	protected void setHandshakeHeaders(HttpHeaders handshakeHeaders) {
-		this.handshakeHeaders = handshakeHeaders;
-	}
-
 	@Override
 	public Principal getPrincipal() {
 		return this.principal;
-	}
-
-	protected void setPrincipal(Principal principal) {
-		this.principal = principal;
 	}
 
 	@Override
@@ -106,22 +99,9 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		return this.localAddress;
 	}
 
-	protected void setLocalAddress(InetSocketAddress localAddress) {
-		this.localAddress = localAddress;
-	}
-
 	@Override
 	public InetSocketAddress getRemoteAddress() {
 		return this.remoteAddress;
-	}
-
-	protected void setRemoteAddress(InetSocketAddress remoteAddress) {
-		this.remoteAddress = remoteAddress;
-	}
-
-	@Override
-	public List<WebSocketExtension> getExtensions() {
-		return Collections.emptyList();
 	}
 
 	/**
@@ -141,17 +121,23 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		return this.acceptedProtocol;
 	}
 
-	public synchronized void handleInitialRequest(ServerHttpRequest request, ServerHttpResponse response,
-			FrameFormat frameFormat) throws SockJsException {
+	@Override
+	public List<WebSocketExtension> getExtensions() {
+		return Collections.emptyList();
+	}
 
-		udpateRequest(request, response, frameFormat);
+
+	public synchronized void handleInitialRequest(ServerHttpRequest request, ServerHttpResponse response,
+			SockJsFrameFormat frameFormat) throws SockJsException {
+
+		updateRequest(request, response, frameFormat);
 		try {
 			writePrelude();
 			writeFrame(SockJsFrame.openFrame());
 		}
-		catch (Throwable t) {
-			tryCloseWithSockJsTransportError(t, CloseStatus.SERVER_ERROR);
-			throw new SockJsTransportFailureException("Failed to send \"open\" frame", getId(), t);
+		catch (Throwable ex) {
+			tryCloseWithSockJsTransportError(ex, CloseStatus.SERVER_ERROR);
+			throw new SockJsTransportFailureException("Failed to send \"open\" frame", getId(), ex);
 		}
 
 		this.uri = request.getURI();
@@ -163,8 +149,8 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		try {
 			delegateConnectionEstablished();
 		}
-		catch (Throwable t) {
-			throw new SockJsException("Unhandled exception from WebSocketHandler", getId(), t);
+		catch (Throwable ex) {
+			throw new SockJsException("Unhandled exception from WebSocketHandler", getId(), ex);
 		}
 	}
 
@@ -172,25 +158,24 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	}
 
 	public synchronized void startLongPollingRequest(ServerHttpRequest request,
-			ServerHttpResponse response, FrameFormat frameFormat) throws SockJsException {
+			ServerHttpResponse response, SockJsFrameFormat frameFormat) throws SockJsException {
 
-		udpateRequest(request, response, frameFormat);
+		updateRequest(request, response, frameFormat);
 		try {
 			this.asyncRequestControl.start(-1);
 			scheduleHeartbeat();
 			tryFlushCache();
 		}
-		catch (Throwable t) {
-			tryCloseWithSockJsTransportError(t, CloseStatus.SERVER_ERROR);
-			throw new SockJsTransportFailureException("Failed to flush messages", getId(), t);
+		catch (Throwable ex) {
+			tryCloseWithSockJsTransportError(ex, CloseStatus.SERVER_ERROR);
+			throw new SockJsTransportFailureException("Failed to flush messages", getId(), ex);
 		}
 	}
 
-	private void udpateRequest(ServerHttpRequest request, ServerHttpResponse response,
-			FrameFormat frameFormat) {
-		Assert.notNull(request, "expected request");
-		Assert.notNull(response, "expected response");
-		Assert.notNull(frameFormat, "expected frameFormat");
+	private void updateRequest(ServerHttpRequest request, ServerHttpResponse response, SockJsFrameFormat frameFormat) {
+		Assert.notNull(request, "Request must not be null");
+		Assert.notNull(response, "Response must not be null");
+		Assert.notNull(frameFormat, "SockJsFrameFormat must not be null");
 		this.request = request;
 		this.response = response;
 		this.asyncRequestControl = request.getAsyncRequestControl(response);
@@ -203,7 +188,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 
 	@Override
 	public synchronized boolean isActive() {
-		return ((this.asyncRequestControl != null) && (!this.asyncRequestControl.isCompleted()));
+		return (this.asyncRequestControl != null && !this.asyncRequestControl.isCompleted());
 	}
 
 	protected BlockingQueue<String> getMessageCache() {

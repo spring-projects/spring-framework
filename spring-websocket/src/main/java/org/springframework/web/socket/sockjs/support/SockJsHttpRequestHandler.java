@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.sockjs;
+package org.springframework.web.socket.sockjs.support;
 
 import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,6 +31,8 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator;
 import org.springframework.web.socket.handler.LoggingWebSocketHandlerDecorator;
+import org.springframework.web.socket.sockjs.SockJsException;
+import org.springframework.web.socket.sockjs.SockJsService;
 
 /**
  * An {@link HttpRequestHandler} that allows mapping a {@link SockJsService} to requests
@@ -44,19 +45,20 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler {
 
 	private final SockJsService sockJsService;
 
-	private final WebSocketHandler wsHandler;
+	private final WebSocketHandler webSocketHandler;
 
 
 	/**
-	 * Create a new {@link SockJsHttpRequestHandler}.
+	 * Create a new SockJsHttpRequestHandler.
 	 * @param sockJsService the SockJS service
-	 * @param wsHandler the websocket handler
+	 * @param webSocketHandler the websocket handler
 	 */
-	public SockJsHttpRequestHandler(SockJsService sockJsService, WebSocketHandler wsHandler) {
+	public SockJsHttpRequestHandler(SockJsService sockJsService, WebSocketHandler webSocketHandler) {
 		Assert.notNull(sockJsService, "sockJsService must not be null");
-		Assert.notNull(wsHandler, "webSocketHandler must not be null");
+		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
 		this.sockJsService = sockJsService;
-		this.wsHandler = new ExceptionWebSocketHandlerDecorator(new LoggingWebSocketHandlerDecorator(wsHandler));
+		this.webSocketHandler =
+				new ExceptionWebSocketHandlerDecorator(new LoggingWebSocketHandlerDecorator(webSocketHandler));
 	}
 
 
@@ -71,8 +73,9 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler {
 	 * Return the {@link WebSocketHandler}.
 	 */
 	public WebSocketHandler getWebSocketHandler() {
-		return this.wsHandler;
+		return this.webSocketHandler;
 	}
+
 
 	@Override
 	public void handleRequest(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
@@ -82,10 +85,10 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler {
 		ServerHttpResponse response = new ServletServerHttpResponse(servletResponse);
 
 		try {
-			this.sockJsService.handleRequest(request, response, getSockJsPath(servletRequest), this.wsHandler);
+			this.sockJsService.handleRequest(request, response, getSockJsPath(servletRequest), this.webSocketHandler);
 		}
-		catch (Throwable t) {
-			throw new SockJsException("Uncaught failure in SockJS request, uri=" + request.getURI(), t);
+		catch (Throwable ex) {
+			throw new SockJsException("Uncaught failure in SockJS request, uri=" + request.getURI(), ex);
 		}
 	}
 

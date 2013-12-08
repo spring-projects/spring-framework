@@ -114,7 +114,7 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 
 		try {
 			XhrReceivingTransportHandler transportHandler = new XhrReceivingTransportHandler();
-			transportHandler.setSockJsServiceConfiguration(sockJsConfig);
+			transportHandler.initialize(sockJsConfig);
 			transportHandler.handleRequest(this.request, this.response, wsHandler, session);
 			fail("Expected exception");
 		}
@@ -129,7 +129,7 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 		WebSocketHandler wsHandler = mock(WebSocketHandler.class);
 		AbstractSockJsSession session = new TestHttpSockJsSession("1", new StubSockJsServiceConfig(), wsHandler, null);
 
-		transportHandler.setSockJsServiceConfiguration(new StubSockJsServiceConfig());
+		transportHandler.initialize(new StubSockJsServiceConfig());
 		transportHandler.handleRequest(this.request, this.response, wsHandler, session);
 
 		assertEquals("text/plain;charset=UTF-8", this.response.getHeaders().getContentType().toString());

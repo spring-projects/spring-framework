@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.sockjs.support.frame;
+package org.springframework.web.socket.sockjs.frame;
 
 import java.io.IOException;
 import java.io.InputStream;
