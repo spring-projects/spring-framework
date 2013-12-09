@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,10 +77,8 @@ public interface Environment extends PropertyResolver {
 	 * activated by setting {@linkplain AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME
 	 * "spring.profiles.active"} as a system property or by calling
 	 * {@link ConfigurableEnvironment#setActiveProfiles(String...)}.
-	 *
 	 * <p>If no profiles have explicitly been specified as active, then any {@linkplain
 	 * #getDefaultProfiles() default profiles} will automatically be activated.
-	 *
 	 * @see #getDefaultProfiles
 	 * @see ConfigurableEnvironment#setActiveProfiles
 	 * @see AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME
@@ -90,7 +88,6 @@ public interface Environment extends PropertyResolver {
 	/**
 	 * Return the set of profiles to be active by default when no active profiles have
 	 * been set explicitly.
-	 *
 	 * @see #getActiveProfiles
 	 * @see ConfigurableEnvironment#setDefaultProfiles
 	 * @see AbstractEnvironment#DEFAULT_PROFILES_PROPERTY_NAME
@@ -101,11 +98,11 @@ public interface Environment extends PropertyResolver {
 	 * Return whether one or more of the given profiles is active or, in the case of no
 	 * explicit active profiles, whether one or more of the given profiles is included in
 	 * the set of default profiles. If a profile begins with '!' the logic is inverted,
-	 * i.e. the method will return true if the given profile is <em>not</em> active. For
-	 * example, <pre>env.acceptsProfiles("p1", "!p2")</pre> will return true if profile
-	 * 'p1' is active or 'p2' is not active.
+	 * i.e. the method will return true if the given profile is <em>not</em> active.
+	 * For example, <pre class="code">env.acceptsProfiles("p1", "!p2")</pre> will
+	 * return {@code true} if profile 'p1' is active or 'p2' is not active.
 	 * @throws IllegalArgumentException if called with zero arguments
-	 * @throws IllegalArgumentException if any profile is null, empty or whitespace-only
+	 * or if any profile is {@code null}, empty or whitespace-only
 	 * @see #getActiveProfiles
 	 * @see #getDefaultProfiles
 	 */

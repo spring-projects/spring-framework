@@ -301,9 +301,11 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		Assert.notEmpty(profiles, "Must specify at least one profile");
 		for (String profile : profiles) {
 			if (profile != null && profile.length() > 0 && profile.charAt(0) == '!') {
-				return !isProfileActive(profile.substring(1));
+				if (!isProfileActive(profile.substring(1))) {
+					return true;
+				}
 			}
-			if (isProfileActive(profile)) {
+			else if (isProfileActive(profile)) {
 				return true;
 			}
 		}
@@ -332,9 +334,12 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * @see #setDefaultProfiles
 	 */
 	protected void validateProfile(String profile) {
-		Assert.hasText(profile, "Invalid profile [" + profile + "]: must contain text");
-		Assert.isTrue(profile.charAt(0) != '!',
-				"Invalid profile [" + profile + "]: must not begin with the ! operator");
+		if (!StringUtils.hasText(profile)) {
+			throw new IllegalArgumentException("Invalid profile [" + profile + "]: must contain text");
+		}
+		if (profile.charAt(0) == '!') {
+			throw new IllegalArgumentException("Invalid profile [" + profile + "]: must not begin with ! operator");
+		}
 	}
 
 	public MutablePropertySources getPropertySources() {
