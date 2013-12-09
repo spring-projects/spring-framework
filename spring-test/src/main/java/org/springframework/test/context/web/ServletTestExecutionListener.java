@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.Conventions;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
@@ -58,6 +59,17 @@ import org.springframework.web.context.request.ServletWebRequest;
  * @since 3.2
  */
 public class ServletTestExecutionListener extends AbstractTestExecutionListener {
+
+	/**
+	 * Attribute name for a {@link TestContext} attribute which indicates
+	 * whether or not the {@code ServletTestExecutionListener} should {@linkplain
+	 * RequestContextHolder#resetRequestAttributes() reset} Spring Web's
+	 * {@code RequestContextHolder} in {@link #afterTestMethod(TestContext)}.
+	 *
+	 * <p>Permissible values include {@link Boolean#TRUE} and {@link Boolean#FALSE}.
+	 */
+	public static final String RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE = Conventions.getQualifiedAttributeName(
+		ServletTestExecutionListener.class, "resetRequestContextHolder");
 
 	private static final Log logger = LogFactory.getLog(ServletTestExecutionListener.class);
 
@@ -94,10 +106,13 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 	 * @see TestExecutionListener#afterTestMethod(TestContext)
 	 */
 	public void afterTestMethod(TestContext testContext) throws Exception {
-		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Resetting RequestContextHolder for test context %s.", testContext));
+		if (Boolean.TRUE.equals(testContext.getAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE))) {
+			if (logger.isDebugEnabled()) {
+				logger.debug(String.format("Resetting RequestContextHolder for test context %s.", testContext));
+			}
+			RequestContextHolder.resetRequestAttributes();
+			testContext.removeAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE);
 		}
-		RequestContextHolder.resetRequestAttributes();
 	}
 
 	private void setUpRequestContextIfNecessary(TestContext testContext) {
@@ -126,6 +141,7 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 				ServletWebRequest servletWebRequest = new ServletWebRequest(request, response);
 
 				RequestContextHolder.setRequestAttributes(servletWebRequest);
+				testContext.setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
 
 				if (wac instanceof ConfigurableApplicationContext) {
 					@SuppressWarnings("resource")
