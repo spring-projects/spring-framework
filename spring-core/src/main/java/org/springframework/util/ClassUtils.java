@@ -1144,6 +1144,39 @@ public abstract class ClassUtils {
 	}
 
 	/**
+	 * Determine the common ancestor of the given classes, if any.
+	 * @param clazz1 the class to introspect
+	 * @param clazz2 the other class to introspect
+	 * @return the common ancestor (i.e. common superclass, one interface
+	 * extending the other), or {@code null} if none found. If any of the
+	 * given classes is {@code null}, the other class will be returned.
+	 * @since 3.2.6
+	 */
+	public static Class<?> determineCommonAncestor(Class<?> clazz1, Class<?> clazz2) {
+		if (clazz1 == null) {
+			return clazz2;
+		}
+		if (clazz2 == null) {
+			return clazz1;
+		}
+		if (clazz1.isAssignableFrom(clazz2)) {
+			return clazz1;
+		}
+		if (clazz2.isAssignableFrom(clazz1)) {
+			return clazz2;
+		}
+		Class<?> ancestor = clazz1;
+		do {
+			ancestor = ancestor.getSuperclass();
+			if (ancestor == null || Object.class.equals(ancestor)) {
+				return null;
+			}
+		}
+		while (!ancestor.isAssignableFrom(clazz2));
+		return ancestor;
+	}
+
+	/**
 	 * Check whether the given class is visible in the given ClassLoader.
 	 * @param clazz the class to check (typically an interface)
 	 * @param classLoader the ClassLoader to check against (may be {@code null},

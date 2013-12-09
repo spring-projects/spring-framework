@@ -657,10 +657,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		// If all factory methods have the same return type, return that type.
 		// Can't clearly figure out exact method due to type converting / autowiring!
+		Class<?> commonType = null;
 		boolean cache = false;
 		int minNrOfArgs = mbd.getConstructorArgumentValues().getArgumentCount();
 		Method[] candidates = ReflectionUtils.getUniqueDeclaredMethods(factoryClass);
-		Set<Class<?>> returnTypes = new HashSet<Class<?>>(1);
 		for (Method factoryMethod : candidates) {
 			if (Modifier.isStatic(factoryMethod.getModifiers()) == isStatic &&
 					factoryMethod.getName().equals(mbd.getFactoryMethodName()) &&
@@ -694,7 +694,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 								factoryMethod, args, getBeanClassLoader());
 						if (returnType != null) {
 							cache = true;
-							returnTypes.add(returnType);
+							commonType = ClassUtils.determineCommonAncestor(returnType, commonType);
 						}
 					}
 					catch (Throwable ex) {
@@ -704,18 +704,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					}
 				}
 				else {
-					returnTypes.add(factoryMethod.getReturnType());
+					commonType = ClassUtils.determineCommonAncestor(factoryMethod.getReturnType(), commonType);
 				}
 			}
 		}
 
-		if (returnTypes.size() == 1) {
+		if (commonType != null) {
 			// Clear return type found: all factory methods return same type.
-			Class<?> result = returnTypes.iterator().next();
 			if (cache) {
-				mbd.resolvedFactoryMethodReturnType = result;
+				mbd.resolvedFactoryMethodReturnType = commonType;
 			}
-			return result;
+			return commonType;
 		}
 		else {
 			// Ambiguous return types found: return null to indicate "not determinable".
