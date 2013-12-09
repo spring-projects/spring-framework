@@ -27,7 +27,6 @@ import java.lang.reflect.Constructor;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
@@ -62,7 +61,6 @@ import com.thoughtworks.xstream.io.xml.XppDriver;
 import com.thoughtworks.xstream.mapper.CannotResolveClassException;
 import com.thoughtworks.xstream.mapper.Mapper;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -70,6 +68,7 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import org.xml.sax.ext.LexicalHandler;
+
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.oxm.MarshallingFailureException;
@@ -133,7 +132,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	private ConverterLookup converterLookup = new DefaultConverterLookup();
 
-	private ConverterRegistry converterRegistry;
+	private ConverterRegistry converterRegistry = (ConverterRegistry) this.converterLookup;
 
 	private ConverterMatcher[] converters;
 
@@ -211,6 +210,9 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 */
 	public void setConverterLookup(ConverterLookup converterLookup) {
 		this.converterLookup = converterLookup;
+		if (converterLookup instanceof ConverterRegistry) {
+			this.converterRegistry = (ConverterRegistry) converterLookup;
+		}
 	}
 
 	/**
@@ -378,7 +380,10 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 * standard constructors or creating a custom subclass.
 	 * @return the {@code XStream} instance
 	 */
+	@SuppressWarnings("deprecation")
 	protected XStream constructXStream() {
+		// The referenced XStream constructor has been deprecated as of 1.4.5.
+		// We're preserving this call for broader XStream 1.4.x compatibility.
 		return new XStream(this.reflectionProvider, this.streamDriver,
 				this.beanClassLoader, this.mapper, this.converterLookup, this.converterRegistry) {
 			@Override
