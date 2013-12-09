@@ -205,6 +205,23 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		this.contentNegotiationManager = contentNegotiationManager;
 	}
 
+	/**
+	 * Return the configured {@link ContentNegotiationManager}.
+	 */
+	public ContentNegotiationManager getContentNegotiationManager() {
+		return this.contentNegotiationManager;
+	}
+
+	/**
+	 * Return an unmodifiable Map with the {@link ControllerAdvice @ControllerAdvice}
+	 * beans discovered in the ApplicationContext. The returned map will be empty if
+	 * the method is invoked before the bean has been initialized via
+	 * {@link #afterPropertiesSet()}.
+	 */
+	public Map<ControllerAdviceBean, ExceptionHandlerMethodResolver> getExceptionHandlerAdviceCache() {
+		return Collections.unmodifiableMap(this.exceptionHandlerAdviceCache);
+	}
+
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
@@ -365,7 +382,8 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		}
 		for (Entry<ControllerAdviceBean, ExceptionHandlerMethodResolver> entry : this.exceptionHandlerAdviceCache.entrySet()) {
 			if(entry.getKey().isApplicableToBeanType(handlerType)) {
-				Method method = entry.getValue().resolveMethod(exception);
+				ExceptionHandlerMethodResolver resolver = entry.getValue();
+				Method method = resolver.resolveMethod(exception);
 				if (method != null) {
 					return new ServletInvocableHandlerMethod(entry.getKey().resolveBean(), method);
 				}

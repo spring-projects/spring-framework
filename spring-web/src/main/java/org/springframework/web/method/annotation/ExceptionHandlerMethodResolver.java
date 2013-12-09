@@ -114,7 +114,16 @@ public class ExceptionHandlerMethodResolver {
 	 * @return a method to handle the exception or {@code null}
 	 */
 	public Method resolveMethod(Exception exception) {
-		Class<? extends Exception> exceptionType = exception.getClass();
+		return resolveMethodByExceptionType(exception.getClass());
+	}
+
+	/**
+	 * Find a method to handle the given exception type. This can be useful if
+	 * an Exception instance is not available (example for tools).
+	 * @param exceptionType the exception type
+	 * @return a method to handle the exception or {@code null}
+	 */
+	public Method resolveMethodByExceptionType(Class<? extends Exception> exceptionType) {
 		Method method = this.exceptionLookupCache.get(exceptionType);
 		if (method == null) {
 			method = getMappedMethod(exceptionType);
