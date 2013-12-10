@@ -18,6 +18,7 @@ package org.springframework.test.context.web;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.springframework.context.ApplicationContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -47,6 +48,14 @@ public class ServletTestExecutionListenerTests {
 	private final TestContext testContext = mock(TestContext.class);
 	private final ServletTestExecutionListener listener = new ServletTestExecutionListener();
 
+
+	private void assertAttributesAvailable() {
+		assertNotNull("request attributes should be available", RequestContextHolder.getRequestAttributes());
+	}
+
+	private void assertAttributesNotAvailable() {
+		assertNull("request attributes should not be available", RequestContextHolder.getRequestAttributes());
+	}
 
 	private void assertAttributeExists() {
 		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
@@ -80,8 +89,12 @@ public class ServletTestExecutionListenerTests {
 	}
 
 	@Test
-	public void withStandardApplicationContext() throws Exception {
+	public void standardApplicationContext() throws Exception {
+		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(getClass());
 		when(testContext.getApplicationContext()).thenReturn(mock(ApplicationContext.class));
+
+		listener.beforeTestClass(testContext);
+		assertAttributeExists();
 
 		listener.prepareTestInstance(testContext);
 		assertAttributeExists();
@@ -94,40 +107,92 @@ public class ServletTestExecutionListenerTests {
 	}
 
 	@Test
-	public void withWebApplicationContextWithoutExistingRequestAttributes() throws Exception {
-		assertAttributeExists();
+	public void legacyWebTestCaseWithoutExistingRequestAttributes() throws Exception {
+		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(LegacyWebTestCase.class);
+
 		RequestContextHolder.resetRequestAttributes();
+		assertAttributesNotAvailable();
+
+		listener.beforeTestClass(testContext);
 
 		listener.prepareTestInstance(testContext);
+		assertAttributesNotAvailable();
+		verify(testContext, times(0)).setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
+		when(testContext.getAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE)).thenReturn(null);
+
+		listener.beforeTestMethod(testContext);
+		assertAttributesNotAvailable();
+		verify(testContext, times(0)).setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
+
+		listener.afterTestMethod(testContext);
+		verify(testContext, times(1)).removeAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE);
+		assertAttributesNotAvailable();
+	}
+
+	@Test
+	public void legacyWebTestCaseWithPresetRequestAttributes() throws Exception {
+		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(LegacyWebTestCase.class);
+
+		listener.beforeTestClass(testContext);
+		assertAttributeExists();
+
+		listener.prepareTestInstance(testContext);
+		assertAttributeExists();
+		verify(testContext, times(0)).setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
+		when(testContext.getAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE)).thenReturn(null);
+
+		listener.beforeTestMethod(testContext);
+		assertAttributeExists();
+		verify(testContext, times(0)).setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
+		when(testContext.getAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE)).thenReturn(null);
+
+		listener.afterTestMethod(testContext);
+		verify(testContext, times(1)).removeAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE);
+		assertAttributeExists();
+	}
+
+	@Test
+	public void atWebAppConfigTestCaseWithoutExistingRequestAttributes() throws Exception {
+		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(AtWebAppConfigWebTestCase.class);
+
+		RequestContextHolder.resetRequestAttributes();
+		listener.beforeTestClass(testContext);
+		assertAttributesNotAvailable();
+
+		assertWebAppConfigTestCase();
+	}
+
+	@Test
+	public void atWebAppConfigTestCaseWithPresetRequestAttributes() throws Exception {
+		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(AtWebAppConfigWebTestCase.class);
+
+		listener.beforeTestClass(testContext);
+		assertAttributesAvailable();
+
+		assertWebAppConfigTestCase();
+	}
+
+	private void assertWebAppConfigTestCase() throws Exception {
+		listener.prepareTestInstance(testContext);
 		assertAttributeDoesNotExist();
-		verify(testContext).setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
+		verify(testContext, times(1)).setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
 		when(testContext.getAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE)).thenReturn(Boolean.TRUE);
 
 		listener.beforeTestMethod(testContext);
 		assertAttributeDoesNotExist();
-		verify(testContext).setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
+		verify(testContext, times(2)).setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
 
 		listener.afterTestMethod(testContext);
 		verify(testContext).removeAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE);
-		assertNull("request attributes should have been cleared", RequestContextHolder.getRequestAttributes());
+		assertAttributesNotAvailable();
 	}
 
-	@Test
-	public void withWebApplicationContextWithPresetRequestAttributes() throws Exception {
-		assertAttributeExists();
 
-		listener.prepareTestInstance(testContext);
-		assertAttributeExists();
-		verify(testContext, times(0)).setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
-		when(testContext.getAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE)).thenReturn(null);
+	static class LegacyWebTestCase {
+	}
 
-		listener.beforeTestMethod(testContext);
-		assertAttributeExists();
-		verify(testContext, times(0)).setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
-		when(testContext.getAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE)).thenReturn(null);
-
-		listener.afterTestMethod(testContext);
-		verify(testContext, times(0)).removeAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE);
+	@WebAppConfiguration
+	static class AtWebAppConfigWebTestCase {
 	}
 
 }
