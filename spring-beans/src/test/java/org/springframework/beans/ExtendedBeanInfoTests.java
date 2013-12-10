@@ -323,10 +323,8 @@ public class ExtendedBeanInfoTests {
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
 
 		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
-
 		assertThat(hasReadMethodForProperty(ebi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(ebi, "foo"), is(false));
+		assertEquals(hasWriteMethodForProperty(bi, "foo"), hasWriteMethodForProperty(ebi, "foo"));
 	}
 
 	@Test
@@ -340,10 +338,8 @@ public class ExtendedBeanInfoTests {
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
 
 		assertThat(hasIndexedReadMethodForProperty(bi, "foos"), is(true));
-		assertThat(hasIndexedWriteMethodForProperty(bi, "foos"), is(false));
-
 		assertThat(hasIndexedReadMethodForProperty(ebi, "foos"), is(true));
-		assertThat(hasIndexedWriteMethodForProperty(ebi, "foos"), is(false));
+		assertEquals(hasIndexedWriteMethodForProperty(bi, "foos"), hasIndexedWriteMethodForProperty(ebi, "foos"));
 	}
 
 	/**
