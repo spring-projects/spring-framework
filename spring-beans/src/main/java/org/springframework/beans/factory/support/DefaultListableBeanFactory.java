@@ -567,15 +567,33 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	public boolean isAutowireCandidate(String beanName, DependencyDescriptor descriptor)
 			throws NoSuchBeanDefinitionException {
 
+		return isAutowireCandidate(beanName, descriptor, getAutowireCandidateResolver());
+	}
+
+	/**
+	 * Determine whether the specified bean definition qualifies as an autowire candidate,
+	 * to be injected into other beans which declare a dependency of matching type.
+	 * @param beanName the name of the bean definition to check
+	 * @param descriptor the descriptor of the dependency to resolve
+	 * @param resolver the AutowireCandidateResolver to use for the actual resolution algorithm
+	 * @return whether the bean should be considered as autowire candidate
+	 */
+	protected boolean isAutowireCandidate(String beanName, DependencyDescriptor descriptor, AutowireCandidateResolver resolver)
+			throws NoSuchBeanDefinitionException {
+
 		String beanDefinitionName = BeanFactoryUtils.transformedBeanName(beanName);
 		if (containsBeanDefinition(beanDefinitionName)) {
-			return isAutowireCandidate(beanName, getMergedLocalBeanDefinition(beanDefinitionName), descriptor);
+			return isAutowireCandidate(beanName, getMergedLocalBeanDefinition(beanDefinitionName), descriptor, resolver);
 		}
 		else if (containsSingleton(beanName)) {
-			return isAutowireCandidate(beanName, new RootBeanDefinition(getType(beanName)), descriptor);
+			return isAutowireCandidate(beanName, new RootBeanDefinition(getType(beanName)), descriptor, resolver);
+		}
+		else if (getParentBeanFactory() instanceof DefaultListableBeanFactory) {
+			// No bean definition found in this factory -> delegate to parent.
+			return ((DefaultListableBeanFactory) getParentBeanFactory()).isAutowireCandidate(beanName, descriptor, resolver);
 		}
 		else if (getParentBeanFactory() instanceof ConfigurableListableBeanFactory) {
-			// No bean definition found in this factory -> delegate to parent.
+			// If no DefaultListableBeanFactory, can't pass the resolver along.
 			return ((ConfigurableListableBeanFactory) getParentBeanFactory()).isAutowireCandidate(beanName, descriptor);
 		}
 		else {
@@ -589,9 +607,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * @param beanName the name of the bean definition to check
 	 * @param mbd the merged bean definition to check
 	 * @param descriptor the descriptor of the dependency to resolve
+	 * @param resolver the AutowireCandidateResolver to use for the actual resolution algorithm
 	 * @return whether the bean should be considered as autowire candidate
 	 */
-	protected boolean isAutowireCandidate(String beanName, RootBeanDefinition mbd, DependencyDescriptor descriptor) {
+	protected boolean isAutowireCandidate(String beanName, RootBeanDefinition mbd,
+			DependencyDescriptor descriptor, AutowireCandidateResolver resolver) {
+
 		String beanDefinitionName = BeanFactoryUtils.transformedBeanName(beanName);
 		resolveBeanClass(mbd, beanDefinitionName);
 		if (mbd.isFactoryMethodUnique) {
@@ -603,7 +624,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				new ConstructorResolver(this).resolveFactoryMethodIfPossible(mbd);
 			}
 		}
-		return getAutowireCandidateResolver().isAutowireCandidate(
+		return resolver.isAutowireCandidate(
 				new BeanDefinitionHolder(mbd, beanName, getAliases(beanDefinitionName)), descriptor);
 	}
 
