@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,11 +52,11 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @return the FactoryBean's object type,
 	 * or {@code null} if the type cannot be determined yet
 	 */
-	protected Class getTypeForFactoryBean(final FactoryBean factoryBean) {
+	protected Class<?> getTypeForFactoryBean(final FactoryBean<?> factoryBean) {
 		try {
 			if (System.getSecurityManager() != null) {
-				return AccessController.doPrivileged(new PrivilegedAction<Class>() {
-					public Class run() {
+				return AccessController.doPrivileged(new PrivilegedAction<Class<?>>() {
+					public Class<?> run() {
 						return factoryBean.getObjectType();
 					}
 				}, getAccessControlContext());
@@ -120,7 +120,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
 	private Object doGetObjectFromFactoryBean(
-			final FactoryBean factory, final String beanName, final boolean shouldPostProcess)
+			final FactoryBean<?> factory, final String beanName, final boolean shouldPostProcess)
 			throws BeanCreationException {
 
 		Object object;
@@ -190,12 +190,12 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @return the bean instance as FactoryBean
 	 * @throws BeansException if the given bean cannot be exposed as a FactoryBean
 	 */
-	protected FactoryBean getFactoryBean(String beanName, Object beanInstance) throws BeansException {
+	protected FactoryBean<?> getFactoryBean(String beanName, Object beanInstance) throws BeansException {
 		if (!(beanInstance instanceof FactoryBean)) {
 			throw new BeanCreationException(beanName,
 					"Bean instance of type [" + beanInstance.getClass() + "] is not a FactoryBean");
 		}
-		return (FactoryBean) beanInstance;
+		return (FactoryBean<?>) beanInstance;
 	}
 
 	/**
