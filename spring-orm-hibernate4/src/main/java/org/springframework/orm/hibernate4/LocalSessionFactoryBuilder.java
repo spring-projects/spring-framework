@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeSet;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
@@ -249,6 +250,8 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * @throws HibernateException if scanning fails for any reason
 	 */
 	public LocalSessionFactoryBuilder scanPackages(String... packagesToScan) throws HibernateException {
+		Set<String> classNames = new TreeSet<String>();
+		Set<String> packageNames = new TreeSet<String>();
 		try {
 			for (String pkg : packagesToScan) {
 				String pattern = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
@@ -260,22 +263,30 @@ public class LocalSessionFactoryBuilder extends Configuration {
 						MetadataReader reader = readerFactory.getMetadataReader(resource);
 						String className = reader.getClassMetadata().getClassName();
 						if (matchesEntityTypeFilter(reader, readerFactory)) {
-							addAnnotatedClass(this.resourcePatternResolver.getClassLoader().loadClass(className));
+							classNames.add(className);
 						}
 						else if (className.endsWith(PACKAGE_INFO_SUFFIX)) {
-							addPackage(className.substring(0, className.length() - PACKAGE_INFO_SUFFIX.length()));
+							packageNames.add(className.substring(0, className.length() - PACKAGE_INFO_SUFFIX.length()));
 						}
 					}
 				}
 			}
-			return this;
 		}
 		catch (IOException ex) {
 			throw new MappingException("Failed to scan classpath for unlisted classes", ex);
 		}
+		try {
+			for (String className : classNames) {
+				addAnnotatedClass(this.resourcePatternResolver.getClassLoader().loadClass(className));
+			}
+			for (String packageName : packageNames) {
+				addPackage(packageName);
+			}
+		}
 		catch (ClassNotFoundException ex) {
 			throw new MappingException("Failed to load annotated classes from classpath", ex);
 		}
+		return this;
 	}
 
 	/**
