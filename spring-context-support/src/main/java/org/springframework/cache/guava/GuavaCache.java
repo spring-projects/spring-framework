@@ -28,9 +28,8 @@ import org.springframework.util.Assert;
  *
  * <p>Requires Google Guava 12.0 or higher.
  *
- * @author Costin Leau
  * @author Juergen Hoeller
- * @since 3.1
+ * @since 4.0
  */
 public class GuavaCache implements Cache {
 
