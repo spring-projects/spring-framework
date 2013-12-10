@@ -21,29 +21,19 @@ import java.beans.IndexedPropertyDescriptor;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 
 import org.junit.Test;
 
 import org.springframework.core.JdkVersion;
 import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.util.ClassUtils;
-
-
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.lessThan;
-
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for {@link ExtendedBeanInfo}.
- *
  * @author Chris Beams
  * @since 3.1
  */
@@ -207,10 +197,6 @@ public class ExtendedBeanInfoTests {
 		}
 	}
 
-	interface Spr9453<T> {
-		T getProp();
-	}
-
 	@Test
 	public void cornerSpr9453() throws IntrospectionException {
 		final class Bean implements Spr9453<Class<?>> {
@@ -335,10 +321,8 @@ public class ExtendedBeanInfoTests {
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
 
 		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
-
 		assertThat(hasReadMethodForProperty(ebi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(ebi, "foo"), is(false));
+		assertEquals(hasWriteMethodForProperty(bi, "foo"), hasWriteMethodForProperty(ebi, "foo"));
 	}
 
 	@Test
@@ -352,10 +336,8 @@ public class ExtendedBeanInfoTests {
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
 
 		assertThat(hasIndexedReadMethodForProperty(bi, "foos"), is(true));
-		assertThat(hasIndexedWriteMethodForProperty(bi, "foos"), is(false));
-
 		assertThat(hasIndexedReadMethodForProperty(ebi, "foos"), is(true));
-		assertThat(hasIndexedWriteMethodForProperty(ebi, "foos"), is(false));
+		assertEquals(hasIndexedWriteMethodForProperty(bi, "foos"), hasIndexedWriteMethodForProperty(ebi, "foos"));
 	}
 
 	/**
@@ -595,7 +577,6 @@ public class ExtendedBeanInfoTests {
 		new ExtendedBeanInfo(Introspector.getBeanInfo(BigDecimal.class));
 	}
 
-
 	@Test
 	public void subclassWriteMethodWithCovariantReturnType() throws IntrospectionException {
 		@SuppressWarnings("unused") class B {
@@ -792,6 +773,7 @@ public class ExtendedBeanInfoTests {
 	@Test
 	public void propertyDescriptorComparator() throws IntrospectionException {
 		PropertyDescriptorComparator c = new PropertyDescriptorComparator();
+
 		assertThat(c.compare(new PropertyDescriptor("a", null, null), new PropertyDescriptor("a", null, null)), equalTo(0));
 		assertThat(c.compare(new PropertyDescriptor("abc", null, null), new PropertyDescriptor("abc", null, null)), equalTo(0));
 		assertThat(c.compare(new PropertyDescriptor("a", null, null), new PropertyDescriptor("b", null, null)), lessThan(0));
@@ -863,31 +845,6 @@ public class ExtendedBeanInfoTests {
 		new ExtendedBeanInfo(Introspector.getBeanInfo(LawLibrary.class));
 	}
 
-	interface Book { }
-
-	interface TextBook extends Book { }
-
-	interface LawBook extends TextBook { }
-
-	interface BookOperations {
-		Book getBook();
-		void setBook(Book book);
-	}
-
-	interface TextBookOperations extends BookOperations {
-		TextBook getBook();
-	}
-
-	abstract class Library {
-		public Book getBook() { return null; }
-		public void setBook(Book book) { }
-	}
-
-	class LawLibrary extends Library implements TextBookOperations {
-		public LawBook getBook() { return null; }
-	}
-
-
 	@Test
 	public void cornerSpr8949() throws IntrospectionException {
 		class A {
@@ -905,23 +862,10 @@ public class ExtendedBeanInfoTests {
 
 		BeanInfo bi = Introspector.getBeanInfo(B.class);
 
-		/* first, demonstrate the 'problem':
-		 * java.beans.Introspector returns the "wrong" declaring class for overridden read
-		 * methods, which in turn violates expectations in {@link ExtendedBeanInfo} regarding
-		 * method equality. Spring's {@link ClassUtils#getMostSpecificMethod(Method, Class)}
-		 * helps out here, and is now put into use in ExtendedBeanInfo as well
-		 */
-		for (PropertyDescriptor pd : bi.getPropertyDescriptors()) {
-			if ("targetMethod".equals(pd.getName())) {
-				Method readMethod = pd.getReadMethod();
-				assertTrue(readMethod.getDeclaringClass().equals(A.class)); // we expected B!
-
-				Method msReadMethod = ClassUtils.getMostSpecificMethod(readMethod, B.class);
-				assertTrue(msReadMethod.getDeclaringClass().equals(B.class)); // and now we get it.
-			}
-		}
-
-		// and now demonstrate that we've indeed fixed the problem
+		// java.beans.Introspector returns the "wrong" declaring class for overridden read
+		// methods, which in turn violates expectations in {@link ExtendedBeanInfo} regarding
+		// method equality. Spring's {@link ClassUtils#getMostSpecificMethod(Method, Class)}
+		// helps out here, and is now put into use in ExtendedBeanInfo as well.
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
 
 		assertThat(hasReadMethodForProperty(bi, "targetMethod"), is(true));
@@ -973,8 +917,56 @@ public class ExtendedBeanInfoTests {
 		}
 	}
 
+
+	interface Spr9453<T> {
+
+		T getProp();
+	}
+
+	interface Book {
+	}
+
+	interface TextBook extends Book {
+	}
+
+	interface LawBook extends TextBook {
+	}
+
+	interface BookOperations {
+
+		Book getBook();
+
+		void setBook(Book book);
+	}
+
+	interface TextBookOperations extends BookOperations {
+
+		@Override
+		TextBook getBook();
+	}
+
+	abstract class Library {
+
+		public Book getBook() {
+			return null;
+		}
+
+		public void setBook(Book book) {
+		}
+	}
+
+	class LawLibrary extends Library implements TextBookOperations {
+
+		@Override
+		public LawBook getBook() {
+			return null;
+		}
+	}
+
 	static class WithStaticWriteMethod {
+
 		public static void setProp1(String prop1) {
 		}
 	}
+
 }

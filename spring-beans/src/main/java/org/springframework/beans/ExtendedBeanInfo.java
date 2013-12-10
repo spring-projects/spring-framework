@@ -41,7 +41,7 @@ import static org.springframework.beans.PropertyDescriptorUtils.*;
  * Decorator for a standard {@link BeanInfo} object, e.g. as created by
  * {@link Introspector#getBeanInfo(Class)}, designed to discover and register static
  * and/or non-void returning setter methods. For example:
- * <pre>{@code
+ * <pre class="code">
  * public class Bean {
  *     private Foo foo;
  *
@@ -53,7 +53,7 @@ import static org.springframework.beans.PropertyDescriptorUtils.*;
  *         this.foo = foo;
  *         return this;
  *     }
- * }}</pre>
+ * }</pre>
  * The standard JavaBeans {@code Introspector} will discover the {@code getFoo} read
  * method, but will bypass the {@code #setFoo(Foo)} write method, because its non-void
  * returning signature does not comply with the JavaBeans specification.
@@ -206,31 +206,31 @@ class ExtendedBeanInfo implements BeanInfo {
 	}
 
 	public BeanInfo[] getAdditionalBeanInfo() {
-		return delegate.getAdditionalBeanInfo();
+		return this.delegate.getAdditionalBeanInfo();
 	}
 
 	public BeanDescriptor getBeanDescriptor() {
-		return delegate.getBeanDescriptor();
+		return this.delegate.getBeanDescriptor();
 	}
 
 	public int getDefaultEventIndex() {
-		return delegate.getDefaultEventIndex();
+		return this.delegate.getDefaultEventIndex();
 	}
 
 	public int getDefaultPropertyIndex() {
-		return delegate.getDefaultPropertyIndex();
+		return this.delegate.getDefaultPropertyIndex();
 	}
 
 	public EventSetDescriptor[] getEventSetDescriptors() {
-		return delegate.getEventSetDescriptors();
+		return this.delegate.getEventSetDescriptors();
 	}
 
 	public Image getIcon(int iconKind) {
-		return delegate.getIcon(iconKind);
+		return this.delegate.getIcon(iconKind);
 	}
 
 	public MethodDescriptor[] getMethodDescriptors() {
-		return delegate.getMethodDescriptors();
+		return this.delegate.getMethodDescriptors();
 	}
 }
 
@@ -284,7 +284,7 @@ class SimplePropertyDescriptor extends PropertyDescriptor {
 				this.propertyType = findPropertyType(this.readMethod, this.writeMethod);
 			}
 			catch (IntrospectionException ex) {
-				// ignore, as does PropertyDescriptor#getPropertyType
+				// Ignore, as does PropertyDescriptor#getPropertyType
 			}
 		}
 		return this.propertyType;
@@ -374,7 +374,7 @@ class SimpleIndexedPropertyDescriptor extends IndexedPropertyDescriptor {
 				this.propertyType = findPropertyType(this.readMethod, this.writeMethod);
 			}
 			catch (IntrospectionException ex) {
-				// ignore, as does IndexedPropertyDescriptor#getPropertyType
+				// Ignore, as does IndexedPropertyDescriptor#getPropertyType
 			}
 		}
 		return this.propertyType;
@@ -408,7 +408,7 @@ class SimpleIndexedPropertyDescriptor extends IndexedPropertyDescriptor {
 						getName(), getPropertyType(), this.indexedReadMethod, this.indexedWriteMethod);
 			}
 			catch (IntrospectionException ex) {
-				// ignore, as does IndexedPropertyDescriptor#getIndexedPropertyType
+				// Ignore, as does IndexedPropertyDescriptor#getIndexedPropertyType
 			}
 		}
 		return this.indexedPropertyType;
@@ -473,14 +473,14 @@ class PropertyDescriptorUtils {
 		target.setShortDescription(source.getShortDescription());
 		target.setDisplayName(source.getDisplayName());
 
-		// copy all attributes (emulating behavior of private FeatureDescriptor#addTable)
+		// Copy all attributes (emulating behavior of private FeatureDescriptor#addTable)
 		Enumeration<String> keys = source.attributeNames();
 		while (keys.hasMoreElements()) {
 			String key = keys.nextElement();
 			target.setValue(key, source.getValue(key));
 		}
 
-		// see java.beans.PropertyDescriptor#PropertyDescriptor(PropertyDescriptor)
+		// See java.beans.PropertyDescriptor#PropertyDescriptor(PropertyDescriptor)
 		target.setPropertyEditorClass(source.getPropertyEditorClass());
 		target.setBound(source.isBound());
 		target.setConstrained(source.isConstrained());
@@ -494,24 +494,34 @@ class PropertyDescriptorUtils {
 		if (readMethod != null) {
 			Class<?>[] params = readMethod.getParameterTypes();
 			if (params.length != 0) {
-				throw new IntrospectionException("bad read method arg count: " + readMethod);
+				throw new IntrospectionException("Bad read method arg count: " + readMethod);
 			}
 			propertyType = readMethod.getReturnType();
 			if (propertyType == Void.TYPE) {
-				throw new IntrospectionException("read method "
-						+ readMethod.getName() + " returns void");
+				throw new IntrospectionException("Read method returns void: " + readMethod);
 			}
 		}
 		if (writeMethod != null) {
 			Class<?> params[] = writeMethod.getParameterTypes();
 			if (params.length != 1) {
-				throw new IntrospectionException("bad write method arg count: " + writeMethod);
+				throw new IntrospectionException("Bad write method arg count: " + writeMethod);
 			}
-			if (propertyType != null
-					&& !params[0].isAssignableFrom(propertyType)) {
-				throw new IntrospectionException("type mismatch between read and write methods");
+			if (propertyType != null) {
+				if (propertyType.isAssignableFrom(params[0])) {
+					// Write method's property type potentially more specific
+					propertyType = params[0];
+				}
+				else if (params[0].isAssignableFrom(propertyType)) {
+					// Proceed with read method's property type
+				}
+				else {
+					throw new IntrospectionException(
+							"Type mismatch between read and write methods: " + readMethod + " - " + writeMethod);
+				}
 			}
-			propertyType = params[0];
+			else {
+				propertyType = params[0];
+			}
 		}
 		return propertyType;
 	}
@@ -523,44 +533,48 @@ class PropertyDescriptorUtils {
 			Method indexedReadMethod, Method indexedWriteMethod) throws IntrospectionException {
 
 		Class<?> indexedPropertyType = null;
-
 		if (indexedReadMethod != null) {
 			Class<?> params[] = indexedReadMethod.getParameterTypes();
 			if (params.length != 1) {
-				throw new IntrospectionException(
-						"bad indexed read method arg count");
+				throw new IntrospectionException("Bad indexed read method arg count: " + indexedReadMethod);
 			}
 			if (params[0] != Integer.TYPE) {
-				throw new IntrospectionException(
-						"non int index to indexed read method");
+				throw new IntrospectionException("Non int index to indexed read method: " + indexedReadMethod);
 			}
 			indexedPropertyType = indexedReadMethod.getReturnType();
 			if (indexedPropertyType == Void.TYPE) {
-				throw new IntrospectionException(
-						"indexed read method returns void");
+				throw new IntrospectionException("Indexed read method returns void: " + indexedReadMethod);
 			}
 		}
 		if (indexedWriteMethod != null) {
 			Class<?> params[] = indexedWriteMethod.getParameterTypes();
 			if (params.length != 2) {
-				throw new IntrospectionException(
-						"bad indexed write method arg count");
+				throw new IntrospectionException("Bad indexed write method arg count: " + indexedWriteMethod);
 			}
 			if (params[0] != Integer.TYPE) {
-				throw new IntrospectionException(
-						"non int index to indexed write method");
+				throw new IntrospectionException("Non int index to indexed write method: " + indexedWriteMethod);
 			}
-			if (indexedPropertyType != null && indexedPropertyType != params[1]) {
-				throw new IntrospectionException(
-						"type mismatch between indexed read and indexed write methods: " + name);
+			if (indexedPropertyType != null) {
+				if (indexedPropertyType.isAssignableFrom(params[1])) {
+					// Write method's property type potentially more specific
+					indexedPropertyType = params[1];
+				}
+				else if (params[1].isAssignableFrom(indexedPropertyType)) {
+					// Proceed with read method's property type
+				}
+				else {
+					throw new IntrospectionException("Type mismatch between indexed read and write methods: " +
+							indexedReadMethod + " - " + indexedWriteMethod);
+				}
 			}
-			indexedPropertyType = params[1];
+			else {
+				indexedPropertyType = params[1];
+			}
 		}
-		if (propertyType != null
-				&& (!propertyType.isArray() ||
-						propertyType.getComponentType() != indexedPropertyType)) {
-			throw new IntrospectionException(
-					"type mismatch between indexed and non-indexed methods: " + name);
+		if (propertyType != null && (!propertyType.isArray() ||
+				propertyType.getComponentType() != indexedPropertyType)) {
+			throw new IntrospectionException("Type mismatch between indexed and non-indexed methods: " +
+					indexedReadMethod + " - " + indexedWriteMethod);
 		}
 		return indexedPropertyType;
 	}
@@ -581,15 +595,12 @@ class PropertyDescriptorUtils {
 			if (!compareMethods(pd1.getReadMethod(), pd2.getReadMethod())) {
 				return false;
 			}
-
 			if (!compareMethods(pd1.getWriteMethod(), pd2.getWriteMethod())) {
 				return false;
 			}
-
-			if (pd1.getPropertyType() == pd2.getPropertyType()
-					&& pd1.getPropertyEditorClass() == pd2.getPropertyEditorClass()
-					&& pd1.isBound() == pd2.isBound()
-					&& pd1.isConstrained() == pd2.isConstrained()) {
+			if (pd1.getPropertyType() == pd2.getPropertyType() &&
+					pd1.getPropertyEditorClass() == pd2.getPropertyEditorClass() &&
+					pd1.isBound() == pd2.isBound() && pd1.isConstrained() == pd2.isConstrained()) {
 				return true;
 			}
 		}
@@ -603,7 +614,7 @@ class PropertyDescriptorUtils {
 		if ((a == null) != (b == null)) {
 			return false;
 		}
-		if (a != null && b != null) {
+		if (a != null) {
 			if (!a.equals(b)) {
 				return false;
 			}
