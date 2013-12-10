@@ -17,6 +17,10 @@
 package org.springframework.orm.hibernate3.annotation;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
@@ -169,6 +173,8 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	protected void scanPackages(Configuration config) {
 		if (this.packagesToScan != null) {
 			try {
+				List<Class<?>> classesToAdd = new ArrayList<Class<?>>();
+				List<String> packagesToAdd = new ArrayList<String>();
 				for (String pkg : this.packagesToScan) {
 					String pattern = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
 							ClassUtils.convertClassNameToResourcePath(pkg) + RESOURCE_PATTERN;
@@ -179,20 +185,58 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 							MetadataReader reader = readerFactory.getMetadataReader(resource);
 							String className = reader.getClassMetadata().getClassName();
 							if (matchesEntityTypeFilter(reader, readerFactory)) {
-								config.addAnnotatedClass(this.resourcePatternResolver.getClassLoader().loadClass(className));
+								classesToAdd.add(this.resourcePatternResolver.getClassLoader().loadClass(className));
 							}
 							else if (className.endsWith(PACKAGE_INFO_SUFFIX)) {
-								config.addPackage(className.substring(0, className.length() - PACKAGE_INFO_SUFFIX.length()));
+								packagesToAdd.add(className.substring(0, className.length() - PACKAGE_INFO_SUFFIX.length()));
 							}
 						}
 					}
 				}
+				sortAndAddClasses(config, classesToAdd);
+				sortAndAddPackages(config, packagesToAdd);
 			}
 			catch (IOException ex) {
 				throw new MappingException("Failed to scan classpath for unlisted classes", ex);
 			}
 			catch (ClassNotFoundException ex) {
 				throw new MappingException("Failed to load annotated classes from classpath", ex);
+			}
+		}
+	}
+
+	/**
+	 * Sort the scanned classes by fully qualified name before adding them to the
+	 * configuration.
+	 * <p>As scanning the packages does not find the classes in a specific or stable
+	 * order, they have to be sorted so different instances of the created Hibernate
+	 * {@link org.hibernate.SessionFactory} always have the entities added in the same
+	 * order, as the insertion index is used in the generated SQL queries.
+	 * See SPR-7742 for more details.
+	 */
+	private static void sortAndAddClasses(Configuration config, List<Class<?>> classesToAdd) {
+		if (!classesToAdd.isEmpty()) {
+			Collections.sort(classesToAdd, new Comparator<Class<?>>() {
+				@Override
+				public int compare(Class<?> o1, Class<?> o2) {
+					return o1.getName().compareTo(o2.getName());
+				}
+			});
+			for (Class<?> clazz : classesToAdd) {
+				config.addAnnotatedClass(clazz);
+			}
+		}
+	}
+
+	/**
+	 * Sort the packages by name before adding them to the configuration, for the same
+	 * reason as the classes.
+	 */
+	private static void sortAndAddPackages(Configuration config, List<String> packagesToAdd) {
+		if (!packagesToAdd.isEmpty()) {
+			Collections.sort(packagesToAdd);
+			for (String pkg : packagesToAdd) {
+				config.addPackage(pkg);
 			}
 		}
 	}
