@@ -256,10 +256,8 @@ class BeanDefinitionValueResolver {
 			mbd = this.beanFactory.getMergedBeanDefinition(innerBeanName, innerBd, this.beanDefinition);
 			// Check given bean name whether it is unique. If not already unique,
 			// add counter - increasing the counter until the name is unique.
-			String actualInnerBeanName = innerBeanName;
-			if (mbd.isSingleton()) {
-				actualInnerBeanName = adaptInnerBeanName(innerBeanName);
-			}
+			String actualInnerBeanName = adaptInnerBeanName(innerBeanName);
+			this.beanFactory.registerContainedBean(actualInnerBeanName, this.beanName);
 			// Guarantee initialization of beans that the inner bean depends on.
 			String[] dependsOn = mbd.getDependsOn();
 			if (dependsOn != null) {
@@ -269,7 +267,6 @@ class BeanDefinitionValueResolver {
 				}
 			}
 			Object innerBean = this.beanFactory.createBean(actualInnerBeanName, mbd, null);
-			this.beanFactory.registerContainedBean(actualInnerBeanName, this.beanName);
 			if (innerBean instanceof FactoryBean) {
 				boolean synthetic = mbd.isSynthetic();
 				return this.beanFactory.getObjectFromFactoryBean((FactoryBean) innerBean, actualInnerBeanName, !synthetic);
