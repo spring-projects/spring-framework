@@ -99,12 +99,33 @@
 {% endhighlight %}
 </script>
 
+
+
+{@ if (repository.url ) { @}
 {% capture gradle_template %}
 {% include build.gradle %}
+repositories {
+    maven {
+        url '{@= repository.url @}'
+    }
+}
 {% endcapture %}
+{@ } else {@}
+{% capture gradle_template %}
+{% include build.gradle %}
+repositories {
+    maven {
+        url 'http://repo.spring.io/libs-release'
+    }
+}
+{% endcapture %}
+{@ }@}
+
+
 
 {%if gradle_template contains 'not found in _includes directory' %}
 {% capture gradle_template %}
+
 dependencies {
     compile '{@= groupId @}:{@= artifactId @}:{@= version @}'
 }
@@ -119,11 +140,6 @@ dependencies {
 
 <script type="text/html" id="project-repository-gradle-widget-template">
 {% highlight groovy %}
-repositories {
-    maven {
-        url '{@= repository.url @}'
-    }
-}
 {% endhighlight %}
 </script>
 
