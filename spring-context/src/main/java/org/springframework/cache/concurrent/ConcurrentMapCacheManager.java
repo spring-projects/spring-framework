@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,15 @@ import org.springframework.cache.CacheManager;
  * the set of cache names is pre-defined through {@link #setCacheNames}, with no
  * dynamic creation of further cache regions at runtime.
  *
+ * <p>Note: This is by no means a sophisticated CacheManager; it comes with no
+ * cache configuration options. However, it may be useful for testing or simple
+ * caching scenarios. For advanced local caching needs, consider
+ * {@link org.springframework.cache.guava.GuavaCacheManager} or
+ * {@link org.springframework.cache.ehcache.EhCacheCacheManager}.
+ *
  * @author Juergen Hoeller
  * @since 3.1
+ * @see ConcurrentMapCache
  */
 public class ConcurrentMapCacheManager implements CacheManager {
 

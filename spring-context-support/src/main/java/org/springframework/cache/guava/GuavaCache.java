@@ -14,74 +14,55 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.concurrent;
+package org.springframework.cache.guava;
 
 import java.io.Serializable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.support.SimpleValueWrapper;
 import org.springframework.util.Assert;
 
 /**
- * Simple {@link Cache} implementation based on the core JDK
- * {@code java.util.concurrent} package.
+ * Spring {@link Cache} adapter implementation on top of a
+ * Guava {@link com.google.common.cache.Cache} instance.
  *
- * <p>Useful for testing or simple caching scenarios, typically in combination
- * with {@link org.springframework.cache.support.SimpleCacheManager} or
- * dynamically through {@link ConcurrentMapCacheManager}.
- *
- * <p><b>Note:</b> As {@link ConcurrentHashMap} (the default implementation used)
- * does not allow for {@code null} values to be stored, this class will replace
- * them with a predefined internal object. This behavior can be changed through the
- * {@link #ConcurrentMapCache(String, ConcurrentMap, boolean)} constructor.
+ * <p>Requires Google Guava 12.0 or higher.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
  * @since 3.1
  */
-public class ConcurrentMapCache implements Cache {
+public class GuavaCache implements Cache {
 
 	private static final Object NULL_HOLDER = new NullHolder();
 
 	private final String name;
 
-	private final ConcurrentMap<Object, Object> store;
+	private final com.google.common.cache.Cache<Object, Object> cache;
 
 	private final boolean allowNullValues;
 
 
 	/**
-	 * Create a new ConcurrentMapCache with the specified name.
+	 * Create a {@link GuavaCache} instance.
 	 * @param name the name of the cache
+	 * @param cache backing Guava Cache instance
 	 */
-	public ConcurrentMapCache(String name) {
-		this(name, new ConcurrentHashMap<Object, Object>(256), true);
+	public GuavaCache(String name, com.google.common.cache.Cache<Object, Object> cache) {
+		this(name, cache, true);
 	}
 
 	/**
-	 * Create a new ConcurrentMapCache with the specified name.
+	 * Create a {@link GuavaCache} instance.
 	 * @param name the name of the cache
+	 * @param cache backing Guava Cache instance
 	 * @param allowNullValues whether to accept and convert null values for this cache
 	 */
-	public ConcurrentMapCache(String name, boolean allowNullValues) {
-		this(name, new ConcurrentHashMap<Object, Object>(256), allowNullValues);
-	}
-
-	/**
-	 * Create a new ConcurrentMapCache with the specified name and the
-	 * given internal ConcurrentMap to use.
-	 * @param name the name of the cache
-	 * @param store the ConcurrentMap to use as an internal store
-	 * @param allowNullValues whether to allow {@code null} values
-	 * (adapting them to an internal null holder value)
-	 */
-	public ConcurrentMapCache(String name, ConcurrentMap<Object, Object> store, boolean allowNullValues) {
+	public GuavaCache(String name, com.google.common.cache.Cache<Object, Object> cache, boolean allowNullValues) {
 		Assert.notNull(name, "Name must not be null");
-		Assert.notNull(store, "Store must not be null");
+		Assert.notNull(cache, "Cache must not be null");
 		this.name = name;
-		this.store = store;
+		this.cache = cache;
 		this.allowNullValues = allowNullValues;
 	}
 
@@ -92,8 +73,8 @@ public class ConcurrentMapCache implements Cache {
 	}
 
 	@Override
-	public ConcurrentMap<Object, Object> getNativeCache() {
-		return this.store;
+	public com.google.common.cache.Cache<Object, Object> getNativeCache() {
+		return this.cache;
 	}
 
 	public boolean isAllowNullValues() {
@@ -102,14 +83,14 @@ public class ConcurrentMapCache implements Cache {
 
 	@Override
 	public ValueWrapper get(Object key) {
-		Object value = this.store.get(key);
+		Object value = this.cache.getIfPresent(key);
 		return (value != null ? new SimpleValueWrapper(fromStoreValue(value)) : null);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T get(Object key, Class<T> type) {
-		Object value = fromStoreValue(this.store.get(key));
+		Object value = fromStoreValue(this.cache.getIfPresent(key));
 		if (type != null && !type.isInstance(value)) {
 			throw new IllegalStateException("Cached value is not of required type [" + type.getName() + "]: " + value);
 		}
@@ -118,17 +99,17 @@ public class ConcurrentMapCache implements Cache {
 
 	@Override
 	public void put(Object key, Object value) {
-		this.store.put(key, toStoreValue(value));
+		this.cache.put(key, toStoreValue(value));
 	}
 
 	@Override
 	public void evict(Object key) {
-		this.store.remove(key);
+		this.cache.invalidate(key);
 	}
 
 	@Override
 	public void clear() {
-		this.store.clear();
+		this.cache.invalidateAll();
 	}
 
 

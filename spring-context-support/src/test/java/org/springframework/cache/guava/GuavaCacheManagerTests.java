@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.concurrent;
+package org.springframework.cache.guava;
 
 import org.junit.Test;
 
@@ -26,21 +26,21 @@ import static org.junit.Assert.*;
 /**
  * @author Juergen Hoeller
  */
-public class ConcurrentMapCacheManagerTests {
+public class GuavaCacheManagerTests {
 
 	@Test
 	public void testDynamicMode() {
-		CacheManager cm = new ConcurrentMapCacheManager();
+		CacheManager cm = new GuavaCacheManager();
 		Cache cache1 = cm.getCache("c1");
-		assertTrue(cache1 instanceof ConcurrentMapCache);
+		assertTrue(cache1 instanceof GuavaCache);
 		Cache cache1again = cm.getCache("c1");
 		assertSame(cache1again, cache1);
 		Cache cache2 = cm.getCache("c2");
-		assertTrue(cache2 instanceof ConcurrentMapCache);
+		assertTrue(cache2 instanceof GuavaCache);
 		Cache cache2again = cm.getCache("c2");
 		assertSame(cache2again, cache2);
 		Cache cache3 = cm.getCache("c3");
-		assertTrue(cache3 instanceof ConcurrentMapCache);
+		assertTrue(cache3 instanceof GuavaCache);
 		Cache cache3again = cm.getCache("c3");
 		assertSame(cache3again, cache3);
 
@@ -56,13 +56,13 @@ public class ConcurrentMapCacheManagerTests {
 
 	@Test
 	public void testStaticMode() {
-		CacheManager cm = new ConcurrentMapCacheManager("c1", "c2");
+		CacheManager cm = new GuavaCacheManager("c1", "c2");
 		Cache cache1 = cm.getCache("c1");
-		assertTrue(cache1 instanceof ConcurrentMapCache);
+		assertTrue(cache1 instanceof GuavaCache);
 		Cache cache1again = cm.getCache("c1");
 		assertSame(cache1again, cache1);
 		Cache cache2 = cm.getCache("c2");
-		assertTrue(cache2 instanceof ConcurrentMapCache);
+		assertTrue(cache2 instanceof GuavaCache);
 		Cache cache2again = cm.getCache("c2");
 		assertSame(cache2again, cache2);
 		Cache cache3 = cm.getCache("c3");
