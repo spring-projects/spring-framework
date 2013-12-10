@@ -52,6 +52,7 @@ public class BeanMethodQualificationTests {
 		assertFalse(ctx.getBeanFactory().containsSingleton("testBean1"));
 		StandardPojo pojo = ctx.getBean(StandardPojo.class);
 		assertThat(pojo.testBean.getName(), equalTo("interesting"));
+		assertThat(pojo.testBean2.getName(), equalTo("boring"));
 	}
 
 	@Test
@@ -61,6 +62,7 @@ public class BeanMethodQualificationTests {
 		assertFalse(ctx.getBeanFactory().containsSingleton("testBean1"));
 		StandardPojo pojo = ctx.getBean(StandardPojo.class);
 		assertThat(pojo.testBean.getName(), equalTo("interesting"));
+		assertThat(pojo.testBean2.getName(), equalTo("boring"));
 	}
 
 	@Test
@@ -70,6 +72,7 @@ public class BeanMethodQualificationTests {
 		assertTrue(ctx.getBeanFactory().containsSingleton("testBean1"));  // a shared scoped proxy
 		StandardPojo pojo = ctx.getBean(StandardPojo.class);
 		assertThat(pojo.testBean.getName(), equalTo("interesting"));
+		assertThat(pojo.testBean2.getName(), equalTo("boring"));
 	}
 
 	@Test
@@ -99,7 +102,7 @@ public class BeanMethodQualificationTests {
 			return new TestBean("interesting");
 		}
 
-		@Bean @Qualifier("boring")
+		@Bean @Boring
 		public TestBean testBean2() {
 			return new TestBean("boring");
 		}
@@ -113,7 +116,7 @@ public class BeanMethodQualificationTests {
 			return new TestBean("interesting");
 		}
 
-		@Bean @Qualifier("boring") @Scope("prototype")
+		@Bean @Boring @Scope("prototype")
 		public TestBean testBean2() {
 			return new TestBean("boring");
 		}
@@ -127,7 +130,7 @@ public class BeanMethodQualificationTests {
 			return new TestBean("interesting");
 		}
 
-		@Bean @Qualifier("boring") @Scope(value="prototype", proxyMode=ScopedProxyMode.TARGET_CLASS)
+		@Bean @Boring @Scope(value="prototype", proxyMode=ScopedProxyMode.TARGET_CLASS)
 		public TestBean testBean2() {
 			return new TestBean("boring");
 		}
@@ -137,6 +140,13 @@ public class BeanMethodQualificationTests {
 	static class StandardPojo {
 
 		@Autowired @Qualifier("interesting") TestBean testBean;
+
+		@Autowired @Boring TestBean testBean2;
+	}
+
+	@Qualifier
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface Boring {
 	}
 
 	@Configuration
