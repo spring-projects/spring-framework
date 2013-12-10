@@ -335,8 +335,7 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Adapts a {@code Map<K, List<V>>} to an {@code MultiValueMap<K,V>}.
-	 *
+	 * Adapt a {@code Map<K, List<V>>} to an {@code MultiValueMap<K,V>}.
 	 * @param map the map
 	 * @return the multi-value map
 	 */
@@ -346,8 +345,7 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Returns an unmodifiable view of the specified multi-value map.
-	 *
+	 * Return an unmodifiable view of the specified multi-value map.
 	 * @param  map the map for which an unmodifiable view is to be returned.
 	 * @return an unmodifiable view of the specified multi-value map.
 	 */
@@ -361,7 +359,6 @@ public abstract class CollectionUtils {
 		Map<K, List<V>> unmodifiableMap = Collections.unmodifiableMap(result);
 		return toMultiValueMap(unmodifiableMap);
 	}
-
 
 
 	/**

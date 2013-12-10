@@ -38,10 +38,10 @@ public class SimpleKeyGenerator implements KeyGenerator {
 
 	@Override
 	public Object generate(Object target, Method method, Object... params) {
-		if(params.length == 0) {
+		if (params.length == 0) {
 			return SimpleKey.EMPTY;
 		}
-		if(params.length == 1 && params[0] != null) {
+		if (params.length == 1 && params[0] != null) {
 			return params[0];
 		}
 		return new SimpleKey(params);

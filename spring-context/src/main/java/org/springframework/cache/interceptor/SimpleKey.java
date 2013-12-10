@@ -29,12 +29,10 @@ import org.springframework.util.StringUtils;
  * @since 4.0
  * @see SimpleKeyGenerator
  */
+@SuppressWarnings("serial")
 public final class SimpleKey implements Serializable {
 
-	private static final long serialVersionUID = 1;
-
-	public static final SimpleKey EMPTY = new SimpleKey(new Object[] {});
-
+	public static final SimpleKey EMPTY = new SimpleKey();
 
 	private final Object[] params;
 
@@ -43,7 +41,7 @@ public final class SimpleKey implements Serializable {
 	 * Create a new {@link SimpleKey} instance.
 	 * @param elements the elements of the key
 	 */
-	public SimpleKey(Object[] elements) {
+	public SimpleKey(Object... elements) {
 		Assert.notNull(elements, "Elements must not be null");
 		this.params = new Object[elements.length];
 		System.arraycopy(elements, 0, this.params, 0, elements.length);
@@ -52,22 +50,17 @@ public final class SimpleKey implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == this) {
-			return true;
-		}
-		if (obj != null && getClass() == obj.getClass()) {
-			return Arrays.equals(this.params, ((SimpleKey) obj).params);
-		}
-		return false;
+		return (this == obj || (obj instanceof SimpleKey && Arrays.equals(this.params, ((SimpleKey) obj).params)));
 	}
 
 	@Override
 	public int hashCode() {
-		return Arrays.hashCode(params);
+		return Arrays.hashCode(this.params);
 	}
 
 	@Override
 	public String toString() {
 		return "SimpleKey [" + StringUtils.arrayToCommaDelimitedString(this.params) + "]";
 	}
+
 }
