@@ -743,11 +743,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// Try to obtain the FactoryBean's object type without instantiating it at all.
 			BeanDefinition fbDef = getBeanDefinition(factoryBeanName);
 			if (fbDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) fbDef).hasBeanClass()) {
-				Class<?> fbClass = ((AbstractBeanDefinition) fbDef).getBeanClass();
-				if (ClassUtils.isCglibProxyClass(fbClass)) {
-					// CGLIB subclass methods hide generic parameters. look at the superclass.
-					fbClass = fbClass.getSuperclass();
-				}
+				// CGLIB subclass methods hide generic parameters; look at the original user class.
+				Class<?> fbClass = ClassUtils.getUserClass(((AbstractBeanDefinition) fbDef).getBeanClass());
 				// Find the given factory method, taking into account that in the case of
 				// @Bean methods, there may be parameters present.
 				ReflectionUtils.doWithMethods(fbClass,
@@ -820,12 +817,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @return the FactoryBean instance, or {@code null} to indicate
 	 * that we couldn't obtain a shortcut FactoryBean instance
 	 */
-	@SuppressWarnings("unchecked")
-	private FactoryBean<Object> getSingletonFactoryBeanForTypeCheck(String beanName, RootBeanDefinition mbd) {
+	private FactoryBean<?> getSingletonFactoryBeanForTypeCheck(String beanName, RootBeanDefinition mbd) {
 		synchronized (getSingletonMutex()) {
 			BeanWrapper bw = this.factoryBeanInstanceCache.get(beanName);
 			if (bw != null) {
-				return (FactoryBean<Object>) bw.getWrappedInstance();
+				return (FactoryBean<?>) bw.getWrappedInstance();
 			}
 			if (isSingletonCurrentlyInCreation(beanName)) {
 				return null;
@@ -845,7 +841,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				// Finished partial creation of this bean.
 				afterSingletonCreation(beanName);
 			}
-			FactoryBean<Object> fb = getFactoryBean(beanName, instance);
+			FactoryBean<?> fb = getFactoryBean(beanName, instance);
 			if (bw != null) {
 				this.factoryBeanInstanceCache.put(beanName, bw);
 			}
@@ -862,7 +858,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @return the FactoryBean instance, or {@code null} to indicate
 	 * that we couldn't obtain a shortcut FactoryBean instance
 	 */
-	private FactoryBean<Object> getNonSingletonFactoryBeanForTypeCheck(String beanName, RootBeanDefinition mbd) {
+	private FactoryBean<?> getNonSingletonFactoryBeanForTypeCheck(String beanName, RootBeanDefinition mbd) {
 		if (isPrototypeCurrentlyInCreation(beanName)) {
 			return null;
 		}

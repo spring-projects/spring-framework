@@ -417,7 +417,7 @@ public abstract class StatementCreatorUtils {
 	 * @see DisposableSqlTypeValue#cleanup()
 	 * @see org.springframework.jdbc.core.support.SqlLobValue#cleanup()
 	 */
-	public static void cleanupParameters(Object[] paramValues) {
+	public static void cleanupParameters(Object... paramValues) {
 		if (paramValues != null) {
 			cleanupParameters(Arrays.asList(paramValues));
 		}
