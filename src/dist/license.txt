@@ -265,15 +265,15 @@ components and modifications thereto, if any, (the "Source Files"), by
 downloading the Source Files from http://www.springsource.org/download, or by
 sending a request, with your name and address to:
 
-    VMware, Inc., 3401 Hillview Avenue
-    Palo Alto, CA 94304
+    Pivotal, Inc., 875 Howard St,
+    San Francisco, CA 94103
     United States of America
 
-or email info@vmware.com.  All such requests should clearly specify:
+or email info@gopivotal.com.  All such requests should clearly specify:
 
     OPEN SOURCE FILES REQUEST
     Attention General Counsel
 
-VMware shall mail a copy of the Source Files to you on a CD or equivalent
+Pivotal shall mail a copy of the Source Files to you on a CD or equivalent
 physical medium. This offer to obtain a copy of the Source Files is valid for
 three years from the date you acquired this Software product.
