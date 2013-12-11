@@ -61,12 +61,12 @@ abstract class MetaAnnotationUtils {
 			return new AnnotationDescriptor<T>(clazz, clazz.getAnnotation(annotationType));
 		}
 
-		// Declared on a stereotype annotation (i.e., as a meta-annotation)?
+		// Declared on a composed annotation (i.e., as a meta-annotation)?
 		if (!Annotation.class.isAssignableFrom(clazz)) {
-			for (Annotation stereotype : clazz.getAnnotations()) {
-				T annotation = stereotype.annotationType().getAnnotation(annotationType);
+			for (Annotation composedAnnotation : clazz.getAnnotations()) {
+				T annotation = composedAnnotation.annotationType().getAnnotation(annotationType);
 				if (annotation != null) {
-					return new AnnotationDescriptor<T>(clazz, stereotype, annotation);
+					return new AnnotationDescriptor<T>(clazz, composedAnnotation, annotation);
 				}
 			}
 		}
@@ -101,13 +101,13 @@ abstract class MetaAnnotationUtils {
 			}
 		}
 
-		// Declared on a stereotype annotation (i.e., as a meta-annotation)?
+		// Declared on a composed annotation (i.e., as a meta-annotation)?
 		if (!Annotation.class.isAssignableFrom(clazz)) {
-			for (Annotation stereotype : clazz.getAnnotations()) {
+			for (Annotation composedAnnotation : clazz.getAnnotations()) {
 				for (Class<? extends Annotation> annotationType : annotationTypes) {
-					Annotation annotation = stereotype.annotationType().getAnnotation(annotationType);
+					Annotation annotation = composedAnnotation.annotationType().getAnnotation(annotationType);
 					if (annotation != null) {
-						return new UntypedAnnotationDescriptor(clazz, stereotype, annotation);
+						return new UntypedAnnotationDescriptor(clazz, composedAnnotation, annotation);
 					}
 				}
 			}
@@ -125,9 +125,10 @@ abstract class MetaAnnotationUtils {
 	 *
 	 * <p>
 	 * If the annotation is used as a meta-annotation, the descriptor also includes
-	 * the {@linkplain #getStereotype() stereotype} on which the annotation is
-	 * present. In such cases, the <em>root declaring class</em> is not directly
-	 * annotated with the annotation but rather indirectly via the stereotype.
+	 * the {@linkplain #getComposedAnnotation() composed annotation} on which the
+	 * annotation is present. In such cases, the <em>root declaring class</em> is
+	 * not directly annotated with the annotation but rather indirectly via the
+	 * composed annotation.
 	 *
 	 * <p>
 	 * Given the following example, if we are searching for the {@code @Transactional}
@@ -135,10 +136,10 @@ abstract class MetaAnnotationUtils {
 	 * properties of the {@code AnnotationDescriptor} would be as follows.
 	 *
 	 * <ul>
-	 * <li>rootDeclaringClass: {@code TransactionalTests} class object</li>
-	 * <li>declaringClass: {@code TransactionalTests} class object</li>
-	 * <li>stereotype: {@code null}</li>
-	 * <li>annotation: instance of the {@code Transactional} annotation</li>
+	 *   <li>rootDeclaringClass: {@code TransactionalTests} class object</li>
+	 *   <li>declaringClass: {@code TransactionalTests} class object</li>
+	 *   <li>composedAnnotation: {@code null}</li>
+	 *   <li>annotation: instance of the {@code Transactional} annotation</li>
 	 * </ul>
 	 *
 	 * <pre style="code">
@@ -153,10 +154,10 @@ abstract class MetaAnnotationUtils {
 	 * properties of the {@code AnnotationDescriptor} would be as follows.
 	 *
 	 * <ul>
-	 * <li>rootDeclaringClass: {@code UserRepositoryTests} class object</li>
-	 * <li>declaringClass: {@code RepositoryTests} class object</li>
-	 * <li>stereotype: instance of the {@code RepositoryTests} annotation</li>
-	 * <li>annotation: instance of the {@code Transactional} annotation</li>
+	 *   <li>rootDeclaringClass: {@code UserRepositoryTests} class object</li>
+	 *   <li>declaringClass: {@code RepositoryTests} class object</li>
+	 *   <li>composedAnnotation: instance of the {@code RepositoryTests} annotation</li>
+	 *   <li>annotation: instance of the {@code Transactional} annotation</li>
 	 * </ul>
 	 *
 	 * <pre style="code">
@@ -176,7 +177,7 @@ abstract class MetaAnnotationUtils {
 
 		private final Class<?> rootDeclaringClass;
 		private final Class<?> declaringClass;
-		private final Annotation stereotype;
+		private final Annotation composedAnnotation;
 		private final T annotation;
 		private final AnnotationAttributes annotationAttributes;
 
@@ -185,13 +186,14 @@ abstract class MetaAnnotationUtils {
 			this(rootDeclaringClass, null, annotation);
 		}
 
-		public AnnotationDescriptor(Class<?> rootDeclaringClass, Annotation stereotype, T annotation) {
+		public AnnotationDescriptor(Class<?> rootDeclaringClass, Annotation composedAnnotation, T annotation) {
 			Assert.notNull(rootDeclaringClass, "rootDeclaringClass must not be null");
 			Assert.notNull(annotation, "annotation must not be null");
 
 			this.rootDeclaringClass = rootDeclaringClass;
-			this.declaringClass = (stereotype != null) ? stereotype.annotationType() : rootDeclaringClass;
-			this.stereotype = stereotype;
+			this.declaringClass = (composedAnnotation != null) ? composedAnnotation.annotationType()
+					: rootDeclaringClass;
+			this.composedAnnotation = composedAnnotation;
 			this.annotation = annotation;
 			this.annotationAttributes = AnnotatedElementUtils.getAnnotationAttributes(rootDeclaringClass,
 				annotation.annotationType().getName());
@@ -217,12 +219,12 @@ abstract class MetaAnnotationUtils {
 			return this.annotationAttributes;
 		}
 
-		public Annotation getStereotype() {
-			return this.stereotype;
+		public Annotation getComposedAnnotation() {
+			return this.composedAnnotation;
 		}
 
-		public Class<? extends Annotation> getStereotypeType() {
-			return this.stereotype == null ? null : this.stereotype.annotationType();
+		public Class<? extends Annotation> getComposedAnnotationType() {
+			return this.composedAnnotation == null ? null : this.composedAnnotation.annotationType();
 		}
 
 		/**
@@ -233,7 +235,7 @@ abstract class MetaAnnotationUtils {
 			return new ToStringCreator(this)//
 			.append("rootDeclaringClass", rootDeclaringClass)//
 			.append("declaringClass", declaringClass)//
-			.append("stereotype", stereotype)//
+			.append("composedAnnotation", composedAnnotation)//
 			.append("annotation", annotation)//
 			.toString();
 		}
@@ -245,8 +247,8 @@ abstract class MetaAnnotationUtils {
 			super(declaringClass, annotation);
 		}
 
-		public UntypedAnnotationDescriptor(Class<?> declaringClass, Annotation stereotype, Annotation annotation) {
-			super(declaringClass, stereotype, annotation);
+		public UntypedAnnotationDescriptor(Class<?> declaringClass, Annotation composedAnnotation, Annotation annotation) {
+			super(declaringClass, composedAnnotation, annotation);
 		}
 	}
 

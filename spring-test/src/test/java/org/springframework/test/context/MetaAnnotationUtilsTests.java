@@ -33,26 +33,26 @@ import static org.springframework.test.context.MetaAnnotationUtils.*;
 
 /**
  * Unit tests for {@link MetaAnnotationUtils}.
- * 
+ *
  * @author Sam Brannen
  * @since 4.0
  */
 public class MetaAnnotationUtilsTests {
 
 	private void assertComponentOnStereotype(Class<?> startClass, Class<?> declaringClass, String name,
-			Class<? extends Annotation> stereotypeType) {
+			Class<? extends Annotation> composedAnnotationType) {
 		AnnotationDescriptor<Component> descriptor = findAnnotationDescriptor(startClass, Component.class);
 		assertNotNull(descriptor);
 		assertEquals(declaringClass, descriptor.getRootDeclaringClass());
 		assertEquals(Component.class, descriptor.getAnnotationType());
 		assertEquals(name, descriptor.getAnnotation().value());
-		assertNotNull(descriptor.getStereotype());
-		assertEquals(stereotypeType, descriptor.getStereotypeType());
+		assertNotNull(descriptor.getComposedAnnotation());
+		assertEquals(composedAnnotationType, descriptor.getComposedAnnotationType());
 	}
 
 	@SuppressWarnings("unchecked")
 	private void assertComponentOnStereotypeForMultipleCandidateTypes(Class<?> startClass, Class<?> declaringClass,
-			String name, Class<? extends Annotation> stereotypeType) {
+			String name, Class<? extends Annotation> composedAnnotationType) {
 		Class<Component> annotationType = Component.class;
 		UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(startClass, Service.class,
 			annotationType, Order.class, Transactional.class);
@@ -60,8 +60,8 @@ public class MetaAnnotationUtilsTests {
 		assertEquals(declaringClass, descriptor.getRootDeclaringClass());
 		assertEquals(annotationType, descriptor.getAnnotationType());
 		assertEquals(name, ((Component) descriptor.getAnnotation()).value());
-		assertNotNull(descriptor.getStereotype());
-		assertEquals(stereotypeType, descriptor.getStereotypeType());
+		assertNotNull(descriptor.getComposedAnnotation());
+		assertEquals(composedAnnotationType, descriptor.getComposedAnnotationType());
 	}
 
 	@Test
@@ -118,8 +118,8 @@ public class MetaAnnotationUtilsTests {
 			annotationType);
 		assertEquals(HasLocalAndMetaComponentAnnotation.class, descriptor.getRootDeclaringClass());
 		assertEquals(annotationType, descriptor.getAnnotationType());
-		assertNull(descriptor.getStereotype());
-		assertNull(descriptor.getStereotypeType());
+		assertNull(descriptor.getComposedAnnotation());
+		assertNull(descriptor.getComposedAnnotationType());
 	}
 
 	@Test
@@ -158,7 +158,8 @@ public class MetaAnnotationUtilsTests {
 	@SuppressWarnings("unchecked")
 	public void findAnnotationDescriptorForTypesWithInheritedAnnotationOnClass() throws Exception {
 		// Note: @Transactional is inherited
-		assertEquals(InheritedAnnotationClass.class,
+		assertEquals(
+			InheritedAnnotationClass.class,
 			findAnnotationDescriptorForTypes(InheritedAnnotationClass.class, Transactional.class).getRootDeclaringClass());
 		assertEquals(
 			InheritedAnnotationClass.class,
@@ -190,7 +191,8 @@ public class MetaAnnotationUtilsTests {
 	@SuppressWarnings("unchecked")
 	public void findAnnotationDescriptorForTypesForNonInheritedAnnotationOnInterface() throws Exception {
 		// Note: @Order is not inherited.
-		assertEquals(NonInheritedAnnotationInterface.class,
+		assertEquals(
+			NonInheritedAnnotationInterface.class,
 			findAnnotationDescriptorForTypes(NonInheritedAnnotationInterface.class, Order.class).getRootDeclaringClass());
 		assertNull(findAnnotationDescriptorForTypes(SubNonInheritedAnnotationInterface.class, Order.class));
 	}
@@ -203,8 +205,8 @@ public class MetaAnnotationUtilsTests {
 			HasLocalAndMetaComponentAnnotation.class, Transactional.class, annotationType, Order.class);
 		assertEquals(HasLocalAndMetaComponentAnnotation.class, descriptor.getRootDeclaringClass());
 		assertEquals(annotationType, descriptor.getAnnotationType());
-		assertNull(descriptor.getStereotype());
-		assertNull(descriptor.getStereotypeType());
+		assertNull(descriptor.getComposedAnnotation());
+		assertNull(descriptor.getComposedAnnotationType());
 	}
 
 	@Test
@@ -228,8 +230,8 @@ public class MetaAnnotationUtilsTests {
 		assertArrayEquals(new Class[] {}, ((ContextConfiguration) descriptor.getAnnotation()).value());
 		assertArrayEquals(new Class[] { MetaConfig.DevConfig.class, MetaConfig.ProductionConfig.class },
 			descriptor.getAnnotationAttributes().getClassArray("classes"));
-		assertNotNull(descriptor.getStereotype());
-		assertEquals(MetaConfig.class, descriptor.getStereotypeType());
+		assertNotNull(descriptor.getComposedAnnotation());
+		assertEquals(MetaConfig.class, descriptor.getComposedAnnotationType());
 	}
 
 	@Test
@@ -247,8 +249,8 @@ public class MetaAnnotationUtilsTests {
 		assertArrayEquals(new Class[] {}, ((ContextConfiguration) descriptor.getAnnotation()).value());
 		assertArrayEquals(new Class[] { MetaAnnotationUtilsTests.class },
 			descriptor.getAnnotationAttributes().getClassArray("classes"));
-		assertNotNull(descriptor.getStereotype());
-		assertEquals(MetaConfig.class, descriptor.getStereotypeType());
+		assertNotNull(descriptor.getComposedAnnotation());
+		assertEquals(MetaConfig.class, descriptor.getComposedAnnotationType());
 	}
 
 	@Test

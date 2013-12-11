@@ -44,10 +44,10 @@ public class OverriddenMetaAnnotationAttributesTests {
 			ContextConfiguration.class);
 		assertNotNull(descriptor);
 		assertEquals(declaringClass, descriptor.getRootDeclaringClass());
-		assertEquals(MetaValueConfig.class, descriptor.getStereotypeType());
+		assertEquals(MetaValueConfig.class, descriptor.getComposedAnnotationType());
 		assertEquals(ContextConfiguration.class, descriptor.getAnnotationType());
-		assertNotNull(descriptor.getStereotype());
-		assertEquals(MetaValueConfig.class, descriptor.getStereotypeType());
+		assertNotNull(descriptor.getComposedAnnotation());
+		assertEquals(MetaValueConfig.class, descriptor.getComposedAnnotationType());
 
 		// direct access to annotation value:
 		assertArrayEquals(new String[] { "foo.xml" }, descriptor.getAnnotation().value());
@@ -60,10 +60,10 @@ public class OverriddenMetaAnnotationAttributesTests {
 			ContextConfiguration.class);
 		assertNotNull(descriptor);
 		assertEquals(declaringClass, descriptor.getRootDeclaringClass());
-		assertEquals(MetaValueConfig.class, descriptor.getStereotypeType());
+		assertEquals(MetaValueConfig.class, descriptor.getComposedAnnotationType());
 		assertEquals(ContextConfiguration.class, descriptor.getAnnotationType());
-		assertNotNull(descriptor.getStereotype());
-		assertEquals(MetaValueConfig.class, descriptor.getStereotypeType());
+		assertNotNull(descriptor.getComposedAnnotation());
+		assertEquals(MetaValueConfig.class, descriptor.getComposedAnnotationType());
 
 		// direct access to annotation value:
 		assertArrayEquals(new String[] { "foo.xml" }, descriptor.getAnnotation().value());
@@ -85,10 +85,10 @@ public class OverriddenMetaAnnotationAttributesTests {
 			ContextConfiguration.class);
 		assertNotNull(descriptor);
 		assertEquals(declaringClass, descriptor.getRootDeclaringClass());
-		assertEquals(MetaLocationsConfig.class, descriptor.getStereotypeType());
+		assertEquals(MetaLocationsConfig.class, descriptor.getComposedAnnotationType());
 		assertEquals(ContextConfiguration.class, descriptor.getAnnotationType());
-		assertNotNull(descriptor.getStereotype());
-		assertEquals(MetaLocationsConfig.class, descriptor.getStereotypeType());
+		assertNotNull(descriptor.getComposedAnnotation());
+		assertEquals(MetaLocationsConfig.class, descriptor.getComposedAnnotationType());
 
 		// direct access to annotation attributes:
 		assertArrayEquals(new String[] { "foo.xml" }, descriptor.getAnnotation().locations());
@@ -102,10 +102,10 @@ public class OverriddenMetaAnnotationAttributesTests {
 			ContextConfiguration.class);
 		assertNotNull(descriptor);
 		assertEquals(declaringClass, descriptor.getRootDeclaringClass());
-		assertEquals(MetaLocationsConfig.class, descriptor.getStereotypeType());
+		assertEquals(MetaLocationsConfig.class, descriptor.getComposedAnnotationType());
 		assertEquals(ContextConfiguration.class, descriptor.getAnnotationType());
-		assertNotNull(descriptor.getStereotype());
-		assertEquals(MetaLocationsConfig.class, descriptor.getStereotypeType());
+		assertNotNull(descriptor.getComposedAnnotation());
+		assertEquals(MetaLocationsConfig.class, descriptor.getComposedAnnotationType());
 
 		// direct access to annotation attributes:
 		assertArrayEquals(new String[] { "foo.xml" }, descriptor.getAnnotation().locations());
