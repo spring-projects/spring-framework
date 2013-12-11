@@ -119,7 +119,6 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected final Message<?> doReceive(MessageChannel channel) {
 
@@ -230,13 +229,14 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 		public boolean send(Message<?> message, long timeout) {
 
 			this.replyMessage = message;
+			boolean alreadyReceivedReply = this.hasReceived;
 			this.replyLatch.countDown();
 
 			String errorDescription = null;
 			if (this.hasTimedOut) {
 				errorDescription = "Reply message received but the receiving thread has exited due to a timeout";
 			}
-			else if (this.hasReceived) {
+			else if (alreadyReceivedReply) {
 				errorDescription = "Reply message received but the receiving thread has already received a reply";
 			}
 			else if (this.hasSendFailed) {
