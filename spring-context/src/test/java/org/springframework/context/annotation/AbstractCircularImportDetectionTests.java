@@ -13,21 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.context.annotation;
+
+import org.junit.Test;
+
+import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
+import org.springframework.tests.sample.beans.TestBean;
 
 import static org.junit.Assert.*;
 
-import org.junit.Test;
-import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ConfigurationClassParser;
-import org.springframework.context.annotation.Import;
-
-import org.springframework.tests.sample.beans.TestBean;
-
 /**
- * TCK-style unit tests for handling circular use of the {@link Import} annotation. Explore
- * subclass hierarchy for specific concrete implementations.
+ * TCK-style unit tests for handling circular use of the {@link Import} annotation.
+ * Explore the subclass hierarchy for specific concrete implementations.
  *
  * @author Chris Beams
  */
@@ -37,22 +35,22 @@ public abstract class AbstractCircularImportDetectionTests {
 
 	protected abstract String loadAsConfigurationSource(Class<?> clazz) throws Exception;
 
+
 	@Test
 	public void simpleCircularImportIsDetected() throws Exception {
 		boolean threw = false;
 		try {
 			newParser().parse(loadAsConfigurationSource(A.class), "A");
-		} catch (BeanDefinitionParsingException ex) {
+		}
+		catch (BeanDefinitionParsingException ex) {
 			assertTrue("Wrong message. Got: " + ex.getMessage(),
 					ex.getMessage().contains(
 						"Illegal attempt by @Configuration class 'AbstractCircularImportDetectionTests.B' " +
 						"to import class 'AbstractCircularImportDetectionTests.A'"));
 			threw = true;
 		}
-
 		assertTrue(threw);
 	}
-
 
 	@Test
 	public void complexCircularImportIsDetected() throws Exception {
@@ -67,9 +65,9 @@ public abstract class AbstractCircularImportDetectionTests {
 						"to import class 'AbstractCircularImportDetectionTests.Z'"));
 			threw = true;
 		}
-
 		assertTrue(threw);
 	}
+
 
 	@Configuration
 	@Import(B.class)
