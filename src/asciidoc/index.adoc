@@ -184,7 +184,7 @@ old Java objects)__.
 
 [[overview-web]]
 ==== Web
-The __Web__ layer consists of the Web, Web-Servlet, Web-Struts, and Web-Portlet modules.
+The __Web__ layer consists of the Web, Web-Servlet, WebSocket and Web-Portlet modules.
 
 Spring's __Web__ module provides basic web-oriented integration features such as
 multipart file-upload functionality and the initialization of the IoC container using
@@ -739,6 +739,7 @@ In such cases with WAS the easiest thing to do is to invert the class loader hie
 the container. That option isn't always open, but there are plenty of other suggestions
 in the public domain for alternative approaches, and your mileage may vary depending on
 the exact version and feature set of the container.
+
 
 
 
@@ -27543,20 +27544,25 @@ within Web services.
 = The Web
 [partintro]
 --
-This part of the reference documentation covers the Spring Framework's support for the
-presentation tier (and specifically web-based presentation tiers).
+This part of the reference documentation covers Spring Framework's support for the
+presentation tier (and specifically web-based presentation tiers) including support
+for WebSocket-style messaging in web applications.
 
-The Spring Framework's own web framework, <<mvc,Spring Web MVC>>, is covered in the
-first couple of chapters. Subsequent chapters are concerned with the Spring Framework's
+Spring Framework's own web framework, <<mvc,Spring Web MVC>>, is covered in the
+first couple of chapters. Subsequent chapters are concerned with Spring Framework's
 integration with other web technologies, such as <<struts,Struts>> <<jsf,JSF>> and
 others.
 
-Following that is coverage of Spring's MVC <<portlet,portlet framework>>.
+Following that is coverage of Spring Framework's MVC <<portlet,portlet framework>>.
+
+The section then concludes with comprehensive coverage of the Spring Framework
+<<websocket>> (including <<websocket-stomp>>).
 
 * <<mvc>>
 * <<view>>
 * <<web-integration>>
 * <<portlet>>
+* <<websocket>>
 --
 
 
@@ -36088,6 +36094,739 @@ Some older portals have been known to corrupt the definition of the
 
 
 
+
+
+[[websocket]]
+== WebSocket Support
+This part of the reference documentation covers Spring Framework's support for
+WebSocket-style messaging in web applications including use of STOMP as an
+application level WebSocket sub-protocol.
+
+<<websocket-intro>> establishes a frame of mind in which to think about
+WebSocket covering adoption challenges, design considerations, and thoughts on
+it is a good fit.
+
+<<websocket-server>> reviews the Spring WebSocket API on the
+server-side while <<websocket-fallback>> explains the SockJS protocol and shows
+how to configure and use it.
+
+<<websocket-stomp-overview>> introduces the STOMP messaging protocol.
+
+
+
+
+[[websocket-intro]]
+=== Introduction
+The WebSocket protocol http://tools.ietf.org/html/rfc6455[RFC 6455] defines an important
+new capability for web applications: full-duplex, two-way communication between client
+and server. It is an exciting new capability on the heels of a long history of
+techniques to make the web more interactive including Java applets, XMLHttpRequest,
+Adobe Flash, ActiveXObject, various Comet techniques, server-sent events, and others.
+
+A proper introduction of the WebSocket protocol is beyond the scope of this
+document. At a minimum however it's important to understand that HTTP is used only for
+the initial handshake, which relies on a mechanism built into HTTP to request
+a protocol upgrade (or in this case a protocol switch) to which the server can respond with
+HTTP status 101 (switching protocols) if it agrees. Assuming the handshake succeeds
+the TCP socket underlying the HTTP upgrade request remains open and both client and
+server can use it to send messages to each other.
+
+Spring Framework 4 includes a new `spring-websocket` module with comprehensive
+WebSocket support. It is compatible with the Java WebSocket API standard (JSR-356)
+and also provides additional value-add as explained in the rest of the introduction.
+
+
+
+[[websocket-into-fallback-options]]
+==== Fallback Options
+An important challenge to adoption is the lack of support for WebSocket in some
+browsers. Notably the first Internet Explorer version to support WebSocket is
+version 10 (see http://caniuse.com/websockets for support by browser versions).
+Furthermore some restrictive proxies
+may be configured in ways that either preclude the attempt to do HTTP upgrade
+or otherwise break connection after some time because it has remained opened
+for too long. For a good overview on this topic see
+http://www.infoq.com/articles/Web-Sockets-Proxy-Servers[this article].
+
+Therefore to build a WebSocket application today, fallback options are required
+to simulate the WebSocket API where necessary.
+Spring Framework provides such transparent fallback
+options based on the https://github.com/sockjs/sockjs-protocol[SockJS protocol].
+These options can be enabled through configuration and do not require
+modifying the application otherwise.
+
+
+
+[[websocket-intro-architecture]]
+==== Messaging Architecture
+Aside from short-to-midterm adoption challenges using WebSocket
+brings up important design considerations that are important to recognize
+early on especially in contrast to what we know about building web applications today.
+
+Today REST is a widely accepted, understood, and supported
+architecture for building web applications. It is an architecture that relies
+on having many URLs (nouns), a handful of HTTP methods (verbs), and
+other principles such as using hypermedia (links), remaining stateless, etc.
+
+By contrast a WebSocket application may use a single URL only for the
+initial HTTP handshake. All messages thereafter share and flow on the
+same TCP connection. This points to an entirely different, asynchronous,
+event-driven, messaging architecture. One that is much closer
+to traditional messaging applications (e.g. JMS, AMQP).
+
+Spring Framework 4 includes a new `spring-messaging` module with key
+abstractions from the
+http://projects.spring.io/spring-integration/[Spring Integration] project
+such as `Message`, `MessageChannel`, `MessageHandler` and others that can serve as
+a foundation for such a messaging architecture. The module also includes a
+set of annotations for mapping messages to methods similar to the Spring MVC
+annotation based programming model.
+
+
+
+[[websocket-intro-sub-protocol]]
+==== Sub-Protocol Support
+WebSocket does imply a messaging architecture but does not mandate the
+use of any specific messaging protocol. It is a very thin layer over TCP
+that transforms a stream of bytes into a stream of messages
+(either text or binary) and not much more. It is up to applications
+to interpret the meaning of a message.
+
+Unlike HTTP which is an application-level protocol, in the WebSocket protocol
+there is simply not enough information in an incoming message for a framework
+or container to know how to route it or process it. Therefore WebSocket is arguably
+too low level for anything but a very trivial application. It can be done but
+it will likely lead to creating a framework on top. This is comparable to how
+most web applications today are written using a web framework rather than the
+Servlet API alone.
+
+For this reason the WebSocket RFC defines the use of
+http://tools.ietf.org/html/rfc6455#section-1.9[sub-protocols].
+During the handshake client and server can use the header
+`Sec-WebSocket-Protocol` to agree on a sub-protocol, i.e. a higher, application-level
+protocol to use. The use of a sub-protocol is not required but
+even if not used, applications will still need to choose a message
+format that both client and server can understand. That format can be custom,
+framework-specific, or a standard messaging protocol.
+
+Spring Framework provides support for using
+http://stomp.github.io/stomp-specification-1.2.html#Abstract[STOMP] -- a simple, messaging protocol
+originally created for use in scripting languages with frames inspired
+by HTTP. STOMP is widely support and well suited for use over
+WebSocket and over the web.
+
+
+
+[[websocket-intro-when-to-use]]
+==== When To Use WebSocket?
+With all design considerations surrounding the use of WebSocket, it is
+reasonable to ask when is it appropriate to use?
+
+The best fit for WebSocket is in web applications where client and
+server need to exchange events at high frequency and at low latency. Prime
+candidates include but are not limited to applications in finance, games,
+collaboration, and others. Such applications are both very sensitive to time
+delays and also need to exchange a wide variety of messages at high
+frequency.
+
+For other application types however this may not be the case.
+For example a news or social feed that shows breaking news as they become
+available may be perfectly okay with simple polling once every few minutes.
+Here latency is important but it is not as crucial if the news takes a
+few minutes to appear.
+
+Even in cases where latency is crucial, if the volume of messages is
+relatively low (e.g. monitoring network failures) the use of
+http://spring.io/blog/2012/05/08/spring-mvc-3-2-preview-techniques-for-real-time-updates[long polling]
+should be considered as a relatively simple alternative that
+works reliably and is comparable by efficiency (again assuming the volume of
+messages is relatively low).
+
+It is the combination of both low latency and high frequency of messages that can make
+the use of the WebSocket protocol critical. Even in such applications
+the choice remains whether all client-server
+communication should be done through WebSocket messages as opposed to using
+HTTP and REST? The answer is going to vary by application, however it is likely
+that some functionality may be exposed over both WebSocket and as a REST API in
+order to provide clients with alternatives. Furthermore a REST API call may need
+to broadcast a message to interested clients connected via WebSocket.
+
+Spring Framework allows `@Controller` classes to have both
+HTTP request handling and WebSocket message handling methods.
+Furthermore, a Spring MVC request handling method, or any application
+method for that matter, can easily broadcast a message to all interested
+WebSocket clients or to a specific user.
+
+
+
+
+[[websocket-server]]
+=== WebSocket Server
+The Spring Framework provides a WebSocket API designed to adapt to various WebSocket engines.
+For example it runs on JSR-356 runtimes such as Tomcat (7.0.47+) and Glassfish (4.0+) but
+can also adapt to other WebSocket runtimes such as the Jetty (9.0+) native WebSocket support.
+
+[NOTE]
+====
+As explained in the <<websocket-intro-sub-protocol,introduction>> direct use of a
+WebSocket API is too low level for applications -- until assumptions are made about the
+format of a message there is little a framework can do to interpret messages or route
+them via annotations. This is why applications should consider using a sub-protocol
+and Spring's <<websocket-stomp,STOMP over WebSocket>> support.
+
+When using a higher level protocol, the details of the WebSocket API become less
+relevant much like the details of TCP communication are not exposed to applications
+when using HTTP. Nevertheless this section covers the details of using WebSocket
+directly.
+====
+
+
+
+[[websocket-server-handler]]
+==== Create and Configure a WebSocketHandler
+Creating a WebSocket server is as simple as implementing `WebSocketHandler` or more
+likely extending either `TextWebSocketHandler` or `BinaryWebSocketHandler`:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	import org.springframework.web.socket.WebSocketHandler;
+	import org.springframework.web.socket.WebSocketSession;
+	import org.springframework.web.socket.TextMessage;
+
+	public class MyHandler extends TextWebSocketHandler {
+
+		@Override
+		public void handleTextMessage(WebSocketSession session, TextMessage message) {
+			// ...
+		}
+
+	}
+----
+
+There is dedicated WebSocket Java-config and XML namespace support for mapping the above
+WebSocket handler at a specific URL:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	import org.springframework.web.socket.config.annotation.EnableWebSocket;
+	import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
+	import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+
+	@Configuration
+	@EnableWebSocket
+	public class WebSocketConfig implements WebSocketConfigurer {
+
+		@Override
+		public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+			registry.addHandler(myHandler(), "/myHandler");
+		}
+
+		@Bean
+		public WebSocketHandler myHandler() {
+			return new MyHandler();
+		}
+
+	}
+----
+
+XML configuration equivalent:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:websocket="http://www.springframework.org/schema/websocket"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/websocket
+			http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+
+		<websocket:handlers>
+			<websocket:mapping path="/myHandler" handler="myHandler"/>
+		</websocket:handlers>
+
+		<bean id="myHandler" class="org.springframework.samples.MyHandler"/>
+
+	</beans>
+----
+
+The above is for use in Spring MVC applications and should be included in the
+configuration of a <<mvc-serlvet,DispatcherServlet>>. However, Spring's WebSocket
+support does not depend on Spring MVC. It is relatively simple to integrate a `WebSocketHandler`
+into other HTTP serving environments with the help of
+https://github.com/spring-projects/spring-framework/blob/master/spring-websocket/src/main/java/org/springframework/web/socket/server/support/WebSocketHttpRequestHandler.java[WebSocketHttpRequestHandler].
+
+
+
+[[websocket-server-handshake]]
+==== Customizing the WebSocket Handshake
+The easiest way to customize the initial HTTP WebSocket handshake request is through
+a `HandshakeInterceptor`, which exposes before and after the handshake methods.
+Such an interceptor can be used to preclude the handshake or to make any attributes
+available to the `WebSocketSession`. For example there is a built-in interceptor
+for passing HTTP session attributes to the WebSocket session:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebSocket
+	public class WebSocketConfig implements WebSocketConfigurer {
+
+		@Override
+		public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+			registry.addHandler(new MyHandler(), "/myHandler")
+				.addInterceptors(new HttpSessionHandshakeInterceptor());
+		}
+
+	}
+----
+
+And the XML configuration equivalent:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:websocket="http://www.springframework.org/schema/websocket"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/websocket
+			http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+
+		<websocket:handlers>
+			<websocket:mapping path="/myHandler" handler="myHandler"/>
+			<websocket:handshake-interceptors>
+				<bean class="org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor"/>
+			</websocket:handshake-interceptors>
+		</websocket:handlers>
+
+		<bean id="myHandler" class="org.springframework.samples.MyHandler"/>
+
+	</beans>
+----
+
+A more advanced option is to extend the `DefaultHandshakeHandler` that performs
+the steps of the WebSocket handshake including  validating the client origin,
+negotiating a sub-protocol, and others. An application may also need to use this
+option if it needs to configure a custom `RequestUpgradeStrategy` in order to
+adapt to a WebSocket server engine and version that is not yet supported
+(also see <<websocket-server-deployment>> for more on this subject).
+Both the Java config and XML namespace make it possible to configure a custom
+`HandshakeHandler`.
+
+
+
+[[websocket-server-decorators]]
+==== WebSocketHandler Decoration
+Spring provides a `WebSocketHandlerDecorator` base class that can be used to decorate
+a `WebSocketHandler` with additional behavior. Logging and exception handling
+implementations are provided and added by default when using the WebSocket Java config
+or XML namespace. The `ExceptionWebSocketHandlerDecorator` catches all uncaught
+exceptions arising from any WebSocketHandler method and closes the WebSocket
+session with status `1011` that indicates a server error.
+
+
+
+[[websocket-server-deployment]]
+==== Deployment Considerations
+The Spring WebSocket API is easy to integrate into a Spring MVC application where
+the `DispatcherServlet` serves both HTTP WebSocket handshake as well as other
+HTTP requests. It is also easy to integrate into other HTTP processing scenarios
+by invoking `WebSocketHttpRequestHandler`. This is convenient and easy to
+understand. However special considerations apply with regards to JSR-356 runtimes.
+
+The Java WebSocket API (JSR-356) provides two deployment mechanisms. The first
+involves a Servlet container classpath scan (Servlet 3 feature) at startup and
+the other is a registration API to use at Servlet container initialization.
+Neither of these mechanism make it possible to use a single "front controller"
+for all HTTP processing -- including WebSocket handshake and all other HTTP
+requests -- such as Spring MVC's `DispatcherServlet`.
+
+This is a significant limitation of JSR-356 that Spring's WebSocket support
+addresses by providing a server-specific `RequestUpgradeStrategy` even when
+running in a JSR-356 runtime. At present such support is available on
+Tomcat 7.0.47+, Jetty 9.0+, and Glassfish 4.0+. Additional support will be
+added as more WebSocket runtimes become available.
+
+[NOTE]
+====
+A request to overcome the above limitation in the Java WebSocket API has been
+created and can be followed at
+https://java.net/jira/browse/WEBSOCKET_SPEC-211[WEBSOCKET_SPEC-211].
+Also note that Tomcat and Jetty already provide native API alternatives that
+makes it easy to overcome the limitation. We are hopeful that more servers
+will follow their example regardless of when it is addressed in the
+Java WebSocket API.
+====
+
+A secondary consideration is that Servlet containers with JSR-356 support
+are expected to perform an SCI scan that can slow down application startup
+in some cases dramatically. If a significant impact is observed after an
+upgrade to a Servlet container version with JSR-356 support, it should
+be possible to selectively enable or disable web fragments (and SCI scanning)
+through the use of an `<absolute-ordering />` element in web.xml:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+	<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="
+			http://java.sun.com/xml/ns/javaee
+			http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+		version="3.0">
+
+		<absolute-ordering/>
+
+	</web-app>
+----
+
+You can then selectively enable web fragments by name, such as Spring's own
+`SpringServletContainerInitializer` that provides support for the Servlet 3
+Java initialization API, if required:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+	<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="
+			http://java.sun.com/xml/ns/javaee
+			http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+		version="3.0">
+
+		<absolute-ordering>
+			<name>spring_web</name>
+		</absolute-ordering>
+
+	</web-app>
+----
+
+
+
+
+[[websocket-fallback]]
+=== Fallback Options
+As explained in the <<websocket-into-fallback-options,introduction>> WebSocket is not
+supported in all browsers yet or may be precluded by restrictive network proxies.
+This is why Spring provides fallback options that emulate the WebSocket API as close
+as possible based on the https://github.com/sockjs/sockjs-protocol[SockJS protocol].
+
+
+
+[[websocket-fallback-sockjs-enable]]
+==== Enable SockJS
+SockJS is easy to enable through a configuration:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebSocket
+	public class WebSocketConfig implements WebSocketConfigurer {
+
+		@Override
+		public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+			registry.addHandler(myHandler(), "/myHandler").withSockJS();
+		}
+
+		@Bean
+		public WebSocketHandler myHandler() {
+			return new MyHandler();
+		}
+
+	}
+----
+
+and the XML configuration equivalent:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:websocket="http://www.springframework.org/schema/websocket"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/websocket
+			http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+
+		<websocket:handlers>
+			<websocket:mapping path="/myHandler" handler="myHandler"/>
+			<websocket:sockjs/>
+		</websocket:handlers>
+
+		<bean id="myHandler" class="org.springframework.samples.MyHandler"/>
+
+	</beans>
+----
+
+The above is for use in Spring MVC applications and should be included in the
+configuration of a <<mvc-serlvet,DispatcherServlet>>. However, Spring's WebSocket
+and SockJS support does not depend on Spring MVC. It is relatively simple to
+integrate into other HTTP serving environments with the help of
+https://github.com/spring-projects/spring-framework/blob/master/spring-websocket/src/main/java/org/springframework/web/socket/sockjs/support/SockJsHttpRequestHandler.java[SockJsHttpRequestHandler].
+
+On the browser side, applications can use the
+https://github.com/sockjs/sockjs-client[sockjs-client] that emulates the W3C
+WebSocket API and communicates with the server to select the best
+transport option depending on the browser it's running in. Review the
+https://github.com/sockjs/sockjs-client[sockjs-client] page and the list of
+transport types supported by browser. The client also provides several
+configuration options, for example to specify which transports to include.
+
+
+
+[[websocket-fallback-sockjs-explained]]
+==== How SockJS Works
+An in-depth description of how SockJS works is beyond the scope of this document.
+This section summarizes a few key facts to aid with understanding.
+The SockJS protocol itself is defined in a
+https://github.com/sockjs/sockjs-protocol/blob/master/sockjs-protocol-0.3.3.py[test suite]
+with comments explaining the protocol. There is also an
+http://sockjs.github.io/sockjs-protocol/sockjs-protocol-0.3.3.html[HTML version of that test]
+showing comments on the right and code on the left.
+
+The SockJS client issues HTTP requests with this URL structure:
+
+.SockJS URL
+----
+http://host:port/{path-to-sockjs-endpoint}/{server-id}/{session-id}/{transport}
+----
+
+The WebSocket transport type uses a single HTTP connection to perform a
+WebSocket handshake and establish an actual WebSocket session. HTTP-based
+transports on the other hand must simulate the WebSocket API and at any time
+may use two HTTP connections -- one for server-to-client messages, via
+https://spring.io/blog/2012/05/08/spring-mvc-3-2-preview-techniques-for-real-time-updates[HTTP streaming or long polling],
+and another for sending client messages to the server via HTTP POST.
+
+The session id is useful with HTTP transports to associate individual HTTP
+requests that belong to the same SockJS session. The server id is not used in the
+protocol but is added to help in clustered environments.
+
+SockJS adds a minimal amount of message framing. For example the server can send
+an "open frame" (the letter +o+), a "heartbeat frame" (the letter +h+), or a
+"close frame" (the letter +c+) while the client sends messages as a JSON-encoded
+array prepended with the letter "a" (e.g. +a["message1","message2"]+).
+
+By default the server sends a heartbeat frame every 25 seconds to keep proxies
+and loadbalancers from timing out the connection.
+
+
+
+[[websocket-fallback-sockjs-spring]]
+==== Spring's SockJS Support
+In the Spring Framework, server-side support for the SockJS protocol is provided through a
+hierarchy of classes that implement the `SockJsService` interface while
+`SockJsHttpRequestHandler` integrates the service into HTTP request processing.
+
+To implement HTTP streaming and long polling both of which require an HTTP connection
+to remain open longer than usual, in Servlet containers Spring's SockJS support
+relies on Servlet 3 async support.
+
+[WARNING]
+====
+Servlet 3 async support does not expose a notification when a client disconnects,
+e.g. a browser tab is closed, page is refreshed, etc
+(see https://java.net/jira/browse/SERVLET_SPEC-44[SERVLET_SPEC-44]). However, the
+Serlvet container will usually raise an IOException on the next attempt to write
+to the response at which point the SockJS session will be closed. Since the
+SockJsService sends a heartbeat every 25 seconds, typically a disconnected
+client will be detected within that time period.
+====
+
+
+
+
+[[websocket-stomp]]
+=== STOMP Messaging
+The WebSocket protocol defines two main types of messages -- text and binary --
+but leaves their content undefined. Instead it's expected that client and
+server may agree on using a sub-protocol, i.e. a higher-level protocol that defines
+the message content. Using a sub-protocol is optional but either way client
+and server both need to understand how to interpret messages.
+
+
+
+[[websocket-stomp-overview]]
+==== STOMP Overview
+http://stomp.github.io/stomp-specification-1.2.html#Abstract[STOMP] is a simple
+messaging protocol originally created to connect to enterprise message brokers from
+scripting languages such as Ruby, Python and Perl. It is designed to address a
+subset of commonly used patterns in messaging protocols. STOMP can be used over
+any reliable 2-way streaming network protocol such as TCP and WebSocket.
+
+STOMP is a frame based protocol with frames modelled on HTTP. This is the
+structure of a frame:
+
+----
+COMMAND
+header1:value1
+header2:value2
+
+Body^@
+----
+
+For example a client can use the +SEND+ command to send a message or the
++SUBSCRIBE+ command to express interest in receiving messages. Both of these commands
+require a +"destination"+ header that indicates where to send a message to or likewise
+what to subscribe to.
+
+Here is an example of a client sending a request to buy stock shares:
+
+----
+SEND
+destination:/queue/trade
+content-type:application/json
+content-length:44
+
+{"action":"BUY","ticker":"MMM","shares",44}^@
+----
+
+Here is an example of a client subscribing to receive stock quotes:
+----
+SUBSCRIBE
+id:sub-1
+destination:/topic/price.stock.*
+
+^@
+----
+
+[NOTE]
+====
+The meaning of a destination is intentionally left opaque in the STOMP spec. It can
+be any string and it's entirely up to STOMP servers to define the semantics and
+the syntax of destinations they support. It is very common however for destinations
+to be path-like strings where "/topic/.." implies publish-subscribe (one-to-many)
+and "/queue/" to implies point-to-point (one-to-one) message exchanges.
+====
+
+STOMP servers can use the +MESSAGE+ command to broadcast messages to all subscribers.
+Here is an example of a server sending a stock quote to a subscribed client:
+
+----
+MESSAGE
+message-id:nxahklf6-1
+subscription:sub-1
+destination:/topic/price.stock.MMM
+
+{"ticker":"MMM","price":129.45}^@
+----
+
+[NOTE]
+====
+It's important to know that a server cannot send unsolicited messages.
+All messages from a server must be in response to a specific client subscription
+and the +"subscription-id"+ header of the server message must match
+the +"id"+ header of the client subscription.
+====
+
+The above overview is intended to provide the most basic understanding of the
+STOMP protocol. It is recommended to review the protocol
+http://stomp.github.io/stomp-specification-1.2.html[specification], which is
+easy to follow and manageable in terms of size.
+
+The following summarizes the benefits for an application from using STOMP over WebSocket:
+
+* Standard message format
+* Application-level protocol with support for common messaging patterns
+* Client-side support, e.g. https://github.com/jmesnil/stomp-websocket[stomp.js], https://github.com/cujojs/msgs[msgs.js]
+* The ability to interpret, route, and process messages on both client and server-side
+* The option to plug a message broker -- RabbitMQ, ActiveMQ, many others -- to broadcast messages (explained later)
+
+Most importantly the use of STOMP (vs plain WebSocket) enables the Spring Framework
+to provide a programming model for application-level use in the same way that
+Spring MVC provides a programming model based on HTTP.
+
+
+
+[[websocket-stomp-enable]]
+==== Enable STOMP over WebSocket
+The Spring Framework provides support for using STOMP over WebSocket through
+the +spring-messaging+ and +spring-websocket+ modules. It's easy to enable it.
+
+Here is an example of configuring a STOMP WebSocket endpoint with SockJS fallback
+options. The endpoint is available for clients to connect to at URL path "/portfolio":
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
+	import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
+
+	@Configuration
+	@EnableWebSocketMessageBroker
+	public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+		@Override
+		public void registerStompEndpoints(StompEndpointRegistry registry) {
+			registry.addEndpoint("/portfolio").withSockJS();
+		}
+
+		// ...
+
+	}
+----
+
+XML configuration equivalent:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:websocket="http://www.springframework.org/schema/websocket"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/websocket
+			http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+
+		<websocket:message-broker>
+			<websocket:stomp-endpoint path="/portfolio" />
+				<websocket:sockjs/>
+			</websocket:stomp-endpoint>
+			...
+		</websocket:message-broker>
+
+	</beans>
+----
+
+On the browser side, a client might connect as follows using
+https://github.com/jmesnil/stomp-websocket[stomp.js] and the
+https://github.com/sockjs/sockjs-client[sockjs-client]:
+
+[source,javascript,indent=0]
+[subs="verbatim,quotes"]
+----
+	var socket = new SockJS("/spring-websocket-portfolio/portfolio");
+	var stompClient = Stomp.over(socket);
+----
+
+Or if connecting via WebSocket (without SockJS):
+
+[source,javascript,indent=0]
+[subs="verbatim,quotes"]
+----
+	var socket = new WebSocket("/spring-websocket-portfolio/portfolio");
+	var stompClient = Stomp.over(socket);
+----
+
+
+
+[[websocket-stomp-handle]]
+==== Handling STOMP Messages
+When STOMP is enabled, the Spring application is effectively becomes a STOMP
+broker to connected clients.
 
 
 [[spring-integration]]
