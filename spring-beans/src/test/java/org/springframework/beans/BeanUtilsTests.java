@@ -16,8 +16,6 @@
 
 package org.springframework.beans;
 
-import static org.junit.Assert.*;
-
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
@@ -25,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.core.io.Resource;
@@ -33,6 +32,7 @@ import org.springframework.tests.sample.beans.DerivedTestBean;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link BeanUtils}.
@@ -79,8 +79,7 @@ public final class BeanUtilsTests {
 	@Test
 	public void testBeanPropertyIsArray() {
 		PropertyDescriptor[] descriptors = BeanUtils.getPropertyDescriptors(ContainerBean.class);
-		for (int i = 0; i < descriptors.length; i++) {
-			PropertyDescriptor descriptor = descriptors[i];
+		for (PropertyDescriptor descriptor : descriptors) {
 			if ("containedBeans".equals(descriptor.getName())) {
 				assertTrue("Property should be an array", descriptor.getPropertyType().isArray());
 				assertEquals(descriptor.getPropertyType().getComponentType(), ContainedBean.class);
@@ -171,7 +170,7 @@ public final class BeanUtilsTests {
 		assertTrue("Touchy empty", tb2.getTouchy() == null);
 
 		// "spouse", "touchy", "age" should not be copied
-		BeanUtils.copyProperties(tb, tb2, new String[]{"spouse", "touchy", "age"});
+		BeanUtils.copyProperties(tb, tb2, "spouse", "touchy", "age");
 		assertTrue("Name copied", tb2.getName() == null);
 		assertTrue("Age still empty", tb2.getAge() == 0);
 		assertTrue("Touchy still empty", tb2.getTouchy() == null);
@@ -182,7 +181,16 @@ public final class BeanUtilsTests {
 		NameAndSpecialProperty source = new NameAndSpecialProperty();
 		source.setName("name");
 		TestBean target = new TestBean();
-		BeanUtils.copyProperties(source, target, new String[]{"specialProperty"});
+		BeanUtils.copyProperties(source, target, "specialProperty");
+		assertEquals(target.getName(), "name");
+	}
+
+	@Test
+	public void testCopyPropertiesWithInvalidProperty() {
+		InvalidProperty source = new InvalidProperty();
+		source.setName("name");
+		InvalidProperty target = new InvalidProperty();
+		BeanUtils.copyProperties(source, target);
 		assertEquals(target.getName(), "name");
 	}
 
@@ -257,7 +265,8 @@ public final class BeanUtilsTests {
 		assertEquals(String.class, keyDescr.getPropertyType());
 		for (PropertyDescriptor propertyDescriptor : descrs) {
 			if (propertyDescriptor.getName().equals(keyDescr.getName())) {
-				assertEquals(propertyDescriptor.getName() + " has unexpected type", keyDescr.getPropertyType(), propertyDescriptor.getPropertyType());
+				assertEquals(propertyDescriptor.getName() + " has unexpected type",
+						keyDescr.getPropertyType(), propertyDescriptor.getPropertyType());
 			}
 		}
 	}
@@ -288,6 +297,31 @@ public final class BeanUtilsTests {
 
 		public int getSpecialProperty() {
 			return specialProperty;
+		}
+	}
+
+
+	@SuppressWarnings("unused")
+	private static class InvalidProperty {
+
+		private String name;
+
+		private String value;
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+
+		public void setValue(int value) {
+			this.value = Integer.toString(value);
+		}
+
+		public String getValue() {
+			return this.value;
 		}
 	}
 
@@ -347,6 +381,7 @@ public final class BeanUtilsTests {
 		}
 	}
 
+
 	private interface MapEntry<K, V> {
 
 		K getKey();
@@ -357,6 +392,7 @@ public final class BeanUtilsTests {
 
 		void setValue(V value);
 	}
+
 
 	private static class Bean implements MapEntry<String, String> {
 
