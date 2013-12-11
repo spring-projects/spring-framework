@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.annotation;
+package org.springframework.beans.factory.annotation;
 
 import static org.junit.Assert.*;
 
