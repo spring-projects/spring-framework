@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package org.springframework.cache.interceptor;
 
 import java.lang.reflect.Method;
 
-import org.springframework.cache.interceptor.KeyGenerator;
-
 /**
  * Default key generator. Returns {@value #NO_PARAM_KEY} if no
  * parameters are provided, the parameter itself if only one is given or
@@ -36,9 +34,10 @@ import org.springframework.cache.interceptor.KeyGenerator;
  * @author Costin Leau
  * @author Chris Beams
  * @since 3.1
- * @see SimpleKeyGenerator
- * @see org.springframework.cache.annotation.CachingConfigurer
+ * @deprecated as of Spring 4.0, in favor of {@link SimpleKeyGenerator}
+ * or custom {@link KeyGenerator} implementations based on hash codes
  */
+@Deprecated
 public class DefaultKeyGenerator implements KeyGenerator {
 
 	public static final int NO_PARAM_KEY = 0;
