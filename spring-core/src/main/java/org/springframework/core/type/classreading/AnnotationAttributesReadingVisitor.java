@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -28,6 +29,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.SpringAsmInfo;
 import org.springframework.asm.Type;
@@ -51,13 +53,11 @@ abstract class AbstractRecursiveAnnotationVisitor extends AnnotationVisitor {
 
 	protected final ClassLoader classLoader;
 
-
 	public AbstractRecursiveAnnotationVisitor(ClassLoader classLoader, AnnotationAttributes attributes) {
 		super(SpringAsmInfo.ASM_VERSION);
 		this.classLoader = classLoader;
 		this.attributes = attributes;
 	}
-
 
 	@Override
 	public void visit(String attributeName, Object attributeValue) {
@@ -114,13 +114,11 @@ final class RecursiveAnnotationArrayVisitor extends AbstractRecursiveAnnotationV
 
 	private final List<AnnotationAttributes> allNestedAttributes = new ArrayList<AnnotationAttributes>();
 
-
 	public RecursiveAnnotationArrayVisitor(
 			String attributeName, AnnotationAttributes attributes, ClassLoader classLoader) {
 		super(classLoader, attributes);
 		this.attributeName = attributeName;
 	}
-
 
 	@Override
 	public void visit(String attributeName, Object attributeValue) {
@@ -170,24 +168,21 @@ class RecursiveAnnotationAttributesVisitor extends AbstractRecursiveAnnotationVi
 
 	private final String annotationType;
 
-
 	public RecursiveAnnotationAttributesVisitor(
 			String annotationType, AnnotationAttributes attributes, ClassLoader classLoader) {
 		super(classLoader, attributes);
 		this.annotationType = annotationType;
 	}
 
-
 	@Override
 	public final void visitEnd() {
 		try {
 			Class<?> annotationClass = this.classLoader.loadClass(this.annotationType);
-			this.doVisitEnd(annotationClass);
+			doVisitEnd(annotationClass);
 		}
 		catch (ClassNotFoundException ex) {
-			this.logger.debug("Failed to classload type while reading annotation " +
-					"metadata. This is a non-fatal error, but certain annotation " +
-					"metadata may be unavailable.", ex);
+			this.logger.debug("Failed to class-load type while reading annotation metadata. " +
+					"This is a non-fatal error, but certain annotation metadata may be unavailable.", ex);
 		}
 	}
 
@@ -196,26 +191,30 @@ class RecursiveAnnotationAttributesVisitor extends AbstractRecursiveAnnotationVi
 	}
 
 	private void registerDefaultValues(Class<?> annotationClass) {
-		// Check declared default values of attributes in the annotation type.
-		Method[] annotationAttributes = annotationClass.getMethods();
-		for (Method annotationAttribute : annotationAttributes) {
-			String attributeName = annotationAttribute.getName();
-			Object defaultValue = annotationAttribute.getDefaultValue();
-			if (defaultValue != null && !this.attributes.containsKey(attributeName)) {
-				if (defaultValue instanceof Annotation) {
-					defaultValue = AnnotationAttributes.fromMap(
-							AnnotationUtils.getAnnotationAttributes((Annotation)defaultValue, false, true));
-				}
-				else if (defaultValue instanceof Annotation[]) {
-					Annotation[] realAnnotations = (Annotation[]) defaultValue;
-					AnnotationAttributes[] mappedAnnotations = new AnnotationAttributes[realAnnotations.length];
-					for (int i = 0; i < realAnnotations.length; i++) {
-						mappedAnnotations[i] = AnnotationAttributes.fromMap(
-								AnnotationUtils.getAnnotationAttributes(realAnnotations[i], false, true));
+		// Only do further scanning for public annotations; we'd run into IllegalAccessExceptions
+		// otherwise, and don't want to mess with accessibility in a SecurityManager environment.
+		if (Modifier.isPublic(annotationClass.getModifiers())) {
+			// Check declared default values of attributes in the annotation type.
+			Method[] annotationAttributes = annotationClass.getMethods();
+			for (Method annotationAttribute : annotationAttributes) {
+				String attributeName = annotationAttribute.getName();
+				Object defaultValue = annotationAttribute.getDefaultValue();
+				if (defaultValue != null && !this.attributes.containsKey(attributeName)) {
+					if (defaultValue instanceof Annotation) {
+						defaultValue = AnnotationAttributes.fromMap(
+								AnnotationUtils.getAnnotationAttributes((Annotation) defaultValue, false, true));
 					}
-					defaultValue = mappedAnnotations;
+					else if (defaultValue instanceof Annotation[]) {
+						Annotation[] realAnnotations = (Annotation[]) defaultValue;
+						AnnotationAttributes[] mappedAnnotations = new AnnotationAttributes[realAnnotations.length];
+						for (int i = 0; i < realAnnotations.length; i++) {
+							mappedAnnotations[i] = AnnotationAttributes.fromMap(
+									AnnotationUtils.getAnnotationAttributes(realAnnotations[i], false, true));
+						}
+						defaultValue = mappedAnnotations;
+					}
+					this.attributes.put(attributeName, defaultValue);
 				}
-				this.attributes.put(attributeName, defaultValue);
 			}
 		}
 	}
@@ -267,19 +266,23 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 		}
 		Set<String> metaAnnotationTypeNames = new LinkedHashSet<String>();
 		for (Annotation metaAnnotation : annotationClass.getAnnotations()) {
-			recusivelyCollectMetaAnnotations(metaAnnotationTypeNames, metaAnnotation);
+			recursivelyCollectMetaAnnotations(metaAnnotationTypeNames, metaAnnotation);
 		}
 		if (this.metaAnnotationMap != null) {
 			this.metaAnnotationMap.put(annotationClass.getName(), metaAnnotationTypeNames);
 		}
 	}
 
-	private void recusivelyCollectMetaAnnotations(Set<String> visited, Annotation annotation) {
+	private void recursivelyCollectMetaAnnotations(Set<String> visited, Annotation annotation) {
 		if (visited.add(annotation.annotationType().getName())) {
-			this.attributesMap.add(annotation.annotationType().getName(),
-					AnnotationUtils.getAnnotationAttributes(annotation, true, true));
-			for (Annotation metaMetaAnnotation : annotation.annotationType().getAnnotations()) {
-				recusivelyCollectMetaAnnotations(visited, metaMetaAnnotation);
+			// Only do further scanning for public annotations; we'd run into IllegalAccessExceptions
+			// otherwise, and don't want to mess with accessibility in a SecurityManager environment.
+			if (Modifier.isPublic(annotation.annotationType().getModifiers())) {
+				this.attributesMap.add(annotation.annotationType().getName(),
+						AnnotationUtils.getAnnotationAttributes(annotation, true, true));
+				for (Annotation metaMetaAnnotation : annotation.annotationType().getAnnotations()) {
+					recursivelyCollectMetaAnnotations(visited, metaMetaAnnotation);
+				}
 			}
 		}
 	}
