@@ -20,10 +20,10 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.AttributeAccessorSupport;
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.util.Assert;
 
@@ -126,7 +126,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 * Get the {@link Class test class} for this test context.
 	 * @return the test class (never {@code null})
 	 */
-	public final Class<?> getTestClass() {
+	public Class<?> getTestClass() {
 		return testClass;
 	}
 
@@ -136,7 +136,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 * @return the current test instance (may be {@code null})
 	 * @see #updateState(Object, Method, Throwable)
 	 */
-	public final Object getTestInstance() {
+	public Object getTestInstance() {
 		return testInstance;
 	}
 
@@ -146,7 +146,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 * @return the current test method (may be {@code null})
 	 * @see #updateState(Object, Method, Throwable)
 	 */
-	public final Method getTestMethod() {
+	public Method getTestMethod() {
 		return testMethod;
 	}
 
@@ -158,7 +158,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 * exception was thrown
 	 * @see #updateState(Object, Method, Throwable)
 	 */
-	public final Throwable getTestException() {
+	public Throwable getTestException() {
 		return testException;
 	}
 
