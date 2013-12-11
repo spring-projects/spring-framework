@@ -5,6 +5,16 @@
 
 
 
+[[migration-4.0]]
+== Migrating to Spring Framework 4.0
+Migration guides for upgrading from previous releases of the Spring Framework are now
+provided as a Wiki page. For details please refer to
+https://github.com/spring-projects/spring-framework/wiki/Migrating-from-earlier-versions-of-the-spring-framework
+
+
+
+
+
 [[classic-spring]]
 == Classic Spring Usage
 This appendix discusses some classic Spring usage patterns as a reference for developers

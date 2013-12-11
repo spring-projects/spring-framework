@@ -744,6 +744,185 @@ the exact version and feature set of the container.
 
 
 
+[[spring-whats-new]]
+= What's New in Spring Framework 4.x
+
+
+
+
+[[new-in-4.0]]
+== New Features and Enhancements in Spring Framework 4.0
+The Spring Framework was first released in 2004, since then there have been only a
+few major revisions: Spring 2.0 provided cleaner XML support and improved AOP; Spring 2.5
+embraced annotation-driven configuration; Spring 3.0 added Java 5 features, such as
+generics and java-based `@Configuration`.
+
+Version 4.0 is the latest major release of the Spring Framework and the first to fully
+support Java 8 features. You can still use Spring with older versions of Java, however,
+the minimum requirement has now been raised to Java SE 6. We have also taken the
+opportunity of a major release to remove many deprecated classes and methods from the
+previous version.
+
+A https://github.com/spring-projects/spring-framework/wiki/Migrating-from-earlier-versions-of-the-spring-framework[migration guide for upgrading to Spring 4.0]
+is available on the https://github.com/spring-projects/spring-framework/wiki[Spring Framework GitHub Wiki].
+
+
+
+=== Improved Getting Started Experience
+The new http://spring.io[spring.io] website provides a whole series of
+http://spring.io/guides["Getting Started"] guides to help you learn Spring. You
+can read more about the guides in the <<overview-getting-started-with-spring>> section
+in this document. The new website also provides a comprehensive overview of the many
+additional projects that are released under the Spring umbrella.
+
+If you are a Maven user you may also be interested in the helpful
+<<overview-maven-bom,bill of materials>> POM file that is now published with each Spring
+Framework release.
+
+
+
+
+=== Removed Deprecated Packages and Methods
+All deprecated packages, and many deprecated classes and methods have been removed with
+version 4.0. If you are upgrading from a previous release of Spring, you should ensure
+that you have fixed any deprecated calls that you were making.
+
+For a complete set of changes, check out the
+http://docs.spring.io/spring-framework/docs/3.2.4.RELEASE_to_4.0.0.RELEASE/[API
+Differences Report].
+
+
+
+
+=== Java 8
+Spring Framework 4.0 provides support for several Java 8 features. You can make use of
+__lambda expressions__ and __method references__ with Spring's callback interfaces. There
+is first class support for `java.time` (http://jcp.org/en/jsr/detail?id=310[JSR-310]) and
+several existing annotations have been retrofitted as `@Repeatable`. You can also use
+Java 8's parameter name discovery as an alternative to compiling your code with debug
+information enabled.
+
+Spring remains compatible with older versions of Java, 6.0 and above are fully
+supported.
+
+
+
+
+=== Java EE 6
+Java EE version 6 or above is now considered the baseline for Spring Framework 4.0. With
+the JPA 2.0 and Servlet 3.0 specifications being of particular relevance. In order to
+remain compatible with Google App Engine, it is possible to deploy a Spring application
+into a Servlet 2.5 environment, however, Servlet 3.0+ is recommended when at all possible.
+
+If you are a WebSphere 7 user, be sure install the JPA 2.0 feature pack.
+
+
+
+
+=== WebSocket, SockJS, and STOMP Messaging
+A new `spring-websocket` module provides comprehensive support for WebSocket-based,
+two-way communication between client and server in web applications. It is compatible with
+http://jcp.org/en/jsr/detail?id=356[JSR-356], the Java WebSocket API, and in addition
+provides SockJS-based fallback options (i.e. WebSocket emulation) for use in browsers
+that don't yet support the WebSocket protocol (e.g. IE < 10).
+
+A new `spring-messaging` module adds support for STOMP as the WebSocket sub-protocol
+to use in applications along with an annotation programming model for routing and
+processing STOMP messages from WebSocket clients. As a result an `@Controller`
+can now contain both `@RequestMapping` and `@MessageMapping` methods for handling
+HTTP requests and messages from WebSocket-connected clients. The new `spring-messaging`
+module also contains key abstractions from the
+http://projects.spring.io/spring-integration/[Spring Integration] project such as
+`Message`, `MessageChannel`, `MessageHandler` and others to serve as
+a foundation for messaging applications.
+
+For more details including a more thorough introduction see the <<websocket>> section.
+
+
+
+
+=== Core Container Improvements
+There have been several general improvements to the core IoC container:
+
+* Spring now treats <<beans-generics-as-qualifiers,__generic types__ as a form of
+  __qualifier__>> when injecting Beans. For example, if you are using a Spring Data
+  `Repository` you can now easily inject a specific implementation:
+  `@Autowired Repository<Customer> customerRepository`.
+* If you use Spring's meta-annotation support, you can now develop custom annotations that
+  <<beans-meta-annotations,expose specific attributes from the source annotation>>.
+* Beans can now be `Ordered` when they are <<beans-autowired-annotation,autowired into
+  lists and arrays>>. Both the `@Ordered` annotation and `Ordered` interface are
+  supported.
+* A generalized model for <<beans-java-conditional,conditionally filtering beans>> has
+  been added via the `@Conditional` annotation. This is similar to `@Profile` but allow
+  user-defined strategies to be developed.
+* <<aop-pfb-proxy-types,CGLIB-based proxy classes>> no longer require a default
+  constructor. Support is provided via the http://code.google.com/p/objenesis/[objenesis]
+  library which is repackaged __inline__ and distributed as part of the Spring Framework.
+* The `@Lazy` annotation can now be used on injection points, as well as `@Bean`
+  definitions.
+* The <<beans-java-bean-description,`@Description` annotation has been added>> for
+  developers using Java-based configuration.
+* It is now possible to specify a time zone with the `@Scheduled` annotation.
+
+
+
+
+=== Web Improvements
+Deployment to Servlet 2.5 servers remains an option, but Spring Framework 4.0 is now
+focused primarily on Servlet 3.0+ environments. If you are using the
+<<spring-mvc-test-framework,Spring MVC Test Framework>> you
+will need to ensure that a Servlet 3.0 compatible JAR is in your __test classpath__.
+
+In addition to the WebSocket support mentioned earlier, the following general improvements
+have been made to Spring's Web modules:
+
+* You can use <<mvc-ann-restcontroller,the new `@RestController` annotation>> with Spring
+  MVC applications, removing the need to add `@ResponseBody` to each of your
+  `@RequestMapping` methods.
+* The `AsyncRestTemplate` class has been added, <<rest-async-resttemplate,allowing
+  non-blocking asynchronous support>> when developing REST clients.
+* Spring now offers <<mvc-timezone,comprehensive timezone support>> when developing
+  Spring MVC applications.
+
+
+=== Groovy DSL Support
+With Spring Framework 4.0 it is now possible to define external bean configuration using
+a Groovy DSL. This is similar in concept to using XML bean definitions, but allows for
+a much more concise syntax. Using Groovy also allows you to easily embed bean definitions
+directly in your code. For example:
+
+[source,groovy,indent=0]
+[subs="verbatim,quotes"]
+----
+	def reader = new GroovyBeanDefinitionReader(myApplicationContext)
+	reader.beans {
+		dataSource(BasicDataSource) {
+			driverClassName = "org.hsqldb.jdbcDriver"
+			url = "jdbc:hsqldb:mem:grailsDB"
+			username = "sa"
+			password = ""
+			settings = [mynew:"setting"]
+		}
+		sessionFactory(SessionFactory) {
+			dataSource = dataSource
+		}
+		myService(MyService) {
+			nestedBean = { AnotherBean bean ->
+				dataSource = dataSource
+			}
+		}
+	}
+----
+
+For more information consult the `GroovyBeanDefinitionReader`
+{javadoc-baseurl}/org/springframework/beans/factory/groovy/GroovyBeanDefinitionReader.html[Javadoc].
+
+
+
+
+
+
 
 [[spring-core]]
 = Core Technologies
