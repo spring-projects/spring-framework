@@ -57,7 +57,7 @@ public abstract class BeanUtils {
 
 	private static final Log logger = LogFactory.getLog(BeanUtils.class);
 
-	// using WeakHashMap as a Set
+	// Effectively using a WeakHashMap as a Set
 	private static final Map<Class<?>, Boolean> unknownEditorTypes =
 			Collections.synchronizedMap(new WeakHashMap<Class<?>, Boolean>());
 
@@ -127,7 +127,7 @@ public abstract class BeanUtils {
 	@SuppressWarnings("unchecked")
 	public static <T> T instantiateClass(Class<?> clazz, Class<T> assignableTo) throws BeanInstantiationException {
 		Assert.isAssignable(assignableTo, clazz);
-		return (T)instantiateClass(clazz);
+		return (T) instantiateClass(clazz);
 	}
 
 	/**
@@ -281,7 +281,7 @@ public abstract class BeanUtils {
 				}
 				else {
 					if (targetMethod.getParameterTypes().length == numParams) {
-						// Additional candidate with same length.
+						// Additional candidate with same length
 						numMethodsFoundWithCurrentMinimumArgs++;
 					}
 				}
@@ -317,10 +317,8 @@ public abstract class BeanUtils {
 	public static Method resolveSignature(String signature, Class<?> clazz) {
 		Assert.hasText(signature, "'signature' must not be empty");
 		Assert.notNull(clazz, "Class must not be null");
-
 		int firstParen = signature.indexOf("(");
 		int lastParen = signature.indexOf(")");
-
 		if (firstParen > -1 && lastParen == -1) {
 			throw new IllegalArgumentException("Invalid method signature '" + signature +
 					"': expected closing ')' for args list");
@@ -475,8 +473,7 @@ public abstract class BeanUtils {
 	 */
 	public static MethodParameter getWriteMethodParameter(PropertyDescriptor pd) {
 		if (pd instanceof GenericTypeAwarePropertyDescriptor) {
-			return new MethodParameter(
-					((GenericTypeAwarePropertyDescriptor) pd).getWriteMethodParameter());
+			return new MethodParameter(((GenericTypeAwarePropertyDescriptor) pd).getWriteMethodParameter());
 		}
 		else {
 			return new MethodParameter(pd.getWriteMethod(), 0);
@@ -545,9 +542,7 @@ public abstract class BeanUtils {
 	 * @throws BeansException if the copying failed
 	 * @see BeanWrapper
 	 */
-	public static void copyProperties(Object source, Object target, Class<?> editable)
-			throws BeansException {
-
+	public static void copyProperties(Object source, Object target, Class<?> editable) throws BeansException {
 		copyProperties(source, target, editable, (String[]) null);
 	}
 
@@ -565,9 +560,7 @@ public abstract class BeanUtils {
 	 * @throws BeansException if the copying failed
 	 * @see BeanWrapper
 	 */
-	public static void copyProperties(Object source, Object target, String... ignoreProperties)
-			throws BeansException {
-
+	public static void copyProperties(Object source, Object target, String... ignoreProperties) throws BeansException {
 		copyProperties(source, target, null, ignoreProperties);
 	}
 
