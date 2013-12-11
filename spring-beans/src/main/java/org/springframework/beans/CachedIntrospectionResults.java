@@ -33,6 +33,7 @@ import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.util.ClassUtils;
@@ -265,8 +266,9 @@ public class CachedIntrospectionResults {
 			// This call is slow so we do it once.
 			PropertyDescriptor[] pds = this.beanInfo.getPropertyDescriptors();
 			for (PropertyDescriptor pd : pds) {
-				if (Class.class.equals(beanClass) && "classLoader".equals(pd.getName())) {
-					// Ignore Class.getClassLoader() method - nobody needs to bind to that
+				if (Class.class.equals(beanClass) &&
+						("classLoader".equals(pd.getName()) ||  "protectionDomain".equals(pd.getName()))) {
+					// Ignore Class.getClassLoader() and getProtectionDomain() methods - nobody needs to bind to those
 					continue;
 				}
 				if (logger.isTraceEnabled()) {
