@@ -35,7 +35,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -1199,28 +1198,29 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * @param resultSetParameters Parameter list of declared resultSet parameters for the stored procedure
 	 * @return Map that contains returned results
 	 */
-	@SuppressWarnings("rawtypes")
-	protected Map<String, Object> extractReturnedResults(
-			CallableStatement cs, List updateCountParameters, List resultSetParameters, int updateCount)
+	protected Map<String, Object> extractReturnedResults(CallableStatement cs,
+			List<SqlParameter> updateCountParameters, List<SqlParameter> resultSetParameters, int updateCount)
 			throws SQLException {
 
 		Map<String, Object> returnedResults = new HashMap<String, Object>();
 		int rsIndex = 0;
 		int updateIndex = 0;
 		boolean moreResults;
-		if (!skipResultsProcessing) {
+		if (!this.skipResultsProcessing) {
 			do {
 				if (updateCount == -1) {
 					if (resultSetParameters != null && resultSetParameters.size() > rsIndex) {
-						SqlReturnResultSet declaredRsParam = (SqlReturnResultSet)resultSetParameters.get(rsIndex);
+						SqlReturnResultSet declaredRsParam = (SqlReturnResultSet) resultSetParameters.get(rsIndex);
 						returnedResults.putAll(processResultSet(cs.getResultSet(), declaredRsParam));
 						rsIndex++;
 					}
 					else {
-						if (!skipUndeclaredResults) {
+						if (!this.skipUndeclaredResults) {
 							String rsName = RETURN_RESULT_SET_PREFIX + (rsIndex + 1);
 							SqlReturnResultSet undeclaredRsParam = new SqlReturnResultSet(rsName, new ColumnMapRowMapper());
-							logger.info("Added default SqlReturnResultSet parameter named " + rsName);
+							if (logger.isDebugEnabled()) {
+								logger.debug("Added default SqlReturnResultSet parameter named '" + rsName + "'");
+							}
 							returnedResults.putAll(processResultSet(cs.getResultSet(), undeclaredRsParam));
 							rsIndex++;
 						}
@@ -1228,16 +1228,18 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				}
 				else {
 					if (updateCountParameters != null && updateCountParameters.size() > updateIndex) {
-						SqlReturnUpdateCount ucParam = (SqlReturnUpdateCount)updateCountParameters.get(updateIndex);
+						SqlReturnUpdateCount ucParam = (SqlReturnUpdateCount) updateCountParameters.get(updateIndex);
 						String declaredUcName = ucParam.getName();
 						returnedResults.put(declaredUcName, updateCount);
 						updateIndex++;
 					}
 					else {
-						if (!skipUndeclaredResults) {
-							String undeclaredUcName = RETURN_UPDATE_COUNT_PREFIX + (updateIndex + 1);
-							logger.info("Added default SqlReturnUpdateCount parameter named " + undeclaredUcName);
-							returnedResults.put(undeclaredUcName, updateCount);
+						if (!this.skipUndeclaredResults) {
+							String undeclaredName = RETURN_UPDATE_COUNT_PREFIX + (updateIndex + 1);
+							if (logger.isDebugEnabled()) {
+								logger.debug("Added default SqlReturnUpdateCount parameter named '" + undeclaredName + "'");
+							}
+							returnedResults.put(undeclaredName, updateCount);
 							updateIndex++;
 						}
 					}
@@ -1281,8 +1283,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 						else {
 							String rsName = outParam.getName();
 							SqlReturnResultSet rsParam = new SqlReturnResultSet(rsName, new ColumnMapRowMapper());
-							returnedResults.putAll(processResultSet(cs.getResultSet(), rsParam));
-							logger.info("Added default SqlReturnResultSet parameter named " + rsName);
+							returnedResults.putAll(processResultSet((ResultSet) out, rsParam));
+							if (logger.isDebugEnabled()) {
+								logger.debug("Added default SqlReturnResultSet parameter named '" + rsName + "'");
+							}
 						}
 					}
 					else {

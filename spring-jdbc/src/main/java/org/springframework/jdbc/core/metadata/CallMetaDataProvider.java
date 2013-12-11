@@ -24,7 +24,8 @@ import org.springframework.jdbc.core.SqlParameter;
 
 /**
  * Interface specifying the API to be implemented by a class providing call metadata.
- * This is intended for internal use by Spring's
+ *
+ * <p>This is intended for internal use by Spring's
  * {@link org.springframework.jdbc.core.simple.SimpleJdbcCall}.
  *
  * @author Thomas Risberg
@@ -74,15 +75,15 @@ public interface CallMetaDataProvider {
 
 	/**
 	 * Provide any modification of the catalog name passed in to match the meta data currently used.
-	 * The returned value will be used for meta data lookups. This could include altering the case used
-	 * or providing a base catalog if none is provided.
+	 * The returned value will be used for meta data lookups. This could include altering the case
+	 * used or providing a base catalog if none is provided.
 	 */
 	String metaDataCatalogNameToUse(String catalogName) ;
 
 	/**
 	 * Provide any modification of the schema name passed in to match the meta data currently used.
-	 * The returned value will be used for meta data lookups. This could include altering the case used
-	 * or providing a base schema if none is provided.
+	 * The returned value will be used for meta data lookups. This could include altering the case
+	 * used or providing a base schema if none is provided.
 	 */
 	String metaDataSchemaNameToUse(String schemaName) ;
 
@@ -94,8 +95,8 @@ public interface CallMetaDataProvider {
 	String parameterNameToUse(String parameterName);
 
 	/**
-	 * Create a default out parameter based on the provided meta data. This is used when no
-	 * explicit parameter declaration has been made.
+	 * Create a default out parameter based on the provided meta data.
+	 * This is used when no explicit parameter declaration has been made.
 	 * @param parameterName the name of the parameter
 	 * @param meta meta data used for this call
 	 * @return the configured SqlOutParameter
@@ -103,8 +104,8 @@ public interface CallMetaDataProvider {
 	SqlParameter createDefaultOutParameter(String parameterName, CallParameterMetaData meta);
 
 	/**
-	 * Create a default inout parameter based on the provided meta data. This is used when no
-	 * explicit parameter declaration has been made.
+	 * Create a default inout parameter based on the provided meta data.
+	 * This is used when no explicit parameter declaration has been made.
 	 * @param parameterName the name of the parameter
 	 * @param meta meta data used for this call
 	 * @return the configured SqlInOutParameter
@@ -112,8 +113,8 @@ public interface CallMetaDataProvider {
 	SqlParameter createDefaultInOutParameter(String parameterName, CallParameterMetaData meta);
 
 	/**
-	 * Create a default in parameter based on the provided meta data. This is used when no
-	 * explicit parameter declaration has been made.
+	 * Create a default in parameter based on the provided meta data.
+	 * This is used when no explicit parameter declaration has been made.
 	 * @param parameterName the name of the parameter
 	 * @param meta meta data used for this call
 	 * @return the configured SqlParameter
@@ -121,26 +122,26 @@ public interface CallMetaDataProvider {
 	SqlParameter createDefaultInParameter(String parameterName, CallParameterMetaData meta);
 
 	/**
-	 * Get the name of the current user.  Useful for meta data lookups etc.
+	 * Get the name of the current user. Useful for meta data lookups etc.
 	 * @return current user name from database connection
 	 */
 	String getUserName();
 
 	/**
-	 * Does this database support returning resultsets that should be retrieved with the JDBC call
+	 * Does this database support returning ResultSets that should be retrieved with the JDBC call.
 	 * {@link java.sql.Statement#getResultSet()}
 	 */
 	boolean isReturnResultSetSupported();
 
 	/**
-	 * Does this database support returning resultsets as ref cursors to be retrieved with
+	 * Does this database support returning ResultSets as ref cursors to be retrieved with
 	 * {@link java.sql.CallableStatement#getObject(int)} for the specified column.
 	 */
 	boolean isRefCursorSupported();
 
 	/**
-	 * Get the {@link java.sql.Types} type for columns that return resultsets as ref cursors if this feature
-	 * is supported.
+	 * Get the {@link java.sql.Types} type for columns that return ResultSets as ref cursors
+	 * if this feature is supported.
 	 */
 	int getRefCursorSqlType();
 
