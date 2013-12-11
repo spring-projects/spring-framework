@@ -76,7 +76,7 @@ public class CachedIntrospectionResults {
 	 * Needs to be a WeakHashMap with WeakReferences as values to allow
 	 * for proper garbage collection in case of multiple class loaders.
 	 */
-	static final Map<Class, Object> classCache = new WeakHashMap<Class, Object>();
+	static final Map<Class<?>, Object> classCache = new WeakHashMap<Class<?>, Object>();
 
 
 	/**
@@ -107,7 +107,7 @@ public class CachedIntrospectionResults {
 	 */
 	public static void clearClassLoader(ClassLoader classLoader) {
 		synchronized (classCache) {
-			for (Iterator<Class> it = classCache.keySet().iterator(); it.hasNext();) {
+			for (Iterator<Class<?>> it = classCache.keySet().iterator(); it.hasNext();) {
 				Class<?> beanClass = it.next();
 				if (isUnderneathClassLoader(beanClass.getClassLoader(), classLoader)) {
 					it.remove();
@@ -130,6 +130,7 @@ public class CachedIntrospectionResults {
 	 * @return the corresponding CachedIntrospectionResults
 	 * @throws BeansException in case of introspection failure
 	 */
+	@SuppressWarnings("unchecked")
 	static CachedIntrospectionResults forClass(Class<?> beanClass) throws BeansException {
 		CachedIntrospectionResults results;
 		Object value;
@@ -137,8 +138,8 @@ public class CachedIntrospectionResults {
 			value = classCache.get(beanClass);
 		}
 		if (value instanceof Reference) {
-			Reference ref = (Reference) value;
-			results = (CachedIntrospectionResults) ref.get();
+			Reference<CachedIntrospectionResults> ref = (Reference<CachedIntrospectionResults>) value;
+			results = ref.get();
 		}
 		else {
 			results = (CachedIntrospectionResults) value;
@@ -260,8 +261,9 @@ public class CachedIntrospectionResults {
 			// This call is slow so we do it once.
 			PropertyDescriptor[] pds = this.beanInfo.getPropertyDescriptors();
 			for (PropertyDescriptor pd : pds) {
-				if (Class.class.equals(beanClass) && "classLoader".equals(pd.getName())) {
-					// Ignore Class.getClassLoader() method - nobody needs to bind to that
+				if (Class.class.equals(beanClass) &&
+						("classLoader".equals(pd.getName()) ||  "protectionDomain".equals(pd.getName()))) {
+					// Ignore Class.getClassLoader() and getProtectionDomain() methods - nobody needs to bind to those
 					continue;
 				}
 				if (logger.isTraceEnabled()) {
