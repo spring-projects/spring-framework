@@ -805,10 +805,10 @@ construction of classes, or a mechanism such as the __Service Locator__ pattern.
 
 The `org.springframework.beans` and `org.springframework.context` packages are the basis
 for Spring Framework's IoC container. The
-{javadoc-baseurl}/org/springframework/beans/factory/BeanFactory.html[BeanFactory]
+{javadoc-baseurl}/org/springframework/beans/factory/BeanFactory.html[`BeanFactory`]
 interface provides an advanced configuration mechanism capable of managing any type of
 object.
-{javadoc-baseurl}/org/springframework/context/ApplicationContext.html[ApplicationContext]
+{javadoc-baseurl}/org/springframework/context/ApplicationContext.html[`ApplicationContext`]
 is a sub-interface of `BeanFactory`. It adds easier integration with Spring's AOP
 features; message resource handling (for use in internationalization), event
 publication; and application-layer specific contexts such as the `WebApplicationContext`
@@ -3026,7 +3026,7 @@ The following scopes are supported out of the box. You can also create
 ====
 As of Spring 3.0, a __thread scope__ is available, but is not registered by default. For
 more information, see the documentation for
-{javadoc-baseurl}/org/springframework/context/support/SimpleThreadScope.html[SimpleThreadScope].
+{javadoc-baseurl}/org/springframework/context/support/SimpleThreadScope.html[`SimpleThreadScope`].
 For instructions on how to register this or any other custom scope, see
 <<beans-factory-scopes-custom-using>>.
 ====
@@ -3411,7 +3411,7 @@ To integrate your custom scope(s) into the Spring container, you need to impleme
 `org.springframework.beans.factory.config.Scope` interface, which is described in this
 section. For an idea of how to implement your own scopes, see the `Scope`
 implementations that are supplied with the Spring Framework itself and the
-{javadoc-baseurl}/org/springframework/beans/factory/config/Scope.html[Scope
+{javadoc-baseurl}/org/springframework/beans/factory/config/Scope.html[`Scope`
 Javadoc], which explains the methods you need to implement in more detail.
 
 The `Scope` interface has four methods to get objects from the scope, remove them from
@@ -7188,7 +7188,7 @@ method that returns `true` or `false`. For example, here is the actual
 ----
 
 See the {javadoc-baseurl}/org/springframework/context/annotation/Conditional.html[
-@Conditional Javadoc] for more detail.
+`@Conditional` Javadoc] for more detail.
 
 [[beans-java-combining]]
 ===== Combining Java and XML configuration
@@ -7403,8 +7403,8 @@ over a configurable hierarchy of property sources.
 You can find out more about
 http://spring.io/blog/2011/02/15/spring-3-1-m1-unified-property-management/[Unified
 Property Management], the
-{javadoc-baseurl}/org/springframework/core/env/PropertySource.html[PropertySource class]
-and the {javadoc-baseurl}org/springframework/context/annotation/PropertySource.html[@PropertySource
+{javadoc-baseurl}/org/springframework/core/env/PropertySource.html[`PropertySource` class]
+and the {javadoc-baseurl}org/springframework/context/annotation/PropertySource.html[`@PropertySource`
 annotation].
 
 
@@ -7970,7 +7970,7 @@ and JMX support facilities. Application components can also interact with the
 application server's JCA WorkManager through Spring's `TaskExecutor` abstraction.
 
 Check out the JavaDoc of the
-{javadoc-baseurl}/org/springframework/jca/context/SpringContextResourceAdapter.html[SpringContextResourceAdapter]
+{javadoc-baseurl}/org/springframework/jca/context/SpringContextResourceAdapter.html[`SpringContextResourceAdapter`]
 class for the configuration details involved in RAR deployment.
 
 __For a simple deployment of a Spring ApplicationContext as a J2EE RAR file:__ package
@@ -8996,9 +8996,9 @@ convenience to aid developers in targeting error messages and suchlike.
 
 More information on the `MessageCodesResolver` and the default strategy can be found
 online with the Javadocs for
-{javadoc-baseurl}/org/springframework/validation/MessageCodesResolver.html[MessageCodesResolver]
+{javadoc-baseurl}/org/springframework/validation/MessageCodesResolver.html[`MessageCodesResolver`]
 and
-{javadoc-baseurl}/org/springframework/validation/DefaultMessageCodesResolver.html[DefaultMessageCodesResolver]
+{javadoc-baseurl}/org/springframework/validation/DefaultMessageCodesResolver.html[`DefaultMessageCodesResolver`]
 respectively.
 
 
@@ -28860,6 +28860,21 @@ As with `@RequestBody`, Spring converts the returned object to a response body b
 an `HttpMessageConverter`. For more information on these converters, see the previous
 section and <<rest-message-conversion,Message Converters>>.
 
+[[mvc-ann-restcontroller]]
+===== Creating REST Controllers with the @RestController annotation
+
+It's a very common use case to have Controllers implement a REST API, thus serving only
+JSON, XML or custom MediaType content. For convenience, instead of annotating all your
+`@RequestMapping` methods with `@ResponseBody`, you can annotate your Controller Class
+with `@RestController`.
+
+{javadoc-baseurl}org/springframework/web/bind/annotation/RestController.html[`@RestController`]
+is a stereotype annotation that combines `@ResponseBody` and `@Controller`. More than
+that, it gives more meaning to your Controller and also may carry additional semantics
+in future releases of the framework.
+
+As with regular `@Controllers`, a `@RestController` may be assisted by a
+`@ControllerAdvice` Bean. See the <<mvc-ann-controller-advice>> section for more details.
 
 [[mvc-ann-httpentity]]
 ===== Using HttpEntity
@@ -28942,9 +28957,8 @@ A controller can have any number of `@ModelAttribute` methods. All such methods 
 invoked before `@RequestMapping` methods of the same controller.
 
 `@ModelAttribute` methods can also be defined in an `@ControllerAdvice`-annotated class
-and such methods apply to all controllers. The `@ControllerAdvice` annotation is a
-component annotation allowing implementation classes to be autodetected through
-classpath scanning.
+and such methods apply to many controllers. See the <<mvc-ann-controller-advice>> section
+for more details.
 
 [TIP]
 ====
@@ -29284,7 +29298,7 @@ the `FormattingConversionService` (see <<format>>).
 To customize request parameter binding with PropertyEditors through Spring's
 `WebDataBinder`, you can use `@InitBinder`-annotated methods within your controller,
 `@InitBinder` methods within an `@ControllerAdvice` class, or provide a custom
-`WebBindingInitializer`.
+`WebBindingInitializer`. See the <<mvc-ann-controller-advice>> section for more details.
 
 [[mvc-ann-initbinder]]
 ====== Customizing data binding with @InitBinder
@@ -29344,15 +29358,9 @@ PropertyEditors required by several of the PetClinic controllers.
 	</bean>
 ----
 
-[[mvc-ann-initbinder-advice]]
-====== Customizing data binding with externalized @InitBinder methods
-
 `@InitBinder` methods can also be defined in an `@ControllerAdvice`-annotated class in
-which case they apply to all controllers. This provides an alternative to using a
-`WebBindingInitializer`.
-
-The `@ControllerAdvice` annotation is a component annotation allowing implementation
-classes to be autodetected through classpath scanning.
+which case they apply to matching controllers. This provides an alternative to using a
+`WebBindingInitializer`. See the <<mvc-ann-controller-advice>> section for more details.
 
 
 [[mvc-ann-lastmodified]]
@@ -29388,6 +29396,39 @@ returning `null`. The former sets the response status to 304 before it returns `
 The latter, in combination with the former, causes Spring MVC to do no further
 processing of the request.
 
+[[mvc-ann-controller-advice]]
+===== Assisting Controllers with the @ControllerAdvice annotation
+The `@ControllerAdvice` annotation is a component annotation allowing implementation
+classes to be autodetected through classpath scanning. It is automatically enabled when
+using the MVC namespace or the MVC Java config.
+
+Classes annotated with `@ControllerAdvice` can contain `@ExceptionHandler`,
+`@InitBinder`, and `@ModelAttribute` annotated methods and those will apply to
+`@RequestMapping` methods across controller hierarchies as opposed to the controller
+hierarchy within which they are declared.
+
+The `@ControllerAdvice` annotation can also target a subset of controllers with its
+attributes:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	// Target all Controllers annotated with @RestController
+	@ControllerAdvice(annotations = RestController.class)
+	public class AnnotationAdvice {}
+
+	// Target all Controllers within specific packages
+	@ControllerAdvice("org.example.controllers")
+	public class BasePackageAdvice {}
+
+	// Target all Controllers assignable to specific classes
+	@ControllerAdvice(assignableTypes = {ControllerInterface.class, AbstractController.class})
+	public class AssignableTypesAdvice {}
+----
+
+Check out the
+{javadoc-baseurl}/org/springframework/web/bind/annotation/ControllerAdvice.html[`@ControllerAdvice`
+documentation] for more details.
 
 [[mvc-ann-async]]
 ==== Asynchronous Request Processing
@@ -30277,7 +30318,53 @@ also have the literal part of the servlet mapping included:
 			.path("/accounts").build()
 ----
 
+[[mvc-construct-uri-controllers]]
+=== Building URIs to Controllers and methods
 
+Spring MVC provides another mechanism for building and encoding URIs that link to
+Controllers and methods defined within an application.
+{javadoc-baseurl}/org/springframework/web/servlet/mvc/method/annotation/MvcUriComponentsBuilder.html[`MvcUriComponentsBuilder`]
+extends `UriComponentsBuilder` and provides such possibilities.
+
+Given this Controller:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Controller
+	@RequestMapping("/hotels/{hotel}")
+	public class BookingController {
+
+		@RequestMapping("/bookings/{booking}")
+		public String getBooking(@PathVariable Long booking) {
+
+		// ...
+
+	}
+----
+
+and using the `MvcUriComponentsBuilder`, the previous example is now:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	UriComponents uriComponents = MvcUriComponentsBuilder
+		.fromMethodName(BookingController.class, "getBooking",21).buildAndExpand(42);
+
+	URI uri = uriComponents.encode().toUri();
+----
+
+The `MvcUriComponentsBuilder` can also create "mock Controllers", thus enabling to create
+URIs by coding against the actual Controller's API:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	UriComponents uriComponents = MvcUriComponentsBuilder
+		.fromMethodCall(on(BookingController.class).getBooking(21)).buildAndExpand(42);
+
+	URI uri = uriComponents.encode().toUri();
+----
 
 
 [[mvc-localeresolver]]
@@ -30753,9 +30840,8 @@ functionally equivalent to the exception mapping feature from the Servlet API, b
 also possible to implement more finely grained mappings of exceptions from different
 handlers. The `@ExceptionHandler` annotation on the other hand can be used on methods
 that should be invoked to handle an exception. Such methods may be defined locally
-within an `@Controller` or may apply globally to all `@RequestMapping` methods when
-defined within an `@ControllerAdvice` class. The following sections explain this in more
-detail.
+within an `@Controller` or may apply to many `@Controller` classes when defined within an
+`@ControllerAdvice` class. The following sections explain this in more detail.
 
 
 
@@ -30773,11 +30859,8 @@ You can do that with `@ExceptionHandler` methods. When declared within a control
 methods apply to exceptions raised by `@RequestMapping` methods of that contoroller (or
 any of its sub-classes). You can also declare an `@ExceptionHandler` method within an
 `@ControllerAdvice` class in which case it handles exceptions from `@RequestMapping`
-methods from any controller. The `@ControllerAdvice` annotation is a component
-annotation, which can be used with classpath scanning. It is automatically enabled when
-using the MVC namespace and the MVC Java config, or otherwise depending on whether the
-`ExceptionHandlerExceptionResolver` is configured or not. Below is an example of a
-controller-local `@ExceptionHandler` method:
+methods from many controllers. Below is an example of a controller-local
+`@ExceptionHandler` method:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -31444,8 +31527,9 @@ the classpath.
 To customize the default configuration in Java you simply implement the
 `WebMvcConfigurer` interface or more likely extend the class `WebMvcConfigurerAdapter`
 and override the methods you need. Below is an example of some of the available methods
-to override. See `WebMvcConifgurer` for a list of all methods and the Javadoc for
-further details:
+to override. See
+{javadoc-baseurl}/org/springframework/web/servlet/config/annotation/WebMvcConfigurer.html[`WebMvcConfigurer`]
+for a list of all methods and the Javadoc for further details:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -31928,14 +32012,15 @@ the `@Import` statement.
 The next step towards more fine-grained control is to customize a property on one of the
 beans created in `WebMvcConfigurationSupport` or perhaps to provide your own instance.
 This requires two things -- remove the `@EnableWebMvc` annotation in order to prevent
-the import and then extend directly from `WebMvcConfigurationSupport`. Here is an
-example:
+the import and then extend from `DelegatingWebMvcConfiguration`, a subclass of
+`WebMvcConfigurationSupport`.
+Here is an example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	@Configuration
-	public class WebConfig extends WebMvcConfigurationSupport {
+	public class WebConfig extends DelegatingWebMvcConfiguration {
 
 		@Override
 		public void addInterceptors(InterceptorRegistry registry){
@@ -31952,8 +32037,16 @@ example:
 	}
 ----
 
-Note that modifying beans in this way does not prevent you from using any of the
-higher-level constructs shown earlier in this section.
+[NOTE]
+====
+An application should have only one configuration extending `DelegatingWebMvcConfiguration`
+or a single `@EnableWebMvc` annotated class, since they both register the same underlying
+beans.
+
+Modifying beans in this way does not prevent you from using any of the higher-level
+constructs shown earlier in this section. `WebMvcConfigurerAdapter` subclasses and
+`WebMvcConfigurer` implementations are still being used.
+====
 
 
 
@@ -37845,6 +37938,12 @@ RestTemplate provides higher level methods that correspond to each of the six ma
 methods that make invoking many RESTful services a one-liner and enforce REST best
 practices.
 
+
+[NOTE]
+====
+RestTemplate has an asynchronous counter-part: see <<rest-async-resttemplate>>.
+====
+
 [[rest-overview-of-resttemplate-methods-tbl]]
 .Overview of RestTemplate methods
 [cols="1,3"]
@@ -38187,8 +38286,70 @@ An `HttpMessageConverter` implementation that can read and write
 `java.awt.image.BufferedImage` from the HTTP request and response. This converter reads
 and writes the media type supported by the Java I/O API.
 
+[[rest-async-resttemplate]]
+==== Async RestTemplate
 
+Web applications often need to query external REST services those days. The very nature of
+HTTP and synchronous calls can lead up to challenges when scaling applications for those
+needs: multiple threads may be blocked, waiting for remote HTTP responses.
 
+`AsyncRestTemplate` and <<rest-resttemplate>>'s APIs are very similar; see
+<<rest-overview-of-resttemplate-methods-tbl>>. The main difference between those APIs is
+that `AsyncRestTemplate` returns
+{javadoc-baseurl}/org/springframework/util/concurrent/ListenableFuture.html[`ListenableFuture`]
+wrappers as opposed to concrete results.
+
+The previous `RestTemplate` example translates to:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	// async call
+	Future<ResponseEntity<String>> futureEntity = template.getForEntity(
+		"http://example.com/hotels/{hotel}/bookings/{booking}", String.class, "42", "21");
+
+	// get the concrete result - synchronous call
+	ResponseEntity<String> entity = futureEntity.get();
+----
+
+{javadoc-baseurl}/org/springframework/util/concurrent/ListenableFuture.html[`ListenableFuture`]
+accepts completion callbacks:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	ListenableFuture<ResponseEntity<String>> futureEntity = template.getForEntity(
+		"http://example.com/hotels/{hotel}/bookings/{booking}", String.class, "42", "21");
+
+	// register a callback
+	futureEntity.addCallback(new ListenableFutureCallback<ResponseEntity<String>>() {
+		@Override
+		public void onSuccess(ResponseEntity<String> entity) {
+			//...
+		}
+
+		@Override
+		public void onFailure(Throwable t) {
+			//...
+		}
+	});
+----
+
+[NOTE]
+====
+The default `AsyncRestTemplate` constructor registers a
+{javadoc-baseurl}/org/springframework/core/task/SimpleAsyncTaskExecutor.html[`SimpleAsyncTaskExecutor`
+] for executing HTTP requests.
+When dealing with a large number of short-lived requests, a thread-pooling TaskExecutor
+implementation like
+{javadoc-baseurl}/org/springframework/scheduling/concurrent/ThreadPoolTaskExecutor.html[`ThreadPoolTaskExecutor`]
+may be a good choice.
+====
+
+See {javadoc-baseurl}/org/springframework/util/concurrent/ListenableFuture.html[`ListenableFuture`
+Javadoc] and
+{javadoc-baseurl}/org/springframework/web/client/AsyncRestTemplate.html[`AsyncRestTemplate`
+Javadoc] for more details.
 
 
 [[ejb]]
@@ -43424,8 +43585,8 @@ seconds and one every morning at 6 AM. To finalize everything, we need to set up
 More properties are available for the `SchedulerFactoryBean` for you to set, such as the
 calendars used by the job details, properties to customize Quartz with, etc. Have a look
 at the
-{javadoc-baseurl}/org/springframework/scheduling/quartz/SchedulerFactoryBean.html[SchedulerFactoryBean
-Javadoc] for more information.
+{javadoc-baseurl}/org/springframework/scheduling/quartz/SchedulerFactoryBean.html[`SchedulerFactoryBean
+Javadoc`] for more information.
 
 
 
