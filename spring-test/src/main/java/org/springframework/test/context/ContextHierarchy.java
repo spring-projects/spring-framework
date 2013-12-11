@@ -131,6 +131,9 @@ import java.lang.annotation.Target;
  * )
  * public class ExtendedTests extends BaseTests {}</pre>
  *
+ * <p>As of Spring Framework 4.0, this annotation may be used as a
+ * <em>meta-annotation</em> to create custom <em>composed annotations</em>.
+ *
  * @author Sam Brannen
  * @since 3.2.2
  * @see ContextConfiguration

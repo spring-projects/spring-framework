@@ -34,6 +34,7 @@ import static org.springframework.test.context.MetaAnnotationUtils.*;
  *
  * @author Sam Brannen
  * @since 4.0
+ * @see MetaAnnotationUtilsTests
  */
 public class OverriddenMetaAnnotationAttributesTests {
 

@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -27,10 +28,26 @@ import org.springframework.util.ObjectUtils;
 import static org.springframework.core.annotation.AnnotationUtils.*;
 
 /**
- * TODO Document MetaAnnotationUtils.
+ * {@code MetaAnnotationUtils} is a collection of utility methods that complements
+ * support already available in {@link AnnotationUtils}.
+ *
+ * <p>Whereas {@code AnnotationUtils} only provides utilities for <em>getting</em>
+ * or <em>finding</em> an annotation, {@code MetaAnnotationUtils} provides
+ * additional support for determining the <em>root class</em> on which an
+ * annotation is declared, either directly or via a <em>composed annotation</em>.
+ * This additional information is encapsulated in an {@link AnnotationDescriptor}.
+ *
+ * <p>The additional information provided by an {@code AnnotationDescriptor} is
+ * required in the <em>Spring TestContext Framework</em> in order to be able to
+ * support class hierarchy traversals for <em>inherited</em> annotations such as
+ * {@link ContextConfiguration @ContextConfiguration},
+ * {@link TestExecutionListeners @TestExecutionListeners}, and
+ * {@link ActiveProfiles @ActiveProfiles}.
  *
  * @author Sam Brannen
  * @since 4.0
+ * @see AnnotationUtils
+ * @see AnnotationDescriptor
  */
 abstract class MetaAnnotationUtils {
 
@@ -39,13 +56,37 @@ abstract class MetaAnnotationUtils {
 	}
 
 	/**
-	 * TODO Document findAnnotationDescriptor().
+	 * Find the {@link AnnotationDescriptor} for the supplied {@code annotationType}
+	 * from the supplied {@link Class}, traversing its annotations and superclasses
+	 * if no annotation can be found on the given class itself.
+	 *
+	 * <p>This method explicitly handles class-level annotations which are not
+	 * declared as {@linkplain java.lang.annotation.Inherited inherited} <em>as
+	 * well as meta-annotations</em>.
+	 *
+	 * <p>The algorithm operates as follows:
+	 * <ol>
+	 *   <li>Search for a local declaration of the annotation on the given class
+	 *   and return a corresponding {@code AnnotationDescriptor} if found.
+	 *   <li>Search through all annotations that the given class declares,
+	 *   returning an {@code AnnotationDescriptor} for the first matching
+	 *   candidate, if any.
+	 *   <li>Proceed with introspection of the superclass hierarchy of the given
+	 *   class by returning to step #1 with the superclass as the class to look
+	 *   for annotations on.
+	 * </ol>
+	 *
+	 * <p>If the supplied {@code clazz} is an interface, only the interface
+	 * itself will be checked; the inheritance hierarchy for interfaces will not
+	 * be traversed.
 	 *
 	 * @param clazz the class to look for annotations on
 	 * @param annotationType the annotation class to look for, both locally and
 	 * as a meta-annotation
 	 * @return the corresponding annotation descriptor if the annotation was found;
 	 * otherwise {@code null}
+	 * @see AnnotationUtils#findAnnotationDeclaringClass(Class, Class)
+	 * @see #findAnnotationDescriptorForTypes(Class, Class...)
 	 */
 	public static <T extends Annotation> AnnotationDescriptor<T> findAnnotationDescriptor(Class<?> clazz,
 			Class<T> annotationType) {
@@ -76,13 +117,43 @@ abstract class MetaAnnotationUtils {
 	}
 
 	/**
-	 * TODO Document findAnnotationDescriptorForTypes().
+	 * Find the {@link UntypedAnnotationDescriptor} for the first {@link Class}
+	 * in the inheritance hierarchy of the specified {@code clazz} (including
+	 * the specified {@code clazz} itself) which declares at least one of the
+	 * specified {@code annotationTypes}, or {@code null} if none of the
+	 * specified annotation types could be found.
+	 * 
+	 * <p>This method traverses the annotations and superclasses of the specified
+	 * {@code clazz} if no annotation can be found on the given class itself.
+	 *
+	 * <p>This method explicitly handles class-level annotations which are not
+	 * declared as {@linkplain java.lang.annotation.Inherited inherited} <em>as
+	 * well as meta-annotations</em>.
+	 *
+	 * <p>The algorithm operates as follows:
+	 * <ol>
+	 *   <li>Search for a local declaration of one of the annotation types on
+	 *   the given class and return a corresponding {@code UntypedAnnotationDescriptor}
+	 *   if found.
+	 *   <li>Search through all annotations that the given class declares,
+	 *   returning an {@code UntypedAnnotationDescriptor} for the first matching
+	 *   candidate, if any.
+	 *   <li>Proceed with introspection of the superclass hierarchy of the given
+	 *   class by returning to step #1 with the superclass as the class to look
+	 *   for annotations on.
+	 * </ol>
+	 *
+	 * <p>If the supplied {@code clazz} is an interface, only the interface
+	 * itself will be checked; the inheritance hierarchy for interfaces will not
+	 * be traversed.
 	 *
 	 * @param clazz the class to look for annotations on
 	 * @param annotationTypes the types of annotations to look for, both locally
 	 * and as meta-annotations
 	 * @return the corresponding annotation descriptor if one of the annotations
 	 * was found; otherwise {@code null}
+	 * @see AnnotationUtils#findAnnotationDeclaringClassForTypes(java.util.List, Class)
+	 * @see #findAnnotationDescriptor(Class, Class)
 	 */
 	@SuppressWarnings("unchecked")
 	public static UntypedAnnotationDescriptor findAnnotationDescriptorForTypes(Class<?> clazz,
@@ -241,6 +312,14 @@ abstract class MetaAnnotationUtils {
 		}
 	}
 
+	/**
+	 * <em>Untyped</em> extension of {@code AnnotationDescriptor} that is used
+	 * to describe the declaration of one of several candidate annotation types
+	 * where the actual annotation type cannot be predetermined.
+	 *
+	 * @author Sam Brannen
+	 * @since 4.0
+	 */
 	public static class UntypedAnnotationDescriptor extends AnnotationDescriptor<Annotation> {
 
 		public UntypedAnnotationDescriptor(Class<?> declaringClass, Annotation annotation) {

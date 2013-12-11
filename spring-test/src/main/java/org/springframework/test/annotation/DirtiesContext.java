@@ -27,28 +27,30 @@ import java.lang.annotation.Target;
  * Test annotation which indicates that the
  * {@link org.springframework.context.ApplicationContext ApplicationContext}
  * associated with a test is <em>dirty</em> and should be closed:
+ *
  * <ul>
- * <li>after the current test, when declared at the method level</li>
- * <li>after each test method in the current test class, when declared at the
- * class level with class mode set to {@link ClassMode#AFTER_EACH_TEST_METHOD
- * AFTER_EACH_TEST_METHOD}</li>
- * <li>after the current test class, when declared at the class level with class
- * mode set to {@link ClassMode#AFTER_CLASS AFTER_CLASS}</li>
+ *   <li>after the current test, when declared at the method level</li>
+ *   <li>after each test method in the current test class, when declared at the
+ *   class level with class mode set to {@link ClassMode#AFTER_EACH_TEST_METHOD
+ *   AFTER_EACH_TEST_METHOD}</li>
+ *   <li>after the current test class, when declared at the class level with class
+ *   mode set to {@link ClassMode#AFTER_CLASS AFTER_CLASS}</li>
  * </ul>
- * <p>
- * Use this annotation if a test has modified the context &mdash; for example, by
- * replacing a bean definition or changing the state of a singleton bean.
+ *
+ * <p>Use this annotation if a test has modified the context &mdash; for example,
+ * by replacing a bean definition or changing the state of a singleton bean.
  * Subsequent tests will be supplied a new context.
- * </p>
- * <p>
- * {@code @DirtiesContext} may be used as a class-level and method-level
+ *
+ * <p>{@code @DirtiesContext} may be used as a class-level and method-level
  * annotation within the same class. In such scenarios, the
  * {@code ApplicationContext} will be marked as <em>dirty</em> after any
  * such annotated method as well as after the entire class. If the
  * {@link ClassMode} is set to {@link ClassMode#AFTER_EACH_TEST_METHOD
  * AFTER_EACH_TEST_METHOD}, the context will be marked dirty after each test
  * method in the class.
- * </p>
+ *
+ * <p>As of Spring Framework 4.0, this annotation may be used as a
+ * <em>meta-annotation</em> to create custom <em>composed annotations</em>.
  *
  * @author Sam Brannen
  * @author Rod Johnson

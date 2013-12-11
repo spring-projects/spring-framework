@@ -64,6 +64,9 @@ import org.springframework.context.ConfigurableApplicationContext;
  * for further information regarding the configuration and semantics of
  * <em>annotated classes</em>.
  *
+ * <p>As of Spring Framework 4.0, this annotation may be used as a
+ * <em>meta-annotation</em> to create custom <em>composed annotations</em>.
+ *
  * @author Sam Brannen
  * @since 2.5
  * @see ContextHierarchy
