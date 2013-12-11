@@ -175,14 +175,18 @@ public class ServletTestExecutionListenerTests {
 	private void assertWebAppConfigTestCase() throws Exception {
 		listener.prepareTestInstance(testContext);
 		assertAttributeDoesNotExist();
+		verify(testContext, times(1)).setAttribute(POPULATED_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
 		verify(testContext, times(1)).setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
+		when(testContext.getAttribute(POPULATED_REQUEST_CONTEXT_HOLDER_ATTRIBUTE)).thenReturn(Boolean.TRUE);
 		when(testContext.getAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE)).thenReturn(Boolean.TRUE);
 
 		listener.beforeTestMethod(testContext);
 		assertAttributeDoesNotExist();
-		verify(testContext, times(2)).setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
+		verify(testContext, times(1)).setAttribute(POPULATED_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
+		verify(testContext, times(1)).setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
 
 		listener.afterTestMethod(testContext);
+		verify(testContext).removeAttribute(POPULATED_REQUEST_CONTEXT_HOLDER_ATTRIBUTE);
 		verify(testContext).removeAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE);
 		assertAttributesNotAvailable();
 	}
