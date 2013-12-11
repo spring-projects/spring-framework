@@ -235,7 +235,7 @@
 			<value>2601,2615,2626</value>
 		</property>
 		<property name="dataIntegrityViolationCodes">
-			<value>233,511,515,530,547,2615,2714</value>
+			<value>233,511,515,530,546,547,2615,2714</value>
 		</property>
 		<property name="transientDataAccessResourceCodes">
 			<value>921,1105</value>
