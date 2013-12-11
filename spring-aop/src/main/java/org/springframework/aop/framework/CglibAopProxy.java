@@ -25,6 +25,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import org.aopalliance.aop.Advice;
+import org.aopalliance.intercept.MethodInvocation;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.aop.Advisor;
+import org.springframework.aop.AopInvocationException;
+import org.springframework.aop.PointcutAdvisor;
+import org.springframework.aop.RawTargetAccess;
+import org.springframework.aop.TargetSource;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.cglib.core.CodeGenerationException;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.CallbackFilter;
@@ -35,17 +46,6 @@ import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.cglib.proxy.NoOp;
 import org.springframework.cglib.transform.impl.MemorySafeUndeclaredThrowableStrategy;
-
-import org.aopalliance.aop.Advice;
-import org.aopalliance.intercept.MethodInvocation;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.aop.Advisor;
-import org.springframework.aop.AopInvocationException;
-import org.springframework.aop.PointcutAdvisor;
-import org.springframework.aop.RawTargetAccess;
-import org.springframework.aop.TargetSource;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.core.SmartClassLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -253,11 +253,14 @@ final class CglibAopProxy implements AopProxy, Serializable {
 	 * for each one found.
 	 */
 	private void doValidateClass(Class<?> proxySuperClass) {
-		Method[] methods = proxySuperClass.getMethods();
-		for (Method method : methods) {
-			if (!Object.class.equals(method.getDeclaringClass()) && Modifier.isFinal(method.getModifiers())) {
-				logger.warn("Unable to proxy method [" + method + "] because it is final: " +
-						"All calls to this method via a proxy will be routed directly to the proxy.");
+		if (logger.isWarnEnabled()) {
+			Method[] methods = proxySuperClass.getMethods();
+			for (Method method : methods) {
+				if (!Object.class.equals(method.getDeclaringClass()) && !Modifier.isStatic(method.getModifiers()) &&
+						Modifier.isFinal(method.getModifiers())) {
+					logger.warn("Unable to proxy method [" + method + "] because it is final: " +
+							"All calls to this method via a proxy will be routed directly to the proxy.");
+				}
 			}
 		}
 	}
