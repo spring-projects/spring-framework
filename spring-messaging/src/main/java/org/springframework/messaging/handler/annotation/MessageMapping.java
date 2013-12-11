@@ -53,8 +53,8 @@ import org.springframework.messaging.Message;
  * 	with STOMP over WebSocket support also sub-classes such as
  * 	{@link org.springframework.messaging.simp.SimpMessageHeaderAccessor}
  * 	for convenient access to all method arguments.</li>
- * 	<li>{@link PathVariable}-annotated arguments for access to URI variable
- * 	values extracted from the message destination (i.e. /hotels/{hotel}).
+ * 	<li>{@link DestinationVariable}-annotated arguments for access to template
+ * 	variable values extracted from the message destination (e.g. /hotels/{hotel}).
  * 	Variable values will be converted to the declared method argument type.</li>
  * 	<li>{@link java.security.Principal} method arguments are supported with
  * 	STOMP over WebSocket messages. It reflects the user logged in to the

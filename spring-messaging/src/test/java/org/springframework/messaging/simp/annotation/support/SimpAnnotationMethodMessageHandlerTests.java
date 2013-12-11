@@ -26,17 +26,16 @@ import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.PathVariable;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
 import org.springframework.stereotype.Controller;
 
 import static org.junit.Assert.*;
@@ -86,26 +85,26 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 	@Test
-	public void messageMappingPathVariableResolution() {
+	public void messageMappingDestinationVariableResolution() {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
 		headers.setDestination("/pre/message/bar/value");
 		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 		this.messageHandler.handleMessage(message);
 
-		assertEquals("messageMappingPathVariable", this.testController.method);
+		assertEquals("messageMappingDestinationVariable", this.testController.method);
 		assertEquals("bar", this.testController.arguments.get("foo"));
 		assertEquals("value", this.testController.arguments.get("name"));
 	}
 
 	@Test
-	public void subscribeEventPathVariableResolution() {
+	public void subscribeEventDestinationVariableResolution() {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.SUBSCRIBE);
 		headers.setDestination("/pre/sub/bar/value");
 		Message<?> message = MessageBuilder.withPayload(new byte[0])
 				.copyHeaders(headers.toMap()).build();
 		this.messageHandler.handleMessage(message);
 
-		assertEquals("subscribeEventPathVariable", this.testController.method);
+		assertEquals("subscribeEventDestinationVariable", this.testController.method);
 		assertEquals("bar", this.testController.arguments.get("foo"));
 		assertEquals("value", this.testController.arguments.get("name"));
 	}
@@ -175,17 +174,17 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		}
 
 		@MessageMapping("/message/{foo}/{name}")
-		public void messageMappingPathVariable(@PathVariable("foo") String param1,
-				@PathVariable("name") String param2) {
-			this.method = "messageMappingPathVariable";
+		public void messageMappingDestinationVariable(@DestinationVariable("foo") String param1,
+				@DestinationVariable("name") String param2) {
+			this.method = "messageMappingDestinationVariable";
 			this.arguments.put("foo", param1);
 			this.arguments.put("name", param2);
 		}
 
 		@SubscribeMapping("/sub/{foo}/{name}")
-		public void subscribeEventPathVariable(@PathVariable("foo") String param1,
-				@PathVariable("name") String param2) {
-			this.method = "subscribeEventPathVariable";
+		public void subscribeEventDestinationVariable(@DestinationVariable("foo") String param1,
+				@DestinationVariable("name") String param2) {
+			this.method = "subscribeEventDestinationVariable";
 			this.arguments.put("foo", param1);
 			this.arguments.put("name", param2);
 		}
@@ -196,7 +195,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		}
 
 		@MessageMapping("/bestmatch/{foo}/path")
-		public void bestMatch(@PathVariable("foo") String param1) {
+		public void bestMatch(@DestinationVariable("foo") String param1) {
 			this.method = "bestMatch";
 			this.arguments.put("foo", param1);
 		}
@@ -207,7 +206,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		}
 
 		@MessageMapping("/binding/id/{id}")
-		public void simpleBinding(@PathVariable("id") Long id) {
+		public void simpleBinding(@DestinationVariable("id") Long id) {
 			this.method = "simpleBinding";
 			this.arguments.put("id", id);
 		}

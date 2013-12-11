@@ -22,46 +22,45 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandlingException;
-import org.springframework.messaging.handler.annotation.PathVariable;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.ValueConstants;
 
 /**
- * Resolves method parameters annotated with {@link PathVariable @PathVariable}.
- *
- * <p>A @{@link PathVariable} is a named value that gets resolved from a path
- * template variable that matches the Message destination header.
- * It is always required and does not have a default value to fall back on.
+ * Resolves method parameters annotated with
+ * {@link org.springframework.messaging.handler.annotation.DestinationVariable @DestinationVariable}.
  *
  * @author Brian Clozel
- * @see org.springframework.messaging.handler.annotation.PathVariable
- * @see org.springframework.messaging.MessageHeaders
  * @since 4.0
  */
-public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
+public class DestinationVariableMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
 
-	public static final String PATH_TEMPLATE_VARIABLES_HEADER =
-			PathVariableMethodArgumentResolver.class.getSimpleName() + ".templateVariables";
+	public static final String DESTINATION_TEMPLATE_VARIABLES_HEADER =
+			DestinationVariableMethodArgumentResolver.class.getSimpleName() + ".templateVariables";
 
 
-	public PathVariableMethodArgumentResolver(ConversionService cs) {
+	public DestinationVariableMethodArgumentResolver(ConversionService cs) {
 		super(cs, null);
 	}
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return parameter.hasParameterAnnotation(PathVariable.class);
+		return parameter.hasParameterAnnotation(DestinationVariable.class);
 	}
 
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
-		PathVariable annotation = parameter.getParameterAnnotation(PathVariable.class);
-		return new PathVariableNamedValueInfo(annotation);
+		DestinationVariable annotation = parameter.getParameterAnnotation(DestinationVariable.class);
+		return new DestinationVariableNamedValueInfo(annotation);
 	}
 
 	@Override
-	protected Object resolveArgumentInternal(MethodParameter parameter, Message<?> message, String name) throws Exception {
+	protected Object resolveArgumentInternal(MethodParameter parameter, Message<?> message, String name)
+			throws Exception {
+
 		@SuppressWarnings("unchecked")
-		Map<String, String> vars = (Map<String, String>) message.getHeaders().get(PATH_TEMPLATE_VARIABLES_HEADER);
+		Map<String, String> vars = (Map<String, String>) message.getHeaders().get(
+				DESTINATION_TEMPLATE_VARIABLES_HEADER);
+
 		return (vars != null) ? vars.get(name) : null;
 	}
 
@@ -72,9 +71,9 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	}
 
 
-	private static class PathVariableNamedValueInfo extends NamedValueInfo {
+	private static class DestinationVariableNamedValueInfo extends NamedValueInfo {
 
-		private PathVariableNamedValueInfo(PathVariable annotation) {
+		private DestinationVariableNamedValueInfo(DestinationVariable annotation) {
 			super(annotation.value(), true, ValueConstants.DEFAULT_NONE);
 		}
 	}

@@ -41,12 +41,8 @@ import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.core.AbstractMessageSendingTemplate;
 import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.support.AnnotationExceptionHandlerMethodResolver;
-import org.springframework.messaging.handler.annotation.support.HeaderMethodArgumentResolver;
-import org.springframework.messaging.handler.annotation.support.HeadersMethodArgumentResolver;
-import org.springframework.messaging.handler.annotation.support.MessageMethodArgumentResolver;
-import org.springframework.messaging.handler.annotation.support.PathVariableMethodArgumentResolver;
-import org.springframework.messaging.handler.annotation.support.PayloadArgumentResolver;
+import org.springframework.messaging.handler.annotation.support.*;
+import org.springframework.messaging.handler.annotation.support.DestinationVariableMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.AbstractExceptionHandlerMethodResolver;
 import org.springframework.messaging.handler.invocation.AbstractMethodMessageHandler;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
@@ -66,10 +62,11 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.PathMatcher;
 
 /**
- * A handler for messages delegating to {@link org.springframework.messaging.simp.annotation.SubscribeMapping @SubscribeMapping} and
+ * A handler for messages delegating to
+ * {@link org.springframework.messaging.simp.annotation.SubscribeMapping @SubscribeMapping} and
  * {@link MessageMapping @MessageMapping} annotated methods.
  * <p>
- * Supports Ant-style path patterns as well as URI template variables in destinations.
+ * Supports Ant-style path patterns with template variables.
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
@@ -226,7 +223,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		// Annotation-based argument resolution
 		resolvers.add(new HeaderMethodArgumentResolver(this.conversionService, beanFactory));
 		resolvers.add(new HeadersMethodArgumentResolver());
-		resolvers.add(new PathVariableMethodArgumentResolver(this.conversionService));
+		resolvers.add(new DestinationVariableMethodArgumentResolver(this.conversionService));
 
 		// Type-based argument resolution
 		resolvers.add(new PrincipalMethodArgumentResolver());
@@ -339,7 +336,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		Map<String, String> vars = getPathMatcher().extractUriTemplateVariables(matchedPattern, lookupDestination);
 
 		headers.setDestination(lookupDestination);
-		headers.setHeader(PathVariableMethodArgumentResolver.PATH_TEMPLATE_VARIABLES_HEADER, vars);
+		headers.setHeader(DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER, vars);
 		message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
 
 		super.handleMatch(mapping, handlerMethod, lookupDestination, message);

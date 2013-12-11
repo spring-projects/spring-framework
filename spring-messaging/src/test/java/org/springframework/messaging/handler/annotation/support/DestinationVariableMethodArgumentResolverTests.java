@@ -29,18 +29,19 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandlingException;
-import org.springframework.messaging.handler.annotation.PathVariable;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.support.MessageBuilder;
 
 import static org.junit.Assert.*;
 
 /**
- * Test fixture for {@link PathVariableMethodArgumentResolver} tests.
+ * Test fixture for {@link DestinationVariableMethodArgumentResolver} tests.
+ *
  * @author Brian Clozel
  */
-public class PathVariableMethodArgumentResolverTests {
+public class DestinationVariableMethodArgumentResolverTests {
 
-	private PathVariableMethodArgumentResolver resolver;
+	private DestinationVariableMethodArgumentResolver resolver;
 
 	private MethodParameter paramAnnotated;
 	private MethodParameter paramAnnotatedValue;
@@ -49,7 +50,7 @@ public class PathVariableMethodArgumentResolverTests {
 
 	@Before
 	public void setup() throws Exception {
-		this.resolver = new PathVariableMethodArgumentResolver(new DefaultConversionService());
+		this.resolver = new DestinationVariableMethodArgumentResolver(new DefaultConversionService());
 
 		Method method = getClass().getDeclaredMethod("handleMessage", String.class, String.class, String.class);
 		this.paramAnnotated = new MethodParameter(method, 0);
@@ -57,9 +58,9 @@ public class PathVariableMethodArgumentResolverTests {
 		this.paramNotAnnotated = new MethodParameter(method, 2);
 
 		this.paramAnnotated.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
-		GenericTypeResolver.resolveParameterType(this.paramAnnotated, PathVariableMethodArgumentResolver.class);
+		GenericTypeResolver.resolveParameterType(this.paramAnnotated, DestinationVariableMethodArgumentResolver.class);
 		this.paramAnnotatedValue.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
-		GenericTypeResolver.resolveParameterType(this.paramAnnotatedValue, PathVariableMethodArgumentResolver.class);
+		GenericTypeResolver.resolveParameterType(this.paramAnnotatedValue, DestinationVariableMethodArgumentResolver.class);
 	}
 
 	@Test
@@ -71,13 +72,17 @@ public class PathVariableMethodArgumentResolverTests {
 
 	@Test
 	public void resolveArgument() throws Exception {
-		Map<String, Object> pathParams = new HashMap<String, Object>();
-		pathParams.put("foo", "bar");
-		pathParams.put("name", "value");
+
+		Map<String, Object> vars = new HashMap<String, Object>();
+		vars.put("foo", "bar");
+		vars.put("name", "value");
+
 		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).setHeader(
-			PathVariableMethodArgumentResolver.PATH_TEMPLATE_VARIABLES_HEADER, pathParams).build();
+			DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER, vars).build();
+
 		Object result = this.resolver.resolveArgument(this.paramAnnotated, message);
 		assertEquals("bar", result);
+
 		result = this.resolver.resolveArgument(this.paramAnnotatedValue, message);
 		assertEquals("value", result);
 	}
@@ -89,6 +94,10 @@ public class PathVariableMethodArgumentResolverTests {
 	}
 
 	@SuppressWarnings("unused")
-	private void handleMessage(@PathVariable String foo, @PathVariable(value = "name") String param1, String param3) {
+	private void handleMessage(
+			@DestinationVariable String foo,
+			@DestinationVariable(value = "name") String param1,
+			String param3) {
 	}
+
 }
