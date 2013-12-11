@@ -20,7 +20,6 @@ import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -74,6 +73,16 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 	public static final String RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE = Conventions.getQualifiedAttributeName(
 		ServletTestExecutionListener.class, "resetRequestContextHolder");
 
+	/**
+	 * Attribute name for a {@link TestContext} attribute which indicates that
+	 * {@code ServletTestExecutionListener} has already populated Spring Web's
+	 * {@code RequestContextHolder}.
+	 *
+	 * <p>Permissible values include {@link Boolean#TRUE} and {@link Boolean#FALSE}.
+	 */
+	public static final String POPULATED_REQUEST_CONTEXT_HOLDER_ATTRIBUTE = Conventions.getQualifiedAttributeName(
+		ServletTestExecutionListener.class, "populatedRequestContextHolder");
+
 	private static final Log logger = LogFactory.getLog(ServletTestExecutionListener.class);
 
 
@@ -111,8 +120,10 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 	 * {@code RequestContextHolder}, but only if the {@link
 	 * #RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE} in the supplied {@code TestContext}
 	 * has a value of {@link Boolean#TRUE}.
-	 * <p>The {@link #RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE} will be
-	 * subsequently removed from the test context, regardless of its value.
+	 *
+	 * <p>The {@link #RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE} and
+	 * {@link #POPULATED_REQUEST_CONTEXT_HOLDER_ATTRIBUTE} will be subsequently
+	 * removed from the test context, regardless of their values.
 	 *
 	 * @see TestExecutionListener#afterTestMethod(TestContext)
 	 */
@@ -124,6 +135,7 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 			}
 			RequestContextHolder.resetRequestAttributes();
 		}
+		testContext.removeAttribute(POPULATED_REQUEST_CONTEXT_HOLDER_ATTRIBUTE);
 		testContext.removeAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE);
 	}
 
@@ -131,8 +143,12 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 		return AnnotationUtils.findAnnotation(testContext.getTestClass(), WebAppConfiguration.class) == null;
 	}
 
+	private boolean alreadyPopulatedRequestContextHolder(TestContext testContext) {
+		return Boolean.TRUE.equals(testContext.getAttribute(POPULATED_REQUEST_CONTEXT_HOLDER_ATTRIBUTE));
+	}
+
 	private void setUpRequestContextIfNecessary(TestContext testContext) {
-		if (notAnnotatedWithWebAppConfiguration(testContext)) {
+		if (notAnnotatedWithWebAppConfiguration(testContext) || alreadyPopulatedRequestContextHolder(testContext)) {
 			return;
 		}
 
@@ -157,6 +173,7 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 			ServletWebRequest servletWebRequest = new ServletWebRequest(request, response);
 
 			RequestContextHolder.setRequestAttributes(servletWebRequest);
+			testContext.setAttribute(POPULATED_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
 			testContext.setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
 
 			if (wac instanceof ConfigurableApplicationContext) {
