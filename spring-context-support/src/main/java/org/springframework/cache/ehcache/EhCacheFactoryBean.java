@@ -52,9 +52,10 @@ import org.springframework.beans.factory.InitializingBean;
  * Cache instance will be retrieved from the CacheManager.
  *
  * <p>Note: As of Spring 4.0, Spring's EhCache support requires EhCache 2.1 or higher.
+ * We recommend the use of EhCache 2.5 or higher.
 
- * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
+ * @author Dmitriy Kopylenko
  * @since 1.1.1
  * @see #setCacheManager
  * @see EhCacheManagerFactoryBean
@@ -87,11 +88,13 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 
 	@SuppressWarnings("deprecation")
 	public EhCacheFactoryBean() {
+		// Using deprecated setMaxElementsInMemory method for EhCache 2.1-2.4 compatibility
 		setMaxElementsInMemory(10000);
 		setMaxElementsOnDisk(10000000);
 		setTimeToLiveSeconds(120);
 		setTimeToIdleSeconds(120);
 	}
+
 
 	/**
 	 * Set a CacheManager from which to retrieve a named Cache instance.

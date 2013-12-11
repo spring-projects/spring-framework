@@ -16,8 +16,8 @@
 
 package org.springframework.cache.ehcache;
 
-import junit.framework.TestCase;
 import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheException;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.config.CacheConfiguration;
@@ -26,17 +26,21 @@ import net.sf.ehcache.constructs.blocking.CacheEntryFactory;
 import net.sf.ehcache.constructs.blocking.SelfPopulatingCache;
 import net.sf.ehcache.constructs.blocking.UpdatingCacheEntryFactory;
 import net.sf.ehcache.constructs.blocking.UpdatingSelfPopulatingCache;
+import org.junit.Test;
 
 import org.springframework.core.io.ClassPathResource;
 
+import static org.junit.Assert.*;
+
 /**
- * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
+ * @author Dmitriy Kopylenko
  * @since 27.09.2004
  */
-public class EhCacheSupportTests extends TestCase {
+public class EhCacheSupportTests {
 
-	public void testLoadingBlankCacheManager() throws Exception {
+	@Test
+	public void testBlankCacheManager() throws Exception {
 		EhCacheManagerFactoryBean cacheManagerFb = new EhCacheManagerFactoryBean();
 		cacheManagerFb.setCacheManagerName("myCacheManager");
 		assertEquals(CacheManager.class, cacheManagerFb.getObjectType());
@@ -53,7 +57,59 @@ public class EhCacheSupportTests extends TestCase {
 		}
 	}
 
-	public void testLoadingCacheManagerFromConfigFile() throws Exception {
+	@Test
+	public void testCacheManagerConflict() throws Exception {
+		EhCacheManagerFactoryBean cacheManagerFb = new EhCacheManagerFactoryBean();
+		cacheManagerFb.setCacheManagerName("myCacheManager");
+		assertEquals(CacheManager.class, cacheManagerFb.getObjectType());
+		assertTrue("Singleton property", cacheManagerFb.isSingleton());
+		cacheManagerFb.afterPropertiesSet();
+		try {
+			CacheManager cm = cacheManagerFb.getObject();
+			assertTrue("Loaded CacheManager with no caches", cm.getCacheNames().length == 0);
+			Cache myCache1 = cm.getCache("myCache1");
+			assertTrue("No myCache1 defined", myCache1 == null);
+
+			EhCacheManagerFactoryBean cacheManagerFb2 = new EhCacheManagerFactoryBean();
+			cacheManagerFb2.setCacheManagerName("myCacheManager");
+			cacheManagerFb2.afterPropertiesSet();
+			fail("Should have thrown CacheException because of naming conflict");
+		}
+		catch (CacheException ex) {
+			// expected
+		}
+		finally {
+			cacheManagerFb.destroy();
+		}
+	}
+
+	@Test
+	public void testAcceptExistingCacheManager() throws Exception {
+		EhCacheManagerFactoryBean cacheManagerFb = new EhCacheManagerFactoryBean();
+		cacheManagerFb.setCacheManagerName("myCacheManager");
+		assertEquals(CacheManager.class, cacheManagerFb.getObjectType());
+		assertTrue("Singleton property", cacheManagerFb.isSingleton());
+		cacheManagerFb.afterPropertiesSet();
+		try {
+			CacheManager cm = cacheManagerFb.getObject();
+			assertTrue("Loaded CacheManager with no caches", cm.getCacheNames().length == 0);
+			Cache myCache1 = cm.getCache("myCache1");
+			assertTrue("No myCache1 defined", myCache1 == null);
+
+			EhCacheManagerFactoryBean cacheManagerFb2 = new EhCacheManagerFactoryBean();
+			cacheManagerFb2.setCacheManagerName("myCacheManager");
+			cacheManagerFb2.setAcceptExisting(true);
+			cacheManagerFb2.afterPropertiesSet();
+			CacheManager cm2 = cacheManagerFb2.getObject();
+			assertSame(cm, cm2);
+			cacheManagerFb2.destroy();
+		}
+		finally {
+			cacheManagerFb.destroy();
+		}
+	}
+
+	public void testCacheManagerFromConfigFile() throws Exception {
 		EhCacheManagerFactoryBean cacheManagerFb = new EhCacheManagerFactoryBean();
 		cacheManagerFb.setConfigLocation(new ClassPathResource("testEhcache.xml", getClass()));
 		cacheManagerFb.setCacheManagerName("myCacheManager");
@@ -70,10 +126,12 @@ public class EhCacheSupportTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testEhCacheFactoryBeanWithDefaultCacheManager() throws Exception {
 		doTestEhCacheFactoryBean(false);
 	}
 
+	@Test
 	public void testEhCacheFactoryBeanWithExplicitCacheManager() throws Exception {
 		doTestEhCacheFactoryBean(true);
 	}
@@ -156,6 +214,7 @@ public class EhCacheSupportTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testEhCacheFactoryBeanWithBlockingCache() throws Exception {
 		EhCacheManagerFactoryBean cacheManagerFb = new EhCacheManagerFactoryBean();
 		cacheManagerFb.afterPropertiesSet();
@@ -175,6 +234,7 @@ public class EhCacheSupportTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testEhCacheFactoryBeanWithSelfPopulatingCache() throws Exception {
 		EhCacheManagerFactoryBean cacheManagerFb = new EhCacheManagerFactoryBean();
 		cacheManagerFb.afterPropertiesSet();
@@ -200,6 +260,7 @@ public class EhCacheSupportTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testEhCacheFactoryBeanWithUpdatingSelfPopulatingCache() throws Exception {
 		EhCacheManagerFactoryBean cacheManagerFb = new EhCacheManagerFactoryBean();
 		cacheManagerFb.afterPropertiesSet();
