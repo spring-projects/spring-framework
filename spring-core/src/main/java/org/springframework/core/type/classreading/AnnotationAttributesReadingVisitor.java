@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -28,6 +29,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.SpringAsmInfo;
 import org.springframework.asm.Type;
@@ -35,7 +37,6 @@ import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
-
 
 /**
  * @author Chris Beams
@@ -169,12 +170,11 @@ class RecursiveAnnotationAttributesVisitor extends AbstractRecursiveAnnotationVi
 	public final void visitEnd() {
 		try {
 			Class<?> annotationClass = this.classLoader.loadClass(this.annotationType);
-			this.doVisitEnd(annotationClass);
+			doVisitEnd(annotationClass);
 		}
 		catch (ClassNotFoundException ex) {
-			this.logger.debug("Failed to classload type while reading annotation " +
-					"metadata. This is a non-fatal error, but certain annotation " +
-					"metadata may be unavailable.", ex);
+			this.logger.debug("Failed to class-load type while reading annotation metadata. " +
+					"This is a non-fatal error, but certain annotation metadata may be unavailable.", ex);
 		}
 	}
 
@@ -183,26 +183,30 @@ class RecursiveAnnotationAttributesVisitor extends AbstractRecursiveAnnotationVi
 	}
 
 	private void registerDefaultValues(Class<?> annotationClass) {
-		// Check declared default values of attributes in the annotation type.
-		Method[] annotationAttributes = annotationClass.getMethods();
-		for (Method annotationAttribute : annotationAttributes) {
-			String attributeName = annotationAttribute.getName();
-			Object defaultValue = annotationAttribute.getDefaultValue();
-			if (defaultValue != null && !this.attributes.containsKey(attributeName)) {
-				if (defaultValue instanceof Annotation) {
-					defaultValue = AnnotationAttributes.fromMap(
-							AnnotationUtils.getAnnotationAttributes((Annotation)defaultValue, false, true));
-				}
-				else if (defaultValue instanceof Annotation[]) {
-					Annotation[] realAnnotations = (Annotation[]) defaultValue;
-					AnnotationAttributes[] mappedAnnotations = new AnnotationAttributes[realAnnotations.length];
-					for (int i = 0; i < realAnnotations.length; i++) {
-						mappedAnnotations[i] = AnnotationAttributes.fromMap(
-								AnnotationUtils.getAnnotationAttributes(realAnnotations[i], false, true));
+		// Only do further scanning for public annotations; we'd run into IllegalAccessExceptions
+		// otherwise, and don't want to mess with accessibility in a SecurityManager environment.
+		if (Modifier.isPublic(annotationClass.getModifiers())) {
+			// Check declared default values of attributes in the annotation type.
+			Method[] annotationAttributes = annotationClass.getMethods();
+			for (Method annotationAttribute : annotationAttributes) {
+				String attributeName = annotationAttribute.getName();
+				Object defaultValue = annotationAttribute.getDefaultValue();
+				if (defaultValue != null && !this.attributes.containsKey(attributeName)) {
+					if (defaultValue instanceof Annotation) {
+						defaultValue = AnnotationAttributes.fromMap(
+								AnnotationUtils.getAnnotationAttributes((Annotation) defaultValue, false, true));
 					}
-					defaultValue = mappedAnnotations;
+					else if (defaultValue instanceof Annotation[]) {
+						Annotation[] realAnnotations = (Annotation[]) defaultValue;
+						AnnotationAttributes[] mappedAnnotations = new AnnotationAttributes[realAnnotations.length];
+						for (int i = 0; i < realAnnotations.length; i++) {
+							mappedAnnotations[i] = AnnotationAttributes.fromMap(
+									AnnotationUtils.getAnnotationAttributes(realAnnotations[i], false, true));
+						}
+						defaultValue = mappedAnnotations;
+					}
+					this.attributes.put(attributeName, defaultValue);
 				}
-				this.attributes.put(attributeName, defaultValue);
 			}
 		}
 	}
@@ -251,12 +255,16 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 		Set<String> metaAnnotationTypeNames = new LinkedHashSet<String>();
 		for (Annotation metaAnnotation : annotationClass.getAnnotations()) {
 			metaAnnotationTypeNames.add(metaAnnotation.annotationType().getName());
-			if (!this.attributesMap.containsKey(metaAnnotation.annotationType().getName())) {
-				this.attributesMap.put(metaAnnotation.annotationType().getName(),
-						AnnotationUtils.getAnnotationAttributes(metaAnnotation, true, true));
-			}
-			for (Annotation metaMetaAnnotation : metaAnnotation.annotationType().getAnnotations()) {
-				metaAnnotationTypeNames.add(metaMetaAnnotation.annotationType().getName());
+			// Only do further scanning for public annotations; we'd run into IllegalAccessExceptions
+			// otherwise, and don't want to mess with accessibility in a SecurityManager environment.
+			if (Modifier.isPublic(metaAnnotation.annotationType().getModifiers())) {
+				if (!this.attributesMap.containsKey(metaAnnotation.annotationType().getName())) {
+					this.attributesMap.put(metaAnnotation.annotationType().getName(),
+							AnnotationUtils.getAnnotationAttributes(metaAnnotation, true, true));
+				}
+				for (Annotation metaMetaAnnotation : metaAnnotation.annotationType().getAnnotations()) {
+					metaAnnotationTypeNames.add(metaMetaAnnotation.annotationType().getName());
+				}
 			}
 		}
 		if (this.metaAnnotationMap != null) {
