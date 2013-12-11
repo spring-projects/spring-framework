@@ -80,6 +80,7 @@ public class ConfigurationClassProcessingTests {
 		RequiredAnnotationBeanPostProcessor rapp = new RequiredAnnotationBeanPostProcessor();
 		rapp.setBeanFactory(factory);
 		factory.addBeanPostProcessor(rapp);
+		factory.freezeConfiguration();
 		return factory;
 	}
 

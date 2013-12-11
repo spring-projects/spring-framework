@@ -739,27 +739,36 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		final Holder objectType = new Holder();
 		String factoryBeanName = mbd.getFactoryBeanName();
 		final String factoryMethodName = mbd.getFactoryMethodName();
-		if (factoryBeanName != null && factoryMethodName != null) {
-			// Try to obtain the FactoryBean's object type without instantiating it at all.
-			BeanDefinition fbDef = getBeanDefinition(factoryBeanName);
-			if (fbDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) fbDef).hasBeanClass()) {
-				// CGLIB subclass methods hide generic parameters; look at the original user class.
-				Class<?> fbClass = ClassUtils.getUserClass(((AbstractBeanDefinition) fbDef).getBeanClass());
-				// Find the given factory method, taking into account that in the case of
-				// @Bean methods, there may be parameters present.
-				ReflectionUtils.doWithMethods(fbClass,
-						new ReflectionUtils.MethodCallback() {
-							@Override
-							public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
-								if (method.getName().equals(factoryMethodName) &&
-										FactoryBean.class.isAssignableFrom(method.getReturnType())) {
-									objectType.value = GenericTypeResolver.resolveReturnTypeArgument(method, FactoryBean.class);
+
+		if (factoryBeanName != null) {
+			if (factoryMethodName != null) {
+				// Try to obtain the FactoryBean's object type without instantiating it at all.
+				BeanDefinition fbDef = getBeanDefinition(factoryBeanName);
+				if (fbDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) fbDef).hasBeanClass()) {
+					// CGLIB subclass methods hide generic parameters; look at the original user class.
+					Class<?> fbClass = ClassUtils.getUserClass(((AbstractBeanDefinition) fbDef).getBeanClass());
+					// Find the given factory method, taking into account that in the case of
+					// @Bean methods, there may be parameters present.
+					ReflectionUtils.doWithMethods(fbClass,
+							new ReflectionUtils.MethodCallback() {
+								@Override
+								public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+									if (method.getName().equals(factoryMethodName) &&
+											FactoryBean.class.isAssignableFrom(method.getReturnType())) {
+										objectType.value = GenericTypeResolver.resolveReturnTypeArgument(method, FactoryBean.class);
+									}
 								}
-							}
-						});
-				if (objectType.value != null) {
-					return objectType.value;
+							});
+					if (objectType.value != null) {
+						return objectType.value;
+					}
 				}
+			}
+			// If not resolvable above and the referenced factory bean doesn't exist yet,
+			// exit here - we don't want to force the creation of another bean just to
+			// obtain a FactoryBean's object type...
+			if (!isBeanEligibleForMetadataCaching(factoryBeanName)) {
+				return null;
 			}
 		}
 
