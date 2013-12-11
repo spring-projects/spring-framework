@@ -154,14 +154,14 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 		String prefetch = containerEle.getAttribute(PREFETCH_ATTRIBUTE);
 		if (StringUtils.hasText(prefetch)) {
 			if (containerType.startsWith("default")) {
-				containerDef.getPropertyValues().add("maxMessagesPerTask", new Integer(prefetch));
+				containerDef.getPropertyValues().add("maxMessagesPerTask", prefetch);
 			}
 		}
 
 		String receiveTimeout = containerEle.getAttribute(RECEIVE_TIMEOUT_ATTRIBUTE);
 		if (StringUtils.hasText(receiveTimeout)) {
 			if (containerType.startsWith("default")) {
-				containerDef.getPropertyValues().add("receiveTimeout", new Integer(receiveTimeout));
+				containerDef.getPropertyValues().add("receiveTimeout", receiveTimeout);
 			}
 		}
 
