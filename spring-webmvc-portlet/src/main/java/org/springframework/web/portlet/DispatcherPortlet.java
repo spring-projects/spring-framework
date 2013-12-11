@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1187,7 +1187,11 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	protected void doDispatch(PortletRequestDispatcher dispatcher, PortletRequest request, MimeResponse response)
 			throws Exception {
 
-		if (PortletRequest.RESOURCE_PHASE.equals(request.getAttribute(PortletRequest.LIFECYCLE_PHASE))) {
+		// In general, we prefer a forward for resource responses, in order to have full Servlet API
+		// support in the target resource (e.g. on uPortal). However, on Liferay, a resource forward
+		// displays an empty page, so we have to resort to an include there...
+		if (PortletRequest.RESOURCE_PHASE.equals(request.getAttribute(PortletRequest.LIFECYCLE_PHASE)) &&
+				!dispatcher.getClass().getName().startsWith("com.liferay")) {
 			dispatcher.forward(request, response);
 		}
 		else {
