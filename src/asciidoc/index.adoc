@@ -18375,7 +18375,7 @@ well as any __set up__ or __tear down__ of the test fixture.
 
 [[testcontext-framework]]
 ==== Spring TestContext Framework
-The __Spring `TestContext` Framework__ (located in the
+The __Spring TestContext Framework__ (located in the
 `org.springframework.test.context` package) provides generic, annotation-driven unit and
 integration testing support that is agnostic of the testing framework in use. The
 TestContext framework also places a great deal of importance on __convention over
@@ -18480,7 +18480,7 @@ locations__.
 ** `GenericPropertiesContextLoader`: loads a standard `ApplicationContext` from Java
 Properties files.
 
-The following sections explain how to configure the `TestContext` framework through
+The following sections explain how to configure the TestContext framework through
 annotations and provide working examples of how to write unit and integration tests with
 the framework.
 
