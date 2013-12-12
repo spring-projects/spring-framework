@@ -925,8 +925,8 @@ Framework 4.0 introduces several new features for use in unit and integration te
 
 * Almost all annotations in the `spring-test` module (e.g., `@ContextConfiguration`,
   `@WebAppConfiguration`, `@ContextHierarchy`, `@ActiveProfiles`, etc.) can now be used
-  as <<beans-meta-annotations,meta-annotations>> to create custom _composed annotations_
-  and reduce configuration duplication across tests.
+  as <<integration-testing-annotations-meta,meta-annotations>> to create custom
+  _composed annotations_ and reduce configuration duplication across tests.
 * Active bean definition profiles can now be resolved programmatically, simply by
   implementing a custom <<testcontext-ctx-management-env-profiles-ActiveProfilesResolver,`ActiveProfilesResolver`>>
   and registering it via the `resolver` attribute of `@ActiveProfiles`.
@@ -18369,6 +18369,80 @@ well as any __set up__ or __tear down__ of the test fixture.
 	public void testProcessRepeatedly() {
 		// ...
 	}
+----
+
+
+[[integration-testing-annotations-meta]]
+===== Meta-Annotation Support for Testing
+As of Spring Framework 4.0, it is now possible to use test-related annotations
+as <<beans-meta-annotations,meta-annotations>> in order to create custom
+_composed annotations_ and reduce configuration duplication across tests.
+
+Each of the following may be used as meta-annotations in conjunction with the 
+<<testcontext-framework,TestContext framework>>.
+
+* `@ContextConfiguration`
+* `@ContextHierarchy`
+* `@ActiveProfiles`
+* `@DirtiesContext`
+* `@WebAppConfiguration`
+* `@TestExecutionListeners`
+* `@Transactional`
+* `@BeforeTransaction`
+* `@AfterTransaction`
+* `@TransactionConfiguration`
+* `@Rollback`
+* `@Repeat`
+* `@Timed`
+* `@IfProfileValue`
+* `@ProfileValueSourceConfiguration`
+
+For example, if we discover that we are repeating the following configuration
+across our JUnit-based test suite...
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@RunWith(SpringJUnit4ClassRunner.class)
+	@ContextConfiguration({"/app-config.xml", "/test-data-access-config.xml"})
+	@ActiveProfiles("dev")
+	@Transactional
+	public class OrderRepositoryTests { }
+
+	@RunWith(SpringJUnit4ClassRunner.class)
+	@ContextConfiguration({"/app-config.xml", "/test-data-access-config.xml"})
+	@ActiveProfiles("dev")
+	@Transactional
+	public class UserRepositoryTests { }
+----
+
+We can reduce the above duplication by introducing a custom _composed annotation_
+that centralizes the common test configuration like this:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Target(ElementType.TYPE)
+	@Retention(RetentionPolicy.RUNTIME)
+	@ContextConfiguration({"/app-config.xml", "/test-data-access-config.xml"})
+	@ActiveProfiles("dev")
+	@Transactional
+	public @interface TransactionalDevTest { }
+----
+
+Then we can use our custom `@TransactionalDevTest` annotation to simplify the
+configuration of individual test classes as follows:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@RunWith(SpringJUnit4ClassRunner.class)
+	@TransactionalDevTest
+	public class OrderRepositoryTests { }
+
+	@RunWith(SpringJUnit4ClassRunner.class)
+	@TransactionalDevTest
+	public class UserRepositoryTests { }
 ----
 
 
