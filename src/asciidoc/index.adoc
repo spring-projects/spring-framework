@@ -19138,7 +19138,7 @@ respective Javadoc.
 
 [[testcontext-ctx-management-web]]
 ====== Loading a WebApplicationContext
-Spring 3.2 introduces support for loading a `WebApplicationContext` in integration
+Spring 3.2 introduced support for loading a `WebApplicationContext` in integration
 tests. To instruct the TestContext framework to load a `WebApplicationContext` instead
 of a standard `ApplicationContext`, simply annotate the respective test class with
 `@WebAppConfiguration`.
@@ -19239,7 +19239,7 @@ example with the previous example.
 
 .[[testcontext-ctx-management-web-mocks]]Working with Web Mocks
 --
-To provide comprehensive web testing support, Spring 3.2 introduces a new
+To provide comprehensive web testing support, Spring 3.2 introduced a
 `ServletTestExecutionListener` that is enabled by default. When testing against a
 `WebApplicationContext` this <<testcontext-key-abstractions,TestExecutionListener>> sets
 up default thread-local state via Spring Web's `RequestContextHolder` before each test
@@ -19667,7 +19667,7 @@ bean by name there (as shown above, assuming that "myDataSource" is the bean id)
 
 <<beans-factory-scopes-other,Request and session scoped beans>> have been supported by
 Spring for several years now, but it's always been a bit non-trivial to test them. As of
-Spring 3.2 it's now a breeze to test your request-scoped and session-scoped beans by
+Spring 3.2 it's a breeze to test your request-scoped and session-scoped beans by
 following these steps.
 
 * Ensure that a `WebApplicationContext` is loaded for your test by annotating your test
@@ -20058,13 +20058,13 @@ feedback, and the contribution of many.
 
 The standalone https://github.com/SpringSource/spring-test-mvc[spring-test-mvc project]
 is still available on GitHub and can be used in conjunction with Spring Framework 3.1.x.
-Applications upgrading to 3.2 should replace the `spring-test-mvc` dependency with a
+Applications upgrading to 3.2 or later should replace the `spring-test-mvc` dependency with a
 dependency on `spring-test`.
 
 The `spring-test` module uses a different package `org.springframework.test.web` but
 otherwise is nearly identical with two exceptions. One is support for features new in
 3.2 (e.g. asynchronous web requests). The other relates to the options for creating a
-`MockMvc` instance. In Spring Framework 3.2, this can only be done through the
+`MockMvc` instance. In Spring Framework 3.2 and later, this can only be done through the
 TestContext framework, which provides caching benefits for the loaded configuration.
 ****
 
