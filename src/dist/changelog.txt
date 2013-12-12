@@ -1,6 +1,33 @@
 SPRING FRAMEWORK CHANGELOG
 ===========================
-http://www.springsource.org
+http://www.spring.io
+
+
+Changes in version 3.2.6 (2013-12-12)
+-------------------------------------
+
+* added Maven bill-of-materials POM
+* fixed BeanUtils.copyProperties() issue caused by recently changes to GenericTypeAwarePropertyDescriptor (SPR-11209)
+* fixed issue with ServletTestExecutionListener breaking existing code (SPR-11144)
+* fixed SpEL ReflectivePropertyAccessor to not consider "is" methods with non boolean returns (SPR-11142)
+* support multiple comma-separated values in X-Forwarded-Host header (SPR-11140)
+* fixed tests related to java.beans.BeanInfo changes in JDK8-b117 (SPR-11139)
+* added synchronization to EhCacheFactoryBean.afterPropertiesSet (SPR-11132)
+* fixed dependency injection issue when using ManagedMap or ManagedList in BeanDefinitionParser (SPR-11131)
+* fixed support for combining multiple @Cacheable within @Caching annotation (SPR-11124)
+* allow autowire qualified scoped-proxy @Bean definitions (SPR-11116)
+* fixed type resolution fails for uninitialized factory-method declaration issue (SPR-11112)
+* fixed "CglibAopProxy: Unable to proxy method" warning when bean class contains static final method (SPR-11107)
+* improved performance for repeated JDBC 3.0 getParameterType calls in StatementCreatorUtils (SPR-11100)
+* fixed minor issue with prior fix for CVE 2010-1622 (SPR-11098)
+* added mapping for additional Sybase error code to DataIntegrityViolationException (SPR-11097)
+* fixed issue with "!profile" selector XML (SPR-11093)
+* fixed set statistics issues with EhCache (SPR-11092, SPR-11080)
+* fixed classpath scanning issue on private meta-attributes (SPR-11091)
+* fixed potential NPE when calling stored procedures (SPR-11076)
+* added synchronization to MBeanExporter & MBeanRegistrationSupport (SPR-11002)
+* removed integer conversion from JmsListenerContainerParser (SPR-10986)
+* fixed @ResourceMapping issue with Portlets (SPR-10791)
 
 
 Changes in version 3.2.5 (2013-11-06)
