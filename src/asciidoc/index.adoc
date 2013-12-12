@@ -36504,7 +36504,7 @@ application level WebSocket sub-protocol.
 
 <<websocket-intro>> establishes a frame of mind in which to think about
 WebSocket covering adoption challenges, design considerations, and thoughts on
-it is a good fit.
+when it is a good fit.
 
 <<websocket-server>> reviews the Spring WebSocket API on the
 server-side while <<websocket-fallback>> explains the SockJS protocol and shows
@@ -37058,7 +37058,7 @@ and server both need to understand how to interpret messages.
 
 
 [[websocket-stomp-overview]]
-==== STOMP Overview
+==== Overview of the STOMP Protocol
 http://stomp.github.io/stomp-specification-1.2.html#Abstract[STOMP] is a simple
 messaging protocol originally created to connect to enterprise message brokers from
 scripting languages such as Ruby, Python and Perl. It is designed to address a
@@ -37150,7 +37150,7 @@ Spring MVC provides a programming model based on HTTP.
 
 
 [[websocket-stomp-enable]]
-==== Enable STOMP over WebSocket
+==== Enable STOMP (over WebSocket)
 The Spring Framework provides support for using STOMP over WebSocket through
 the +spring-messaging+ and +spring-websocket+ modules. It's easy to enable it.
 
@@ -37224,9 +37224,152 @@ Or if connecting via WebSocket (without SockJS):
 
 
 [[websocket-stomp-handle]]
-==== Handling STOMP Messages
-When STOMP is enabled, the Spring application is effectively becomes a STOMP
-broker to connected clients.
+==== Overview of STOMP Message Handling
+
+When a STOMP endpoint is configured, the Spring application effectively becomes
+the broker to connected clients, handling incoming messages and broadcasting
+messages back to them. This part of the documentation describes how STOMP
+messages are handled within the application.
+
+As mentioned in the <<websocket-intro-architecture,introduction>> the
+`spring-messaging` module contains key abstractions from the
+https://spring.io/spring-integration[Spring Integration] project including
+`Message`, `MessageChannel`, `MessageHandler` and a few others.
+
+[NOTE]
+====
+Spring Integration 4 will be the first version to start using the abstractions
+from the package structure of the `spring-messaging` module as opposed to its
+own present packages. Spring Integration also provides many additional
+abstractions and implementations in support of the well-known
+EAI patterns (http://www.eaipatterns.com/[enterprise integration patterns]).
+====
+
+https://github.com/spring-projects/spring-framework/blob/master/spring-messaging/src/main/java/org/springframework/messaging/MessageChannel.java[MessageChannel]
+is a simple contract for passing messages between components without
+creating tight coupling among them.
+https://github.com/spring-projects/spring-framework/blob/master/spring-messaging/src/main/java/org/springframework/messaging/SubscribableChannel.java[SubscribableChannel] extends
+it with the ability to register subscribers and
+https://github.com/spring-projects/spring-framework/blob/master/spring-messaging/src/main/java/org/springframework/messaging/support/ExecutorSubscribableChannel.java[ExecutorSubscribableChannel]
+is an implementation that passes messages to subscribers in
+the same thread or a different thread depending on whether it has been provided with
+a `java.util.concurrent.Executor`. This enables assembling message
+handling flows from various components and modifying them through configuration.
+
+The provided Java config `@EnableWebSocketMessageBroker` and XML namespace
+`<websocket:message-broker>` each put together a default message handling
+flow for applications to use, as explained next. This flow can be modified,
+customized, or extended. For example an application can add a
+https://github.com/spring-projects/spring-framework/blob/master/spring-messaging/src/main/java/org/springframework/messaging/support/ChannelInterceptor.java[ChannelInterceptor]
+to any message channel in order to intercept messages passing through it,
+it can register additional message handling components, alternate between
+synchronous and asynchronous message passing, and so on.
+
+Incoming client STOMP messages are passed to a message channel with the name
+`"clientInboundChannel"`. By default the messages are routed to annotated
+methods as well as to a "simple" message broker. This simple message broker
+automatically records subscriptions, in-memory, and broadcasts messages as
+necessary. As explained later you can also use a full-featured message broker
+(e.g. RabbitMQ, ActiveMQ, and any other broker that supports STOMP) to manage
+subscriptions and broadcast messages.
+
+Below is example configuration:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebSocketMessageBroker
+	public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+		@Override
+		public void registerStompEndpoints(StompEndpointRegistry registry) {
+			registry.addEndpoint("/portfolio").withSockJS();
+		}
+
+		@Override
+		public void configureMessageBroker(MessageBrokerRegistry registry) {
+			registry.enableSimpleBroker("/topic/");
+			registry.setApplicationDestinationPrefixes("/app");
+		}
+
+	}
+----
+
+XML configuration equivalent:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:websocket="http://www.springframework.org/schema/websocket"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/websocket
+			http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+
+		<websocket:message-broker application-destination-prefix="/app">
+			<websocket:stomp-endpoint path="/portfolio" />
+				<websocket:sockjs/>
+			</websocket:stomp-endpoint>
+			<websocket:simple-broker prefix="/topic"/>
+		</websocket:message-broker>
+
+	</beans>
+----
+
+The configuration example assigns destination prefixes -- "/app" for filtering
+messages to annotated methods and "/topic" for messages to the broker. The
+examples below demonstrate how this can be used.
+
+The destination prefix should not be included in annotation mappings. For
+example this method handles messages to destination "/app/greetings":
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Controller
+	public class GreetingController {
+
+		@MessageMapping("/greetings") {
+		public void handle(String greeting) {
+			// ...
+		}
+
+	}
+
+----
+
+The method accepts a String extracted from the payload of the message,
+possibly converted based on its content type. The method can also return a
+value, which is wrapped as the payload of a new message and sent to a message
+channel named `"brokerChannel"` to the same destination as the client message
+but with a new prefix ("/topic" by default). The `@SendTo` annotation :
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Controller
+	public class GreetingController {
+
+		@MessageMapping("/greetings") {
+		public String handle(String greeting) {
+			return "[" + getTimestamp() + ": " + greeting;
+		}
+
+	}
+
+----
+
+As a result, to put it all together, a client sends a greeting message to
+destination "/app/greetings". The message is routed to `GreetingController`,
+which enriches the greeting with a timestamp and sends a new message to the
+broker with destination "/topic/greetings". The broker then broadcasts the
+message to all subscribed, connected clients.
+
+
 
 
 [[spring-integration]]
