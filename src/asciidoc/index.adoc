@@ -783,9 +783,9 @@ Framework release.
 
 
 === Removed Deprecated Packages and Methods
-All deprecated packages, and many deprecated classes and methods have been removed with
-version 4.0. If you are upgrading from a previous release of Spring, you should ensure
-that you have fixed any deprecated calls that you were making.
+All deprecated packages, and many deprecated classes, methods, and fields have been
+removed with version 4.0. If you are upgrading from a previous release of Spring, you
+should ensure that you have fixed any deprecated calls that you were making.
 
 For a complete set of changes, check out the
 http://docs.spring.io/spring-framework/docs/3.2.4.RELEASE_to_4.0.0.RELEASE/[API
@@ -919,8 +919,26 @@ For more information consult the `GroovyBeanDefinitionReader`
 {javadoc-baseurl}/org/springframework/beans/factory/groovy/GroovyBeanDefinitionReader.html[Javadoc].
 
 
+=== Testing Improvements
+In addition to pruning of deprecated code within the `spring-test` module, Spring
+Framework 4.0 introduces several new features for use in unit and integration testing.
 
-
+* Almost all annotations in the `spring-test` module (e.g., `@ContextConfiguration`,
+  `@WebAppConfiguration`, `@ContextHierarchy`, `@ActiveProfiles`, etc.) can now be used
+  as <<beans-meta-annotations,meta-annotations>> to create custom _composed annotations_
+  and reduce configuration duplication across tests.
+* Active bean definition profiles can now be resolved programmatically, simply by
+  implementing a custom <<testcontext-ctx-management-env-profiles-ActiveProfilesResolver,`ActiveProfilesResolver`>>
+  and registering it via the `resolver` attribute of `@ActiveProfiles`.
+* A new `SocketUtils` utility class has been introduced in the `spring-core` module
+  which enables you to scan for free TCP & UDP server ports on localhost. This
+  functionality is not specific to testing but can prove very useful when writing
+  integration tests that require the use of sockets, for example tests that start
+  an in-memory SMTP server, FTP server, Servlet container, etc.
+* As of Spring 4.0, the set of mocks in the `org.springframework.mock.web` package is
+  now compatible with Servlet 3.0. Furthermore, several of the Servlet API mocks
+  (e.g., `MockHttpServletRequest`, `MockServletContext`, etc.) have been updated with
+  minor enhancements and improved configurability.
 
 
 
@@ -17948,7 +17966,8 @@ should be active when loading an `ApplicationContext` for test classes.
 ====
 `@ActiveProfiles` provides support for __inheriting__ active bean definition profiles
 declared by superclasses by default. It is also possible to resolve active bean
-definition profiles programmatically by implementing a custom `ActiveProfilesResolver`
+definition profiles programmatically by implementing a custom
+<<testcontext-ctx-management-env-profiles-ActiveProfilesResolver,`ActiveProfilesResolver`>>
 and registering it via the `resolver` attribute of `@ActiveProfiles`.
 ====
 
@@ -19071,6 +19090,7 @@ disable the inheritance of active profiles.
 	}
 ----
 
+[[testcontext-ctx-management-env-profiles-ActiveProfilesResolver]]
 Furthermore, it is sometimes necessary to resolve active profiles for tests
 __programmatically__ instead of declaratively -- for example, based on:
 
