@@ -9205,11 +9205,11 @@ respectively.
 === Bean manipulation and the BeanWrapper
 
 The `org.springframework.beans` package adheres to the JavaBeans standard provided by
-Sun. A JavaBean is simply a class with a default no-argument constructor, which follows
+Oracle. A JavaBean is simply a class with a default no-argument constructor, which follows
 a naming convention where (by way of an example) a property named `bingoMadness` would
 have a setter method `setBingoMadness(..)` and a getter method `getBingoMadness()`. For
-more information about JavaBeans and the specification, please refer to Sun's website (
-http://java.sun.com/products/javabeans/[java.sun.com/products/javabeans]).
+more information about JavaBeans and the specification, please refer to Oracle's website (
+http://docs.oracle.com/javase/6/docs/api/java/beans/package-summary.html[javabeans]).
 
 One quite important class in the beans package is the `BeanWrapper` interface and its
 corresponding implementation ( `BeanWrapperImpl`). As quoted from the Javadoc, the
@@ -9358,7 +9358,7 @@ behavior can be achieved by __registering custom editors__, of type
 `java.beans.PropertyEditor`. Registering custom editors on a `BeanWrapper` or
 alternately in a specific IoC container as mentioned in the previous chapter, gives it
 the knowledge of how to convert properties to the desired type. Read more about
-`PropertyEditors` in the Javadoc of the `java.beans` package provided by Sun.
+`PropertyEditors` in the Javadoc of the `java.beans` package provided by Oracle.
 
 A couple of examples where property editing is used in Spring:
 
@@ -14843,7 +14843,7 @@ using Spring in accordance with the properties of the annotation". In this conte
 __initialization__ refers to newly instantiated objects (e.g., objects instantiated with
 the ' `new`' operator) as well as to `Serializable` objects that are undergoing
 deserialization (e.g., via
-http://java.sun.com/j2se/1.5.0/docs/api/java/io/Serializable.html[readResolve()]).
+http://docs.oracle.com/javase/6/docs/api/java/io/Serializable.html[readResolve()]).
 
 [NOTE]
 ====
@@ -18266,10 +18266,10 @@ methods. Class-level usage overrides method-level usage.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	**@IfProfileValue**(**name**="java.vendor", **value**="Sun Microsystems Inc.")
+	**@IfProfileValue**(**name**="java.vendor", **value**="Oracle Corporation")
 	@Test
-	public void testProcessWhichRunsOnlyOnSunJvm() {
-		// some logic that should run only on Java VMs from Sun Microsystems
+	public void testProcessWhichRunsOnlyOnOracleJvm() {
+		// some logic that should run only on Java VMs from Oracle Corporation
 	}
 ----
 
@@ -23321,9 +23321,9 @@ are the parameter names and the values are the parameter values.
 
 Another `SqlParameterSource` implementation is the `BeanPropertySqlParameterSource`
 class. This class wraps an arbitrary JavaBean (that is, an instance of a class that
-adheres to http://java.sun.com/products/javabeans/docs/spec.html[the JavaBean
-conventions]), and uses the properties of the wrapped JavaBean as the source of named
-parameter values.
+adheres to http://www.oracle.com/technetwork/java/javase/documentation/spec-136004.html[the
+JavaBean conventions]), and uses the properties of the wrapped JavaBean as the source
+of named parameter values.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -26534,7 +26534,7 @@ within Spring's JDO support.
 === JPA
 The Spring JPA, available under the `org.springframework.orm.jpa` package, offers
 comprehensive support for the
-http://java.sun.com/developer/technicalArticles/J2EE/jpa/index.html[Java Persistence
+http://www.oracle.com/technetwork/articles/javaee/jpa-137156.html[Java Persistence
 API] in a similar manner to the integration with Hibernate or JDO, while being aware of
 the underlying implementation in order to provide additional features.
 
@@ -34925,8 +34925,8 @@ chapter.
 .JSR-168 The Java Portlet Specification
 ****
 For more general information about portlet development, please review a whitepaper from
-Sun entitled
-http://developers.sun.com/prodtech/portalserver/reference/techart/jsr168/["Introduction
+Oracle entitled
+http://www.oracle.com/technetwork/java/index-raji-test-141933.html["Introduction
 to JSR 168"], and of course the
 http://jcp.org/aboutJava/communityprocess/final/jsr168/[JSR-168 Specification] itself.
 ****
@@ -37580,7 +37580,7 @@ servlet name matching the bean name of the target exporter:
 	</servlet-mapping>
 ----
 
-If you are running outside of a servlet container and are using Sun's Java 6, then you
+If you are running outside of a servlet container and are using Oracle's Java 6, then you
 can use the built-in HTTP server implementation. You can configure the
 `SimpleHttpServerFactoryBean` together with a `SimpleHttpInvokerServiceExporter` as is
 shown in this example:
@@ -37708,7 +37708,7 @@ See Java EE 5 web service tutorials for details.
 
 [[remoting-web-services-jaxws-export-standalone]]
 ==== Exporting standalone web services using JAX-WS
-The built-in JAX-WS provider that comes with Sun's JDK 1.6 supports exposure of web
+The built-in JAX-WS provider that comes with Oracle's JDK 1.6 supports exposure of web
 services using the built-in HTTP server that's included in JDK 1.6 as well. Spring's
 `SimpleJaxWsServiceExporter` detects all `@WebService` annotated beans in the Spring
 application context, exporting them through the default JAX-WS server (the JDK 1.6 HTTP
@@ -37765,7 +37765,7 @@ and Spring's `@Autowired` configuration annotation still being honored:
 
 [[remoting-web-services-jaxws-export-ri]]
 ==== Exporting web services using the JAX-WS RI's Spring support
-Sun's JAX-WS RI, developed as part of the GlassFish project, ships Spring support as
+Oracle's JAX-WS RI, developed as part of the GlassFish project, ships Spring support as
 part of its JAX-WS Commons project. This allows for defining JAX-WS endpoints as
 Spring-managed beans, similar to the standalone mode discussed in the previous section -
 but this time in a Servlet environment. __Note that this is not portable in a Java EE 5
@@ -41311,15 +41311,14 @@ you can accept the coupling to both Spring and JMX, then do so.
 === Further Resources
 This section contains links to further resources about JMX.
 
-* The http://java.sun.com/products/JavaManagement/[JMX homepage] at Sun
+* The http://www.oracle.com/technetwork/java/javase/tech/javamanagement-140525.html[JMX
+homepage] at Oracle
 * The http://jcp.org/aboutJava/communityprocess/final/jsr003/index3.html[JMX
   specification] (JSR-000003)
 * The http://jcp.org/aboutJava/communityprocess/final/jsr160/index.html[JMX Remote API
   specification] (JSR-000160)
 * The http://mx4j.sourceforge.net/[MX4J homepage] (an Open Source implementation of
   various JMX specs)
-* http://java.sun.com/developer/technicalArticles/J2SE/jmx.html[Getting Started with
-  JMX] - an introductory article from Sun.
 
 
 
@@ -42208,7 +42207,7 @@ database with the Blackbox CCI connector.
 [NOTE]
 ====
 The original version of this connector is provided by the Java EE SDK (version 1.3),
-available from Sun.
+available from Oracle.
 ====
 
 Firstly, some initializations on the CCI `InteractionSpec` must be done to specify which
@@ -42496,8 +42495,8 @@ For more information on Spring's transaction facilities, see the chapter entitle
 The following additional jars to be on the classpath of your application in order to be
 able to use the Spring Framework's email library.
 
-* The http://java.sun.com/products/javamail/[JavaMail] `mail.jar` library
-* The http://java.sun.com/products/javabeans/jaf/downloads/index.html[JAF]
+* The https://java.net/projects/javamail/pages/Home[JavaMail] `mail.jar` library
+* The http://www.oracle.com/technetwork/java/jaf11-139815.html[JAF]
   `activation.jar` library
 
 All of these libraries are freely available on the web.
@@ -43502,7 +43501,7 @@ As you can see from that configuration, a 'queue-capacity' value has also been p
 The configuration of the thread pool should also be considered in light of the
 executor's queue capacity. For the full description of the relationship between pool
 size and queue capacity, consult the documentation for
-http://java.sun.com/javase/6/docs/api/java/util/concurrent/ThreadPoolExecutor.html[ThreadPoolExecutor].
+http://docs.oracle.com/javase/6/docs/api/java/util/concurrent/ThreadPoolExecutor.html[ThreadPoolExecutor].
 The main idea is that when a task is submitted, the executor will first try to use a
 free thread if the number of active threads is currently less than the core size. If the
 core size has been reached, then the task will be added to the queue as long as its
