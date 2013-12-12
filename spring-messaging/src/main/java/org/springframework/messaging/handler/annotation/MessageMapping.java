@@ -61,8 +61,7 @@ import org.springframework.messaging.Message;
  * 	WebSocket session on which the message was received. Regular HTTP-based
  * 	authentication (e.g. Spring Security based) can be used to secure the
  * 	HTTP handshake that initiates WebSocket sessions.</li>
- * </ul
- * >
+ * </ul>
  * <p>By default the return value is wrapped as a message and sent to the destination
  * specified with an {@link SendTo} method-level annotation.
  *

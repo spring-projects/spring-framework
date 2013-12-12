@@ -37058,7 +37058,7 @@ and server both need to understand how to interpret messages.
 
 
 [[websocket-stomp-overview]]
-==== Overview of the STOMP Protocol
+==== Overview of STOMP
 http://stomp.github.io/stomp-specification-1.2.html#Abstract[STOMP] is a simple
 messaging protocol originally created to connect to enterprise message brokers from
 scripting languages such as Ruby, Python and Perl. It is designed to address a
@@ -37345,8 +37345,10 @@ example this method handles messages to destination "/app/greetings":
 The method accepts a String extracted from the payload of the message,
 possibly converted based on its content type. The method can also return a
 value, which is wrapped as the payload of a new message and sent to a message
-channel named `"brokerChannel"` to the same destination as the client message
-but with a new prefix ("/topic" by default). The `@SendTo` annotation :
+channel named `"brokerChannel"` used for sending messages to the broker
+from within the application. The new message is sent to the same destination
+as that of the client message but with the default prefix "/topic"
+(`@SendTo` can be used for any other target destination):
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -37369,7 +37371,201 @@ which enriches the greeting with a timestamp and sends a new message to the
 broker with destination "/topic/greetings". The broker then broadcasts the
 message to all subscribed, connected clients.
 
+[[websocket-stomp-handle-annotations]]
+===== Annotation-based Message Handling
 
+The `@MessageMapping` annotation is supported on methods of `@Controller`-annotated classes.
+It can be used for mapping methods to path-like message destinations. It is also
+possible to combine with a type-level `@MessageMapping` for expressing shared
+mappings across all annotated methods within a controller.
+
+Destination mappings can contain Ant-style patterns (e.g. "/foo*", "/foo/**")
+and template variables (e.g. "/foo/{id}"), which can then be accessed via
+`@DestinationVariable` method arguments. This should be familiar to Spring MVC
+users, in fact the same `AntPathMatcher` is used for matching destinations based
+on patterns and for extracting template variables.
+
+The following method arguments are supported for `@MessageMapping` methods:
+
+* `Message` method argument to get access to the complete message being processed.
+* `@Payload`-annotated argument for access to the payload of a message, converted with
+a `org.springframework.messaging.converter.MessageConverter`.
+The presence of the annotation is not required since it is assumed by default.
+* `@Header`-annotated arguments for access to a specific header value along with
+type conversion using an `org.springframework.core.convert.converter.Converter`
+if necessary.
+* `@Headers`-annotated method argument that must also be assignable to `java.util.Map`
+for access to all headers in the message
+* `MessageHeaders` method argument for getting access to a map of all headers
+* `MessageHeaderAccessor`, `SimpMessageHeaderAccessor`, or `StompHeaderAccessor`
+for access to headers via typed accessor methods.
+* `@DestinationVariable`-annotated arguments for access to template
+variables extracted from the message destination. Values will be converted to
+the declared method argument type as necessary.
+* `java.security.Principal` method arguments reflecting the user logged in at
+the time of the WebSocket HTTP handshake.
+
+The return value from an `@MessageMapping` method is converted with a
+`org.springframework.messaging.converter.MessageConverter` and used as the body
+of a new message that is then sent, by default, to the `"brokerChannel"` with
+the same destination as the client message but using the prefix "/topic" by
+default. An `@SendTo` message level annotation can be used to specify any
+other destination instead.
+
+An `@SubscribeMapping` annotation can also be used to map subscription requests
+to `@Controller` methods. It is supported on the method level but can also be
+combined with a type level `@MessageMapping` annotation that expresses shared
+mappings across all message handling methods within the same controller.
+
+By default the return value from an `@SubscribeMapping` method is sent as a
+message directly back to the connected client and does not pass through the
+broker. This useful for implementing request-reply message interactions for
+example to fetch application data when the application UI is being initialized.
+Or alternatively an `@SubscribeMapping` method can be annotated with `@SendTo`
+in which case the resulting message is sent to the `"brokerChannel"` using
+the specified target destination.
+
+[[websocket-stomp-handle-send]]
+===== Sending Messages From Anywhere
+
+What if you wanted to send messages to connected clients from any part of the
+application? Any application component can send messages to the `"brokerChannel"`.
+The easist way to do that is to have a `SimpMessagingTemplate` injected and
+use it to send messages. Typically it should be easy to have it injected by
+type, for example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Controller
+	public class GreetingController {
+
+		private SimpMessagingTemplate template;
+
+		@Autowired
+		public GreetingController(SimpMessagingTemplate template) {
+			this.template = template;
+		}
+
+		@RequestMapping(value="/greetings", method=POST)
+		public void greet(String greeting) {
+			String text = "[" + getTimestamp() + "]:" + greeting;
+			this.template.convertAndSend("/topic/greetings", text);
+		}
+
+	}
+----
+
+But it can also be qualified by its name "brokerMessagingTemplate" if another
+bean of the same type exists.
+
+[[websocket-stomp-handle-simple-broker]]
+===== Simple Message Broker
+
+The built-in, simple, message broker handles subscription requests from clients,
+stores them in memory, and broadcats messages to connected clients with matching
+destinations. The broker supports path-like destinations including subscriptions
+to Ant-style destination patterns.
+
+[[websocket-stomp-handle-broker-relay]]
+===== Using a Full-Featured Message Broker
+
+The simple broker is great for getting started but supports only a subset of
+STOMP commands (e.g. no acks, receipts, etc), relies on a simple message
+sending loop, and is not suitable for clustering.
+
+Instead applications can use a full-featured message broker and use it for
+managing client subscriptions and broadcasting messages.
+
+Check the message broker STOMP page (e.g.
+http://www.rabbitmq.com/stomp.html[RabbitMQ], 
+http://activemq.apache.org/stomp.html[ActiveMQ]), install and run the broker with
+STOMP support enabled. Then enable the STOMP broker relay in the Spring
+configuration as an alternative to the simple broker.
+
+Below is example configuration:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebSocketMessageBroker
+	public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+		@Override
+		public void registerStompEndpoints(StompEndpointRegistry registry) {
+			registry.addEndpoint("/portfolio").withSockJS();
+		}
+
+		@Override
+		public void configureMessageBroker(MessageBrokerRegistry registry) {
+			registry.enableStompBrokerRelay("/topic/", "/queue/");
+			registry.setApplicationDestinationPrefixes("/app");
+		}
+
+	}
+----
+
+XML configuration equivalent:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:websocket="http://www.springframework.org/schema/websocket"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/websocket
+			http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+
+		<websocket:message-broker application-destination-prefix="/app">
+			<websocket:stomp-endpoint path="/portfolio" />
+				<websocket:sockjs/>
+			</websocket:stomp-endpoint>
+			<websocket:stomp-broker-relay prefix="/topic,/queue" />
+		</websocket:message-broker>
+
+	</beans>
+----
+
+The STOMP "broker relay" from the above configuration manages TCP connections
+to the external broker, and forwards matching messages to it. Likewise any
+messages received from the external broker are matched and routed to connected
+clients.
+
+In effect, messages are now broadcast through a full-featured, robust and
+scalable message broker.
+
+[[websocket-stomp-handle-user]]
+===== Handling Messages to User Destinations
+
+An application can also send messages targeting a specific user.
+
+To do so a user must first be authenticated. Although the STOMP `CONNECT` frame
+has authentication headers when used over WebSocket, it's simpler to use
+the same HTTP-based authentication already used to secure the application.
+
+An application can use Spring Security for example as usual protecting the
+HTTP URLs of the STOMP WebSocket endpoint. The authenticanted user will then
+be added as a header to all messages resulting on that STOMP/WebSocket session.
+
+Spring supports STOMP destinations prefixed with "/user/". For example a client
+can subscribe to "/user/position-updates". Such destinations are handled by
+the `UserDestinationMessageHandler` and transformed into a destination unique
+to the user's session, e.g. "/user/position-updates-123". This provides the
+convenience of subscribing to a simple destination while also ensuring that it
+doesn't collide with any other user that also subscribes to "/user/position-updates"
+in order to receive position updates unique to them.
+
+Similarly on the sending side, messages can be sent to destination
+"/user/{username}/position-updates", which in turn will be translated into the
+destination belonging to the specified user by name.
+
+This allows any component within the application to send messages to a specific
+user without necessarily knowing anything more than their name and a generic
+destination.
 
 
 [[spring-integration]]
