@@ -1981,7 +1981,7 @@ created, including the validation of whether bean reference properties refer to 
 beans. However, the bean properties themselves are not set until the bean __is actually
 created__. Beans that are singleton-scoped and set to be pre-instantiated (the default)
 are created when the container is created. Scopes are defined in
-<<beans-factory-scopes>> Otherwise, the bean is created only when it is requested.
+<<beans-factory-scopes>>. Otherwise, the bean is created only when it is requested.
 Creation of a bean potentially causes a graph of beans to be created, as the bean's
 dependencies and its dependencies' dependencies (and so on) are created and assigned.
 
