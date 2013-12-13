@@ -2712,7 +2712,7 @@ Let's review the examples from <<beans-constructor-injection>> with the `c:` nam
 		</bean>
 
 		<!-- c-namespace declaration -->
-		<bean id="foo" class="x.y.Foo" c:bar-ref="bar" c:baz-ref="baz" c:email="foo@bar.com">
+		<bean id="foo" class="x.y.Foo" c:bar-ref="bar" c:baz-ref="baz" c:email="foo@bar.com"/>
 
 	</beans>
 ----
