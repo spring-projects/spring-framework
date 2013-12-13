@@ -2040,7 +2040,9 @@ part of a Spring XML configuration file specifies some bean definitions:
 ----
 	<bean id="exampleBean" class="examples.ExampleBean">
 		<!-- setter injection using the nested <ref/> element -->
-		<property name="beanOne"><ref bean="anotherExampleBean"/></property>
+		<property name="beanOne">
+			<ref bean="anotherExampleBean"/>
+		</property>
 
 		<!-- setter injection using the neater 'ref' attribute -->
 		<property name="beanTwo" ref="yetAnotherBean"/>
