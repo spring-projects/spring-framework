@@ -2704,7 +2704,7 @@ Let's review the examples from <<beans-constructor-injection>> with the `c` name
 		<bean id="bar" class="x.y.Bar"/>
 		<bean id="baz" class="x.y.Baz"/>
 
-		<-- traditional declaration -->
+		<!-- traditional declaration -->
 		<bean id="foo" class="x.y.Foo">
 			<constructor-arg ref="bar"/>
 			<constructor-arg ref="baz"/>
