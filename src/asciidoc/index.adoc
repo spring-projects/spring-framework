@@ -1808,7 +1808,7 @@ by type without help. Consider the following class:
 
 	public class ExampleBean {
 
-		// No. of years to the calculate the Ultimate Answer
+		// No. of years to calculate the Ultimate Answer
 		private int years;
 
 		// The Answer to Life, the Universe, and Everything
