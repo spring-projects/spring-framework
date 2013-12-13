@@ -2828,7 +2828,7 @@ element; for example:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<bean id="lazy" class="com.foo.ExpensiveToCreateBean" **lazy-init="true"**/>
+	<bean id="lazy" class="com.foo.ExpensiveToCreateBean" lazy-init="true"/>
 	<bean name="not.lazy" class="com.foo.AnotherBean"/>
 ----
 
