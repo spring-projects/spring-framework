@@ -2299,7 +2299,7 @@ validate the bean id earlier, at XML document parse time.
 [subs="verbatim,quotes"]
 ----
 	<property name="targetName">
-		<!-- a bean with id 'theTargetBean' must exist; otherwise an exception will be thrown -->
+		<!-- a bean with id theTargetBean must exist; otherwise an exception will be thrown -->
 		<idref bean="theTargetBean"/>
 	</property>
 ----
