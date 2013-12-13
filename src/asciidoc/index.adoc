@@ -2711,7 +2711,7 @@ Let's review the examples from <<beans-constructor-injection>> with the `c` name
 			<constructor-arg value="foo@bar.com"/>
 		</bean>
 
-		<-- c-namespace declaration -->
+		<!-- c-namespace declaration -->
 		<bean id="foo" class="x.y.Foo" c:bar-ref="bar" c:baz-ref="baz" c:email="foo@bar.com">
 
 	</beans>
