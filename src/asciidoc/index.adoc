@@ -804,17 +804,17 @@ retained for the time being where Spring 3.2 had it; now just in deprecated form
 === Java 8 (as well as 6 and 7)
 Spring Framework 4.0 provides support for several Java 8 features. You can make use of
 __lambda expressions__ and __method references__ with Spring's callback interfaces. There
-is first class support for `java.time` (http://jcp.org/en/jsr/detail?id=310[JSR-310]) and
+is first class support for `java.time` (http://jcp.org/en/jsr/detail?id=310[JSR-310]), and
 several existing annotations have been retrofitted as `@Repeatable`. You can also use
 Java 8's parameter name discovery as an alternative to compiling your code with debug
 information enabled.
 
-Spring remains compatible with older versions of Java and the JDK: Concretely, Java SE 6
+Spring remains compatible with older versions of Java and the JDK: concretely, Java SE 6
 (specifically, a minimum level equivalent to JDK 6 update 10, as released in late 2008)
 and above are still fully supported. However, for newly started development projects
 based on Spring 4, we recommend the use of Java 7 or 8.
 
-Note that the Java 8 bytecode level (-target 1.8, as required by -source 1.8) is only
+Note that the Java 8 bytecode level (`-target 1.8`, as required by `-source 1.8`) is only
 fully supported as of Spring Framework 4.0. In particular, Spring 3.2 based applications
 need to be compiled with a maximum of Java 7 as the target, even if they happen to be
 deployed onto a Java 8 runtime. Please upgrade to Spring 4 for Java 8 based applications.
@@ -831,7 +831,7 @@ is recommended when at all possible.
 
 [NOTE]
 ====
-If you are a WebSphere 7 user, be sure install the JPA 2.0 feature pack. On
+If you are a WebSphere 7 user, be sure to install the JPA 2.0 feature pack. On
 WebLogic 10.3.4 or higher, install the JPA 2.0 patch that comes with it. This turns
 both of those server generations into Spring 4 compatible deployment environments.
 ====
@@ -840,7 +840,7 @@ On a more forward-looking note, Spring Framework 4.0 supports the Java EE 7 leve
 applicable specifications now: in particular, JMS 2.0, JTA 1.2, JPA 2.1, Bean Validation
 1.1, and JSR-236 Concurrency Utilities. As usual, this support focuses on individual
 use of those specifications, e.g. on Tomcat or in standalone environments. However,
-it works equally well when a Spring application is being deployed to a Java EE 7 server.
+it works equally well when a Spring application is deployed to a Java EE 7 server.
 
 Note that Hibernate 4.3 is a JPA 2.1 provider and therefore only supported as of
 Spring Framework 4.0. The same applies to Hibernate Validator 5.0 as a Bean Validation
@@ -893,16 +893,16 @@ There have been several general improvements to the core container:
   `@Autowired Repository<Customer> customerRepository`.
 * If you use Spring's meta-annotation support, you can now develop custom annotations that
   <<beans-meta-annotations,expose specific attributes from the source annotation>>.
-* Beans can now be `Ordered` when they are <<beans-autowired-annotation,autowired into
+* Beans can now be __ordered__ when they are <<beans-autowired-annotation,autowired into
   lists and arrays>>. Both the `@Ordered` annotation and `Ordered` interface are
   supported.
-* The `@Lazy` annotation can now be used on injection points, as well as `@Bean`
+* The `@Lazy` annotation can now be used on injection points, as well as on `@Bean`
   definitions.
-* The <<beans-java-bean-description,`@Description` annotation has been added>> for
+* The <<beans-java-bean-description,`@Description` annotation has been introduced>> for
   developers using Java-based configuration.
 * A generalized model for <<beans-java-conditional,conditionally filtering beans>> has
-  been added via the `@Conditional` annotation. This is similar to `@Profile` but allows
-  for user-defined strategies to be developed.
+  been added via the `@Conditional` annotation. This is similar to `@Profile` support but
+  allows for user-defined strategies to be developed programmatically.
 * <<aop-pfb-proxy-types,CGLIB-based proxy classes>> no longer require a default
   constructor. Support is provided via the http://code.google.com/p/objenesis/[objenesis]
   library which is repackaged __inline__ and distributed as part of the Spring Framework.
@@ -918,10 +918,10 @@ focused primarily on Servlet 3.0+ environments. If you are using the
 <<spring-mvc-test-framework,Spring MVC Test Framework>> you
 will need to ensure that a Servlet 3.0 compatible JAR is in your __test classpath__.
 
-In addition to the WebSocket support mentioned earlier, the following general improvements
+In addition to the WebSocket support mentioned later, the following general improvements
 have been made to Spring's Web modules:
 
-* You can use <<mvc-ann-restcontroller,the new `@RestController` annotation>> with Spring
+* You can use the <<mvc-ann-restcontroller,new `@RestController` annotation>> with Spring
   MVC applications, removing the need to add `@ResponseBody` to each of your
   `@RequestMapping` methods.
 * The `AsyncRestTemplate` class has been added, <<rest-async-resttemplate,allowing
@@ -937,7 +937,7 @@ A new `spring-websocket` module provides comprehensive support for WebSocket-bas
 two-way communication between client and server in web applications. It is compatible with
 http://jcp.org/en/jsr/detail?id=356[JSR-356], the Java WebSocket API, and in addition
 provides SockJS-based fallback options (i.e. WebSocket emulation) for use in browsers
-that don't yet support the WebSocket protocol (e.g. IE < 10).
+that don't yet support the WebSocket protocol (e.g. Internet Explorer < 10).
 
 A new `spring-messaging` module adds support for STOMP as the WebSocket sub-protocol
 to use in applications along with an annotation programming model for routing and
@@ -946,10 +946,10 @@ can now contain both `@RequestMapping` and `@MessageMapping` methods for handlin
 HTTP requests and messages from WebSocket-connected clients. The new `spring-messaging`
 module also contains key abstractions from the
 http://projects.spring.io/spring-integration/[Spring Integration] project such as
-`Message`, `MessageChannel`, `MessageHandler` and others to serve as
-a foundation for messaging applications.
+`Message`, `MessageChannel`, `MessageHandler`, and others to serve as a foundation
+for messaging-based applications.
 
-For more details including a more thorough introduction, see the <<websocket>> section.
+For further details, including a more thorough introduction, see the <<websocket>> section.
 
 
 
@@ -961,17 +961,17 @@ Framework 4.0 introduces several new features for use in unit and integration te
 * Almost all annotations in the `spring-test` module (e.g., `@ContextConfiguration`,
   `@WebAppConfiguration`, `@ContextHierarchy`, `@ActiveProfiles`, etc.) can now be used
   as <<integration-testing-annotations-meta,meta-annotations>> to create custom
-  _composed annotations_ and reduce configuration duplication across tests.
+  _composed annotations_ and reduce configuration duplication across a test suite.
 * Active bean definition profiles can now be resolved programmatically, simply by
   implementing a custom <<testcontext-ctx-management-env-profiles-ActiveProfilesResolver,`ActiveProfilesResolver`>>
   and registering it via the `resolver` attribute of `@ActiveProfiles`.
-* A new `SocketUtils` utility class has been introduced in the `spring-core` module
-  which enables you to scan for free TCP & UDP server ports on localhost. This
+* A new `SocketUtils` class has been introduced in the `spring-core` module
+  which enables you to scan for free TCP and UDP server ports on localhost. This
   functionality is not specific to testing but can prove very useful when writing
   integration tests that require the use of sockets, for example tests that start
   an in-memory SMTP server, FTP server, Servlet container, etc.
 * As of Spring 4.0, the set of mocks in the `org.springframework.mock.web` package is
-  now compatible with Servlet 3.0. Furthermore, several of the Servlet API mocks
+  now based on the Servlet 3.0 API. Furthermore, several of the Servlet API mocks
   (e.g., `MockHttpServletRequest`, `MockServletContext`, etc.) have been updated with
   minor enhancements and improved configurability.
 
@@ -1414,15 +1414,16 @@ Every bean has one or more identifiers. These identifiers must be unique within 
 container that hosts the bean. A bean usually has only one identifier, but if it
 requires more than one, the extra ones can be considered aliases.
 
-In XML-based configuration metadata, you use the `id` and/or `name` attributes to
-specify the bean identifier(s). The `id` attribute allows you to specify exactly one id.
- Conventionally these names are alphanumeric ('myBean', 'fooService', etc), but may
-special characters as well. If you want to introduce other aliases to the bean, you can
-also specify them in the `name` attribute, separated by a comma (`,`), semicolon (`;`),
-or white space. As a historical note, in versions prior to Spring 3.1, the `id`
-attribute was typed as an `xsd:ID`, which constrained possible characters. As of 3.1,
-it is now `xsd:string`. Note that bean id uniqueness is still enforced by the
-container, though no longer by XML parsers.
+In XML-based configuration metadata, you use the `id` and/or `name` attributes
+to specify the bean identifier(s). The `id` attribute allows you to specify
+exactly one id. Conventionally these names are alphanumeric ('myBean',
+'fooService', etc.), but may contain special characters as well. If you want to
+introduce other aliases to the bean, you can also specify them in the `name`
+attribute, separated by a comma (`,`), semicolon (`;`), or white space. As a
+historical note, in versions prior to Spring 3.1, the `id` attribute was
+defined as an `xsd:ID` type, which constrained possible characters. As of 3.1,
+it is defined as an `xsd:string` type. Note that bean `id` uniqueness is still
+enforced by the container, though no longer by XML parsers.
 
 You are not required to supply a name or id for a bean. If no name or id is supplied
 explicitly, the container generates a unique name for that bean. However, if you want to
@@ -1465,8 +1466,8 @@ XML-based configuration metadata, you can use the `<alias/>` element to accompli
 	<alias name="fromName" alias="toName"/>
 ----
 
-In this case, a bean in the same container which is named `fromName`, may also after the
-use of this alias definition, be referred to as `toName`.
+In this case, a bean in the same container which is named `fromName`, may also,
+after the use of this alias definition, be referred to as `toName`.
 
 For example, the configuration metadata for subsystem A may refer to a DataSource via
 the name `subsystemA-dataSource`. The configuration metadata for subsystem B may refer to
@@ -18413,7 +18414,7 @@ well as any __set up__ or __tear down__ of the test fixture.
 ===== Meta-Annotation Support for Testing
 As of Spring Framework 4.0, it is now possible to use test-related annotations
 as <<beans-meta-annotations,meta-annotations>> in order to create custom
-_composed annotations_ and reduce configuration duplication across tests.
+_composed annotations_ and reduce configuration duplication across a test suite.
 
 Each of the following may be used as meta-annotations in conjunction with the
 <<testcontext-framework,TestContext framework>>.
