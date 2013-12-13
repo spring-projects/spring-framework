@@ -2481,7 +2481,7 @@ The following example demonstrates collection merging:
 		</bean>
 		<bean id="child" parent="parent">
 			<property name="adminEmails">
-				<!-- the merge is specified on the *child* collection definition -->
+				<!-- the merge is specified on the child collection definition -->
 				<props merge="true">
 					<prop key="sales">sales@example.com</prop>
 					<prop key="support">support@example.co.uk</prop>
