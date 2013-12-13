@@ -1465,7 +1465,7 @@ XML-based configuration metadata, you can use the `<alias/>` element to accompli
 	<alias name="fromName" alias="toName"/>
 ----
 
-In this case, a bean in the same container which is named `fromName`, may also after the
+In this case, a bean in the same container which is named `fromName`, may also, after the
 use of this alias definition, be referred to as `toName`.
 
 For example, the configuration metadata for subsystem A may refer to a DataSource via
