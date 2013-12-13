@@ -2575,7 +2575,7 @@ various value elements as being of type `Float`, and the string values `9.99, 2.
 ===== Null and empty string values
 Spring treats empty arguments for properties and the like as empty `Strings`. The
 following XML-based configuration metadata snippet sets the email property to the empty
-`String` value ("")
+`String` value ("").
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
