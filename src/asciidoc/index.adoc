@@ -1417,7 +1417,7 @@ requires more than one, the extra ones can be considered aliases.
 In XML-based configuration metadata, you use the `id` and/or `name` attributes to
 specify the bean identifier(s). The `id` attribute allows you to specify exactly one id.
  Conventionally these names are alphanumeric ('myBean', 'fooService', etc), but may
-special characters as well. If you want to introduce other aliases to the bean, you can
+contain special characters as well. If you want to introduce other aliases to the bean, you can
 also specify them in the `name` attribute, separated by a comma (`,`), semicolon (`;`),
 or white space. As a historical note, in versions prior to Spring 3.1, the `id`
 attribute was typed as an `xsd:ID`, which constrained possible characters. As of 3.1,
