@@ -2729,7 +2729,7 @@ argument indexes:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<-- c-namespace index declaration -->
+	<!-- c-namespace index declaration -->
 	<bean id="foo" class="x.y.Foo" c:_0-ref="bar" c:_1-ref="baz">
 ----
 
