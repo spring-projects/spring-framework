@@ -2342,7 +2342,7 @@ the target bean is in the same XML file.
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<ref bean="someBean"/>
+	<ref local="someBean"/>
 ----
 
 Specifying the target bean through the `parent` attribute creates a reference to a bean
