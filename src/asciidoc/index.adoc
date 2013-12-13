@@ -2730,7 +2730,7 @@ argument indexes:
 [subs="verbatim,quotes"]
 ----
 	<!-- c-namespace index declaration -->
-	<bean id="foo" class="x.y.Foo" c:_0-ref="bar" c:_1-ref="baz">
+	<bean id="foo" class="x.y.Foo" c:_0-ref="bar" c:_1-ref="baz"/>
 ----
 
 [NOTE]
