@@ -1744,12 +1744,12 @@ has no dependencies on container specific interfaces, base classes or annotation
 		// the SimpleMovieLister has a dependency on a MovieFinder
 		private MovieFinder movieFinder;
 
-		// a constructor so that the Spring container can 'inject' a MovieFinder
+		// a constructor so that the Spring container can inject a MovieFinder
 		public SimpleMovieLister(MovieFinder movieFinder) {
 			this.movieFinder = movieFinder;
 		}
 
-		// business logic that actually 'uses' the injected MovieFinder is omitted...
+		// business logic that actually uses the injected MovieFinder is omitted...
 
 	}
 ----
