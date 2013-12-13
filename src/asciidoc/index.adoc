@@ -941,7 +941,7 @@ that don't yet support the WebSocket protocol (e.g. IE < 10).
 
 A new `spring-messaging` module adds support for STOMP as the WebSocket sub-protocol
 to use in applications along with an annotation programming model for routing and
-processing STOMP messages from WebSocket clients. As a result an `@Controller`
+processing STOMP messages from WebSocket clients. As a result a `@Controller`
 can now contain both `@RequestMapping` and `@MessageMapping` methods for handling
 HTTP requests and messages from WebSocket-connected clients. The new `spring-messaging`
 module also contains key abstractions from the
@@ -1417,7 +1417,7 @@ requires more than one, the extra ones can be considered aliases.
 In XML-based configuration metadata, you use the `id` and/or `name` attributes to
 specify the bean identifier(s). The `id` attribute allows you to specify exactly one id.
  Conventionally these names are alphanumeric ('myBean', 'fooService', etc), but may
-special characters as well. If you want to introduce other aliases to the bean, you can
+contain special characters as well. If you want to introduce other aliases to the bean, you can
 also specify them in the `name` attribute, separated by a comma (`,`), semicolon (`;`),
 or white space. As a historical note, in versions prior to Spring 3.1, the `id`
 attribute was typed as an `xsd:ID`, which constrained possible characters. As of 3.1,
@@ -1465,7 +1465,7 @@ XML-based configuration metadata, you can use the `<alias/>` element to accompli
 	<alias name="fromName" alias="toName"/>
 ----
 
-In this case, a bean in the same container which is named `fromName`, may also after the
+In this case, a bean in the same container which is named `fromName`, may also, after the
 use of this alias definition, be referred to as `toName`.
 
 For example, the configuration metadata for subsystem A may refer to a DataSource via
@@ -1509,8 +1509,8 @@ You use the `Class` property in one of two ways:
   itself directly creates the bean by calling its constructor reflectively, somewhat
   equivalent to Java code using the `new` operator.
 * To specify the actual class containing the `static` factory method that will be
-  invoked to create the object, in the less common case where the container invokes a
-  `static`, __factory__ method on a class to create the bean. The object type returned
+  invoked to create the object, in the less common case, where the container invokes a
+  `static` __factory__ method on a class to create the bean. The object type returned
   from the invocation of the `static` factory method may be the same class or another
   class entirely.
 
@@ -1744,12 +1744,12 @@ has no dependencies on container specific interfaces, base classes or annotation
 		// the SimpleMovieLister has a dependency on a MovieFinder
 		private MovieFinder movieFinder;
 
-		// a constructor so that the Spring container can 'inject' a MovieFinder
+		// a constructor so that the Spring container can inject a MovieFinder
 		public SimpleMovieLister(MovieFinder movieFinder) {
 			this.movieFinder = movieFinder;
 		}
 
-		// business logic that actually 'uses' the injected MovieFinder is omitted...
+		// business logic that actually uses the injected MovieFinder is omitted...
 
 	}
 ----
