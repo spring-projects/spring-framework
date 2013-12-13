@@ -1967,7 +1967,7 @@ The container performs bean dependency resolution as follows:
   annotations.
 * For each bean, its dependencies are expressed in the form of properties, constructor
   arguments, or arguments to the static-factory method if you are using that instead of
-  a normal constructor. These dependencies are provided to the bean,__when the bean is
+  a normal constructor. These dependencies are provided to the bean, __when the bean is
   actually created__.
 * Each property or constructor argument is an actual definition of the value to set, or
   a reference to another bean in the container.
