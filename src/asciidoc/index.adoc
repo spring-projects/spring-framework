@@ -2781,8 +2781,8 @@ dependency on a single bean:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<bean id="beanOne" class="ExampleBean" depends-on="**manager**"/>
-	<bean id="**manager**" class="ManagerBean" />
+	<bean id="beanOne" class="ExampleBean" depends-on="manager"/>
+	<bean id="manager" class="ManagerBean" />
 ----
 
 To express a dependency on multiple beans, supply a list of bean names as the value of
