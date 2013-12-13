@@ -2690,7 +2690,7 @@ Similar to the <<beans-p-namespace>>, the __c-namespace__, newly introduced in S
 3.1, allows usage of inlined attributes for configuring the constructor arguments rather
 then nested `constructor-arg` elements.
 
-Let's review the examples from <<beans-constructor-injection>> with the `c` namespace:
+Let's review the examples from <<beans-constructor-injection>> with the `c:` namespace:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
