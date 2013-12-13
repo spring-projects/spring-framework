@@ -1745,12 +1745,12 @@ has no dependencies on container specific interfaces, base classes or annotation
 		// the SimpleMovieLister has a dependency on a MovieFinder
 		private MovieFinder movieFinder;
 
-		// a constructor so that the Spring container can 'inject' a MovieFinder
+		// a constructor so that the Spring container can inject a MovieFinder
 		public SimpleMovieLister(MovieFinder movieFinder) {
 			this.movieFinder = movieFinder;
 		}
 
-		// business logic that actually 'uses' the injected MovieFinder is omitted...
+		// business logic that actually uses the injected MovieFinder is omitted...
 
 	}
 ----
@@ -1809,7 +1809,7 @@ by type without help. Consider the following class:
 
 	public class ExampleBean {
 
-		// No. of years to the calculate the Ultimate Answer
+		// Number of years to calculate the Ultimate Answer
 		private int years;
 
 		// The Answer to Life, the Universe, and Everything
@@ -1916,12 +1916,12 @@ on container specific interfaces, base classes or annotations.
 		// the SimpleMovieLister has a dependency on the MovieFinder
 		private MovieFinder movieFinder;
 
-		// a setter method so that the Spring container can 'inject' a MovieFinder
+		// a setter method so that the Spring container can inject a MovieFinder
 		public void setMovieFinder(MovieFinder movieFinder) {
 			this.movieFinder = movieFinder;
 		}
 
-		// business logic that actually 'uses' the injected MovieFinder is omitted...
+		// business logic that actually uses the injected MovieFinder is omitted...
 
 	}
 ----
@@ -1968,7 +1968,7 @@ The container performs bean dependency resolution as follows:
   annotations.
 * For each bean, its dependencies are expressed in the form of properties, constructor
   arguments, or arguments to the static-factory method if you are using that instead of
-  a normal constructor. These dependencies are provided to the bean,__when the bean is
+  a normal constructor. These dependencies are provided to the bean, __when the bean is
   actually created__.
 * Each property or constructor argument is an actual definition of the value to set, or
   a reference to another bean in the container.
@@ -1982,7 +1982,7 @@ created, including the validation of whether bean reference properties refer to 
 beans. However, the bean properties themselves are not set until the bean __is actually
 created__. Beans that are singleton-scoped and set to be pre-instantiated (the default)
 are created when the container is created. Scopes are defined in
-<<beans-factory-scopes>> Otherwise, the bean is created only when it is requested.
+<<beans-factory-scopes>>. Otherwise, the bean is created only when it is requested.
 Creation of a bean potentially causes a graph of beans to be created, as the bean's
 dependencies and its dependencies' dependencies (and so on) are created and assigned.
 
@@ -2041,7 +2041,9 @@ part of a Spring XML configuration file specifies some bean definitions:
 ----
 	<bean id="exampleBean" class="examples.ExampleBean">
 		<!-- setter injection using the nested <ref/> element -->
-		<property name="beanOne"><ref bean="anotherExampleBean"/></property>
+		<property name="beanOne">
+			<ref bean="anotherExampleBean"/>
+		</property>
 
 		<!-- setter injection using the neater 'ref' attribute -->
 		<property name="beanTwo" ref="yetAnotherBean"/>
@@ -2332,7 +2334,7 @@ the values in the `name` attribute of the target bean.
 ----
 
 Specifying the target bean through the `local` attribute leverages the ability of the
-XML parser to validate XML id references within the same file. The value of the `local`
+XML parser to validate XML `id` references within the same file. The value of the `local`
 attribute must be the same as the `id` attribute of the target bean. The XML parser
 issues an error if no matching element is found in the same file. As such, using the
 local variant is the best choice (in order to know about errors as early as possible) if
@@ -2341,7 +2343,7 @@ the target bean is in the same XML file.
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<ref bean="someBean"/>
+	<ref local="someBean"/>
 ----
 
 Specifying the target bean through the `parent` attribute creates a reference to a bean
@@ -2480,7 +2482,7 @@ The following example demonstrates collection merging:
 		</bean>
 		<bean id="child" parent="parent">
 			<property name="adminEmails">
-				<!-- the merge is specified on the *child* collection definition -->
+				<!-- the merge is specified on the child collection definition -->
 				<props merge="true">
 					<prop key="sales">sales@example.com</prop>
 					<prop key="support">support@example.co.uk</prop>
