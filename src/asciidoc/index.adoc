@@ -941,7 +941,7 @@ that don't yet support the WebSocket protocol (e.g. IE < 10).
 
 A new `spring-messaging` module adds support for STOMP as the WebSocket sub-protocol
 to use in applications along with an annotation programming model for routing and
-processing STOMP messages from WebSocket clients. As a result an `@Controller`
+processing STOMP messages from WebSocket clients. As a result a `@Controller`
 can now contain both `@RequestMapping` and `@MessageMapping` methods for handling
 HTTP requests and messages from WebSocket-connected clients. The new `spring-messaging`
 module also contains key abstractions from the
