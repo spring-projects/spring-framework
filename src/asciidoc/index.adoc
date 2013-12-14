@@ -3358,7 +3358,7 @@ prototype-scoped bean repeatedly at runtime. You cannot dependency-inject a
 prototype-scoped bean into your singleton bean, because that injection occurs only
 __once__, when the Spring container is instantiating the singleton bean and resolving
 and injecting its dependencies. If you need a new instance of a prototype bean at
-runtime more than once, see <<beans-factory-method-injection>>
+runtime more than once, see <<beans-factory-method-injection>>.
 
 
 
