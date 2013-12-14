@@ -3364,7 +3364,7 @@ runtime more than once, see <<beans-factory-method-injection>>
 
 [[beans-factory-scopes-other]]
 ==== Request, session, and global session scopes
-The `request`, `session`, and `global session` scopes are __only__ available if you use
+The request, session, and global session scopes are __only__ available if you use
 a web-aware Spring `ApplicationContext` implementation (such as
 `XmlWebApplicationContext`). If you use these scopes with regular Spring IoC containers
 such as the `ClassPathXmlApplicationContext`, you get an `IllegalStateException`
@@ -3373,7 +3373,7 @@ complaining about an unknown bean scope.
 
 [[beans-factory-scopes-other-web-configuration]]
 ===== Initial web configuration
-To support the scoping of beans at the `request`, `session`, and `global session` levels
+To support the scoping of beans at the request, session, and global session levels
 (web-scoped beans), some minor initial configuration is required before you define your
 beans. (This initial setup is __not__ required for the standard scopes, singleton and
 prototype.)
