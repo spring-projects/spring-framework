@@ -3514,7 +3514,7 @@ You __do not__ need to use the `<aop:scoped-proxy/>` in conjunction with beans t
 scoped as `singletons` or `prototypes`.
 ====
 
-The configuration in the following example is only one line, but it is important to
+The configuration in the following example contains only one additional line, but it is important to
 understand the "why" as well as the "how" behind it.
 
 [source,xml,indent=0]
