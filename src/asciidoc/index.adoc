@@ -3451,7 +3451,7 @@ The Spring container creates a new instance of the `LoginAction` bean by using t
 `loginAction` bean is scoped at the HTTP request level. You can change the internal
 state of the instance that is created as much as you want, because other instances
 created from the same `loginAction` bean definition will not see these changes in state;
-they are particular to an individual request. When the request completes processing, the
+they are particular to an individual request. When the request processing completes, the
 bean that is scoped to the request is discarded.
 
 
