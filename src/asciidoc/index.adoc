@@ -4281,8 +4281,8 @@ init-method.
 Besides `ApplicationContextAware` and `BeanNameAware` discussed above, Spring offers a
 range of `Aware` interfaces that allow beans to indicate to the container that they
 require a certain __infrastructure__ dependency. The most important `Aware` interfaces
-are summarized below - as a general rule, the name is a good indication of the
-dependency type:
+are summarized below (as a general rule, the name is a good indication of the
+dependency type):
 
 [[beans-factory-nature-aware-list]]
 .Aware interfaces
@@ -4386,7 +4386,7 @@ specifying the parent bean as the value of this attribute.
 
 	<bean id="inheritsWithDifferentClass"
 			class="org.springframework.beans.DerivedTestBean"
-			**parent="inheritedTestBean"** init-method="initialize">
+			parent="inheritedTestBean" init-method="initialize">
 		<property name="name" value="override"/>
 		<!-- the age property value of 1 will be inherited from parent -->
 	</bean>
