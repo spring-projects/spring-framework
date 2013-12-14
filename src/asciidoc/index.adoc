@@ -3511,7 +3511,7 @@ onto the real object.
 [NOTE]
 ====
 You __do not__ need to use the `<aop:scoped-proxy/>` in conjunction with beans that are
-scoped as `singletons` or `prototypes`.
+scoped as singletons or prototypes.
 ====
 
 The configuration in the following example contains only one additional line, but it is important to
@@ -3545,8 +3545,8 @@ understand the "why" as well as the "how" behind it.
 
 To create such a proxy, you insert a child `<aop:scoped-proxy/>` element into a scoped
 bean definition. See <<beans-factory-scopes-other-injection-proxies>> and
-<<xsd-config>>. Why do definitions of beans scoped at the `request`, `session`,
-`globalSession` and custom-scope levels require the `<aop:scoped-proxy/>` element ?
+<<xsd-config>>. Why do definitions of beans scoped at the request, session,
+global session and custom-scope levels require the `<aop:scoped-proxy/>` element ?
 Let's examine the following singleton bean definition and contrast it with what you need
 to define for the aforementioned scopes. (The following `userPreferences` bean
 definition as it stands is __incomplete.)__
