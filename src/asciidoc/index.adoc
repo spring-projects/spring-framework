@@ -3386,7 +3386,7 @@ setup is necessary: `DispatcherServlet` and `DispatcherPortlet` already expose a
 relevant state.
 
 If you use a Servlet 2.4+ web container, with requests processed outside of Spring's
-DispatcherServlet (for example, when using JSF or Struts), you need to register the
+`DispatcherServlet` (for example, when using JSF or Struts), you need to register the
 `org.springframework.web.context.request.RequestContextListener` `ServletRequestListener`.
 For Servlet 3.0+, this can done programmatically via the `WebApplicationInitializer`
 interface. Alternatively, or for older containers, add the following declaration to your
@@ -3409,7 +3409,7 @@ web applications `web.xml` file:
 If you use an older web container (Servlet 2.3), use the provided `javax.servlet.Filter`
 implementation. The following snippet of XML configuration must be included in the
 `web.xml` file of your web application if you want to access web-scoped beans in
-requests outside of Spring's DispatcherServlet on a Servlet 2.3 container. (The filter
+requests outside of Spring's `DispatcherServlet` on a Servlet 2.3 container. (The filter
 mapping depends on the surrounding web application configuration, so you must change it
 as appropriate.)
 
