@@ -3375,7 +3375,7 @@ complaining about an unknown bean scope.
 ===== Initial web configuration
 To support the scoping of beans at the request, session, and global session levels
 (web-scoped beans), some minor initial configuration is required before you define your
-beans. (This initial setup is __not__ required for the standard scopes, singleton and
+beans. (This initial setup is __not__ required for the standard scopes: singleton and
 prototype.)
 
 How you accomplish this initial setup depends on your particular Servlet environment.
