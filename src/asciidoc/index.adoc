@@ -4469,7 +4469,7 @@ you write your own `BeanPostProcessor` you should consider implementing the `Ord
 interface too. For further details, consult the Javadoc for the `BeanPostProcessor` and
 `Ordered` interfaces. See also the note below on
 <<beans-factory-programmatically-registering-beanpostprocessors, programmatic
-registration of `BeanPostProcessors`>>
+registration of `BeanPostProcessors`>>.
 
 [NOTE]
 ====
