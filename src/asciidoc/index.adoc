@@ -4242,7 +4242,7 @@ couples the code to Spring and does not follow the Inversion of Control style, w
 collaborators are provided to beans as properties. Other methods of the
 ApplicationContext provide access to file resources, publishing application events, and
 accessing a MessageSource. These additional features are described in
-<<context-introduction>>
+<<context-introduction>>.
 
 As of Spring 2.5, autowiring is another alternative to obtain reference to the
 `ApplicationContext`. The "traditional" `constructor` and `byType` autowiring modes (as
