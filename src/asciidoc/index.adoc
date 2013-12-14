@@ -4264,7 +4264,7 @@ a reference to the name defined in its associated object definition.
 ----
 	public interface BeanNameAware {
 
-		void setBeanName(string name) throws BeansException;
+		void setBeanName(String name) throws BeansException;
 
 	}
 ----
