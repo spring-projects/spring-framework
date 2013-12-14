@@ -3562,7 +3562,7 @@ definition as it stands is __incomplete.)__
 ----
 
 In the preceding example, the singleton bean `userManager` is injected with a reference
-to the HTTP `Session`-scoped bean `userPreferences`. The salient point here is that the
+to the HTTP session-scoped bean `userPreferences`. The salient point here is that the
 `userManager` bean is a singleton: it will be instantiated __exactly once__ per
 container, and its dependencies (in this case only one, the `userPreferences` bean) are
 also injected only once. This means that the `userManager` bean will only operate on the
@@ -3570,18 +3570,18 @@ exact same `userPreferences` object, that is, the one that it was originally inj
 with.
 
 This is __not__ the behavior you want when injecting a shorter-lived scoped bean into a
-longer-lived scoped bean, for example injecting an HTTP `Session`-scoped collaborating
+longer-lived scoped bean, for example injecting an HTTP session-scoped collaborating
 bean as a dependency into singleton bean. Rather, you need a single `userManager`
-object, and for the lifetime of an HTTP `Session`, you need a `userPreferences` object
-that is specific to said HTTP `Session`. Thus the container creates an object that
+object, and for the lifetime of an HTTP session, you need a `userPreferences` object
+that is specific to said HTTP session. Thus the container creates an object that
 exposes the exact same public interface as the `UserPreferences` class (ideally an
 object that __is a__ `UserPreferences` instance) which can fetch the real
-`UserPreferences` object from the scoping mechanism (HTTP request, `Session`, etc.). The
+`UserPreferences` object from the scoping mechanism (HTTP request, session, etc.). The
 container injects this proxy object into the `userManager` bean, which is unaware that
 this `UserPreferences` reference is a proxy. In this example, when a `UserManager`
 instance invokes a method on the dependency-injected `UserPreferences` object, it
 actually is invoking a method on the proxy. The proxy then fetches the real
-`UserPreferences` object from (in this case) the HTTP `Session`, and delegates the
+`UserPreferences` object from (in this case) the HTTP session, and delegates the
 method invocation onto the retrieved real `UserPreferences` object.
 
 Thus you need the following, correct and complete, configuration when injecting
