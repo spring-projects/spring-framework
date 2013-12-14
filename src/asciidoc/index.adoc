@@ -3504,7 +3504,7 @@ The Spring IoC container manages not only the instantiation of your objects (bea
 also the wiring up of collaborators (or dependencies). If you want to inject (for
 example) an HTTP request scoped bean into another bean, you must inject an AOP proxy in
 place of the scoped bean. That is, you need to inject a proxy object that exposes the
-same public interface as the scoped object but that can also retrieve the real, target
+same public interface as the scoped object, but that can also retrieve the real, target
 object from the relevant scope (for example, an HTTP request) and delegate method calls
 onto the real object.
 
