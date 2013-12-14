@@ -3378,7 +3378,7 @@ To support the scoping of beans at the `request`, `session`, and `global session
 beans. (This initial setup is __not__ required for the standard scopes, singleton and
 prototype.)
 
-How you accomplish this initial setup depends on your particular Servlet environment..
+How you accomplish this initial setup depends on your particular Servlet environment.
 
 If you access scoped beans within Spring Web MVC, in effect, within a request that is
 processed by the Spring `DispatcherServlet`, or `DispatcherPortlet`, then no special
