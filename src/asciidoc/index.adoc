@@ -4269,7 +4269,7 @@ a reference to the name defined in its associated object definition.
 	}
 ----
 
-The callback is invoked after population of normal bean properties but before an
+The callback is invoked after population of normal, bean properties but before an
 initialization callback such as `InitializingBean` __afterPropertiesSet__ or a custom
 init-method.
 
