@@ -4858,16 +4858,13 @@ __dataSource__, which has __driver__ and __url__ properties.
 
 Compound property names are also supported, as long as every component of the path
 except the final property being overridden is already non-null (presumably initialized
-by the constructors). In this example...
+by the constructors). In the following example the `sammy` property of the `bob` property of the `fred` property of the `foo` bean is set to the scalar value `123`: 
 
 [literal]
 [subs="verbatim,quotes"]
 ----
 foo.fred.bob.sammy=123
 ----
-
-... the `sammy` property of the `bob` property of the `fred` property of the `foo` bean
-is set to the scalar value `123`.
 
 [NOTE]
 ====
