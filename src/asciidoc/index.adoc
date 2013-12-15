@@ -8959,7 +8959,7 @@ classpath:com/mycompany/**/service-context.xml
 ----
 
 is used to try to resolve it, the resolver will work off the (first) URL returned by
-`getResource("com/mycompany")`;. If this base package node exists in multiple
+`getResource("com/mycompany")`. If this base package node exists in multiple
 classloader locations, the actual end resource may not be underneath. Therefore,
 preferably, use `classpath*:` with the same Ant-style pattern in such a case, which
 will search all class path locations that contain the root package.
