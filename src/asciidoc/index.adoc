@@ -8833,7 +8833,7 @@ The resource paths in application context constructor values may be a simple pat
 shown above) which has a one-to-one mapping to a target Resource, or alternately may
 contain the special "classpath*:" prefix and/or internal Ant-style regular expressions
 (matched using Spring's `PathMatcher` utility). Both of the latter are effectively
-wildcards
+wildcards.
 
 One use for this mechanism is when doing component-style application assembly. All
 components can 'publish' context definition fragments to a well-known location path, and
