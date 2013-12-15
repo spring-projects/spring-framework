@@ -5255,7 +5255,7 @@ argument. In the simplest case, this can be a plain descriptive value:
 	public class MovieRecommender {
 
 		@Autowired
-		**@Qualifier("main")**
+		@Qualifier("main")
 		private MovieCatalog movieCatalog;
 
 		// ...
@@ -5276,7 +5276,7 @@ method parameters:
 		private CustomerPreferenceDao customerPreferenceDao;
 
 		@Autowired
-		public void prepare(**@Qualifier("main")**MovieCatalog movieCatalog,
+		public void prepare(@Qualifier("main")MovieCatalog movieCatalog,
 				CustomerPreferenceDao customerPreferenceDao) {
 			this.movieCatalog = movieCatalog;
 			this.customerPreferenceDao = customerPreferenceDao;
