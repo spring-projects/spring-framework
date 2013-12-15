@@ -8923,8 +8923,8 @@ inappropriate result is returned, check the application server documentation for
 settings that might affect the classloader behavior.
 ====
 
-The " `classpath*:`" prefix can also be combined with a `PathMatcher` pattern in the
-rest of the location path, for example " `classpath*:META-INF/*-beans.xml`". In this
+The `classpath*:` prefix can also be combined with a `PathMatcher` pattern in the
+rest of the location path, for example `classpath*:META-INF/*-beans.xml`. In this
 case, the resolution strategy is fairly simple: a ClassLoader.getResources() call is
 used on the last non-wildcard path segment to get all the matching resources in the
 class loader hierarchy, and then off each resource the same PathMatcher resolution
@@ -8933,15 +8933,14 @@ strategy described above is used for the wildcard subpath.
 
 [[resources-wildcards-in-path-other-stuff]]
 ===== Other notes relating to wildcards
-Please note that " `classpath*:`" when combined with Ant-style patterns will only work
+Please note that `classpath*:` when combined with Ant-style patterns will only work
 reliably with at least one root directory before the pattern starts, unless the actual
-target files reside in the file system. This means that a pattern like "
-`classpath*:*.xml`" will not retrieve files from the root of jar files but rather only
+target files reside in the file system. This means that a pattern like `classpath*:*.xml` will not retrieve files from the root of jar files but rather only
 from the root of expanded directories. This originates from a limitation in the JDK's
 `ClassLoader.getResources()` method which only returns file system locations for a
 passed-in empty string (indicating potential roots to search).
 
-Ant-style patterns with " `classpath:`" resources are not guaranteed to find matching
+Ant-style patterns with `classpath:` resources are not guaranteed to find matching
 resources if the root package to search is available in multiple class path locations.
 This is because a resource such as
 
@@ -8962,7 +8961,7 @@ classpath:com/mycompany/**/service-context.xml
 is used to try to resolve it, the resolver will work off the (first) URL returned by
 `getResource("com/mycompany")`;. If this base package node exists in multiple
 classloader locations, the actual end resource may not be underneath. Therefore,
-preferably, use " `classpath*:`" with the same Ant-style pattern in such a case, which
+preferably, use `classpath*:` with the same Ant-style pattern in such a case, which
 will search all class path locations that contain the root package.
 
 
