@@ -5288,7 +5288,7 @@ method parameters:
 ----
 
 The corresponding bean definitions appear as follows. The bean with qualifier value
-"main" is wired with the constructor argument that is qualified with the same value.
+"main" is wired with the method parameter that is qualified with the same value.
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
