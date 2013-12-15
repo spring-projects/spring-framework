@@ -5263,7 +5263,7 @@ argument. In the simplest case, this can be a plain descriptive value:
 	}
 ----
 
-The `@Qualifier` annotation can also be specified on individual constructor arguments or
+The `@Qualifier` annotation can also be specified on individual s or
 method parameters:
 
 [source,java,indent=0]
@@ -5305,13 +5305,13 @@ The corresponding bean definitions appear as follows. The bean with qualifier va
 		<context:annotation-config/>
 
 		<bean class="example.SimpleMovieCatalog">
-			**<qualifier value="main"/>**
+			<qualifier value="main"/>
 
 			<!-- inject any dependencies required by this bean -->
 		</bean>
 
 		<bean class="example.SimpleMovieCatalog">
-			**<qualifier value="action"/>**
+			<qualifier value="action"/>
 
 			<!-- inject any dependencies required by this bean -->
 		</bean>
