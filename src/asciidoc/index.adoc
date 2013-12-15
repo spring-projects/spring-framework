@@ -5368,7 +5368,7 @@ provide the `@Qualifier` annotation within your definition:
 ----
 	@Target({ElementType.FIELD, ElementType.PARAMETER})
 	@Retention(RetentionPolicy.RUNTIME)
-	**@Qualifier**
+	@Qualifier
 	public @interface Genre {
 
 		String value();
@@ -5383,12 +5383,12 @@ Then you can provide the custom qualifier on autowired fields and parameters:
 	public class MovieRecommender {
 
 		@Autowired
-		**@Genre("Action")**
+		@Genre("Action")
 		private MovieCatalog actionCatalog;
 		private MovieCatalog comedyCatalog;
 
 		@Autowired
-		public void setComedyCatalog(**@Genre("Comedy")** MovieCatalog comedyCatalog) {
+		public void setComedyCatalog(@Genre("Comedy") MovieCatalog comedyCatalog) {
 			this.comedyCatalog = comedyCatalog;
 		}
 
@@ -5419,12 +5419,12 @@ demonstrated in the following example.
 		<context:annotation-config/>
 
 		<bean class="example.SimpleMovieCatalog">
-			**<qualifier type="Genre" value="Action"/>**
+			<qualifier type="Genre" value="Action"/>
 			<!-- inject any dependencies required by this bean -->
 		</bean>
 
 		<bean class="example.SimpleMovieCatalog">
-			**_<qualifier type="example.Genre" value="Comedy"/>**
+			<qualifier type="example.Genre" value="Comedy"/>
 			<!-- inject any dependencies required by this bean -->
 		</bean>
 
@@ -5461,7 +5461,7 @@ Then add the annotation to the field or property to be autowired:
 	public class MovieRecommender {
 
 		@Autowired
-		**@Offline**
+		@Offline
 		private MovieCatalog offlineCatalog;
 
 		// ...
@@ -5475,7 +5475,7 @@ Now the bean definition only needs a qualifier `type`:
 [subs="verbatim,quotes"]
 ----
 	<bean class="example.SimpleMovieCatalog">
-		**<qualifier type="Offline"/>**
+		<qualifier type="Offline"/>
 		<!-- inject any dependencies required by this bean -->
 	</bean>
 ----
@@ -5700,7 +5700,7 @@ demonstrated in this example:
 
 		private MovieFinder movieFinder;
 
-		**@Resource(name="myMovieFinder")**
+		@Resource(name="myMovieFinder")
 		public void setMovieFinder(MovieFinder movieFinder) {
 			this.movieFinder = movieFinder;
 		}
@@ -5720,7 +5720,7 @@ name "movieFinder" injected into its setter method:
 
 		private MovieFinder movieFinder;
 
-		**@Resource**
+		@Resource
 		public void setMovieFinder(MovieFinder movieFinder) {
 			this.movieFinder = movieFinder;
 		}
@@ -5873,7 +5873,7 @@ with `@Component`:
 	@Target({ElementType.TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
-	**@Component** // Spring will see this and treat @Service in the same way as @Component
+	@Component // Spring will see this and treat @Service in the same way as @Component
 	public @interface Service {
 
 		// ....
@@ -5898,7 +5898,7 @@ of the `proxyMode`.
 	@Target({ElementType.TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
-	**@Scope("session")**
+	@Scope("session")
 	public @interface SessionScope {
 
 		ScopedProxyMode proxyMode() default ScopedProxyMode.DEFAULT
@@ -6274,7 +6274,7 @@ technique:
 [subs="verbatim,quotes"]
 ----
 	@Component
-	**@Qualifier("Action")**
+	@Qualifier("Action")
 	public class ActionMovieCatalog implements MovieCatalog {
 		// ...
 	}
@@ -6284,7 +6284,7 @@ technique:
 [subs="verbatim,quotes"]
 ----
 	@Component
-	**@Genre("Action")**
+	@Genre("Action")
 	public class ActionMovieCatalog implements MovieCatalog {
 		// ...
 	}
@@ -6294,7 +6294,7 @@ technique:
 [subs="verbatim,quotes"]
 ----
 	@Component
-	**@Offline**
+	@Offline
 	public class CachingMovieCatalog implements MovieCatalog {
 		// ...
 	}
@@ -6900,7 +6900,7 @@ The default scope is `singleton`, but you can override this with the `@Scope` an
 	public class MyConfiguration {
 
 		@Bean
-		**@Scope("prototype")**
+		@Scope("prototype")
 		public Encryptor encryptor() {
 			// ...
 		}
@@ -6926,7 +6926,7 @@ link) to our `@Bean` using Java, it would look like the following:
 ----
 	// an HTTP Session-scoped bean exposed as a proxy
 	@Bean
-	**@Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)**
+	@Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
 	public UserPreferences userPreferences() {
 		return new UserPreferences();
 	}
