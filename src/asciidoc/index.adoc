@@ -4303,7 +4303,7 @@ dependency type):
 
 | `BeanFactoryAware`
 | Declaring `BeanFactory`
-| <<beans-factory-aware>>
+| <<beans-factory-aware>>, <<beans-beanfactory>>
 
 | `BeanNameAware`
 | Name of the declaring bean
@@ -6812,8 +6812,8 @@ details.
 The regular Spring <<beans-factory-nature,lifecycle>> callbacks are fully supported as
 well. If a bean implements `InitializingBean`, `DisposableBean`, or `Lifecycle`, their
 respective methods are called by the container.
-
 The standard set of `*Aware` interfaces such as <<beans-beanfactory,BeanFactoryAware>>,
+
 <<beans-factory-aware,BeanNameAware>>,
 <<context-functionality-messagesource,MessageSourceAware>>,
 <<beans-factory-aware,ApplicationContextAware>>, and so on are also fully supported.
