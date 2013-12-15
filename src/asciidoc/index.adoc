@@ -8893,7 +8893,7 @@ environment before you rely on it.
 
 
 [[resources-classpath-wildcards]]
-===== The Classpath*: portability classpath*: prefix
+===== Special `classpath*:` prefix
 
 When constructing an XML-based application context, a location string may use the
 special `classpath*:` prefix:
