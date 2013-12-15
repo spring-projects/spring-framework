@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" ?>
+
 <xsd:schema xmlns="http://www.springframework.org/schema/mvc"
-	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-	xmlns:beans="http://www.springframework.org/schema/beans"
-	xmlns:tool="http://www.springframework.org/schema/tool"
-	targetNamespace="http://www.springframework.org/schema/mvc"
-	elementFormDefault="qualified" attributeFormDefault="unqualified">  
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+		xmlns:beans="http://www.springframework.org/schema/beans"
+		xmlns:tool="http://www.springframework.org/schema/tool"
+		targetNamespace="http://www.springframework.org/schema/mvc"
+		elementFormDefault="qualified"
+		attributeFormDefault="unqualified">
 
 	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-3.2.xsd" />
 	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-3.2.xsd" />
 
-	<xsd:element name="annotation-driven"> 
+	<xsd:element name="annotation-driven">
 		<xsd:annotation>
 			<xsd:documentation source="java:org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"><![CDATA[
-	Configures the  ssssss annotation-driven Spring MVC Controller programming model.
+	Configures the annotation-driven Spring MVC Controller programming model.
 	Note that, with Spring 3.0, this tag works in Servlet MVC only!
 
 	See org.springframework.web.servlet.config.annotation.EnableWebMvc Javadoc for
@@ -443,31 +445,4 @@
 		</xsd:complexType>
 	</xsd:element>
 
-
-	<xsd:element name="view-resolvers" >
-		<xsd:complexType>
-			<xsd:all minOccurs="0">
-				<xsd:element name="jsp" minOccurs="0" >
-					<xsd:complexType>
-						<xsd:attribute name="prefix" />
-						<xsd:attribute name="suffix"  />
-					</xsd:complexType>
-				</xsd:element>
-				<xsd:element name="tiles" minOccurs="0" >
-					<xsd:complexType>
-						<xsd:attribute name="definitions" />
-					</xsd:complexType>
-				</xsd:element>
-				<xsd:element name="bean-name" minOccurs="0" />
-				<xsd:element name="freemarker" minOccurs="0">
-					<xsd:complexType>
-						<xsd:attribute name="prefix" />
-						<xsd:attribute name="suffix"  />
-						<xsd:attribute name="templateLoaderPath" />
-					</xsd:complexType>
-				</xsd:element>
-			</xsd:all>
-		</xsd:complexType>	
-	</xsd:element>
-	
 </xsd:schema>
