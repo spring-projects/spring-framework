@@ -28,13 +28,14 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  */
 public class MvcNamespaceHandler extends NamespaceHandlerSupport {
 
-	@Override
+	
 	public void init() {
 		registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenBeanDefinitionParser());
 		registerBeanDefinitionParser("default-servlet-handler", new DefaultServletHandlerBeanDefinitionParser());
 		registerBeanDefinitionParser("interceptors", new InterceptorsBeanDefinitionParser());
 		registerBeanDefinitionParser("resources", new ResourcesBeanDefinitionParser());
 		registerBeanDefinitionParser("view-controller", new ViewControllerBeanDefinitionParser());
+		registerBeanDefinitionParser("view-resolvers", new ViewResolversBeanDefinitionParser());
 	}
 
 }

@@ -79,6 +79,13 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
+import org.springframework.web.servlet.view.BeanNameViewResolver;
+import org.springframework.web.servlet.view.InternalResourceView;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
+import org.springframework.web.servlet.view.tiles2.TilesConfigurer;
+import org.springframework.web.servlet.view.tiles2.TilesViewResolver;
 
 import static org.junit.Assert.*;
 
@@ -87,7 +94,7 @@ import static org.junit.Assert.*;
  * @author Arjen Poutsma
  * @author Jeremy Grelle
  */
-public class MvcNamespaceTests {
+public class MvcNamespaceTests {   
 
 	private GenericWebApplicationContext appContext;
 
@@ -105,6 +112,7 @@ public class MvcNamespaceTests {
 		Method method = TestController.class.getMethod("testBind", Date.class, TestBean.class, BindingResult.class);
 		handlerMethod = new InvocableHandlerMethod(handler, method);
 	}
+	
 
 	@Test
 	public void testDefaultConfig() throws Exception {
@@ -491,6 +499,33 @@ public class MvcNamespaceTests {
 				(DeferredResultProcessingInterceptor[]) fieldAccessor.getPropertyValue("deferredResultInterceptors");
 		assertEquals(1, deferredResultInterceptors.length);
 	}
+	
+	@Test
+	public void testViewResolvers() throws Exception{
+		loadBeanDefinitions("mvc-config-view-resolvers.xml", 6);
+		InternalResourceViewResolver internalResourceViewResolver=appContext.getBean(InternalResourceViewResolver.class);
+		assertNotNull(internalResourceViewResolver);
+		InternalResourceView jstlView=(InternalResourceView) internalResourceViewResolver.resolveViewName("xyz", Locale.ENGLISH);
+		assertEquals(jstlView.getUrl(), "/WEB-INF/xyz.jsp");
+	
+		BeanNameViewResolver beanNameUrlHandlerMapping=appContext.getBean(BeanNameViewResolver.class);
+		assertNotNull(beanNameUrlHandlerMapping);	
+		
+		TilesConfigurer tilesConfigurer=appContext.getBean(TilesConfigurer.class);
+		assertNotNull(tilesConfigurer);
+		
+		TilesViewResolver tilesViewResolver=appContext.getBean(TilesViewResolver.class);
+		assertNotNull(tilesViewResolver);
+		
+		FreeMarkerConfigurer freeMarkerConfigurer=appContext.getBean(FreeMarkerConfigurer.class);		
+		assertNotNull(freeMarkerConfigurer);
+		
+		FreeMarkerViewResolver freeMarkerViewResolver=appContext.getBean(FreeMarkerViewResolver.class);
+		assertNotNull(freeMarkerViewResolver);
+	
+	
+	}
+	
 
 
 	private void loadBeanDefinitions(String fileName, int expectedBeanCount) {

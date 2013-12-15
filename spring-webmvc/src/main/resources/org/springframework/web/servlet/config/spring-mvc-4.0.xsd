@@ -444,5 +444,33 @@
 			</xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
+	
+	<xsd:element name="view-resolvers" >
+		<xsd:complexType>
+			<xsd:all minOccurs="0">
+				<xsd:element name="jsp" minOccurs="0" >
+					<xsd:complexType>
+						<xsd:attribute name="prefix" />
+						<xsd:attribute name="suffix"  />
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="tiles" minOccurs="0" >
+					<xsd:complexType>
+						<xsd:attribute name="definitions" />
+						<xsd:attribute name="viewClass" use="optional" /> 
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="bean-name" minOccurs="0" />
+				<xsd:element name="freemarker" minOccurs="0">
+					<xsd:complexType>
+						<xsd:attribute name="prefix" />
+						<xsd:attribute name="suffix"  />
+						<xsd:attribute name="templateLoaderPath" />
+					</xsd:complexType> 
+				</xsd:element>									
+			</xsd:all>
+		</xsd:complexType>	
+	</xsd:element>
+	
 
 </xsd:schema>
