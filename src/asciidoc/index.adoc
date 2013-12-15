@@ -7474,10 +7474,10 @@ properly.
 	}
 ----
 
+system-test-config.xml
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	system-test-config.xml
 	<beans>
 		<!-- enable processing of annotations such as @Autowired and @Configuration -->
 		<context:annotation-config/>
