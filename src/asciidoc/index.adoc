@@ -8831,7 +8831,7 @@ details of the various constructors.
 ==== Wildcards in application context constructor resource paths
 The resource paths in application context constructor values may be a simple path (as
 shown above) which has a one-to-one mapping to a target Resource, or alternately may
-contain the special "classpath*:" prefix and/or internal Ant-style regular expressions
+contain the special `classpath*:` prefix and/or internal Ant-style regular expressions
 (matched using Spring's `PathMatcher` utility). Both of the latter are effectively
 wildcards.
 
@@ -8862,8 +8862,8 @@ When the path location contains an Ant-style pattern, for example:
 
 the resolver follows a more complex but defined procedure to try to resolve the
 wildcard. It produces a Resource for the path up to the last non-wildcard segment and
-obtains a URL from it. If this URL is not a "jar:" URL or container-specific variant
-(e.g. " `zip:`" in WebLogic, " `wsjar`" in WebSphere, etc.), then a `java.io.File` is
+obtains a URL from it. If this URL is not a `jar:` URL or container-specific variant
+(e.g. `zip:` in WebLogic, `wsjar` in WebSphere, etc.), then a `java.io.File` is
 obtained from it and used to resolve the wildcard by traversing the filesystem. In the
 case of a jar URL, the resolver either gets a `java.net.JarURLConnection` from it or
 manually parses the jar URL and then traverses the contents of the jar file to resolve
