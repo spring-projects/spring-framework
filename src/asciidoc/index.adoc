@@ -8854,8 +8854,8 @@ When the path location contains an Ant-style pattern, for example:
 [literal]
 [subs="verbatim,quotes"]
 ----
-/WEB-INF/*-context.xml
-  com/mycompany/**/applicationContext.xml
+/WEB-INF/\*-context.xml
+  com/mycompany/*\*/applicationContext.xml
   file:C:/some/path/*-context.xml
   classpath:com/mycompany/**/applicationContext.xml
 ----
