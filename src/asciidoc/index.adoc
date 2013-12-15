@@ -7493,10 +7493,10 @@ system-test-config.xml
 	</beans>
 ----
 
+jdbc.properties
 [literal]
 [subs="verbatim,quotes"]
 ----
-jdbc.properties
 jdbc.url=jdbc:hsqldb:hsql://localhost/xdb
 jdbc.username=sa
 jdbc.password=
