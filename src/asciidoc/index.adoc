@@ -7531,10 +7531,10 @@ Note that in this case, we don't need to explicitly declare
 `<context:annotation-config/>`, because `<context:component-scan/>` enables all the same
 functionality.
 
+system-test-config.xml
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	system-test-config.xml
 	<beans>
 		<!-- picks up and registers AppConfig as a bean definition -->
 		<context:component-scan base-package="com.acme"/>
