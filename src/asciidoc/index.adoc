@@ -8813,7 +8813,7 @@ com/
 ----
 
 A `ClassPathXmlApplicationContext` instance composed of the beans defined in the
-`'services.xml'` and `'daos.xml'` could be instantiated like so...
+`'services.xml'` and `'daos.xml'` could be instantiated as follows:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
