@@ -6998,7 +6998,7 @@ annotation can be used:
 	public class AppConfig {
 
 		@Bean
-		**@Desciption("Provides a basic example of a bean")**
+		@Desciption("Provides a basic example of a bean")
 		public Foo foo() {
 			return new Foo();
 		}
@@ -7311,7 +7311,7 @@ configuration classes themselves:
 
 		@Bean
 		public TransferService transferService() {
-			// navigate 'through' the config class to the @Bean method!
+			// navigate through the config class to the @Bean method!
 			return new TransferServiceImpl(repositoryConfig.accountRepository());
 		}
 
