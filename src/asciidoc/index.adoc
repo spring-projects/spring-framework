@@ -8778,7 +8778,7 @@ the current working directory.
 
 Note that the use of the special classpath prefix or a standard URL prefix on the
 location path will override the default type of `Resource` created to load the
-definition. So this `FileSystemXmlApplicationContext`...
+definition. So this `FileSystemXmlApplicationContext` will actually load its bean definitions from the classpath:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -8787,9 +8787,7 @@ definition. So this `FileSystemXmlApplicationContext`...
 		new FileSystemXmlApplicationContext("classpath:conf/appContext.xml");
 ----
 
-... will actually load its bean definitions from the classpath. However, it is still a
-`FileSystemXmlApplicationContext`. If it is subsequently used as a `ResourceLoader`, any
-unprefixed paths will still be treated as filesystem paths.
+However, it is still a `FileSystemXmlApplicationContext`. If it is subsequently used as a `ResourceLoader`, any unprefixed paths will still be treated as filesystem paths.
 
 
 [[resources-app-ctx-classpathxml]]
