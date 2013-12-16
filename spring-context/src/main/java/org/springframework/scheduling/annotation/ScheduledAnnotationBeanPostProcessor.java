@@ -134,8 +134,8 @@ public class ScheduledAnnotationBeanPostProcessor
 
 			if (AopUtils.isJdkDynamicProxy(bean)) {
 				try {
-					// found a @Scheduled method on the target class for this JDK proxy -> is it
-					// also present on the proxy itself?
+					// Found a @Scheduled method on the target class for this JDK proxy ->
+					// is it also present on the proxy itself?
 					method = bean.getClass().getMethod(method.getName(), method.getParameterTypes());
 				}
 				catch (SecurityException ex) {
@@ -158,7 +158,7 @@ public class ScheduledAnnotationBeanPostProcessor
 			// Determine initial delay
 			long initialDelay = scheduled.initialDelay();
 			String initialDelayString = scheduled.initialDelayString();
-			if (!"".equals(initialDelayString)) {
+			if (StringUtils.hasText(initialDelayString)) {
 				Assert.isTrue(initialDelay < 0, "Specify 'initialDelay' or 'initialDelayString', not both");
 				if (this.embeddedValueResolver != null) {
 					initialDelayString = this.embeddedValueResolver.resolveStringValue(initialDelayString);
@@ -174,7 +174,7 @@ public class ScheduledAnnotationBeanPostProcessor
 
 			// Check cron expression
 			String cron = scheduled.cron();
-			if (!"".equals(cron)) {
+			if (StringUtils.hasText(cron)) {
 				Assert.isTrue(initialDelay == -1, "'initialDelay' not supported for cron triggers");
 				processedSchedule = true;
 				String zone = scheduled.zone();
@@ -183,7 +183,7 @@ public class ScheduledAnnotationBeanPostProcessor
 					zone = this.embeddedValueResolver.resolveStringValue(zone);
 				}
 				TimeZone timeZone;
-				if (!"".equals(zone)) {
+				if (StringUtils.hasText(zone)) {
 					timeZone = StringUtils.parseTimeZoneString(zone);
 				}
 				else {
@@ -205,7 +205,7 @@ public class ScheduledAnnotationBeanPostProcessor
 				this.registrar.addFixedDelayTask(new IntervalTask(runnable, fixedDelay, initialDelay));
 			}
 			String fixedDelayString = scheduled.fixedDelayString();
-			if (!"".equals(fixedDelayString)) {
+			if (StringUtils.hasText(fixedDelayString)) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
 				if (this.embeddedValueResolver != null) {
@@ -229,7 +229,7 @@ public class ScheduledAnnotationBeanPostProcessor
 				this.registrar.addFixedRateTask(new IntervalTask(runnable, fixedRate, initialDelay));
 			}
 			String fixedRateString = scheduled.fixedRateString();
-			if (!"".equals(fixedRateString)) {
+			if (StringUtils.hasText(fixedRateString)) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
 				if (this.embeddedValueResolver != null) {
