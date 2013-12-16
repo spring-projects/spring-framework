@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -78,6 +79,19 @@ public class BeanMethodQualificationTests {
 	public void testCustom() {
 		AnnotationConfigApplicationContext ctx =
 				new AnnotationConfigApplicationContext(CustomConfig.class, CustomPojo.class);
+		assertFalse(ctx.getBeanFactory().containsSingleton("testBean1"));
+		CustomPojo pojo = ctx.getBean(CustomPojo.class);
+		assertThat(pojo.testBean.getName(), equalTo("interesting"));
+	}
+
+	@Test
+	public void testCustomWithAsm() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.registerBeanDefinition("customConfig", new RootBeanDefinition(CustomConfig.class.getName()));
+		RootBeanDefinition customPojo = new RootBeanDefinition(CustomPojo.class.getName());
+		customPojo.setLazyInit(true);
+		ctx.registerBeanDefinition("customPojo", customPojo);
+		ctx.refresh();
 		assertFalse(ctx.getBeanFactory().containsSingleton("testBean1"));
 		CustomPojo pojo = ctx.getBean(CustomPojo.class);
 		assertThat(pojo.testBean.getName(), equalTo("interesting"));

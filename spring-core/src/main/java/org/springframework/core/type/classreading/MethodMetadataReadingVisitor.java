@@ -18,6 +18,7 @@ package org.springframework.core.type.classreading;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.MethodVisitor;
@@ -49,27 +50,27 @@ final class MethodMetadataReadingVisitor extends MethodVisitor implements Method
 
 	private final ClassLoader classLoader;
 
-	private final MultiValueMap<String, MethodMetadata> methodMetadataMap;
+	private final Set<MethodMetadata> methodMetadataSet;
 
 	private final Map<String, AnnotationAttributes> attributeMap = new LinkedHashMap<String, AnnotationAttributes>(2);
 
 
-	public MethodMetadataReadingVisitor(String name, int access, String declaringClassName, ClassLoader classLoader,
-			MultiValueMap<String, MethodMetadata> methodMetadataMap) {
+	public MethodMetadataReadingVisitor(String name, int access, String declaringClassName,
+			ClassLoader classLoader, Set<MethodMetadata> methodMetadataSet) {
 
 		super(SpringAsmInfo.ASM_VERSION);
 		this.name = name;
 		this.access = access;
 		this.declaringClassName = declaringClassName;
 		this.classLoader = classLoader;
-		this.methodMetadataMap = methodMetadataMap;
+		this.methodMetadataSet = methodMetadataSet;
 	}
 
 
 	@Override
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
 		String className = Type.getType(desc).getClassName();
-		this.methodMetadataMap.add(className, this);
+		this.methodMetadataSet.add(this);
 		return new AnnotationAttributesReadingVisitor(className, this.attributeMap, null, this.classLoader);
 	}
 
