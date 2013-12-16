@@ -8915,7 +8915,7 @@ context definition.
 The wildcard classpath relies on the `getResources()` method of the underlying
 classloader. As most application servers nowadays supply their own classloader
 implementation, the behavior might differ especially when dealing with jar files. A
-simple test to check if `classpath*` works is to use the classloader to load a file from
+simple test to check if `classpath*:` works is to use the classloader to load a file from
 within a jar on the classpath:
 `getClass().getClassLoader().getResources("<someFileInsideTheJar>")`. Try this test with
 files that have the same name but are placed inside two different locations. In case an
