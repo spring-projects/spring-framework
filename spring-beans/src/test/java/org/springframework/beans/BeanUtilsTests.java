@@ -189,9 +189,13 @@ public final class BeanUtilsTests {
 	public void testCopyPropertiesWithInvalidProperty() {
 		InvalidProperty source = new InvalidProperty();
 		source.setName("name");
+		source.setFlag1(true);
+		source.setFlag2(true);
 		InvalidProperty target = new InvalidProperty();
 		BeanUtils.copyProperties(source, target);
 		assertEquals(target.getName(), "name");
+		assertTrue(target.getFlag1());
+		assertTrue(target.getFlag2());
 	}
 
 	@Test
@@ -308,6 +312,10 @@ public final class BeanUtilsTests {
 
 		private String value;
 
+		private boolean flag1;
+
+		private boolean flag2;
+
 		public void setName(String name) {
 			this.name = name;
 		}
@@ -322,6 +330,22 @@ public final class BeanUtilsTests {
 
 		public String getValue() {
 			return this.value;
+		}
+
+		public void setFlag1(boolean flag1) {
+			this.flag1 = flag1;
+		}
+
+		public Boolean getFlag1() {
+			return this.flag1;
+		}
+
+		public void setFlag2(Boolean flag2) {
+			this.flag2 = flag2;
+		}
+
+		public boolean getFlag2() {
+			return this.flag2;
 		}
 	}
 

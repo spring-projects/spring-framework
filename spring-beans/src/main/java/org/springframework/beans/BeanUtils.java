@@ -600,7 +600,7 @@ public abstract class BeanUtils {
 				if (sourcePd != null) {
 					Method readMethod = sourcePd.getReadMethod();
 					if (readMethod != null &&
-							writeMethod.getParameterTypes()[0].isAssignableFrom(readMethod.getReturnType())) {
+							ClassUtils.isAssignable(writeMethod.getParameterTypes()[0], readMethod.getReturnType())) {
 						try {
 							if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
 								readMethod.setAccessible(true);
