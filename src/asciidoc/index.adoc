@@ -8915,7 +8915,7 @@ context definition.
 The wildcard classpath relies on the `getResources()` method of the underlying
 classloader. As most application servers nowadays supply their own classloader
 implementation, the behavior might differ especially when dealing with jar files. A
-simple test to check if `classpath*:` works is to use the classloader to load a file from
+simple test to check if `classpath*` works is to use the classloader to load a file from
 within a jar on the classpath:
 `getClass().getClassLoader().getResources("<someFileInsideTheJar>")`. Try this test with
 files that have the same name but are placed inside two different locations. In case an
@@ -8940,7 +8940,7 @@ from the root of expanded directories. This originates from a limitation in the 
 `ClassLoader.getResources()` method which only returns file system locations for a
 passed-in empty string (indicating potential roots to search).
 
-Ant-style patterns with `classpath*:` resources are not guaranteed to find matching
+Ant-style patterns with `classpath:` resources are not guaranteed to find matching
 resources if the root package to search is available in multiple class path locations.
 This is because a resource such as
 
