@@ -8925,7 +8925,7 @@ settings that might affect the classloader behavior.
 
 The `classpath*:` prefix can also be combined with a `PathMatcher` pattern in the
 rest of the location path, for example `classpath*:META-INF/*-beans.xml`. In this
-case, the resolution strategy is fairly simple: a ClassLoader.getResources() call is
+case, the resolution strategy is fairly simple: a `ClassLoader.getResources()` call is
 used on the last non-wildcard path segment to get all the matching resources in the
 class loader hierarchy, and then off each resource the same PathMatcher resolution
 strategy described above is used for the wildcard subpath.
