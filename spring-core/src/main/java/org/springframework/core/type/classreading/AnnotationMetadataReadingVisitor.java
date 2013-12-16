@@ -29,7 +29,6 @@ import org.springframework.asm.Type;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -48,13 +47,13 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 
 	protected final ClassLoader classLoader;
 
-	protected final Set<String> annotationSet = new LinkedHashSet<String>();
+	protected final Set<String> annotationSet = new LinkedHashSet<String>(4);
 
 	protected final Map<String, Set<String>> metaAnnotationMap = new LinkedHashMap<String, Set<String>>(4);
 
 	protected final MultiValueMap<String, AnnotationAttributes> attributeMap = new LinkedMultiValueMap<String, AnnotationAttributes>(4);
 
-	protected final MultiValueMap<String, MethodMetadata> methodMetadataMap = new LinkedMultiValueMap<String, MethodMetadata>();
+	protected final Set<MethodMetadata> methodMetadataSet = new LinkedHashSet<MethodMetadata>(4);
 
 
 	public AnnotationMetadataReadingVisitor(ClassLoader classLoader) {
@@ -64,7 +63,7 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 
 	@Override
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-		return new MethodMetadataReadingVisitor(name, access, this.getClassName(), this.classLoader, this.methodMetadataMap);
+		return new MethodMetadataReadingVisitor(name, access, getClassName(), this.classLoader, this.methodMetadataSet);
 	}
 
 	@Override
@@ -141,17 +140,22 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 
 	@Override
 	public boolean hasAnnotatedMethods(String annotationType) {
-		return this.methodMetadataMap.containsKey(annotationType);
+		for (MethodMetadata methodMetadata : this.methodMetadataSet) {
+			if (methodMetadata.isAnnotated(annotationType)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
 	public Set<MethodMetadata> getAnnotatedMethods(String annotationType) {
-		List<MethodMetadata> list = this.methodMetadataMap.get(annotationType);
-		if (CollectionUtils.isEmpty(list)) {
-			return new LinkedHashSet<MethodMetadata>(0);
+		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>(4);
+		for (MethodMetadata methodMetadata : this.methodMetadataSet) {
+			if (methodMetadata.isAnnotated(annotationType)) {
+				annotatedMethods.add(methodMetadata);
+			}
 		}
-		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>(list.size());
-		annotatedMethods.addAll(list);
 		return annotatedMethods;
 	}
 
