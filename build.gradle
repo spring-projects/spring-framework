@@ -92,6 +92,7 @@ configure(allprojects) { project ->
 		"http://aopalliance.sourceforge.net/doc/",
 		"http://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
 		"http://ehcache.org/apidocs/",
+		"http://docs.jboss.org/infinispan/5.2/apidocs/",
 		"http://quartz-scheduler.org/api/2.1.7/",
 		"http://jackson.codehaus.org/1.9.4/javadoc/",
 		"http://fasterxml.github.com/jackson-core/javadoc/2.2.0/",
@@ -499,6 +500,10 @@ project("spring-jdbc") {
 project("spring-context-support") {
 	description = "Spring Context Support"
 
+        repositories {
+                maven { url "https://repository.jboss.org/nexus/content/repositories/releases/" } // infinispan 
+        }
+
 	dependencies {
 		compile(project(":spring-core"))
 		compile(project(":spring-beans"))
@@ -509,6 +514,7 @@ project("spring-context-support") {
 		optional("javax.cache:cache-api:1.0.0-PFD")
 		optional("com.google.guava:guava:14.0.1")
 		optional("net.sf.ehcache:ehcache-core:2.6.5")
+		optional("org.infinispan:infinispan-core:5.2.6.Final")
 		optional("org.quartz-scheduler:quartz:1.8.6") {
 			exclude group: "org.slf4j", module: "slf4j-log4j12"
 		}
