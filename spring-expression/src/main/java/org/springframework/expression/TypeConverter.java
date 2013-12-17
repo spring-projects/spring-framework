@@ -21,8 +21,8 @@ import org.springframework.core.convert.TypeDescriptor;
 /**
  * A type converter can convert values between different types encountered during
  * expression evaluation. This is an SPI for the expression parser; see
- * {@link org.springframework.core.convert.ConversionService} for the primary user API to
- * Spring's conversion facilities.
+ * {@link org.springframework.core.convert.ConversionService} for the primary
+ * user API to Spring's conversion facilities.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -31,8 +31,8 @@ import org.springframework.core.convert.TypeDescriptor;
 public interface TypeConverter {
 
 	/**
-	 * Return true if the type converter can convert the specified type to the desired
-	 * target type.
+	 * Return {@code true} if the type converter can convert the specified type
+	 * to the desired target type.
 	 * @param sourceType a type descriptor that describes the source type
 	 * @param targetType a type descriptor that describes the requested result type
 	 * @return true if that conversion can be performed
@@ -46,9 +46,9 @@ public interface TypeConverter {
 	 * than simply a List.
 	 * @param value the value to be converted
 	 * @param sourceType a type descriptor that supplies extra information about the
-	 *        source object
+	 * source object
 	 * @param targetType a type descriptor that supplies extra information about the
-	 *        requested result type
+	 * requested result type
 	 * @return the converted value
 	 * @throws EvaluationException if conversion is not possible
 	 */
