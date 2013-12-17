@@ -97,15 +97,12 @@ public @interface ControllerAdvice {
 	 */
 	Class<?>[] assignableTypes() default {};
 
-
 	/**
 	 * Array of annotations.
 	 * Controllers that are annotated with this/one of those annotation(s)
 	 * will be assisted by the {@code @ControllerAdvice} annotated class.
-	 *
 	 * <p>Consider creating a special annotation or use a predefined one,
 	 * like {@link RestController @RestController}.
-	 *
 	 * @since 4.0
 	 */
 	Class<? extends Annotation>[] annotations() default {};
