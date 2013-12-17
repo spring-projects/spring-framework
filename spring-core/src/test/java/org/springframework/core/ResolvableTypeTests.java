@@ -48,6 +48,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.runners.MockitoJUnitRunner;
+
 import org.springframework.core.ResolvableType.VariableResolver;
 import org.springframework.util.MultiValueMap;
 
@@ -833,8 +834,7 @@ public class ResolvableTypeTests {
 		assertThat("field " + field + " toString", type.toString(), equalTo(expected));
 	}
 
-	private void assertTypedFieldToStringValue(String field, String expected)
-			throws Exception {
+	private void assertTypedFieldToStringValue(String field, String expected) throws Exception {
 		ResolvableType type = ResolvableType.forField(Fields.class.getField(field), TypedFields.class);
 		assertThat("field " + field + " toString", type.toString(), equalTo(expected));
 	}
@@ -842,8 +842,7 @@ public class ResolvableTypeTests {
 	@Test
 	public void resolveFromOuterClass() throws Exception {
 		Field field = EnclosedInParameterizedType.InnerTyped.class.getField("field");
-		ResolvableType type = ResolvableType.forField(
-				field, TypedEnclosedInParameterizedType.TypedInnerTyped.class);
+		ResolvableType type = ResolvableType.forField(field, TypedEnclosedInParameterizedType.TypedInnerTyped.class);
 		assertThat(type.resolve(), equalTo((Type) Integer.class));
 	}
 
@@ -1198,8 +1197,7 @@ public class ResolvableTypeTests {
 		return read;
 	}
 
-	private static AssertAssignbleMatcher assertAssignable(final ResolvableType type,
-			final ResolvableType... fromTypes) {
+	private static AssertAssignbleMatcher assertAssignable(final ResolvableType type, final ResolvableType... fromTypes) {
 		return new AssertAssignbleMatcher() {
 			@Override
 			public void equalTo(boolean... values) {
@@ -1227,19 +1225,16 @@ public class ResolvableTypeTests {
 	private static interface AssertAssignbleMatcher {
 
 		void equalTo(boolean... values);
-
 	}
 
 
 	@SuppressWarnings("serial")
 	static class ExtendsList extends ArrayList<CharSequence> {
-
 	}
 
 
 	@SuppressWarnings("serial")
 	static class ExtendsMap extends HashMap<String, Integer> {
-
 	}
 
 
@@ -1281,12 +1276,10 @@ public class ResolvableTypeTests {
 		public Map<Map<String, Integer>, Map<Byte, Long>> nested;
 
 		public T[] variableTypeGenericArray;
-
 	}
 
 
 	static class TypedFields extends Fields<String> {
-
 	}
 
 
@@ -1303,7 +1296,6 @@ public class ResolvableTypeTests {
 		void typedParameter(T p);
 
 		T typedReturn();
-
 	}
 
 
@@ -1352,17 +1344,14 @@ public class ResolvableTypeTests {
 		public Collection<? extends Collection<? extends CharSequence>> complexWildcard3;
 
 		public List<List<String>> complexWildcard4;
-
 	}
 
 
 	static class Assignment extends AssignmentBase<Object, CharSequence, String> {
-
 	}
 
 
 	static interface TypedMethods extends Methods<String> {
-
 	}
 
 
@@ -1373,7 +1362,6 @@ public class ResolvableTypeTests {
 
 		public Constructors(Map<T, Long> p) {
 		}
-
 	}
 
 
@@ -1386,65 +1374,52 @@ public class ResolvableTypeTests {
 		public TypedConstructors(Map<String, Long> p) {
 			super(p);
 		}
-
 	}
 
 
 	public interface MyInterfaceType<T> {
-
 	}
 
 
 	public class MySimpleInterfaceType implements MyInterfaceType<String> {
-
 	}
 
 	public abstract class MySimpleInterfaceTypeWithImplementsRaw implements MyInterfaceType<String>, List {
-
 	}
 
 	public abstract class ExtendsMySimpleInterfaceTypeWithImplementsRaw extends MySimpleInterfaceTypeWithImplementsRaw {
-
 	}
 
 
 	public class MyCollectionInterfaceType implements MyInterfaceType<Collection<String>> {
-
 	}
 
 
 	public abstract class MySuperclassType<T> {
-
 	}
 
 
 	public class MySimpleSuperclassType extends MySuperclassType<String> {
-
 	}
 
 
 	public class MyCollectionSuperclassType extends MySuperclassType<Collection<String>> {
-
 	}
 
 
 	static interface Wildcard<T extends Number> extends List<T> {
-
 	}
 
 
 	static interface RawExtendsWildcard extends Wildcard {
-
 	}
 
 
 	static interface VariableNameSwitch<V, K> extends MultiValueMap<K, V> {
-
 	}
 
 
 	static interface ListOfGenericArray extends List<List<String>[]> {
-
 	}
 
 
@@ -1457,7 +1432,6 @@ public class ResolvableTypeTests {
 
 			public T field;
 		}
-
 	}
 
 
@@ -1466,7 +1440,6 @@ public class ResolvableTypeTests {
 
 		class TypedInnerTyped extends InnerTyped<Long> {
 		}
-
 	}
 
 }
