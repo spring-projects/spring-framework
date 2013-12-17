@@ -577,7 +577,7 @@ Spring dependencies are declared, you only have to do that once.
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
+			<artifactId>spring-core</artifactId>
 			<version>{spring-version}</version>
 			<scope>runtime</scope>
 			<exclusions>
@@ -622,7 +622,7 @@ implementation itself. In Maven you would do that like this
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
+			<artifactId>spring-core</artifactId>
 			<version>{spring-version}</version>
 			<scope>runtime</scope>
 			<exclusions>
@@ -692,7 +692,7 @@ is your dependency declaration:
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
+			<artifactId>spring-core</artifactId>
 			<version>{spring-version}</version>
 			<scope>runtime</scope>
 		</dependency>
@@ -28765,7 +28765,7 @@ All matrix variables may be obtained in a Map:
 
 Note that to enable the use of matrix variables, you must set the
 `removeSemicolonContent` property of `RequestMappingHandlerMapping` to `false`. By
-default it is set to `false`.
+default it is set to `true`.
 
 
 [[mvc-ann-requestmapping-consumes]]
