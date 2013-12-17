@@ -73,10 +73,8 @@ import org.springframework.util.StringUtils;
  * @see #forClass(Class)
  * @see #forType(Type)
  */
+@SuppressWarnings("serial")
 public final class ResolvableType implements Serializable {
-
-	private static final long serialVersionUID = 1L;
-
 
 	private static ConcurrentReferenceHashMap<ResolvableType, ResolvableType> cache =
 			new ConcurrentReferenceHashMap<ResolvableType, ResolvableType>();
@@ -93,14 +91,14 @@ public final class ResolvableType implements Serializable {
 
 
 	/**
-	 * The underlying java type being managed (only ever {@code null} for {@link #NONE}).
+	 * The underlying Java type being managed (only ever {@code null} for {@link #NONE}).
 	 */
 	private final Type type;
 
 	/**
 	 * Optional provider for the type.
 	 */
-	private TypeProvider typeProvider;
+	private final TypeProvider typeProvider;
 
 	/**
 	 * The {@code VariableResolver} to use or {@code null} if no resolver is available.
@@ -125,12 +123,13 @@ public final class ResolvableType implements Serializable {
 
 	/**
 	 * Private constructor used to create a new {@link ResolvableType}.
-	 * @param type the underlying java type (may only be {@code null} for {@link #NONE})
+	 * @param type the underlying Java type (may only be {@code null} for {@link #NONE})
 	 * @param variableResolver the resolver used for {@link TypeVariable}s (may be {@code null})
 	 * @param componentType an option declared component type for arrays (may be {@code null})
 	 */
-	private ResolvableType(Type type, TypeProvider typeProvider,
-			VariableResolver variableResolver, ResolvableType componentType) {
+	private ResolvableType(
+			Type type, TypeProvider typeProvider, VariableResolver variableResolver, ResolvableType componentType) {
+
 		this.type = type;
 		this.typeProvider = typeProvider;
 		this.variableResolver = variableResolver;
@@ -590,7 +589,6 @@ public final class ResolvableType implements Serializable {
 		if (this.type instanceof ParameterizedType) {
 			return forType(((ParameterizedType) this.type).getRawType(), this.variableResolver);
 		}
-
 		if (this.type instanceof WildcardType) {
 			Type resolved = resolveBounds(((WildcardType) this.type).getUpperBounds());
 			if (resolved == null) {
@@ -598,10 +596,8 @@ public final class ResolvableType implements Serializable {
 			}
 			return forType(resolved, this.variableResolver);
 		}
-
 		if (this.type instanceof TypeVariable) {
 			TypeVariable<?> variable = (TypeVariable<?>) this.type;
-
 			// Try default variable resolution
 			if (this.variableResolver != null) {
 				ResolvableType resolved = this.variableResolver.resolveVariable(variable);
@@ -609,11 +605,9 @@ public final class ResolvableType implements Serializable {
 					return resolved;
 				}
 			}
-
 			// Fallback to bounds
 			return forType(resolveBounds(variable.getBounds()), this.variableResolver);
 		}
-
 		return NONE;
 	}
 
@@ -628,7 +622,6 @@ public final class ResolvableType implements Serializable {
 		if (this.type instanceof TypeVariable) {
 			return resolveType().resolveVariable(variable);
 		}
-
 		if (this.type instanceof ParameterizedType) {
 			ParameterizedType parameterizedType = (ParameterizedType) this.type;
 			TypeVariable<?>[] variables = resolve().getTypeParameters();
@@ -638,16 +631,13 @@ public final class ResolvableType implements Serializable {
 					return forType(actualType, this.variableResolver);
 				}
 			}
-
 			if (parameterizedType.getOwnerType() != null) {
 				return forType(parameterizedType.getOwnerType(), this.variableResolver).resolveVariable(variable);
 			}
 		}
-
 		if (this.variableResolver != null) {
 			return this.variableResolver.resolveVariable(variable);
 		}
-
 		return null;
 	}
 
@@ -673,27 +663,22 @@ public final class ResolvableType implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == this) {
+		if (this == obj) {
 			return true;
 		}
-		if (obj instanceof ResolvableType) {
-			ResolvableType other = (ResolvableType) obj;
-			boolean equals = ObjectUtils.nullSafeEquals(this.type, other.type);
-			equals &= ObjectUtils.nullSafeEquals(getSource(), other.getSource());
-			equals &= variableResolverSourceEquals(this.variableResolver, other.variableResolver);
-			equals &= ObjectUtils.nullSafeEquals(this.componentType, other.componentType);
-			return equals;
+		if (!(obj instanceof ResolvableType)) {
+			return false;
 		}
-		return false;
+		ResolvableType other = (ResolvableType) obj;
+		return (ObjectUtils.nullSafeEquals(this.type, other.type) &&
+				ObjectUtils.nullSafeEquals(getSource(), other.getSource()) &&
+				variableResolverSourceEquals(other.variableResolver) &&
+				ObjectUtils.nullSafeEquals(this.componentType, other.componentType));
 	}
 
 	@Override
 	public int hashCode() {
-		int hashCode = ObjectUtils.nullSafeHashCode(this.type);
-		hashCode = hashCode * 31 + ObjectUtils.nullSafeHashCode(
-				this.variableResolver == null ? null : this.variableResolver.getSource());
-		hashCode = hashCode * 31 + ObjectUtils.nullSafeHashCode(this.componentType);
-		return hashCode;
+		return ObjectUtils.nullSafeHashCode(this.type);
 	}
 
 	/**
@@ -713,10 +698,15 @@ public final class ResolvableType implements Serializable {
 		return new DefaultVariableResolver();
 	}
 
-	private static boolean variableResolverSourceEquals(VariableResolver o1, VariableResolver o2) {
-		Object s1 = (o1 == null ? null : o1.getSource());
-		Object s2 = (o2 == null ? null : o2.getSource());
-		return ObjectUtils.nullSafeEquals(s1,s2);
+	private boolean variableResolverSourceEquals(VariableResolver other) {
+		if (this.variableResolver == null) {
+			return (other == null);
+		}
+		if (other == null) {
+			return false;
+		}
+		Object src = this.variableResolver.getSource();
+		return (src == this ? src == other.getSource() : ObjectUtils.nullSafeEquals(src, other.getSource()));
 	}
 
 	private static ResolvableType[] forTypes(Type[] types, VariableResolver owner) {
@@ -840,6 +830,7 @@ public final class ResolvableType implements Serializable {
 	 */
 	public static ResolvableType forConstructorParameter(Constructor<?> constructor, int parameterIndex,
 			Class<?> implementationClass) {
+
 		Assert.notNull(constructor, "Constructor must not be null");
 		MethodParameter methodParameter = new MethodParameter(constructor, parameterIndex);
 		methodParameter.setContainingClass(implementationClass);
@@ -923,7 +914,7 @@ public final class ResolvableType implements Serializable {
 	 * @param componentType the component type
 	 * @return a {@link ResolvableType} as an array of the specified component type
 	 */
-	public static ResolvableType forArrayComponent(final ResolvableType componentType) {
+	public static ResolvableType forArrayComponent(ResolvableType componentType) {
 		Assert.notNull(componentType, "ComponentType must not be null");
 		Class<?> arrayClass = Array.newInstance(componentType.resolve(), 0).getClass();
 		return new ResolvableType(arrayClass, null, null, componentType);
@@ -1035,7 +1026,7 @@ public final class ResolvableType implements Serializable {
 		Object getSource();
 
 		/**
-		 * Resolve the specified varaible.
+		 * Resolve the specified variable.
 		 * @param variable the variable to resolve
 		 * @return the resolved variable or {@code null}
 		 */
