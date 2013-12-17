@@ -131,11 +131,13 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * (may be {@code null})
 	 * @param resourceLoader the ResourceLoader to load application classes from
 	 */
+	@SuppressWarnings("deprecation")
 	public LocalSessionFactoryBuilder(DataSource dataSource, ResourceLoader resourceLoader) {
 		getProperties().put(Environment.CURRENT_SESSION_CONTEXT_CLASS, SpringSessionContext.class.getName());
 		if (dataSource != null) {
 			getProperties().put(Environment.DATASOURCE, dataSource);
 		}
+		// APP_CLASSLOADER is deprecated as of Hibernate 4.3 but we need to remain compatible with 4.0+
 		getProperties().put(AvailableSettings.APP_CLASSLOADER, resourceLoader.getClassLoader());
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 	}

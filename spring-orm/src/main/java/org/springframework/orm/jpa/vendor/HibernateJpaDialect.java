@@ -68,13 +68,13 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link org.springframework.orm.jpa.JpaDialect} implementation for
- * Hibernate EntityManager. Developed against Hibernate 3.6 and 4.2.
+ * Hibernate EntityManager. Developed against Hibernate 3.6 and 4.2/4.3.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
  * @since 2.0
  */
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial", "deprecation"})
 public class HibernateJpaDialect extends DefaultJpaDialect {
 
 	private static Class<?> optimisticLockExceptionClass;
@@ -88,6 +88,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			optimisticLockExceptionClass = cl.loadClass("org.hibernate.dialect.lock.OptimisticEntityLockException");
 		}
 		catch (ClassNotFoundException ex) {
+			// OptimisticLockException is deprecated on Hibernate 4.x; we're just using it on 3.x anyway
 			optimisticLockExceptionClass = OptimisticLockException.class;
 		}
 		try {
