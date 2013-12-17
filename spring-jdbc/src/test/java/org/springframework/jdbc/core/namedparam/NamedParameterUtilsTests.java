@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Thomas Risberg
@@ -117,7 +118,7 @@ public class NamedParameterUtilsTests {
 	@Test(expected = InvalidDataAccessApiUsageException.class)
 	public void buildValueArrayWithMissingParameterValue() throws Exception {
 		String sql = "select count(0) from foo where id = :id";
-		NamedParameterUtils.buildValueArray(sql, new HashMap());
+		NamedParameterUtils.buildValueArray(sql, Collections.<String, Object>emptyMap());
 	}
 
 	@Test
@@ -168,7 +169,7 @@ public class NamedParameterUtilsTests {
 
 		String sql4 = "/*+ HINT */ xxx /* comment :a ? */ :a yyyy :b :c :a zzzzz /* :xx XX*";
 		ParsedSql psql4 = NamedParameterUtils.parseSqlStatement(sql4);
-		Map parameters = Collections.singletonMap("a", "0");
+		Map<String, String> parameters = Collections.singletonMap("a", "0");
 		assertEquals("/*+ HINT */ xxx /* comment :a ? */ ? yyyy ? ? ? zzzzz /* :xx XX*",
 				NamedParameterUtils.substituteNamedParameters(psql4, new MapSqlParameterSource(parameters)));
 	}
@@ -235,7 +236,6 @@ public class NamedParameterUtilsTests {
 		assertEquals(0, parsedSql2.getParameterNames().size());
 		String finalSql2 = NamedParameterUtils.substituteNamedParameters(parsedSql2, null);
 		assertEquals(expectedSql2, finalSql2);
-
 	}
 
 	/*
@@ -294,4 +294,5 @@ public class NamedParameterUtilsTests {
 		assertEquals(1, psql2.getTotalParameterCount());
 		assertEquals("xxx", psql2.getParameterNames().get(0));
 	}
+
 }
