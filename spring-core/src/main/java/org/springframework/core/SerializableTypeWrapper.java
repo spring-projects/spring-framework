@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
@@ -53,8 +54,8 @@ import org.springframework.util.ReflectionUtils;
  */
 abstract class SerializableTypeWrapper {
 
-	private static final Class<?>[] SUPPORTED_SERIALAZABLE_TYPES = { GenericArrayType.class,
-		ParameterizedType.class, TypeVariable.class, WildcardType.class };
+	private static final Class<?>[] SUPPORTED_SERIALIZABLE_TYPES = {
+			GenericArrayType.class, ParameterizedType.class, TypeVariable.class, WildcardType.class};
 
 
 	/**
@@ -76,12 +77,9 @@ abstract class SerializableTypeWrapper {
 	/**
 	 * Return a {@link Serializable} variant of {@link Class#getGenericSuperclass()}.
 	 */
+	@SuppressWarnings("serial")
 	public static Type forGenericSuperclass(final Class<?> type) {
 		return forTypeProvider(new DefaultTypeProvider() {
-
-			private static final long serialVersionUID = 1L;
-
-
 			@Override
 			public Type getType() {
 				return type.getGenericSuperclass();
@@ -92,15 +90,12 @@ abstract class SerializableTypeWrapper {
 	/**
 	 * Return a {@link Serializable} variant of {@link Class#getGenericInterfaces()}.
 	 */
+	@SuppressWarnings("serial")
 	public static Type[] forGenericInterfaces(final Class<?> type) {
 		Type[] result = new Type[type.getGenericInterfaces().length];
 		for (int i = 0; i < result.length; i++) {
 			final int index = i;
 			result[i] = forTypeProvider(new DefaultTypeProvider() {
-
-				private static final long serialVersionUID = 1L;
-
-
 				@Override
 				public Type getType() {
 					return type.getGenericInterfaces()[index];
@@ -113,15 +108,12 @@ abstract class SerializableTypeWrapper {
 	/**
 	 * Return a {@link Serializable} variant of {@link Class#getTypeParameters()}.
 	 */
+	@SuppressWarnings("serial")
 	public static Type[] forTypeParameters(final Class<?> type) {
 		Type[] result = new Type[type.getTypeParameters().length];
 		for (int i = 0; i < result.length; i++) {
 			final int index = i;
 			result[i] = forTypeProvider(new DefaultTypeProvider() {
-
-				private static final long serialVersionUID = 1L;
-
-
 				@Override
 				public Type getType() {
 					return type.getTypeParameters()[index];
@@ -131,7 +123,6 @@ abstract class SerializableTypeWrapper {
 		return result;
 	}
 
-
 	/**
 	 * Return a {@link Serializable} {@link Type} backed by a {@link TypeProvider} .
 	 */
@@ -140,7 +131,7 @@ abstract class SerializableTypeWrapper {
 		if (provider.getType() instanceof Serializable || provider.getType() == null) {
 			return provider.getType();
 		}
-		for (Class<?> type : SUPPORTED_SERIALAZABLE_TYPES) {
+		for (Class<?> type : SUPPORTED_SERIALIZABLE_TYPES) {
 			if (type.isAssignableFrom(provider.getType().getClass())) {
 				ClassLoader classLoader = provider.getClass().getClassLoader();
 				Class<?>[] interfaces = new Class<?>[] { type, Serializable.class };
@@ -148,8 +139,7 @@ abstract class SerializableTypeWrapper {
 				return (Type) Proxy.newProxyInstance(classLoader, interfaces, handler);
 			}
 		}
-		throw new IllegalArgumentException("Unsupported Type class "
-				+ provider.getType().getClass().getName());
+		throw new IllegalArgumentException("Unsupported Type class " + provider.getType().getClass().getName());
 	}
 
 
@@ -167,17 +157,14 @@ abstract class SerializableTypeWrapper {
 		 * Return the source of the type or {@code null}.
 		 */
 		Object getSource();
-
 	}
 
 
 	/**
 	 * Default implementation of {@link TypeProvider} with a {@code null} source.
 	 */
-	static abstract class DefaultTypeProvider implements TypeProvider {
-
-		private static final long serialVersionUID = 1L;
-
+	@SuppressWarnings("serial")
+	private static abstract class DefaultTypeProvider implements TypeProvider {
 
 		@Override
 		public Object getSource() {
@@ -186,24 +173,20 @@ abstract class SerializableTypeWrapper {
 
 	}
 
+
 	/**
 	 * {@link Serializable} {@link InvocationHandler} used by the Proxied {@link Type}.
 	 * Provides serialization support and enhances any methods that return {@code Type}
 	 * or {@code Type[]}.
 	 */
-	private static class TypeProxyInvocationHandler implements InvocationHandler,
-			Serializable {
-
-		private static final long serialVersionUID = 1L;
-
+	@SuppressWarnings("serial")
+	private static class TypeProxyInvocationHandler implements InvocationHandler, Serializable {
 
 		private final TypeProvider provider;
-
 
 		public TypeProxyInvocationHandler(TypeProvider provider) {
 			this.provider = provider;
 		}
-
 
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -217,20 +200,21 @@ abstract class SerializableTypeWrapper {
 				}
 				return result;
 			}
-			return method.invoke(this.provider.getType(), args);
+			try {
+				return method.invoke(this.provider.getType(), args);
+			}
+			catch (InvocationTargetException ex) {
+				throw ex.getTargetException();
+			}
 		}
-
 	}
-
 
 
 	/**
 	 * {@link TypeProvider} for {@link Type}s obtained from a {@link Field}.
 	 */
+	@SuppressWarnings("serial")
 	static class FieldTypeProvider implements TypeProvider {
-
-		private static final long serialVersionUID = 1L;
-
 
 		private final String fieldName;
 
@@ -238,13 +222,11 @@ abstract class SerializableTypeWrapper {
 
 		private transient Field field;
 
-
 		public FieldTypeProvider(Field field) {
 			this.fieldName = field.getName();
 			this.declaringClass = field.getDeclaringClass();
 			this.field = field;
 		}
-
 
 		@Override
 		public Type getType() {
@@ -256,28 +238,23 @@ abstract class SerializableTypeWrapper {
 			return this.field;
 		}
 
-		private void readObject(ObjectInputStream inputStream) throws IOException,
-				ClassNotFoundException {
+		private void readObject(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
 			inputStream.defaultReadObject();
 			try {
 				this.field = this.declaringClass.getDeclaredField(this.fieldName);
 			}
 			catch (Throwable ex) {
-				throw new IllegalStateException(
-						"Could not find original class structure", ex);
+				throw new IllegalStateException("Could not find original class structure", ex);
 			}
 		}
-
 	}
 
 
 	/**
 	 * {@link TypeProvider} for {@link Type}s obtained from a {@link MethodParameter}.
 	 */
+	@SuppressWarnings("serial")
 	static class MethodParameterTypeProvider implements TypeProvider {
-
-		private static final long serialVersionUID = 1L;
-
 
 		private final String methodName;
 
@@ -288,7 +265,6 @@ abstract class SerializableTypeWrapper {
 		private final int parameterIndex;
 
 		private transient MethodParameter methodParameter;
-
 
 		public MethodParameterTypeProvider(MethodParameter methodParameter) {
 			if (methodParameter.getMethod() != null) {
@@ -315,37 +291,30 @@ abstract class SerializableTypeWrapper {
 			return this.methodParameter;
 		}
 
-		private void readObject(ObjectInputStream inputStream) throws IOException,
-				ClassNotFoundException {
+		private void readObject(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
 			inputStream.defaultReadObject();
 			try {
 				if (this.methodName != null) {
 					this.methodParameter = new MethodParameter(
-							this.declaringClass.getDeclaredMethod(this.methodName,
-									this.parameterTypes), this.parameterIndex);
+							this.declaringClass.getDeclaredMethod(this.methodName, this.parameterTypes), this.parameterIndex);
 				}
 				else {
 					this.methodParameter = new MethodParameter(
-							this.declaringClass.getDeclaredConstructor(this.parameterTypes),
-							this.parameterIndex);
+							this.declaringClass.getDeclaredConstructor(this.parameterTypes), this.parameterIndex);
 				}
 			}
 			catch (Throwable ex) {
-				throw new IllegalStateException(
-						"Could not find original class structure", ex);
+				throw new IllegalStateException("Could not find original class structure", ex);
 			}
 		}
-
 	}
 
 
 	/**
 	 * {@link TypeProvider} for {@link Type}s obtained by invoking a no-arg method.
 	 */
+	@SuppressWarnings("serial")
 	static class MethodInvokeTypeProvider implements TypeProvider {
-
-		private static final long serialVersionUID = 1L;
-
 
 		private final TypeProvider provider;
 
@@ -355,14 +324,12 @@ abstract class SerializableTypeWrapper {
 
 		private transient Object result;
 
-
 		public MethodInvokeTypeProvider(TypeProvider provider, Method method, int index) {
 			this.provider = provider;
 			this.methodName = method.getName();
 			this.index = index;
 			this.result = ReflectionUtils.invokeMethod(method, provider.getType());
 		}
-
 
 		@Override
 		public Type getType() {
@@ -377,13 +344,11 @@ abstract class SerializableTypeWrapper {
 			return null;
 		}
 
-		private void readObject(ObjectInputStream inputStream) throws IOException,
-				ClassNotFoundException {
+		private void readObject(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
 			inputStream.defaultReadObject();
-			Method method = ReflectionUtils.findMethod(
-					this.provider.getType().getClass(), this.methodName);
+			Method method = ReflectionUtils.findMethod(this.provider.getType().getClass(), this.methodName);
 			this.result = ReflectionUtils.invokeMethod(method, this.provider.getType());
 		}
-
 	}
+
 }

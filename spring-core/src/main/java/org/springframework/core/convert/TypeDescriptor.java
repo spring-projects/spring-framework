@@ -40,19 +40,18 @@ import org.springframework.util.ObjectUtils;
  * @author Sam Brannen
  * @since 3.0
  */
+@SuppressWarnings("serial")
 public class TypeDescriptor implements Serializable {
-
-	private static final long serialVersionUID = 1L;
-
 
 	static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
 
 	private static final Map<Class<?>, TypeDescriptor> commonTypesCache = new HashMap<Class<?>, TypeDescriptor>();
 
-	private static final Class<?>[] CACHED_COMMON_TYPES = { Boolean.class, byte.class,
-		Byte.class, char.class, Character.class, short.class, Short.class, int.class,
-		Integer.class, long.class, Long.class, float.class, Float.class, double.class,
-		Double.class, String.class };
+	private static final Class<?>[] CACHED_COMMON_TYPES = {Boolean.class, byte.class,
+			Byte.class, char.class, Character.class, short.class, Short.class, int.class,
+			Integer.class, long.class, Long.class, float.class, Float.class, double.class,
+			Double.class, String.class};
+
 	static {
 		for (Class<?> preCachedClass : CACHED_COMMON_TYPES) {
 			commonTypesCache.put(preCachedClass, valueOf(preCachedClass));
