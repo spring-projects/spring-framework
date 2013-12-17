@@ -93,7 +93,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	private static final String PRAGMA = "Pragma";
 
-	private static final String UPGARDE = "Upgrade";
+	private static final String UPGRADE = "Upgrade";
 
 
 	private static final String[] DATE_FORMATS = new String[] {
@@ -547,7 +547,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @param upgrade the value of the header
 	 */
 	public void setUpgrade(String upgrade) {
-		set(UPGARDE, upgrade);
+		set(UPGRADE, upgrade);
 	}
 
 	/**
@@ -555,7 +555,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @return the value of the header
 	 */
 	public String getUpgrade() {
-		return getFirst(UPGARDE);
+		return getFirst(UPGRADE);
 	}
 
 	// Date methods
