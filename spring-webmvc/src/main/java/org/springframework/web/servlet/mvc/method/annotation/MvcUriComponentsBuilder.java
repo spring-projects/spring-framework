@@ -118,7 +118,7 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 
 		Method match = null;
 		for (Method method : controllerType.getDeclaredMethods()) {
-			if ((method.getParameterCount() == argumentValues.length) && method.getName().equals(methodName)) {
+			if ((method.getParameterTypes().length == argumentValues.length) && method.getName().equals(methodName)) {
 				if (match != null) {
 					throw new IllegalStateException("Found two methods named '" + methodName
 							+ "' having " + argumentValues + " arguments, controller "
