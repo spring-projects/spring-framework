@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,8 +56,8 @@ import org.springframework.web.util.UriComponentsBuilder;
  * {@link RequestParamMapMethodArgumentResolver} is used instead to provide
  * access to all URI variables in a map.
  *
- * <p>A {@link WebDataBinder} is invoked to apply type conversion to resolved path variable values that
- * don't yet match the method parameter type.
+ * <p>A {@link WebDataBinder} is invoked to apply type conversion to resolved
+ * path variable values that don't yet match the method parameter type.
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
@@ -70,8 +70,8 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 
 
 	public PathVariableMethodArgumentResolver() {
-		super(null);
 	}
+
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
@@ -143,8 +143,9 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 
 	private static class PathVariableNamedValueInfo extends NamedValueInfo {
 
-		private PathVariableNamedValueInfo(PathVariable annotation) {
+		public PathVariableNamedValueInfo(PathVariable annotation) {
 			super(annotation.value(), true, ValueConstants.DEFAULT_NONE);
 		}
 	}
+
 }

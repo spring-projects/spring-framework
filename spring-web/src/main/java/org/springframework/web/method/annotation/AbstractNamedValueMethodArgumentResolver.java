@@ -18,7 +18,6 @@ package org.springframework.web.method.annotation;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.servlet.ServletException;
 
 import org.springframework.beans.factory.config.BeanExpressionContext;
@@ -61,8 +60,13 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 	private final BeanExpressionContext expressionContext;
 
-	private Map<MethodParameter, NamedValueInfo> namedValueInfoCache =
-			new ConcurrentHashMap<MethodParameter, NamedValueInfo>(256);
+	private Map<MethodParameter, NamedValueInfo> namedValueInfoCache = new ConcurrentHashMap<MethodParameter, NamedValueInfo>(256);
+
+
+	public AbstractNamedValueMethodArgumentResolver() {
+		this.configurableBeanFactory = null;
+		this.expressionContext = null;
+	}
 
 	/**
 	 * @param beanFactory a bean factory to use for resolving ${...} placeholder
@@ -71,14 +75,13 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 */
 	public AbstractNamedValueMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
 		this.configurableBeanFactory = beanFactory;
-		this.expressionContext = (beanFactory != null) ? new BeanExpressionContext(beanFactory, new RequestScope()) : null;
+		this.expressionContext = (beanFactory != null ? new BeanExpressionContext(beanFactory, new RequestScope()) : null);
 	}
 
+
 	@Override
-	public final Object resolveArgument(
-			MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
-			throws Exception {
+	public final Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
 		Class<?> paramType = parameter.getParameterType();
 		NamedValueInfo namedValueInfo = getNamedValueInfo(parameter);
@@ -217,7 +220,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 		private final String defaultValue;
 
-		protected NamedValueInfo(String name, boolean required, String defaultValue) {
+		public NamedValueInfo(String name, boolean required, String defaultValue) {
 			this.name = name;
 			this.required = required;
 			this.defaultValue = defaultValue;

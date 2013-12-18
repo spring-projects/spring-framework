@@ -16,16 +16,17 @@
 
 package org.springframework.web.method.support;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 /**
  * A {@link UriComponentsContributor} containing a list of other contributors
@@ -37,7 +38,7 @@ import java.util.Map;
  */
 public class CompositeUriComponentsContributor implements UriComponentsContributor {
 
-	private final List<UriComponentsContributor> contributors = new ArrayList<UriComponentsContributor>();
+	private final List<UriComponentsContributor> contributors = new LinkedList<UriComponentsContributor>();
 
 	private final ConversionService conversionService;
 
@@ -46,10 +47,24 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 	 * Create an instance from a collection of {@link UriComponentsContributor}s or
 	 * {@link HandlerMethodArgumentResolver}s. Since both of these tend to be implemented
 	 * by the same class, the most convenient option is to obtain the configured
-	 * {@code HandlerMethodArgumentResolvers} in {@code RequestMappingHandlerAdapter} and
-	 * provide that to this constructor.
+	 * {@code HandlerMethodArgumentResolvers} in {@code RequestMappingHandlerAdapter}
+	 * and provide that to this constructor.
 	 * @param contributors a collection of {@link UriComponentsContributor}
-	 *        or {@link HandlerMethodArgumentResolver}s.
+	 * or {@link HandlerMethodArgumentResolver}s.
+	 */
+	public CompositeUriComponentsContributor(UriComponentsContributor... contributors) {
+		Collections.addAll(this.contributors, contributors);
+		this.conversionService = new DefaultFormattingConversionService();
+	}
+
+	/**
+	 * Create an instance from a collection of {@link UriComponentsContributor}s or
+	 * {@link HandlerMethodArgumentResolver}s. Since both of these tend to be implemented
+	 * by the same class, the most convenient option is to obtain the configured
+	 * {@code HandlerMethodArgumentResolvers} in {@code RequestMappingHandlerAdapter}
+	 * and provide that to this constructor.
+	 * @param contributors a collection of {@link UriComponentsContributor}
+	 * or {@link HandlerMethodArgumentResolver}s.
 	 */
 	public CompositeUriComponentsContributor(Collection<?> contributors) {
 		this(contributors, null);
@@ -70,17 +85,14 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 	 * need to be formatted as Strings before being added to the URI
 	 */
 	public CompositeUriComponentsContributor(Collection<?> contributors, ConversionService conversionService) {
-
 		Assert.notNull(contributors, "'uriComponentsContributors' must not be null");
-
 		for (Object contributor : contributors) {
 			if (contributor instanceof UriComponentsContributor) {
 				this.contributors.add((UriComponentsContributor) contributor);
 			}
 		}
-
-		this.conversionService = (conversionService != null) ?
-				conversionService : new DefaultFormattingConversionService();
+		this.conversionService =
+				(conversionService != null ? conversionService : new DefaultFormattingConversionService());
 	}
 
 
@@ -90,8 +102,8 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		for (UriComponentsContributor c : this.contributors) {
-			if (c.supportsParameter(parameter)) {
+		for (UriComponentsContributor contributor : this.contributors) {
+			if (contributor.supportsParameter(parameter)) {
 				return true;
 			}
 		}
@@ -102,9 +114,9 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 	public void contributeMethodArgument(MethodParameter parameter, Object value,
 			UriComponentsBuilder builder, Map<String, Object> uriVariables, ConversionService conversionService) {
 
-		for (UriComponentsContributor c : this.contributors) {
-			if (c.supportsParameter(parameter)) {
-				c.contributeMethodArgument(parameter, value, builder, uriVariables, conversionService);
+		for (UriComponentsContributor contributor : this.contributors) {
+			if (contributor.supportsParameter(parameter)) {
+				contributor.contributeMethodArgument(parameter, value, builder, uriVariables, conversionService);
 				break;
 			}
 		}
