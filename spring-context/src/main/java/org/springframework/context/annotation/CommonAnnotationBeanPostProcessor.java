@@ -315,10 +315,10 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		// Fall back to class name as cache key, for backwards compatibility with custom callers.
 		String cacheKey = (StringUtils.hasLength(beanName) ? beanName : clazz.getName());
 		InjectionMetadata metadata = this.injectionMetadataCache.get(cacheKey);
-		if (metadata == null) {
+		if (InjectionMetadata.needsRefresh(metadata, clazz)) {
 			synchronized (this.injectionMetadataCache) {
 				metadata = this.injectionMetadataCache.get(cacheKey);
-				if (metadata == null) {
+				if (InjectionMetadata.needsRefresh(metadata, clazz)) {
 					LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<InjectionMetadata.InjectedElement>();
 					Class<?> targetClass = clazz;
 

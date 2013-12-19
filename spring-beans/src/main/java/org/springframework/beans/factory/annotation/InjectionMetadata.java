@@ -90,6 +90,11 @@ public class InjectionMetadata {
 	}
 
 
+	public static boolean needsRefresh(InjectionMetadata metadata, Class<?> clazz) {
+		return (metadata == null || !metadata.targetClass.equals(clazz));
+	}
+
+
 	public static abstract class InjectedElement {
 
 		protected final Member member;
