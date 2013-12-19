@@ -314,10 +314,10 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		// Fall back to class name as cache key, for backwards compatibility with custom callers.
 		String cacheKey = (StringUtils.hasLength(beanName) ? beanName : clazz.getName());
 		InjectionMetadata metadata = this.injectionMetadataCache.get(cacheKey);
-		if (metadata == null) {
+		if (InjectionMetadata.needsRefresh(metadata, clazz)) {
 			synchronized (this.injectionMetadataCache) {
 				metadata = this.injectionMetadataCache.get(cacheKey);
-				if (metadata == null) {
+				if (InjectionMetadata.needsRefresh(metadata, clazz)) {
 					LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<InjectionMetadata.InjectedElement>();
 					Class<?> targetClass = clazz;
 
@@ -606,7 +606,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 				}
 				if (StringUtils.hasLength(this.wsdlLocation)) {
 					try {
-						Constructor<?> ctor = this.lookupType.getConstructor(new Class[] {URL.class, QName.class});
+						Constructor<?> ctor = this.lookupType.getConstructor(new Class<?>[] {URL.class, QName.class});
 						WebServiceClient clientAnn = this.lookupType.getAnnotation(WebServiceClient.class);
 						if (clientAnn == null) {
 							throw new IllegalStateException("JAX-WS Service class [" + this.lookupType.getName() +

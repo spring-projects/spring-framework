@@ -265,10 +265,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						if (requiredConstructor == null && defaultConstructor != null) {
 							candidates.add(defaultConstructor);
 						}
-						candidateConstructors = candidates.toArray(new Constructor[candidates.size()]);
+						candidateConstructors = candidates.toArray(new Constructor<?>[candidates.size()]);
 					}
 					else {
-						candidateConstructors = new Constructor[0];
+						candidateConstructors = new Constructor<?>[0];
 					}
 					this.candidateConstructorsCache.put(beanClass, candidateConstructors);
 				}
@@ -314,10 +314,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		// Fall back to class name as cache key, for backwards compatibility with custom callers.
 		String cacheKey = (StringUtils.hasLength(beanName) ? beanName : clazz.getName());
 		InjectionMetadata metadata = this.injectionMetadataCache.get(cacheKey);
-		if (metadata == null) {
+		if (InjectionMetadata.needsRefresh(metadata, clazz)) {
 			synchronized (this.injectionMetadataCache) {
 				metadata = this.injectionMetadataCache.get(cacheKey);
-				if (metadata == null) {
+				if (InjectionMetadata.needsRefresh(metadata, clazz)) {
 					metadata = buildAutowiringMetadata(clazz);
 					this.injectionMetadataCache.put(cacheKey, metadata);
 				}
