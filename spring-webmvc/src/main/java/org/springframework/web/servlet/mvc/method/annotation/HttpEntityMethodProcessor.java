@@ -61,18 +61,16 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		super(messageConverters, contentNegotiationManager);
 	}
 
+
 	public boolean supportsParameter(MethodParameter parameter) {
-		Class<?> parameterType = parameter.getParameterType();
-		return HttpEntity.class.equals(parameterType);
+		return HttpEntity.class.equals(parameter.getParameterType());
 	}
 
 	public boolean supportsReturnType(MethodParameter returnType) {
-		Class<?> parameterType = returnType.getParameterType();
-		return HttpEntity.class.isAssignableFrom(parameterType) || ResponseEntity.class.isAssignableFrom(parameterType);
+		return HttpEntity.class.isAssignableFrom(returnType.getParameterType());
 	}
 
-	public Object resolveArgument(
-			MethodParameter parameter, ModelAndViewContainer mavContainer,
+	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
 			throws IOException, HttpMediaTypeNotSupportedException {
 
@@ -85,22 +83,21 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 	private Type getHttpEntityType(MethodParameter parameter) {
 		Assert.isAssignable(HttpEntity.class, parameter.getParameterType());
-		ParameterizedType type = (ParameterizedType) parameter.getGenericParameterType();
-		if (type.getActualTypeArguments().length == 1) {
-			return type.getActualTypeArguments()[0];
+		Type parameterType = parameter.getGenericParameterType();
+		if (parameterType instanceof ParameterizedType) {
+			ParameterizedType type = (ParameterizedType) parameterType;
+			if (type.getActualTypeArguments().length == 1) {
+				return type.getActualTypeArguments()[0];
+			}
 		}
-		throw new IllegalArgumentException("HttpEntity parameter ("
-				+ parameter.getParameterName() + ") in method " + parameter.getMethod()
-				+ " is not parameterized or has more than one parameter");
+		throw new IllegalArgumentException("HttpEntity parameter '" + parameter.getParameterName() +
+				"' in method " + parameter.getMethod() + " is not parameterized or has more than one parameter");
 	}
 
-	public void handleReturnValue(
-			Object returnValue, MethodParameter returnType,
-			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)
-			throws Exception {
+	public void handleReturnValue(Object returnValue, MethodParameter returnType,
+			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
 		mavContainer.setRequestHandled(true);
-
 		if (returnValue == null) {
 			return;
 		}
@@ -124,7 +121,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			writeWithMessageConverters(body, returnType, inputMessage, outputMessage);
 		}
 		else {
-			// flush headers to the HttpServletResponse
+			// Flush headers to the HttpServletResponse
 			outputMessage.getBody();
 		}
 	}

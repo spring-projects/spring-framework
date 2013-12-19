@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import static org.junit.Assert.*;
 
 /**
  * @author Keith Donald
+ * @author Juergen Hoeller
  */
 public class CollectionToCollectionConverterTests {
 
@@ -63,8 +64,9 @@ public class CollectionToCollectionConverterTests {
 		assertTrue(conversionService.canConvert(sourceType, targetType));
 		try {
 			conversionService.convert(list, sourceType, targetType);
-		} catch (ConversionFailedException e) {
-			assertTrue(e.getCause() instanceof ConverterNotFoundException);
+		}
+		catch (ConversionFailedException ex) {
+			assertTrue(ex.getCause() instanceof ConverterNotFoundException);
 		}
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		assertTrue(conversionService.canConvert(sourceType, targetType));
@@ -141,10 +143,10 @@ public class CollectionToCollectionConverterTests {
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("objectToCollection"));
 		assertTrue(conversionService.canConvert(sourceType, targetType));
 		List<List<List<Integer>>> result = (List<List<List<Integer>>>) conversionService.convert(list, sourceType, targetType);
-		assertEquals((Integer)9, result.get(0).get(0).get(0));
-		assertEquals((Integer)12, result.get(0).get(1).get(0));
-		assertEquals((Integer)37, result.get(1).get(0).get(0));
-		assertEquals((Integer)23, result.get(1).get(1).get(0));
+		assertEquals((Integer) 9, result.get(0).get(0).get(0));
+		assertEquals((Integer) 12, result.get(0).get(1).get(0));
+		assertEquals((Integer) 37, result.get(1).get(0).get(0));
+		assertEquals((Integer) 23, result.get(1).get(1).get(0));
 	}
 
 	public List<List<List<Integer>>> objectToCollection;

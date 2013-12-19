@@ -173,11 +173,11 @@ public class NamedParameterQueryTests {
 		parms.addValue("id", 3);
 		Object o = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id",
 				parms, new RowMapper<Object>() {
-					@Override
-					public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
-						return rs.getInt(1);
-					}
-				});
+			@Override
+			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return rs.getInt(1);
+			}
+		});
 
 		assertTrue("Correct result type", o instanceof Integer);
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");
@@ -225,7 +225,7 @@ public class NamedParameterQueryTests {
 		given(resultSet.getInt(1)).willReturn(22);
 
 		MapSqlParameterSource parms = new MapSqlParameterSource();
-		parms.addValue("ids", Arrays.asList(new Object[] { 3, 4 }));
+		parms.addValue("ids", Arrays.asList(3, 4));
 		Object o = template.queryForObject(sql, parms, Integer.class);
 
 		assertTrue("Correct result type", o instanceof Integer);
@@ -241,8 +241,8 @@ public class NamedParameterQueryTests {
 
 		MapSqlParameterSource parms = new MapSqlParameterSource();
 		List<Object[]> l1 = new ArrayList<Object[]>();
-		l1.add(new Object[] { 3, "Rod" });
-		l1.add(new Object[] { 4, "Juergen" });
+		l1.add(new Object[] {3, "Rod"});
+		l1.add(new Object[] {4, "Juergen"});
 		parms.addValue("multiExpressionList", l1);
 		Object o = template.queryForObject(
 				"SELECT AGE FROM CUSTMR WHERE (ID, NAME) IN (:multiExpressionList)",
