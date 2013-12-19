@@ -39,10 +39,8 @@ import org.springframework.util.ObjectUtils;
  * @author Sam Brannen
  * @since 3.0
  */
+@SuppressWarnings("serial")
 public class TypeDescriptor implements Serializable {
-
-	private static final long serialVersionUID = 1L;
-
 
 	static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
 

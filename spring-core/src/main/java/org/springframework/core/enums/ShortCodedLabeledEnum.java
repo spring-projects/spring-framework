@@ -28,9 +28,8 @@ package org.springframework.core.enums;
  * @deprecated as of Spring 3.0, in favor of Java 5 enums.
  */
 @Deprecated
+@SuppressWarnings("serial")
 public class ShortCodedLabeledEnum extends AbstractGenericLabeledEnum {
-
-	private static final long serialVersionUID = 1L;
 
 	/**
 	 * The unique code of this enum.
