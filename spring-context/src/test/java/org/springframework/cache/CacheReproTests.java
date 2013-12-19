@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
+
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.cache.annotation.EnableCaching;
@@ -34,13 +35,13 @@ import static org.junit.Assert.*;
  * Tests to reproduce raised caching issues.
  *
  * @author Phillip Webb
+ * @author Juergen Hoeller
  */
 public class CacheReproTests {
 
 	@Test
 	public void spr11124() throws Exception {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
-				Spr11124Config.class);
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr11124Config.class);
 		Spr11124Service bean = context.getBean(Spr11124Service.class);
 		bean.single(2);
 		bean.single(2);
@@ -48,6 +49,16 @@ public class CacheReproTests {
 		bean.multiple(2);
 		context.close();
 	}
+
+	@Test
+	public void spr11249() throws Exception {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr11249Config.class);
+		Spr11249Service bean = context.getBean(Spr11249Service.class);
+		Object result = bean.doSomething("op", 2, 3);
+		assertSame(result, bean.doSomething("op", 2, 3));
+		context.close();
+	}
+
 
 	@Configuration
 	@EnableCaching
@@ -62,23 +73,23 @@ public class CacheReproTests {
 		public Spr11124Service service() {
 			return new Spr11124ServiceImpl();
 		}
-
 	}
+
 
 	public interface Spr11124Service {
 
 		public List<String> single(int id);
 
 		public List<String> multiple(int id);
-
 	}
+
 
 	public static class Spr11124ServiceImpl implements Spr11124Service {
 
 		private int multipleCount = 0;
 
 		@Override
-		@Cacheable(value = "smallCache")
+		@Cacheable("smallCache")
 		public List<String> single(int id) {
 			if (this.multipleCount > 0) {
 				fail("Called too many times");
@@ -98,7 +109,31 @@ public class CacheReproTests {
 			this.multipleCount++;
 			return Collections.emptyList();
 		}
+	}
 
+
+	@Configuration
+	@EnableCaching
+	public static class Spr11249Config {
+
+		@Bean
+		public CacheManager cacheManager() {
+			return new ConcurrentMapCacheManager();
+		}
+
+		@Bean
+		public Spr11249Service service() {
+			return new Spr11249Service();
+		}
+	}
+
+
+	public static class Spr11249Service {
+
+		@Cacheable("smallCache")
+		public Object doSomething(String name, int... values) {
+			return new Object();
+		}
 	}
 
 }

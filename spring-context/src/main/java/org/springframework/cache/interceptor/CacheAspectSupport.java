@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.Cache;
@@ -37,6 +38,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -114,7 +116,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 	/**
 	 * Set the KeyGenerator for this cache aspect.
-	 * Default is {@link DefaultKeyGenerator}.
+	 * The default is a {@link SimpleKeyGenerator}.
 	 */
 	public void setKeyGenerator(KeyGenerator keyGenerator) {
 		this.keyGenerator = keyGenerator;
@@ -249,8 +251,8 @@ public abstract class CacheAspectSupport implements InitializingBean {
 	}
 
 	private void logInvalidating(CacheOperationContext context, CacheEvictOperation operation, Object key) {
-		if (this.logger.isTraceEnabled()) {
-			this.logger.trace("Invalidating " + (key == null ? "entire cache" : "cache key " + key) +
+		if (logger.isTraceEnabled()) {
+			logger.trace("Invalidating " + (key != null ? "cache key [" + key + "]" : "entire cache") +
 					" for operation " + operation + " on method " + context.method);
 		}
 	}
@@ -302,8 +304,8 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 	private boolean isConditionPassing(CacheOperationContext context, Object result) {
 		boolean passing = context.isConditionPassing(result);
-		if (!passing && this.logger.isTraceEnabled()) {
-			this.logger.trace("Cache condition failed on method " + context.method + " for operation " + context.operation);
+		if (!passing && logger.isTraceEnabled()) {
+			logger.trace("Cache condition failed on method " + context.method + " for operation " + context.operation);
 		}
 		return passing;
 	}
@@ -312,8 +314,8 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		Object key = context.generateKey(result);
 		Assert.notNull(key, "Null key returned for cache operation (maybe you are using named params " +
 				"on classes without debug info?) " + context.operation);
-		if (this.logger.isTraceEnabled()) {
-			this.logger.trace("Computed cache key " + key + " for operation " + context.operation);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Computed cache key " + key + " for operation " + context.operation);
 		}
 		return key;
 	}
@@ -334,7 +336,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 				Method method, Object[] args, Object target, Class<?> targetClass) {
 
 			for (CacheOperation operation : operations) {
-				this.contexts.add(operation.getClass(), new CacheOperationContext(operation, method, args, target, targetClass));
+				this.contexts.add(operation.getClass(), getOperationContext(operation, method, args, target, targetClass));
 			}
 		}
 
@@ -373,7 +375,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 			if (!method.isVarArgs()) {
 				return args;
 			}
-			Object[] varArgs = (Object[]) args[args.length - 1];
+			Object[] varArgs = ObjectUtils.toObjectArray(args[args.length - 1]);
 			Object[] combinedArgs = new Object[args.length - 1 + varArgs.length];
 			System.arraycopy(args, 0, combinedArgs, 0, args.length - 1);
 			System.arraycopy(varArgs, 0, combinedArgs, args.length - 1, varArgs.length);
@@ -416,7 +418,8 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		}
 
 		private EvaluationContext createEvaluationContext(Object result) {
-			return evaluator.createEvaluationContext(this.caches, this.method, this.args, this.target, this.targetClass, result);
+			return evaluator.createEvaluationContext(
+					this.caches, this.method, this.args, this.target, this.targetClass, result);
 		}
 
 		protected Collection<? extends Cache> getCaches() {
