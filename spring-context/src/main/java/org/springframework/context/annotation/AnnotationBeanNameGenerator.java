@@ -88,13 +88,16 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 		for (String type : types) {
 			AnnotationAttributes attributes = MetadataUtils.attributesFor(amd, type);
 			if (isStereotypeWithNameValue(type, amd.getMetaAnnotationTypes(type), attributes)) {
-				String value = (String) attributes.get("value");
-				if (StringUtils.hasLength(value)) {
-					if (beanName != null && !value.equals(beanName)) {
-						throw new IllegalStateException("Stereotype annotations suggest inconsistent " +
-								"component names: '" + beanName + "' versus '" + value + "'");
+				Object value = attributes.get("value");
+				if (value instanceof String) {
+					String strVal = (String) value;
+					if (StringUtils.hasLength(strVal)) {
+						if (beanName != null && !strVal.equals(beanName)) {
+							throw new IllegalStateException("Stereotype annotations suggest inconsistent " +
+									"component names: '" + beanName + "' versus '" + strVal + "'");
+						}
+						beanName = strVal;
 					}
-					beanName = value;
 				}
 			}
 		}
@@ -117,9 +120,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 				annotationType.equals("javax.annotation.ManagedBean") ||
 				annotationType.equals("javax.inject.Named");
 
-		return (isStereotype && attributes != null &&
-				attributes.containsKey("value") &&
-				attributes.get("value") instanceof String);
+		return (isStereotype && attributes != null && attributes.containsKey("value"));
 	}
 
 	/**
