@@ -1183,6 +1183,13 @@ public class ResolvableTypeTests {
 		assertThat(type.hasUnresolvableGenerics(), equalTo(true));
 	}
 
+	@Test
+	public void testSpr11219() throws Exception {
+		ResolvableType type = ResolvableType.forField(BaseProvider.class.getField("stuff"), BaseProvider.class);
+		assertTrue(type.getNested(2).isAssignableFrom(ResolvableType.forClass(BaseImplementation.class)));
+		assertEquals("java.util.Collection<org.springframework.core.ResolvableTypeTests$IBase<?>>", type.toString());
+	}
+
 
 	private ResolvableType testSerialization(ResolvableType type) throws Exception {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -1202,10 +1209,8 @@ public class ResolvableTypeTests {
 			@Override
 			public void equalTo(boolean... values) {
 				for (int i = 0; i < fromTypes.length; i++) {
-					assertThat(stringDesc(type) + " isAssignableFrom "
-							+ stringDesc(fromTypes[i]),
-							type.isAssignableFrom(fromTypes[i]),
-							Matchers.equalTo(values[i]));
+					assertThat(stringDesc(type) + " isAssignableFrom " + stringDesc(fromTypes[i]),
+							type.isAssignableFrom(fromTypes[i]), Matchers.equalTo(values[i]));
 				}
 			}
 		};
@@ -1435,11 +1440,28 @@ public class ResolvableTypeTests {
 	}
 
 
-	static class TypedEnclosedInParameterizedType extends
-			EnclosedInParameterizedType<Integer> {
+	static class TypedEnclosedInParameterizedType extends EnclosedInParameterizedType<Integer> {
 
 		class TypedInnerTyped extends InnerTyped<Long> {
 		}
+	}
+
+
+	public interface IProvider<P> {
+	}
+
+	public interface IBase<BT extends IBase<BT>> {
+	}
+
+	public abstract class AbstractBase<BT extends IBase<BT>> implements IBase<BT> {
+	}
+
+	public class BaseImplementation extends AbstractBase<BaseImplementation> {
+	}
+
+	public class BaseProvider<BT extends IBase<BT>> implements IProvider<IBase<BT>> {
+
+		public Collection<IBase<BT>> stuff;
 	}
 
 }

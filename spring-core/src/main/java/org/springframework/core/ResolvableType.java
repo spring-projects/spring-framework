@@ -106,19 +106,14 @@ public final class ResolvableType implements Serializable {
 	private final VariableResolver variableResolver;
 
 	/**
-	 * If resolution has happened and {@link #resolved} contains a valid result.
-	 */
-	private boolean isResolved = false;
-
-	/**
-	 * Late binding stored copy of the resolved value (valid when {@link #isResolved} is true).
-	 */
-	private Class<?> resolved;
-
-	/**
 	 * The component type for an array or {@code null} if the type should be deduced.
 	 */
 	private final ResolvableType componentType;
+
+	/**
+	 * Copy of the resolved value.
+	 */
+	private final Class<?> resolved;
 
 
 	/**
@@ -134,6 +129,7 @@ public final class ResolvableType implements Serializable {
 		this.typeProvider = typeProvider;
 		this.variableResolver = variableResolver;
 		this.componentType = componentType;
+		this.resolved = resolveClass();
 	}
 
 
@@ -166,7 +162,7 @@ public final class ResolvableType implements Serializable {
 	 */
 	public Object getSource() {
 		Object source = (this.typeProvider == null ? null : this.typeProvider.getSource());
-		return (source == null ? this.type : source);
+		return (source != null ? source : this.type);
 	}
 
 	/**
@@ -199,45 +195,78 @@ public final class ResolvableType implements Serializable {
 		WildcardBounds ourBounds = WildcardBounds.get(this);
 		WildcardBounds typeBounds = WildcardBounds.get(type);
 
-		// in the from X is assignable to <? extends Number>
+		// In the from X is assignable to <? extends Number>
 		if (typeBounds != null) {
 			return (ourBounds != null && ourBounds.isSameKind(typeBounds) &&
 					ourBounds.isAssignableFrom(typeBounds.getBounds()));
 		}
 
-		// in the form <? extends Number> is assignable to X ...
+		// In the form <? extends Number> is assignable to X...
 		if (ourBounds != null) {
 			return ourBounds.isAssignableFrom(type);
 		}
 
-		// Main assignability check
-		boolean rtn = resolve(Object.class).isAssignableFrom(type.resolve(Object.class));
+		// Main assignability check about to follow
+		boolean checkGenerics = true;
+		Class<?> ourResolved = null;
+		if (this.type instanceof TypeVariable) {
+			TypeVariable<?> variable = (TypeVariable<?>) this.type;
+			// Try default variable resolution
+			if (this.variableResolver != null) {
+				ResolvableType resolved = this.variableResolver.resolveVariable(variable);
+				if (resolved != null) {
+					ourResolved = resolved.resolve();
+				}
+			}
+			if (ourResolved == null) {
+				// Try variable resolution against target type
+				if (type.variableResolver != null) {
+					ResolvableType resolved = type.variableResolver.resolveVariable(variable);
+					if (resolved != null) {
+						ourResolved = resolved.resolve();
+						checkGenerics = false;
+					}
+				}
+			}
+		}
+		if (ourResolved == null) {
+			ourResolved = resolve(Object.class);
+		}
+		Class<?> typeResolved = type.resolve(Object.class);
 
 		// We need an exact type match for generics
 		// List<CharSequence> is not assignable from List<String>
-		rtn &= (!checkingGeneric || resolve(Object.class).equals(type.resolve(Object.class)));
-
-		// Recursively check each generic
-		for (int i = 0; i < getGenerics().length; i++) {
-			rtn &= getGeneric(i).isAssignableFrom(type.as(resolve(Object.class)).getGeneric(i), true);
+		if (checkingGeneric ? !ourResolved.equals(typeResolved) : !ourResolved.isAssignableFrom(typeResolved)) {
+			return false;
 		}
 
-		return rtn;
+		if (checkGenerics) {
+			// Recursively check each generic
+			ResolvableType[] ourGenerics = getGenerics();
+			ResolvableType[] typeGenerics = type.as(ourResolved).getGenerics();
+			if (ourGenerics.length != typeGenerics.length) {
+				return false;
+			}
+			for (int i = 0; i < ourGenerics.length; i++) {
+				if (!ourGenerics[i].isAssignableFrom(typeGenerics[i], true)) {
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 
 	/**
-	 * Return {@code true} if this type will resolve to a Class that represents an
-	 * array.
+	 * Return {@code true} if this type resolves to a Class that represents an array.
 	 * @see #getComponentType()
 	 */
 	public boolean isArray() {
 		if (this == NONE) {
 			return false;
 		}
-		return (((this.type instanceof Class) &&
-				((Class<?>) this.type).isArray()) ||
-				this.type instanceof GenericArrayType ||
-				this.resolveType().isArray());
+		return (((this.type instanceof Class && ((Class<?>) this.type).isArray())) ||
+				this.type instanceof GenericArrayType || resolveType().isArray());
 	}
 
 	/**
@@ -562,10 +591,6 @@ public final class ResolvableType implements Serializable {
 	 * @see #resolveGenerics()
 	 */
 	public Class<?> resolve(Class<?> fallback) {
-		if (!this.isResolved) {
-			this.resolved = resolveClass();
-			this.isResolved = true;
-		}
 		return (this.resolved != null ? this.resolved : fallback);
 	}
 
@@ -582,8 +607,8 @@ public final class ResolvableType implements Serializable {
 
 	/**
 	 * Resolve this type by a single level, returning the resolved value or {@link #NONE}.
-	 * NOTE: the returned {@link ResolvableType} should only be used as an intermediary as
-	 * it cannot be serialized.
+	 * <p>Note: The returned {@link ResolvableType} should only be used as an intermediary
+	 * as it cannot be serialized.
 	 */
 	ResolvableType resolveType() {
 		if (this.type instanceof ParameterizedType) {
@@ -642,17 +667,26 @@ public final class ResolvableType implements Serializable {
 	}
 
 	/**
-	 * Return a string representation of this type in its fully resolved form
+	 * Return a String representation of this type in its fully resolved form
 	 * (including any generic parameters).
-	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
 		if (isArray()) {
 			return getComponentType() + "[]";
 		}
-		StringBuilder result = new StringBuilder();
-		result.append(resolve() == null ? "?" : resolve().getName());
+		if (this.resolved == null) {
+			return "?";
+		}
+		if (this.type instanceof TypeVariable) {
+			TypeVariable<?> variable = (TypeVariable<?>) this.type;
+			if (this.variableResolver == null || this.variableResolver.resolveVariable(variable) == null) {
+				// Don't bother with variable boundaries for toString()...
+				// Can cause infinite recursions in case of self-references
+				return "?";
+			}
+		}
+		StringBuilder result = new StringBuilder(this.resolved.getName());
 		if (hasGenerics()) {
 			result.append('<');
 			result.append(StringUtils.arrayToDelimitedString(getGenerics(), ", "));
@@ -705,8 +739,7 @@ public final class ResolvableType implements Serializable {
 		if (other == null) {
 			return false;
 		}
-		Object src = this.variableResolver.getSource();
-		return (src == this ? src == other.getSource() : ObjectUtils.nullSafeEquals(src, other.getSource()));
+		return ObjectUtils.nullSafeEquals(this.variableResolver.getSource(), other.getSource());
 	}
 
 	private static ResolvableType[] forTypes(Type[] types, VariableResolver owner) {
