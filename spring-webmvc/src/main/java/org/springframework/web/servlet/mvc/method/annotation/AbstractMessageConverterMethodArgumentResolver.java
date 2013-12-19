@@ -121,14 +121,11 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 		catch (InvalidMediaTypeException ex) {
 			throw new HttpMediaTypeNotSupportedException(ex.getMessage());
 		}
-
 		if (contentType == null) {
 			contentType = MediaType.APPLICATION_OCTET_STREAM;
 		}
 
 		Class<?> contextClass = methodParam.getContainingClass();
-		Class<T> targetClass = (Class<T>) ResolvableType.forType(targetType,
-				ResolvableType.forMethodParameter(methodParam)).resolve();
 
 		for (HttpMessageConverter<?> converter : this.messageConverters) {
 			if (converter instanceof GenericHttpMessageConverter) {
@@ -141,18 +138,18 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 					return genericConverter.read(targetType, contextClass, inputMessage);
 				}
 			}
-			if (targetClass != null) {
-				if (converter.canRead(targetClass, contentType)) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Reading [" + targetClass.getName() + "] as \"" +
-								contentType + "\" using [" + converter + "]");
-					}
-					return ((HttpMessageConverter<T>) converter).read(targetClass, inputMessage);
+			Class<T> targetClass = (Class<T>)
+					ResolvableType.forMethodParameter(methodParam, targetType).resolve(Object.class);
+			if (converter.canRead(targetClass, contentType)) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Reading [" + targetClass.getName() + "] as \"" +
+							contentType + "\" using [" + converter + "]");
 				}
+				return ((HttpMessageConverter<T>) converter).read(targetClass, inputMessage);
 			}
 		}
 
-		throw new HttpMediaTypeNotSupportedException(contentType, allSupportedMediaTypes);
+		throw new HttpMediaTypeNotSupportedException(contentType, this.allSupportedMediaTypes);
 	}
 
 	/**

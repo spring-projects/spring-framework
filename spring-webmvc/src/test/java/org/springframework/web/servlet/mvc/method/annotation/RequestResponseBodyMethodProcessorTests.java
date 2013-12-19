@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,9 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
@@ -76,9 +79,7 @@ public class RequestResponseBodyMethodProcessorTests {
 
 	@Before
 	public void setUp() throws Exception {
-
-		Method method = getClass().getMethod("handle",
-				List.class, SimpleBean.class, MultiValueMap.class, String.class);
+		Method method = getClass().getMethod("handle", List.class, SimpleBean.class, MultiValueMap.class, String.class);
 
 		paramGenericList = new MethodParameter(method, 0);
 		paramSimpleBean = new MethodParameter(method, 1);
@@ -171,8 +172,7 @@ public class RequestResponseBodyMethodProcessorTests {
 
 	@Test
 	public void resolveArgumentTypeVariable() throws Exception {
-
-		Method method = MySimpleParameterizedController.class.getMethod("handleDto", Identifiable.class);
+		Method method = MyParameterizedController.class.getMethod("handleDto", Identifiable.class);
 		HandlerMethod handlerMethod = new HandlerMethod(new MySimpleParameterizedController(), method);
 		MethodParameter methodParam = handlerMethod.getMethodParameters()[0];
 
@@ -182,6 +182,30 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
 		converters.add(new MappingJackson2HttpMessageConverter());
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
+
+		SimpleBean result = (SimpleBean) processor.resolveArgument(methodParam, mavContainer, webRequest, binderFactory);
+
+		assertNotNull(result);
+		assertEquals("Jad", result.getName());
+	}
+
+	// SPR-11225
+
+	@Test
+	public void resolveArgumentTypeVariableWithNonGenericConverter() throws Exception {
+		Method method = MyParameterizedController.class.getMethod("handleDto", Identifiable.class);
+		HandlerMethod handlerMethod = new HandlerMethod(new MySimpleParameterizedController(), method);
+		MethodParameter methodParam = handlerMethod.getMethodParameters()[0];
+
+		String content = "{\"name\" : \"Jad\"}";
+		this.servletRequest.setContent(content.getBytes("UTF-8"));
+		this.servletRequest.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		HttpMessageConverter target = new MappingJackson2HttpMessageConverter();
+		HttpMessageConverter proxy = ProxyFactory.getProxy(HttpMessageConverter.class, new SingletonTargetSource(target));
+		converters.add(proxy);
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
 		SimpleBean result = (SimpleBean) processor.resolveArgument(methodParam, mavContainer, webRequest, binderFactory);
@@ -235,7 +259,6 @@ public class RequestResponseBodyMethodProcessorTests {
 
 	@Test
 	public void supportsReturnTypeResponseBodyOnType() throws Exception {
-
 		Method method = ResponseBodyController.class.getMethod("handle");
 		MethodParameter returnType = new MethodParameter(method, -1);
 
@@ -249,7 +272,6 @@ public class RequestResponseBodyMethodProcessorTests {
 
 	@Test
 	public void supportsReturnTypeRestController() throws Exception {
-
 		Method method = TestRestController.class.getMethod("handle");
 		MethodParameter returnType = new MethodParameter(method, -1);
 
@@ -271,22 +293,31 @@ public class RequestResponseBodyMethodProcessorTests {
 		return null;
 	}
 
+
 	private static abstract class MyParameterizedController<DTO extends Identifiable> {
+
 		@SuppressWarnings("unused")
 		public void handleDto(@RequestBody DTO dto) {}
 	}
 
-	private static class MySimpleParameterizedController extends MyParameterizedController<SimpleBean> { }
+
+	private static class MySimpleParameterizedController extends MyParameterizedController<SimpleBean> {
+	}
+
 
 	private interface Identifiable extends Serializable {
+
 		public Long getId();
+
 		public void setId(Long id);
 	}
+
 
 	@SuppressWarnings({ "serial" })
 	private static class SimpleBean implements Identifiable {
 
 		private Long id;
+
 		private String name;
 
 		@Override
@@ -308,7 +339,9 @@ public class RequestResponseBodyMethodProcessorTests {
 		}
 	}
 
+
 	private final class ValidatingBinderFactory implements WebDataBinderFactory {
+
 		@Override
 		public WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName) throws Exception {
 			LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
@@ -319,6 +352,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		}
 	}
 
+
 	@ResponseBody
 	private static class ResponseBodyController {
 
@@ -327,6 +361,7 @@ public class RequestResponseBodyMethodProcessorTests {
 			return "hello";
 		}
 	}
+
 
 	@RestController
 	private static class TestRestController {

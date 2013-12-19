@@ -117,10 +117,7 @@ public final class ResolvableType implements Serializable {
 
 
 	/**
-	 * Private constructor used to create a new {@link ResolvableType}.
-	 * @param type the underlying Java type (may only be {@code null} for {@link #NONE})
-	 * @param variableResolver the resolver used for {@link TypeVariable}s (may be {@code null})
-	 * @param componentType an option declared component type for arrays (may be {@code null})
+	 * Private constructor used to create a new {@link ResolvableType} for resolution purposes.
 	 */
 	private ResolvableType(
 			Type type, TypeProvider typeProvider, VariableResolver variableResolver, ResolvableType componentType) {
@@ -130,6 +127,17 @@ public final class ResolvableType implements Serializable {
 		this.variableResolver = variableResolver;
 		this.componentType = componentType;
 		this.resolved = resolveClass();
+	}
+
+	/**
+	 * Private constructor used to create a new {@link ResolvableType} for cache key purposes.
+	 */
+	private ResolvableType(Type type, TypeProvider typeProvider, VariableResolver variableResolver) {
+		this.type = type;
+		this.typeProvider = typeProvider;
+		this.variableResolver = variableResolver;
+		this.componentType = null;
+		this.resolved = null;
 	}
 
 
@@ -935,9 +943,21 @@ public final class ResolvableType implements Serializable {
 	 * @see #forMethodParameter(Method, int)
 	 */
 	public static ResolvableType forMethodParameter(MethodParameter methodParameter) {
+		return forMethodParameter(methodParameter, null);
+	}
+
+	/**
+	 * Return a {@link ResolvableType} for the specified {@link MethodParameter},
+	 * overriding the target type to resolve with a specific given type.
+	 * @param methodParameter the source method parameter (must not be {@code null})
+	 * @param targetType the type to resolve (a part of the method parameter's type)
+	 * @return a {@link ResolvableType} for the specified method parameter
+	 * @see #forMethodParameter(Method, int)
+	 */
+	public static ResolvableType forMethodParameter(MethodParameter methodParameter, Type targetType) {
 		Assert.notNull(methodParameter, "MethodParameter must not be null");
 		ResolvableType owner = forType(methodParameter.getContainingClass()).as(methodParameter.getDeclaringClass());
-		return forType(null, new MethodParameterTypeProvider(methodParameter),
+		return forType(targetType, new MethodParameterTypeProvider(methodParameter),
 				owner.asVariableResolver()).getNested(methodParameter.getNestingLevel(),
 				methodParameter.typeIndexesPerLevel);
 	}
@@ -985,8 +1005,8 @@ public final class ResolvableType implements Serializable {
 	}
 
 	/**
-	 * Return a {@link ResolvableType} for the specified {@link Type}. NOTE: The resulting
-	 * {@link ResolvableType} may not be {@link Serializable}.
+	 * Return a {@link ResolvableType} for the specified {@link Type}.
+	 * Note: The resulting {@link ResolvableType} may not be {@link Serializable}.
 	 * @param type the source type or {@code null}
 	 * @return a {@link ResolvableType} for the specified {@link Type}
 	 * @see #forType(Type, ResolvableType)
@@ -997,7 +1017,7 @@ public final class ResolvableType implements Serializable {
 
 	/**
 	 * Return a {@link ResolvableType} for the specified {@link Type} backed by the given
-	 * owner type. NOTE: The resulting {@link ResolvableType} may not be {@link Serializable}.
+	 * owner type. Note: The resulting {@link ResolvableType} may not be {@link Serializable}.
 	 * @param type the source type or {@code null}
 	 * @param owner the owner type used to resolve variables
 	 * @return a {@link ResolvableType} for the specified {@link Type} and owner
@@ -1038,10 +1058,10 @@ public final class ResolvableType implements Serializable {
 			return NONE;
 		}
 		// Check the cache, we may have a ResolvableType that may have already been resolved
-		ResolvableType key = new ResolvableType(type, typeProvider, variableResolver, null);
+		ResolvableType key = new ResolvableType(type, typeProvider, variableResolver);
 		ResolvableType resolvableType = cache.get(key);
 		if (resolvableType == null) {
-			resolvableType = key;
+			resolvableType = new ResolvableType(type, typeProvider, variableResolver, null);
 			cache.put(key, resolvableType);
 		}
 		return resolvableType;
