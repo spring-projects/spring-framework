@@ -61,6 +61,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		super(messageConverters, contentNegotiationManager);
 	}
 
+
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		Class<?> parameterType = parameter.getParameterType();
@@ -69,13 +70,11 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		Class<?> parameterType = returnType.getParameterType();
-		return HttpEntity.class.isAssignableFrom(parameterType) || ResponseEntity.class.isAssignableFrom(parameterType);
+		return HttpEntity.class.isAssignableFrom(returnType.getParameterType());
 	}
 
 	@Override
-	public Object resolveArgument(
-			MethodParameter parameter, ModelAndViewContainer mavContainer,
+	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
 			throws IOException, HttpMediaTypeNotSupportedException {
 
@@ -92,19 +91,15 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		if (type.getActualTypeArguments().length == 1) {
 			return type.getActualTypeArguments()[0];
 		}
-		throw new IllegalArgumentException("HttpEntity parameter ("
-				+ parameter.getParameterName() + ") in method " + parameter.getMethod()
-				+ " is not parameterized or has more than one parameter");
+		throw new IllegalArgumentException("HttpEntity parameter (" + parameter.getParameterName() +
+				") in method " + parameter.getMethod() + " is not parameterized or has more than one parameter");
 	}
 
 	@Override
-	public void handleReturnValue(
-			Object returnValue, MethodParameter returnType,
-			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)
-			throws Exception {
+	public void handleReturnValue(Object returnValue, MethodParameter returnType,
+			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
 		mavContainer.setRequestHandled(true);
-
 		if (returnValue == null) {
 			return;
 		}
@@ -128,7 +123,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			writeWithMessageConverters(body, returnType, inputMessage, outputMessage);
 		}
 		else {
-			// flush headers to the HttpServletResponse
+			// Flush headers to the HttpServletResponse
 			outputMessage.getBody();
 		}
 	}

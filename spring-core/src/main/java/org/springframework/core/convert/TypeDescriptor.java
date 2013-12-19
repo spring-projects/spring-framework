@@ -513,15 +513,18 @@ public class TypeDescriptor implements Serializable {
 		}
 		ResolvableType element = (elementTypeDescriptor == null ? null
 				: elementTypeDescriptor.resolvableType);
-		return new TypeDescriptor(ResolvableType.forClassWithGenerics(collectionType,
-				element), null, null);
+		return new TypeDescriptor(ResolvableType.forClassWithGenerics(collectionType, element), null, null);
 	}
 
 	/**
 	 * Create a new type descriptor from a {@link java.util.Map} type.
 	 * <p>Useful for converting to typed Maps.
-	 * <p>For example, a Map&lt;String, String&gt; could be converted to a Map&lt;Id, EmailAddress&gt; by converting to a targetType built with this method:
-	 * The method call to construct such a TypeDescriptor would look something like: map(Map.class, TypeDescriptor.valueOf(Id.class), TypeDescriptor.valueOf(EmailAddress.class));
+	 * <p>For example, a Map&lt;String, String&gt; could be converted to a Map&lt;Id, EmailAddress&gt;
+	 * by converting to a targetType built with this method:
+	 * The method call to construct such a TypeDescriptor would look something like:
+	 * <pre class="code">
+	 * map(Map.class, TypeDescriptor.valueOf(Id.class), TypeDescriptor.valueOf(EmailAddress.class));
+	 * </pre>
 	 * @param mapType the map type, which must implement {@link Map}
 	 * @param keyTypeDescriptor a descriptor for the map's key type, used to convert map keys
 	 * @param valueTypeDescriptor the map's value type, used to convert map values
@@ -538,18 +541,19 @@ public class TypeDescriptor implements Serializable {
 
 	/**
 	 * Create a new type descriptor as an array of the specified type.
-	 * <p>For example to create a {@code Map<String,String>[]} use
-	 * {@code TypeDescriptor.array(TypeDescriptor.map(Map.class, TypeDescriptor.value(String.class), TypeDescriptor.value(String.class)))}.
+	 * <p>For example to create a {@code Map<String,String>[]} use:
+	 * <pre class="code">
+	 * TypeDescriptor.array(TypeDescriptor.map(Map.class, TypeDescriptor.value(String.class), TypeDescriptor.value(String.class)));
+	 * </pre>
 	 * @param elementTypeDescriptor the {@link TypeDescriptor} of the array element or {@code null}
 	 * @return an array {@link TypeDescriptor} or {@code null} if {@code elementTypeDescriptor} is {@code null}
 	 * @since 3.2.1
 	 */
 	public static TypeDescriptor array(TypeDescriptor elementTypeDescriptor) {
-		if(elementTypeDescriptor == null) {
+		if (elementTypeDescriptor == null) {
 			return null;
 		}
-		return new TypeDescriptor(
-				ResolvableType.forArrayComponent(elementTypeDescriptor.resolvableType),
+		return new TypeDescriptor(ResolvableType.forArrayComponent(elementTypeDescriptor.resolvableType),
 				null, elementTypeDescriptor.getAnnotations());
 	}
 
@@ -572,13 +576,13 @@ public class TypeDescriptor implements Serializable {
 	 * @return the nested type descriptor at the specified nesting level, or null
 	 * if it could not be obtained
 	 * @throws IllegalArgumentException if the nesting level of the input
-	 * {@link MethodParameter} argument is not 1
-	 * @throws IllegalArgumentException if the types up to the specified nesting
-	 * level are not of collection, array, or map types
+	 * {@link MethodParameter} argument is not 1, or if the types up to the
+	 * specified nesting level are not of collection, array, or map types
 	 */
 	public static TypeDescriptor nested(MethodParameter methodParameter, int nestingLevel) {
 		if (methodParameter.getNestingLevel() != 1) {
-			throw new IllegalArgumentException("methodParameter nesting level must be 1: use the nestingLevel parameter to specify the desired nestingLevel for nested type traversal");
+			throw new IllegalArgumentException("methodParameter nesting level must be 1: " +
+					"use the nestingLevel parameter to specify the desired nestingLevel for nested type traversal");
 		}
 		return nested(new TypeDescriptor(methodParameter), nestingLevel);
 	}
@@ -634,8 +638,10 @@ public class TypeDescriptor implements Serializable {
 
 	/**
 	 * Create a new type descriptor for an object.
-	 * <p>Use this factory method to introspect a source object before asking the conversion system to convert it to some another type.
-	 * <p>If the provided object is null, returns null, else calls {@link #valueOf(Class)} to build a TypeDescriptor from the object's class.
+	 * <p>Use this factory method to introspect a source object before asking the
+	 * conversion system to convert it to some another type.
+	 * <p>If the provided object is null, returns null, else calls {@link #valueOf(Class)}
+	 * to build a TypeDescriptor from the object's class.
 	 * @param source the source object
 	 * @return the type descriptor
 	 */
@@ -649,7 +655,8 @@ public class TypeDescriptor implements Serializable {
 			if (Object.class.equals(nested.getType())) {
 				// could be a collection type but we don't know about its element type,
 				// so let's just assume there is an element type of type Object
-			} else {
+			}
+			else {
 				nested = nested.getNested(2);
 			}
 		}
