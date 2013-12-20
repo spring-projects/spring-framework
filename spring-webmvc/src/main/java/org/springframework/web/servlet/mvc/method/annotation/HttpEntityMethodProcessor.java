@@ -64,8 +64,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		Class<?> parameterType = parameter.getParameterType();
-		return HttpEntity.class.equals(parameterType);
+		return HttpEntity.class.equals(parameter.getParameterType());
 	}
 
 	@Override
@@ -87,12 +86,15 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 	private Type getHttpEntityType(MethodParameter parameter) {
 		Assert.isAssignable(HttpEntity.class, parameter.getParameterType());
-		ParameterizedType type = (ParameterizedType) parameter.getGenericParameterType();
-		if (type.getActualTypeArguments().length == 1) {
-			return type.getActualTypeArguments()[0];
+		Type parameterType = parameter.getGenericParameterType();
+		if (parameterType instanceof ParameterizedType) {
+			ParameterizedType type = (ParameterizedType) parameterType;
+			if (type.getActualTypeArguments().length == 1) {
+				return type.getActualTypeArguments()[0];
+			}
 		}
-		throw new IllegalArgumentException("HttpEntity parameter (" + parameter.getParameterName() +
-				") in method " + parameter.getMethod() + " is not parameterized or has more than one parameter");
+		throw new IllegalArgumentException("HttpEntity parameter '" + parameter.getParameterName() +
+				"' in method " + parameter.getMethod() + " is not parameterized or has more than one parameter");
 	}
 
 	@Override
