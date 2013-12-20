@@ -268,10 +268,16 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 	private GenericConverter.ConvertiblePair getRequiredTypeInfo(Object converter, Class<?> genericIfc) {
 		ResolvableType resolvableType = ResolvableType.forClass(converter.getClass()).as(genericIfc);
-		if(resolvableType.hasUnresolvableGenerics()) {
+		ResolvableType[] generics = resolvableType.getGenerics();
+		if (generics.length < 2) {
 			return null;
 		}
-		return new GenericConverter.ConvertiblePair(resolvableType.resolveGeneric(0), resolvableType.resolveGeneric(1));
+		Class<?> sourceType = generics[0].resolve();
+		Class<?> targetType = generics[1].resolve();
+		if (sourceType == null || targetType == null) {
+			return null;
+		}
+		return new GenericConverter.ConvertiblePair(sourceType, targetType);
 	}
 
 	private void invalidateCache() {
@@ -328,7 +334,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 		@Override
 		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-			if(!this.typeInfo.getTargetType().equals(targetType.getObjectType())) {
+			if (!this.typeInfo.getTargetType().equals(targetType.getObjectType())) {
 				return false;
 			}
 			if (this.converter instanceof ConditionalConverter) {
@@ -382,9 +388,9 @@ public class GenericConversionService implements ConfigurableConversionService {
 			if (this.converterFactory instanceof ConditionalConverter) {
 				matches = ((ConditionalConverter) this.converterFactory).matches(sourceType, targetType);
 			}
-			if(matches) {
+			if (matches) {
 				Converter<?, ?> converter = this.converterFactory.getConverter(targetType.getType());
-				if(converter instanceof ConditionalConverter) {
+				if (converter instanceof ConditionalConverter) {
 					matches = ((ConditionalConverter) converter).matches(sourceType, targetType);
 				}
 			}
@@ -455,11 +461,10 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 */
 	private static class Converters {
 
-		private final Set<GenericConverter> globalConverters =
-				new LinkedHashSet<GenericConverter>();
+		private final Set<GenericConverter> globalConverters = new LinkedHashSet<GenericConverter>();
 
 		private final Map<ConvertiblePair, ConvertersForPair> converters =
-			new LinkedHashMap<ConvertiblePair, ConvertersForPair>(36);
+				new LinkedHashMap<ConvertiblePair, ConvertersForPair>(36);
 
 		public void add(GenericConverter converter) {
 			Set<ConvertiblePair> convertibleTypes = converter.getConvertibleTypes();
@@ -486,7 +491,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 
 		public void remove(Class<?> sourceType, Class<?> targetType) {
-			converters.remove(new ConvertiblePair(sourceType, targetType));
+			this.converters.remove(new ConvertiblePair(sourceType, targetType));
 		}
 
 		/**
@@ -504,9 +509,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 			for (Class<?> sourceCandidate : sourceCandidates) {
 				for (Class<?> targetCandidate : targetCandidates) {
 					ConvertiblePair convertiblePair = new ConvertiblePair(sourceCandidate, targetCandidate);
-					GenericConverter converter = getRegisteredConverter(
-							sourceType, targetType, convertiblePair);
-					if(converter != null) {
+					GenericConverter converter = getRegisteredConverter(sourceType, targetType, convertiblePair);
+					if (converter != null) {
 						return converter;
 					}
 				}
@@ -518,17 +522,17 @@ public class GenericConversionService implements ConfigurableConversionService {
 				TypeDescriptor targetType, ConvertiblePair convertiblePair) {
 
 			// Check specifically registered converters
-			ConvertersForPair convertersForPair = converters.get(convertiblePair);
-			GenericConverter converter = convertersForPair == null ? null
-				: convertersForPair.getConverter(sourceType, targetType);
-			if (converter != null) {
-				return converter;
+			ConvertersForPair convertersForPair = this.converters.get(convertiblePair);
+			if (convertersForPair != null) {
+				GenericConverter converter = convertersForPair.getConverter(sourceType, targetType);
+				if (converter != null) {
+					return converter;
+				}
 			}
 
 			// Check ConditionalGenericConverter that match all types
 			for (GenericConverter globalConverter : this.globalConverters) {
-				if (((ConditionalConverter)globalConverter).matches(
-						sourceType, targetType)) {
+				if (((ConditionalConverter)globalConverter).matches(sourceType, targetType)) {
 					return globalConverter;
 				}
 			}
@@ -568,10 +572,10 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 		private void addToClassHierarchy(int index, Class<?> type, boolean asArray,
 				List<Class<?>> hierarchy, Set<Class<?>> visited) {
-			if(asArray) {
+			if (asArray) {
 				type = Array.newInstance(type, 0).getClass();
 			}
-			if(visited.add(type)) {
+			if (visited.add(type)) {
 				hierarchy.add(index, type);
 			}
 		}
@@ -634,13 +638,11 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 */
 	private static class NoOpConverter implements GenericConverter {
 
-		private String name;
-
+		private final String name;
 
 		public NoOpConverter(String name) {
 			this.name = name;
 		}
-
 
 		@Override
 		public Set<ConvertiblePair> getConvertibleTypes() {
@@ -648,14 +650,14 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 
 		@Override
-		public Object convert(Object source, TypeDescriptor sourceType,
-				TypeDescriptor targetType) {
+		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			return source;
 		}
 
 		@Override
 		public String toString() {
-			return name;
+			return this.name;
 		}
 	}
+
 }

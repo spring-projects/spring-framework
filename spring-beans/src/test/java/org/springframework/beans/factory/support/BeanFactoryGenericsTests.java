@@ -769,6 +769,21 @@ public class BeanFactoryGenericsTests {
 		assertEquals(1, beans.size());
 	}
 
+	@Test
+	public void testSpr11250() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new GenericTypeAwareAutowireCandidateResolver());
+
+		bf.registerBeanDefinition("doubleStore", new RootBeanDefinition(NumberStore.class));
+		bf.registerBeanDefinition("floatStore", new RootBeanDefinition(NumberStore.class));
+		bf.registerBeanDefinition("numberBean",
+				new RootBeanDefinition(NumberBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR, false));
+
+		NumberBean nb = bf.getBean(NumberBean.class);
+		assertNotNull(nb.getDoubleStore());
+		assertNotNull(nb.getFloatStore());
+	}
+
 
 	@SuppressWarnings("serial")
 	public static class NamedUrlList extends LinkedList<URL> {
@@ -828,6 +843,31 @@ public class BeanFactoryGenericsTests {
 							throw new UnsupportedOperationException("mocked!");
 						}
 					});
+		}
+	}
+
+
+	public static class NumberStore<T extends Number> {
+	}
+
+
+	public static class NumberBean {
+
+		private final NumberStore<Double> doubleStore;
+
+		private final NumberStore<Float> floatStore;
+
+		public NumberBean(NumberStore<Double> doubleStore, NumberStore<Float> floatStore) {
+			this.doubleStore = doubleStore;
+			this.floatStore = floatStore;
+		}
+
+		public NumberStore<Double> getDoubleStore() {
+			return this.doubleStore;
+		}
+
+		public NumberStore<Float> getFloatStore() {
+			return this.floatStore;
 		}
 	}
 

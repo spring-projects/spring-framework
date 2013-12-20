@@ -394,8 +394,12 @@ public final class ResolvableType implements Serializable {
 	 * The result will be {@code true} only in those two scenarios.
 	 */
 	public boolean hasUnresolvableGenerics() {
-		for (Class<?> generic : resolveGenerics()) {
-			if (generic == null) {
+		if (this == NONE) {
+			return false;
+		}
+		ResolvableType[] generics = getGenerics();
+		for (ResolvableType generic : generics) {
+			if (generic.isUnresolvableTypeVariable()) {
 				return true;
 			}
 		}
@@ -408,8 +412,24 @@ public final class ResolvableType implements Serializable {
 					}
 				}
 			}
-			if (resolved.getGenericSuperclass() != null) {
-				return getSuperType().hasUnresolvableGenerics();
+			return getSuperType().hasUnresolvableGenerics();
+		}
+		return false;
+	}
+
+	/**
+	 * Determine whether the underlying type is a type variable that
+	 * cannot be resolved through the associated variable resolver.
+	 */
+	private boolean isUnresolvableTypeVariable() {
+		if (this.type instanceof TypeVariable) {
+			if (this.variableResolver == null) {
+				return true;
+			}
+			TypeVariable<?> variable = (TypeVariable<?>) this.type;
+			ResolvableType resolved = this.variableResolver.resolveVariable(variable);
+			if (resolved == null || resolved.isUnresolvableTypeVariable()) {
+				return true;
 			}
 		}
 		return false;
@@ -486,11 +506,11 @@ public final class ResolvableType implements Serializable {
 			if (indexes == null || indexes.length == 0) {
 				return getGenerics()[0];
 			}
-			ResolvableType rtn = this;
+			ResolvableType generic = this;
 			for (int index : indexes) {
-				rtn = rtn.getGenerics()[index];
+				generic = generic.getGenerics()[index];
 			}
-			return rtn;
+			return generic;
 		}
 		catch (IndexOutOfBoundsException ex) {
 			return NONE;
