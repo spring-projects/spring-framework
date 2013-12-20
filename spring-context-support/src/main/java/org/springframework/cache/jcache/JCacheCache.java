@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
  * {@link org.springframework.cache.Cache} implementation on top of a
  * {@link javax.cache.Cache} instance.
  *
- * <p>Note: This class has been updated for JCache 0.11, as of Spring 4.0.
+ * <p>Note: This class has been updated for JCache 1.0, as of Spring 4.0.
  *
  * @author Juergen Hoeller
  * @since 3.2
@@ -35,8 +35,7 @@ public class JCacheCache implements Cache {
 
 	private static final Object NULL_HOLDER = new NullHolder();
 
-	@SuppressWarnings("rawtypes")
-	private final javax.cache.Cache cache;
+	private final javax.cache.Cache<Object, Object> cache;
 
 	private final boolean allowNullValues;
 
@@ -45,7 +44,7 @@ public class JCacheCache implements Cache {
 	 * Create an {@link org.springframework.cache.jcache.JCacheCache} instance.
 	 * @param jcache backing JCache Cache instance
 	 */
-	public JCacheCache(javax.cache.Cache<?,?> jcache) {
+	public JCacheCache(javax.cache.Cache<Object, Object> jcache) {
 		this(jcache, true);
 	}
 
@@ -54,7 +53,7 @@ public class JCacheCache implements Cache {
 	 * @param jcache backing JCache Cache instance
 	 * @param allowNullValues whether to accept and convert null values for this cache
 	 */
-	public JCacheCache(javax.cache.Cache<?,?> jcache, boolean allowNullValues) {
+	public JCacheCache(javax.cache.Cache<Object, Object> jcache, boolean allowNullValues) {
 		Assert.notNull(jcache, "Cache must not be null");
 		this.cache = jcache;
 		this.allowNullValues = allowNullValues;
@@ -62,21 +61,20 @@ public class JCacheCache implements Cache {
 
 
 	@Override
-	public String getName() {
+	public final String getName() {
 		return this.cache.getName();
 	}
 
 	@Override
-	public javax.cache.Cache<?,?> getNativeCache() {
+	public final javax.cache.Cache<Object, Object> getNativeCache() {
 		return this.cache;
 	}
 
-	public boolean isAllowNullValues() {
+	public final boolean isAllowNullValues() {
 		return this.allowNullValues;
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public ValueWrapper get(Object key) {
 		Object value = this.cache.get(key);
 		return (value != null ? new SimpleValueWrapper(fromStoreValue(value)) : null);
@@ -93,13 +91,11 @@ public class JCacheCache implements Cache {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void put(Object key, Object value) {
 		this.cache.put(key, toStoreValue(value));
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void evict(Object key) {
 		this.cache.remove(key);
 	}

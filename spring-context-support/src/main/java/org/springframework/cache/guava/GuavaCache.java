@@ -67,16 +67,16 @@ public class GuavaCache implements Cache {
 
 
 	@Override
-	public String getName() {
+	public final String getName() {
 		return this.name;
 	}
 
 	@Override
-	public com.google.common.cache.Cache<Object, Object> getNativeCache() {
+	public final com.google.common.cache.Cache<Object, Object> getNativeCache() {
 		return this.cache;
 	}
 
-	public boolean isAllowNullValues() {
+	public final boolean isAllowNullValues() {
 		return this.allowNullValues;
 	}
 

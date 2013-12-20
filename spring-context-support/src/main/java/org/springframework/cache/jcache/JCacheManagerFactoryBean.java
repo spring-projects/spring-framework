@@ -32,7 +32,7 @@ import org.springframework.beans.factory.InitializingBean;
  * obtaining a pre-defined CacheManager by name through the standard
  * JCache {@link javax.cache.Caching} class.
  *
- * <p>Note: This class has been updated for JCache 0.11, as of Spring 4.0.
+ * <p>Note: This class has been updated for JCache 1.0, as of Spring 4.0.
  *
  * @author Juergen Hoeller
  * @since 3.2

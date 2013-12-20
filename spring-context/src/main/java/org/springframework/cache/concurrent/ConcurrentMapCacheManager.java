@@ -47,6 +47,8 @@ public class ConcurrentMapCacheManager implements CacheManager {
 
 	private boolean dynamic = true;
 
+	private boolean allowNullValues = true;
+
 
 	/**
 	 * Construct a dynamic ConcurrentMapCacheManager,
@@ -78,6 +80,25 @@ public class ConcurrentMapCacheManager implements CacheManager {
 		}
 	}
 
+	/**
+	 * Specify whether to accept and convert {@code null} values for all caches
+	 * in this cache manager.
+	 * <p>Default is "true", despite ConcurrentHashMap itself not supporting {@code null}
+	 * values. An internal holder object will be used to store user-level {@code null}s.
+	 */
+	public void setAllowNullValues(boolean allowNullValues) {
+		this.allowNullValues = allowNullValues;
+	}
+
+	/**
+	 * Return whether this cache manager accepts and converts {@code null} values
+	 * for all of its caches.
+	 */
+	public boolean isAllowNullValues() {
+		return this.allowNullValues;
+	}
+
+
 	@Override
 	public Collection<String> getCacheNames() {
 		return Collections.unmodifiableSet(this.cacheMap.keySet());
@@ -104,7 +125,7 @@ public class ConcurrentMapCacheManager implements CacheManager {
 	 * @return the ConcurrentMapCache (or a decorator thereof)
 	 */
 	protected Cache createConcurrentMapCache(String name) {
-		return new ConcurrentMapCache(name);
+		return new ConcurrentMapCache(name, isAllowNullValues());
 	}
 
 }

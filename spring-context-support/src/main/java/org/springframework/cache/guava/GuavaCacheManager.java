@@ -26,7 +26,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheBuilderSpec;
 import com.google.common.cache.CacheLoader;
 
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.util.Assert;
@@ -49,7 +48,7 @@ import org.springframework.util.Assert;
  * @since 4.0
  * @see GuavaCache
  */
-public class GuavaCacheManager implements CacheManager, DisposableBean {
+public class GuavaCacheManager implements CacheManager {
 
 	private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<String, Cache>(16);
 
@@ -58,6 +57,8 @@ public class GuavaCacheManager implements CacheManager, DisposableBean {
 	private CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder();
 
 	private CacheLoader<Object, Object> cacheLoader;
+
+	private boolean allowNullValues = true;
 
 
 	/**
@@ -133,6 +134,24 @@ public class GuavaCacheManager implements CacheManager, DisposableBean {
 		this.cacheLoader = cacheLoader;
 	}
 
+	/**
+	 * Specify whether to accept and convert {@code null} values for all caches
+	 * in this cache manager.
+	 * <p>Default is "true", despite Guava itself not supporting {@code null} values.
+	 * An internal holder object will be used to store user-level {@code null}s.
+	 */
+	public void setAllowNullValues(boolean allowNullValues) {
+		this.allowNullValues = allowNullValues;
+	}
+
+	/**
+	 * Return whether this cache manager accepts and converts {@code null} values
+	 * for all of its caches.
+	 */
+	public boolean isAllowNullValues() {
+		return this.allowNullValues;
+	}
+
 
 	@Override
 	public Collection<String> getCacheNames() {
@@ -160,7 +179,7 @@ public class GuavaCacheManager implements CacheManager, DisposableBean {
 	 * @return the Spring GuavaCache adapter (or a decorator thereof)
 	 */
 	protected Cache createGuavaCache(String name) {
-		return new GuavaCache(name, createNativeGuavaCache(name));
+		return new GuavaCache(name, createNativeGuavaCache(name), isAllowNullValues());
 	}
 
 	/**
@@ -174,14 +193,6 @@ public class GuavaCacheManager implements CacheManager, DisposableBean {
 		}
 		else {
 			return this.cacheBuilder.build();
-		}
-	}
-
-
-	@Override
-	public void destroy() {
-		for (Cache cache : this.cacheMap.values()) {
-
 		}
 	}
 

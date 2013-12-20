@@ -28,7 +28,7 @@ import org.springframework.cache.transaction.AbstractTransactionSupportingCacheM
  * {@link org.springframework.cache.CacheManager} implementation
  * backed by a JCache {@link javax.cache.CacheManager}.
  *
- * <p>Note: This class has been updated for JCache 0.11, as of Spring 4.0.
+ * <p>Note: This class has been updated for JCache 1.0, as of Spring 4.0.
  *
  * @author Juergen Hoeller
  * @since 3.2
@@ -71,17 +71,17 @@ public class JCacheCacheManager extends AbstractTransactionSupportingCacheManage
 	}
 
 	/**
-	 * Specify whether to accept and convert null values for all caches
+	 * Specify whether to accept and convert {@code null} values for all caches
 	 * in this cache manager.
-	 * <p>Default is "true", despite JSR-107 itself not supporting null values.
-	 * An internal holder object will be used to store user-level null values.
+	 * <p>Default is "true", despite JSR-107 itself not supporting {@code null} values.
+	 * An internal holder object will be used to store user-level {@code null}s.
 	 */
 	public void setAllowNullValues(boolean allowNullValues) {
 		this.allowNullValues = allowNullValues;
 	}
 
 	/**
-	 * Return whether this cache manager accepts and converts null values
+	 * Return whether this cache manager accepts and converts {@code null} values
 	 * for all of its caches.
 	 */
 	public boolean isAllowNullValues() {
@@ -90,8 +90,8 @@ public class JCacheCacheManager extends AbstractTransactionSupportingCacheManage
 
 	@Override
 	public void afterPropertiesSet() {
-		if (this.cacheManager == null) {
-			this.cacheManager = Caching.getCachingProvider().getCacheManager();
+		if (getCacheManager() == null) {
+			setCacheManager(Caching.getCachingProvider().getCacheManager());
 		}
 		super.afterPropertiesSet();
 	}
@@ -100,9 +100,9 @@ public class JCacheCacheManager extends AbstractTransactionSupportingCacheManage
 	@Override
 	protected Collection<Cache> loadCaches() {
 		Collection<Cache> caches = new LinkedHashSet<Cache>();
-		for (String cacheName : this.cacheManager.getCacheNames()) {
-			javax.cache.Cache<Object, Object> jcache = this.cacheManager.getCache(cacheName);
-			caches.add(new JCacheCache(jcache, this.allowNullValues));
+		for (String cacheName : getCacheManager().getCacheNames()) {
+			javax.cache.Cache<Object, Object> jcache = getCacheManager().getCache(cacheName);
+			caches.add(new JCacheCache(jcache, isAllowNullValues()));
 		}
 		return caches;
 	}
@@ -111,11 +111,10 @@ public class JCacheCacheManager extends AbstractTransactionSupportingCacheManage
 	public Cache getCache(String name) {
 		Cache cache = super.getCache(name);
 		if (cache == null) {
-			// check the JCache cache again
-			// (in case the cache was added at runtime)
-			javax.cache.Cache<?,?> jcache = this.cacheManager.getCache(name);
+			// Check the JCache cache again (in case the cache was added at runtime)
+			javax.cache.Cache<Object, Object> jcache = getCacheManager().getCache(name);
 			if (jcache != null) {
-				cache = new JCacheCache(jcache, this.allowNullValues);
+				cache = new JCacheCache(jcache, isAllowNullValues());
 				addCache(cache);
 			}
 		}

@@ -87,16 +87,16 @@ public class ConcurrentMapCache implements Cache {
 
 
 	@Override
-	public String getName() {
+	public final String getName() {
 		return this.name;
 	}
 
 	@Override
-	public ConcurrentMap<Object, Object> getNativeCache() {
+	public final ConcurrentMap<Object, Object> getNativeCache() {
 		return this.store;
 	}
 
-	public boolean isAllowNullValues() {
+	public final boolean isAllowNullValues() {
 		return this.allowNullValues;
 	}
 

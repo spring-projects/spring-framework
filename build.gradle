@@ -65,7 +65,6 @@ configure(allprojects) { project ->
 		maven { url "http://repo.spring.io/libs-release" }
 		maven { url "http://repo.spring.io/milestone" }  // for AspectJ 1.8.0.M1
 		maven { url "https://repository.apache.org/content/repositories/releases" }  // tomcat 8
-		// maven { url "https://repository.apache.org/content/repositories/snapshots" }  // tomcat 8 snapshots
 		maven { url "https://maven.java.net/content/repositories/releases" }  // javax.websocket, tyrus
 		maven { url "https://oss.sonatype.org/content/repositories/releases" }  // javax.cache
 	}
@@ -506,7 +505,7 @@ project("spring-context-support") {
 		optional(project(":spring-jdbc")) // for Quartz support
 		optional(project(":spring-tx")) // for Quartz support
 		optional("javax.mail:mail:1.4.7")
-		optional("javax.cache:cache-api:1.0.0-PFD")
+		optional("javax.cache:cache-api:1.0.0-RC1")
 		optional("com.google.guava:guava:14.0.1")
 		optional("net.sf.ehcache:ehcache-core:2.6.5")
 		optional("org.quartz-scheduler:quartz:1.8.6") {

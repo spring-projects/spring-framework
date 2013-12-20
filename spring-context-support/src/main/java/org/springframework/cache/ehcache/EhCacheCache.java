@@ -50,12 +50,12 @@ public class EhCacheCache implements Cache {
 
 
 	@Override
-	public String getName() {
+	public final String getName() {
 		return this.cache.getName();
 	}
 
 	@Override
-	public Ehcache getNativeCache() {
+	public final Ehcache getNativeCache() {
 		return this.cache;
 	}
 

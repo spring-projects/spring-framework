@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class EhCacheCacheManager extends AbstractTransactionSupportingCacheManag
 	}
 
 	/**
-	 * Create a new EhCacheCacheManager for the given backing EhCache.
+	 * Create a new EhCacheCacheManager for the given backing EhCache CacheManager.
 	 * @param cacheManager the backing EhCache {@link net.sf.ehcache.CacheManager}
 	 */
 	public EhCacheCacheManager(net.sf.ehcache.CacheManager cacheManager) {
@@ -71,15 +71,16 @@ public class EhCacheCacheManager extends AbstractTransactionSupportingCacheManag
 
 	@Override
 	protected Collection<Cache> loadCaches() {
-		Assert.notNull(this.cacheManager, "A backing EhCache CacheManager is required");
-		Status status = this.cacheManager.getStatus();
+		net.sf.ehcache.CacheManager cacheManager = getCacheManager();
+		Assert.notNull(cacheManager, "A backing EhCache CacheManager is required");
+		Status status = cacheManager.getStatus();
 		Assert.isTrue(Status.STATUS_ALIVE.equals(status),
 				"An 'alive' EhCache CacheManager is required - current cache is " + status.toString());
 
-		String[] names = this.cacheManager.getCacheNames();
+		String[] names = cacheManager.getCacheNames();
 		Collection<Cache> caches = new LinkedHashSet<Cache>(names.length);
 		for (String name : names) {
-			caches.add(new EhCacheCache(this.cacheManager.getEhcache(name)));
+			caches.add(new EhCacheCache(cacheManager.getEhcache(name)));
 		}
 		return caches;
 	}
@@ -90,7 +91,7 @@ public class EhCacheCacheManager extends AbstractTransactionSupportingCacheManag
 		if (cache == null) {
 			// check the EhCache cache again
 			// (in case the cache was added at runtime)
-			Ehcache ehcache = this.cacheManager.getEhcache(name);
+			Ehcache ehcache = getCacheManager().getEhcache(name);
 			if (ehcache != null) {
 				cache = new EhCacheCache(ehcache);
 				addCache(cache);
