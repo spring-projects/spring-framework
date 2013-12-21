@@ -36,9 +36,10 @@ import org.springframework.core.io.Resource;
  *
  * <p>Consider this as the equivalent of {@link GenericXmlApplicationContext} for
  * Groovy bean definitions. The main difference is that, within a Groovy script,
- * the context can be used with an inline bean definition closure like as follows:
+ * the context can be used with an inline bean definition closure as follows:
  *
- * <pre>import org.hibernate.SessionFactory
+ * <pre class="code">
+ * import org.hibernate.SessionFactory
  * import org.apache.commons.dbcp.BasicDataSource
  *
  * def context = new GenericGroovyApplicationContext()
@@ -59,12 +60,14 @@ import org.springframework.core.io.Resource;
  *         }
  *     }
  * }
- * context.refresh()</pre>
+ * context.refresh()
+ * </pre>
  *
  * <p>Alternatively, load a Groovy bean definition script like the following
  * from an external resource (e.g. an "applicationContext.groovy" file):
  *
- * <pre>import org.hibernate.SessionFactory
+ * <pre class="code">
+ * import org.hibernate.SessionFactory
  * import org.apache.commons.dbcp.BasicDataSource
  *
  * beans {
@@ -83,18 +86,23 @@ import org.springframework.core.io.Resource;
  *             dataSource = dataSource
  *         }
  *     }
- * }</pre>
+ * }
+ * </pre>
  *
  * <p>With the following Java code creating the {@code GenericGroovyApplicationContext}
  * (potentially using Ant-style '*'/'**' location patterns):
  *
- * <pre>GenericGroovyApplicationContext context = new GenericGroovyApplicationContext();
+ * <pre class="code">
+ * GenericGroovyApplicationContext context = new GenericGroovyApplicationContext();
  * context.load("org/myapp/applicationContext.groovy");
- * context.refresh();</pre>
+ * context.refresh();
+ * </pre>
  *
  * <p>Or even more concise, provided that no extra configuration is needed:
  *
- * <pre>ApplicationContext context = new GenericGroovyApplicationContext("org/myapp/applicationContext.groovy");</pre>
+ * <pre class="code">
+ * ApplicationContext context = new GenericGroovyApplicationContext("org/myapp/applicationContext.groovy");
+ * </pre>
  *
  * @author Juergen Hoeller
  * @author Jeff Brown

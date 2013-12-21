@@ -56,10 +56,11 @@ import org.springframework.core.io.support.EncodedResource;
 import org.springframework.core.io.support.ResourcePatternUtils;
 
 /**
- * A Groovy-based reader for Spring bean definitions: Like a Groovy builder,
+ * A Groovy-based reader for Spring bean definitions: like a Groovy builder,
  * but more of a DSL for Spring configuration. Allows syntax like:
  *
- * <pre>import org.hibernate.SessionFactory
+ * <pre class="code">
+ * import org.hibernate.SessionFactory
  * import org.apache.commons.dbcp.BasicDataSource
  *
  * def reader = new GroovyBeanDefinitionReader(myApplicationContext)
@@ -81,11 +82,12 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  *     }
  * }</pre>
  *
- * <p>You can also load resources containing beans defined as a Groovy script using
+ * <p>You can also load resources containing beans defined in a Groovy script using
  * either the {@link #loadBeanDefinitions(org.springframework.core.io.Resource...)}
  * or {@link #loadBeanDefinitions(String...)} method, with a script looking as follows:
  *
- * <pre>import org.hibernate.SessionFactory
+ * <pre class="code">
+ * import org.hibernate.SessionFactory
  * import org.apache.commons.dbcp.BasicDataSource
  *
  * beans {
@@ -257,10 +259,10 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 	/**
-	 * Defines an inner bean definition
-	 * @param type The bean type
-	 * @param args The constructors arguments and closure configurer
-	 * @return The bean definition
+	 * Define an inner bean definition.
+	 * @param type the bean type
+	 * @param args the constructors arguments and closure configurer
+	 * @return the bean definition
 	 */
 	public AbstractBeanDefinition bean(Class<?> type, Object...args) {
 		GroovyBeanDefinitionWrapper current = this.currentBeanDefinition;
@@ -292,7 +294,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 	/**
-	 * Defines an Spring namespace definition to use.
+	 * Define a Spring namespace definition to use.
 	 * @param definition the namespace definition
 	 */
 	public void xmlns(Map<String, String> definition) {
@@ -314,7 +316,8 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 	/**
-	 * Imports Spring bean definitions from either XML or Groovy sources into the current bean builder instance.
+	 * Import Spring bean definitions from either XML or Groovy sources into the
+	 * current bean builder instance.
 	 * @param resourcePattern the resource pattern
 	 */
 	public void importBeans(String resourcePattern) throws IOException {
@@ -336,7 +339,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 
 	/**
 	 * This method overrides method invocation to create beans for each method name that
-	 * takes a class argument
+	 * takes a class argument.
 	 */
 	public Object invokeMethod(String name, Object arg) {
 		Object[] args = (Object[])arg;
@@ -411,7 +414,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 	/**
-	 * When an methods argument is only a closure it is a set of bean definitions.
+	 * When a method argument is only a closure it is a set of bean definitions.
 	 * @param callable the closure argument
 	 * @return this GroovyBeanDefinitionReader instance
 	 */
@@ -528,7 +531,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 	/**
-	 * Checks whether there are any {@link RuntimeBeanReference} inside the Map
+	 * Checks whether there are any {@link RuntimeBeanReference}s inside the Map
 	 * and converts it to a ManagedMap if necessary.
 	 * @param map the original Map
 	 * @return either the original map or a managed copy of it
@@ -550,8 +553,8 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 	/**
-	 * Checks whether there are any {@link RuntimeBeanReference} inside the Lis
-	 * and  converts it to a ManagedList if necessary.
+	 * Checks whether there are any {@link RuntimeBeanReference}s inside the List
+	 * and converts it to a ManagedList if necessary.
 	 * @param list the original List
 	 * @return either the original list or a managed copy of it
 	 */
@@ -612,10 +615,14 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 	/**
-	 * This method overrides property retrieval in the scope of the GroovyBeanDefinitionReader to either:
-	 * a) Retrieve a variable from the bean builder's binding if it exists
-	 * b) Retrieve a RuntimeBeanReference for a specific bean if it exists
-	 * c) Otherwise just delegate to MetaClass.getProperty which will resolve properties from the GroovyBeanDefinitionReader itself
+	 * This method overrides property retrieval in the scope of the
+	 * GroovyBeanDefinitionReader to either:
+	 * <ul>
+	 * <li>Retrieve a variable from the bean builder's binding if it exists
+	 * <li>Retrieve a RuntimeBeanReference for a specific bean if it exists
+	 * <li>Otherwise just delegate to MetaClass.getProperty which will resolve
+	 * properties from the GroovyBeanDefinitionReader itself
+	 * </ul>
 	 */
 	public Object getProperty(String name) {
 		Binding binding = getBinding();
@@ -678,9 +685,10 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 
 
 	/**
-	 * This class is used to defer the adding of a property to a bean definition until later
-	 * This is for a case where you assign a property to a list that may not contain bean references at
-	 * that point of assignment, but may later hence it would need to be managed
+	 * This class is used to defer the adding of a property to a bean definition
+	 * until later. This is for a case where you assign a property to a list that
+	 * may not contain bean references at that point of assignment, but may later;
+	 * hence, it would need to be managed.
 	 */
 	private static class DeferredProperty {
 
@@ -703,7 +711,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 
 
 	/**
-	 * A RuntimeBeanReference that takes care of adding new properties to runtime references
+	 * A RuntimeBeanReference that takes care of adding new properties to runtime references.
 	 */
 	private class GroovyRuntimeBeanReference extends RuntimeBeanReference implements GroovyObject {
 
