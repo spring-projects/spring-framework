@@ -59,8 +59,6 @@ import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import static org.springframework.context.annotation.MetadataUtils.*;
-
 /**
  * Parses a {@link Configuration} class definition, populating a collection of
  * {@link ConfigurationClass} objects (parsing a single Configuration class may result in
@@ -172,20 +170,19 @@ class ConfigurationClassParser {
 	/**
 	 * @return annotation metadata of superclass, {@code null} if none found or previously processed
 	 */
-	protected AnnotationMetadata doProcessConfigurationClass(
-			ConfigurationClass configClass, AnnotationMetadata metadata) throws IOException {
-
+	protected AnnotationMetadata doProcessConfigurationClass(ConfigurationClass configClass, AnnotationMetadata metadata) throws IOException {
 		// recursively process any member (nested) classes first
 		processMemberClasses(metadata);
 
 		// process any @PropertySource annotations
-		AnnotationAttributes propertySource = attributesFor(metadata, org.springframework.context.annotation.PropertySource.class);
+		AnnotationAttributes propertySource = MetadataUtils.attributesFor(metadata,
+				org.springframework.context.annotation.PropertySource.class);
 		if (propertySource != null) {
 			processPropertySource(propertySource);
 		}
 
 		// process any @ComponentScan annotations
-		AnnotationAttributes componentScan = attributesFor(metadata, ComponentScan.class);
+		AnnotationAttributes componentScan = MetadataUtils.attributesFor(metadata, ComponentScan.class);
 		if (componentScan != null) {
 			// the config class is annotated with @ComponentScan -> perform the scan immediately
 			Set<BeanDefinitionHolder> scannedBeanDefinitions =
@@ -204,12 +201,12 @@ class ConfigurationClassParser {
 		Set<Object> visited = new LinkedHashSet<Object>();
 		collectImports(metadata, imports, visited);
 		if (!imports.isEmpty()) {
-			processImport(configClass, imports, true);
+			processImport(configClass, metadata, imports, true);
 		}
 
 		// process any @ImportResource annotations
 		if (metadata.isAnnotated(ImportResource.class.getName())) {
-			AnnotationAttributes importResource = attributesFor(metadata, ImportResource.class);
+			AnnotationAttributes importResource = MetadataUtils.attributesFor(metadata, ImportResource.class);
 			String[] resources = importResource.getStringArray("value");
 			Class<? extends BeanDefinitionReader> readerClass = importResource.getClass("reader");
 			for (String resource : resources) {
@@ -369,13 +366,14 @@ class ConfigurationClassParser {
 		}
 	}
 
-	private void processImport(ConfigurationClass configClass, Collection<?> classesToImport, boolean checkForCircularImports) throws IOException {
+	private void processImport(ConfigurationClass configClass, AnnotationMetadata metadata,
+			Collection<?> classesToImport, boolean checkForCircularImports) throws IOException {
+
 		if (checkForCircularImports && this.importStack.contains(configClass)) {
 			this.problemReporter.error(new CircularImportProblem(configClass, this.importStack, configClass.getMetadata()));
 		}
 		else {
 			this.importStack.push(configClass);
-			AnnotationMetadata importingClassMetadata = configClass.getMetadata();
 			try {
 				for (Object candidate : classesToImport) {
 					Object candidateToCheck = (candidate instanceof Class ? (Class) candidate :
@@ -385,7 +383,7 @@ class ConfigurationClassParser {
 						Class<?> candidateClass = (candidate instanceof Class ? (Class) candidate :
 								this.resourceLoader.getClassLoader().loadClass((String) candidate));
 						ImportSelector selector = BeanUtils.instantiateClass(candidateClass, ImportSelector.class);
-						processImport(configClass, Arrays.asList(selector.selectImports(importingClassMetadata)), false);
+						processImport(configClass, metadata, Arrays.asList(selector.selectImports(metadata)), false);
 					}
 					else if (checkAssignability(ImportBeanDefinitionRegistrar.class, candidateToCheck)) {
 						// the candidate class is an ImportBeanDefinitionRegistrar -> delegate to it to register additional bean definitions
@@ -393,11 +391,11 @@ class ConfigurationClassParser {
 								this.resourceLoader.getClassLoader().loadClass((String) candidate));
 						ImportBeanDefinitionRegistrar registrar = BeanUtils.instantiateClass(candidateClass, ImportBeanDefinitionRegistrar.class);
 						invokeAwareMethods(registrar);
-						registrar.registerBeanDefinitions(importingClassMetadata, this.registry);
+						registrar.registerBeanDefinitions(metadata, this.registry);
 					}
 					else {
 						// candidate class not an ImportSelector or ImportBeanDefinitionRegistrar -> process it as a @Configuration class
-						this.importStack.registerImport(importingClassMetadata,
+						this.importStack.registerImport(metadata,
 								(candidate instanceof Class ? ((Class) candidate).getName() : (String) candidate));
 						processConfigurationClass(candidateToCheck instanceof Class ? new ConfigurationClass((Class) candidateToCheck, true) :
 								new ConfigurationClass((MetadataReader) candidateToCheck, true));
