@@ -42,7 +42,8 @@ public abstract class MockMvcBuilderSupport {
 
 	protected final MockMvc createMockMvc(Filter[] filters, MockServletConfig servletConfig,
 			WebApplicationContext webAppContext, RequestBuilder defaultRequestBuilder,
-			List<ResultMatcher> globalResultMatchers, List<ResultHandler> globalResultHandlers, Boolean dispatchOptions) {
+			List<ResultMatcher> globalResultMatchers, List<ResultHandler> globalResultHandlers,
+			Boolean dispatchOptions) {
 
 		ServletContext servletContext = webAppContext.getServletContext();
 

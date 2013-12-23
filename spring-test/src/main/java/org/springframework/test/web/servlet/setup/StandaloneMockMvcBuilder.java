@@ -82,7 +82,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMockMvcBuilder> {
+public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneMockMvcBuilder> {
 
 	private final Object[] controllers;
 
@@ -124,7 +124,6 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 	 * @see MockMvcBuilders#standaloneSetup(Object...)
 	 */
 	protected StandaloneMockMvcBuilder(Object... controllers) {
-		super(new StubWebApplicationContext(new MockServletContext()));
 		Assert.isTrue(!ObjectUtils.isEmpty(controllers), "At least one controller is required");
 		this.controllers = controllers;
 	}
@@ -308,37 +307,39 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 
 
 	@Override
-	protected void initWebAppContext(WebApplicationContext cxt) {
-		StubWebApplicationContext mockCxt = (StubWebApplicationContext) cxt;
-		registerMvcSingletons(mockCxt);
-		cxt.getServletContext().setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, mockCxt);
+	protected WebApplicationContext initWebAppContext() {
+		MockServletContext servletContext = new MockServletContext();
+		StubWebApplicationContext wac = new StubWebApplicationContext(servletContext);
+		registerMvcSingletons(wac);
+		servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
+		return wac;
 	}
 
-	private void registerMvcSingletons(StubWebApplicationContext cxt) {
+	private void registerMvcSingletons(StubWebApplicationContext wac) {
 
 		StandaloneConfiguration config = new StandaloneConfiguration();
 
 		StaticRequestMappingHandlerMapping hm = config.getHandlerMapping();
-		hm.setServletContext(cxt.getServletContext());
-		hm.setApplicationContext(cxt);
-		hm.registerHandlers(controllers);
-		cxt.addBean("requestMappingHandlerMapping", hm);
+		hm.setServletContext(wac.getServletContext());
+		hm.setApplicationContext(wac);
+		hm.registerHandlers(this.controllers);
+		wac.addBean("requestMappingHandlerMapping", hm);
 
 		RequestMappingHandlerAdapter handlerAdapter = config.requestMappingHandlerAdapter();
-		handlerAdapter.setServletContext(cxt.getServletContext());
-		handlerAdapter.setApplicationContext(cxt);
+		handlerAdapter.setServletContext(wac.getServletContext());
+		handlerAdapter.setApplicationContext(wac);
 		handlerAdapter.afterPropertiesSet();
-		cxt.addBean("requestMappingHandlerAdapter", handlerAdapter);
+		wac.addBean("requestMappingHandlerAdapter", handlerAdapter);
 
-		cxt.addBean("handlerExceptionResolver", config.handlerExceptionResolver());
+		wac.addBean("handlerExceptionResolver", config.handlerExceptionResolver());
 
-		cxt.addBeans(initViewResolvers(cxt));
-		cxt.addBean(DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME, this.localeResolver);
-		cxt.addBean(DispatcherServlet.THEME_RESOLVER_BEAN_NAME, new FixedThemeResolver());
-		cxt.addBean(DispatcherServlet.REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME, new DefaultRequestToViewNameTranslator());
+		wac.addBeans(initViewResolvers(wac));
+		wac.addBean(DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME, this.localeResolver);
+		wac.addBean(DispatcherServlet.THEME_RESOLVER_BEAN_NAME, new FixedThemeResolver());
+		wac.addBean(DispatcherServlet.REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME, new DefaultRequestToViewNameTranslator());
 
 		this.flashMapManager = new SessionFlashMapManager();
-		cxt.addBean(DispatcherServlet.FLASH_MAP_MANAGER_BEAN_NAME, this.flashMapManager);
+		wac.addBean(DispatcherServlet.FLASH_MAP_MANAGER_BEAN_NAME, this.flashMapManager);
 	}
 
 	private List<ViewResolver> initViewResolvers(WebApplicationContext wac) {

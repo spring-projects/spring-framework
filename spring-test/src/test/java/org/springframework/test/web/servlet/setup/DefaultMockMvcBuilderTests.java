@@ -35,7 +35,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  */
 public class DefaultMockMvcBuilderTests {
 
-	private DefaultMockMvcBuilder<?> builder;
+	private StandaloneMockMvcBuilder builder;
 
 	@Before
 	public void setup() {
