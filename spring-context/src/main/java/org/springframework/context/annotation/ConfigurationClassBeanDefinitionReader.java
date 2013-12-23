@@ -51,8 +51,6 @@ import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.StringUtils;
 
-import static org.springframework.context.annotation.MetadataUtils.*;
-
 /**
  * Reads a given fully-populated set of ConfigurationClass instances, registering bean
  * definitions with the given {@link BeanDefinitionRegistry} based on its contents.
@@ -173,13 +171,13 @@ class ConfigurationClassBeanDefinitionReader {
 		beanDef.setAttribute(RequiredAnnotationBeanPostProcessor.SKIP_REQUIRED_CHECK_ATTRIBUTE, Boolean.TRUE);
 
 		// consider role
-		AnnotationAttributes role = attributesFor(metadata, Role.class);
+		AnnotationAttributes role = MetadataUtils.attributesFor(metadata, Role.class);
 		if (role != null) {
 			beanDef.setRole(role.<Integer>getNumber("value"));
 		}
 
 		// consider name and any aliases
-		AnnotationAttributes bean = attributesFor(metadata, Bean.class);
+		AnnotationAttributes bean = MetadataUtils.attributesFor(metadata, Bean.class);
 		List<String> names = new ArrayList<String>(Arrays.asList(bean.getStringArray("name")));
 		String beanName = (names.size() > 0 ? names.remove(0) : beanMethod.getMetadata().getMethodName());
 		for (String alias : names) {
@@ -216,16 +214,16 @@ class ConfigurationClassBeanDefinitionReader {
 
 		// is this bean to be instantiated lazily?
 		if (metadata.isAnnotated(Lazy.class.getName())) {
-			AnnotationAttributes lazy = attributesFor(metadata, Lazy.class);
+			AnnotationAttributes lazy = MetadataUtils.attributesFor(metadata, Lazy.class);
 			beanDef.setLazyInit(lazy.getBoolean("value"));
 		}
 		else if (configClass.getMetadata().isAnnotated(Lazy.class.getName())){
-			AnnotationAttributes lazy = attributesFor(configClass.getMetadata(), Lazy.class);
+			AnnotationAttributes lazy = MetadataUtils.attributesFor(configClass.getMetadata(), Lazy.class);
 			beanDef.setLazyInit(lazy.getBoolean("value"));
 		}
 
 		if (metadata.isAnnotated(DependsOn.class.getName())) {
-			AnnotationAttributes dependsOn = attributesFor(metadata, DependsOn.class);
+			AnnotationAttributes dependsOn = MetadataUtils.attributesFor(metadata, DependsOn.class);
 			String[] otherBeans = dependsOn.getStringArray("value");
 			if (otherBeans.length > 0) {
 				beanDef.setDependsOn(otherBeans);
@@ -249,7 +247,7 @@ class ConfigurationClassBeanDefinitionReader {
 
 		// Consider scoping
 		ScopedProxyMode proxyMode = ScopedProxyMode.NO;
-		AnnotationAttributes scope = attributesFor(metadata, Scope.class);
+		AnnotationAttributes scope = MetadataUtils.attributesFor(metadata, Scope.class);
 		if (scope != null) {
 			beanDef.setScope(scope.getString("value"));
 			proxyMode = scope.getEnum("proxyMode");
@@ -272,7 +270,7 @@ class ConfigurationClassBeanDefinitionReader {
 					configClass.getMetadata().getClassName(), beanName));
 		}
 
-		registry.registerBeanDefinition(beanName, beanDefToRegister);
+		this.registry.registerBeanDefinition(beanName, beanDefToRegister);
 	}
 
 
@@ -297,7 +295,8 @@ class ConfigurationClassBeanDefinitionReader {
 					readerInstanceCache.put(readerClass, readerInstance);
 				}
 				catch (Exception ex) {
-					throw new IllegalStateException("Could not instantiate BeanDefinitionReader class [" + readerClass.getName() + "]");
+					throw new IllegalStateException(
+							"Could not instantiate BeanDefinitionReader class [" + readerClass.getName() + "]");
 				}
 			}
 			BeanDefinitionReader reader = readerInstanceCache.get(readerClass);
