@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,11 @@
 package org.springframework.jdbc.datasource.embedded;
 
 import org.junit.Test;
+
 import org.springframework.core.io.ClassRelativeResourceLoader;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.CannotReadScriptException;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
 
 import static org.junit.Assert.*;
 
@@ -36,12 +35,18 @@ public class EmbeddedDatabaseBuilderTests {
 		EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
 		EmbeddedDatabase db = builder.addDefaultScripts().build();
 		assertDatabaseCreatedAndShutdown(db);
+
+		db = builder.addDefaultScripts().build();
+		assertDatabaseCreatedAndShutdown(db);
 	}
 
 	@Test
 	public void testBuild() {
 		EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()));
 		EmbeddedDatabase db = builder.addScript("db-schema.sql").addScript("db-test-data.sql").build();
+		assertDatabaseCreatedAndShutdown(db);
+
+		db = builder.addScript("db-schema.sql").addScript("db-test-data.sql").build();
 		assertDatabaseCreatedAndShutdown(db);
 	}
 
@@ -50,6 +55,9 @@ public class EmbeddedDatabaseBuilderTests {
 		EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()));
 		EmbeddedDatabase db = builder.addScript("db-schema-comments.sql").addScript("db-test-data.sql").build();
 		assertDatabaseCreatedAndShutdown(db);
+
+		db = builder.addScript("db-schema-comments.sql").addScript("db-test-data.sql").build();
+		assertDatabaseCreatedAndShutdown(db);
 	}
 
 	@Test
@@ -57,14 +65,18 @@ public class EmbeddedDatabaseBuilderTests {
 		EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()));
 		EmbeddedDatabase db = builder.setType(EmbeddedDatabaseType.H2).addScript("db-schema.sql").addScript("db-test-data.sql").build();
 		assertDatabaseCreatedAndShutdown(db);
+
+		db = builder.setType(EmbeddedDatabaseType.H2).addScript("db-schema.sql").addScript("db-test-data.sql").build();
+		assertDatabaseCreatedAndShutdown(db);
 	}
 
 	@Test
 	public void testBuildDerby() {
-		Assume.group(TestGroup.LONG_RUNNING);
-
 		EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()));
 		EmbeddedDatabase db = builder.setType(EmbeddedDatabaseType.DERBY).addScript("db-schema-derby.sql").addScript("db-test-data.sql").build();
+		assertDatabaseCreatedAndShutdown(db);
+
+		db = builder.setType(EmbeddedDatabaseType.DERBY).addScript("db-schema-derby-with-drop.sql").addScript("db-test-data.sql").build();
 		assertDatabaseCreatedAndShutdown(db);
 	}
 

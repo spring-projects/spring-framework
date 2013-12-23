@@ -489,8 +489,8 @@ project("spring-jdbc") {
 		optional("c3p0:c3p0:0.9.1.2")
 		optional("org.hsqldb:hsqldb:${hsqldbVersion}")
 		optional("com.h2database:h2:1.0.71")
-		optional("org.apache.derby:derby:10.5.3.0_1")
-		optional("org.apache.derby:derbyclient:10.5.3.0_1")
+		optional("org.apache.derby:derby:10.10.1.1")
+		optional("org.apache.derby:derbyclient:10.10.1.1")
 		optional("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1")
 	}
 }
