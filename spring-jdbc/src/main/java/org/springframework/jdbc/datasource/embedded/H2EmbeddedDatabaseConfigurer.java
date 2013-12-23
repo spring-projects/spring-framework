@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,10 @@ import org.springframework.util.ClassUtils;
  */
 final class H2EmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigurer {
 
-	private static H2EmbeddedDatabaseConfigurer INSTANCE;
+	private static H2EmbeddedDatabaseConfigurer instance;
 
 	private final Class<? extends Driver> driverClass;
+
 
 	/**
 	 * Get the singleton {@link H2EmbeddedDatabaseConfigurer} instance.
@@ -41,12 +42,13 @@ final class H2EmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigu
 	 */
 	@SuppressWarnings("unchecked")
 	public static synchronized H2EmbeddedDatabaseConfigurer getInstance() throws ClassNotFoundException {
-		if (INSTANCE == null) {
-			INSTANCE = new H2EmbeddedDatabaseConfigurer(
-					(Class<? extends Driver>) ClassUtils.forName("org.h2.Driver", H2EmbeddedDatabaseConfigurer.class.getClassLoader()));
+		if (instance == null) {
+			instance = new H2EmbeddedDatabaseConfigurer( (Class<? extends Driver>)
+					ClassUtils.forName("org.h2.Driver", H2EmbeddedDatabaseConfigurer.class.getClassLoader()));
 		}
-		return INSTANCE;
+		return instance;
 	}
+
 
 	private H2EmbeddedDatabaseConfigurer(Class<? extends Driver> driverClass) {
 		this.driverClass = driverClass;
