@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.util.xml;
 
 import java.util.Iterator;
-
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 import javax.xml.stream.Location;
@@ -31,116 +30,34 @@ import javax.xml.stream.events.StartDocument;
 import javax.xml.stream.events.XMLEvent;
 
 /**
- * Implementation of the {@link javax.xml.stream.XMLStreamReader} interface that wraps a {@link XMLEventReader}. Useful,
- * because the StAX {@link javax.xml.stream.XMLInputFactory} allows one to create a event reader from a stream reader,
- * but not vice-versa.
+ * Implementation of the {@link javax.xml.stream.XMLStreamReader} interface that wraps a
+ * {@link XMLEventReader}. Useful because the StAX {@link javax.xml.stream.XMLInputFactory}
+ * allows one to create a event reader from a stream reader, but not vice-versa.
  *
  * @author Arjen Poutsma
  * @since 3.0
  * @see StaxUtils#createEventStreamReader(javax.xml.stream.XMLEventReader)
  */
-@SuppressWarnings("rawtypes")
 class XMLEventStreamReader extends AbstractXMLStreamReader {
 
 	private XMLEvent event;
 
 	private final XMLEventReader eventReader;
 
-	XMLEventStreamReader(XMLEventReader eventReader) throws XMLStreamException {
+
+	public XMLEventStreamReader(XMLEventReader eventReader) throws XMLStreamException {
 		this.eventReader = eventReader;
-		event = eventReader.nextEvent();
+		this.event = eventReader.nextEvent();
 	}
 
-	@Override
-	public boolean isStandalone() {
-		if (event.isStartDocument()) {
-			return ((StartDocument) event).isStandalone();
-		}
-		else {
-			throw new IllegalStateException();
-		}
-	}
-
-	@Override
-	public String getVersion() {
-		if (event.isStartDocument()) {
-			return ((StartDocument) event).getVersion();
-		}
-		else {
-			return null;
-		}
-	}
-
-	@Override
-	public int getTextStart() {
-		return 0;
-	}
-
-	@Override
-	public String getText() {
-		if (event.isCharacters()) {
-			return event.asCharacters().getData();
-		}
-		else if (event.getEventType() == XMLEvent.COMMENT) {
-			return ((Comment) event).getText();
-		}
-		else {
-			throw new IllegalStateException();
-		}
-	}
-
-	@Override
-	public String getPITarget() {
-		if (event.isProcessingInstruction()) {
-			return ((ProcessingInstruction) event).getTarget();
-		}
-		else {
-			throw new IllegalStateException();
-		}
-	}
-
-	@Override
-	public String getPIData() {
-		if (event.isProcessingInstruction()) {
-			return ((ProcessingInstruction) event).getData();
-		}
-		else {
-			throw new IllegalStateException();
-		}
-	}
-
-	@Override
-	public int getNamespaceCount() {
-		Iterator namespaces;
-		if (event.isStartElement()) {
-			namespaces = event.asStartElement().getNamespaces();
-		}
-		else if (event.isEndElement()) {
-			namespaces = event.asEndElement().getNamespaces();
-		}
-		else {
-			throw new IllegalStateException();
-		}
-		return countIterator(namespaces);
-	}
-
-	@Override
-	public NamespaceContext getNamespaceContext() {
-		if (event.isStartElement()) {
-			return event.asStartElement().getNamespaceContext();
-		}
-		else {
-			throw new IllegalStateException();
-		}
-	}
 
 	@Override
 	public QName getName() {
-		if (event.isStartElement()) {
-			return event.asStartElement().getName();
+		if (this.event.isStartElement()) {
+			return this.event.asStartElement().getName();
 		}
-		else if (event.isEndElement()) {
-			return event.asEndElement().getName();
+		else if (this.event.isEndElement()) {
+			return this.event.asEndElement().getName();
 		}
 		else {
 			throw new IllegalStateException();
@@ -149,12 +66,47 @@ class XMLEventStreamReader extends AbstractXMLStreamReader {
 
 	@Override
 	public Location getLocation() {
-		return event.getLocation();
+		return this.event.getLocation();
 	}
 
 	@Override
 	public int getEventType() {
-		return event.getEventType();
+		return this.event.getEventType();
+	}
+
+	@Override
+	public String getVersion() {
+		if (this.event.isStartDocument()) {
+			return ((StartDocument) this.event).getVersion();
+		}
+		else {
+			return null;
+		}
+	}
+
+	@Override
+	public Object getProperty(String name) throws IllegalArgumentException {
+		return this.eventReader.getProperty(name);
+	}
+
+	@Override
+	public boolean isStandalone() {
+		if (this.event.isStartDocument()) {
+			return ((StartDocument) event).isStandalone();
+		}
+		else {
+			throw new IllegalStateException();
+		}
+	}
+
+	@Override
+	public boolean standaloneSet() {
+		if (this.event.isStartDocument()) {
+			return ((StartDocument) this.event).standaloneSet();
+		}
+		else {
+			throw new IllegalStateException();
+		}
 	}
 
 	@Override
@@ -168,17 +120,56 @@ class XMLEventStreamReader extends AbstractXMLStreamReader {
 	}
 
 	@Override
-	public int getAttributeCount() {
-		if (!event.isStartElement()) {
+	public String getPITarget() {
+		if (this.event.isProcessingInstruction()) {
+			return ((ProcessingInstruction) this.event).getTarget();
+		}
+		else {
 			throw new IllegalStateException();
 		}
-		Iterator attributes = event.asStartElement().getAttributes();
+	}
+
+	@Override
+	public String getPIData() {
+		if (this.event.isProcessingInstruction()) {
+			return ((ProcessingInstruction) this.event).getData();
+		}
+		else {
+			throw new IllegalStateException();
+		}
+	}
+
+	@Override
+	public int getTextStart() {
+		return 0;
+	}
+
+	@Override
+	public String getText() {
+		if (this.event.isCharacters()) {
+			return event.asCharacters().getData();
+		}
+		else if (this.event.getEventType() == XMLEvent.COMMENT) {
+			return ((Comment) this.event).getText();
+		}
+		else {
+			throw new IllegalStateException();
+		}
+	}
+
+	@Override
+	@SuppressWarnings("rawtypes")
+	public int getAttributeCount() {
+		if (!this.event.isStartElement()) {
+			throw new IllegalStateException();
+		}
+		Iterator attributes = this.event.asStartElement().getAttributes();
 		return countIterator(attributes);
 	}
 
 	@Override
-	public void close() throws XMLStreamException {
-		eventReader.close();
+	public boolean isAttributeSpecified(int index) {
+		return getAttribute(index).isSpecified();
 	}
 
 	@Override
@@ -196,57 +187,13 @@ class XMLEventStreamReader extends AbstractXMLStreamReader {
 		return getAttribute(index).getValue();
 	}
 
-	@Override
-	public String getNamespacePrefix(int index) {
-		return getNamespace(index).getPrefix();
-	}
-
-	@Override
-	public String getNamespaceURI(int index) {
-		return getNamespace(index).getNamespaceURI();
-	}
-
-	@Override
-	public Object getProperty(String name) throws IllegalArgumentException {
-		return eventReader.getProperty(name);
-	}
-
-	@Override
-	public boolean isAttributeSpecified(int index) {
-		return getAttribute(index).isSpecified();
-	}
-
-	@Override
-	public int next() throws XMLStreamException {
-		event = eventReader.nextEvent();
-		return event.getEventType();
-	}
-
-	@Override
-	public boolean standaloneSet() {
-		if (event.isStartDocument()) {
-			return ((StartDocument) event).standaloneSet();
-		}
-		else {
-			throw new IllegalStateException();
-		}
-	}
-
-	private int countIterator(Iterator iterator) {
-		int count = 0;
-		while (iterator.hasNext()) {
-			iterator.next();
-			count++;
-		}
-		return count;
-	}
-
+	@SuppressWarnings("rawtypes")
 	private Attribute getAttribute(int index) {
-		if (!event.isStartElement()) {
+		if (!this.event.isStartElement()) {
 			throw new IllegalStateException();
 		}
 		int count = 0;
-		Iterator attributes = event.asStartElement().getAttributes();
+		Iterator attributes = this.event.asStartElement().getAttributes();
 		while (attributes.hasNext()) {
 			Attribute attribute = (Attribute) attributes.next();
 			if (count == index) {
@@ -259,13 +206,50 @@ class XMLEventStreamReader extends AbstractXMLStreamReader {
 		throw new IllegalArgumentException();
 	}
 
+	@Override
+	public NamespaceContext getNamespaceContext() {
+		if (this.event.isStartElement()) {
+			return this.event.asStartElement().getNamespaceContext();
+		}
+		else {
+			throw new IllegalStateException();
+		}
+	}
+
+	@Override
+	@SuppressWarnings("rawtypes")
+	public int getNamespaceCount() {
+		Iterator namespaces;
+		if (this.event.isStartElement()) {
+			namespaces = this.event.asStartElement().getNamespaces();
+		}
+		else if (this.event.isEndElement()) {
+			namespaces = this.event.asEndElement().getNamespaces();
+		}
+		else {
+			throw new IllegalStateException();
+		}
+		return countIterator(namespaces);
+	}
+
+	@Override
+	public String getNamespacePrefix(int index) {
+		return getNamespace(index).getPrefix();
+	}
+
+	@Override
+	public String getNamespaceURI(int index) {
+		return getNamespace(index).getNamespaceURI();
+	}
+
+	@SuppressWarnings("rawtypes")
 	private Namespace getNamespace(int index) {
 		Iterator namespaces;
-		if (event.isStartElement()) {
-			namespaces = event.asStartElement().getNamespaces();
+		if (this.event.isStartElement()) {
+			namespaces = this.event.asStartElement().getNamespaces();
 		}
-		else if (event.isEndElement()) {
-			namespaces = event.asEndElement().getNamespaces();
+		else if (this.event.isEndElement()) {
+			namespaces = this.event.asEndElement().getNamespaces();
 		}
 		else {
 			throw new IllegalStateException();
@@ -282,4 +266,27 @@ class XMLEventStreamReader extends AbstractXMLStreamReader {
 		}
 		throw new IllegalArgumentException();
 	}
+
+	@Override
+	public int next() throws XMLStreamException {
+		this.event = this.eventReader.nextEvent();
+		return this.event.getEventType();
+	}
+
+	@Override
+	public void close() throws XMLStreamException {
+		this.eventReader.close();
+	}
+
+
+	@SuppressWarnings("rawtypes")
+	private static int countIterator(Iterator iterator) {
+		int count = 0;
+		while (iterator.hasNext()) {
+			iterator.next();
+			count++;
+		}
+		return count;
+	}
+
 }
