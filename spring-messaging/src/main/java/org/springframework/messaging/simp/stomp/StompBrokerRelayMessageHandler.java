@@ -250,10 +250,20 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 	/**
-	 * Used for unit testing.
+	 * Configure a TCP client for managing TCP connections to the STOMP broker. By default
+	 * {@link org.springframework.messaging.simp.stomp.StompReactorNettyTcpClient} is used.
 	 */
-	void setTcpClient(TcpOperations<byte[]> tcpClient) {
+	public void setTcpClient(TcpOperations<byte[]> tcpClient) {
 		this.tcpClient = tcpClient;
+	}
+
+	/**
+	 * Get the configured TCP client. Never {@code null} unless not configured
+	 * invoked and this method is invoked before the handler is started and
+	 * hence a default implementation initialized.
+	 */
+	public TcpOperations<byte[]> getTcpClient() {
+		return this.tcpClient;
 	}
 
 
@@ -264,7 +274,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		this.brokerChannel.subscribe(this);
 
 		if (this.tcpClient == null) {
-			this.tcpClient = new ReactorNettyTcpClient<byte[]>(this.relayHost, this.relayPort, new StompCodec());
+			this.tcpClient = new StompReactorNettyTcpClient(this.relayHost, this.relayPort);
 		}
 
 		if (logger.isDebugEnabled()) {
