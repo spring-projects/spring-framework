@@ -10,7 +10,9 @@
             <websocket:sockjs/>
         </websocket:stomp-endpoint>
         <websocket:stomp-broker-relay prefix="/topic,/queue" relay-host="relayhost" relay-port="1234"
-                login="login" passcode="pass" heartbeat-send-interval="5000" heartbeat-receive-interval="5000"
+                client-login="clientlogin" client-passcode="clientpass"
+                system-login="syslogin" system-passcode="syspass"
+                heartbeat-send-interval="5000" heartbeat-receive-interval="5000"
                 virtual-host="spring.io"/>
     </websocket:message-broker>
 

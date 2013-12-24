@@ -243,17 +243,39 @@
                 ]]></xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
-        <xsd:attribute name="login" type="xsd:string">
+        <xsd:attribute name="client-login" type="xsd:string">
             <xsd:annotation>
                 <xsd:documentation source="java:org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler"><![CDATA[
-        The login for the "system" connection used to send messages to the STOMP broker.
+        The login to use when creating connections to the STOMP broker on behalf of connected clients.
+        By default this is set to "guest".
                 ]]></xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
-        <xsd:attribute name="passcode" type="xsd:string">
+        <xsd:attribute name="client-passcode" type="xsd:string">
             <xsd:annotation>
                 <xsd:documentation source="java:org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler"><![CDATA[
-        The passcode for the "system" connection used to send messages to the STOMP broker.
+        The passcode to use when creating connections to the STOMP broker on behalf of connected clients.
+        By default this is set to "guest".
+                ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="system-login" type="xsd:string">
+            <xsd:annotation>
+                <xsd:documentation source="java:org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler"><![CDATA[
+        The login for the shared "system" connection used to send messages to
+        the STOMP broker from within the application, i.e. messages not associated
+        with a specific client session (e.g. REST/HTTP request handling method).
+        By default this is set to "guest".
+                ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="system-passcode" type="xsd:string">
+            <xsd:annotation>
+                <xsd:documentation source="java:org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler"><![CDATA[
+        The passcode for the shared "system" connection used to send messages to
+        the STOMP broker from within the application, i.e. messages not associated
+        with a specific client session (e.g. REST/HTTP request handling method).
+        By default this is set to "guest".
                 ]]></xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>

@@ -33,7 +33,6 @@ import org.springframework.messaging.tcp.FixedIntervalReconnectStrategy;
 import org.springframework.messaging.tcp.TcpConnection;
 import org.springframework.messaging.tcp.TcpConnectionHandler;
 import org.springframework.messaging.tcp.TcpOperations;
-import org.springframework.messaging.tcp.reactor.ReactorNettyTcpClient;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
@@ -51,13 +50,16 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  *
  * <p>This class also automatically opens a default "system" TCP connection to the message
  * broker that is used for sending messages that originate from the server application (as
- * opposed to from a client). Such messages are recognized because they are not associated
- * with any client and therefore do not have a session id header. The "system" connection
- * is effectively shared and cannot be used to receive messages. Several properties are
- * provided to configure the "system" connection including the the
- * {@link #setSystemLogin(String) login} {@link #setSystemPasscode(String) passcode},
- * heartbeat {@link #setSystemHeartbeatSendInterval(long) send} and
- * {@link #setSystemHeartbeatReceiveInterval(long) receive} intervals.
+ * opposed to from a client). Such messages are are not associated with any client and
+ * therefore do not have a session id header. The "system" connection is effectively
+ * shared and cannot be used to receive messages. Several properties are provided to
+ * configure the "system" connection including:
+ * <ul>
+ * 	<li>{@link #setSystemLogin(String)}</li>
+ * 	<li>{@link #setSystemPasscode(String)}</li>
+ * 	<li>{@link #setSystemHeartbeatSendInterval(long)}</li>
+ * 	<li>{@link #setSystemHeartbeatReceiveInterval(long)}</li>
+ * </ul>
  *
  * @author Rossen Stoyanchev
  * @author Andy Wilkinson
@@ -86,6 +88,10 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	private String relayHost = "127.0.0.1";
 
 	private int relayPort = 61613;
+
+	private String clientLogin = "guest";
+
+	private String clientPasscode = "guest";
 
 	private String systemLogin = "guest";
 
@@ -198,9 +204,53 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 	/**
-	 * Set the login for the "system" connection used to send messages to the STOMP
-	 * broker without having a client session (e.g. REST/HTTP request handling method).
-	 * <p>See class-level documentation for more information on the "system" connection.
+	 * Set the login to use when creating connections to the STOMP broker on
+	 * behalf of connected clients.
+	 * <p>
+	 * By default this is set to "guest".
+	 * @see #setSystemLogin(String)
+	 */
+	public void setClientLogin(String clientLogin) {
+		Assert.hasText(clientLogin, "clientLogin must not be empty");
+		this.clientLogin = clientLogin;
+	}
+
+	/**
+	 * @return the configured login to use for connections to the STOMP broker
+	 * on behalf of connected clients.
+	 * @see #getSystemLogin()
+	 */
+	public String getClientLogin() {
+		return this.clientLogin;
+	}
+
+	/**
+	 * Set the clientPasscode to use to create connections to the STOMP broker on
+	 * behalf of connected clients.
+	 * <p>
+	 * By default this is set to "guest".
+	 * @see #setSystemPasscode(String)
+	 */
+	public void setClientPasscode(String clientPasscode) {
+		Assert.hasText(clientPasscode, "clientPasscode must not be empty");
+		this.clientPasscode = clientPasscode;
+	}
+
+	/**
+	 * @return the configured passocde to use for connections to the STOMP broker on
+	 * behalf of connected clients.
+	 * @see #getSystemPasscode()
+	 */
+	public String getClientPasscode() {
+		return this.clientPasscode;
+	}
+
+	/**
+	 * Set the login for the shared "system" connection used to send messages to
+	 * the STOMP broker from within the application, i.e. messages not associated
+	 * with a specific client session (e.g. REST/HTTP request handling method).
+	 * <p>
+	 * By default this is set to "guest".
 	 */
 	public void setSystemLogin(String systemLogin) {
 		Assert.hasText(systemLogin, "systemLogin must not be empty");
@@ -208,23 +258,25 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 	/**
-	 * @return the login used by the "system" connection to connect to the STOMP broker
+	 * @return the login used for the shared "system" connection to the STOMP broker
 	 */
 	public String getSystemLogin() {
 		return this.systemLogin;
 	}
 
 	/**
-	 * Set the passcode for the "system" connection used to send messages to the STOMP
-	 * broker without having a client session (e.g. REST/HTTP request handling method).
-	 * <p>See class-level documentation for more information on the "system" connection.
+	 * Set the passcode for the shared "system" connection used to send messages to
+	 * the STOMP broker from within the application, i.e. messages not associated
+	 * with a specific client session (e.g. REST/HTTP request handling method).
+	 * <p>
+	 * By default this is set to "guest".
 	 */
 	public void setSystemPasscode(String systemPasscode) {
 		this.systemPasscode = systemPasscode;
 	}
 
 	/**
-	 * @return the passcode used by the "system" connection to connect to the STOMP broker
+	 * @return the passcode used for the shared "system" connection to the STOMP broker
 	 */
 	public String getSystemPasscode() {
 		return this.systemPasscode;
@@ -348,6 +400,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 		if (SimpMessageType.CONNECT.equals(messageType)) {
 			logger.debug("Processing CONNECT in session=" + sessionId);
+			headers.setLogin(this.clientLogin);
+			headers.setPasscode(this.clientPasscode);
 			if (getVirtualHost() != null) {
 				headers.setHost(getVirtualHost());
 			}

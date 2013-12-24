@@ -33,9 +33,13 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 
 	private int relayPort = 61613;
 
-	private String applicationLogin = "guest";
+	private String clientLogin = "guest";
 
-	private String applicationPasscode = "guest";
+	private String clientPasscode = "guest";
+
+	private String systemLogin = "guest";
+
+	private String systemPasscode = "guest";
 
 	private Long systemHeartbeatSendInterval;
 
@@ -68,23 +72,54 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 		return this;
 	}
 
+
 	/**
-	 * Set the login for the "system" relay session used to send messages to the STOMP
-	 * broker without having a client session (e.g. REST/HTTP request handling method).
+	 * Set the login to use when creating connections to the STOMP broker on
+	 * behalf of connected clients.
+	 * <p>
+	 * By default this is set to "guest".
 	 */
-	public StompBrokerRelayRegistration setApplicationLogin(String login) {
-		Assert.hasText(login, "applicationLogin must not be empty");
-		this.applicationLogin = login;
+	public StompBrokerRelayRegistration setClientLogin(String login) {
+		Assert.hasText(login, "clientLogin must not be empty");
+		this.clientLogin = login;
 		return this;
 	}
 
 	/**
-	 * Set the passcode for the "system" relay session used to send messages to the STOMP
-	 * broker without having a client session (e.g. REST/HTTP request handling method).
+	 * Set the passcode to use when creating connections to the STOMP broker on
+	 * behalf of connected clients.
+	 * <p>
+	 * By default this is set to "guest".
 	 */
-	public StompBrokerRelayRegistration setApplicationPasscode(String passcode) {
-		Assert.hasText(passcode, "applicationPasscode must not be empty");
-		this.applicationPasscode = passcode;
+	public StompBrokerRelayRegistration setClientPasscode(String passcode) {
+		Assert.hasText(passcode, "clientPasscode must not be empty");
+		this.clientPasscode = passcode;
+		return this;
+	}
+
+	/**
+	 * Set the login for the shared "system" connection used to send messages to
+	 * the STOMP broker from within the application, i.e. messages not associated
+	 * with a specific client session (e.g. REST/HTTP request handling method).
+	 * <p>
+	 * By default this is set to "guest".
+	 */
+	public StompBrokerRelayRegistration setSystemLogin(String login) {
+		Assert.hasText(login, "systemLogin must not be empty");
+		this.systemLogin = login;
+		return this;
+	}
+
+	/**
+	 * Set the passcode for the shared "system" connection used to send messages to
+	 * the STOMP broker from within the application, i.e. messages not associated
+	 * with a specific client session (e.g. REST/HTTP request handling method).
+	 * <p>
+	 * By default this is set to "guest".
+	 */
+	public StompBrokerRelayRegistration setSystemPasscode(String passcode) {
+		Assert.hasText(passcode, "systemPasscode must not be empty");
+		this.systemPasscode = passcode;
 		return this;
 	}
 
@@ -129,18 +164,22 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 
 		handler.setRelayHost(this.relayHost);
 		handler.setRelayPort(this.relayPort);
-		handler.setSystemLogin(this.applicationLogin);
-		handler.setSystemPasscode(this.applicationPasscode);
+
+		handler.setClientLogin(this.clientLogin);
+		handler.setClientPasscode(this.clientPasscode);
+
+		handler.setSystemLogin(this.systemLogin);
+		handler.setSystemPasscode(this.systemPasscode);
 
 		if (this.systemHeartbeatSendInterval != null) {
 			handler.setSystemHeartbeatSendInterval(this.systemHeartbeatSendInterval);
 		}
-
 		if (this.systemHeartbeatReceiveInterval != null) {
 			handler.setSystemHeartbeatReceiveInterval(this.systemHeartbeatReceiveInterval);
 		}
 
 		handler.setAutoStartup(this.autoStartup);
+
 		return handler;
 	}
 

@@ -168,8 +168,10 @@ public class MessageBrokerBeanDefinitionParserTests {
 
 		StompBrokerRelayMessageHandler messageBroker = this.appContext.getBean(StompBrokerRelayMessageHandler.class);
 		assertNotNull(messageBroker);
-		assertEquals("login", messageBroker.getSystemLogin());
-		assertEquals("pass", messageBroker.getSystemPasscode());
+		assertEquals("clientlogin", messageBroker.getClientLogin());
+		assertEquals("clientpass", messageBroker.getClientPasscode());
+		assertEquals("syslogin", messageBroker.getSystemLogin());
+		assertEquals("syspass", messageBroker.getSystemPasscode());
 		assertEquals("relayhost", messageBroker.getRelayHost());
 		assertEquals(1234, messageBroker.getRelayPort());
 		assertEquals("spring.io", messageBroker.getVirtualHost());

@@ -303,11 +303,19 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			if(!relayPort.isEmpty()) {
 				mpvs.add("relayPort", Integer.valueOf(relayPort));
 			}
-			String attrValue = brokerRelayElem.getAttribute("login");
+			String attrValue = brokerRelayElem.getAttribute("client-login");
+			if(!attrValue.isEmpty()) {
+				mpvs.add("clientLogin",attrValue);
+			}
+			attrValue = brokerRelayElem.getAttribute("client-passcode");
+			if(!attrValue.isEmpty()) {
+				mpvs.add("clientPasscode", attrValue);
+			}
+			attrValue = brokerRelayElem.getAttribute("system-login");
 			if(!attrValue.isEmpty()) {
 				mpvs.add("systemLogin",attrValue);
 			}
-			attrValue = brokerRelayElem.getAttribute("passcode");
+			attrValue = brokerRelayElem.getAttribute("system-passcode");
 			if(!attrValue.isEmpty()) {
 				mpvs.add("systemPasscode", attrValue);
 			}

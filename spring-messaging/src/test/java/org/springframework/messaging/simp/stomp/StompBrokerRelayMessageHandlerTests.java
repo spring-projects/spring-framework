@@ -50,9 +50,7 @@ public class StompBrokerRelayMessageHandlerTests {
 
 	@Before
 	public void setup() {
-
 		this.tcpClient = new StubTcpOperations();
-
 		this.brokerRelay = new StompBrokerRelayMessageHandler(new StubMessageChannel(),
 				new StubMessageChannel(), new StubMessageChannel(), Arrays.asList("/topic"));
 		this.brokerRelay.setTcpClient(this.tcpClient);
@@ -81,6 +79,35 @@ public class StompBrokerRelayMessageHandlerTests {
 		StompHeaderAccessor headers2 = StompHeaderAccessor.wrap(sent.get(1));
 		assertEquals(sessionId, headers2.getSessionId());
 		assertEquals(virtualHost, headers2.getHost());
+	}
+
+	@Test
+	public void testLoginPasscode() {
+
+		String sessionId = "sess1";
+
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
+		headers.setSessionId(sessionId);
+
+		this.brokerRelay.setClientLogin("clientlogin");
+		this.brokerRelay.setClientPasscode("clientpasscode");
+
+		this.brokerRelay.setSystemLogin("syslogin");
+		this.brokerRelay.setSystemPasscode("syspasscode");
+
+		this.brokerRelay.start();
+		this.brokerRelay.handleMessage(MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build());
+
+		List<Message<byte[]>> sent = this.tcpClient.connection.messages;
+		assertEquals(2, sent.size());
+
+		StompHeaderAccessor headers1 = StompHeaderAccessor.wrap(sent.get(0));
+		assertEquals("syslogin", headers1.getLogin());
+		assertEquals("syspasscode", headers1.getPasscode());
+
+		StompHeaderAccessor headers2 = StompHeaderAccessor.wrap(sent.get(1));
+		assertEquals("clientlogin", headers2.getLogin());
+		assertEquals("clientpasscode", headers2.getPasscode());
 	}
 
 	@Test
