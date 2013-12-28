@@ -50,10 +50,6 @@ import org.springframework.util.MultiValueMap;
  */
 public abstract class CollectionFactory {
 
-	private static Class<?> navigableSetClass = null;
-
-	private static Class<?> navigableMapClass = null;
-
 	private static final Set<Class<?>> approximableCollectionTypes = new HashSet<Class<?>>(10);
 
 	private static final Set<Class<?>> approximableMapTypes = new HashSet<Class<?>>(6);
@@ -137,7 +133,7 @@ public abstract class CollectionFactory {
 			if (List.class.equals(collectionType)) {
 				return new ArrayList<E>(initialCapacity);
 			}
-			else if (SortedSet.class.equals(collectionType) || collectionType.equals(navigableSetClass)) {
+			else if (SortedSet.class.equals(collectionType) || NavigableSet.class.equals(collectionType)) {
 				return new TreeSet<E>();
 			}
 			else if (Set.class.equals(collectionType) || Collection.class.equals(collectionType)) {
@@ -206,7 +202,7 @@ public abstract class CollectionFactory {
 			if (Map.class.equals(mapType)) {
 				return new LinkedHashMap<K, V>(initialCapacity);
 			}
-			else if (SortedMap.class.equals(mapType) || mapType.equals(navigableMapClass)) {
+			else if (SortedMap.class.equals(mapType) || NavigableMap.class.equals(mapType)) {
 				return new TreeMap<K, V>();
 			}
 			else if (MultiValueMap.class.equals(mapType)) {
