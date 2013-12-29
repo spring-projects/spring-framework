@@ -18,16 +18,11 @@ package org.springframework.http.converter.json;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.beans.FatalBeanException;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -41,6 +36,14 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.FatalBeanException;
+import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * A {@link FactoryBean} for creating a Jackson 2.x {@link ObjectMapper} with setters
@@ -114,17 +117,16 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
  * @author <a href="mailto:dmitry.katsubo@gmail.com">Dmitry Katsubo</a>
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Juergen Hoeller
  * @since 3.2
  */
-public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper>, InitializingBean {
+public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper>, BeanClassLoaderAware, InitializingBean {
 
 	private ObjectMapper objectMapper;
 
-	private Map<Object, Boolean> features = new HashMap<Object, Boolean>();
-
-	private final List<Module> modules = new ArrayList<Module>();
-
 	private DateFormat dateFormat;
+
+	private JsonInclude.Include serializationInclusion;
 
 	private AnnotationIntrospector annotationIntrospector;
 
@@ -132,7 +134,13 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 	private final Map<Class<?>, JsonDeserializer<?>> deserializers = new LinkedHashMap<Class<?>, JsonDeserializer<?>>();
 
-	private JsonInclude.Include serializationInclusion;
+	private final Map<Object, Boolean> features = new HashMap<Object, Boolean>();
+
+	private final List<Module> modules = new LinkedList<Module>();
+
+	private boolean findModules;
+
+	private ClassLoader beanClassLoader;
 
 
 	/**
@@ -164,11 +172,18 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	}
 
 	/**
-	 * Set the {@link AnnotationIntrospector} for both serialization and
-	 * deserialization.
+	 * Set an {@link AnnotationIntrospector} for both serialization and deserialization.
 	 */
 	public void setAnnotationIntrospector(AnnotationIntrospector annotationIntrospector) {
 		this.annotationIntrospector = annotationIntrospector;
+	}
+
+	/**
+	 * Set a custom inclusion strategy for serialization.
+	 * @see com.fasterxml.jackson.annotation.JsonInclude.Include
+	 */
+	public void setSerializationInclusion(JsonInclude.Include serializationInclusion) {
+		this.serializationInclusion = serializationInclusion;
 	}
 
 	/**
@@ -270,24 +285,33 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	}
 
 	/**
-	 * Sets the custom inclusion strategy for serialization.
-	 * @see com.fasterxml.jackson.annotation.JsonInclude.Include
+	 * Set whether to let Jackson find available modules via the ServiceLoader.
+	 * Requires Jackson 2.2 or higher.
+	 * <p>If this mode is not set, Spring's Jackson2ObjectMapperFactoryBean itself
+	 * will try to find the JSR-310 and Joda-Time support modules on the classpath -
+	 * provided that Java 8 and Joda-Time themselves are available, respectively.
+	 * @see com.fasterxml.jackson.databind.ObjectMapper#findModules()
 	 */
-	public void setSerializationInclusion(JsonInclude.Include serializationInclusion) {
-		this.serializationInclusion = serializationInclusion;
+	public void setFindModules(boolean findModules) {
+		this.findModules = findModules;
 	}
 
 	/**
-	 * Sets the list of modules to be registered with {@link ObjectMapper}.
-	 * @param modules the list of modules
-	 * @see com.fasterxml.jackson.databind.Module
+	 * Set the list of modules to be registered with the {@link ObjectMapper}.
 	 * @since 4.0
+	 * @see com.fasterxml.jackson.databind.Module
 	 */
 	public void setModules(List<Module> modules) {
-		if(modules != null) {
+		if (modules != null) {
 			this.modules.addAll(modules);
 		}
 	}
+
+	@Override
+	public void setBeanClassLoader(ClassLoader beanClassLoader) {
+		this.beanClassLoader = beanClassLoader;
+	}
+
 
 	@Override
 	public void afterPropertiesSet() {
@@ -299,6 +323,14 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 			this.objectMapper.setDateFormat(this.dateFormat);
 		}
 
+		if (this.annotationIntrospector != null) {
+			this.objectMapper.setAnnotationIntrospector(this.annotationIntrospector);
+		}
+
+		if (this.serializationInclusion != null) {
+			this.objectMapper.setSerializationInclusion(this.serializationInclusion);
+		}
+
 		if (!this.serializers.isEmpty() || !this.deserializers.isEmpty()) {
 			SimpleModule module = new SimpleModule();
 			addSerializers(module);
@@ -306,19 +338,18 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 			this.objectMapper.registerModule(module);
 		}
 
-		if (this.annotationIntrospector != null) {
-			this.objectMapper.setAnnotationIntrospector(this.annotationIntrospector);
-		}
-
 		for (Object feature : this.features.keySet()) {
 			configureFeature(feature, this.features.get(feature));
 		}
 
-		if (this.serializationInclusion != null) {
-			this.objectMapper.setSerializationInclusion(this.serializationInclusion);
+		if (this.findModules) {
+			this.objectMapper.registerModules(ObjectMapper.findModules(this.beanClassLoader));
+		}
+		else {
+			registerWellKnownModulesIfAvailable();
 		}
 
-		if(!this.modules.isEmpty()) {
+		if (!this.modules.isEmpty()) {
 			this.objectMapper.registerModules(this.modules);
 		}
 	}
@@ -354,7 +385,37 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 			this.objectMapper.configure((MapperFeature) feature, enabled);
 		}
 		else {
-			throw new FatalBeanException("Unknown feature class " + feature.getClass().getName());
+			throw new FatalBeanException("Unknown feature class: " + feature.getClass().getName());
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void registerWellKnownModulesIfAvailable() {
+		ClassLoader cl = this.beanClassLoader;
+		if (cl == null) {
+			cl = getClass().getClassLoader();
+		}
+		// Java 8 java.time package present?
+		if (ClassUtils.isPresent("java.time.LocalDate", cl)) {
+			try {
+				Class<? extends Module> jsr310Module = (Class<? extends Module>)
+						cl.loadClass("com.fasterxml.jackson.datatype.jsr310.JSR310Module");
+				this.objectMapper.registerModule(BeanUtils.instantiate(jsr310Module));
+			}
+			catch (ClassNotFoundException ex) {
+				// jackson-datatype-jsr310 not available
+			}
+		}
+		// Joda-Time present?
+		if (ClassUtils.isPresent("org.joda.time.LocalDate", cl)) {
+			try {
+				Class<? extends Module> jodaModule = (Class<? extends Module>)
+						cl.loadClass("com.fasterxml.jackson.datatype.joda.JodaModule");
+				this.objectMapper.registerModule(BeanUtils.instantiate(jodaModule));
+			}
+			catch (ClassNotFoundException ex) {
+				// jackson-datatype-joda not available
+			}
 		}
 	}
 
