@@ -93,7 +93,8 @@ configure(allprojects) { project ->
 		"http://ehcache.org/apidocs/",
 		"http://quartz-scheduler.org/api/2.1.7/",
 		"http://jackson.codehaus.org/1.9.4/javadoc/",
-		"http://fasterxml.github.com/jackson-core/javadoc/2.2.0/",
+		"http://fasterxml.github.com/jackson-core/javadoc/2.3.0/",
+		"http://fasterxml.github.com/jackson-databind/javadoc/2.3.0/",
 		"http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs"
 	] as String[]
 }
@@ -381,7 +382,7 @@ project("spring-messaging") {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
 		compile(project(":spring-context"))
-		optional("com.fasterxml.jackson.core:jackson-databind:2.2.2")
+		optional("com.fasterxml.jackson.core:jackson-databind:2.3.0")
 		optional("org.projectreactor:reactor-core:1.0.0.RELEASE")
 		optional("org.projectreactor:reactor-tcp:1.0.0.RELEASE")
 		optional("org.eclipse.jetty.websocket:websocket-server:${jettyVersion}") {
@@ -474,7 +475,7 @@ project("spring-jms") {
 		optional("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1")
 		optional("javax.resource:connector-api:1.5")
 		optional("org.codehaus.jackson:jackson-mapper-asl:1.9.12")
-		optional("com.fasterxml.jackson.core:jackson-databind:2.2.2")
+		optional("com.fasterxml.jackson.core:jackson-databind:2.3.0")
 	}
 }
 
@@ -550,7 +551,7 @@ project("spring-web") {
 		optional("org.apache.httpcomponents:httpclient:4.3.1")
 		optional("org.apache.httpcomponents:httpasyncclient:4.0")
 		optional("org.codehaus.jackson:jackson-mapper-asl:1.9.12")
-		optional("com.fasterxml.jackson.core:jackson-databind:2.2.2")
+		optional("com.fasterxml.jackson.core:jackson-databind:2.3.0")
 		optional("taglibs:standard:1.1.2")
 		optional("org.eclipse.jetty:jetty-servlet:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
@@ -593,8 +594,7 @@ project("spring-websocket") {
 			exclude group: "javax.servlet", module: "javax.servlet"
 		}
 		optional("org.eclipse.jetty.websocket:websocket-client:${jettyVersion}")
-		optional("com.fasterxml.jackson.core:jackson-databind:2.2.2")
-		optional("org.codehaus.jackson:jackson-mapper-asl:1.9.12")
+		optional("com.fasterxml.jackson.core:jackson-databind:2.3.0")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:8.0.0-RC5")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("log4j:log4j:1.2.17")
@@ -670,7 +670,7 @@ project("spring-webmvc") {
 		optional("velocity-tools:velocity-tools-view:1.4")
 		optional("org.freemarker:freemarker:2.3.19")
 		optional("org.codehaus.jackson:jackson-mapper-asl:1.9.12")
-		optional("com.fasterxml.jackson.core:jackson-databind:2.2.2")
+		optional("com.fasterxml.jackson.core:jackson-databind:2.3.0")
 		provided("javax.servlet:jstl:1.2")
 		provided("javax.servlet:javax.servlet-api:3.0.1")
 		provided("javax.servlet.jsp:jsp-api:2.1")
@@ -789,7 +789,7 @@ project("spring-test") {
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
 		testCompile("org.hibernate:hibernate-validator:4.3.0.Final")
 		testCompile("org.codehaus.jackson:jackson-mapper-asl:1.9.12")
-		testCompile("com.fasterxml.jackson.core:jackson-databind:2.2.2")
+		testCompile("com.fasterxml.jackson.core:jackson-databind:2.3.0")
 		testCompile("com.thoughtworks.xstream:xstream:1.4.4")
 		testCompile("rome:rome:1.0")
 		testCompile("javax.activation:activation:1.1")

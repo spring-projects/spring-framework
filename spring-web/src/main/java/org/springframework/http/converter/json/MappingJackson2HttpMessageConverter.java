@@ -19,6 +19,15 @@ package org.springframework.http.converter.json;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+import java.util.concurrent.atomic.AtomicReference;
+
+import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -28,14 +37,7 @@ import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.Assert;
-
-import com.fasterxml.jackson.core.JsonEncoding;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import org.springframework.util.ClassUtils;
 
 /**
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter} that
@@ -46,17 +48,22 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * <p>By default, this converter supports {@code application/json}. This can be overridden by setting the
  * {@link #setSupportedMediaTypes supportedMediaTypes} property.
  *
- * <p>Tested against Jackson 2.2; compatible with Jackson 2.0 and higher.
+ * <p>Tested against Jackson 2.2 and 2.3; compatible with Jackson 2.0 and higher.
  *
  * @author Arjen Poutsma
  * @author Keith Donald
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1.2
  */
 public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConverter<Object>
 		implements GenericHttpMessageConverter<Object> {
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+
+	// Check for Jackson 2.3's overloaded canDeserialize/canSerialize variants with cause reference
+	private static final boolean jackson23Available =
+			ClassUtils.hasMethod(ObjectMapper.class, "canDeserialize", JavaType.class, AtomicReference.class);
 
 
 	private ObjectMapper objectMapper = new ObjectMapper();
@@ -147,12 +154,34 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 	@Override
 	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
 		JavaType javaType = getJavaType(type, contextClass);
-		return (this.objectMapper.canDeserialize(javaType) && canRead(mediaType));
+		if (!jackson23Available || !logger.isWarnEnabled()) {
+			return (this.objectMapper.canDeserialize(javaType) && canRead(mediaType));
+		}
+		AtomicReference<Throwable> causeRef = new AtomicReference<Throwable>();
+		if (this.objectMapper.canDeserialize(javaType, causeRef) && canRead(mediaType)) {
+			return true;
+		}
+		Throwable cause = causeRef.get();
+		if (cause != null) {
+			logger.warn("Failed to evaluate deserialization for type: " + javaType);
+		}
+		return false;
 	}
 
 	@Override
 	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
-		return (this.objectMapper.canSerialize(clazz) && canWrite(mediaType));
+		if (!jackson23Available || !logger.isWarnEnabled()) {
+			return (this.objectMapper.canSerialize(clazz) && canWrite(mediaType));
+		}
+		AtomicReference<Throwable> causeRef = new AtomicReference<Throwable>();
+		if (this.objectMapper.canSerialize(clazz, causeRef) && canWrite(mediaType)) {
+			return true;
+		}
+		Throwable cause = causeRef.get();
+		if (cause != null) {
+			logger.warn("Failed to evaluate serialization for type: " + clazz);
+		}
+		return false;
 	}
 
 	@Override

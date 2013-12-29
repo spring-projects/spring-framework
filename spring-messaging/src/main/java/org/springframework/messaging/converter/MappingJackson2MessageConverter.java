@@ -21,10 +21,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
-
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
-import org.springframework.util.MimeType;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -33,13 +30,26 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.MimeType;
+
 /**
  * A Jackson 2 based {@link MessageConverter} implementation.
  *
+ * <p>Tested against Jackson 2.2 and 2.3; compatible with Jackson 2.0 and higher.
+ *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.0
  */
 public class MappingJackson2MessageConverter extends AbstractMessageConverter {
+
+	// Check for Jackson 2.3's overloaded canDeserialize/canSerialize variants with cause reference
+	private static final boolean jackson23Available =
+			ClassUtils.hasMethod(ObjectMapper.class, "canDeserialize", JavaType.class, AtomicReference.class);
+
 
 	private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -76,13 +86,35 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 		if (targetClass == null) {
 			return false;
 		}
-		JavaType type = this.objectMapper.constructType(targetClass);
-		return (this.objectMapper.canDeserialize(type) && supportsMimeType(message.getHeaders()));
+		JavaType javaType = this.objectMapper.constructType(targetClass);
+		if (!jackson23Available || !logger.isWarnEnabled()) {
+			return (this.objectMapper.canDeserialize(javaType) && supportsMimeType(message.getHeaders()));
+		}
+		AtomicReference<Throwable> causeRef = new AtomicReference<Throwable>();
+		if (this.objectMapper.canDeserialize(javaType, causeRef) && supportsMimeType(message.getHeaders())) {
+			return true;
+		}
+		Throwable cause = causeRef.get();
+		if (cause != null) {
+			logger.warn("Failed to evaluate deserialization for type: " + javaType);
+		}
+		return false;
 	}
 
 	@Override
 	protected boolean canConvertTo(Object payload, MessageHeaders headers) {
-		return (this.objectMapper.canSerialize(payload.getClass()) && supportsMimeType(headers));
+		if (!jackson23Available || !logger.isWarnEnabled()) {
+			return (this.objectMapper.canSerialize(payload.getClass()) && supportsMimeType(headers));
+		}
+		AtomicReference<Throwable> causeRef = new AtomicReference<Throwable>();
+		if (this.objectMapper.canSerialize(payload.getClass(), causeRef) && supportsMimeType(headers)) {
+			return true;
+		}
+		Throwable cause = causeRef.get();
+		if (cause != null) {
+			logger.warn("Failed to evaluate serialization for type: " + payload.getClass());
+		}
+		return false;
 	}
 
 	@Override
@@ -143,7 +175,6 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 
 	/**
 	 * Determine the JSON encoding to use for the given content type.
-	 *
 	 * @param contentType the MIME type from the MessageHeaders, if any
 	 * @return the JSON encoding to use (never {@code null})
 	 */
