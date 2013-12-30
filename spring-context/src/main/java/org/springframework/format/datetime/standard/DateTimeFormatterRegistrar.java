@@ -108,7 +108,7 @@ public class DateTimeFormatterRegistrar implements FormatterRegistrar {
 
 	/**
 	 * Set the formatter that will be used for objects representing date values.
-	 * <p>This formatter will be used for the {@link org.joda.time.LocalDate} type.
+	 * <p>This formatter will be used for the {@link LocalDate} type.
 	 * When specified, the {@link #setDateStyle dateStyle} and
 	 * {@link #setUseIsoFormat useIsoFormat} properties will be ignored.
 	 * @param formatter the formatter to use
@@ -121,8 +121,8 @@ public class DateTimeFormatterRegistrar implements FormatterRegistrar {
 
 	/**
 	 * Set the formatter that will be used for objects representing time values.
-	 * <p>This formatter will be used for the {@link org.joda.time.LocalTime} type.
-	 * When specified, the {@link #setTimeStyle timeStyle} and
+	 * <p>This formatter will be used for the {@link LocalTime} and {@link OffsetTime}
+	 * types. When specified, the {@link #setTimeStyle timeStyle} and
 	 * {@link #setUseIsoFormat useIsoFormat} properties will be ignored.
 	 * @param formatter the formatter to use
 	 * @see #setDateFormatter
@@ -134,9 +134,9 @@ public class DateTimeFormatterRegistrar implements FormatterRegistrar {
 
 	/**
 	 * Set the formatter that will be used for objects representing date and time values.
-	 * <p>This formatter will be used for {@link org.joda.time.LocalDateTime}, {@link org.joda.time.ReadableInstant},
-	 * {@link java.util.Date} and {@link java.util.Calendar} types.
-	 * When specified, the {@link #setDateTimeStyle dateTimeStyle} and
+	 * <p>This formatter will be used for {@link LocalDateTime}, {@link ZonedDateTime}
+	 * and {@link OffsetDateTime} types. When specified, the
+	 * {@link #setDateTimeStyle dateTimeStyle} and
 	 * {@link #setUseIsoFormat useIsoFormat} properties will be ignored.
 	 * @param formatter the formatter to use
 	 * @see #setDateFormatter
@@ -149,6 +149,8 @@ public class DateTimeFormatterRegistrar implements FormatterRegistrar {
 
 	@Override
 	public void registerFormatters(FormatterRegistry registry) {
+		DateTimeConverters.registerConverters(registry);
+
 		DateTimeFormatter dateFormatter = getFormatter(Type.DATE);
 		DateTimeFormatter timeFormatter = getFormatter(Type.TIME);
 		DateTimeFormatter dateTimeFormatter = getFormatter(Type.DATE_TIME);

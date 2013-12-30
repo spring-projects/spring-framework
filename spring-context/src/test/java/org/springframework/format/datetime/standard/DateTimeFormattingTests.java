@@ -16,7 +16,7 @@
 
 package org.springframework.format.datetime.standard;
 
-import java.lang.reflect.Method;
+import java.text.DateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,8 +25,10 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import org.junit.After;
 import org.junit.Before;
@@ -34,7 +36,6 @@ import org.junit.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
@@ -172,6 +173,15 @@ public class DateTimeFormattingTests {
 	}
 
 	@Test
+	public void testBindLocalDateFromJavaUtilCalendar() throws Exception {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("localDate", new GregorianCalendar(2009, 9, 31, 0, 0));
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("10/31/09", binder.getBindingResult().getFieldValue("localDate"));
+	}
+
+	@Test
 	public void testBindLocalTime() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localTime", "12:00 PM");
@@ -214,6 +224,15 @@ public class DateTimeFormattingTests {
 	}
 
 	@Test
+	public void testBindLocalTimeFromJavaUtilCalendar() throws Exception {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("localTime", new GregorianCalendar(1970, 0, 0, 12, 0));
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("12:00 PM", binder.getBindingResult().getFieldValue("localTime"));
+	}
+
+	@Test
 	public void testBindLocalDateTime() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localDateTime", "10/31/09 12:00 PM");
@@ -232,6 +251,15 @@ public class DateTimeFormattingTests {
 	}
 
 	@Test
+	public void testBindLocalDateTimeFromJavaUtilCalendar() throws Exception {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("localDateTime", new GregorianCalendar(2009, 9, 31, 12, 0));
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("10/31/09 12:00 PM", binder.getBindingResult().getFieldValue("localDateTime"));
+	}
+
+	@Test
 	public void testBindDateTimeWithSpecificStyle() throws Exception {
 		DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
 		registrar.setDateTimeStyle(FormatStyle.MEDIUM);
@@ -241,9 +269,6 @@ public class DateTimeFormattingTests {
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		assertEquals("Oct 31, 2009 12:00:00 PM", binder.getBindingResult().getFieldValue("localDateTime"));
-		Method testMethod = LocalVariableTableParameterNameDiscoverer.class.getMethod("getParameterNames", Method.class);
-		System.out.println(testMethod.getParameters()[0].getName());
-		System.out.println(new LocalVariableTableParameterNameDiscoverer().getParameterNames(testMethod)[0]);
 	}
 
 	@Test
@@ -286,6 +311,17 @@ public class DateTimeFormattingTests {
 	public void testBindInstant() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("instant", "2009-10-31T12:00:00.000Z");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertTrue(binder.getBindingResult().getFieldValue("instant").toString().startsWith("2009-10-31T12:00"));
+	}
+
+	@Test
+	public void testBindInstantFromJavaUtilDate() throws Exception {
+		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.US);
+		df.setTimeZone(TimeZone.getTimeZone("GMT"));
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("instant", df.parse("10/31/09 12:00 PM"));
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		assertTrue(binder.getBindingResult().getFieldValue("instant").toString().startsWith("2009-10-31T12:00"));
