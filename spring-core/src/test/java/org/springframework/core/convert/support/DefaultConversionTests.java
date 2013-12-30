@@ -209,7 +209,7 @@ public class DefaultConversionTests {
 	}
 
 	@Test
-	public void testStringToEnumWithSubclss() throws Exception {
+	public void testStringToEnumWithSubclass() throws Exception {
 		assertEquals(SubFoo.BAZ, conversionService.convert("BAZ", SubFoo.BAR.getClass()));
 	}
 
@@ -224,7 +224,7 @@ public class DefaultConversionTests {
 	}
 
 	public static enum Foo {
-		BAR, BAZ;
+		BAR, BAZ
 	}
 
 	public static enum SubFoo {

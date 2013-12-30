@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,10 +92,10 @@ public class Jsr310DateTimeFormatAnnotationFormatterFactory
 	}
 
 	/**
-	 * Factory method used to create a {@link org.joda.time.format.DateTimeFormatter}.
+	 * Factory method used to create a {@link DateTimeFormatter}.
 	 * @param annotation the format annotation for the field
 	 * @param fieldType the type of field
-	 * @return a {@link org.joda.time.format.DateTimeFormatter} instance
+	 * @return a {@link DateTimeFormatter} instance
 	 */
 	protected DateTimeFormatter getFormatter(DateTimeFormat annotation, Class<?> fieldType) {
 		DateTimeFormatterFactory factory = new DateTimeFormatterFactory();

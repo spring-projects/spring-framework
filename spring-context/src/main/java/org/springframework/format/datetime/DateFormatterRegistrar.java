@@ -60,7 +60,7 @@ public class DateFormatterRegistrar implements FormatterRegistrar {
 
 		// In order to retain back compatibility we only register Date/Calendar
 		// types when a user defined formatter is specified (see SPR-10105)
-		if(this.dateFormatter != null) {
+		if (this.dateFormatter != null) {
 			registry.addFormatter(this.dateFormatter);
 			registry.addFormatterForFieldType(Calendar.class, this.dateFormatter);
 		}
@@ -113,7 +113,7 @@ public class DateFormatterRegistrar implements FormatterRegistrar {
 
 		@Override
 		public Long convert(Calendar source) {
-			return source.getTime().getTime();
+			return source.getTimeInMillis();
 		}
 	}
 
@@ -129,11 +129,11 @@ public class DateFormatterRegistrar implements FormatterRegistrar {
 
 	private static class LongToCalendarConverter implements Converter<Long, Calendar> {
 
-		private final DateToCalendarConverter dateToCalendarConverter = new DateToCalendarConverter();
-
 		@Override
 		public Calendar convert(Long source) {
-			return this.dateToCalendarConverter.convert(new Date(source));
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTimeInMillis(source);
+			return calendar;
 		}
 	}
 

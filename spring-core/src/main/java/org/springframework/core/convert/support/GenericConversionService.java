@@ -456,6 +456,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 	}
 
+
 	/**
 	 * Manages all converters registered with the service.
 	 */
@@ -614,12 +615,10 @@ public class GenericConversionService implements ConfigurableConversionService {
 			this.converters.addFirst(converter);
 		}
 
-		public GenericConverter getConverter(TypeDescriptor sourceType,
-				TypeDescriptor targetType) {
+		public GenericConverter getConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			for (GenericConverter converter : this.converters) {
-				if (!(converter instanceof ConditionalGenericConverter)
-						|| ((ConditionalGenericConverter) converter).matches(sourceType,
-								targetType)) {
+				if (!(converter instanceof ConditionalGenericConverter) ||
+						((ConditionalGenericConverter) converter).matches(sourceType, targetType)) {
 					return converter;
 				}
 			}

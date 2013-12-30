@@ -187,7 +187,7 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 
 		// In order to retain backwards compatibility we only register Date/Calendar
 		// types when a user defined formatter is specified (see SPR-10105)
-		if( this.formatters.containsKey(Type.DATE_TIME)) {
+		if (this.formatters.containsKey(Type.DATE_TIME)) {
 			addFormatterForFields(registry,
 					new ReadableInstantPrinter(dateTimeFormatter),
 					new DateTimeParser(dateTimeFormatter),
