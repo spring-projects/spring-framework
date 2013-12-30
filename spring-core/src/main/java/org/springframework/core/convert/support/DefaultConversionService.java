@@ -38,7 +38,7 @@ import org.springframework.util.ClassUtils;
 public class DefaultConversionService extends GenericConversionService {
 
 	/** Java 8's java.time package available? */
-	private static final boolean zoneIdAvailable =
+	private static final boolean jsr310Available =
 			ClassUtils.isPresent("java.time.ZoneId", DefaultConversionService.class.getClassLoader());
 
 
@@ -64,8 +64,8 @@ public class DefaultConversionService extends GenericConversionService {
 		addCollectionConverters(converterRegistry);
 
 		converterRegistry.addConverter(new ByteBufferConverter((ConversionService) converterRegistry));
-		if (zoneIdAvailable) {
-			ZoneIdConverterRegistrar.registerZoneIdConverters(converterRegistry);
+		if (jsr310Available) {
+			Jsr310ConverterRegistrar.registerZoneIdConverters(converterRegistry);
 		}
 
 		converterRegistry.addConverter(new ObjectToObjectConverter());
@@ -129,13 +129,13 @@ public class DefaultConversionService extends GenericConversionService {
 
 
 	/**
-	 * Inner class to avoid a hard-coded dependency on Java 8's {@link java.time.ZoneId}.
+	 * Inner class to avoid a hard-coded dependency on Java 8's {@code java.time} package.
 	 */
-	private static final class ZoneIdConverterRegistrar {
+	private static final class Jsr310ConverterRegistrar {
 
 		public static void registerZoneIdConverters(ConverterRegistry converterRegistry) {
-			converterRegistry.addConverter(new TimeZoneToZoneIdConverter());
 			converterRegistry.addConverter(new ZoneIdToTimeZoneConverter());
+			converterRegistry.addConverter(new ZonedDateTimeToCalendarConverter());
 		}
 	}
 
