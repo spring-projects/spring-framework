@@ -16,16 +16,6 @@
 
 package org.springframework.core.convert.support;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
 import java.awt.Color;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -45,12 +35,16 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.junit.Test;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterRegistry;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Keith Donald
@@ -214,7 +208,7 @@ public class DefaultConversionTests {
 	}
 
 	@Test
-	public void testStringToEnumWithSubclss() throws Exception {
+	public void testStringToEnumWithSubclass() throws Exception {
 		assertEquals(SubFoo.BAZ, conversionService.convert("BAZ", SubFoo.BAR.getClass()));
 	}
 
@@ -229,7 +223,7 @@ public class DefaultConversionTests {
 	}
 
 	public static enum Foo {
-		BAR, BAZ;
+		BAR, BAZ
 	}
 
 	public static enum SubFoo {
