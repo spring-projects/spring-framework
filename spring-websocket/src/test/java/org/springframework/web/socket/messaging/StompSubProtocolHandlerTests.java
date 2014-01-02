@@ -34,6 +34,7 @@ import org.springframework.messaging.simp.stomp.StompDecoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.handler.TestWebSocketSession;
 
 import static org.junit.Assert.*;
@@ -117,6 +118,19 @@ public class StompSubProtocolHandlerTests {
 		assertEquals(new HashSet<>(Arrays.asList("1.1","1.0")), headers.getAcceptVersion());
 
 		assertEquals(0, this.session.getSentMessages().size());
+	}
+
+	@Test
+	public void invalidStompCommand() {
+
+		TextMessage textMessage = new TextMessage("FOO");
+
+		this.stompHandler.handleMessageFromClient(this.session, textMessage, this.channel);
+
+		verifyZeroInteractions(this.channel);
+		assertEquals(1, this.session.getSentMessages().size());
+		TextMessage actual = (TextMessage) this.session.getSentMessages().get(0);
+		assertTrue(actual.getPayload().startsWith("ERROR"));
 	}
 
 }

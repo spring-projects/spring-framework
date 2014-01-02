@@ -97,16 +97,25 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 	public void handleMessageFromClient(WebSocketSession session,
 			WebSocketMessage<?> webSocketMessage, MessageChannel outputChannel) {
 
-		Message<?> message;
+		Message<?> message = null;
+		Throwable decodeFailure = null;
 		try {
 			Assert.isInstanceOf(TextMessage.class,  webSocketMessage);
-			String payload = ((TextMessage)webSocketMessage).getPayload();
+			String payload = ((TextMessage) webSocketMessage).getPayload();
 			ByteBuffer byteBuffer = ByteBuffer.wrap(payload.getBytes(UTF8_CHARSET));
+
 			message = this.stompDecoder.decode(byteBuffer);
+			if (message == null) {
+				decodeFailure = new IllegalStateException("Not a valid STOMP frame: " + payload);
+			}
 		}
 		catch (Throwable ex) {
-			logger.error("Failed to parse STOMP frame, WebSocket message payload", ex);
-			sendErrorMessage(session, ex);
+			decodeFailure = ex;
+		}
+
+		if (decodeFailure != null) {
+			logger.error("Failed to parse WebSocket message as STOMP frame", decodeFailure);
+			sendErrorMessage(session, decodeFailure);
 			return;
 		}
 
