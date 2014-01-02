@@ -1,5 +1,5 @@
 = Spring Framework Reference Documentation
-Rod Johnson; Juergen Hoeller; Keith Donald; Colin Sampaleanu; Rob Harrop; Thomas Risberg; Alef Arendsen; Darren Davison; Dmitriy Kopylenko; Mark Pollack; Thierry Templier; Erwin Vervaet; Portia Tung; Ben Hale; Adrian Colyer; John Lewis; Costin Leau; Mark Fisher; Sam Brannen; Ramnivas Laddad; Arjen Poutsma; Chris Beams; Tareq Abedrabbo; Andy Clement; Dave Syer; Oliver Gierke; Rossen Stoyanchev; Phillip Webb; Rob Winch
+Rod Johnson; Juergen Hoeller; Keith Donald; Colin Sampaleanu; Rob Harrop; Thomas Risberg; Alef Arendsen; Darren Davison; Dmitriy Kopylenko; Mark Pollack; Thierry Templier; Erwin Vervaet; Portia Tung; Ben Hale; Adrian Colyer; John Lewis; Costin Leau; Mark Fisher; Sam Brannen; Ramnivas Laddad; Arjen Poutsma; Chris Beams; Tareq Abedrabbo; Andy Clement; Dave Syer; Oliver Gierke; Rossen Stoyanchev; Phillip Webb; Rob Winch; Brian Clozel
 
 :javadoc-baseurl: http://docs.spring.io/spring/docs/current/javadoc-api
 
@@ -37402,6 +37402,8 @@ The following method arguments are supported for `@MessageMapping` methods:
 * `@Payload`-annotated argument for access to the payload of a message, converted with
 a `org.springframework.messaging.converter.MessageConverter`.
 The presence of the annotation is not required since it is assumed by default.
+Payload method arguments annotated with Validation annotations (like `@Validated`) will
+be subject to JSR-303 validation.
 * `@Header`-annotated arguments for access to a specific header value along with
 type conversion using an `org.springframework.core.convert.converter.Converter`
 if necessary.

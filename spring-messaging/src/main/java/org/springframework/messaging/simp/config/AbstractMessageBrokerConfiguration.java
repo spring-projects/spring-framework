@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,11 @@ package org.springframework.messaging.simp.config;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanInitializationException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.ByteArrayMessageConverter;
@@ -41,6 +46,8 @@ import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 
 /**
  * Provides essential configuration for handling messages with simple messaging
@@ -62,19 +69,23 @@ import org.springframework.util.MimeTypeUtils;
  * to and from the client inbound/outbound channels (e.g. STOMP over WebSocket).
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 4.0
  */
-public abstract class AbstractMessageBrokerConfiguration {
+public abstract class AbstractMessageBrokerConfiguration implements ApplicationContextAware {
 
 	private static final boolean jackson2Present= ClassUtils.isPresent(
 			"com.fasterxml.jackson.databind.ObjectMapper", AbstractMessageBrokerConfiguration.class.getClassLoader());
 
+	private static final String MVC_VALIDATOR_NAME = "mvcValidator";
 
 	private ChannelRegistration clientInboundChannelRegistration;
 
 	private ChannelRegistration clientOutboundChannelRegistration;
 
 	private MessageBrokerRegistry brokerRegistry;
+
+	private ApplicationContext applicationContext;
 
 
 	/**
@@ -204,6 +215,7 @@ public abstract class AbstractMessageBrokerConfiguration {
 
 		handler.setDestinationPrefixes(getBrokerRegistry().getApplicationDestinationPrefixes());
 		handler.setMessageConverter(brokerMessageConverter());
+		handler.setValidator(simpValidator());
 		return handler;
 	}
 
@@ -268,6 +280,61 @@ public abstract class AbstractMessageBrokerConfiguration {
 		return new DefaultUserSessionRegistry();
 	}
 
+	/**
+	 * Override this method to provide a custom {@link Validator}.
+	 * @since 4.0.1
+	 */
+	public Validator getValidator() {
+        return null;
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
+	}
+
+	public ApplicationContext getApplicationContext() {
+		return applicationContext;
+	}
+
+	/**
+	 * Return a {@link org.springframework.validation.Validator}s instance for validating
+	 * {@code @Payload} method arguments.
+	 * In order, this method tries to get a Validator instance:
+	 * <ul>
+	 *   <li>delegating to getValidator() first</li>
+	 *   <li>if none returned, getting an existing instance with its well-known name "mvcValidator", created by an MVC configuration</li>
+	 *   <li>if none returned, checking the classpath for the presence of a JSR-303 implementation before creating a
+	 *   {@code LocalValidatorFactoryBean}</li>
+	 *   <li>returning a no-op Validator instance</li>
+	 * </ul>
+	 */
+	protected Validator simpValidator() {
+		Validator validator = getValidator();
+		if (validator == null) {
+			if(this.applicationContext.containsBean(MVC_VALIDATOR_NAME)) {
+				validator = this.applicationContext.getBean(MVC_VALIDATOR_NAME, Validator.class);
+			}
+			else if (ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
+				Class<?> clazz;
+				try {
+					String className = "org.springframework.validation.beanvalidation.LocalValidatorFactoryBean";
+					clazz = ClassUtils.forName(className, AbstractMessageBrokerConfiguration.class.getClassLoader());
+				}
+				catch (ClassNotFoundException e) {
+					throw new BeanInitializationException("Could not find default validator", e);
+				}
+				catch (LinkageError e) {
+					throw new BeanInitializationException("Could not find default validator", e);
+				}
+				validator = (Validator) BeanUtils.instantiate(clazz);
+			}
+			else {
+				validator = noopValidator;
+			}
+		}
+		return validator;
+	}
 
 	private static final AbstractBrokerMessageHandler noopBroker = new AbstractBrokerMessageHandler(null) {
 
@@ -284,5 +351,16 @@ public abstract class AbstractMessageBrokerConfiguration {
 		}
 
 	};
+
+	private static final Validator noopValidator = new Validator() {
+		@Override
+		public boolean supports(Class<?> clazz) {
+			return false;
+		}
+		@Override
+		public void validate(Object target, Errors errors) {
+		}
+	};
+
 
 }

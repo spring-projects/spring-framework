@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.messaging.simp.config;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -48,6 +49,8 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 
 import static org.junit.Assert.*;
 
@@ -55,6 +58,7 @@ import static org.junit.Assert.*;
  * Test fixture for {@link AbstractMessageBrokerConfiguration}.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  */
 public class MessageBrokerConfigurationTests {
 
@@ -64,6 +68,7 @@ public class MessageBrokerConfigurationTests {
 
 	private AnnotationConfigApplicationContext cxtCustomizedChannelConfig;
 
+	private AnnotationConfigApplicationContext cxtCustomizedValidator;
 
 	@Before
 	public void setupOnce() {
@@ -79,6 +84,10 @@ public class MessageBrokerConfigurationTests {
 		this.cxtCustomizedChannelConfig = new AnnotationConfigApplicationContext();
 		this.cxtCustomizedChannelConfig.register(CustomizedChannelConfig.class);
 		this.cxtCustomizedChannelConfig.refresh();
+
+		this.cxtCustomizedValidator = new AnnotationConfigApplicationContext();
+		this.cxtCustomizedValidator.register(ValidationConfig.class);
+		this.cxtCustomizedValidator.refresh();
 	}
 
 
@@ -271,6 +280,20 @@ public class MessageBrokerConfigurationTests {
 		assertEquals(MimeTypeUtils.APPLICATION_JSON, resolver.getDefaultMimeType());
 	}
 
+	@Test
+	public void defaultValidator() {
+		SimpAnnotationMethodMessageHandler messageHandler =
+				this.cxtSimpleBroker.getBean(SimpAnnotationMethodMessageHandler.class);
+		assertThat(messageHandler.getValidator(),Matchers.notNullValue(Validator.class));
+	}
+
+	@Test
+	public void customValidator() {
+		SimpAnnotationMethodMessageHandler messageHandler =
+				this.cxtCustomizedValidator.getBean(SimpAnnotationMethodMessageHandler.class);
+		assertThat(messageHandler.getValidator(),Matchers.notNullValue(Validator.class));
+		assertThat(messageHandler.getValidator(),Matchers.instanceOf(Validator.class));
+	}
 
 	@Controller
 	static class TestController {
@@ -361,6 +384,24 @@ public class MessageBrokerConfigurationTests {
 			registry.configureBrokerChannel().taskExecutor()
 					.corePoolSize(31).maxPoolSize(32).keepAliveSeconds(33).queueCapacity(34);
 		}
+	}
+
+	@Configuration
+	static class ValidationConfig extends TestMessageBrokerConfiguration {
+		@Override
+		public Validator getValidator() {
+			return new TestValidator();
+		}
+	}
+
+	private static class TestValidator implements Validator {
+		@Override
+		public boolean supports(Class<?> clazz) {
+			return false;
+		}
+
+		@Override
+		public void validate(Object target, Errors errors) {}
 	}
 
 

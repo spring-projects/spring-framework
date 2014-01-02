@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,8 @@ import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
-import org.springframework.messaging.handler.annotation.DestinationVariable;
-import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.messaging.handler.annotation.Headers;
-import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.*;
+import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.SimpMessageType;
@@ -37,6 +35,10 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
+import org.springframework.validation.annotation.Validated;
 
 import static org.junit.Assert.*;
 
@@ -58,6 +60,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		SimpMessageSendingOperations brokerTemplate = new SimpMessagingTemplate(channel);
 		this.messageHandler = new TestSimpAnnotationMethodMessageHandler(brokerTemplate, channel, channel);
 		this.messageHandler.setApplicationContext(new StaticApplicationContext());
+		this.messageHandler.setValidator(new StringNotEmptyValidator());
 		this.messageHandler.afterPropertiesSet();
 
 		testController = new TestController();
@@ -142,6 +145,15 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		assertEquals(12L, this.testController.arguments.get("id"));
 	}
 
+	@Test
+	public void validationError() {
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
+		headers.setDestination("/pre/validation/payload");
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		this.messageHandler.handleMessage(message);
+		assertEquals("handleValidationException", this.testController.method);
+	}
+
 
 	private static class TestSimpAnnotationMethodMessageHandler extends SimpAnnotationMethodMessageHandler {
 
@@ -210,6 +222,17 @@ public class SimpAnnotationMethodMessageHandlerTests {
 			this.method = "simpleBinding";
 			this.arguments.put("id", id);
 		}
+
+		@MessageMapping("/validation/payload")
+		public void payloadValidation(@Validated @Payload String payload) {
+			this.method = "payloadValidation";
+			this.arguments.put("message", payload);
+		}
+
+		@MessageExceptionHandler(MethodArgumentNotValidException.class)
+		public void handleValidationException() {
+			this.method = "handleValidationException";
+		}
 	}
 
 	@Controller
@@ -220,6 +243,20 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 		@MessageMapping(value="/duplicate")
 		public void handle2() { }
+	}
+
+	private static class StringNotEmptyValidator implements Validator {
+		@Override
+		public boolean supports(Class<?> clazz) {
+			return String.class.isAssignableFrom(clazz);
+		}
+		@Override
+		public void validate(Object target, Errors errors) {
+			String value = (String) target;
+			if (StringUtils.isEmpty(value.toString())) {
+				errors.reject("empty value");
+			}
+		}
 	}
 
 }

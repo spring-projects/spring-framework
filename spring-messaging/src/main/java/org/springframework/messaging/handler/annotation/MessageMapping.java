@@ -41,7 +41,10 @@ import org.springframework.messaging.Message;
  * 	a message and optionally convert it using a
  * 	{@link org.springframework.messaging.converter.MessageConverter}.
  * 	The presence of the annotation is not required since it is assumed by default
- * 	for method arguments that are not annotated.</li>
+ * 	for method arguments that are not annotated. Payload method arguments annotated
+ * 	with Validation annotations (like
+ * 	{@link org.springframework.validation.annotation.Validated}) will be subject to
+ * 	JSR-303 validation.</li>
  * 	<li>{@link Header}-annotated method arguments to extract a specific
  * 	header value along with type conversion with a
  * 	{@link org.springframework.core.convert.converter.Converter} if necessary.</li>

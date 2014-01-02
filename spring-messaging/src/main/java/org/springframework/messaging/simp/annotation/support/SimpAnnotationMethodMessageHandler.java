@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,7 @@
 package org.springframework.messaging.simp.annotation.support;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -60,6 +54,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.PathMatcher;
+import org.springframework.validation.Validator;
 
 /**
  * A handler for messages delegating to
@@ -86,6 +81,8 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	private ConversionService conversionService = new DefaultFormattingConversionService();
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
+
+	private Validator validator;
 
 	private final Object lifecycleMonitor = new Object();
 
@@ -171,6 +168,22 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		return this.pathMatcher;
 	}
 
+	/**
+	 * The configured Validator instance
+	 */
+	public Validator getValidator() {
+		return validator;
+	}
+
+	/**
+	 * Set the Validator instance used for validating @Payload arguments
+	 * @see org.springframework.validation.annotation.Validated
+	 * @see PayloadArgumentResolver
+	 */
+	public void setValidator(Validator validator) {
+		this.validator = validator;
+	}
+
 	@Override
 	public boolean isAutoStartup() {
 		return true;
@@ -230,7 +243,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		resolvers.add(new MessageMethodArgumentResolver());
 
 		resolvers.addAll(getCustomArgumentResolvers());
-		resolvers.add(new PayloadArgumentResolver(this.messageConverter));
+		resolvers.add(new PayloadArgumentResolver(this.messageConverter, this.validator));
 
 		return resolvers;
 	}

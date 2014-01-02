@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,16 @@ import java.lang.reflect.Method;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
+import org.springframework.util.StringUtils;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
+import org.springframework.validation.annotation.Validated;
 
 import static org.junit.Assert.*;
 
@@ -33,6 +37,7 @@ import static org.junit.Assert.*;
  * Test fixture for {@link PayloadArgumentResolver}.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  */
 public class PayloadArgumentResolverTests {
 
@@ -41,20 +46,22 @@ public class PayloadArgumentResolverTests {
 	private MethodParameter param;
 	private MethodParameter paramNotRequired;
 	private MethodParameter paramWithSpelExpression;
+	private MethodParameter paramValidated;
 
 
 	@Before
 	public void setup() throws Exception {
 
-		MessageConverter messageConverter = new StringMessageConverter();
-		this.resolver = new PayloadArgumentResolver(messageConverter );
+		this.resolver = new PayloadArgumentResolver(new StringMessageConverter(), testValidator());
 
 		Method method = PayloadArgumentResolverTests.class.getDeclaredMethod("handleMessage",
-				String.class, String.class, String.class);
+				String.class, String.class, String.class, String.class);
 
 		this.param = new MethodParameter(method , 0);
 		this.paramNotRequired = new MethodParameter(method , 1);
 		this.paramWithSpelExpression = new MethodParameter(method , 2);
+		this.paramValidated = new MethodParameter(method , 3);
+		this.paramValidated.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
 	}
 
 
@@ -82,12 +89,41 @@ public class PayloadArgumentResolverTests {
 		this.resolver.resolveArgument(this.paramWithSpelExpression, message);
 	}
 
+	@Test
+	public void resolveValidation() throws Exception {
+		Message<?> message = MessageBuilder.withPayload("ABC".getBytes()).build();
+		this.resolver.resolveArgument(this.paramValidated, message);
+	}
+
+	@Test(expected=MethodArgumentNotValidException.class)
+	public void resolveFailValidation() throws Exception {
+		Message<?> message = MessageBuilder.withPayload("".getBytes()).build();
+		this.resolver.resolveArgument(this.paramValidated, message);
+	}
+
+	private Validator testValidator() {
+
+		return new Validator() {
+			@Override
+			public boolean supports(Class<?> clazz) {
+				return String.class.isAssignableFrom(clazz);
+			}
+			@Override
+			public void validate(Object target, Errors errors) {
+				String value = (String) target;
+				if (StringUtils.isEmpty(value.toString())) {
+					errors.reject("empty value");
+				}
+			}
+		};
+	}
 
 	@SuppressWarnings("unused")
 	private void handleMessage(
 			@Payload String param,
 			@Payload(required=false) String paramNotRequired,
-			@Payload("foo.bar") String paramWithSpelExpression) {
+			@Payload("foo.bar") String paramWithSpelExpression,
+			@Validated @Payload String validParam) {
 	}
 
 }
