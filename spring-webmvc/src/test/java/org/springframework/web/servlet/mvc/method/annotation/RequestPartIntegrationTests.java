@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
@@ -104,7 +104,7 @@ public class RequestPartIntegrationTests {
 	public void setUp() {
 		AllEncompassingFormHttpMessageConverter converter = new AllEncompassingFormHttpMessageConverter();
 		converter.setPartConverters(Arrays.<HttpMessageConverter<?>>asList(
-				new ResourceHttpMessageConverter(), new MappingJacksonHttpMessageConverter()));
+				new ResourceHttpMessageConverter(), new MappingJackson2HttpMessageConverter()));
 
 		restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 		restTemplate.setMessageConverters(Arrays.<HttpMessageConverter<?>>asList(converter));

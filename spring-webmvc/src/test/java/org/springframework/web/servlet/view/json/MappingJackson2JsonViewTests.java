@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ public class MappingJackson2JsonViewTests {
 		assertEquals("no-cache, no-store, max-age=0", response.getHeader("Cache-Control"));
 		assertNotNull(response.getHeader("Expires"));
 
-		assertEquals(MappingJacksonJsonView.DEFAULT_CONTENT_TYPE, response.getContentType());
+		assertEquals(MappingJackson2JsonView.DEFAULT_CONTENT_TYPE, response.getContentType());
 
 		String jsonResult = response.getContentAsString();
 		assertTrue(jsonResult.length() > 0);
