@@ -85,11 +85,13 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 	/**
 	 * Set the {@code ObjectMapper} for this view.
 	 * If not set, a default {@link ObjectMapper#ObjectMapper() ObjectMapper} is used.
-	 * <p>Setting a custom-configured {@code ObjectMapper} is one way to take further control of the JSON
-	 * serialization process. For example, an extended {@link org.codehaus.jackson.map.SerializerFactory}
-	 * can be configured that provides custom serializers for specific types. The other option for refining
-	 * the serialization process is to use Jackson's provided annotations on the types to be serialized,
-	 * in which case a custom-configured ObjectMapper is unnecessary.
+	 * <p>Setting a custom-configured {@code ObjectMapper} is one way to take further
+	 * control of the JSON serialization process. For example, an extended
+	 * {@link com.fasterxml.jackson.databind.ser.SerializerFactory}
+	 * can be configured that provides custom serializers for specific types.
+	 * The other option for refining the serialization process is to use Jackson's
+	 * provided annotations on the types to be serialized, in which case a
+	 * custom-configured ObjectMapper is unnecessary.
 	 */
 	public void setObjectMapper(ObjectMapper objectMapper) {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
