@@ -61,12 +61,6 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 	 */
 	public GenericMessage(T payload, Map<String, Object> headers) {
 		Assert.notNull(payload, "payload must not be null");
-		if (headers == null) {
-			headers = new HashMap<String, Object>();
-		}
-		else {
-			headers = new HashMap<String, Object>(headers);
-		}
 		this.headers = new MessageHeaders(headers);
 		this.payload = payload;
 	}
