@@ -22,10 +22,10 @@ def customizePom(pom, gradleProject) {
 		generatedPom.project {
 			name = gradleProject.description
 			description = gradleProject.description
-			url = "https://github.com/SpringSource/spring-framework"
+			url = "https://github.com/spring-projects/spring-framework"
 			organization {
-				name = "SpringSource"
-				url = "http://springsource.org/spring-framework"
+				name = "Spring IO"
+				url = "http://projects.spring.io/spring-framework"
 			}
 			licenses {
 				license {
@@ -35,9 +35,9 @@ def customizePom(pom, gradleProject) {
 				}
 			}
 			scm {
-				url = "https://github.com/SpringSource/spring-framework"
-				connection = "scm:git:git://github.com/SpringSource/spring-framework"
-				developerConnection = "scm:git:git://github.com/SpringSource/spring-framework"
+				url = "https://github.com/spring-projects/spring-framework"
+				connection = "scm:git:git://github.com/spring-projects/spring-framework"
+				developerConnection = "scm:git:git://github.com/spring-projects/spring-framework"
 			}
 			developers {
 				developer {
