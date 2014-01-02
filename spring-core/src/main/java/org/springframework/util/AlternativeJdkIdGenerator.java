@@ -36,7 +36,9 @@ public class AlternativeJdkIdGenerator implements IdGenerator {
 
 
 	public AlternativeJdkIdGenerator() {
-		byte[] seed = new SecureRandom().generateSeed(8);
+		SecureRandom secureRandom = new SecureRandom();
+		byte[] seed = new byte[8];
+		secureRandom.nextBytes(seed);
 		this.random = new Random(new BigInteger(seed).longValue());
 	}
 
