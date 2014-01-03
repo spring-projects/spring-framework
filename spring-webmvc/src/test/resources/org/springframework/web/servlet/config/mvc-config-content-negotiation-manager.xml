@@ -5,7 +5,8 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<mvc:annotation-driven content-negotiation-manager="contentNegotiationManager" />
+	<mvc:annotation-driven content-negotiation-manager="contentNegotiationManager"
+            use-registered-suffix-pattern-match="true"/>
 
 	<bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
 		<property name="mediaTypes">

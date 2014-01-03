@@ -171,6 +171,19 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			Boolean enableMatrixVariables = Boolean.valueOf(element.getAttribute("enableMatrixVariables"));
 			handlerMappingDef.getPropertyValues().add("removeSemicolonContent", !enableMatrixVariables);
 		}
+		if(element.hasAttribute("use-suffix-pattern-match")) {
+			handlerMappingDef.getPropertyValues().add("useSuffixPatternMatch",
+					Boolean.valueOf(element.getAttribute("use-suffix-pattern-match")));
+		}
+		if(element.hasAttribute("use-trailing-slash-match")) {
+			handlerMappingDef.getPropertyValues().add("useTrailingSlashMatch",
+					Boolean.valueOf(element.getAttribute("use-trailing-slash-match")));
+		}
+		if(element.hasAttribute("use-registered-suffix-pattern-match")) {
+			handlerMappingDef.getPropertyValues().add("useRegisteredSuffixPatternMatch",
+					Boolean.valueOf(element.getAttribute("use-registered-suffix-pattern-match")));
+		}
+
 
 		RuntimeBeanReference conversionService = getConversionService(element, source, parserContext);
 		RuntimeBeanReference validator = getValidator(element, source, parserContext);
