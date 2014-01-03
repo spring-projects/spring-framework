@@ -16,12 +16,11 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 
@@ -39,6 +38,9 @@ public class InterceptorRegistration {
 	private final List<String> includePatterns = new ArrayList<String>();
 
 	private final List<String> excludePatterns = new ArrayList<String>();
+
+	private PathMatcher pathMatcher;
+
 
 	/**
 	 * Creates an {@link InterceptorRegistration} instance.
@@ -65,6 +67,17 @@ public class InterceptorRegistration {
 	}
 
 	/**
+	 * A PathMatcher implementation to use with this interceptor. This is an optional,
+	 * advanced property required only if using custom PathMatcher implementations
+	 * that support mapping metadata other than the Ant path patterns supported
+	 * by default.
+	 */
+	public InterceptorRegistration pathMatcher(PathMatcher pathMatcher) {
+		this.pathMatcher = pathMatcher;
+		return this;
+	}
+
+	/**
 	 * Returns the underlying interceptor. If URL patterns are provided the returned type is
 	 * {@link MappedInterceptor}; otherwise {@link HandlerInterceptor}.
 	 */
@@ -72,7 +85,12 @@ public class InterceptorRegistration {
 		if (this.includePatterns.isEmpty()) {
 			return this.interceptor;
 		}
-		return new MappedInterceptor(toArray(this.includePatterns), toArray(this.excludePatterns), interceptor);
+		MappedInterceptor mappedInterceptor = new MappedInterceptor(
+				toArray(this.includePatterns), toArray(this.excludePatterns), interceptor);
+		if (this.pathMatcher != null) {
+			mappedInterceptor.setPathMatcher(this.pathMatcher);
+		}
+		return mappedInterceptor;
 	}
 
 	private static String[] toArray(List<String> list) {

@@ -19,10 +19,7 @@ package org.springframework.web.servlet.config;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 import javax.servlet.RequestDispatcher;
 import javax.validation.constraints.NotNull;
@@ -47,6 +44,7 @@ import org.springframework.mock.web.test.MockRequestDispatcher;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.PathMatcher;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
@@ -68,10 +66,7 @@ import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
-import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
-import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
-import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapter;
+import org.springframework.web.servlet.handler.*;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
@@ -219,7 +214,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testInterceptors() throws Exception {
-		loadBeanDefinitions("mvc-config-interceptors.xml", 18);
+		loadBeanDefinitions("mvc-config-interceptors.xml", 20);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
@@ -231,11 +226,12 @@ public class MvcNamespaceTests {
 		request.addParameter("theme", "green");
 
 		HandlerExecutionChain chain = mapping.getHandler(request);
-		assertEquals(4, chain.getInterceptors().length);
+		assertEquals(5, chain.getInterceptors().length);
 		assertTrue(chain.getInterceptors()[0] instanceof ConversionServiceExposingInterceptor);
 		assertTrue(chain.getInterceptors()[1] instanceof LocaleChangeInterceptor);
 		assertTrue(chain.getInterceptors()[2] instanceof WebRequestHandlerInterceptorAdapter);
 		assertTrue(chain.getInterceptors()[3] instanceof ThemeChangeInterceptor);
+		assertTrue(chain.getInterceptors()[4] instanceof UserRoleAuthorizationInterceptor);
 
 		request.setRequestURI("/admin/users");
 		chain = mapping.getHandler(request);
@@ -583,5 +579,43 @@ public class MvcNamespaceTests {
 	public static class TestCallableProcessingInterceptor extends CallableProcessingInterceptorAdapter { }
 
 	public static class TestDeferredResultProcessingInterceptor extends DeferredResultProcessingInterceptorAdapter { }
+
+	public static class TestPathMatcher implements PathMatcher {
+
+		@Override
+		public boolean isPattern(String path) {
+			return false;
+		}
+
+		@Override
+		public boolean match(String pattern, String path) {
+			return path.matches(pattern);
+		}
+
+		@Override
+		public boolean matchStart(String pattern, String path) {
+			return false;
+		}
+
+		@Override
+		public String extractPathWithinPattern(String pattern, String path) {
+			return null;
+		}
+
+		@Override
+		public Map<String, String> extractUriTemplateVariables(String pattern, String path) {
+			return null;
+		}
+
+		@Override
+		public Comparator<String> getPatternComparator(String path) {
+			return null;
+		}
+
+		@Override
+		public String combine(String pattern1, String pattern2) {
+			return null;
+		}
+	}
 
 }

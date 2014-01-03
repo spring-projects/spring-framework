@@ -415,6 +415,20 @@
 					</xsd:complexType>
 				</xsd:element>
 			</xsd:choice>
+            <xsd:attribute name="path-matcher" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation source="java:org.springframework.util.PathMatcher"><![CDATA[
+	The bean name of a PathMatcher implementation to use with nested interceptors. This is an optional,
+	advanced property required only if using custom PathMatcher implementations that support mapping
+	metadata other than the Ant path patterns supported by default.
+					]]></xsd:documentation>
+                    <xsd:appinfo>
+                        <tool:annotation kind="ref">
+                            <tool:expected-type type="java:org.springframework.util.PathMatcher" />
+                        </tool:annotation>
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
 

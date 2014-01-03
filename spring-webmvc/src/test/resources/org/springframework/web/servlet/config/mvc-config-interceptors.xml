@@ -26,4 +26,13 @@
 	<bean id="log4jInterceptor"
 		class="org.springframework.web.context.request.Log4jNestedDiagnosticContextInterceptor" />
 
+    <mvc:interceptors path-matcher="pathMatcher">
+        <mvc:interceptor>
+            <mvc:mapping path="/accounts/[0-9]*" />
+            <bean class="org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor" />
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+    <bean id="pathMatcher" class="org.springframework.web.servlet.config.MvcNamespaceTests$TestPathMatcher" />
+
 </beans>
