@@ -57,6 +57,9 @@ import org.springframework.util.CollectionUtils;
  * {@link #setValidationMessageSource} won't work in that scenario. Please stick with
  * Hibernate Validator 4.3 for the time being, or upgrade to Spring Framework 4.0.
  *
+ * <p>This class is also being used by Spring's MVC configuration namespace, in case of the
+ * {@code javax.validation} API being present but no explicit Validator having been configured.
+ *
  * @author Juergen Hoeller
  * @since 3.0
  * @see javax.validation.ValidatorFactory
@@ -143,7 +146,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	/**
 	 * Specify resource locations to load XML constraint mapping files from, if any.
 	 */
-	public void setMappingLocations(Resource[] mappingLocations) {
+	public void setMappingLocations(Resource... mappingLocations) {
 		this.mappingLocations = mappingLocations;
 	}
 
