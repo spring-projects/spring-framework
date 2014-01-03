@@ -48,8 +48,6 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 
 	private String destinationPrefix = "/user/";
 
-	private String subscriptionDestinationPrefix = "/user/queue/";
-
 
 	/**
 	 * Create an instance that will access user session id information through
@@ -70,7 +68,6 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 	public void setUserDestinationPrefix(String prefix) {
 		Assert.hasText(prefix, "prefix must not be empty");
 		this.destinationPrefix = prefix.endsWith("/") ? prefix : prefix + "/";
-		this.subscriptionDestinationPrefix = this.destinationPrefix + "queue/";
 	}
 
 	/**
@@ -82,13 +79,6 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		return this.destinationPrefix;
 	}
 
-	/**
-	 * Return the prefix used to identify user destinations for (un)subscribe messages.
-	 * <p>By default "/user/queue/".
-	 */
-	public String getSubscriptionDestinationPrefix() {
-		return this.subscriptionDestinationPrefix;
-	}
 
 	/**
 	 * Return the configured {@link UserSessionRegistry}.
@@ -130,7 +120,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		SimpMessageType messageType = headers.getMessageType();
 
 		if (SimpMessageType.SUBSCRIBE.equals(messageType) || SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
-			if (!checkDestination(destination, this.subscriptionDestinationPrefix)) {
+			if (!checkDestination(destination, this.destinationPrefix)) {
 				return null;
 			}
 			if (user == null) {
