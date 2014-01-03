@@ -304,7 +304,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		}
 		else if (javaxValidationPresent) {
 			RootBeanDefinition validatorDef = new RootBeanDefinition(
-					"org.springframework.validation.beanvalidation.LocalValidatorFactoryBean");
+					"org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean");
 			validatorDef.setSource(source);
 			validatorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			String validatorName = parserContext.getReaderContext().registerWithGeneratedName(validatorDef);

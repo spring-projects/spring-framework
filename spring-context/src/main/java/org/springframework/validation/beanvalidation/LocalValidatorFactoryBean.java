@@ -45,6 +45,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.io.Resource;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
@@ -84,6 +85,7 @@ import org.springframework.util.ReflectionUtils;
 public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		implements ValidatorFactory, ApplicationContextAware, InitializingBean, DisposableBean {
 
+	// Bean Validation 1.1 close() method available?
 	private static final Method closeMethod = ClassUtils.getMethodIfAvailable(ValidatorFactory.class, "close");
 
 
@@ -214,10 +216,9 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void afterPropertiesSet() {
-		@SuppressWarnings("rawtypes")
-		Configuration configuration = (this.providerClass != null ?
+		@SuppressWarnings({"rawtypes", "unchecked"})
+		Configuration<?> configuration = (this.providerClass != null ?
 				Validation.byProvider(this.providerClass).configure() :
 				Validation.byDefaultProvider().configure());
 
@@ -240,7 +241,9 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 			configuration.constraintValidatorFactory(targetConstraintValidatorFactory);
 		}
 
-		configureParameterNameProviderIfPossible(configuration);
+		if (this.parameterNameDiscoverer != null) {
+			configureParameterNameProviderIfPossible(configuration);
+		}
 
 		if (this.mappingLocations != null) {
 			for (Resource location : this.mappingLocations) {
@@ -329,31 +332,36 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 
 	@Override
 	public Validator getValidator() {
+		Assert.notNull(this.validatorFactory, "No target ValidatorFactory set");
 		return this.validatorFactory.getValidator();
 	}
 
 	@Override
 	public ValidatorContext usingContext() {
+		Assert.notNull(this.validatorFactory, "No target ValidatorFactory set");
 		return this.validatorFactory.usingContext();
 	}
 
 	@Override
 	public MessageInterpolator getMessageInterpolator() {
+		Assert.notNull(this.validatorFactory, "No target ValidatorFactory set");
 		return this.validatorFactory.getMessageInterpolator();
 	}
 
 	@Override
 	public TraversableResolver getTraversableResolver() {
+		Assert.notNull(this.validatorFactory, "No target ValidatorFactory set");
 		return this.validatorFactory.getTraversableResolver();
 	}
 
 	@Override
 	public ConstraintValidatorFactory getConstraintValidatorFactory() {
+		Assert.notNull(this.validatorFactory, "No target ValidatorFactory set");
 		return this.validatorFactory.getConstraintValidatorFactory();
 	}
 
 	public void close() {
-		if (closeMethod != null) {
+		if (closeMethod != null && this.validatorFactory != null) {
 			ReflectionUtils.invokeMethod(closeMethod, this.validatorFactory);
 		}
 	}

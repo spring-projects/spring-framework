@@ -83,27 +83,31 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 
 	@Override
 	public boolean supports(Class<?> clazz) {
-		return true;
+		return (this.targetValidator != null);
 	}
 
 	@Override
 	public void validate(Object target, Errors errors) {
-		processConstraintViolations(this.targetValidator.validate(target), errors);
+		if (this.targetValidator != null) {
+			processConstraintViolations(this.targetValidator.validate(target), errors);
+		}
 	}
 
 	@Override
 	@SuppressWarnings("rawtypes")
 	public void validate(Object target, Errors errors, Object... validationHints) {
-		Set<Class> groups = new LinkedHashSet<Class>();
-		if (validationHints != null) {
-			for (Object hint : validationHints) {
-				if (hint instanceof Class) {
-					groups.add((Class) hint);
+		if (this.targetValidator != null) {
+			Set<Class> groups = new LinkedHashSet<Class>();
+			if (validationHints != null) {
+				for (Object hint : validationHints) {
+					if (hint instanceof Class) {
+						groups.add((Class) hint);
+					}
 				}
 			}
+			processConstraintViolations(
+					this.targetValidator.validate(target, groups.toArray(new Class[groups.size()])), errors);
 		}
-		processConstraintViolations(
-				this.targetValidator.validate(target, groups.toArray(new Class[groups.size()])), errors);
 	}
 
 	/**
@@ -200,11 +204,13 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 
 	@Override
 	public <T> Set<ConstraintViolation<T>> validate(T object, Class<?>... groups) {
+		Assert.notNull(this.targetValidator, "No target Validator set");
 		return this.targetValidator.validate(object, groups);
 	}
 
 	@Override
 	public <T> Set<ConstraintViolation<T>> validateProperty(T object, String propertyName, Class<?>... groups) {
+		Assert.notNull(this.targetValidator, "No target Validator set");
 		return this.targetValidator.validateProperty(object, propertyName, groups);
 	}
 
@@ -212,16 +218,19 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	public <T> Set<ConstraintViolation<T>> validateValue(
 			Class<T> beanType, String propertyName, Object value, Class<?>... groups) {
 
+		Assert.notNull(this.targetValidator, "No target Validator set");
 		return this.targetValidator.validateValue(beanType, propertyName, value, groups);
 	}
 
 	@Override
 	public BeanDescriptor getConstraintsForClass(Class<?> clazz) {
+		Assert.notNull(this.targetValidator, "No target Validator set");
 		return this.targetValidator.getConstraintsForClass(clazz);
 	}
 
 	@Override
 	public <T> T unwrap(Class<T> type) {
+		Assert.notNull(this.targetValidator, "No target Validator set");
 		return this.targetValidator.unwrap(type);
 	}
 
