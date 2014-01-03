@@ -275,12 +275,9 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 			writeFrameInternal(frame);
 		}
 		catch (Throwable ex) {
-			if (ex instanceof EOFException || ex instanceof SocketException) {
-				logger.warn("Client went away. Terminating connection");
-			}
-			else {
-				logger.warn("Terminating connection after failure to send message: " + ex.getMessage());
-			}
+			logger.error("Terminating connection after failure to send message to client. " +
+					"This may be because the client has gone away " +
+					"(see https://java.net/jira/browse/SERVLET_SPEC-44)", ex);
 			try {
 				disconnect(CloseStatus.SERVER_ERROR);
 				close(CloseStatus.SERVER_ERROR);
