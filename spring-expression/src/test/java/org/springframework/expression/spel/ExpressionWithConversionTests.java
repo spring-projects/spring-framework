@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,6 @@
 
 package org.springframework.expression.spel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,6 +23,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -36,6 +33,8 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import static org.junit.Assert.*;
+
 /**
  * Expression evaluation where the TypeConverter plugged in is the
  * {@link org.springframework.core.convert.support.GenericConversionService}.
@@ -43,7 +42,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
  * @author Andy Clement
  * @author Dave Syer
  */
-public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCase {
+public class ExpressionWithConversionTests extends ExpressionTestCase {
 
 	private static List<String> listOfString = new ArrayList<String>();
 	private static TypeDescriptor typeDescriptorForListOfString = null;
@@ -61,8 +60,8 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 
 	@Before
 	public void setUp() throws Exception {
-		ExpressionTestsUsingCoreConversionService.typeDescriptorForListOfString = new TypeDescriptor(ExpressionTestsUsingCoreConversionService.class.getDeclaredField("listOfString"));
-		ExpressionTestsUsingCoreConversionService.typeDescriptorForListOfInteger = new TypeDescriptor(ExpressionTestsUsingCoreConversionService.class.getDeclaredField("listOfInteger"));
+		ExpressionWithConversionTests.typeDescriptorForListOfString = new TypeDescriptor(ExpressionWithConversionTests.class.getDeclaredField("listOfString"));
+		ExpressionWithConversionTests.typeDescriptorForListOfInteger = new TypeDescriptor(ExpressionWithConversionTests.class.getDeclaredField("listOfInteger"));
 	}
 
 
@@ -133,42 +132,34 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 
 	}
 
-	public static class Foo {
-
-		private Collection<Foo> foos;
-
-		public final String value;
-
-		public Foo(String value) {
-			this.value = value;
-		}
-
-		public void setFoos(Collection<Foo> foos) {
-			this.foos = foos;
-		}
-
-		public Collection<Foo> getFoos() {
-			return this.foos;
-		}
-
-	}
-
 	@Test
 	public void testConvert() {
 		Foo root = new Foo("bar");
-		StandardEvaluationContext context = new StandardEvaluationContext(root);
-
 		Collection<String> foos = Collections.singletonList("baz");
 
-		// property access, works
+		StandardEvaluationContext context = new StandardEvaluationContext(root);
+
+		// property access
 		Expression expression = parser.parseExpression("foos");
 		expression.setValue(context, foos);
 		Foo baz = root.getFoos().iterator().next();
 		assertEquals("baz", baz.value);
 
-		// method call, fails (ClassCastException)
+		// method call
 		expression = parser.parseExpression("setFoos(#foos)");
 		context.setVariable("foos", foos);
+		expression.getValue(context);
+		baz = root.getFoos().iterator().next();
+		assertEquals("baz", baz.value);
+
+		// method call with result from method call
+		expression = parser.parseExpression("setFoos(getFoosAsStrings())");
+		expression.getValue(context);
+		baz = root.getFoos().iterator().next();
+		assertEquals("baz", baz.value);
+
+		// method call with result from method call
+		expression = parser.parseExpression("setFoos(getFoosAsObjects())");
 		expression.getValue(context);
 		baz = root.getFoos().iterator().next();
 		assertEquals("baz", baz.value);
@@ -190,6 +181,34 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 		@Override
 		public Object convertValue(Object value, TypeDescriptor sourceType, TypeDescriptor targetType) throws EvaluationException {
 			return this.service.convert(value, sourceType, targetType);
+		}
+	}
+
+
+	public static class Foo {
+
+		public final String value;
+
+		private Collection<Foo> foos;
+
+		public Foo(String value) {
+			this.value = value;
+		}
+
+		public void setFoos(Collection<Foo> foos) {
+			this.foos = foos;
+		}
+
+		public Collection<Foo> getFoos() {
+			return this.foos;
+		}
+
+		public Collection<String> getFoosAsStrings() {
+			return Collections.singletonList("baz");
+		}
+
+		public Collection<?> getFoosAsObjects() {
+			return Collections.singletonList("baz");
 		}
 	}
 
