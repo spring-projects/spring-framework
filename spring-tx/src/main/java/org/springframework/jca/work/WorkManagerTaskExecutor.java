@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import javax.resource.spi.work.WorkManager;
 import javax.resource.spi.work.WorkRejectedException;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.TaskRejectedException;
 import org.springframework.core.task.TaskTimeoutException;
 import org.springframework.jca.context.BootstrapContextAware;
@@ -36,6 +37,8 @@ import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.scheduling.SchedulingException;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureTask;
 
 /**
  * {@link org.springframework.core.task.TaskExecutor} implementation
@@ -69,7 +72,7 @@ import org.springframework.util.Assert;
  * @see javax.resource.spi.work.WorkManager#scheduleWork
  */
 public class WorkManagerTaskExecutor extends JndiLocatorSupport
-		implements SchedulingTaskExecutor, WorkManager, BootstrapContextAware, InitializingBean {
+		implements AsyncListenableTaskExecutor, SchedulingTaskExecutor, WorkManager, BootstrapContextAware, InitializingBean {
 
 	private WorkManager workManager;
 
@@ -246,6 +249,20 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 	@Override
 	public <T> Future<T> submit(Callable<T> task) {
 		FutureTask<T> future = new FutureTask<T>(task);
+		execute(future, TIMEOUT_INDEFINITE);
+		return future;
+	}
+
+	@Override
+	public ListenableFuture<?> submitListenable(Runnable task) {
+		ListenableFutureTask<Object> future = new ListenableFutureTask<Object>(task, null);
+		execute(future, TIMEOUT_INDEFINITE);
+		return future;
+	}
+
+	@Override
+	public <T> ListenableFuture<T> submitListenable(Callable<T> task) {
+		ListenableFutureTask<T> future = new ListenableFutureTask<T>(task);
 		execute(future, TIMEOUT_INDEFINITE);
 		return future;
 	}

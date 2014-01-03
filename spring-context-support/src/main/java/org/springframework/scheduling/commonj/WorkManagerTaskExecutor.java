@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-
 import javax.naming.NamingException;
 
 import commonj.work.Work;
@@ -31,11 +30,14 @@ import commonj.work.WorkManager;
 import commonj.work.WorkRejectedException;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.TaskRejectedException;
 import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.scheduling.SchedulingException;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureTask;
 
 /**
  * TaskExecutor implementation that delegates to a CommonJ WorkManager,
@@ -61,7 +63,7 @@ import org.springframework.util.Assert;
  * @since 2.0
  */
 public class WorkManagerTaskExecutor extends JndiLocatorSupport
-		implements SchedulingTaskExecutor, WorkManager, InitializingBean {
+		implements AsyncListenableTaskExecutor, SchedulingTaskExecutor, WorkManager, InitializingBean {
 
 	private WorkManager workManager;
 
@@ -149,6 +151,20 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 	@Override
 	public <T> Future<T> submit(Callable<T> task) {
 		FutureTask<T> future = new FutureTask<T>(task);
+		execute(future);
+		return future;
+	}
+
+	@Override
+	public ListenableFuture<?> submitListenable(Runnable task) {
+		ListenableFutureTask<Object> future = new ListenableFutureTask<Object>(task, null);
+		execute(future);
+		return future;
+	}
+
+	@Override
+	public <T> ListenableFuture<T> submitListenable(Callable<T> task) {
+		ListenableFutureTask<T> future = new ListenableFutureTask<T>(task);
 		execute(future);
 		return future;
 	}

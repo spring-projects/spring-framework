@@ -29,9 +29,12 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.TaskRejectedException;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureTask;
 
 /**
  * JavaBean that allows for configuring a {@link java.util.concurrent.ThreadPoolExecutor}
@@ -64,7 +67,8 @@ import org.springframework.util.Assert;
  * @see ConcurrentTaskExecutor
  */
 @SuppressWarnings("serial")
-public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport implements SchedulingTaskExecutor {
+public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
+		implements AsyncListenableTaskExecutor, SchedulingTaskExecutor {
 
 	private final Object poolSizeMonitor = new Object();
 
@@ -275,6 +279,32 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 		ExecutorService executor = getThreadPoolExecutor();
 		try {
 			return executor.submit(task);
+		}
+		catch (RejectedExecutionException ex) {
+			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
+		}
+	}
+
+	@Override
+	public ListenableFuture<?> submitListenable(Runnable task) {
+		ExecutorService executor = getThreadPoolExecutor();
+		try {
+			ListenableFutureTask<Object> future = new ListenableFutureTask<Object>(task, null);
+			executor.execute(future);
+			return future;
+		}
+		catch (RejectedExecutionException ex) {
+			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
+		}
+	}
+
+	@Override
+	public <T> ListenableFuture<T> submitListenable(Callable<T> task) {
+		ExecutorService executor = getThreadPoolExecutor();
+		try {
+			ListenableFutureTask<T> future = new ListenableFutureTask<T>(task);
+			executor.execute(future);
+			return future;
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);

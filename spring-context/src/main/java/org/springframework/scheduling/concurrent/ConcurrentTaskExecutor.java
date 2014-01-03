@@ -25,10 +25,12 @@ import java.util.concurrent.Future;
 import javax.enterprise.concurrent.ManagedExecutors;
 import javax.enterprise.concurrent.ManagedTask;
 
+import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.support.TaskExecutorAdapter;
 import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * Adapter that takes a {@code java.util.concurrent.Executor} and exposes
@@ -57,7 +59,7 @@ import org.springframework.util.ClassUtils;
  * @see DefaultManagedTaskExecutor
  * @see ThreadPoolTaskExecutor
  */
-public class ConcurrentTaskExecutor implements SchedulingTaskExecutor {
+public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, SchedulingTaskExecutor {
 
 	private static Class<?> managedExecutorServiceClass;
 
@@ -146,6 +148,16 @@ public class ConcurrentTaskExecutor implements SchedulingTaskExecutor {
 		return this.adaptedExecutor.submit(task);
 	}
 
+	@Override
+	public ListenableFuture<?> submitListenable(Runnable task) {
+		return this.adaptedExecutor.submitListenable(task);
+	}
+
+	@Override
+	public <T> ListenableFuture<T> submitListenable(Callable<T> task) {
+		return this.adaptedExecutor.submitListenable(task);
+	}
+
 	/**
 	 * This task executor prefers short-lived work units.
 	 */
@@ -180,6 +192,16 @@ public class ConcurrentTaskExecutor implements SchedulingTaskExecutor {
 		@Override
 		public <T> Future<T> submit(Callable<T> task) {
 			return super.submit(ManagedTaskBuilder.buildManagedTask(task, task.toString()));
+		}
+
+		@Override
+		public ListenableFuture<?> submitListenable(Runnable task) {
+			return super.submitListenable(ManagedTaskBuilder.buildManagedTask(task, task.toString()));
+		}
+
+		@Override
+		public <T> ListenableFuture<T> submitListenable(Callable<T> task) {
+			return super.submitListenable(ManagedTaskBuilder.buildManagedTask(task, task.toString()));
 		}
 	}
 

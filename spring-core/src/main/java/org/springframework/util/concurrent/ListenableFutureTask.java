@@ -26,15 +26,14 @@ import java.util.concurrent.FutureTask;
  * @author Arjen Poutsma
  * @since 4.0
  */
-public class ListenableFutureTask<T> extends FutureTask<T>
-		implements ListenableFuture<T> {
+public class ListenableFutureTask<T> extends FutureTask<T> implements ListenableFuture<T> {
 
-	private final ListenableFutureCallbackRegistry<T> callbacks =
-			new ListenableFutureCallbackRegistry<T>();
+	private final ListenableFutureCallbackRegistry<T> callbacks = new ListenableFutureCallbackRegistry<T>();
+
 
 	/**
-	 * Creates a new {@code ListenableFutureTask} that will, upon running, execute the
-	 * given {@link Callable}.
+	 * Create a new {@code ListenableFutureTask} that will, upon running,
+	 * execute the given {@link Callable}.
 	 * @param callable the callable task
 	 */
 	public ListenableFutureTask(Callable<T> callable) {
@@ -42,9 +41,9 @@ public class ListenableFutureTask<T> extends FutureTask<T>
 	}
 
 	/**
-	 * Creates a {@code ListenableFutureTask} that will, upon running, execute the given
-	 * {@link Runnable}, and arrange that {@link #get()} will return the given result on
-	 * successful completion.
+	 * Create a {@code ListenableFutureTask} that will, upon running,
+	 * execute the given {@link Runnable}, and arrange that {@link #get()}
+	 * will return the given result on successful completion.
 	 * @param runnable the runnable task
 	 * @param result the result to return on successful completion
 	 */
@@ -52,9 +51,10 @@ public class ListenableFutureTask<T> extends FutureTask<T>
 		super(runnable, result);
 	}
 
+
 	@Override
 	public void addCallback(ListenableFutureCallback<? super T> callback) {
-		callbacks.addCallback(callback);
+		this.callbacks.addCallback(callback);
 	}
 
 	@Override
@@ -62,7 +62,7 @@ public class ListenableFutureTask<T> extends FutureTask<T>
 		Throwable cause;
 		try {
 			T result = get();
-			callbacks.success(result);
+			this.callbacks.success(result);
 			return;
 		}
 		catch (InterruptedException ex) {
@@ -75,9 +75,10 @@ public class ListenableFutureTask<T> extends FutureTask<T>
 				cause = ex;
 			}
 		}
-		catch (Throwable t) {
-			cause = t;
+		catch (Throwable ex) {
+			cause = ex;
 		}
-		callbacks.failure(cause);
+		this.callbacks.failure(cause);
 	}
+
 }
