@@ -71,6 +71,9 @@ import org.springframework.util.ReflectionUtils;
  * a {@link ValidatorFactory} and call {@link #getValidator()} on it, then {@code #forExecutables}
  * on the returned native {@link Validator} reference instead of directly on this class.
  *
+ * <p>This class is also being used by Spring's MVC configuration namespace, in case of the
+ * {@code javax.validation} API being present but no explicit Validator having been configured.
+ *
  * @author Juergen Hoeller
  * @since 3.0
  * @see javax.validation.ValidatorFactory
@@ -170,7 +173,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	/**
 	 * Specify resource locations to load XML constraint mapping files from, if any.
 	 */
-	public void setMappingLocations(Resource[] mappingLocations) {
+	public void setMappingLocations(Resource... mappingLocations) {
 		this.mappingLocations = mappingLocations;
 	}
 
