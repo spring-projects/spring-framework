@@ -174,7 +174,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 		RuntimeBeanReference conversionService = getConversionService(element, source, parserContext);
 		RuntimeBeanReference validator = getValidator(element, source, parserContext);
-		RuntimeBeanReference messageCodesResolver = getMessageCodesResolver(element, source, parserContext);
+		RuntimeBeanReference messageCodesResolver = getMessageCodesResolver(element);
 
 		RootBeanDefinition bindingDef = new RootBeanDefinition(ConfigurableWebBindingInitializer.class);
 		bindingDef.setSource(source);
@@ -185,9 +185,9 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 		ManagedList<?> messageConverters = getMessageConverters(element, source, parserContext);
 		ManagedList<?> argumentResolvers = getArgumentResolvers(element, parserContext);
-		ManagedList<?> returnValueHandlers = getReturnValueHandlers(element, source, parserContext);
-		String asyncTimeout = getAsyncTimeout(element, source, parserContext);
-		RuntimeBeanReference asyncExecutor = getAsyncExecutor(element, source, parserContext);
+		ManagedList<?> returnValueHandlers = getReturnValueHandlers(element, parserContext);
+		String asyncTimeout = getAsyncTimeout(element);
+		RuntimeBeanReference asyncExecutor = getAsyncExecutor(element);
 		ManagedList<?> callableInterceptors = getCallableInterceptors(element, source, parserContext);
 		ManagedList<?> deferredResultInterceptors = getDeferredResultInterceptors(element, source, parserContext);
 
@@ -349,7 +349,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return props;
 	}
 
-	private RuntimeBeanReference getMessageCodesResolver(Element element, Object source, ParserContext parserContext) {
+	private RuntimeBeanReference getMessageCodesResolver(Element element) {
 		if (element.hasAttribute("message-codes-resolver")) {
 			return new RuntimeBeanReference(element.getAttribute("message-codes-resolver"));
 		}
@@ -358,12 +358,12 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
-	private String getAsyncTimeout(Element element, Object source, ParserContext parserContext) {
+	private String getAsyncTimeout(Element element) {
 		Element asyncElement = DomUtils.getChildElementByTagName(element, "async-support");
 		return (asyncElement != null) ? asyncElement.getAttribute("default-timeout") : null;
 	}
 
-	private RuntimeBeanReference getAsyncExecutor(Element element, Object source, ParserContext parserContext) {
+	private RuntimeBeanReference getAsyncExecutor(Element element) {
 		Element asyncElement = DomUtils.getChildElementByTagName(element, "async-support");
 		if (asyncElement != null) {
 			if (asyncElement.hasAttribute("task-executor")) {
@@ -416,7 +416,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return null;
 	}
 
-	private ManagedList<?> getReturnValueHandlers(Element element, Object source, ParserContext parserContext) {
+	private ManagedList<?> getReturnValueHandlers(Element element, ParserContext parserContext) {
 		Element handlersElement = DomUtils.getChildElementByTagName(element, "return-value-handlers");
 		if (handlersElement != null) {
 			return extractBeanSubElements(handlersElement, parserContext);
@@ -430,7 +430,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		ManagedList<? super Object> messageConverters = new ManagedList<Object>();
 		if (convertersElement != null) {
 			messageConverters.setSource(source);
-			for (Element beanElement : DomUtils.getChildElementsByTagName(convertersElement, new String[] { "bean", "ref" })) {
+			for (Element beanElement : DomUtils.getChildElementsByTagName(convertersElement, "bean", "ref")) {
 				Object object = parserContext.getDelegate().parsePropertySubElement(beanElement, null);
 				messageConverters.add(object);
 			}
@@ -466,8 +466,8 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		}
 		return messageConverters;
 	}
-	@SuppressWarnings("rawtypes")
-	private RootBeanDefinition createConverterDefinition(Class<? extends HttpMessageConverter> converterClass, Object source) {
+
+	private RootBeanDefinition createConverterDefinition(Class<?> converterClass, Object source) {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(converterClass);
 		beanDefinition.setSource(source);
 		beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
