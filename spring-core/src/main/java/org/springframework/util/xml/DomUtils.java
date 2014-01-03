@@ -32,7 +32,8 @@ import org.xml.sax.ContentHandler;
 import org.springframework.util.Assert;
 
 /**
- * Convenience methods for working with the DOM API, in particular for working with DOM Nodes and DOM Elements.
+ * Convenience methods for working with the DOM API,
+ * in particular for working with DOM Nodes and DOM Elements.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -55,7 +56,7 @@ public abstract class DomUtils {
 	 * @see org.w3c.dom.Element
 	 * @see org.w3c.dom.Element#getElementsByTagName
 	 */
-	public static List<Element> getChildElementsByTagName(Element ele, String[] childEleNames) {
+	public static List<Element> getChildElementsByTagName(Element ele, String... childEleNames) {
 		Assert.notNull(ele, "Element must not be null");
 		Assert.notNull(childEleNames, "Element names collection must not be null");
 		List<String> childEleNameList = Arrays.asList(childEleNames);
@@ -81,7 +82,7 @@ public abstract class DomUtils {
 	 * @see org.w3c.dom.Element#getElementsByTagName
 	 */
 	public static List<Element> getChildElementsByTagName(Element ele, String childEleName) {
-		return getChildElementsByTagName(ele, new String[]{childEleName});
+		return getChildElementsByTagName(ele, new String[] {childEleName});
 	}
 
 	/**
