@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.WebDataBinder;
@@ -129,8 +128,8 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  * <ul>
  * 	<li>A {@link ContentNegotiationManager}
  * 	<li>A {@link DefaultFormattingConversionService}
- * 	<li>A {@link LocalValidatorFactoryBean} if a JSR-303 implementation is
- * 	available on the classpath
+ * 	<li>A {@link org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean}
+ * 	if a JSR-303 implementation is available on the classpath
  * 	<li>A range of {@link HttpMessageConverter}s depending on the 3rd party
  * 	libraries available on the classpath.
  * </ul>
@@ -410,7 +409,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * {@code @ModelAttribute} and {@code @RequestBody} method arguments.
 	 * Delegates to {@link #getValidator()} first and if that returns {@code null}
 	 * checks the classpath for the presence of a JSR-303 implementations
-	 * before creating a {@code LocalValidatorFactoryBean}.If a JSR-303
+	 * before creating a {@code OptionalValidatorFactoryBean}.If a JSR-303
 	 * implementation is not available, a no-op {@link Validator} is returned.
 	 */
 	@Bean
@@ -420,7 +419,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			if (ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
 				Class<?> clazz;
 				try {
-					String className = "org.springframework.validation.beanvalidation.LocalValidatorFactoryBean";
+					String className = "org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean";
 					clazz = ClassUtils.forName(className, WebMvcConfigurationSupport.class.getClassLoader());
 				}
 				catch (ClassNotFoundException e) {

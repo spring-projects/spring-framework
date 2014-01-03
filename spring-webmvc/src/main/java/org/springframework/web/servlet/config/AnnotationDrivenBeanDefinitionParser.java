@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,6 @@ import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConvert
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.xml.DomUtils;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
@@ -116,8 +115,8 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  * <ul>
  * 	<li>A {@link ContentNegotiationManager}
  * 	<li>A {@link DefaultFormattingConversionService}
- * 	<li>A {@link LocalValidatorFactoryBean} if a JSR-303 implementation is
- * 	available on the classpath
+ * 	<li>A {@link org.springframework.validation.beanvalidation.LocalValidatorFactoryBean}
+ * 	if a JSR-303 implementation is available on the classpath
  * 	<li>A range of {@link HttpMessageConverter}s depending on what 3rd party
  * 	libraries are available on the classpath.
  * </ul>

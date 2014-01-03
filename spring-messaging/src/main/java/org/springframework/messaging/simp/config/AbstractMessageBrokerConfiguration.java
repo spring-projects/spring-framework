@@ -305,7 +305,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	 *   <li>delegating to getValidator() first</li>
 	 *   <li>if none returned, getting an existing instance with its well-known name "mvcValidator", created by an MVC configuration</li>
 	 *   <li>if none returned, checking the classpath for the presence of a JSR-303 implementation before creating a
-	 *   {@code LocalValidatorFactoryBean}</li>
+	 *   {@code OptionalValidatorFactoryBean}</li>
 	 *   <li>returning a no-op Validator instance</li>
 	 * </ul>
 	 */
@@ -318,7 +318,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 			else if (ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
 				Class<?> clazz;
 				try {
-					String className = "org.springframework.validation.beanvalidation.LocalValidatorFactoryBean";
+					String className = "org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean";
 					clazz = ClassUtils.forName(className, AbstractMessageBrokerConfiguration.class.getClassLoader());
 				}
 				catch (ClassNotFoundException e) {

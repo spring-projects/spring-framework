@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public interface WebMvcConfigurer {
 	/**
 	 * Provide a custom {@link Validator} instead of the one created by default.
 	 * The default implementation, assuming JSR-303 is on the classpath, is:
-	 * {@link org.springframework.validation.beanvalidation.LocalValidatorFactoryBean}.
+	 * {@link org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean}.
 	 * Leave the return value as {@code null} to keep the default.
 	 */
 	Validator getValidator();
