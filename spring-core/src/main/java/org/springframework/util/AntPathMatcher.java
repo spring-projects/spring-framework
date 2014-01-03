@@ -50,28 +50,36 @@ import java.util.regex.Pattern;
  */
 public class AntPathMatcher implements PathMatcher {
 
-	private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{[^/]+?\\}");
-
 	/** Default path separator: "/" */
 	public static final String DEFAULT_PATH_SEPARATOR = "/";
 
+	private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{[^/]+?\\}");
+
+
 	private String pathSeparator = DEFAULT_PATH_SEPARATOR;
+
+	private boolean trimTokens = true;
 
 	private final Map<String, AntPathStringMatcher> stringMatcherCache =
 			new ConcurrentHashMap<String, AntPathStringMatcher>(256);
 
-	private boolean trimTokens = true;
 
-
-	/** Set the path separator to use for pattern parsing. Default is "/", as in Ant. */
+	/**
+	 * Set the path separator to use for pattern parsing.
+	 * Default is "/", as in Ant.
+	 */
 	public void setPathSeparator(String pathSeparator) {
 		this.pathSeparator = (pathSeparator != null ? pathSeparator : DEFAULT_PATH_SEPARATOR);
 	}
 
-	/** Whether to trim tokenized paths and patterns. */
+	/**
+	 * Specify whether to trim tokenized paths and patterns.
+	 * Default is {@code true}.
+	 */
 	public void setTrimTokens(boolean trimTokens) {
-		this.trimTokens  = trimTokens;
+		this.trimTokens = trimTokens;
 	}
+
 
 	public boolean isPattern(String path) {
 		return (path.indexOf('*') != -1 || path.indexOf('?') != -1);
@@ -94,15 +102,13 @@ public class AntPathMatcher implements PathMatcher {
 	 * as far as the given base path goes is sufficient)
 	 * @return {@code true} if the supplied {@code path} matched, {@code false} if it didn't
 	 */
-	protected boolean doMatch(String pattern, String path, boolean fullMatch,
-			Map<String, String> uriTemplateVariables) {
-
+	protected boolean doMatch(String pattern, String path, boolean fullMatch, Map<String, String> uriTemplateVariables) {
 		if (path.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
 			return false;
 		}
 
-		String[] pattDirs = StringUtils.tokenizeToStringArray(pattern, this.pathSeparator, this.trimTokens, true);
-		String[] pathDirs = StringUtils.tokenizeToStringArray(path, this.pathSeparator, this.trimTokens, true);
+		String[] pattDirs = tokenizePath(pattern);
+		String[] pathDirs = tokenizePath(path);
 
 		int pattIdxStart = 0;
 		int pattIdxEnd = pattDirs.length - 1;
@@ -111,11 +117,11 @@ public class AntPathMatcher implements PathMatcher {
 
 		// Match all elements up to the first **
 		while (pattIdxStart <= pattIdxEnd && pathIdxStart <= pathIdxEnd) {
-			String patDir = pattDirs[pattIdxStart];
-			if ("**".equals(patDir)) {
+			String pattDir = pattDirs[pattIdxStart];
+			if ("**".equals(pattDir)) {
 				break;
 			}
-			if (!matchStrings(patDir, pathDirs[pathIdxStart], uriTemplateVariables)) {
+			if (!matchStrings(pattDir, pathDirs[pathIdxStart], uriTemplateVariables)) {
 				return false;
 			}
 			pattIdxStart++;
@@ -152,11 +158,11 @@ public class AntPathMatcher implements PathMatcher {
 
 		// up to last '**'
 		while (pattIdxStart <= pattIdxEnd && pathIdxStart <= pathIdxEnd) {
-			String patDir = pattDirs[pattIdxEnd];
-			if (patDir.equals("**")) {
+			String pattDir = pattDirs[pattIdxEnd];
+			if (pattDir.equals("**")) {
 				break;
 			}
-			if (!matchStrings(patDir, pathDirs[pathIdxEnd], uriTemplateVariables)) {
+			if (!matchStrings(pattDir, pathDirs[pathIdxEnd], uriTemplateVariables)) {
 				return false;
 			}
 			pattIdxEnd--;
@@ -219,6 +225,15 @@ public class AntPathMatcher implements PathMatcher {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Tokenize the given path String into parts, based on this matcher's settings.
+	 * @param path the path to tokenize
+	 * @return the tokenized path parts
+	 */
+	protected String[] tokenizePath(String path) {
+		return StringUtils.tokenizeToStringArray(path, this.pathSeparator, this.trimTokens, true);
 	}
 
 	/**

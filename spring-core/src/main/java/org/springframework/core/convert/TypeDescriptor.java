@@ -621,7 +621,7 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	private String wildcard(TypeDescriptor typeDescriptor) {
-		return typeDescriptor != null ? typeDescriptor.toString() : "?";
+		return (typeDescriptor != null ? typeDescriptor.toString() : "?");
 	}
 
 

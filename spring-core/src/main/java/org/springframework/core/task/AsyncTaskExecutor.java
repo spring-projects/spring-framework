@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,7 @@ public interface AsyncTaskExecutor extends TaskExecutor {
 	 * @param task the {@code Runnable} to execute (never {@code null})
 	 * @return a Future representing pending completion of the task
 	 * @throws TaskRejectedException if the given task was not accepted
+	 * @since 3.0
 	 */
 	Future<?> submit(Runnable task);
 
@@ -76,6 +77,7 @@ public interface AsyncTaskExecutor extends TaskExecutor {
 	 * @param task the {@code Callable} to execute (never {@code null})
 	 * @return a Future representing pending completion of the task
 	 * @throws TaskRejectedException if the given task was not accepted
+	 * @since 3.0
 	 */
 	<T> Future<T> submit(Callable<T> task);
 

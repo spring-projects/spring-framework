@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,10 +140,11 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	public <T> Future<T> submit(Callable<T> task) {
 		ExecutorService executor = getScheduledExecutor();
 		try {
+			Callable<T> taskToUse = task;
 			if (this.errorHandler != null) {
-				task = new DelegatingErrorHandlingCallable<T>(task, this.errorHandler);
+				taskToUse = new DelegatingErrorHandlingCallable<T>(task, this.errorHandler);
 			}
-			return executor.submit(task);
+			return executor.submit(taskToUse);
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
@@ -222,6 +223,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
+
 	private Runnable errorHandlingTask(Runnable task, boolean isRepeatingTask) {
 		return TaskUtils.decorateTaskWithErrorHandler(task, this.errorHandler, isRepeatingTask);
 	}
@@ -233,14 +235,14 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 
 		private final ErrorHandler errorHandler;
 
-		DelegatingErrorHandlingCallable(Callable<V> delegate, ErrorHandler errorHandler) {
+		public DelegatingErrorHandlingCallable(Callable<V> delegate, ErrorHandler errorHandler) {
 			this.delegate = delegate;
 			this.errorHandler = errorHandler;
 		}
 
 		public V call() throws Exception {
 			try {
-				return delegate.call();
+				return this.delegate.call();
 			}
 			catch (Throwable t) {
 				this.errorHandler.handleError(t);

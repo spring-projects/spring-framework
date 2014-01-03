@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.core.task.TaskRejectedException;
 import org.springframework.util.Assert;
 
 /**
- * Adapter that takes a JDK 1.5 {@code java.util.concurrent.Executor} and
+ * Adapter that takes a JDK {@code java.util.concurrent.Executor} and
  * exposes a Spring {@link org.springframework.core.task.TaskExecutor} for it.
  * Also detects an extended {@code java.util.concurrent.ExecutorService}, adapting
  * the {@link org.springframework.core.task.AsyncTaskExecutor} interface accordingly.
@@ -41,13 +41,13 @@ import org.springframework.util.Assert;
  */
 public class TaskExecutorAdapter implements AsyncTaskExecutor {
 
-	private Executor concurrentExecutor;
+	private final Executor concurrentExecutor;
 
 
 	/**
 	 * Create a new TaskExecutorAdapter,
-	 * using the given JDK 1.5 concurrent executor.
-	 * @param concurrentExecutor the JDK 1.5 concurrent executor to delegate to
+	 * using the given JDK concurrent executor.
+	 * @param concurrentExecutor the JDK concurrent executor to delegate to
 	 */
 	public TaskExecutorAdapter(Executor concurrentExecutor) {
 		Assert.notNull(concurrentExecutor, "Executor must not be null");
@@ -56,7 +56,7 @@ public class TaskExecutorAdapter implements AsyncTaskExecutor {
 
 
 	/**
-	 * Delegates to the specified JDK 1.5 concurrent executor.
+	 * Delegates to the specified JDK concurrent executor.
 	 * @see java.util.concurrent.Executor#execute(Runnable)
 	 */
 	public void execute(Runnable task) {

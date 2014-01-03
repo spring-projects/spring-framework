@@ -165,7 +165,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 		RuntimeBeanReference conversionService = getConversionService(element, source, parserContext);
 		RuntimeBeanReference validator = getValidator(element, source, parserContext);
-		RuntimeBeanReference messageCodesResolver = getMessageCodesResolver(element, source, parserContext);
+		RuntimeBeanReference messageCodesResolver = getMessageCodesResolver(element);
 
 		RootBeanDefinition bindingDef = new RootBeanDefinition(ConfigurableWebBindingInitializer.class);
 		bindingDef.setSource(source);
@@ -175,10 +175,10 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		bindingDef.getPropertyValues().add("messageCodesResolver", messageCodesResolver);
 
 		ManagedList<?> messageConverters = getMessageConverters(element, source, parserContext);
-		ManagedList<?> argumentResolvers = getArgumentResolvers(element, source, parserContext);
-		ManagedList<?> returnValueHandlers = getReturnValueHandlers(element, source, parserContext);
-		String asyncTimeout = getAsyncTimeout(element, source, parserContext);
-		RuntimeBeanReference asyncExecutor = getAsyncExecutor(element, source, parserContext);
+		ManagedList<?> argumentResolvers = getArgumentResolvers(element, parserContext);
+		ManagedList<?> returnValueHandlers = getReturnValueHandlers(element, parserContext);
+		String asyncTimeout = getAsyncTimeout(element);
+		RuntimeBeanReference asyncExecutor = getAsyncExecutor(element);
 		ManagedList<?> callableInterceptors = getCallableInterceptors(element, source, parserContext);
 		ManagedList<?> deferredResultInterceptors = getDeferredResultInterceptors(element, source, parserContext);
 
@@ -324,7 +324,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return props;
 	}
 
-	private RuntimeBeanReference getMessageCodesResolver(Element element, Object source, ParserContext parserContext) {
+	private RuntimeBeanReference getMessageCodesResolver(Element element) {
 		if (element.hasAttribute("message-codes-resolver")) {
 			return new RuntimeBeanReference(element.getAttribute("message-codes-resolver"));
 		}
@@ -333,12 +333,12 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
-	private String getAsyncTimeout(Element element, Object source, ParserContext parserContext) {
+	private String getAsyncTimeout(Element element) {
 		Element asyncElement = DomUtils.getChildElementByTagName(element, "async-support");
 		return (asyncElement != null) ? asyncElement.getAttribute("default-timeout") : null;
 	}
 
-	private RuntimeBeanReference getAsyncExecutor(Element element, Object source, ParserContext parserContext) {
+	private RuntimeBeanReference getAsyncExecutor(Element element) {
 		Element asyncElement = DomUtils.getChildElementByTagName(element, "async-support");
 		if (asyncElement != null) {
 			if (asyncElement.hasAttribute("task-executor")) {
@@ -382,16 +382,16 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return interceptors;
 	}
 
-	private ManagedList<?> getArgumentResolvers(Element element, Object source, ParserContext parserContext) {
+	private ManagedList<?> getArgumentResolvers(Element element, ParserContext parserContext) {
 		Element resolversElement = DomUtils.getChildElementByTagName(element, "argument-resolvers");
 		if (resolversElement != null) {
 			ManagedList<BeanDefinitionHolder> argumentResolvers = extractBeanSubElements(resolversElement, parserContext);
-			return wrapWebArgumentResolverBeanDefs(argumentResolvers);
+			return wrapWebArgumentResolverBeanDefs(argumentResolvers, parserContext);
 		}
 		return null;
 	}
 
-	private ManagedList<?> getReturnValueHandlers(Element element, Object source, ParserContext parserContext) {
+	private ManagedList<?> getReturnValueHandlers(Element element, ParserContext parserContext) {
 		Element handlersElement = DomUtils.getChildElementByTagName(element, "return-value-handlers");
 		if (handlersElement != null) {
 			return extractBeanSubElements(handlersElement, parserContext);
@@ -421,14 +421,15 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			messageConverters.add(createConverterDefinition(ResourceHttpMessageConverter.class, source));
 			messageConverters.add(createConverterDefinition(SourceHttpMessageConverter.class, source));
 			messageConverters.add(createConverterDefinition(AllEncompassingFormHttpMessageConverter.class, source));
+
 			if (romePresent) {
 				messageConverters.add(createConverterDefinition(AtomFeedHttpMessageConverter.class, source));
 				messageConverters.add(createConverterDefinition(RssChannelHttpMessageConverter.class, source));
 			}
 			if (jaxb2Present) {
-				messageConverters
-						.add(createConverterDefinition(Jaxb2RootElementHttpMessageConverter.class, source));
+				messageConverters.add(createConverterDefinition(Jaxb2RootElementHttpMessageConverter.class, source));
 			}
+
 			if (jackson2Present) {
 				messageConverters.add(createConverterDefinition(MappingJackson2HttpMessageConverter.class, source));
 			}
@@ -457,11 +458,13 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return list;
 	}
 
-	private ManagedList<BeanDefinitionHolder> wrapWebArgumentResolverBeanDefs(List<BeanDefinitionHolder> beanDefs) {
+	private ManagedList<BeanDefinitionHolder> wrapWebArgumentResolverBeanDefs(
+			List<BeanDefinitionHolder> beanDefs, ParserContext parserContext) {
+
 		ManagedList<BeanDefinitionHolder> result = new ManagedList<BeanDefinitionHolder>();
 		for (BeanDefinitionHolder beanDef : beanDefs) {
 			String className = beanDef.getBeanDefinition().getBeanClassName();
-			Class<?> clazz = ClassUtils.resolveClassName(className, ClassUtils.getDefaultClassLoader());
+			Class<?> clazz = ClassUtils.resolveClassName(className, parserContext.getReaderContext().getBeanClassLoader());
 			if (WebArgumentResolver.class.isAssignableFrom(clazz)) {
 				RootBeanDefinition adapter = new RootBeanDefinition(ServletWebArgumentResolverAdapter.class);
 				adapter.getConstructorArgumentValues().addIndexedArgumentValue(0, beanDef);
