@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Simple Pointcut that looks for a specific Java 5 annotation
@@ -96,6 +97,36 @@ public class AnnotationMatchingPointcut implements Pointcut {
 
 	public MethodMatcher getMethodMatcher() {
 		return this.methodMatcher;
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof AnnotationMatchingPointcut)) {
+			return false;
+		}
+		AnnotationMatchingPointcut that = (AnnotationMatchingPointcut) other;
+		return ObjectUtils.nullSafeEquals(that.classFilter, this.classFilter) &&
+				ObjectUtils.nullSafeEquals(that.methodMatcher, this.methodMatcher);
+	}
+
+	@Override
+	public int hashCode() {
+		int code = 17;
+		if (this.classFilter != null) {
+			code = 37 * code + this.classFilter.hashCode();
+		}
+		if (this.methodMatcher != null) {
+			code = 37 * code + this.methodMatcher.hashCode();
+		}
+		return code;
+	}
+
+	@Override
+	public String toString() {
+		return "AnnotationMatchingPointcut: " + this.classFilter + ", " +this.methodMatcher;
 	}
 
 
