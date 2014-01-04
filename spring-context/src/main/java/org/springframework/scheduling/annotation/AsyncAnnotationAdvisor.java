@@ -143,7 +143,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 		ComposablePointcut result = null;
 		for (Class<? extends Annotation> asyncAnnotationType : asyncAnnotationTypes) {
 			Pointcut cpc = new AnnotationMatchingPointcut(asyncAnnotationType, true);
-			Pointcut mpc = new AnnotationMatchingPointcut(null, asyncAnnotationType);
+			Pointcut mpc = AnnotationMatchingPointcut.forMethodAnnotation(asyncAnnotationType);
 			if (result == null) {
 				result = new ComposablePointcut(cpc).union(mpc);
 			}
