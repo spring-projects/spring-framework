@@ -45,7 +45,7 @@ import org.springframework.util.Assert;
  * <p>Example usage with
  * {@link org.springframework.http.converter.json.MappingJackson2HttpMessageConverter}:
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
  *   &lt;property name="objectMapper">
  *     &lt;bean class="org.springframework.web.context.support.Jackson2ObjectMapperFactoryBean"
@@ -58,7 +58,7 @@ import org.springframework.util.Assert;
  *
  * <p>Example usage with MappingJackson2JsonView:
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView">
  *   &lt;property name="objectMapper">
  *     &lt;bean class="org.springframework.web.context.support.Jackson2ObjectMapperFactoryBean"
@@ -78,7 +78,7 @@ import org.springframework.util.Assert;
  * options), you can still use the more general methods
  * {@link #setFeaturesToEnable(Object[])} and {@link #setFeaturesToDisable(Object[])}.
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean class="org.springframework.web.context.support.Jackson2ObjectMapperFactoryBean">
  *   &lt;property name="featuresToEnable">
  *     &lt;array>
@@ -102,8 +102,6 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 	private ObjectMapper objectMapper;
 
-	private Map<Object, Boolean> features = new HashMap<Object, Boolean>();
-
 	private DateFormat dateFormat;
 
 	private AnnotationIntrospector annotationIntrospector;
@@ -111,6 +109,8 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	private final Map<Class<?>, JsonSerializer<?>> serializers = new LinkedHashMap<Class<?>, JsonSerializer<?>>();
 
 	private final Map<Class<?>, JsonDeserializer<?>> deserializers = new LinkedHashMap<Class<?>, JsonDeserializer<?>>();
+
+	private final Map<Object, Boolean> features = new HashMap<Object, Boolean>();
 
 
 	/**
@@ -142,8 +142,7 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	}
 
 	/**
-	 * Set the {@link AnnotationIntrospector} for both serialization and
-	 * deserialization.
+	 * Set an {@link AnnotationIntrospector} for both serialization and deserialization.
 	 */
 	public void setAnnotationIntrospector(AnnotationIntrospector annotationIntrospector) {
 		this.annotationIntrospector = annotationIntrospector;
@@ -257,15 +256,15 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 			this.objectMapper.setDateFormat(this.dateFormat);
 		}
 
+		if (this.annotationIntrospector != null) {
+			this.objectMapper.setAnnotationIntrospector(this.annotationIntrospector);
+		}
+
 		if (!this.serializers.isEmpty() || !this.deserializers.isEmpty()) {
 			SimpleModule module = new SimpleModule();
 			addSerializers(module);
 			addDeserializers(module);
 			this.objectMapper.registerModule(module);
-		}
-
-		if (this.annotationIntrospector != null) {
-			this.objectMapper.setAnnotationIntrospector(this.annotationIntrospector);
 		}
 
 		for (Object feature : this.features.keySet()) {
@@ -304,7 +303,7 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 			this.objectMapper.configure((MapperFeature) feature, enabled);
 		}
 		else {
-			throw new FatalBeanException("Unknown feature class " + feature.getClass().getName());
+			throw new FatalBeanException("Unknown feature class: " + feature.getClass().getName());
 		}
 	}
 
