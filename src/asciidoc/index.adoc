@@ -43734,7 +43734,7 @@ If you prefer XML configuration use the `<task:annotation-driven>` element.
 ----
 	<task:annotation-driven executor="myExecutor" scheduler="myScheduler"/>
 	<task:executor id="myExecutor" pool-size="5"/>
-	<task:scheduler id="myScheduler" pool-size="10"/>}
+	<task:scheduler id="myScheduler" pool-size="10"/>
 ----
 
 Notice with the above XML that an executor reference is provided for handling those
