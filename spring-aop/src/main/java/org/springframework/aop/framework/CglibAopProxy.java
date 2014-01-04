@@ -219,12 +219,11 @@ class CglibAopProxy implements AopProxy, Serializable {
 	}
 
 	protected Object createProxyClassAndInstance(Enhancer enhancer, Callback[] callbacks) {
-
 		enhancer.setInterceptDuringConstruction(false);
 		enhancer.setCallbacks(callbacks);
-
-		return this.constructorArgs == null ? enhancer.create() : enhancer.create(
-				this.constructorArgTypes, this.constructorArgs);
+		return (this.constructorArgs != null ?
+				enhancer.create(this.constructorArgTypes, this.constructorArgs) :
+				enhancer.create());
 	}
 
 	/**
@@ -314,8 +313,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 			Callback[] fixedCallbacks = new Callback[methods.length];
 			this.fixedInterceptorMap = new HashMap<String, Integer>(methods.length);
 
-			// TODO: small memory optimisation here (can skip creation for
-			// methods with no advice)
+			// TODO: small memory optimisation here (can skip creation for methods with no advice)
 			for (int x = 0; x < methods.length; x++) {
 				List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(methods[x], rootClass);
 				fixedCallbacks[x] = new FixedChainStaticTargetInterceptor(
@@ -342,16 +340,15 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 */
 	private static Object processReturnType(Object proxy, Object target, Method method, Object retVal) {
 		// Massage return value if necessary
-		if (retVal != null && retVal == target &&
-				!RawTargetAccess.class.isAssignableFrom(method.getDeclaringClass())) {
-			// Special case: it returned "this".
-			// Note that we can't help if the target sets a reference
-			// to itself in another returned object.
+		if (retVal != null && retVal == target && !RawTargetAccess.class.isAssignableFrom(method.getDeclaringClass())) {
+			// Special case: it returned "this". Note that we can't help
+			// if the target sets a reference to itself in another returned object.
 			retVal = proxy;
 		}
 		Class<?> returnType = method.getReturnType();
 		if (retVal == null && returnType != Void.TYPE && returnType.isPrimitive()) {
-				throw new AopInvocationException("Null return value from advice does not match primitive return type for: " + method);
+			throw new AopInvocationException(
+					"Null return value from advice does not match primitive return type for: " + method);
 		}
 		return retVal;
 	}
@@ -864,7 +861,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 		@Override
 		public boolean equals(Object other) {
-			if (other == this) {
+			if (this == other) {
 				return true;
 			}
 			if (!(other instanceof ProxyCallbackFilter)) {

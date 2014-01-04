@@ -16,9 +16,9 @@
 
 package org.springframework.aop.framework;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.Factory;
@@ -54,15 +54,14 @@ class ObjenesisCglibAopProxy extends CglibAopProxy {
 	@SuppressWarnings("unchecked")
 	protected Object createProxyClassAndInstance(Enhancer enhancer, Callback[] callbacks) {
 		try {
-			Factory factory = (Factory) objenesis.newInstance(enhancer.createClass());
+			Factory factory = (Factory) this.objenesis.newInstance(enhancer.createClass());
 			factory.setCallbacks(callbacks);
 			return factory;
 		}
 		catch (ObjenesisException ex) {
-			// Fallback to Cglib on unsupported JVMs
+			// Fallback to regular proxy construction on unsupported JVMs
 			if (logger.isDebugEnabled()) {
-				logger.debug("Unable to instantiate proxy using Objenesis, falling back "
-						+ "to regular proxy construction", ex);
+				logger.debug("Unable to instantiate proxy using Objenesis, falling back to regular proxy construction", ex);
 			}
 			return super.createProxyClassAndInstance(enhancer, callbacks);
 		}

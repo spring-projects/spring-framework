@@ -64,7 +64,7 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	 * @see #setPatterns
 	 */
 	public void setPattern(String pattern) {
-		setPatterns(new String[] {pattern});
+		setPatterns(pattern);
 	}
 
 	/**
@@ -72,7 +72,7 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	 * Matching will be the union of all these; if any match,
 	 * the pointcut matches.
 	 */
-	public void setPatterns(String[] patterns) {
+	public void setPatterns(String... patterns) {
 		Assert.notEmpty(patterns, "'patterns' must not be empty");
 		this.patterns = new String[patterns.length];
 		for (int i = 0; i < patterns.length; i++) {
@@ -94,7 +94,7 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	 * @see #setExcludedPatterns
 	 */
 	public void setExcludedPattern(String excludedPattern) {
-		setExcludedPatterns(new String[] {excludedPattern});
+		setExcludedPatterns(excludedPattern);
 	}
 
 	/**
@@ -102,7 +102,7 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	 * Matching will be the union of all these; if any match,
 	 * the pointcut matches.
 	 */
-	public void setExcludedPatterns(String[] excludedPatterns) {
+	public void setExcludedPatterns(String... excludedPatterns) {
 		Assert.notEmpty(excludedPatterns, "'excludedPatterns' must not be empty");
 		this.excludedPatterns = new String[excludedPatterns.length];
 		for (int i = 0; i < excludedPatterns.length; i++) {
