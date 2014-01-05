@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class TilesConfigurerTests {
 	public void simpleBootstrap() {
 		MockServletContext sc = new MockServletContext();
 		TilesConfigurer tc = new TilesConfigurer();
-		tc.setDefinitions(new String[] {"/org/springframework/web/servlet/view/tiles2/tiles-definitions.xml"});
+		tc.setDefinitions("/org/springframework/web/servlet/view/tiles2/tiles-definitions.xml");
 		tc.setCheckRefresh(true);
 		tc.setServletContext(sc);
 		tc.afterPropertiesSet();

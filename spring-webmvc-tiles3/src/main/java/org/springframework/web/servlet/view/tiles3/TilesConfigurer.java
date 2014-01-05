@@ -18,7 +18,6 @@ package org.springframework.web.servlet.view.tiles3;
 
 import java.util.LinkedList;
 import java.util.List;
-
 import javax.el.ArrayELResolver;
 import javax.el.BeanELResolver;
 import javax.el.CompositeELResolver;
@@ -49,14 +48,15 @@ import org.apache.tiles.extras.complete.CompleteAutoloadTilesContainerFactory;
 import org.apache.tiles.extras.complete.CompleteAutoloadTilesInitializer;
 import org.apache.tiles.factory.AbstractTilesContainerFactory;
 import org.apache.tiles.factory.BasicTilesContainerFactory;
-import org.apache.tiles.impl.BasicTilesContainer;
 import org.apache.tiles.impl.mgmt.CachingTilesContainer;
 import org.apache.tiles.locale.LocaleResolver;
 import org.apache.tiles.preparer.factory.PreparerFactory;
 import org.apache.tiles.request.ApplicationContext;
+import org.apache.tiles.request.ApplicationContextAware;
 import org.apache.tiles.request.ApplicationResource;
 import org.apache.tiles.startup.DefaultTilesInitializer;
 import org.apache.tiles.startup.TilesInitializer;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
@@ -103,12 +103,14 @@ import org.springframework.web.context.ServletContextAware;
  * @author mick semb wever
  * @author Rossen Stoyanchev
  * @since 3.2
+ * @see TilesView
+ * @see TilesViewResolver
  */
 public class TilesConfigurer implements ServletContextAware, InitializingBean, DisposableBean {
 
-	private static final boolean tilesElPresent =  // requires JSP 2.1 as well as Tiles EL module
-			ClassUtils.isPresent("javax.servlet.jsp.JspApplicationContext", TilesConfigurer.class.getClassLoader()) &&
+	private static final boolean tilesElPresent =
 			ClassUtils.isPresent("org.apache.tiles.el.ELAttributeEvaluator", TilesConfigurer.class.getClassLoader());
+
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -128,8 +130,6 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 
 	private ServletContext servletContext;
 
-	public TilesConfigurer() {
-	}
 
 	/**
 	 * Configure Tiles using a custom TilesInitializer, typically specified as an inner bean.
@@ -158,10 +158,11 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 			try {
 				this.tilesInitializer = new SpringCompleteAutoloadTilesInitializer();
 			}
-			catch (Exception ex) {
-				throw new IllegalStateException("tiles-extras 3.x not available", ex);
+			catch (Throwable ex) {
+				throw new IllegalStateException("Tiles-Extras 3.0 not available", ex);
 			}
-		} else {
+		}
+		else {
 			this.tilesInitializer = null;
 		}
 	}
@@ -170,7 +171,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	 * Set the Tiles definitions, i.e. the list of files containing the definitions.
 	 * Default is "/WEB-INF/tiles.xml".
 	 */
-	public void setDefinitions(String[] definitions) {
+	public void setDefinitions(String... definitions) {
 		this.definitions = definitions;
 	}
 
@@ -318,8 +319,8 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 
 			if (definitionsFactoryClass != null) {
 				DefinitionsFactory factory = BeanUtils.instantiate(definitionsFactoryClass);
-				if (factory instanceof org.apache.tiles.request.ApplicationContextAware) {
-					((org.apache.tiles.request.ApplicationContextAware) factory).setApplicationContext(applicationContext);
+				if (factory instanceof ApplicationContextAware) {
+					((ApplicationContextAware) factory).setApplicationContext(applicationContext);
 				}
 				BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(factory);
 				if (bw.isWritableProperty("localeResolver")) {
@@ -352,21 +353,19 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 		@Override
 		protected AttributeEvaluatorFactory createAttributeEvaluatorFactory(ApplicationContext context,
 				LocaleResolver resolver) {
-			return new BasicAttributeEvaluatorFactory(createELEvaluator(context));
-		}
-
-		private AttributeEvaluator createELEvaluator(ApplicationContext context) {
-			if (tilesElPresent) {
-				AttributeEvaluator evaluator = new TilesElActivator().createEvaluator();
-				if (evaluator != null) {
-					return evaluator;
-				}
+			AttributeEvaluator evaluator;
+			if (tilesElPresent && JspFactory.getDefaultFactory() != null) {
+				evaluator = new TilesElActivator().createEvaluator();
 			}
-			return new DirectAttributeEvaluator();
+			else {
+				evaluator = new DirectAttributeEvaluator();
+			}
+			return new BasicAttributeEvaluatorFactory(evaluator);
 		}
 	}
 
-	private class SpringCompleteAutoloadTilesInitializer extends CompleteAutoloadTilesInitializer {
+
+	private static class SpringCompleteAutoloadTilesInitializer extends CompleteAutoloadTilesInitializer {
 
 		@Override
 		protected AbstractTilesContainerFactory createContainerFactory(ApplicationContext context) {
@@ -374,41 +373,28 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 		}
 	}
 
-	private class SpringCompleteAutoloadTilesContainerFactory extends CompleteAutoloadTilesContainerFactory {
+
+	private static class SpringCompleteAutoloadTilesContainerFactory extends CompleteAutoloadTilesContainerFactory {
 
 		@Override
-		public TilesContainer createContainer(ApplicationContext applicationContext) {
-			CachingTilesContainer cachingContainer = (CachingTilesContainer) super.createContainer(applicationContext);
-			BasicTilesContainer tilesContainer = (BasicTilesContainer) cachingContainer.getWrappedContainer();
-			BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(tilesContainer.getDefinitionsFactory());
-			if (bw.isWritableProperty("localeResolver")) {
-				bw.setPropertyValue("localeResolver", new SpringLocaleResolver());
-			}
-			return tilesContainer;
+		protected LocaleResolver createLocaleResolver(ApplicationContext applicationContext) {
+			return new SpringLocaleResolver();
 		}
+
 	}
 
 
 	private class TilesElActivator {
 
 		public AttributeEvaluator createEvaluator() {
-			try {
-				// jsp-api-2.1 doesn't default instantiate a factory for us
-				JspFactory factory = JspFactory.getDefaultFactory();
-				if ((factory != null) && (factory.getJspApplicationContext(servletContext).getExpressionFactory() != null)) {
-					logger.info("Found JSP 2.1 ExpressionFactory");
-					ELAttributeEvaluator evaluator = new ELAttributeEvaluator();
-					evaluator.setExpressionFactory(factory.getJspApplicationContext(servletContext).getExpressionFactory());
-					evaluator.setResolver(new CompositeELResolverImpl());
-					return evaluator;
-				}
-			}
-			catch (Throwable ex) {
-				logger.warn("Could not obtain JSP 2.1 ExpressionFactory", ex);
-			}
-			return null;
+			ELAttributeEvaluator evaluator = new ELAttributeEvaluator();
+			evaluator.setExpressionFactory(
+					JspFactory.getDefaultFactory().getJspApplicationContext(servletContext).getExpressionFactory());
+			evaluator.setResolver(new CompositeELResolverImpl());
+			return evaluator;
 		}
 	}
+
 
 	private static class CompositeELResolverImpl extends CompositeELResolver {
 
@@ -423,4 +409,5 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 			add(new BeanELResolver(false));
 		}
 	}
+
 }
