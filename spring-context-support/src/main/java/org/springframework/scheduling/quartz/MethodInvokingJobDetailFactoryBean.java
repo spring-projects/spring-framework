@@ -92,7 +92,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 			jobDetailImplClass = null;
 		}
 		try {
-			Class jobExecutionContextClass =
+			Class<?> jobExecutionContextClass =
 					QuartzJobBean.class.getClassLoader().loadClass("org.quartz.JobExecutionContext");
 			setResultMethod = jobExecutionContextClass.getMethod("setResult", Object.class);
 		}
@@ -172,7 +172,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	 * @see SchedulerFactoryBean#setJobListeners
 	 * @see org.quartz.JobListener#getName
 	 */
-	public void setJobListenerNames(String[] names) {
+	public void setJobListenerNames(String... names) {
 		this.jobListenerNames = names;
 	}
 
@@ -189,7 +189,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	}
 
 	@Override
-	protected Class resolveClassName(String className) throws ClassNotFoundException {
+	protected Class<?> resolveClassName(String className) throws ClassNotFoundException {
 		return ClassUtils.forName(className, this.beanClassLoader);
 	}
 
@@ -201,7 +201,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 		String name = (this.name != null ? this.name : this.beanName);
 
 		// Consider the concurrent flag to choose between stateful and stateless job.
-		Class jobClass = (this.concurrent ? MethodInvokingJob.class : StatefulMethodInvokingJob.class);
+		Class<?> jobClass = (this.concurrent ? MethodInvokingJob.class : StatefulMethodInvokingJob.class);
 
 		// Build JobDetail instance.
 		if (jobDetailImplClass != null) {
@@ -249,8 +249,8 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	 * Overridden to support the {@link #setTargetBeanName "targetBeanName"} feature.
 	 */
 	@Override
-	public Class getTargetClass() {
-		Class targetClass = super.getTargetClass();
+	public Class<?> getTargetClass() {
+		Class<?> targetClass = super.getTargetClass();
 		if (targetClass == null && this.targetBeanName != null) {
 			Assert.state(this.beanFactory != null, "BeanFactory must be set when using 'targetBeanName'");
 			targetClass = this.beanFactory.getType(this.targetBeanName);

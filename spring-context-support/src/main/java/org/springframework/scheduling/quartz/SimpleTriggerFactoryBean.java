@@ -17,7 +17,6 @@
 package org.springframework.scheduling.quartz;
 
 import java.lang.reflect.Method;
-import java.text.ParseException;
 import java.util.Date;
 import java.util.Map;
 
@@ -142,9 +141,19 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 	}
 
 	/**
+	 * Set a specific start time for the trigger.
+	 * <p>Note that a dynamically computed {@link #setStartDelay} specification
+	 * overrides a static timestamp set here.
+	 */
+	public void setStartTime(Date startTime) {
+		this.startTime = startTime;
+	}
+
+	/**
 	 * Set the start delay in milliseconds.
 	 * <p>The start delay is added to the current system time (when the bean starts)
 	 * to control the start time of the trigger.
+	 * @see #setStartTime
 	 */
 	public void setStartDelay(long startDelay) {
 		Assert.isTrue(startDelay >= 0, "Start delay cannot be negative");
@@ -200,7 +209,7 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 	}
 
 
-	public void afterPropertiesSet() throws ParseException {
+	public void afterPropertiesSet() {
 		if (this.name == null) {
 			this.name = this.beanName;
 		}
@@ -210,11 +219,8 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 		if (this.jobDetail != null) {
 			this.jobDataMap.put(JobDetailAwareTrigger.JOB_DETAIL_KEY, this.jobDetail);
 		}
-		if (this.startDelay > 0) {
+		if (this.startDelay > 0 || this.startTime == null) {
 			this.startTime = new Date(System.currentTimeMillis() + this.startDelay);
-		}
-		else if (this.startTime == null) {
-			this.startTime = new Date();
 		}
 
 		/*
@@ -231,7 +237,7 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 		this.simpleTrigger = sti;
 		*/
 
-		Class simpleTriggerClass;
+		Class<?> simpleTriggerClass;
 		Method jobKeyMethod;
 		try {
 			simpleTriggerClass = getClass().getClassLoader().loadClass("org.quartz.impl.triggers.SimpleTriggerImpl");
@@ -277,4 +283,5 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 	public boolean isSingleton() {
 		return true;
 	}
+
 }

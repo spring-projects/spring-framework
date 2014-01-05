@@ -59,7 +59,7 @@ public class SpringBeanJobFactory extends AdaptableJobFactory implements Schedul
 	 * ignored if there is no corresponding property found on the particular
 	 * job class (all other unknown properties will still trigger an exception).
 	 */
-	public void setIgnoredUnknownProperties(String[] ignoredUnknownProperties) {
+	public void setIgnoredUnknownProperties(String... ignoredUnknownProperties) {
 		this.ignoredUnknownProperties = ignoredUnknownProperties;
 	}
 

@@ -73,7 +73,7 @@ public class CronTriggerBean extends CronTrigger
 
 	private String beanName;
 
-	private long startDelay;
+	private long startDelay = 0;
 
 
 	/**
@@ -108,9 +108,9 @@ public class CronTriggerBean extends CronTrigger
 	 * @see SchedulerFactoryBean#setTriggerListeners
 	 * @see org.quartz.TriggerListener#getName
 	 */
-	public void setTriggerListenerNames(String[] names) {
-		for (int i = 0; i < names.length; i++) {
-			addTriggerListener(names[i]);
+	public void setTriggerListenerNames(String... names) {
+		for (String name : names) {
+			addTriggerListener(name);
 		}
 	}
 
@@ -148,19 +148,19 @@ public class CronTriggerBean extends CronTrigger
 	}
 
 
+	/**
+	 * Note that this method's declaration of an Exception is deprecated
+	 * and will be removed in the Spring 4.0 line.
+	 */
 	public void afterPropertiesSet() throws Exception {
-		if (this.startDelay > 0) {
-			setStartTime(new Date(System.currentTimeMillis() + this.startDelay));
-		}
-
 		if (getName() == null) {
 			setName(this.beanName);
 		}
 		if (getGroup() == null) {
 			setGroup(Scheduler.DEFAULT_GROUP);
 		}
-		if (getStartTime() == null) {
-			setStartTime(new Date());
+		if (this.startDelay > 0 || getStartTime() == null) {
+			setStartTime(new Date(System.currentTimeMillis() + this.startDelay));
 		}
 		if (getTimeZone() == null) {
 			setTimeZone(TimeZone.getDefault());
