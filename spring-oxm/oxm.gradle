@@ -8,8 +8,8 @@ dependencies {
 	castor "org.codehaus.castor:castor-anttasks:1.2"
 	castor "velocity:velocity:1.5"
 	xjc "com.sun.xml.bind:jaxb-xjc:2.1.7"
-	xmlbeans "org.apache.xmlbeans:xmlbeans:2.4.0"
-	jibx "org.jibx:jibx-bind:1.2.3"
+	xmlbeans "org.apache.xmlbeans:xmlbeans:2.6.0"
+	jibx "org.jibx:jibx-bind:1.2.5"
 	jibx "bcel:bcel:5.1"
 }
 
