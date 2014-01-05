@@ -53,6 +53,7 @@ import org.springframework.util.ReflectionUtils;
  * {@link SchedulerAccessorBean} classes.
  *
  * <p>Compatible with Quartz 1.8 as well as Quartz 2.0-2.2, as of Spring 4.0.
+ * <b>Note:</b> Quartz 1.x support is deprecated - please upgrade to Quartz 2.0+.
  *
  * @author Juergen Hoeller
  * @since 2.5.6
@@ -64,6 +65,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	private static Class<?> triggerKeyClass;
 
 	static {
+		// Quartz 2.0 job/trigger key available?
 		try {
 			jobKeyClass = Class.forName("org.quartz.JobKey");
 			triggerKeyClass = Class.forName("org.quartz.TriggerKey");
@@ -100,6 +102,13 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	private PlatformTransactionManager transactionManager;
 
 	protected ResourceLoader resourceLoader;
+
+
+	public SchedulerAccessor() {
+		if (jobKeyClass == null && logger.isInfoEnabled()) {
+			logger.info("Spring's Quartz 1.x support is deprecated - please upgrade to Quartz 2.0+");
+		}
+	}
 
 
 	/**
@@ -202,7 +211,9 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	 * manually register a Matcher against the Quartz ListenerManager instead.
 	 * @see org.quartz.JobListener#getName
 	 * @see JobDetailBean#setJobListenerNames
+	 * @deprecated as of Spring 4.0, since it only works on Quartz 1.x
 	 */
+	@Deprecated
 	public void setJobListeners(JobListener... jobListeners) {
 		this.jobListeners = jobListeners;
 	}
@@ -224,7 +235,9 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	 * @see org.quartz.TriggerListener#getName
 	 * @see CronTriggerBean#setTriggerListenerNames
 	 * @see SimpleTriggerBean#setTriggerListenerNames
+	 * @deprecated as of Spring 4.0, since it only works on Quartz 1.x
 	 */
+	@Deprecated
 	public void setTriggerListeners(TriggerListener... triggerListeners) {
 		this.triggerListeners = triggerListeners;
 	}

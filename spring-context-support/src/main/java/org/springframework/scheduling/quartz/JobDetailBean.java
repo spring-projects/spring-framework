@@ -82,7 +82,7 @@ public class JobDetailBean extends JobDetail
 	 * to adapt the given job class to the Quartz Job interface.
 	 */
 	@Override
-	public Class<?> getJobClass() {
+	public Class getJobClass() {
 		return (this.actualJobClass != null ? this.actualJobClass : super.getJobClass());
 	}
 
@@ -97,7 +97,7 @@ public class JobDetailBean extends JobDetail
 	 * (for example Spring-managed beans)
 	 * @see SchedulerFactoryBean#setSchedulerContextAsMap
 	 */
-	public void setJobDataAsMap(Map jobDataAsMap) {
+	public void setJobDataAsMap(Map<String, ?> jobDataAsMap) {
 		getJobDataMap().putAll(jobDataAsMap);
 	}
 
@@ -108,7 +108,9 @@ public class JobDetailBean extends JobDetail
 	 * by the JobListener implementation.
 	 * @see SchedulerFactoryBean#setJobListeners
 	 * @see org.quartz.JobListener#getName
+	 * @deprecated as of Spring 4.0, since it only works on Quartz 1.x
 	 */
+	@Deprecated
 	public void setJobListenerNames(String... names) {
 		for (String name : names) {
 			addJobListener(name);

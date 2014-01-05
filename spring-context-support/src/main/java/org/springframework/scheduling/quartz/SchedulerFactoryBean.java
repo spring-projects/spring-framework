@@ -76,6 +76,7 @@ import org.springframework.util.CollectionUtils;
  * Alternatively, you may add transactional advice for the Scheduler itself.
  *
  * <p>Compatible with Quartz 1.8 as well as Quartz 2.0-2.2, as of Spring 4.0.
+ * <b>Note:</b> Quartz 1.x support is deprecated - please upgrade to Quartz 2.0+.
  *
  * @author Juergen Hoeller
  * @since 18.02.2004
@@ -454,10 +455,8 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 			this.resourceLoader = this.applicationContext;
 		}
 
-		// Create SchedulerFactory instance.
-		SchedulerFactory schedulerFactory = (SchedulerFactory)
-				BeanUtils.instantiateClass(this.schedulerFactoryClass);
-
+		// Create SchedulerFactory instance...
+		SchedulerFactory schedulerFactory = BeanUtils.instantiateClass(this.schedulerFactoryClass);
 		initSchedulerFactory(schedulerFactory);
 
 		if (this.resourceLoader != null) {
@@ -520,9 +519,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * Load and/or apply Quartz properties to the given SchedulerFactory.
 	 * @param schedulerFactory the SchedulerFactory to initialize
 	 */
-	private void initSchedulerFactory(SchedulerFactory schedulerFactory)
-			throws SchedulerException, IOException {
-
+	private void initSchedulerFactory(SchedulerFactory schedulerFactory) throws SchedulerException, IOException {
 		if (!(schedulerFactory instanceof StdSchedulerFactory)) {
 			if (this.configLocation != null || this.quartzProperties != null ||
 					this.taskExecutor != null || this.dataSource != null) {

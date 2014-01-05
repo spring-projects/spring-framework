@@ -68,6 +68,7 @@ import org.springframework.util.ReflectionUtils;
  * where you want a persistent job to delegate to a specific service method.
  *
  * <p>Compatible with Quartz 1.8 as well as Quartz 2.0-2.2, as of Spring 4.0.
+ * <b>Note:</b> Quartz 1.x support is deprecated - please upgrade to Quartz 2.0+.
  *
  * @author Juergen Hoeller
  * @author Alef Arendsen
@@ -171,7 +172,9 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	 * by the JobListener implementation.
 	 * @see SchedulerFactoryBean#setJobListeners
 	 * @see org.quartz.JobListener#getName
+	 * @deprecated as of Spring 4.0, since it only works on Quartz 1.x
 	 */
+	@Deprecated
 	public void setJobListenerNames(String... names) {
 		this.jobListenerNames = names;
 	}

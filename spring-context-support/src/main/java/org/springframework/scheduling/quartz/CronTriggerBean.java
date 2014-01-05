@@ -107,7 +107,9 @@ public class CronTriggerBean extends CronTrigger
 	 * by the TriggerListener implementation.
 	 * @see SchedulerFactoryBean#setTriggerListeners
 	 * @see org.quartz.TriggerListener#getName
+	 * @deprecated as of Spring 4.0, since it only works on Quartz 1.x
 	 */
+	@Deprecated
 	public void setTriggerListenerNames(String... names) {
 		for (String name : names) {
 			addTriggerListener(name);

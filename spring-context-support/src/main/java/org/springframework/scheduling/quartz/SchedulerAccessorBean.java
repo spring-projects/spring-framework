@@ -30,6 +30,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
  * triggers and listeners on a given {@link org.quartz.Scheduler} instance.
  *
  * <p>Compatible with Quartz 1.8 as well as Quartz 2.0-2.2, as of Spring 4.0.
+ * <b>Note:</b> Quartz 1.x support is deprecated - please upgrade to Quartz 2.0+.
  *
  * @author Juergen Hoeller
  * @since 2.5.6
