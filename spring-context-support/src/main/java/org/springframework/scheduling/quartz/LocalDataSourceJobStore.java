@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.scheduling.quartz;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import javax.sql.DataSource;
 
 import org.quartz.SchedulerConfigException;
@@ -110,14 +109,17 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 					public void shutdown() {
 						// Do nothing - a Spring-managed DataSource has its own lifecycle.
 					}
+					/* Quartz 2.2 initialize method */
+					public void initialize() {
+						// Do nothing - a Spring-managed DataSource has its own lifecycle.
+					}
 				}
 		);
 
 		// Non-transactional DataSource is optional: fall back to default
 		// DataSource if not explicitly specified.
 		DataSource nonTxDataSource = SchedulerFactoryBean.getConfigTimeNonTransactionalDataSource();
-		final DataSource nonTxDataSourceToUse =
-				(nonTxDataSource != null ? nonTxDataSource : this.dataSource);
+		final DataSource nonTxDataSourceToUse = (nonTxDataSource != null ? nonTxDataSource : this.dataSource);
 
 		// Configure non-transactional connection settings for Quartz.
 		setNonManagedTXDataSource(NON_TX_DATA_SOURCE_PREFIX + getInstanceName());
@@ -135,21 +137,24 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 					public void shutdown() {
 						// Do nothing - a Spring-managed DataSource has its own lifecycle.
 					}
+					/* Quartz 2.2 initialize method */
+					public void initialize() {
+						// Do nothing - a Spring-managed DataSource has its own lifecycle.
+					}
 				}
 		);
 
-		// No, if HSQL is the platform, we really don't want to use locks
+		// No, if HSQL is the platform, we really don't want to use locks...
 		try {
-			String productName = JdbcUtils.extractDatabaseMetaData(dataSource,
-					"getDatabaseProductName").toString();
+			String productName = JdbcUtils.extractDatabaseMetaData(this.dataSource, "getDatabaseProductName").toString();
 			productName = JdbcUtils.commonDatabaseName(productName);
-			if (productName != null
-					&& productName.toLowerCase().contains("hsql")) {
+			if (productName != null && productName.toLowerCase().contains("hsql")) {
 				setUseDBLocks(false);
 				setLockHandler(new SimpleSemaphore());
 			}
-		} catch (MetaDataAccessException e) {
-			logWarnIfNonZero(1, "Could not detect database type.  Assuming locks can be taken.");
+		}
+		catch (MetaDataAccessException ex) {
+			logWarnIfNonZero(1, "Could not detect database type. Assuming locks can be taken.");
 		}
 
 		super.initialize(loadHelper, signaler);
