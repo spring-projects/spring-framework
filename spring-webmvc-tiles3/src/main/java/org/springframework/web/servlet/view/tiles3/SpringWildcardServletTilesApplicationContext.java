@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.view.tiles3;
 
 import java.io.IOException;
@@ -21,14 +22,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Locale;
-
 import javax.servlet.ServletContext;
 
 import org.apache.tiles.request.ApplicationResource;
 import org.apache.tiles.request.locale.URLApplicationResource;
 import org.apache.tiles.request.servlet.ServletApplicationContext;
+
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.support.ServletContextResourcePatternResolver;
 
 /**
@@ -39,20 +41,14 @@ import org.springframework.web.context.support.ServletContextResourcePatternReso
  */
 public class SpringWildcardServletTilesApplicationContext extends ServletApplicationContext {
 
-	/**
-	 * The pattern resolver.
-	 */
-	protected ResourcePatternResolver resolver;
+	private final ResourcePatternResolver resolver;
 
-	/**
-	 * Constructor.
-	 *
-	 * @param servletContext The servlet context.
-	 */
+
 	public SpringWildcardServletTilesApplicationContext(ServletContext servletContext) {
 		super(servletContext);
-		resolver = new ServletContextResourcePatternResolver(servletContext);
+		this.resolver = new ServletContextResourcePatternResolver(servletContext);
 	}
+
 
 	@Override
 	public ApplicationResource getResource(String localePath) {
@@ -78,20 +74,22 @@ public class SpringWildcardServletTilesApplicationContext extends ServletApplica
 	public Collection<ApplicationResource> getResources(String path) {
 		Resource[] resources;
 		try {
-			resources = resolver.getResources(path);
-		} catch (IOException e) {
+			resources = this.resolver.getResources(path);
+		}
+		catch (IOException ex) {
 			return Collections.<ApplicationResource> emptyList();
 		}
 		Collection<ApplicationResource> resourceList = new ArrayList<ApplicationResource>();
-		if (resources != null && resources.length > 0) {
-			for (int i = 0; i < resources.length; i++) {
+		if (!ObjectUtils.isEmpty(resources)) {
+			for (Resource resource : resources) {
 				URL url;
 				try {
-					url = resources[i].getURL();
+					url = resource.getURL();
 					resourceList.add(new URLApplicationResource(url.toExternalForm(), url));
-				} catch (IOException e) {
+				}
+				catch (IOException ex) {
 					// shouldn't happen with the kind of resources we're using
-					throw new IllegalArgumentException("no URL for " + resources[i].toString(), e);
+					throw new IllegalArgumentException("No URL for " + resource.toString(), ex);
 				}
 			}
 		}

@@ -565,22 +565,22 @@ project("spring-webmvc") {
 		compile(project(":spring-context"))
 		optional(project(":spring-context-support")) // for Velocity support
 		optional(project(":spring-oxm")) // for MarshallingView
-		optional("org.apache.tiles:tiles-api:2.1.2")
-		optional("org.apache.tiles:tiles-core:2.1.2")
-		optional("org.apache.tiles:tiles-jsp:2.1.2")
-		optional("org.apache.tiles:tiles-servlet:2.1.2")
-		optional("net.sourceforge.jexcelapi:jxl:2.6.3")
-		optional("org.apache.poi:poi:3.0.2-FINAL")
-		optional("com.lowagie:itext:2.1.7")
+		optional("org.codehaus.jackson:jackson-mapper-asl:1.4.2")
+		optional("com.fasterxml.jackson.core:jackson-databind:2.0.1")
 		optional("jasperreports:jasperreports:2.0.5") {
 			exclude group: "xml-apis", module: "xml-apis"
 		}
 		optional("rome:rome:1.0")
+		optional("com.lowagie:itext:2.1.7")
+		optional("net.sourceforge.jexcelapi:jxl:2.6.3")
+		optional("org.apache.poi:poi:3.0.2-FINAL")
 		optional("velocity:velocity:1.5")
 		optional("velocity-tools:velocity-tools-view:1.4")
 		optional("org.freemarker:freemarker:2.3.19")
-		optional("org.codehaus.jackson:jackson-mapper-asl:1.4.2")
-		optional("com.fasterxml.jackson.core:jackson-databind:2.0.1")
+		optional("org.apache.tiles:tiles-api:2.1.2")
+		optional("org.apache.tiles:tiles-core:2.1.2")
+		optional("org.apache.tiles:tiles-jsp:2.1.2")
+		optional("org.apache.tiles:tiles-servlet:2.1.2")
 		provided("javax.servlet:jstl:1.2")
 		provided("javax.servlet:javax.servlet-api:3.0.1")
 		provided("javax.servlet.jsp:jsp-api:2.1")
@@ -634,11 +634,12 @@ project("spring-webmvc-tiles3") {
 		optional("org.apache.tiles:tiles-jsp:3.0.1") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		optional("org.apache.tiles:tiles-extras:3.0.1") {
-			exclude group: "org.slf4j", module: "jcl-over-slf4j"
-		}
 		optional("org.apache.tiles:tiles-el:3.0.1") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
+		}
+		optional("org.apache.tiles:tiles-extras:3.0.1") {
+			exclude group: "org.slf4j", module: "jcl-over-slf4j"
+			exclude group: "org.springframework", module: "spring-web"
 		}
 		provided("javax.servlet:javax.servlet-api:3.0.1")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -200,7 +200,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 						"org.apache.tiles.extras.complete.CompleteAutoloadTilesInitializer");
 				this.tilesInitializer = (TilesInitializer) clazz.newInstance();
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				throw new IllegalStateException("Tiles-Extras 2.2 not available", ex);
 			}
 		}
@@ -214,7 +214,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	 * Set the Tiles definitions, i.e. the list of files containing the definitions.
 	 * Default is "/WEB-INF/tiles.xml".
 	 */
-	public void setDefinitions(String[] definitions) {
+	public void setDefinitions(String... definitions) {
 		this.definitions = definitions;
 		if (definitions != null) {
 			String defs = StringUtils.arrayToCommaDelimitedString(definitions);
