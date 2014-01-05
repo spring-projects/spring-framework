@@ -39,7 +39,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
 /**
- * A {@link FactoryBean} for creating a Jackson 2 {@link ObjectMapper} with setters
+ * A {@link FactoryBean} for creating a Jackson 2.x {@link ObjectMapper} with setters
  * to enable or disable Jackson features from within XML configuration.
  *
  * <p>Example usage with
@@ -48,7 +48,7 @@ import org.springframework.util.Assert;
  * <pre class="code">
  * &lt;bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
  *   &lt;property name="objectMapper">
- *     &lt;bean class="org.springframework.web.context.support.Jackson2ObjectMapperFactoryBean"
+ *     &lt;bean class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean"
  *       p:autoDetectFields="false"
  *       p:autoDetectGettersSetters="false"
  *       p:annotationIntrospector-ref="jaxbAnnotationIntrospector" />
@@ -61,7 +61,7 @@ import org.springframework.util.Assert;
  * <pre class="code">
  * &lt;bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView">
  *   &lt;property name="objectMapper">
- *     &lt;bean class="org.springframework.web.context.support.Jackson2ObjectMapperFactoryBean"
+ *     &lt;bean class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean"
  *       p:failOnEmptyBeans="false"
  *       p:indentOutput="true">
  *       &lt;property name="serializers">
@@ -74,12 +74,12 @@ import org.springframework.util.Assert;
  * &lt;/bean>
  * </pre>
  *
- * <p>In case there are no specific setters provided (for some rarely used
- * options), you can still use the more general methods
- * {@link #setFeaturesToEnable(Object[])} and {@link #setFeaturesToDisable(Object[])}.
+ * <p>In case there are no specific setters provided (for some rarely used options),
+ * you can still use the more general methods  {@link #setFeaturesToEnable} and
+ * {@link #setFeaturesToDisable}.
  *
  * <pre class="code">
- * &lt;bean class="org.springframework.web.context.support.Jackson2ObjectMapperFactoryBean">
+ * &lt;bean class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean">
  *   &lt;property name="featuresToEnable">
  *     &lt;array>
  *       &lt;util:constant static-field="com.fasterxml.jackson.databind.SerializationFeature$WRAP_ROOT_VALUE"/>
