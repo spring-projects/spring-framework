@@ -449,10 +449,8 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 			this.resourceLoader = this.applicationContext;
 		}
 
-		// Create SchedulerFactory instance.
-		SchedulerFactory schedulerFactory = (SchedulerFactory)
-				BeanUtils.instantiateClass(this.schedulerFactoryClass);
-
+		// Create SchedulerFactory instance...
+		SchedulerFactory schedulerFactory = BeanUtils.instantiateClass(this.schedulerFactoryClass);
 		initSchedulerFactory(schedulerFactory);
 
 		if (this.resourceLoader != null) {
@@ -515,9 +513,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * Load and/or apply Quartz properties to the given SchedulerFactory.
 	 * @param schedulerFactory the SchedulerFactory to initialize
 	 */
-	private void initSchedulerFactory(SchedulerFactory schedulerFactory)
-			throws SchedulerException, IOException {
-
+	private void initSchedulerFactory(SchedulerFactory schedulerFactory) throws SchedulerException, IOException {
 		if (!(schedulerFactory instanceof StdSchedulerFactory)) {
 			if (this.configLocation != null || this.quartzProperties != null ||
 					this.taskExecutor != null || this.dataSource != null) {
