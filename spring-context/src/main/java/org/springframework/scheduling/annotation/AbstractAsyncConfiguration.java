@@ -54,7 +54,7 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 	/**
 	 * Collect any {@link AsyncConfigurer} beans through autowiring.
 	 */
-	@Autowired(required = false)
+	@Autowired(required=false)
 	void setConfigurers(Collection<AsyncConfigurer> configurers) {
 		if (CollectionUtils.isEmpty(configurers)) {
 			return;
@@ -65,4 +65,5 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 		AsyncConfigurer configurer = configurers.iterator().next();
 		this.executor = configurer.getAsyncExecutor();
 	}
+
 }
