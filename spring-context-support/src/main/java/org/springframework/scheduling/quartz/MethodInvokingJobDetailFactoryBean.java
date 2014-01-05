@@ -172,7 +172,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	 * @see SchedulerFactoryBean#setJobListeners
 	 * @see org.quartz.JobListener#getName
 	 */
-	public void setJobListenerNames(String[] names) {
+	public void setJobListenerNames(String... names) {
 		this.jobListenerNames = names;
 	}
 

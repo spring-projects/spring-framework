@@ -16,7 +16,6 @@
 
 package org.springframework.scheduling.quartz;
 
-import java.text.ParseException;
 import java.util.Date;
 import java.util.Map;
 
@@ -114,9 +113,9 @@ public class SimpleTriggerBean extends SimpleTrigger
 	 * @see SchedulerFactoryBean#setTriggerListeners
 	 * @see org.quartz.TriggerListener#getName
 	 */
-	public void setTriggerListenerNames(String[] names) {
-		for (int i = 0; i < names.length; i++) {
-			addTriggerListener(names[i]);
+	public void setTriggerListenerNames(String... names) {
+		for (String name : names) {
+			addTriggerListener(name);
 		}
 	}
 
@@ -156,14 +155,14 @@ public class SimpleTriggerBean extends SimpleTrigger
 
 
 	@Override
-	public void afterPropertiesSet() throws ParseException {
+	public void afterPropertiesSet() {
 		if (getName() == null) {
 			setName(this.beanName);
 		}
 		if (getGroup() == null) {
 			setGroup(Scheduler.DEFAULT_GROUP);
 		}
-		if (getStartTime() == null) {
+		if (this.startDelay > 0 || getStartTime() == null) {
 			setStartTime(new Date(System.currentTimeMillis() + this.startDelay));
 		}
 		if (this.jobDetail != null) {

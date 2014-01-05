@@ -78,7 +78,7 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 
 	private Date startTime;
 
-	private long startDelay;
+	private long startDelay = 0;
 
 	private String cronExpression;
 
@@ -139,6 +139,15 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 	 */
 	public void setJobDataAsMap(Map<String, ?> jobDataAsMap) {
 		this.jobDataMap.putAll(jobDataAsMap);
+	}
+
+	/**
+	 * Set a specific start time for the trigger.
+	 * <p>Note that a dynamically computed {@link #setStartDelay} specification
+	 * overrides a static timestamp set here.
+	 */
+	public void setStartTime(Date startTime) {
+		this.startTime = startTime;
 	}
 
 	/**
@@ -208,11 +217,8 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 		if (this.jobDetail != null) {
 			this.jobDataMap.put(JobDetailAwareTrigger.JOB_DETAIL_KEY, this.jobDetail);
 		}
-		if (this.startDelay > 0) {
+		if (this.startDelay > 0 || this.startTime == null) {
 			this.startTime = new Date(System.currentTimeMillis() + this.startDelay);
-		}
-		else if (this.startTime == null) {
-			this.startTime = new Date();
 		}
 		if (this.timeZone == null) {
 			this.timeZone = TimeZone.getDefault();

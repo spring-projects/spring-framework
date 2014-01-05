@@ -21,6 +21,7 @@ import java.util.Map;
 import org.quartz.Job;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
+
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -47,7 +48,7 @@ import org.springframework.context.ApplicationContextAware;
  * @see org.springframework.beans.factory.BeanNameAware
  * @see org.quartz.Scheduler#DEFAULT_GROUP
  */
-@SuppressWarnings({ "serial", "rawtypes" })
+@SuppressWarnings({"serial", "rawtypes"})
 public class JobDetailBean extends JobDetail
 		implements BeanNameAware, ApplicationContextAware, InitializingBean {
 
@@ -81,7 +82,7 @@ public class JobDetailBean extends JobDetail
 	 * to adapt the given job class to the Quartz Job interface.
 	 */
 	@Override
-	public Class getJobClass() {
+	public Class<?> getJobClass() {
 		return (this.actualJobClass != null ? this.actualJobClass : super.getJobClass());
 	}
 
@@ -108,9 +109,9 @@ public class JobDetailBean extends JobDetail
 	 * @see SchedulerFactoryBean#setJobListeners
 	 * @see org.quartz.JobListener#getName
 	 */
-	public void setJobListenerNames(String[] names) {
-		for (int i = 0; i < names.length; i++) {
-			addJobListener(names[i]);
+	public void setJobListenerNames(String... names) {
+		for (String name : names) {
+			addJobListener(name);
 		}
 	}
 

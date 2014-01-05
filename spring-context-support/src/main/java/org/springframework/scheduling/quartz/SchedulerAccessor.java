@@ -129,7 +129,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	 * to jobs defined directly on this SchedulerFactoryBean.
 	 * @see org.quartz.xml.XMLSchedulingDataProcessor
 	 */
-	public void setJobSchedulingDataLocations(String[] jobSchedulingDataLocations) {
+	public void setJobSchedulingDataLocations(String... jobSchedulingDataLocations) {
 		this.jobSchedulingDataLocations = jobSchedulingDataLocations;
 	}
 
@@ -143,9 +143,8 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	 * @see org.quartz.JobDetail
 	 * @see JobDetailBean
 	 * @see JobDetailAwareTrigger
-	 * @see org.quartz.Trigger#setJobName
 	 */
-	public void setJobDetails(JobDetail[] jobDetails) {
+	public void setJobDetails(JobDetail... jobDetails) {
 		// Use modifiable ArrayList here, to allow for further adding of
 		// JobDetail objects during autodetection of JobDetailAwareTriggers.
 		this.jobDetails = new ArrayList<JobDetail>(Arrays.asList(jobDetails));
@@ -157,7 +156,6 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	 * @param calendars Map with calendar names as keys as Calendar
 	 * objects as values
 	 * @see org.quartz.Calendar
-	 * @see org.quartz.Trigger#setCalendarName
 	 */
 	public void setCalendars(Map<String, Calendar> calendars) {
 		this.calendars = calendars;
@@ -176,7 +174,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	 * @see CronTriggerBean
 	 * @see SimpleTriggerBean
 	 */
-	public void setTriggers(Trigger[] triggers) {
+	public void setTriggers(Trigger... triggers) {
 		this.triggers = Arrays.asList(triggers);
 	}
 
@@ -184,7 +182,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	/**
 	 * Specify Quartz SchedulerListeners to be registered with the Scheduler.
 	 */
-	public void setSchedulerListeners(SchedulerListener[] schedulerListeners) {
+	public void setSchedulerListeners(SchedulerListener... schedulerListeners) {
 		this.schedulerListeners = schedulerListeners;
 	}
 
@@ -192,7 +190,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	 * Specify global Quartz JobListeners to be registered with the Scheduler.
 	 * Such JobListeners will apply to all Jobs in the Scheduler.
 	 */
-	public void setGlobalJobListeners(JobListener[] globalJobListeners) {
+	public void setGlobalJobListeners(JobListener... globalJobListeners) {
 		this.globalJobListeners = globalJobListeners;
 	}
 
@@ -200,11 +198,12 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	 * Specify named Quartz JobListeners to be registered with the Scheduler.
 	 * Such JobListeners will only apply to Jobs that explicitly activate
 	 * them via their name.
+	 * <p>Note that non-global JobListeners are not supported on Quartz 2.x -
+	 * manually register a Matcher against the Quartz ListenerManager instead.
 	 * @see org.quartz.JobListener#getName
-	 * @see org.quartz.JobDetail#addJobListener
 	 * @see JobDetailBean#setJobListenerNames
 	 */
-	public void setJobListeners(JobListener[] jobListeners) {
+	public void setJobListeners(JobListener... jobListeners) {
 		this.jobListeners = jobListeners;
 	}
 
@@ -212,7 +211,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	 * Specify global Quartz TriggerListeners to be registered with the Scheduler.
 	 * Such TriggerListeners will apply to all Triggers in the Scheduler.
 	 */
-	public void setGlobalTriggerListeners(TriggerListener[] globalTriggerListeners) {
+	public void setGlobalTriggerListeners(TriggerListener... globalTriggerListeners) {
 		this.globalTriggerListeners = globalTriggerListeners;
 	}
 
@@ -220,12 +219,13 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	 * Specify named Quartz TriggerListeners to be registered with the Scheduler.
 	 * Such TriggerListeners will only apply to Triggers that explicitly activate
 	 * them via their name.
+	 * <p>Note that non-global TriggerListeners are not supported on Quartz 2.x -
+	 * manually register a Matcher against the Quartz ListenerManager instead.
 	 * @see org.quartz.TriggerListener#getName
-	 * @see org.quartz.Trigger#addTriggerListener
 	 * @see CronTriggerBean#setTriggerListenerNames
 	 * @see SimpleTriggerBean#setTriggerListenerNames
 	 */
-	public void setTriggerListeners(TriggerListener[] triggerListeners) {
+	public void setTriggerListeners(TriggerListener... triggerListeners) {
 		this.triggerListeners = triggerListeners;
 	}
 
