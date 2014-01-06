@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.mock.web;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
@@ -221,8 +222,9 @@ public class MockHttpServletResponseTests {
 		assertEquals(redirectUrl, response.getRedirectedUrl());
 	}
 
-	// SPR-10414
-
+	/**
+	 * SPR-10414
+	 */
 	@Test
 	public void modifyStatusAfterSendError() throws IOException {
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -230,9 +232,11 @@ public class MockHttpServletResponseTests {
 		assertEquals(response.getStatus(),HttpServletResponse.SC_NOT_FOUND);
 	}
 
-	// SPR-10414
-
+	/**
+	 * SPR-10414
+	 */
 	@Test
+	@SuppressWarnings("deprecation")
 	public void modifyStatusMessageAfterSendError() throws IOException {
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);
 		response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"Server Error");
