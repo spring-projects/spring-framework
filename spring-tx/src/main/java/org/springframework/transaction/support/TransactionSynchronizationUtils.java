@@ -20,8 +20,10 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.aop.framework.Advised;
 
 import org.springframework.aop.scope.ScopedObject;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.core.InfrastructureProxy;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -61,6 +63,13 @@ public abstract class TransactionSynchronizationUtils {
 	static Object unwrapResourceIfNecessary(Object resource) {
 		Assert.notNull(resource, "Resource must not be null");
 		Object resourceRef = resource;
+		if(AopUtils.isJdkDynamicProxy(resource)){
+                    try {
+                        resourceRef = ((Advised)resource).getTargetSource().getTarget();
+                    } catch (Exception ex) {
+                        logger.warn("Unexpected exception while wrapping jdk dynamic proxy:",ex);
+                    }
+                }
 		// unwrap infrastructure proxy
 		if (resourceRef instanceof InfrastructureProxy) {
 			resourceRef = ((InfrastructureProxy) resourceRef).getWrappedObject();
