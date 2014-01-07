@@ -47,6 +47,7 @@ import org.springframework.web.socket.JettyWebSocketTestServer;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.TomcatWebSocketTestServer;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.config.annotation.AbstractWebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
@@ -205,7 +206,7 @@ public class SimpAnnotationMethodIntegrationTests extends AbstractWebSocketInteg
 	@ComponentScan(basePackageClasses=SimpAnnotationMethodIntegrationTests.class,
 			useDefaultFilters=false,
 			includeFilters=@ComponentScan.Filter(IntegrationTestController.class))
-	static class TestMessageBrokerConfigurer implements WebSocketMessageBrokerConfigurer {
+	static class TestMessageBrokerConfigurer extends AbstractWebSocketMessageBrokerConfigurer {
 
 		@Autowired
 		private HandshakeHandler handshakeHandler; // can't rely on classpath for server detection
@@ -213,14 +214,6 @@ public class SimpAnnotationMethodIntegrationTests extends AbstractWebSocketInteg
 		@Override
 		public void registerStompEndpoints(StompEndpointRegistry registry) {
 			registry.addEndpoint("/ws").setHandshakeHandler(this.handshakeHandler);
-		}
-
-		@Override
-		public void configureClientInboundChannel(ChannelRegistration registration) {
-		}
-
-		@Override
-		public void configureClientOutboundChannel(ChannelRegistration registration) {
 		}
 
 		@Override

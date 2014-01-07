@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.util.CollectionUtils;
@@ -69,6 +70,17 @@ public class DelegatingWebSocketMessageBrokerConfiguration extends WebSocketMess
 		for (WebSocketMessageBrokerConfigurer c : this.configurers) {
 			c.configureClientOutboundChannel(registration);
 		}
+	}
+
+	@Override
+	protected boolean configureMessageConverters(List<MessageConverter> messageConverters) {
+		boolean registerDefaults = true;
+		for (WebSocketMessageBrokerConfigurer c : this.configurers) {
+			if (!c.configureMessageConverters(messageConverters)) {
+				registerDefaults = false;
+			}
+		}
+		return registerDefaults;
 	}
 
 	@Override

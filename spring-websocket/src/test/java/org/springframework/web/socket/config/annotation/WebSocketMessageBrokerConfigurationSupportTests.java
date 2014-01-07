@@ -118,7 +118,7 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 	}
 
 	@Configuration
-	static class TestSimpleMessageBrokerConfig implements WebSocketMessageBrokerConfigurer {
+	static class TestSimpleMessageBrokerConfig extends AbstractWebSocketMessageBrokerConfigurer {
 
 		@Bean
 		public TestController subscriptionController() {
@@ -128,19 +128,6 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		@Override
 		public void registerStompEndpoints(StompEndpointRegistry registry) {
 			registry.addEndpoint("/simpleBroker");
-		}
-
-		@Override
-		public void configureClientInboundChannel(ChannelRegistration registration) {
-		}
-
-		@Override
-		public void configureClientOutboundChannel(ChannelRegistration registration) {
-		}
-
-		@Override
-		public void configureMessageBroker(MessageBrokerRegistry registry) {
-			// SimpleBroker used by default
 		}
 
 	}

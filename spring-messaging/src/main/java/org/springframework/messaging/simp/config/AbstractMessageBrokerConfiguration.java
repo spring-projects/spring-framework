@@ -26,12 +26,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.converter.ByteArrayMessageConverter;
-import org.springframework.messaging.converter.CompositeMessageConverter;
-import org.springframework.messaging.converter.DefaultContentTypeResolver;
-import org.springframework.messaging.converter.MappingJackson2MessageConverter;
-import org.springframework.messaging.converter.MessageConverter;
-import org.springframework.messaging.converter.StringMessageConverter;
+import org.springframework.messaging.converter.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
 import org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler;
@@ -127,7 +122,8 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	 * A hook for sub-classes to customize the message channel for inbound messages
 	 * from WebSocket clients.
 	 */
-	protected abstract void configureClientInboundChannel(ChannelRegistration registration);
+	protected void configureClientInboundChannel(ChannelRegistration registration) {
+	}
 
 
 	@Bean
@@ -161,7 +157,8 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	 * A hook for sub-classes to customize the message channel for messages from
 	 * the application or message broker to WebSocket clients.
 	 */
-	protected abstract void configureClientOutboundChannel(ChannelRegistration registration);
+	protected void configureClientOutboundChannel(ChannelRegistration registration) {
+	}
 
 	@Bean
 	public AbstractSubscribableChannel brokerChannel() {
@@ -204,8 +201,8 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	 * A hook for sub-classes to customize message broker configuration through the
 	 * provided {@link MessageBrokerRegistry} instance.
 	 */
-	protected abstract void configureMessageBroker(MessageBrokerRegistry registry);
-
+	protected void configureMessageBroker(MessageBrokerRegistry registry) {
+	}
 
 	@Bean
 	public SimpAnnotationMethodMessageHandler simpAnnotationMethodMessageHandler() {
@@ -251,18 +248,27 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	@Bean
 	public CompositeMessageConverter brokerMessageConverter() {
-
-		DefaultContentTypeResolver contentTypeResolver = new DefaultContentTypeResolver();
-
 		List<MessageConverter> converters = new ArrayList<MessageConverter>();
+		if (configureMessageConverters(converters)) {
+			if (jackson2Present) {
+				converters.add(new MappingJackson2MessageConverter());
+			}
+			converters.add(new StringMessageConverter());
+			converters.add(new ByteArrayMessageConverter());
+		}
+		return new CompositeMessageConverter(converters, getContentTypeResolver());
+	}
+
+	protected boolean configureMessageConverters(List<MessageConverter> messageConverters) {
+		return true;
+	}
+
+	protected ContentTypeResolver getContentTypeResolver() {
+		DefaultContentTypeResolver contentTypeResolver = new DefaultContentTypeResolver();
 		if (jackson2Present) {
-			converters.add(new MappingJackson2MessageConverter());
 			contentTypeResolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
 		}
-		converters.add(new StringMessageConverter());
-		converters.add(new ByteArrayMessageConverter());
-
-		return new CompositeMessageConverter(converters, contentTypeResolver);
+		return contentTypeResolver;
 	}
 
 	@Bean
@@ -278,14 +284,6 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	@Bean
 	public UserSessionRegistry userSessionRegistry() {
 		return new DefaultUserSessionRegistry();
-	}
-
-	/**
-	 * Override this method to provide a custom {@link Validator}.
-	 * @since 4.0.1
-	 */
-	public Validator getValidator() {
-        return null;
 	}
 
 	@Override
@@ -330,11 +328,28 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 				validator = (Validator) BeanUtils.instantiate(clazz);
 			}
 			else {
-				validator = noopValidator;
+				validator = new Validator() {
+					@Override
+					public boolean supports(Class<?> clazz) {
+						return false;
+					}
+					@Override
+					public void validate(Object target, Errors errors) {
+					}
+				};
 			}
 		}
 		return validator;
 	}
+
+	/**
+	 * Override this method to provide a custom {@link Validator}.
+	 * @since 4.0.1
+	 */
+	public Validator getValidator() {
+		return null;
+	}
+
 
 	private static final AbstractBrokerMessageHandler noopBroker = new AbstractBrokerMessageHandler(null) {
 
@@ -351,16 +366,5 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		}
 
 	};
-
-	private static final Validator noopValidator = new Validator() {
-		@Override
-		public boolean supports(Class<?> clazz) {
-			return false;
-		}
-		@Override
-		public void validate(Object target, Errors errors) {
-		}
-	};
-
 
 }

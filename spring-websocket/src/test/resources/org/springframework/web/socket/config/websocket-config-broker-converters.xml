@@ -1,0 +1,19 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:websocket="http://www.springframework.org/schema/websocket"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+
+    <websocket:message-broker>
+
+        <websocket:stomp-endpoint path="/foo" />
+
+        <websocket:simple-broker />
+
+        <websocket:message-converters>
+            <bean class="org.springframework.messaging.converter.StringMessageConverter"/>
+        </websocket:message-converters>
+
+    </websocket:message-broker>
+
+</beans>

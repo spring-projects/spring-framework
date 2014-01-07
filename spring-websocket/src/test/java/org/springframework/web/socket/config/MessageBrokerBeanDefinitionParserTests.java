@@ -29,6 +29,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.converter.CompositeMessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
 import org.springframework.messaging.simp.user.DefaultUserDestinationResolver;
@@ -245,6 +246,29 @@ public class MessageBrokerBeanDefinitionParserTests {
 		testChannel("brokerChannel", subscriberTypes, 0);
 		testExecutor("brokerChannel", 102, 202, 602);
 	}
+
+	@Test
+	public void messageConverters() {
+		loadBeanDefinitions("websocket-config-broker-converters.xml");
+
+		CompositeMessageConverter compositeConverter = this.appContext.getBean(CompositeMessageConverter.class);
+		assertNotNull(compositeConverter);
+
+		assertEquals(4, compositeConverter.getConverters().size());
+		assertEquals(StringMessageConverter.class, compositeConverter.getConverters().iterator().next().getClass());
+	}
+
+	@Test
+	public void messageConvertersDefaultsOff() {
+		loadBeanDefinitions("websocket-config-broker-converters-defaults-off.xml");
+
+		CompositeMessageConverter compositeConverter = this.appContext.getBean(CompositeMessageConverter.class);
+		assertNotNull(compositeConverter);
+
+		assertEquals(1, compositeConverter.getConverters().size());
+		assertEquals(StringMessageConverter.class, compositeConverter.getConverters().iterator().next().getClass());
+	}
+
 
 	private void testChannel(String channelName, List<Class<? extends  MessageHandler>> subscriberTypes,
 			int interceptorCount) {

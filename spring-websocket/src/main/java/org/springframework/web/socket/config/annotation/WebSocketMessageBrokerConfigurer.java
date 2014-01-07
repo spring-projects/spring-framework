@@ -17,8 +17,11 @@
 package org.springframework.web.socket.config.annotation;
 
 
+import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+
+import java.util.List;
 
 /**
  * Defines methods for configuring message handling with simple messaging
@@ -51,6 +54,20 @@ public interface WebSocketMessageBrokerConfigurer {
 	 * settings for production use.
 	 */
 	void configureClientOutboundChannel(ChannelRegistration registration);
+
+	/**
+	 * Configure the message converters to use when extracting the payload of
+	 * messages in annotated methods and when sending messages (e.g. through the
+	 * "broker" SimpMessagingTemplate).
+	 * <p>
+	 * The provided list, initially empty, can be used to add message converters
+	 * while the boolean return value is used to determine if default message should
+	 * be added as well.
+	 *
+	 * @param messageConverters initially an empty list of converters
+	 * @return whether to also add default converter or not
+	 */
+	boolean configureMessageConverters(List<MessageConverter> messageConverters);
 
 	/**
 	 * Configure message broker options.

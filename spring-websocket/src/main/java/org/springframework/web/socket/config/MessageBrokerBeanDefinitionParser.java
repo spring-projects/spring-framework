@@ -153,7 +153,8 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		RuntimeBeanReference brokerChannel = getMessageChannel(beanName, channelElem, parserCxt, source);
 		registerMessageBroker(element, clientInChannel, clientOutChannel, brokerChannel, parserCxt, source);
 
-		RuntimeBeanReference messageConverter = registerBrokerMessageConverter(parserCxt, source);
+		RuntimeBeanReference messageConverter = registerBrokerMessageConverter(element, parserCxt, source);
+
 		RuntimeBeanReference messagingTemplate = registerBrokerMessagingTemplate(element, brokerChannel,
 				messageConverter, parserCxt, source);
 
@@ -339,24 +340,39 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 
 	}
 
-	private RuntimeBeanReference registerBrokerMessageConverter(ParserContext parserCxt, Object source) {
+	private RuntimeBeanReference registerBrokerMessageConverter(Element element,
+			ParserContext parserCxt, Object source) {
+
+		Element convertersElement = DomUtils.getChildElementByTagName(element, "message-converters");
+		ManagedList<? super Object> convertersDef = new ManagedList<Object>();
+		if (convertersElement != null) {
+			convertersDef.setSource(source);
+			for (Element beanElement : DomUtils.getChildElementsByTagName(convertersElement, "bean", "ref")) {
+				Object object = parserCxt.getDelegate().parsePropertySubElement(beanElement, null);
+				convertersDef.add(object);
+			}
+		}
+
+		if (convertersElement == null || Boolean.valueOf(convertersElement.getAttribute("register-defaults"))) {
+			convertersDef.setSource(source);
+			if (jackson2Present) {
+				convertersDef.add(new RootBeanDefinition(MappingJackson2MessageConverter.class));
+			}
+			convertersDef.add(new RootBeanDefinition(StringMessageConverter.class));
+			convertersDef.add(new RootBeanDefinition(ByteArrayMessageConverter.class));
+		}
 
 		RootBeanDefinition contentTypeResolverDef = new RootBeanDefinition(DefaultContentTypeResolver.class);
-
-		ManagedList<RootBeanDefinition> convertersDef = new ManagedList<RootBeanDefinition>();
 		if (jackson2Present) {
-			convertersDef.add(new RootBeanDefinition(MappingJackson2MessageConverter.class));
 			contentTypeResolverDef.getPropertyValues().add("defaultMimeType", MimeTypeUtils.APPLICATION_JSON);
 		}
-		convertersDef.add(new RootBeanDefinition(StringMessageConverter.class));
-		convertersDef.add(new RootBeanDefinition(ByteArrayMessageConverter.class));
 
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addIndexedArgumentValue(0, convertersDef);
 		cavs.addIndexedArgumentValue(1, contentTypeResolverDef);
 
 		RootBeanDefinition brokerMessage = new RootBeanDefinition(CompositeMessageConverter.class, cavs, null);
-		return new RuntimeBeanReference(registerBeanDef(brokerMessage,parserCxt, source));
+		return new RuntimeBeanReference(registerBeanDef(brokerMessage, parserCxt, source));
 	}
 
 	private RuntimeBeanReference registerBrokerMessagingTemplate(

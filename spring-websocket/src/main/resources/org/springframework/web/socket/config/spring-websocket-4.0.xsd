@@ -481,6 +481,43 @@
                     <xsd:element name="simple-broker" type="simple-broker" />
                     <xsd:element name="stomp-broker-relay" type="stomp-broker-relay" />
                 </xsd:choice>
+                <xsd:element name="message-converters" minOccurs="0">
+                    <xsd:annotation>
+                        <xsd:documentation><![CDATA[
+        Configure the message converters to use when extracting the payload of messages in annotated methods
+        and when sending messages (e.g. through the "broker" SimpMessagingTemplate.
+        MessageConverter registrations provided here will take precedence over MessageConverter types registered by default.
+        Also see the register-defaults attribute if you want to turn off default registrations entirely.
+						]]></xsd:documentation>
+                    </xsd:annotation>
+                    <xsd:complexType>
+                        <xsd:sequence>
+                            <xsd:choice maxOccurs="unbounded">
+                                <xsd:element ref="beans:bean">
+                                    <xsd:annotation>
+                                        <xsd:documentation><![CDATA[
+        A MessageConverter bean definition.
+										]]></xsd:documentation>
+                                    </xsd:annotation>
+                                </xsd:element>
+                                <xsd:element ref="beans:ref">
+                                    <xsd:annotation>
+                                        <xsd:documentation><![CDATA[
+		A reference to an HttpMessageConverter bean.
+										]]></xsd:documentation>
+                                    </xsd:annotation>
+                                </xsd:element>
+                            </xsd:choice>
+                        </xsd:sequence>
+                        <xsd:attribute name="register-defaults" type="xsd:boolean" default="true">
+                            <xsd:annotation>
+                                <xsd:documentation><![CDATA[
+        Whether or not default MessageConverter registrations should be added in addition to the ones provided within this element.
+								]]></xsd:documentation>
+                            </xsd:annotation>
+                        </xsd:attribute>
+                    </xsd:complexType>
+                </xsd:element>
                 <xsd:element name="client-inbound-channel" type="channel" minOccurs="0" maxOccurs="1">
                     <xsd:annotation>
                         <xsd:documentation><![CDATA[
