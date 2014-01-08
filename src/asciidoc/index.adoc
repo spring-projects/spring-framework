@@ -19049,6 +19049,29 @@ TestContext Framework to load the `ApplicationContext` with the active profiles 
 `accountRepository` bean will be wired with a reference to the development `DataSource`.
 And that's likely what we want in an integration test.
 
+It is sometimes useful to assign beans to a `default` profile. Beans within the default profile
+are only included when no other profile is specifically activated. This can be used to define
+_fallback_ beans to be used in the application's default state. For example, you may
+explicitly provide a data source for `dev` and `production` profiles, but define an in-memory
+data source as a default when neither of these are specified.
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+		xmlns:jee="http://www.springframework.org/schema/jee"
+		xsi:schemaLocation="...">
+
+		<beans profile="default">
+			<jdbc:embedded-database id="dataSource"/>
+		</beans>
+
+	</beans>
+----
+
+
 The following code listings demonstrate how to implement the same configuration and
 integration test but using `@Configuration` classes instead of XML.
 
