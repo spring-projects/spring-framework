@@ -17630,7 +17630,7 @@ get it from (see the <<dependency-management,section on Dependency Management>> 
 explanation). This library includes the `org.springframework.test` package, which
 contains valuable classes for integration testing with a Spring container. This testing
 does not rely on an application server or other deployment environment. Such tests are
-slower to run than unit tests but much faster than the equivalent Cactus tests or remote
+slower to run than unit tests but much faster than the equivalent Selenium tests or remote
 tests that rely on deployment to an application server.
 
 In Spring 2.5 and later, unit and integration testing support is provided in the form of
