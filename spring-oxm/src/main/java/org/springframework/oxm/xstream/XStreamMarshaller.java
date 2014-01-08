@@ -92,7 +92,7 @@ import org.springframework.util.xml.StaxUtils;
  * {@code XStreamMarshaller} to unmarshal external XML, set the
  * {@link #setSupportedClasses(Class[]) supportedClasses} and
  * {@link #setConverters(ConverterMatcher[]) converters} properties (possibly using a
- * {@link CatchAllConverter} as the last converter in the list) or override the
+ * {@link CatchAllConverter}) or override the
  * {@link #customizeXStream(XStream)} method to make sure it only accepts the classes
  * you want it to support.
  *

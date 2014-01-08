@@ -27,7 +27,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * (un)marshalling.
  * <p>Main purpose of this class is to
  * {@linkplain com.thoughtworks.xstream.XStream#registerConverter(com.thoughtworks.xstream.converters.Converter, int) register}
- * this converter as a catchall last converter with a
+ * this converter as a catchall converter with a
  * {@linkplain com.thoughtworks.xstream.XStream#PRIORITY_NORMAL normal}
  * or higher priority, in addition to converters that explicitly support the domain
  * classes that should be supported. As a result, default XStream converters with lower
