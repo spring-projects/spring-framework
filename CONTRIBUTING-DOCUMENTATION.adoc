@@ -4,19 +4,33 @@ The Spring Framework reference now uses http://asciidoctor.org/[asciidoctor]. Th
 
 == Building with Gradle
 
-You can build the documentation using gradle using the `asciidoc` task. For example, from the project root execute the following command:
+You can build the documentation using gradle using the `reference` task. For example, from the project root execute the following command:
 
-  gradlew asciidoc
+  ./gradlew reference
 
-the output will be available at `spring-framework/build/asciidoc/index.html`
+the output will be available at `spring-framework/build/reference/htmlsingle/index.html`
 
 == Live editing
 
 One of the nice features about using asciidoctor is the support for live editing.
 
-You will find a Guardfile already present at `spring-framework/src/asciidoc/Guardfile`. Then ensure to follow the setup instructions within the http://asciidoctor.org/docs/editing-asciidoc-with-live-preview/[Editing AsciiDoc with Live Preview] document.
+You will find a Guardfile already present at `spring-framework/src/asciidoc/Guardfile`. Make sure first to follow
+the setup instructions within the http://asciidoctor.org/docs/editing-asciidoc-with-live-preview/[Editing AsciiDoc with Live Preview]
+document. Once you have done that, there are additional gems to install to make it work (assuming that you are using
+http://livereload.com/[LiveReload]):
+
+  gem install guard-rspec guard-livereload
 
 When running `guard start` within the `src/asciidoc/` folder, any changes to the `src/asciidoc/index.adoc` file will automatically be written at `src/asciidoc/build/index.html`.
+
+== Troubleshooting
+
+* If you are using LiveReload, make sure to select _Allow access to file URLs_ in the LiveEdit plugin options of
+  your browser.
+* The icon used to enable _LiveReload_ can be a bit confusing. The dot is empty when it is disabled and full when
+  the plugin is active. Make sure to enable it on the tab displaying the `index.html` file.
+* Ensure you are _not_ running guard start at all as two instances could not run at the same time. To exit a current
+  session in a clean way, just type e in the shell.
 
 == Documentation notes
 
