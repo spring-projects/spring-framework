@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ public abstract class CacheOperation {
 
 	private String key = "";
 
+	private String keyGenerator = "";
+
 	private String name = "";
 
 
@@ -48,6 +50,10 @@ public abstract class CacheOperation {
 
 	public String getKey() {
 		return key;
+	}
+
+	public String getKeyGenerator() {
+		return keyGenerator;
 	}
 
 	public String getName() {
@@ -75,6 +81,11 @@ public abstract class CacheOperation {
 	public void setKey(String key) {
 		Assert.notNull(key);
 		this.key = key;
+	}
+
+	public void setKeyGenerator(String keyGenerator) {
+		Assert.notNull(keyGenerator);
+		this.keyGenerator = keyGenerator;
 	}
 
 	public void setName(String name) {
@@ -124,6 +135,8 @@ public abstract class CacheOperation {
 		result.append(this.cacheNames);
 		result.append(" | key='");
 		result.append(this.key);
+		result.append("' | keyGenerator='");
+		result.append(this.keyGenerator);
 		result.append("' | condition='");
 		result.append(this.condition);
 		result.append("'");

@@ -16,6 +16,8 @@
 			<cache:cacheable method="varArgsKey"/>
 			<cache:cacheable method="nam*" key="#root.methodName"/>
 			<cache:cacheable method="rootVars" key="#root.methodName + #root.method.name + #root.targetClass + #root.target"/>
+			<cache:cacheable method="customKeyGenerator" key-generator="customKeyGenerator"/>
+			<cache:cacheable method="unknownCustomKeyGenerator" key-generator="unknownBeanName"/>
 			<cache:cacheable method="nullValue" cache="default"/>
 		</cache:caching>
 		<cache:caching>
@@ -106,6 +108,8 @@
 	</bean>
 
 	<bean id="keyGenerator" class="org.springframework.cache.config.SomeKeyGenerator"/>
+
+    <bean id="customKeyGenerator" class="org.springframework.cache.config.SomeCustomKeyGenerator"/>
 
 	<bean id="debugInterceptor" class="org.springframework.aop.interceptor.DebugInterceptor"/>
 
