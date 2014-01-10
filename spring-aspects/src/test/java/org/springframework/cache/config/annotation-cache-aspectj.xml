@@ -43,6 +43,8 @@
 		</property>
 	</bean>
 
+	<bean id="customKeyGenerator" class="org.springframework.cache.config.SomeCustomKeyGenerator" />
+
 	<bean id="debugInterceptor" class="org.springframework.aop.interceptor.DebugInterceptor"/>
 
 	<bean id="service" class="org.springframework.cache.config.DefaultCacheableService"/>

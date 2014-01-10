@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,9 +48,16 @@ public @interface Cacheable {
 
 	/**
 	 * Spring Expression Language (SpEL) attribute for computing the key dynamically.
-	 * <p>Default is "", meaning all method parameters are considered as a key.
+	 * <p>Default is "", meaning all method parameters are considered as a key, unless
+	 * a custom {@link #keyGenerator()} has been set.
 	 */
 	String key() default "";
+
+	/**
+	 * The bean name of the custom {@link org.springframework.cache.interceptor.KeyGenerator} to use.
+	 * <p>Mutually exclusive with the {@link #key()} attribute.
+	 */
+	String keyGenerator() default "";
 
 	/**
 	 * Spring Expression Language (SpEL) attribute used for conditioning the method caching.

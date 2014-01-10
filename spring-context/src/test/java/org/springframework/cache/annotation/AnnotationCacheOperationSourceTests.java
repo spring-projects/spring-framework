@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 the original author or authors.
+ * Copyright 2011-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,6 +90,32 @@ public class AnnotationCacheOperationSourceTests {
 		assertTrue(next.getCacheNames().contains("bar"));
 	}
 
+	@Test
+	public void testCustomKeyGenerator() {
+		Collection<CacheOperation> ops = getOps("customKeyGenerator");
+		assertEquals(1, ops.size());
+		CacheOperation cacheOperation = ops.iterator().next();
+		assertEquals("Custom key generator not set", "custom", cacheOperation.getKeyGenerator());
+	}
+
+	@Test
+	public void testCustomKeyGeneratorInherited() {
+		Collection<CacheOperation> ops = getOps("customKeyGeneratorInherited");
+		assertEquals(1, ops.size());
+		CacheOperation cacheOperation = ops.iterator().next();
+		assertEquals("Custom key generator not set", "custom", cacheOperation.getKeyGenerator());
+	}
+
+	@Test
+	public void testKeyAndKeyGeneratorCannotBeSetTogether() {
+		try {
+			getOps("invalidKeyAndKeyGeneratorSet");
+			fail("Should have failed to parse @Cacheable annotation");
+		} catch (IllegalStateException e) {
+			// expected
+		}
+	}
+
 	private static class AnnotatedClass {
 		@Cacheable("test")
 		public void singular() {
@@ -100,13 +126,16 @@ public class AnnotationCacheOperationSourceTests {
 		public void multiple() {
 		}
 
-		@Caching(cacheable = { @Cacheable("test") }, evict = { @CacheEvict("test") })
+		@Caching(cacheable = {@Cacheable("test")}, evict = {@CacheEvict("test")})
 		public void caching() {
+		}
+
+		@Cacheable(value = "test", keyGenerator = "custom")
+		public void customKeyGenerator() {
 		}
 
 		@EvictFoo
 		public void singleStereotype() {
-
 		}
 
 		@EvictFoo
@@ -115,8 +144,16 @@ public class AnnotationCacheOperationSourceTests {
 		public void multipleStereotype() {
 		}
 
-		@Caching(cacheable = { @Cacheable(value = "test", key = "a"), @Cacheable(value = "test", key = "b") })
+		@Caching(cacheable = {@Cacheable(value = "test", key = "a"), @Cacheable(value = "test", key = "b")})
 		public void multipleCaching() {
+		}
+
+		@CacheableFooCustomKeyGenerator
+		public void customKeyGeneratorInherited() {
+		}
+
+		@Cacheable(value = "test", key = "#root.methodName", keyGenerator = "custom")
+		public void invalidKeyAndKeyGeneratorSet() {
 		}
 	}
 
@@ -124,6 +161,12 @@ public class AnnotationCacheOperationSourceTests {
 	@Target(ElementType.METHOD)
 	@Cacheable("foo")
 	public @interface CacheableFoo {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	@Cacheable(value = "foo", keyGenerator = "custom")
+	public @interface CacheableFooCustomKeyGenerator {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

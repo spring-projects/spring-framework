@@ -30,5 +30,7 @@
 	<bean id="classService" class="org.springframework.cache.config.AnnotatedClassCacheableService"/>
 
 	<bean id="keyGenerator" class="org.springframework.cache.config.SomeKeyGenerator"/>
-	
+
+	<bean id="customKeyGenerator" class="org.springframework.cache.config.SomeCustomKeyGenerator"/>
+
 </beans>

@@ -176,9 +176,15 @@
 		<xsd:attribute name="key" type="xsd:string" use="optional">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-	The SpEL expression used for computing the cache key.]]></xsd:documentation>
+	The SpEL expression used for computing the cache key, mutually exclusive with the key-generator parameter.]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
+        <xsd:attribute name="key-generator" type="xsd:string" use="optional">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[
+	The name of the KeyGenerator bean responsible to compute the key, mutually exclusive with the key parameter.]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
 		<xsd:attribute name="condition" type="xsd:string" use="optional">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
