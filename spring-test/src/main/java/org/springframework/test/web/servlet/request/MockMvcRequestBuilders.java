@@ -33,6 +33,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Greg Turnquist
  * @since 3.2
  */
 public abstract class MockMvcRequestBuilders {
@@ -68,6 +69,16 @@ public abstract class MockMvcRequestBuilders {
 	 */
 	public static MockHttpServletRequestBuilder put(String urlTemplate, Object... urlVariables) {
 		return new MockHttpServletRequestBuilder(HttpMethod.PUT, urlTemplate, urlVariables);
+	}
+
+	/**
+	 * Create a {@link MockHttpServletRequestBuilder} for a PATCH request.
+	 *
+	 * @param urlTemplate a URL template; the resulting URL will be encoded
+	 * @param urlVariables zero or more URL variables
+	 */
+	public static MockHttpServletRequestBuilder patch(String urlTemplate, Object... urlVariables) {
+		return new MockHttpServletRequestBuilder(HttpMethod.PATCH, urlTemplate, urlVariables);
 	}
 
 	/**
