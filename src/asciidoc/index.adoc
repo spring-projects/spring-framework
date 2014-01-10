@@ -2299,7 +2299,7 @@ validate the bean id earlier, at XML document parse time.
 [subs="verbatim,quotes"]
 ----
 	<property name="targetName">
-		<!-- a bean with id 'theTargetBean' must exist; otherwise an exception will be thrown -->
+		<!-- a bean with id theTargetBean must exist; otherwise an exception will be thrown -->
 		<idref bean="theTargetBean"/>
 	</property>
 ----
@@ -2575,7 +2575,7 @@ various value elements as being of type `Float`, and the string values `9.99, 2.
 ===== Null and empty string values
 Spring treats empty arguments for properties and the like as empty `Strings`. The
 following XML-based configuration metadata snippet sets the email property to the empty
-`String` value ("")
+`String` value ("").
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -2690,7 +2690,7 @@ Similar to the <<beans-p-namespace>>, the __c-namespace__, newly introduced in S
 3.1, allows usage of inlined attributes for configuring the constructor arguments rather
 then nested `constructor-arg` elements.
 
-Let's review the examples from <<beans-constructor-injection>> with the `c` namespace:
+Let's review the examples from <<beans-constructor-injection>> with the `c:` namespace:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -2704,15 +2704,15 @@ Let's review the examples from <<beans-constructor-injection>> with the `c` name
 		<bean id="bar" class="x.y.Bar"/>
 		<bean id="baz" class="x.y.Baz"/>
 
-		<-- 'traditional' declaration -->
+		<!-- traditional declaration -->
 		<bean id="foo" class="x.y.Foo">
 			<constructor-arg ref="bar"/>
 			<constructor-arg ref="baz"/>
 			<constructor-arg value="foo@bar.com"/>
 		</bean>
 
-		<-- 'c-namespace' declaration -->
-		<bean id="foo" class="x.y.Foo" c:bar-ref="bar" c:baz-ref="baz" c:email="foo@bar.com">
+		<!-- c-namespace declaration -->
+		<bean id="foo" class="x.y.Foo" c:bar-ref="bar" c:baz-ref="baz" c:email="foo@bar.com"/>
 
 	</beans>
 ----
@@ -2729,8 +2729,8 @@ argument indexes:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<-- 'c-namespace' index declaration -->
-	<bean id="foo" class="x.y.Foo" c:_0-ref="bar" c:_1-ref="baz">
+	<!-- c-namespace index declaration -->
+	<bean id="foo" class="x.y.Foo" c:_0-ref="bar" c:_1-ref="baz"/>
 ----
 
 [NOTE]
@@ -2781,8 +2781,8 @@ dependency on a single bean:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<bean id="beanOne" class="ExampleBean" depends-on="**manager**"/>
-	<bean id="**manager**" class="ManagerBean" />
+	<bean id="beanOne" class="ExampleBean" depends-on="manager"/>
+	<bean id="manager" class="ManagerBean" />
 ----
 
 To express a dependency on multiple beans, supply a list of bean names as the value of
@@ -2828,7 +2828,7 @@ element; for example:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<bean id="lazy" class="com.foo.ExpensiveToCreateBean" **lazy-init="true"**/>
+	<bean id="lazy" class="com.foo.ExpensiveToCreateBean" lazy-init="true"/>
 	<bean name="not.lazy" class="com.foo.AnotherBean"/>
 ----
 
