@@ -1,4 +1,5 @@
 /*
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +30,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.socket.client.WebSocketClient;
+import org.springframework.web.socket.server.standard.UndertowRequestUpgradeStrategy;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy;
@@ -48,6 +50,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 	static {
 		upgradeStrategyConfigTypes.put(JettyWebSocketTestServer.class, JettyUpgradeStrategyConfig.class);
 		upgradeStrategyConfigTypes.put(TomcatWebSocketTestServer.class, TomcatUpgradeStrategyConfig.class);
+		upgradeStrategyConfigTypes.put(UndertowTestServer.class, UndertowUpgradeStrategyConfig.class);
 	}
 
 	@Parameter(0)
@@ -138,6 +141,15 @@ public abstract class AbstractWebSocketIntegrationTests {
 		@Bean
 		public RequestUpgradeStrategy requestUpgradeStrategy() {
 			return new TomcatRequestUpgradeStrategy();
+		}
+	}
+
+	@Configuration
+	static class UndertowUpgradeStrategyConfig extends AbstractRequestUpgradeStrategyConfig {
+
+		@Bean
+		public RequestUpgradeStrategy requestUpgradeStrategy() {
+			return new UndertowRequestUpgradeStrategy();
 		}
 	}
 

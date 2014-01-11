@@ -593,6 +593,13 @@ project("spring-websocket") {
 			exclude group: "javax.servlet", module: "javax.servlet"
 		}
 		optional("org.eclipse.jetty.websocket:websocket-client:${jettyVersion}")
+		optional("io.undertow:undertow-core:1.0.0.Beta31")
+		optional("io.undertow:undertow-servlet:1.0.0.Beta31") {
+			exclude group: "org.jboss.spec.javax.servlet", module: "jboss-servlet-api_3.1_spec"
+		}
+		optional("io.undertow:undertow-websockets-jsr:1.0.0.Beta31") {
+			exclude group: "org.jboss.spec.javax.websocket", module: "jboss-websocket-api_1.0_spec"
+		}
 		optional("com.fasterxml.jackson.core:jackson-databind:2.3.0")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:8.0.0-RC10")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")

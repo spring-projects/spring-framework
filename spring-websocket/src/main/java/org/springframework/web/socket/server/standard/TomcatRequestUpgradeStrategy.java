@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,6 @@ import org.apache.tomcat.websocket.server.WsServerContainer;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.http.server.ServletServerHttpResponse;
-import org.springframework.util.Assert;
 import org.springframework.web.socket.server.HandshakeFailureException;
 
 /**
@@ -60,11 +57,8 @@ public class TomcatRequestUpgradeStrategy extends AbstractStandardUpgradeStrateg
 			String selectedProtocol, List<Extension> selectedExtensions,
 			Endpoint endpoint) throws HandshakeFailureException {
 
-		Assert.isTrue(request instanceof ServletServerHttpRequest);
-		HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
-
-		Assert.isTrue(response instanceof ServletServerHttpResponse);
-		HttpServletResponse servletResponse = ((ServletServerHttpResponse) response).getServletResponse();
+		HttpServletRequest servletRequest = getHttpServletRequest(request);
+		HttpServletResponse servletResponse = getHttpServletResponse(response);
 
 		StringBuffer requestUrl = servletRequest.getRequestURL();
 		String path = servletRequest.getRequestURI(); // shouldn't matter

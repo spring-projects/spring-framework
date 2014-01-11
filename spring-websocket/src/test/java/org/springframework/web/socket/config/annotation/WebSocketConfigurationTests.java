@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,7 @@ import org.junit.runners.Parameterized.Parameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.AbstractWebSocketIntegrationTests;
-import org.springframework.web.socket.JettyWebSocketTestServer;
-import org.springframework.web.socket.TomcatWebSocketTestServer;
-import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
@@ -51,7 +48,8 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 	public static Iterable<Object[]> arguments() {
 		return Arrays.asList(new Object[][] {
 				{new JettyWebSocketTestServer(), new JettyWebSocketClient()},
-				{new TomcatWebSocketTestServer(), new StandardWebSocketClient()}
+				{new TomcatWebSocketTestServer(), new StandardWebSocketClient()},
+				{new UndertowTestServer(), new StandardWebSocketClient()}
 		});
 	};
 

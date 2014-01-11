@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,8 @@ public class WebSocketIntegrationTests extends  AbstractWebSocketIntegrationTest
 	public static Iterable<Object[]> arguments() {
 		return Arrays.asList(new Object[][]{
 				{new JettyWebSocketTestServer(), new JettyWebSocketClient()},
-				{new TomcatWebSocketTestServer(), new StandardWebSocketClient()}
+				{new TomcatWebSocketTestServer(), new StandardWebSocketClient()},
+				{new UndertowTestServer(), new JettyWebSocketClient()}
 		});
 	};
 

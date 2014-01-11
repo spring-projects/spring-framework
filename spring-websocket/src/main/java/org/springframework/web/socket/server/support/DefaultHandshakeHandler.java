@@ -62,14 +62,17 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 
 	protected Log logger = LogFactory.getLog(getClass());
 
+	private static final boolean glassFishWsPresent = ClassUtils.isPresent(
+			"org.glassfish.tyrus.servlet.TyrusHttpUpgradeHandler", DefaultHandshakeHandler.class.getClassLoader());
+
 	private static final boolean jettyWsPresent = ClassUtils.isPresent(
 			"org.eclipse.jetty.websocket.server.WebSocketServerFactory", DefaultHandshakeHandler.class.getClassLoader());
 
 	private static final boolean tomcatWsPresent = ClassUtils.isPresent(
 			"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", DefaultHandshakeHandler.class.getClassLoader());
 
-	private static final boolean glassFishWsPresent = ClassUtils.isPresent(
-			"org.glassfish.tyrus.servlet.TyrusHttpUpgradeHandler", DefaultHandshakeHandler.class.getClassLoader());
+	private static final boolean undertowWsPresent = ClassUtils.isPresent(
+			"io.undertow.websockets.jsr.ServerWebSocketContainer", DefaultHandshakeHandler.class.getClassLoader());
 
 
 	private final RequestUpgradeStrategy requestUpgradeStrategy;
@@ -96,6 +99,9 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 		}
 		else if (glassFishWsPresent) {
 			className = "org.springframework.web.socket.server.standard.GlassFishRequestUpgradeStrategy";
+		}
+		else if (undertowWsPresent) {
+			className = "org.springframework.web.socket.server.standard.UndertowRequestUpgradeStrategy";
 		}
 		else {
 			throw new IllegalStateException("No suitable default RequestUpgradeStrategy found");

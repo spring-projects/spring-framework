@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.websocket.Endpoint;
 import javax.websocket.Extension;
 import javax.websocket.WebSocketContainer;
@@ -35,6 +36,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
@@ -83,6 +85,16 @@ public abstract class AbstractStandardUpgradeStrategy implements RequestUpgradeS
 			result.add(new StandardToWebSocketExtensionAdapter(ext));
 		}
 		return result;
+	}
+
+	protected final HttpServletResponse getHttpServletResponse(ServerHttpResponse response) {
+		Assert.isTrue(response instanceof ServletServerHttpResponse);
+		return ((ServletServerHttpResponse) response).getServletResponse();
+	}
+
+	protected final HttpServletRequest getHttpServletRequest(ServerHttpRequest request) {
+		Assert.isTrue(request instanceof ServletServerHttpRequest);
+		return ((ServletServerHttpRequest) request).getServletRequest();
 	}
 
 	@Override
