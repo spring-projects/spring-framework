@@ -227,8 +227,12 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	 * @return whether the FieldError matches the given field
 	 */
 	protected boolean isMatchingFieldError(String field, FieldError fieldError) {
-		return (field.equals(fieldError.getField()) ||
-				(field.endsWith("*") && fieldError.getField().startsWith(field.substring(0, field.length() - 1))));
+		if (field.equals(fieldError.getField())) {
+			return true;
+		}
+		// Optimization: use chatAt instead of endsWith (SPR-11304, VESC-165)
+		int endIndex = field.length() - 1;
+		return (field.charAt(endIndex) == '*' && fieldError.getField().startsWith(field.substring(0, endIndex)));
 	}
 
 
