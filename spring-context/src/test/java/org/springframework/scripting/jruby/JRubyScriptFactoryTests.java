@@ -18,11 +18,10 @@ package org.springframework.scripting.jruby;
 
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -31,8 +30,7 @@ import org.springframework.scripting.ConfigurableMessenger;
 import org.springframework.scripting.Messenger;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.TestBeanAwareMessenger;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+import org.springframework.tests.sample.beans.TestBean;
 
 import static org.junit.Assert.*;
 
@@ -50,10 +48,6 @@ public class JRubyScriptFactoryTests {
 					"end\n" +
 					"RubyBar.new";
 
-	@Before
-	public void setUp() {
-		Assume.group(TestGroup.LONG_RUNNING);
-	}
 
 	@Test
 	public void testStaticScript() throws Exception {
@@ -106,7 +100,7 @@ public class JRubyScriptFactoryTests {
 	@Test
 	public void testCtorWithNullScriptSourceLocator() throws Exception {
 		try {
-			new JRubyScriptFactory(null, new Class<?>[]{Messenger.class});
+			new JRubyScriptFactory(null, Messenger.class);
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
@@ -116,7 +110,7 @@ public class JRubyScriptFactoryTests {
 	@Test
 	public void testCtorWithEmptyScriptSourceLocator() throws Exception {
 		try {
-			new JRubyScriptFactory("", new Class<?>[]{Messenger.class});
+			new JRubyScriptFactory("", Messenger.class);
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
@@ -126,7 +120,7 @@ public class JRubyScriptFactoryTests {
 	@Test
 	public void testCtorWithWhitespacedScriptSourceLocator() throws Exception {
 		try {
-			new JRubyScriptFactory("\n   ", new Class<?>[]{Messenger.class});
+			new JRubyScriptFactory("\n   ", Messenger.class);
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
@@ -136,7 +130,7 @@ public class JRubyScriptFactoryTests {
 	@Test
 	public void testCtorWithNullScriptInterfacesArray() throws Exception {
 		try {
-			new JRubyScriptFactory(RUBY_SCRIPT_SOURCE_LOCATOR, null);
+			new JRubyScriptFactory(RUBY_SCRIPT_SOURCE_LOCATOR);
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
@@ -291,7 +285,7 @@ public class JRubyScriptFactoryTests {
 	}
 
 	@Test
-	public void testAOP() throws Exception {
+	public void testAop() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jruby-aop.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
 		assertEquals(new StringBuffer("Hello World!").reverse().toString(), messenger.getMessage());
