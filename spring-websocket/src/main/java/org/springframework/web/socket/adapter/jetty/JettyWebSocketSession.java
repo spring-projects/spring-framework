@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,11 +55,24 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	/**
 	 * Create a new {@link JettyWebSocketSession} instance.
-	 * @param principal the user associated with the session, or {@code null}
+	 *
 	 * @param handshakeAttributes attributes from the HTTP handshake to make available
 	 *        through the WebSocket session
 	 */
-	public JettyWebSocketSession(Principal principal, Map<String, Object> handshakeAttributes) {
+	public JettyWebSocketSession(Map<String, Object> handshakeAttributes) {
+		this(handshakeAttributes, null);
+	}
+
+	/**
+	 * Create a new {@link JettyWebSocketSession} instance associated with the given user.
+	 *
+	 * @param handshakeAttributes attributes from the HTTP handshake to make available
+	 *        through the WebSocket session
+	 * @param principal the user associated with the session; can be left
+	 * 	{@code null} in which case, we'll fallback on the user available via
+	 * 	{@link org.eclipse.jetty.websocket.api.Session#getUpgradeRequest()}
+	 */
+	public JettyWebSocketSession(Map<String, Object> handshakeAttributes, Principal principal) {
 		super(handshakeAttributes);
 		this.principal = principal;
 	}
@@ -90,7 +103,11 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	@Override
 	public Principal getPrincipal() {
-		return this.principal;
+		if (this.principal != null) {
+			return this.principal;
+		}
+		checkNativeSessionInitialized();
+		return getNativeSession().getUpgradeRequest().getUserPrincipal();
 	}
 
 	@Override

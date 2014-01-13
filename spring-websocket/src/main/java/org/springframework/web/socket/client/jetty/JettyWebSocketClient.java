@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -186,7 +186,7 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Sma
 		}
 
 		Principal user = getUser();
-		final JettyWebSocketSession wsSession = new JettyWebSocketSession(user, handshakeAttributes);
+		final JettyWebSocketSession wsSession = new JettyWebSocketSession(handshakeAttributes, user);
 		final JettyWebSocketHandlerAdapter listener = new JettyWebSocketHandlerAdapter(wsHandler, wsSession);
 
 		return this.taskExecutor.submitListenable(new Callable<WebSocketSession>() {
@@ -201,7 +201,7 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Sma
 
 	/**
 	 * @return the user to make available through {@link WebSocketSession#getPrincipal()};
-	 * by default this method returns {@code null}
+	 * 	by default this method returns {@code null}
 	 */
 	protected Principal getUser() {
 		return null;
