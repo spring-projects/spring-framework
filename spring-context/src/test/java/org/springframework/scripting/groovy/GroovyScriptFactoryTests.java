@@ -64,11 +64,6 @@ import static org.mockito.BDDMockito.*;
 @SuppressWarnings("resource")
 public class GroovyScriptFactoryTests {
 
-	@Before
-	public void setUp() {
-		Assume.group(TestGroup.LONG_RUNNING);
-	}
-
 	@Test
 	public void testStaticScript() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovyContext.xml", getClass());
@@ -412,8 +407,6 @@ public class GroovyScriptFactoryTests {
 
 	@Test
 	public void testAnonymousScriptDetected() throws Exception {
-		Assume.group(TestGroup.LONG_RUNNING);
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
 		Map<?, Messenger> beans = ctx.getBeansOfType(Messenger.class);
 		assertEquals(4, beans.size());
@@ -490,6 +483,7 @@ public class GroovyScriptFactoryTests {
 		assertTrue(result instanceof String);
 		assertEquals("test", result);
 	}
+
 
 	public static class TestCustomizer implements GroovyObjectCustomizer {
 
