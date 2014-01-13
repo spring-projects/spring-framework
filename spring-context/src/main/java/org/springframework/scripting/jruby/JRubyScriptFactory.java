@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public class JRubyScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 
 	private final String scriptSourceLocator;
 
-	private final Class[] scriptInterfaces;
+	private final Class<?>[] scriptInterfaces;
 
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
@@ -59,7 +59,7 @@ public class JRubyScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	 * @param scriptInterfaces the Java interfaces that the scripted object
 	 * is supposed to implement
 	 */
-	public JRubyScriptFactory(String scriptSourceLocator, Class[] scriptInterfaces) {
+	public JRubyScriptFactory(String scriptSourceLocator, Class<?>... scriptInterfaces) {
 		Assert.hasText(scriptSourceLocator, "'scriptSourceLocator' must not be empty");
 		Assert.notEmpty(scriptInterfaces, "'scriptInterfaces' must not be empty");
 		this.scriptSourceLocator = scriptSourceLocator;
@@ -76,7 +76,7 @@ public class JRubyScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 		return this.scriptSourceLocator;
 	}
 
-	public Class[] getScriptInterfaces() {
+	public Class<?>[] getScriptInterfaces() {
 		return this.scriptInterfaces;
 	}
 
@@ -91,7 +91,7 @@ public class JRubyScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	 * Load and parse the JRuby script via JRubyScriptUtils.
 	 * @see JRubyScriptUtils#createJRubyObject(String, Class[], ClassLoader)
 	 */
-	public Object getScriptedObject(ScriptSource scriptSource, Class[] actualInterfaces)
+	public Object getScriptedObject(ScriptSource scriptSource, Class<?>... actualInterfaces)
 			throws IOException, ScriptCompilationException {
 		try {
 			return JRubyScriptUtils.createJRubyObject(
@@ -108,7 +108,7 @@ public class JRubyScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 		}
 	}
 
-	public Class getScriptedObjectType(ScriptSource scriptSource)
+	public Class<?> getScriptedObjectType(ScriptSource scriptSource)
 			throws IOException, ScriptCompilationException {
 
 		return null;
