@@ -28,11 +28,11 @@ import java.net.URL;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Utility for detecting the JBoss VFS version available in the classpath.
- * As of Spring 4.0, supports VFS 3.x on JBoss AS 6+ (package {@code org.jboss.vfs}).
+ * Utility for detecting and accessing JBoss VFS in the classpath.
+ * As of Spring 4.0, supports VFS 3.x on JBoss AS 6+ (package {@code org.jboss.vfs})
+ * and is in particular compatible with JBoss AS 7 and WildFly 8.
  *
  * <p>Thanks go to Marius Bogoevici for the initial patch.
- *
  * <b>Note:</b> This is an internal class and should not be used outside the framework.
  *
  * @author Costin Leau
