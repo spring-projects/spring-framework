@@ -87,6 +87,8 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 
 	private int misfireInstruction;
 
+	private String description;
+
 	private String beanName;
 
 	private SimpleTrigger simpleTrigger;
@@ -204,6 +206,13 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 		this.misfireInstruction = constants.asNumber(constantName).intValue();
 	}
 
+	/**
+	 * Associate a textual description with this trigger.
+	 */
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
@@ -234,6 +243,7 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 		sti.setRepeatCount(this.repeatCount);
 		sti.setPriority(this.priority);
 		sti.setMisfireInstruction(this.misfireInstruction);
+		cti.setDescription(this.description);
 		this.simpleTrigger = sti;
 		*/
 
@@ -267,6 +277,7 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 		pvs.add("repeatCount", this.repeatCount);
 		pvs.add("priority", this.priority);
 		pvs.add("misfireInstruction", this.misfireInstruction);
+		pvs.add("description", this.description);
 		bw.setPropertyValues(pvs);
 		this.simpleTrigger = (SimpleTrigger) bw.getWrappedInstance();
 	}

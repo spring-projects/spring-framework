@@ -84,9 +84,13 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 
 	private TimeZone timeZone;
 
+	private String calendarName;
+
 	private int priority;
 
 	private int misfireInstruction;
+
+	private String description;
 
 	private String beanName;
 
@@ -175,6 +179,13 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 	}
 
 	/**
+	 * Associate a specific calendar with this cron trigger.
+	 */
+	public void setCalendarName(String calendarName) {
+		this.calendarName = calendarName;
+	}
+
+	/**
 	 * Specify the priority of this trigger.
 	 */
 	public void setPriority(int priority) {
@@ -198,6 +209,13 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 	 */
 	public void setMisfireInstructionName(String constantName) {
 		this.misfireInstruction = constants.asNumber(constantName).intValue();
+	}
+
+	/**
+	 * Associate a textual description with this trigger.
+	 */
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public void setBeanName(String beanName) {
@@ -231,8 +249,10 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 		cti.setStartTime(this.startTime);
 		cti.setCronExpression(this.cronExpression);
 		cti.setTimeZone(this.timeZone);
+		cti.setCalendarName(this.calendarName);
 		cti.setPriority(this.priority);
 		cti.setMisfireInstruction(this.misfireInstruction);
+		cti.setDescription(this.description);
 		this.cronTrigger = cti;
 		*/
 
@@ -264,8 +284,10 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 		pvs.add("startTime", this.startTime);
 		pvs.add("cronExpression", this.cronExpression);
 		pvs.add("timeZone", this.timeZone);
+		pvs.add("calendarName", this.calendarName);
 		pvs.add("priority", this.priority);
 		pvs.add("misfireInstruction", this.misfireInstruction);
+		pvs.add("description", this.description);
 		bw.setPropertyValues(pvs);
 		this.cronTrigger = (CronTrigger) bw.getWrappedInstance();
 	}
