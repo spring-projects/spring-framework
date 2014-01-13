@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.expression.TypedValue;
 public class EnvironmentAccessor implements PropertyAccessor {
 
 	public Class<?>[] getSpecificTargetClasses() {
-		return new Class[] { Environment.class };
+		return new Class<?>[] {Environment.class};
 	}
 
 	/**
@@ -48,19 +48,18 @@ public class EnvironmentAccessor implements PropertyAccessor {
 	 * environment.
 	 */
 	public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-		return new TypedValue(((Environment)target).getProperty(name));
+		return new TypedValue(((Environment) target).getProperty(name));
 	}
 
 	/**
-	 * Read only.
-	 * @return false
+	 * Read-only: returns {@code false}.
 	 */
 	public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
 		return false;
 	}
 
 	/**
-	 * Read only. No-op.
+	 * Read-only: no-op.
 	 */
 	public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
 	}

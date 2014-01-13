@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -305,9 +305,11 @@ public class DefaultPersistenceUnitManager
 	/**
 	 * Specify the Spring LoadTimeWeaver to use for class instrumentation according
 	 * to the JPA class transformer contract.
-	 * <p>It is not required to specify a LoadTimeWeaver: Most providers will be
-	 * able to provide a subset of their functionality without class instrumentation
-	 * as well, or operate with their VM agent specified on JVM startup.
+	 * <p>It is not required to specify a LoadTimeWeaver: Most providers will be able
+	 * to provide a subset of their functionality without class instrumentation as well,
+	 * or operate with their own VM agent specified on JVM startup. Furthermore,
+	 * DefaultPersistenceUnitManager falls back to an InstrumentationLoadTimeWeaver
+	 * if Spring's agent-based instrumentation is available at runtime.
 	 * <p>In terms of Spring-provided weaving options, the most important ones are
 	 * InstrumentationLoadTimeWeaver, which requires a Spring-specific (but very general)
 	 * VM agent specified on JVM startup, and ReflectiveLoadTimeWeaver, which interacts
@@ -315,12 +317,11 @@ public class DefaultPersistenceUnitManager
 	 * on it (for example, interacting with Spring's TomcatInstrumentableClassLoader).
 	 * <p><b>NOTE:</b> As of Spring 2.5, the context's default LoadTimeWeaver (defined
 	 * as bean with name "loadTimeWeaver") will be picked up automatically, if available,
-	 * removing the need for LoadTimeWeaver configuration on each affected target bean.</b>
+	 * removing the need for LoadTimeWeaver configuration on each affected target bean.
 	 * Consider using the {@code context:load-time-weaver} XML tag for creating
 	 * such a shared LoadTimeWeaver (autodetecting the environment by default).
 	 * @see org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver
 	 * @see org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver
-	 * @see org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader
 	 */
 	public void setLoadTimeWeaver(LoadTimeWeaver loadTimeWeaver) {
 		this.loadTimeWeaver = loadTimeWeaver;
@@ -447,7 +448,7 @@ public class DefaultPersistenceUnitManager
 					}
 				}
 				catch (IOException ex) {
-					throw new PersistenceException("Failed to scan classpath for unlisted classes", ex);
+					throw new PersistenceException("Failed to scan classpath for unlisted entity classes", ex);
 				}
 			}
 		}

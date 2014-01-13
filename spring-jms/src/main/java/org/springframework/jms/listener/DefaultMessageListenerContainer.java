@@ -247,10 +247,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * transaction in case of a freshly obtained JMS {@code Connection} and {@code Session},
 	 * which is why this listener container by default does not cache any of those.
 	 * However, if you want to optimize for a specific server, consider switching
-	 * this setting to at least {@link #CACHE_CONNECTION} or {@link #CACHE_SESSION} even in
-	 * conjunction with an external transaction manager.
-	 * <p>Currently known servers that absolutely require {@link #CACHE_NONE} for XA
-	 * transaction processing: JBoss 4. For any others, consider raising the cache level.
+	 * this setting to at least {@link #CACHE_CONNECTION} or {@link #CACHE_SESSION}
+	 * even in conjunction with an external transaction manager.
 	 * @see #CACHE_NONE
 	 * @see #CACHE_CONNECTION
 	 * @see #CACHE_SESSION
