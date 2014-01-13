@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.servlet.request;
 
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -20,12 +21,12 @@ import org.springframework.mock.web.MockHttpServletRequest;
 /**
  * Extension point for applications or 3rd party libraries that wish to further
  * initialize a {@link MockHttpServletRequest} instance after it has been built
- * by {@link MockHttpServletRequestBuilder} or its sub-class
+ * by {@link MockHttpServletRequestBuilder} or its subclass
  * {@link MockMultipartHttpServletRequestBuilder}.
  *
  * <p>Implementations of this interface can be provided to
  * {@link MockHttpServletRequestBuilder#with(RequestPostProcessor)} at the time
- * when a request is about to be performed.
+ * when a request is about to be constructed.
  *
  * @author Rossen Stoyanchev
  * @author Rob Winch
@@ -36,9 +37,8 @@ public interface RequestPostProcessor {
 	/**
 	 * Post-process the given {@code MockHttpServletRequest} after its creation
 	 * and initialization through a {@code MockHttpServletRequestBuilder}.
-	 *
 	 * @param request the request to initialize
-	 * @return the request to use, either the one passed in or a wrapped one;
+	 * @return the request to use, either the one passed in or a wrapped one
 	 */
 	MockHttpServletRequest postProcessRequest(MockHttpServletRequest request);
 

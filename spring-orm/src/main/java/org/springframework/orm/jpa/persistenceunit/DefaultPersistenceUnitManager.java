@@ -343,9 +343,11 @@ public class DefaultPersistenceUnitManager
 	/**
 	 * Specify the Spring LoadTimeWeaver to use for class instrumentation according
 	 * to the JPA class transformer contract.
-	 * <p>It is not required to specify a LoadTimeWeaver: Most providers will be
-	 * able to provide a subset of their functionality without class instrumentation
-	 * as well, or operate with their VM agent specified on JVM startup.
+	 * <p>It is not required to specify a LoadTimeWeaver: Most providers will be able
+	 * to provide a subset of their functionality without class instrumentation as well,
+	 * or operate with their own VM agent specified on JVM startup. Furthermore,
+	 * DefaultPersistenceUnitManager falls back to an InstrumentationLoadTimeWeaver
+	 * if Spring's agent-based instrumentation is available at runtime.
 	 * <p>In terms of Spring-provided weaving options, the most important ones are
 	 * InstrumentationLoadTimeWeaver, which requires a Spring-specific (but very general)
 	 * VM agent specified on JVM startup, and ReflectiveLoadTimeWeaver, which interacts
@@ -355,7 +357,6 @@ public class DefaultPersistenceUnitManager
 	 * such a shared LoadTimeWeaver (autodetecting the environment by default).
 	 * @see org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver
 	 * @see org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver
-	 * @see org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader
 	 */
 	@Override
 	public void setLoadTimeWeaver(LoadTimeWeaver loadTimeWeaver) {
@@ -486,7 +487,7 @@ public class DefaultPersistenceUnitManager
 					}
 				}
 				catch (IOException ex) {
-					throw new PersistenceException("Failed to scan classpath for unlisted classes", ex);
+					throw new PersistenceException("Failed to scan classpath for unlisted entity classes", ex);
 				}
 			}
 		}

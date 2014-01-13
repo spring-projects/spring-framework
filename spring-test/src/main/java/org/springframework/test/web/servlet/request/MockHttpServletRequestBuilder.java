@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
@@ -70,9 +69,9 @@ import org.springframework.web.util.UriUtils;
  */
 public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable {
 
-	private final UriComponents uriComponents;
-
 	private final HttpMethod method;
+
+	private final UriComponents uriComponents;
 
 	private final MultiValueMap<String, Object> headers = new LinkedMultiValueMap<String, Object>();
 
@@ -88,9 +87,9 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 
 	private String characterEncoding;
 
-	private Principal principal;
-
 	private Boolean secure;
+
+	private Principal principal;
 
 	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
 
@@ -106,34 +105,28 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 
 	private String pathInfo = ValueConstants.DEFAULT_NONE;
 
-	private final List<RequestPostProcessor> postProcessors =
-			new ArrayList<RequestPostProcessor>();
+	private final List<RequestPostProcessor> postProcessors = new ArrayList<RequestPostProcessor>();
 
 
 	/**
 	 * Package private constructor. To get an instance, use static factory
 	 * methods in {@link MockMvcRequestBuilders}.
-	 *
 	 * <p>Although this class cannot be extended, additional ways to initialize
 	 * the {@code MockHttpServletRequest} can be plugged in via
 	 * {@link #with(RequestPostProcessor)}.
-	 *
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
 	 */
 	MockHttpServletRequestBuilder(HttpMethod httpMethod, String urlTemplate, Object... urlVariables) {
-
-		Assert.notNull(urlTemplate, "uriTemplate is required");
 		Assert.notNull(httpMethod, "httpMethod is required");
-
-		this.uriComponents = UriComponentsBuilder.fromUriString(urlTemplate).buildAndExpand(urlVariables).encode();
+		Assert.notNull(urlTemplate, "uriTemplate is required");
 		this.method = httpMethod;
+		this.uriComponents = UriComponentsBuilder.fromUriString(urlTemplate).buildAndExpand(urlVariables).encode();
 	}
 
 	/**
 	 * Add a request parameter to the {@link MockHttpServletRequest}.
 	 * If called more than once, the new values are added.
-	 *
 	 * @param name the parameter name
 	 * @param values one or more values
 	 */
@@ -144,7 +137,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 
 	/**
 	 * Add a header to the request. Values are always added.
-	 *
 	 * @param name the header name
 	 * @param values one or more header values
 	 */
@@ -155,7 +147,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 
 	/**
 	 * Add all headers to the request. Values are always added.
-	 *
 	 * @param httpHeaders the headers and values to add
 	 */
 	public MockHttpServletRequestBuilder headers(HttpHeaders httpHeaders) {
@@ -168,7 +159,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 
 	/**
 	 * Set the 'Content-Type' header of the request.
-	 *
 	 * @param mediaType the content type
 	 */
 	public MockHttpServletRequestBuilder contentType(MediaType mediaType) {
@@ -180,7 +170,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 
 	/**
 	 * Set the 'Accept' header to the given media type(s).
-	 *
 	 * @param mediaTypes one or more media types
 	 */
 	public MockHttpServletRequestBuilder accept(MediaType... mediaTypes) {
@@ -191,7 +180,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 
 	/**
 	 * Set the 'Accept' header to the given media type(s).
-	 *
 	 * @param mediaTypes one or more media types
 	 */
 	public MockHttpServletRequestBuilder accept(String... mediaTypes) {
@@ -206,7 +194,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 
 	/**
 	 * Set the request body.
-	 *
 	 * @param content the body content
 	 */
 	public MockHttpServletRequestBuilder content(byte[] content) {
@@ -216,7 +203,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 
 	/**
 	 * Set the request body as a UTF-8 String.
-	 *
 	 * @param content the body content
 	 */
 	public MockHttpServletRequestBuilder content(String content) {
@@ -231,7 +217,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 
 	/**
 	 * Add the given cookies to the request. Cookies are always added.
-	 *
 	 * @param cookies the cookies to add
 	 */
 	public MockHttpServletRequestBuilder cookie(Cookie... cookies) {
@@ -243,7 +228,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 
 	/**
 	 * Set the locale of the request.
-	 *
 	 * @param locale the locale
 	 */
 	public MockHttpServletRequestBuilder locale(Locale locale) {
@@ -253,7 +237,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 
 	/**
 	 * Set the character encoding of the request.
-	 *
 	 * @param encoding the character encoding
 	 */
 	public MockHttpServletRequestBuilder characterEncoding(String encoding) {
@@ -263,7 +246,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 
 	/**
 	 * Set a request attribute.
-	 *
 	 * @param name the attribute name
 	 * @param value the attribute value
 	 */
@@ -274,7 +256,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 
 	/**
 	 * Set a session attribute.
-	 *
 	 * @param name the session attribute name
 	 * @param value the session attribute value
 	 */
@@ -285,7 +266,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 
 	/**
 	 * Set session attributes.
-	 *
 	 * @param sessionAttributes the session attributes
 	 */
 	public MockHttpServletRequestBuilder sessionAttrs(Map<String, Object> sessionAttributes) {
@@ -298,7 +278,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 
 	/**
 	 * Set an "input" flash attribute.
-	 *
 	 * @param name the flash attribute name
 	 * @param value the flash attribute value
 	 */
@@ -309,7 +288,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 
 	/**
 	 * Set flash attributes.
-	 *
 	 * @param flashAttributes the flash attributes
 	 */
 	public MockHttpServletRequestBuilder flashAttrs(Map<String, Object> flashAttributes) {
@@ -322,10 +300,8 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 
 	/**
 	 * Set the HTTP session to use, possibly re-used across requests.
-	 *
 	 * <p>Individual attributes provided via {@link #sessionAttr(String, Object)}
 	 * override the content of the session provided here.
-	 *
 	 * @param session the HTTP session
 	 */
 	public MockHttpServletRequestBuilder session(MockHttpSession session) {
@@ -336,7 +312,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 
 	/**
 	 * Set the principal of the request.
-	 *
 	 * @param principal the principal
 	 */
 	public MockHttpServletRequestBuilder principal(Principal principal) {
@@ -347,16 +322,12 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 
 	/**
 	 * Specify the portion of the requestURI that represents the context path.
-	 * The context path, if specified, must match to the start of the request
-	 * URI.
-	 *
+	 * The context path, if specified, must match to the start of the request URI.
 	 * <p>In most cases, tests can be written by omitting the context path from
 	 * the requestURI. This is because most applications don't actually depend
 	 * on the name under which they're deployed. If specified here, the context
 	 * path must start with a "/" and must not end with a "/".
-	 *
-	 * @see <a
-	 * href="http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpServletRequest.html#getContextPath%28%29">HttpServletRequest.getContextPath()</a>
+	 * @see <a href="http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpServletRequest.html#getContextPath%28%29">HttpServletRequest.getContextPath()</a>
 	 */
 	public MockHttpServletRequestBuilder contextPath(String contextPath) {
 		if (StringUtils.hasText(contextPath)) {
@@ -371,7 +342,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	 * Specify the portion of the requestURI that represents the path to which
 	 * the Servlet is mapped. This is typically a portion of the requestURI
 	 * after the context path.
-	 *
 	 * <p>In most cases, tests can be written by omitting the servlet path from
 	 * the requestURI. This is because most applications don't actually depend
 	 * on the prefix to which a servlet is mapped. For example if a Servlet is
@@ -379,9 +349,7 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	 * {@code "/accounts/1"} as opposed to {@code "/main/accounts/1"}.
 	 * If specified here, the servletPath must start with a "/" and must not
 	 * end with a "/".
-	 *
-	 * @see <a
-	 * href="http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpServletRequest.html#getServletPath%28%29">HttpServletRequest.getServletPath()</a>
+	 * @see <a href="http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpServletRequest.html#getServletPath%28%29">HttpServletRequest.getServletPath()</a>
 	 */
 	public MockHttpServletRequestBuilder servletPath(String servletPath) {
 		if (StringUtils.hasText(servletPath)) {
@@ -394,14 +362,11 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 
 	/**
 	 * Specify the portion of the requestURI that represents the pathInfo.
-	 *
 	 * <p>If left unspecified (recommended), the pathInfo will be automatically
 	 * derived by removing the contextPath and the servletPath from the
 	 * requestURI and using any remaining part. If specified here, the pathInfo
 	 * must start with a "/".
-	 *
 	 * <p>If specified, the pathInfo will be used as is.
-	 *
 	 * @see <a
 	 * href="http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpServletRequest.html#getPathInfo%28%29">HttpServletRequest.getServletPath()</a>
 	 */
@@ -416,7 +381,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	/**
 	 * Set the secure property of the {@link ServletRequest} indicating use of a
 	 * secure channel, such as HTTPS.
-	 *
 	 * @param secure whether the request is using a secure channel
 	 */
 	public MockHttpServletRequestBuilder secure(boolean secure){
@@ -429,7 +393,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	 * in ways not built directly into the {@code MockHttpServletRequestBuilder}.
 	 * Implementation of this interface can have builder-style methods themselves
 	 * and be made accessible through static factory methods.
-	 *
 	 * @param postProcessor a post-processor to add
 	 */
 	public MockHttpServletRequestBuilder with(RequestPostProcessor postProcessor) {
@@ -450,7 +413,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	/**
 	 * Merges the properties of the "parent" RequestBuilder accepting values
 	 * only if not already set in "this" instance.
-	 *
 	 * @param parent the parent {@code RequestBuilder} to inherit properties from
 	 * @return the result of the merge
 	 */
@@ -462,7 +424,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 		if (!(parent instanceof MockHttpServletRequestBuilder)) {
 			throw new IllegalArgumentException("Cannot merge with [" + parent.getClass().getName() + "]");
 		}
-
 		MockHttpServletRequestBuilder parentBuilder = (MockHttpServletRequestBuilder) parent;
 
 		for (String headerName : parentBuilder.headers.keySet()) {
@@ -474,7 +435,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 		if (this.contentType == null) {
 			this.contentType = parentBuilder.contentType;
 		}
-
 		if (this.content == null) {
 			this.content = parentBuilder.content;
 		}
@@ -484,7 +444,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 				this.parameters.put(paramName, parentBuilder.parameters.get(paramName));
 			}
 		}
-
 		for (Cookie cookie : parentBuilder.cookies) {
 			if (!containsCookie(cookie)) {
 				this.cookies.add(cookie);
@@ -494,18 +453,17 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 		if (this.locale == null) {
 			this.locale = parentBuilder.locale;
 		}
-
 		if (this.characterEncoding == null) {
 			this.characterEncoding = parentBuilder.characterEncoding;
-		}
-
-		if (this.principal == null) {
-			this.principal = parentBuilder.principal;
 		}
 
 		if (this.secure == null) {
 			this.secure = parentBuilder.secure;
 		}
+		if (this.principal == null) {
+			this.principal = parentBuilder.principal;
+		}
+
 
 		for (String attributeName : parentBuilder.attributes.keySet()) {
 			if (!this.attributes.containsKey(attributeName)) {
@@ -547,8 +505,8 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	}
 
 	private boolean containsCookie(Cookie cookie) {
-		for (Cookie c : this.cookies) {
-			if (ObjectUtils.nullSafeEquals(c.getName(), cookie.getName())) {
+		for (Cookie cookieToCheck : this.cookies) {
+			if (ObjectUtils.nullSafeEquals(cookieToCheck.getName(), cookie.getName())) {
 				return true;
 			}
 		}
@@ -564,7 +522,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 
 		String requestUri = this.uriComponents.getPath();
 		request.setRequestURI(requestUri);
-
 		updatePathRequestProperties(request, requestUri);
 
 		if (this.uriComponents.getScheme() != null) {
@@ -578,7 +535,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 		}
 
 		request.setMethod(this.method.name());
-
 		for (String name : this.headers.keySet()) {
 			for (Object value : this.headers.get(name)) {
 				request.addHeader(name, value);
@@ -610,31 +566,26 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 
 		request.setContentType(this.contentType);
 		request.setContent(this.content);
-
 		request.setCookies(this.cookies.toArray(new Cookie[this.cookies.size()]));
 
 		if (this.locale != null) {
 			request.addPreferredLocale(this.locale);
 		}
-
 		request.setCharacterEncoding(this.characterEncoding);
-
-		request.setUserPrincipal(this.principal);
 
 		if (this.secure != null) {
 			request.setSecure(this.secure);
 		}
+		request.setUserPrincipal(this.principal);
 
 		for (String name : this.attributes.keySet()) {
 			request.setAttribute(name, this.attributes.get(name));
 		}
 
 		// Set session before session and flash attributes
-
 		if (this.session != null) {
 			request.setSession(this.session);
 		}
-
 		for (String name : this.sessionAttributes.keySet()) {
 			request.getSession().setAttribute(name, this.sessionAttributes.get(name));
 		}
@@ -646,10 +597,11 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 		flashMapManager.saveOutputFlashMap(flashMap, request, new MockHttpServletResponse());
 
 		// Apply post-processors at the very end
-
 		for (RequestPostProcessor postProcessor : this.postProcessors) {
 			request = postProcessor.postProcessRequest(request);
-			Assert.notNull(request, "Post-processor [" + postProcessor.getClass().getName() + "] returned null");
+			if (request == null) {
+				throw new IllegalStateException("Post-processor [" + postProcessor.getClass().getName() + "] returned null");
+			}
 		}
 
 		request.setAsyncSupported(true);
@@ -669,22 +621,16 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	 * Update the contextPath, servletPath, and pathInfo of the request.
 	 */
 	private void updatePathRequestProperties(MockHttpServletRequest request, String requestUri) {
-
 		Assert.isTrue(requestUri.startsWith(this.contextPath),
 				"requestURI [" + requestUri + "] does not start with contextPath [" + this.contextPath + "]");
-
 		request.setContextPath(this.contextPath);
 		request.setServletPath(this.servletPath);
-
 		if (ValueConstants.DEFAULT_NONE.equals(this.pathInfo)) {
-
 			Assert.isTrue(requestUri.startsWith(this.contextPath + this.servletPath),
 					"Invalid servletPath [" + this.servletPath + "] for requestURI [" + requestUri + "]");
-
 			String extraPath = requestUri.substring(this.contextPath.length() + this.servletPath.length());
 			this.pathInfo = (StringUtils.hasText(extraPath)) ? extraPath : null;
 		}
-
 		request.setPathInfo(this.pathInfo);
 	}
 
@@ -696,10 +642,12 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 			flashMapManager = wac.getBean(DispatcherServlet.FLASH_MAP_MANAGER_BEAN_NAME, FlashMapManager.class);
 		}
 		catch (IllegalStateException ex) {
+			// ignore
 		}
 		catch (NoSuchBeanDefinitionException ex) {
+			// ignore
 		}
-		return (flashMapManager != null) ? flashMapManager : new SessionFlashMapManager();
+		return (flashMapManager != null ? flashMapManager : new SessionFlashMapManager());
 	}
 
 	private static <T> void addToMultiValueMap(MultiValueMap<String, T> map, String name, T[] values) {

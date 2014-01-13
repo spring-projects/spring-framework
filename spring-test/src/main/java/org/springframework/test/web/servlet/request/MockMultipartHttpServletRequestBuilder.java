@@ -39,13 +39,11 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 
 
 	/**
-	 * Package private constructor. Use static factory methods in
+	 * Package-private constructor. Use static factory methods in
 	 * {@link MockMvcRequestBuilders}.
-	 *
 	 * <p>For other ways to initialize a {@code MockMultipartHttpServletRequest},
 	 * see {@link #with(RequestPostProcessor)} and the
 	 * {@link RequestPostProcessor} extension point.
-	 *
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
 	 */
@@ -54,9 +52,9 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 		super.contentType(MediaType.MULTIPART_FORM_DATA);
 	}
 
+
 	/**
 	 * Create a new MockMultipartFile with the given content.
-	 *
 	 * @param name the name of the file
 	 * @param content the content of the file
 	 */
@@ -67,7 +65,6 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 
 	/**
 	 * Add the given MockMultipartFile.
-	 *
 	 * @param file the multipart file
 	 */
 	public MockMultipartHttpServletRequestBuilder file(MockMultipartFile file) {
