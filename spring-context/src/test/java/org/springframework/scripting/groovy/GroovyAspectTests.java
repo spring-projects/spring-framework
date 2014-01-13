@@ -35,7 +35,6 @@ public class GroovyAspectTests {
 
 	@Test
 	public void testManualGroovyBeanWithUnconditionalPointcut() throws Exception {
-
 		LogUserAdvice logAdvice = new LogUserAdvice();
 
 		GroovyScriptFactory scriptFactory = new GroovyScriptFactory("GroovyServiceImpl.grv");
@@ -43,7 +42,6 @@ public class GroovyAspectTests {
 				new ClassPathResource("GroovyServiceImpl.grv", getClass())));
 
 		testAdvice(new DefaultPointcutAdvisor(logAdvice), logAdvice, target, "GroovyServiceImpl");
-
 	}
 
 	@Test
@@ -61,7 +59,6 @@ public class GroovyAspectTests {
 
 	@Test
 	public void testManualGroovyBeanWithDynamicPointcut() throws Exception {
-
 		LogUserAdvice logAdvice = new LogUserAdvice();
 
 		GroovyScriptFactory scriptFactory = new GroovyScriptFactory("GroovyServiceImpl.grv");
@@ -76,7 +73,6 @@ public class GroovyAspectTests {
 
 	@Test
 	public void testManualGroovyBeanWithDynamicPointcutProxyTargetClass() throws Exception {
-
 		LogUserAdvice logAdvice = new LogUserAdvice();
 
 		GroovyScriptFactory scriptFactory = new GroovyScriptFactory("GroovyServiceImpl.grv");
@@ -91,6 +87,7 @@ public class GroovyAspectTests {
 
 	private void testAdvice(Advisor advisor, LogUserAdvice logAdvice, TestService target, String message)
 			throws Exception {
+
 		testAdvice(advisor, logAdvice, target, message, false);
 	}
 
