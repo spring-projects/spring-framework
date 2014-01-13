@@ -367,8 +367,7 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	 * requestURI and using any remaining part. If specified here, the pathInfo
 	 * must start with a "/".
 	 * <p>If specified, the pathInfo will be used as is.
-	 * @see <a
-	 * href="http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpServletRequest.html#getPathInfo%28%29">HttpServletRequest.getServletPath()</a>
+	 * @see <a href="http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpServletRequest.html#getPathInfo%28%29">HttpServletRequest.getServletPath()</a>
 	 */
 	public MockHttpServletRequestBuilder pathInfo(String pathInfo) {
 		if (StringUtils.hasText(pathInfo)) {
@@ -463,7 +462,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 		if (this.principal == null) {
 			this.principal = parentBuilder.principal;
 		}
-
 
 		for (String attributeName : parentBuilder.attributes.keySet()) {
 			if (!this.attributes.containsKey(attributeName)) {

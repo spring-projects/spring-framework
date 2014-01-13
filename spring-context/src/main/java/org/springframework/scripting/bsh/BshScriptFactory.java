@@ -86,6 +86,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 		this.scriptInterfaces = scriptInterfaces;
 	}
 
+
 	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
