@@ -50,7 +50,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	private List<WebSocketExtension> extensions;
 
-	private final Principal principal;
+	private final Principal user;
 
 
 	/**
@@ -68,13 +68,13 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 	 *
 	 * @param handshakeAttributes attributes from the HTTP handshake to make available
 	 *        through the WebSocket session
-	 * @param principal the user associated with the session; can be left
+	 * @param user the user associated with the session; can be left
 	 * 	{@code null} in which case, we'll fallback on the user available via
 	 * 	{@link org.eclipse.jetty.websocket.api.Session#getUpgradeRequest()}
 	 */
-	public JettyWebSocketSession(Map<String, Object> handshakeAttributes, Principal principal) {
+	public JettyWebSocketSession(Map<String, Object> handshakeAttributes, Principal user) {
 		super(handshakeAttributes);
-		this.principal = principal;
+		this.user = user;
 	}
 
 
@@ -103,8 +103,8 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	@Override
 	public Principal getPrincipal() {
-		if (this.principal != null) {
-			return this.principal;
+		if (this.user != null) {
+			return this.user;
 		}
 		checkNativeSessionInitialized();
 		return getNativeSession().getUpgradeRequest().getUserPrincipal();

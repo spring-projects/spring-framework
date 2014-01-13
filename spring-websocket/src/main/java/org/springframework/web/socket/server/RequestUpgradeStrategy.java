@@ -16,6 +16,7 @@
 
 package org.springframework.web.socket.server;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -49,6 +50,7 @@ public interface RequestUpgradeStrategy {
 	 * @param response the current response
 	 * @param selectedProtocol the selected sub-protocol, if any
 	 * @param selectedExtensions the selected WebSocket protocol extensions
+	 * @param user the user to associate with the WebSocket session
 	 * @param wsHandler the handler for WebSocket messages
 	 * @param attributes handshake request specific attributes to be set on the WebSocket
 	 * session via {@link org.springframework.web.socket.server.HandshakeInterceptor}
@@ -60,7 +62,7 @@ public interface RequestUpgradeStrategy {
 	 * handshake request.
 	 */
 	void upgrade(ServerHttpRequest request, ServerHttpResponse response,
-			String selectedProtocol, List<WebSocketExtension> selectedExtensions,
+			String selectedProtocol, List<WebSocketExtension> selectedExtensions, Principal user,
 			WebSocketHandler wsHandler, Map<String, Object> attributes) throws HandshakeFailureException;
 
 }

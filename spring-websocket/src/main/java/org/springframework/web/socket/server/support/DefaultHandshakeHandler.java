@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.socket.server.support;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -199,11 +200,13 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 		List<WebSocketExtension> supported = this.requestUpgradeStrategy.getSupportedExtensions(request);
 		List<WebSocketExtension> extensions = filterRequestedExtensions(request, requested, supported);
 
+		Principal user = determineUser(request, wsHandler, attributes);
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Upgrading request, sub-protocol=" + subProtocol + ", extensions=" + extensions);
 		}
 
-		this.requestUpgradeStrategy.upgrade(request, response, subProtocol, extensions, wsHandler, attributes);
+		this.requestUpgradeStrategy.upgrade(request, response, subProtocol, extensions, user, wsHandler, attributes);
 
 		return true;
 	}
@@ -324,6 +327,27 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 			}
 		}
 		return requested;
+	}
+
+	/**
+	 * A method that can be used to associate a user with the WebSocket session
+	 * in the process of being established. The default implementation calls
+	 * {@link org.springframework.http.server.ServerHttpRequest#getPrincipal()}
+	 * <p>
+	 * Sub-classes can provide custom logic for associating a user with a session,
+	 * for example for assigning a name to anonymous users (i.e. not fully
+	 * authenticated).
+	 *
+	 * @param request the handshake request
+	 * @param wsHandler the WebSocket handler that will handle messages
+	 * @param attributes handshake attributes to pass to the WebSocket session
+	 *
+	 * @return the user for the WebSocket session or {@code null}
+	 */
+	protected Principal determineUser(ServerHttpRequest request, WebSocketHandler wsHandler,
+			Map<String, Object> attributes) {
+
+		return request.getPrincipal();
 	}
 
 }

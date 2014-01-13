@@ -17,6 +17,7 @@
 package org.springframework.web.socket.server.jetty;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -130,7 +131,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	@Override
 	public void upgrade(ServerHttpRequest request, ServerHttpResponse response,
-			String selectedProtocol, List<WebSocketExtension> selectedExtensions,
+			String selectedProtocol, List<WebSocketExtension> selectedExtensions, Principal user,
 			WebSocketHandler wsHandler, Map<String, Object> attributes) throws HandshakeFailureException {
 
 		Assert.isInstanceOf(ServletServerHttpRequest.class, request);
@@ -141,7 +142,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 		Assert.isTrue(this.factory.isUpgradeRequest(servletRequest, servletResponse), "Not a WebSocket handshake");
 
-		JettyWebSocketSession session = new JettyWebSocketSession(attributes, request.getPrincipal());
+		JettyWebSocketSession session = new JettyWebSocketSession(attributes, user);
 		JettyWebSocketHandlerAdapter handlerAdapter = new JettyWebSocketHandlerAdapter(wsHandler, session);
 
 		WebSocketHandlerContainer container =

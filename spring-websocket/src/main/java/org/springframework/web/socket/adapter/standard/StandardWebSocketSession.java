@@ -54,11 +54,14 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 
 	private final InetSocketAddress remoteAddress;
 
+	private final Principal user;
+
 	private List<WebSocketExtension> extensions;
 
 
 	/**
 	 * Class constructor.
+	 *
 	 * @param headers the headers of the handshake request
 	 * @param handshakeAttributes attributes from the HTTP handshake to make available
 	 * through the WebSocket session
@@ -67,11 +70,30 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	 */
 	public StandardWebSocketSession(HttpHeaders headers, Map<String, Object> handshakeAttributes,
 			InetSocketAddress localAddress, InetSocketAddress remoteAddress) {
+
+		this(headers, handshakeAttributes, localAddress, remoteAddress, null);
+	}
+
+	/**
+	 * Class constructor that associates a user with the WebSocket session.
+	 *
+	 * @param headers the headers of the handshake request
+	 * @param handshakeAttributes attributes from the HTTP handshake to make available
+	 * through the WebSocket session
+	 * @param localAddress the address on which the request was received
+	 * @param remoteAddress the address of the remote client
+	 * @param user the user associated with the session; can be left
+	 * 	{@code null} in which case, we'll fallback on the user available via
+	 */
+	public StandardWebSocketSession(HttpHeaders headers, Map<String, Object> handshakeAttributes,
+			InetSocketAddress localAddress, InetSocketAddress remoteAddress, Principal user) {
+
 		super(handshakeAttributes);
 		headers = (headers != null) ? headers : new HttpHeaders();
 		this.handshakeHeaders = HttpHeaders.readOnlyHttpHeaders(headers);
 		this.localAddress = localAddress;
 		this.remoteAddress = remoteAddress;
+		this.user = user;
 	}
 
 	@Override
@@ -93,6 +115,9 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 
 	@Override
 	public Principal getPrincipal() {
+		if (this.user != null) {
+			return this.user;
+		}
 		checkNativeSessionInitialized();
 		return getNativeSession().getUserPrincipal();
 	}

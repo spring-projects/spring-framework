@@ -77,7 +77,7 @@ public class DefaultHandshakeHandlerTests extends AbstractHttpRequestTests {
 		this.handshakeHandler.doHandshake(this.request, this.response, handler, attributes);
 
 		verify(this.upgradeStrategy).upgrade(this.request, this.response,
-				"STOMP", Collections.<WebSocketExtension>emptyList(), handler, attributes);
+				"STOMP", Collections.<WebSocketExtension>emptyList(), null, handler, attributes);
 	}
 
 	@Test
@@ -99,7 +99,7 @@ public class DefaultHandshakeHandlerTests extends AbstractHttpRequestTests {
 		this.handshakeHandler.doHandshake(this.request, this.response, handler, attributes);
 
 		verify(this.upgradeStrategy).upgrade(this.request, this.response,
-				"v11.stomp", Collections.<WebSocketExtension>emptyList(), handler, attributes);
+				"v11.stomp", Collections.<WebSocketExtension>emptyList(), null, handler, attributes);
 	}
 
 	@Test
@@ -121,7 +121,7 @@ public class DefaultHandshakeHandlerTests extends AbstractHttpRequestTests {
 		this.handshakeHandler.doHandshake(this.request, this.response, handler, attributes);
 
 		verify(this.upgradeStrategy).upgrade(this.request, this.response,
-				null, Collections.<WebSocketExtension>emptyList(), handler, attributes);
+				null, Collections.<WebSocketExtension>emptyList(), null, handler, attributes);
 	}
 
 

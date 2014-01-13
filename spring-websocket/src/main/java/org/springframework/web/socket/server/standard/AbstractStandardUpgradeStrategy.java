@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.socket.server.standard;
 
 import java.net.InetSocketAddress;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -86,15 +87,15 @@ public abstract class AbstractStandardUpgradeStrategy implements RequestUpgradeS
 
 	@Override
 	public void upgrade(ServerHttpRequest request, ServerHttpResponse response,
-			String selectedProtocol, List<WebSocketExtension> selectedExtensions,
-			WebSocketHandler wsHandler, Map<String, Object> attributes) throws HandshakeFailureException {
+			String selectedProtocol, List<WebSocketExtension> selectedExtensions, Principal user,
+			WebSocketHandler wsHandler, Map<String, Object> attrs) throws HandshakeFailureException {
 
 		HttpHeaders headers = request.getHeaders();
 
 		InetSocketAddress localAddr = request.getLocalAddress();
 		InetSocketAddress remoteAddr = request.getRemoteAddress();
 
-		StandardWebSocketSession session = new StandardWebSocketSession(headers, attributes, localAddr, remoteAddr);
+		StandardWebSocketSession session = new StandardWebSocketSession(headers, attrs, localAddr, remoteAddr, user);
 		StandardWebSocketHandlerAdapter endpoint = new StandardWebSocketHandlerAdapter(wsHandler, session);
 
 		List<Extension> extensions = new ArrayList<Extension>();
