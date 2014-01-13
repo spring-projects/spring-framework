@@ -15,20 +15,17 @@
  */
 package org.springframework.test.web.servlet.request;
 
-import java.lang.reflect.Method;
-
 import javax.servlet.ServletContext;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Static factory methods for {@link RequestBuilder}s.
  *
- * <p><strong>Eclipse users:</strong> consider adding this class as a Java
+ * <p><strong>Eclipse users:</strong> Consider adding this class as a Java
  * editor favorite. To navigate, open the Preferences and type "favorites".
  *
  * @author Arjen Poutsma
@@ -38,12 +35,8 @@ import org.springframework.util.ReflectionUtils;
  */
 public abstract class MockMvcRequestBuilders {
 
-	private MockMvcRequestBuilders() {
-	}
-
 	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a GET request.
-	 *
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
 	 */
@@ -53,7 +46,6 @@ public abstract class MockMvcRequestBuilders {
 
 	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a POST request.
-	 *
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
 	 */
@@ -63,7 +55,6 @@ public abstract class MockMvcRequestBuilders {
 
 	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a PUT request.
-	 *
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
 	 */
@@ -73,7 +64,6 @@ public abstract class MockMvcRequestBuilders {
 
 	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a PATCH request.
-	 *
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
 	 */
@@ -83,7 +73,6 @@ public abstract class MockMvcRequestBuilders {
 
 	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a DELETE request.
-	 *
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
 	 */
@@ -93,7 +82,6 @@ public abstract class MockMvcRequestBuilders {
 
 	/**
      * Create a {@link MockHttpServletRequestBuilder} for an OPTIONS request.
-     *
      * @param urlTemplate a URL template; the resulting URL will be encoded
      * @param urlVariables zero or more URL variables
      */
@@ -104,7 +92,6 @@ public abstract class MockMvcRequestBuilders {
 
 	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a request with the given HTTP method.
-	 *
 	 * @param httpMethod the HTTP method
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
@@ -115,7 +102,6 @@ public abstract class MockMvcRequestBuilders {
 
 	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a multipart request.
-	 *
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
 	 */
@@ -126,14 +112,12 @@ public abstract class MockMvcRequestBuilders {
 	/**
 	 * Create a {@link RequestBuilder} for an async dispatch from the
 	 * {@link MvcResult} of the request that started async processing.
-	 *
 	 * <p>Usage involves performing one request first that starts async processing:
 	 * <pre class="code">
 	 * MvcResult mvcResult = this.mockMvc.perform(get("/1"))
 	 *	.andExpect(request().asyncStarted())
 	 *	.andReturn();
 	 *  </pre>
-	 *
 	 * <p>And then performing the async dispatch re-using the {@code MvcResult}:
 	 * <pre class="code">
 	 * this.mockMvc.perform(asyncDispatch(mvcResult))
@@ -141,7 +125,6 @@ public abstract class MockMvcRequestBuilders {
 	 * 	.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 	 * 	.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 	 * </pre>
-	 *
 	 * @param mvcResult the result from the request that started async processing
 	 */
 	public static RequestBuilder asyncDispatch(final MvcResult mvcResult) {
@@ -149,9 +132,7 @@ public abstract class MockMvcRequestBuilders {
 			@Override
 			public MockHttpServletRequest buildRequest(ServletContext servletContext) {
 				MockHttpServletRequest request = mvcResult.getRequest();
-				Method method = ReflectionUtils.findMethod(request.getClass(), "setAsyncStarted", boolean.class);
-				method.setAccessible(true);
-				ReflectionUtils.invokeMethod(method, request, false);
+				request.setAsyncStarted(false);
 				return request;
 			}
 		};
