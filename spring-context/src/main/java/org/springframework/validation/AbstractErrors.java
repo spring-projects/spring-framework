@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.util.StringUtils;
  * of {@link ObjectError ObjectErrors} and {@link FieldError FieldErrors}.
  *
  * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  * @since 2.5.3
  */
 @SuppressWarnings("serial")
@@ -205,8 +206,12 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	 * @return whether the FieldError matches the given field
 	 */
 	protected boolean isMatchingFieldError(String field, FieldError fieldError) {
-		return (field.equals(fieldError.getField()) ||
-				(field.endsWith("*") && fieldError.getField().startsWith(field.substring(0, field.length() - 1))));
+		if (field.equals(fieldError.getField())) {
+			return true;
+		}
+		// Optimization: use charAt instead of endsWith (SPR-11304)
+		int endIndex = field.length() - 1;
+		return (field.charAt(endIndex) == '*' && fieldError.getField().startsWith(field.substring(0, endIndex)));
 	}
 
 
