@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,10 +83,12 @@ public class MessageBrokerBeanDefinitionParserTests {
 		HttpRequestHandler httpRequestHandler = (HttpRequestHandler) suhm.getUrlMap().get("/foo");
 		assertNotNull(httpRequestHandler);
 		assertThat(httpRequestHandler, Matchers.instanceOf(WebSocketHttpRequestHandler.class));
+
 		WebSocketHttpRequestHandler wsHttpRequestHandler = (WebSocketHttpRequestHandler) httpRequestHandler;
 		WebSocketHandler wsHandler = unwrapWebSocketHandler(wsHttpRequestHandler.getWebSocketHandler());
 		assertNotNull(wsHandler);
 		assertThat(wsHandler, Matchers.instanceOf(SubProtocolWebSocketHandler.class));
+
 		SubProtocolWebSocketHandler subProtocolWsHandler = (SubProtocolWebSocketHandler) wsHandler;
 		assertEquals(Arrays.asList("v10.stomp", "v11.stomp", "v12.stomp"), subProtocolWsHandler.getSubProtocols());
 
@@ -97,6 +99,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		httpRequestHandler = (HttpRequestHandler) suhm.getUrlMap().get("/test/**");
 		assertNotNull(httpRequestHandler);
 		assertThat(httpRequestHandler, Matchers.instanceOf(SockJsHttpRequestHandler.class));
+
 		SockJsHttpRequestHandler sockJsHttpRequestHandler = (SockJsHttpRequestHandler) httpRequestHandler;
 		wsHandler = unwrapWebSocketHandler(sockJsHttpRequestHandler.getWebSocketHandler());
 		assertNotNull(wsHandler);
@@ -111,11 +114,14 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertThat(userDestResolver, Matchers.instanceOf(DefaultUserDestinationResolver.class));
 		DefaultUserDestinationResolver defaultUserDestResolver = (DefaultUserDestinationResolver) userDestResolver;
 		assertEquals("/personal/", defaultUserDestResolver.getDestinationPrefix());
-
 		assertSame(stompHandler.getUserSessionRegistry(), defaultUserDestResolver.getUserSessionRegistry());
 
 		UserDestinationMessageHandler userDestHandler = this.appContext.getBean(UserDestinationMessageHandler.class);
 		assertNotNull(userDestHandler);
+
+		SimpleBrokerMessageHandler brokerMessageHandler = this.appContext.getBean(SimpleBrokerMessageHandler.class);
+		assertNotNull(brokerMessageHandler);
+		assertEquals(Arrays.asList("/topic", "/queue"), brokerMessageHandler.getDestinationPrefixes());
 
 		List<Class<? extends MessageHandler>> subscriberTypes =
 				Arrays.<Class<? extends MessageHandler>>asList(SimpAnnotationMethodMessageHandler.class,

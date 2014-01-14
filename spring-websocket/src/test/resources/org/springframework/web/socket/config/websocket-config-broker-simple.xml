@@ -12,7 +12,7 @@
             <websocket:handshake-handler ref="myHandler"/>
             <websocket:sockjs/>
         </websocket:stomp-endpoint>
-        <websocket:simple-broker prefix="/topic"/>
+        <websocket:simple-broker prefix="/topic, /queue"/>
     </websocket:message-broker>
 
     <bean id="myHandler" class="org.springframework.web.socket.config.TestHandshakeHandler"/>

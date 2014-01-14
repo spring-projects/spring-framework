@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.socket.config;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -131,7 +132,8 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 			ManagedMap<String, Object> urlMap = new ManagedMap<String, Object>();
 			Object source = parserContext.extractSource(mappingElement);
 
-			List<String> mappings = Arrays.asList(mappingElement.getAttribute("path").split(","));
+			String path = mappingElement.getAttribute("path");
+			List<String> mappings = Arrays.asList(StringUtils.tokenizeToStringArray(path, ","));
 			RuntimeBeanReference webSocketHandlerReference = new RuntimeBeanReference(mappingElement.getAttribute("handler"));
 
 			ConstructorArgumentValues cavs = new ConstructorArgumentValues();
@@ -168,7 +170,8 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 			ManagedMap<String, Object> urlMap = new ManagedMap<String, Object>();
 			Object source = parserContext.extractSource(mappingElement);
 
-			List<String> mappings = Arrays.asList(mappingElement.getAttribute("path").split(","));
+			String pathValue = mappingElement.getAttribute("path");
+			List<String> mappings = Arrays.asList(StringUtils.tokenizeToStringArray(pathValue, ","));
 			RuntimeBeanReference webSocketHandlerReference = new RuntimeBeanReference(mappingElement.getAttribute("handler"));
 
 			ConstructorArgumentValues cavs = new ConstructorArgumentValues();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,7 +135,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			String pathAttribute = stompEndpointElem.getAttribute("path");
 			Assert.state(StringUtils.hasText(pathAttribute), "Invalid <stomp-endpoint> (no path mapping)");
 
-			List<String> paths = Arrays.asList(pathAttribute.split(","));
+			List<String> paths = Arrays.asList(StringUtils.tokenizeToStringArray(pathAttribute, ","));
 			for(String path : paths) {
 				path = path.trim();
 				Assert.state(StringUtils.hasText(path), "Invalid <stomp-endpoint> path attribute: " + pathAttribute);
@@ -286,14 +286,14 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		if (simpleBrokerElem != null) {
 
 			String prefix = simpleBrokerElem.getAttribute("prefix");
-			cavs.addIndexedArgumentValue(3, Arrays.asList(prefix.split(",")));
+			cavs.addIndexedArgumentValue(3, Arrays.asList(StringUtils.tokenizeToStringArray(prefix, ",")));
 			RootBeanDefinition brokerDef = new RootBeanDefinition(SimpleBrokerMessageHandler.class, cavs, null);
 			registerBeanDef(brokerDef, parserCxt, source);
 		}
 		else if (brokerRelayElem != null) {
 
 			String prefix = brokerRelayElem.getAttribute("prefix");
-			cavs.addIndexedArgumentValue(3, Arrays.asList(prefix.split(",")));
+			cavs.addIndexedArgumentValue(3, Arrays.asList(StringUtils.tokenizeToStringArray(prefix, ",")));
 
 			MutablePropertyValues mpvs = new MutablePropertyValues();
 			String relayHost = brokerRelayElem.getAttribute("relay-host");
@@ -397,7 +397,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			RuntimeBeanReference brokerMessageConverterRef, RuntimeBeanReference brokerMessagingTemplateRef,
 			ParserContext parserCxt, Object source) {
 
-		String applicationDestinationPrefix = messageBrokerElement.getAttribute("application-destination-prefix");
+		String appDestPrefix = messageBrokerElement.getAttribute("application-destination-prefix");
 
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addIndexedArgumentValue(0, clientInChannelDef);
@@ -405,7 +405,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		cavs.addIndexedArgumentValue(2, brokerMessagingTemplateRef);
 
 		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.add("destinationPrefixes",Arrays.asList(applicationDestinationPrefix.split(",")));
+		mpvs.add("destinationPrefixes",Arrays.asList(StringUtils.tokenizeToStringArray(appDestPrefix, ",")));
 		mpvs.add("messageConverter", brokerMessageConverterRef);
 
 		RootBeanDefinition annotationMethodMessageHandlerDef =
