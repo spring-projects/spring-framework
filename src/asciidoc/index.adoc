@@ -28772,7 +28772,7 @@ A matrix variable may be defined as optional and a default value specified:
 	// GET /pets/42
 
 	@RequestMapping(value = "/pets/{petId}", method = RequestMethod.GET)
-	public void findPet(@MatrixVariable(required=true, defaultValue="1") int q) {
+	public void findPet(@MatrixVariable(required=false, defaultValue="1") int q) {
 
 		// q == 1
 
