@@ -3358,13 +3358,13 @@ prototype-scoped bean repeatedly at runtime. You cannot dependency-inject a
 prototype-scoped bean into your singleton bean, because that injection occurs only
 __once__, when the Spring container is instantiating the singleton bean and resolving
 and injecting its dependencies. If you need a new instance of a prototype bean at
-runtime more than once, see <<beans-factory-method-injection>>
+runtime more than once, see <<beans-factory-method-injection>>.
 
 
 
 [[beans-factory-scopes-other]]
 ==== Request, session, and global session scopes
-The `request`, `session`, and `global session` scopes are __only__ available if you use
+The request, session, and global session scopes are __only__ available if you use
 a web-aware Spring `ApplicationContext` implementation (such as
 `XmlWebApplicationContext`). If you use these scopes with regular Spring IoC containers
 such as the `ClassPathXmlApplicationContext`, you get an `IllegalStateException`
@@ -3373,12 +3373,12 @@ complaining about an unknown bean scope.
 
 [[beans-factory-scopes-other-web-configuration]]
 ===== Initial web configuration
-To support the scoping of beans at the `request`, `session`, and `global session` levels
+To support the scoping of beans at the request, session, and global session levels
 (web-scoped beans), some minor initial configuration is required before you define your
-beans. (This initial setup is __not__ required for the standard scopes, singleton and
+beans. (This initial setup is __not__ required for the standard scopes: singleton and
 prototype.)
 
-How you accomplish this initial setup depends on your particular Servlet environment..
+How you accomplish this initial setup depends on your particular Servlet environment.
 
 If you access scoped beans within Spring Web MVC, in effect, within a request that is
 processed by the Spring `DispatcherServlet`, or `DispatcherPortlet`, then no special
@@ -3386,7 +3386,7 @@ setup is necessary: `DispatcherServlet` and `DispatcherPortlet` already expose a
 relevant state.
 
 If you use a Servlet 2.4+ web container, with requests processed outside of Spring's
-DispatcherServlet (for example, when using JSF or Struts), you need to register the
+`DispatcherServlet` (for example, when using JSF or Struts), you need to register the
 `org.springframework.web.context.request.RequestContextListener` `ServletRequestListener`.
 For Servlet 3.0+, this can done programmatically via the `WebApplicationInitializer`
 interface. Alternatively, or for older containers, add the following declaration to your
@@ -3409,7 +3409,7 @@ web applications `web.xml` file:
 If you use an older web container (Servlet 2.3), use the provided `javax.servlet.Filter`
 implementation. The following snippet of XML configuration must be included in the
 `web.xml` file of your web application if you want to access web-scoped beans in
-requests outside of Spring's DispatcherServlet on a Servlet 2.3 container. (The filter
+requests outside of Spring's `DispatcherServlet` on a Servlet 2.3 container. (The filter
 mapping depends on the surrounding web application configuration, so you must change it
 as appropriate.)
 
@@ -3451,7 +3451,7 @@ The Spring container creates a new instance of the `LoginAction` bean by using t
 `loginAction` bean is scoped at the HTTP request level. You can change the internal
 state of the instance that is created as much as you want, because other instances
 created from the same `loginAction` bean definition will not see these changes in state;
-they are particular to an individual request. When the request completes processing, the
+they are particular to an individual request. When the request processing completes, the
 bean that is scoped to the request is discarded.
 
 
@@ -3466,14 +3466,14 @@ Consider the following bean definition:
 ----
 
 The Spring container creates a new instance of the `UserPreferences` bean by using the
-`userPreferences` bean definition for the lifetime of a single HTTP `Session`. In other
-words, the `userPreferences` bean is effectively scoped at the HTTP `Session` level. As
-with `request-scoped` beans, you can change the internal state of the instance that is
-created as much as you want, knowing that other HTTP `Session` instances that are also
+`userPreferences` bean definition for the lifetime of a single HTTP session. In other
+words, the `userPreferences` bean is effectively scoped at the HTTP session level. As
+with request-scoped beans, you can change the internal state of the instance that is
+created as much as you want, knowing that other HTTP session instances that are also
 using instances created from the same `userPreferences` bean definition do not see these
-changes in state, because they are particular to an individual HTTP `Session`. When the
-HTTP `Session` is eventually discarded, the bean that is scoped to that particular HTTP
-`Session` is also discarded.
+changes in state, because they are particular to an individual HTTP session. When the
+HTTP session is eventually discarded, the bean that is scoped to that particular HTTP
+session is also discarded.
 
 
 [[beans-factory-scopes-global-session]]
@@ -3486,15 +3486,15 @@ Consider the following bean definition:
 	<bean id="userPreferences" class="com.foo.UserPreferences" scope="globalSession"/>
 ----
 
-The `global session` scope is similar to the standard HTTP `Session` scope
+The global session scope is similar to the standard HTTP session scope
 (<<beans-factory-scopes-session,described above>>), and applies only in the context of
 portlet-based web applications. The portlet specification defines the notion of a global
-`Session` that is shared among all portlets that make up a single portlet web
-application. Beans defined at the `global session` scope are scoped (or bound) to the
-lifetime of the global portlet `Session`.
+session that is shared among all portlets that make up a single portlet web
+application. Beans defined at the global session scope are scoped (or bound) to the
+lifetime of the global portlet session.
 
 If you write a standard Servlet-based web application and you define one or more beans
-as having `global session` scope, the standard HTTP `Session` scope is used, and no
+as having global session scope, the standard HTTP session scope is used, and no
 error is raised.
 
 
@@ -3502,19 +3502,19 @@ error is raised.
 ===== Scoped beans as dependencies
 The Spring IoC container manages not only the instantiation of your objects (beans), but
 also the wiring up of collaborators (or dependencies). If you want to inject (for
-example) an HTTP request scoped bean into another bean, you must inject an AOP proxy in
+example) an HTTP request-scoped bean into another bean, you must inject an AOP proxy in
 place of the scoped bean. That is, you need to inject a proxy object that exposes the
-same public interface as the scoped object but that can also retrieve the real, target
+same public interface as the scoped object, but that can also retrieve the real, target
 object from the relevant scope (for example, an HTTP request) and delegate method calls
 onto the real object.
 
 [NOTE]
 ====
 You __do not__ need to use the `<aop:scoped-proxy/>` in conjunction with beans that are
-scoped as `singletons` or `prototypes`.
+scoped as singletons or prototypes.
 ====
 
-The configuration in the following example is only one line, but it is important to
+The configuration in the following example contains only one additional line, but it is important to
 understand the "why" as well as the "how" behind it.
 
 [source,xml,indent=0]
@@ -3545,8 +3545,8 @@ understand the "why" as well as the "how" behind it.
 
 To create such a proxy, you insert a child `<aop:scoped-proxy/>` element into a scoped
 bean definition. See <<beans-factory-scopes-other-injection-proxies>> and
-<<xsd-config>>.) Why do definitions of beans scoped at the `request`, `session`,
-`globalSession` and custom-scope levels require the `<aop:scoped-proxy/>` element ?
+<<xsd-config>>. Why do definitions of beans scoped at the request, session,
+global session and custom-scope levels require the `<aop:scoped-proxy/>` element ?
 Let's examine the following singleton bean definition and contrast it with what you need
 to define for the aforementioned scopes. (The following `userPreferences` bean
 definition as it stands is __incomplete.)__
@@ -3562,7 +3562,7 @@ definition as it stands is __incomplete.)__
 ----
 
 In the preceding example, the singleton bean `userManager` is injected with a reference
-to the HTTP `Session`-scoped bean `userPreferences`. The salient point here is that the
+to the HTTP session-scoped bean `userPreferences`. The salient point here is that the
 `userManager` bean is a singleton: it will be instantiated __exactly once__ per
 container, and its dependencies (in this case only one, the `userPreferences` bean) are
 also injected only once. This means that the `userManager` bean will only operate on the
@@ -3570,18 +3570,18 @@ exact same `userPreferences` object, that is, the one that it was originally inj
 with.
 
 This is __not__ the behavior you want when injecting a shorter-lived scoped bean into a
-longer-lived scoped bean, for example injecting an HTTP `Session`-scoped collaborating
+longer-lived scoped bean, for example injecting an HTTP session-scoped collaborating
 bean as a dependency into singleton bean. Rather, you need a single `userManager`
-object, and for the lifetime of an HTTP `Session`, you need a `userPreferences` object
-that is specific to said HTTP `Session`. Thus the container creates an object that
+object, and for the lifetime of an HTTP session, you need a `userPreferences` object
+that is specific to said HTTP session. Thus the container creates an object that
 exposes the exact same public interface as the `UserPreferences` class (ideally an
 object that __is a__ `UserPreferences` instance) which can fetch the real
-`UserPreferences` object from the scoping mechanism (HTTP request, `Session`, etc.). The
+`UserPreferences` object from the scoping mechanism (HTTP request, session, etc.). The
 container injects this proxy object into the `userManager` bean, which is unaware that
 this `UserPreferences` reference is a proxy. In this example, when a `UserManager`
 instance invokes a method on the dependency-injected `UserPreferences` object, it
 actually is invoking a method on the proxy. The proxy then fetches the real
-`UserPreferences` object from (in this case) the HTTP `Session`, and delegates the
+`UserPreferences` object from (in this case) the HTTP session, and delegates the
 method invocation onto the retrieved real `UserPreferences` object.
 
 Thus you need the following, correct and complete, configuration when injecting
@@ -4242,7 +4242,7 @@ couples the code to Spring and does not follow the Inversion of Control style, w
 collaborators are provided to beans as properties. Other methods of the
 ApplicationContext provide access to file resources, publishing application events, and
 accessing a MessageSource. These additional features are described in
-<<context-introduction>>
+<<context-introduction>>.
 
 As of Spring 2.5, autowiring is another alternative to obtain reference to the
 `ApplicationContext`. The "traditional" `constructor` and `byType` autowiring modes (as
@@ -4264,13 +4264,13 @@ a reference to the name defined in its associated object definition.
 ----
 	public interface BeanNameAware {
 
-		void setBeanName(string name) throws BeansException;
+		void setBeanName(String name) throws BeansException;
 
 	}
 ----
 
-The callback is invoked after population of normal bean properties but before an
-initialization callback such as `InitializingBean` __afterPropertiesSet__ or a custom
+The callback is invoked after population of normal, bean properties but before an
+initialization callback such as `InitializingBean` __afterPropertiesSet()__ or a custom
 init-method.
 
 
@@ -4281,8 +4281,8 @@ init-method.
 Besides `ApplicationContextAware` and `BeanNameAware` discussed above, Spring offers a
 range of `Aware` interfaces that allow beans to indicate to the container that they
 require a certain __infrastructure__ dependency. The most important `Aware` interfaces
-are summarized below - as a general rule, the name is a good indication of the
-dependency type:
+are summarized below (as a general rule, the name is a good indication of the
+dependency type):
 
 [[beans-factory-nature-aware-list]]
 .Aware interfaces
@@ -4303,7 +4303,7 @@ dependency type:
 
 | `BeanFactoryAware`
 | Declaring `BeanFactory`
-| <<beans-factory-aware>>
+| <<beans-factory-aware>>, <<beans-beanfactory>>
 
 | `BeanNameAware`
 | Name of the declaring bean
@@ -4386,7 +4386,7 @@ specifying the parent bean as the value of this attribute.
 
 	<bean id="inheritsWithDifferentClass"
 			class="org.springframework.beans.DerivedTestBean"
-			**parent="inheritedTestBean"** init-method="initialize">
+			parent="inheritedTestBean" init-method="initialize">
 		<property name="name" value="override"/>
 		<!-- the age property value of 1 will be inherited from parent -->
 	</bean>
@@ -4469,7 +4469,7 @@ you write your own `BeanPostProcessor` you should consider implementing the `Ord
 interface too. For further details, consult the Javadoc for the `BeanPostProcessor` and
 `Ordered` interfaces. See also the note below on
 <<beans-factory-programmatically-registering-beanpostprocessors, programmatic
-registration of `BeanPostProcessors`>>
+registration of `BeanPostProcessors`>>.
 
 [NOTE]
 ====
@@ -4858,16 +4858,13 @@ __dataSource__, which has __driver__ and __url__ properties.
 
 Compound property names are also supported, as long as every component of the path
 except the final property being overridden is already non-null (presumably initialized
-by the constructors). In this example...
+by the constructors). In the following example the `sammy` property of the `bob` property of the `fred` property of the `foo` bean is set to the scalar value `123`: 
 
 [literal]
 [subs="verbatim,quotes"]
 ----
 foo.fred.bob.sammy=123
 ----
-
-... the `sammy` property of the `bob` property of the `fred` property of the `foo` bean
-is set to the scalar value `123`.
 
 [NOTE]
 ====
@@ -5258,7 +5255,7 @@ argument. In the simplest case, this can be a plain descriptive value:
 	public class MovieRecommender {
 
 		@Autowired
-		**@Qualifier("main")**
+		@Qualifier("main")
 		private MovieCatalog movieCatalog;
 
 		// ...
@@ -5266,7 +5263,7 @@ argument. In the simplest case, this can be a plain descriptive value:
 	}
 ----
 
-The `@Qualifier` annotation can also be specified on individual constructor arguments or
+The `@Qualifier` annotation can also be specified on individual s or
 method parameters:
 
 [source,java,indent=0]
@@ -5279,7 +5276,7 @@ method parameters:
 		private CustomerPreferenceDao customerPreferenceDao;
 
 		@Autowired
-		public void prepare(**@Qualifier("main")**MovieCatalog movieCatalog,
+		public void prepare(@Qualifier("main")MovieCatalog movieCatalog,
 				CustomerPreferenceDao customerPreferenceDao) {
 			this.movieCatalog = movieCatalog;
 			this.customerPreferenceDao = customerPreferenceDao;
@@ -5291,7 +5288,7 @@ method parameters:
 ----
 
 The corresponding bean definitions appear as follows. The bean with qualifier value
-"main" is wired with the constructor argument that is qualified with the same value.
+"main" is wired with the method parameter that is qualified with the same value.
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -5308,13 +5305,13 @@ The corresponding bean definitions appear as follows. The bean with qualifier va
 		<context:annotation-config/>
 
 		<bean class="example.SimpleMovieCatalog">
-			**<qualifier value="main"/>**
+			<qualifier value="main"/>
 
 			<!-- inject any dependencies required by this bean -->
 		</bean>
 
 		<bean class="example.SimpleMovieCatalog">
-			**<qualifier value="action"/>**
+			<qualifier value="action"/>
 
 			<!-- inject any dependencies required by this bean -->
 		</bean>
@@ -5371,7 +5368,7 @@ provide the `@Qualifier` annotation within your definition:
 ----
 	@Target({ElementType.FIELD, ElementType.PARAMETER})
 	@Retention(RetentionPolicy.RUNTIME)
-	**@Qualifier**
+	@Qualifier
 	public @interface Genre {
 
 		String value();
@@ -5386,12 +5383,12 @@ Then you can provide the custom qualifier on autowired fields and parameters:
 	public class MovieRecommender {
 
 		@Autowired
-		**@Genre("Action")**
+		@Genre("Action")
 		private MovieCatalog actionCatalog;
 		private MovieCatalog comedyCatalog;
 
 		@Autowired
-		public void setComedyCatalog(**@Genre("Comedy")** MovieCatalog comedyCatalog) {
+		public void setComedyCatalog(@Genre("Comedy") MovieCatalog comedyCatalog) {
 			this.comedyCatalog = comedyCatalog;
 		}
 
@@ -5422,12 +5419,12 @@ demonstrated in the following example.
 		<context:annotation-config/>
 
 		<bean class="example.SimpleMovieCatalog">
-			**<qualifier type="Genre" value="Action"/>**
+			<qualifier type="Genre" value="Action"/>
 			<!-- inject any dependencies required by this bean -->
 		</bean>
 
 		<bean class="example.SimpleMovieCatalog">
-			**_<qualifier type="example.Genre" value="Comedy"/>**
+			<qualifier type="example.Genre" value="Comedy"/>
 			<!-- inject any dependencies required by this bean -->
 		</bean>
 
@@ -5464,7 +5461,7 @@ Then add the annotation to the field or property to be autowired:
 	public class MovieRecommender {
 
 		@Autowired
-		**@Offline**
+		@Offline
 		private MovieCatalog offlineCatalog;
 
 		// ...
@@ -5478,7 +5475,7 @@ Now the bean definition only needs a qualifier `type`:
 [subs="verbatim,quotes"]
 ----
 	<bean class="example.SimpleMovieCatalog">
-		**<qualifier type="Offline"/>**
+		<qualifier type="Offline"/>
 		<!-- inject any dependencies required by this bean -->
 	</bean>
 ----
@@ -5703,7 +5700,7 @@ demonstrated in this example:
 
 		private MovieFinder movieFinder;
 
-		**@Resource(name="myMovieFinder")**
+		@Resource(name="myMovieFinder")
 		public void setMovieFinder(MovieFinder movieFinder) {
 			this.movieFinder = movieFinder;
 		}
@@ -5723,7 +5720,7 @@ name "movieFinder" injected into its setter method:
 
 		private MovieFinder movieFinder;
 
-		**@Resource**
+		@Resource
 		public void setMovieFinder(MovieFinder movieFinder) {
 			this.movieFinder = movieFinder;
 		}
@@ -5876,7 +5873,7 @@ with `@Component`:
 	@Target({ElementType.TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
-	**@Component** // Spring will see this and treat @Service in the same way as @Component
+	@Component // Spring will see this and treat @Service in the same way as @Component
 	public @interface Service {
 
 		// ....
@@ -5901,7 +5898,7 @@ of the `proxyMode`.
 	@Target({ElementType.TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
-	**@Scope("session")**
+	@Scope("session")
 	public @interface SessionScope {
 
 		ScopedProxyMode proxyMode() default ScopedProxyMode.DEFAULT
@@ -6277,7 +6274,7 @@ technique:
 [subs="verbatim,quotes"]
 ----
 	@Component
-	**@Qualifier("Action")**
+	@Qualifier("Action")
 	public class ActionMovieCatalog implements MovieCatalog {
 		// ...
 	}
@@ -6287,7 +6284,7 @@ technique:
 [subs="verbatim,quotes"]
 ----
 	@Component
-	**@Genre("Action")**
+	@Genre("Action")
 	public class ActionMovieCatalog implements MovieCatalog {
 		// ...
 	}
@@ -6297,7 +6294,7 @@ technique:
 [subs="verbatim,quotes"]
 ----
 	@Component
-	**@Offline**
+	@Offline
 	public class CachingMovieCatalog implements MovieCatalog {
 		// ...
 	}
@@ -6815,8 +6812,8 @@ details.
 The regular Spring <<beans-factory-nature,lifecycle>> callbacks are fully supported as
 well. If a bean implements `InitializingBean`, `DisposableBean`, or `Lifecycle`, their
 respective methods are called by the container.
-
 The standard set of `*Aware` interfaces such as <<beans-beanfactory,BeanFactoryAware>>,
+
 <<beans-factory-aware,BeanNameAware>>,
 <<context-functionality-messagesource,MessageSourceAware>>,
 <<beans-factory-aware,ApplicationContextAware>>, and so on are also fully supported.
@@ -6903,7 +6900,7 @@ The default scope is `singleton`, but you can override this with the `@Scope` an
 	public class MyConfiguration {
 
 		@Bean
-		**@Scope("prototype")**
+		@Scope("prototype")
 		public Encryptor encryptor() {
 			// ...
 		}
@@ -6929,7 +6926,7 @@ link) to our `@Bean` using Java, it would look like the following:
 ----
 	// an HTTP Session-scoped bean exposed as a proxy
 	@Bean
-	**@Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)**
+	@Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
 	public UserPreferences userPreferences() {
 		return new UserPreferences();
 	}
@@ -6967,7 +6964,7 @@ resulting bean. This functionality can be overridden, however, with the `name` a
 [[beans-java-bean-aliasing]]
 ===== Bean aliasing
 As discussed in <<beans-beanname>>, it is sometimes desirable to give a single bean
-multiple names, otherwise known as__bean aliasing__. The `name` attribute of the `@Bean`
+multiple names, otherwise known as __bean aliasing__. The `name` attribute of the `@Bean`
 annotation accepts a String array for this purpose.
 
 [source,java,indent=0]
@@ -7001,7 +6998,7 @@ annotation can be used:
 	public class AppConfig {
 
 		@Bean
-		**@Desciption("Provides a basic example of a bean")**
+		@Desciption("Provides a basic example of a bean")
 		public Foo foo() {
 			return new Foo();
 		}
@@ -7314,7 +7311,7 @@ configuration classes themselves:
 
 		@Bean
 		public TransferService transferService() {
-			// navigate 'through' the config class to the @Bean method!
+			// navigate through the config class to the @Bean method!
 			return new TransferServiceImpl(repositoryConfig.accountRepository());
 		}
 
@@ -7477,10 +7474,10 @@ properly.
 	}
 ----
 
+system-test-config.xml
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	system-test-config.xml
 	<beans>
 		<!-- enable processing of annotations such as @Autowired and @Configuration -->
 		<context:annotation-config/>
@@ -7496,10 +7493,10 @@ properly.
 	</beans>
 ----
 
+jdbc.properties
 [literal]
 [subs="verbatim,quotes"]
 ----
-jdbc.properties
 jdbc.url=jdbc:hsqldb:hsql://localhost/xdb
 jdbc.username=sa
 jdbc.password=
@@ -7534,10 +7531,10 @@ Note that in this case, we don't need to explicitly declare
 `<context:annotation-config/>`, because `<context:component-scan/>` enables all the same
 functionality.
 
+system-test-config.xml
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	system-test-config.xml
 	<beans>
 		<!-- picks up and registers AppConfig as a bean definition -->
 		<context:component-scan base-package="com.acme"/>
@@ -8781,7 +8778,7 @@ the current working directory.
 
 Note that the use of the special classpath prefix or a standard URL prefix on the
 location path will override the default type of `Resource` created to load the
-definition. So this `FileSystemXmlApplicationContext`...
+definition. So this `FileSystemXmlApplicationContext` will actually load its bean definitions from the classpath:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -8790,9 +8787,7 @@ definition. So this `FileSystemXmlApplicationContext`...
 		new FileSystemXmlApplicationContext("classpath:conf/appContext.xml");
 ----
 
-... will actually load its bean definitions from the classpath. However, it is still a
-`FileSystemXmlApplicationContext`. If it is subsequently used as a `ResourceLoader`, any
-unprefixed paths will still be treated as filesystem paths.
+However, it is still a `FileSystemXmlApplicationContext`. If it is subsequently used as a `ResourceLoader`, any unprefixed paths will still be treated as filesystem paths.
 
 
 [[resources-app-ctx-classpathxml]]
@@ -8818,7 +8813,7 @@ com/
 ----
 
 A `ClassPathXmlApplicationContext` instance composed of the beans defined in the
-`'services.xml'` and `'daos.xml'` could be instantiated like so...
+`services.xml` and `daos.xml` could be instantiated as follows:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -8836,9 +8831,9 @@ details of the various constructors.
 ==== Wildcards in application context constructor resource paths
 The resource paths in application context constructor values may be a simple path (as
 shown above) which has a one-to-one mapping to a target Resource, or alternately may
-contain the special "classpath*:" prefix and/or internal Ant-style regular expressions
+contain the special `classpath*:` prefix and/or internal Ant-style regular expressions
 (matched using Spring's `PathMatcher` utility). Both of the latter are effectively
-wildcards
+wildcards.
 
 One use for this mechanism is when doing component-style application assembly. All
 components can 'publish' context definition fragments to a well-known location path, and
@@ -8859,16 +8854,16 @@ When the path location contains an Ant-style pattern, for example:
 [literal]
 [subs="verbatim,quotes"]
 ----
-/WEB-INF/*-context.xml
-  com/mycompany/**/applicationContext.xml
+/WEB-INF/\*-context.xml
+  com/mycompany/*\*/applicationContext.xml
   file:C:/some/path/*-context.xml
   classpath:com/mycompany/**/applicationContext.xml
 ----
 
-... the resolver follows a more complex but defined procedure to try to resolve the
+the resolver follows a more complex but defined procedure to try to resolve the
 wildcard. It produces a Resource for the path up to the last non-wildcard segment and
-obtains a URL from it. If this URL is not a "jar:" URL or container-specific variant
-(e.g. " `zip:`" in WebLogic, " `wsjar`" in WebSphere, etc.), then a `java.io.File` is
+obtains a URL from it. If this URL is not a `jar:` URL or container-specific variant
+(e.g. `zip:` in WebLogic, `wsjar` in WebSphere, etc.), then a `java.io.File` is
 obtained from it and used to resolve the wildcard by traversing the filesystem. In the
 case of a jar URL, the resolver either gets a `java.net.JarURLConnection` from it or
 manually parses the jar URL and then traverses the contents of the jar file to resolve
@@ -8898,7 +8893,7 @@ environment before you rely on it.
 
 
 [[resources-classpath-wildcards]]
-===== The Classpath*: portability classpath*: prefix
+===== Special `classpath*:` prefix
 
 When constructing an XML-based application context, a location string may use the
 special `classpath*:` prefix:
@@ -8920,7 +8915,7 @@ context definition.
 The wildcard classpath relies on the `getResources()` method of the underlying
 classloader. As most application servers nowadays supply their own classloader
 implementation, the behavior might differ especially when dealing with jar files. A
-simple test to check if `classpath*` works is to use the classloader to load a file from
+simple test to check if `classpath*:` works is to use the classloader to load a file from
 within a jar on the classpath:
 `getClass().getClassLoader().getResources("<someFileInsideTheJar>")`. Try this test with
 files that have the same name but are placed inside two different locations. In case an
@@ -8928,9 +8923,9 @@ inappropriate result is returned, check the application server documentation for
 settings that might affect the classloader behavior.
 ====
 
-The " `classpath*:`" prefix can also be combined with a `PathMatcher` pattern in the
-rest of the location path, for example " `classpath*:META-INF/*-beans.xml`". In this
-case, the resolution strategy is fairly simple: a ClassLoader.getResources() call is
+The `classpath*:` prefix can also be combined with a `PathMatcher` pattern in the
+rest of the location path, for example `classpath*:META-INF/*-beans.xml`. In this
+case, the resolution strategy is fairly simple: a `ClassLoader.getResources()` call is
 used on the last non-wildcard path segment to get all the matching resources in the
 class loader hierarchy, and then off each resource the same PathMatcher resolution
 strategy described above is used for the wildcard subpath.
@@ -8938,15 +8933,14 @@ strategy described above is used for the wildcard subpath.
 
 [[resources-wildcards-in-path-other-stuff]]
 ===== Other notes relating to wildcards
-Please note that " `classpath*:`" when combined with Ant-style patterns will only work
+Please note that `classpath*:` when combined with Ant-style patterns will only work
 reliably with at least one root directory before the pattern starts, unless the actual
-target files reside in the file system. This means that a pattern like "
-`classpath*:*.xml`" will not retrieve files from the root of jar files but rather only
+target files reside in the file system. This means that a pattern like `classpath*:*.xml` will not retrieve files from the root of jar files but rather only
 from the root of expanded directories. This originates from a limitation in the JDK's
 `ClassLoader.getResources()` method which only returns file system locations for a
 passed-in empty string (indicating potential roots to search).
 
-Ant-style patterns with " `classpath:`" resources are not guaranteed to find matching
+Ant-style patterns with `classpath:` resources are not guaranteed to find matching
 resources if the root package to search is available in multiple class path locations.
 This is because a resource such as
 
@@ -8965,9 +8959,9 @@ classpath:com/mycompany/**/service-context.xml
 ----
 
 is used to try to resolve it, the resolver will work off the (first) URL returned by
-`getResource("com/mycompany")`;. If this base package node exists in multiple
+`getResource("com/mycompany")`. If this base package node exists in multiple
 classloader locations, the actual end resource may not be underneath. Therefore,
-preferably, use " `classpath*:`" with the same Ant-style pattern in such a case, which
+preferably, use `classpath*:` with the same Ant-style pattern in such a case, which
 will search all class path locations that contain the root package.
 
 
