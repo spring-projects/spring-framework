@@ -19013,11 +19013,11 @@ Let's take a look at some examples with XML configuration and `@Configuration` c
 		</beans>
 
 		<beans profile="default">
-            <jdbc:embedded-database id="dataSource">
-                <jdbc:script
-                    location="classpath:com/bank/config/sql/schema.sql"/>
-            </jdbc:embedded-database>
-        </beans>
+			<jdbc:embedded-database id="dataSource">
+				<jdbc:script
+					location="classpath:com/bank/config/sql/schema.sql"/>
+			</jdbc:embedded-database>
+		</beans>
 
 	</beans>
 ----
