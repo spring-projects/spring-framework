@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,16 @@
 
 package org.springframework.messaging.core;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.support.GenericMessage;
-
 import java.util.Collections;
 import java.util.Map;
 
-import static junit.framework.Assert.assertNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import org.junit.Before;
+import org.junit.Test;
+
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.GenericMessage;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link AbstractMessageSendingTemplate}.
@@ -48,7 +47,6 @@ public class MessageSendingTemplateTests {
 		this.postProcessor = new TestMessagePostProcessor();
 		this.headers = Collections.<String, Object>singletonMap("key", "value");
 	}
-
 
 	@Test
 	public void send() {
@@ -118,7 +116,6 @@ public class MessageSendingTemplateTests {
 		assertEquals("value", this.template.message.getHeaders().get("key"));
 		assertEquals("payload", this.template.message.getPayload());
 	}
-
 
 	@Test
 	public void convertAndSendPayloadWithPostProcessor() {
