@@ -32,6 +32,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import javax.annotation.Priority;
 import javax.security.auth.Subject;
 
 import org.apache.commons.logging.Log;
@@ -99,6 +100,7 @@ import static org.mockito.BDDMockito.*;
  * @author Sam Brannen
  * @author Chris Beams
  * @author Phillip Webb
+ * @author Stephane Nicoll
  */
 public class DefaultListableBeanFactoryTests {
 
@@ -1378,6 +1380,42 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
+	public void testGetBeanByTypeWithPriority() throws Exception {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = new RootBeanDefinition(HighPriorityTestBean.class);
+		RootBeanDefinition bd2 = new RootBeanDefinition(LowPriorityTestBean.class);
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("bd2", bd2);
+		TestBean bean = lbf.getBean(TestBean.class);
+		assertThat(bean.getBeanName(), equalTo("bd1"));
+	}
+
+	@Test
+	public void testGetBeanByTypeWithMultiplePriority() throws Exception {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = new RootBeanDefinition(HighPriorityTestBean.class);
+		RootBeanDefinition bd2 = new RootBeanDefinition(HighPriorityTestBean.class);
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("bd2", bd2);
+		thrown.expect(NoUniqueBeanDefinitionException.class);
+		thrown.expectMessage(containsString("Multiple beans found with the same priority"));
+		thrown.expectMessage(containsString("500")); // conflicting priority
+		lbf.getBean(TestBean.class);
+	}
+
+	@Test
+	public void testGetBeanByTypePrimaryHasPrecedenceOverPriority() throws Exception {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = new RootBeanDefinition(HighPriorityTestBean.class);
+		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
+		bd2.setPrimary(true);
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("bd2", bd2);
+		TestBean bean = lbf.getBean(TestBean.class);
+		assertThat(bean.getBeanName(), equalTo("bd2"));
+	}
+
+	@Test
 	public void testGetBeanByTypeFiltersOutNonAutowireCandidates() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
@@ -1544,6 +1582,53 @@ public class DefaultListableBeanFactoryTests {
 			assertNotNull("Exception should have cause", ex.getCause());
 			assertEquals("Wrong cause type", NoUniqueBeanDefinitionException.class, ex.getCause().getClass());
 		}
+	}
+
+	@Test
+	public void testAutowireBeanByTypeWithTwoMatchesAndPriority() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd = new RootBeanDefinition(HighPriorityTestBean.class);
+		RootBeanDefinition bd2 = new RootBeanDefinition(LowPriorityTestBean.class);
+		lbf.registerBeanDefinition("test", bd);
+		lbf.registerBeanDefinition("spouse", bd2);
+
+		DependenciesBean bean = (DependenciesBean)
+				lbf.autowire(DependenciesBean.class, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true);
+		assertThat(bean.getSpouse(), equalTo(lbf.getBean("test")));
+	}
+
+	@Test
+	public void testAutowireBeanByTypeWithIdenticalPriorityCandidates() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd = new RootBeanDefinition(HighPriorityTestBean.class);
+		RootBeanDefinition bd2 = new RootBeanDefinition(HighPriorityTestBean.class);
+		lbf.registerBeanDefinition("test", bd);
+		lbf.registerBeanDefinition("spouse", bd2);
+
+		try {
+			lbf.autowire(DependenciesBean.class, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true);
+			fail("Should have thrown UnsatisfiedDependencyException");
+		}
+		catch (UnsatisfiedDependencyException ex) {
+			// expected
+			assertNotNull("Exception should have cause", ex.getCause());
+			assertEquals("Wrong cause type", NoUniqueBeanDefinitionException.class, ex.getCause().getClass());
+			assertTrue(ex.getMessage().contains("500")); // conflicting priority
+		}
+	}
+
+	@Test
+	public void testAutowireBeanByTypePrimaryTakesPrecedenceOverPriority() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd = new RootBeanDefinition(HighPriorityTestBean.class);
+		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
+		bd2.setPrimary(true);
+		lbf.registerBeanDefinition("test", bd);
+		lbf.registerBeanDefinition("spouse", bd2);
+
+		DependenciesBean bean = (DependenciesBean)
+				lbf.autowire(DependenciesBean.class, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true);
+		assertThat(bean.getSpouse(), equalTo(lbf.getBean("spouse")));
 	}
 
 	@Test
@@ -2801,5 +2886,12 @@ public class DefaultListableBeanFactoryTests {
 		}
 
 	}
+
+	@Priority(500)
+	private static class HighPriorityTestBean extends TestBean {}
+
+	@Priority(5)
+	private static class LowPriorityTestBean extends TestBean {}
+
 
 }
