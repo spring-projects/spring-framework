@@ -19047,20 +19047,20 @@ When `TransferServiceTest` is run, its `ApplicationContext` will be loaded from 
 `app-config.xml` configuration file in the root of the classpath. If you inspect
 `app-config.xml` you'll notice that the `accountRepository` bean has a dependency on a
 `dataSource` bean; however, `dataSource` is not defined as a top-level bean. Instead,
-`dataSource` is defined three times, that is the __production__ profile, the
-__dev__ profile and the __default__ profile.
+`dataSource` is defined three times: in the __production__ profile, the
+__dev__ profile, and the __default__ profile.
 
 By annotating `TransferServiceTest` with `@ActiveProfiles("dev")` we instruct the Spring
 TestContext Framework to load the `ApplicationContext` with the active profiles set to
-`{"dev"}`. As a result, an embedded database will be created, and the
-`accountRepository` bean will be wired with a reference to the development `DataSource`.
-And that's likely what we want in an integration test.
+`{"dev"}`. As a result, an embedded database will be created and populated with test data,
+and the `accountRepository` bean will be wired with a reference to the development
+`DataSource`. And that's likely what we want in an integration test.
 
 It is sometimes useful to assign beans to a `default` profile. Beans within the default profile
 are only included when no other profile is specifically activated. This can be used to define
 _fallback_ beans to be used in the application's default state. For example, you may
 explicitly provide a data source for `dev` and `production` profiles, but define an in-memory
-data source as a default when neither of these are specified.
+data source as a default when neither of these is active.
 
 The following code listings demonstrate how to implement the same configuration and
 integration test but using `@Configuration` classes instead of XML.
