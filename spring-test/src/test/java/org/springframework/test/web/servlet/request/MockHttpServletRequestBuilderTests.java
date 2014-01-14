@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.print.attribute.standard.Media;
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 
@@ -265,6 +266,28 @@ public class MockHttpServletRequestBuilderTests {
 		assertEquals("text/html", contentType);
 		assertEquals(1, contentTypes.size());
 		assertEquals("text/html", contentTypes.get(0));
+	}
+
+	// SPR-11308
+
+	@Test
+	public void contentTypeViaHeader() throws Exception {
+		this.builder.header("Content-Type", MediaType.TEXT_HTML_VALUE);
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+		String contentType = request.getContentType();
+
+		assertEquals("text/html", contentType);
+	}
+
+	// SPR-11308
+
+	@Test
+	public void contentTypeViaMultipleHeaderValues() throws Exception {
+		this.builder.header("Content-Type", MediaType.TEXT_HTML_VALUE, MediaType.ALL_VALUE);
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+		String contentType = request.getContentType();
+
+		assertEquals("text/html, */*", contentType);
 	}
 
 	@Test

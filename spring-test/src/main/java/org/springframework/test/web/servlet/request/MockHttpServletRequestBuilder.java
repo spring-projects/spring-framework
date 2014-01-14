@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,6 +141,10 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	 * @param values one or more header values
 	 */
 	public MockHttpServletRequestBuilder header(String name, Object... values) {
+		if ("Content-Type".equalsIgnoreCase(name)) {
+			List<MediaType> mediaTypes = MediaType.parseMediaTypes(StringUtils.arrayToCommaDelimitedString(values));
+			this.contentType = MediaType.toString(mediaTypes);
+		}
 		addToMultiValueMap(this.headers, name, values);
 		return this;
 	}
@@ -150,6 +154,10 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	 * @param httpHeaders the headers and values to add
 	 */
 	public MockHttpServletRequestBuilder headers(HttpHeaders httpHeaders) {
+		MediaType mediaType = httpHeaders.getContentType();
+		if (mediaType != null) {
+			this.contentType = mediaType.toString();
+		}
 		for (String name : httpHeaders.keySet()) {
 			Object[] values = ObjectUtils.toObjectArray(httpHeaders.get(name).toArray());
 			addToMultiValueMap(this.headers, name, values);
