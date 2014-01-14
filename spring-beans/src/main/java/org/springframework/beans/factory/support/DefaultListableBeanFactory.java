@@ -1042,11 +1042,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				if (primaryBeanName != null) {
 					boolean candidateLocal = containsBeanDefinition(candidateBeanName);
 					boolean primaryLocal = containsBeanDefinition(primaryBeanName);
-					if (candidateLocal == primaryLocal) {
+					if (candidateLocal && primaryLocal) {
 						throw new NoUniqueBeanDefinitionException(descriptor.getDependencyType(), candidateBeans.size(),
 								"more than one 'primary' bean found among candidates: " + candidateBeans.keySet());
 					}
-					else if (candidateLocal && !primaryLocal) {
+					else if (candidateLocal) {
 						primaryBeanName = candidateBeanName;
 					}
 				}
