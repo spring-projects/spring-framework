@@ -92,6 +92,7 @@ import org.springframework.util.StringUtils;
  * @author Costin Leau
  * @author Chris Beams
  * @author Phillip Webb
+ * @author Stephane Nicoll
  * @since 16 April 2001
  * @see StaticListableBeanFactory
  * @see PropertiesBeanDefinitionReader
@@ -295,21 +296,19 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return getBean(beanNames[0], requiredType);
 		}
 		else if (beanNames.length > 1) {
-			T primaryBean = null;
+			Map<String, Object> candidates = new HashMap<String, Object>();
 			for (String beanName : beanNames) {
-				T beanInstance = getBean(beanName, requiredType);
-				if (isPrimary(beanName, beanInstance)) {
-					if (primaryBean != null) {
-						throw new NoUniqueBeanDefinitionException(requiredType, beanNames.length,
-								"more than one 'primary' bean found of required type: " + Arrays.asList(beanNames));
-					}
-					primaryBean = beanInstance;
-				}
+				candidates.put(beanName, getBean(beanName, requiredType));
 			}
-			if (primaryBean != null) {
-				return primaryBean;
+			String primaryCandidate = determinePrimaryCandidate(candidates, requiredType);
+			if (primaryCandidate != null) {
+				return getBean(primaryCandidate, requiredType);
 			}
-			throw new NoUniqueBeanDefinitionException(requiredType, beanNames);
+			String priorityCandidate = determineHighestPriorityCandidate(candidates, requiredType);
+			if (priorityCandidate != null) {
+				return getBean(priorityCandidate, requiredType);
+			}
+			throw new NoUniqueBeanDefinitionException(requiredType, candidates.keySet());
 		}
 		else if (getParentBeanFactory() != null) {
 			return getParentBeanFactory().getBean(requiredType);
@@ -962,7 +961,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				return null;
 			}
 			if (matchingBeans.size() > 1) {
-				String primaryBeanName = determinePrimaryCandidate(matchingBeans, descriptor);
+				String primaryBeanName = determineAutowireCandidate(matchingBeans, descriptor);
 				if (primaryBeanName == null) {
 					throw new NoUniqueBeanDefinitionException(type, matchingBeans.keySet());
 				}
@@ -1026,15 +1025,50 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	/**
-	 * Determine the primary autowire candidate in the given set of beans.
+	 * Determine the autowire candidate in the given set of beans.
+	 * <p>Looks for {@code @Primary} and {@code @Priority} (in that order).
+	 *
 	 * @param candidateBeans a Map of candidate names and candidate instances
 	 * that match the required type, as returned by {@link #findAutowireCandidates}
 	 * @param descriptor the target dependency to match against
-	 * @return the name of the primary candidate, or {@code null} if none found
+	 * @return the name of the autowire candidate, or {@code null} if none found
 	 */
-	protected String determinePrimaryCandidate(Map<String, Object> candidateBeans, DependencyDescriptor descriptor) {
+	protected String determineAutowireCandidate(Map<String, Object> candidateBeans,
+												DependencyDescriptor descriptor) {
+		Class<?> requiredType = descriptor.getDependencyType();
+		String primaryCandidate =
+				determinePrimaryCandidate(candidateBeans, requiredType);
+		if (primaryCandidate != null) {
+			return primaryCandidate;
+		}
+		String priorityCandidate =
+				determineHighestPriorityCandidate(candidateBeans, requiredType);
+		if (priorityCandidate != null) {
+			return priorityCandidate;
+		}
+		// Fallback
+		for (Map.Entry<String, Object> entry : candidateBeans.entrySet()) {
+			String candidateBeanName = entry.getKey();
+			Object beanInstance = entry.getValue();
+			if (this.resolvableDependencies.values().contains(beanInstance) ||
+					matchesBeanName(candidateBeanName, descriptor.getDependencyName())) {
+				return candidateBeanName;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Determine the primary candidate in the given set of beans.
+	 *
+	 * @param candidateBeans a Map of candidate names and candidate instances
+	 * that match the required type
+	 * @param requiredType the target dependency type to match against
+	 * @return the name of the primary candidate, or {@code null} if none found
+	 * @see #isPrimary(String, Object)
+	 */
+	protected String determinePrimaryCandidate(Map<String, Object> candidateBeans, Class<?> requiredType) {
 		String primaryBeanName = null;
-		String fallbackBeanName = null;
 		for (Map.Entry<String, Object> entry : candidateBeans.entrySet()) {
 			String candidateBeanName = entry.getKey();
 			Object beanInstance = entry.getValue();
@@ -1043,24 +1077,53 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					boolean candidateLocal = containsBeanDefinition(candidateBeanName);
 					boolean primaryLocal = containsBeanDefinition(primaryBeanName);
 					if (candidateLocal && primaryLocal) {
-						throw new NoUniqueBeanDefinitionException(descriptor.getDependencyType(), candidateBeans.size(),
+						throw new NoUniqueBeanDefinitionException(requiredType, candidateBeans.size(),
 								"more than one 'primary' bean found among candidates: " + candidateBeans.keySet());
-					}
-					else if (candidateLocal) {
+					} else if (candidateLocal) {
 						primaryBeanName = candidateBeanName;
 					}
-				}
-				else {
+				} else {
 					primaryBeanName = candidateBeanName;
 				}
 			}
-			if (primaryBeanName == null &&
-					(this.resolvableDependencies.values().contains(beanInstance) ||
-							matchesBeanName(candidateBeanName, descriptor.getDependencyName()))) {
-				fallbackBeanName = candidateBeanName;
+		}
+		return primaryBeanName;
+	}
+
+	/**
+	 * Determine the candidate with the highest priority in the given set of beans.
+	 *
+	 * @param candidateBeans a Map of candidate names and candidate instances
+	 * that match the required type
+	 * @param requiredType the target dependency type to match against
+	 * @return the name of the candidate with the highest priority, or {@code null} if none found
+	 * @see #getPriority(Object)
+	 */
+	protected String determineHighestPriorityCandidate(Map<String, Object> candidateBeans,
+													   Class<?> requiredType) {
+		String highestPriorityBeanName = null;
+		Integer highestPriority = null;
+		for (Map.Entry<String, Object> entry : candidateBeans.entrySet()) {
+			String candidateBeanName = entry.getKey();
+			Object beanInstance = entry.getValue();
+			Integer candidatePriority = getPriority(beanInstance);
+			if (candidatePriority != null) {
+				if (highestPriorityBeanName != null) {
+					if (candidatePriority.equals(highestPriority)) {
+						throw new NoUniqueBeanDefinitionException(requiredType, candidateBeans.size(),
+								"Multiple beans found with the same priority ('" + highestPriority + "') " +
+										"among candidates: " + candidateBeans.keySet());
+					} else if (candidatePriority > highestPriority) {
+						highestPriorityBeanName = candidateBeanName;
+						highestPriority = candidatePriority;
+					}
+				} else {
+					highestPriorityBeanName = candidateBeanName;
+					highestPriority = candidatePriority;
+				}
 			}
 		}
-		return (primaryBeanName != null ? primaryBeanName : fallbackBeanName);
+		return highestPriorityBeanName;
 	}
 
 	/**
@@ -1077,6 +1140,23 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		BeanFactory parentFactory = getParentBeanFactory();
 		return (parentFactory instanceof DefaultListableBeanFactory &&
 				((DefaultListableBeanFactory) parentFactory).isPrimary(beanName, beanInstance));
+	}
+
+	/**
+	 * Return the priority assigned for the given bean instance by
+	 * the {@code javax.annotation.Priority} annotation.
+	 * <p>If the annotation is not present, returns <tt>null</tt>.
+	 *
+	 * @param beanInstance the bean instance to check
+	 * @return the priority assigned to that bean or <tt>null</tt> if none is set
+	 */
+	protected Integer getPriority(Object beanInstance) {
+		for (Annotation annotation : beanInstance.getClass().getAnnotations()) {
+			if ("javax.annotation.Priority".equals(annotation.annotationType().getName())) {
+				return (Integer) AnnotationUtils.getValue(annotation);
+			}
+		}
+		return null;
 	}
 
 	/**

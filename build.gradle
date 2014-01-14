@@ -262,7 +262,8 @@ project("spring-beans") {
 		provided("javax.el:javax.el-api:2.2.4")
 		provided("javax.inject:javax.inject:1")
 		testCompile("log4j:log4j:1.2.17")
-	}
+		testCompile("org.apache.tomcat.embed:tomcat-embed-core:8.0.0-RC10")
+    }
 }
 
 project('spring-beans-groovy') {
