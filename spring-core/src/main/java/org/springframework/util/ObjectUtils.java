@@ -59,10 +59,10 @@ public abstract class ObjectUtils {
 	}
 
 	/**
-	 * Check whether the given exception is compatible with the exceptions
-	 * declared in a throws clause.
-	 * @param ex the exception to checked
-	 * @param declaredExceptions the exceptions declared in the throws clause
+	 * Check whether the given exception is compatible with the specified
+	 * exception types, as declared in a throws clause.
+	 * @param ex the exception to check
+	 * @param declaredExceptions the exception types declared in the throws clause
 	 * @return whether the given exception is compatible
 	 */
 	public static boolean isCompatibleWithThrowsClause(Throwable ex, Class<?>... declaredExceptions) {
@@ -71,7 +71,7 @@ public abstract class ObjectUtils {
 		}
 		if (declaredExceptions != null) {
 			for (Class<?> declaredException : declaredExceptions) {
-				if (declaredException.isAssignableFrom(ex.getClass())) {
+				if (declaredException.isInstance(ex)) {
 					return true;
 				}
 			}

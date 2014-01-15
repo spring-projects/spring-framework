@@ -76,7 +76,7 @@ public class CachedIntrospectionResults {
 	 * mode when calling the JavaBeans {@link Introspector}: "spring.beaninfo.ignore", with a
 	 * value of "true" skipping the search for {@code BeanInfo} classes (typically for scenarios
 	 * where no such classes are being defined for beans in the application in the first place).
-	 * <p>Default is "false", considering all {@code BeanInfo} metadata classes, like for
+	 * <p>The default is "false", considering all {@code BeanInfo} metadata classes, like for
 	 * standard {@link Introspector#getBeanInfo(Class)} calls. Consider switching this flag to
 	 * "true" if you experience repeated ClassLoader access for non-existing {@code BeanInfo}
 	 * classes, in case such access is expensive on startup or on lazy loading.

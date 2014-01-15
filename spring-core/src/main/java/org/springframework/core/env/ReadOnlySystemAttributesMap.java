@@ -40,7 +40,7 @@ import org.springframework.util.Assert;
 abstract class ReadOnlySystemAttributesMap implements Map<String, String> {
 
 	public boolean containsKey(Object key) {
-		return get(key) != null;
+		return (get(key) != null);
 	}
 
 	/**
@@ -49,9 +49,7 @@ abstract class ReadOnlySystemAttributesMap implements Map<String, String> {
 	 */
 	public String get(Object key) {
 		Assert.isInstanceOf(String.class, key,
-			String.format("expected key [%s] to be of type String, got %s",
-					key, key.getClass().getName()));
-
+				String.format("Expected key [%s] to be of type String, got %s", key, key.getClass().getName()));
 		return this.getSystemAttribute((String) key);
 	}
 
@@ -61,10 +59,10 @@ abstract class ReadOnlySystemAttributesMap implements Map<String, String> {
 
 	/**
 	 * Template method that returns the underlying system attribute.
-	 *
 	 * <p>Implementations typically call {@link System#getProperty(String)} or {@link System#getenv(String)} here.
 	 */
 	protected abstract String getSystemAttribute(String attributeName);
+
 
 	// Unsupported
 
@@ -92,7 +90,7 @@ abstract class ReadOnlySystemAttributesMap implements Map<String, String> {
 		return Collections.emptySet();
 	}
 
-	public void putAll(Map<? extends String, ? extends String> m) {
+	public void putAll(Map<? extends String, ? extends String> map) {
 		throw new UnsupportedOperationException();
 	}
 
