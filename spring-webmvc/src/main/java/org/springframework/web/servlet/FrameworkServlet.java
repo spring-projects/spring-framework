@@ -27,7 +27,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationContextException;
@@ -363,9 +362,10 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * @see #configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext)
 	 * @see #applyInitializers(ConfigurableApplicationContext)
 	 */
-	public void setContextInitializers(ApplicationContextInitializer<ConfigurableApplicationContext>... contextInitializers) {
-		for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : contextInitializers) {
-			this.contextInitializers.add(initializer);
+	@SuppressWarnings("unchecked")
+	public void setContextInitializers(ApplicationContextInitializer<? extends ConfigurableApplicationContext>... contextInitializers) {
+		for (ApplicationContextInitializer<? extends ConfigurableApplicationContext> initializer : contextInitializers) {
+			this.contextInitializers.add((ApplicationContextInitializer<ConfigurableApplicationContext>) initializer);
 		}
 	}
 
@@ -448,6 +448,23 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 */
 	public void setDispatchTraceRequest(boolean dispatchTraceRequest) {
 		this.dispatchTraceRequest = dispatchTraceRequest;
+	}
+
+	/**
+	 * Called by Spring via {@link ApplicationContextAware} to inject the current
+	 * application context. This method allows FrameworkServlets to be registered as
+	 * Spring beans inside an existing {@link WebApplicationContext} rather than
+	 * {@link #findWebApplicationContext() finding} a
+	 * {@link org.springframework.web.context.ContextLoaderListener bootstrapped} context.
+	 * <p>Primarily added to support use in embedded servlet containers.
+	 * @since 4.0
+	 */
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		if (this.webApplicationContext == null && applicationContext instanceof WebApplicationContext) {
+			this.webApplicationContext = (WebApplicationContext) applicationContext;
+			this.webApplicationContextInjected = true;
+		}
 	}
 
 
@@ -796,11 +813,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 */
 	@Override
 	public void destroy() {
-		if (this.webApplicationContextInjected) {
-			return;
-		}
 		getServletContext().log("Destroying Spring FrameworkServlet '" + getServletName() + "'");
-		if (this.webApplicationContext instanceof ConfigurableApplicationContext) {
+		// Only call close() on WebApplicationContext if locally managed...
+		if (this.webApplicationContext instanceof ConfigurableApplicationContext && !this.webApplicationContextInjected) {
 			((ConfigurableApplicationContext) this.webApplicationContext).close();
 		}
 	}
@@ -1065,29 +1080,6 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		return (userPrincipal != null ? userPrincipal.getName() : null);
 	}
 
-	/**
-	 * Called by Spring via {@link ApplicationContextAware} to inject the current
-	 * application context. This method allows FrameworkServlets to be registered as
-	 * Spring Beans inside an existing {@link WebApplicationContext} rather than
-	 * {@link #findWebApplicationContext() finding} a
-	 * {@link org.springframework.web.context.ContextLoaderListener bootstrapped} context.
-	 * <p>Primarily added to support use in embedded servlet containers, this method is not
-	 * intended to be called directly.
-	 * @since 4.0
-	 */
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext)
-			throws BeansException {
-		if (this.webApplicationContext == null
-				&& applicationContext instanceof WebApplicationContext) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Using existing application context for "
-						+ ClassUtils.getShortName(getClass()));
-			}
-			this.webApplicationContext = (WebApplicationContext) applicationContext;
-			this.webApplicationContextInjected = true;
-		}
-	}
 
 	/**
 	 * Subclasses must implement this method to do the work of request handling,
