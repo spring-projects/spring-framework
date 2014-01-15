@@ -38,12 +38,8 @@ class ReflectiveConstructorExecutor implements ConstructorExecutor {
 
 	private final Integer varargsPosition;
 
-	// When the constructor was found, we will have determined if arguments need to be converted for it
-	// to be invoked. Conversion won't be cheap so let's only do it if necessary.
-	private final int[] argsRequiringConversion;
 
-
-	public ReflectiveConstructorExecutor(Constructor<?> ctor, int[] argsRequiringConversion) {
+	public ReflectiveConstructorExecutor(Constructor<?> ctor) {
 		this.ctor = ctor;
 		if (ctor.isVarArgs()) {
 			Class<?>[] paramTypes = ctor.getParameterTypes();
@@ -52,15 +48,13 @@ class ReflectiveConstructorExecutor implements ConstructorExecutor {
 		else {
 			this.varargsPosition = null;
 		}
-		this.argsRequiringConversion = argsRequiringConversion;
 	}
 
 	@Override
 	public TypedValue execute(EvaluationContext context, Object... arguments) throws AccessException {
 		try {
 			if (arguments != null) {
-				ReflectionHelper.convertArguments(context.getTypeConverter(), arguments,
-						this.ctor, this.argsRequiringConversion, this.varargsPosition);
+				ReflectionHelper.convertArguments(context.getTypeConverter(), arguments, this.ctor, this.varargsPosition);
 			}
 			if (this.ctor.isVarArgs()) {
 				arguments = ReflectionHelper.setupArgumentsForVarargsInvocation(this.ctor.getParameterTypes(), arguments);

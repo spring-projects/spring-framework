@@ -37,21 +37,16 @@ class ReflectiveMethodExecutor implements MethodExecutor {
 
 	private final Integer varargsPosition;
 
-	// When the method was found, we will have determined if arguments need to be converted for it
-	// to be invoked. Conversion won't be cheap so let's only do it if necessary.
-	private final int[] argsRequiringConversion;
 
-
-	public ReflectiveMethodExecutor(Method theMethod, int[] argumentsRequiringConversion) {
-		this.method = theMethod;
-		if (theMethod.isVarArgs()) {
-			Class<?>[] paramTypes = theMethod.getParameterTypes();
+	public ReflectiveMethodExecutor(Method method) {
+		this.method = method;
+		if (method.isVarArgs()) {
+			Class<?>[] paramTypes = method.getParameterTypes();
 			this.varargsPosition = paramTypes.length - 1;
 		}
 		else {
 			this.varargsPosition = null;
 		}
-		this.argsRequiringConversion = argumentsRequiringConversion;
 	}
 
 
@@ -59,9 +54,7 @@ class ReflectiveMethodExecutor implements MethodExecutor {
 	public TypedValue execute(EvaluationContext context, Object target, Object... arguments) throws AccessException {
 		try {
 			if (arguments != null) {
-				ReflectionHelper.convertArguments(
-						context.getTypeConverter(), arguments, this.method,
-						this.argsRequiringConversion, this.varargsPosition);
+				ReflectionHelper.convertArguments(context.getTypeConverter(), arguments, this.method, this.varargsPosition);
 			}
 			if (this.method.isVarArgs()) {
 				arguments = ReflectionHelper.setupArgumentsForVarargsInvocation(this.method.getParameterTypes(), arguments);

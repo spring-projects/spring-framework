@@ -71,8 +71,6 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 			});
 
 			Constructor<?> closeMatch = null;
-			int[] argsToConvert = null;
-			Constructor<?> matchRequiringConversion = null;
 
 			for (Constructor<?> ctor : ctors) {
 				Class<?>[] paramTypes = ctor.getParameterTypes();
@@ -81,7 +79,7 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 					paramDescriptors.add(new TypeDescriptor(new MethodParameter(ctor, i)));
 				}
 				ReflectionHelper.ArgumentsMatchInfo matchInfo = null;
-				if (ctor.isVarArgs() && argumentTypes.size() >= (paramTypes.length - 1)) {
+				if (ctor.isVarArgs() && argumentTypes.size() >= paramTypes.length - 1) {
 					// *sigh* complicated
 					// Basically.. we have to have all parameters match up until the varargs one, then the rest of what is
 					// being provided should be
@@ -96,26 +94,16 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 				}
 				if (matchInfo != null) {
 					if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.EXACT) {
-						return new ReflectiveConstructorExecutor(ctor, null);
+						return new ReflectiveConstructorExecutor(ctor);
 					}
-					else if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.CLOSE) {
+					else if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.CLOSE ||
+							matchInfo.kind == ReflectionHelper.ArgsMatchKind.REQUIRES_CONVERSION) {
 						closeMatch = ctor;
-					}
-					else if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.REQUIRES_CONVERSION) {
-						argsToConvert = matchInfo.argsRequiringConversion;
-						matchRequiringConversion = ctor;
 					}
 				}
 			}
-			if (closeMatch != null) {
-				return new ReflectiveConstructorExecutor(closeMatch, null);
-			}
-			else if (matchRequiringConversion != null) {
-				return new ReflectiveConstructorExecutor(matchRequiringConversion, argsToConvert);
-			}
-			else {
-				return null;
-			}
+
+			return (closeMatch != null ? new ReflectiveConstructorExecutor(closeMatch) : null);
 		}
 		catch (EvaluationException ex) {
 			throw new AccessException("Failed to resolve constructor", ex);

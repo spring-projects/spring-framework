@@ -141,12 +141,12 @@ public class ReflectiveMethodResolver implements MethodResolver {
 						matchInfo = ReflectionHelper.compareArgumentsVarargs(paramDescriptors, argumentTypes, typeConverter);
 					}
 					else if (paramTypes.length == argumentTypes.size()) {
-						// name and parameter number match, check the arguments
+						// Name and parameter number match, check the arguments
 						matchInfo = ReflectionHelper.compareArguments(paramDescriptors, argumentTypes, typeConverter);
 					}
 					if (matchInfo != null) {
 						if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.EXACT) {
-							return new ReflectiveMethodExecutor(method, null);
+							return new ReflectiveMethodExecutor(method);
 						}
 						else if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.CLOSE) {
 							if (!this.useDistance) {
@@ -154,8 +154,8 @@ public class ReflectiveMethodResolver implements MethodResolver {
 							}
 							else {
 								int matchDistance = ReflectionHelper.getTypeDifferenceWeight(paramDescriptors, argumentTypes);
-								if (matchDistance<closeMatchDistance) {
-									// this is a better match
+								if (matchDistance < closeMatchDistance) {
+									// This is a better match...
 									closeMatchDistance = matchDistance;
 									closeMatch = method;
 								}
@@ -165,20 +165,19 @@ public class ReflectiveMethodResolver implements MethodResolver {
 							if (matchRequiringConversion != null) {
 								multipleOptions = true;
 							}
-							argsToConvert = matchInfo.argsRequiringConversion;
 							matchRequiringConversion = method;
 						}
 					}
 				}
 			}
 			if (closeMatch != null) {
-				return new ReflectiveMethodExecutor(closeMatch, null);
+				return new ReflectiveMethodExecutor(closeMatch);
 			}
 			else if (matchRequiringConversion != null) {
 				if (multipleOptions) {
 					throw new SpelEvaluationException(SpelMessage.MULTIPLE_POSSIBLE_METHODS, name);
 				}
-				return new ReflectiveMethodExecutor(matchRequiringConversion, argsToConvert);
+				return new ReflectiveMethodExecutor(matchRequiringConversion);
 			}
 			else {
 				return null;
