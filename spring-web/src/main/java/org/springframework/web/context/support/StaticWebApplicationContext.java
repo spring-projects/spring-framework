@@ -177,9 +177,8 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 
 	@Override
 	protected void initPropertySources() {
-		super.initPropertySources();
-		WebApplicationContextUtils.initServletPropertySources(
-				this.getEnvironment().getPropertySources(), this.servletContext, this.servletConfig);
+		WebApplicationContextUtils.initServletPropertySources(getEnvironment().getPropertySources(),
+				this.servletContext, this.servletConfig);
 	}
 
 	public Theme getTheme(String themeName) {

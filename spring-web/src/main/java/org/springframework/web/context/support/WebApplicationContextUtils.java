@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,11 @@
 
 package org.springframework.web.context.support;
 
-import static org.springframework.web.context.support.StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME;
-import static org.springframework.web.context.support.StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME;
-
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.ServletConfig;
@@ -51,11 +47,11 @@ import org.springframework.web.context.request.WebRequest;
 /**
  * Convenience methods for retrieving the root
  * {@link org.springframework.web.context.WebApplicationContext} for a given
- * {@code ServletContext}. This is e.g. useful for accessing a Spring
- * context from within custom web views or Struts actions.
+ * {@code ServletContext}. This is useful for programmatically accessing a
+ * Spring application context from within custom web views or MVC actions.
  *
  * <p>Note that there are more convenient ways of accessing the root context for
- * many web frameworks, either part of Spring or available as external library.
+ * many web frameworks, either part of Spring or available as an external library.
  * This helper class is just the most generic way to access the root context.
  *
  * @author Juergen Hoeller
@@ -63,7 +59,6 @@ import org.springframework.web.context.request.WebRequest;
  * @see org.springframework.web.servlet.FrameworkServlet
  * @see org.springframework.web.servlet.DispatcherServlet
  * @see org.springframework.web.jsf.FacesContextUtils
- * @see org.springframework.web.jsf.SpringBeanVariableResolver
  * @see org.springframework.web.jsf.el.SpringBeanFacesELResolver
  */
 public abstract class WebApplicationContextUtils {
@@ -260,16 +255,17 @@ public abstract class WebApplicationContextUtils {
 	 */
 	public static void initServletPropertySources(
 			MutablePropertySources propertySources, ServletContext servletContext, ServletConfig servletConfig) {
+
 		Assert.notNull(propertySources, "propertySources must not be null");
-		if(servletContext != null &&
-				propertySources.contains(SERVLET_CONTEXT_PROPERTY_SOURCE_NAME) &&
-				propertySources.get(SERVLET_CONTEXT_PROPERTY_SOURCE_NAME) instanceof StubPropertySource) {
-			propertySources.replace(SERVLET_CONTEXT_PROPERTY_SOURCE_NAME, new ServletContextPropertySource(SERVLET_CONTEXT_PROPERTY_SOURCE_NAME, servletContext));
+		if (servletContext != null && propertySources.contains(StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME) &&
+				propertySources.get(StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME) instanceof StubPropertySource) {
+			propertySources.replace(StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME,
+					new ServletContextPropertySource(StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME, servletContext));
 		}
-		if(servletConfig != null &&
-				propertySources.contains(SERVLET_CONFIG_PROPERTY_SOURCE_NAME) &&
-				propertySources.get(SERVLET_CONFIG_PROPERTY_SOURCE_NAME) instanceof StubPropertySource) {
-			propertySources.replace(SERVLET_CONFIG_PROPERTY_SOURCE_NAME, new ServletConfigPropertySource(SERVLET_CONFIG_PROPERTY_SOURCE_NAME, servletConfig));
+		if (servletConfig != null && propertySources.contains(StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME) &&
+				propertySources.get(StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME) instanceof StubPropertySource) {
+			propertySources.replace(StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME,
+					new ServletConfigPropertySource(StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME, servletConfig));
 		}
 	}
 
