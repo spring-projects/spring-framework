@@ -53,8 +53,6 @@ import org.springframework.expression.spel.SpelMessage;
  */
 public class ReflectiveMethodResolver implements MethodResolver {
 
-	private static Method[] NO_METHODS = new Method[0];
-
 	private Map<Class<?>, MethodFilter> filters = null;
 
 	// Using distance will ensure a more accurate match is discovered,
@@ -77,6 +75,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	public ReflectiveMethodResolver(boolean useDistance) {
 		this.useDistance = useDistance;
 	}
+
 
 	/**
 	 * Locate a method on a type. There are three kinds of match that might occur:
@@ -140,27 +139,27 @@ public class ReflectiveMethodResolver implements MethodResolver {
 						matchInfo = ReflectionHelper.compareArgumentsVarargs(paramDescriptors, argumentTypes, typeConverter);
 					}
 					else if (paramTypes.length == argumentTypes.size()) {
-						// name and parameter number match, check the arguments
+						// Name and parameter number match, check the arguments
 						matchInfo = ReflectionHelper.compareArguments(paramDescriptors, argumentTypes, typeConverter);
 					}
 					if (matchInfo != null) {
-						if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.EXACT) {
+						if (matchInfo.isExactMatch()) {
 							return new ReflectiveMethodExecutor(method, null);
 						}
-						else if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.CLOSE) {
+						else if (matchInfo.isCloseMatch()) {
 							if (!this.useDistance) {
 								closeMatch = method;
 							}
 							else {
 								int matchDistance = ReflectionHelper.getTypeDifferenceWeight(paramDescriptors, argumentTypes);
-								if (matchDistance<closeMatchDistance) {
-									// this is a better match
+								if (matchDistance < closeMatchDistance) {
+									// This is a better match...
 									closeMatchDistance = matchDistance;
 									closeMatch = method;
 								}
 							}
 						}
-						else if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.REQUIRES_CONVERSION) {
+						else if (matchInfo.isMatchRequiringConversion()) {
 							if (matchRequiringConversion != null) {
 								multipleOptions = true;
 							}
