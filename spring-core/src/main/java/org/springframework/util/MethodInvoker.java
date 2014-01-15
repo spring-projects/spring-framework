@@ -28,10 +28,6 @@ import java.lang.reflect.Modifier;
  * optionally specify arguments, prepare the invoker. Afterwards, you may
  * invoke the method any number of times, obtaining the invocation result.
  *
- * <p>Typically not used directly but via its subclasses
- * {@link org.springframework.beans.factory.config.MethodInvokingFactoryBean} and
- * {@link org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean}.
- *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @since 19.02.2004
@@ -168,7 +164,7 @@ public class MethodInvoker {
 		}
 
 		Object[] arguments = getArguments();
-		Class[] argTypes = new Class[arguments.length];
+		Class<?>[] argTypes = new Class<?>[arguments.length];
 		for (int i = 0; i < arguments.length; ++i) {
 			argTypes[i] = (arguments[i] != null ? arguments[i].getClass() : Object.class);
 		}
@@ -216,7 +212,7 @@ public class MethodInvoker {
 
 		for (Method candidate : candidates) {
 			if (candidate.getName().equals(targetMethod)) {
-				Class[] paramTypes = candidate.getParameterTypes();
+				Class<?>[] paramTypes = candidate.getParameterTypes();
 				if (paramTypes.length == argCount) {
 					int typeDiffWeight = getTypeDifferenceWeight(paramTypes, arguments);
 					if (typeDiffWeight < minTypeDiffWeight) {

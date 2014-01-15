@@ -177,7 +177,7 @@ public abstract class ObjectUtils {
 	 * @param obj the object to append
 	 * @return the new array (of the same component type; never {@code null})
 	 */
-	public static <A,O extends A> A[] addObjectToArray(A[] array, O obj) {
+	public static <A, O extends A> A[] addObjectToArray(A[] array, O obj) {
 		Class<?> compType = Object.class;
 		if (array != null) {
 			compType = array.getClass().getComponentType();
