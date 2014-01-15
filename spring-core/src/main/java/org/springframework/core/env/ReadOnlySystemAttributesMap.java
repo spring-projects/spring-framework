@@ -51,7 +51,7 @@ abstract class ReadOnlySystemAttributesMap implements Map<String, String> {
 	@Override
 	public String get(Object key) {
 		Assert.isInstanceOf(String.class, key,
-			String.format("expected key [%s] to be of type String, got %s", key, key.getClass().getName()));
+				String.format("Expected key [%s] to be of type String, got %s", key, key.getClass().getName()));
 		return this.getSystemAttribute((String) key);
 	}
 

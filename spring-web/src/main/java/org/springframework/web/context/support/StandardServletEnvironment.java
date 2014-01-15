@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,7 @@ import org.springframework.web.context.ConfigurableWebEnvironment;
  * @since 3.1
  * @see StandardEnvironment
  */
-public class StandardServletEnvironment extends StandardEnvironment
-		implements ConfigurableWebEnvironment {
+public class StandardServletEnvironment extends StandardEnvironment implements ConfigurableWebEnvironment {
 
 	/** Servlet context init parameters property source name: {@value} */
 	public static final String SERVLET_CONTEXT_PROPERTY_SOURCE_NAME = "servletContextInitParams";
@@ -92,8 +91,7 @@ public class StandardServletEnvironment extends StandardEnvironment
 
 	@Override
 	public void initPropertySources(ServletContext servletContext, ServletConfig servletConfig) {
-		WebApplicationContextUtils.initServletPropertySources(
-				this.getPropertySources(), servletContext, servletConfig);
+		WebApplicationContextUtils.initServletPropertySources(getPropertySources(), servletContext, servletConfig);
 	}
 
 }
