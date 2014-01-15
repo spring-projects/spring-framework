@@ -28,10 +28,8 @@ import java.sql.Types;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
@@ -63,8 +61,9 @@ public abstract class StatementCreatorUtils {
 
 	private static final Log logger = LogFactory.getLog(StatementCreatorUtils.class);
 
-	static final Set<String> driversWithNoSupportForGetParameterType =
-			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(1));
+	// Using a ConcurrentHashMap as a Set (for Java 5 compatibility)
+	static final Map<String, Boolean> driversWithNoSupportForGetParameterType =
+			new ConcurrentHashMap<String, Boolean>(1);
 
 	private static final Map<Class<?>, Integer> javaTypeToSqlTypeMap = new HashMap<Class<?>, Integer>(32);
 
@@ -233,7 +232,7 @@ public abstract class StatementCreatorUtils {
 				try {
 					dbmd = ps.getConnection().getMetaData();
 					jdbcDriverName = dbmd.getDriverName();
-					checkGetParameterType = !driversWithNoSupportForGetParameterType.contains(jdbcDriverName);
+					checkGetParameterType = !driversWithNoSupportForGetParameterType.containsKey(jdbcDriverName);
 				}
 				catch (Throwable ex) {
 					logger.debug("Could not check connection metadata", ex);
@@ -260,7 +259,7 @@ public abstract class StatementCreatorUtils {
 						jdbcDriverName = dbmd.getDriverName();
 					}
 					if (checkGetParameterType) {
-						driversWithNoSupportForGetParameterType.add(jdbcDriverName);
+						driversWithNoSupportForGetParameterType.put(jdbcDriverName, Boolean.TRUE);
 					}
 					String databaseProductName = dbmd.getDatabaseProductName();
 					if (databaseProductName.startsWith("Informix") ||

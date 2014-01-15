@@ -109,7 +109,7 @@ public class StatementCreatorUtilsTests {
 	@Test
 	public void testSetParameterValueWithNullAndGetParameterTypeWorkingButNotForOtherDriver() throws SQLException {
 		StatementCreatorUtils.driversWithNoSupportForGetParameterType.clear();
-		StatementCreatorUtils.driversWithNoSupportForGetParameterType.add("Oracle JDBC Driver");
+		StatementCreatorUtils.driversWithNoSupportForGetParameterType.put("Oracle JDBC Driver", Boolean.TRUE);
 		Connection con = mock(Connection.class);
 		DatabaseMetaData dbmd = mock(DatabaseMetaData.class);
 		ParameterMetaData pmd = mock(ParameterMetaData.class);
