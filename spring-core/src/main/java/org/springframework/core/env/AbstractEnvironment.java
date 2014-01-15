@@ -53,6 +53,18 @@ import static org.springframework.util.StringUtils.*;
 public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 	/**
+	 * System property that instructs Spring to ignore system environment variables,
+	 * i.e. to never attempt to retrieve such a variable via {@link System#getenv()}.
+	 * <p>The default is "false", falling back to system environment variable checks if a
+	 * Spring environment property (e.g. a placeholder in a configuration String) isn't
+	 * resolvable otherwise. Consider switching this flag to "true" if you experience
+	 * log warnings from {@code getenv} calls coming from Spring, e.g. on WebSphere
+	 * with strict SecurityManager settings and AccessControlExceptions warnings.
+	 */
+	public static final String IGNORE_GETENV_PROPERTY_NAME = "spring.getenv.ignore";
+
+
+	/**
 	 * Name of property to set to specify active profiles: {@value}. Value may be comma
 	 * delimited.
 	 * <p>Note that certain shell environments such as Bash disallow the use of the period
@@ -168,8 +180,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * {@code remove}, or {@code replace} methods exposed by {@link MutablePropertySources}
 	 * in order to create the exact arrangement of property sources desired.
 	 *
-	 * <p>The base implementation in {@link AbstractEnvironment#customizePropertySources}
-	 * registers no property sources.
+	 * <p>The base implementation registers no property sources.
 	 *
 	 * <p>Note that clients of any {@link ConfigurableEnvironment} may further customize
 	 * property sources via the {@link #getPropertySources()} accessor, typically within
@@ -228,7 +239,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 */
 	protected Set<String> doGetActiveProfiles() {
 		if (this.activeProfiles.isEmpty()) {
-			String profiles = this.getProperty(ACTIVE_PROFILES_PROPERTY_NAME);
+			String profiles = getProperty(ACTIVE_PROFILES_PROPERTY_NAME);
 			if (StringUtils.hasText(profiles)) {
 				setActiveProfiles(commaDelimitedListToStringArray(trimAllWhitespace(profiles)));
 			}
@@ -273,7 +284,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 */
 	protected Set<String> doGetDefaultProfiles() {
 		if (this.defaultProfiles.equals(getReservedDefaultProfiles())) {
-			String profiles = this.getProperty(DEFAULT_PROFILES_PROPERTY_NAME);
+			String profiles = getProperty(DEFAULT_PROFILES_PROPERTY_NAME);
 			if (StringUtils.hasText(profiles)) {
 				setDefaultProfiles(commaDelimitedListToStringArray(trimAllWhitespace(profiles)));
 			}
@@ -348,12 +359,22 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> getSystemEnvironment() {
-		Map<String, ?> systemEnvironment;
 		try {
-			systemEnvironment = System.getenv();
+			if ("true".equalsIgnoreCase(System.getProperty(IGNORE_GETENV_PROPERTY_NAME))) {
+				return Collections.emptyMap();
+			}
+		}
+		catch (Throwable ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not obtain system property '" + IGNORE_GETENV_PROPERTY_NAME + "': " + ex);
+			}
+		}
+
+		try {
+			return (Map) System.getenv();
 		}
 		catch (AccessControlException ex) {
-			systemEnvironment = new ReadOnlySystemAttributesMap() {
+			return (Map) new ReadOnlySystemAttributesMap() {
 				@Override
 				protected String getSystemAttribute(String variableName) {
 					try {
@@ -361,9 +382,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 					}
 					catch (AccessControlException ex) {
 						if (logger.isInfoEnabled()) {
-							logger.info(format("Caught AccessControlException when " +
-									"accessing system environment variable [%s]; its " +
-									"value will be returned [null]. Reason: %s",
+							logger.info(format("Caught AccessControlException when accessing system " +
+									"environment variable [%s]; its value will be returned [null]. Reason: %s",
 									variableName, ex.getMessage()));
 						}
 						return null;
@@ -371,17 +391,15 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 				}
 			};
 		}
-		return (Map<String, Object>) systemEnvironment;
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings("unchecked")
 	public Map<String, Object> getSystemProperties() {
-		Map systemProperties;
 		try {
-			systemProperties = System.getProperties();
+			return (Map) System.getProperties();
 		}
 		catch (AccessControlException ex) {
-			systemProperties = new ReadOnlySystemAttributesMap() {
+			return (Map) new ReadOnlySystemAttributesMap() {
 				@Override
 				protected String getSystemAttribute(String propertyName) {
 					try {
@@ -389,9 +407,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 					}
 					catch (AccessControlException ex) {
 						if (logger.isInfoEnabled()) {
-							logger.info(format("Caught AccessControlException when " +
-									"accessing system property [%s]; its value will be " +
-									"returned [null]. Reason: %s",
+							logger.info(format("Caught AccessControlException when accessing system " +
+									"property [%s]; its value will be returned [null]. Reason: %s",
 									propertyName, ex.getMessage()));
 						}
 						return null;
@@ -399,7 +416,6 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 				}
 			};
 		}
-		return systemProperties;
 	}
 
 	public void merge(ConfigurableEnvironment parent) {
