@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,11 +47,11 @@ import org.springframework.web.context.request.WebRequest;
 /**
  * Convenience methods for retrieving the root
  * {@link org.springframework.web.context.WebApplicationContext} for a given
- * {@code ServletContext}. This is e.g. useful for accessing a Spring
- * context from within custom web views or Struts actions.
+ * {@code ServletContext}. This is useful for programmatically accessing a
+ * Spring application context from within custom web views or MVC actions.
  *
  * <p>Note that there are more convenient ways of accessing the root context for
- * many web frameworks, either part of Spring or available as external library.
+ * many web frameworks, either part of Spring or available as an external library.
  * This helper class is just the most generic way to access the root context.
  *
  * @author Juergen Hoeller
