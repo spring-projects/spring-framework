@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
+ * @author Markus Malkusch
  * @since 26.07.2006
  */
 public class ServletWebRequestTests {
@@ -116,7 +117,7 @@ public class ServletWebRequestTests {
 	}
 
 	@Test
-	public void checkNotModifiedTimeStamp() {
+	public void checkNotModifiedTimeStampForGET() {
 		long currentTime = new Date().getTime();
 		servletRequest.setMethod("GET");
 		servletRequest.addHeader("If-Modified-Since", currentTime);
@@ -127,7 +128,7 @@ public class ServletWebRequestTests {
 	}
 
 	@Test
-	public void checkModifiedTimeStamp() {
+	public void checkModifiedTimeStampForGET() {
 		long currentTime = new Date().getTime();
 		long oneMinuteAgo  = currentTime - (1000 * 60);
 		servletRequest.setMethod("GET");
@@ -140,7 +141,7 @@ public class ServletWebRequestTests {
 	}
 
 	@Test
-	public void checkNotModifiedETag() {
+	public void checkNotModifiedETagForGET() {
 		String eTag = "\"Foo\"";
 		servletRequest.setMethod("GET");
 		servletRequest.addHeader("If-None-Match", eTag );
@@ -151,10 +152,58 @@ public class ServletWebRequestTests {
 	}
 
 	@Test
-	public void checkModifiedETag() {
+	public void checkModifiedETagForGET() {
 		String currentETag = "\"Foo\"";
 		String oldEtag = "Bar";
 		servletRequest.setMethod("GET");
+		servletRequest.addHeader("If-None-Match", oldEtag);
+
+		request.checkNotModified(currentETag);
+
+		assertEquals(200, servletResponse.getStatus());
+		assertEquals(currentETag, servletResponse.getHeader("ETag"));
+	}
+
+	@Test
+	public void checkNotModifiedTimeStampForHEAD() {
+		long currentTime = new Date().getTime();
+		servletRequest.setMethod("HEAD");
+		servletRequest.addHeader("If-Modified-Since", currentTime);
+
+		request.checkNotModified(currentTime);
+
+		assertEquals(304, servletResponse.getStatus());
+	}
+
+	@Test
+	public void checkModifiedTimeStampForHEAD() {
+		long currentTime = new Date().getTime();
+		long oneMinuteAgo  = currentTime - (1000 * 60);
+		servletRequest.setMethod("HEAD");
+		servletRequest.addHeader("If-Modified-Since", oneMinuteAgo);
+
+		request.checkNotModified(currentTime);
+
+		assertEquals(200, servletResponse.getStatus());
+		assertEquals(""+currentTime, servletResponse.getHeader("Last-Modified"));
+	}
+
+	@Test
+	public void checkNotModifiedETagForHEAD() {
+		String eTag = "\"Foo\"";
+		servletRequest.setMethod("HEAD");
+		servletRequest.addHeader("If-None-Match", eTag );
+
+		request.checkNotModified(eTag);
+
+		assertEquals(304, servletResponse.getStatus());
+	}
+
+	@Test
+	public void checkModifiedETagForHEAD() {
+		String currentETag = "\"Foo\"";
+		String oldEtag = "Bar";
+		servletRequest.setMethod("HEAD");
 		servletRequest.addHeader("If-None-Match", oldEtag);
 
 		request.checkNotModified(currentETag);
