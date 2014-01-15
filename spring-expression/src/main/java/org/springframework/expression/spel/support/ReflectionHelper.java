@@ -401,8 +401,10 @@ public class ReflectionHelper {
 
 
 	/**
-	 * @deprecated as of Spring 3.2.7, since there is no need to ever refer to this directly...
-	 * and {@link #REQUIRES_CONVERSION} is effectively unused, going away in Spring 4.0
+	 * @deprecated in its public form as of Spring 3.2.7, since there is no need to refer to this directly...
+	 * @see ReflectionHelper.ArgumentsMatchInfo#isExactMatch()
+	 * @see ReflectionHelper.ArgumentsMatchInfo#isCloseMatch()
+	 * @see ReflectionHelper.ArgumentsMatchInfo#isMatchRequiringConversion()
 	 */
 	@Deprecated
 	public static enum ArgsMatchKind {
