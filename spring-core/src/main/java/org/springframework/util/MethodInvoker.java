@@ -28,10 +28,6 @@ import java.lang.reflect.Modifier;
  * optionally specify arguments, prepare the invoker. Afterwards, you may
  * invoke the method any number of times, obtaining the invocation result.
  *
- * <p>Typically not used directly but via its subclasses
- * {@link org.springframework.beans.factory.config.MethodInvokingFactoryBean} and
- * {@link org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean}.
- *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @since 19.02.2004
