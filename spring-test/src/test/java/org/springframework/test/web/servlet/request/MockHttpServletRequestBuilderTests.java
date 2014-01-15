@@ -15,11 +15,6 @@
  */
 package org.springframework.test.web.servlet.request;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,22 +23,23 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.print.attribute.standard.Media;
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockServletContext;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests building a MockHttpServletRequest with {@link MockHttpServletRequestBuilder}.
