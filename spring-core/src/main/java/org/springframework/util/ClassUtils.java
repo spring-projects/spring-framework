@@ -34,10 +34,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Miscellaneous class utility methods. Mainly for internal use within the
- * framework; consider
- * <a href="http://commons.apache.org/lang/" target="_blank">Apache Commons Lang</a>
- * for a more comprehensive suite of class utilities.
+ * Miscellaneous class utility methods.
+ * Mainly for internal use within the framework.
  *
  * @author Juergen Hoeller
  * @author Keith Donald
@@ -803,7 +801,7 @@ public abstract class ClassUtils {
 	 * @param method the method to check
 	 * @param targetClass the target class to check against
 	 */
-	private static boolean isOverridable(Method method, Class targetClass) {
+	private static boolean isOverridable(Method method, Class<?> targetClass) {
 		if (Modifier.isPrivate(method.getModifiers())) {
 			return false;
 		}
@@ -816,7 +814,7 @@ public abstract class ClassUtils {
 	/**
 	 * Return a public static method of a class.
 	 * @param methodName the static method name
-	 * @param clazz    the class which defines the method
+	 * @param clazz the class which defines the method
 	 * @param args the parameter types to the method
 	 * @return the static method, or {@code null} if no static method was found
 	 * @throws IllegalArgumentException if the method name is blank or the clazz is null
@@ -906,13 +904,13 @@ public abstract class ClassUtils {
 			return true;
 		}
 		if (lhsType.isPrimitive()) {
-			Class resolvedPrimitive = primitiveWrapperTypeMap.get(rhsType);
+			Class<?> resolvedPrimitive = primitiveWrapperTypeMap.get(rhsType);
 			if (resolvedPrimitive != null && lhsType.equals(resolvedPrimitive)) {
 				return true;
 			}
 		}
 		else {
-			Class resolvedWrapper = primitiveTypeToWrapperMap.get(rhsType);
+			Class<?> resolvedWrapper = primitiveTypeToWrapperMap.get(rhsType);
 			if (resolvedWrapper != null && lhsType.isAssignableFrom(resolvedWrapper)) {
 				return true;
 			}
