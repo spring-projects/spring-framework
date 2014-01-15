@@ -47,6 +47,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 	private static final String METHOD_GET = "GET";
 
+	private static final String METHOD_HEAD = "HEAD";
 
 	private HttpServletResponse response;
 
@@ -165,6 +166,10 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	public boolean isSecure() {
 		return getRequest().isSecure();
 	}
+	
+	private boolean isSafeHttpMethod(String method) {
+		return METHOD_GET.equals(method) || METHOD_HEAD.equals(method);
+	}
 
 	@Override
 	public boolean checkNotModified(long lastModifiedTimestamp) {
@@ -173,7 +178,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 			long ifModifiedSince = getRequest().getDateHeader(HEADER_IF_MODIFIED_SINCE);
 			this.notModified = (ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000));
 			if (this.response != null) {
-				if (this.notModified && METHOD_GET.equals(getRequest().getMethod())) {
+				if (this.notModified && isSafeHttpMethod(getRequest().getMethod())) {
 					this.response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 				}
 				else {
@@ -191,7 +196,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 			String ifNoneMatch = getRequest().getHeader(HEADER_IF_NONE_MATCH);
 			this.notModified = eTag.equals(ifNoneMatch);
 			if (this.response != null) {
-				if (this.notModified && METHOD_GET.equals(getRequest().getMethod())) {
+				if (this.notModified && isSafeHttpMethod(getRequest().getMethod())) {
 					this.response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 				}
 				else {
