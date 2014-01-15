@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 
 package org.springframework.util;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
 import java.io.IOException;
 import java.sql.SQLException;
 
 import junit.framework.TestCase;
 
 import org.springframework.core.task.TaskRejectedException;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson
@@ -51,25 +51,25 @@ public final class ObjectUtilsTests extends TestCase {
 		Class<?>[] sqlAndIO = new Class[] {SQLException.class, IOException.class};
 		Class<?>[] throwable = new Class[] {Throwable.class};
 
-		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new RuntimeException(), null));
+		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new RuntimeException()));
 		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new RuntimeException(), empty));
 		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new RuntimeException(), exception));
 		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new RuntimeException(), sqlAndIO));
 		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new RuntimeException(), throwable));
 
-		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new Exception(), null));
+		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new Exception()));
 		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new Exception(), empty));
 		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new Exception(), exception));
 		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new Exception(), sqlAndIO));
 		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new Exception(), throwable));
 
-		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new SQLException(), null));
+		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new SQLException()));
 		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new SQLException(), empty));
 		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new SQLException(), exception));
 		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new SQLException(), sqlAndIO));
 		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new SQLException(), throwable));
 
-		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new Throwable(), null));
+		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new Throwable()));
 		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new Throwable(), empty));
 		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new Throwable(), exception));
 		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new Throwable(), sqlAndIO));
@@ -196,7 +196,7 @@ public final class ObjectUtilsTests extends TestCase {
 		Object obj = new Object();
 		String expected = obj.getClass().getName() + "@" + ObjectUtils.getIdentityHexString(obj);
 		String actual = ObjectUtils.identityToString(obj);
-		assertEquals(expected.toString(), actual);
+		assertEquals(expected, actual);
 	}
 
 	public void testIdentityToStringWithNullObject() {
@@ -620,7 +620,7 @@ public final class ObjectUtilsTests extends TestCase {
 		assertEquals("null", ObjectUtils.nullSafeToString((String[]) null));
 	}
 
-	enum Tropes { FOO, BAR, baz };
+	enum Tropes { FOO, BAR, baz }
 
 	public void testContainsConstant() {
 		assertThat(ObjectUtils.containsConstant(Tropes.values(), "FOO"), is(true));
