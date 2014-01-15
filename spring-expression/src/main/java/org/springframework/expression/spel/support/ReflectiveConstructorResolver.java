@@ -32,8 +32,7 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
 
 /**
- * A constructor resolver that uses reflection to locate the constructor that should be
- * invoked
+ * A constructor resolver that uses reflection to locate the constructor that should be invoked.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -44,12 +43,10 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 	/**
 	 * Locate a constructor on the type. There are three kinds of match that might occur:
 	 * <ol>
-	 * <li>An exact match where the types of the arguments match the types of the
-	 * constructor
-	 * <li>An in-exact match where the types we are looking for are subtypes of those
-	 * defined on the constructor
-	 * <li>A match where we are able to convert the arguments into those expected by the
-	 * constructor, according to the registered type converter.
+	 * <li>An exact match where the types of the arguments match the types of the constructor
+	 * <li>An in-exact match where the types we are looking for are subtypes of those defined on the constructor
+	 * <li>A match where we are able to convert the arguments into those expected by the constructor, according to the
+	 * registered type converter.
 	 * </ol>
 	 */
 	@Override
@@ -93,11 +90,10 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 					matchInfo = ReflectionHelper.compareArguments(paramDescriptors, argumentTypes, typeConverter);
 				}
 				if (matchInfo != null) {
-					if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.EXACT) {
+					if (matchInfo.isExactMatch()) {
 						return new ReflectiveConstructorExecutor(ctor);
 					}
-					else if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.CLOSE ||
-							matchInfo.kind == ReflectionHelper.ArgsMatchKind.REQUIRES_CONVERSION) {
+					else if (matchInfo.isCloseMatch() || matchInfo.isMatchRequiringConversion()) {
 						closeMatch = ctor;
 					}
 				}

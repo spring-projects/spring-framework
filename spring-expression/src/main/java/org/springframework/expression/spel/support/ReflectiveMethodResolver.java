@@ -42,8 +42,8 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 
 /**
- * Reflection-based {@link MethodResolver} used by default in
- * {@link StandardEvaluationContext} unless explicit method resolvers have been specified.
+ * Reflection-based {@link MethodResolver} used by default in {@link StandardEvaluationContext}
+ * unless explicit method resolvers have been specified.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -124,7 +124,6 @@ public class ReflectiveMethodResolver implements MethodResolver {
 
 			Method closeMatch = null;
 			int closeMatchDistance = Integer.MAX_VALUE;
-			int[] argsToConvert = null;
 			Method matchRequiringConversion = null;
 			boolean multipleOptions = false;
 
@@ -145,10 +144,10 @@ public class ReflectiveMethodResolver implements MethodResolver {
 						matchInfo = ReflectionHelper.compareArguments(paramDescriptors, argumentTypes, typeConverter);
 					}
 					if (matchInfo != null) {
-						if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.EXACT) {
+						if (matchInfo.isExactMatch()) {
 							return new ReflectiveMethodExecutor(method);
 						}
-						else if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.CLOSE) {
+						else if (matchInfo.isCloseMatch()) {
 							if (!this.useDistance) {
 								closeMatch = method;
 							}
@@ -161,7 +160,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 								}
 							}
 						}
-						else if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.REQUIRES_CONVERSION) {
+						else if (matchInfo.isMatchRequiringConversion()) {
 							if (matchRequiringConversion != null) {
 								multipleOptions = true;
 							}

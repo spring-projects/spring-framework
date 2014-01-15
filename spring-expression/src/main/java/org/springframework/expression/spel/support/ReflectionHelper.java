@@ -55,7 +55,7 @@ public class ReflectionHelper {
 		Assert.isTrue(expectedArgTypes.size() == suppliedArgTypes.size(),
 				"Expected argument types and supplied argument types should be arrays of same length");
 
-		ArgsMatchKind match = ArgsMatchKind.EXACT;
+		ArgumentsMatchKind match = ArgumentsMatchKind.EXACT;
 		for (int i = 0; i < expectedArgTypes.size() && match != null; i++) {
 			TypeDescriptor suppliedArg = suppliedArgTypes.get(i);
 			TypeDescriptor expectedArg = expectedArgTypes.get(i);
@@ -68,12 +68,12 @@ public class ReflectionHelper {
 				}
 				else {
 					if (suppliedArg.isAssignableTo(expectedArg)) {
-						if (match != ArgsMatchKind.REQUIRES_CONVERSION) {
-							match = ArgsMatchKind.CLOSE;
+						if (match != ArgumentsMatchKind.REQUIRES_CONVERSION) {
+							match = ArgumentsMatchKind.CLOSE;
 						}
 					}
 					else if (typeConverter.canConvert(suppliedArg, expectedArg)) {
-						match = ArgsMatchKind.REQUIRES_CONVERSION;
+						match = ArgumentsMatchKind.REQUIRES_CONVERSION;
 					}
 					else {
 						match = null;
@@ -144,7 +144,7 @@ public class ReflectionHelper {
 		Assert.isTrue(expectedArgTypes.get(expectedArgTypes.size() - 1).isArray(),
 				"Final expected argument should be array type (the varargs parameter)");
 
-		ArgsMatchKind match = ArgsMatchKind.EXACT;
+		ArgumentsMatchKind match = ArgumentsMatchKind.EXACT;
 
 		// Check up until the varargs argument:
 
@@ -161,12 +161,12 @@ public class ReflectionHelper {
 			else {
 				if (!expectedArg.equals(suppliedArg)) {
 					if (suppliedArg.isAssignableTo(expectedArg)) {
-						if (match != ArgsMatchKind.REQUIRES_CONVERSION) {
-							match = ArgsMatchKind.CLOSE;
+						if (match != ArgumentsMatchKind.REQUIRES_CONVERSION) {
+							match = ArgumentsMatchKind.CLOSE;
 						}
 					}
 					else if (typeConverter.canConvert(suppliedArg, expectedArg)) {
-						match = ArgsMatchKind.REQUIRES_CONVERSION;
+						match = ArgumentsMatchKind.REQUIRES_CONVERSION;
 					}
 					else {
 						match = null;
@@ -202,12 +202,12 @@ public class ReflectionHelper {
 				else {
 					if (varargsParamType != suppliedArg.getType()) {
 						if (ClassUtils.isAssignable(varargsParamType, suppliedArg.getType())) {
-							if (match != ArgsMatchKind.REQUIRES_CONVERSION) {
-								match = ArgsMatchKind.CLOSE;
+							if (match != ArgumentsMatchKind.REQUIRES_CONVERSION) {
+								match = ArgumentsMatchKind.CLOSE;
 							}
 						}
 						else if (typeConverter.canConvert(suppliedArg, TypeDescriptor.valueOf(varargsParamType))) {
-							match = ArgsMatchKind.REQUIRES_CONVERSION;
+							match = ArgumentsMatchKind.REQUIRES_CONVERSION;
 						}
 						else {
 							match = null;
@@ -331,8 +331,9 @@ public class ReflectionHelper {
 		// Check if repackaging is needed:
 		if (parameterCount != args.length ||
 				requiredParameterTypes[parameterCount - 1] !=
-						(args[argumentCount - 1] == null ? null : args[argumentCount - 1].getClass())) {
-			int arraySize = 0; // zero size array if nothing to pass as the varargs parameter
+						(args[argumentCount - 1] != null ? args[argumentCount - 1].getClass() : null)) {
+
+			int arraySize = 0;  // zero size array if nothing to pass as the varargs parameter
 			if (argumentCount >= parameterCount) {
 				arraySize = argumentCount - (parameterCount - 1);
 			}
@@ -341,93 +342,26 @@ public class ReflectionHelper {
 			Object[] newArgs = new Object[parameterCount];
 			System.arraycopy(args, 0, newArgs, 0, newArgs.length - 1);
 
-			// Now sort out the final argument, which is the varargs one.  Before entering this
-			// method the arguments should have been converted to the box form of the required type.
-			Class<?> componentType = requiredParameterTypes[parameterCount-1].getComponentType();
-			if (componentType.isPrimitive()) {
-				if (componentType == Integer.TYPE) {
-					int[] repackagedArguments = (int[]) Array.newInstance(componentType,
-							arraySize);
-					for (int i = 0; i < arraySize; i++) {
-						repackagedArguments[i] = ((Integer) args[parameterCount + i - 1]).intValue();
-					}
-					newArgs[newArgs.length - 1] = repackagedArguments;
-				}
-				else if (componentType == Float.TYPE) {
-					float[] repackagedArguments = (float[]) Array.newInstance(
-							componentType, arraySize);
-					for (int i = 0; i < arraySize; i++) {
-						repackagedArguments[i] = ((Float) args[parameterCount + i - 1]).floatValue();
-					}
-					newArgs[newArgs.length - 1] = repackagedArguments;
-				}
-				else if (componentType == Double.TYPE) {
-					double[] repackagedArguments = (double[]) Array.newInstance(
-							componentType, arraySize);
-					for (int i = 0; i < arraySize; i++) {
-						repackagedArguments[i] = ((Double) args[parameterCount + i - 1]).doubleValue();
-					}
-					newArgs[newArgs.length - 1] = repackagedArguments;
-				}
-				else if (componentType == Short.TYPE) {
-					short[] repackagedArguments = (short[]) Array.newInstance(
-							componentType, arraySize);
-					for (int i = 0; i < arraySize; i++) {
-						repackagedArguments[i] = ((Short) args[parameterCount + i - 1]).shortValue();
-					}
-					newArgs[newArgs.length - 1] = repackagedArguments;
-				}
-				else if (componentType == Character.TYPE) {
-					char[] repackagedArguments = (char[]) Array.newInstance(
-							componentType, arraySize);
-					for (int i = 0; i < arraySize; i++) {
-						repackagedArguments[i] = ((Character) args[parameterCount + i - 1]).charValue();
-					}
-					newArgs[newArgs.length - 1] = repackagedArguments;
-				}
-				else if (componentType == Byte.TYPE) {
-					byte[] repackagedArguments = (byte[]) Array.newInstance(
-							componentType, arraySize);
-					for (int i = 0; i < arraySize; i++) {
-						repackagedArguments[i] = ((Byte) args[parameterCount + i - 1]).byteValue();
-					}
-					newArgs[newArgs.length - 1] = repackagedArguments;
-				}
-				else if (componentType == Boolean.TYPE) {
-					boolean[] repackagedArguments = (boolean[]) Array.newInstance(
-							componentType, arraySize);
-					for (int i = 0; i < arraySize; i++) {
-						repackagedArguments[i] = ((Boolean) args[parameterCount + i - 1]).booleanValue();
-					}
-					newArgs[newArgs.length - 1] = repackagedArguments;
-				}
-				else if (componentType == Long.TYPE) {
-					long[] repackagedArguments = (long[]) Array.newInstance(
-							componentType, arraySize);
-					for (int i = 0; i < arraySize; i++) {
-						repackagedArguments[i] = ((Long) args[parameterCount + i - 1]).longValue();
-					}
-					newArgs[newArgs.length - 1] = repackagedArguments;
-				}
+			// Now sort out the final argument, which is the varargs one. Before entering this method,
+			// the arguments should have been converted to the box form of the required type.
+			Class<?> componentType = requiredParameterTypes[parameterCount - 1].getComponentType();
+			Object repackagedArgs = Array.newInstance(componentType, arraySize);
+			for (int i = 0; i < arraySize; i++) {
+				Array.set(repackagedArgs, i, args[parameterCount - 1 + i]);
 			}
-			else {
-				Object[] repackagedArguments = (Object[]) Array.newInstance(componentType, arraySize);
-				// Copy all but the varargs arguments
-				System.arraycopy(args, parameterCount - 1, repackagedArguments, 0, arraySize);
-				newArgs[newArgs.length - 1] = repackagedArguments;
-			}
+			newArgs[newArgs.length - 1] = repackagedArgs;
 			return newArgs;
 		}
 		return args;
 	}
 
 
-	public static enum ArgsMatchKind {
+	static enum ArgumentsMatchKind {
 
-		/** An exact match is where the parameter types exactly match what the method/constructor being invoked is expecting */
+		/** An exact match is where the parameter types exactly match what the method/constructor is expecting */
 		EXACT,
 
-		/** A close match is where the parameter types either exactly match or are assignment compatible with the method/constructor being invoked */
+		/** A close match is where the parameter types either exactly match or are assignment-compatible */
 		CLOSE,
 
 		/** A conversion match is where the type converter must be used to transform some of the parameter types */
@@ -441,24 +375,24 @@ public class ReflectionHelper {
 	 * If the kind indicates that conversion is required for some of the arguments then the arguments that require
 	 * conversion are listed in the argsRequiringConversion array.
 	 */
-	public static class ArgumentsMatchInfo {
+	static class ArgumentsMatchInfo {
 
-		public final ArgsMatchKind kind;
+		private final ArgumentsMatchKind kind;
 
-		ArgumentsMatchInfo(ArgsMatchKind kind) {
+		ArgumentsMatchInfo(ArgumentsMatchKind kind) {
 			this.kind = kind;
 		}
 
 		public boolean isExactMatch() {
-			return (this.kind == ArgsMatchKind.EXACT);
+			return (this.kind == ArgumentsMatchKind.EXACT);
 		}
 
 		public boolean isCloseMatch() {
-			return (this.kind == ArgsMatchKind.CLOSE);
+			return (this.kind == ArgumentsMatchKind.CLOSE);
 		}
 
 		public boolean isMatchRequiringConversion() {
-			return (this.kind == ArgsMatchKind.REQUIRES_CONVERSION);
+			return (this.kind == ArgumentsMatchKind.REQUIRES_CONVERSION);
 		}
 
 		@Override
