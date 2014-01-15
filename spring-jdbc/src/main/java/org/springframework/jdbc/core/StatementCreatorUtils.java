@@ -30,9 +30,9 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -64,7 +64,7 @@ public abstract class StatementCreatorUtils {
 	private static final Log logger = LogFactory.getLog(StatementCreatorUtils.class);
 
 	static final Set<String> driversWithNoSupportForGetParameterType =
-			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(1));
+			Collections.synchronizedSet(new HashSet<String>());
 
 	private static final Map<Class<?>, Integer> javaTypeToSqlTypeMap = new HashMap<Class<?>, Integer>(32);
 
