@@ -89,6 +89,8 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 	private int priority;
 
 	private int misfireInstruction;
+	
+	private String description;
 
 	private String description;
 
@@ -210,6 +212,13 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 	public void setMisfireInstructionName(String constantName) {
 		this.misfireInstruction = constants.asNumber(constantName).intValue();
 	}
+	
+	/**
+	 * Set the description for this trigger.
+	 */
+	public void setDescription(String description) {
+        	this.description = description;
+        }
 
 	/**
 	 * Associate a textual description with this trigger.
