@@ -8,7 +8,7 @@
 
 	<xsd:annotation>
 		<xsd:documentation><![CDATA[
-	Spring XML Beans Schema, version 3.2
+	Spring XML Beans Schema, version 4.0
 	Authors: Juergen Hoeller, Rob Harrop, Mark Fisher, Chris Beams
 
 	This defines a simple and consistent way of creating a namespace
