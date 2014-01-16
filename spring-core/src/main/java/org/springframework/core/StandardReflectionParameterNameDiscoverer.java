@@ -22,7 +22,7 @@ import java.lang.reflect.Parameter;
 
 /**
  * {@link ParameterNameDiscoverer} implementation which uses JDK 8's reflection facilities
- * for introspecting parameter names.
+ * for introspecting parameter names (based on the "-parameters" compiler flag).
  *
  * @author Juergen Hoeller
  * @since 4.0
