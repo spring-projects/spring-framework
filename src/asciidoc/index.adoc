@@ -804,13 +804,13 @@ retained for the time being where Spring 3.2 had it; now just in deprecated form
 === Java 8 (as well as 6 and 7)
 Spring Framework 4.0 provides support for several Java 8 features. You can make use of
 __lambda expressions__ and __method references__ with Spring's callback interfaces. There
-is first class support for `java.time` (http://jcp.org/en/jsr/detail?id=310[JSR-310]), and
-several existing annotations have been retrofitted as `@Repeatable`. You can also use
-Java 8's parameter name discovery as an alternative to compiling your code with debug
-information enabled.
+is first-class support for `java.time` (http://jcp.org/en/jsr/detail?id=310[JSR-310]),
+and several existing annotations have been retrofitted as `@Repeatable`. You can also
+use Java 8's parameter name discovery (based on the `-parameters` compiler flag) as an
+alternative to compiling your code with debug information enabled.
 
 Spring remains compatible with older versions of Java and the JDK: concretely, Java SE 6
-(specifically, a minimum level equivalent to JDK 6 update 10, as released in late 2008)
+(specifically, a minimum level equivalent to JDK 6 update 18, as released in January 2010)
 and above are still fully supported. However, for newly started development projects
 based on Spring 4, we recommend the use of Java 7 or 8.
 
