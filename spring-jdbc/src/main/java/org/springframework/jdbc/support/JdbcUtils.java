@@ -34,6 +34,7 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.UsesJava7;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.util.ClassUtils;
@@ -134,6 +135,7 @@ public abstract class JdbcUtils {
 	 * @return the value object
 	 * @throws SQLException if thrown by the JDBC API
 	 */
+	@UsesJava7 // guard use of JDBC 4.1 (safe with 1.6)
 	public static Object getResultSetValue(ResultSet rs, int index, Class<?> requiredType) throws SQLException {
 		if (requiredType == null) {
 			return getResultSetValue(rs, index);
