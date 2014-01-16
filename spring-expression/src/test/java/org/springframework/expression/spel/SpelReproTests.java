@@ -133,14 +133,14 @@ public class SpelReproTests extends ExpressionTestCase {
 	static class MyTypeLocator extends StandardTypeLocator {
 
 		@Override
-		public Class<?> findType(String typename) throws EvaluationException {
-			if (typename.equals("Spr5899Class")) {
+		public Class<?> findType(String typeName) throws EvaluationException {
+			if (typeName.equals("Spr5899Class")) {
 				return Spr5899Class.class;
 			}
-			if (typename.equals("Outer")) {
+			if (typeName.equals("Outer")) {
 				return Outer.class;
 			}
-			return super.findType(typename);
+			return super.findType(typeName);
 		}
 	}
 

@@ -25,9 +25,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
-
-import javax.websocket.*;
+import javax.websocket.ClientEndpointConfig;
 import javax.websocket.ClientEndpointConfig.Configurator;
+import javax.websocket.ContainerProvider;
+import javax.websocket.Endpoint;
+import javax.websocket.Extension;
+import javax.websocket.HandshakeResponse;
+import javax.websocket.WebSocketContainer;
 
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
@@ -35,17 +39,17 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.standard.StandardWebSocketHandlerAdapter;
 import org.springframework.web.socket.adapter.standard.StandardWebSocketSession;
 import org.springframework.web.socket.adapter.standard.WebSocketToStandardExtensionAdapter;
 import org.springframework.web.socket.client.AbstractWebSocketClient;
-import org.springframework.web.socket.WebSocketExtension;
 
 /**
- * Initiates WebSocket requests to a WebSocket server programatically through the standard
- * Java WebSocket API.
+ * Initiates WebSocket requests to a WebSocket server programmatically
+ * through the standard Java WebSocket API.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -54,26 +58,25 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 
 	private final WebSocketContainer webSocketContainer;
 
-	private AsyncListenableTaskExecutor taskExecutor =
-			new SimpleAsyncTaskExecutor("WebSocketClient-");
+	private AsyncListenableTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("WebSocketClient-");
 
 
 	/**
-	 * Default constructor that calls {@code ContainerProvider.getWebSocketContainer()} to
-	 * obtain a {@link WebSocketContainer} instance.
+	 * Default constructor that calls {@code ContainerProvider.getWebSocketContainer()}
+	 * to obtain a {@link WebSocketContainer} instance.
 	 */
 	public StandardWebSocketClient() {
 		this.webSocketContainer = ContainerProvider.getWebSocketContainer();
 	}
 
 	/**
-	 * Constructor that accepts a pre-configured {@link WebSocketContainer} instance. If
-	 * using XML configuration see {@link WebSocketContainerFactoryBean}. In Java
+	 * Constructor that accepts a pre-configured {@link WebSocketContainer} instance.
+	 * If using XML configuration see {@link WebSocketContainerFactoryBean}. In Java
 	 * configuration use {@code ContainerProvider.getWebSocketContainer()} to obtain
 	 * a container instance.
 	 */
 	public StandardWebSocketClient(WebSocketContainer webSocketContainer) {
-		Assert.notNull(webSocketContainer, "webSocketContainer must not be null");
+		Assert.notNull(webSocketContainer, "WebSocketContainer must not be null");
 		this.webSocketContainer = webSocketContainer;
 	}
 
@@ -93,6 +96,7 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 	public AsyncListenableTaskExecutor getTaskExecutor() {
 		return this.taskExecutor;
 	}
+
 
 	@Override
 	protected ListenableFuture<WebSocketSession> doHandshakeInternal(WebSocketHandler webSocketHandler,
@@ -133,7 +137,7 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 		try {
 			return InetAddress.getLocalHost();
 		}
-		catch (UnknownHostException e) {
+		catch (UnknownHostException ex) {
 			return InetAddress.getLoopbackAddress();
 		}
 	}
@@ -141,7 +145,7 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 	private int getPort(URI uri) {
 		if (uri.getPort() == -1) {
 	        String scheme = uri.getScheme().toLowerCase(Locale.ENGLISH);
-	        return "wss".equals(scheme) ? 443 : 80;
+	        return ("wss".equals(scheme) ? 443 : 80);
 		}
 		return uri.getPort();
 	}
@@ -150,7 +154,6 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 	private class StandardWebSocketClientConfigurator extends Configurator {
 
 		private final HttpHeaders headers;
-
 
 		public StandardWebSocketClientConfigurator(HttpHeaders headers) {
 			this.headers = headers;
