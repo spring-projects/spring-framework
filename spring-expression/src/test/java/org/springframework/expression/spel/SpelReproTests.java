@@ -175,6 +175,7 @@ public class SpelReproTests extends ExpressionTestCase {
 			 return sb.toString();
 		 }
 
+		 @Override
 		 public String toString() {
 			 return "instance";
 		 }
@@ -559,24 +560,24 @@ public class SpelReproTests extends ExpressionTestCase {
 	// ---
 
 	private void checkTemplateParsing(String expression, String expectedValue) throws Exception {
-		checkTemplateParsing(expression,TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT, expectedValue);
+		checkTemplateParsing(expression, TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT, expectedValue);
 	}
 
 	private void checkTemplateParsing(String expression, ParserContext context, String expectedValue) throws Exception {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expr = parser.parseExpression(expression,context);
-		assertEquals(expectedValue,expr.getValue(TestScenarioCreator.getTestEvaluationContext()));
+		assertEquals(expectedValue, expr.getValue(TestScenarioCreator.getTestEvaluationContext()));
 	}
 
-	private void checkTemplateParsingError(String expression,String expectedMessage) throws Exception {
-		checkTemplateParsingError(expression, TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT,expectedMessage);
+	private void checkTemplateParsingError(String expression, String expectedMessage) throws Exception {
+		checkTemplateParsingError(expression, TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT, expectedMessage);
 	}
 
-	private void checkTemplateParsingError(String expression,ParserContext context, String expectedMessage) throws Exception {
+	private void checkTemplateParsingError(String expression, ParserContext context, String expectedMessage) throws Exception {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		try {
-			parser.parseExpression(expression,context);
-			fail("Should have failed");
+			parser.parseExpression(expression, context);
+			fail("Should have failed with message: " + expectedMessage);
 		}
 		catch (Exception ex) {
 			if (!ex.getMessage().equals(expectedMessage)) {
@@ -587,17 +588,14 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 	private static final ParserContext DOLLARSQUARE_TEMPLATE_PARSER_CONTEXT = new ParserContext() {
-
 		@Override
 		public String getExpressionPrefix() {
 			return "$[";
 		}
-
 		@Override
 		public String getExpressionSuffix() {
 			return "]";
 		}
-
 		@Override
 		public boolean isTemplate() {
 			return true;
@@ -826,6 +824,7 @@ public class SpelReproTests extends ExpressionTestCase {
 			a=s;
 		}
 
+		@Override
 		public String toString() {
 			return "D("+a+")";
 		}
