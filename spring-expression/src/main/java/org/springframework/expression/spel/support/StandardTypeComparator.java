@@ -24,8 +24,8 @@ import org.springframework.expression.spel.SpelMessage;
 import org.springframework.util.NumberUtils;
 
 /**
- * A simple basic TypeComparator implementation. It supports comparison of numbers and
- * types implementing Comparable.
+ * A simple basic {@link TypeComparator} implementation.
+ * It supports comparison of Numbers and types implementing Comparable.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -35,14 +35,28 @@ import org.springframework.util.NumberUtils;
 public class StandardTypeComparator implements TypeComparator {
 
 	@Override
+	public boolean canCompare(Object left, Object right) {
+		if (left == null || right == null) {
+			return true;
+		}
+		if (left instanceof Number && right instanceof Number) {
+			return true;
+		}
+		if (left instanceof Comparable) {
+			return true;
+		}
+		return false;
+	}
+
+	@Override
 	@SuppressWarnings("unchecked")
 	public int compare(Object left, Object right) throws SpelEvaluationException {
 		// If one is null, check if the other is
 		if (left == null) {
-			return right == null ? 0 : -1;
+			return (right == null ? 0 : -1);
 		}
 		else if (right == null) {
-			return 1; // left cannot be null
+			return 1;  // left cannot be null at this point
 		}
 
 		// Basic number comparisons
@@ -55,48 +69,41 @@ public class StandardTypeComparator implements TypeComparator {
 				BigDecimal rightBigDecimal = NumberUtils.convertNumberToTargetClass(rightNumber, BigDecimal.class);
 				return leftBigDecimal.compareTo(rightBigDecimal);
 			}
-
-			if (leftNumber instanceof Double || rightNumber instanceof Double) {
+			else if (leftNumber instanceof Double || rightNumber instanceof Double) {
 				return Double.compare(leftNumber.doubleValue(), rightNumber.doubleValue());
 			}
-
-			if (leftNumber instanceof Float || rightNumber instanceof Float) {
+			else if (leftNumber instanceof Float || rightNumber instanceof Float) {
 				return Float.compare(leftNumber.floatValue(), rightNumber.floatValue());
 			}
-
-			if (leftNumber instanceof Long || rightNumber instanceof Long) {
-				return Long.compare(leftNumber.longValue(), rightNumber.longValue());
+			else if (leftNumber instanceof Long || rightNumber instanceof Long) {
+				// Don't call Long.compare here - only available on JDK 1.7+
+				return compare(leftNumber.longValue(), rightNumber.longValue());
 			}
-
-			return Integer.compare(leftNumber.intValue(), rightNumber.intValue());
+			else {
+				// Don't call Integer.compare here - only available on JDK 1.7+
+				return compare(leftNumber.intValue(), rightNumber.intValue());
+			}
 		}
 
 		try {
 			if (left instanceof Comparable) {
-				return ((Comparable<Object>) left).compareTo(right);
+				return ((Comparable) left).compareTo(right);
 			}
-		} catch (ClassCastException cce) {
-			throw new SpelEvaluationException(cce, SpelMessage.NOT_COMPARABLE, left.getClass(), right.getClass());
+		}
+		catch (ClassCastException ex) {
+			throw new SpelEvaluationException(ex, SpelMessage.NOT_COMPARABLE, left.getClass(), right.getClass());
 		}
 
 		throw new SpelEvaluationException(SpelMessage.NOT_COMPARABLE, left.getClass(), right.getClass());
 	}
 
-	@Override
-	public boolean canCompare(Object left, Object right) {
-		if (left == null || right == null) {
-			return true;
-		}
 
-		if (left instanceof Number && right instanceof Number) {
-			return true;
-		}
+	private static int compare(int x, int y) {
+		return (x < y ? -1 : (x > y ? 1 : 0));
+	}
 
-		if (left instanceof Comparable) {
-			return true;
-		}
-
-		return false;
+	private static int compare(long x, long y) {
+		return (x < y ? -1 : (x > y ? 1 : 0));
 	}
 
 }
