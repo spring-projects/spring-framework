@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,11 +95,10 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 			else {
 				// Try a URL connection content-length header...
 				URLConnection con = url.openConnection();
-				ResourceUtils.useCachesIfNecessary(con);
+				customizeConnection(con);
 				HttpURLConnection httpCon =
 						(con instanceof HttpURLConnection ? (HttpURLConnection) con : null);
 				if (httpCon != null) {
-					httpCon.setRequestMethod("HEAD");
 					int code = httpCon.getResponseCode();
 					if (code == HttpURLConnection.HTTP_OK) {
 						return true;
@@ -157,10 +156,7 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 		else {
 			// Try a URL connection content-length header...
 			URLConnection con = url.openConnection();
-			ResourceUtils.useCachesIfNecessary(con);
-			if (con instanceof HttpURLConnection) {
-				((HttpURLConnection) con).setRequestMethod("HEAD");
-			}
+			customizeConnection(con);
 			return con.getContentLength();
 		}
 	}
@@ -175,12 +171,37 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 		else {
 			// Try a URL connection last-modified header...
 			URLConnection con = url.openConnection();
-			ResourceUtils.useCachesIfNecessary(con);
-			if (con instanceof HttpURLConnection) {
-				((HttpURLConnection) con).setRequestMethod("HEAD");
-			}
+			customizeConnection(con);
 			return con.getLastModified();
 		}
+	}
+
+
+	/**
+	 * Customize the given {@link URLConnection}, obtained in the course of an
+	 * {@link #exists()}, {@link #contentLength()} or {@link #lastModified()} call.
+	 * <p>Calls {@link ResourceUtils#useCachesIfNecessary(URLConnection)} and
+	 * delegates to {@link #customizeConnection(HttpURLConnection)} if possible.
+	 * Can be overridden in subclasses.
+	 * @param con the URLConnection to customize
+	 * @throws IOException if thrown from URLConnection methods
+	 */
+	protected void customizeConnection(URLConnection con) throws IOException {
+		ResourceUtils.useCachesIfNecessary(con);
+		if (con instanceof HttpURLConnection) {
+			customizeConnection((HttpURLConnection) con);
+		}
+	}
+
+	/**
+	 * Customize the given {@link HttpURLConnection}, obtained in the course of an
+	 * {@link #exists()}, {@link #contentLength()} or {@link #lastModified()} call.
+	 * <p>Sets request method "HEAD" by default. Can be overridden in subclasses.
+	 * @param con the HttpURLConnection to customize
+	 * @throws IOException if thrown from HttpURLConnection methods
+	 */
+	protected void customizeConnection(HttpURLConnection con) throws IOException {
+		con.setRequestMethod("HEAD");
 	}
 
 
