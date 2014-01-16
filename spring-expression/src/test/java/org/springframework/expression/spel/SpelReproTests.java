@@ -27,10 +27,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
@@ -75,9 +75,8 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 	@Test
-	@Ignore
 	public void testSWF1086() {
-		evaluate("printDouble(T(java.math.BigDecimal).valueOf(14.35))", "anullc", String.class);
+		evaluate("printDouble(T(java.math.BigDecimal).valueOf(14.35))", "14.35", String.class);
 	}
 
 	@Test
@@ -101,7 +100,8 @@ public class SpelReproTests extends ExpressionTestCase {
 			expr = new SpelExpressionParser().parseRaw("tryToInvokeWithNull2(null)");
 			expr.getValue();
 			fail("Should have failed to find a method to which it could pass null");
-		} catch (EvaluationException see) {
+		}
+		catch (EvaluationException see) {
 			// success
 		}
 		eContext.setTypeLocator(new MyTypeLocator());
@@ -145,26 +145,39 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 	static class Spr5899Class {
-		 public Spr5899Class() {}
-		 public Spr5899Class(Integer i) { }
-		 public Spr5899Class(Integer i, String... s) { }
 
-		 public Integer tryToInvokeWithNull(Integer value) { return value; }
-		 public Integer tryToInvokeWithNull2(int i) { return new Integer(i); }
-		 public String tryToInvokeWithNull3(Integer value,String... strings) {
+		 public Spr5899Class() {
+		 }
+
+		 public Spr5899Class(Integer i) {
+		 }
+
+		 public Spr5899Class(Integer i, String... s) {
+		 }
+
+		 public Integer tryToInvokeWithNull(Integer value) {
+			 return value;
+		 }
+
+		 public Integer tryToInvokeWithNull2(int i) {
+			 return new Integer(i);
+		 }
+
+		 public String tryToInvokeWithNull3(Integer value, String... strings) {
 			 StringBuilder sb = new StringBuilder();
-			 for (int i=0;i<strings.length;i++) {
-				 if (strings[i]==null) {
+			 for (String string : strings) {
+				 if (string == null) {
 					 sb.append("null");
-				 } else {
-					 sb.append(strings[i]);
+				 }
+				 else {
+					 sb.append(string);
 				 }
 			 }
 			 return sb.toString();
 		 }
 
 		 @Override
-		public String toString() {
+		 public String toString() {
 			 return "instance";
 		 }
 	}
@@ -183,11 +196,15 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 	static class Outer {
+
 		static class Inner {
+
 			public Inner() {}
+
 			public static int run() {
 				return 12;
 			}
+
 			public int run2() {
 				return 13;
 			}
@@ -277,7 +294,6 @@ public class SpelReproTests extends ExpressionTestCase {
 		public Class<?>[] getSpecificTargetClasses() {
 			return new Class[] {Map.class};
 		}
-
 	}
 
 	@Test
@@ -324,13 +340,15 @@ public class SpelReproTests extends ExpressionTestCase {
 		try {
 			propertyAccessor.read(context, null, "abc");
 			fail("Should have failed with an AccessException");
-		} catch (AccessException ae) {
+		}
+		catch (AccessException ae) {
 			// success
 		}
 		try {
 			propertyAccessor.write(context, null, "abc","foo");
 			fail("Should have failed with an AccessException");
-		} catch (AccessException ae) {
+		}
+		catch (AccessException ae) {
 			// success
 		}
 	}
@@ -348,20 +366,25 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 	static class Foo {
+
 		public ResourceSummary resource = new ResourceSummary();
 	}
 
 	static class ResourceSummary {
+
+		private final Resource resource;
+
 		ResourceSummary() {
 			this.resource = new Resource();
 		}
-		private final Resource resource;
+
 		public Resource getResource() {
 			return resource;
 		}
 	}
 
 	static class Resource {
+
 		public String getServer() {
 			return "abc";
 		}
@@ -499,6 +522,7 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 	static class XX {
+
 		public Map<String,String> m;
 
 		public String floo ="bar";
@@ -513,7 +537,9 @@ public class SpelReproTests extends ExpressionTestCase {
 	static class Goo {
 
 		public static Goo instance = new Goo();
+
 		public String bar = "key";
+
 		public String value = null;
 
 		public String wibble = "wobble";
@@ -525,7 +551,6 @@ public class SpelReproTests extends ExpressionTestCase {
 		public void setKey(String s) {
 			value = s;
 		}
-
 	}
 
 	static class Holder {
@@ -536,27 +561,26 @@ public class SpelReproTests extends ExpressionTestCase {
 	// ---
 
 	private void checkTemplateParsing(String expression, String expectedValue) throws Exception {
-		checkTemplateParsing(expression,TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT, expectedValue);
+		checkTemplateParsing(expression, TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT, expectedValue);
 	}
 
 	private void checkTemplateParsing(String expression, ParserContext context, String expectedValue) throws Exception {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expr = parser.parseExpression(expression,context);
-		assertEquals(expectedValue,expr.getValue(TestScenarioCreator.getTestEvaluationContext()));
+		assertEquals(expectedValue, expr.getValue(TestScenarioCreator.getTestEvaluationContext()));
 	}
 
-	private void checkTemplateParsingError(String expression, String expectedMessage)
-			throws Exception {
+	private void checkTemplateParsingError(String expression, String expectedMessage) throws Exception {
 		checkTemplateParsingError(expression, TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT, expectedMessage);
 	}
 
-	private void checkTemplateParsingError(String expression, ParserContext context,
-			String expectedMessage) throws Exception {
+	private void checkTemplateParsingError(String expression, ParserContext context, String expectedMessage) throws Exception {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		try {
-			parser.parseExpression(expression,context);
-			fail("Should have failed");
-		} catch (Exception ex) {
+			parser.parseExpression(expression, context);
+			fail("Should have failed with message: " + expectedMessage);
+		}
+		catch (Exception ex) {
 			String message = ex.getMessage();
 			if (ex instanceof ExpressionException) {
 				message = ((ExpressionException) ex).getSimpleMessage();
@@ -584,12 +608,14 @@ public class SpelReproTests extends ExpressionTestCase {
 	};
 
 	static class Foo2 {
+
 		public void execute(String str){
 			System.out.println("Value: " + str);
 		}
 	}
 
 	static class Message{
+
 		private String payload;
 
 		public String getPayload() {
@@ -612,7 +638,8 @@ public class SpelReproTests extends ExpressionTestCase {
 		try {
 			expr = new SpelExpressionParser().parseRaw("@foo");
 			assertEquals("custard",expr.getValue(eContext,String.class));
-		} catch (SpelEvaluationException see) {
+		}
+		catch (SpelEvaluationException see) {
 			assertEquals(SpelMessage.NO_BEAN_RESOLVER_REGISTERED,see.getMessageCode());
 			assertEquals("foo",see.getInserts()[0]);
 		}
@@ -631,7 +658,8 @@ public class SpelReproTests extends ExpressionTestCase {
 		expr = new SpelExpressionParser().parseRaw("@goo");
 		try {
 			assertEquals(null,expr.getValue(eContext,String.class));
-		} catch (SpelEvaluationException see) {
+		}
+		catch (SpelEvaluationException see) {
 			assertEquals(SpelMessage.EXCEPTION_DURING_BEAN_RESOLUTION,see.getMessageCode());
 			assertEquals("goo",see.getInserts()[0]);
 			assertTrue(see.getCause() instanceof AccessException);
@@ -646,19 +674,23 @@ public class SpelReproTests extends ExpressionTestCase {
 		try {
 			expr = new SpelExpressionParser().parseRaw("@378");
 			assertEquals("trouble",expr.getValue(eContext,String.class));
-		} catch (SpelParseException spe) {
+		}
+		catch (SpelParseException spe) {
 			assertEquals(SpelMessage.INVALID_BEAN_REFERENCE,spe.getMessageCode());
 		}
 	}
 
 	static class MyBeanResolver implements BeanResolver {
+
 		@Override
-		public Object resolve(EvaluationContext context, String beanname) throws AccessException {
-			if (beanname.equals("foo")) {
+		public Object resolve(EvaluationContext context, String beanName) throws AccessException {
+			if (beanName.equals("foo")) {
 				return "custard";
-			} else if (beanname.equals("foo.bar")) {
+			}
+			else if (beanName.equals("foo.bar")) {
 				return "trouble";
-			} else if (beanname.equals("goo")) {
+			}
+			else if (beanName.equals("goo")) {
 				throw new AccessException("DONT ASK ME ABOUT GOO");
 			}
 			return null;
@@ -685,7 +717,8 @@ public class SpelReproTests extends ExpressionTestCase {
 			expr = new SpelExpressionParser().parseRaw("(?'abc':'default')");
 			expr.getValue(eContext);
 			fail();
-		} catch (SpelEvaluationException see ) {
+		}
+		catch (SpelEvaluationException see ) {
 			assertEquals(SpelMessage.TYPE_CONVERSION_ERROR,see.getMessageCode());
 		}
 		expr = new SpelExpressionParser().parseRaw("(false?'abc':null)");
@@ -696,7 +729,8 @@ public class SpelReproTests extends ExpressionTestCase {
 			expr = new SpelExpressionParser().parseRaw("(='default')");
 			expr.getValue(eContext);
 			fail();
-		} catch (SpelEvaluationException see ) {
+		}
+		catch (SpelEvaluationException see ) {
 			assertEquals(SpelMessage.SETVALUE_NOT_SUPPORTED,see.getMessageCode());
 		}
 	}
@@ -921,7 +955,6 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 
-
 	@Test
 	public void varargsAndPrimitives_SPR8174() throws Exception  {
 		EvaluationContext emptyEvalContext = new StandardEvaluationContext();
@@ -968,60 +1001,59 @@ public class SpelReproTests extends ExpressionTestCase {
 		args.add(TypeDescriptor.forObject(23f));
 		me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"bar",args);
 		me.execute(emptyEvalContext, ru, 12,23f);
-
 	}
 
 
-
 	public class ReflectionUtil<T extends Number> {
+
 		public Object methodToCall(T param) {
 			System.out.println(param+" "+param.getClass());
-				return "Object methodToCall(T param)";
+			return "Object methodToCall(T param)";
 		}
 
 		public void foo(int... array) {
-			if (array.length==0) {
+			if (array.length == 0) {
 				throw new RuntimeException();
 			}
 		}
 		public void foo(float...array) {
-			if (array.length==0) {
+			if (array.length == 0) {
 				throw new RuntimeException();
 			}
 		}
 		public void foo(double...array) {
-			if (array.length==0) {
+			if (array.length == 0) {
 				throw new RuntimeException();
 			}
 		}
 		public void foo(short...array) {
-			if (array.length==0) {
+			if (array.length == 0) {
 				throw new RuntimeException();
 			}
 		}
 		public void foo(long...array) {
-			if (array.length==0) {
+			if (array.length == 0) {
 				throw new RuntimeException();
 			}
 		}
 		public void foo(boolean...array) {
-			if (array.length==0) {
+			if (array.length == 0) {
 				throw new RuntimeException();
 			}
 		}
 		public void foo(char...array) {
-			if (array.length==0) {
+			if (array.length == 0) {
 				throw new RuntimeException();
 			}
 		}
 		public void foo(byte...array) {
-			if (array.length==0) {
+			if (array.length == 0) {
 				throw new RuntimeException();
 			}
 		}
 
 		public void bar(int... array) {
-			if (array.length==0) {
+			if (array.length == 0) {
 				throw new RuntimeException();
 			}
 		}
@@ -1048,41 +1080,42 @@ public class SpelReproTests extends ExpressionTestCase {
 				m.put("NE","xyz");
 			}
 		}
+
 		StandardEvaluationContext ctx = new StandardEvaluationContext(new Reserver());
 		SpelExpressionParser parser = new SpelExpressionParser();
 		String ex = "getReserver().NE";
-		SpelExpression exp = null;
-		exp = parser.parseRaw(ex);
-		String value = (String)exp.getValue(ctx);
-		assertEquals("abc",value);
+		SpelExpression exp = parser.parseRaw(ex);
+		String value = (String) exp.getValue(ctx);
+		assertEquals("abc", value);
 
 		ex = "getReserver().ne";
 		exp = parser.parseRaw(ex);
-		value = (String)exp.getValue(ctx);
-		assertEquals("def",value);
+		value = (String) exp.getValue(ctx);
+		assertEquals("def", value);
 
 		ex = "getReserver().m[NE]";
 		exp = parser.parseRaw(ex);
-		value = (String)exp.getValue(ctx);
-		assertEquals("xyz",value);
+		value = (String) exp.getValue(ctx);
+		assertEquals("xyz", value);
 
 		ex = "getReserver().DIV";
 		exp = parser.parseRaw(ex);
-		assertEquals(1,exp.getValue(ctx));
+		assertEquals(1, exp.getValue(ctx));
 
 		ex = "getReserver().div";
 		exp = parser.parseRaw(ex);
-		assertEquals(3,exp.getValue(ctx));
+		assertEquals(3, exp.getValue(ctx));
 
 		exp = parser.parseRaw("NE");
-		assertEquals("abc",exp.getValue(ctx));
+		assertEquals("abc", exp.getValue(ctx));
 	}
 
 	@Test
 	public void testReservedWordProperties_9862() throws Exception {
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 		SpelExpressionParser parser = new SpelExpressionParser();
-		SpelExpression expression = parser.parseRaw("T(org.springframework.expression.spel.testresources.le.div.mod.reserved.Reserver).CONST");
+		SpelExpression expression = parser.parseRaw(
+				"T(org.springframework.expression.spel.testresources.le.div.mod.reserved.Reserver).CONST");
 		Object value = expression.getValue(ctx);
 		assertEquals(value, Reserver.CONST);
 	}
@@ -1115,47 +1148,53 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 	class TestPropertyAccessor implements PropertyAccessor {
+
 		private String mapName;
+
 		public TestPropertyAccessor(String mapName) {
 			this.mapName = mapName;
 		}
+
 		@SuppressWarnings("unchecked")
 		public Map<String, String> getMap(Object target) {
 			try {
 				Field f = target.getClass().getDeclaredField(mapName);
 				return (Map<String,String>) f.get(target);
-			} catch (Exception e) {
+			}
+			catch (Exception ex) {
 			}
 			return null;
 		}
+
 		@Override
-		public boolean canRead(EvaluationContext context, Object target, String name)
-				throws AccessException {
+		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
 			return getMap(target).containsKey(name);
 		}
+
 		@Override
-		public boolean canWrite(EvaluationContext context, Object target, String name)
-				throws AccessException {
+		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
 			return getMap(target).containsKey(name);
 		}
+
 		@Override
 		public Class<?>[] getSpecificTargetClasses() {
-			return new Class[]{ContextObject.class};
+			return new Class[] {ContextObject.class};
 		}
+
 		@Override
-		public TypedValue read(EvaluationContext context, Object target, String name)
-				throws AccessException {
+		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 			return new TypedValue(getMap(target).get(name));
 		}
+
 		@Override
 		public void write(EvaluationContext context, Object target, String name, Object newValue)
 			throws AccessException {
 			getMap(target).put(name, (String) newValue);
 		}
-
 	}
 
 	class ContextObject {
+
 		public Map<String, String> firstContext = new HashMap<String, String>();
 		public Map<String, String> secondContext = new HashMap<String, String>();
 		public Map<String, String> thirdContext = new HashMap<String, String>();
@@ -1176,6 +1215,7 @@ public class SpelReproTests extends ExpressionTestCase {
 
 			fourthContext.put("shouldBeFourth", "fourth");
 		}
+
 		public Map<String, String> getFirstContext() {return firstContext;}
 		public Map<String, String> getSecondContext() {return secondContext;}
 		public Map<String, String> getThirdContext() {return thirdContext;}
@@ -1188,33 +1228,28 @@ public class SpelReproTests extends ExpressionTestCase {
 	 */
 	@Test
 	public void testCustomStaticFunctions_SPR9038() {
-		try {
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			List<MethodResolver> methodResolvers = new ArrayList<MethodResolver>();
-			methodResolvers.add(new ReflectiveMethodResolver() {
-				@Override
-				protected Method[] getMethods(Class<?> type) {
-					try {
-						return new Method[] {
-								Integer.class.getDeclaredMethod("parseInt", new Class[] {
-										String.class, Integer.TYPE }) };
-					} catch (NoSuchMethodException e1) {
-						return new Method[0];
-					}
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		List<MethodResolver> methodResolvers = new ArrayList<MethodResolver>();
+		methodResolvers.add(new ReflectiveMethodResolver() {
+			@Override
+			protected Method[] getMethods(Class<?> type) {
+				try {
+					return new Method[] {Integer.class.getDeclaredMethod("parseInt",
+							new Class[] {String.class, Integer.TYPE })};
 				}
-			});
+				catch (NoSuchMethodException ex) {
+					return new Method[0];
+				}
+			}
+		});
 
-			context.setMethodResolvers(methodResolvers);
-			org.springframework.expression.Expression expression =
-					parser.parseExpression("parseInt('-FF', 16)");
+		context.setMethodResolvers(methodResolvers);
+		org.springframework.expression.Expression expression =
+				parser.parseExpression("parseInt('-FF', 16)");
 
-			Integer result = expression.getValue(context, "", Integer.class);
-			assertEquals("Equal assertion failed: ", -255, result.intValue());
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Unexpected exception: "+e.toString());
-		}
+		Integer result = expression.getValue(context, "", Integer.class);
+		assertEquals("Equal assertion failed: ", -255, result.intValue());
 	}
 
 	@Test
@@ -1247,23 +1282,19 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 	@Test
-	public void SPR_9486_floatFunctionResolverTest() {
-		try {
-			Number expectedResult = Math.abs(-10.2f);
-			ExpressionParser parser = new SpelExpressionParser();
-			SPR_9486_FunctionsClass testObject = new SPR_9486_FunctionsClass();
+	public void SPR_9486_floatFunctionResolverTest() throws Exception {
+		Number expectedResult = Math.abs(-10.2f);
+		ExpressionParser parser = new SpelExpressionParser();
+		SPR_9486_FunctionsClass testObject = new SPR_9486_FunctionsClass();
 
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("abs(-10.2f)");
-			Number result = expression.getValue(context, testObject, Number.class);
-			assertEquals("Equal assertion failed for SPR_9486_floatFunctionResolverTest Test: ", expectedResult, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_floatFunctionResolverTest");
-		}
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("abs(-10.2f)");
+		Number result = expression.getValue(context, testObject, Number.class);
+		assertEquals("Equal assertion failed for SPR_9486_floatFunctionResolverTest Test: ", expectedResult, result);
 	}
 
 	class SPR_9486_FunctionsClass {
+
 		public int abs(int value) {
 			return Math.abs(value);
 		}
@@ -1275,394 +1306,264 @@ public class SpelReproTests extends ExpressionTestCase {
 
 	@Test
 	public void SPR_9486_addFloatWithDoubleTest() {
-		try {
-			Number expectedNumber = 10.21f + 10.2;
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("10.21f + 10.2");
-			Number result = expression.getValue(context, null, Number.class);
-			assertEquals("Equal assertion failed for SPR_9486_addFloatWithDoubleTest Test: ", expectedNumber, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_addFloatWithDoubleTest");
-		}
+		Number expectedNumber = 10.21f + 10.2;
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("10.21f + 10.2");
+		Number result = expression.getValue(context, null, Number.class);
+		assertEquals("Equal assertion failed for SPR_9486_addFloatWithDoubleTest Test: ", expectedNumber, result);
 	}
 
 	@Test
 	public void SPR_9486_addFloatWithFloatTest() {
-		try {
-			Number expectedNumber = 10.21f + 10.2f;
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("10.21f + 10.2f");
-			Number result = expression.getValue(context, null, Number.class);
-			assertEquals("Equal assertion failed for SPR_9486_addFloatWithFloatTest Test: ", expectedNumber, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_addFloatWithFloatTest");
-		}
+		Number expectedNumber = 10.21f + 10.2f;
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("10.21f + 10.2f");
+		Number result = expression.getValue(context, null, Number.class);
+		assertEquals("Equal assertion failed for SPR_9486_addFloatWithFloatTest Test: ", expectedNumber, result);
 	}
 
 	@Test
 	public void SPR_9486_subtractFloatWithDoubleTest() {
-		try {
-			Number expectedNumber = 10.21f - 10.2;
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("10.21f - 10.2");
-			Number result = expression.getValue(context, null, Number.class);
-			assertEquals("Equal assertion failed for SPR_9486_subtractFloatWithDoubleTest Test: ", expectedNumber, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_subtractFloatWithDoubleTest");
-		}
+		Number expectedNumber = 10.21f - 10.2;
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("10.21f - 10.2");
+		Number result = expression.getValue(context, null, Number.class);
+		assertEquals("Equal assertion failed for SPR_9486_subtractFloatWithDoubleTest Test: ", expectedNumber, result);
 	}
 
 	@Test
 	public void SPR_9486_subtractFloatWithFloatTest() {
-		try {
-			Number expectedNumber = 10.21f - 10.2f;
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("10.21f - 10.2f");
-			Number result = expression.getValue(context, null, Number.class);
-			assertEquals("Equal assertion failed for SPR_9486_subtractFloatWithFloatTest Test: ", expectedNumber, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_subtractFloatWithFloatTest");
-		}
+		Number expectedNumber = 10.21f - 10.2f;
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("10.21f - 10.2f");
+		Number result = expression.getValue(context, null, Number.class);
+		assertEquals("Equal assertion failed for SPR_9486_subtractFloatWithFloatTest Test: ", expectedNumber, result);
 	}
 
 	@Test
 	public void SPR_9486_multiplyFloatWithDoubleTest() {
-		try {
-			Number expectedNumber = 10.21f * 10.2;
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("10.21f * 10.2");
-			Number result = expression.getValue(context, null, Number.class);
-			assertEquals("Equal assertion failed for float multiplied by double Test: ", expectedNumber, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_multiplyFloatWithDoubleTest");
-		}
+		Number expectedNumber = 10.21f * 10.2;
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("10.21f * 10.2");
+		Number result = expression.getValue(context, null, Number.class);
+		assertEquals("Equal assertion failed for float multiplied by double Test: ", expectedNumber, result);
 	}
 
 	@Test
 	public void SPR_9486_multiplyFloatWithFloatTest() {
-		try {
-			Number expectedNumber = 10.21f * 10.2f;
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("10.21f * 10.2f");
-			Number result = expression.getValue(context, null, Number.class);
-			assertEquals("Equal assertion failed for float multiply by another float Test: ", expectedNumber, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_multiplyFloatWithFloatTest");
-		}
+		Number expectedNumber = 10.21f * 10.2f;
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("10.21f * 10.2f");
+		Number result = expression.getValue(context, null, Number.class);
+		assertEquals("Equal assertion failed for float multiply by another float Test: ", expectedNumber, result);
 	}
 
 	@Test
 	public void SPR_9486_floatDivideByFloatTest() {
-		try {
-			Number expectedNumber = -10.21f/-10.2f;
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("-10.21f / -10.2f");
-			Number result = expression.getValue(context, null, Number.class);
-			assertEquals("Equal assertion failed for float divide Test: ", expectedNumber, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_floatDivideByFloatTest");
-		}
+		Number expectedNumber = -10.21f/-10.2f;
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("-10.21f / -10.2f");
+		Number result = expression.getValue(context, null, Number.class);
+		assertEquals("Equal assertion failed for float divide Test: ", expectedNumber, result);
 	}
 
 	@Test
 	public void SPR_9486_floatDivideByDoubleTest() {
-		try {
-			Number expectedNumber = -10.21f/-10.2;
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("-10.21f / -10.2");
-			Number result = expression.getValue(context, null, Number.class);
-			assertEquals("Equal assertion failed for float divide Test: ", expectedNumber, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_floatDivideByDoubleTest");
-		}
+		Number expectedNumber = -10.21f/-10.2;
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("-10.21f / -10.2");
+		Number result = expression.getValue(context, null, Number.class);
+		assertEquals("Equal assertion failed for float divide Test: ", expectedNumber, result);
 	}
 
 	@Test
 	public void SPR_9486_floatEqFloatUnaryMinusTest() {
-		try {
-			Boolean expectedResult =  -10.21f == -10.2f;
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("-10.21f == -10.2f");
-			Boolean result = expression.getValue(context, null, Boolean.class);
-			assertEquals("Equal assertion failed for SPR_9486_floatEqFloatUnaryMinusTest Test: ", expectedResult, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_floatEqFloatUnaryMinusTest");
-		}
+		Boolean expectedResult =  -10.21f == -10.2f;
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("-10.21f == -10.2f");
+		Boolean result = expression.getValue(context, null, Boolean.class);
+		assertEquals("Equal assertion failed for SPR_9486_floatEqFloatUnaryMinusTest Test: ", expectedResult, result);
 	}
 
 	@Test
 	public void SPR_9486_floatEqDoubleUnaryMinusTest() {
-		try {
-			Boolean expectedResult =  -10.21f == -10.2;
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("-10.21f == -10.2");
-			Boolean result = expression.getValue(context, null, Boolean.class);
-			assertEquals("Equal assertion failed for SPR_9486_floatEqDoubleUnaryMinusTest Test: ", expectedResult, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_floatEqDoubleUnaryMinusTest");
-		}
+		Boolean expectedResult =  -10.21f == -10.2;
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("-10.21f == -10.2");
+		Boolean result = expression.getValue(context, null, Boolean.class);
+		assertEquals("Equal assertion failed for SPR_9486_floatEqDoubleUnaryMinusTest Test: ", expectedResult, result);
 	}
 
 	@Test
 	public void SPR_9486_floatEqFloatTest() {
-		try {
-			Boolean expectedResult =  10.215f == 10.2109f;
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("10.215f == 10.2109f");
-			Boolean result = expression.getValue(context, null, Boolean.class);
-			assertEquals("Equal assertion failed for SPR_9486_floatEqFloatTest Test: ", expectedResult, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_floatEqFloatTest");
-		}
+		Boolean expectedResult =  10.215f == 10.2109f;
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("10.215f == 10.2109f");
+		Boolean result = expression.getValue(context, null, Boolean.class);
+		assertEquals("Equal assertion failed for SPR_9486_floatEqFloatTest Test: ", expectedResult, result);
 	}
 
 	@Test
 	public void SPR_9486_floatEqDoubleTest() {
-		try {
-			Boolean expectedResult =  10.215f == 10.2109;
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("10.215f == 10.2109");
-			Boolean result = expression.getValue(context, null, Boolean.class);
-			assertEquals("Equal assertion failed for SPR_9486_floatEqDoubleTest() Test: ", expectedResult, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_floatEqDoubleTest()");
-		}
+		Boolean expectedResult =  10.215f == 10.2109;
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("10.215f == 10.2109");
+		Boolean result = expression.getValue(context, null, Boolean.class);
+		assertEquals("Equal assertion failed for SPR_9486_floatEqDoubleTest() Test: ", expectedResult, result);
 	}
 
 	@Test
 	public void SPR_9486_floatNotEqFloatTest() {
-		try {
-			Boolean expectedResult =  10.215f != 10.2109f;
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("10.215f != 10.2109f");
-			Boolean result = expression.getValue(context, null, Boolean.class);
-			assertEquals("Equal assertion failed for SPR_9486_floatEqFloatTest Test: ", expectedResult, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_floatEqFloatTest");
-		}
+		Boolean expectedResult =  10.215f != 10.2109f;
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("10.215f != 10.2109f");
+		Boolean result = expression.getValue(context, null, Boolean.class);
+		assertEquals("Equal assertion failed for SPR_9486_floatEqFloatTest Test: ", expectedResult, result);
 	}
 
 	@Test
 	public void SPR_9486_floatNotEqDoubleTest() {
-		try {
-			Boolean expectedResult =  10.215f != 10.2109;
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("10.215f != 10.2109");
-			Boolean result = expression.getValue(context, null, Boolean.class);
-			assertEquals("Equal assertion failed for SPR_9486_floatNotEqDoubleTest Test: ", expectedResult, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_floatNotEqDoubleTest");
-		}
+		Boolean expectedResult =  10.215f != 10.2109;
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("10.215f != 10.2109");
+		Boolean result = expression.getValue(context, null, Boolean.class);
+		assertEquals("Equal assertion failed for SPR_9486_floatNotEqDoubleTest Test: ", expectedResult, result);
 	}
 
 
 
 	@Test
 	public void SPR_9486_floatLessThanFloatTest() {
-		try {
-			Boolean expectedNumber = -10.21f < -10.2f;
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("-10.21f < -10.2f");
-			Boolean result = expression.getValue(context, null, Boolean.class);
-			assertEquals("Equal assertion failed for SPR_9486_floatLessThanFloatTest Test: ", expectedNumber, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_floatLessThanFloatTest()");
-		}
+		Boolean expectedNumber = -10.21f < -10.2f;
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("-10.21f < -10.2f");
+		Boolean result = expression.getValue(context, null, Boolean.class);
+		assertEquals("Equal assertion failed for SPR_9486_floatLessThanFloatTest Test: ", expectedNumber, result);
 	}
 
 	@Test
 	public void SPR_9486_floatLessThanDoubleTest() {
-		try {
-			Boolean expectedNumber = -10.21f < -10.2;
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("-10.21f < -10.2");
-			Boolean result = expression.getValue(context, null, Boolean.class);
-			assertEquals("Equal assertion failed for SPR_9486_floatLessThanDoubleTest Test: ", expectedNumber, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_floatLessThanDoubleTest()");
-		}
+		Boolean expectedNumber = -10.21f < -10.2;
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("-10.21f < -10.2");
+		Boolean result = expression.getValue(context, null, Boolean.class);
+		assertEquals("Equal assertion failed for SPR_9486_floatLessThanDoubleTest Test: ", expectedNumber, result);
 	}
 
 	@Test
 	public void SPR_9486_floatLessThanOrEqualFloatTest() {
-		try {
-			Boolean expectedNumber = -10.21f <= -10.22f;
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("-10.21f <= -10.22f");
-			Boolean result = expression.getValue(context, null, Boolean.class);
-			assertEquals("Equal assertion failed for SPR_9486_floatLessThanOrEqualFloatTest Test: ", expectedNumber, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_floatLessThanOrEqualFloatTest");
-		}
+		Boolean expectedNumber = -10.21f <= -10.22f;
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("-10.21f <= -10.22f");
+		Boolean result = expression.getValue(context, null, Boolean.class);
+		assertEquals("Equal assertion failed for SPR_9486_floatLessThanOrEqualFloatTest Test: ", expectedNumber, result);
 	}
 
 	@Test
 	public void SPR_9486_floatLessThanOrEqualDoubleTest() {
-		try {
-			Boolean expectedNumber = -10.21f <= -10.2;
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("-10.21f <= -10.2");
-			Boolean result = expression.getValue(context, null, Boolean.class);
-			assertEquals("Equal assertion failed for SPR_9486_floatLessThanOrEqualDoubleTest Test: ", expectedNumber, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_floatLessThanOrEqualDoubleTest");
-		}
+		Boolean expectedNumber = -10.21f <= -10.2;
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("-10.21f <= -10.2");
+		Boolean result = expression.getValue(context, null, Boolean.class);
+		assertEquals("Equal assertion failed for SPR_9486_floatLessThanOrEqualDoubleTest Test: ", expectedNumber, result);
 	}
 
 	@Test
 	public void SPR_9486_floatGreaterThanFloatTest() {
-		try {
-			Boolean expectedNumber = -10.21f > -10.2f;
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("-10.21f > -10.2f");
-			Boolean result = expression.getValue(context, null, Boolean.class);
-			assertEquals("Equal assertion failed for SPR_9486_floatGreaterThanFloatTest Test: ", expectedNumber, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_floatGreaterThanTest");
-		}
+		Boolean expectedNumber = -10.21f > -10.2f;
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("-10.21f > -10.2f");
+		Boolean result = expression.getValue(context, null, Boolean.class);
+		assertEquals("Equal assertion failed for SPR_9486_floatGreaterThanFloatTest Test: ", expectedNumber, result);
 	}
 
 	@Test
 	public void SPR_9486_floatGreaterThanDoubleTest() {
-		try {
-			Boolean expectedResult = -10.21f > -10.2;
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("-10.21f > -10.2");
-			Boolean result = expression.getValue(context, null, Boolean.class);
-			assertEquals("Equal assertion failed for SPR_9486_floatGreaterThanDoubleTest Test: ", expectedResult, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_floatGreaterThanTest");
-		}
+		Boolean expectedResult = -10.21f > -10.2;
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("-10.21f > -10.2");
+		Boolean result = expression.getValue(context, null, Boolean.class);
+		assertEquals("Equal assertion failed for SPR_9486_floatGreaterThanDoubleTest Test: ", expectedResult, result);
 	}
 
 	@Test
 	public void SPR_9486_floatGreaterThanOrEqualFloatTest() {
-		try {
-			Boolean expectedNumber = -10.21f >= -10.2f;
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("-10.21f >= -10.2f");
-			Boolean result = expression.getValue(context, null, Boolean.class);
-			assertEquals("Equal assertion failed for SPR_9486_floatGreaterThanFloatTest Test: ", expectedNumber, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_floatGreaterThanTest");
-		}
+		Boolean expectedNumber = -10.21f >= -10.2f;
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("-10.21f >= -10.2f");
+		Boolean result = expression.getValue(context, null, Boolean.class);
+		assertEquals("Equal assertion failed for SPR_9486_floatGreaterThanFloatTest Test: ", expectedNumber, result);
 	}
 
 	@Test
 	public void SPR_9486_floatGreaterThanEqualDoubleTest() {
-		try {
-			Boolean expectedResult = -10.21f >= -10.2;
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("-10.21f >= -10.2");
-			Boolean result = expression.getValue(context, null, Boolean.class);
-			assertEquals("Equal assertion failed for SPR_9486_floatGreaterThanDoubleTest Test: ", expectedResult, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_floatGreaterThanTest");
-		}
+		Boolean expectedResult = -10.21f >= -10.2;
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("-10.21f >= -10.2");
+		Boolean result = expression.getValue(context, null, Boolean.class);
+		assertEquals("Equal assertion failed for SPR_9486_floatGreaterThanDoubleTest Test: ", expectedResult, result);
 	}
 
 	@Test
 	public void SPR_9486_floatModulusFloatTest() {
-		try {
-			Number expectedResult = 10.21f % 10.2f;
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("10.21f % 10.2f");
-			Number result = expression.getValue(context, null, Number.class);
-			assertEquals("Equal assertion failed for SPR_9486_floatModulusFloatTest Test: ", expectedResult, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_floatModulusFloatTest");
-		}
+		Number expectedResult = 10.21f % 10.2f;
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("10.21f % 10.2f");
+		Number result = expression.getValue(context, null, Number.class);
+		assertEquals("Equal assertion failed for SPR_9486_floatModulusFloatTest Test: ", expectedResult, result);
 	}
 
 	@Test
 	public void SPR_9486_floatModulusDoubleTest() {
-		try {
-			Number expectedResult = 10.21f % 10.2;
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("10.21f % 10.2");
-			Number result = expression.getValue(context, null, Number.class);
-			assertEquals("Equal assertion failed for SPR_9486_floatModulusDoubleTest Test: ", expectedResult, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_floatModulusDoubleTest");
-		}
+		Number expectedResult = 10.21f % 10.2;
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("10.21f % 10.2");
+		Number result = expression.getValue(context, null, Number.class);
+		assertEquals("Equal assertion failed for SPR_9486_floatModulusDoubleTest Test: ", expectedResult, result);
 	}
 
 	@Test
 	public void SPR_9486_floatPowerFloatTest() {
-		try {
-			Number expectedResult = Math.pow(10.21f, -10.2f);
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("10.21f ^ -10.2f");
-			Number result = expression.getValue(context, null, Number.class);
-			assertEquals("Equal assertion failed for SPR_9486_floatPowerFloatTest Test: ", expectedResult, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_floatPowerFloatTest");
-		}
+		Number expectedResult = Math.pow(10.21f, -10.2f);
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("10.21f ^ -10.2f");
+		Number result = expression.getValue(context, null, Number.class);
+		assertEquals("Equal assertion failed for SPR_9486_floatPowerFloatTest Test: ", expectedResult, result);
 	}
 
 	@Test
 	public void SPR_9486_floatPowerDoubleTest() {
-		try {
-			Number expectedResult = Math.pow(10.21f, 10.2);
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			org.springframework.expression.Expression expression = parser.parseExpression("10.21f ^ 10.2");
-			Number result = expression.getValue(context, null, Number.class);
-			assertEquals("Equal assertion failed for SPR_9486_floatPowerDoubleTest Test: ", expectedResult, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Test failed - SPR_9486_floatPowerDoubleTest");
-		}
+		Number expectedResult = Math.pow(10.21f, 10.2);
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		org.springframework.expression.Expression expression = parser.parseExpression("10.21f ^ 10.2");
+		Number result = expression.getValue(context, null, Number.class);
+		assertEquals("Equal assertion failed for SPR_9486_floatPowerDoubleTest Test: ", expectedResult, result);
 	}
 
 	@Test
@@ -1840,6 +1741,17 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 	@Test
+	public void SPR_11142() throws Exception {
+		SpelExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		SPR11142 rootObject = new SPR11142();
+		Expression expression = parser.parseExpression("something");
+		thrown.expect(SpelEvaluationException.class);
+		thrown.expectMessage("property 'something' cannot be found");
+		expression.getValue(context, rootObject);
+	}
+
+	@Test
 	public void testOperatorEq_SPR9194() {
 		TestClass2 one = new TestClass2("abc");
 		TestClass2 two = new TestClass2("abc");
@@ -1850,17 +1762,6 @@ public class SpelReproTests extends ExpressionTestCase {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression classNameExpression = parser.parseExpression("['one'] == ['two']");
 		assertTrue(classNameExpression.getValue(map,Boolean.class));
-	}
-
-	@Test
-	public void SPR_11142() throws Exception {
-		SpelExpressionParser parser = new SpelExpressionParser();
-		StandardEvaluationContext context = new StandardEvaluationContext();
-		SPR11142 rootObject = new SPR11142();
-		Expression expression = parser.parseExpression("something");
-		thrown.expect(SpelEvaluationException.class);
-		thrown.expectMessage("property 'something' cannot be found");
-		expression.getValue(context, rootObject);
 	}
 
 
@@ -1898,6 +1799,7 @@ public class SpelReproTests extends ExpressionTestCase {
 		public T getProperty();
 	}
 
+
 	private static class GenericImplementation implements GenericInterface<Integer> {
 
 		@Override
@@ -1906,6 +1808,7 @@ public class SpelReproTests extends ExpressionTestCase {
 		}
 	}
 
+
 	static class PackagePrivateClassWithGetter {
 
 		public Integer getProperty() {
@@ -1913,26 +1816,29 @@ public class SpelReproTests extends ExpressionTestCase {
 		}
 	}
 
-	public static class OnlyBridgeMethod extends PackagePrivateClassWithGetter {
 
+	public static class OnlyBridgeMethod extends PackagePrivateClassWithGetter {
 	}
+
 
 	public static interface StaticFinal {
+
 		public static final String VALUE = "interfaceValue";
 	}
+
 
 	public abstract static class AbstractStaticFinal implements StaticFinal {
 	}
 
+
 	public static class StaticFinalImpl1 extends AbstractStaticFinal implements StaticFinal {
 	}
+
 
 	public static class StaticFinalImpl2 extends AbstractStaticFinal {
 	}
 
-	/**
-	 * The Class TestObject.
-	 */
+
 	public static class SPR10486 {
 
 		private String name = "name";
@@ -1944,10 +1850,19 @@ public class SpelReproTests extends ExpressionTestCase {
 		public void setName(String name) {
 			this.name = name;
 		}
-
 	}
 
+
+	static class SPR11142 {
+
+		public String isSomething() {
+			return "";
+		}
+	}
+
+
 	static class TestClass2 { // SPR-9194
+
 		String string;
 
 		public TestClass2(String string) {
@@ -1965,14 +1880,6 @@ public class SpelReproTests extends ExpressionTestCase {
 			}
 			return false;
 		}
-
 	}
 
-	static class SPR11142 {
-
-		public String isSomething() {
-			return "";
-		}
-
-	}
 }
