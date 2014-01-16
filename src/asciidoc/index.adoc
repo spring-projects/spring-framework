@@ -40110,7 +40110,8 @@ JMS can be roughly divided into two areas of functionality, namely the productio
 consumption of messages. The `JmsTemplate` class is used for message production and
 synchronous message reception. For asynchronous reception similar to Java EE's
 message-driven bean style, Spring provides a number of message listener containers that
-are used to create Message-Driven POJOs (MDPs).
+are used to create Message-Driven POJOs (MDPs). Spring also provides a declarative way
+of creating message listeners.
 
 The package `org.springframework.jms.core` provides the core functionality for using
 JMS. It contains JMS template classes that simplify the use of the JMS by handling the
@@ -40134,6 +40135,13 @@ abstraction to convert between Java objects and JMS messages.
 The package `org.springframework.jms.support.destination` provides various strategies
 for managing JMS destinations, such as providing a service locator for destinations
 stored in JNDI.
+
+The package `org.springframework.jms.annotation` provides the necessary infrastructure
+to support annotation-driven listener endpoints using `@JmsListener`.
+
+The package `org.springframework.jms.config` provides the parser implementation for the
+`jms` namespace as well the java config support to configure listener containers and
+create listener endpoints.
 
 Finally, the package `org.springframework.jms.connection` provides an implementation of
 the `ConnectionFactory` suitable for use in standalone applications. It also contains an
@@ -40171,7 +40179,7 @@ avoid duplication in the number of send methods. Similarly, the timeout value fo
 synchronous receive calls is set using the property `setReceiveTimeout`.
 
 Some JMS providers allow the setting of default QOS values administratively through the
-configuration of the ConnectionFactory. This has the effect that a call to
+configuration of the `ConnectionFactory`. This has the effect that a call to
 `MessageProducer`'s send method `send(Destination destination, Message message)` will
 use different QOS default values than those specified in the JMS specification. In order
 to provide consistent management of QOS values, the `JmsTemplate` must therefore be
@@ -40219,7 +40227,7 @@ ConnectionFactory->Connection->Session->MessageProducer->send
 
 Between the ConnectionFactory and the Send operation there are three intermediate
 objects that are created and destroyed. To optimise the resource usage and increase
-performance two implementations of IConnectionFactory are provided.
+performance two implementations of `ConnectionFactory` are provided.
 
 
 [[jms-connection-factory]]
@@ -40240,7 +40248,7 @@ cache size is set to 1, use the property `SessionCacheSize` to increase the numb
 cached sessions. Note that the number of actual cached sessions will be more than that
 number as sessions are cached based on their acknowledgment mode, so there can be up to
 4 cached session instances when `SessionCacheSize` is set to one, one for each
-AcknowledgementMode. MessageProducers and MessageConsumers are cached within their
+`AcknowledgementMode`. MessageProducers and MessageConsumers are cached within their
 owning session and also take into account the unique properties of the producers and
 consumers when caching. MessageProducers are cached based on their destination.
 MessageConsumers are cached based on a key composed of the destination, selector,
@@ -40298,10 +40306,12 @@ operations that do not refer to a specific destination.
 One of the most common uses of JMS messages in the EJB world is to drive message-driven
 beans (MDBs). Spring offers a solution to create message-driven POJOs (MDPs) in a way
 that does not tie a user to an EJB container. (See <<jms-asynchronousMessageReception>>
-for detailed coverage of Spring's MDP support.)
+for detailed coverage of Spring's MDP support.) As from Spring Framework 4.1, endpoint
+methods can be simply annotated using `@JmsListener` see <<jms-annotated>> for more
+details.
 
 A message listener container is used to receive messages from a JMS message queue and
-drive the MessageListener that is injected into it. The listener container is
+drive the `MessageListener` that is injected into it. The listener container is
 responsible for all threading of message reception and dispatches into the listener for
 processing. A message listener container is the intermediary between an MDP and a
 messaging provider, and takes care of registering to receive messages, participating in
@@ -40528,6 +40538,15 @@ the receiver should wait before giving up waiting for a message.
 
 [[jms-asynchronousMessageReception]]
 ==== Asynchronous Reception - Message-Driven POJOs
+
+[NOTE]
+====
+Spring also supports annotated-listener endpoints through the use of the `@JmsListener`
+and provides an open infrastructure to register endpoints programmatically. This
+is by far the most convenient way to setup an asynchronous receiver, see
+<<jms-annotated-support>> for more details.
+====
+
 In a fashion similar to a Message-Driven Bean (MDB) in the EJB world, the Message-Driven
 POJO (MDP) acts as a receiver for JMS messages. The one restriction (but see also below
 for the discussion of the `MessageListenerAdapter` class) on an MDP is that it must
@@ -40914,10 +40933,237 @@ contract.
 
 
 
+[[jms-annotated]]
+=== Annotation-driven listener endpoints
+The easiest way to receive a message asynchronously is to use the annotated listener
+endpoint infrastructure. In a nutshell, it allows you to expose a method of a managed
+bean as a JMS listener endpoint.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+    @Component
+    public class MyService {
+
+    	@JmsListener(destination = "myDestination")
+    	public void processOrder(String data) { ... }
+    }
+----
+
+The idea of the example above is that whenever a message is available on the
+`javax.jms.Destination` "myDestination", the `processOrder` method is invoked
+accordingly (in this case, with the content of the JMS message similarly to
+what the <<jms-receiving-async-message-listener-adapter, `MessageListenerAdapter`>>
+provides).
+
+The annotated endpoint infrastructure creates a message listener container
+behind the scenes for each annotated method, using a `JmsListenerContainerFactory`.
+
+[[jms-annotated-support]]
+==== Enable listener endpoint annotations
+
+To enable support for `@JmsListener` annotations add `@EnableJms` to one of
+your `@Configuration` classes.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableJms
+	public class AppConfig {
+
+		@Bean
+		public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
+			DefaultJmsListenerContainerFactory factory =
+					new DefaultJmsListenerContainerFactory();
+			factory.setConnectionFactory(connectionFactory());
+			factory.setDestinationResolver(destinationResolver());
+			factory.setConcurrency("3-10");
+			return factory;
+		}
+	}
+----
+
+By default, the infrastructure looks for a bean named `jmsListenerContainerFactory`
+as the source for the factory to use to create message listener containers. In this
+case, and ignoring the JMS infrastructure setup, the `processOrder` method can be
+invoked with a core poll size of 3 threads and a maximum pool size of 10 threads.
+
+It is possible to customize the listener container factory to use per annotation or
+an explicit default can be configured by implementing the `JmsListenerConfigurer`
+interface. The default is only required if at least one endpoint is registered
+without a specific container factory. See the javadoc for full details and examples.
+
+If you prefer <<jms-namespace,XML configuration>> use the `<jms:annotation-driven>`
+element.
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<jms:annotation-driven/>
+
+    <bean id="jmsListenerContainerFactory"
+            class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="destinationResolver" ref="destinationResolver"/>
+        <property name="concurrency" value="3-10"/>
+    </bean>
+----
+
+[[jms-annotated-programmatic-registration]]
+==== Programmatic endpoints registration
+
+`JmsListenerEndpoint` provides a model of an JMS endpoint and is responsible for configuring
+the container for that model. The infrastructure allows you to configure endpoints
+programmatically in addition to the ones that are detected by the `JmsListener` annotation.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableJms
+	public class AppConfig implements JmsListenerConfigurer {
+
+		@Override
+		public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
+			SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
+			endpoint.setDestination("anotherQueue");
+			endpoint.setMessageListener(message -> {
+				// processing
+			});
+			registrar.registerEndpoint(endpoint);
+		}
+	}
+----
+
+In the example above, we used `SimpleJmsListenerEndpoint` which provides the actual
+`MessageListener` to invoke but you could just as well build your own endpoint variant
+describing a custom invocation mechanism.
+
+It should be noted that you could just as well skip the use of `@JmsListener` altogether
+and only register your endpoints programmatically through `JmsListenerConfigurer`.
+
+[[jms-annotated-method-signature]]
+==== Annotated endpoint method signature
+
+So far, we have been injecting a simple `String` in our endpoint but it can actually
+have a very flexible method signature. Let's rewrite it to inject the `Order` with
+a custom header:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Component
+	public class MyService {
+
+    	@JmsListener(destination = "myDestination")
+    	public void processOrder(Order order, @Header("order_type") String orderType) {
+        	...
+    	}
+	}
+----
+
+These are the main elements you can inject in JMS listener endpoints:
+
+* The raw `javax.jms.Message` or any of its subclasses (provided of course that it
+  matches the incoming message type).
+* The `javax.jms.Session` for optional access to the native JMS API e.g. for sending
+  a custom reply.
+* The `org.springframework.messaging.Message` representing the incoming JMS message.
+  Note that this message holds both the custom and the standard headers (as defined
+  by `JmsHeaders`).
+* `@Header`-annotated method arguments to extract a specific header value, including
+  standard JMS headers.
+* `@Headers`-annotated argument that must also be assignable to `java.util.Map` for
+  getting access to all headers.
+* A non-annotated element that is not one of the supported types (i.e. `Message` and
+  `Session`) is considered to be the payload. You can make that explicit by annotating
+  the parameter with `@Payload`. You can also turn on validation by adding an extra
+  `@Validated`.
+
+The ability to inject Spring's `Message` abstraction is particularly useful to benefit
+from all the information stored in the transport-specific message without relying on
+transport-specific API.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@JmsListener(destination = "myDestination")
+	public void processOrder(Message<Order> order) { ... }
+----
+
+Handling of method arguments is provided by `DefaultJmsHandlerMethodFactory` which can be
+further customized to support additional method arguments. The conversion and validation
+support can be customized there as well.
+
+For instance, if we want to make sure our `Order` is valid before processing it, we can
+annotate the payload with `@Valid` and configure the necessary validator as follows:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableJms
+	public class AppConfig implements JmsListenerConfigurer {
+
+    	@Override
+    	public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
+        	registrar.setJmsHandlerMethodFactory(myJmsHandlerMethodFactory());
+    	}
+
+    	@Bean
+    	public DefaultJmsHandlerMethodFactory myJmsHandlerMethodFactory() {
+        	DefaultJmsHandlerMethodFactory factory = new DefaultJmsHandlerMethodFactory();
+        	factory.setValidator(myValidator());
+        	return factory;
+    	}
+	}
+----
+
+[[jms-annotated-reply]]
+==== Reply management
+
+The existing support in <<jms-receiving-async-message-listener-adapter,MessageListenerAdapter>>
+already allows your method to have a non-`void` return type. When that's the case, the result of
+the invocation is encapsulated in a `javax.jms.Message` sent either in the destination specified
+in the `JMSReplyTo` header of the original message or in the default destination configured on
+the listener. That default destination can now be set using the `@SendTo` annotation of the
+messaging abstraction.
+
+Assuming our `processOrder` method should now return an `OrderStatus`, it is possible to write it
+as follow to automatically send a reply:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@JmsListener(destination = "myDestination")
+	@SendTo("status")
+	public OrderStatus processOrder(Order order) {
+    	// order processing
+    	return status;
+	}
+----
+
+If you need to set additional headers in a transport-independent manner, you could return a
+`Message` instead, something like:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@JmsListener(destination = "myDestination")
+	@SendTo("status")
+	public Message<OrderStatus> processOrder(Order order) {
+    	// order processing
+    	return MessageBuilder
+        	    .withPayload(status)
+            	.setHeader("code", 1234)
+            	.build();
+	}
+----
 
 [[jms-namespace]]
 === JMS Namespace Support
-Spring 2.5 introduces an XML namespace for simplifying JMS configuration. To use the JMS
+Spring provides an XML namespace for simplifying JMS configuration. To use the JMS
 namespace elements you will need to reference the JMS schema:
 
 [source,xml,indent=0]
@@ -40936,9 +41182,11 @@ namespace elements you will need to reference the JMS schema:
 	</beans>
 ----
 
-The namespace consists of two top-level elements: `<listener-container/>` and
-`<jca-listener-container/>` both of which may contain one or more `<listener/>` child
-elements. Here is an example of a basic configuration for two listeners.
+The namespace consists of three top-level elements: `<annotation-driven/>`, `<listener-container/>`
+and `<jca-listener-container/>`. `<annotation-driven` enables the use of <<jms-annotated,
+annotation-driven listener endpoints>>. `<listener-container/>` and `<jca-listener-container/>`
+defines shared listener container configuration and may contain `<listener/>` child elements. Here
+is an example of a basic configuration for two listeners.
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -40999,6 +41247,9 @@ allows for customization of the various strategies (for example, `taskExecutor` 
 these attributes, it is possible to define highly-customized listener containers while
 still benefiting from the convenience of the namespace.
 
+Such settings can be automatically exposed as a `JmsListenerContainerFactory` by
+specifying the id of the bean to expose through the `factory-id` attribute.
+
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -41034,6 +41285,10 @@ choices and message redelivery scenarios.
 | A custom listener container implementation class as fully qualified class name.
   Default is Spring's standard `DefaultMessageListenerContainer` or
   `SimpleMessageListenerContainer`, according to the "container-type" attribute.
+
+| factory-id
+| Exposes the settings defined by this element as a `JmsListenerContainerFactory`
+  with the specified id so that they can be reused with other endpoints.
 
 | connection-factory
 | A reference to the JMS `ConnectionFactory` bean (the default bean name is
@@ -41128,6 +41383,10 @@ table:
 [cols="1,6"]
 |===
 | Attribute| Description
+
+| factory-id
+| Exposes the settings defined by this element as a `JmsListenerContainerFactory`
+  with the specified id so that they can be reused with other endpoints.
 
 | resource-adapter
 | A reference to the JCA `ResourceAdapter` bean (the default bean name is
