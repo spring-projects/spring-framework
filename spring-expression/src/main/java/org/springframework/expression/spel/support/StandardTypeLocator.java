@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.expression.spel.support;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.expression.EvaluationException;
@@ -27,8 +27,9 @@ import org.springframework.expression.spel.SpelMessage;
 import org.springframework.util.ClassUtils;
 
 /**
- * A default implementation of a TypeLocator that uses the context classloader (or any classloader set upon it). It
- * supports 'well known' packages so if a type cannot be found it will try the registered imports to locate it.
+ * A simple implementation of {@link TypeLocator} that uses the context ClassLoader
+ * (or any ClassLoader set upon it). It supports 'well-known' packages: So if a
+ * type cannot be found, it will try the registered imports to locate it.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -36,48 +37,29 @@ import org.springframework.util.ClassUtils;
  */
 public class StandardTypeLocator implements TypeLocator {
 
-	private ClassLoader loader;
+	private final ClassLoader classLoader;
 
-	private final List<String> knownPackagePrefixes = new ArrayList<String>();
+	private final List<String> knownPackagePrefixes = new LinkedList<String>();
 
 
+	/**
+	 * Create a StandardTypeLocator for the default ClassLoader
+	 * (typically, the thread context ClassLoader).
+	 */
 	public StandardTypeLocator() {
 		this(ClassUtils.getDefaultClassLoader());
 	}
 
-	public StandardTypeLocator(ClassLoader loader) {
-		this.loader = loader;
-		// Similar to when writing Java, it only knows about java.lang by default
+	/**
+	 * Create a StandardTypeLocator for the given ClassLoader.
+	 * @param classLoader the ClassLoader to delegate to
+	 */
+	public StandardTypeLocator(ClassLoader classLoader) {
+		this.classLoader = classLoader;
+		// Similar to when writing regular Java code, it only knows about java.lang by default
 		registerImport("java.lang");
 	}
 
-
-	/**
-	 * Find a (possibly unqualified) type reference - first using the typename as is, then trying any registered
-	 * prefixes if the typename cannot be found.
-	 * @param typename the type to locate
-	 * @return the class object for the type
-	 * @throws EvaluationException if the type cannot be found
-	 */
-	public Class<?> findType(String typename) throws EvaluationException {
-		String nameToLookup = typename;
-		try {
-			return this.loader.loadClass(nameToLookup);
-		}
-		catch (ClassNotFoundException ey) {
-			// try any registered prefixes before giving up
-		}
-		for (String prefix : this.knownPackagePrefixes) {
-			try {
-				nameToLookup = new StringBuilder().append(prefix).append(".").append(typename).toString();
-				return this.loader.loadClass(nameToLookup);
-			}
-			catch (ClassNotFoundException ex) {
-				// might be a different prefix
-			}
-		}
-		throw new SpelEvaluationException(SpelMessage.TYPE_NOT_FOUND, typename);
-	}
 
 	/**
 	 * Register a new import prefix that will be used when searching for unqualified types.
@@ -89,15 +71,47 @@ public class StandardTypeLocator implements TypeLocator {
 	}
 
 	/**
+	 * Remove that specified prefix from this locator's list of imports.
+	 * @param prefix the prefix to remove
+	 */
+	public void removeImport(String prefix) {
+		this.knownPackagePrefixes.remove(prefix);
+	}
+
+	/**
 	 * Return a list of all the import prefixes registered with this StandardTypeLocator.
-	 * @return list of registered import prefixes
+	 * @return a list of registered import prefixes
 	 */
 	public List<String> getImportPrefixes() {
 		return Collections.unmodifiableList(this.knownPackagePrefixes);
 	}
 
-	public void removeImport(String prefix) {
-		this.knownPackagePrefixes.remove(prefix);
+
+	/**
+	 * Find a (possibly unqualified) type reference - first using the type name as-is,
+	 * then trying any registered prefixes if the type name cannot be found.
+	 * @param typeName the type to locate
+	 * @return the class object for the type
+	 * @throws EvaluationException if the type cannot be found
+	 */
+	public Class<?> findType(String typeName) throws EvaluationException {
+		String nameToLookup = typeName;
+		try {
+			return this.classLoader.loadClass(nameToLookup);
+		}
+		catch (ClassNotFoundException ey) {
+			// try any registered prefixes before giving up
+		}
+		for (String prefix : this.knownPackagePrefixes) {
+			try {
+				nameToLookup = prefix + "." + typeName;
+				return this.classLoader.loadClass(nameToLookup);
+			}
+			catch (ClassNotFoundException ex) {
+				// might be a different prefix
+			}
+		}
+		throw new SpelEvaluationException(SpelMessage.TYPE_NOT_FOUND, typeName);
 	}
 
 }

@@ -18,7 +18,6 @@ package org.springframework.expression.spel.support;
 
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.expression.TypeConverter;
@@ -27,8 +26,8 @@ import org.springframework.expression.spel.SpelMessage;
 import org.springframework.util.Assert;
 
 /**
- * Default implementation of the {@link TypeConverter} interface, delegating to a core
- * Spring {@link ConversionService}.
+ * Default implementation of the {@link TypeConverter} interface,
+ * delegating to a core Spring {@link ConversionService}.
  *
  * @author Juergen Hoeller
  * @author Andy Clement
@@ -42,6 +41,9 @@ public class StandardTypeConverter implements TypeConverter {
 	private final ConversionService conversionService;
 
 
+	/**
+	 * Create a StandardTypeConverter for the default ConversionService.
+	 */
 	public StandardTypeConverter() {
 		synchronized (this) {
 			if (defaultConversionService == null) {
@@ -51,6 +53,10 @@ public class StandardTypeConverter implements TypeConverter {
 		this.conversionService = defaultConversionService;
 	}
 
+	/**
+	 * Create a StandardTypeConverter for the given ConversionService.
+	 * @param conversionService the ConversionService to delegate to
+	 */
 	public StandardTypeConverter(ConversionService conversionService) {
 		Assert.notNull(conversionService, "ConversionService must not be null");
 		this.conversionService = conversionService;
@@ -64,10 +70,6 @@ public class StandardTypeConverter implements TypeConverter {
 	public Object convertValue(Object value, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		try {
 			return this.conversionService.convert(value, sourceType, targetType);
-		}
-		catch (ConverterNotFoundException ex) {
-			throw new SpelEvaluationException(
-					ex, SpelMessage.TYPE_CONVERSION_ERROR, sourceType.toString(), targetType.toString());
 		}
 		catch (ConversionException ex) {
 			throw new SpelEvaluationException(
