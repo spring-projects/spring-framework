@@ -37,11 +37,11 @@ import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Test fixture for {@link WebSocketServerSockJsSession}.
+ * Unit tests for {@link WebSocketServerSockJsSession}.
  *
  * @author Rossen Stoyanchev
  */
-public class WebSocketServerSockJsSessionTests extends BaseAbstractSockJsSessionTests<TestWebSocketServerSockJsSession> {
+public class WebSocketServerSockJsSessionTests extends AbstractSockJsSessionTests<TestWebSocketServerSockJsSession> {
 
 	private TestWebSocketSession webSocketSession;
 

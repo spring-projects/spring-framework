@@ -16,9 +16,7 @@
 
 package org.springframework.web.socket.sockjs.transport.session;
 
-import java.io.EOFException;
 import java.io.IOException;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -149,7 +147,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 		for (String message : messages) {
 			try {
 				if (isClosed()) {
-					throw new SockJsMessageDeliveryException(this.id, undelivered, null);
+					throw new SockJsMessageDeliveryException(this.id, undelivered, "Session closed");
 				}
 				else {
 					this.handler.handleMessage(this, new TextMessage(message));

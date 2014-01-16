@@ -78,7 +78,7 @@ public abstract class AbstractHttpSendingTransportHandler extends AbstractTransp
 		}
 		else if (!sockJsSession.isActive()) {
 			logger.debug("starting " + getTransportType() + " async request");
-			sockJsSession.startLongPollingRequest(request, response, getFrameFormat(request));
+			sockJsSession.handleSuccessiveRequest(request, response, getFrameFormat(request));
 		}
 		else {
 			logger.debug("another " + getTransportType() + " connection still open: " + sockJsSession);

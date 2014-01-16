@@ -55,7 +55,7 @@ public class StreamingSockJsSession extends AbstractHttpSockJsSession {
 
 		// the WebSocketHandler delegate may have closed the session
 		if (!isClosed()) {
-			super.startLongPollingRequest(request, response, frameFormat);
+			super.startAsyncRequest();
 		}
 	}
 

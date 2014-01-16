@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,23 +28,22 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.frame.DefaultSockJsFrameFormat;
 import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
 import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
-import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJsSessionTests.TestAbstractHttpSockJsSession;
+import org.springframework.web.socket.sockjs.transport.session.HttpSockJsSessionTests.TestAbstractHttpSockJsSession;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Test fixture for {@link AbstractHttpSockJsSession}.
+ * Unit tests for {@link AbstractHttpSockJsSession}.
  *
  * @author Rossen Stoyanchev
  */
-public class AbstractHttpSockJsSessionTests extends BaseAbstractSockJsSessionTests<TestAbstractHttpSockJsSession> {
+public class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstractHttpSockJsSession> {
 
 	protected ServerHttpRequest request;
 
@@ -56,6 +55,11 @@ public class AbstractHttpSockJsSessionTests extends BaseAbstractSockJsSessionTes
 
 	private SockJsFrameFormat frameFormat;
 
+
+	@Override
+	protected TestAbstractHttpSockJsSession initSockJsSession() {
+		return new TestAbstractHttpSockJsSession(this.sockJsConfig, this.webSocketHandler, null);
+	}
 
 	@Before
 	public void setup() {
@@ -72,30 +76,25 @@ public class AbstractHttpSockJsSessionTests extends BaseAbstractSockJsSessionTes
 		this.request = new ServletServerHttpRequest(this.servletRequest);
 	}
 
-	@Override
-	protected TestAbstractHttpSockJsSession initSockJsSession() {
-		return new TestAbstractHttpSockJsSession(this.sockJsConfig, this.webSocketHandler, null);
-	}
-
 	@Test
-	public void setInitialRequest() throws Exception {
+	public void handleInitialRequest() throws Exception {
 
 		this.session.handleInitialRequest(this.request, this.response, this.frameFormat);
 
 		assertTrue(this.session.hasRequest());
 		assertTrue(this.session.hasResponse());
 
-		assertEquals("o", this.servletResponse.getContentAsString());
+		assertEquals("hhh\no", this.servletResponse.getContentAsString());
 		assertFalse(this.servletRequest.isAsyncStarted());
 
 		verify(this.webSocketHandler).afterConnectionEstablished(this.session);
 	}
 
 	@Test
-	public void setLongPollingRequest() throws Exception {
+	public void handleSuccessiveRequest() throws Exception {
 
 		this.session.getMessageCache().add("x");
-		this.session.startLongPollingRequest(this.request, this.response, this.frameFormat);
+		this.session.handleSuccessiveRequest(this.request, this.response, this.frameFormat);
 
 		assertTrue(this.session.hasRequest());
 		assertTrue(this.session.hasResponse());
@@ -104,19 +103,9 @@ public class AbstractHttpSockJsSessionTests extends BaseAbstractSockJsSessionTes
 		assertTrue(this.session.wasHeartbeatScheduled());
 		assertTrue(this.session.wasCacheFlushed());
 
+		assertEquals("hhh\n", this.servletResponse.getContentAsString());
+
 		verifyNoMoreInteractions(this.webSocketHandler);
-	}
-
-	@Test
-	public void setLongPollingRequestWhenClosed() throws Exception {
-
-		this.session.delegateConnectionClosed(CloseStatus.NORMAL);
-		assertClosed();
-
-		this.session.startLongPollingRequest(this.request, this.response, this.frameFormat);
-
-		assertEquals("c[3000,\"Go away!\"]", this.servletResponse.getContentAsString());
-		assertFalse(this.servletRequest.isAsyncStarted());
 	}
 
 
@@ -133,6 +122,11 @@ public class AbstractHttpSockJsSessionTests extends BaseAbstractSockJsSessionTes
 				Map<String, Object> attributes) {
 
 			super("1", config, handler, attributes);
+		}
+
+		@Override
+		protected void writePrelude() throws IOException {
+			getResponse().getBody().write("hhh\n".getBytes());
 		}
 
 		public boolean wasCacheFlushed() {

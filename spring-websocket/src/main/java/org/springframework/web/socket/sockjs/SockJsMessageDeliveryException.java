@@ -40,6 +40,12 @@ public class SockJsMessageDeliveryException extends SockJsException {
 		this.undeliveredMessages = undeliveredMessages;
 	}
 
+	public SockJsMessageDeliveryException(String sessionId, List<String> undeliveredMessages, String message) {
+		super("Failed to deliver message(s) " + undeliveredMessages + " for session "
+				+ sessionId + ": " + message, sessionId, null);
+		this.undeliveredMessages = undeliveredMessages;
+	}
+
 	public List<String> getUndeliveredMessages() {
 		return this.undeliveredMessages;
 	}

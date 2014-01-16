@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,10 +127,40 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	}
 
 
+	/**
+	 * Handle the first HTTP request, i.e. the one that starts a SockJS session.
+	 * Write a prelude to the response (if needed), send the SockJS "open" frame
+	 * to indicate to the client the session is opened, and invoke the
+	 * delegate WebSocketHandler to provide it with the newly opened session.
+	 * <p>
+	 * The "xhr" and "jsonp" (polling-based) transports completes the initial request
+	 * as soon as the open frame is sent. Following that the client should start a
+	 * successive polling request within the same SockJS session.
+	 * <p>
+	 * The "xhr_streaming", "eventsource", and "htmlfile" transports are streaming
+	 * based and will leave the initial request open in order to stream one or
+	 * more messages. However, even streaming based transports eventually recycle
+	 * the long running request, after a certain number of bytes have been streamed
+	 * (128K by default), and allow the client to start a successive request within
+	 * the same SockJS session.
+	 *
+	 * @param request the current request
+	 * @param response the current response
+	 * @param frameFormat the transport-specific SocksJS frame format to use
+	 *
+	 * @see #handleSuccessiveRequest(org.springframework.http.server.ServerHttpRequest, org.springframework.http.server.ServerHttpResponse, org.springframework.web.socket.sockjs.frame.SockJsFrameFormat)
+	 */
 	public synchronized void handleInitialRequest(ServerHttpRequest request, ServerHttpResponse response,
 			SockJsFrameFormat frameFormat) throws SockJsException {
 
-		updateRequest(request, response, frameFormat);
+		initRequest(request, response, frameFormat);
+
+		this.uri = request.getURI();
+		this.handshakeHeaders = request.getHeaders();
+		this.principal = request.getPrincipal();
+		this.localAddress = request.getLocalAddress();
+		this.remoteAddress = request.getRemoteAddress();
+
 		try {
 			writePrelude();
 			writeFrame(SockJsFrame.openFrame());
@@ -140,12 +170,6 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 			throw new SockJsTransportFailureException("Failed to send \"open\" frame", getId(), ex);
 		}
 
-		this.uri = request.getURI();
-		this.handshakeHeaders = request.getHeaders();
-		this.principal = request.getPrincipal();
-		this.localAddress = request.getLocalAddress();
-		this.remoteAddress = request.getRemoteAddress();
-
 		try {
 			delegateConnectionEstablished();
 		}
@@ -154,13 +178,60 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		}
 	}
 
+	private void initRequest(ServerHttpRequest request, ServerHttpResponse response,
+			SockJsFrameFormat frameFormat) {
+
+		Assert.notNull(request, "Request must not be null");
+		Assert.notNull(response, "Response must not be null");
+		Assert.notNull(frameFormat, "SockJsFrameFormat must not be null");
+
+		this.request = request;
+		this.response = response;
+		this.asyncRequestControl = request.getAsyncRequestControl(response);
+		this.frameFormat = frameFormat;
+	}
+
 	protected void writePrelude() throws IOException {
 	}
 
-	public synchronized void startLongPollingRequest(ServerHttpRequest request,
+	/**
+	 * Handle all HTTP requests part of the same SockJS session except for the very
+	 * first, initial request. Write a prelude (if needed) and keep the request
+	 * open and ready to send a message from the server to the client.
+	 * <p>
+	 * The "xhr" and "jsonp" (polling-based) transports completes the request when
+	 * the next message is sent, which could be an array of messages cached during
+	 * the time between successive requests, or it could be a heartbeat message
+	 * sent if no other messages were sent (by default within 25 seconds).
+	 * <p>
+	 * The "xhr_streaming", "eventsource", and "htmlfile" transports are streaming
+	 * based and will leave the request open longer in order to stream messages over
+	 * a period of time. However, even streaming based transports eventually recycle
+	 * the long running request, after a certain number of bytes have been streamed
+	 * (128K by default), and allow the client to start a successive request within
+	 * the same SockJS session.
+	 *
+	 * @param request the current request
+	 * @param response the current response
+	 * @param frameFormat the transport-specific SocksJS frame format to use
+	 *
+	 * @see #handleInitialRequest(org.springframework.http.server.ServerHttpRequest, org.springframework.http.server.ServerHttpResponse, org.springframework.web.socket.sockjs.frame.SockJsFrameFormat)
+	 */
+	public synchronized void handleSuccessiveRequest(ServerHttpRequest request,
 			ServerHttpResponse response, SockJsFrameFormat frameFormat) throws SockJsException {
 
-		updateRequest(request, response, frameFormat);
+		initRequest(request, response, frameFormat);
+		try {
+			writePrelude();
+		}
+		catch (Throwable ex) {
+			tryCloseWithSockJsTransportError(ex, CloseStatus.SERVER_ERROR);
+			throw new SockJsTransportFailureException("Failed to send \"open\" frame", getId(), ex);
+		}
+		startAsyncRequest();
+	}
+
+	protected void startAsyncRequest() throws SockJsException {
 		try {
 			this.asyncRequestControl.start(-1);
 			scheduleHeartbeat();
@@ -170,20 +241,6 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 			tryCloseWithSockJsTransportError(ex, CloseStatus.SERVER_ERROR);
 			throw new SockJsTransportFailureException("Failed to flush messages", getId(), ex);
 		}
-	}
-
-	private void updateRequest(ServerHttpRequest request, ServerHttpResponse response, SockJsFrameFormat frameFormat) {
-		Assert.notNull(request, "Request must not be null");
-		Assert.notNull(response, "Response must not be null");
-		Assert.notNull(frameFormat, "SockJsFrameFormat must not be null");
-		this.request = request;
-		this.response = response;
-		this.asyncRequestControl = request.getAsyncRequestControl(response);
-		this.frameFormat = frameFormat;
-		afterRequestUpdated();
-	}
-
-	protected void afterRequestUpdated() {
 	}
 
 	@Override
@@ -210,9 +267,21 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	}
 
 	private void tryFlushCache() throws SockJsTransportFailureException {
-		if (isActive() && !getMessageCache().isEmpty()) {
+		if (this.messageCache.isEmpty()) {
+			logger.trace("Nothing to flush");
+			return;
+		}
+		if (logger.isTraceEnabled()) {
+			logger.trace(this.messageCache.size() + " message(s) to flush");
+		}
+		if (isActive()) {
 			logger.trace("Flushing messages");
 			flushCache();
+		}
+		else {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Not ready to flush");
+			}
 		}
 	}
 

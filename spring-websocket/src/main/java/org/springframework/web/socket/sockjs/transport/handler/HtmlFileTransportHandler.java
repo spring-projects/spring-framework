@@ -133,7 +133,7 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 		}
 
 		@Override
-		protected void afterRequestUpdated() {
+		protected void writePrelude() {
 			// we already validated the parameter above..
 			String callback = getCallbackParam(getRequest());
 
