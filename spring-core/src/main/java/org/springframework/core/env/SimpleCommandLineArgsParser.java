@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,9 +52,9 @@ package org.springframework.core.env;
 class SimpleCommandLineArgsParser {
 
 	/**
-	 * Parse the given {@code String} array based on the rules described {@linkplain
-	 * SimpleCommandLineArgsParser above}, returning a fully-populated
-	 * {@link CommandLineArgs} object.
+	 * Parse the given {@code String} array based on the rules described
+	 * {@linkplain SimpleCommandLineArgsParser above}, returning a
+	 * fully-populated {@link CommandLineArgs} object.
 	 * @param args command line arguments, typically from a {@code main()} method
 	 */
 	public CommandLineArgs parse(String... args) {
@@ -65,13 +65,13 @@ class SimpleCommandLineArgsParser {
 				String optionName;
 				String optionValue = null;
 				if (optionText.contains("=")) {
-					optionName = optionText.substring(0, optionText.indexOf("="));
-					optionValue = optionText.substring(optionText.indexOf("=")+1, optionText.length());
+					optionName = optionText.substring(0, optionText.indexOf('='));
+					optionValue = optionText.substring(optionText.indexOf('=') + 1, optionText.length());
 				}
 				else {
 					optionName = optionText;
 				}
-				if (optionName.isEmpty() || (optionValue != null && optionValue.isEmpty())) {
+				if (optionName.length() == 0 || (optionValue != null && optionValue.length() == 0)) {
 					throw new IllegalArgumentException("Invalid argument syntax: " + arg);
 				}
 				commandLineArgs.addOptionArg(optionName, optionValue);
