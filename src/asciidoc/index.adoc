@@ -826,8 +826,9 @@ deployed onto a Java 8 runtime. Please upgrade to Spring 4 for Java 8 based appl
 Java EE version 6 or above is now considered the baseline for Spring Framework 4, with
 the JPA 2.0 and Servlet 3.0 specifications being of particular relevance. In order to
 remain compatible with Google App Engine and older application servers, it is possible
-to deploy a Spring application into a Servlet 2.5 environment; however, Servlet 3.0+
-is recommended when at all possible.
+to deploy a Spring 4 application into a Servlet 2.5 environment. However, Servlet 3.0+
+is strongly recommended and a prerequisite in Spring's test and mock packages for test
+setups in development environments.
 
 [NOTE]
 ====
@@ -2333,19 +2334,6 @@ the values in the `name` attribute of the target bean.
 	<ref bean="someBean"/>
 ----
 
-Specifying the target bean through the `local` attribute leverages the ability of the
-XML parser to validate XML `id` references within the same file. The value of the `local`
-attribute must be the same as the `id` attribute of the target bean. The XML parser
-issues an error if no matching element is found in the same file. As such, using the
-local variant is the best choice (in order to know about errors as early as possible) if
-the target bean is in the same XML file.
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<ref local="someBean"/>
-----
-
 Specifying the target bean through the `parent` attribute creates a reference to a bean
 that is in a parent container of the current container. The value of the `parent`
 attribute may be the same as either the `id` attribute of the target bean, or one of the
@@ -2375,6 +2363,13 @@ container with a proxy that will have the same name as the parent bean.
 		<!-- insert other configuration and dependencies as required here -->
 	</bean>
 ----
+
+[NOTE]
+====
+The `local` attribute on the `ref` element is no longer supported in the 4.0 beans xsd
+since it does not provide value over a regular `bean` reference anymore. Simply change
+your existing `ref local` references to `ref bean` when upgrading to the 4.0 schema.
+====
 
 
 [[beans-inner-beans]]
@@ -3385,12 +3380,12 @@ processed by the Spring `DispatcherServlet`, or `DispatcherPortlet`, then no spe
 setup is necessary: `DispatcherServlet` and `DispatcherPortlet` already expose all
 relevant state.
 
-If you use a Servlet 2.4+ web container, with requests processed outside of Spring's
+If you use a Servlet 2.5 web container, with requests processed outside of Spring's
 DispatcherServlet (for example, when using JSF or Struts), you need to register the
 `org.springframework.web.context.request.RequestContextListener` `ServletRequestListener`.
 For Servlet 3.0+, this can done programmatically via the `WebApplicationInitializer`
-interface. Alternatively, or for older containers, add the following declaration to your
-web applications `web.xml` file:
+interface. Alternatively, or for older containers, add the following declaration to
+your web application's `web.xml` file:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -3406,12 +3401,9 @@ web applications `web.xml` file:
 	</web-app>
 ----
 
-If you use an older web container (Servlet 2.3), use the provided `javax.servlet.Filter`
-implementation. The following snippet of XML configuration must be included in the
-`web.xml` file of your web application if you want to access web-scoped beans in
-requests outside of Spring's DispatcherServlet on a Servlet 2.3 container. (The filter
-mapping depends on the surrounding web application configuration, so you must change it
-as appropriate.)
+Alternatively, if there are issues with your listener setup, consider the provided
+`RequestContextFilter`. The filter mapping depends on the surrounding web
+application configuration, so you have to change it as appropriate.
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -5977,7 +5969,10 @@ The use of `<context:component-scan>` implicitly enables the functionality of
 ====
 The scanning of classpath packages requires the presence of corresponding directory
 entries in the classpath. When you build JARs with Ant, make sure that you do __not__
-activate the files-only switch of the JAR task.
+activate the files-only switch of the JAR task. Also, classpath directories may not
+get exposed based on security policies in some environments, e.g. standalone apps on
+JDK 1.7.0_45 and higher (which requires 'Trusted-Library' setup in your manifests; see
+http://stackoverflow.com/questions/19394570/java-jre-7u45-breaks-classloader-getresources).
 ====
 
 Furthermore, the `AutowiredAnnotationBeanPostProcessor` and
@@ -8140,16 +8135,6 @@ actual context type.
 You can create `ApplicationContext` instances declaratively by using, for example, a
 `ContextLoader`. Of course you can also create `ApplicationContext` instances
 programmatically by using one of the `ApplicationContext` implementations.
-
-The `ContextLoader` mechanism comes in two flavors: the `ContextLoaderListener` and the
-`ContextLoaderServlet`. They have the same functionality but differ in that the listener
-version is not reliable in Servlet 2.3 containers. In the Servlet 2.4 specification,
-Servlet context listeners must execute immediately after the Servlet context for the web
-application is created and is available to service the first request (and also when the
-Servlet context is about to be shut down). As such a Servlet context listener is an
-ideal place to initialize the Spring `ApplicationContext`. All things being equal, you
-should probably prefer `ContextLoaderListener`; for more information on compatibility,
-have a look at the Javadoc for the `ContextLoaderServlet`.
 
 You can register an `ApplicationContext` using the `ContextLoaderListener` as follows:
 
@@ -16358,7 +16343,7 @@ interfaces an `IntroductionInterceptor` is prepared to support, the
 `IntroductionAdvisor` used will control which interfaces are actually exposed. An
 introduced interface will conceal any implementation of the same interface by the target.
 
-Thus LockMixin subclasses `DelegatingIntroductionInterceptor` and implements Lockable
+Thus `LockMixin` extends `DelegatingIntroductionInterceptor` and implements `Lockable`
 itself. The superclass automatically picks up that Lockable can be supported for
 introduction, so we don't need to specify that. We could introduce any number of
 interfaces in this way.
@@ -17216,32 +17201,23 @@ attributes. You need to:
   an existing advice, merely implementing a static pointcut that picks up the custom
   attribute.
 
-It's possible for such advisors to be unique to each advised class (for example,
-mixins): they simply need to be defined as prototype, rather than singleton, bean
-definitions. For example, the `LockMixin` introduction interceptor from the Spring test
-suite, shown above, could be used in conjunction with an attribute-driven pointcut to
-target a mixin, as shown here. We use the generic `DefaultPointcutAdvisor`, configured
-using JavaBean properties:
+It's possible for such advisors to be unique to each advised class (for example, mixins):
+they simply need to be defined as prototype, rather than singleton, bean definitions.
+For example, the `LockMixin` introduction interceptor from the Spring test suite,
+shown above, could be used in conjunction with a generic `DefaultIntroductionAdvisor`:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<bean id="lockMixin" class="org.springframework.aop.LockMixin"
-			scope="prototype"/>
+	<bean id="lockMixin" class="test.mixin.LockMixin" scope="prototype"/>
 
-	<bean id="lockableAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor"
+	<bean id="lockableAdvisor" class="org.springframework.aop.support.DefaultIntroductionAdvisor"
 			scope="prototype">
-		<property name="pointcut" ref="myAttributeAwarePointcut"/>
-		<property name="advice" ref="lockMixin"/>
+		<constructor-arg ref="lockMixin"/>
 	</bean>
-
-	<bean id="anyBean" class="anyclass" ...
 ----
 
-If the attribute aware pointcut matches any methods in the `anyBean` or other bean
-definitions, the mixin will be applied. Note that both `lockMixin` and `lockableAdvisor`
-definitions are prototypes. The `myAttributeAwarePointcut` pointcut can be a singleton
-definition, as it doesn't hold state for individual advised objects.
+Note that both `lockMixin` and `lockableAdvisor` are defined as prototypes.
 
 
 
@@ -17603,6 +17579,9 @@ dealing with Spring MVC `ModelAndView` objects.
 To test your Spring MVC `Controller` s, use `ModelAndViewAssert` combined with
 `MockHttpServletRequest`, `MockHttpSession`, and so on from the <<mock-objects-servlet,
 `org.springframework.mock.web`>> package.
+
+Note: As of Spring 4.0, the set of mocks in the `org.springframework.mock.web` package
+is now based on the Servlet 3.0 API.
 ====
 
 
