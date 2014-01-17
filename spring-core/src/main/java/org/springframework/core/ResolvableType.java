@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -836,6 +836,23 @@ public final class ResolvableType implements Serializable {
 	}
 
 	/**
+	 * Return a {@link ResolvableType} for the specified {@link Field} with a given
+	 * implementation.
+	 * <p>Use this variant when the class that declares the field includes generic
+	 * parameter variables that are satisfied by the implementation type.
+	 * @param field the source field
+	 * @param implementationType the implementation type
+	 * @return a {@link ResolvableType} for the specified field
+	 * @see #forField(Field)
+	 */
+	public static ResolvableType forField(Field field, ResolvableType implementationType) {
+		Assert.notNull(field, "Field must not be null");
+		implementationType = (implementationType == null ? NONE : implementationType);
+		ResolvableType owner = implementationType.as(field.getDeclaringClass());
+		return forType(null, new FieldTypeProvider(field), owner.asVariableResolver());
+	}
+
+	/**
 	 * Return a {@link ResolvableType} for the specified {@link Field} with the
 	 * given nesting level.
 	 * @param field the source field
@@ -963,7 +980,25 @@ public final class ResolvableType implements Serializable {
 	 * @see #forMethodParameter(Method, int)
 	 */
 	public static ResolvableType forMethodParameter(MethodParameter methodParameter) {
-		return forMethodParameter(methodParameter, null);
+		return forMethodParameter(methodParameter, (Type) null);
+	}
+
+	/**
+	 * Return a {@link ResolvableType} for the specified {@link MethodParameter} with a
+	 * given implementation type. Use this variant when the class that declares the method
+	 * includes generic parameter variables that are satisfied by the implementation type.
+	 * @param methodParameter the source method parameter (must not be {@code null})
+	 * @param implementationType the implementation type
+	 * @return a {@link ResolvableType} for the specified method parameter
+	 * @see #forMethodParameter(MethodParameter)
+	 */
+	public static ResolvableType forMethodParameter(MethodParameter methodParameter, ResolvableType implementationType) {
+		Assert.notNull(methodParameter, "MethodParameter must not be null");
+		implementationType = (implementationType == null ? forType(methodParameter.getContainingClass()) : implementationType);
+		ResolvableType owner = implementationType.as(methodParameter.getDeclaringClass());
+		return forType(null, new MethodParameterTypeProvider(methodParameter),
+				owner.asVariableResolver()).getNested(methodParameter.getNestingLevel(),
+				methodParameter.typeIndexesPerLevel);
 	}
 
 	/**

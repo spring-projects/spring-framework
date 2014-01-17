@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -660,6 +660,16 @@ public class ResolvableTypeTests {
 	}
 
 	@Test
+	public void resolveTypeVariableFromFieldTypeWithImplementsType() throws Exception {
+		ResolvableType implementationType = ResolvableType.forClassWithGenerics(
+				Fields.class, Integer.class);
+		ResolvableType type = ResolvableType.forField(
+				Fields.class.getField("parameterizedType"), implementationType);
+		assertThat(type.resolve(), equalTo((Class) List.class));
+		assertThat(type.getGeneric().resolve(), equalTo((Class) Integer.class));
+	}
+
+	@Test
 	public void resolveTypeVariableFromSuperType() throws Exception {
 		ResolvableType type = ResolvableType.forClass(ExtendsList.class);
 		assertThat(type.resolve(), equalTo((Class) ExtendsList.class));
@@ -732,6 +742,16 @@ public class ResolvableTypeTests {
 		methodParameter.setContainingClass(TypedMethods.class);
 		ResolvableType type = ResolvableType.forMethodParameter(methodParameter);
 		assertThat(type.resolve(), equalTo((Class) String.class));
+		assertThat(type.getType().toString(), equalTo("T"));
+	}
+
+	@Test
+	public void resolveTypeVariableFromMethodParameterTypeWithImplementsType() throws Exception {
+		Method method = Methods.class.getMethod("typedParameter", Object.class);
+		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(method, 0);
+		ResolvableType implementationType = ResolvableType.forClassWithGenerics(Methods.class, Integer.class);
+		ResolvableType type = ResolvableType.forMethodParameter(methodParameter, implementationType);
+		assertThat(type.resolve(), equalTo((Class) Integer.class));
 		assertThat(type.getType().toString(), equalTo("T"));
 	}
 
