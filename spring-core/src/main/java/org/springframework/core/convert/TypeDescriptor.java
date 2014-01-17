@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,15 @@ public class TypeDescriptor implements Serializable {
 		this.annotations = nullSafeAnnotations(property.getAnnotations());
 	}
 
-	private TypeDescriptor(ResolvableType resolvableType, Class<?> type, Annotation[] annotations) {
+	/**
+	 * Create a new type descriptor from a {@link ResolvableType}. This protected
+	 * constructor is used internally and may also be used by subclasses that support
+	 * non-Java languages with extended type systems.
+	 * @param resolvableType the resolvable type
+	 * @param type the backing type or {@code null} if should be resolved
+	 * @param annotations the type annotations
+	 */
+	protected TypeDescriptor(ResolvableType resolvableType, Class<?> type, Annotation[] annotations) {
 		this.resolvableType = resolvableType;
 		this.type = (type != null ? type : resolvableType.resolve(Object.class));
 		this.annotations = nullSafeAnnotations(annotations);
@@ -139,6 +147,13 @@ public class TypeDescriptor implements Serializable {
 	 */
 	public Class<?> getType() {
 		return this.type;
+	}
+
+	/**
+	 * Returns the underlying {@link ResolvableType}.
+	 */
+	protected ResolvableType getResolvableType() {
+		return this.resolvableType;
 	}
 
 	/**
