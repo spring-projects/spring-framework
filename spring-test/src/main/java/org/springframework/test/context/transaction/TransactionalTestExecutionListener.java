@@ -273,8 +273,9 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 		txContext.startTransaction();
 		++this.transactionsStarted;
 		if (logger.isInfoEnabled()) {
-			logger.info("Began transaction (" + this.transactionsStarted + "): transaction manager ["
-					+ txContext.transactionManager + "]; rollback [" + isRollback(testContext) + "]");
+			logger.info(String.format(
+				"Began transaction (%s) for test context %s; transaction manager [%s]; rollback [%s]",
+				this.transactionsStarted, testContext, txContext.transactionManager, isRollback(testContext)));
 		}
 	}
 
@@ -288,8 +289,9 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	private void endTransaction(TestContext testContext, TransactionContext txContext) throws Exception {
 		boolean rollback = isRollback(testContext);
 		if (logger.isTraceEnabled()) {
-			logger.trace("Ending transaction for test context " + testContext + "; transaction manager ["
-					+ txContext.transactionStatus + "]; rollback [" + rollback + "]");
+			logger.trace(String.format(
+				"Ending transaction for test context %s; transaction status [%s]; rollback [%s]", testContext,
+				txContext.transactionStatus, rollback));
 		}
 		txContext.endTransaction(rollback);
 		if (logger.isInfoEnabled()) {
