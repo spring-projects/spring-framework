@@ -97,8 +97,12 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		}
 
 		Set<String> set = new HashSet<String>();
-		for (String sessionId : this.userSessionRegistry.getSessionIds(info.getUser())) {
-			set.add(getTargetDestination(headers.getDestination(), info.getDestination(), sessionId, info.getUser()));
+		if (headers.getSessionId() != null) {
+			set.add(getTargetDestination(headers.getDestination(), info.getDestination(), headers.getSessionId(), info.getUser()));
+		} else {
+			for (String sessionId : this.userSessionRegistry.getSessionIds(info.getUser())) {
+				set.add(getTargetDestination(headers.getDestination(), info.getDestination(), sessionId, info.getUser()));
+			}
 		}
 		return set;
 	}
