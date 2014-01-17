@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -154,6 +156,7 @@ import org.springframework.web.util.NestedServletException;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Arjen Poutsma
+ * @author Stephane Nicoll
  * @since 2.5
  */
 public class ServletAnnotationControllerTests {
@@ -1791,6 +1794,18 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+	@Test
+	public void responseAsHttpHeaders() throws Exception {
+		initServlet(HttpHeadersResponseController.class);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(new MockHttpServletRequest("POST", "/"), response);
+
+		assertEquals("Wrong status code", MockHttpServletResponse.SC_CREATED, response.getStatus());
+		assertEquals("Wrong number of headers", 1, response.getHeaderNames().size());
+		assertEquals("Wrong value for 'location' header", "/test/items/123", response.getHeader("location"));
+		assertEquals("Expected an empty content", 0, response.getContentLength());
+	}
+
 	/*
 	 * See SPR-6021
 	 */
@@ -3341,4 +3356,15 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+	@Controller
+	static class HttpHeadersResponseController {
+
+		@RequestMapping(value = "", method = RequestMethod.POST)
+		@ResponseStatus(HttpStatus.CREATED)
+		public HttpHeaders create() throws URISyntaxException {
+			HttpHeaders headers = new HttpHeaders();
+			headers.setLocation(new URI("/test/items/123"));
+			return headers;
+		}
+	}
 }
