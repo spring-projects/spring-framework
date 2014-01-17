@@ -19,6 +19,7 @@ package org.springframework.web.socket.config.annotation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -95,10 +96,10 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 	@Test
 	public void clientOutboundChannelChannel() {
 		TestChannel channel = this.config.getBean("clientOutboundChannel", TestChannel.class);
-		List<MessageHandler> values = channel.handlers;
+		Set<MessageHandler> handlers = channel.getSubscribers();
 
-		assertEquals(1, values.size());
-		assertTrue(values.get(0) instanceof SubProtocolWebSocketHandler);
+		assertEquals(1, handlers.size());
+		assertTrue(handlers.iterator().next() instanceof SubProtocolWebSocketHandler);
 	}
 
 
@@ -155,16 +156,7 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 
 	private static class TestChannel extends ExecutorSubscribableChannel {
 
-		private final List<MessageHandler> handlers = new ArrayList<>();
-
 		private final List<Message<?>> messages = new ArrayList<>();
-
-
-		@Override
-		public boolean subscribeInternal(MessageHandler handler) {
-			this.handlers.add(handler);
-			return super.subscribeInternal(handler);
-		}
 
 		@Override
 		public boolean sendInternal(Message<?> message, long timeout) {

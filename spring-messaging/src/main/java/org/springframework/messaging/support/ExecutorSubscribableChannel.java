@@ -35,8 +35,6 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 
 	private final Executor executor;
 
-	private final Set<MessageHandler> handlers = new CopyOnWriteArraySet<MessageHandler>();
-
 
 	/**
 	 * Create a new {@link ExecutorSubscribableChannel} instance where messages will be sent
@@ -62,13 +60,8 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 	}
 
 	@Override
-	public boolean hasSubscription(MessageHandler handler) {
-		return this.handlers.contains(handler);
-	}
-
-	@Override
 	public boolean sendInternal(final Message<?> message, long timeout) {
-		for (final MessageHandler handler : this.handlers) {
+		for (final MessageHandler handler : getSubscribers()) {
 			if (this.executor == null) {
 				handler.handleMessage(message);
 			}
@@ -82,16 +75,6 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 			}
 		}
 		return true;
-	}
-
-	@Override
-	public boolean subscribeInternal(MessageHandler handler) {
-		return this.handlers.add(handler);
-	}
-
-	@Override
-	public boolean unsubscribeInternal(MessageHandler handler) {
-		return this.handlers.remove(handler);
 	}
 
 }

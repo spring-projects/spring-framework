@@ -19,6 +19,7 @@ package org.springframework.messaging.simp.config;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -93,7 +94,7 @@ public class MessageBrokerConfigurationTests {
 	public void clientInboundChannel() {
 
 		TestChannel channel = this.simpleContext.getBean("clientInboundChannel", TestChannel.class);
-		List<MessageHandler> handlers = channel.handlers;
+		Set<MessageHandler> handlers = channel.getSubscribers();
 
 		assertEquals(3, handlers.size());
 		assertTrue(handlers.contains(simpleContext.getBean(SimpAnnotationMethodMessageHandler.class)));
@@ -104,12 +105,12 @@ public class MessageBrokerConfigurationTests {
 	@Test
 	public void clientInboundChannelWithBrokerRelay() {
 		TestChannel channel = this.brokerRelayContext.getBean("clientInboundChannel", TestChannel.class);
-		List<MessageHandler> values = channel.handlers;
+		Set<MessageHandler> handlers = channel.getSubscribers();
 
-		assertEquals(3, values.size());
-		assertTrue(values.contains(brokerRelayContext.getBean(SimpAnnotationMethodMessageHandler.class)));
-		assertTrue(values.contains(brokerRelayContext.getBean(UserDestinationMessageHandler.class)));
-		assertTrue(values.contains(brokerRelayContext.getBean(StompBrokerRelayMessageHandler.class)));
+		assertEquals(3, handlers.size());
+		assertTrue(handlers.contains(brokerRelayContext.getBean(SimpAnnotationMethodMessageHandler.class)));
+		assertTrue(handlers.contains(brokerRelayContext.getBean(UserDestinationMessageHandler.class)));
+		assertTrue(handlers.contains(brokerRelayContext.getBean(StompBrokerRelayMessageHandler.class)));
 	}
 
 	@Test
@@ -197,7 +198,7 @@ public class MessageBrokerConfigurationTests {
 	@Test
 	public void brokerChannel() {
 		TestChannel channel = this.simpleContext.getBean("brokerChannel", TestChannel.class);
-		List<MessageHandler> handlers = channel.handlers;
+		Set<MessageHandler> handlers = channel.getSubscribers();
 
 		assertEquals(2, handlers.size());
 		assertTrue(handlers.contains(simpleContext.getBean(UserDestinationMessageHandler.class)));
@@ -207,7 +208,7 @@ public class MessageBrokerConfigurationTests {
 	@Test
 	public void brokerChannelWithBrokerRelay() {
 		TestChannel channel = this.brokerRelayContext.getBean("brokerChannel", TestChannel.class);
-		List<MessageHandler> handlers = channel.handlers;
+		Set<MessageHandler> handlers = channel.getSubscribers();
 
 		assertEquals(2, handlers.size());
 		assertTrue(handlers.contains(brokerRelayContext.getBean(UserDestinationMessageHandler.class)));
@@ -451,16 +452,7 @@ public class MessageBrokerConfigurationTests {
 
 	private static class TestChannel extends ExecutorSubscribableChannel {
 
-		private final List<MessageHandler> handlers = new ArrayList<>();
-
 		private final List<Message<?>> messages = new ArrayList<>();
-
-
-		@Override
-		public boolean subscribeInternal(MessageHandler handler) {
-			this.handlers.add(handler);
-			return super.subscribeInternal(handler);
-		}
 
 		@Override
 		public boolean sendInternal(Message<?> message, long timeout) {

@@ -19,6 +19,11 @@ package org.springframework.messaging.support;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+
 /**
  * Abstract base class for {@link SubscribableChannel} implementations.
  *
@@ -27,9 +32,20 @@ import org.springframework.messaging.SubscribableChannel;
  */
 public abstract class AbstractSubscribableChannel extends AbstractMessageChannel implements SubscribableChannel {
 
+	private final Set<MessageHandler> handlers = new CopyOnWriteArraySet<MessageHandler>();
+
+
+	public Set<MessageHandler> getSubscribers() {
+		return Collections.<MessageHandler>unmodifiableSet(this.handlers);
+	}
+
+	public boolean hasSubscription(MessageHandler handler) {
+		return this.handlers.contains(handler);
+	}
+
 	@Override
-	public final boolean subscribe(MessageHandler handler) {
-		boolean result = subscribeInternal(handler);
+	public boolean subscribe(MessageHandler handler) {
+		boolean result = this.handlers.add(handler);
 		if (result) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("[" + getBeanName() + "] subscribed " + handler);
@@ -39,8 +55,8 @@ public abstract class AbstractSubscribableChannel extends AbstractMessageChannel
 	}
 
 	@Override
-	public final boolean unsubscribe(MessageHandler handler) {
-		boolean result = unsubscribeInternal(handler);
+	public boolean unsubscribe(MessageHandler handler) {
+		boolean result = this.handlers.remove(handler);
 		if (result) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("[" + getBeanName() + "] unsubscribed " + handler);
@@ -48,21 +64,5 @@ public abstract class AbstractSubscribableChannel extends AbstractMessageChannel
 		}
 		return result;
 	}
-
-
-	/**
-	 * Whether the given {@link MessageHandler} is already subscribed.
-	 */
-	public abstract boolean hasSubscription(MessageHandler handler);
-
-	/**
-	 * Subscribe the given {@link MessageHandler}.
-	 */
-	protected abstract boolean subscribeInternal(MessageHandler handler);
-
-	/**
-	 * Unsubscribe the given {@link MessageHandler}.
-	 */
-	protected abstract boolean unsubscribeInternal(MessageHandler handler);
 
 }
