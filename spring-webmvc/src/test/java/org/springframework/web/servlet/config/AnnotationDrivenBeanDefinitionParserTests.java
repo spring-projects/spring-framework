@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 package org.springframework.web.servlet.config;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -38,16 +42,11 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.ServletWebArgumentResolverAdapter;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
 
 /**
  * Test fixture for the configuration in mvc-config-annotation-driven.xml.
  * @author Rossen Stoyanchev
- * @author Brian Clozel
  */
 public class AnnotationDrivenBeanDefinitionParserTests {
 
@@ -69,28 +68,6 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertNotNull(resolver);
 		assertEquals(TestMessageCodesResolver.class, resolver.getClass());
 		assertEquals(false, new DirectFieldAccessor(adapter).getPropertyValue("ignoreDefaultModelOnRedirect"));
-	}
-
-	@Test
-	public void testCustomContentNegotiationManager() {
-		loadBeanDefinitions("mvc-config-content-negotiation-manager.xml");
-		RequestMappingHandlerMapping hm = appContext.getBean(RequestMappingHandlerMapping.class);
-		assertNotNull(hm);
-		assertTrue(hm.useSuffixPatternMatch());
-		assertTrue(hm.useRegisteredSuffixPatternMatch());
-		List<String> fileExtensions = hm.getContentNegotiationManager().getAllFileExtensions();
-		assertThat(fileExtensions, contains("xml"));
-		assertThat(fileExtensions, hasSize(1));
-	}
-
-	@Test
-	public void testRequestMappingCustomAttributes() {
-		loadBeanDefinitions("mvc-config-custom-attributes.xml");
-		RequestMappingHandlerMapping hm = appContext.getBean(RequestMappingHandlerMapping.class);
-		assertNotNull(hm);
-		assertFalse(hm.getUrlPathHelper().shouldRemoveSemicolonContent());
-		assertFalse(hm.useTrailingSlashMatch());
-		assertFalse(hm.useSuffixPatternMatch());
 	}
 
 	@Test

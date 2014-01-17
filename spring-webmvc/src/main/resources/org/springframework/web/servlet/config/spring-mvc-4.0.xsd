@@ -255,35 +255,6 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
-            <xsd:attribute name="use-suffix-pattern-match" type="xsd:boolean">
-                <xsd:annotation>
-                    <xsd:documentation><![CDATA[
-    Whether to use suffix pattern match (".*") when matching patterns to requests. If enabled
-    a method mapped to "/users" also matches to "/users.*". The default value is true.
-					]]></xsd:documentation>
-                </xsd:annotation>
-            </xsd:attribute>
-            <xsd:attribute name="use-trailing-slash-match" type="xsd:boolean">
-                <xsd:annotation>
-                    <xsd:documentation><![CDATA[
-    Whether to match to URLs irrespective of the presence of a trailing slash.
-    If enabled a method mapped to "/users" also matches to "/users/".
-	The default value is true.
-                    ]]></xsd:documentation>
-                </xsd:annotation>
-            </xsd:attribute>
-            <xsd:attribute name="use-registered-suffix-pattern-match" type="xsd:boolean">
-                <xsd:annotation>
-                    <xsd:documentation><![CDATA[
-    Whether to use suffix pattern match for registered file extensions only when matching patterns to requests.
-	If enabled, a controller method mapped to "/users" also matches to "/users.json" assuming ".json" is a file extension registered with
-	the provided ContentNegotiationManager. This can be useful for allowing only specific URL extensions to be used as well as in cases
-	where a "." in the URL path can lead to ambiguous interpretation of path variable content, (e.g. given "/users/{user}" and incoming
-	URLs such as "/users/john.j.joe" and "/users/john.j.joe.json").
-	If enabled, this attribute also enables use-suffix-pattern-match. The default value is false.
-                    ]]></xsd:documentation>
-                </xsd:annotation>
-            </xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
 
