@@ -195,7 +195,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 				result.put(name, Arrays.asList(subscriptionId));
 			}
 			else {
-				logger.warn(getCommand() + " frame should have a subscription: " + this.toString());
+				logger.warn(getCommand() + " frame does not have a subscription identifier" + this.toString());
 			}
 		}
 

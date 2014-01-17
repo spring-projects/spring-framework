@@ -29,22 +29,24 @@ public abstract class AbstractSubscribableChannel extends AbstractMessageChannel
 
 	@Override
 	public final boolean subscribe(MessageHandler handler) {
-		if (hasSubscription(handler)) {
-			logger.warn("[" + getBeanName() + "] handler already subscribed " + handler);
-			return false;
+		boolean result = subscribeInternal(handler);
+		if (result) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("[" + getBeanName() + "] subscribed " + handler);
+			}
 		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("[" + getBeanName() + "] subscribing " + handler);
-		}
-		return subscribeInternal(handler);
+		return result;
 	}
 
 	@Override
 	public final boolean unsubscribe(MessageHandler handler) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("[" + getBeanName() + "] unsubscribing " + handler);
+		boolean result = unsubscribeInternal(handler);
+		if (result) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("[" + getBeanName() + "] unsubscribed " + handler);
+			}
 		}
-		return unsubscribeInternal(handler);
+		return result;
 	}
 
 
