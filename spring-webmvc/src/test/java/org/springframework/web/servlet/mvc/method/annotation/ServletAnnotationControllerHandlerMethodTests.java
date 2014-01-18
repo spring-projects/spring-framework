@@ -26,6 +26,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -1575,6 +1577,28 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		assertEquals("Hello World!", response.getContentAsString());
 	}
 
+	@Test
+	public void responseAsHttpHeaders() throws Exception {
+		initServletWithControllers(HttpHeadersResponseController.class);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(new MockHttpServletRequest("POST", "/"), response);
+
+		assertEquals("Wrong status code", MockHttpServletResponse.SC_CREATED, response.getStatus());
+		assertEquals("Wrong number of headers", 1, response.getHeaderNames().size());
+		assertEquals("Wrong value for 'location' header", "/test/items/123", response.getHeader("location"));
+		assertEquals("Expected an empty content", 0, response.getContentLength());
+	}
+
+	@Test
+	public void responseAsHttpHeadersNoHeader() throws Exception {
+		initServletWithControllers(HttpHeadersResponseController.class);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(new MockHttpServletRequest("POST", "/empty"), response);
+
+		assertEquals("Wrong status code", MockHttpServletResponse.SC_CREATED, response.getStatus());
+		assertEquals("Wrong number of headers", 0, response.getHeaderNames().size());
+		assertEquals("Expected an empty content", 0, response.getContentLength());
+	}
 
 	/*
 	 * Controllers
@@ -2993,6 +3017,25 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		public String home() {
 			return "Hello World!";
 		}
+	}
+
+	@Controller
+	static class HttpHeadersResponseController {
+
+		@RequestMapping(value = "", method = RequestMethod.POST)
+		@ResponseStatus(HttpStatus.CREATED)
+		public HttpHeaders create() throws URISyntaxException {
+			HttpHeaders headers = new HttpHeaders();
+			headers.setLocation(new URI("/test/items/123"));
+			return headers;
+		}
+
+		@RequestMapping(value = "empty", method = RequestMethod.POST)
+		@ResponseStatus(HttpStatus.CREATED)
+		public HttpHeaders createNoHeader() throws URISyntaxException {
+			return new HttpHeaders();
+		}
+
 	}
 
 
