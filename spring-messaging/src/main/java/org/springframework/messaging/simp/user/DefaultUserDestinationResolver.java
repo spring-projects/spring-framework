@@ -97,13 +97,13 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		}
 
 		Set<String> set = new HashSet<String>();
-        if (SimpMessageType.SUBSCRIBE.equals(headers.getMessageType()) || SimpMessageType.UNSUBSCRIBE.equals(headers.getMessageType())) {
-            set.add(getTargetDestination(headers.getDestination(), info.getDestination(), headers.getSessionId(), info.getUser()));
-        } else {
-            for (String sessionId : this.userSessionRegistry.getSessionIds(info.getUser())) {
-                set.add(getTargetDestination(headers.getDestination(), info.getDestination(), sessionId, info.getUser()));
-            }
-        }
+		if (SimpMessageType.SUBSCRIBE.equals(headers.getMessageType()) || SimpMessageType.UNSUBSCRIBE.equals(headers.getMessageType())) {
+			set.add(getTargetDestination(headers.getDestination(), info.getDestination(), headers.getSessionId(), info.getUser()));
+		} else {
+			for (String sessionId : this.userSessionRegistry.getSessionIds(info.getUser())) {
+				set.add(getTargetDestination(headers.getDestination(), info.getDestination(), sessionId, info.getUser()));
+			}
+		}
 		return set;
 	}
 
