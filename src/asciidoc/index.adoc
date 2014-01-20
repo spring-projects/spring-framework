@@ -36530,7 +36530,12 @@ server-side while <<websocket-fallback>> explains the SockJS protocol and shows
 how to configure and use it.
 
 <<websocket-stomp-overview>> introduces the STOMP messaging protocol.
-
+<<websocket-stomp-enable>> demonstrates how to configure STOMP support in Spring.
+<<websocket-stomp-handle>> explains how to use it including writing annotated message
+handling methods, sending messages, choosing message broker options, as
+well as working with the special "user" destinations. Finally
+<<websocket-stomp-testing>> lists three approaches to testing STOMP/WebSocket
+applications.
 
 
 
@@ -37612,6 +37617,47 @@ So in that case the client could subscribe to `/user/exchange/amq.direct/positio
 ActiveMQ has http://activemq.apache.org/delete-inactive-destinations.html[configuration options]
 for purging inactive destinations.
 
+[[websocket-stomp-testing]]
+===== Testing Message Handling Controllers
+
+There are two main approaches to testing applications using Spring's STOMP over
+WebSocket support. The first is to write server-side tests verifying the functionality
+of controllers and their annotated message handling methods. The second is to write
+full end-to-end tests that involve running a client and a server.
+
+The two approaches are not mutually exclusive. On the contrary each has a place
+in an overall test strategy. Server-side tests are more focused and easier to write
+and maintain. End-to-end integration tests on the other hand are more complete and
+test much more but they're also more involved to write and maintain.
+
+The simplest form of server-side tests is to write controller unit tests. However
+this is not useful enough since much of what a controller does depends on its
+annotations. Pure unit tests simply can't test that.
+
+Ideally controllers under test should be invoked as they are at runtime, much like
+the approach to testing controllers handling HTTP requests using the Spring MVC Test
+framework. i.e. without running a Servlet container but relying on the Spring Framework
+to invoke the annotated controllers. Just like with Spring MVC Test here there are two
+two possible alternatives, either using a "context-based" or "standalone" setup:
+
+1. Load the actual Spring configuration with the help of the
+Spring TestContext framework, inject "clientInboundChannel" as a test field, and
+use it to send messages to be handled by controller methods.
+
+2. Manually set up the minimum Spring framework infrastructure required to invoke
+controllers (namely the `SimpAnnotationMethodMessageHandler`) and pass messages for
+controllers directly to it.
+
+Both of these setup scenarios are demonstrated in the
+https://github.com/rstoyanchev/spring-websocket-portfolio/tree/master/src/test/java/org/springframework/samples/portfolio/web[tests for the stock portfolio]
+sample application.
+
+The second approach is to create end-to-end integration tests. For that you will need
+to run a WebSocket server in embedded mode and connect to it as a WebSocket client
+sending WebSocket messages containing STOMP frames.
+The https://github.com/rstoyanchev/spring-websocket-portfolio/tree/master/src/test/java/org/springframework/samples/portfolio/web[tests for the stock portfolio]
+sample application also demonstrate this approach using Tomcat as the embedded
+WebSocket server and a simple STOMP client for test purposes.
 
 [[spring-integration]]
 = Integration
