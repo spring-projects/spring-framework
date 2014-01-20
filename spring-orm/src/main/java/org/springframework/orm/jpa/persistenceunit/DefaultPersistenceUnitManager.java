@@ -34,6 +34,9 @@ import javax.persistence.PersistenceException;
 import javax.persistence.spi.PersistenceUnitInfo;
 import javax.sql.DataSource;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.weaving.LoadTimeWeaverAware;
@@ -102,6 +105,8 @@ public class DefaultPersistenceUnitManager
 			new AnnotationTypeFilter(Entity.class, false),
 			new AnnotationTypeFilter(Embeddable.class, false),
 			new AnnotationTypeFilter(MappedSuperclass.class, false)};
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private String[] persistenceXmlLocations = new String[] {DEFAULT_PERSISTENCE_XML_LOCATION};
 
@@ -359,6 +364,7 @@ public class DefaultPersistenceUnitManager
 	public void preparePersistenceUnitInfos() {
 		this.persistenceUnitInfoNames.clear();
 		this.persistenceUnitInfos.clear();
+
 		List<SpringPersistenceUnitInfo> puis = readPersistenceUnitInfos();
 		for (SpringPersistenceUnitInfo pui : puis) {
 			if (pui.getPersistenceUnitRootUrl() == null) {
@@ -400,18 +406,29 @@ public class DefaultPersistenceUnitManager
 	 */
 	private List<SpringPersistenceUnitInfo> readPersistenceUnitInfos() {
 		List<SpringPersistenceUnitInfo> infos = new LinkedList<SpringPersistenceUnitInfo>();
+		String defaultName = this.defaultPersistenceUnitName;
 		boolean buildDefaultUnit = (this.packagesToScan != null || this.mappingResources != null);
+		boolean foundDefaultUnit = false;
+
 		PersistenceUnitReader reader = new PersistenceUnitReader(this.resourcePatternResolver, this.dataSourceLookup);
 		SpringPersistenceUnitInfo[] readInfos = reader.readPersistenceUnitInfos(this.persistenceXmlLocations);
 		for (SpringPersistenceUnitInfo readInfo : readInfos) {
 			infos.add(readInfo);
-			if (this.defaultPersistenceUnitName != null &&
-					this.defaultPersistenceUnitName.equals(readInfo.getPersistenceUnitName())) {
-				buildDefaultUnit = false;
+			if (defaultName != null && defaultName.equals(readInfo.getPersistenceUnitName())) {
+				foundDefaultUnit = true;
 			}
 		}
+
 		if (buildDefaultUnit) {
-			infos.add(buildDefaultPersistenceUnitInfo());
+			if (foundDefaultUnit) {
+				if (logger.isInfoEnabled()) {
+					logger.info("Found explicit default unit with name '" + defaultName + "' in persistence.xml - " +
+							"overriding local default unit settings ('packagesToScan'/'mappingResources')");
+				}
+			}
+			else {
+				infos.add(buildDefaultPersistenceUnitInfo());
+			}
 		}
 		return infos;
 	}
