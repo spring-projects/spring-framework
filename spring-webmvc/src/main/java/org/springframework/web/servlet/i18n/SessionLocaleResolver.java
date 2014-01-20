@@ -24,9 +24,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Implementation of LocaleResolver that uses a locale attribute in the user's
- * session in case of a custom setting, with a fallback to the specified default
- * locale or the request's accept-header locale.
+ * {@link org.springframework.web.servlet.LocaleResolver} implementation that
+ * uses a locale attribute in the user's session in case of a custom setting,
+ * with a fallback to the specified default locale or the request's
+ * accept-header locale.
  *
  * <p>This is most appropriate if the application needs user sessions anyway,
  * that is, when the HttpSession does not have to be created for the locale.
