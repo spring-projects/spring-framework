@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.view.document;
 
 import java.io.ByteArrayInputStream;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -27,18 +28,21 @@ import junit.framework.TestCase;
 import jxl.Cell;
 import jxl.Sheet;
 import jxl.Workbook;
+import jxl.WorkbookSettings;
+import jxl.read.biff.WorkbookParser;
 import jxl.write.Label;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
+
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
-
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.LocaleResolver;
@@ -194,7 +198,7 @@ public class ExcelViewTests extends TestCase {
 	}
 
 	public void testJExcel() throws Exception {
-		AbstractJExcelView excelView = new AbstractJExcelView() {
+		AbstractJExcelView excelView = new UnixSafeAbstractJExcelView() {
 			@Override
 			protected void buildExcelDocument(Map<String, Object> model, WritableWorkbook wb,
 					HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -220,7 +224,7 @@ public class ExcelViewTests extends TestCase {
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE,
 				newDummyLocaleResolver("nl", "nl"));
 
-		AbstractJExcelView excelView = new AbstractJExcelView() {
+		AbstractJExcelView excelView = new UnixSafeAbstractJExcelView() {
 			@Override
 			protected void buildExcelDocument(Map<String, Object> model, WritableWorkbook wb,
 					HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -247,7 +251,7 @@ public class ExcelViewTests extends TestCase {
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE,
 				newDummyLocaleResolver("en", "US"));
 
-		AbstractJExcelView excelView = new AbstractJExcelView() {
+		AbstractJExcelView excelView = new UnixSafeAbstractJExcelView() {
 			@Override
 			protected void buildExcelDocument(Map<String, Object> model, WritableWorkbook wb,
 					HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -274,7 +278,7 @@ public class ExcelViewTests extends TestCase {
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE,
 				newDummyLocaleResolver("de", ""));
 
-		AbstractJExcelView excelView = new AbstractJExcelView() {
+		AbstractJExcelView excelView = new UnixSafeAbstractJExcelView() {
 			@Override
 			protected void buildExcelDocument(Map<String, Object> model, WritableWorkbook wb,
 					HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -310,4 +314,27 @@ public class ExcelViewTests extends TestCase {
 		};
 	}
 
+
+	/**
+	 * Workaround JXL bug that causes ArrayIndexOutOfBounds exceptions when running in
+	 * *nix machines. Same bug as reported at http://jira.pentaho.com/browse/PDI-5031.
+	 *
+	 * We want to use the latest JXL code because it doesn't include log4j config files
+	 * inside the jar. Since the project appears to be abandoned AbstractJExcelView
+	 * will be deprecated.
+	 */
+	private static abstract class UnixSafeAbstractJExcelView extends AbstractJExcelView {
+
+		@Override
+		protected Workbook getTemplateSource(String url, HttpServletRequest request)
+				throws Exception {
+			Workbook workbook = super.getTemplateSource(url, request);
+			Field field = WorkbookParser.class.getDeclaredField("settings");
+			field.setAccessible(true);
+			WorkbookSettings settings = (WorkbookSettings) ReflectionUtils.getField(field, workbook);
+			settings.setWriteAccess(null);
+			return workbook;
+		}
+
+	}
 }

@@ -668,7 +668,7 @@ project("spring-webmvc") {
 		}
 		optional("rome:rome:1.0")
 		optional("com.lowagie:itext:2.1.7")
-		optional("net.sourceforge.jexcelapi:jxl:2.6.3")
+		optional("net.sourceforge.jexcelapi:jxl:2.6.12")
 		optional("org.apache.poi:poi:3.9")
 		optional("org.apache.velocity:velocity:1.7")
 		optional("velocity-tools:velocity-tools-view:1.4")
