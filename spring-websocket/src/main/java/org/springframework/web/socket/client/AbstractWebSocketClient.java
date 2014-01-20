@@ -48,7 +48,6 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 
 	static {
 		specialHeaders.add("cache-control");
-		specialHeaders.add("cookie");
 		specialHeaders.add("connection");
 		specialHeaders.add("host");
 		specialHeaders.add("sec-websocket-extensions");
