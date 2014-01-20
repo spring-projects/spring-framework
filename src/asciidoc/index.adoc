@@ -37220,7 +37220,7 @@ XML configuration equivalent:
 			http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
 
 		<websocket:message-broker>
-			<websocket:stomp-endpoint path="/portfolio" />
+			<websocket:stomp-endpoint path="/portfolio">
 				<websocket:sockjs/>
 			</websocket:stomp-endpoint>
 			...
