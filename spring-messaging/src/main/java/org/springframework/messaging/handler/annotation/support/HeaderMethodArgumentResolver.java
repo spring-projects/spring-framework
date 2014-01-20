@@ -16,6 +16,9 @@
 
 package org.springframework.messaging.handler.annotation.support;
 
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -25,10 +28,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandlingException;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
-import org.springframework.util.MultiValueMap;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Resolves method parameters annotated with {@link Header @Header}.
@@ -77,8 +76,7 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 
 	private Object getNativeHeaderValue(Message<?> message, String name) {
 
-		Map<String, List<String>> nativeHeaders =
-				(Map<String, List<String>>) message.getHeaders().get(NativeMessageHeaderAccessor.NATIVE_HEADERS);
+		Map<String, List<String>> nativeHeaders = getNativeHeaders(message);
 
 		if (name.startsWith("nativeHeaders.")) {
 			name = name.substring("nativeHeaders.".length());
@@ -93,6 +91,12 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 
 		List<?> nativeHeaderValues = nativeHeaders.get(name);
 		return (nativeHeaderValues.size() == 1) ? nativeHeaderValues.get(0) : nativeHeaderValues;
+	}
+
+	@SuppressWarnings("unchecked")
+	private Map<String, List<String>> getNativeHeaders(Message<?> message) {
+		return (Map<String, List<String>>) message.getHeaders().get(
+				NativeMessageHeaderAccessor.NATIVE_HEADERS);
 	}
 
 	@Override
