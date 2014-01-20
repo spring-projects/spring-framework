@@ -13,7 +13,7 @@ configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
 
-	ext.aspectjVersion  = "1.8.0.M1"
+	ext.aspectjVersion  = "1.7.4"
 	ext.groovyVersion   = "1.8.9"
 	ext.hsqldbVersion   = "2.3.1"
 	ext.junitVersion    = "4.11"
@@ -857,9 +857,9 @@ project("spring-aspects") {
 		aspects(project(":spring-orm"))
 		provided("org.eclipse.persistence:javax.persistence:2.0.0")
 		testCompile("javax.mail:mail:1.4.7")
-		ajc("org.aspectj:aspectjtools:${aspectjVersion}")
-		rt("org.aspectj:aspectjrt:${aspectjVersion}")
-		compile("org.aspectj:aspectjweaver:${aspectjVersion}")
+		ajc("org.aspectj:aspectjtools:1.8.0.M1") // needed for ajc on JDK 8 only
+		rt("org.aspectj:aspectjrt:1.8.0.M1") // needed for ajc on JDK 8 only
+		compile("org.aspectj:aspectjweaver:${aspectjVersion}") // exposing regular AspectJ version to users
 		testCompile(project(":spring-core")) // for CodeStyleAspect
 		compile(project(":spring-beans")) // for "p" namespace visibility
 		testCompile(project(":spring-test"))
