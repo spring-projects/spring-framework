@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,11 @@ abstract class SerializableTypeWrapper {
 	private static final Class<?>[] SUPPORTED_SERIALIZABLE_TYPES = {
 			GenericArrayType.class, ParameterizedType.class, TypeVariable.class, WildcardType.class};
 
+	private static final Method EQUALS_METHOD = ReflectionUtils.findMethod(Object.class,
+			"equals", Object.class);
+
+	private static final Method GET_TYPE_PROVIDER_METHOD = ReflectionUtils.findMethod(
+			SerializableTypeProxy.class, "getTypeProvider");
 
 	/**
 	 * Return a {@link Serializable} variant of {@link Field#getGenericType()}.
@@ -134,12 +139,26 @@ abstract class SerializableTypeWrapper {
 		for (Class<?> type : SUPPORTED_SERIALIZABLE_TYPES) {
 			if (type.isAssignableFrom(provider.getType().getClass())) {
 				ClassLoader classLoader = provider.getClass().getClassLoader();
-				Class<?>[] interfaces = new Class<?>[] { type, Serializable.class };
+				Class<?>[] interfaces = new Class<?>[] { type,
+					SerializableTypeProxy.class, Serializable.class };
 				InvocationHandler handler = new TypeProxyInvocationHandler(provider);
 				return (Type) Proxy.newProxyInstance(classLoader, interfaces, handler);
 			}
 		}
 		throw new IllegalArgumentException("Unsupported Type class " + provider.getType().getClass().getName());
+	}
+
+
+	/**
+	 * Additional interface implemented by the type proxy.
+	 */
+	static interface SerializableTypeProxy {
+
+		/**
+		 * Return the underlying type provider.
+		 */
+		TypeProvider getTypeProvider();
+
 	}
 
 
@@ -190,6 +209,17 @@ abstract class SerializableTypeWrapper {
 
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			if (GET_TYPE_PROVIDER_METHOD.equals(method)) {
+				return this.provider;
+			}
+			if (EQUALS_METHOD.equals(method)) {
+				Object other = args[0];
+				// Unwrap proxies for speed
+				while (other instanceof SerializableTypeProxy) {
+					other = ((SerializableTypeProxy) other).getTypeProvider().getType();
+				}
+				return this.provider.getType().equals(other);
+			}
 			if (Type.class.equals(method.getReturnType()) && args == null) {
 				return forTypeProvider(new MethodInvokeTypeProvider(this.provider, method, -1));
 			}
