@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.ByteArrayInputStream;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -69,12 +68,9 @@ public class ExcelViewTests extends TestCase {
 	public void testExcel() throws Exception {
 		AbstractExcelView excelView = new AbstractExcelView() {
 			@Override
-			protected void buildExcelDocument(Map model, HSSFWorkbook wb,
-					HttpServletRequest request, HttpServletResponse response)
-					throws Exception {
-				HSSFSheet sheet = wb.createSheet();
-				wb.setSheetName(0, "Test Sheet");
-
+			protected void buildExcelDocument(Map<String, Object> model, HSSFWorkbook wb,
+					HttpServletRequest request, HttpServletResponse response) throws Exception {
+				HSSFSheet sheet = wb.createSheet("Test Sheet");
 				// test all possible permutation of row or column not existing
 				HSSFCell cell = getCell(sheet, 2, 4);
 				cell.setCellValue("Test Value");
@@ -87,14 +83,14 @@ public class ExcelViewTests extends TestCase {
 			}
 		};
 
-		excelView.render(new HashMap(), request, response);
+		excelView.render(new HashMap<String, Object>(), request, response);
 
 		POIFSFileSystem poiFs = new POIFSFileSystem(new ByteArrayInputStream(response.getContentAsByteArray()));
 		HSSFWorkbook wb = new HSSFWorkbook(poiFs);
 		assertEquals("Test Sheet", wb.getSheetName(0));
 		HSSFSheet sheet = wb.getSheet("Test Sheet");
 		HSSFRow row = sheet.getRow(2);
-		HSSFCell cell = row.getCell((short) 4);
+		HSSFCell cell = row.getCell(4);
 		assertEquals("Test Value", cell.getStringCellValue());
 	}
 
@@ -104,11 +100,9 @@ public class ExcelViewTests extends TestCase {
 
 		AbstractExcelView excelView = new AbstractExcelView() {
 			@Override
-			protected void buildExcelDocument(Map model, HSSFWorkbook wb,
-					HttpServletRequest request, HttpServletResponse response)
-					throws Exception {
+			protected void buildExcelDocument(Map<String, Object> model, HSSFWorkbook wb,
+					HttpServletRequest request, HttpServletResponse response) throws Exception {
 				HSSFSheet sheet = wb.getSheet("Sheet1");
-
 				// test all possible permutation of row or column not existing
 				HSSFCell cell = getCell(sheet, 2, 4);
 				cell.setCellValue("Test Value");
@@ -123,13 +117,13 @@ public class ExcelViewTests extends TestCase {
 
 		excelView.setApplicationContext(webAppCtx);
 		excelView.setUrl("template");
-		excelView.render(new HashMap(), request, response);
+		excelView.render(new HashMap<String, Object>(), request, response);
 
 		POIFSFileSystem poiFs = new POIFSFileSystem(new ByteArrayInputStream(response.getContentAsByteArray()));
 		HSSFWorkbook wb = new HSSFWorkbook(poiFs);
 		HSSFSheet sheet = wb.getSheet("Sheet1");
 		HSSFRow row = sheet.getRow(0);
-		HSSFCell cell = row.getCell((short) 0);
+		HSSFCell cell = row.getCell(0);
 		assertEquals("Test Template", cell.getStringCellValue());
 	}
 
@@ -139,11 +133,9 @@ public class ExcelViewTests extends TestCase {
 
 		AbstractExcelView excelView = new AbstractExcelView() {
 			@Override
-			protected void buildExcelDocument(Map model, HSSFWorkbook wb,
-					HttpServletRequest request, HttpServletResponse response)
-					throws Exception {
+			protected void buildExcelDocument(Map<String, Object> model, HSSFWorkbook wb,
+					HttpServletRequest request, HttpServletResponse response) throws Exception {
 				HSSFSheet sheet = wb.getSheet("Sheet1");
-
 				// test all possible permutation of row or column not existing
 				HSSFCell cell = getCell(sheet, 2, 4);
 				cell.setCellValue("Test Value");
@@ -158,13 +150,13 @@ public class ExcelViewTests extends TestCase {
 
 		excelView.setApplicationContext(webAppCtx);
 		excelView.setUrl("template");
-		excelView.render(new HashMap(), request, response);
+		excelView.render(new HashMap<String, Object>(), request, response);
 
 		POIFSFileSystem poiFs = new POIFSFileSystem(new ByteArrayInputStream(response.getContentAsByteArray()));
 		HSSFWorkbook wb = new HSSFWorkbook(poiFs);
 		HSSFSheet sheet = wb.getSheet("Sheet1");
 		HSSFRow row = sheet.getRow(0);
-		HSSFCell cell = row.getCell((short) 0);
+		HSSFCell cell = row.getCell(0);
 		assertEquals("Test Template American English", cell.getStringCellValue());
 	}
 
@@ -174,11 +166,9 @@ public class ExcelViewTests extends TestCase {
 
 		AbstractExcelView excelView = new AbstractExcelView() {
 			@Override
-			protected void buildExcelDocument(Map model, HSSFWorkbook wb,
-					HttpServletRequest request, HttpServletResponse response)
-					throws Exception {
+			protected void buildExcelDocument(Map<String, Object> model, HSSFWorkbook wb,
+					HttpServletRequest request, HttpServletResponse response) throws Exception {
 				HSSFSheet sheet = wb.getSheet("Sheet1");
-
 				// test all possible permutation of row or column not existing
 				HSSFCell cell = getCell(sheet, 2, 4);
 				cell.setCellValue("Test Value");
@@ -193,26 +183,22 @@ public class ExcelViewTests extends TestCase {
 
 		excelView.setApplicationContext(webAppCtx);
 		excelView.setUrl("template");
-		excelView.render(new HashMap(), request, response);
+		excelView.render(new HashMap<String, Object>(), request, response);
 
 		POIFSFileSystem poiFs = new POIFSFileSystem(new ByteArrayInputStream(response.getContentAsByteArray()));
 		HSSFWorkbook wb = new HSSFWorkbook(poiFs);
 		HSSFSheet sheet = wb.getSheet("Sheet1");
 		HSSFRow row = sheet.getRow(0);
-		HSSFCell cell = row.getCell((short) 0);
+		HSSFCell cell = row.getCell(0);
 		assertEquals("Test Template auf Deutsch", cell.getStringCellValue());
 	}
 
 	public void testJExcel() throws Exception {
 		AbstractJExcelView excelView = new AbstractJExcelView() {
 			@Override
-			protected void buildExcelDocument(Map model,
-					WritableWorkbook wb,
-					HttpServletRequest request,
-					HttpServletResponse response)
-					throws Exception {
+			protected void buildExcelDocument(Map<String, Object> model, WritableWorkbook wb,
+					HttpServletRequest request, HttpServletResponse response) throws Exception {
 				WritableSheet sheet = wb.createSheet("Test Sheet", 0);
-
 				// test all possible permutation of row or column not existing
 				sheet.addCell(new Label(2, 4, "Test Value"));
 				sheet.addCell(new Label(2, 3, "Test Value"));
@@ -221,7 +207,7 @@ public class ExcelViewTests extends TestCase {
 			}
 		};
 
-		excelView.render(new HashMap(), request, response);
+		excelView.render(new HashMap<String, Object>(), request, response);
 
 		Workbook wb = Workbook.getWorkbook(new ByteArrayInputStream(response.getContentAsByteArray()));
 		assertEquals("Test Sheet", wb.getSheet(0).getName());
@@ -236,13 +222,9 @@ public class ExcelViewTests extends TestCase {
 
 		AbstractJExcelView excelView = new AbstractJExcelView() {
 			@Override
-			protected void buildExcelDocument(Map model,
-					WritableWorkbook wb,
-					HttpServletRequest request,
-					HttpServletResponse response)
-					throws Exception {
+			protected void buildExcelDocument(Map<String, Object> model, WritableWorkbook wb,
+					HttpServletRequest request, HttpServletResponse response) throws Exception {
 				WritableSheet sheet = wb.getSheet("Sheet1");
-
 				// test all possible permutation of row or column not existing
 				sheet.addCell(new Label(2, 4, "Test Value"));
 				sheet.addCell(new Label(2, 3, "Test Value"));
@@ -253,7 +235,7 @@ public class ExcelViewTests extends TestCase {
 
 		excelView.setApplicationContext(webAppCtx);
 		excelView.setUrl("template");
-		excelView.render(new HashMap(), request, response);
+		excelView.render(new HashMap<String, Object>(), request, response);
 
 		Workbook wb = Workbook.getWorkbook(new ByteArrayInputStream(response.getContentAsByteArray()));
 		Sheet sheet = wb.getSheet("Sheet1");
@@ -267,13 +249,9 @@ public class ExcelViewTests extends TestCase {
 
 		AbstractJExcelView excelView = new AbstractJExcelView() {
 			@Override
-			protected void buildExcelDocument(Map model,
-					WritableWorkbook wb,
-					HttpServletRequest request,
-					HttpServletResponse response)
-					throws Exception {
+			protected void buildExcelDocument(Map<String, Object> model, WritableWorkbook wb,
+					HttpServletRequest request, HttpServletResponse response) throws Exception {
 				WritableSheet sheet = wb.getSheet("Sheet1");
-
 				// test all possible permutation of row or column not existing
 				sheet.addCell(new Label(2, 4, "Test Value"));
 				sheet.addCell(new Label(2, 3, "Test Value"));
@@ -284,7 +262,7 @@ public class ExcelViewTests extends TestCase {
 
 		excelView.setApplicationContext(webAppCtx);
 		excelView.setUrl("template");
-		excelView.render(new HashMap(), request, response);
+		excelView.render(new HashMap<String, Object>(), request, response);
 
 		Workbook wb = Workbook.getWorkbook(new ByteArrayInputStream(response.getContentAsByteArray()));
 		Sheet sheet = wb.getSheet("Sheet1");
@@ -298,13 +276,9 @@ public class ExcelViewTests extends TestCase {
 
 		AbstractJExcelView excelView = new AbstractJExcelView() {
 			@Override
-			protected void buildExcelDocument(Map model,
-					WritableWorkbook wb,
-					HttpServletRequest request,
-					HttpServletResponse response)
-					throws Exception {
+			protected void buildExcelDocument(Map<String, Object> model, WritableWorkbook wb,
+					HttpServletRequest request, HttpServletResponse response) throws Exception {
 				WritableSheet sheet = wb.getSheet("Sheet1");
-
 				// test all possible permutation of row or column not existing
 				sheet.addCell(new Label(2, 4, "Test Value"));
 				sheet.addCell(new Label(2, 3, "Test Value"));
@@ -315,7 +289,7 @@ public class ExcelViewTests extends TestCase {
 
 		excelView.setApplicationContext(webAppCtx);
 		excelView.setUrl("template");
-		excelView.render(new HashMap(), request, response);
+		excelView.render(new HashMap<String, Object>(), request, response);
 
 		Workbook wb = Workbook.getWorkbook(new ByteArrayInputStream(response.getContentAsByteArray()));
 		Sheet sheet = wb.getSheet("Sheet1");
@@ -329,12 +303,9 @@ public class ExcelViewTests extends TestCase {
 			public Locale resolveLocale(HttpServletRequest request) {
 				return new Locale(lang, country);
 			}
-
 			@Override
-			public void setLocale(HttpServletRequest request,
-					HttpServletResponse response, Locale locale) {
-				// not supported!
-
+			public void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
+				// not supported
 			}
 		};
 	}
