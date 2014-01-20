@@ -506,16 +506,16 @@ project("spring-context-support") {
 		optional(project(":spring-tx")) // for Quartz support
 		optional("javax.mail:mail:1.4.7")
 		optional("javax.cache:cache-api:1.0.0-RC1")
-		optional("com.google.guava:guava:14.0.1")
+		optional("com.google.guava:guava:16.0")
 		optional("net.sf.ehcache:ehcache-core:2.6.5")
 		optional("org.quartz-scheduler:quartz:1.8.6") {
 			exclude group: "org.slf4j", module: "slf4j-log4j12"
 		}
 		optional("org.codehaus.fabric3.api:commonj:1.1.0")
 		optional("org.apache.velocity:velocity:1.7")
-		optional("org.freemarker:freemarker:2.3.19")
+		optional("org.freemarker:freemarker:2.3.20")
 		optional("com.lowagie:itext:2.1.7")
-		optional("net.sf.jasperreports:jasperreports:5.1.0")
+		optional("net.sf.jasperreports:jasperreports:5.5.0")
 		optional("org.slf4j:slf4j-api:${slf4jVersion}")
 		provided("javax.activation:activation:1.1")
 		testCompile("org.apache.poi:poi:3.9")
@@ -663,16 +663,16 @@ project("spring-webmvc") {
 		optional(project(":spring-oxm")) // for MarshallingView
 		optional("org.codehaus.jackson:jackson-mapper-asl:1.9.12")
 		optional("com.fasterxml.jackson.core:jackson-databind:2.3.0")
-		optional("net.sf.jasperreports:jasperreports:5.1.0") {
+		optional("net.sf.jasperreports:jasperreports:5.5.0") {
 			exclude group: "xml-apis", module: "xml-apis"
 		}
 		optional("rome:rome:1.0")
 		optional("com.lowagie:itext:2.1.7")
-		optional("net.sourceforge.jexcelapi:jxl:2.6.3")
+		optional("net.sourceforge.jexcelapi:jxl:2.6.12")
 		optional("org.apache.poi:poi:3.9")
 		optional("org.apache.velocity:velocity:1.7")
 		optional("velocity-tools:velocity-tools-view:1.4")
-		optional("org.freemarker:freemarker:2.3.19")
+		optional("org.freemarker:freemarker:2.3.20")
 		optional("org.apache.tiles:tiles-api:2.2.2")
 		optional("org.apache.tiles:tiles-core:2.2.2") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
@@ -712,7 +712,7 @@ project("spring-webmvc") {
 			exclude group: "javax.servlet", module: "javax.servlet"
 		}
 		testCompile("javax.validation:validation-api:1.0.0.GA")
-		testCompile("commons-fileupload:commons-fileupload:1.2")
+		testCompile("commons-fileupload:commons-fileupload:1.3")
 		testCompile("commons-io:commons-io:1.3")
 		testCompile("org.hibernate:hibernate-validator:4.3.0.Final")
 		testCompile("org.apache.httpcomponents:httpclient:4.3.1")
@@ -767,7 +767,7 @@ project("spring-webmvc-portlet") {
 		compile(project(":spring-context"))
 		compile(project(":spring-web"))
 		compile(project(":spring-webmvc"))
-		optional("commons-fileupload:commons-fileupload:1.2")
+		optional("commons-fileupload:commons-fileupload:1.3")
 	}
 
 	// pick up DispatcherPortlet.properties in src/main
@@ -788,7 +788,7 @@ project("spring-test") {
 		optional(project(":spring-webmvc"))
 		optional(project(":spring-webmvc-portlet"))
 		optional("junit:junit:${junitVersion}")
-		optional("org.testng:testng:6.8.5")
+		optional("org.testng:testng:6.8.7")
 		optional("javax.servlet:javax.servlet-api:3.0.1")
 		optional("javax.servlet.jsp:jsp-api:2.1")
 		optional("javax.portlet:portlet-api:2.0")
