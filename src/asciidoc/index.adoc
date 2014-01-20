@@ -567,9 +567,15 @@ as a new project it would use a different logging dependency. The first choice w
 probably be the Simple Logging Facade for Java ( http://www.slf4j.org[SLF4J]), which is
 also used by a lot of other tools that people use with Spring inside their applications.
 
-Switching off `commons-logging` is easy: just make sure it isn't on the classpath at
-runtime. In Maven terms you exclude the dependency, and because of the way that the
-Spring dependencies are declared, you only have to do that once.
+There are basically two ways to switch off `commons-logging`:
+
+. Exclude the dependency from the `spring-core` module (as it is the only module that
+  explicitly depends on `commons-logging`)
+. Depend on a special `commons-logging` dependency that replaces the library with
+  an empty jar (more details can be found in the
+  http://slf4j.org/faq.html#excludingJCL[SLF4J FAQ])
+
+To exclude commons-logging, add the following to your `dependencyManagement` section:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes,attributes"]
@@ -579,7 +585,6 @@ Spring dependencies are declared, you only have to do that once.
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
 			<version>{spring-version}</version>
-			<scope>runtime</scope>
 			<exclusions>
 				<exclusion>
 					<groupId>commons-logging</groupId>
@@ -624,7 +629,6 @@ implementation itself. In Maven you would do that like this
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
 			<version>{spring-version}</version>
-			<scope>runtime</scope>
 			<exclusions>
 				<exclusion>
 					<groupId>commons-logging</groupId>
@@ -636,25 +640,21 @@ implementation itself. In Maven you would do that like this
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>
 			<version>1.5.8</version>
-			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>1.5.8</version>
-			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>1.5.8</version>
-			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.14</version>
-			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
 ----
@@ -694,13 +694,11 @@ is your dependency declaration:
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
 			<version>{spring-version}</version>
-			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.14</version>
-			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
 ----
