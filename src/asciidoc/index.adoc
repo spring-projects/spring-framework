@@ -567,9 +567,16 @@ as a new project it would use a different logging dependency. The first choice w
 probably be the Simple Logging Facade for Java ( http://www.slf4j.org[SLF4J]), which is
 also used by a lot of other tools that people use with Spring inside their applications.
 
-Switching off `commons-logging` is easy: just make sure it isn't on the classpath at
-runtime. In Maven terms you exclude the dependency, and because of the way that the
-Spring dependencies are declared, you only have to do that once.
+There are basically two ways to switch off `commons-logging`:
+
+. Exclude the dependency from the spring modules you are explicitly relying upon
+. Depend on a special `commons-logging` dependency that replaces the library with
+  an empty jar (more details can be found in the
+  http://slf4j.org/faq.html#excludingJCL[SLF4J FAQ])
+
+To exclude commons-logging, add the following to your `dependencies` or better
+`dependencyManagement` section for *all* the spring modules you are relying upon
+explicitly (here `spring-core` and `spring-context`):
 
 [source,xml,indent=0]
 [subs="verbatim,quotes,attributes"]
@@ -579,7 +586,16 @@ Spring dependencies are declared, you only have to do that once.
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
 			<version>{spring-version}</version>
-			<scope>runtime</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>{spring-version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>commons-logging</groupId>
