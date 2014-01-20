@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorA
 	}
 
 	public void setAspectJAdvisorFactory(AspectJAdvisorFactory aspectJAdvisorFactory) {
-		Assert.notNull(this.aspectJAdvisorFactory, "AspectJAdvisorFactory must not be null");
+		Assert.notNull(aspectJAdvisorFactory, "AspectJAdvisorFactory must not be null");
 		this.aspectJAdvisorFactory = aspectJAdvisorFactory;
 	}
 
@@ -89,7 +89,7 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorA
 	}
 
 	@Override
-	protected boolean isInfrastructureClass(Class beanClass) {
+	protected boolean isInfrastructureClass(Class<?> beanClass) {
 		// Previously we setProxyTargetClass(true) in the constructor, but that has too
 		// broad an impact. Instead we now override isInfrastructureClass to avoid proxying
 		// aspects. I'm not entirely happy with that as there is no good reason not
