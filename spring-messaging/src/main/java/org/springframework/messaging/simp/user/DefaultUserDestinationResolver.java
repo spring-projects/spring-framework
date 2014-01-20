@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,17 +96,13 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 			return Collections.emptySet();
 		}
 
-		Set<String> set = new HashSet<String>();
-		for (String sessionId : this.userSessionRegistry.getSessionIds(info.getUser())) {
-			set.add(getTargetDestination(headers.getDestination(), info.getDestination(), sessionId, info.getUser()));
+		Set<String> result = new HashSet<String>();
+		for (String sessionId : info.getSessionIds()) {
+			result.add(getTargetDestination(
+					headers.getDestination(), info.getDestination(), sessionId, info.getUser()));
 		}
-		return set;
-	}
 
-	protected String getTargetDestination(String originalDestination, String targetDestination,
-			String sessionId, String user) {
-
-		return targetDestination + "-user" + sessionId;
+		return result;
 	}
 
 	private UserDestinationInfo getUserDestinationInfo(SimpMessageHeaderAccessor headers) {
@@ -115,6 +111,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 
 		String targetUser;
 		String targetDestination;
+		Set<String> sessionIds;
 
 		Principal user = headers.getUser();
 		SimpMessageType messageType = headers.getMessageType();
@@ -124,11 +121,16 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 				return null;
 			}
 			if (user == null) {
-				logger.warn("Ignoring message, no user information");
+				logger.error("Ignoring message, no user info available");
+				return null;
+			}
+			if (headers.getSessionId() == null) {
+				logger.error("Ignoring message, no session id available");
 				return null;
 			}
 			targetUser = user.getName();
 			targetDestination = destination.substring(this.destinationPrefix.length()-1);
+			sessionIds = Collections.singleton(headers.getSessionId());
 		}
 		else if (SimpMessageType.MESSAGE.equals(messageType)) {
 			if (!checkDestination(destination, this.destinationPrefix)) {
@@ -139,7 +141,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 			Assert.isTrue(endIndex > 0, "Expected destination pattern \"/user/{userId}/**\"");
 			targetUser = destination.substring(startIndex, endIndex);
 			targetDestination = destination.substring(endIndex);
-
+			sessionIds = this.userSessionRegistry.getSessionIds(targetUser);
 		}
 		else {
 			if (logger.isTraceEnabled()) {
@@ -148,7 +150,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 			return null;
 		}
 
-		return new UserDestinationInfo(targetUser, targetDestination);
+		return new UserDestinationInfo(targetUser, targetDestination, sessionIds);
 	}
 
 	protected boolean checkDestination(String destination, String requiredPrefix) {
@@ -165,6 +167,10 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		return true;
 	}
 
+	protected String getTargetDestination(String origDestination, String targetDestination, String sessionId, String user) {
+		return targetDestination + "-user" + sessionId;
+	}
+
 
 	private static class UserDestinationInfo {
 
@@ -172,17 +178,24 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 
 		private final String destination;
 
-		private UserDestinationInfo(String user, String destination) {
+		private final Set<String> sessionIds;
+
+		private UserDestinationInfo(String user, String destination, Set<String> sessionIds) {
 			this.user = user;
 			this.destination = destination;
+			this.sessionIds = sessionIds;
 		}
 
-		private String getUser() {
+		public String getUser() {
 			return this.user;
 		}
 
-		private String getDestination() {
+		public String getDestination() {
 			return this.destination;
+		}
+
+		public Set<String> getSessionIds() {
+			return this.sessionIds;
 		}
 	}
 

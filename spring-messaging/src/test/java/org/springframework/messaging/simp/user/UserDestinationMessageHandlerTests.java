@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,6 @@ import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.TestPrincipal;
-import org.springframework.messaging.simp.user.DefaultUserDestinationResolver;
-import org.springframework.messaging.simp.user.DefaultUserSessionRegistry;
-import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
-import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.messaging.support.MessageBuilder;
 
 import static org.junit.Assert.assertEquals;
@@ -42,6 +38,7 @@ import static org.mockito.Mockito.*;
  */
 public class UserDestinationMessageHandlerTests {
 
+	public static final String SESSION_ID = "123";
 	private UserDestinationMessageHandler messageHandler;
 
 
@@ -63,9 +60,8 @@ public class UserDestinationMessageHandlerTests {
 
 	@Test
 	public void handleSubscribe() {
-		this.registry.registerSessionId("joe", "123");
 		when(this.brokerChannel.send(Mockito.any(Message.class))).thenReturn(true);
-		this.messageHandler.handleMessage(createMessage(SimpMessageType.SUBSCRIBE, "joe", "/user/queue/foo"));
+		this.messageHandler.handleMessage(createMessage(SimpMessageType.SUBSCRIBE, "joe", SESSION_ID, "/user/queue/foo"));
 
 		ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
 		Mockito.verify(this.brokerChannel).send(captor.capture());
@@ -76,9 +72,8 @@ public class UserDestinationMessageHandlerTests {
 
 	@Test
 	public void handleUnsubscribe() {
-		this.registry.registerSessionId("joe", "123");
 		when(this.brokerChannel.send(Mockito.any(Message.class))).thenReturn(true);
-		this.messageHandler.handleMessage(createMessage(SimpMessageType.UNSUBSCRIBE, "joe", "/user/queue/foo"));
+		this.messageHandler.handleMessage(createMessage(SimpMessageType.UNSUBSCRIBE, "joe", "123", "/user/queue/foo"));
 
 		ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
 		Mockito.verify(this.brokerChannel).send(captor.capture());
@@ -91,7 +86,7 @@ public class UserDestinationMessageHandlerTests {
 	public void handleMessage() {
 		this.registry.registerSessionId("joe", "123");
 		when(this.brokerChannel.send(Mockito.any(Message.class))).thenReturn(true);
-		this.messageHandler.handleMessage(createMessage(SimpMessageType.MESSAGE, "joe", "/user/joe/queue/foo"));
+		this.messageHandler.handleMessage(createMessage(SimpMessageType.MESSAGE, "joe", "123", "/user/joe/queue/foo"));
 
 		ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
 		Mockito.verify(this.brokerChannel).send(captor.capture());
@@ -105,34 +100,37 @@ public class UserDestinationMessageHandlerTests {
 	public void ignoreMessage() {
 
 		// no destination
-		this.messageHandler.handleMessage(createMessage(SimpMessageType.MESSAGE, "joe", null));
+		this.messageHandler.handleMessage(createMessage(SimpMessageType.MESSAGE, "joe", "123", null));
 		Mockito.verifyZeroInteractions(this.brokerChannel);
 
 		// not a user destination
-		this.messageHandler.handleMessage(createMessage(SimpMessageType.MESSAGE, "joe", "/queue/foo"));
+		this.messageHandler.handleMessage(createMessage(SimpMessageType.MESSAGE, "joe", "123", "/queue/foo"));
 		Mockito.verifyZeroInteractions(this.brokerChannel);
 
 		// subscribe + no user
-		this.messageHandler.handleMessage(createMessage(SimpMessageType.SUBSCRIBE, null, "/user/queue/foo"));
+		this.messageHandler.handleMessage(createMessage(SimpMessageType.SUBSCRIBE, null, "123", "/user/queue/foo"));
 		Mockito.verifyZeroInteractions(this.brokerChannel);
 
 		// subscribe + not a user destination
-		this.messageHandler.handleMessage(createMessage(SimpMessageType.SUBSCRIBE, "joe", "/queue/foo"));
+		this.messageHandler.handleMessage(createMessage(SimpMessageType.SUBSCRIBE, "joe", "123", "/queue/foo"));
 		Mockito.verifyZeroInteractions(this.brokerChannel);
 
 		// no match on message type
-		this.messageHandler.handleMessage(createMessage(SimpMessageType.CONNECT, "joe", "user/joe/queue/foo"));
+		this.messageHandler.handleMessage(createMessage(SimpMessageType.CONNECT, "joe", "123", "user/joe/queue/foo"));
 		Mockito.verifyZeroInteractions(this.brokerChannel);
 	}
 
 
-	private Message<?> createMessage(SimpMessageType messageType, String user, String destination) {
+	private Message<?> createMessage(SimpMessageType messageType, String user, String sessionId, String destination) {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(messageType);
 		if (destination != null) {
 			headers.setDestination(destination);
 		}
 		if (user != null) {
 			headers.setUser(new TestPrincipal(user));
+		}
+		if (sessionId != null) {
+			headers.setSessionId(sessionId);
 		}
 		return MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 	}
