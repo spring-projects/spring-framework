@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,19 @@
 
 package org.springframework.messaging.handler.annotation.support;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandlingException;
 import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.support.NativeMessageHeaderAccessor;
+import org.springframework.util.MultiValueMap;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Resolves method parameters annotated with {@link Header @Header}.
@@ -30,6 +37,8 @@ import org.springframework.messaging.handler.annotation.Header;
  * @since 4.0
  */
 public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
+
+	private static final Log logger = LogFactory.getLog(HeaderMethodArgumentResolver.class);
 
 
 	public HeaderMethodArgumentResolver(ConversionService cs, ConfigurableBeanFactory beanFactory) {
@@ -51,7 +60,39 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 	protected Object resolveArgumentInternal(MethodParameter parameter, Message<?> message,
 			String name) throws Exception {
 
-		return message.getHeaders().get(name);
+		Object headerValue = message.getHeaders().get(name);
+		Object nativeHeaderValue = getNativeHeaderValue(message, name);
+
+		if (headerValue != null && nativeHeaderValue != null) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Message headers contain two values for the same header '" + name + "', " +
+						"one in the top level header map and a second in the nested map with native headers. " +
+						"Using the value from top level map. " +
+						"Use 'nativeHeader.myHeader' to resolve to the value from the nested native header map." );
+			}
+		}
+
+		return (headerValue != null) ? headerValue : nativeHeaderValue;
+	}
+
+	private Object getNativeHeaderValue(Message<?> message, String name) {
+
+		Map<String, List<String>> nativeHeaders =
+				(Map<String, List<String>>) message.getHeaders().get(NativeMessageHeaderAccessor.NATIVE_HEADERS);
+
+		if (name.startsWith("nativeHeaders.")) {
+			name = name.substring("nativeHeaders.".length());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Looking up native header '" + name + "'");
+			}
+		}
+
+		if ((nativeHeaders == null) || !nativeHeaders.containsKey(name)) {
+			return null;
+		}
+
+		List<?> nativeHeaderValues = nativeHeaders.get(name);
+		return (nativeHeaderValues.size() == 1) ? nativeHeaderValues.get(0) : nativeHeaderValues;
 	}
 
 	@Override
