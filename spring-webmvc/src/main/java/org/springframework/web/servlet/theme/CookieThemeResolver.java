@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,13 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.web.util.CookieGenerator;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Implementation of ThemeResolver that uses a cookie sent back to the user
+ * {@link ThemeResolver} implementation that uses a cookie sent back to the user
  * in case of a custom setting, with a fallback to the default theme.
  * This is particularly useful for stateless applications without user sessions.
  *
@@ -79,29 +80,35 @@ public class CookieThemeResolver extends CookieGenerator implements ThemeResolve
 	@Override
 	public String resolveThemeName(HttpServletRequest request) {
 		// Check request for preparsed or preset theme.
-		String theme = (String) request.getAttribute(THEME_REQUEST_ATTRIBUTE_NAME);
-		if (theme != null) {
-			return theme;
+		String themeName = (String) request.getAttribute(THEME_REQUEST_ATTRIBUTE_NAME);
+		if (themeName != null) {
+			return themeName;
 		}
 
 		// Retrieve cookie value from request.
 		Cookie cookie = WebUtils.getCookie(request, getCookieName());
 		if (cookie != null) {
-			return cookie.getValue();
+			String value = cookie.getValue();
+			if (StringUtils.hasText(value)) {
+				themeName = value;
+			}
 		}
 
 		// Fall back to default theme.
-		return getDefaultThemeName();
+		if (themeName == null) {
+			themeName = getDefaultThemeName();
+		}
+		request.setAttribute(THEME_REQUEST_ATTRIBUTE_NAME, themeName);
+		return themeName;
 	}
 
 	@Override
 	public void setThemeName(HttpServletRequest request, HttpServletResponse response, String themeName) {
-		if (themeName != null) {
+		if (StringUtils.hasText(themeName)) {
 			// Set request attribute and add cookie.
 			request.setAttribute(THEME_REQUEST_ATTRIBUTE_NAME, themeName);
 			addCookie(response, themeName);
 		}
-
 		else {
 			// Set request attribute to fallback theme and remove cookie.
 			request.setAttribute(THEME_REQUEST_ATTRIBUTE_NAME, getDefaultThemeName());
