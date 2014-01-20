@@ -125,6 +125,7 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  * @author Juergen Hoeller
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 3.0
  */
 class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
@@ -171,6 +172,8 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			Boolean enableMatrixVariables = Boolean.valueOf(element.getAttribute("enableMatrixVariables"));
 			handlerMappingDef.getPropertyValues().add("removeSemicolonContent", !enableMatrixVariables);
 		}
+
+		configurePathMatchingProperties(handlerMappingDef, element);
 
 		RuntimeBeanReference conversionService = getConversionService(element, source, parserContext);
 		RuntimeBeanReference validator = getValidator(element, source, parserContext);
@@ -332,6 +335,33 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			contentNegotiationManagerRef = new RuntimeBeanReference(beanName);
 		}
 		return contentNegotiationManagerRef;
+	}
+
+	private void configurePathMatchingProperties(RootBeanDefinition handlerMappingDef, Element element) {
+
+		Element pathMatchingElement = DomUtils.getChildElementByTagName(element, "path-matching");
+		if(pathMatchingElement != null) {
+			if (pathMatchingElement.hasAttribute("suffix-pattern")) {
+				Boolean useSuffixPatternMatch = Boolean.valueOf(pathMatchingElement.getAttribute("suffix-pattern"));
+				handlerMappingDef.getPropertyValues().add("useSuffixPatternMatch", useSuffixPatternMatch);
+			}
+			if (pathMatchingElement.hasAttribute("trailing-slash")) {
+				Boolean useTrailingSlashMatch = Boolean.valueOf(pathMatchingElement.getAttribute("trailing-slash"));
+				handlerMappingDef.getPropertyValues().add("useTrailingSlashMatch", useTrailingSlashMatch);
+			}
+			if (pathMatchingElement.hasAttribute("registered-suffixes-only")) {
+				Boolean useRegisteredSuffixPatternMatch = Boolean.valueOf(pathMatchingElement.getAttribute("registered-suffixes-only"));
+				handlerMappingDef.getPropertyValues().add("useRegisteredSuffixPatternMatch", useRegisteredSuffixPatternMatch);
+			}
+			if (pathMatchingElement.hasAttribute("path-helper")) {
+				RuntimeBeanReference pathHelperRef = new RuntimeBeanReference(pathMatchingElement.getAttribute("path-helper"));
+				handlerMappingDef.getPropertyValues().add("urlPathHelper", pathHelperRef);
+			}
+			if (pathMatchingElement.hasAttribute("path-matcher")) {
+				RuntimeBeanReference pathMatcherRef = new RuntimeBeanReference(pathMatchingElement.getAttribute("path-matcher"));
+				handlerMappingDef.getPropertyValues().add("pathMatcher", pathMatcherRef);
+			}
+		}
 	}
 
 	private Properties getDefaultMediaTypes() {
