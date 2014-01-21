@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.servlet.view.document;
 import java.io.OutputStream;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -34,9 +33,9 @@ import org.springframework.web.servlet.view.AbstractView;
 /**
  * Convenient superclass for Excel document views.
  *
- * <p>This class uses the <i>JExcelAPI</i> instead of <i>POI</i>. More
- * information on <i>JExcelAPI</i> can be found on their <a
- * href="http://www.andykhan.com/jexcelapi/" target="_blank">website</a>.
+ * <p>This class uses the <i>JExcelAPI</i> instead of <i>POI</i>.
+ * More information on <i>JExcelAPI</i> can be found on their
+ * <a href="http://www.andykhan.com/jexcelapi/" target="_blank">website</a>.
  *
  * <p>Properties:
  * <ul>
@@ -58,11 +57,11 @@ import org.springframework.web.servlet.view.AbstractView;
  *
  * <pre class="code">
  * protected void buildExcelDocument(
- *      Map&lt;String, Object&gt; model, WritableWorkbook workbook,
- * 		HttpServletRequest request, HttpServletResponse response) {
+ *     Map&lt;String, Object&gt; model, WritableWorkbook workbook,
+ *     HttpServletRequest request, HttpServletResponse response) {
  *
  * 	 if (workbook.getNumberOfSheets() == 0) {
- * 	     workbook.createSheet(&quot;Spring&quot;, 0);
+ * 	   workbook.createSheet(&quot;Spring&quot;, 0);
  *   }
  *
  * 	 WritableSheet sheet = workbook.getSheet(&quot;Spring&quot;);
@@ -70,7 +69,7 @@ import org.springframework.web.servlet.view.AbstractView;
  * 	 sheet.addCell(label);
  * }</pre>
  *
- * The use of this view is close to the AbstractExcelView class,
+ * The use of this view is close to the {@link AbstractExcelView} class,
  * just using the JExcel API instead of the Apache POI API.
  *
  * @author Bram Smeets
@@ -79,7 +78,10 @@ import org.springframework.web.servlet.view.AbstractView;
  * @since 1.2.5
  * @see AbstractExcelView
  * @see AbstractPdfView
+ * @deprecated as of Spring 4.0, since JExcelAPI is an abandoned project
+ * (no release since 2009, with serious bugs remaining)
  */
+@Deprecated
 public abstract class AbstractJExcelView extends AbstractView {
 
 	/** The content type for an Excel response */
