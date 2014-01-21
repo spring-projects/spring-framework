@@ -241,13 +241,13 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 		if (principal != null) {
 			headers.setNativeHeader(CONNECTED_USER_HEADER, principal.getName());
 			if (this.userSessionRegistry != null) {
-				String userName = getNameForUserSessionRegistry(principal);
+				String userName = resolveNameForUserSessionRegistry(principal);
 				this.userSessionRegistry.registerSessionId(userName, session.getId());
 			}
 		}
 	}
 
-	private String getNameForUserSessionRegistry(Principal principal) {
+	private String resolveNameForUserSessionRegistry(Principal principal) {
 		String userName = principal.getName();
 		if (principal instanceof DestinationUserNameProvider) {
 			userName = ((DestinationUserNameProvider) principal).getDestinationUserName();
@@ -270,7 +270,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 
 		Principal principal = session.getPrincipal();
 		if ((this.userSessionRegistry != null) && (principal != null)) {
-			String userName = getNameForUserSessionRegistry(principal);
+			String userName = resolveNameForUserSessionRegistry(principal);
 			this.userSessionRegistry.unregisterSessionId(userName, session.getId());
 		}
 

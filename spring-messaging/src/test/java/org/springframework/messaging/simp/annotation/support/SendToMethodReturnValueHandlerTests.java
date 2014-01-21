@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,9 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.simp.annotation.SendToUser;
+import org.springframework.messaging.simp.user.DestinationUserNameProvider;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.converter.MessageConverter;
 
@@ -126,7 +128,7 @@ public class SendToMethodReturnValueHandlerTests {
 	}
 
 	@Test
-	public void sendToMethod() throws Exception {
+	public void sendTo() throws Exception {
 
 		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
 
@@ -150,7 +152,7 @@ public class SendToMethodReturnValueHandlerTests {
 	}
 
 	@Test
-	public void sendToDefaultDestinationMethod() throws Exception {
+	public void sendToDefaultDestination() throws Exception {
 
 		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
 
@@ -168,7 +170,7 @@ public class SendToMethodReturnValueHandlerTests {
 	}
 
 	@Test
-	public void sendToUserMethod() throws Exception {
+	public void sendToUser() throws Exception {
 
 		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
 
@@ -193,7 +195,26 @@ public class SendToMethodReturnValueHandlerTests {
 	}
 
 	@Test
-	public void sendToUserDefaultDestinationMethod() throws Exception {
+	public void sendToUserWithUserNameProvider() throws Exception {
+
+		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
+
+		String sessionId = "sess1";
+		TestUser user = new UniqueUser();
+		Message<?> inputMessage = createInputMessage(sessionId, "sub1", null, user);
+		this.handler.handleReturnValue(payloadContent, this.sendToUserReturnType, inputMessage);
+
+		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
+
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(this.messageCaptor.getAllValues().get(0));
+		assertEquals("/user/Me myself and I/dest1", headers.getDestination());
+
+		headers = SimpMessageHeaderAccessor.wrap(this.messageCaptor.getAllValues().get(1));
+		assertEquals("/user/Me myself and I/dest2", headers.getDestination());
+	}
+
+	@Test
+	public void sendToUserDefaultDestination() throws Exception {
 
 		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
 
@@ -233,6 +254,14 @@ public class SendToMethodReturnValueHandlerTests {
 
 		public boolean implies(Subject subject) {
 			return false;
+		}
+	}
+
+	private static class UniqueUser extends TestUser implements DestinationUserNameProvider {
+
+		@Override
+		public String getDestinationUserName() {
+			return "Me myself and I";
 		}
 	}
 

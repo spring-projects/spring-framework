@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.messaging.simp.annotation.support;
 
 import java.lang.annotation.Annotation;
+import java.security.Principal;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -28,6 +29,7 @@ import org.springframework.messaging.handler.invocation.HandlerMethodReturnValue
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.annotation.SendToUser;
+import org.springframework.messaging.simp.user.DestinationUserNameProvider;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -124,13 +126,17 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 
 		SendToUser sendToUser = returnType.getMethodAnnotation(SendToUser.class);
 		if (sendToUser != null) {
-			if (inputHeaders.getUser() == null) {
+			Principal principal = inputHeaders.getUser();
+			if (principal == null) {
 				throw new MissingSessionUserException(inputMessage);
 			}
-			String user = inputHeaders.getUser().getName();
+			String userName = principal.getName();
+			if (principal instanceof DestinationUserNameProvider) {
+				userName = ((DestinationUserNameProvider) principal).getDestinationUserName();
+			}
 			String[] destinations = getTargetDestinations(sendToUser, inputHeaders, this.defaultUserDestinationPrefix);
 			for (String destination : destinations) {
-				this.messagingTemplate.convertAndSendToUser(user, destination, returnValue, postProcessor);
+				this.messagingTemplate.convertAndSendToUser(userName, destination, returnValue, postProcessor);
 			}
 			return;
 		}
