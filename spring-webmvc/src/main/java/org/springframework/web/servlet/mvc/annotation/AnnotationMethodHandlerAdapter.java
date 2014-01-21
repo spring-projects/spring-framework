@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,6 +133,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Juergen Hoeller
  * @author Arjen Poutsma
+ * @author Stephane Nicoll
  * @since 2.5
  * @see #setPathMatcher
  * @see #setMethodNameResolver
@@ -943,7 +944,10 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 				}
 			}
 
-			if (returnValue instanceof HttpEntity) {
+			if (returnValue instanceof HttpHeaders) {
+				handleHttpHeaders ((HttpHeaders) returnValue, webRequest);
+				return null;
+			} else if (returnValue instanceof HttpEntity) {
 				handleHttpEntityResponse((HttpEntity<?>) returnValue, webRequest);
 				return null;
 			}
@@ -990,6 +994,14 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			else {
 				throw new IllegalArgumentException("Invalid handler method return value: " + returnValue);
 			}
+		}
+
+		private void handleHttpHeaders(HttpHeaders headers, ServletWebRequest webRequest) throws Exception {
+			HttpOutputMessage outputMessage = createHttpOutputMessage(webRequest);
+			if (!headers.isEmpty()) {
+				outputMessage.getHeaders().putAll(headers);
+			}
+			outputMessage.getBody(); // flush headers
 		}
 
 		private void handleResponseBody(Object returnValue, ServletWebRequest webRequest)
