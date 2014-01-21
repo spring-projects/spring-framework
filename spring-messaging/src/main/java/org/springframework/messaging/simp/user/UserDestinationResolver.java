@@ -24,12 +24,17 @@ import java.util.Set;
  * A strategy for resolving unique, user destinations per session. User destinations
  * provide a user with the ability to subscribe to a queue unique to their session
  * as well others with the ability to send messages to those queues.
- *
- * <p>For example when a user attempts to subscribe to "/user/queue/position-updates",
- * the destination may be resolved to "/queue/position-updates-useri9oqdfzo" yielding a
- * unique queue name that does not collide with any other user attempting to do the same.
- * Subsequently when messages are sent to "/user/{username}/queue/position-updates",
- * the destination is translated to "/queue/position-updates-useri9oqdfzo".
+ * <p>
+ * When a user attempts to subscribe to "/user/queue/position-updates", the
+ * "/user" prefix is removed and a unique suffix added, resulting in something
+ * like "/queue/position-updates-useri9oqdfzo" where the suffix is based on the
+ * user's session and ensures it does not collide with any other users attempting
+ * to subscribe to "/user/queue/position-updates".
+ * <p>
+ * When a message is sent to a user with a destination such as
+ * "/user/{username}/queue/position-updates", the "/user/{username}" prefix is
+ * removed and the suffix added, resulting in something like
+ * "/queue/position-updates-useri9oqdfzo".
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -39,12 +44,14 @@ import java.util.Set;
 public interface UserDestinationResolver {
 
 	/**
-	 * Resolve the destination of the message to one or more user/session-specific target
-	 * destinations. If the user has multiple sessions, the method may return more than
-	 * one target destinations.
+	 * Resolve the destination of the message to a set of actual target destinations
+	 * to use. If the message is SUBSCRIBE/UNSUBSCRIBE, the returned set will contain
+	 * only target destination. If the message represents data being sent to a user,
+	 * the returned set may contain multiple target destinations, one for each active
+	 * session of the target user.
+	 *
 	 * @param message the message to resolve
-	 * @return the resolved unique user destinations or an empty Set if the message
-	 * destination is not recognized as a user destination
+	 * @return the resolved unique user destination(s) or an empty Set
 	 */
 	Set<String> resolveDestination(Message<?> message);
 

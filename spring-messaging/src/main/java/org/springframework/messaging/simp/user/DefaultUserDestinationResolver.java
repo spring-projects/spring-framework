@@ -30,11 +30,9 @@ import java.util.Set;
 
 /**
  * A default implementation of {@link UserDestinationResolver}.
- *
- * <p>Resolves messages sent to destination patterns "/user/{user-name}/**" as well as
- * subscriptions to destinations "/user/queue/**" where the "/user/" prefix used to
- * recognize such destinations is customizable via
- * {@link #setUserDestinationPrefix(String)}.
+ * <p>
+ * Uses the {@link org.springframework.messaging.simp.user.UserSessionRegistry}
+ * provided to the constructor to find the sessionIds associated with a user.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -111,26 +109,26 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 
 		String targetUser;
 		String targetDestination;
-		Set<String> sessionIds;
+		Set<String> targetSessionIds;
 
-		Principal user = headers.getUser();
+		Principal principal = headers.getUser();
 		SimpMessageType messageType = headers.getMessageType();
 
 		if (SimpMessageType.SUBSCRIBE.equals(messageType) || SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
 			if (!checkDestination(destination, this.destinationPrefix)) {
 				return null;
 			}
-			if (user == null) {
-				logger.error("Ignoring message, no user info available");
+			if (principal == null) {
+				logger.error("Ignoring message, no principal info available");
 				return null;
 			}
 			if (headers.getSessionId() == null) {
 				logger.error("Ignoring message, no session id available");
 				return null;
 			}
-			targetUser = user.getName();
+			targetUser = principal.getName();
 			targetDestination = destination.substring(this.destinationPrefix.length()-1);
-			sessionIds = Collections.singleton(headers.getSessionId());
+			targetSessionIds = Collections.singleton(headers.getSessionId());
 		}
 		else if (SimpMessageType.MESSAGE.equals(messageType)) {
 			if (!checkDestination(destination, this.destinationPrefix)) {
@@ -138,10 +136,10 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 			}
 			int startIndex = this.destinationPrefix.length();
 			int endIndex = destination.indexOf('/', startIndex);
-			Assert.isTrue(endIndex > 0, "Expected destination pattern \"/user/{userId}/**\"");
+			Assert.isTrue(endIndex > 0, "Expected destination pattern \"/principal/{userId}/**\"");
 			targetUser = destination.substring(startIndex, endIndex);
 			targetDestination = destination.substring(endIndex);
-			sessionIds = this.userSessionRegistry.getSessionIds(targetUser);
+			targetSessionIds = this.userSessionRegistry.getSessionIds(targetUser);
 		}
 		else {
 			if (logger.isTraceEnabled()) {
@@ -150,7 +148,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 			return null;
 		}
 
-		return new UserDestinationInfo(targetUser, targetDestination, sessionIds);
+		return new UserDestinationInfo(targetUser, targetDestination, targetSessionIds);
 	}
 
 	protected boolean checkDestination(String destination, String requiredPrefix) {
