@@ -29033,9 +29033,10 @@ The following are the supported return types:
 * If the method is annotated with `@ResponseBody`, the return type is written to the
   response HTTP body. The return value will be converted to the declared method argument
   type using `HttpMessageConverter` s. See <<mvc-ann-responsebody>>.
-* A `HttpEntity<?>` or `ResponseEntity<?>` object to provide access to the Servlet
+* An `HttpEntity<?>` or `ResponseEntity<?>` object to provide access to the Servlet
   response HTTP headers and contents. The entity body will be converted to the response
   stream using `HttpMessageConverter` s. See <<mvc-ann-httpentity>>.
+* An `HttpHeaders` object to return a response with no body.
 * A `Callable<?>` can be returned when the application wants to produce the return value
   asynchronously in a thread managed by Spring MVC.
 * A `DeferredResult<?>` can be returned when the application wants to produce the return

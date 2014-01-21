@@ -41,17 +41,18 @@ public class HttpHeadersReturnValueHandler implements HandlerMethodReturnValueHa
 
 	@Override
 	public void handleReturnValue(Object returnValue, MethodParameter returnType,
-								  ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
+			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
+
 		mavContainer.setRequestHandled(true);
 
 		Assert.isInstanceOf(HttpHeaders.class, returnValue);
 		HttpHeaders headers = (HttpHeaders) returnValue;
 
-		HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
-		ServletServerHttpResponse outputMessage = new ServletServerHttpResponse(response);
 		if (!headers.isEmpty()) {
+			HttpServletResponse servletResponse = webRequest.getNativeResponse(HttpServletResponse.class);
+			ServletServerHttpResponse outputMessage = new ServletServerHttpResponse(servletResponse);
 			outputMessage.getHeaders().putAll(headers);
+			outputMessage.getBody(); // flush headers
 		}
-		outputMessage.getBody(); // flush headers
 	}
 }

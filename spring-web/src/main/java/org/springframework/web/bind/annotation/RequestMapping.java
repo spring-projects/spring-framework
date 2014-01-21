@@ -195,6 +195,8 @@ import java.util.concurrent.Callable;
  * The entity body will be converted to the response stream using
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message
  * converters}.
+ * <li>An {@link org.springframework.http.HttpHeaders HttpHeaders} object to
+ * return a response with no body.</li>
  * <li>A {@link Callable} which is used by Spring MVC to obtain the return
  * value asynchronously in a separate thread transparently managed by Spring MVC
  * on behalf of the application.
