@@ -13,13 +13,14 @@ configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
 
-	ext.aspectjVersion  = "1.7.4"
-	ext.groovyVersion   = "1.8.9"
-	ext.hsqldbVersion   = "2.3.1"
-	ext.junitVersion    = "4.11"
-	ext.slf4jVersion    = "1.6.1"
-	ext.jettyVersion    = "9.1.0.v20131115"
-	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
+	ext.aspectjVersion    = "1.7.4"
+	ext.groovyVersion     = "1.8.9"
+	ext.hibernate3Version = "3.6.9.Final"
+	ext.hsqldbVersion     = "2.3.1"
+	ext.jettyVersion      = "9.1.0.v20131115"
+	ext.junitVersion      = "4.11"
+	ext.slf4jVersion      = "1.6.1"
+	ext.gradleScriptDir   = "${rootProject.projectDir}/gradle"
 
 	apply plugin: "propdeps"
 	apply plugin: "java"
@@ -617,8 +618,8 @@ project("spring-orm") {
 		optional("org.eclipse.persistence:javax.persistence:2.0.0")
 		optional("org.eclipse.persistence:org.eclipse.persistence.core:2.4.0")
 		optional("org.eclipse.persistence:org.eclipse.persistence.jpa:2.4.0")
-		optional("org.hibernate:hibernate-core:3.6.9.Final")
-		optional("org.hibernate:hibernate-entitymanager:3.6.9.Final")
+		optional("org.hibernate:hibernate-core:${hibernate3Version}")
+		optional("org.hibernate:hibernate-entitymanager:${hibernate3Version}")
 		optional("org.apache.openjpa:openjpa:2.2.1")
 		optional("javax.jdo:jdo-api:3.0")
 		provided("javax.servlet:javax.servlet-api:3.0.1")
@@ -803,7 +804,7 @@ project("spring-test") {
 		testCompile(project(":spring-context-support"))
 		testCompile(project(":spring-oxm"))
 		testCompile(project(":spring-webmvc-tiles3"))
-		testCompile("org.hibernate:hibernate-core:3.6.9.Final")
+		testCompile("org.hibernate:hibernate-core:${hibernate3Version}")
 		testCompile "org.slf4j:slf4j-jcl:${slf4jVersion}"
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
 		testCompile("org.hibernate:hibernate-validator:4.3.0.Final")
