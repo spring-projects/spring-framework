@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,9 @@ import java.lang.reflect.InvocationTargetException;
  *
  * <p>This is an SPI class, typically not used directly by applications.
  * Can be subclassed for additional invocation parameters.
+ *
+ * <p>Both {@link RemoteInvocation} and {@link RemoteInvocationResult} are designed
+ * for use with standard Java serialization as well as JavaBean-style serialization.
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -59,6 +62,26 @@ public class RemoteInvocationResult implements Serializable {
 		this.exception = exception;
 	}
 
+	/**
+	 * Create a new RemoteInvocationResult for JavaBean-style deserialization
+	 * (e.g. with Jackson).
+	 * @see #setValue
+	 * @see #setException
+	 */
+	public RemoteInvocationResult() {
+	}
+
+
+	/**
+	 * Set the result value returned by a successful invocation of the
+	 * target method, if any.
+	 * <p>This setter is intended for JavaBean-style deserialization.
+	 * Use {@link #RemoteInvocationResult(Object)} otherwise.
+	 * @see #RemoteInvocationResult()
+	 */
+	public void setValue(Object value) {
+		this.value = value;
+	}
 
 	/**
 	 * Return the result value returned by a successful invocation
@@ -67,6 +90,17 @@ public class RemoteInvocationResult implements Serializable {
 	 */
 	public Object getValue() {
 		return this.value;
+	}
+
+	/**
+	 * Set the exception thrown by an unsuccessful invocation of the
+	 * target method, if any.
+	 * <p>This setter is intended for JavaBean-style deserialization.
+	 * Use {@link #RemoteInvocationResult(Throwable)} otherwise.
+	 * @see #RemoteInvocationResult()
+	 */
+	public void setException(Throwable exception) {
+		this.exception = exception;
 	}
 
 	/**
@@ -81,7 +115,7 @@ public class RemoteInvocationResult implements Serializable {
 	/**
 	 * Return whether this invocation result holds an exception.
 	 * If this returns {@code false}, the result value applies
-	 * (even if {@code null}).
+	 * (even if it is {@code null}).
 	 * @see #getValue
 	 * @see #getException
 	 */
