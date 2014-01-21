@@ -40,6 +40,11 @@ public class RemoteInvocationResult implements Serializable {
 
 	private Throwable exception;
 
+	/**
+	 * Create a new RemoteInvocationResult for use as JavaBean.
+	 */
+	public RemoteInvocationResult() {
+	}
 
 	/**
 	 * Create a new RemoteInvocationResult for the given result value.
@@ -59,6 +64,13 @@ public class RemoteInvocationResult implements Serializable {
 		this.exception = exception;
 	}
 
+	/**
+	 * Set the result value returned by a successful invocation
+	 * of the target method.
+	 */
+	public void setValue(Object value) {
+		this.value = value;
+	}
 
 	/**
 	 * Return the result value returned by a successful invocation
@@ -67,6 +79,14 @@ public class RemoteInvocationResult implements Serializable {
 	 */
 	public Object getValue() {
 		return this.value;
+	}
+
+	/**
+	 * Set the exception thrown by an unsuccessful invocation
+	 * of the target method.
+	 */
+	public void setException(Throwable exception) {
+		this.exception = exception;
 	}
 
 	/**
