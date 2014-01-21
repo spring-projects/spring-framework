@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,17 @@ import org.springframework.messaging.core.AbstractMessageSendingTemplate;
 import org.springframework.messaging.core.MessagePostProcessor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
- * A specialization of {@link AbstractMessageSendingTemplate} that adds String-based
- * destinations as a message header.
+ * A specialization of {@link AbstractMessageSendingTemplate} that interprets a
+ * String-based destination as the
+ * {@link org.springframework.messaging.simp.SimpMessageHeaderAccessor#DESTINATION_HEADER DESTINATION_HEADER}
+ * to be added to the headers of sent messages.
+ * <p>
+ * Also provides methods for sending messages to a user. See
+ * {@link org.springframework.messaging.simp.user.UserDestinationResolver UserDestinationResolver}
+ * for more on user destinations.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -127,30 +134,29 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 	@Override
 	public void convertAndSendToUser(String user, String destination, Object payload) throws MessagingException {
-		MessagePostProcessor postProcessor = null;
-		this.convertAndSendToUser(user, destination, payload, postProcessor);
+		this.convertAndSendToUser(user, destination, payload, (MessagePostProcessor) null);
 	}
 
 	@Override
 	public void convertAndSendToUser(String user, String destination, Object payload,
 			Map<String, Object> headers) throws MessagingException {
 
-		MessagePostProcessor postProcessor = null;
-		this.convertAndSendToUser(user, destination, payload, headers, postProcessor);
+		this.convertAndSendToUser(user, destination, payload, headers, null);
 	}
 
 	@Override
 	public void convertAndSendToUser(String user, String destination, Object payload,
 			MessagePostProcessor postProcessor) throws MessagingException {
 
-		Map<String, Object> headers = null;
-		this.convertAndSendToUser(user, destination, payload, headers, postProcessor);
+		this.convertAndSendToUser(user, destination, payload, null, postProcessor);
 	}
 
 	@Override
 	public void convertAndSendToUser(String user, String destination, Object payload, Map<String, Object> headers,
 			MessagePostProcessor postProcessor) throws MessagingException {
+
 		Assert.notNull(user, "User must not be null");
+		user = StringUtils.replace(user, "/", "%2F");
 		super.convertAndSend(this.userDestinationPrefix + user + destination, payload, headers, postProcessor);
 	}
 

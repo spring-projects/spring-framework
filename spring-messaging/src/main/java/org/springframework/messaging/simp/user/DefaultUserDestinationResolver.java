@@ -22,6 +22,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import java.security.Principal;
 import java.util.Collections;
@@ -138,6 +139,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 			int endIndex = destination.indexOf('/', startIndex);
 			Assert.isTrue(endIndex > 0, "Expected destination pattern \"/principal/{userId}/**\"");
 			targetUser = destination.substring(startIndex, endIndex);
+			targetUser = StringUtils.replace(targetUser, "%2F", "/");
 			targetDestination = destination.substring(endIndex);
 			targetSessionIds = this.userSessionRegistry.getSessionIds(targetUser);
 		}

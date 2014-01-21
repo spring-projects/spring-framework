@@ -23,6 +23,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.util.StringUtils;
 
 import java.util.Set;
 
@@ -30,6 +31,8 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link org.springframework.messaging.simp.user.DefaultUserDestinationResolver}.
+ *
+ * @author Rossen Stoyanchev
  */
 public class DefaultUserDestinationResolverTests {
 
@@ -93,6 +96,18 @@ public class DefaultUserDestinationResolverTests {
 		assertEquals("/queue/foo-user123", actual.iterator().next());
 	}
 
+	@Test
+	public void handleMessageEncodedUserName() {
+
+		String userName = "http://joe.openid.example.org/";
+		this.registry.registerSessionId(userName, "openid123");
+		String destination = "/user/" + StringUtils.replace(userName, "/", "%2F") + "/queue/foo";
+		Message<?> message = createMessage(SimpMessageType.MESSAGE, this.user, SESSION_ID, destination);
+		Set<String> actual = this.resolver.resolveDestination(message);
+
+		assertEquals(1, actual.size());
+		assertEquals("/queue/foo-useropenid123", actual.iterator().next());
+	}
 
 	@Test
 	public void ignoreMessage() {
