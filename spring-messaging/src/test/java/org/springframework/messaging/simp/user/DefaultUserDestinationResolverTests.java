@@ -39,19 +39,21 @@ public class DefaultUserDestinationResolverTests {
 
 	private UserSessionRegistry registry;
 
+	private TestPrincipal user;
+
 
 	@Before
 	public void setup() {
+		this.user = new TestPrincipal("joe");
 		this.registry = new DefaultUserSessionRegistry();
-		this.registry.registerSessionId("joe", SESSION_ID);
-
+		this.registry.registerSessionId(this.user.getName(), SESSION_ID);
 		this.resolver = new DefaultUserDestinationResolver(this.registry);
 	}
 
 
 	@Test
 	public void handleSubscribe() {
-		Message<?> message = createMessage(SimpMessageType.SUBSCRIBE, "joe", SESSION_ID, "/user/queue/foo");
+		Message<?> message = createMessage(SimpMessageType.SUBSCRIBE, this.user, SESSION_ID, "/user/queue/foo");
 		Set<String> actual = this.resolver.resolveDestination(message);
 
 		assertEquals(1, actual.size());
@@ -66,7 +68,7 @@ public class DefaultUserDestinationResolverTests {
 		this.registry.registerSessionId("joe", "456");
 		this.registry.registerSessionId("joe", "789");
 
-		Message<?> message = createMessage(SimpMessageType.SUBSCRIBE, "joe", SESSION_ID, "/user/queue/foo");
+		Message<?> message = createMessage(SimpMessageType.SUBSCRIBE, this.user, SESSION_ID, "/user/queue/foo");
 		Set<String> actual = this.resolver.resolveDestination(message);
 
 		assertEquals(1, actual.size());
@@ -75,7 +77,7 @@ public class DefaultUserDestinationResolverTests {
 
 	@Test
 	public void handleUnsubscribe() {
-		Message<?> message = createMessage(SimpMessageType.UNSUBSCRIBE, "joe", SESSION_ID, "/user/queue/foo");
+		Message<?> message = createMessage(SimpMessageType.UNSUBSCRIBE, this.user, SESSION_ID, "/user/queue/foo");
 		Set<String> actual = this.resolver.resolveDestination(message);
 
 		assertEquals(1, actual.size());
@@ -84,7 +86,7 @@ public class DefaultUserDestinationResolverTests {
 
 	@Test
 	public void handleMessage() {
-		Message<?> message = createMessage(SimpMessageType.MESSAGE, "joe", SESSION_ID, "/user/joe/queue/foo");
+		Message<?> message = createMessage(SimpMessageType.MESSAGE, this.user, SESSION_ID, "/user/joe/queue/foo");
 		Set<String> actual = this.resolver.resolveDestination(message);
 
 		assertEquals(1, actual.size());
@@ -96,12 +98,12 @@ public class DefaultUserDestinationResolverTests {
 	public void ignoreMessage() {
 
 		// no destination
-		Message<?> message = createMessage(SimpMessageType.MESSAGE, "joe", SESSION_ID, null);
+		Message<?> message = createMessage(SimpMessageType.MESSAGE, this.user, SESSION_ID, null);
 		Set<String> actual = this.resolver.resolveDestination(message);
 		assertEquals(0, actual.size());
 
 		// not a user destination
-		message = createMessage(SimpMessageType.MESSAGE, "joe", SESSION_ID, "/queue/foo");
+		message = createMessage(SimpMessageType.MESSAGE, this.user, SESSION_ID, "/queue/foo");
 		actual = this.resolver.resolveDestination(message);
 		assertEquals(0, actual.size());
 
@@ -111,24 +113,24 @@ public class DefaultUserDestinationResolverTests {
 		assertEquals(0, actual.size());
 
 		// subscribe + not a user destination
-		message = createMessage(SimpMessageType.SUBSCRIBE, "joe", SESSION_ID, "/queue/foo");
+		message = createMessage(SimpMessageType.SUBSCRIBE, this.user, SESSION_ID, "/queue/foo");
 		actual = this.resolver.resolveDestination(message);
 		assertEquals(0, actual.size());
 
 		// no match on message type
-		message = createMessage(SimpMessageType.CONNECT, "joe", SESSION_ID, "user/joe/queue/foo");
+		message = createMessage(SimpMessageType.CONNECT, this.user, SESSION_ID, "user/joe/queue/foo");
 		actual = this.resolver.resolveDestination(message);
 		assertEquals(0, actual.size());
 	}
 
 
-	private Message<?> createMessage(SimpMessageType messageType, String user, String sessionId, String destination) {
+	private Message<?> createMessage(SimpMessageType messageType, TestPrincipal user, String sessionId, String destination) {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(messageType);
 		if (destination != null) {
 			headers.setDestination(destination);
 		}
 		if (user != null) {
-			headers.setUser(new TestPrincipal(user));
+			headers.setUser(user);
 		}
 		if (sessionId != null) {
 			headers.setSessionId(sessionId);

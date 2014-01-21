@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.socket.messaging;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 
 import org.junit.Before;
@@ -32,6 +33,9 @@ import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompDecoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.messaging.simp.user.DefaultUserSessionRegistry;
+import org.springframework.messaging.simp.user.DestinationUserNameProvider;
+import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
@@ -47,7 +51,7 @@ import static org.mockito.Mockito.*;
  */
 public class StompSubProtocolHandlerTests {
 
-	private StompSubProtocolHandler stompHandler;
+	private StompSubProtocolHandler protocolHandler;
 
 	private TestWebSocketSession session;
 
@@ -58,7 +62,7 @@ public class StompSubProtocolHandlerTests {
 
 	@Before
 	public void setup() {
-		this.stompHandler = new StompSubProtocolHandler();
+		this.protocolHandler = new StompSubProtocolHandler();
 		this.channel = Mockito.mock(MessageChannel.class);
 		this.messageCaptor = ArgumentCaptor.forClass(Message.class);
 
@@ -68,18 +72,55 @@ public class StompSubProtocolHandlerTests {
 	}
 
 	@Test
-	public void connectedResponseIsSentWhenConnectAckIsToBeSentToClient() {
+	public void handleMessageToClientConnected() {
+
+		UserSessionRegistry registry = new DefaultUserSessionRegistry();
+		this.protocolHandler.setUserSessionRegistry(registry);
+
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECTED);
+		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		this.protocolHandler.handleMessageToClient(this.session, message);
+
+		assertEquals(1, this.session.getSentMessages().size());
+		WebSocketMessage<?> textMessage = this.session.getSentMessages().get(0);
+		assertEquals("CONNECTED\n" + "user-name:joe\n" + "\n" + "\u0000", textMessage.getPayload());
+
+		assertEquals(Collections.singleton("s1"), registry.getSessionIds("joe"));
+	}
+
+	@Test
+	public void handleMessageToClientConnectedUniqueUserName() {
+
+		this.session.setPrincipal(new UniqueUser("joe"));
+
+		UserSessionRegistry registry = new DefaultUserSessionRegistry();
+		this.protocolHandler.setUserSessionRegistry(registry);
+
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECTED);
+		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		this.protocolHandler.handleMessageToClient(this.session, message);
+
+		assertEquals(1, this.session.getSentMessages().size());
+		WebSocketMessage<?> textMessage = this.session.getSentMessages().get(0);
+		assertEquals("CONNECTED\n" + "user-name:joe\n" + "\n" + "\u0000", textMessage.getPayload());
+
+		assertEquals(Collections.<String>emptySet(), registry.getSessionIds("joe"));
+		assertEquals(Collections.singleton("s1"), registry.getSessionIds("Me myself and I"));
+	}
+
+	@Test
+	public void handleMessageToClientConnectAck() {
+
 		StompHeaderAccessor connectHeaders = StompHeaderAccessor.create(StompCommand.CONNECT);
 		connectHeaders.setHeartbeat(10000, 10000);
 		connectHeaders.setNativeHeader(StompHeaderAccessor.STOMP_ACCEPT_VERSION_HEADER, "1.0,1.1");
-
 		Message<?> connectMessage = MessageBuilder.withPayload(new byte[0]).setHeaders(connectHeaders).build();
 
 		SimpMessageHeaderAccessor connectAckHeaders = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
 		connectAckHeaders.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, connectMessage);
+		Message<byte[]> connectAckMessage = MessageBuilder.withPayload(new byte[0]).setHeaders(connectAckHeaders).build();
 
-		Message<byte[]> connectAck = MessageBuilder.withPayload(new byte[0]).setHeaders(connectAckHeaders).build();
-		this.stompHandler.handleMessageToClient(this.session, connectAck);
+		this.protocolHandler.handleMessageToClient(this.session, connectAckMessage);
 
 		verifyNoMoreInteractions(this.channel);
 
@@ -97,12 +138,12 @@ public class StompSubProtocolHandlerTests {
 	}
 
 	@Test
-	public void messagesAreAugmentedAndForwarded() {
+	public void handleMessageFromClient() {
 
 		TextMessage textMessage = StompTextMessageBuilder.create(StompCommand.CONNECT).headers(
 				"login:guest", "passcode:guest", "accept-version:1.1,1.0", "heart-beat:10000,10000").build();
 
-		this.stompHandler.handleMessageFromClient(this.session, textMessage, this.channel);
+		this.protocolHandler.handleMessageFromClient(this.session, textMessage, this.channel);
 
 		verify(this.channel).send(this.messageCaptor.capture());
 		Message<?> actual = this.messageCaptor.getValue();
@@ -121,16 +162,29 @@ public class StompSubProtocolHandlerTests {
 	}
 
 	@Test
-	public void invalidStompCommand() {
+	public void handleMessageFromClientInvalidStompCommand() {
 
 		TextMessage textMessage = new TextMessage("FOO");
 
-		this.stompHandler.handleMessageFromClient(this.session, textMessage, this.channel);
+		this.protocolHandler.handleMessageFromClient(this.session, textMessage, this.channel);
 
 		verifyZeroInteractions(this.channel);
 		assertEquals(1, this.session.getSentMessages().size());
 		TextMessage actual = (TextMessage) this.session.getSentMessages().get(0);
 		assertTrue(actual.getPayload().startsWith("ERROR"));
+	}
+
+
+	private static class UniqueUser extends TestPrincipal implements DestinationUserNameProvider {
+
+		private UniqueUser(String name) {
+			super(name);
+		}
+
+		@Override
+		public String getDestinationUserName() {
+			return "Me myself and I";
+		}
 	}
 
 }

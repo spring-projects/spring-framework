@@ -35,6 +35,7 @@ import org.springframework.messaging.simp.stomp.StompConversionException;
 import org.springframework.messaging.simp.stomp.StompDecoder;
 import org.springframework.messaging.simp.stomp.StompEncoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.messaging.simp.user.DestinationUserNameProvider;
 import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
@@ -240,9 +241,18 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 		if (principal != null) {
 			headers.setNativeHeader(CONNECTED_USER_HEADER, principal.getName());
 			if (this.userSessionRegistry != null) {
-				this.userSessionRegistry.registerSessionId(principal.getName(), session.getId());
+				String userName = getNameForUserSessionRegistry(principal);
+				this.userSessionRegistry.registerSessionId(userName, session.getId());
 			}
 		}
+	}
+
+	private String getNameForUserSessionRegistry(Principal principal) {
+		String userName = principal.getName();
+		if (principal instanceof DestinationUserNameProvider) {
+			userName = ((DestinationUserNameProvider) principal).getDestinationUserName();
+		}
+		return userName;
 	}
 
 	@Override
@@ -258,8 +268,10 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 	@Override
 	public void afterSessionEnded(WebSocketSession session, CloseStatus closeStatus, MessageChannel outputChannel) {
 
-		if ((this.userSessionRegistry != null) && (session.getPrincipal() != null)) {
-			this.userSessionRegistry.unregisterSessionId(session.getPrincipal().getName(), session.getId());
+		Principal principal = session.getPrincipal();
+		if ((this.userSessionRegistry != null) && (principal != null)) {
+			String userName = getNameForUserSessionRegistry(principal);
+			this.userSessionRegistry.unregisterSessionId(userName, session.getId());
 		}
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);

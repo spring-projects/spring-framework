@@ -165,7 +165,9 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		return true;
 	}
 
-	protected String getTargetDestination(String origDestination, String targetDestination, String sessionId, String user) {
+	protected String getTargetDestination(String origDestination, String targetDestination,
+			String sessionId, String user) {
+
 		return targetDestination + "-user" + sessionId;
 	}
 
