@@ -16,27 +16,24 @@
 
 package org.springframework.http.converter.xml;
 
-import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertNotEquals;
-
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.nio.charset.Charset;
-
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
-import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamSource;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.DefaultHandler;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -44,12 +41,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.util.FileCopyUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.DefaultHandler;
+
+import static org.custommonkey.xmlunit.XMLAssert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Arjen Poutsma
@@ -62,15 +58,16 @@ public class SourceHttpMessageConverterTests {
 
 	private String bodyExternal;
 
+
 	@Before
 	public void setUp() throws IOException {
 		converter = new SourceHttpMessageConverter<Source>();
 		Resource external = new ClassPathResource("external.txt", getClass());
-
 		bodyExternal = "<!DOCTYPE root [" +
 				"  <!ELEMENT root ANY >\n" +
 				"  <!ENTITY ext SYSTEM \"" + external.getURI() + "\" >]><root>&ext;</root>";
 	}
+
 
 	@Test
 	public void canRead() {
@@ -132,38 +129,6 @@ public class SourceHttpMessageConverterTests {
 	}
 
 	@Test
-	public void readStAXSource() throws Exception {
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(BODY.getBytes("UTF-8"));
-		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
-		StAXSource result = (StAXSource) converter.read(StAXSource.class, inputMessage);
-		XMLStreamReader streamReader = result.getXMLStreamReader();
-		assertTrue(streamReader.hasNext());
-		streamReader.nextTag();
-		String s = streamReader.getLocalName();
-		assertEquals("root", s);
-		s = streamReader.getElementText();
-		assertEquals("Hello World", s);
-		streamReader.close();
-	}
-
-	@Test
-	public void readStAXSourceExternal() throws Exception {
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(bodyExternal.getBytes("UTF-8"));
-		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
-		StAXSource result = (StAXSource) converter.read(StAXSource.class, inputMessage);
-		XMLStreamReader streamReader = result.getXMLStreamReader();
-		assertTrue(streamReader.hasNext());
-		streamReader.next();
-		streamReader.next();
-		String s = streamReader.getLocalName();
-		assertEquals("root", s);
-		s = streamReader.getElementText();
-		assertNotEquals("Foo Bar", s);
-		streamReader.close();
-	}
-
-
-	@Test
 	public void readStreamSource() throws Exception {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(BODY.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
@@ -203,7 +168,6 @@ public class SourceHttpMessageConverterTests {
 	public void writeSAXSource() throws Exception {
 		String xml = "<root>Hello World</root>";
 		SAXSource saxSource = new SAXSource(new InputSource(new StringReader(xml)));
-
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		converter.write(saxSource, null, outputMessage);
 		assertXMLEqual("Invalid result", "<root>Hello World</root>",
@@ -216,7 +180,6 @@ public class SourceHttpMessageConverterTests {
 	public void writeStreamSource() throws Exception {
 		String xml = "<root>Hello World</root>";
 		StreamSource streamSource = new StreamSource(new StringReader(xml));
-
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		converter.write(streamSource, null, outputMessage);
 		assertXMLEqual("Invalid result", "<root>Hello World</root>",
