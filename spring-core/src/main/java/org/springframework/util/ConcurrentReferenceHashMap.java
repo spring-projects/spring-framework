@@ -60,9 +60,9 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 	private static final int DEFAULT_INITIAL_CAPACITY = 16;
 
-	private static final int DEFAULT_CONCURRENCY_LEVEL = 16;
-
 	private static final float DEFAULT_LOAD_FACTOR = 0.75f;
+
+	private static final int DEFAULT_CONCURRENCY_LEVEL = 16;
 
 	private static final ReferenceType DEFAULT_REFERENCE_TYPE = ReferenceType.SOFT;
 
@@ -116,7 +116,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	 * Create a new {@code ConcurrentReferenceHashMap} instance.
 	 * @param initialCapacity the initial capacity of the map
 	 * @param loadFactor the load factor. When the average number of references per table
-	 *        exceeds this value resize will be attempted
+	 * exceeds this value resize will be attempted
 	 */
 	public ConcurrentReferenceHashMap(int initialCapacity, float loadFactor) {
 		this(initialCapacity, loadFactor, DEFAULT_CONCURRENCY_LEVEL, DEFAULT_REFERENCE_TYPE);
@@ -157,9 +157,9 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	public ConcurrentReferenceHashMap(int initialCapacity, float loadFactor, int concurrencyLevel,
 			ReferenceType referenceType) {
 
-		Assert.isTrue(concurrencyLevel > 0, "ConcurrencyLevel must be positive");
-		Assert.isTrue(initialCapacity >= 0, "InitialCapacity must not be negative");
-		Assert.isTrue(loadFactor > 0f, "LoadFactor must be positive");
+		Assert.isTrue(initialCapacity >= 0, "Initial capacity must not be negative");
+		Assert.isTrue(loadFactor > 0f, "Load factor must be positive");
+		Assert.isTrue(concurrencyLevel > 0, "Concurrency level must be positive");
 		Assert.notNull(referenceType, "Reference type must not be null");
 		this.loadFactor = loadFactor;
 		this.shift = calculateShift(concurrencyLevel, MAXIMUM_CONCURRENCY_LEVEL);
@@ -635,7 +635,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 		/**
 		 * Release this entry and ensure that it will be returned from
-		 * {@link ReferenceManager#pollForPurge()}.
+		 * {@code ReferenceManager#pollForPurge()}.
 		 */
 		void release();
 	}
@@ -737,7 +737,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 
 	/**
-	 * Various options supported by a {@link Task}.
+	 * Various options supported by a {@code Task}.
 	 */
 	private static enum TaskOption {
 
