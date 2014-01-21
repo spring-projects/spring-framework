@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ import org.springframework.util.ResourceUtils;
  * with configurable file locations, JDBC DataSource lookup and load-time weaving.
  *
  * <p>The default XML file location is {@code classpath*:META-INF/persistence.xml},
- * scanning for all matching files in the class path (as defined in the JPA specification).
+ * scanning for all matching files in the classpath (as defined in the JPA specification).
  * DataSource names are by default interpreted as JNDI names, and no load time weaving
  * is available (which requires weaving to be turned off in the persistence provider).
  *
@@ -86,21 +86,25 @@ import org.springframework.util.ResourceUtils;
 public class DefaultPersistenceUnitManager
 		implements PersistenceUnitManager, ResourceLoaderAware, LoadTimeWeaverAware, InitializingBean {
 
+	private static final String ENTITY_CLASS_RESOURCE_PATTERN = "/**/*.class";
+
+	private static final String DEFAULT_ORM_XML_RESOURCE = "META-INF/orm.xml";
+
+	private static final String PERSISTENCE_XML_FILENAME = "persistence.xml";
+
 	/**
 	 * Default location of the {@code persistence.xml} file:
 	 * "classpath*:META-INF/persistence.xml".
 	 */
-	public final static String DEFAULT_PERSISTENCE_XML_LOCATION = "classpath*:META-INF/persistence.xml";
+	public final static String DEFAULT_PERSISTENCE_XML_LOCATION = "classpath*:META-INF/" + PERSISTENCE_XML_FILENAME;
 
 	/**
 	 * Default location for the persistence unit root URL:
-	 * "classpath:", indicating the root of the class path.
+	 * "classpath:", indicating the root of the classpath.
 	 */
 	public final static String ORIGINAL_DEFAULT_PERSISTENCE_UNIT_ROOT_LOCATION = "classpath:";
 
 	public final static String ORIGINAL_DEFAULT_PERSISTENCE_UNIT_NAME = "default";
-
-	private static final String ENTITY_CLASS_RESOURCE_PATTERN = "/**/*.class";
 
 
 	private static final Set<TypeFilter> entityTypeFilters;
@@ -178,9 +182,9 @@ public class DefaultPersistenceUnitManager
 	/**
 	 * Set the default persistence unit root location, to be applied
 	 * if no unit-specific persistence unit root could be determined.
-	 * <p>Default is "classpath:", that is, the root of the current class path
+	 * <p>Default is "classpath:", that is, the root of the current classpath
 	 * (nearest root directory). To be overridden if unit-specific resolution
-	 * does not work and the class path root is not appropriate either.
+	 * does not work and the classpath root is not appropriate either.
 	 */
 	public void setDefaultPersistenceUnitRootLocation(String defaultPersistenceUnitRootLocation) {
 		this.defaultPersistenceUnitRootLocation = defaultPersistenceUnitRootLocation;
@@ -205,6 +209,18 @@ public class DefaultPersistenceUnitManager
 	 * <p>Default is none. Specify packages to search for autodetection of your entity
 	 * classes in the classpath. This is analogous to Spring's component-scan feature
 	 * ({@link org.springframework.context.annotation.ClassPathBeanDefinitionScanner}).
+	 * <p>Such package scanning defines a "default persistence unit" in Spring, which
+	 * may live next to regularly defined units originating from {@code persistence.xml}.
+	 * Its name is determined by {@link #setDefaultPersistenceUnitName}: by default,
+	 * it's simply "default".
+	 * <p>If no explicit {@link #setMappingResources mapping resources} have been
+	 * specified in addition to these packages, this manager looks for a default
+	 * {@code META-INF/orm.xml} file in the classpath, registering it as a mapping
+	 * resource for the default unit if the mapping file is not co-located with a
+	 * {@code persistence.xml} file (in which case we assume it is only meant to be
+	 * used with the persistence units defined there, like in standard JPA).
+	 * @see #setDefaultPersistenceUnitName
+	 * @see #setMappingResources
 	 */
 	public void setPackagesToScan(String... packagesToScan) {
 		this.packagesToScan = packagesToScan;
@@ -218,6 +234,17 @@ public class DefaultPersistenceUnitManager
 	 * <p>Note that mapping resources must be relative to the classpath root,
 	 * e.g. "META-INF/mappings.xml" or "com/mycompany/repository/mappings.xml",
 	 * so that they can be loaded through {@code ClassLoader.getResource}.
+	 * <p>If no explicit mapping resources have been specified next to
+	 * {@link #setPackagesToScan packages to scan}, this manager looks for a default
+	 * {@code META-INF/orm.xml} file in the classpath, registering it as a mapping
+	 * resource for the default unit if the mapping file is not co-located with a
+	 * {@code persistence.xml} file (in which case we assume it is only meant to be
+	 * used with the persistence units defined there, like in standard JPA).
+	 * <p>Note that specifying an empty array/list here suppresses the default
+	 * {@code META-INF/orm.xml} check. On the other hand, explicitly specifying
+	 * {@code META-INF/orm.xml} here will register that file even if it happens
+	 * to be co-located with a {@code persistence.xml} file.
+	 * @see #setDefaultPersistenceUnitName
 	 * @see #setPackagesToScan
 	 */
 	public void setMappingResources(String... mappingResources) {
@@ -480,6 +507,7 @@ public class DefaultPersistenceUnitManager
 		SpringPersistenceUnitInfo scannedUnit = new SpringPersistenceUnitInfo();
 		scannedUnit.setPersistenceUnitName(this.defaultPersistenceUnitName);
 		scannedUnit.setExcludeUnlistedClasses(true);
+
 		if (this.packagesToScan != null) {
 			for (String pkg : this.packagesToScan) {
 				try {
@@ -508,11 +536,16 @@ public class DefaultPersistenceUnitManager
 				}
 			}
 		}
+
 		if (this.mappingResources != null) {
 			for (String mappingFileName : this.mappingResources) {
 				scannedUnit.addMappingFileName(mappingFileName);
 			}
 		}
+		else if (useOrmXmlForDefaultPersistenceUnit()) {
+			scannedUnit.addMappingFileName(DEFAULT_ORM_XML_RESOURCE);
+		}
+
 		return scannedUnit;
 	}
 
@@ -546,6 +579,30 @@ public class DefaultPersistenceUnitManager
 		catch (IOException ex) {
 			throw new PersistenceException("Unable to resolve persistence unit root URL", ex);
 		}
+	}
+
+	/**
+	 * Determine whether to register JPA's default "META-INF/orm.xml" with
+	 * Spring's default persistence unit, if any.
+	 * <p>Checks whether a "META-INF/orm.xml" file exists in the classpath and
+	 * uses it if it is not co-located with a "META-INF/persistence.xml" file.
+	 */
+	private boolean useOrmXmlForDefaultPersistenceUnit() {
+		Resource ormXml = this.resourcePatternResolver.getResource(
+				this.defaultPersistenceUnitRootLocation + DEFAULT_ORM_XML_RESOURCE);
+		if (ormXml.exists()) {
+			try {
+				Resource persistenceXml = ormXml.createRelative(PERSISTENCE_XML_FILENAME);
+				if (!persistenceXml.exists()) {
+					return true;
+				}
+			}
+			catch (IOException ex) {
+				// Cannot resolve relative persistence.xml file - let's assume it's not there.
+				return true;
+			}
+		}
+		return false;
 	}
 
 

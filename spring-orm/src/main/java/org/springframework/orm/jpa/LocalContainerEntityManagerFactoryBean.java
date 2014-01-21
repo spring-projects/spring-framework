@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,6 +134,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * Uses the specified persistence unit name as the name of the default
 	 * persistence unit, if applicable.
 	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
+	 * @see DefaultPersistenceUnitManager#setDefaultPersistenceUnitName
 	 */
 	@Override
 	public void setPersistenceUnitName(String persistenceUnitName) {
@@ -149,10 +150,17 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * <p>Default is none. Specify packages to search for autodetection of your entity
 	 * classes in the classpath. This is analogous to Spring's component-scan feature
 	 * ({@link org.springframework.context.annotation.ClassPathBeanDefinitionScanner}).
+	 * <p>If no explicit {@link #setMappingResources mapping resources} have been
+	 * specified in addition to these packages, Spring's setup looks for a default
+	 * {@code META-INF/orm.xml} file in the classpath, registering it as a mapping
+	 * resource for the default unit if the mapping file is not co-located with a
+	 * {@code persistence.xml} file (in which case we assume it is only meant to be
+	 * used with the persistence units defined there, like in standard JPA).
 	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
 	 * @param packagesToScan one or more base packages to search, analogous to
 	 * Spring's component-scan configuration for regular Spring components
 	 * @see #setPersistenceUnitManager
+	 * @see DefaultPersistenceUnitManager#setPackagesToScan
 	 */
 	public void setPackagesToScan(String... packagesToScan) {
 		this.internalPersistenceUnitManager.setPackagesToScan(packagesToScan);
@@ -166,8 +174,19 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * <p>Note that mapping resources must be relative to the classpath root,
 	 * e.g. "META-INF/mappings.xml" or "com/mycompany/repository/mappings.xml",
 	 * so that they can be loaded through {@code ClassLoader.getResource}.
+	 * <p>If no explicit mapping resources have been specified next to
+	 * {@link #setPackagesToScan packages to scan}, Spring's setup looks for a default
+	 * {@code META-INF/orm.xml} file in the classpath, registering it as a mapping
+	 * resource for the default unit if the mapping file is not co-located with a
+	 * {@code persistence.xml} file (in which case we assume it is only meant to be
+	 * used with the persistence units defined there, like in standard JPA).
+	 * <p>Note that specifying an empty array/list here suppresses the default
+	 * {@code META-INF/orm.xml} check. On the other hand, explicitly specifying
+	 * {@code META-INF/orm.xml} here will register that file even if it happens
+	 * to be co-located with a {@code persistence.xml} file.
 	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
 	 * @see #setPersistenceUnitManager
+	 * @see DefaultPersistenceUnitManager#setMappingResources
 	 */
 	public void setMappingResources(String... mappingResources) {
 		this.internalPersistenceUnitManager.setMappingResources(mappingResources);
