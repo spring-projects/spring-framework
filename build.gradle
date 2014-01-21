@@ -694,19 +694,23 @@ project("spring-test") {
 
 	task testNG(type: Test) {
 		useTestNG()
+		// forkEvery 1
 		scanForTestClasses = false
-		include "**/testng/*.*"
+		include "**/testng/**/*.*"
 		exclude "**/FailingBeforeAndAfterMethodsTests.class"
 		// "TestCase" classes are run by other test classes, not the build.
 		exclude "**/*TestCase.class"
 		// Generate TestNG reports alongside JUnit reports.
 		testReport true
+		// show standard out and standard error of the test JVM(s) on the console
+		// testLogging.showStandardStreams = true
 	}
 
 	test {
 		dependsOn testNG
 		useJUnit()
-		exclude "**/testng/*.*"
+		exclude "**/testng/**/*.*"
+		include "**/testng/FailingBeforeAndAfterMethodsTests"
 		// "TestCase" classes are run by other test classes, not the build.
 		exclude(["**/*TestCase.class", "**/*TestSuite.class"])
 	}
