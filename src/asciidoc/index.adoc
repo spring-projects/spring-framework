@@ -44652,6 +44652,28 @@ specified with the `<qualifier>` element or Spring's `@Qualifier` annotation.
 
 
 
+[[scheduling-annotation-support-exception]]
+==== Exception management with @Async
+When an `@Async` method has a `Future` typed return value, it is easy to manage
+an exception that was thrown during the method execution as this exception will
+be thrown when calling `get` on the `Future` result. With a void return type
+however, the exception is uncaught and cannot be transmitted. For those cases, an
+`AsyncUncaughtExceptionHandler` can be provided to handle such exceptions.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public class MyAsyncUncaughtExceptionHandler implements AsyncUncaughtExceptionHandler {
+
+    	@Override
+    	public void handleUncaughtException(Throwable ex, Method method, Object... params) {
+			// handle exception
+    	}
+	}
+----
+
+By default, the exception is simply logged. A custom `AsyncUncaughtExceptionHandler` can
+be defined _via_ `AsyncConfigurer` or the `task:annotation-driven` XML element.
 
 [[scheduling-task-namespace]]
 === The Task Namespace

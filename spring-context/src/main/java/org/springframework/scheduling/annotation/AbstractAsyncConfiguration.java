@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.scheduling.annotation;
 import java.util.Collection;
 import java.util.concurrent.Executor;
 
+import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportAware;
@@ -32,6 +33,7 @@ import org.springframework.util.CollectionUtils;
  * Spring's asynchronous method execution capability.
  *
  * @author Chris Beams
+ * @author Stephane Nicoll
  * @since 3.1
  * @see EnableAsync
  */
@@ -41,6 +43,7 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 	protected AnnotationAttributes enableAsync;
 
 	protected Executor executor;
+	protected AsyncUncaughtExceptionHandler exceptionHandler;
 
 
 	@Override
@@ -64,6 +67,7 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 		}
 		AsyncConfigurer configurer = configurers.iterator().next();
 		this.executor = configurer.getAsyncExecutor();
+		this.exceptionHandler = configurer.getAsyncUncaughtExceptionHandler();
 	}
 
 }

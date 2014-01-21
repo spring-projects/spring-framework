@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
 
 import org.springframework.aop.interceptor.AsyncExecutionInterceptor;
+import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
 import org.springframework.core.annotation.AnnotationUtils;
 
 /**
@@ -30,6 +32,7 @@ import org.springframework.core.annotation.AnnotationUtils;
  * declaring class level. See {@link #getExecutorQualifier(Method)} for details.
  *
  * @author Chris Beams
+ * @author Stephane Nicoll
  * @since 3.1.2
  * @see org.springframework.scheduling.annotation.Async
  * @see org.springframework.scheduling.annotation.AsyncAnnotationAdvisor
@@ -40,9 +43,23 @@ public class AnnotationAsyncExecutionInterceptor extends AsyncExecutionIntercept
 	 * Create a new {@code AnnotationAsyncExecutionInterceptor} with the given executor.
 	 * @param defaultExecutor the executor to be used by default if no more specific
 	 * executor has been qualified at the method level using {@link Async#value()}
+	 * @param exceptionHandler the {@link AsyncUncaughtExceptionHandler} to use to
+	 * handle exceptions thrown by asynchronous method executions with {@code void}
+	 * return type
+	 */
+	public AnnotationAsyncExecutionInterceptor(Executor defaultExecutor,
+											   AsyncUncaughtExceptionHandler exceptionHandler) {
+		super(defaultExecutor, exceptionHandler);
+	}
+
+	/**
+	 * Create a new {@code AnnotationAsyncExecutionInterceptor} with the given executor
+	 * and a simple {@link AsyncUncaughtExceptionHandler}.
+	 * @param defaultExecutor the executor to be used by default if no more specific
+	 * executor has been qualified at the method level using {@link Async#value()}
 	 */
 	public AnnotationAsyncExecutionInterceptor(Executor defaultExecutor) {
-		super(defaultExecutor);
+		this(defaultExecutor, new SimpleAsyncUncaughtExceptionHandler());
 	}
 
 	/**
