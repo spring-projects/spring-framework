@@ -374,8 +374,8 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	/**
 	 * Set whether message delivery should be persistent or non-persistent,
 	 * specified as boolean value ("true" or "false"). This will set the delivery
-	 * mode accordingly, to either "PERSISTENT" (1) or "NON_PERSISTENT" (2).
-	 * <p>Default it "true" aka delivery mode "PERSISTENT".
+	 * mode accordingly, to either "PERSISTENT" (2) or "NON_PERSISTENT" (1).
+	 * <p>Default is "true" a.k.a. delivery mode "PERSISTENT".
 	 * @see #setDeliveryMode(int)
 	 * @see javax.jms.DeliveryMode#PERSISTENT
 	 * @see javax.jms.DeliveryMode#NON_PERSISTENT
@@ -386,7 +386,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	/**
 	 * Set the delivery mode to use when sending a message.
-	 * Default is the Message default: "PERSISTENT".
+	 * Default is the JMS Message default: "PERSISTENT".
 	 * <p>Since a default value may be defined administratively,
 	 * this is only used when "isExplicitQosEnabled" equals "true".
 	 * @param deliveryMode the delivery mode to use
