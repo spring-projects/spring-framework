@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -254,7 +254,34 @@ public class ConfigurationClassPostProcessorTests {
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
 
-		assertSame(beanFactory.getBean("repo"), beanFactory.getBean("repoConsumer"));
+		assertSame(beanFactory.getBean("rawRepo"), beanFactory.getBean("repoConsumer"));
+	}
+
+	@Test
+	public void testGenericsBasedInjectionWithWildcardMatch() {
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(WildcardMatchingConfiguration.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+
+		assertSame(beanFactory.getBean("genericRepo"), beanFactory.getBean("repoConsumer"));
+	}
+
+	@Test
+	public void testGenericsBasedInjectionWithWildcardWithExtendsMatch() {
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(WildcardWithExtendsConfiguration.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+
+		assertSame(beanFactory.getBean("stringRepo"), beanFactory.getBean("repoConsumer"));
+	}
+
+	@Test
+	public void testGenericsBasedInjectionWithWildcardWithGenericExtendsMatch() {
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(WildcardWithGenericExtendsConfiguration.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+
+		assertSame(beanFactory.getBean("genericRepo"), beanFactory.getBean("repoConsumer"));
 	}
 
 
@@ -362,6 +389,16 @@ public class ConfigurationClassPostProcessorTests {
 				}
 			};
 		}
+
+		@Bean
+		public Repository<?> genericRepo() {
+			return new Repository<Object>() {
+				@Override
+				public String toString() {
+					return "Repository<Object>";
+				}
+			};
+		}
 	}
 
 
@@ -384,6 +421,16 @@ public class ConfigurationClassPostProcessorTests {
 				@Override
 				public String toString() {
 					return "Repository<Integer>";
+				}
+			};
+		}
+
+		@Bean @Scope("prototype")
+		public Repository genericRepo() {
+			return new Repository<Object>() {
+				@Override
+				public String toString() {
+					return "Repository<Object>";
 				}
 			};
 		}
@@ -461,8 +508,63 @@ public class ConfigurationClassPostProcessorTests {
 	public static class RawMatchingConfiguration {
 
 		@Bean
-		public Repository repo() {
+		public Repository rawRepo() {
 			return new Repository();
+		}
+
+		@Bean
+		public Object repoConsumer(Repository<String> repo) {
+			return repo;
+		}
+	}
+
+
+	@Configuration
+	public static class WildcardMatchingConfiguration {
+
+		@Bean
+		public Repository<?> genericRepo() {
+			return new Repository();
+		}
+
+		@Bean
+		public Object repoConsumer(Repository<String> repo) {
+			return repo;
+		}
+	}
+
+
+	@Configuration
+	public static class WildcardWithExtendsConfiguration {
+
+		@Bean
+		public Repository<? extends String> stringRepo() {
+			return new Repository<String>();
+		}
+
+		@Bean
+		public Repository<? extends Number> numberRepo() {
+			return new Repository<Number>();
+		}
+
+		@Bean
+		public Object repoConsumer(Repository<? extends String> repo) {
+			return repo;
+		}
+	}
+
+
+	@Configuration
+	public static class WildcardWithGenericExtendsConfiguration {
+
+		@Bean
+		public Repository<? extends Object> genericRepo() {
+			return new Repository<String>();
+		}
+
+		@Bean
+		public Repository<? extends Number> numberRepo() {
+			return new Repository<Number>();
 		}
 
 		@Bean

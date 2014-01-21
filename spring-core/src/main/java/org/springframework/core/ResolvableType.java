@@ -399,7 +399,7 @@ public final class ResolvableType implements Serializable {
 		}
 		ResolvableType[] generics = getGenerics();
 		for (ResolvableType generic : generics) {
-			if (generic.isUnresolvableTypeVariable()) {
+			if (generic.isUnresolvableTypeVariable() || generic.isWildcardWithoutBounds()) {
 				return true;
 			}
 		}
@@ -430,6 +430,23 @@ public final class ResolvableType implements Serializable {
 			ResolvableType resolved = this.variableResolver.resolveVariable(variable);
 			if (resolved == null || resolved.isUnresolvableTypeVariable()) {
 				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Determine whether the underlying type represents a wildcard
+	 * without specific bounds (i.e., equal to {@code ? extends Object}).
+	 */
+	private boolean isWildcardWithoutBounds() {
+		if (this.type instanceof WildcardType) {
+			WildcardType wt = (WildcardType) this.type;
+			if (wt.getLowerBounds().length == 0) {
+				Type[] upperBounds = wt.getUpperBounds();
+				if (upperBounds.length == 0 || (upperBounds.length == 1 && Object.class.equals(upperBounds[0]))) {
+					return true;
+				}
 			}
 		}
 		return false;
