@@ -569,14 +569,13 @@ also used by a lot of other tools that people use with Spring inside their appli
 
 There are basically two ways to switch off `commons-logging`:
 
-. Exclude the dependency from the spring modules you are explicitly relying upon
+. Exclude the dependency from the `spring-core` module as it is the only module that has
+  an explicit dependency on it
 . Depend on a special `commons-logging` dependency that replaces the library with
   an empty jar (more details can be found in the
   http://slf4j.org/faq.html#excludingJCL[SLF4J FAQ])
 
-To exclude commons-logging, add the following to your `dependencies` or better
-`dependencyManagement` section for *all* the spring modules you are relying upon
-explicitly (here `spring-core` and `spring-context`):
+To exclude commons-logging, add the following to your `dependencyManagement` section:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes,attributes"]
@@ -585,16 +584,6 @@ explicitly (here `spring-core` and `spring-context`):
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
-			<version>{spring-version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
 			<version>{spring-version}</version>
 			<exclusions>
 				<exclusion>
