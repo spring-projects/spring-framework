@@ -180,7 +180,6 @@ public class TestContextManager {
 		List<Class<? extends TestExecutionListener>> classesList = new ArrayList<Class<? extends TestExecutionListener>>();
 
 		AnnotationDescriptor<TestExecutionListeners> descriptor = findAnnotationDescriptor(clazz, annotationType);
-		boolean defaultListeners = false;
 
 		// Use defaults?
 		if (descriptor == null) {
@@ -188,7 +187,6 @@ public class TestContextManager {
 				logger.debug("@TestExecutionListeners is not present for class [" + clazz + "]: using defaults.");
 			}
 			classesList.addAll(getDefaultTestExecutionListenerClasses());
-			defaultListeners = true;
 		}
 		else {
 			// Traverse the class hierarchy...
@@ -232,15 +230,10 @@ public class TestContextManager {
 				listeners.add(BeanUtils.instantiateClass(listenerClass));
 			}
 			catch (NoClassDefFoundError err) {
-				if (defaultListeners) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Could not instantiate default TestExecutionListener class ["
-								+ listenerClass.getName()
-								+ "]. Specify custom listener classes or make the default listener classes available.");
-					}
-				}
-				else {
-					throw err;
+				if (logger.isInfoEnabled()) {
+					logger.info(String.format("Could not instantiate TestExecutionListener class [%s]. "
+							+ "Specify custom listener classes or make the default listener classes "
+							+ "(and their dependencies) available.", listenerClass.getName()));
 				}
 			}
 		}
