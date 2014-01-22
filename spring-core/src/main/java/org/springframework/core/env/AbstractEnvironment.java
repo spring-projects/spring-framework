@@ -60,6 +60,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * resolvable otherwise. Consider switching this flag to "true" if you experience
 	 * log warnings from {@code getenv} calls coming from Spring, e.g. on WebSphere
 	 * with strict SecurityManager settings and AccessControlExceptions warnings.
+	 * @see #suppressGetenvAccess()
 	 */
 	public static final String IGNORE_GETENV_PROPERTY_NAME = "spring.getenv.ignore";
 
@@ -367,17 +368,9 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> getSystemEnvironment() {
-		try {
-			if ("true".equalsIgnoreCase(System.getProperty(IGNORE_GETENV_PROPERTY_NAME))) {
-				return Collections.emptyMap();
-			}
+		if (suppressGetenvAccess()) {
+			return Collections.emptyMap();
 		}
-		catch (Throwable ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Could not obtain system property '" + IGNORE_GETENV_PROPERTY_NAME + "': " + ex);
-			}
-		}
-
 		try {
 			return (Map) System.getenv();
 		}
@@ -398,6 +391,27 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 					}
 				}
 			};
+		}
+	}
+
+	/**
+	 * Determine whether to suppress {@link System#getenv()}/{@link System#getenv(String)}
+	 * access for the purposes of {@link #getSystemEnvironment()}.
+	 * <p>If this method returns {@code true}, an empty dummy Map will be used instead
+	 * of the regular system environment Map, never even trying to call {@code getenv}
+	 * and therefore avoiding security manager warnings (if any).
+	 * <p>The default implementation checks for the "spring.getenv.ignore" system property,
+	 * returning {@code true} if its value equals "true" in any case.
+	 */
+	protected boolean suppressGetenvAccess() {
+		try {
+			return "true".equalsIgnoreCase(System.getProperty(IGNORE_GETENV_PROPERTY_NAME));
+		}
+		catch (Throwable ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not obtain system property '" + IGNORE_GETENV_PROPERTY_NAME + "': " + ex);
+			}
+			return false;
 		}
 	}
 
