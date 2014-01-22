@@ -82,11 +82,6 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		assertEquals("bar", ((Map<String, Object>) this.testController.arguments.get("headers")).get("foo"));
 	}
 
-	@Test(expected=IllegalStateException.class)
-	public void duplicateMappings() {
-		this.messageHandler.registerHandler(new DuplicateMappingController());
-	}
-
 	@Test
 	public void messageMappingDestinationVariableResolution() {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
@@ -110,27 +105,6 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		assertEquals("subscribeEventDestinationVariable", this.testController.method);
 		assertEquals("bar", this.testController.arguments.get("foo"));
 		assertEquals("value", this.testController.arguments.get("name"));
-	}
-
-	@Test
-	public void antPatchMatchWildcard() {
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
-		headers.setDestination("/pre/pathmatch/wildcard/test");
-		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
-		this.messageHandler.handleMessage(message);
-
-		assertEquals("pathMatchWildcard", this.testController.method);
-	}
-
-	@Test
-	public void bestMatchWildcard() {
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
-		headers.setDestination("/pre/bestmatch/bar/path");
-		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
-		this.messageHandler.handleMessage(message);
-
-		assertEquals("bestMatch", this.testController.method);
-		assertEquals("bar", this.testController.arguments.get("foo"));
 	}
 
 	@Test
@@ -201,22 +175,6 @@ public class SimpAnnotationMethodMessageHandlerTests {
 			this.arguments.put("name", param2);
 		}
 
-		@MessageMapping("/pathmatch/wildcard/**")
-		public void pathMatchWildcard() {
-			this.method = "pathMatchWildcard";
-		}
-
-		@MessageMapping("/bestmatch/{foo}/path")
-		public void bestMatch(@DestinationVariable("foo") String param1) {
-			this.method = "bestMatch";
-			this.arguments.put("foo", param1);
-		}
-
-		@MessageMapping("/bestmatch/*/*")
-		public void secondBestMatch() {
-			this.method = "secondBestMatch";
-		}
-
 		@MessageMapping("/binding/id/{id}")
 		public void simpleBinding(@DestinationVariable("id") Long id) {
 			this.method = "simpleBinding";
@@ -233,16 +191,6 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		public void handleValidationException() {
 			this.method = "handleValidationException";
 		}
-	}
-
-	@Controller
-	private static class DuplicateMappingController {
-
-		@MessageMapping(value="/duplicate")
-		public void handle1() { }
-
-		@MessageMapping(value="/duplicate")
-		public void handle2() { }
 	}
 
 	private static class StringNotEmptyValidator implements Validator {
