@@ -146,7 +146,7 @@ public final class ResolvableType implements Serializable {
 	 * the {@link #NONE} constant, this method will never return {@code null}.
 	 */
 	public Type getType() {
-		return this.type;
+		return SerializableTypeWrapper.unwrap(this.type);
 	}
 
 	/**
@@ -1190,7 +1190,8 @@ public final class ResolvableType implements Serializable {
 		@Override
 		public ResolvableType resolveVariable(TypeVariable<?> variable) {
 			for (int i = 0; i < this.typeVariables.length; i++) {
-				if (this.typeVariables[i].equals(variable)) {
+				if (SerializableTypeWrapper.unwrap(this.typeVariables[i]).equals(
+						SerializableTypeWrapper.unwrap(variable))) {
 					return this.generics[i];
 				}
 			}

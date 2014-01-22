@@ -129,6 +129,20 @@ abstract class SerializableTypeWrapper {
 	}
 
 	/**
+	 * Unwrap the given type, effectively returning the original non-serializable type.
+	 * @param type the type to unwrap
+	 * @return the original non-serializable type
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends Type> T unwrap(T type) {
+		Type unwrapped = type;
+		while (unwrapped instanceof SerializableTypeProxy) {
+			unwrapped = ((SerializableTypeProxy) type).getTypeProvider().getType();
+		}
+		return (T) unwrapped;
+	}
+
+	/**
 	 * Return a {@link Serializable} {@link Type} backed by a {@link TypeProvider} .
 	 */
 	static Type forTypeProvider(final TypeProvider provider) {
@@ -215,8 +229,8 @@ abstract class SerializableTypeWrapper {
 			if (EQUALS_METHOD.equals(method)) {
 				Object other = args[0];
 				// Unwrap proxies for speed
-				while (other instanceof SerializableTypeProxy) {
-					other = ((SerializableTypeProxy) other).getTypeProvider().getType();
+				if (other instanceof Type) {
+					other = unwrap((Type) other);
 				}
 				return this.provider.getType().equals(other);
 			}
