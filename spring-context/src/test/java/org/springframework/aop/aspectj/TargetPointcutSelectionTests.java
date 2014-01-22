@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,16 +34,21 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public final class TargetPointcutSelectionTests {
 
 	public TestInterface testImpl1;
+
 	public TestInterface testImpl2;
+
 	public TestAspect testAspectForTestImpl1;
+
 	public TestAspect testAspectForAbstractTestImpl;
+
 	public TestInterceptor testInterceptor;
 
 
 	@Before
 	public void setUp() {
 		ClassPathXmlApplicationContext ctx =
-			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
+				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
+
 		testImpl1 = (TestInterface) ctx.getBean("testImpl1");
 		testImpl2 = (TestInterface) ctx.getBean("testImpl2");
 		testAspectForTestImpl1 = (TestAspect) ctx.getBean("testAspectForTestImpl1");
@@ -54,6 +59,7 @@ public final class TargetPointcutSelectionTests {
 		testAspectForAbstractTestImpl.count = 0;
 		testInterceptor.count = 0;
 	}
+
 
 	@Test
 	public void testTargetSelectionForMatchedType() {

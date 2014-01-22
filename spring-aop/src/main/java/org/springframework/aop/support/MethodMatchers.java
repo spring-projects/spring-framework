@@ -25,12 +25,11 @@ import org.springframework.aop.MethodMatcher;
 import org.springframework.util.Assert;
 
 /**
- * Static utility methods for composing
- * {@link org.springframework.aop.MethodMatcher MethodMatchers}.
+ * Static utility methods for composing {@link MethodMatcher MethodMatchers}.
  *
- * <p>A MethodMatcher may be evaluated statically (based on method
- * and target class) or need further evaluation dynamically
- * (based on arguments at the time of method invocation).
+ * <p>A MethodMatcher may be evaluated statically (based on method and target
+ * class) or need further evaluation dynamically (based on arguments at the
+ * time of method invocation).
  *
  * @author Rod Johnson
  * @author Rob Harrop
