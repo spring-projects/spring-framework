@@ -38,24 +38,6 @@ import static org.testng.AssertJUnit.*;
 public class RollbackForRequiredEjbTxDaoTestNGTests extends CommitForRequiredEjbTxDaoTestNGTests {
 
 	/**
-	 * Redeclared to ensure test method execution order. Simply delegates to super.
-	 */
-	@Test
-	@Override
-	public void test1InitialState() {
-		super.test1InitialState();
-	}
-
-	/**
-	 * Redeclared to ensure test method execution order. Simply delegates to super.
-	 */
-	@Test(dependsOnMethods = "test1InitialState")
-	@Override
-	public void test2IncrementCount1() {
-		super.test2IncrementCount1();
-	}
-
-	/**
 	 * Overrides parent implementation in order to change expectations to align with
 	 * behavior associated with "required" transactions on repositories/DAOs and
 	 * default rollback semantics for transactions managed by the TestContext
