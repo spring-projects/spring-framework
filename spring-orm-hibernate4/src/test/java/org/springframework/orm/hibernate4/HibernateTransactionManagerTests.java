@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionSynchronizationRegistry;
@@ -40,8 +41,10 @@ import org.hibernate.dialect.HSQLDialect;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.engine.transaction.internal.jta.CMTTransactionFactory;
 import org.hibernate.exception.ConstraintViolationException;
+
 import org.junit.After;
 import org.junit.Test;
+
 import org.mockito.InOrder;
 
 import org.springframework.beans.factory.BeanFactory;
@@ -67,6 +70,7 @@ import static org.mockito.BDDMockito.*;
  * @author Juergen Hoeller
  * @since 3.2
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class HibernateTransactionManagerTests {
 
 	@After
@@ -584,7 +588,7 @@ public class HibernateTransactionManagerTests {
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
-		Object result = tt.execute(new TransactionCallbackWithoutResult() {
+		tt.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			public void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
