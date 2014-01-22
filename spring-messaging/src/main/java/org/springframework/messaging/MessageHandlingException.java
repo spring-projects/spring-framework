@@ -22,10 +22,8 @@ package org.springframework.messaging;
  * @author Mark Fisher
  * @since 4.0
  */
+@SuppressWarnings("serial")
 public class MessageHandlingException extends MessagingException {
-
-	private static final long serialVersionUID = 690969923668400297L;
-
 
 	public MessageHandlingException(Message<?> message, String description) {
 		super(message, description);

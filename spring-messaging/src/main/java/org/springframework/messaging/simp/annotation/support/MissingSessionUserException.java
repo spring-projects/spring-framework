@@ -23,10 +23,8 @@ import org.springframework.messaging.MessagingException;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
+@SuppressWarnings("serial")
 public class MissingSessionUserException extends MessagingException {
-
-	private static final long serialVersionUID = -6905878930083523161L;
-
 
 	public MissingSessionUserException(Message<?> message) {
 		super(message, "No \"user\" header in message");
