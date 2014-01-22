@@ -20,7 +20,6 @@ import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
@@ -28,7 +27,6 @@ import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.messaging.handler.HandlerMethodSelector;
 import org.springframework.messaging.handler.annotation.support.MessageMethodArgumentResolver;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.ReflectionUtils.MethodFilter;
@@ -41,26 +39,31 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 /**
- * Test fixture for {@link org.springframework.messaging.handler.invocation.AbstractMethodMessageHandler}.
+ * Test fixture for
+ * {@link org.springframework.messaging.handler.invocation.AbstractMethodMessageHandler}.
+ *
  * @author Brian Clozel
+ * @author Rossen Stoyanchev
  */
-public class AbstractMethodMessageHandlerTests {
+public class MethodMessageHandlerTests {
 
-	private static final String DESTINATION_HEADER = "testDestination";
+	private static final String DESTINATION_HEADER = "destination";
 
-	private MyMethodMessageHandler messageHandler;
+	private TestMethodMessageHandler messageHandler;
 
 	private TestController testController;
 
+
 	@Before
 	public void setup() {
-		List<String> destinationPrefixes = new ArrayList<String>();
-		destinationPrefixes.add("/test/");
 
-		this.messageHandler = new MyMethodMessageHandler();
+		List<String> destinationPrefixes = Arrays.asList("/test");
+
+		this.messageHandler = new TestMethodMessageHandler();
 		this.messageHandler.setApplicationContext(new StaticApplicationContext());
 		this.messageHandler.setDestinationPrefixes(destinationPrefixes);
 		this.messageHandler.afterPropertiesSet();
+
 		this.testController = new TestController();
 		this.messageHandler.registerHandler(this.testController);
 	}
@@ -73,9 +76,7 @@ public class AbstractMethodMessageHandlerTests {
 	@Test
 	public void registeredMappings() {
 
-		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(this.messageHandler);
-		Map<String, HandlerMethod> handlerMethods = (Map<String, HandlerMethod>)
-				fieldAccessor.getPropertyValue("handlerMethods");
+		Map<String, HandlerMethod> handlerMethods = this.messageHandler.getHandlerMethods();
 
 		assertNotNull(handlerMethods);
 		assertThat(handlerMethods.keySet(), Matchers.hasSize(3));
@@ -85,12 +86,9 @@ public class AbstractMethodMessageHandlerTests {
 	public void antPatchMatchWildcard() throws Exception {
 
 		Method method = this.testController.getClass().getMethod("handlerPathMatchWildcard");
-		this.messageHandler.registerHandlerMethod(this.testController, method, "/handlerPathMatch**");
+		this.messageHandler.registerHandlerMethod(this.testController, method, "/handlerPathMatch*");
 
-		MessageHeaderAccessor headers = new MessageHeaderAccessor();
-		headers.setHeader(DESTINATION_HEADER, "/test/handlerPathMatchFoo");
-		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
-		this.messageHandler.handleMessage(message);
+		this.messageHandler.handleMessage(toDestination("/test/handlerPathMatchFoo"));
 
 		assertEquals("pathMatchWildcard", this.testController.method);
 	}
@@ -104,38 +102,33 @@ public class AbstractMethodMessageHandlerTests {
 		method = this.testController.getClass().getMethod("secondBestMatch");
 		this.messageHandler.registerHandlerMethod(this.testController, method, "/bestmatch/*/*");
 
-		MessageHeaderAccessor headers = new MessageHeaderAccessor();
-		headers.setHeader(DESTINATION_HEADER, "/test/bestmatch/bar/path");
-		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
-		this.messageHandler.handleMessage(message);
+		this.messageHandler.handleMessage(toDestination("/test/bestmatch/bar/path"));
 
 		assertEquals("bestMatch", this.testController.method);
 	}
 
 	@Test
-	public void argumentResolver() {
+	public void argumentResolution() {
 
-		MessageHeaderAccessor headers = new MessageHeaderAccessor();
-		headers.setHeader(DESTINATION_HEADER, "/test/handlerArgumentResolver");
-		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
-		this.messageHandler.handleMessage(message);
+		this.messageHandler.handleMessage(toDestination("/test/handlerArgumentResolver"));
 
 		assertEquals("handlerArgumentResolver", this.testController.method);
 		assertNotNull(this.testController.arguments.get("message"));
 	}
 
 	@Test
-	public void exceptionResolver() {
+	public void exceptionHandled() {
 
-		MessageHeaderAccessor headers = new MessageHeaderAccessor();
-		headers.setHeader(DESTINATION_HEADER, "/test/handlerThrowsExc");
-		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
-		this.messageHandler.handleMessage(message);
+		this.messageHandler.handleMessage(toDestination("/test/handlerThrowsExc"));
 
 		assertEquals("illegalStateException", this.testController.method);
 		assertNotNull(this.testController.arguments.get("exception"));
-
 	}
+
+	private Message<?> toDestination(String destination) {
+		return MessageBuilder.withPayload(new byte[0]).setHeader(DESTINATION_HEADER, destination).build();
+	}
+
 
 	private static class TestController {
 
@@ -179,7 +172,7 @@ public class AbstractMethodMessageHandlerTests {
 	}
 
 
-	private static class MyMethodMessageHandler extends AbstractMethodMessageHandler<String> {
+	private static class TestMethodMessageHandler extends AbstractMethodMessageHandler<String> {
 
 		private PathMatcher pathMatcher = new AntPathMatcher();
 
@@ -245,7 +238,7 @@ public class AbstractMethodMessageHandlerTests {
 		}
 
 		@Override
-		protected Comparator<String> getMappingComparator(Message<?> message) {
+		protected Comparator<String> getMappingComparator(final Message<?> message) {
 			return new Comparator<String>() {
 				@Override
 				public int compare(String info1, String info2) {
@@ -258,13 +251,13 @@ public class AbstractMethodMessageHandlerTests {
 
 		@Override
 		protected AbstractExceptionHandlerMethodResolver createExceptionHandlerMethodResolverFor(Class<?> beanType) {
-			return new MyExceptionHandlerMethodResolver(beanType);
+			return new TestExceptionHandlerMethodResolver(beanType);
 		}
 	}
 
-	private static class MyExceptionHandlerMethodResolver extends AbstractExceptionHandlerMethodResolver {
+	private static class TestExceptionHandlerMethodResolver extends AbstractExceptionHandlerMethodResolver {
 
-		public MyExceptionHandlerMethodResolver(Class<?> handlerType) {
+		public TestExceptionHandlerMethodResolver(Class<?> handlerType) {
 			super(initExceptionMappings(handlerType));
 		}
 

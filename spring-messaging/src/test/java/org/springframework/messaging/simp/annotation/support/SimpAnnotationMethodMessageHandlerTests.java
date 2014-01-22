@@ -43,7 +43,9 @@ import org.springframework.validation.annotation.Validated;
 import static org.junit.Assert.*;
 
 /**
- * Test fixture for {@link org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler}.
+ * Test fixture for
+ * {@link org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler}.
+ *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  */
@@ -56,8 +58,10 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 	@Before
 	public void setup() {
+
 		SubscribableChannel channel = Mockito.mock(SubscribableChannel.class);
 		SimpMessageSendingOperations brokerTemplate = new SimpMessagingTemplate(channel);
+
 		this.messageHandler = new TestSimpAnnotationMethodMessageHandler(brokerTemplate, channel, channel);
 		this.messageHandler.setApplicationContext(new StaticApplicationContext());
 		this.messageHandler.setValidator(new StringNotEmptyValidator());
@@ -98,8 +102,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	public void subscribeEventDestinationVariableResolution() {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.SUBSCRIBE);
 		headers.setDestination("/pre/sub/bar/value");
-		Message<?> message = MessageBuilder.withPayload(new byte[0])
-				.copyHeaders(headers.toMap()).build();
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).copyHeaders(headers.toMap()).build();
 		this.messageHandler.handleMessage(message);
 
 		assertEquals("subscribeEventDestinationVariable", this.testController.method);

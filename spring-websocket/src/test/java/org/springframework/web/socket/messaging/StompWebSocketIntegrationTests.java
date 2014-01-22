@@ -55,10 +55,11 @@ import static org.springframework.web.socket.messaging.StompTextMessageBuilder.*
 
 /**
  * Integration tests with annotated message-handling methods.
+ *
  * @author Rossen Stoyanchev
  */
 @RunWith(Parameterized.class)
-public class SimpAnnotationMethodIntegrationTests extends AbstractWebSocketIntegrationTests {
+public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 	@Parameters
 	public static Iterable<Object[]> arguments() {
@@ -198,7 +199,7 @@ public class SimpAnnotationMethodIntegrationTests extends AbstractWebSocketInteg
 	}
 
 	@Configuration
-	@ComponentScan(basePackageClasses=SimpAnnotationMethodIntegrationTests.class,
+	@ComponentScan(basePackageClasses=StompWebSocketIntegrationTests.class,
 			useDefaultFilters=false,
 			includeFilters=@ComponentScan.Filter(IntegrationTestController.class))
 	static class TestMessageBrokerConfigurer extends AbstractWebSocketMessageBrokerConfigurer {
