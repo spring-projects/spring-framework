@@ -804,7 +804,9 @@ project("spring-test") {
 		testCompile(project(":spring-context-support"))
 		testCompile(project(":spring-oxm"))
 		testCompile(project(":spring-webmvc-tiles3"))
+		testCompile("javax.ejb:ejb-api:3.0")
 		testCompile("org.hibernate:hibernate-core:${hibernate3Version}")
+		testCompile("org.hibernate:hibernate-entitymanager:${hibernate3Version}")
 		testCompile "org.slf4j:slf4j-jcl:${slf4jVersion}"
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
 		testCompile("org.hibernate:hibernate-validator:4.3.0.Final")
