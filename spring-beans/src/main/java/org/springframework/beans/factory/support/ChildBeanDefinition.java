@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.util.ObjectUtils;
 
@@ -127,7 +128,7 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 	 * @param original the original bean definition to copy from
 	 */
 	public ChildBeanDefinition(ChildBeanDefinition original) {
-		super(original);
+		super((BeanDefinition) original);
 	}
 
 
