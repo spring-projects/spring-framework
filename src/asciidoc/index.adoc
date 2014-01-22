@@ -37032,7 +37032,7 @@ that into Spring's `DefaultHandshakeHandler` through your WebSocket Java config:
 		@Override
 		public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
 			registry.addHandler(echoWebSocketHandler(),
-				"/echo").setHandshakeHandler(this.handshakeHandler);
+				"/echo").setHandshakeHandler(handshakeHandler());
 		}
 
 		@Bean
