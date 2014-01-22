@@ -51,8 +51,8 @@ import org.springframework.util.Assert;
  * <p>Enable debug- or trace-level logging for this class (or package) for messages
  * explaining when these 'property name resolutions' occur.
  *
- * <p>This property source is included by default in {@link StandardEnvironment} and all
- * its subclasses.
+ * <p>This property source is included by default in {@link StandardEnvironment}
+ * and all its subclasses.
  *
  * @author Chris Beams
  * @since 3.1
@@ -76,7 +76,7 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 	 */
 	@Override
 	public boolean containsProperty(String name) {
-		return getProperty(name) != null;
+		return (getProperty(name) != null);
 	}
 
 	/**
@@ -89,9 +89,8 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 		Assert.notNull(name, "property name must not be null");
 		String actualName = resolvePropertyName(name);
 		if (logger.isDebugEnabled() && !name.equals(actualName)) {
-			logger.debug(String.format(
-					"PropertySource [%s] does not contain '%s', but found equivalent '%s'",
-					this.getName(), name, actualName));
+			logger.debug(String.format("PropertySource [%s] does not contain '%s', but found equivalent '%s'",
+					getName(), name, actualName));
 		}
 		return super.getProperty(actualName);
 	}
@@ -115,7 +114,8 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 		if (!name.equals(ucName)) {
 			if (super.containsProperty(ucName)) {
 				return ucName;
-			} else {
+			}
+			else {
 				String usUcName = ucName.replace('.', '_');
 				if (!ucName.equals(usUcName) && super.containsProperty(usUcName)) {
 					return usUcName;
