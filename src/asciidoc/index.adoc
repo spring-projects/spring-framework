@@ -28780,6 +28780,38 @@ Note that to enable the use of matrix variables, you must set the
 `removeSemicolonContent` property of `RequestMappingHandlerMapping` to `false`. By
 default it is set to `true`.
 
+[TIP]
+====
+
+The MVC Java config and the MVC namespace both provide options for enabling the use of
+matrix variables.
+
+If you are using Java config, The <<mvc-config-advanced-java, Advanced Customizations
+with MVC Java Config>> section describes how the `RequestMappingHandlerMapping` can
+be customized.
+
+In the MVC namespace, the `<mvc:annotation-driven>` element has an
+`enableMatrixVariables` attribute that should be set to `true`. By default it is set
+to `false`.
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:mvc="http://www.springframework.org/schema/mvc"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/mvc
+			http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+		<mvc:annotation-driven enableMatrixVariables="true"/>
+
+	</beans>
+----
+====
 
 [[mvc-ann-requestmapping-consumes]]
 ===== Consumable Media Types
