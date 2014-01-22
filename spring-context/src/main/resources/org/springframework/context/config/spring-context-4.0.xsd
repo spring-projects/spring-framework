@@ -47,7 +47,7 @@
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="order" type="xsd:integer">
+		<xsd:attribute name="order" type="xsd:token">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
 	Specifies the order for this placeholder configurer.  If more than one is present in a context

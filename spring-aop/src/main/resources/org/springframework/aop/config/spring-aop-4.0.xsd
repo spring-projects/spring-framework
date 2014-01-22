@@ -197,7 +197,7 @@
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="order" type="xsd:int">
+		<xsd:attribute name="order" type="xsd:token">
 			<xsd:annotation>
 				<xsd:documentation source="java:org.springframework.core.Ordered"><![CDATA[
 	Controls the ordering of the execution of this aspect when multiple
@@ -386,7 +386,7 @@
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="order" type="xsd:int">
+		<xsd:attribute name="order" type="xsd:token">
 			<xsd:annotation>
 				<xsd:documentation source="java:org.springframework.core.Ordered"><![CDATA[
 	Controls the ordering of the execution of this advice when multiple
