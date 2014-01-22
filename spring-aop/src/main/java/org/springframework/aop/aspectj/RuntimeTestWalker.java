@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.aop.aspectj;
 
 import java.lang.reflect.Field;
 
+import org.aspectj.weaver.ReferenceType;
+import org.aspectj.weaver.ReferenceTypeDelegate;
 import org.aspectj.weaver.ResolvedType;
 import org.aspectj.weaver.ast.And;
 import org.aspectj.weaver.ast.Call;
@@ -30,6 +32,7 @@ import org.aspectj.weaver.ast.Not;
 import org.aspectj.weaver.ast.Or;
 import org.aspectj.weaver.ast.Test;
 import org.aspectj.weaver.internal.tools.MatchingContextBasedTest;
+import org.aspectj.weaver.reflect.ReflectionBasedReferenceTypeDelegate;
 import org.aspectj.weaver.reflect.ReflectionVar;
 import org.aspectj.weaver.reflect.ShadowMatchImpl;
 import org.aspectj.weaver.tools.ShadowMatch;
@@ -55,25 +58,36 @@ import org.springframework.util.ReflectionUtils;
  */
 class RuntimeTestWalker {
 
+	private static final Field residualTestField;
+
+	private static final Field varTypeField;
+
+	private static final Field myClassField;
+
+
+	static {
+		try {
+			residualTestField = ShadowMatchImpl.class.getDeclaredField("residualTest");
+			varTypeField = ReflectionVar.class.getDeclaredField("varType");
+			myClassField = ReflectionBasedReferenceTypeDelegate.class.getDeclaredField("myClass");
+		}
+		catch (NoSuchFieldException ex) {
+			throw new IllegalStateException("The version of aspectjtools.jar / aspectjweaver.jar " +
+					"on the classpath is incompatible with this version of Spring: " + ex);
+		}
+	}
+
+
 	private final Test runtimeTest;
 
 
 	public RuntimeTestWalker(ShadowMatch shadowMatch) {
-		ShadowMatchImpl shadowMatchImplementation = (ShadowMatchImpl) shadowMatch;
 		try {
-			Field testField = shadowMatchImplementation.getClass().getDeclaredField("residualTest");
-			ReflectionUtils.makeAccessible(testField);
-			this.runtimeTest = (Test) testField.get(shadowMatch);
+			ReflectionUtils.makeAccessible(residualTestField);
+			this.runtimeTest = (Test) residualTestField.get(shadowMatch);
 		}
-		catch (NoSuchFieldException noSuchFieldEx) {
-			throw new IllegalStateException("The version of aspectjtools.jar / aspectjweaver.jar " +
-					"on the classpath is incompatible with this version of Spring: Expected field " +
-					"'runtimeTest' is not present on ShadowMatchImpl class.");
-		}
-		catch (IllegalAccessException illegalAccessEx) {
-			// Famous last words... but I don't see how this can happen given the
-			// makeAccessible call above
-			throw new IllegalStateException("Unable to access ShadowMatchImpl.residualTest field");
+		catch (IllegalAccessException ex) {
+			throw new IllegalStateException(ex);
 		}
 	}
 
@@ -149,19 +163,11 @@ class RuntimeTestWalker {
 
 		protected int getVarType(ReflectionVar v) {
 			try {
-				Field varTypeField = ReflectionVar.class.getDeclaredField("varType");
 				ReflectionUtils.makeAccessible(varTypeField);
 				return (Integer) varTypeField.get(v);
 			}
-			catch (NoSuchFieldException noSuchFieldEx) {
-				throw new IllegalStateException("the version of aspectjtools.jar / aspectjweaver.jar " +
-						"on the classpath is incompatible with this version of Spring:- expected field " +
-						"'varType' is not present on ReflectionVar class");
-			}
-			catch (IllegalAccessException illegalAccessEx) {
-				// Famous last words... but I don't see how this can happen given the
-				// makeAccessible call above
-				throw new IllegalStateException("Unable to access ReflectionVar.varType field");
+			catch (IllegalAccessException ex) {
+				throw new IllegalStateException(ex);
 			}
 		}
 	}
@@ -169,9 +175,11 @@ class RuntimeTestWalker {
 
 	private static abstract class InstanceOfResidueTestVisitor extends TestVisitorAdapter {
 
-		private Class<?> matchClass;
+		private final Class<?> matchClass;
+
 		private boolean matches;
-		private int matchVarType;
+
+		private final int matchVarType;
 
 		public InstanceOfResidueTestVisitor(Class<?> matchClass, boolean defaultMatches, int matchVarType) {
 			this.matchClass = matchClass;
@@ -181,19 +189,34 @@ class RuntimeTestWalker {
 
 		public boolean instanceOfMatches(Test test) {
 			test.accept(this);
-			return matches;
+			return this.matches;
 		}
 
 		@Override
 		public void visit(Instanceof i) {
-			ResolvedType type = (ResolvedType) i.getType();
 			int varType = getVarType((ReflectionVar) i.getVar());
 			if (varType != this.matchVarType) {
 				return;
 			}
+			Class<?> typeClass = null;
+			ResolvedType type = (ResolvedType) i.getType();
+			if (type instanceof ReferenceType) {
+				ReferenceTypeDelegate delegate = ((ReferenceType) type).getDelegate();
+				if (delegate instanceof ReflectionBasedReferenceTypeDelegate) {
+					try {
+						ReflectionUtils.makeAccessible(myClassField);
+						typeClass = (Class<?>) myClassField.get(delegate);
+					}
+					catch (IllegalAccessException ex) {
+						throw new IllegalStateException(ex);
+					}
+				}
+			}
 			try {
-				Class<?> typeClass = ClassUtils.forName(type.getName(), this.matchClass.getClassLoader());
-				// Don't use ReflectionType.isAssignableFrom() as it won't be aware of (Spring) mixins
+				// Don't use ResolvedType.isAssignableFrom() as it won't be aware of (Spring) mixins
+				if (typeClass == null) {
+					typeClass = ClassUtils.forName(type.getName(), this.matchClass.getClassLoader());
+				}
 				this.matches = typeClass.isAssignableFrom(this.matchClass);
 			}
 			catch (ClassNotFoundException ex) {
@@ -237,8 +260,11 @@ class RuntimeTestWalker {
 	private static class SubtypeSensitiveVarTypeTestVisitor extends TestVisitorAdapter {
 
 		private final Object thisObj = new Object();
+
 		private final Object targetObj = new Object();
+
 		private final Object[] argsObjs = new Object[0];
+
 		private boolean testsSubtypeSensitiveVars = false;
 
 		public boolean testsSubtypeSensitiveVars(Test aTest) {
@@ -249,8 +275,8 @@ class RuntimeTestWalker {
 		@Override
 		public void visit(Instanceof i) {
 			ReflectionVar v = (ReflectionVar) i.getVar();
-			Object varUnderTest = v.getBindingAtJoinPoint(thisObj,targetObj,argsObjs);
-			if ((varUnderTest == thisObj) || (varUnderTest == targetObj)) {
+			Object varUnderTest = v.getBindingAtJoinPoint(this.thisObj, this.targetObj, this.argsObjs);
+			if (varUnderTest == this.thisObj || varUnderTest == this.targetObj) {
 				this.testsSubtypeSensitiveVars = true;
 			}
 		}
@@ -260,7 +286,7 @@ class RuntimeTestWalker {
 			// If you thought things were bad before, now we sink to new levels of horror...
 			ReflectionVar v = (ReflectionVar) hasAnn.getVar();
 			int varType = getVarType(v);
-				if ((varType == AT_THIS_VAR) || (varType == AT_TARGET_VAR) || (varType == AT_ANNOTATION_VAR)) {
+			if (varType == AT_THIS_VAR || varType == AT_TARGET_VAR || varType == AT_ANNOTATION_VAR) {
 				this.testsSubtypeSensitiveVars = true;
 			}
 		}
