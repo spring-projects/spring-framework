@@ -31,7 +31,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.AbstractWebSocketIntegrationTests;
 import org.springframework.web.socket.JettyWebSocketTestServer;
 import org.springframework.web.socket.TomcatWebSocketTestServer;
-import org.springframework.web.socket.UndertowTestServer;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;

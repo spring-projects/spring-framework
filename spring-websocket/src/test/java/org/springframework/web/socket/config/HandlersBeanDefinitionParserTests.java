@@ -151,6 +151,7 @@ public class HandlersBeanDefinitionParserTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void sockJsSupport() {
 		loadBeanDefinitions("websocket-config-handlers-sockjs.xml");
 		SimpleUrlHandlerMapping handlerMapping = appContext.getBean(SimpleUrlHandlerMapping.class);
@@ -183,6 +184,7 @@ public class HandlersBeanDefinitionParserTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void sockJsAttributesSupport() {
 		loadBeanDefinitions("websocket-config-handlers-sockjs-attributes.xml");
 		SimpleUrlHandlerMapping handlerMapping = appContext.getBean(SimpleUrlHandlerMapping.class);
@@ -270,6 +272,7 @@ class FooTestInterceptor implements HandshakeInterceptor {
 
 class BarTestInterceptor extends FooTestInterceptor {}
 
+@SuppressWarnings({ "unchecked", "rawtypes" })
 class TestTaskScheduler implements TaskScheduler {
 	@Override
 	public ScheduledFuture schedule(Runnable task, Trigger trigger) { return null; }

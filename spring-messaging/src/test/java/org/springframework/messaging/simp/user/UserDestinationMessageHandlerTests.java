@@ -59,6 +59,7 @@ public class UserDestinationMessageHandlerTests {
 
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void handleSubscribe() {
 		when(this.brokerChannel.send(Mockito.any(Message.class))).thenReturn(true);
 		this.messageHandler.handleMessage(createMessage(SimpMessageType.SUBSCRIBE, "joe", SESSION_ID, "/user/queue/foo"));
@@ -71,6 +72,7 @@ public class UserDestinationMessageHandlerTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void handleUnsubscribe() {
 		when(this.brokerChannel.send(Mockito.any(Message.class))).thenReturn(true);
 		this.messageHandler.handleMessage(createMessage(SimpMessageType.UNSUBSCRIBE, "joe", "123", "/user/queue/foo"));
@@ -83,6 +85,7 @@ public class UserDestinationMessageHandlerTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void handleMessage() {
 		this.registry.registerSessionId("joe", "123");
 		when(this.brokerChannel.send(Mockito.any(Message.class))).thenReturn(true);

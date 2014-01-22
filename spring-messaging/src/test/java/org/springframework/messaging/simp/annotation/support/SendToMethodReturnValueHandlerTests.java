@@ -23,17 +23,18 @@ import javax.security.auth.Subject;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.simp.user.DestinationUserNameProvider;
 import org.springframework.messaging.support.MessageBuilder;
@@ -70,8 +71,8 @@ public class SendToMethodReturnValueHandlerTests {
 	private MethodParameter sendToUserDefaultDestReturnType;
 
 
-	@SuppressWarnings("unchecked")
 	@Before
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void setup() throws Exception {
 
 		MockitoAnnotations.initMocks(this);

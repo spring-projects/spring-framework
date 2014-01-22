@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsException;
-import org.springframework.web.socket.sockjs.transport.TransportType;
 
 import static org.junit.Assert.*;
 
@@ -164,6 +163,7 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 
 		private String sessionId;
 
+		@SuppressWarnings("unused")
 		private String transport;
 
 		private WebSocketHandler handler;

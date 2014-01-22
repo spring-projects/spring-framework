@@ -57,6 +57,7 @@ public class StompSubProtocolHandlerTests {
 
 	private MessageChannel channel;
 
+	@SuppressWarnings("rawtypes")
 	private ArgumentCaptor<Message> messageCaptor;
 
 
