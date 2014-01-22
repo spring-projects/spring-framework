@@ -53,8 +53,7 @@ public class UserDestinationMessageHandlerTests {
 		MockitoAnnotations.initMocks(this);
 		this.registry = new DefaultUserSessionRegistry();
 		DefaultUserDestinationResolver resolver = new DefaultUserDestinationResolver(this.registry);
-		this.messageHandler = new UserDestinationMessageHandler(new StubMessageChannel(),
-				new StubMessageChannel(), this.brokerChannel, resolver);
+		this.messageHandler = new UserDestinationMessageHandler(new StubMessageChannel(), this.brokerChannel, resolver);
 	}
 
 

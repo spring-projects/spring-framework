@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.SmartLifecycle;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.SubscribableChannel;
@@ -49,8 +48,6 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 
 	private final SubscribableChannel clientInboundChannel;
 
-	private final MessageChannel clientOutboundChannel;
-
 	private final SubscribableChannel brokerChannel;
 
 	private final MessageSendingOperations<String> brokerMessagingTemplate;
@@ -66,20 +63,17 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 	 * Create an instance of the handler with the given messaging template and a
 	 * user destination resolver.
 	 * @param clientInChannel the channel for receiving messages from clients (e.g. WebSocket clients)
-	 * @param clientOutChannel the channel for sending messages to clients (e.g. WebSocket clients)
 	 * @param brokerChannel the channel for sending messages with translated user destinations
 	 * @param userDestinationResolver the resolver to use to find queue suffixes for a user
 	 */
-	public UserDestinationMessageHandler(SubscribableChannel clientInChannel, MessageChannel clientOutChannel,
+	public UserDestinationMessageHandler(SubscribableChannel clientInChannel,
 			SubscribableChannel brokerChannel, UserDestinationResolver userDestinationResolver) {
 
 		Assert.notNull(clientInChannel, "'clientInChannel' must not be null");
-		Assert.notNull(clientOutChannel, "'clientOutChannel' must not be null");
 		Assert.notNull(brokerChannel, "'brokerChannel' must not be null");
 		Assert.notNull(userDestinationResolver, "DestinationResolver must not be null");
 
 		this.clientInboundChannel = clientInChannel;
-		this.clientOutboundChannel = clientOutChannel;
 		this.brokerChannel = brokerChannel;
 		this.brokerMessagingTemplate = new SimpMessagingTemplate(brokerChannel);
 		this.userDestinationResolver = userDestinationResolver;

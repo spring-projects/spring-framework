@@ -435,9 +435,8 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addIndexedArgumentValue(0, clientInChannelDef);
-		cavs.addIndexedArgumentValue(1, clientOutChannelDef);
-		cavs.addIndexedArgumentValue(2, brokerChannelDef);
-		cavs.addIndexedArgumentValue(3, userDestinationResolverRef);
+		cavs.addIndexedArgumentValue(1, brokerChannelDef);
+		cavs.addIndexedArgumentValue(2, userDestinationResolverRef);
 
 		RootBeanDefinition userDestinationMessageHandlerDef =
 				new RootBeanDefinition(UserDestinationMessageHandler.class, cavs, null);

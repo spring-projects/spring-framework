@@ -231,7 +231,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	@Bean
 	public UserDestinationMessageHandler userDestinationMessageHandler() {
 		UserDestinationMessageHandler handler = new UserDestinationMessageHandler(
-				clientInboundChannel(), clientOutboundChannel(), brokerChannel(), userDestinationResolver());
+				clientInboundChannel(), brokerChannel(), userDestinationResolver());
 		return handler;
 	}
 
