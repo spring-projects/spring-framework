@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,6 @@ import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
 import static org.springframework.context.ConfigurableApplicationContext.*;
 import static org.springframework.core.env.EnvironmentIntegrationTests.Constants.*;
 
-
 /**
  * Integration tests for container support of {@link Environment}
  * interface.
@@ -84,6 +83,7 @@ import static org.springframework.core.env.EnvironmentIntegrationTests.Constants
  *
  * @author Chris Beams
  */
+@SuppressWarnings("resource")
 public class EnvironmentIntegrationTests {
 
 	private ConfigurableEnvironment prodEnv;
