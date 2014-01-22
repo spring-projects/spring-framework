@@ -36969,6 +36969,126 @@ Java initialization API, if required:
 	</web-app>
 ----
 
+[[websocket-server-runtime-configuration]]
+==== Configuring the WebSocket Engine
+
+Each underlying WebSocket engine exposes configuration properties that control
+runtime characteristics such as the size of message buffer sizes, idle timeout,
+and others.
+
+For Tomcat, WildFly, and Glassfish add a `WebSocketContainerFactoryBean` to your
+WebSocket Java config:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebSocket
+	public class WebSocketConfig implements WebSocketConfigurer {
+
+		@Bean
+		public WebSocketContainerFactoryBean createWebSocketContainer() {
+			WebSocketContainerFactoryBean container = new WebSocketContainerFactoryBean();
+			container.setMaxTextMessageBufferSize(8192);
+			container.setMaxBinaryMessageBufferSize(8192);
+			return container;
+		}
+
+	}
+----
+
+or WebSocket XML namespace:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:websocket="http://www.springframework.org/schema/websocket"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/websocket
+			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
+
+		<bean class="org.springframework...WebSocketContainerFactoryBean">
+			<property name="maxTextMessageBufferSize" value="8192"/>
+			<property name="maxBinaryMessageBufferSize" value="8192"/>
+		</bean>
+
+	</beans>
+----
+
+For Jetty, you'll need to supply a pre-configured Jetty `WebSocketServerFactory` and plug
+that into Spring's `DefaultHandshakeHandler` through your WebSocket Java config:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebSocket
+	public class WebSocketConfig implements WebSocketConfigurer {
+
+		@Override
+		public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+			registry.addHandler(echoWebSocketHandler(),
+				"/echo").setHandshakeHandler(this.handshakeHandler);
+		}
+
+		@Bean
+		public DefaultHandshakeHandler handshakeHandler() {
+
+			WebSocketPolicy policy = new WebSocketPolicy(WebSocketBehavior.SERVER);
+			policy.setInputBufferSize(8192);
+			policy.setIdleTimeout(600000);
+
+			return new DefaultHandshakeHandler(
+					new JettyRequestUpgradeStrategy(new WebSocketServerFactory(policy)));
+		}
+
+	}
+----
+
+or WebSocket XML namespace:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:websocket="http://www.springframework.org/schema/websocket"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/websocket
+			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
+
+		<websocket:handlers>
+			<websocket:mapping path="/echo" handler="echoHandler"/>
+			<websocket:handshake-handler ref="handshakeHandler"/>
+		</websocket:handlers>
+
+		<bean id="handshakeHandler" class="org.springframework...DefaultHandshakeHandler">
+			<constructor-arg ref="upgradeStrategy"/>
+		</bean>
+
+		<bean id="upgradeStrategy" class="org.springframework...JettyRequestUpgradeStrategy">
+			<constructor-arg ref="serverFactory"/>
+		</bean>
+
+		<bean id="serverFactory" class="org.eclipse.jetty...WebSocketServerFactory">
+			<constructor-arg>
+				<bean class="org.eclipse.jetty...WebSocketPolicy">
+					<constructor-arg value="SERVER"/>
+					<property name="inputBufferSize" value="8092"/>
+					<property name="idleTimeout" value="600000"/>
+				</bean>
+			</constructor-arg>
+		</bean>
+
+	</beans>
+----
+
 
 
 
