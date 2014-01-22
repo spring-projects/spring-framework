@@ -186,18 +186,17 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	@Override
 	protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) {
 		AnnotatedBeanDefinitionReader reader = new AnnotatedBeanDefinitionReader(beanFactory);
-		reader.setEnvironment(this.getEnvironment());
+		reader.setEnvironment(getEnvironment());
 
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(beanFactory);
-		scanner.setEnvironment(this.getEnvironment());
+		scanner.setEnvironment(getEnvironment());
 
 		BeanNameGenerator beanNameGenerator = getBeanNameGenerator();
 		ScopeMetadataResolver scopeMetadataResolver = getScopeMetadataResolver();
 		if (beanNameGenerator != null) {
 			reader.setBeanNameGenerator(beanNameGenerator);
 			scanner.setBeanNameGenerator(beanNameGenerator);
-			beanFactory.registerSingleton(
-					AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR, beanNameGenerator);
+			beanFactory.registerSingleton(AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR, beanNameGenerator);
 		}
 		if (scopeMetadataResolver != null) {
 			reader.setScopeMetadataResolver(scopeMetadataResolver);
