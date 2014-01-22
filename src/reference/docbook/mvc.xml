@@ -1175,6 +1175,9 @@ public void findPet(
         <classname>RequestMappingHandlerMapping</classname> to <code>false</code>.
         By default it is set to <code>false</code>.</para>
 
+        <para>In the MVC namespace, the `mvc:annotation-driven` element has an
+        `enableMatrixVariables` attribute that should be set to `true`. By default
+        it is set to `false`.</para>
       </section>
 
       <section xml:id="mvc-ann-requestmapping-consumes">
