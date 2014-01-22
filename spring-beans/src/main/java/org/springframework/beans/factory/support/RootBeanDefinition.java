@@ -18,9 +18,8 @@ package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -49,18 +48,9 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class RootBeanDefinition extends AbstractBeanDefinition {
 
-	private final Set<Member> externallyManagedConfigMembers =
-			Collections.newSetFromMap(new ConcurrentHashMap<Member, Boolean>(0));
-
-	private final Set<String> externallyManagedInitMethods =
-			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(0));
-
-	private final Set<String> externallyManagedDestroyMethods =
-			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(0));
+	boolean allowCaching = true;
 
 	private BeanDefinitionHolder decoratedDefinition;
-
-	boolean allowCaching = true;
 
 	private volatile Class<?> targetType;
 
@@ -90,6 +80,12 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	/** Package-visible field that indicates a before-instantiation post-processor having kicked in */
 	volatile Boolean beforeInstantiationResolved;
+
+	private Set<Member> externallyManagedConfigMembers;
+
+	private Set<String> externallyManagedInitMethods;
+
+	private Set<String> externallyManagedDestroyMethods;
 
 
 	/**
@@ -175,8 +171,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 */
 	public RootBeanDefinition(RootBeanDefinition original) {
 		super(original);
-		this.decoratedDefinition = original.decoratedDefinition;
 		this.allowCaching = original.allowCaching;
+		this.decoratedDefinition = original.decoratedDefinition;
 		this.targetType = original.targetType;
 		this.isFactoryMethodUnique = original.isFactoryMethodUnique;
 	}
@@ -201,6 +197,20 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		if (parentName != null) {
 			throw new IllegalArgumentException("Root bean cannot be changed into a child bean with parent reference");
 		}
+	}
+
+	/**
+	 * Register a target definition that is being decorated by this bean definition.
+	 */
+	public void setDecoratedDefinition(BeanDefinitionHolder decoratedDefinition) {
+		this.decoratedDefinition = decoratedDefinition;
+	}
+
+	/**
+	 * Return the target definition that is being decorated by this bean definition, if any.
+	 */
+	public BeanDefinitionHolder getDecoratedDefinition() {
+		return this.decoratedDefinition;
 	}
 
 	/**
@@ -245,37 +255,52 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		}
 	}
 
-
 	public void registerExternallyManagedConfigMember(Member configMember) {
-		this.externallyManagedConfigMembers.add(configMember);
+		synchronized (this.postProcessingLock) {
+			if (this.externallyManagedConfigMembers == null) {
+				this.externallyManagedConfigMembers = new HashSet<Member>(1);
+			}
+			this.externallyManagedConfigMembers.add(configMember);
+		}
 	}
 
 	public boolean isExternallyManagedConfigMember(Member configMember) {
-		return this.externallyManagedConfigMembers.contains(configMember);
+		synchronized (this.postProcessingLock) {
+			return (this.externallyManagedConfigMembers != null &&
+					this.externallyManagedConfigMembers.contains(configMember));
+		}
 	}
 
 	public void registerExternallyManagedInitMethod(String initMethod) {
-		this.externallyManagedInitMethods.add(initMethod);
+		synchronized (this.postProcessingLock) {
+			if (this.externallyManagedInitMethods == null) {
+				this.externallyManagedInitMethods = new HashSet<String>(1);
+			}
+			this.externallyManagedInitMethods.add(initMethod);
+		}
 	}
 
 	public boolean isExternallyManagedInitMethod(String initMethod) {
-		return this.externallyManagedInitMethods.contains(initMethod);
+		synchronized (this.postProcessingLock) {
+			return (this.externallyManagedInitMethods != null &&
+					this.externallyManagedInitMethods.contains(initMethod));
+		}
 	}
 
 	public void registerExternallyManagedDestroyMethod(String destroyMethod) {
-		this.externallyManagedDestroyMethods.add(destroyMethod);
+		synchronized (this.postProcessingLock) {
+			if (this.externallyManagedDestroyMethods == null) {
+				this.externallyManagedDestroyMethods = new HashSet<String>(1);
+			}
+			this.externallyManagedDestroyMethods.add(destroyMethod);
+		}
 	}
 
 	public boolean isExternallyManagedDestroyMethod(String destroyMethod) {
-		return this.externallyManagedDestroyMethods.contains(destroyMethod);
-	}
-
-	public void setDecoratedDefinition(BeanDefinitionHolder decoratedDefinition) {
-		this.decoratedDefinition = decoratedDefinition;
-	}
-
-	public BeanDefinitionHolder getDecoratedDefinition() {
-		return this.decoratedDefinition;
+		synchronized (this.postProcessingLock) {
+			return (this.externallyManagedDestroyMethods != null &&
+					this.externallyManagedDestroyMethods.contains(destroyMethod));
+		}
 	}
 
 
