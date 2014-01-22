@@ -24,13 +24,18 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.*;
-import org.springframework.web.socket.handler.AbstractWebSocketHandler;
-import org.springframework.web.socket.client.standard.StandardWebSocketClient;
+import org.springframework.web.socket.AbstractWebSocketIntegrationTests;
+import org.springframework.web.socket.JettyWebSocketTestServer;
+import org.springframework.web.socket.TomcatWebSocketTestServer;
+import org.springframework.web.socket.UndertowTestServer;
+import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
+import org.springframework.web.socket.client.standard.StandardWebSocketClient;
+import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
 
@@ -48,20 +53,20 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 	public static Iterable<Object[]> arguments() {
 		return Arrays.asList(new Object[][] {
 				{new JettyWebSocketTestServer(), new JettyWebSocketClient()},
-				{new TomcatWebSocketTestServer(), new StandardWebSocketClient()},
-				{new UndertowTestServer(), new StandardWebSocketClient()}
+				{new TomcatWebSocketTestServer(), new StandardWebSocketClient()}
+				// {new UndertowTestServer(), new StandardWebSocketClient()}
+				// TODO: Undertow tests fail against OpenJDK 8 build 124 with a BindException
 		});
-	};
+	}
 
 
 	@Override
 	protected Class<?>[] getAnnotatedConfigClasses() {
-		return new Class<?>[] { TestWebSocketConfigurer.class };
+		return new Class<?>[] {TestWebSocketConfigurer.class};
 	}
 
 	@Test
 	public void registerWebSocketHandler() throws Exception {
-
 		WebSocketSession session = this.webSocketClient.doHandshake(
 				new AbstractWebSocketHandler() {}, getWsBaseUrl() + "/ws").get();
 
@@ -73,7 +78,6 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 
 	@Test
 	public void registerWebSocketHandlerWithSockJS() throws Exception {
-
 		WebSocketSession session = this.webSocketClient.doHandshake(
 				new AbstractWebSocketHandler() {}, getWsBaseUrl() + "/sockjs/websocket").get();
 
@@ -91,13 +95,10 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 		@Autowired
 		private HandshakeHandler handshakeHandler; // can't rely on classpath for server detection
 
-
 		@Override
 		public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-
 			registry.addHandler(serverHandler(), "/ws")
 				.setHandshakeHandler(this.handshakeHandler);
-
 			registry.addHandler(serverHandler(), "/sockjs").withSockJS()
 				.setTransportHandlerOverrides(new WebSocketTransportHandler(this.handshakeHandler));
 		}

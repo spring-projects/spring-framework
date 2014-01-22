@@ -16,24 +16,21 @@
 
 package org.springframework.web.socket;
 
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+
 import io.undertow.Undertow;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.InstanceFactory;
 import io.undertow.servlet.api.InstanceHandle;
-import io.undertow.websockets.jsr.ServerWebSocketContainer;
 import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
+
 import org.springframework.util.SocketUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
-import org.xnio.ByteBufferSlicePool;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-
-import static io.undertow.servlet.Servlets.defaultContainer;
-import static io.undertow.servlet.Servlets.deployment;
-import static io.undertow.servlet.Servlets.servlet;
+import static io.undertow.servlet.Servlets.*;
 
 /**
  * Undertow-based {@link WebSocketTestServer}.
@@ -60,16 +57,14 @@ public class UndertowTestServer implements WebSocketTestServer {
 
 	@Override
 	public void deployConfig(WebApplicationContext cxt) {
-
 		DispatcherServletInstanceFactory servletFactory = new DispatcherServletInstanceFactory(cxt);
 
 		DeploymentInfo servletBuilder = deployment()
 				.setClassLoader(UndertowTestServer.class.getClassLoader())
-				.setDeploymentName("underow-websocket-test")
+				.setDeploymentName("undertow-websocket-test")
 				.setContextPath("/")
 				.addServlet(servlet("DispatcherServlet", DispatcherServlet.class, servletFactory).addMapping("/"))
 				.addServletContextAttribute(WebSocketDeploymentInfo.ATTRIBUTE_NAME, new WebSocketDeploymentInfo());
-
 
 		this.manager = defaultContainer().addDeployment(servletBuilder);
 		this.manager.deploy();
@@ -79,8 +74,8 @@ public class UndertowTestServer implements WebSocketTestServer {
 					.addListener(this.port, "localhost")
 					.setHandler(this.manager.start()).build();
 		}
-		catch (ServletException e) {
-			throw new IllegalStateException(e);
+		catch (ServletException ex) {
+			throw new IllegalStateException(ex);
 		}
 	}
 
@@ -104,8 +99,7 @@ public class UndertowTestServer implements WebSocketTestServer {
 
 		private final WebApplicationContext wac;
 
-
-		private DispatcherServletInstanceFactory(WebApplicationContext wac) {
+		public DispatcherServletInstanceFactory(WebApplicationContext wac) {
 			this.wac = wac;
 		}
 
@@ -122,4 +116,5 @@ public class UndertowTestServer implements WebSocketTestServer {
 			};
 		}
 	}
+
 }
