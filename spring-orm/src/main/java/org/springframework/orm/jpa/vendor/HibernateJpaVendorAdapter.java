@@ -57,9 +57,9 @@ import org.springframework.orm.jpa.JpaDialect;
  */
 public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 
-	private final PersistenceProvider persistenceProvider;
-
 	private final JpaDialect jpaDialect = new HibernateJpaDialect();
+
+	private final PersistenceProvider persistenceProvider;
 
 	private final Class<? extends EntityManagerFactory> entityManagerFactoryInterface;
 

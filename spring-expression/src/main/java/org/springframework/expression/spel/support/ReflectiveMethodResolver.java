@@ -53,20 +53,21 @@ import org.springframework.expression.spel.SpelMessage;
  */
 public class ReflectiveMethodResolver implements MethodResolver {
 
-	private Map<Class<?>, MethodFilter> filters = null;
-
 	// Using distance will ensure a more accurate match is discovered,
 	// more closely following the Java rules.
-	private boolean useDistance = false;
+	private final boolean useDistance;
+
+	private Map<Class<?>, MethodFilter> filters;
 
 
 	public ReflectiveMethodResolver() {
+		this.useDistance = false;
 	}
 
 	/**
 	 * This constructors allows the ReflectiveMethodResolver to be configured such that it will
 	 * use a distance computation to check which is the better of two close matches (when there
-	 * are multiple matches).  Using the distance computation is intended to ensure matches
+	 * are multiple matches). Using the distance computation is intended to ensure matches
 	 * are more closely representative of what a Java compiler would do when taking into
 	 * account boxing/unboxing and whether the method candidates are declared to handle a
 	 * supertype of the type (of the argument) being passed in.
@@ -74,6 +75,19 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	 */
 	public ReflectiveMethodResolver(boolean useDistance) {
 		this.useDistance = useDistance;
+	}
+
+
+	public void registerMethodFilter(Class<?> type, MethodFilter filter) {
+		if (this.filters == null) {
+			this.filters = new HashMap<Class<?>, MethodFilter>();
+		}
+		if (filter != null) {
+			this.filters.put(type, filter);
+		}
+		else {
+			this.filters.remove(type);
+		}
 	}
 
 
@@ -184,18 +198,6 @@ public class ReflectiveMethodResolver implements MethodResolver {
 		}
 		catch (EvaluationException ex) {
 			throw new AccessException("Failed to resolve method", ex);
-		}
-	}
-
-	public void registerMethodFilter(Class<?> type, MethodFilter filter) {
-		if (this.filters == null) {
-			this.filters = new HashMap<Class<?>, MethodFilter>();
-		}
-		if (filter == null) {
-			this.filters.remove(type);
-		}
-		else {
-			this.filters.put(type,filter);
 		}
 	}
 

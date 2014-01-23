@@ -59,8 +59,8 @@ public abstract class SpringFactoriesLoader {
 
 
 	/**
-	 * Loads the factory implementations of the given type from the default location, using
-	 * the given class loader.
+	 * Load the factory implementations of the given type from the default location,
+	 * using the given class loader.
 	 * <p>The returned factories are ordered in accordance with the {@link OrderComparator}.
 	 * @param factoryClass the interface or abstract class representing the factory
 	 * @param classLoader the ClassLoader to use for loading (can be {@code null} to use the default)
