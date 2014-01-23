@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ public interface AnnotationFormatterFactory<A extends Annotation> {
 
 	/**
 	 * Get the Printer to print the value of a field of {@code fieldType} annotated with {@code annotation}.
-	 * If the type &lt;T&gt; the printer accepts is not assignable to {@code fieldType}, a coersion from {@code fieldType} to &lt;T&gt; will be attempted before the Printer is invoked.
+	 * If the type &lt;T&gt; the printer accepts is not assignable to {@code fieldType}, a coercion from {@code fieldType} to &lt;T&gt; will be attempted before the Printer is invoked.
 	 * @param annotation the annotation instance
 	 * @param fieldType the type of field that was annotated
 	 * @return the printer
@@ -46,7 +46,7 @@ public interface AnnotationFormatterFactory<A extends Annotation> {
 
 	/**
 	 * Get the Parser to parse a submitted value for a field of {@code fieldType} annotated with {@code annotation}.
-	 * If the object the parser returns is not assignable to {@code fieldType}, a coersion to {@code fieldType} will be attempted before the field is set.
+	 * If the object the parser returns is not assignable to {@code fieldType}, a coercion to {@code fieldType} will be attempted before the field is set.
 	 * @param annotation the annotation instance
 	 * @param fieldType the type of field that was annotated
 	 * @return the parser
