@@ -21,7 +21,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -1571,7 +1574,7 @@ public class SpelReproTests extends ExpressionTestCase {
 		ReflectivePropertyAccessor accessor = new ReflectivePropertyAccessor();
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		Object target = new GenericImplementation();
-		TypedValue value = accessor.read(context, target , "property");
+		TypedValue value = accessor.read(context, target, "property");
 		assertEquals(Integer.class, value.getTypeDescriptor().getType());
 	}
 
@@ -1711,8 +1714,7 @@ public class SpelReproTests extends ExpressionTestCase {
 							Method method = XYZ.class.getMethod("values");
 							Object value = method.invoke(target, arguments);
 							return new TypedValue(value, new TypeDescriptor(new MethodParameter(method, -1)).narrow(value));
-						}
-						catch (Exception ex) {
+						} catch (Exception ex) {
 							throw new AccessException(ex.getMessage(), ex);
 						}
 					}
@@ -1752,16 +1754,32 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 	@Test
-	public void testOperatorEq_SPR9194() {
+	public void SPR_9194() {
 		TestClass2 one = new TestClass2("abc");
 		TestClass2 two = new TestClass2("abc");
-		Map<String,TestClass2> map = new HashMap<String,TestClass2>();
-		map.put("one",one);
-		map.put("two",two);
+		Map<String, TestClass2> map = new HashMap<String, TestClass2>();
+		map.put("one", one);
+		map.put("two", two);
 
 		SpelExpressionParser parser = new SpelExpressionParser();
-		Expression classNameExpression = parser.parseExpression("['one'] == ['two']");
-		assertTrue(classNameExpression.getValue(map,Boolean.class));
+		Expression expr = parser.parseExpression("['one'] == ['two']");
+		assertTrue(expr.getValue(map, Boolean.class));
+	}
+
+	@Test
+	public void SPR_11348() {
+		Collection<String> coll = new HashSet<String>();
+		coll.add("one");
+		coll.add("two");
+		coll = Collections.unmodifiableCollection(coll);
+
+		SpelExpressionParser parser = new SpelExpressionParser();
+		Expression expr = parser.parseExpression("new java.util.ArrayList(#root)");
+		Object value = expr.getValue(coll);
+		assertTrue(value instanceof ArrayList);
+		ArrayList list = (ArrayList) value;
+		assertEquals("one", list.get(0));
+		assertEquals("two", list.get(1));
 	}
 
 

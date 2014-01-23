@@ -68,6 +68,7 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 			});
 
 			Constructor<?> closeMatch = null;
+			Constructor<?> matchRequiringConversion = null;
 
 			for (Constructor<?> ctor : ctors) {
 				Class<?>[] paramTypes = ctor.getParameterTypes();
@@ -93,13 +94,24 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 					if (matchInfo.isExactMatch()) {
 						return new ReflectiveConstructorExecutor(ctor);
 					}
-					else if (matchInfo.isCloseMatch() || matchInfo.isMatchRequiringConversion()) {
+					else if (matchInfo.isCloseMatch()) {
 						closeMatch = ctor;
+					}
+					else if (matchInfo.isMatchRequiringConversion()) {
+						matchRequiringConversion = ctor;
 					}
 				}
 			}
 
-			return (closeMatch != null ? new ReflectiveConstructorExecutor(closeMatch) : null);
+			if (closeMatch != null) {
+				return new ReflectiveConstructorExecutor(closeMatch);
+			}
+			else if (matchRequiringConversion != null) {
+				return new ReflectiveConstructorExecutor(matchRequiringConversion);
+			}
+			else {
+				return null;
+			}
 		}
 		catch (EvaluationException ex) {
 			throw new AccessException("Failed to resolve constructor", ex);
