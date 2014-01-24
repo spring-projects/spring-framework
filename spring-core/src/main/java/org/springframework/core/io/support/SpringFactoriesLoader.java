@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,8 +59,8 @@ public abstract class SpringFactoriesLoader {
 
 
 	/**
-	 * Loads the factory implementations of the given type from the default location, using
-	 * the given class loader.
+	 * Load the factory implementations of the given type from the default location,
+	 * using the given class loader.
 	 * <p>The returned factories are ordered in accordance with the {@link OrderComparator}.
 	 * @param factoryClass the interface or abstract class representing the factory
 	 * @param classLoader the ClassLoader to use for loading (can be {@code null} to use the default)
@@ -82,7 +82,7 @@ public abstract class SpringFactoriesLoader {
 		return result;
 	}
 
-	private static List<String> loadFactoryNames(Class<?> factoryClass, ClassLoader classLoader) {
+	public static List<String> loadFactoryNames(Class<?> factoryClass, ClassLoader classLoader) {
 		String factoryClassName = factoryClass.getName();
 		try {
 			List<String> result = new ArrayList<String>();

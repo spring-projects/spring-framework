@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletContext;
 import javax.portlet.PortletRequest;
@@ -42,9 +41,9 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
- * Convenience methods for retrieving the root WebApplicationContext for a given
- * PortletContext. This is e.g. useful for accessing a Spring context from
- * within custom Portlet implementations.
+ * Convenience methods for retrieving the root {@link WebApplicationContext} for
+ * a given {@link PortletContext}. This is useful for programmatically accessing
+ * a Spring application context from within custom Portlet implementations.
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
@@ -98,7 +97,7 @@ public abstract class PortletApplicationContextUtils {
 	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
 	public static ApplicationContext getRequiredWebApplicationContext(PortletContext pc)
-		throws IllegalStateException {
+			throws IllegalStateException {
 
 		ApplicationContext wac = getWebApplicationContext(pc);
 		if (wac == null) {
@@ -156,16 +155,16 @@ public abstract class PortletApplicationContextUtils {
 		if (!bf.containsBean(WebApplicationContext.CONTEXT_PARAMETERS_BEAN_NAME)) {
 			Map<String, String> parameterMap = new HashMap<String, String>();
 			if (pc != null) {
-				Enumeration paramNameEnum = pc.getInitParameterNames();
+				Enumeration<String> paramNameEnum = pc.getInitParameterNames();
 				while (paramNameEnum.hasMoreElements()) {
-					String paramName = (String) paramNameEnum.nextElement();
+					String paramName = paramNameEnum.nextElement();
 					parameterMap.put(paramName, pc.getInitParameter(paramName));
 				}
 			}
 			if (config != null) {
-				Enumeration paramNameEnum = config.getInitParameterNames();
+				Enumeration<String> paramNameEnum = config.getInitParameterNames();
 				while (paramNameEnum.hasMoreElements()) {
-					String paramName = (String) paramNameEnum.nextElement();
+					String paramName = paramNameEnum.nextElement();
 					parameterMap.put(paramName, config.getInitParameter(paramName));
 				}
 			}
@@ -176,9 +175,9 @@ public abstract class PortletApplicationContextUtils {
 		if (!bf.containsBean(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME)) {
 			Map<String, Object> attributeMap = new HashMap<String, Object>();
 			if (pc != null) {
-				Enumeration attrNameEnum = pc.getAttributeNames();
+				Enumeration<String> attrNameEnum = pc.getAttributeNames();
 				while (attrNameEnum.hasMoreElements()) {
-					String attrName = (String) attrNameEnum.nextElement();
+					String attrName = attrNameEnum.nextElement();
 					attributeMap.put(attrName, pc.getAttribute(attrName));
 				}
 			}
@@ -211,15 +210,15 @@ public abstract class PortletApplicationContextUtils {
 	 */
 	public static void initPortletPropertySources(MutablePropertySources propertySources, ServletContext servletContext,
 			PortletContext portletContext, PortletConfig portletConfig) {
-		Assert.notNull(propertySources, "propertySources must not be null");
 
+		Assert.notNull(propertySources, "propertySources must not be null");
 		WebApplicationContextUtils.initServletPropertySources(propertySources, servletContext);
 
-		if(portletContext != null && propertySources.contains(StandardPortletEnvironment.PORTLET_CONTEXT_PROPERTY_SOURCE_NAME)) {
+		if (portletContext != null && propertySources.contains(StandardPortletEnvironment.PORTLET_CONTEXT_PROPERTY_SOURCE_NAME)) {
 			propertySources.replace(StandardPortletEnvironment.PORTLET_CONTEXT_PROPERTY_SOURCE_NAME,
 					new PortletContextPropertySource(StandardPortletEnvironment.PORTLET_CONTEXT_PROPERTY_SOURCE_NAME, portletContext));
 		}
-		if(portletConfig != null && propertySources.contains(StandardPortletEnvironment.PORTLET_CONFIG_PROPERTY_SOURCE_NAME)) {
+		if (portletConfig != null && propertySources.contains(StandardPortletEnvironment.PORTLET_CONFIG_PROPERTY_SOURCE_NAME)) {
 			propertySources.replace(StandardPortletEnvironment.PORTLET_CONFIG_PROPERTY_SOURCE_NAME,
 					new PortletConfigPropertySource(StandardPortletEnvironment.PORTLET_CONFIG_PROPERTY_SOURCE_NAME, portletConfig));
 		}
