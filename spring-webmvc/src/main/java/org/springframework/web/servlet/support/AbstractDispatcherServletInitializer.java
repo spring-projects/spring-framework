@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.support;
 
 import java.util.EnumSet;
-
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterRegistration;
@@ -55,19 +54,19 @@ import org.springframework.web.servlet.DispatcherServlet;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public abstract class AbstractDispatcherServletInitializer
-		extends AbstractContextLoaderInitializer {
+public abstract class AbstractDispatcherServletInitializer extends AbstractContextLoaderInitializer {
 
 	/**
 	 * The default servlet name. Can be customized by overriding {@link #getServletName}.
 	 */
 	public static final String DEFAULT_SERVLET_NAME = "dispatcher";
 
+
 	@Override
 	public void onStartup(ServletContext servletContext) throws ServletException {
 		super.onStartup(servletContext);
 
-		this.registerDispatcherServlet(servletContext);
+		registerDispatcherServlet(servletContext);
 	}
 
 	/**
@@ -82,19 +81,15 @@ public abstract class AbstractDispatcherServletInitializer
 	 */
 	protected void registerDispatcherServlet(ServletContext servletContext) {
 		String servletName = this.getServletName();
-		Assert.hasLength(servletName,
-				"getServletName() may not return empty or null");
+		Assert.hasLength(servletName, "getServletName() may not return empty or null");
 
 		WebApplicationContext servletAppContext = this.createServletApplicationContext();
 		Assert.notNull(servletAppContext,
 				"createServletApplicationContext() did not return an application " +
-						"context for servlet [" + servletName + "]");
+				"context for servlet [" + servletName + "]");
 
 		DispatcherServlet dispatcherServlet = new DispatcherServlet(servletAppContext);
-
-		ServletRegistration.Dynamic registration =
-				servletContext.addServlet(servletName, dispatcherServlet);
-
+		ServletRegistration.Dynamic registration = servletContext.addServlet(servletName, dispatcherServlet);
 		Assert.notNull(registration,
 				"Failed to register servlet with name '" + servletName + "'." +
 				"Check if there is another servlet registered under the same name.");
