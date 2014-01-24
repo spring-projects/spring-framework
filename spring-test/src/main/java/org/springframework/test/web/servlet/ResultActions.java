@@ -37,7 +37,7 @@ public interface ResultActions {
 	 * mockMvc.perform(get("/person/1"))
 	 *   .andExpect(status.isOk())
 	 *   .andExpect(content().mimeType(MediaType.APPLICATION_JSON))
-	 *   .andExpect(jsonPath("$.person.name").equalTo("Jason"));
+	 *   .andExpect(jsonPath("$.person.name").value("Jason"));
 	 *
 	 * mockMvc.perform(post("/form"))
 	 *   .andExpect(status.isOk())
