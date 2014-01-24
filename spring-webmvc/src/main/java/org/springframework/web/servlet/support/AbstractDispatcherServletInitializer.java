@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,14 +33,13 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
 /**
- * Base class for {@link org.springframework.web.WebApplicationInitializer
- * WebApplicationInitializer} implementations that register a {@link DispatcherServlet} in
- * the servlet context.
+ * Base class for {@link org.springframework.web.WebApplicationInitializer}
+ * implementations that register a {@link DispatcherServlet} in the servlet context.
  *
- * <p>Concrete implementations are required to implement {@link
- * #createServletApplicationContext()}, as well as {@link #getServletMappings()}, both of
- * which gets invoked from {@link #registerDispatcherServlet(ServletContext)}. Further
- * customization can be achieved by overriding
+ * <p>Concrete implementations are required to implement
+ * {@link #createServletApplicationContext()}, as well as {@link #getServletMappings()},
+ * both of which get invoked from {@link #registerDispatcherServlet(ServletContext)}.
+ * Further customization can be achieved by overriding
  * {@link #customizeRegistration(ServletRegistration.Dynamic)}.
  *
  * <p>Because this class extends from {@link AbstractContextLoaderInitializer}, concrete
@@ -80,10 +79,10 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	 * @param servletContext the context to register the servlet against
 	 */
 	protected void registerDispatcherServlet(ServletContext servletContext) {
-		String servletName = this.getServletName();
+		String servletName = getServletName();
 		Assert.hasLength(servletName, "getServletName() may not return empty or null");
 
-		WebApplicationContext servletAppContext = this.createServletApplicationContext();
+		WebApplicationContext servletAppContext = createServletApplicationContext();
 		Assert.notNull(servletAppContext,
 				"createServletApplicationContext() did not return an application " +
 				"context for servlet [" + servletName + "]");
@@ -105,7 +104,7 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 			}
 		}
 
-		this.customizeRegistration(registration);
+		customizeRegistration(registration);
 	}
 
 	/**
@@ -120,22 +119,22 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	/**
 	 * Create a servlet application context to be provided to the {@code DispatcherServlet}.
 	 * <p>The returned context is delegated to Spring's
-	 * {@link DispatcherServlet#DispatcherServlet(WebApplicationContext)} As such, it
-	 * typically contains controllers, view resolvers, locale resolvers, and other
+	 * {@link DispatcherServlet#DispatcherServlet(WebApplicationContext)}. As such,
+	 * it typically contains controllers, view resolvers, locale resolvers, and other
 	 * web-related beans.
 	 * @see #registerDispatcherServlet(ServletContext)
 	 */
 	protected abstract WebApplicationContext createServletApplicationContext();
 
 	/**
-	 * Specify the servlet mapping(s) for the {@code DispatcherServlet}, e.g. '/', '/app', etc.
+	 * Specify the servlet mapping(s) for the {@code DispatcherServlet} &mdash;
+	 * for example {@code "/"}, {@code "/app"}, etc.
 	 * @see #registerDispatcherServlet(ServletContext)
 	 */
 	protected abstract String[] getServletMappings();
 
 	/**
-	 * Specify filters to add and also map to the {@code DispatcherServlet}.
-	 *
+	 * Specify filters to add and map to the {@code DispatcherServlet}.
 	 * @return an array of filters or {@code null}
 	 * @see #registerServletFilter(ServletContext, Filter)
 	 */
@@ -154,9 +153,8 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	 * {@code FORWARD}, {@code INCLUDE}, and conditionally {@code ASYNC} depending
 	 * on the return value of {@link #isAsyncSupported() asyncSupported}
 	 * </ul>
-	 * <p>If the above defaults are not suitable or insufficient, register
-	 * filters directly with the {@code ServletContext}.
-	 *
+	 * <p>If the above defaults are not suitable or insufficient, override this
+	 * method and register filters directly with the {@code ServletContext}.
 	 * @param servletContext the servlet context to register filters with
 	 * @param filter the filter to be registered
 	 * @return the filter registration

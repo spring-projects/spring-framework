@@ -179,6 +179,7 @@ public class AnnotationConfigDispatcherServletInitializerTests {
 
 	private class MyMockServletContext extends MockServletContext {
 
+		@Override
 		public <T extends EventListener> void addListener(T t) {
 			if (t instanceof ServletContextListener) {
 				((ServletContextListener) t).contextInitialized(new ServletContextEvent(this));
