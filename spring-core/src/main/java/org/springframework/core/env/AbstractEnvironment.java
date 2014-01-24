@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,10 +43,11 @@ import static org.springframework.util.StringUtils.*;
  * add by default. {@code AbstractEnvironment} adds none. Subclasses should contribute
  * property sources through the protected {@link #customizePropertySources(MutablePropertySources)}
  * hook, while clients should customize using {@link ConfigurableEnvironment#getPropertySources()}
- * and working against the {@link MutablePropertySources} API. See
- * {@link ConfigurableEnvironment} Javadoc for usage examples.
+ * and working against the {@link MutablePropertySources} API.
+ * See {@link ConfigurableEnvironment} javadoc for usage examples.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  * @see ConfigurableEnvironment
  * @see StandardEnvironment
@@ -403,6 +404,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * and therefore avoiding security manager warnings (if any).
 	 * <p>The default implementation checks for the "spring.getenv.ignore" system property,
 	 * returning {@code true} if its value equals "true" in any case.
+	 * @see #IGNORE_GETENV_PROPERTY_NAME
+	 * @see SpringProperties#getFlag
 	 */
 	protected boolean suppressGetenvAccess() {
 		return SpringProperties.getFlag(IGNORE_GETENV_PROPERTY_NAME);
