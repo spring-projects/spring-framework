@@ -47,10 +47,10 @@ public class TypeDescriptor implements Serializable {
 
 	private static final Map<Class<?>, TypeDescriptor> commonTypesCache = new HashMap<Class<?>, TypeDescriptor>();
 
-	private static final Class<?>[] CACHED_COMMON_TYPES = {Boolean.class, byte.class,
-			Byte.class, char.class, Character.class, short.class, Short.class, int.class,
-			Integer.class, long.class, Long.class, float.class, Float.class, double.class,
-			Double.class, String.class};
+	private static final Class<?>[] CACHED_COMMON_TYPES = {
+			boolean.class, Boolean.class, byte.class, Byte.class, char.class, Character.class,
+			double.class, Double.class, int.class, Integer.class, long.class, Long.class,
+			float.class, Float.class, short.class, Short.class, String.class, Object.class};
 
 	static {
 		for (Class<?> preCachedClass : CACHED_COMMON_TYPES) {
@@ -125,7 +125,7 @@ public class TypeDescriptor implements Serializable {
 
 
 	private Annotation[] nullSafeAnnotations(Annotation[] annotations) {
-		return annotations != null ? annotations : EMPTY_ANNOTATION_ARRAY;
+		return (annotations != null ? annotations : EMPTY_ANNOTATION_ARRAY);
 	}
 
 	/**
@@ -500,11 +500,13 @@ public class TypeDescriptor implements Serializable {
 	 * field is available to provide additional conversion context.
 	 * <p>Generally prefer use of {@link #forObject(Object)} for constructing type
 	 * descriptors from source objects, as it handles the {@code null} object case.
-	 * @param type the class
-	 * @return the type descriptor
+	 * @param type the class (may be {@code null} to indicate {@code Object.class})
+	 * @return the corresponding type descriptor
 	 */
 	public static TypeDescriptor valueOf(Class<?> type) {
-		Assert.notNull(type, "Type must not be null");
+		if (type == null) {
+			type = Object.class;
+		}
 		TypeDescriptor desc = commonTypesCache.get(type);
 		return (desc != null ? desc : new TypeDescriptor(ResolvableType.forClass(type), null, null));
 	}
@@ -522,12 +524,11 @@ public class TypeDescriptor implements Serializable {
 	 * @return the collection type descriptor
 	 */
 	public static TypeDescriptor collection(Class<?> collectionType, TypeDescriptor elementTypeDescriptor) {
-		Assert.notNull(collectionType, "CollectionType must not be null");
+		Assert.notNull(collectionType, "collectionType must not be null");
 		if (!Collection.class.isAssignableFrom(collectionType)) {
 			throw new IllegalArgumentException("collectionType must be a java.util.Collection");
 		}
-		ResolvableType element = (elementTypeDescriptor == null ? null
-				: elementTypeDescriptor.resolvableType);
+		ResolvableType element = (elementTypeDescriptor != null ? elementTypeDescriptor.resolvableType : null);
 		return new TypeDescriptor(ResolvableType.forClassWithGenerics(collectionType, element), null, null);
 	}
 
@@ -549,8 +550,8 @@ public class TypeDescriptor implements Serializable {
 		if (!Map.class.isAssignableFrom(mapType)) {
 			throw new IllegalArgumentException("mapType must be a java.util.Map");
 		}
-		ResolvableType key = (keyTypeDescriptor == null ? null : keyTypeDescriptor.resolvableType);
-		ResolvableType value = (valueTypeDescriptor == null ? null : valueTypeDescriptor.resolvableType);
+		ResolvableType key = (keyTypeDescriptor != null ? keyTypeDescriptor.resolvableType : null);
+		ResolvableType value = (valueTypeDescriptor != null ? valueTypeDescriptor.resolvableType : null);
 		return new TypeDescriptor(ResolvableType.forClassWithGenerics(mapType, key, value), null, null);
 	}
 
@@ -655,8 +656,8 @@ public class TypeDescriptor implements Serializable {
 	 * Create a new type descriptor for an object.
 	 * <p>Use this factory method to introspect a source object before asking the
 	 * conversion system to convert it to some another type.
-	 * <p>If the provided object is null, returns null, else calls {@link #valueOf(Class)}
-	 * to build a TypeDescriptor from the object's class.
+	 * <p>If the provided object is {@code null}, returns {@code null}, else calls
+	 * {@link #valueOf(Class)} to build a TypeDescriptor from the object's class.
 	 * @param source the source object
 	 * @return the type descriptor
 	 */

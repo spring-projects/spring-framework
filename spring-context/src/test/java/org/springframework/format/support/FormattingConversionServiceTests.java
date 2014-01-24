@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -304,6 +304,28 @@ public class FormattingConversionServiceTests {
 
 		formattingService.convert(new MyDate(), new TypeDescriptor(ModelWithSubclassField.class.getField("date")),
 				TypeDescriptor.valueOf(String.class));
+	}
+
+	@Test
+	public void testRegisterDefaultValueViaFormatter() {
+		registerDefaultValue(Date.class, new Date());
+	}
+
+	private <T> void registerDefaultValue(Class<T> clazz, final T defaultValue) {
+		formattingService.addFormatterForFieldType(clazz, new Formatter<T>() {
+			@Override
+			public T parse(String text, Locale locale) throws ParseException {
+				return defaultValue;
+			}
+			@Override
+			public String print(T t, Locale locale) {
+				return defaultValue.toString();
+			}
+			@Override
+			public String toString() {
+				return defaultValue.toString();
+			}
+		});
 	}
 
 
