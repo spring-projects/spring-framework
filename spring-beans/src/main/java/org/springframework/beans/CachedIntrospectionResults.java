@@ -33,6 +33,7 @@ import java.util.WeakHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.SpringProperties;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -114,17 +115,7 @@ public class CachedIntrospectionResults {
 
 
 	static {
-		boolean ignoreValue;
-		try {
-			ignoreValue = "true".equalsIgnoreCase(System.getProperty(IGNORE_BEANINFO_PROPERTY_NAME));
-		}
-		catch (Throwable ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Could not obtain system property '" + IGNORE_BEANINFO_PROPERTY_NAME + "': " + ex);
-			}
-			ignoreValue = false;
-		}
-		shouldIntrospectorIgnoreBeaninfoClasses = ignoreValue;
+		shouldIntrospectorIgnoreBeaninfoClasses = SpringProperties.getFlag(IGNORE_BEANINFO_PROPERTY_NAME);
 	}
 
 
@@ -293,16 +284,19 @@ public class CachedIntrospectionResults {
 			}
 			this.beanInfo = beanInfo;
 
-			// Immediately remove class from Introspector cache, to allow for proper
-			// garbage collection on class loader shutdown - we cache it here anyway,
-			// in a GC-friendly manner. In contrast to CachedIntrospectionResults,
-			// Introspector does not use WeakReferences as values of its WeakHashMap!
-			Class<?> classToFlush = beanClass;
-			do {
-				Introspector.flushFromCaches(classToFlush);
-				classToFlush = classToFlush.getSuperclass();
+			// Only bother with flushFromCaches if the Introspector actually cached...
+			if (!shouldIntrospectorIgnoreBeaninfoClasses) {
+				// Immediately remove class from Introspector cache, to allow for proper
+				// garbage collection on class loader shutdown - we cache it here anyway,
+				// in a GC-friendly manner. In contrast to CachedIntrospectionResults,
+				// Introspector does not use WeakReferences as values of its WeakHashMap!
+				Class<?> classToFlush = beanClass;
+				do {
+					Introspector.flushFromCaches(classToFlush);
+					classToFlush = classToFlush.getSuperclass();
+				}
+				while (classToFlush != null);
 			}
-			while (classToFlush != null);
 
 			if (logger.isTraceEnabled()) {
 				logger.trace("Caching PropertyDescriptors for class [" + beanClass.getName() + "]");

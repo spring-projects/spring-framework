@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.springframework.beans.BeansException;
 import org.springframework.core.Constants;
+import org.springframework.core.SpringProperties;
 import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
@@ -84,7 +85,7 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 	private int systemPropertiesMode = SYSTEM_PROPERTIES_MODE_FALLBACK;
 
 	private boolean searchSystemEnvironment =
-			!"true".equalsIgnoreCase(System.getProperty(AbstractEnvironment.IGNORE_GETENV_PROPERTY_NAME));
+			!SpringProperties.getFlag(AbstractEnvironment.IGNORE_GETENV_PROPERTY_NAME);
 
 
 	/**

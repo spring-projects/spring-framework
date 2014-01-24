@@ -25,6 +25,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.SpringProperties;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -369,15 +370,15 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		catch (AccessControlException ex) {
 			return (Map) new ReadOnlySystemAttributesMap() {
 				@Override
-				protected String getSystemAttribute(String variableName) {
+				protected String getSystemAttribute(String attributeName) {
 					try {
-						return System.getenv(variableName);
+						return System.getenv(attributeName);
 					}
 					catch (AccessControlException ex) {
 						if (logger.isInfoEnabled()) {
 							logger.info(format("Caught AccessControlException when accessing system " +
 									"environment variable [%s]; its value will be returned [null]. Reason: %s",
-									variableName, ex.getMessage()));
+									attributeName, ex.getMessage()));
 						}
 						return null;
 					}
@@ -396,15 +397,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * returning {@code true} if its value equals "true" in any case.
 	 */
 	protected boolean suppressGetenvAccess() {
-		try {
-			return "true".equalsIgnoreCase(System.getProperty(IGNORE_GETENV_PROPERTY_NAME));
-		}
-		catch (Throwable ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Could not obtain system property '" + IGNORE_GETENV_PROPERTY_NAME + "': " + ex);
-			}
-			return false;
-		}
+		return SpringProperties.getFlag(IGNORE_GETENV_PROPERTY_NAME);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -415,15 +408,15 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		catch (AccessControlException ex) {
 			return (Map) new ReadOnlySystemAttributesMap() {
 				@Override
-				protected String getSystemAttribute(String propertyName) {
+				protected String getSystemAttribute(String attributeName) {
 					try {
-						return System.getProperty(propertyName);
+						return System.getProperty(attributeName);
 					}
 					catch (AccessControlException ex) {
 						if (logger.isInfoEnabled()) {
 							logger.info(format("Caught AccessControlException when accessing system " +
 									"property [%s]; its value will be returned [null]. Reason: %s",
-									propertyName, ex.getMessage()));
+									attributeName, ex.getMessage()));
 						}
 						return null;
 					}
