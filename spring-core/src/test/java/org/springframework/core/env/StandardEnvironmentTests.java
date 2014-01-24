@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,15 +59,15 @@ public class StandardEnvironmentTests {
 		child.setActiveProfiles("c1", "c2");
 		child.getPropertySources().addLast(
 				new MockPropertySource("childMock")
-					.withProperty("childKey", "childVal")
-					.withProperty("bothKey", "childBothVal"));
+						.withProperty("childKey", "childVal")
+						.withProperty("bothKey", "childBothVal"));
 
 		ConfigurableEnvironment parent = new StandardEnvironment();
 		parent.setActiveProfiles("p1", "p2");
 		parent.getPropertySources().addLast(
 				new MockPropertySource("parentMock")
-					.withProperty("parentKey", "parentVal")
-					.withProperty("bothKey", "parentBothVal"));
+						.withProperty("parentKey", "parentVal")
+						.withProperty("bothKey", "parentBothVal"));
 
 		assertThat(child.getProperty("childKey"), is("childVal"));
 		assertThat(child.getProperty("parentKey"), nullValue());
@@ -350,6 +350,13 @@ public class StandardEnvironmentTests {
 	@Test
 	public void suppressGetenvAccessThroughSpringProperty() {
 		SpringProperties.setProperty("spring.getenv.ignore", "true");
+		assertTrue(environment.getSystemEnvironment().isEmpty());
+		SpringProperties.setProperty("spring.getenv.ignore", null);
+	}
+
+	@Test
+	public void suppressGetenvAccessThroughSpringFlag() {
+		SpringProperties.setFlag("spring.getenv.ignore");
 		assertTrue(environment.getSystemEnvironment().isEmpty());
 		SpringProperties.setProperty("spring.getenv.ignore", null);
 	}
