@@ -16,22 +16,21 @@
 
 package org.springframework.web.servlet.support;
 
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
 /**
- * Base class for {@link org.springframework.web.WebApplicationInitializer
- * WebApplicationInitializer} implementations that register a {@link
- * org.springframework.web.servlet.DispatcherServlet DispatcherServlet}
- * configured with annotated classes, e.g. Spring's {@link
- * org.springframework.context.annotation.Configuration @Configuration} classes.
+ * Base class for {@link org.springframework.web.WebApplicationInitializer}
+ * implementations that register a
+ * {@link org.springframework.web.servlet.DispatcherServlet DispatcherServlet}
+ * configured with annotated classes, e.g. Spring's
+ * {@link org.springframework.context.annotation.Configuration @Configuration} classes.
  *
  * <p>Concrete implementations are required to implement {@link #getRootConfigClasses()}
- * and {@link #getServletConfigClasses()} as well as {@link #getServletMappings()}. Further
- * template and customization methods are provided by {@link
- * AbstractDispatcherServletInitializer}.
+ * and {@link #getServletConfigClasses()} as well as {@link #getServletMappings()}.
+ * Further template and customization methods are provided by
+ * {@link AbstractDispatcherServletInitializer}.
  *
  * @author Arjen Poutsma
  * @author Chris Beams
@@ -48,10 +47,10 @@ public abstract class AbstractAnnotationConfigDispatcherServletInitializer
 	 */
 	@Override
 	protected WebApplicationContext createRootApplicationContext() {
-		Class<?>[] rootConfigClasses = this.getRootConfigClasses();
-		if (!ObjectUtils.isEmpty(rootConfigClasses)) {
+		Class<?>[] configClasses = getRootConfigClasses();
+		if (!ObjectUtils.isEmpty(configClasses)) {
 			AnnotationConfigWebApplicationContext rootAppContext = new AnnotationConfigWebApplicationContext();
-			rootAppContext.register(rootConfigClasses);
+			rootAppContext.register(configClasses);
 			return rootAppContext;
 		}
 		else {
@@ -67,7 +66,7 @@ public abstract class AbstractAnnotationConfigDispatcherServletInitializer
 	@Override
 	protected WebApplicationContext createServletApplicationContext() {
 		AnnotationConfigWebApplicationContext servletAppContext = new AnnotationConfigWebApplicationContext();
-		Class<?>[] configClasses = this.getServletConfigClasses();
+		Class<?>[] configClasses = getServletConfigClasses();
 		if (!ObjectUtils.isEmpty(configClasses)) {
 			servletAppContext.register(configClasses);
 		}
@@ -89,7 +88,7 @@ public abstract class AbstractAnnotationConfigDispatcherServletInitializer
 	 * provided to the {@linkplain #createServletApplicationContext() dispatcher servlet
 	 * application context}.
 	 * @return the configuration classes for the dispatcher servlet application context
-	 * (may not be empty or {@code null}).
+	 * (may not be empty or {@code null})
 	 */
 	protected abstract Class<?>[] getServletConfigClasses();
 

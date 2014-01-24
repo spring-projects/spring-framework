@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.support;
 
 import java.util.EnumSet;
-
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterRegistration;
@@ -34,14 +33,13 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
 /**
- * Base class for {@link org.springframework.web.WebApplicationInitializer
- * WebApplicationInitializer} implementations that register a {@link DispatcherServlet} in
- * the servlet context.
+ * Base class for {@link org.springframework.web.WebApplicationInitializer}
+ * implementations that register a {@link DispatcherServlet} in the servlet context.
  *
- * <p>Concrete implementations are required to implement {@link
- * #createServletApplicationContext()}, as well as {@link #getServletMappings()}, both of
- * which get invoked from {@link #registerDispatcherServlet(ServletContext)}. Further
- * customization can be achieved by overriding
+ * <p>Concrete implementations are required to implement
+ * {@link #createServletApplicationContext()}, as well as {@link #getServletMappings()},
+ * both of which get invoked from {@link #registerDispatcherServlet(ServletContext)}.
+ * Further customization can be achieved by overriding
  * {@link #customizeRegistration(ServletRegistration.Dynamic)}.
  *
  * <p>Because this class extends from {@link AbstractContextLoaderInitializer}, concrete
@@ -55,24 +53,24 @@ import org.springframework.web.servlet.DispatcherServlet;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public abstract class AbstractDispatcherServletInitializer
-		extends AbstractContextLoaderInitializer {
+public abstract class AbstractDispatcherServletInitializer extends AbstractContextLoaderInitializer {
 
 	/**
 	 * The default servlet name. Can be customized by overriding {@link #getServletName}.
 	 */
 	public static final String DEFAULT_SERVLET_NAME = "dispatcher";
 
+
 	@Override
 	public void onStartup(ServletContext servletContext) throws ServletException {
 		super.onStartup(servletContext);
 
-		this.registerDispatcherServlet(servletContext);
+		registerDispatcherServlet(servletContext);
 	}
 
 	/**
 	 * Register a {@link DispatcherServlet} against the given servlet context.
-	 * <p>This method will create a {@code DispatcherServlet} with the name returned from
+	 * <p>This method will create a {@code DispatcherServlet} with the name returned by
 	 * {@link #getServletName()}, initializing it with the application context returned
 	 * from {@link #createServletApplicationContext()}, and mapping it to the patterns
 	 * returned from {@link #getServletMappings()}.
@@ -81,21 +79,18 @@ public abstract class AbstractDispatcherServletInitializer
 	 * @param servletContext the context to register the servlet against
 	 */
 	protected void registerDispatcherServlet(ServletContext servletContext) {
-		String servletName = this.getServletName();
+		String servletName = getServletName();
 		Assert.hasLength(servletName, "getServletName() may not return empty or null");
 
-		WebApplicationContext servletAppContext = this.createServletApplicationContext();
+		WebApplicationContext servletAppContext = createServletApplicationContext();
 		Assert.notNull(servletAppContext,
 				"createServletApplicationContext() did not return an application " +
-						"context for servlet [" + servletName + "]");
+				"context for servlet [" + servletName + "]");
 
 		DispatcherServlet dispatcherServlet = new DispatcherServlet(servletAppContext);
-
-		ServletRegistration.Dynamic registration =
-				servletContext.addServlet(servletName, dispatcherServlet);
-
+		ServletRegistration.Dynamic registration = servletContext.addServlet(servletName, dispatcherServlet);
 		Assert.notNull(registration,
-				"Failed to register servlet with name '" + servletName + "'. " +
+				"Failed to register servlet with name '" + servletName + "'." +
 				"Check if there is another servlet registered under the same name.");
 
 		registration.setLoadOnStartup(1);
@@ -109,7 +104,7 @@ public abstract class AbstractDispatcherServletInitializer
 			}
 		}
 
-		this.customizeRegistration(registration);
+		customizeRegistration(registration);
 	}
 
 	/**
@@ -124,8 +119,8 @@ public abstract class AbstractDispatcherServletInitializer
 	/**
 	 * Create a servlet application context to be provided to the {@code DispatcherServlet}.
 	 * <p>The returned context is delegated to Spring's
-	 * {@link DispatcherServlet#DispatcherServlet(WebApplicationContext)}. As such, it
-	 * typically contains controllers, view resolvers, locale resolvers, and other
+	 * {@link DispatcherServlet#DispatcherServlet(WebApplicationContext)}. As such,
+	 * it typically contains controllers, view resolvers, locale resolvers, and other
 	 * web-related beans.
 	 * @see #registerDispatcherServlet(ServletContext)
 	 */
@@ -140,7 +135,6 @@ public abstract class AbstractDispatcherServletInitializer
 
 	/**
 	 * Specify filters to add and map to the {@code DispatcherServlet}.
-	 *
 	 * @return an array of filters or {@code null}
 	 * @see #registerServletFilter(ServletContext, Filter)
 	 */
@@ -161,7 +155,6 @@ public abstract class AbstractDispatcherServletInitializer
 	 * </ul>
 	 * <p>If the above defaults are not suitable or insufficient, override this
 	 * method and register filters directly with the {@code ServletContext}.
-	 *
 	 * @param servletContext the servlet context to register filters with
 	 * @param filter the filter to be registered
 	 * @return the filter registration

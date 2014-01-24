@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,12 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.web.WebApplicationInitializer;
 
 /**
- * Convenient base class for {@link WebApplicationInitializer} implementations that
- * register a {@link ContextLoaderListener} in the servlet context.
+ * Convenient base class for {@link WebApplicationInitializer} implementations
+ * that register a {@link ContextLoaderListener} in the servlet context.
  *
- * <p>The only method required to be implemented by subclasses is {@link
- * #createRootApplicationContext()}, which gets invoked from {@link
- * #registerContextLoaderListener(javax.servlet.ServletContext)}.
+ * <p>The only method required to be implemented by subclasses is
+ * {@link #createRootApplicationContext()}, which gets invoked from
+ * {@link #registerContextLoaderListener(ServletContext)}.
  *
  * @author Arjen Poutsma
  * @author Chris Beams
@@ -38,12 +38,13 @@ import org.springframework.web.WebApplicationInitializer;
  */
 public abstract class AbstractContextLoaderInitializer implements WebApplicationInitializer {
 
-	/** Logger available to subclasses. */
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
+
 
 	@Override
 	public void onStartup(ServletContext servletContext) throws ServletException {
-		this.registerContextLoaderListener(servletContext);
+		registerContextLoaderListener(servletContext);
 	}
 
 	/**
@@ -53,7 +54,7 @@ public abstract class AbstractContextLoaderInitializer implements WebApplication
 	 * @param servletContext the servlet context to register the listener against
 	 */
 	protected void registerContextLoaderListener(ServletContext servletContext) {
-		WebApplicationContext rootAppContext = this.createRootApplicationContext();
+		WebApplicationContext rootAppContext = createRootApplicationContext();
 		if (rootAppContext != null) {
 			servletContext.addListener(new ContextLoaderListener(rootAppContext));
 		}

@@ -16,18 +16,23 @@
 
 package org.springframework.web.servlet.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.*;
-
-import javax.servlet.*;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.EventListener;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
 import javax.servlet.FilterRegistration.Dynamic;
+import javax.servlet.Servlet;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRegistration;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.test.MockServletConfig;
@@ -36,6 +41,8 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.filter.HiddenHttpMethodFilter;
 import org.springframework.web.servlet.DispatcherServlet;
+
+import static org.junit.Assert.*;
 
 /**
  * Test case for {@link AbstractAnnotationConfigDispatcherServletInitializer}.
@@ -130,13 +137,12 @@ public class AnnotationConfigDispatcherServletInitializerTests {
 	}
 
 	// SPR-11357
-
 	@Test
 	public void rootContextOnly() throws ServletException {
 		initializer = new MyAnnotationConfigDispatcherServletInitializer() {
 			@Override
 			protected Class<?>[] getRootConfigClasses() {
-				return new Class[]{MyConfiguration.class};
+				return new Class<?>[] {MyConfiguration.class};
 			}
 			@Override
 			protected Class<?>[] getServletConfigClasses() {
@@ -174,6 +180,13 @@ public class AnnotationConfigDispatcherServletInitializerTests {
 	private class MyMockServletContext extends MockServletContext {
 
 		@Override
+		public <T extends EventListener> void addListener(T t) {
+			if (t instanceof ServletContextListener) {
+				((ServletContextListener) t).contextInitialized(new ServletContextEvent(this));
+			}
+		}
+
+		@Override
 		public ServletRegistration.Dynamic addServlet(String servletName, Servlet servlet) {
 			servlets.put(servletName, servlet);
 			MockServletRegistration registration = new MockServletRegistration();
@@ -188,14 +201,8 @@ public class AnnotationConfigDispatcherServletInitializerTests {
 			filterRegistrations.put(filterName, registration);
 			return registration;
 		}
-
-		@Override
-		public <T extends EventListener> void addListener(T t) {
-			if (t instanceof ServletContextListener) {
-				((ServletContextListener) t).contextInitialized(new ServletContextEvent(this));
-			}
-		}
 	}
+
 
 	private static class MyAnnotationConfigDispatcherServletInitializer
 			extends AbstractAnnotationConfigDispatcherServletInitializer {
@@ -229,12 +236,12 @@ public class AnnotationConfigDispatcherServletInitializerTests {
 		protected Class<?>[] getRootConfigClasses() {
 			return null;
 		}
-
 	}
+
 
 	private static class MyBean {
-
 	}
+
 
 	@Configuration
 	@SuppressWarnings("unused")
@@ -247,7 +254,6 @@ public class AnnotationConfigDispatcherServletInitializerTests {
 		public MyBean bean() {
 			return new MyBean();
 		}
-
 	}
 
 }
