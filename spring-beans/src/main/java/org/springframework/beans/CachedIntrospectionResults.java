@@ -295,7 +295,7 @@ public class CachedIntrospectionResults {
 					Introspector.flushFromCaches(classToFlush);
 					classToFlush = classToFlush.getSuperclass();
 				}
-				while (classToFlush != null);
+				while (classToFlush != null && classToFlush != Object.class);
 			}
 
 			if (logger.isTraceEnabled()) {
