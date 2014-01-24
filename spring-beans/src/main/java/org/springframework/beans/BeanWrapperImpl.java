@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -492,20 +492,21 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	public Object convertForProperty(Object value, String propertyName) throws TypeMismatchException {
 		CachedIntrospectionResults cachedIntrospectionResults = getCachedIntrospectionResults();
 		PropertyDescriptor pd = cachedIntrospectionResults.getPropertyDescriptor(propertyName);
-		TypeDescriptor td = cachedIntrospectionResults.getTypeDescriptor(pd);
 		if (pd == null) {
 			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 					"No property '" + propertyName + "' found");
 		}
+		TypeDescriptor td = cachedIntrospectionResults.getTypeDescriptor(pd);
 		if (td == null) {
 			td = new TypeDescriptor(property(pd));
-			cachedIntrospectionResults.putTypeDescriptor(pd, td);
+			cachedIntrospectionResults.addTypeDescriptor(pd, td);
 		}
 		return convertForProperty(propertyName, null, value, pd, td);
 	}
 
 	private Object convertForProperty(String propertyName, Object oldValue, Object newValue, PropertyDescriptor pd, TypeDescriptor td)
 			throws TypeMismatchException {
+
 		return convertIfNecessary(propertyName, oldValue, newValue, pd.getPropertyType(), td);
 	}
 

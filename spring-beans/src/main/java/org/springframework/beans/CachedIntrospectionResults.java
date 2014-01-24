@@ -22,7 +22,6 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -30,10 +29,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.SpringProperties;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.util.ClassUtils;
@@ -116,17 +117,7 @@ public class CachedIntrospectionResults {
 
 
 	static {
-		boolean ignoreValue;
-		try {
-			ignoreValue = "true".equalsIgnoreCase(System.getProperty(IGNORE_BEANINFO_PROPERTY_NAME));
-		}
-		catch (Throwable ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Could not obtain system property '" + IGNORE_BEANINFO_PROPERTY_NAME + "': " + ex);
-			}
-			ignoreValue = false;
-		}
-		shouldIntrospectorIgnoreBeaninfoClasses = ignoreValue;
+		shouldIntrospectorIgnoreBeaninfoClasses = SpringProperties.getFlag(IGNORE_BEANINFO_PROPERTY_NAME);
 	}
 
 
@@ -298,16 +289,19 @@ public class CachedIntrospectionResults {
 			}
 			this.beanInfo = beanInfo;
 
-			// Immediately remove class from Introspector cache, to allow for proper
-			// garbage collection on class loader shutdown - we cache it here anyway,
-			// in a GC-friendly manner. In contrast to CachedIntrospectionResults,
-			// Introspector does not use WeakReferences as values of its WeakHashMap!
-			Class<?> classToFlush = beanClass;
-			do {
-				Introspector.flushFromCaches(classToFlush);
-				classToFlush = classToFlush.getSuperclass();
+			// Only bother with flushFromCaches if the Introspector actually cached...
+			if (!shouldIntrospectorIgnoreBeaninfoClasses) {
+				// Immediately remove class from Introspector cache, to allow for proper
+				// garbage collection on class loader shutdown - we cache it here anyway,
+				// in a GC-friendly manner. In contrast to CachedIntrospectionResults,
+				// Introspector does not use WeakReferences as values of its WeakHashMap!
+				Class<?> classToFlush = beanClass;
+				do {
+					Introspector.flushFromCaches(classToFlush);
+					classToFlush = classToFlush.getSuperclass();
+				}
+				while (classToFlush != null);
 			}
-			while (classToFlush != null);
 
 			if (logger.isTraceEnabled()) {
 				logger.trace("Caching PropertyDescriptors for class [" + beanClass.getName() + "]");
@@ -332,7 +326,7 @@ public class CachedIntrospectionResults {
 				this.propertyDescriptorCache.put(pd.getName(), pd);
 			}
 
-			this.typeDescriptorCache = new HashMap<PropertyDescriptor, TypeDescriptor>();
+			this.typeDescriptorCache = new ConcurrentHashMap<PropertyDescriptor, TypeDescriptor>();
 		}
 		catch (IntrospectionException ex) {
 			throw new FatalBeanException("Failed to obtain BeanInfo for class [" + beanClass.getName() + "]", ex);
@@ -381,12 +375,12 @@ public class CachedIntrospectionResults {
 		}
 	}
 
-	TypeDescriptor getTypeDescriptor(PropertyDescriptor pd) {
-		return this.typeDescriptorCache.get(pd);
+	void addTypeDescriptor(PropertyDescriptor pd, TypeDescriptor td) {
+		this.typeDescriptorCache.put(pd, td);
 	}
 
-	void putTypeDescriptor(PropertyDescriptor pd, TypeDescriptor td) {
-		this.typeDescriptorCache.put(pd, td);
+	TypeDescriptor getTypeDescriptor(PropertyDescriptor pd) {
+		return this.typeDescriptorCache.get(pd);
 	}
 
 }

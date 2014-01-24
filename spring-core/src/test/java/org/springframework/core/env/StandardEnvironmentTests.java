@@ -17,18 +17,17 @@
 package org.springframework.core.env;
 
 import java.lang.reflect.Field;
-
 import java.security.AccessControlException;
 import java.security.Permission;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
 import org.junit.Test;
+
+import org.springframework.core.SpringProperties;
 import org.springframework.mock.env.MockPropertySource;
 
-import static java.lang.String.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.springframework.core.env.AbstractEnvironment.*;
@@ -37,6 +36,7 @@ import static org.springframework.core.env.AbstractEnvironment.*;
  * Unit tests for {@link StandardEnvironment}.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  */
 public class StandardEnvironmentTests {
 
@@ -333,10 +333,25 @@ public class StandardEnvironmentTests {
 		try {
 			env.addActiveProfile("invalid-profile");
 			fail("expected validation exception");
-		} catch (IllegalArgumentException ex) {
+		}
+		catch (IllegalArgumentException ex) {
 			assertThat(ex.getMessage(),
 					equalTo("Invalid profile [invalid-profile]: must not contain dash character"));
 		}
+	}
+
+	@Test
+	public void suppressGetenvAccessThroughSystemProperty() {
+		System.setProperty("spring.getenv.ignore", "true");
+		assertTrue(environment.getSystemEnvironment().isEmpty());
+		System.clearProperty("spring.getenv.ignore");
+	}
+
+	@Test
+	public void suppressGetenvAccessThroughSpringProperty() {
+		SpringProperties.setProperty("spring.getenv.ignore", "true");
+		assertTrue(environment.getSystemEnvironment().isEmpty());
+		SpringProperties.setProperty("spring.getenv.ignore", null);
 	}
 
 	@Test
@@ -370,7 +385,7 @@ public class StandardEnvironmentTests {
 				// see http://download.oracle.com/javase/1.5.0/docs/api/java/lang/System.html#getProperty(java.lang.String)
 				if (DISALLOWED_PROPERTY_NAME.equals(key)) {
 					throw new AccessControlException(
-							format("Accessing the system property [%s] is disallowed", DISALLOWED_PROPERTY_NAME));
+							String.format("Accessing the system property [%s] is disallowed", DISALLOWED_PROPERTY_NAME));
 				}
 			}
 			@Override
@@ -401,7 +416,8 @@ public class StandardEnvironmentTests {
 			try {
 				systemProperties.get(NON_STRING_PROPERTY_NAME);
 				fail("Expected IllegalArgumentException when searching with non-string key against ReadOnlySystemAttributesMap");
-			} catch (IllegalArgumentException ex) {
+			}
+			catch (IllegalArgumentException ex) {
 				// expected
 			}
 		}
@@ -435,7 +451,7 @@ public class StandardEnvironmentTests {
 				//see http://download.oracle.com/javase/1.5.0/docs/api/java/lang/System.html#getenv(java.lang.String)
 				if (("getenv."+DISALLOWED_PROPERTY_NAME).equals(perm.getName())) {
 					throw new AccessControlException(
-							format("Accessing the system environment variable [%s] is disallowed", DISALLOWED_PROPERTY_NAME));
+							String.format("Accessing the system environment variable [%s] is disallowed", DISALLOWED_PROPERTY_NAME));
 				}
 			}
 		};
@@ -468,7 +484,8 @@ public class StandardEnvironmentTests {
 					if (obj != null && obj.getClass().getName().equals("java.lang.ProcessEnvironment$StringEnvironment")) {
 						return (Map<String, String>) obj;
 					}
-				} catch (Exception ex) {
+				}
+				catch (Exception ex) {
 					throw new RuntimeException(ex);
 				}
 			}
@@ -478,8 +495,9 @@ public class StandardEnvironmentTests {
 		Class<?> processEnvironmentClass;
 		try {
 			processEnvironmentClass = Class.forName("java.lang.ProcessEnvironment");
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+		}
+		catch (Exception ex) {
+			throw new IllegalStateException(ex);
 		}
 
 		try {
@@ -487,10 +505,12 @@ public class StandardEnvironmentTests {
 			theCaseInsensitiveEnvironmentField.setAccessible(true);
 			Object obj = theCaseInsensitiveEnvironmentField.get(null);
 			return (Map<String, String>) obj;
-		} catch (NoSuchFieldException e) {
+		}
+		catch (NoSuchFieldException ex) {
 			// do nothing
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+		}
+		catch (Exception ex) {
+			throw new IllegalStateException(ex);
 		}
 
 		try {
@@ -498,12 +518,15 @@ public class StandardEnvironmentTests {
 			theEnvironmentField.setAccessible(true);
 			Object obj = theEnvironmentField.get(null);
 			return (Map<String, String>) obj;
-		} catch (NoSuchFieldException e) {
+		}
+		catch (NoSuchFieldException ex) {
 			// do nothing
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+		}
+		catch (Exception ex) {
+			throw new IllegalStateException(ex);
 		}
 
 		throw new IllegalStateException();
 	}
+
 }
