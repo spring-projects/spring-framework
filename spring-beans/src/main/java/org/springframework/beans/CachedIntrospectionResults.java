@@ -289,20 +289,6 @@ public class CachedIntrospectionResults {
 			}
 			this.beanInfo = beanInfo;
 
-			// Only bother with flushFromCaches if the Introspector actually cached...
-			if (!shouldIntrospectorIgnoreBeaninfoClasses) {
-				// Immediately remove class from Introspector cache, to allow for proper
-				// garbage collection on class loader shutdown - we cache it here anyway,
-				// in a GC-friendly manner. In contrast to CachedIntrospectionResults,
-				// Introspector does not use WeakReferences as values of its WeakHashMap!
-				Class<?> classToFlush = beanClass;
-				do {
-					Introspector.flushFromCaches(classToFlush);
-					classToFlush = classToFlush.getSuperclass();
-				}
-				while (classToFlush != null);
-			}
-
 			if (logger.isTraceEnabled()) {
 				logger.trace("Caching PropertyDescriptors for class [" + beanClass.getName() + "]");
 			}
