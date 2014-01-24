@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,8 +50,7 @@ public abstract class AbstractAnnotationConfigDispatcherServletInitializer
 	protected WebApplicationContext createRootApplicationContext() {
 		Class<?>[] rootConfigClasses = this.getRootConfigClasses();
 		if (!ObjectUtils.isEmpty(rootConfigClasses)) {
-			AnnotationConfigWebApplicationContext rootAppContext =
-					new AnnotationConfigWebApplicationContext();
+			AnnotationConfigWebApplicationContext rootAppContext = new AnnotationConfigWebApplicationContext();
 			rootAppContext.register(rootConfigClasses);
 			return rootAppContext;
 		}
@@ -64,18 +63,14 @@ public abstract class AbstractAnnotationConfigDispatcherServletInitializer
 	 * {@inheritDoc}
 	 * <p>This implementation creates an {@link AnnotationConfigWebApplicationContext},
 	 * providing it the annotated classes returned by {@link #getServletConfigClasses()}.
-	 * @throws IllegalArgumentException if {@link #getServletConfigClasses()} returns
-	 * empty or {@code null}
 	 */
 	@Override
 	protected WebApplicationContext createServletApplicationContext() {
-		AnnotationConfigWebApplicationContext servletAppContext =
-				new AnnotationConfigWebApplicationContext();
-		Class<?>[] servletConfigClasses = this.getServletConfigClasses();
-		Assert.notEmpty(servletConfigClasses,
-				"getServletConfigClasses() did not return any configuration classes");
-
-		servletAppContext.register(servletConfigClasses);
+		AnnotationConfigWebApplicationContext servletAppContext = new AnnotationConfigWebApplicationContext();
+		Class<?>[] configClasses = this.getServletConfigClasses();
+		if (!ObjectUtils.isEmpty(configClasses)) {
+			servletAppContext.register(configClasses);
+		}
 		return servletAppContext;
 	}
 

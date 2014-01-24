@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,22 +21,16 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
+import javax.servlet.*;
 import javax.servlet.FilterRegistration.Dynamic;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRegistration;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.mock.web.test.MockServletConfig;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -89,11 +83,11 @@ public class AnnotationConfigDispatcherServletInitializerTests {
 		assertNotNull(servlets.get(SERVLET_NAME));
 
 		DispatcherServlet servlet = (DispatcherServlet) servlets.get(SERVLET_NAME);
-		WebApplicationContext dispatcherServletContext = servlet.getWebApplicationContext();
-		((AnnotationConfigWebApplicationContext) dispatcherServletContext).refresh();
+		WebApplicationContext wac = servlet.getWebApplicationContext();
+		((AnnotationConfigWebApplicationContext) wac).refresh();
 
-		assertTrue(dispatcherServletContext.containsBean("bean"));
-		assertTrue(dispatcherServletContext.getBean("bean") instanceof MyBean);
+		assertTrue(wac.containsBean("bean"));
+		assertTrue(wac.getBean("bean") instanceof MyBean);
 
 		assertEquals(1, servletRegistrations.size());
 		assertNotNull(servletRegistrations.get(SERVLET_NAME));
@@ -135,6 +129,33 @@ public class AnnotationConfigDispatcherServletInitializerTests {
 				filterRegistration.getMappings().get(SERVLET_NAME));
 	}
 
+	// SPR-11357
+
+	@Test
+	public void rootContextOnly() throws ServletException {
+		initializer = new MyAnnotationConfigDispatcherServletInitializer() {
+			@Override
+			protected Class<?>[] getRootConfigClasses() {
+				return new Class[]{MyConfiguration.class};
+			}
+			@Override
+			protected Class<?>[] getServletConfigClasses() {
+				return null;
+			}
+		};
+
+		initializer.onStartup(servletContext);
+
+		DispatcherServlet servlet = (DispatcherServlet) servlets.get(SERVLET_NAME);
+		servlet.init(new MockServletConfig(this.servletContext));
+
+		WebApplicationContext wac = servlet.getWebApplicationContext();
+		((AnnotationConfigWebApplicationContext) wac).refresh();
+
+		assertTrue(wac.containsBean("bean"));
+		assertTrue(wac.getBean("bean") instanceof MyBean);
+	}
+
 	@Test
 	public void noFilters() throws ServletException {
 		initializer = new MyAnnotationConfigDispatcherServletInitializer() {
@@ -166,6 +187,13 @@ public class AnnotationConfigDispatcherServletInitializerTests {
 			MockFilterRegistration registration = new MockFilterRegistration();
 			filterRegistrations.put(filterName, registration);
 			return registration;
+		}
+
+		@Override
+		public <T extends EventListener> void addListener(T t) {
+			if (t instanceof ServletContextListener) {
+				((ServletContextListener) t).contextInitialized(new ServletContextEvent(this));
+			}
 		}
 	}
 
