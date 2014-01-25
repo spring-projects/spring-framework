@@ -83,10 +83,9 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.orm.jpa.support.SharedEntityManagerBean
  * @see javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory
  */
+@SuppressWarnings("serial")
 public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean
 		implements ResourceLoaderAware, LoadTimeWeaverAware {
-
-	private static final long serialVersionUID = 1L;
 
 	private PersistenceUnitManager persistenceUnitManager;
 
