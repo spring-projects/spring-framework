@@ -20,7 +20,7 @@ configure(allprojects) { project ->
 	ext.jettyVersion      = "9.1.0.v20131115"
 	ext.junitVersion      = "4.11"
 	ext.slf4jVersion      = "1.6.1"
-	ext.xstreamVersion    = "1.4.4"
+	ext.xstreamVersion    = "1.4.6"
 	ext.gradleScriptDir   = "${rootProject.projectDir}/gradle"
 
 	apply plugin: "propdeps"
