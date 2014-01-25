@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -253,7 +253,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	}
 
 	/**
-	 * Set an alias/type map, consisting of string aliases mapped to classes.
+	 * Set the alias/type map, consisting of string aliases mapped to classes.
 	 * <p>Keys are aliases; values are either {@code Class} instances, or String class names.
 	 * @see XStream#alias(String, Class)
 	 */
@@ -262,7 +262,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	}
 
 	/**
-	 * Sets the aliases by type map, consisting of string aliases mapped to classes.
+	 * Set the <em>aliases by type</em> map, consisting of string aliases mapped to classes.
 	 * <p>Any class that is assignable to this type will be aliased to the same name.
 	 * Keys are aliases; values are either {@code Class} instances, or String class names.
 	 * @see XStream#aliasType(String, Class)
@@ -272,7 +272,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	}
 
 	/**
-	 * Set a field alias/type map, consiting of field names.
+	 * Set the field alias/type map, consisting of field names.
 	 * @see XStream#aliasField(String, Class, String)
 	 */
 	public void setFieldAliases(Map<String, String> fieldAliases) {
