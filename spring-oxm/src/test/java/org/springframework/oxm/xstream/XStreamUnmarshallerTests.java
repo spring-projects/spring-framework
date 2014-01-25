@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLInputFactory;
@@ -28,13 +29,15 @@ import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+
+import org.springframework.util.xml.StaxUtils;
+
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
-import org.springframework.util.xml.StaxUtils;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -48,7 +51,7 @@ public class XStreamUnmarshallerTests {
 	@Before
 	public void creteUnmarshaller() throws Exception {
 		unmarshaller = new XStreamMarshaller();
-		Map<String, Class> aliases = new HashMap<String, Class>();
+		Map<String, Class<?>> aliases = new HashMap<String, Class<?>>();
 		aliases.put("flight", Flight.class);
 		unmarshaller.setAliases(aliases);
 	}
