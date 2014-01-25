@@ -19,7 +19,6 @@ package org.springframework.format.datetime.joda;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
 import org.joda.time.LocalDate;
@@ -51,6 +50,7 @@ final class JodaTimeConverters {
 	 * Install the converters into the converter registry.
 	 * @param registry the converter registry
 	 */
+	@SuppressWarnings("deprecation")
 	public static void registerConverters(ConverterRegistry registry) {
 		DateFormatterRegistrar.addDateConverters(registry);
 
@@ -68,8 +68,6 @@ final class JodaTimeConverters {
 		registry.addConverter(new LongToReadableInstantConverter());
 		registry.addConverter(new LocalDateTimeToLocalDateConverter());
 		registry.addConverter(new LocalDateTimeToLocalTimeConverter());
-		registry.addConverter(new LocalDateToDateMidnightConverter());
-		registry.addConverter(new DateMidnightToLocalDateConverter());
 	}
 
 
@@ -100,10 +98,11 @@ final class JodaTimeConverters {
 	}
 
 
-	private static class DateTimeToDateMidnightConverter implements Converter<DateTime, DateMidnight> {
+	@Deprecated
+	private static class DateTimeToDateMidnightConverter implements Converter<DateTime, org.joda.time.DateMidnight> {
 
 		@Override
-		public DateMidnight convert(DateTime source) {
+		public org.joda.time.DateMidnight convert(DateTime source) {
 			return source.toDateMidnight();
 		}
 	}
@@ -210,24 +209,6 @@ final class JodaTimeConverters {
 		@Override
 		public LocalTime convert(LocalDateTime source) {
 			return source.toLocalTime();
-		}
-	}
-
-
-	private static class LocalDateToDateMidnightConverter implements Converter<LocalDate, DateMidnight> {
-
-		@Override
-		public DateMidnight convert(LocalDate source) {
-			return source.toDateMidnight();
-		}
-	}
-
-
-	private static class DateMidnightToLocalDateConverter implements Converter<DateMidnight, LocalDate> {
-
-		@Override
-		public LocalDate convert(DateMidnight source) {
-			return source.toLocalDate();
 		}
 	}
 
