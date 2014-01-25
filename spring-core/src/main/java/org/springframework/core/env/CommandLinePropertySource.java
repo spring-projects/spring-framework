@@ -288,8 +288,8 @@ public abstract class CommandLinePropertySource<T> extends EnumerablePropertySou
 	protected abstract List<String> getOptionValues(String name);
 
 	/**
-	 * Return the collection of non-option arguments parsed from the command line. Never
-	 * {@code null}.
+	 * Return the collection of non-option arguments parsed from the command line.
+	 * Never {@code null}.
 	 */
 	protected abstract List<String> getNonOptionArgs();
 

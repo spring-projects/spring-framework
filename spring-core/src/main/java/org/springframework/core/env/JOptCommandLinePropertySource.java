@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.util.List;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
+import org.springframework.util.Assert;
+
 /**
  * {@link CommandLinePropertySource} implementation backed by a JOpt {@link OptionSet}.
  *
@@ -42,12 +44,10 @@ import joptsimple.OptionSpec;
  *
  * See {@link CommandLinePropertySource} for complete general usage examples.
  *
- * <h3>Requirements</h3>
- *
- * <p>Use of this class requires adding the jopt-simple JAR to your application classpath.
- * Versions 3.0 and better are supported.
+ * <p>Requires JOpt version 3.0 or higher. Tested against JOpt up until 4.6.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  * @see CommandLinePropertySource
  * @see joptsimple.OptionParser
@@ -73,6 +73,7 @@ public class JOptCommandLinePropertySource extends CommandLinePropertySource<Opt
 		super(name, options);
 	}
 
+
 	@Override
 	protected boolean containsOption(String name) {
 		return this.source.has(name);
@@ -95,26 +96,26 @@ public class JOptCommandLinePropertySource extends CommandLinePropertySource<Opt
 	public List<String> getOptionValues(String name) {
 		List<?> argValues = this.source.valuesOf(name);
 		List<String> stringArgValues = new ArrayList<String>();
-		for(Object argValue : argValues) {
-			if (!(argValue instanceof String)) {
-				throw new IllegalArgumentException("argument values must be of type String");
-			}
-			stringArgValues.add((String)argValue);
+		for (Object argValue : argValues) {
+			Assert.isInstanceOf(String.class, argValue, "Argument values must be of type String");
+			stringArgValues.add((String) argValue);
 		}
-		if (stringArgValues.size() == 0) {
-			if (this.source.has(name)) {
-				return Collections.emptyList();
-			}
-			else {
-				return null;
-			}
+		if (stringArgValues.isEmpty()) {
+			return (this.source.has(name) ? Collections.<String>emptyList() : null);
 		}
 		return Collections.unmodifiableList(stringArgValues);
 	}
 
 	@Override
 	protected List<String> getNonOptionArgs() {
-		return this.source.nonOptionArguments();
+		List<?> argValues = this.source.nonOptionArguments();
+		List<String> stringArgValues = new ArrayList<String>();
+		for (Object argValue : argValues) {
+			Assert.isInstanceOf(String.class, argValue, "Argument values must be of type String");
+			stringArgValues.add((String) argValue);
+		}
+		return (stringArgValues.isEmpty() ? Collections.<String>emptyList() :
+				Collections.unmodifiableList(stringArgValues));
 	}
 
 }
