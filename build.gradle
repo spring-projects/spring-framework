@@ -278,7 +278,7 @@ project("spring-aop") {
 		compile(files(project(":spring-core").cglibRepackJar))
 		compile("aopalliance:aopalliance:1.0")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
-		optional("commons-pool:commons-pool:1.6")
+		optional("commons-pool:commons-pool:1.5.7")
 		optional("com.jamonapi:jamon:2.4")
 	}
 }
