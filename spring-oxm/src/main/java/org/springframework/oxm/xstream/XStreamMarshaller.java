@@ -91,13 +91,12 @@ import org.springframework.util.xml.StaxUtils;
  * as this can result in <b>security vulnerabilities</b>. If you do use the
  * {@code XStreamMarshaller} to unmarshal external XML, set the
  * {@link #setSupportedClasses(Class[]) supportedClasses} and
- * {@link #setConverters(ConverterMatcher[]) converters} properties (possibly using a
- * {@link CatchAllConverter}) or override the
- * {@link #customizeXStream(XStream)} method to make sure it only accepts the classes
- * you want it to support.
+ * {@link #setConverters(ConverterMatcher[]) converters} properties (possibly using
+ * a {@link CatchAllConverter}) or override the {@link #customizeXStream(XStream)}
+ * method to make sure it only accepts the classes you want it to support.
  *
- * <p>Due to XStream's API, it is required to set the encoding used for writing to OutputStreams.
- * It defaults to {@code UTF-8}.
+ * <p>Due to XStream's API, it is required to set the encoding used for writing to
+ * OutputStreams. It defaults to {@code UTF-8}.
  *
  * <p><b>NOTE:</b> XStream is an XML serialization library, not a data binding library.
  * Therefore, it has limited namespace support. As such, it is rather unsuitable for

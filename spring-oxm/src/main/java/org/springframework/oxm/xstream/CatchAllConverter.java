@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,15 +23,17 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 /**
- * XStream {@link Converter} that supports all classes, but throws exceptions for
- * (un)marshalling.
+ * XStream {@link Converter} that supports all classes but throws exceptions
+ * for (un)marshalling.
+ *
  * <p>Main purpose of this class is to
- * {@linkplain com.thoughtworks.xstream.XStream#registerConverter(com.thoughtworks.xstream.converters.Converter, int) register}
- * this converter as a catchall converter with a
+ * {@linkplain com.thoughtworks.xstream.XStream#registerConverter(Converter, int) register}
+ * this converter as a catch-all converter with a
  * {@linkplain com.thoughtworks.xstream.XStream#PRIORITY_NORMAL normal}
  * or higher priority, in addition to converters that explicitly support the domain
  * classes that should be supported. As a result, default XStream converters with lower
  * priorities and possible security vulnerabilities do not get invoked.
+ *
  * <p>For instance:</p>
  * <pre class="code">
  * XStreamMarshaller unmarshaller = new XStreamMarshaller();
@@ -52,14 +54,13 @@ public class CatchAllConverter implements Converter {
 	}
 
 	@Override
-	public void marshal(Object source, HierarchicalStreamWriter writer,
-			MarshallingContext context) {
-		throw new UnsupportedOperationException("marshalling not supported");
+	public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
+		throw new UnsupportedOperationException("Marshalling not supported");
 	}
 
 	@Override
-	public Object unmarshal(HierarchicalStreamReader reader,
-			UnmarshallingContext context) {
-		throw new UnsupportedOperationException("unmarshalling not supported");
+	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+		throw new UnsupportedOperationException("Unmarshalling not supported");
 	}
+
 }
