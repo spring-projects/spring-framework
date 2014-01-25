@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.core.Constants;
 
 /**
- * TargetSource implementation that holds objects in a configurable
- * Jakarta Commons Pool.
+ * {@link org.springframework.aop.TargetSource} implementation that holds
+ * objects in a configurable Apache Commons Pool.
  *
  * <p>By default, an instance of {@code GenericObjectPool} is created.
  * Subclasses may change the type of {@code ObjectPool} used by
@@ -38,10 +38,12 @@ import org.springframework.core.Constants;
  * of configuration properties that are relevant to your chosen implementation.
  *
  * <p>The {@code testOnBorrow}, {@code testOnReturn} and {@code testWhileIdle}
- * properties are explictly not mirrored because the implementation of
+ * properties are explicitly not mirrored because the implementation of
  * {@code PoolableObjectFactory} used by this class does not implement
- * meaningful validation. All exposed Commons Pool properties use the corresponding
- * Commons Pool defaults: for example,
+ * meaningful validation. All exposed Commons Pool properties use the
+ * corresponding Commons Pool defaults.
+ *
+ * <p>Compatible with Apache Commons Pool 1.5.x and 1.6.
  *
  * @author Rod Johnson
  * @author Rob Harrop
@@ -55,10 +57,8 @@ import org.springframework.core.Constants;
  * @see #setTimeBetweenEvictionRunsMillis
  * @see #setMinEvictableIdleTimeMillis
  */
-public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
-		implements PoolableObjectFactory {
-
-	private static final long serialVersionUID = 1L;
+@SuppressWarnings("serial")
+public class CommonsPoolTargetSource extends AbstractPoolingTargetSource implements PoolableObjectFactory {
 
 	private static final Constants constants = new Constants(GenericObjectPool.class);
 

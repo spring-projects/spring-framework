@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,12 +42,10 @@ import org.springframework.util.StringUtils;
  *
  * @author Rossen Stoyanchev
  * @since 3.1
- *
  * @see FlashMapManager
  */
+@SuppressWarnings("serial")
 public final class FlashMap extends HashMap<String, Object> implements Comparable<FlashMap> {
-
-	private static final long serialVersionUID = 1L;
 
 	private String targetRequestPath;
 
@@ -56,6 +54,7 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 	private long expirationStartTime;
 
 	private int timeToLive;
+
 
 	/**
 	 * Provide a URL path to help identify the target request for this FlashMap.
@@ -71,7 +70,7 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 	 * Return the target URL path or {@code null}.
 	 */
 	public String getTargetRequestPath() {
-		return targetRequestPath;
+		return this.targetRequestPath;
 	}
 
 	/**
@@ -123,7 +122,7 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 	 */
 	public boolean isExpired() {
 		if (this.expirationStartTime != 0) {
-			return (System.currentTimeMillis() - this.expirationStartTime) > this.timeToLive * 1000;
+			return (System.currentTimeMillis() - this.expirationStartTime > this.timeToLive * 1000);
 		}
 		else {
 			return false;
@@ -136,8 +135,8 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 	 * instances ensure that they match a given request.
 	 */
 	public int compareTo(FlashMap other) {
-		int thisUrlPath = (this.targetRequestPath != null) ? 1 : 0;
-		int otherUrlPath = (other.targetRequestPath != null) ? 1 : 0;
+		int thisUrlPath = (this.targetRequestPath != null ? 1 : 0);
+		int otherUrlPath = (other.targetRequestPath != null ? 1 : 0);
 		if (thisUrlPath != otherUrlPath) {
 			return otherUrlPath - thisUrlPath;
 		}
@@ -149,7 +148,7 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("[Attributes=").append(super.toString());
+		sb.append("FlashMap [attributes=").append(super.toString());
 		sb.append(", targetRequestPath=").append(this.targetRequestPath);
 		sb.append(", targetRequestParams=").append(this.targetRequestParams).append("]");
 		return sb.toString();

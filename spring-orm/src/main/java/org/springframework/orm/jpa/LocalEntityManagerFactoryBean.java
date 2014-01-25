@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,6 @@ import javax.persistence.spi.PersistenceProvider;
  * @since 2.0
  * @see #setJpaProperties
  * @see #setJpaVendorAdapter
- * @see JpaTemplate#setEntityManagerFactory
  * @see JpaTransactionManager#setEntityManagerFactory
  * @see LocalContainerEntityManagerFactoryBean
  * @see org.springframework.jndi.JndiObjectFactoryBean
@@ -65,9 +64,8 @@ import javax.persistence.spi.PersistenceProvider;
  * @see javax.persistence.Persistence#createEntityManagerFactory
  * @see javax.persistence.spi.PersistenceProvider#createEntityManagerFactory
  */
+@SuppressWarnings("serial")
 public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean {
-
-	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Initialize the EntityManagerFactory for the given configuration.

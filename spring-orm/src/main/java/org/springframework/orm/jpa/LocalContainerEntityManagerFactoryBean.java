@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,10 +78,9 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.orm.jpa.support.SharedEntityManagerBean
  * @see javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory
  */
+@SuppressWarnings("serial")
 public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean
 		implements ResourceLoaderAware, LoadTimeWeaverAware {
-
-	private static final long serialVersionUID = 1L;
 
 	private PersistenceUnitManager persistenceUnitManager;
 
@@ -129,6 +128,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * Uses the specified persistence unit name as the name of the default
 	 * persistence unit, if applicable.
 	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
+	 * @see DefaultPersistenceUnitManager#setDefaultPersistenceUnitName
 	 */
 	@Override
 	public void setPersistenceUnitName(String persistenceUnitName) {
@@ -148,6 +148,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * @param packagesToScan one or more base packages to search, analogous to
 	 * Spring's component-scan configuration for regular Spring components
 	 * @see #setPersistenceUnitManager
+	 * @see DefaultPersistenceUnitManager#setPackagesToScan
 	 */
 	public void setPackagesToScan(String... packagesToScan) {
 		this.internalPersistenceUnitManager.setPackagesToScan(packagesToScan);
@@ -163,6 +164,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * so that they can be loaded through {@code ClassLoader.getResource}.
 	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
 	 * @see #setPersistenceUnitManager
+	 * @see DefaultPersistenceUnitManager#setMappingResources
 	 */
 	public void setMappingResources(String... mappingResources) {
 		this.internalPersistenceUnitManager.setMappingResources(mappingResources);
