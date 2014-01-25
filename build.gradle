@@ -20,6 +20,7 @@ configure(allprojects) { project ->
 	ext.jettyVersion      = "9.1.0.v20131115"
 	ext.junitVersion      = "4.11"
 	ext.slf4jVersion      = "1.6.1"
+	ext.xstreamVersion    = "1.4.4"
 	ext.gradleScriptDir   = "${rootProject.projectDir}/gradle"
 
 	apply plugin: "propdeps"
@@ -389,7 +390,7 @@ project("spring-messaging") {
 		}
 		optional("org.eclipse.jetty.websocket:websocket-client:${jettyVersion}")
 		testCompile(project(":spring-test"))
-		testCompile("com.thoughtworks.xstream:xstream:1.4.4")
+		testCompile("com.thoughtworks.xstream:xstream:${xstreamVersion}")
 		testCompile("commons-dbcp:commons-dbcp:1.2.2")
 		testCompile("javax.inject:javax.inject-tck:1")
 		testCompile("javax.servlet:javax.servlet-api:3.1.0")
@@ -447,7 +448,7 @@ project("spring-oxm") {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
 		testCompile(project(":spring-context"))
-		optional("com.thoughtworks.xstream:xstream:1.4.4")
+		optional("com.thoughtworks.xstream:xstream:${xstreamVersion}")
 		optional("org.jibx:jibx-run:1.2.5")
 		optional("org.apache.xmlbeans:xmlbeans:2.6.0")
 		optional("org.codehaus.castor:castor-xml:1.3.2")
@@ -812,7 +813,7 @@ project("spring-test") {
 		testCompile("org.hibernate:hibernate-validator:4.3.0.Final")
 		testCompile("org.codehaus.jackson:jackson-mapper-asl:1.9.12")
 		testCompile("com.fasterxml.jackson.core:jackson-databind:2.3.0")
-		testCompile("com.thoughtworks.xstream:xstream:1.4.4")
+		testCompile("com.thoughtworks.xstream:xstream:${xstreamVersion}")
 		testCompile("rome:rome:1.0")
 		testCompile("javax.activation:activation:1.1")
 		testCompile("javax.mail:mail:1.4.7")
