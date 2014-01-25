@@ -55,6 +55,7 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 
 	private int timeToLive;
 
+
 	/**
 	 * Provide a URL path to help identify the target request for this FlashMap.
 	 * The path may be absolute (e.g. /application/resource) or relative to the
@@ -69,7 +70,7 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 	 * Return the target URL path or {@code null}.
 	 */
 	public String getTargetRequestPath() {
-		return targetRequestPath;
+		return this.targetRequestPath;
 	}
 
 	/**
@@ -121,7 +122,7 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 	 */
 	public boolean isExpired() {
 		if (this.expirationStartTime != 0) {
-			return (System.currentTimeMillis() - this.expirationStartTime) > this.timeToLive * 1000;
+			return (System.currentTimeMillis() - this.expirationStartTime > this.timeToLive * 1000);
 		}
 		else {
 			return false;
@@ -135,8 +136,8 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 	 */
 	@Override
 	public int compareTo(FlashMap other) {
-		int thisUrlPath = (this.targetRequestPath != null) ? 1 : 0;
-		int otherUrlPath = (other.targetRequestPath != null) ? 1 : 0;
+		int thisUrlPath = (this.targetRequestPath != null ? 1 : 0);
+		int otherUrlPath = (other.targetRequestPath != null ? 1 : 0);
 		if (thisUrlPath != otherUrlPath) {
 			return otherUrlPath - thisUrlPath;
 		}
@@ -148,7 +149,7 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("[Attributes=").append(super.toString());
+		sb.append("FlashMap [attributes=").append(super.toString());
 		sb.append(", targetRequestPath=").append(this.targetRequestPath);
 		sb.append(", targetRequestParams=").append(this.targetRequestParams).append("]");
 		return sb.toString();

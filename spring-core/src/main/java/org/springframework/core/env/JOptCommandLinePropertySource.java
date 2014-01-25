@@ -44,10 +44,11 @@ import org.springframework.util.Assert;
  *
  * See {@link CommandLinePropertySource} for complete general usage examples.
  *
- * <p>Requires JOpt version 3.0 or higher. Tested against JOpt up until 4.6.
+ * <p>Requires JOpt version 4.3 or higher. Tested against JOpt up until 4.6.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Dave Syer
  * @since 3.1
  * @see CommandLinePropertySource
  * @see joptsimple.OptionParser
@@ -82,11 +83,11 @@ public class JOptCommandLinePropertySource extends CommandLinePropertySource<Opt
 	@Override
 	public String[] getPropertyNames() {
 		List<String> names = new ArrayList<String>();
-		for (OptionSpec<?> spec : source.specs()) {
+		for (OptionSpec<?> spec : this.source.specs()) {
 			List<String> aliases = new ArrayList<String>(spec.options());
 			if (!aliases.isEmpty()) {
 				// Only the longest name is used for enumerating
-				names.add(aliases.get(aliases.size()-1));
+				names.add(aliases.get(aliases.size() - 1));
 			}
 		}
 		return names.toArray(new String[names.size()]);
