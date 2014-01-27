@@ -165,7 +165,7 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	protected void postProcessMappings(Configuration config) throws HibernateException {
 		AnnotationConfiguration annConfig = (AnnotationConfiguration) config;
 		if (this.annotatedClasses != null) {
-			for (Class annotatedClass : this.annotatedClasses) {
+			for (Class<?> annotatedClass : this.annotatedClasses) {
 				annConfig.addAnnotatedClass(annotatedClass);
 			}
 		}

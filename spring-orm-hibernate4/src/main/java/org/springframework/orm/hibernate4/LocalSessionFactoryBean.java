@@ -43,10 +43,14 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  * Hibernate SessionFactory in a Spring application context; the SessionFactory can
  * then be passed to Hibernate-based data access objects via dependency injection.
  *
- * <p><b>NOTE:</b> This variant of LocalSessionFactoryBean requires Hibernate 4.0 or higher.
- * It is similar in role to the same-named class in the {@code orm.hibernate3} package.
- * However, in practice, it is closer to {@code AnnotationSessionFactoryBean} since
- * its core purpose is to bootstrap a {@code SessionFactory} from annotation scanning.
+ * <p><b>This variant of LocalSessionFactoryBean requires Hibernate 4.0 or higher.</b>
+ * Note that this version is not compatible with the (the quite refactored) Hibernate
+ * 4.3 yet; please upgrade to the Spring 4.0 line for full Hibernate 4.3 support.
+ * We recommend using this version with the latest Hibernate 4.1.x or 4.2.x releases.
+ *
+ * <p>This class is similar in role to the same-named class in the {@code orm.hibernate3}
+ * package. However, in practice, it is closer to {@code AnnotationSessionFactoryBean}
+ * since its core purpose is to bootstrap a {@code SessionFactory} from package scanning.
  *
  * <p><b>NOTE:</b> To set up Hibernate 4 for Spring-driven JTA transactions, make
  * sure to either specify the {@link #setJtaTransactionManager "jtaTransactionManager"}

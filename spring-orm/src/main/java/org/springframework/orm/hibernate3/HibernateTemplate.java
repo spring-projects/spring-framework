@@ -1001,7 +1001,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			final String queryName, final String[] paramNames, final Object[] values)
 			throws DataAccessException {
 
-		if (paramNames != null && values != null && paramNames.length != values.length) {
+		if (values != null && (paramNames == null || paramNames.length != values.length)) {
 			throw new IllegalArgumentException("Length of paramNames array must match length of values array");
 		}
 		return executeWithNativeSession(new HibernateCallback<List>() {

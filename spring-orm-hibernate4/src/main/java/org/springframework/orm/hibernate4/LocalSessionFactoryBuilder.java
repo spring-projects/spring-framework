@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,11 @@ import org.springframework.util.ClassUtils;
  *
  * <p>This is designed for programmatic use, e.g. in {@code @Bean} factory methods.
  * Consider using {@link LocalSessionFactoryBean} for XML bean definition files.
+ *
+ * <p><b>Requires Hibernate 4.0 or higher.</b> Note that this version is not
+ * compatible with the (the quite refactored) Hibernate 4.3 yet; please upgrade
+ * to the Spring 4.0 line for full Hibernate 4.3 support. We recommend using
+ * this version with the latest Hibernate 4.1.x or 4.2.x releases.
  *
  * <p><b>NOTE:</b> To set up Hibernate 4 for Spring-driven JTA transactions, make
  * sure to either use the {@link #setJtaTransactionManager} method or to set the
