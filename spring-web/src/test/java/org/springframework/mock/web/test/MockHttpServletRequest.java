@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,8 @@ import javax.servlet.http.Part;
 
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
@@ -66,6 +68,7 @@ import org.springframework.util.StringUtils;
  * @author Mark Fisher
  * @author Chris Beams
  * @author Sam Brannen
+ * @author Brian Clozel
  * @since 1.0.2
  */
 public class MockHttpServletRequest implements HttpServletRequest {
@@ -196,7 +199,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private boolean requestedSessionIdFromURL = false;
 
-	private final Map<String, Part> parts = new LinkedHashMap<String, Part>();
+	private final MultiValueMap<String, Part> parts = new LinkedMultiValueMap<String, Part>();
 
 
 	// ---------------------------------------------------------------------
@@ -1048,17 +1051,21 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public void addPart(Part part) {
-		this.parts.put(part.getName(), part);
+		this.parts.add(part.getName(), part);
 	}
 
 	@Override
 	public Part getPart(String name) throws IOException, IllegalStateException, ServletException {
-		return this.parts.get(name);
+		return this.parts.getFirst(name);
 	}
 
 	@Override
 	public Collection<Part> getParts() throws IOException, IllegalStateException, ServletException {
-		return this.parts.values();
+		List<Part> result = new LinkedList<Part>();
+		for(List<Part> list : this.parts.values()) {
+			result.addAll(list);
+		}
+		return result;
 	}
 
 }

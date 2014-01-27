@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import javax.servlet.http.Part;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
@@ -53,13 +54,12 @@ import org.springframework.web.multipart.support.RequestPartServletServerHttpReq
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Test fixture with {@link RequestPartMethodArgumentResolver} and mock {@link HttpMessageConverter}.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  */
 public class RequestPartMethodArgumentResolverTests {
 
@@ -75,10 +75,12 @@ public class RequestPartMethodArgumentResolverTests {
 	private MethodParameter paramValidRequestPart;
 	private MethodParameter paramMultipartFile;
 	private MethodParameter paramMultipartFileList;
+	private MethodParameter paramMultipartFileArray;
 	private MethodParameter paramInt;
 	private MethodParameter paramMultipartFileNotAnnot;
 	private MethodParameter paramPart;
 	private MethodParameter paramPartList;
+	private MethodParameter paramPartArray;
 	private MethodParameter paramRequestParamAnnot;
 
 	private NativeWebRequest webRequest;
@@ -92,8 +94,9 @@ public class RequestPartMethodArgumentResolverTests {
 	public void setUp() throws Exception {
 
 		Method method = getClass().getMethod("handle", SimpleBean.class, SimpleBean.class,
-				SimpleBean.class, MultipartFile.class, List.class, Integer.TYPE,
-				MultipartFile.class, Part.class, List.class, MultipartFile.class);
+				SimpleBean.class, MultipartFile.class, List.class, MultipartFile[].class,
+				Integer.TYPE, MultipartFile.class, Part.class, List.class,
+				Part[].class, MultipartFile.class);
 
 		paramRequestPart = new MethodParameter(method, 0);
 		paramRequestPart.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
@@ -101,13 +104,15 @@ public class RequestPartMethodArgumentResolverTests {
 		paramValidRequestPart = new MethodParameter(method, 2);
 		paramMultipartFile = new MethodParameter(method, 3);
 		paramMultipartFileList = new MethodParameter(method, 4);
-		paramInt = new MethodParameter(method, 5);
-		paramMultipartFileNotAnnot = new MethodParameter(method, 6);
+		paramMultipartFileArray = new MethodParameter(method, 5);
+		paramInt = new MethodParameter(method, 6);
+		paramMultipartFileNotAnnot = new MethodParameter(method, 7);
 		paramMultipartFileNotAnnot.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
-		paramPart = new MethodParameter(method, 7);
+		paramPart = new MethodParameter(method, 8);
 		paramPart.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
-		paramPartList = new MethodParameter(method, 8);
-		paramRequestParamAnnot = new MethodParameter(method, 9);
+		paramPartList = new MethodParameter(method, 9);
+		paramPartArray = new MethodParameter(method, 10);
+		paramRequestParamAnnot = new MethodParameter(method, 11);
 
 		messageConverter = mock(HttpMessageConverter.class);
 		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
@@ -129,6 +134,11 @@ public class RequestPartMethodArgumentResolverTests {
 		assertTrue("RequestPart parameter not supported", resolver.supportsParameter(paramRequestPart));
 		assertTrue("MultipartFile parameter not supported", resolver.supportsParameter(paramMultipartFileNotAnnot));
 		assertTrue("Part parameter not supported", resolver.supportsParameter(paramPart));
+		assertTrue("List<Part> parameter not supported", resolver.supportsParameter(paramPartList));
+		assertTrue("Part[] parameter not supported", resolver.supportsParameter(paramPartArray));
+		assertTrue("MultipartFile parameter not supported", resolver.supportsParameter(paramMultipartFile));
+		assertTrue("List<MultipartFile> parameter not supported", resolver.supportsParameter(paramMultipartFileList));
+		assertTrue("MultipartFile[] parameter not supported", resolver.supportsParameter(paramMultipartFileArray));
 		assertFalse("non-RequestPart parameter supported", resolver.supportsParameter(paramInt));
 		assertFalse("@RequestParam args not supported", resolver.supportsParameter(paramRequestParamAnnot));
 	}
@@ -146,6 +156,16 @@ public class RequestPartMethodArgumentResolverTests {
 		assertNotNull(actual);
 		assertTrue(actual instanceof List);
 		assertEquals(Arrays.asList(multipartFile1, multipartFile2), actual);
+	}
+
+	@Test
+	public void resolveMultipartFileArray() throws Exception {
+		Object actual = resolver.resolveArgument(paramMultipartFileArray, null, webRequest, null);
+		assertNotNull(actual);
+		assertTrue(actual instanceof MultipartFile[]);
+		MultipartFile[] parts = (MultipartFile[]) actual;
+		assertEquals(parts[0], multipartFile1);
+		assertEquals(parts[1], multipartFile2);
 	}
 
 	@Test
@@ -191,6 +211,26 @@ public class RequestPartMethodArgumentResolverTests {
 
 		assertTrue(result instanceof List);
 		assertEquals(Arrays.asList(part1, part2), result);
+	}
+
+	@Test
+	public void resolvePartArrayArgument() throws Exception {
+		MockPart part1 = new MockPart("requestPart1", "Hello World 1".getBytes());
+		MockPart part2 = new MockPart("requestPart2", "Hello World 2".getBytes());
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setMethod("POST");
+		request.setContentType("multipart/form-data");
+		request.addPart(part1);
+		request.addPart(part2);
+		webRequest = new ServletWebRequest(request);
+
+		Object result = resolver.resolveArgument(paramPartArray, null, webRequest, null);
+
+		assertTrue(result instanceof Part[]);
+		Part[] parts = (Part[]) result;
+		assertThat(parts, Matchers.arrayWithSize(2));
+		assertEquals(parts[0], part1);
+		assertEquals(parts[1], part2);
 	}
 
 	@Test
@@ -296,10 +336,12 @@ public class RequestPartMethodArgumentResolverTests {
 					   @Valid @RequestPart("requestPart") SimpleBean validRequestPart,
 					   @RequestPart("requestPart") MultipartFile multipartFile,
 					   @RequestPart("requestPart") List<MultipartFile> multipartFileList,
+					   @RequestPart("requestPart") MultipartFile[] multipartFileArray,
 					   int i,
 					   MultipartFile multipartFileNotAnnot,
 					   Part part,
-					   @RequestPart("requestPart") List<Part> partList,
+					   @RequestPart("part") List<Part> partList,
+					   @RequestPart("part") Part[] partArray,
 					   @RequestParam MultipartFile requestParamAnnot) {
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
 
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
@@ -73,6 +74,7 @@ import org.springframework.web.util.WebUtils;
  * code returned if {@link DefaultHandlerExceptionResolver} is configured.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 3.1
  */
 public class RequestPartMethodArgumentResolver extends AbstractMessageConverterMethodArgumentResolver {
@@ -131,6 +133,10 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 			Assert.notNull(multipartRequest, "Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
 			arg = multipartRequest.getFiles(partName);
 		}
+		else if (isMultipartFileArray(parameter)) {
+			Assert.notNull(multipartRequest, "Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
+			arg = multipartRequest.getFiles(partName).toArray(new MultipartFile[0]);
+		}
 		else if ("javax.servlet.http.Part".equals(parameter.getParameterType().getName())) {
 			assertIsMultipartRequest(servletRequest);
 			arg = servletRequest.getPart(partName);
@@ -138,6 +144,10 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 		else if (isPartCollection(parameter)) {
 			assertIsMultipartRequest(servletRequest);
 			arg = new ArrayList<Object>(servletRequest.getParts());
+		}
+		else if (isPartArray(parameter)) {
+			assertIsMultipartRequest(servletRequest);
+			arg = RequestPartResolver.resolvePart(servletRequest);
 		}
 		else {
 			try {
@@ -193,6 +203,16 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 		return ((collectionType != null) && "javax.servlet.http.Part".equals(collectionType.getName()));
 	}
 
+	private boolean isPartArray(MethodParameter parameter) {
+		Class<?> paramType = parameter.getParameterType().getComponentType();
+		return ((paramType != null) && "javax.servlet.http.Part".equals(paramType.getName()));
+	}
+
+	private boolean isMultipartFileArray(MethodParameter parameter) {
+		Class<?> paramType = parameter.getParameterType().getComponentType();
+		return ((paramType != null) && MultipartFile.class.equals(paramType));
+	}
+
 	private Class<?> getCollectionParameterType(MethodParameter parameter) {
 		Class<?> paramType = parameter.getParameterType();
 		if (Collection.class.equals(paramType) || List.class.isAssignableFrom(paramType)){
@@ -233,6 +253,13 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 		boolean hasBindingResult = (paramTypes.length > (i + 1) && Errors.class.isAssignableFrom(paramTypes[i + 1]));
 
 		return !hasBindingResult;
+	}
+
+	private static class RequestPartResolver {
+
+		public static Object resolvePart(HttpServletRequest servletRequest) throws Exception {
+			return servletRequest.getParts().toArray(new Part[servletRequest.getParts().size()]);
+		}
 	}
 
 }
