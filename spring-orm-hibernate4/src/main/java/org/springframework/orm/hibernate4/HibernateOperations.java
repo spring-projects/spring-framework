@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.hibernate3;
+package org.springframework.orm.hibernate4;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -38,30 +38,11 @@ import org.springframework.dao.DataAccessException;
  * strongly encouraged to read the Hibernate {@code Session} javadocs
  * for details on the semantics of those methods.
  *
- * <p>Note that operations that return an {@link java.util.Iterator} (i.e.
- * {@code iterate(..)}) are supposed to be used within Spring-driven
- * or JTA-driven transactions (with {@link HibernateTransactionManager},
- * {@link org.springframework.transaction.jta.JtaTransactionManager},
- * or EJB CMT). Else, the {@code Iterator} won't be able to read
- * results from its {@link java.sql.ResultSet} anymore, as the underlying
- * Hibernate {@code Session} will already have been closed.
- *
- * <p>Note that lazy loading will just work with an open Hibernate
- * {@code Session}, either within a transaction or within
- * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewFilter}/
- * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor}.
- * Furthermore, some operations just make sense within transactions,
- * for example: {@code contains}, {@code evict}, {@code lock},
- * {@code flush}, {@code clear}.
- *
  * @author Juergen Hoeller
- * @since 1.2
+ * @since 4.0.1
  * @see HibernateTemplate
  * @see org.hibernate.Session
  * @see HibernateTransactionManager
- * @see org.springframework.transaction.jta.JtaTransactionManager
- * @see org.springframework.orm.hibernate3.support.OpenSessionInViewFilter
- * @see org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor
  */
 public interface HibernateOperations {
 
@@ -84,20 +65,6 @@ public interface HibernateOperations {
 	 * @see org.hibernate.Session
 	 */
 	<T> T execute(HibernateCallback<T> action) throws DataAccessException;
-
-	/**
-	 * Execute the specified action assuming that the result object is a
-	 * {@link List}.
-	 * <p>This is a convenience method for executing Hibernate find calls or
-	 * queries within an action.
-	 * @param action callback object that specifies the Hibernate action
-	 * @return a List result returned by the action, or {@code null}
-	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @deprecated as of Spring 3.2.7, in favor of using a regular {@link #execute}
-	 * call with a generic List type declared
-	 */
-	@Deprecated
-	List<Object> executeFind(HibernateCallback<?> action) throws DataAccessException;
 
 
 	//-------------------------------------------------------------------------
@@ -492,7 +459,6 @@ public interface HibernateOperations {
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#merge(Object)
 	 * @see #saveOrUpdate
-	 * @see org.springframework.orm.hibernate3.support.IdTransferringMergeEventListener
 	 */
 	<T> T merge(T entity) throws DataAccessException;
 
@@ -593,26 +559,6 @@ public interface HibernateOperations {
 	//-------------------------------------------------------------------------
 
 	/**
-	 * Execute an HQL query.
-	 * @param queryString a query expressed in Hibernate's query language
-	 * @return a {@link List} containing the results of the query execution
-	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Session#createQuery
-	 */
-	List<?> find(String queryString) throws DataAccessException;
-
-	/**
-	 * Execute an HQL query, binding one value to a "?" parameter in the
-	 * query string.
-	 * @param queryString a query expressed in Hibernate's query language
-	 * @param value the value of the parameter
-	 * @return a {@link List} containing the results of the query execution
-	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Session#createQuery
-	 */
-	List<Object> find(String queryString, Object value) throws DataAccessException;
-
-	/**
 	 * Execute an HQL query, binding a number of values to "?" parameters
 	 * in the query string.
 	 * @param queryString a query expressed in Hibernate's query language
@@ -665,28 +611,6 @@ public interface HibernateOperations {
 	//-------------------------------------------------------------------------
 	// Convenience finder methods for named queries
 	//-------------------------------------------------------------------------
-
-	/**
-	 * Execute a named query.
-	 * <p>A named query is defined in a Hibernate mapping file.
-	 * @param queryName the name of a Hibernate query in a mapping file
-	 * @return a {@link List} containing the results of the query execution
-	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Session#getNamedQuery(String)
-	 */
-	List<Object> findByNamedQuery(String queryName) throws DataAccessException;
-
-	/**
-	 * Execute a named query, binding one value to a "?" parameter in
-	 * the query string.
-	 * <p>A named query is defined in a Hibernate mapping file.
-	 * @param queryName the name of a Hibernate query in a mapping file
-	 * @param value the value of the parameter
-	 * @return a {@link List} containing the results of the query execution
-	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Session#getNamedQuery(String)
-	 */
-	List<Object> findByNamedQuery(String queryName, Object value) throws DataAccessException;
 
 	/**
 	 * Execute a named query binding a number of values to "?" parameters
@@ -836,32 +760,6 @@ public interface HibernateOperations {
 	//-------------------------------------------------------------------------
 
 	/**
-	 * Execute a query for persistent instances.
-	 * <p>Returns the results as an {@link Iterator}. Entities returned are
-	 * initialized on demand. See the Hibernate API documentation for details.
-	 * @param queryString a query expressed in Hibernate's query language
-	 * @return an {@link Iterator} containing 0 or more persistent instances
-	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Session#createQuery
-	 * @see org.hibernate.Query#iterate
-	 */
-	Iterator<Object> iterate(String queryString) throws DataAccessException;
-
-	/**
-	 * Execute a query for persistent instances, binding one value
-	 * to a "?" parameter in the query string.
-	 * <p>Returns the results as an {@link Iterator}. Entities returned are
-	 * initialized on demand. See the Hibernate API documentation for details.
-	 * @param queryString a query expressed in Hibernate's query language
-	 * @param value the value of the parameter
-	 * @return an {@link Iterator} containing 0 or more persistent instances
-	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Session#createQuery
-	 * @see org.hibernate.Query#iterate
-	 */
-	Iterator<Object> iterate(String queryString, Object value) throws DataAccessException;
-
-	/**
 	 * Execute a query for persistent instances, binding a number of
 	 * values to "?" parameters in the query string.
 	 * <p>Returns the results as an {@link Iterator}. Entities returned are
@@ -884,28 +782,6 @@ public interface HibernateOperations {
 	 * @see org.hibernate.Hibernate#close
 	 */
 	void closeIterator(Iterator<?> it) throws DataAccessException;
-
-	/**
-	 * Update/delete all objects according to the given query.
-	 * @param queryString an update/delete query expressed in Hibernate's query language
-	 * @return the number of instances updated/deleted
-	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Session#createQuery
-	 * @see org.hibernate.Query#executeUpdate
-	 */
-	int bulkUpdate(String queryString) throws DataAccessException;
-
-	/**
-	 * Update/delete all objects according to the given query, binding one value
-	 * to a "?" parameter in the query string.
-	 * @param queryString an update/delete query expressed in Hibernate's query language
-	 * @param value the value of the parameter
-	 * @return the number of instances updated/deleted
-	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Session#createQuery
-	 * @see org.hibernate.Query#executeUpdate
-	 */
-	int bulkUpdate(String queryString, Object value) throws DataAccessException;
 
 	/**
 	 * Update/delete all objects according to the given query, binding a number of
