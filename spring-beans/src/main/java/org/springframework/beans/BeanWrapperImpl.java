@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.convert.ConversionException;
@@ -501,13 +502,13 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			td = new TypeDescriptor(property(pd));
 			cachedIntrospectionResults.addTypeDescriptor(pd, td);
 		}
-		return convertForProperty(propertyName, null, value, pd, td);
+		return convertForProperty(propertyName, null, value, td);
 	}
 
-	private Object convertForProperty(String propertyName, Object oldValue, Object newValue, PropertyDescriptor pd, TypeDescriptor td)
+	private Object convertForProperty(String propertyName, Object oldValue, Object newValue, TypeDescriptor td)
 			throws TypeMismatchException {
 
-		return convertIfNecessary(propertyName, oldValue, newValue, pd.getPropertyType(), td);
+		return convertIfNecessary(propertyName, oldValue, newValue, td.getType(), td);
 	}
 
 	private Property property(PropertyDescriptor pd) {
@@ -812,7 +813,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						Class<?> mapKeyType = GenericCollectionTypeResolver.getMapKeyReturnType(pd.getReadMethod(), i + 1);
 						// IMPORTANT: Do not pass full property name in here - property editors
 						// must not kick in for map keys but rather only for map values.
-						TypeDescriptor typeDescriptor = mapKeyType != null ? TypeDescriptor.valueOf(mapKeyType) : TypeDescriptor.valueOf(Object.class);
+						TypeDescriptor typeDescriptor = (mapKeyType != null ?
+								TypeDescriptor.valueOf(mapKeyType) : TypeDescriptor.valueOf(Object.class));
 						Object convertedMapKey = convertIfNecessary(null, null, key, mapKeyType, typeDescriptor);
 						value = map.get(convertedMapKey);
 					}
@@ -1113,7 +1115,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 								}
 							}
 						}
-						valueToApply = convertForProperty(propertyName, oldValue, originalValue, pd, new TypeDescriptor(property(pd)));
+						valueToApply = convertForProperty(
+								propertyName, oldValue, originalValue, new TypeDescriptor(property(pd)));
 					}
 					pv.getOriginalPropertyValue().conversionNecessary = (valueToApply != originalValue);
 				}
