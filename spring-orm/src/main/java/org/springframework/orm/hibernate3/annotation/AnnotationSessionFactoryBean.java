@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,19 +99,19 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 
 	/**
 	 * Specify annotated classes, for which mappings will be read from
-	 * class-level JDK 1.5+ annotation metadata.
+	 * class-level annotation metadata.
 	 * @see org.hibernate.cfg.Configuration#addAnnotatedClass(Class)
 	 */
-	public void setAnnotatedClasses(Class<?>[] annotatedClasses) {
+	public void setAnnotatedClasses(Class<?>... annotatedClasses) {
 		this.annotatedClasses = annotatedClasses;
 	}
 
 	/**
 	 * Specify the names of annotated packages, for which package-level
-	 * JDK 1.5+ annotation metadata will be read.
+	 * annotation metadata will be read.
 	 * @see org.hibernate.cfg.Configuration#addPackage(String)
 	 */
-	public void setAnnotatedPackages(String[] annotatedPackages) {
+	public void setAnnotatedPackages(String... annotatedPackages) {
 		this.annotatedPackages = annotatedPackages;
 	}
 
@@ -122,7 +122,7 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	 * classes in the classpath. This is analogous to Spring's component-scan feature
 	 * ({@link org.springframework.context.annotation.ClassPathBeanDefinitionScanner}).
 	 */
-	public void setPackagesToScan(String[] packagesToScan) {
+	public void setPackagesToScan(String... packagesToScan) {
 		this.packagesToScan = packagesToScan;
 	}
 
@@ -134,7 +134,7 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	 * Hibernate's special {@code @org.hibernate.annotations.Entity}.
 	 * @see #setPackagesToScan
 	 */
-	public void setEntityTypeFilters(TypeFilter[] entityTypeFilters) {
+	public void setEntityTypeFilters(TypeFilter... entityTypeFilters) {
 		this.entityTypeFilters = entityTypeFilters;
 	}
 

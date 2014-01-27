@@ -599,7 +599,7 @@ public interface HibernateOperations {
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#createQuery
 	 */
-	List<?> find(String queryString) throws DataAccessException;
+	List<Object> find(String queryString) throws DataAccessException;
 
 	/**
 	 * Execute an HQL query, binding one value to a "?" parameter in the

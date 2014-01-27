@@ -485,7 +485,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * @see #prepareCriteria
 	 */
 	protected Session createSessionProxy(Session session) {
-		Class<?>[] sessionIfcs = null;
+		Class<?>[] sessionIfcs;
 		Class<?> mainIfc = (session instanceof org.hibernate.classic.Session ?
 				org.hibernate.classic.Session.class : Session.class);
 		if (session instanceof EventSource) {
@@ -518,7 +518,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 		return executeWithNativeSession(new HibernateCallback<T>() {
 			@Override
-			@SuppressWarnings({ "unchecked" })
+			@SuppressWarnings("unchecked")
 			public T doInHibernate(Session session) throws HibernateException {
 				if (lockMode != null) {
 					return (T) session.get(entityClass, id, lockMode);
