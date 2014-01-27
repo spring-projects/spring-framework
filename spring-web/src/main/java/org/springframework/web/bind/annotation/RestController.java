@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,12 @@ import org.springframework.stereotype.Controller;
  * A convenience annotation that is itself annotated with {@link Controller @Controller}
  * and {@link ResponseBody @ResponseBody}.
  * <p>
- * Types that carry this annotation are treated as
- * controllers where {@link RequestMapping @RequestMapping} methods assume
+ * Types that carry this annotation are treated as controllers where
+ * {@link RequestMapping @RequestMapping} methods assume
  * {@link ResponseBody @ResponseBody} semantics by default.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.0
  */
 @Target(ElementType.TYPE)
@@ -41,5 +42,13 @@ import org.springframework.stereotype.Controller;
 @Controller
 @ResponseBody
 public @interface RestController {
+
+	/**
+	 * The value may indicate a suggestion for a logical component name,
+	 * to be turned into a Spring bean in case of an autodetected component.
+	 * @return the suggested component name, if any
+	 * @since 4.0.1
+	 */
+	String value() default "";
 
 }

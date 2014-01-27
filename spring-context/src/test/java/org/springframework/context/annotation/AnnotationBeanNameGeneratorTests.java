@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefiniti
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -34,10 +35,13 @@ import example.scannable.DefaultNamedComponent;
 import static org.junit.Assert.*;
 
 /**
+ * Unit tests for {@link AnnotationBeanNameGenerator}.
+ *
  * @author Rick Evans
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @author Chris Beams
+ * @author Sam Brannen
  */
 public class AnnotationBeanNameGeneratorTests {
 
@@ -45,7 +49,7 @@ public class AnnotationBeanNameGeneratorTests {
 
 
 	@Test
-	public void testGenerateBeanNameWithNamedComponent() {
+	public void generateBeanNameWithNamedComponent() {
 		BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
 		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(ComponentWithName.class);
 		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
@@ -55,7 +59,7 @@ public class AnnotationBeanNameGeneratorTests {
 	}
 
 	@Test
-	public void testGenerateBeanNameWithDefaultNamedComponent() {
+	public void generateBeanNameWithDefaultNamedComponent() {
 		BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
 		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(DefaultNamedComponent.class);
 		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
@@ -65,7 +69,7 @@ public class AnnotationBeanNameGeneratorTests {
 	}
 
 	@Test
-	public void testGenerateBeanNameWithNamedComponentWhereTheNameIsBlank() {
+	public void generateBeanNameWithNamedComponentWhereTheNameIsBlank() {
 		BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
 		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(ComponentWithBlankName.class);
 		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
@@ -76,7 +80,7 @@ public class AnnotationBeanNameGeneratorTests {
 	}
 
 	@Test
-	public void testGenerateBeanNameWithAnonymousComponentYieldsGeneratedBeanName() {
+	public void generateBeanNameWithAnonymousComponentYieldsGeneratedBeanName() {
 		BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
 		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(AnonymousComponent.class);
 		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
@@ -87,7 +91,7 @@ public class AnnotationBeanNameGeneratorTests {
 	}
 
 	@Test
-	public void testGenerateBeanNameFromMetaComponentWithStringValue() {
+	public void generateBeanNameFromMetaComponentWithStringValue() {
 		BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
 		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(ComponentFromStringMeta.class);
 		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
@@ -95,11 +99,50 @@ public class AnnotationBeanNameGeneratorTests {
 	}
 
 	@Test
-	public void testGenerateBeanNameFromMetaComponentWithNonStringValue() {
+	public void generateBeanNameFromMetaComponentWithNonStringValue() {
 		BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
 		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(ComponentFromNonStringMeta.class);
 		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
 		assertEquals("annotationBeanNameGeneratorTests.ComponentFromNonStringMeta", beanName);
+	}
+
+	/**
+	 * @since 4.0.1
+	 * @see https://jira.springsource.org/browse/SPR-11360
+	 */
+	@Test
+	public void generateBeanNameFromComposedControllerAnnotationWithoutName() {
+		BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
+		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(ComposedControllerAnnotationWithoutName.class);
+		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
+		String expectedGeneratedBeanName = this.beanNameGenerator.buildDefaultBeanName(bd);
+		assertEquals(expectedGeneratedBeanName, beanName);
+	}
+
+	/**
+	 * @since 4.0.1
+	 * @see https://jira.springsource.org/browse/SPR-11360
+	 */
+	@Test
+	public void generateBeanNameFromComposedControllerAnnotationWithBlankName() {
+		BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
+		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(ComposedControllerAnnotationWithBlankName.class);
+		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
+		String expectedGeneratedBeanName = this.beanNameGenerator.buildDefaultBeanName(bd);
+		assertEquals(expectedGeneratedBeanName, beanName);
+	}
+
+	/**
+	 * @since 4.0.1
+	 * @see https://jira.springsource.org/browse/SPR-11360
+	 */
+	@Test
+	public void generateBeanNameFromComposedControllerAnnotationWithStringValue() {
+		BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
+		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(
+			ComposedControllerAnnotationWithStringValue.class);
+		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
+		assertEquals("restController", beanName);
 	}
 
 
@@ -107,11 +150,9 @@ public class AnnotationBeanNameGeneratorTests {
 	private static class ComponentWithName {
 	}
 
-
 	@Component(" ")
 	private static class ComponentWithBlankName {
 	}
-
 
 	@Component
 	private static class AnonymousComponent {
@@ -125,11 +166,35 @@ public class AnnotationBeanNameGeneratorTests {
 	@Target(ElementType.TYPE)
 	@Component
 	public @interface NonStringMetaComponent {
+
 		long value();
 	}
 
 	@NonStringMetaComponent(123)
 	private static class ComponentFromNonStringMeta {
+	}
+
+	/**
+	 * @see org.springframework.web.bind.annotation.RestController
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	@Controller
+	public static @interface TestRestController {
+
+		String value() default "";
+	}
+
+	@TestRestController
+	public static class ComposedControllerAnnotationWithoutName {
+	}
+
+	@TestRestController(" ")
+	public static class ComposedControllerAnnotationWithBlankName {
+	}
+
+	@TestRestController("restController")
+	public static class ComposedControllerAnnotationWithStringValue {
 	}
 
 }
