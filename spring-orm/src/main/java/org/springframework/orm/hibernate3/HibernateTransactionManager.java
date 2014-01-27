@@ -17,7 +17,6 @@
 package org.springframework.orm.hibernate3;
 
 import java.sql.Connection;
-
 import javax.sql.DataSource;
 
 import org.hibernate.ConnectionReleaseMode;
@@ -30,6 +29,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.impl.SessionImpl;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -110,7 +110,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * support nested transactions! Hence, do not expect Hibernate access code to
  * semantically participate in a nested transaction.</i>
  *
- * <p>Requires Hibernate 3.6 or later, as of Spring 4.0.
+ * <p>Requires Hibernate 3.6.x, as of Spring 4.0.
  *
  * @author Juergen Hoeller
  * @since 1.2

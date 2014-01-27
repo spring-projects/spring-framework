@@ -43,10 +43,7 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Subclass of Spring's standard LocalSessionFactoryBean for Hibernate,
- * supporting JDK 1.5+ annotation metadata for mappings.
- *
- * <p>Note: As of Spring 4.0, this class requires Hibernate 3.6 or later,
- * with the Java Persistence API present.
+ * supporting annotation metadata for mappings.
  *
  * <p>Example for an AnnotationSessionFactoryBean bean definition:
  *
@@ -69,7 +66,7 @@ import org.springframework.util.ClassUtils;
  *   &lt;property name="packagesToScan" value="test.package"/&gt;
  * &lt;/bean&gt;</pre>
  *
- * <p>Requires Hibernate 3.6 or later, as of Spring 4.0.
+ * <p>Requires Hibernate 3.6.x, as of Spring 4.0.
  *
  * @author Juergen Hoeller
  * @since 1.2.2

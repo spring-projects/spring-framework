@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-
 import javax.sql.DataSource;
 import javax.transaction.Status;
 import javax.transaction.Transaction;
@@ -57,6 +56,7 @@ import org.hibernate.exception.DataException;
 import org.hibernate.exception.JDBCConnectionException;
 import org.hibernate.exception.LockAcquisitionException;
 import org.hibernate.exception.SQLGrammarException;
+
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessException;
@@ -91,7 +91,7 @@ import org.springframework.util.Assert;
  * and {@link HibernateTransactionManager}. Can also be used directly in
  * application code.
  *
- * <p>Requires Hibernate 3.6 or later, as of Spring 4.0.
+ * <p>Requires Hibernate 3.6.x, as of Spring 4.0.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -618,10 +618,12 @@ public abstract class SessionFactoryUtils {
 	 */
 	public static void applyTransactionTimeout(Criteria criteria, SessionFactory sessionFactory) {
 		Assert.notNull(criteria, "No Criteria object specified");
-		SessionHolder sessionHolder =
-			(SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
-		if (sessionHolder != null && sessionHolder.hasTimeout()) {
-			criteria.setTimeout(sessionHolder.getTimeToLiveInSeconds());
+		if (sessionFactory != null) {
+			SessionHolder sessionHolder =
+				(SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
+			if (sessionHolder != null && sessionHolder.hasTimeout()) {
+				criteria.setTimeout(sessionHolder.getTimeToLiveInSeconds());
+			}
 		}
 	}
 

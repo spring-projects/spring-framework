@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.orm.hibernate4.SessionFactoryUtils;
@@ -77,23 +78,29 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 	private SessionFactory sessionFactory;
 
 
+	/**
+	 * Set the Hibernate SessionFactory that should be used to create
+	 * Hibernate Sessions.
+	 */
 	public void setSessionFactory(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
 	}
 
+	/**
+	 * Return the Hibernate SessionFactory that should be used to create
+	 * Hibernate Sessions.
+	 */
 	public SessionFactory getSessionFactory() {
 		return this.sessionFactory;
 	}
 
 
 	/**
-	 * Open a new Hibernate {@code Session} according to the settings of this
-	 * {@code HibernateAccessor} and bind it to the thread via the
+	 * Open a new Hibernate {@code Session} according and bind it to the thread via the
 	 * {@link org.springframework.transaction.support.TransactionSynchronizationManager}.
 	 */
 	@Override
 	public void preHandle(WebRequest request) throws DataAccessException {
-
 		String participateAttributeName = getParticipateAttributeName();
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
