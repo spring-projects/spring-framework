@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * Hibernate's own {@code SessionFactory.getCurrentSession()} method, to be
  * able to detect a thread-bound Session. Typically, the code will look like as follows:
  *
- * <pre>
+ * <pre class="code">
  * public void doSomeDataAccessAction() {
  *   Session session = this.sessionFactory.getCurrentSession();
  *   ...
@@ -68,7 +68,12 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see org.hibernate.SessionFactory#getCurrentSession()
  * @see HibernateTransactionManager
  * @see HibernateTemplate
+ * @deprecated as of Spring 3.2.7, in favor of either HibernateTemplate usage or
+ * native Hibernate API usage within transactions, in combination with a general
+ * {@link org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor}.
+ * Note: This class does not have an equivalent replacement in {@code orm.hibernate4}.
  */
+@Deprecated
 public class HibernateInterceptor extends HibernateAccessor implements MethodInterceptor {
 
 	private boolean exceptionConversionEnabled = true;

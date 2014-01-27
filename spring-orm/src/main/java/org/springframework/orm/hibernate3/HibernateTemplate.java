@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,7 +132,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	/**
 	 * Create a new HibernateTemplate instance.
-	 * @param sessionFactory SessionFactory to create Sessions
+	 * @param sessionFactory the SessionFactory to create Sessions with
 	 */
 	public HibernateTemplate(SessionFactory sessionFactory) {
 		setSessionFactory(sessionFactory);
@@ -141,7 +141,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	/**
 	 * Create a new HibernateTemplate instance.
-	 * @param sessionFactory SessionFactory to create Sessions
+	 * @param sessionFactory the SessionFactory to create Sessions with
 	 * @param allowCreate if a non-transactional Session should be created when no
 	 * transactional Session can be found for the current thread
 	 */
@@ -339,6 +339,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		return doExecute(action, false, false);
 	}
 
+	@Deprecated
 	public List executeFind(HibernateCallback<?> action) throws DataAccessException {
 		Object result = doExecute(action, false, false);
 		if (result != null && !(result instanceof List)) {
@@ -480,17 +481,17 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * @see #prepareCriteria
 	 */
 	protected Session createSessionProxy(Session session) {
-		Class[] sessionIfcs = null;
-		Class mainIfc = (session instanceof org.hibernate.classic.Session ?
+		Class<?>[] sessionIfcs;
+		Class<?> mainIfc = (session instanceof org.hibernate.classic.Session ?
 				org.hibernate.classic.Session.class : Session.class);
 		if (session instanceof EventSource) {
-			sessionIfcs = new Class[] {mainIfc, EventSource.class};
+			sessionIfcs = new Class<?>[] {mainIfc, EventSource.class};
 		}
 		else if (session instanceof SessionImplementor) {
-			sessionIfcs = new Class[] {mainIfc, SessionImplementor.class};
+			sessionIfcs = new Class<?>[] {mainIfc, SessionImplementor.class};
 		}
 		else {
-			sessionIfcs = new Class[] {mainIfc};
+			sessionIfcs = new Class<?>[] {mainIfc};
 		}
 		return (Session) Proxy.newProxyInstance(
 				session.getClass().getClassLoader(), sessionIfcs,

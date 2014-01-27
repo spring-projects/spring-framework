@@ -611,10 +611,12 @@ public abstract class SessionFactoryUtils {
 	 */
 	public static void applyTransactionTimeout(Criteria criteria, SessionFactory sessionFactory) {
 		Assert.notNull(criteria, "No Criteria object specified");
-		SessionHolder sessionHolder =
-			(SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
-		if (sessionHolder != null && sessionHolder.hasTimeout()) {
-			criteria.setTimeout(sessionHolder.getTimeToLiveInSeconds());
+		if (sessionFactory != null) {
+			SessionHolder sessionHolder =
+				(SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
+			if (sessionHolder != null && sessionHolder.hasTimeout()) {
+				criteria.setTimeout(sessionHolder.getTimeToLiveInSeconds());
+			}
 		}
 	}
 

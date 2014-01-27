@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,10 +90,13 @@ public interface HibernateOperations {
 	 * {@link List}.
 	 * <p>This is a convenience method for executing Hibernate find calls or
 	 * queries within an action.
-	 * @param action calback object that specifies the Hibernate action
+	 * @param action callback object that specifies the Hibernate action
 	 * @return a List result returned by the action, or {@code null}
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @deprecated as of Spring 3.2.7, in favor of using a regular {@link #execute}
+	 * call with a generic List type declared
 	 */
+	@Deprecated
 	List executeFind(HibernateCallback<?> action) throws DataAccessException;
 
 
@@ -131,8 +134,7 @@ public interface HibernateOperations {
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#get(Class, java.io.Serializable, org.hibernate.LockMode)
 	 */
-	<T> T get(Class<T> entityClass, Serializable id, LockMode lockMode)
-			throws DataAccessException;
+	<T> T get(Class<T> entityClass, Serializable id, LockMode lockMode) throws DataAccessException;
 
 	/**
 	 * Return the persistent instance of the given entity class
@@ -164,8 +166,7 @@ public interface HibernateOperations {
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#get(Class, java.io.Serializable, org.hibernate.LockMode)
 	 */
-	Object get(String entityName, Serializable id, LockMode lockMode)
-			throws DataAccessException;
+	Object get(String entityName, Serializable id, LockMode lockMode) throws DataAccessException;
 
 	/**
 	 * Return the persistent instance of the given entity class
@@ -199,8 +200,7 @@ public interface HibernateOperations {
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#load(Class, java.io.Serializable)
 	 */
-	<T> T load(Class<T> entityClass, Serializable id, LockMode lockMode)
-			throws DataAccessException;
+	<T> T load(Class<T> entityClass, Serializable id, LockMode lockMode) throws DataAccessException;
 
 	/**
 	 * Return the persistent instance of the given entity class
@@ -234,8 +234,7 @@ public interface HibernateOperations {
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#load(Class, java.io.Serializable)
 	 */
-	Object load(String entityName, Serializable id, LockMode lockMode)
-			throws DataAccessException;
+	Object load(String entityName, Serializable id, LockMode lockMode) throws DataAccessException;
 
 	/**
 	 * Return all persistent instances of the given entity class.
@@ -245,7 +244,7 @@ public interface HibernateOperations {
 	 * @throws org.springframework.dao.DataAccessException if there is a Hibernate error
 	 * @see org.hibernate.Session#createCriteria
 	 */
-	<T>List<T> loadAll(Class<T> entityClass) throws DataAccessException;
+	<T> List<T> loadAll(Class<T> entityClass) throws DataAccessException;
 
 	/**
 	 * Load the persistent instance with the given identifier
