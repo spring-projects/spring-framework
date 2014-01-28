@@ -45718,7 +45718,7 @@ do yourself a favour and read <<expressions>>:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(value="books", **key="#isbn")**
+	@Cacheable(value="books", **key="#isbn"**)
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 
 	@Cacheable(value="books", **key="#isbn.rawNumber"**)
@@ -45728,7 +45728,7 @@ do yourself a favour and read <<expressions>>:
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 ----
 
-The snippets above, show how easy it is to select a certain argument, one of its
+The snippets above show how easy it is to select a certain argument, one of its
 properties or even an arbitrary (static) method.
 
 
@@ -45739,8 +45739,8 @@ might depend on the given arguments). The cache annotations support such functio
 through the `conditional` parameter which takes a `SpEL` expression that is evaluated to
 either `true` or `false`. If `true`, the method is cached - if not, it behaves as if the
 method is not cached, that is executed every since time no matter what values are in the
-cache or what arguments are used. A quick example - the following method will be cached,
-only if the argument `name` has a length shorter then 32:
+cache or what arguments are used. A quick example - the following method will be cached
+only if the argument `name` has a length shorter than 32:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -45769,7 +45769,7 @@ Each `SpEL` expression evaluates again a dedicated
 <<expressions-language-ref,`context`>>. In addition to the build in parameters, the
 framework provides dedicated caching related metadata such as the argument names. The
 next table lists the items made available to the context so one can use them for key and
-conditional(see next section) computations:
+conditional (see next section) computations:
 
 [[cache-spel-context-tbl]]
 .Cache SpEL available metadata
@@ -45847,7 +45847,7 @@ The cache abstraction allows not just population of a cache store but also evict
 This process is useful for removing stale or unused data from the cache. Opposed to
 `@Cacheable`, annotation `@CacheEvict` demarcates methods that perform cache
 __eviction__, that is methods that act as triggers for removing data from the cache.
-Just like its sibling, `@CacheEvict` requires one to specify one (or multiple) caches
+Just like its sibling, `@CacheEvict` requires specifying one (or multiple) caches
 that are affected by the action, allows a key or a condition to be specified but in
 addition, features an extra parameter `allEntries` which indicates whether a cache-wide
 eviction needs to be performed rather then just an entry one (based on the key):
@@ -45876,7 +45876,7 @@ to the method outcome.
 
 It is important to note that void methods can be used with `@CacheEvict` - as the
 methods act as triggers, the return values are ignored (as they don't interact with the
-cache) - this is not the case with `@Cacheable` which adds/update data into the cache
+cache) - this is not the case with `@Cacheable` which adds/updates data into the cache
 and thus requires a result.
 
 
@@ -45887,7 +45887,7 @@ and thus requires a result.
 There are cases when multiple annotations of the same type, such as `@CacheEvict` or
 `@CachePut` need to be specified, for example because the condition or the key
 expression is different between different caches. Unfortunately Java does not support
-such declarations however there is a workaround - using a __enclosing__ annotation, in
+such declarations however there is a workaround - using an __enclosing__ annotation, in
 this case, `@Caching`. `@Caching` allows multiple nested `@Cacheable`, `@CachePut` and
 `@CacheEvict` to be used on the same method:
 
@@ -45903,7 +45903,7 @@ this case, `@Caching`. `@Caching` allows multiple nested `@Cacheable`, `@CachePu
 [[cache-annotation-enable]]
 ==== Enable caching annotations
 It is important to note that even though declaring the cache annotations does not
-automatically triggers their actions - like many things in Spring, the feature has to be
+automatically trigger their actions - like many things in Spring, the feature has to be
 declaratively enabled (which means if you ever suspect caching is to blame, you can
 disable it by removing only one configuration line rather then all the annotations in
 your code).
@@ -46207,7 +46207,7 @@ reference documentation].
 ==== Dealing with caches without a backing store
 Sometimes when switching environments or doing testing, one might have cache
 declarations without an actual backing cache configured. As this is an invalid
-configuration, at runtime an exception will be through since the caching infrastructure
+configuration, at runtime an exception will be thrown since the caching infrastructure
 is unable to find a suitable store. In situations like this, rather then removing the
 cache declarations (which can prove tedious), one can wire in a simple, dummy cache that
 performs no caching - that is, forces the cached methods to be executed every time:
