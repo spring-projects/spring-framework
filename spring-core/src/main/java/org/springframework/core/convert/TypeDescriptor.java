@@ -105,7 +105,7 @@ public class TypeDescriptor implements Serializable {
 	public TypeDescriptor(Property property) {
 		Assert.notNull(property, "Property must not be null");
 		this.resolvableType = ResolvableType.forMethodParameter(property.getMethodParameter());
-		this.type = this.resolvableType.resolve(Object.class);
+		this.type = this.resolvableType.resolve(property.getType());
 		this.annotations = nullSafeAnnotations(property.getAnnotations());
 	}
 

@@ -1577,6 +1577,24 @@ public final class BeanWrapperTests {
 		assertEquals(8, bwi.getPropertyValue("object"));
 	}
 
+	@Test
+	public void testGenericArraySetter() {
+		SkipReaderStub foo = new SkipReaderStub();
+		BeanWrapperImpl bwi = new BeanWrapperImpl(foo);
+		List<String> values = new LinkedList<String>();
+		values.add("1");
+		values.add("2");
+		values.add("3");
+		values.add("4");
+		bwi.setPropertyValue("items", values);
+		Object[] result = foo.items;
+		assertEquals(4, result.length);
+		assertEquals("1", result[0]);
+		assertEquals("2", result[1]);
+		assertEquals("3", result[2]);
+		assertEquals("4", result[3]);
+	}
+
 
 	static class Spr10115Bean {
 
@@ -1988,6 +2006,23 @@ public final class BeanWrapperTests {
 
 		public Integer getObject() {
 			return (this.value != null ? this.value.length() : null);
+		}
+	}
+
+
+	public static class SkipReaderStub<T> {
+
+		public T[] items;
+
+		public SkipReaderStub() {
+		}
+
+		public SkipReaderStub(T... items) {
+			this.items = items;
+		}
+
+		public void setItems(T... items) {
+			this.items = items;
 		}
 	}
 
