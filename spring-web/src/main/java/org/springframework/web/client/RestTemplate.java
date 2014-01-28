@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,6 +115,7 @@ import org.springframework.web.util.UriTemplate;
  * requestFactory} and {@link #setErrorHandler(ResponseErrorHandler) errorHandler} bean properties.
  *
  * @author Arjen Poutsma
+ * @author Brian Clozel
  * @since 3.0
  * @see HttpMessageConverter
  * @see RequestCallback
@@ -141,13 +142,14 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 	private final ResponseExtractor<HttpHeaders> headersExtractor = new HeadersExtractor();
 
-	private List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
+	private final List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
 
 	private ResponseErrorHandler errorHandler = new DefaultResponseErrorHandler();
 
 
 	/**
 	 * Create a new instance of the {@link RestTemplate} using default settings.
+	 * Default {@link HttpMessageConverter}s are initialized.
 	 */
 	@SuppressWarnings("deprecation")
 	public RestTemplate() {
@@ -182,6 +184,17 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		setRequestFactory(requestFactory);
 	}
 
+	/**
+	 * Create a new instance of the {@link RestTemplate} using the given list of
+	 * {@link HttpMessageConverter} to use
+	 * @param messageConverters the list of {@link HttpMessageConverter} to use
+	 * @since 4.0.1
+	 */
+	public RestTemplate(List<HttpMessageConverter<?>> messageConverters) {
+		Assert.notEmpty(messageConverters, "'messageConverters' must not be empty");
+		this.messageConverters.addAll(messageConverters);
+	}
+
 
 	/**
 	 * Set the message body converters to use.
@@ -189,7 +202,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 */
 	public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
 		Assert.notEmpty(messageConverters, "'messageConverters' must not be empty");
-		this.messageConverters = messageConverters;
+		this.messageConverters.clear();
+		this.messageConverters.addAll(messageConverters);
 	}
 
 	/**
