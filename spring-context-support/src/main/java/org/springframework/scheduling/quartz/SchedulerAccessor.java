@@ -481,10 +481,21 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 				}
 			}
 			if (this.globalJobListeners != null) {
-				Method addJobListener = target.getClass().getMethod(
-						(quartz2 ? "addJobListener" : "addGlobalJobListener"), JobListener.class);
+				final Method addJobListener;
+				if (quartz2) {
+					addJobListener = target.getClass().getMethod(
+							"addJobListener", JobListener.class, List.class);
+				} else {
+					addJobListener = target.getClass().getMethod(
+							"addGlobalJobListener", JobListener.class);
+				}
 				for (JobListener listener : this.globalJobListeners) {
-					ReflectionUtils.invokeMethod(addJobListener, target, listener);
+					if (quartz2) {
+						final List<?> matchers = new ArrayList<Object>();
+						ReflectionUtils.invokeMethod(addJobListener, target, listener, matchers);
+					} else {
+						ReflectionUtils.invokeMethod(addJobListener, target, listener);
+					}
 				}
 			}
 			if (this.jobListeners != null) {
@@ -497,10 +508,21 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 				}
 			}
 			if (this.globalTriggerListeners != null) {
-				Method addTriggerListener = target.getClass().getMethod(
-						(quartz2 ? "addTriggerListener" : "addGlobalTriggerListener"), TriggerListener.class);
+				final Method addTriggerListener;
+				if (quartz2) {
+					addTriggerListener = target.getClass().getMethod(
+							"addTriggerListener", TriggerListener.class, List.class);
+				} else {
+					addTriggerListener = target.getClass().getMethod(
+							"addGlobalTriggerListener", TriggerListener.class);
+				}
 				for (TriggerListener listener : this.globalTriggerListeners) {
-					ReflectionUtils.invokeMethod(addTriggerListener, target, listener);
+					if (quartz2) {
+						final List<?> matchers = new ArrayList<Object>();
+						ReflectionUtils.invokeMethod(addTriggerListener, target, listener, matchers);
+					} else {
+						ReflectionUtils.invokeMethod(addTriggerListener, target, listener);
+					}
 				}
 			}
 			if (this.triggerListeners != null) {
