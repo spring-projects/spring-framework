@@ -60,7 +60,6 @@ import org.springframework.util.StringUtils;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -1561,11 +1560,11 @@ public final class BeanWrapperTests {
 		BeanWrapperImpl bwi = new BeanWrapperImpl(foo);
 
 		Object[] array = new Object[] {"1","2"};
-		bwi.setPropertyValue("object", array );
+		bwi.setPropertyValue("object", array);
 		assertThat(foo.getObject(), equalTo((Object) array));
 
 		array = new Object[] {"1"};
-		bwi.setPropertyValue("object", array );
+		bwi.setPropertyValue("object", array);
 		assertThat(foo.getObject(), equalTo((Object) array));
 	}
 
