@@ -871,8 +871,9 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		}
 	}
 
-	private void growCollectionIfNecessary(Collection<Object> collection, int index,
-			String name, PropertyDescriptor pd, int nestingLevel) {
+	private void growCollectionIfNecessary(Collection<Object> collection, int index, String name,
+			PropertyDescriptor pd, int nestingLevel) {
+
 		if (!this.autoGrowNestedPaths) {
 			return;
 		}
