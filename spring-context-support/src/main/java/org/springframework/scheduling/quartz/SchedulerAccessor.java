@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ import org.springframework.util.ReflectionUtils;
  * <b>Note:</b> Quartz 1.x support is deprecated - please upgrade to Quartz 2.0+.
  *
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 2.5.6
  */
 public abstract class SchedulerAccessor implements ResourceLoaderAware {
@@ -395,7 +396,8 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 		}
 		else {
 			try {
-				Map<?, ?> jobDataMap = (Map<?, ?>) ReflectionUtils.invokeMethod(Trigger.class.getMethod("getJobDataMap"), trigger);
+				Map<?, ?> jobDataMap =
+						(Map<?, ?>) ReflectionUtils.invokeMethod(Trigger.class.getMethod("getJobDataMap"), trigger);
 				return (JobDetail) jobDataMap.remove(JobDetailAwareTrigger.JOB_DETAIL_KEY);
 			}
 			catch (NoSuchMethodException ex) {
@@ -472,19 +474,33 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 			target = getScheduler();
 			quartz2 = false;
 		}
+		Class<?> targetClass = target.getClass();
 
 		try {
 			if (this.schedulerListeners != null) {
-				Method addSchedulerListener = target.getClass().getMethod("addSchedulerListener", SchedulerListener.class);
+				Method addSchedulerListener = targetClass.getMethod("addSchedulerListener", SchedulerListener.class);
 				for (SchedulerListener listener : this.schedulerListeners) {
 					ReflectionUtils.invokeMethod(addSchedulerListener, target, listener);
 				}
 			}
 			if (this.globalJobListeners != null) {
-				Method addJobListener = target.getClass().getMethod(
-						(quartz2 ? "addJobListener" : "addGlobalJobListener"), JobListener.class);
+				Method addJobListener;
+				if (quartz2) {
+					// addJobListener(JobListener) only introduced as late as Quartz 2.2, so we need
+					// to fall back to the Quartz 2.0/2.1 compatible variant with an empty matchers List
+					addJobListener = targetClass.getMethod("addJobListener", JobListener.class, List.class);
+				}
+				else {
+					addJobListener = targetClass.getMethod("addGlobalJobListener", JobListener.class);
+				}
 				for (JobListener listener : this.globalJobListeners) {
-					ReflectionUtils.invokeMethod(addJobListener, target, listener);
+					if (quartz2) {
+						List<?> emptyMatchers = new LinkedList<Object>();
+						ReflectionUtils.invokeMethod(addJobListener, target, listener, emptyMatchers);
+					}
+					else {
+						ReflectionUtils.invokeMethod(addJobListener, target, listener);
+					}
 				}
 			}
 			if (this.jobListeners != null) {
@@ -497,10 +513,23 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 				}
 			}
 			if (this.globalTriggerListeners != null) {
-				Method addTriggerListener = target.getClass().getMethod(
-						(quartz2 ? "addTriggerListener" : "addGlobalTriggerListener"), TriggerListener.class);
+				Method addTriggerListener;
+				if (quartz2) {
+					// addTriggerListener(TriggerListener) only introduced as late as Quartz 2.2, so we need
+					// to fall back to the Quartz 2.0/2.1 compatible variant with an empty matchers List
+					addTriggerListener = targetClass.getMethod("addTriggerListener", TriggerListener.class, List.class);
+				}
+				else {
+					addTriggerListener = targetClass.getMethod("addGlobalTriggerListener", TriggerListener.class);
+				}
 				for (TriggerListener listener : this.globalTriggerListeners) {
-					ReflectionUtils.invokeMethod(addTriggerListener, target, listener);
+					if (quartz2) {
+						List<?> emptyMatchers = new LinkedList<Object>();
+						ReflectionUtils.invokeMethod(addTriggerListener, target, listener, emptyMatchers);
+					}
+					else {
+						ReflectionUtils.invokeMethod(addTriggerListener, target, listener);
+					}
 				}
 			}
 			if (this.triggerListeners != null) {
