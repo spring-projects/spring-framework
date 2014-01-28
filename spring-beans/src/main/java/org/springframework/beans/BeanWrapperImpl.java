@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -223,7 +223,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		return this.object;
 	}
 
-	public final Class getWrappedClass() {
+	public final Class<?> getWrappedClass() {
 		return (this.object != null ? this.object.getClass() : null);
 	}
 
@@ -246,7 +246,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 * Return the class of the root object at the top of the path of this BeanWrapper.
 	 * @see #getNestedPath
 	 */
-	public final Class getRootClass() {
+	public final Class<?> getRootClass() {
 		return (this.rootObject != null ? this.rootObject.getClass() : null);
 	}
 
@@ -304,7 +304,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 * Needs to be called when the target object changes.
 	 * @param clazz the class to introspect
 	 */
-	protected void setIntrospectionClass(Class clazz) {
+	protected void setIntrospectionClass(Class<?> clazz) {
 		if (this.cachedIntrospectionResults != null &&
 				!clazz.equals(this.cachedIntrospectionResults.getBeanClass())) {
 			this.cachedIntrospectionResults = null;
@@ -352,7 +352,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	}
 
 	@Override
-	public Class getPropertyType(String propertyName) throws BeansException {
+	public Class<?> getPropertyType(String propertyName) throws BeansException {
 		try {
 			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
 			if (pd != null) {
@@ -366,7 +366,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				}
 				// Check to see if there is a custom editor,
 				// which might give an indication on the desired target type.
-				Class editorType = guessPropertyTypeFromEditors(propertyName);
+				Class<?> editorType = guessPropertyTypeFromEditors(propertyName);
 				if (editorType != null) {
 					return editorType;
 				}
@@ -485,13 +485,13 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 					"No property '" + propertyName + "' found");
 		}
-		return convertForProperty(propertyName, null, value, pd);
+		return convertForProperty(propertyName, null, value, new TypeDescriptor(property(pd)));
 	}
 
-	private Object convertForProperty(String propertyName, Object oldValue, Object newValue, PropertyDescriptor pd)
+	private Object convertForProperty(String propertyName, Object oldValue, Object newValue, TypeDescriptor td)
 			throws TypeMismatchException {
 
-		return convertIfNecessary(propertyName, oldValue, newValue, pd.getPropertyType(), new TypeDescriptor(property(pd)));
+		return convertIfNecessary(propertyName, oldValue, newValue, td.getType(), td);
 	}
 
 	private Property property(PropertyDescriptor pd) {
@@ -699,7 +699,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		return nestedBw.getPropertyValue(tokens);
 	}
 
-    private Object getPropertyValue(PropertyTokenHolder tokens) throws BeansException {
+    @SuppressWarnings("unchecked")
+	private Object getPropertyValue(PropertyTokenHolder tokens) throws BeansException {
 		String propertyName = tokens.canonicalName;
 		String actualName = tokens.actualName;
 		PropertyDescriptor pd = getCachedIntrospectionResults().getPropertyDescriptor(actualName);
@@ -766,20 +767,20 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					}
 					else if (value instanceof List) {
 						int index = Integer.parseInt(key);
-						List list = (List) value;
+						List<Object> list = (List<Object>) value;
 						growCollectionIfNecessary(list, index, indexedPropertyName, pd, i + 1);
 						value = list.get(index);
 					}
 					else if (value instanceof Set) {
 						// Apply index to Iterator in case of a Set.
-						Set set = (Set) value;
+						Set<Object> set = (Set<Object>) value;
 						int index = Integer.parseInt(key);
 						if (index < 0 || index >= set.size()) {
 							throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 									"Cannot get element with index " + index + " from Set of size " +
 									set.size() + ", accessed using property path '" + propertyName + "'");
 						}
-						Iterator it = set.iterator();
+						Iterator<Object> it = set.iterator();
 						for (int j = 0; it.hasNext(); j++) {
 							Object elem = it.next();
 							if (j == index) {
@@ -789,11 +790,12 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						}
 					}
 					else if (value instanceof Map) {
-						Map map = (Map) value;
+						Map<Object, Object> map = (Map<Object, Object>) value;
 						Class<?> mapKeyType = GenericCollectionTypeResolver.getMapKeyReturnType(pd.getReadMethod(), i + 1);
 						// IMPORTANT: Do not pass full property name in here - property editors
 						// must not kick in for map keys but rather only for map values.
-						TypeDescriptor typeDescriptor = mapKeyType != null ? TypeDescriptor.valueOf(mapKeyType) : TypeDescriptor.valueOf(Object.class);
+						TypeDescriptor typeDescriptor = (mapKeyType != null ?
+								TypeDescriptor.valueOf(mapKeyType) : TypeDescriptor.valueOf(Object.class));
 						Object convertedMapKey = convertIfNecessary(null, null, key, mapKeyType, typeDescriptor);
 						value = map.get(convertedMapKey);
 					}
@@ -850,16 +852,15 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private void growCollectionIfNecessary(
-			Collection collection, int index, String name, PropertyDescriptor pd, int nestingLevel) {
+	private void growCollectionIfNecessary(Collection<Object> collection, int index, String name,
+			PropertyDescriptor pd, int nestingLevel) {
 
 		if (!this.autoGrowNestedPaths) {
 			return;
 		}
 		int size = collection.size();
 		if (index >= size && index < this.autoGrowCollectionLimit) {
-			Class elementType = GenericCollectionTypeResolver.getCollectionReturnType(pd.getReadMethod(), nestingLevel);
+			Class<?> elementType = GenericCollectionTypeResolver.getCollectionReturnType(pd.getReadMethod(), nestingLevel);
 			if (elementType != null) {
 				for (int i = collection.size(); i < index + 1; i++) {
 					collection.add(newValue(elementType, name));
@@ -945,7 +946,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			}
 			if (propValue.getClass().isArray()) {
 				PropertyDescriptor pd = getCachedIntrospectionResults().getPropertyDescriptor(actualName);
-				Class requiredType = propValue.getClass().getComponentType();
+				Class<?> requiredType = propValue.getClass().getComponentType();
 				int arrayIndex = Integer.parseInt(key);
 				Object oldValue = null;
 				try {
@@ -963,9 +964,9 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			}
 			else if (propValue instanceof List) {
 				PropertyDescriptor pd = getCachedIntrospectionResults().getPropertyDescriptor(actualName);
-				Class requiredType = GenericCollectionTypeResolver.getCollectionReturnType(
+				Class<?> requiredType = GenericCollectionTypeResolver.getCollectionReturnType(
 						pd.getReadMethod(), tokens.keys.length);
-				List list = (List) propValue;
+				List<Object> list = (List<Object>) propValue;
 				int index = Integer.parseInt(key);
 				Object oldValue = null;
 				if (isExtractOldValueForEditor() && index < list.size()) {
@@ -1000,11 +1001,11 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			}
 			else if (propValue instanceof Map) {
 				PropertyDescriptor pd = getCachedIntrospectionResults().getPropertyDescriptor(actualName);
-				Class mapKeyType = GenericCollectionTypeResolver.getMapKeyReturnType(
+				Class<?> mapKeyType = GenericCollectionTypeResolver.getMapKeyReturnType(
 						pd.getReadMethod(), tokens.keys.length);
-				Class mapValueType = GenericCollectionTypeResolver.getMapValueReturnType(
+				Class<?> mapValueType = GenericCollectionTypeResolver.getMapValueReturnType(
 						pd.getReadMethod(), tokens.keys.length);
-				Map map = (Map) propValue;
+				Map<Object, Object> map = (Map<Object, Object>) propValue;
 				// IMPORTANT: Do not pass full property name in here - property editors
 				// must not kick in for map keys but rather only for map values.
 				TypeDescriptor typeDescriptor = (mapKeyType != null ?
@@ -1094,7 +1095,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 								}
 							}
 						}
-						valueToApply = convertForProperty(propertyName, oldValue, originalValue, pd);
+						valueToApply = convertForProperty(
+								propertyName, oldValue, originalValue, new TypeDescriptor(property(pd)));
 					}
 					pv.getOriginalPropertyValue().conversionNecessary = (valueToApply != originalValue);
 				}
