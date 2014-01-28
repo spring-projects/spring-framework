@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web;
 
 import java.lang.reflect.Modifier;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ServiceLoader;
@@ -47,12 +46,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
  * Final Draft specification for complete details.
  *
  * <h3>In combination with {@code web.xml}</h3>
- * <p>If a web application includes a {@code WEB-INF/web.xml} file, it is important to
- * understand that neither this nor any other {@code ServletContextInitializer} will be
- * processed unless the {@code <web-app>} element's {@code version} attribute is >= "3.0"
- * and the {@code xsi:schemaLocation} for "http://java.sun.com/xml/ns/javaee" is set to
- * "http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd".
- * <p>A web application can choose to limit the amount of classpath scanning the Servlet
+ * A web application can choose to limit the amount of classpath scanning the Servlet
  * container does at startup either through the {@code metadata-complete} attribute in
  * {@code web.xml}, which controls scanning for Servlet annotations or through an
  * {@code <absolute-ordering>} element also in {@code web.xml}, which controls which
@@ -173,7 +167,7 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 			return;
 		}
 
-		Collections.sort(initializers, new AnnotationAwareOrderComparator());
+		AnnotationAwareOrderComparator.sort(initializers);
 		servletContext.log("Spring WebApplicationInitializers detected on classpath: " + initializers);
 
 		for (WebApplicationInitializer initializer : initializers) {
