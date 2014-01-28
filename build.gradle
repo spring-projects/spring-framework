@@ -20,7 +20,7 @@ configure(allprojects) { project ->
 	ext.aspectjVersion  = "1.7.2"
 	ext.hsqldbVersion   = "1.8.0.10"
 	ext.junitVersion    = "4.11"
-	ext.slf4jVersion    = "1.6.1"
+	ext.slf4jVersion    = "1.6.6"
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
 	apply plugin: "propdeps"
