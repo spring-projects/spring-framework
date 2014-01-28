@@ -3,6 +3,35 @@ SPRING FRAMEWORK CHANGELOG
 http://www.spring.io
 
 
+Changes in version 3.2.7 (2013-12-12)
+-------------------------------------
+
+* fixed memory leaks with @Async (SPR-11275, SPR-11276)
+* restored full Java 5 compatibility (SPR-11313, SPR-11349, SPR-11321)
+* fixed various dependency compatibility issues (SPR-11359, SPR-11265, SPR-11362, SPR-11284)
+* improved performance and reduced memory consumption for some edge cases (SPR-11343, SPR-9014, SPR-11344, SPR-11304)
+* fixed WebSphere compatibility issue (SPR-11341, SPR-11297)
+* fixed ServletWebRequest.checkNotModified() methods to treat HEAD identically to GET (SPR-11317)
+* fixed various regression issues (SPR-11320, SPR-11246, SPR-11231)
+* fixed theme resolution fails with "IllegalArgumentException" issue (SPR-11128)
+* fixed @Enable registrars subclass issues (SPR-11251)
+* allowed consolidation of all configuration into the "root" context with AbstractAnnotationConfigDispatcherServletInitializer (SPR-11357)
+* provided alternative RestTemplate constructor to avoid default MessageConverter creation (SPR-11351)
+* handle NoClassDefFoundError for TestExecutionListeners consistently (SPR-11347)
+* fixed @Bean meta-annotation detection when using ASM (SPR-10488)
+* provide access to SimpleTriggerFactoryBean property startTime (SPR-10940)
+* added patch() to MockMvcRequestBuilders (SPR-11299)
+* provided a mechanism for adding ApplicationContextInitializers to DispatcherServlet's ApplicationContext (SPR-11314)
+* fixed various documentation issues (SPR-3983, SPR-11364, SPR-11331)
+* enabled ServletTestExecutionListener by default in abstract base test classes (SPR-11340)
+* fixed type comparison in ReflectionHelper.getTypeDifferenceWeight (SPR-11306)
+* improved logging and exception information (SPR-11346, SPR-11333)
+* fixed read/write method mismatch problems with BeanWrapper (SPR-11361)
+* fixed context:component-scan element in the mvc-cofig.xml (SPR-11221)
+* fixed XMLEventStreamWriter handleing for writeEmptyElement() followed by writeAttribute() (SPR-11254)
+* fixed CronTriggerFactoryBean to allow calendar name and description to be specified (SPR-9771)
+
+
 Changes in version 3.2.6 (2013-12-12)
 -------------------------------------
 
