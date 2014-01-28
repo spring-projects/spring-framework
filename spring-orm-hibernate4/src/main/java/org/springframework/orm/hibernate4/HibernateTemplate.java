@@ -144,7 +144,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	 * Sessions (for example, within a transaction).
 	 * @see #enableFilters(org.hibernate.Session)
 	 * @see org.hibernate.Session#enableFilter(String)
-	 * @see org.springframework.orm.hibernate3.LocalSessionFactoryBean#setFilterDefinitions(org.springframework.orm.hibernate3.FilterDefinition...)
 	 */
 	public void setFilterNames(String... filterNames) {
 		this.filterNames = filterNames;
