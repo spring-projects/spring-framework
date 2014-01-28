@@ -52,7 +52,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
-
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -69,6 +68,7 @@ import static org.mockito.BDDMockito.*;
  * @author Juergen Hoeller
  * @since 4.0.1
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class HibernateTemplateTests {
 
 	private SessionFactory sessionFactory;
