@@ -19,6 +19,7 @@ package org.springframework.cache.annotation;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -26,6 +27,7 @@ import org.springframework.cache.interceptor.CacheEvictOperation;
 import org.springframework.cache.interceptor.CacheOperation;
 import org.springframework.cache.interceptor.CachePutOperation;
 import org.springframework.cache.interceptor.CacheableOperation;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -44,35 +46,47 @@ import org.springframework.util.StringUtils;
 public class SpringCacheAnnotationParser implements CacheAnnotationParser, Serializable {
 
 	@Override
-	public Collection<CacheOperation> parseCacheAnnotations(AnnotatedElement ae) {
+	public Collection<CacheOperation> parseCacheAnnotations(Class<?> type) {
+		DefaultCacheConfig defaultConfig = getDefaultCacheConfig(type);
+		return parseCacheAnnotations(defaultConfig, type);
+	}
+
+	@Override
+	public Collection<CacheOperation> parseCacheAnnotations(Method method) {
+		DefaultCacheConfig defaultConfig = getDefaultCacheConfig(method.getDeclaringClass());
+		return parseCacheAnnotations(defaultConfig, method);
+	}
+
+	protected Collection<CacheOperation> parseCacheAnnotations(DefaultCacheConfig cachingConfig,
+															   AnnotatedElement ae) {
 		Collection<CacheOperation> ops = null;
 
 		Collection<Cacheable> cacheables = getAnnotations(ae, Cacheable.class);
 		if (cacheables != null) {
 			ops = lazyInit(ops);
 			for (Cacheable cacheable : cacheables) {
-				ops.add(parseCacheableAnnotation(ae, cacheable));
+				ops.add(parseCacheableAnnotation(ae, cachingConfig, cacheable));
 			}
 		}
 		Collection<CacheEvict> evicts = getAnnotations(ae, CacheEvict.class);
 		if (evicts != null) {
 			ops = lazyInit(ops);
 			for (CacheEvict e : evicts) {
-				ops.add(parseEvictAnnotation(ae, e));
+				ops.add(parseEvictAnnotation(ae, cachingConfig, e));
 			}
 		}
 		Collection<CachePut> updates = getAnnotations(ae, CachePut.class);
 		if (updates != null) {
 			ops = lazyInit(ops);
 			for (CachePut p : updates) {
-				ops.add(parseUpdateAnnotation(ae, p));
+				ops.add(parseUpdateAnnotation(ae, cachingConfig, p));
 			}
 		}
 		Collection<Caching> caching = getAnnotations(ae, Caching.class);
 		if (caching != null) {
 			ops = lazyInit(ops);
 			for (Caching c : caching) {
-				ops.addAll(parseCachingAnnotation(ae, c));
+				ops.addAll(parseCachingAnnotation(ae, cachingConfig, c));
 			}
 		}
 		return ops;
@@ -82,7 +96,8 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		return (ops != null ? ops : new ArrayList<CacheOperation>(1));
 	}
 
-	CacheableOperation parseCacheableAnnotation(AnnotatedElement ae, Cacheable caching) {
+	CacheableOperation parseCacheableAnnotation(AnnotatedElement ae,
+												DefaultCacheConfig defaultConfig, Cacheable caching) {
 		CacheableOperation cuo = new CacheableOperation();
 		cuo.setCacheNames(caching.value());
 		cuo.setCondition(caching.condition());
@@ -92,11 +107,14 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		cuo.setCacheManager(caching.cacheManager());
 		cuo.setName(ae.toString());
 
-		checkKeySourceConsistency(ae, caching.key(), caching.keyGenerator());
+		defaultConfig.applyDefault(cuo);
+
+		validateCacheOperation(ae, cuo);
 		return cuo;
 	}
 
-	CacheEvictOperation parseEvictAnnotation(AnnotatedElement ae, CacheEvict caching) {
+	CacheEvictOperation parseEvictAnnotation(AnnotatedElement ae,
+											 DefaultCacheConfig defaultConfig, CacheEvict caching) {
 		CacheEvictOperation ceo = new CacheEvictOperation();
 		ceo.setCacheNames(caching.value());
 		ceo.setCondition(caching.condition());
@@ -107,11 +125,14 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		ceo.setBeforeInvocation(caching.beforeInvocation());
 		ceo.setName(ae.toString());
 
-		checkKeySourceConsistency(ae, caching.key(), caching.keyGenerator());
+		defaultConfig.applyDefault(ceo);
+
+		validateCacheOperation(ae, ceo);
 		return ceo;
 	}
 
-	CacheOperation parseUpdateAnnotation(AnnotatedElement ae, CachePut caching) {
+	CacheOperation parseUpdateAnnotation(AnnotatedElement ae,
+										 DefaultCacheConfig defaultConfig, CachePut caching) {
 		CachePutOperation cuo = new CachePutOperation();
 		cuo.setCacheNames(caching.value());
 		cuo.setCondition(caching.condition());
@@ -121,36 +142,54 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		cuo.setCacheManager(caching.cacheManager());
 		cuo.setName(ae.toString());
 
-		checkKeySourceConsistency(ae, caching.key(), caching.keyGenerator());
+		defaultConfig.applyDefault(cuo);
+
+		validateCacheOperation(ae, cuo);
 		return cuo;
 	}
 
-	Collection<CacheOperation> parseCachingAnnotation(AnnotatedElement ae, Caching caching) {
+	Collection<CacheOperation> parseCachingAnnotation(AnnotatedElement ae,
+													  DefaultCacheConfig defaultConfig, Caching caching) {
 		Collection<CacheOperation> ops = null;
 
 		Cacheable[] cacheables = caching.cacheable();
 		if (!ObjectUtils.isEmpty(cacheables)) {
 			ops = lazyInit(ops);
 			for (Cacheable cacheable : cacheables) {
-				ops.add(parseCacheableAnnotation(ae, cacheable));
+				ops.add(parseCacheableAnnotation(ae, defaultConfig, cacheable));
 			}
 		}
 		CacheEvict[] evicts = caching.evict();
 		if (!ObjectUtils.isEmpty(evicts)) {
 			ops = lazyInit(ops);
 			for (CacheEvict evict : evicts) {
-				ops.add(parseEvictAnnotation(ae, evict));
+				ops.add(parseEvictAnnotation(ae, defaultConfig, evict));
 			}
 		}
 		CachePut[] updates = caching.put();
 		if (!ObjectUtils.isEmpty(updates)) {
 			ops = lazyInit(ops);
 			for (CachePut update : updates) {
-				ops.add(parseUpdateAnnotation(ae, update));
+				ops.add(parseUpdateAnnotation(ae, defaultConfig, update));
 			}
 		}
 
 		return ops;
+	}
+
+	/**
+	 * Provides the {@link DefaultCacheConfig} instance for the specified {@link Class}.
+	 *
+	 * @param target the class-level to handle
+	 * @return the default config (never {@code null})
+	 */
+	DefaultCacheConfig getDefaultCacheConfig(Class<?> target) {
+		final CacheConfig annotation = AnnotationUtils.getAnnotation(target, CacheConfig.class);
+		if (annotation != null) {
+			return new DefaultCacheConfig(annotation.cacheManager(),
+					annotation.keyGenerator(), annotation.cacheNames());
+		}
+		return new DefaultCacheConfig();
 	}
 
 	private <T extends Annotation> Collection<T> getAnnotations(AnnotatedElement ae, Class<T> annotationType) {
@@ -173,12 +212,26 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		return (anns.isEmpty() ? null : anns);
 	}
 
-	private void checkKeySourceConsistency(AnnotatedElement ae, String key, String keyGenerator) {
-		if (StringUtils.hasText(key) && StringUtils.hasText(keyGenerator)) {
+	/**
+	 * Validates the specified {@link CacheOperation}.
+	 * <p>Throws an {@link IllegalStateException} if the state of the operation is
+	 * invalid. As there might be multiple sources for default values, this ensure
+	 * that the operation is in a proper state before being returned.
+	 *
+	 * @param ae the annotated element of the cache operation
+	 * @param operation the {@link CacheOperation} to validate
+	 */
+	private void validateCacheOperation(AnnotatedElement ae, CacheOperation operation) {
+		if (StringUtils.hasText(operation.getKey()) && StringUtils.hasText(operation.getKeyGenerator())) {
 			throw new IllegalStateException("Invalid cache annotation configuration on '"
 					+ ae.toString() + "'. Both 'key' and 'keyGenerator' attributes have been set. " +
 					"These attributes are mutually exclusive: either set the SpEL expression used to" +
 					"compute the key at runtime or set the name of the KeyGenerator bean to use.");
+		}
+		if (operation.getCacheNames().isEmpty()) {
+			throw new IllegalStateException("No cache names could be detected on '"
+					+ ae.toString()+ "'. Make sure to set the value parameter on the annotation or" +
+					"declare a @CacheConfig at the class-level with the default cache name(s) to use.");
 		}
 	}
 
@@ -190,6 +243,43 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 	@Override
 	public int hashCode() {
 		return SpringCacheAnnotationParser.class.hashCode();
+	}
+
+	/**
+	 * Provides default settings for a given set of cache operations.
+	 */
+	static class DefaultCacheConfig {
+		private final String cacheManager;
+		private final String keyGenerator;
+		private final String[] cacheNames;
+
+		private DefaultCacheConfig(String cacheManager, String keyGenerator, String[] cacheNames) {
+			this.cacheManager = cacheManager;
+			this.keyGenerator = keyGenerator;
+			this.cacheNames = cacheNames;
+		}
+
+		public DefaultCacheConfig() {
+			this(null, null, null);
+		}
+
+		/**
+		 * Apply the defaults to the specified {@link CacheOperation}.
+		 *
+		 * @param operation the operation to update
+		 */
+		public void applyDefault(CacheOperation operation) {
+			if (!StringUtils.hasText(operation.getCacheManager()) && StringUtils.hasText(cacheManager)) {
+				operation.setCacheManager(cacheManager);
+			}
+			if (!StringUtils.hasText(operation.getKey()) && !StringUtils.hasText(operation.getKeyGenerator())
+					&& StringUtils.hasText(keyGenerator)) {
+				operation.setKeyGenerator(keyGenerator);
+			}
+			if (operation.getCacheNames().isEmpty() && cacheNames != null) {
+				operation.setCacheNames(cacheNames);
+			}
+		}
 	}
 
 }

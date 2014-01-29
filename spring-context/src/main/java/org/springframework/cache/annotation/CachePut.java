@@ -35,6 +35,7 @@ import org.springframework.cache.Cache;
  * @author Phillip Webb
  * @author Stephane Nicoll
  * @since 3.1
+ * @see CacheConfig
  */
 @Target({ ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
@@ -47,7 +48,7 @@ public @interface CachePut {
 	 * <p>May be used to determine the target cache (or caches), matching the
 	 * qualifier value (or the bean name(s)) of (a) specific bean definition.
 	 */
-	String[] value();
+	String[] value() default {};
 
 	/**
 	 * Spring Expression Language (SpEL) attribute for computing the key dynamically.

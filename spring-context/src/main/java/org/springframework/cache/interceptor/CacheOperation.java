@@ -73,10 +73,10 @@ public abstract class CacheOperation {
 	}
 
 	public void setCacheNames(String[] cacheNames) {
-		Assert.notEmpty(cacheNames);
 		this.cacheNames = new LinkedHashSet<String>(cacheNames.length);
-		for (String string : cacheNames) {
-			this.cacheNames.add(string);
+		for (String cacheName : cacheNames) {
+			Assert.hasText(cacheName, "Cache name must be set if specified.");
+			this.cacheNames.add(cacheName);
 		}
 	}
 
