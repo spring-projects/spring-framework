@@ -461,17 +461,17 @@ public class TypeDescriptor implements Serializable {
 		if (getAnnotations().length != other.getAnnotations().length) {
 			return false;
 		}
-		for (Annotation ann : this.getAnnotations()) {
+		for (Annotation ann : getAnnotations()) {
 			if (other.getAnnotation(ann.annotationType()) == null) {
 				return false;
 			}
 		}
 		if (isCollection() || isArray()) {
-			return ObjectUtils.nullSafeEquals(this.getElementTypeDescriptor(), other.getElementTypeDescriptor());
+			return ObjectUtils.nullSafeEquals(getElementTypeDescriptor(), other.getElementTypeDescriptor());
 		}
 		else if (isMap()) {
-			return ObjectUtils.nullSafeEquals(this.getMapKeyTypeDescriptor(), other.getMapKeyTypeDescriptor()) &&
-					ObjectUtils.nullSafeEquals(this.getMapValueTypeDescriptor(), other.getMapValueTypeDescriptor());
+			return ObjectUtils.nullSafeEquals(getMapKeyTypeDescriptor(), other.getMapKeyTypeDescriptor()) &&
+					ObjectUtils.nullSafeEquals(getMapValueTypeDescriptor(), other.getMapValueTypeDescriptor());
 		}
 		else {
 			return true;
