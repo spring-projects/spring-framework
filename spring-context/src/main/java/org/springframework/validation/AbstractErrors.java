@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,6 +208,9 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	protected boolean isMatchingFieldError(String field, FieldError fieldError) {
 		if (field.equals(fieldError.getField())) {
 			return true;
+		}
+		if (field.equals("")) {
+			return false;
 		}
 		// Optimization: use charAt instead of endsWith (SPR-11304)
 		int endIndex = field.length() - 1;
