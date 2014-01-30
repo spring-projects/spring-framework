@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -40,7 +41,7 @@ import org.springframework.util.StringUtils;
  * (driven by the {@value #MBEAN_DOMAIN_PROPERTY_NAME} environment property).
  *
  * <p>Note: This feature is still in beta and primarily designed for use with
- * Spring Tool Suite 3.1.
+ * Spring Tool Suite 3.1 and higher.
  *
  * @author Juergen Hoeller
  * @since 3.2
@@ -119,6 +120,17 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 	}
 
 	/**
+	 * Find all applicable ApplicationContexts for the current application.
+	 * <p>Called if no specific ApplicationContext has been set for this LiveBeansView.
+	 * @return the set of ApplicationContexts
+	 */
+	protected Set<ConfigurableApplicationContext> findApplicationContexts() {
+		synchronized (applicationContexts) {
+			return new LinkedHashSet<ConfigurableApplicationContext>(applicationContexts);
+		}
+	}
+
+	/**
 	 * Actually generate a JSON snapshot of the beans in the given ApplicationContexts.
 	 * <p>This implementation doesn't use any JSON parsing libraries in order to avoid
 	 * third-party library dependencies. It produces an array of context description
@@ -143,11 +155,13 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 			result.append("\"beans\": [\n");
 			ConfigurableListableBeanFactory bf = context.getBeanFactory();
 			String[] beanNames = bf.getBeanDefinitionNames();
-			for (int i = 0; i < beanNames.length; i++) {
-				String beanName = beanNames[i];
+			boolean elementAppended = false;
+			for (String beanName : beanNames) {
 				BeanDefinition bd = bf.getBeanDefinition(beanName);
-				if (bd.getRole() != BeanDefinition.ROLE_INFRASTRUCTURE &&
-						(!bd.isLazyInit() || bf.containsSingleton(beanName))) {
+				if (isBeanEligible(beanName, bd, bf)) {
+					if (elementAppended) {
+						result.append(",\n");
+					}
 					result.append("{\n\"bean\": \"").append(beanName).append("\",\n");
 					String scope = bd.getScope();
 					if (!StringUtils.hasText(scope)) {
@@ -173,9 +187,7 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 						result.append("\"");
 					}
 					result.append("]\n}");
-					if (i < beanNames.length - 1) {
-						result.append(",\n");
-					}
+					elementAppended = true;
 				}
 			}
 			result.append("]\n");
@@ -189,14 +201,16 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 	}
 
 	/**
-	 * Find all applicable ApplicationContexts for the current application.
-	 * <p>Called if no specific ApplicationContext has been set for this LiveBeansView.
-	 * @return the set of ApplicationContexts
+	 * Determine whether the specified bean  is eligible for inclusion in the
+	 * LiveBeansView JSON snapshot.
+	 * @param beanName the name of the bean
+	 * @param bd the corresponding bean definition
+	 * @param bf the containing bean factory
+	 * @return {@code true} if the bean is to be included; {@code false} otherwise
 	 */
-	protected Set<ConfigurableApplicationContext> findApplicationContexts() {
-		synchronized (applicationContexts) {
-			return new LinkedHashSet<ConfigurableApplicationContext>(applicationContexts);
-		}
+	protected boolean isBeanEligible(String beanName, BeanDefinition bd, ConfigurableBeanFactory bf) {
+		return (bd.getRole() != BeanDefinition.ROLE_INFRASTRUCTURE &&
+				(!bd.isLazyInit() || bf.containsSingleton(beanName)));
 	}
 
 }
