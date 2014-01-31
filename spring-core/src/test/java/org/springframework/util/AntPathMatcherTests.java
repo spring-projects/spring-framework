@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -447,10 +447,21 @@ public class AntPathMatcherTests {
 		assertEquals(-1, comparator.compare("/hotels/{hotel}", "/hotels/*"));
 		assertEquals(1, comparator.compare("/hotels/*", "/hotels/{hotel}"));
 
-		assertEquals(-2, comparator.compare("/hotels/*", "/hotels/*/**"));
-		assertEquals(2, comparator.compare("/hotels/*/**", "/hotels/*"));
+		assertEquals(-1, comparator.compare("/hotels/*", "/hotels/*/**"));
+		assertEquals(1, comparator.compare("/hotels/*/**", "/hotels/*"));
 
 		assertEquals(-1, comparator.compare("/hotels/new", "/hotels/new.*"));
+
+		//SPR-6741
+		assertEquals(-1, comparator.compare("/hotels/{hotel}/bookings/{booking}/cutomers/{customer}", "/hotels/**"));
+		assertEquals(1, comparator.compare("/hotels/**", "/hotels/{hotel}/bookings/{booking}/cutomers/{customer}"));
+		assertEquals(1, comparator.compare("/hotels/foo/bar/**", "/hotels/{hotel}"));
+		assertEquals(-1, comparator.compare("/hotels/{hotel}", "/hotels/foo/bar/**"));
+		assertEquals(-12, comparator.compare("/hotels/**/bookings/**", "/hotels/**"));
+		assertEquals(12, comparator.compare("/hotels/**", "/hotels/**/bookings/**"));
+
+		//SPR-8683
+		assertEquals(1, comparator.compare("/**", "/hotels/{hotel}"));
 
 		// longer is better
 		assertEquals(1, comparator.compare("/hotels", "/hotels2"));

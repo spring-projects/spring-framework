@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -565,6 +565,16 @@ public class AntPathMatcher implements PathMatcher {
 	/**
 	 * The default {@link Comparator} implementation returned by
 	 * {@link #getPatternComparator(String)}.
+	 * <p>In order, the most "generic" pattern is determined by the following:
+	 * <ul>
+	 *     <li>if it's null or a capture all pattern (i.e. it is equal to "/**")</li>
+	 *     <li>if the other pattern is an actual match</li>
+	 *     <li>if it's a catch-all pattern (i.e. it ends with "**"</li>
+	 *     <li>if it's got more "*" than the other pattern</li>
+	 *     <li>if it's got more "{foo}" than the other pattern</li>
+	 *     <li>if it's shorter than the other pattern</li>
+	 * </ul>
+	 * </p>
 	 */
 	protected static class AntPatternComparator implements Comparator<String> {
 
@@ -574,15 +584,25 @@ public class AntPathMatcher implements PathMatcher {
 			this.path = path;
 		}
 
+		/**
+		 * Compare two patterns to determine which should match first, i.e. which is the most specific
+		 * regarding the current path.
+		 *
+		 * @return a negative integer, zero, or a positive integer as pattern1 is
+		 * more specific, equally specific, or less specific than pattern2.
+		 */
 		@Override
 		public int compare(String pattern1, String pattern2) {
-			if (isNullOrCaptureAllPattern(pattern1) && isNullOrCaptureAllPattern(pattern2)) {
+
+			boolean pattern1NullCaptureAll = isNullOrCaptureAllPattern(pattern1);
+			boolean pattern2NullCaptureAll = isNullOrCaptureAllPattern(pattern2);
+			if (pattern1NullCaptureAll && pattern2NullCaptureAll) {
 				return 0;
 			}
-			else if (isNullOrCaptureAllPattern(pattern1)) {
+			else if (pattern1NullCaptureAll) {
 				return 1;
 			}
-			else if (isNullOrCaptureAllPattern(pattern2)) {
+			else if (pattern2NullCaptureAll) {
 				return -1;
 			}
 
@@ -598,14 +618,18 @@ public class AntPathMatcher implements PathMatcher {
 				return 1;
 			}
 
-			int wildCardCount1 = getWildCardCount(pattern1);
-			int wildCardCount2 = getWildCardCount(pattern2);
+			PatternElements pattern1Elements = new PatternElements(pattern1);
+			PatternElements pattern2Elements = new PatternElements(pattern2);
 
-			int bracketCount1 = StringUtils.countOccurrencesOf(pattern1, "{");
-			int bracketCount2 = StringUtils.countOccurrencesOf(pattern2, "{");
+			if(pattern1Elements.endsWithCatchAll && pattern2Elements.catchAllCount == 0) {
+				return 1;
+			}
+			else if(pattern2Elements.endsWithCatchAll && pattern1Elements.catchAllCount == 0) {
+				return -1;
+			}
 
-			int totalCount1 = wildCardCount1 + bracketCount1;
-			int totalCount2 = wildCardCount2 + bracketCount2;
+			int totalCount1 = pattern1Elements.bracketCount + pattern1Elements.wildcardsCount;
+			int totalCount2 = pattern2Elements.bracketCount + pattern2Elements.wildcardsCount;
 
 			if (totalCount1 != totalCount2) {
 				return totalCount1 - totalCount2;
@@ -618,17 +642,17 @@ public class AntPathMatcher implements PathMatcher {
 				return pattern2Length - pattern1Length;
 			}
 
-			if (wildCardCount1 < wildCardCount2) {
+			if (pattern1Elements.wildcardsCount < pattern2Elements.wildcardsCount) {
 				return -1;
 			}
-			else if (wildCardCount2 < wildCardCount1) {
+			else if (pattern2Elements.wildcardsCount < pattern1Elements.wildcardsCount) {
 				return 1;
 			}
 
-			if (bracketCount1 < bracketCount2) {
+			if (pattern1Elements.bracketCount < pattern2Elements.bracketCount) {
 				return -1;
 			}
-			else if (bracketCount2 < bracketCount1) {
+			else if (pattern2Elements.bracketCount < pattern1Elements.bracketCount) {
 				return 1;
 			}
 
@@ -639,18 +663,48 @@ public class AntPathMatcher implements PathMatcher {
 			return pattern == null || "/**".equals(pattern);
 		}
 
-		private int getWildCardCount(String pattern) {
-			if (pattern.endsWith(".*")) {
-				pattern = pattern.substring(0, pattern.length() - 2);
-			}
-			return StringUtils.countOccurrencesOf(pattern, "*");
-		}
-
 		/**
 		 * Returns the length of the given pattern, where template variables are considered to be 1 long.
 		 */
 		private int getPatternLength(String pattern) {
 			return VARIABLE_PATTERN.matcher(pattern).replaceAll("#").length();
+		}
+
+		/**
+		 * Value class that holds the number of occurrences for "*", "**", and "{" pattern elements
+		 */
+		private class PatternElements {
+			int bracketCount = 0;
+			int wildcardsCount = 0;
+			int catchAllCount = 0;
+			boolean endsWithCatchAll;
+
+			public PatternElements(String pattern) {
+
+				if(pattern == null || pattern.length() == 0) {
+					return;
+				}
+				int pos = 0;
+
+				while(pos < pattern.length()) {
+					if(pattern.charAt(pos) == '{') {
+						bracketCount++;
+						pos++;
+					} else if(pattern.charAt(pos) == '*') {
+						if(pos + 1 < pattern.length() && pattern.charAt(pos + 1) == '*') {
+							catchAllCount++;
+							pos += 2;
+						} else {
+							wildcardsCount++;
+							pos++;
+						}
+					} else {
+						pos++;
+					}
+				}
+				endsWithCatchAll = pattern.endsWith("**");
+			}
+
 		}
 	}
 
