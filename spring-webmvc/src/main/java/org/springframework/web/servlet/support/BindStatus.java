@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,13 +61,13 @@ public class BindStatus {
 
 	private Object value;
 
-	private Class valueType;
+	private Class<?> valueType;
 
 	private Object actualValue;
 
 	private PropertyEditor editor;
 
-	private List objectErrors;
+	private List<? extends ObjectError> objectErrors;
 
 	private String[] errorCodes;
 
@@ -90,7 +90,7 @@ public class BindStatus {
 		this.htmlEscape = htmlEscape;
 
 		// determine name of the object and property
-		String beanName = null;
+		String beanName;
 		int dotPos = path.indexOf('.');
 		if (dotPos == -1) {
 			// property not set, only the object itself
@@ -124,6 +124,9 @@ public class BindStatus {
 						this.actualValue = this.bindingResult.getRawFieldValue(this.expression);
 						this.editor = this.bindingResult.findEditor(this.expression, null);
 					}
+					else {
+						this.actualValue = this.value;
+					}
 				}
 			}
 			else {
@@ -143,8 +146,9 @@ public class BindStatus {
 			}
 			if (this.expression != null && !"*".equals(this.expression) && !this.expression.endsWith("*")) {
 				BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(target);
-				this.valueType = bw.getPropertyType(this.expression);
 				this.value = bw.getPropertyValue(this.expression);
+				this.valueType = bw.getPropertyType(this.expression);
+				this.actualValue = this.value;
 			}
 			this.errorCodes = new String[0];
 			this.errorMessages = new String[0];
@@ -161,7 +165,7 @@ public class BindStatus {
 	private void initErrorCodes() {
 		this.errorCodes = new String[this.objectErrors.size()];
 		for (int i = 0; i < this.objectErrors.size(); i++) {
-			ObjectError error = (ObjectError) this.objectErrors.get(i);
+			ObjectError error = this.objectErrors.get(i);
 			this.errorCodes[i] = error.getCode();
 		}
 	}
@@ -173,7 +177,7 @@ public class BindStatus {
 		if (this.errorMessages == null) {
 			this.errorMessages = new String[this.objectErrors.size()];
 			for (int i = 0; i < this.objectErrors.size(); i++) {
-				ObjectError error = (ObjectError) this.objectErrors.get(i);
+				ObjectError error = this.objectErrors.get(i);
 				this.errorMessages[i] = this.requestContext.getMessage(error, this.htmlEscape);
 			}
 		}
@@ -214,7 +218,7 @@ public class BindStatus {
 	 * '{@code getValue().getClass()}' since '{@code getValue()}' may
 	 * return '{@code null}'.
 	 */
-	public Class getValueType() {
+	public Class<?> getValueType() {
 		return this.valueType;
 	}
 
@@ -318,7 +322,7 @@ public class BindStatus {
 	 * @param valueClass the value class that an editor is needed for
 	 * @return the associated PropertyEditor, or {@code null} if none
 	 */
-	public PropertyEditor findEditor(Class valueClass) {
+	public PropertyEditor findEditor(Class<?> valueClass) {
 		return (this.bindingResult != null ? this.bindingResult.findEditor(this.expression, valueClass) : null);
 	}
 
