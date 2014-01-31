@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,16 +37,10 @@ import java.util.TreeSet;
 
 import junit.framework.TestCase;
 
-import org.springframework.tests.sample.beans.BeanWithObjectProperty;
-import org.springframework.tests.sample.beans.DerivedTestBean;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.IndexedTestBean;
 import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.beans.NullValueInNestedPathException;
-import org.springframework.tests.sample.beans.SerializablePerson;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.propertyeditors.CustomCollectionEditor;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -56,6 +50,12 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.format.Formatter;
 import org.springframework.format.number.NumberFormatter;
 import org.springframework.format.support.FormattingConversionService;
+import org.springframework.tests.sample.beans.BeanWithObjectProperty;
+import org.springframework.tests.sample.beans.DerivedTestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.IndexedTestBean;
+import org.springframework.tests.sample.beans.SerializablePerson;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -135,7 +135,7 @@ public class DataBinderTests extends TestCase {
 		binder.setIgnoreUnknownFields(false);
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("name", "Rod");
-		pvs.add("age", new Integer(32));
+		pvs.add("age", 32);
 		pvs.add("nonExisting", "someValue");
 
 		try {
@@ -152,7 +152,7 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(rod, "person");
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("name", "Rod");
-		pvs.add("spouse.age", new Integer(32));
+		pvs.add("spouse.age", 32);
 
 		try {
 			binder.bind(pvs);
@@ -169,7 +169,7 @@ public class DataBinderTests extends TestCase {
 		binder.setIgnoreInvalidFields(true);
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("name", "Rod");
-		pvs.add("spouse.age", new Integer(32));
+		pvs.add("spouse.age", 32);
 
 		binder.bind(pvs);
 	}
@@ -505,7 +505,7 @@ public class DataBinderTests extends TestCase {
 	public void testBindingWithAllowedFields() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod);
-		binder.setAllowedFields(new String[] {"name", "myparam"});
+		binder.setAllowedFields("name", "myparam");
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("name", "Rod");
 		pvs.add("age", "32x");
@@ -519,7 +519,7 @@ public class DataBinderTests extends TestCase {
 	public void testBindingWithDisallowedFields() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod);
-		binder.setDisallowedFields(new String[] {"age"});
+		binder.setDisallowedFields("age");
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("name", "Rod");
 		pvs.add("age", "32x");
@@ -536,8 +536,8 @@ public class DataBinderTests extends TestCase {
 	public void testBindingWithAllowedAndDisallowedFields() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod);
-		binder.setAllowedFields(new String[] {"name", "myparam"});
-		binder.setDisallowedFields(new String[] {"age"});
+		binder.setAllowedFields("name", "myparam");
+		binder.setDisallowedFields("age");
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("name", "Rod");
 		pvs.add("age", "32x");
@@ -554,8 +554,8 @@ public class DataBinderTests extends TestCase {
 	public void testBindingWithOverlappingAllowedAndDisallowedFields() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod);
-		binder.setAllowedFields(new String[] {"name", "age"});
-		binder.setDisallowedFields(new String[] {"age"});
+		binder.setAllowedFields("name", "age");
+		binder.setDisallowedFields("age");
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("name", "Rod");
 		pvs.add("age", "32x");
@@ -572,7 +572,7 @@ public class DataBinderTests extends TestCase {
 	public void testBindingWithAllowedFieldsUsingAsterisks() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
-		binder.setAllowedFields(new String[] {"nam*", "*ouchy"});
+		binder.setAllowedFields("nam*", "*ouchy");
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("name", "Rod");
@@ -598,8 +598,8 @@ public class DataBinderTests extends TestCase {
 	public void testBindingWithAllowedAndDisallowedMapFields() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod);
-		binder.setAllowedFields(new String[] {"someMap[key1]", "someMap[key2]"});
-		binder.setDisallowedFields(new String[] {"someMap['key3']", "someMap[key4]"});
+		binder.setAllowedFields("someMap[key1]", "someMap[key2]");
+		binder.setDisallowedFields("someMap['key3']", "someMap[key4]");
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("someMap[key1]", "value1");
@@ -627,7 +627,7 @@ public class DataBinderTests extends TestCase {
 		tb.setSpouse(new TestBean());
 
 		DataBinder binder = new DataBinder(tb, "person");
-		binder.setRequiredFields(new String[] {"touchy", "name", "age", "date", "spouse.name"});
+		binder.setRequiredFields("touchy", "name", "age", "date", "spouse.name");
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("touchy", "");
@@ -657,7 +657,7 @@ public class DataBinderTests extends TestCase {
 		tb.setSpouse(new TestBean());
 
 		DataBinder binder = new DataBinder(tb, "person");
-		binder.setRequiredFields(new String[] {"someMap[key1]", "someMap[key2]", "someMap['key3']", "someMap[key4]"});
+		binder.setRequiredFields("someMap[key1]", "someMap[key2]", "someMap['key3']", "someMap[key4]");
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("someMap[key1]", "value1");
@@ -1543,7 +1543,7 @@ public class DataBinderTests extends TestCase {
 	public void testTrackDisallowedFields() throws Exception {
 		TestBean testBean = new TestBean();
 		DataBinder binder = new DataBinder(testBean, "testBean");
-		binder.setAllowedFields(new String[] {"name", "age"});
+		binder.setAllowedFields("name", "age");
 
 		String name = "Rob Harrop";
 		String beanName = "foobar";
@@ -1628,7 +1628,27 @@ public class DataBinderTests extends TestCase {
 		assertEquals("firstValue", list.get(0));
 		assertEquals("secondValue", list.get(1));
 		assertEquals(2, list.size());
-	  }
+	}
+
+	public void testFieldErrorAccessVariations() throws Exception {
+		TestBean testBean = new TestBean();
+		DataBinder binder = new DataBinder(testBean, "testBean");
+		assertNull(binder.getBindingResult().getGlobalError());
+		assertNull(binder.getBindingResult().getFieldError());
+		assertNull(binder.getBindingResult().getFieldError(""));
+
+		MutablePropertyValues mpv = new MutablePropertyValues();
+		mpv.add("age", "invalid");
+		binder.bind(mpv);
+		assertNull(binder.getBindingResult().getGlobalError());
+		assertNull(binder.getBindingResult().getFieldError(""));
+		assertNull(binder.getBindingResult().getFieldError("b*"));
+		assertEquals("age", binder.getBindingResult().getFieldError().getField());
+		assertEquals("age", binder.getBindingResult().getFieldError("*").getField());
+		assertEquals("age", binder.getBindingResult().getFieldError("a*").getField());
+		assertEquals("age", binder.getBindingResult().getFieldError("ag*").getField());
+		assertEquals("age", binder.getBindingResult().getFieldError("age").getField());
+	}
 
 
 	@SuppressWarnings("unused")

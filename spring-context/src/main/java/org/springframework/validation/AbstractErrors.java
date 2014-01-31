@@ -193,10 +193,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 
 	public Class<?> getFieldType(String field) {
 		Object value = getFieldValue(field);
-		if (value != null) {
-			return value.getClass();
-		}
-		return null;
+		return (value != null ? value.getClass() : null);
 	}
 
 	/**
@@ -209,12 +206,10 @@ public abstract class AbstractErrors implements Errors, Serializable {
 		if (field.equals(fieldError.getField())) {
 			return true;
 		}
-		if (field.equals("")) {
-			return false;
-		}
-		// Optimization: use charAt instead of endsWith (SPR-11304)
+		// Optimization: use charAt and regionMatches instead of endsWith and startsWith (SPR-11304)
 		int endIndex = field.length() - 1;
-		return (field.charAt(endIndex) == '*' && fieldError.getField().startsWith(field.substring(0, endIndex)));
+		return (endIndex >= 0 && field.charAt(endIndex) == '*' &&
+				(endIndex == 0 || field.regionMatches(0, fieldError.getField(), 0, endIndex)));
 	}
 
 
