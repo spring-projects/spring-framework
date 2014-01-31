@@ -30,16 +30,22 @@ import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
 import org.springframework.util.Assert;
 
 /**
- * Creates a {@link EmbeddedDatabase} instance. Callers are guaranteed that
+ * Creates an {@link EmbeddedDatabase} instance. Callers are guaranteed that
  * the returned database has been fully initialized and populated.
  *
- * <p>Can be configured:<br>
- * Call {@link #setDatabaseName(String)} to change the name of the database.<br>
- * Call {@link #setDatabaseType(EmbeddedDatabaseType)} to set the database type if you wish to use one of the supported types.<br>
- * Call {@link #setDatabaseConfigurer(EmbeddedDatabaseConfigurer)} to configure support for your own embedded database type.<br>
- * Call {@link #setDatabasePopulator(DatabasePopulator)} to change the algorithm used to populate the database.<br>
- * Call {@link #setDataSourceFactory(DataSourceFactory)} to change the type of DataSource used to connect to the database.<br>
- * Call {@link #getDatabase()} to get the {@link EmbeddedDatabase} instance.<br>
+ * <p>Can be configured:
+ * <ul>
+ * <li>Call {@link #setDatabaseName(String)} to change the name of the database.
+ * <li>Call {@link #setDatabaseType(EmbeddedDatabaseType)} to set the database
+ * type if you wish to use one of the supported types.
+ * <li>Call {@link #setDatabaseConfigurer(EmbeddedDatabaseConfigurer)} to
+ * configure support for your own embedded database type.
+ * <li>Call {@link #setDatabasePopulator(DatabasePopulator)} to change the
+ * algorithm used to populate the database.
+ * <li>Call {@link #setDataSourceFactory(DataSourceFactory)} to change the type
+ * of DataSource used to connect to the database.
+ * <li>Call {@link #getDatabase()} to get the {@link EmbeddedDatabase} instance.
+ * </ul>
  *
  * @author Keith Donald
  * @author Juergen Hoeller
