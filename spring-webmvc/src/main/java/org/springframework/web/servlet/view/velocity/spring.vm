@@ -107,7 +107,7 @@
  *
  * @param path the name of the field to bind to
  * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
+ *    or CSS styles or size)
  *
  *#
 #macro( springFormInput $path $attributes )
@@ -124,7 +124,7 @@
  *
  * @param path the name of the field to bind to
  * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
+ *    or CSS styles or size)
  *
  *#
 #macro( springFormPasswordInput $path $attributes )
@@ -140,7 +140,7 @@
  *
  * @param path the name of the field to bind to
  * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
+ *    or CSS styles or size)
  *
  *#
 #macro( springFormHiddenInput $path $attributes )
@@ -156,7 +156,7 @@
  *
  * @param path the name of the field to bind to
  * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
+ *    or CSS styles or size)
  *
  *#
 #macro( springFormTextarea $path $attributes )
@@ -178,16 +178,14 @@
  * @param path the name of the field to bind to
  * @param options a map (value=label) of all the available options
  * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
+ *    or CSS styles or size)
 *#
 #macro( springFormSingleSelect $path $options $attributes )
     #springBind($path)
     <select id="${status.expression}" name="${status.expression}" ${attributes}>
         #foreach($option in $options.keySet())
             <option value="${option}"
-            #if("$!status.value" == "$option")
-                selected="selected"
-            #end>
+            #if("$!status.value" == "$option") selected="selected" #end>
             ${options.get($option)}</option>
         #end
     </select>
@@ -202,17 +200,15 @@
  * @param path the name of the field to bind to
  * @param options a map (value=label) of all the available options
  * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
+ *    or CSS styles or size)
 *#
 #macro( springFormMultiSelect $path $options $attributes )
     #springBind($path)
     <select multiple="multiple" id="${status.expression}" name="${status.expression}" ${attributes}>
         #foreach($option in $options.keySet())
             <option value="${option}"
-            #foreach($item in $status.value)
-                #if($item == $option)
-                    selected="selected"
-                #end
+            #foreach($item in $status.actualValue)
+                #if($item == $option) selected="selected" #end
             #end
             >${options.get($option)}</option>
         #end
@@ -229,15 +225,13 @@
  * @param separator the html tag or other character list that should be used to
  *    separate each option.  Typically '&nbsp;' or '<br>'
  * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
+ *    or CSS styles or size)
 *#
 #macro( springFormRadioButtons $path $options $separator $attributes )
     #springBind($path)
     #foreach($option in $options.keySet())
         <input type="radio" name="${status.expression}" value="${option}"
-        #if("$!status.value" == "$option")
-            checked="checked"
-        #end
+        #if("$!status.value" == "$option") checked="checked" #end
         ${attributes}
         #springCloseTag()
         ${options.get($option)} ${separator}
@@ -252,15 +246,15 @@
  * @param path the name of the field to bind to
  * @param options a map (value=label) of all the available options
  * @param separator the html tag or other character list that should be used to
- *    separate each option.  Typically '&nbsp;' or '<br>'
+ *    separate each option. Typically '&nbsp;' or '<br>'.
  * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
+ *    or CSS styles or size)
 *#
 #macro( springFormCheckboxes $path $options $separator $attributes )
     #springBind($path)
     #foreach($option in $options.keySet())
         <input type="checkbox" name="${status.expression}" value="${option}" 
-        #foreach($item in $status.value) 
+        #foreach($item in $status.actualValue)
             #if($item == $option) checked="checked" #end 
         #end
         ${attributes} #springCloseTag()
@@ -276,7 +270,7 @@
  *
  * @param path the name of the field to bind to
  * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
+ *    or CSS styles or size)
 *#
 #macro( springFormCheckbox $path $attributes )
     #springBind($path)

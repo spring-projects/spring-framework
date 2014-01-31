@@ -45,7 +45,7 @@ FORM7
 #springFormRadioButtons("command.name" $nameOptionMap " " "")
 
 FORM8
-#springFormCheckboxes("command.spouses" $nameOptionMap " " "")
+#springFormCheckboxes("command.stringArray" $nameOptionMap " " "")
 
 FORM9
 #springFormPasswordInput("command.name" "")

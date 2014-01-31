@@ -61,7 +61,7 @@ FORM7
 <@spring.formRadioButtons "command.name", nameOptionMap, " ", ""/>
 
 FORM8
-<@spring.formCheckboxes "command.spouses", nameOptionMap, " ", ""/>
+<@spring.formCheckboxes "command.stringArray", nameOptionMap, " ", ""/>
 
 FORM9
 <@spring.formPasswordInput "command.name", ""/>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ public class BindStatus {
 		this.htmlEscape = htmlEscape;
 
 		// determine name of the object and property
-		String beanName = null;
+		String beanName;
 		int dotPos = path.indexOf('.');
 		if (dotPos == -1) {
 			// property not set, only the object itself
@@ -124,6 +124,9 @@ public class BindStatus {
 						this.actualValue = this.bindingResult.getRawFieldValue(this.expression);
 						this.editor = this.bindingResult.findEditor(this.expression, null);
 					}
+					else {
+						this.actualValue = this.value;
+					}
 				}
 			}
 			else {
@@ -143,8 +146,9 @@ public class BindStatus {
 			}
 			if (this.expression != null && !"*".equals(this.expression) && !this.expression.endsWith("*")) {
 				BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(target);
-				this.valueType = bw.getPropertyType(this.expression);
 				this.value = bw.getPropertyValue(this.expression);
+				this.valueType = bw.getPropertyType(this.expression);
+				this.actualValue = this.value;
 			}
 			this.errorCodes = new String[0];
 			this.errorMessages = new String[0];

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,26 @@
 
 package org.springframework.web.servlet.view.freemarker;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
+import freemarker.template.Configuration;
+import freemarker.template.SimpleHash;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.tests.sample.beans.TestBean;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
@@ -47,10 +46,7 @@ import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
 import org.springframework.web.servlet.view.DummyMacroRequestContext;
 
-import freemarker.template.Configuration;
-import freemarker.template.SimpleHash;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
+import static org.junit.Assert.*;
 
 /**
  * @author Darren Davison
@@ -68,6 +64,7 @@ public class FreeMarkerMacroTests {
 	private MockHttpServletResponse response;
 
 	private FreeMarkerConfigurer fc;
+
 
 	@Before
 	public void setUp() throws Exception {
@@ -219,6 +216,7 @@ public class FreeMarkerMacroTests {
 	}
 
 	// TODO verify remaining output (fix whitespace)
+
 	@Test
 	public void testForm9() throws Exception {
 		assertEquals("<input type=\"password\" id=\"name\" name=\"name\" value=\"\"     >", getMacroOutput("FORM9"));
@@ -272,8 +270,8 @@ public class FreeMarkerMacroTests {
 		assertTrue("Wrong output: " + output, output.contains("<input type=\"checkbox\" id=\"spouses0.jedi\" name=\"spouses[0].jedi\" checked=\"checked\" />"));
 	}
 
-	private String getMacroOutput(String name) throws Exception {
 
+	private String getMacroOutput(String name) throws Exception {
 		String macro = fetchMacro(name);
 		assertNotNull(macro);
 
@@ -296,6 +294,7 @@ public class FreeMarkerMacroTests {
 		fred.setJedi(true);
 		darren.setSpouse(fred);
 		darren.setJedi(true);
+		darren.setStringArray(new String[] {"John", "Fred"});
 		request.setAttribute("command", darren);
 
 		Map<String, String> names = new HashMap<String, String>();
