@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
 import org.springframework.util.Assert;
 
 /**
- * Creates a {@link EmbeddedDatabase} instance. Callers are guaranteed that the returned database has been fully
- * initialized and populated.
+ * Creates a {@link EmbeddedDatabase} instance. Callers are guaranteed that
+ * the returned database has been fully initialized and populated.
  *
  * <p>Can be configured:<br>
  * Call {@link #setDatabaseName(String)} to change the name of the database.<br>
@@ -145,7 +145,8 @@ public class EmbeddedDatabaseFactory {
 
 	/**
 	 * Hook to shutdown the embedded database. Subclasses may call to force shutdown.
-	 * After calling, {@link #getDataSource()} returns null. Does nothing if no embedded database has been initialized.
+	 * <p>After calling, {@link #getDataSource()} returns {@code null}.
+	 * Does nothing if no embedded database has been initialized.
 	 */
 	protected void shutdownDatabase() {
 		if (this.dataSource != null) {
