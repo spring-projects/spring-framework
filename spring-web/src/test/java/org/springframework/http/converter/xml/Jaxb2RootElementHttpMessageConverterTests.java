@@ -84,7 +84,7 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 		byte[] body = "<rootElement><type s=\"Hello World\"/></rootElement>".getBytes("UTF-8");
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
 		RootElementSubclass result = (RootElementSubclass) converter.read(RootElementSubclass.class, inputMessage);
-		assertEquals("Invalid result", "Hello World", result.type.s);
+		assertEquals("Invalid result", "Hello World", result.getType().s);
 	}
 
 	@Test
@@ -118,9 +118,16 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 	@XmlRootElement
 	public static class RootElement {
 
-		@XmlElement
-		public Type type = new Type();
+		private Type type = new Type();
 
+		public Type getType() {
+			return this.type;
+		}
+
+		@XmlElement
+		public void setType(Type type) {
+			this.type = type;
+		}
 	}
 
 	@XmlType
