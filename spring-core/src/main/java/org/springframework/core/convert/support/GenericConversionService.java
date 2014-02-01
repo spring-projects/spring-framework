@@ -355,7 +355,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 		@Override
 		public String toString() {
-			return this.typeInfo + " : " + this.converter.toString();
+			return this.typeInfo + " : " + this.converter;
 		}
 	}
 
@@ -405,7 +405,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 		@Override
 		public String toString() {
-			return this.typeInfo + " : " + this.converterFactory.toString();
+			return this.typeInfo + " : " + this.converterFactory;
 		}
 	}
 
@@ -495,7 +495,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 		 * through the class and interface hierarchy of the types.
 		 * @param sourceType the source type
 		 * @param targetType the target type
-		 * @return a {@link GenericConverter} or <tt>null</tt>
+		 * @return a matching {@link GenericConverter}, or {@code null} if none found
 		 */
 		public GenericConverter find(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			// Search the full type hierarchy
@@ -574,11 +574,9 @@ public class GenericConversionService implements ConfigurableConversionService {
 		@Override
 		public String toString() {
 			StringBuilder builder = new StringBuilder();
-			builder.append("ConversionService converters =").append("\n");
+			builder.append("ConversionService converters =\n");
 			for (String converterString : getConverterStrings()) {
-				builder.append("\t");
-				builder.append(converterString);
-				builder.append("\n");
+				builder.append('\t').append(converterString).append('\n');
 			}
 			return builder.toString();
 		}
