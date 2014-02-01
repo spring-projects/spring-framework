@@ -271,15 +271,6 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void messageConverter() {
-		CompositeMessageConverter messageConverter = this.brokerRelayContext.getBean(
-				"brokerMessageConverter", CompositeMessageConverter.class);
-
-		DefaultContentTypeResolver resolver = (DefaultContentTypeResolver) messageConverter.getContentTypeResolver();
-		assertEquals(MimeTypeUtils.APPLICATION_JSON, resolver.getDefaultMimeType());
-	}
-
-	@Test
 	public void configureMessageConvertersDefault() {
 		AbstractMessageBrokerConfiguration config = new AbstractMessageBrokerConfiguration() {};
 		CompositeMessageConverter compositeConverter = config.brokerMessageConverter();
@@ -289,6 +280,9 @@ public class MessageBrokerConfigurationTests {
 		assertThat(iterator.next(), Matchers.instanceOf(MappingJackson2MessageConverter.class));
 		assertThat(iterator.next(), Matchers.instanceOf(StringMessageConverter.class));
 		assertThat(iterator.next(), Matchers.instanceOf(ByteArrayMessageConverter.class));
+
+		DefaultContentTypeResolver resolver = (DefaultContentTypeResolver) compositeConverter.getContentTypeResolver();
+		assertEquals(MimeTypeUtils.APPLICATION_JSON, resolver.getDefaultMimeType());
 	}
 
 	@Test
@@ -301,11 +295,14 @@ public class MessageBrokerConfigurationTests {
 				return false;
 			}
 		};
-		CompositeMessageConverter compositeConverter = config.brokerMessageConverter();
 
+		CompositeMessageConverter compositeConverter = config.brokerMessageConverter();
 		assertThat(compositeConverter.getConverters().size(), Matchers.is(1));
 		Iterator<MessageConverter> iterator = compositeConverter.getConverters().iterator();
 		assertThat(iterator.next(), Matchers.is(testConverter));
+
+		DefaultContentTypeResolver resolver = (DefaultContentTypeResolver) compositeConverter.getContentTypeResolver();
+		assertNull(resolver.getDefaultMimeType());
 	}
 
 	@Test
@@ -328,6 +325,9 @@ public class MessageBrokerConfigurationTests {
 		assertThat(iterator.next(), Matchers.instanceOf(MappingJackson2MessageConverter.class));
 		assertThat(iterator.next(), Matchers.instanceOf(StringMessageConverter.class));
 		assertThat(iterator.next(), Matchers.instanceOf(ByteArrayMessageConverter.class));
+
+		DefaultContentTypeResolver resolver = (DefaultContentTypeResolver) compositeConverter.getContentTypeResolver();
+		assertEquals(MimeTypeUtils.APPLICATION_JSON, resolver.getDefaultMimeType());
 	}
 
 	@Test

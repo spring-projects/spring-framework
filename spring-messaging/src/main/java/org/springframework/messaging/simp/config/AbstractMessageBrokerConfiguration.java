@@ -248,27 +248,44 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	@Bean
 	public CompositeMessageConverter brokerMessageConverter() {
+
 		List<MessageConverter> converters = new ArrayList<MessageConverter>();
-		if (configureMessageConverters(converters)) {
+		boolean registerDefaults = configureMessageConverters(converters);
+		if (registerDefaults) {
 			if (jackson2Present) {
 				converters.add(new MappingJackson2MessageConverter());
 			}
 			converters.add(new StringMessageConverter());
 			converters.add(new ByteArrayMessageConverter());
 		}
-		return new CompositeMessageConverter(converters, getContentTypeResolver());
+
+		ContentTypeResolver contentTypeResolver = getContentTypeResolver();
+		if (contentTypeResolver == null) {
+			contentTypeResolver = new DefaultContentTypeResolver();
+			if (jackson2Present && registerDefaults) {
+				((DefaultContentTypeResolver) contentTypeResolver).setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
+			}
+		}
+
+		return new CompositeMessageConverter(converters, contentTypeResolver);
 	}
 
+	/**
+	 * Override this method to add custom message converters.
+	 * @param messageConverters the list to add converters to, initially empty
+	 *
+	 * @return {@code true} if default message converters should be added to list,
+	 * 	{@code false} if no more converters should be added.
+	 */
 	protected boolean configureMessageConverters(List<MessageConverter> messageConverters) {
 		return true;
 	}
 
+	/**
+	 * Override this method to provide a custom {@link ContentTypeResolver}.
+	 */
 	protected ContentTypeResolver getContentTypeResolver() {
-		DefaultContentTypeResolver contentTypeResolver = new DefaultContentTypeResolver();
-		if (jackson2Present) {
-			contentTypeResolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
-		}
-		return contentTypeResolver;
+		return null;
 	}
 
 	@Bean
