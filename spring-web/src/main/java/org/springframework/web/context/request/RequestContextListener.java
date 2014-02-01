@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,17 +62,19 @@ public class RequestContextListener implements ServletRequestListener {
 	}
 
 	public void requestDestroyed(ServletRequestEvent requestEvent) {
-		ServletRequestAttributes attributes =
-				(ServletRequestAttributes) requestEvent.getServletRequest().getAttribute(REQUEST_ATTRIBUTES_ATTRIBUTE);
-		ServletRequestAttributes threadAttributes =
-				(ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+		ServletRequestAttributes attributes = null;
+		Object reqAttr = requestEvent.getServletRequest().getAttribute(REQUEST_ATTRIBUTES_ATTRIBUTE);
+		if (reqAttr instanceof ServletRequestAttributes) {
+			attributes = (ServletRequestAttributes) reqAttr;
+		}
+		RequestAttributes threadAttributes = RequestContextHolder.getRequestAttributes();
 		if (threadAttributes != null) {
 			// We're assumably within the original request thread...
-			if (attributes == null) {
-				attributes = threadAttributes;
-			}
 			LocaleContextHolder.resetLocaleContext();
 			RequestContextHolder.resetRequestAttributes();
+			if (attributes == null && threadAttributes instanceof ServletRequestAttributes) {
+				attributes = (ServletRequestAttributes) threadAttributes;
+			}
 		}
 		if (attributes != null) {
 			attributes.requestCompleted();
