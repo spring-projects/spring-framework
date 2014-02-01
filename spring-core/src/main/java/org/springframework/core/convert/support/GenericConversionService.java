@@ -331,18 +331,18 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 		@Override
 		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+			// Check raw type first...
+			if (!this.typeInfo.getTargetType().equals(targetType.getObjectType())) {
+				return false;
+			}
+			// Full check for complex generic type match required?
 			ResolvableType rt = targetType.getResolvableType();
-			if (!rt.isAssignableFrom(this.targetType)) {
-				// Generic type structure not fully assignable -> try lenient fallback if
-				// unresolvable generics remain, just requiring the raw type to match then
-				if (!rt.hasUnresolvableGenerics() || !this.typeInfo.getTargetType().equals(targetType.getObjectType())) {
-					return false;
-				}
+			if (!(rt.getType() instanceof Class) && !rt.isAssignableFrom(this.targetType) &&
+					!this.targetType.hasUnresolvableGenerics()) {
+				return false;
 			}
-			if (this.converter instanceof ConditionalConverter) {
-				return ((ConditionalConverter) this.converter).matches(sourceType, targetType);
-			}
-			return true;
+			return !(this.converter instanceof ConditionalConverter) ||
+					((ConditionalConverter) this.converter).matches(sourceType, targetType);
 		}
 
 		@Override

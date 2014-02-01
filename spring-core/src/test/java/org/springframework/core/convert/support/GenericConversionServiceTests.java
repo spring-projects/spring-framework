@@ -619,7 +619,7 @@ public class GenericConversionServiceTests {
 		GenericConversionService conversionService = new DefaultConversionService();
 		byte[] byteArray = new byte[] { 1, 2, 3 };
 		Byte[] converted = conversionService.convert(byteArray, Byte[].class);
-		assertTrue(Arrays.equals(converted, new Byte[] { 1, 2, 3 }));
+		assertTrue(Arrays.equals(converted, new Byte[] {1, 2, 3}));
 	}
 
 	@Test
@@ -739,7 +739,7 @@ public class GenericConversionServiceTests {
 		byte[] byteArray = new byte[] { 1, 2, 3 };
 		byte[] converted = conversionService.convert(byteArray, byte[].class);
 		assertNotSame(byteArray, converted);
-		assertTrue(Arrays.equals(new byte[] { 2, 3, 4 }, converted));
+		assertTrue(Arrays.equals(new byte[] {2, 3, 4}, converted));
 	}
 
 	@Test
@@ -769,8 +769,11 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void multipleCollectionTypesFromSameSourceType() throws Exception {
+		conversionService.addConverter(new MyStringToRawCollectionConverter());
+		conversionService.addConverter(new MyStringToGenericCollectionConverter());
 		conversionService.addConverter(new MyStringToStringCollectionConverter());
 		conversionService.addConverter(new MyStringToIntegerCollectionConverter());
+
 		assertEquals(Collections.singleton("testX"),
 				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("stringCollection"))));
 		assertEquals(Collections.singleton(4),
@@ -788,6 +791,7 @@ public class GenericConversionServiceTests {
 	@Test
 	public void adaptedCollectionTypesFromSameSourceType() throws Exception {
 		conversionService.addConverter(new MyStringToStringCollectionConverter());
+
 		assertEquals(Collections.singleton("testX"),
 				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("stringCollection"))));
 		assertEquals(Collections.singleton("testX"),
@@ -800,6 +804,46 @@ public class GenericConversionServiceTests {
 				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("stringCollection"))));
 		assertEquals(Collections.singleton("testX"),
 				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("rawCollection"))));
+
+		try {
+			conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("integerCollection")));
+			fail("Should have thrown ConverterNotFoundException");
+		}
+		catch (ConverterNotFoundException ex) {
+			// expected
+		}
+	}
+
+	@Test
+	public void genericCollectionAsSource() throws Exception {
+		conversionService.addConverter(new MyStringToGenericCollectionConverter());
+
+		assertEquals(Collections.singleton("testX"),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("stringCollection"))));
+		assertEquals(Collections.singleton("testX"),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("genericCollection"))));
+		assertEquals(Collections.singleton("testX"),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("rawCollection"))));
+
+		// The following is unpleasant but a consequence of the generic collection converter above...
+		assertEquals(Collections.singleton("testX"),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("integerCollection"))));
+	}
+
+	@Test
+	public void rawCollectionAsSource() throws Exception {
+		conversionService.addConverter(new MyStringToRawCollectionConverter());
+
+		assertEquals(Collections.singleton("testX"),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("stringCollection"))));
+		assertEquals(Collections.singleton("testX"),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("genericCollection"))));
+		assertEquals(Collections.singleton("testX"),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("rawCollection"))));
+
+		// The following is unpleasant but a consequence of the raw collection converter above...
+		assertEquals(Collections.singleton("testX"),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("integerCollection"))));
 	}
 
 
@@ -809,6 +853,7 @@ public class GenericConversionServiceTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	public static @interface ExampleAnnotation {
 	}
+
 
 	private static class MyConditionalConverter implements Converter<String, Color>, ConditionalConverter {
 
@@ -830,8 +875,8 @@ public class GenericConversionServiceTests {
 		}
 	}
 
-	private static class MyConditionalGenericConverter implements GenericConverter,
-			ConditionalConverter {
+
+	private static class MyConditionalGenericConverter implements GenericConverter, ConditionalConverter {
 
 		private List<TypeDescriptor> sourceTypes = new ArrayList<TypeDescriptor>();
 
@@ -857,8 +902,8 @@ public class GenericConversionServiceTests {
 		}
 	}
 
-	private static class MyConditionalConverterFactory implements
-			ConverterFactory<String, Color>, ConditionalConverter {
+
+	private static class MyConditionalConverterFactory implements ConverterFactory<String, Color>, ConditionalConverter {
 
 		private MyConditionalConverter converter = new MyConditionalConverter();
 
@@ -885,6 +930,7 @@ public class GenericConversionServiceTests {
 		}
 	}
 
+
 	interface MyEnumInterface {
 
 		String getCode();
@@ -897,6 +943,23 @@ public class GenericConversionServiceTests {
 			public String getCode() {
 				return "1";
 			}
+		}
+	}
+
+
+	public static class MyStringToRawCollectionConverter implements Converter<String, Collection> {
+
+		@Override
+		public Collection convert(String source) {
+			return Collections.singleton(source + "X");
+		}
+	}
+
+	public static class MyStringToGenericCollectionConverter implements Converter<String, Collection<?>> {
+
+		@Override
+		public Collection<?> convert(String source) {
+			return Collections.singleton(source + "X");
 		}
 	}
 
@@ -924,12 +987,13 @@ public class GenericConversionServiceTests {
 		}
 	}
 
-	public Collection<String> stringCollection;
-
-	public Collection<Integer> integerCollection;
 
 	public Collection rawCollection;
 
 	public Collection<?> genericCollection;
+
+	public Collection<String> stringCollection;
+
+	public Collection<Integer> integerCollection;
 
 }
