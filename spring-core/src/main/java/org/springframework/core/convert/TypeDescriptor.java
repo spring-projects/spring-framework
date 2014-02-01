@@ -150,9 +150,9 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	/**
-	 * Returns the underlying {@link ResolvableType}.
+	 * Return the underlying {@link ResolvableType}.
 	 */
-	protected ResolvableType getResolvableType() {
+	public ResolvableType getResolvableType() {
 		return this.resolvableType;
 	}
 

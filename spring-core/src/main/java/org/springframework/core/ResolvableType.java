@@ -34,6 +34,7 @@ import org.springframework.core.SerializableTypeWrapper.FieldTypeProvider;
 import org.springframework.core.SerializableTypeWrapper.MethodParameterTypeProvider;
 import org.springframework.core.SerializableTypeWrapper.TypeProvider;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -169,7 +170,7 @@ public final class ResolvableType implements Serializable {
 	 * type information or meta-data that alternative JVM languages may provide.
 	 */
 	public Object getSource() {
-		Object source = (this.typeProvider == null ? null : this.typeProvider.getSource());
+		Object source = (this.typeProvider != null ? this.typeProvider.getSource() : null);
 		return (source != null ? source : this.type);
 	}
 
@@ -244,7 +245,7 @@ public final class ResolvableType implements Serializable {
 
 		// We need an exact type match for generics
 		// List<CharSequence> is not assignable from List<String>
-		if (checkingGeneric ? !ourResolved.equals(typeResolved) : !ourResolved.isAssignableFrom(typeResolved)) {
+		if (checkingGeneric ? !ourResolved.equals(typeResolved) : !ClassUtils.isAssignable(ourResolved, typeResolved)) {
 			return false;
 		}
 
