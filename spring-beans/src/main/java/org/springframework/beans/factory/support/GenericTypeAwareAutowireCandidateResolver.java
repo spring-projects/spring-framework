@@ -106,12 +106,10 @@ public class GenericTypeAwareAutowireCandidateResolver implements AutowireCandid
 				}
 			}
 		}
-		if (targetType == null) {
+		if (targetType == null || (descriptor.fallbackMatchAllowed() && targetType.hasUnresolvableGenerics())) {
 			return true;
 		}
-		if (descriptor.fallbackMatchAllowed() && targetType.hasUnresolvableGenerics()) {
-			return descriptor.getDependencyType().isAssignableFrom(targetType.getRawClass());
-		}
+		// Full check for complex generic type match...
 		return dependencyType.isAssignableFrom(targetType);
 	}
 
