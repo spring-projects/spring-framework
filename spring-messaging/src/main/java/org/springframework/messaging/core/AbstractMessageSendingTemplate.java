@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.SimpleMessageConverter;
 import org.springframework.util.Assert;
@@ -130,6 +131,14 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 
 		MessageHeaders messageHeaders = (headers != null) ? new MessageHeaders(headers) : null;
 		Message<?> message = this.converter.toMessage(payload, messageHeaders);
+
+		if (message == null) {
+			String payloadType = (payload != null) ? payload.getClass().getName() : null;
+			throw new MessageConversionException("Unable to convert payload type '"
+					+ payloadType + "', Content-Type=" + messageHeaders.get(MessageHeaders.CONTENT_TYPE)
+					+ ", converter=" + this.converter, null);
+		}
+
 		if (postProcessor != null) {
 			message = postProcessor.postProcessMessage(message);
 		}

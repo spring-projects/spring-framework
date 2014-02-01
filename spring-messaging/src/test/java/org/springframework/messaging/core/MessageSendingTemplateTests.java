@@ -16,14 +16,20 @@
 
 package org.springframework.messaging.core;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.converter.*;
 import org.springframework.messaging.support.GenericMessage;
+import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 
 import static org.junit.Assert.*;
 
@@ -45,7 +51,8 @@ public class MessageSendingTemplateTests {
 	public void setup() {
 		this.template = new TestMessageSendingTemplate();
 		this.postProcessor = new TestMessagePostProcessor();
-		this.headers = Collections.<String, Object>singletonMap("key", "value");
+		this.headers = new HashMap<>();
+		this.headers.put("key", "value");
 	}
 
 	@Test
@@ -142,6 +149,17 @@ public class MessageSendingTemplateTests {
 
 		assertNotNull(this.postProcessor.getMessage());
 		assertSame(this.template.message, this.postProcessor.getMessage());
+	}
+
+	@Test(expected = MessageConversionException.class)
+	public void convertAndSendNoMatchingConverter() {
+
+		MessageConverter converter = new CompositeMessageConverter(
+				Arrays.asList(new MappingJackson2MessageConverter()), new DefaultContentTypeResolver());
+		this.template.setMessageConverter(converter);
+
+		this.headers.put(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_XML);
+		this.template.convertAndSend("home", "payload", new MessageHeaders(this.headers));
 	}
 
 

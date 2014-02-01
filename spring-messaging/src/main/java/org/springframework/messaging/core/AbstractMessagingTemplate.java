@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.converter.MessageConversionException;
 
 /**
  * An extension of {@link AbstractMessageSendingTemplate} that adds support for
@@ -116,9 +117,18 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageSendin
 
 		MessageHeaders messageHeaders = (headers != null) ? new MessageHeaders(headers) : null;
 		Message<?> requestMessage = getMessageConverter().toMessage(request, messageHeaders);
+
+		if (requestMessage == null) {
+			String payloadType = (request != null) ? request.getClass().getName() : null;
+			throw new MessageConversionException("Unable to convert payload type '"
+					+ payloadType + "', Content-Type=" + messageHeaders.get(MessageHeaders.CONTENT_TYPE)
+					+ ", converter=" + getMessageConverter(), null);
+		}
+
 		if (postProcessor != null) {
 			requestMessage = postProcessor.postProcessMessage(requestMessage);
 		}
+
 		Message<?> replyMessage = this.sendAndReceive(destination, requestMessage);
 		return (replyMessage != null) ? (T) getMessageConverter().fromMessage(replyMessage, targetClass) : null;
 	}
