@@ -155,7 +155,7 @@ public class MessageSendingTemplateTests {
 	public void convertAndSendNoMatchingConverter() {
 
 		MessageConverter converter = new CompositeMessageConverter(
-				Arrays.asList(new MappingJackson2MessageConverter()), new DefaultContentTypeResolver());
+				Arrays.<MessageConverter>asList(new MappingJackson2MessageConverter()), new DefaultContentTypeResolver());
 		this.template.setMessageConverter(converter);
 
 		this.headers.put(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_XML);
