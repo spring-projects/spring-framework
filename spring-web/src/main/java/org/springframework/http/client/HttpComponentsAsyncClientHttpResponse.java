@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.http.HttpHeaders;
  *
  * @author Oleg Kalnichevski
  * @author Arjen Poutsma
- * @since 3.1
+ * @since 4.0
  * @see HttpComponentsAsyncClientHttpRequest#executeAsync()
  */
 final class HttpComponentsAsyncClientHttpResponse extends AbstractClientHttpResponse {
@@ -76,9 +76,8 @@ final class HttpComponentsAsyncClientHttpResponse extends AbstractClientHttpResp
 
 	@Override
 	public void close() {
-        // HTTP responses returned by async HTTP client
-        // are not bound to an active connection and
-        // do not have to deallocate any resources
+        // HTTP responses returned by async HTTP client are not bound to an
+        // active connection and do not have to deallocate any resources...
 	}
 
 }

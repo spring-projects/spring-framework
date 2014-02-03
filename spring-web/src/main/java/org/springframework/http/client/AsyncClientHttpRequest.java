@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,24 +23,24 @@ import org.springframework.http.HttpRequest;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**
- * Represents a client-side asynchronous HTTP request. Created via an implementation of
- * the {@link AsyncClientHttpRequestFactory}.
- * <p>A {@code AsyncHttpRequest} can be {@linkplain #executeAsync() executed}, getting a
- * future {@link ClientHttpResponse} which can be read from.
+ * Represents a client-side asynchronous HTTP request. Created via an
+ * implementation of the {@link AsyncClientHttpRequestFactory}.
+ *
+ * <p>A {@code AsyncHttpRequest} can be {@linkplain #executeAsync() executed},
+ * getting a future {@link ClientHttpResponse} which can be read from.
  *
  * @author Arjen Poutsma
  * @since 4.0
- * @see AsyncClientHttpRequestFactory#createAsyncRequest(java.net.URI, org.springframework.http.HttpMethod)
+ * @see AsyncClientHttpRequestFactory#createAsyncRequest
  */
 public interface AsyncClientHttpRequest extends HttpRequest, HttpOutputMessage {
 
 	/**
-	 * Execute this request asynchronously, resulting in a future
+	 * Execute this request asynchronously, resulting in a Future handle.
 	 * {@link ClientHttpResponse} that can be read.
 	 * @return the future response result of the execution
 	 * @throws java.io.IOException in case of I/O errors
 	 */
 	ListenableFuture<ClientHttpResponse> executeAsync() throws IOException;
-
 
 }

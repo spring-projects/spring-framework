@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ final class HttpComponentsClientHttpResponse extends AbstractClientHttpResponse 
 	@Override
 	public InputStream getBody() throws IOException {
 		HttpEntity entity = this.httpResponse.getEntity();
-		return entity != null ? entity.getContent() : null;
+		return (entity != null ? entity.getContent() : null);
 	}
 
 	@Override
@@ -83,12 +83,13 @@ final class HttpComponentsClientHttpResponse extends AbstractClientHttpResponse 
             try {
                 // Attempt to keep connection alive by consuming its remaining content
                 EntityUtils.consume(this.httpResponse.getEntity());
-            } finally {
-                // Paranoia
+            }
+			finally {
                 this.httpResponse.close();
             }
         }
-        catch (IOException ignore) {
+        catch (IOException ex) {
+			// Ignore exception on close...
         }
 	}
 

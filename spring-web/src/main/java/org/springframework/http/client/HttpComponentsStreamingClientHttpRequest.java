@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,18 +36,16 @@ import org.springframework.http.MediaType;
 import org.springframework.http.StreamingHttpOutputMessage;
 
 /**
- * {@link ClientHttpRequest} implementation that uses Apache HttpComponents HttpClient to
- * execute requests.
+ * {@link ClientHttpRequest} implementation that uses Apache HttpComponents
+ * HttpClient to execute requests.
  *
- * <p>Created via the
- * {@link org.springframework.http.client.HttpComponentsClientHttpRequestFactory}.
+ * <p>Created via the {@link HttpComponentsClientHttpRequestFactory}.
  *
  * @author Arjen Poutsma
- * @see org.springframework.http.client.HttpComponentsClientHttpRequestFactory#createRequest(java.net.URI, org.springframework.http.HttpMethod)
  * @since 4.0
+ * @see HttpComponentsClientHttpRequestFactory#createRequest(java.net.URI, org.springframework.http.HttpMethod)
  */
-final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpRequest
-		implements StreamingHttpOutputMessage {
+final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpRequest implements StreamingHttpOutputMessage {
 
 	private final CloseableHttpClient httpClient;
 
@@ -57,12 +55,13 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 
 	private Body body;
 
-	public HttpComponentsStreamingClientHttpRequest(CloseableHttpClient httpClient,
-			HttpUriRequest httpRequest, HttpContext httpContext) {
+
+	HttpComponentsStreamingClientHttpRequest(CloseableHttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext) {
 		this.httpClient = httpClient;
 		this.httpRequest = httpRequest;
 		this.httpContext = httpContext;
 	}
+
 
 	@Override
 	public HttpMethod getMethod() {
@@ -82,8 +81,7 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 
 	@Override
 	protected OutputStream getBodyInternal(HttpHeaders headers) throws IOException {
-		throw new UnsupportedOperationException(
-				"getBody not supported when bufferRequestBody is false");
+		throw new UnsupportedOperationException("getBody not supported");
 	}
 
 	@Override
@@ -91,16 +89,15 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 		HttpComponentsClientHttpRequest.addHeaders(this.httpRequest, headers);
 
 		if (this.httpRequest instanceof HttpEntityEnclosingRequest && body != null) {
-			HttpEntityEnclosingRequest entityEnclosingRequest =
-					(HttpEntityEnclosingRequest) this.httpRequest;
-
+			HttpEntityEnclosingRequest entityEnclosingRequest = (HttpEntityEnclosingRequest) this.httpRequest;
 			HttpEntity requestEntity = new StreamingHttpEntity(getHeaders(), body);
 			entityEnclosingRequest.setEntity(requestEntity);
 		}
-		CloseableHttpResponse httpResponse =
-				this.httpClient.execute(this.httpRequest, this.httpContext);
+
+		CloseableHttpResponse httpResponse = this.httpClient.execute(this.httpRequest, this.httpContext);
 		return new HttpComponentsClientHttpResponse(httpResponse);
 	}
+
 
 	private static class StreamingHttpEntity implements HttpEntity {
 
@@ -108,9 +105,7 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 
 		private final StreamingHttpOutputMessage.Body body;
 
-
-		private StreamingHttpEntity(HttpHeaders headers,
-				StreamingHttpOutputMessage.Body body) {
+		public StreamingHttpEntity(HttpHeaders headers, StreamingHttpOutputMessage.Body body) {
 			this.headers = headers;
 			this.body = body;
 		}
@@ -127,32 +122,30 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 
 		@Override
 		public long getContentLength() {
-			return headers.getContentLength();
+			return this.headers.getContentLength();
 		}
 
 		@Override
 		public Header getContentType() {
-			MediaType contentType = headers.getContentType();
-			return contentType != null ?
-					new BasicHeader("Content-Type", contentType.toString()) : null;
+			MediaType contentType = this.headers.getContentType();
+			return (contentType != null ? new BasicHeader("Content-Type", contentType.toString()) : null);
 		}
 
 		@Override
 		public Header getContentEncoding() {
-			String contentEncoding = headers.getFirst("Content-Encoding");
-			return contentEncoding != null ?
-					new BasicHeader("Content-Encoding", contentEncoding) : null;
+			String contentEncoding = this.headers.getFirst("Content-Encoding");
+			return (contentEncoding != null ? new BasicHeader("Content-Encoding", contentEncoding) : null);
 
 		}
 
 		@Override
 		public InputStream getContent() throws IOException, IllegalStateException {
-			throw new IllegalStateException();
+			throw new IllegalStateException("No content available");
 		}
 
 		@Override
 		public void writeTo(OutputStream outputStream) throws IOException {
-			body.writeTo(outputStream);
+			this.body.writeTo(outputStream);
 		}
 
 		@Override
