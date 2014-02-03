@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.core.type;
 
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
+package org.springframework.core.type;
 
 import java.net.URL;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -30,22 +27,22 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+
 /**
- * Unit test checking the behaviour of {@link CachingMetadataReaderFactory} under load.
- * If the cache is not controller, this test should fail with an out of memory exception around entry
- * 5k.
- *
+ * Unit tests for checking the behaviour of {@link CachingMetadataReaderFactory} under
+ * load. If the cache is not controlled, this test should fail with an out of memory
+ * exception around entry 5k.
+ * 
  * @author Costin Leau
+ * @author Sam Brannen
  */
-public class CachingMetadataReaderLeakTest {
+public class CachingMetadataReaderLeakTests {
 
-	private static int ITEMS_LOAD = 9999;
-	private MetadataReaderFactory mrf;
+	private static final int ITEMS_TO_LOAD = 9999;
 
-	@Before
-	public void before() {
-		mrf = new CachingMetadataReaderFactory();
-	}
+	private final MetadataReaderFactory mrf = new CachingMetadataReaderFactory();
 
 	@Test
 	public void testSignificantLoad() throws Exception {
@@ -56,14 +53,12 @@ public class CachingMetadataReaderLeakTest {
 		assertThat(url, notNullValue());
 
 		// look at a LOT of items
-		for (int i = 0; i < ITEMS_LOAD; i++) {
+		for (int i = 0; i < ITEMS_TO_LOAD; i++) {
 			Resource resource = new UrlResource(url) {
-				private int counter = 0;
 
 				@Override
 				public boolean equals(Object obj) {
 					return (obj == this);
-
 				}
 
 				@Override
@@ -77,6 +72,7 @@ public class CachingMetadataReaderLeakTest {
 		}
 
 		// useful for profiling to take snapshots
-		//System.in.read();
+		// System.in.read();
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -174,7 +174,7 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	 */
 	@Test
 	public void resolveActiveProfilesWithResolver() {
-		String[] profiles = resolveActiveProfiles(FooActiveProfilesResolverTest.class);
+		String[] profiles = resolveActiveProfiles(FooActiveProfilesResolverTestCase.class);
 		assertNotNull(profiles);
 		assertEquals(1, profiles.length);
 		assertArrayEquals(new String[] { "foo" }, profiles);
@@ -185,7 +185,7 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	 */
 	@Test
 	public void resolveActiveProfilesWithInheritedResolver() {
-		String[] profiles = resolveActiveProfiles(InheritedFooActiveProfilesResolverTest.class);
+		String[] profiles = resolveActiveProfiles(InheritedFooActiveProfilesResolverTestCase.class);
 		assertNotNull(profiles);
 		assertEquals(1, profiles.length);
 		assertArrayEquals(new String[] { "foo" }, profiles);
@@ -196,7 +196,7 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	 */
 	@Test
 	public void resolveActiveProfilesWithMergedInheritedResolver() {
-		String[] profiles = resolveActiveProfiles(MergedInheritedFooActiveProfilesResolverTest.class);
+		String[] profiles = resolveActiveProfiles(MergedInheritedFooActiveProfilesResolverTestCase.class);
 		assertNotNull(profiles);
 		assertEquals(2, profiles.length);
 		List<String> list = Arrays.asList(profiles);
@@ -209,7 +209,7 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	 */
 	@Test
 	public void resolveActiveProfilesWithOverridenInheritedResolver() {
-		String[] profiles = resolveActiveProfiles(OverridenInheritedFooActiveProfilesResolverTest.class);
+		String[] profiles = resolveActiveProfiles(OverridenInheritedFooActiveProfilesResolverTestCase.class);
 		assertNotNull(profiles);
 		assertEquals(1, profiles.length);
 		assertArrayEquals(new String[] { "bar" }, profiles);
@@ -220,7 +220,7 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	 */
 	@Test(expected = IllegalStateException.class)
 	public void resolveActiveProfilesWithConflictingResolverAndProfiles() {
-		resolveActiveProfiles(ConflictingResolverAndProfilesTest.class);
+		resolveActiveProfiles(ConflictingResolverAndProfilesTestCase.class);
 	}
 
 	/**
@@ -228,7 +228,7 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	 */
 	@Test(expected = IllegalStateException.class)
 	public void resolveActiveProfilesWithConflictingResolverAndValue() {
-		resolveActiveProfiles(ConflictingResolverAndValueTest.class);
+		resolveActiveProfiles(ConflictingResolverAndValueTestCase.class);
 	}
 
 	/**
@@ -236,7 +236,7 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	 */
 	@Test(expected = IllegalStateException.class)
 	public void resolveActiveProfilesWithConflictingProfilesAndValue() {
-		resolveActiveProfiles(ConflictingProfilesAndValueTest.class);
+		resolveActiveProfiles(ConflictingProfilesAndValueTestCase.class);
 	}
 
 	/**
@@ -244,7 +244,7 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	 */
 	@Test(expected = IllegalStateException.class)
 	public void resolveActiveProfilesWithResolverWithoutDefaultConstructor() {
-		resolveActiveProfiles(NoDefaultConstructorActiveProfilesResolverTest.class);
+		resolveActiveProfiles(NoDefaultConstructorActiveProfilesResolverTestCase.class);
 	}
 
 	/**
@@ -252,7 +252,7 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	 */
 	@Test(expected = IllegalStateException.class)
 	public void resolveActiveProfilesWithResolverThatReturnsNull() {
-		resolveActiveProfiles(NullActiveProfilesResolverTest.class);
+		resolveActiveProfiles(NullActiveProfilesResolverTestCase.class);
 	}
 
 
@@ -299,38 +299,40 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	}
 
 	@ActiveProfiles(resolver = NullActiveProfilesResolver.class)
-	private static class NullActiveProfilesResolverTest {
+	private static class NullActiveProfilesResolverTestCase {
 	}
 
 	@ActiveProfiles(resolver = NoDefaultConstructorActiveProfilesResolver.class)
-	private static class NoDefaultConstructorActiveProfilesResolverTest {
+	private static class NoDefaultConstructorActiveProfilesResolverTestCase {
 	}
 
 	@ActiveProfiles(resolver = FooActiveProfilesResolver.class)
-	private static class FooActiveProfilesResolverTest {
+	private static class FooActiveProfilesResolverTestCase {
 	}
 
-	private static class InheritedFooActiveProfilesResolverTest extends FooActiveProfilesResolverTest {
+	private static class InheritedFooActiveProfilesResolverTestCase extends FooActiveProfilesResolverTestCase {
 	}
 
 	@ActiveProfiles(resolver = BarActiveProfilesResolver.class)
-	private static class MergedInheritedFooActiveProfilesResolverTest extends InheritedFooActiveProfilesResolverTest {
+	private static class MergedInheritedFooActiveProfilesResolverTestCase extends
+			InheritedFooActiveProfilesResolverTestCase {
 	}
 
 	@ActiveProfiles(resolver = BarActiveProfilesResolver.class, inheritProfiles = false)
-	private static class OverridenInheritedFooActiveProfilesResolverTest extends InheritedFooActiveProfilesResolverTest {
+	private static class OverridenInheritedFooActiveProfilesResolverTestCase extends
+			InheritedFooActiveProfilesResolverTestCase {
 	}
 
 	@ActiveProfiles(resolver = BarActiveProfilesResolver.class, profiles = "conflict")
-	private static class ConflictingResolverAndProfilesTest {
+	private static class ConflictingResolverAndProfilesTestCase {
 	}
 
 	@ActiveProfiles(resolver = BarActiveProfilesResolver.class, value = "conflict")
-	private static class ConflictingResolverAndValueTest {
+	private static class ConflictingResolverAndValueTestCase {
 	}
 
 	@ActiveProfiles(profiles = "conflict", value = "conflict")
-	private static class ConflictingProfilesAndValueTest {
+	private static class ConflictingProfilesAndValueTestCase {
 	}
 
 	private static class FooActiveProfilesResolver implements ActiveProfilesResolver {

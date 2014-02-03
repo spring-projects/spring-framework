@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,27 @@
 
 package org.springframework.mock.staticmock;
 
-import static org.junit.Assert.assertEquals;
-
 import java.rmi.RemoteException;
 
 import javax.persistence.PersistenceException;
 
 import org.junit.Ignore;
-import org.junit.Test;
-import org.springframework.mock.staticmock.AnnotationDrivenStaticEntityMockingControl;
-import org.springframework.mock.staticmock.MockStaticEntityMethods;
 
-//Used because verification failures occur after method returns,
-//so we can't test for them in the test case itself
+import static org.junit.Assert.*;
+
+/**
+ * This isn't meant for direct testing; rather it is driven from
+ * {@link AnnotationDrivenStaticEntityMockingControlTests}.
+ * 
+ * @author Rod Johnson
+ * @author Ramnivas Laddad
+ * @author Sam Brannen
+ */
 @MockStaticEntityMethods
-@Ignore // This isn't meant for direct testing; rather it is driven from AnnotationDrivenStaticEntityMockingControl
+@Ignore("Used because verification failures occur after method returns, so we can't test for them in the test case itself")
 public class Delegate {
 
-	@Test
-	public void testArgMethodNoMatchExpectReturn() {
+	public void argMethodNoMatchExpectReturn() {
 		long id = 13;
 		Person found = new Person();
 		Person.findPerson(id);
@@ -43,8 +45,7 @@ public class Delegate {
 		assertEquals(found, Person.findPerson(id + 1));
 	}
 
-	@Test
-	public void testArgMethodNoMatchExpectThrow() {
+	public void argMethodNoMatchExpectThrow() {
 		long id = 13;
 		Person found = new Person();
 		Person.findPerson(id);
@@ -53,7 +54,6 @@ public class Delegate {
 		assertEquals(found, Person.findPerson(id + 1));
 	}
 
-	@Test
 	public void failTooFewCalls() {
 		long id = 13;
 		Person found = new Person();
@@ -65,28 +65,26 @@ public class Delegate {
 		assertEquals(found, Person.findPerson(id));
 	}
 
-	@Test
 	public void doesntEverReplay() {
 		Person.countPeople();
 	}
 
-	@Test
 	public void doesntEverSetReturn() {
 		Person.countPeople();
 		AnnotationDrivenStaticEntityMockingControl.playback();
 	}
 
-	@Test
 	public void rejectUnexpectedCall() {
 		AnnotationDrivenStaticEntityMockingControl.playback();
 		Person.countPeople();
 	}
 
-	@Test(expected=RemoteException.class)
-	public void testVerificationFailsEvenWhenTestFailsInExpectedManner() throws RemoteException {
+	public void verificationFailsEvenWhenTestFailsInExpectedManner()
+			throws RemoteException {
 		Person.countPeople();
 		AnnotationDrivenStaticEntityMockingControl.playback();
 		// No calls to allow verification failure
 		throw new RemoteException();
 	}
+
 }

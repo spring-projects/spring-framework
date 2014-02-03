@@ -20,7 +20,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.test.context.junit4.aci.annotation.InitializerWithoutConfigFilesOrClassesTest;
+import org.springframework.test.context.junit4.aci.annotation.InitializerWithoutConfigFilesOrClassesTests;
 import org.springframework.test.context.junit4.aci.annotation.MergedInitializersAnnotationConfigTests;
 import org.springframework.test.context.junit4.aci.annotation.MultipleInitializersAnnotationConfigTests;
 import org.springframework.test.context.junit4.aci.annotation.OrderedInitializersAnnotationConfigTests;
@@ -45,7 +45,7 @@ import org.springframework.test.context.junit4.aci.xml.MultipleInitializersXmlCo
 	MergedInitializersAnnotationConfigTests.class,//
 	OverriddenInitializersAnnotationConfigTests.class,//
 	OrderedInitializersAnnotationConfigTests.class,//
-	InitializerWithoutConfigFilesOrClassesTest.class //
+	InitializerWithoutConfigFilesOrClassesTests.class //
 })
 public class AciTestSuite {
 }

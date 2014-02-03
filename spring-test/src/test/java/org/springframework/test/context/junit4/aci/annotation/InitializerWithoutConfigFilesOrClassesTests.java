@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.test.context.junit4.aci.annotation;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -27,19 +25,21 @@ import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.junit4.aci.annotation.InitializerWithoutConfigFilesOrClassesTest.EntireAppInitializer;
+import org.springframework.test.context.junit4.aci.annotation.InitializerWithoutConfigFilesOrClassesTests.EntireAppInitializer;
+
+import static org.junit.Assert.*;
 
 /**
  * Integration test that verifies support for {@link ApplicationContextInitializer
- * ApplicationContextInitializers} in the TestContext framework when the test
- * class declares neither XML configuration files nor annotated configuration classes.
- *
+ * ApplicationContextInitializers} in the TestContext framework when the test class
+ * declares neither XML configuration files nor annotated configuration classes.
+ * 
  * @author Sam Brannen
  * @since 3.2
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(initializers = EntireAppInitializer.class)
-public class InitializerWithoutConfigFilesOrClassesTest {
+public class InitializerWithoutConfigFilesOrClassesTests {
 
 	@Autowired
 	private String foo;

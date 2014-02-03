@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.sql.Connection;
 
 import javax.sql.DataSource;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.*;
@@ -31,20 +30,14 @@ import static org.mockito.BDDMockito.*;
 
 /**
  * Tests for {@link DelegatingDataSource}.
- *
+ * 
  * @author Phillip Webb
  */
-public class DelegatingDataSourceTest {
+public class DelegatingDataSourceTests {
 
-	private DataSource delegate;
+	private final DataSource delegate = mock(DataSource.class);
 
-	private DelegatingDataSource dataSource;
-
-	@Before
-	public void setup() {
-		this.delegate = mock(DataSource.class);
-		this.dataSource = new DelegatingDataSource(delegate);
-	}
+	private DelegatingDataSource dataSource = new DelegatingDataSource(delegate);
 
 	@Test
 	public void shouldDelegateGetConnection() throws Exception {

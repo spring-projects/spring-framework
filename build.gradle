@@ -65,8 +65,8 @@ configure(allprojects) { project ->
 		systemProperty("java.awt.headless", "true")
 		systemProperty("testGroups", project.properties.get("testGroups"))
 		scanForTestClasses = false
-		include '**/*Tests.*'
-		exclude '**/*Abstract*.*'
+		include(["**/*Tests.*", "**/*Test.*"])
+		exclude "**/Abstract*.*"
 	}
 
 	repositories {
@@ -273,8 +273,8 @@ project("spring-beans") {
 	}
 }
 
-project('spring-beans-groovy') {
-	description 'Groovy Bean Definitions'
+project("spring-beans-groovy") {
+	description "Groovy Bean Definitions"
 	merge.into = project(":spring-beans")
 	apply plugin: "groovy"
 
@@ -288,7 +288,7 @@ project('spring-beans-groovy') {
 	sourceSets {
 		main {
 			groovy {
-				srcDir 'src/main/java'
+				srcDir "src/main/java"
 			}
 		}
 	}
@@ -830,10 +830,9 @@ project("spring-test") {
 		useTestNG()
 		// forkEvery 1
 		scanForTestClasses = false
-		include "**/testng/**/*.*"
-		exclude "**/FailingBeforeAndAfterMethodsTests.class"
+		include(["**/testng/**/*Tests.*", "**/testng/**/*Test.*"])
 		// "TestCase" classes are run by other test classes, not the build.
-		exclude "**/*TestCase.class"
+		exclude(["**/Abstract*.*", "**/*TestCase.class", "**/FailingBeforeAndAfterMethodsTests.class"])
 		// Generate TestNG reports alongside JUnit reports.
 		getReports().getHtml().setEnabled(true)
 		// show standard out and standard error of the test JVM(s) on the console
@@ -843,10 +842,15 @@ project("spring-test") {
 	test {
 		dependsOn testNG
 		useJUnit()
-		exclude "**/testng/**/*.*"
-		include "**/testng/FailingBeforeAndAfterMethodsTests"
+		include(["**/*Tests.*", "**/*Test.*"])
+		// In general, we exclude all classes under the 'testng' package.
 		// "TestCase" classes are run by other test classes, not the build.
-		exclude(["**/*TestCase.class", "**/*TestSuite.class"])
+		// "TestSuite" classes only exist as a convenience to the develper; they
+		// should not be run by the build.
+		exclude(["**/testng/**/*.*", "**/Abstract*.*", "**/*TestCase.class", "**/*TestSuite.class"])
+		// FailingBeforeAndAfterMethodsTests is actually a JUnit-based test which
+		// itself runs TestNG manually in order to test our TestNG support.
+		include "**/testng/FailingBeforeAndAfterMethodsTests"
 	}
 }
 

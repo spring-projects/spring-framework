@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,28 +17,25 @@
 package org.springframework.web.filter;
 
 import java.io.IOException;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
-import static org.junit.Assert.assertEquals;
-import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
-/** @author Arjen Poutsma */
-public class HiddenHttpMethodFilterTest {
+import static org.junit.Assert.*;
 
-	private HiddenHttpMethodFilter filter;
+/**
+ * @author Arjen Poutsma
+ */
+public class HiddenHttpMethodFilterTests {
 
-	@Before
-	public void createFilter() {
-		filter = new HiddenHttpMethodFilter();
-	}
+	private final HiddenHttpMethodFilter filter = new HiddenHttpMethodFilter();
 
 	@Test
 	public void filterWithParameter() throws IOException, ServletException {
@@ -49,9 +46,10 @@ public class HiddenHttpMethodFilterTest {
 		FilterChain filterChain = new FilterChain() {
 
 			@Override
-			public void doFilter(ServletRequest filterRequest, ServletResponse filterResponse)
-					throws IOException, ServletException {
-				assertEquals("Invalid method", "DELETE", ((HttpServletRequest) filterRequest).getMethod());
+			public void doFilter(ServletRequest filterRequest,
+					ServletResponse filterResponse) throws IOException, ServletException {
+				assertEquals("Invalid method", "DELETE",
+						((HttpServletRequest) filterRequest).getMethod());
 			}
 		};
 		filter.doFilter(request, response, filterChain);
@@ -65,11 +63,13 @@ public class HiddenHttpMethodFilterTest {
 		FilterChain filterChain = new FilterChain() {
 
 			@Override
-			public void doFilter(ServletRequest filterRequest, ServletResponse filterResponse)
-					throws IOException, ServletException {
-				assertEquals("Invalid method", "POST", ((HttpServletRequest) filterRequest).getMethod());
+			public void doFilter(ServletRequest filterRequest,
+					ServletResponse filterResponse) throws IOException, ServletException {
+				assertEquals("Invalid method", "POST",
+						((HttpServletRequest) filterRequest).getMethod());
 			}
 		};
 		filter.doFilter(request, response, filterChain);
 	}
+
 }

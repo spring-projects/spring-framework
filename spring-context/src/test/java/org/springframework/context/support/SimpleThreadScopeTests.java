@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,20 @@
 
 package org.springframework.context.support;
 
-import static org.junit.Assert.*;
-import org.junit.Before;
 import org.junit.Test;
-
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.context.ApplicationContext;
+import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
+ * @author Sam Brannen
  */
-public class SimpleThreadScopeTest {
+public class SimpleThreadScopeTests {
 
-	private ApplicationContext applicationContext;
-
-	@Before
-	public void setUp() {
-		applicationContext = new ClassPathXmlApplicationContext("simpleThreadScopeTests.xml", getClass());
-	}
+	private ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
+			"simpleThreadScopeTests.xml", getClass());
 
 	@Test
 	public void getFromScope() throws Exception {
@@ -49,15 +45,19 @@ public class SimpleThreadScopeTest {
 	public void getMultipleInstances() throws Exception {
 		final TestBean[] beans = new TestBean[2];
 		Thread thread1 = new Thread(new Runnable() {
+
 			@Override
 			public void run() {
-				beans[0] = applicationContext.getBean("threadScopedObject", TestBean.class);
+				beans[0] = applicationContext.getBean("threadScopedObject",
+						TestBean.class);
 			}
 		});
 		Thread thread2 = new Thread(new Runnable() {
+
 			@Override
 			public void run() {
-				beans[1] = applicationContext.getBean("threadScopedObject", TestBean.class);
+				beans[1] = applicationContext.getBean("threadScopedObject",
+						TestBean.class);
 			}
 		});
 		thread1.start();

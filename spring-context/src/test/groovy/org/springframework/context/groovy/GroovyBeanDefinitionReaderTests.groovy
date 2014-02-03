@@ -344,10 +344,10 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 	void testScopes() {
 		def appCtx = new GenericGroovyApplicationContext()
 		appCtx.reader.beans {
-			myBean(ScopeTest) { bean ->
+			myBean(ScopeTestBean) { bean ->
 				bean.scope = "prototype"
 			}
-			myBean2(ScopeTest)
+			myBean2(ScopeTestBean)
 		}
 		appCtx.refresh()
 
@@ -955,7 +955,7 @@ class Bean1Factory {
 	}
 }
 
-class ScopeTest {
+class ScopeTestBean {
 }
 
 class TestScope implements Scope {

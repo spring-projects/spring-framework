@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,10 @@ import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
-public class DomContentHandlerTest {
+/**
+ * Unit tests for {@link DomContentHandler}.
+ */
+public class DomContentHandlerTests {
 
 	private static final String XML_1 =
 			"<?xml version='1.0' encoding='UTF-8'?>" + "<?pi content?>" + "<root xmlns='namespace'>" +
@@ -92,4 +95,5 @@ public class DomContentHandlerTest {
 		assertXMLEqual("Invalid result", expected, result);
 
 	}
+
 }
