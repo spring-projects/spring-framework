@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,22 @@ package org.springframework.mock.staticmock;
 
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.List;
+
+import org.springframework.util.ObjectUtils;
 
 /**
  * Abstract aspect to enable mocking of methods picked out by a pointcut.
- * Sub-aspects must define the mockStaticsTestMethod() pointcut to
- * indicate call stacks when mocking should be triggered, and the
- * methodToMock() pointcut to pick out a method invocations to mock.
+ *
+ * <p>Sub-aspects must define:
+ * <ul>
+ * <li>the {@link #mockStaticsTestMethod()} pointcut to indicate call stacks
+ * when mocking should be triggered
+ * <li>the {@link #methodToMock()} pointcut to pick out method invocations to mock
+ * </ul>
  *
  * @author Rod Johnson
  * @author Ramnivas Laddad
+ * @author Sam Brannen
  */
 public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMethod()) {
 
@@ -35,24 +41,34 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 
 	protected abstract pointcut methodToMock();
 
+
 	private boolean recording = true;
 
-	static enum CallResponse { nothing, return_, throw_ };
 
-	// Represents a list of expected calls to static entity methods
+	static enum CallResponse {
+		nothing, return_, throw_
+	};
+
+	/**
+	 * Represents a list of expected calls to methods.
+	 */
 	// Public to allow inserted code to access: is this normal??
 	public class Expectations {
 
-		// Represents an expected call to a static entity method
+		/**
+		 * Represents an expected call to a method.
+		 */
 		private class Call {
+
 			private final String signature;
 			private final Object[] args;
 
 			private Object responseObject; // return value or throwable
 			private CallResponse responseType = CallResponse.nothing;
 
-			public Call(String name, Object[] args) {
-				this.signature = name;
+
+			public Call(String signature, Object[] args) {
+				this.signature = signature;
 				this.args = args;
 			}
 
@@ -77,7 +93,7 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 
 			public Object throwException(String lastSig, Object[] args) {
 				checkSignature(lastSig, args);
-				throw (RuntimeException)responseObject;
+				throw (RuntimeException) responseObject;
 			}
 
 			private void checkSignature(String lastSig, Object[] args) {
@@ -88,16 +104,29 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 					throw new IllegalArgumentException("Arguments don't match");
 				}
 			}
+
+			@Override
+			public String toString() {
+				return String.format("Call with signature [%s] and arguments %s", this.signature,
+					ObjectUtils.nullSafeToString(args));
+			}
 		}
 
-		private List<Call> calls = new LinkedList<Call>();
 
-		// Calls already verified
+		/**
+		 * The list of recorded calls.
+		 */
+		private final LinkedList<Call> calls = new LinkedList<Call>();
+
+		/**
+		 * The number of calls already verified.
+		 */
 		private int verified;
+
 
 		public void verify() {
 			if (verified != calls.size()) {
-				throw new IllegalStateException("Expected " + calls.size() + " calls, received " + verified);
+				throw new IllegalStateException("Expected " + calls.size() + " calls, but received " + verified);
 			}
 		}
 
@@ -105,31 +134,32 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 		 * Validate the call and provide the expected return value.
 		 */
 		public Object respond(String lastSig, Object[] args) {
-			Call call = nextCall();
-			CallResponse responseType = call.responseType;
-			if (responseType == CallResponse.return_) {
-				return call.returnValue(lastSig, args);
+			Call c = nextCall();
+
+			switch (c.responseType) {
+				case return_: {
+					return c.returnValue(lastSig, args);
+				}
+				case throw_: {
+					return c.throwException(lastSig, args);
+				}
+				default: {
+					throw new IllegalStateException("Behavior of " + c + " not specified");
+				}
 			}
-			else if (responseType == CallResponse.throw_) {
-				return call.throwException(lastSig, args);
-			}
-			else if (responseType == CallResponse.nothing) {
-				// do nothing
-			}
-			throw new IllegalStateException("Behavior of " + call + " not specified");
 		}
 
 		private Call nextCall() {
 			verified++;
 			if (verified > calls.size()) {
-				throw new IllegalStateException("Expected " + calls.size() + " calls, received " + verified);
+				throw new IllegalStateException("Expected " + calls.size() + " calls, but received " + verified);
 			}
-			return calls.get(verified);
+			// The 'verified' count is 1-based; whereas, 'calls' is 0-based.
+			return calls.get(verified - 1);
 		}
 
-		public void expectCall(String lastSig, Object lastArgs[]) {
-			Call call = new Call(lastSig, lastArgs);
-			calls.add(call);
+		public void expectCall(String lastSig, Object[] lastArgs) {
+			calls.add(new Call(lastSig, lastArgs));
 		}
 
 		public boolean hasCalls() {
@@ -137,29 +167,31 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 		}
 
 		public void expectReturn(Object retVal) {
-			Call call = calls.get(calls.size() - 1);
-			if (call.hasResponseSpecified()) {
-				throw new IllegalStateException("No static method invoked before setting return value");
+			Call c = calls.getLast();
+			if (c.hasResponseSpecified()) {
+				throw new IllegalStateException("No method invoked before setting return value");
 			}
-			call.setReturnVal(retVal);
+			c.setReturnVal(retVal);
 		}
 
 		public void expectThrow(Throwable throwable) {
-			Call call = calls.get(calls.size() - 1);
-			if (call.hasResponseSpecified()) {
-				throw new IllegalStateException("No static method invoked before setting throwable");
+			Call c = calls.getLast();
+			if (c.hasResponseSpecified()) {
+				throw new IllegalStateException("No method invoked before setting throwable");
 			}
-			call.setThrow(throwable);
+			c.setThrow(throwable);
 		}
 	}
 
-	private Expectations expectations = new Expectations();
+
+	private final Expectations expectations = new Expectations();
+
 
 	after() returning : mockStaticsTestMethod() {
 		if (recording && (expectations.hasCalls())) {
 			throw new IllegalStateException(
-					"Calls recorded, yet playback state never reached: Create expectations then call "
-							+ this.getClass().getSimpleName() + ".playback()");
+				"Calls recorded, yet playback state never reached: Create expectations then call "
+						+ this.getClass().getSimpleName() + ".playback()");
 		}
 		expectations.verify();
 	}
