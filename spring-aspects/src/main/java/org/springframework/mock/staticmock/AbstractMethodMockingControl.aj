@@ -181,7 +181,6 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 			}
 			c.setThrow(throwable);
 		}
-		}
 	}
 
 
