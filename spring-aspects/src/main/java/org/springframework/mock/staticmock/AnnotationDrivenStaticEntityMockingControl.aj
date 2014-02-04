@@ -17,20 +17,21 @@
 package org.springframework.mock.staticmock;
 
 /**
- * Annotation-based aspect to use in test builds to enable mocking static methods
- * on JPA-annotated {@code @Entity} classes, as used by Spring Roo for finders.
+ * Annotation-based aspect to use in test builds to enable mocking of static methods
+ * on JPA-annotated {@code @Entity} classes, as used by Spring Roo for so-called
+ * <em>finder methods</em>.
  *
- * <p>Mocking will occur in the call stack of any method in a class (typically a test class)
- * that is annotated with the {@code @MockStaticEntityMethods} annotation.
+ * <p>Mocking will occur within the call stack of any method in a class (typically a
+ * test class) that is annotated with {@code @MockStaticEntityMethods}.
  *
- * <p>Also provides static methods to simplify the programming model for
- * entering playback mode and setting expected return values.
+ * <p>This aspect also provides static methods to simplify the programming model for
+ * setting expectations and entering playback mode.
  *
  * <p>Usage:
  * <ol>
  * <li>Annotate a test class with {@code @MockStaticEntityMethods}.
  * <li>In each test method, {@code AnnotationDrivenStaticEntityMockingControl}
- * will begin in recording mode.
+ * will begin in <em>recording</em> mode.
  * <li>Invoke static methods on JPA-annotated {@code @Entity} classes, with each
  * recording-mode invocation being followed by an invocation of either the static
  * {@link #expectReturn(Object)} method or the static {@link #expectThrow(Throwable)}
@@ -48,22 +49,37 @@ package org.springframework.mock.staticmock;
 public aspect AnnotationDrivenStaticEntityMockingControl extends AbstractMethodMockingControl {
 
 	/**
-	 * Stop recording mock calls and enter playback state
+	 * Expect the supplied {@link Object} to be returned by the previous static
+	 * method invocation.
+	 * @see #playback()
 	 */
-	public static void playback() {
-		AnnotationDrivenStaticEntityMockingControl.aspectOf().playbackInternal();
-	}
-
 	public static void expectReturn(Object retVal) {
 		AnnotationDrivenStaticEntityMockingControl.aspectOf().expectReturnInternal(retVal);
 	}
 
+	/**
+	 * Expect the supplied {@link Throwable} to be thrown by the previous static
+	 * method invocation.
+	 * @see #playback()
+	 */
 	public static void expectThrow(Throwable throwable) {
 		AnnotationDrivenStaticEntityMockingControl.aspectOf().expectThrowInternal(throwable);
 	}
 
-	// Only matches directly annotated @Test methods, to allow methods in
-	// @MockStatics classes to invoke each other without resetting the mocking environment
+	/**
+	 * Stop recording mock expectations and enter <em>playback</em> mode.
+	 * @see #expectReturn(Object)
+	 * @see #expectThrow(Throwable)
+	 */
+	public static void playback() {
+		AnnotationDrivenStaticEntityMockingControl.aspectOf().playbackInternal();
+	}
+	
+	// Apparently, the following pointcut was originally defined to only match
+	// methods directly annotated with @Test (in order to allow methods in
+	// @MockStaticEntityMethods classes to invoke each other without resetting
+	// the mocking environment); however, this is no longer the case. The current
+	// pointcut applies to all public methods in @MockStaticEntityMethods classes.
 	protected pointcut mockStaticsTestMethod() : execution(public * (@MockStaticEntityMethods *).*(..));
 
 	protected pointcut methodToMock() : execution(public static * (@javax.persistence.Entity *).*(..));

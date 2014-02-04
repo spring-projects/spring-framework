@@ -16,16 +16,18 @@
 
 package org.springframework.mock.staticmock;
 
+import java.rmi.RemoteException;
+
 import javax.persistence.PersistenceException;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 import static org.springframework.mock.staticmock.AnnotationDrivenStaticEntityMockingControl.*;
 
 /**
- * Tests for static entity mocking framework.
+ * Tests for Spring's static entity mocking framework (i.e., @{@link MockStaticEntityMethods}
+ * and {@link AnnotationDrivenStaticEntityMockingControl}).
  * 
  * @author Rod Johnson
  * @author Ramnivas Laddad
@@ -34,10 +36,8 @@ import static org.springframework.mock.staticmock.AnnotationDrivenStaticEntityMo
 @MockStaticEntityMethods
 public class AnnotationDrivenStaticEntityMockingControlTests {
 
-	// TODO Fix failing test
-	@Ignore
 	@Test
-	public void noArgIntReturn() {
+	public void noArgumentMethodInvocationReturnsInt() {
 		int expectedCount = 13;
 		Person.countPeople();
 		expectReturn(expectedCount);
@@ -45,20 +45,16 @@ public class AnnotationDrivenStaticEntityMockingControlTests {
 		assertEquals(expectedCount, Person.countPeople());
 	}
 
-	// TODO Fix failing test
-	@Ignore
 	@Test(expected = PersistenceException.class)
-	public void noArgThrows() {
+	public void noArgumentMethodInvocationThrowsException() {
 		Person.countPeople();
 		expectThrow(new PersistenceException());
 		playback();
 		Person.countPeople();
 	}
 
-	// TODO Fix failing test
-	@Ignore
 	@Test
-	public void argMethodMatches() {
+	public void methodArgumentsMatch() {
 		long id = 13;
 		Person found = new Person();
 		Person.findPerson(id);
@@ -67,8 +63,6 @@ public class AnnotationDrivenStaticEntityMockingControlTests {
 		assertEquals(found, Person.findPerson(id));
 	}
 
-	// TODO Fix failing test
-	@Ignore
 	@Test
 	public void longSeriesOfCalls() {
 		long id1 = 13;
@@ -91,36 +85,26 @@ public class AnnotationDrivenStaticEntityMockingControlTests {
 		assertEquals(0, Person.countPeople());
 	}
 
-	/**
-	 * Note delegation is used when tests are invalid and should fail, as otherwise the
-	 * failure will occur on the verify() method in the aspect after this method returns,
-	 * failing the test case.
-	 */
-	// TODO Fix failing test
-	@Ignore
-	@Test
-	public void argMethodNoMatchExpectReturn() {
-		try {
-			new Delegate().argMethodNoMatchExpectReturn();
-			fail();
-		}
-		catch (IllegalArgumentException expected) {
-		}
-	}
-
-	// TODO Fix failing test
-	@Ignore
 	@Test(expected = IllegalArgumentException.class)
-	public void argMethodNoMatchExpectThrow() {
-		new Delegate().argMethodNoMatchExpectThrow();
+	public void methodArgumentsDoNotMatchAndReturnsObject() {
+		long id = 13;
+		Person found = new Person();
+		Person.findPerson(id);
+		AnnotationDrivenStaticEntityMockingControl.expectReturn(found);
+		AnnotationDrivenStaticEntityMockingControl.playback();
+		assertEquals(found, Person.findPerson(id + 1));
 	}
 
-	private void called(Person found, long id) {
-		assertEquals(found, Person.findPerson(id));
+	@Test(expected = IllegalArgumentException.class)
+	public void methodArgumentsDoNotMatchAndThrowsException() {
+		long id = 13;
+		Person found = new Person();
+		Person.findPerson(id);
+		AnnotationDrivenStaticEntityMockingControl.expectThrow(new PersistenceException());
+		AnnotationDrivenStaticEntityMockingControl.playback();
+		assertEquals(found, Person.findPerson(id + 1));
 	}
 
-	// TODO Fix failing test
-	@Ignore
 	@Test
 	public void reentrant() {
 		long id = 13;
@@ -131,31 +115,56 @@ public class AnnotationDrivenStaticEntityMockingControlTests {
 		called(found, id);
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void rejectUnexpectedCall() {
-		new Delegate().rejectUnexpectedCall();
+	private void called(Person found, long id) {
+		assertEquals(found, Person.findPerson(id));
 	}
 
-	// TODO Fix failing test
-	@Ignore
 	@Test(expected = IllegalStateException.class)
-	public void failTooFewCalls() {
-		new Delegate().failTooFewCalls();
+	public void rejectUnexpectedCall() {
+		AnnotationDrivenStaticEntityMockingControl.playback();
+		Person.countPeople();
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void tooFewCalls() {
+		long id = 13;
+		Person found = new Person();
+		Person.findPerson(id);
+		AnnotationDrivenStaticEntityMockingControl.expectReturn(found);
+		Person.countPeople();
+		AnnotationDrivenStaticEntityMockingControl.expectReturn(25);
+		AnnotationDrivenStaticEntityMockingControl.playback();
+		assertEquals(found, Person.findPerson(id));
 	}
 
 	@Test
 	public void empty() {
-		// Test that verification check doesn't blow up if no replay() call happened
+		// Test that verification check doesn't blow up if no replay() call happened.
 	}
 
 	@Test(expected = IllegalStateException.class)
-	public void doesntEverReplay() {
-		new Delegate().doesntEverReplay();
+	public void doesNotEnterPlaybackMode() {
+		Person.countPeople();
 	}
 
 	@Test(expected = IllegalStateException.class)
-	public void doesntEverSetReturn() {
-		new Delegate().doesntEverSetReturn();
+	public void doesNotSetExpectedReturnValue() {
+		Person.countPeople();
+		AnnotationDrivenStaticEntityMockingControl.playback();
+	}
+
+	/**
+	 * Note: this test method currently does NOT actually verify that the mock
+	 * verification fails.
+	 */
+	// TODO Determine if it's possible for a mock verification failure to fail a test in
+	// JUnit 4+ if the test method itself throws an expected exception.
+	@Test(expected = RemoteException.class)
+	public void verificationFailsEvenWhenTestFailsInExpectedManner() throws Exception {
+		Person.countPeople();
+		AnnotationDrivenStaticEntityMockingControl.playback();
+		// No calls in order to allow verification failure
+		throw new RemoteException();
 	}
 
 }

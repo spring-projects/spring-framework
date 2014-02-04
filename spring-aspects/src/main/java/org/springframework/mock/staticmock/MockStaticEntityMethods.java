@@ -22,12 +22,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation to indicate a test class for whose {code @Test} methods
+ * Annotation to indicate a test class for whose {@code @Test} methods
  * static methods on JPA-annotated {@code @Entity} classes should be mocked.
  *
- * <p>See {@code AnnotationDrivenStaticEntityMockingControl} for details.
+ * <p>See {@link AnnotationDrivenStaticEntityMockingControl} for details.
  *
  * @author Rod Johnson
+ * @author Sam Brannen
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
