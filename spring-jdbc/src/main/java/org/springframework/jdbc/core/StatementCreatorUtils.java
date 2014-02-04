@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.SpringProperties;
 import org.springframework.jdbc.support.SqlValue;
 
 /**
@@ -59,11 +60,28 @@ import org.springframework.jdbc.support.SqlValue;
  */
 public abstract class StatementCreatorUtils {
 
-	private static final Log logger = LogFactory.getLog(StatementCreatorUtils.class);
+	/**
+	 * System property that instructs Spring to ignore {@link java.sql.ParameterMetaData#getParameterType}
+	 * completely, i.e. to never even attempt to retrieve {@link PreparedStatement#getParameterMetaData()}
+	 * for {@link StatementCreatorUtils#setNull} calls.
+	 * <p>The default is "false", trying {@code getParameterType} calls first and falling back to
+	 * {@link PreparedStatement#setNull} / {@link PreparedStatement#setObject} calls based on well-known
+	 * behavior of common databases. Spring records JDBC drivers with non-working {@code getParameterType}
+	 * implementations and won't attempt to call that method for that driver again, always falling back.
+	 * <p>Consider switching this flag to "true" if you experience misbehavior at runtime, e.g. with
+	 * a connection pool setting back the {@link PreparedStatement} instance in case of an exception
+	 * thrown from {@code getParameterType} (as reported on JBoss AS 7).
+	 */
+	public static final String IGNORE_GETPARAMETERTYPE_PROPERTY_NAME = "spring.jdbc.getParameterType.ignore";
+
+
+	static final boolean shouldIgnoreGetParameterType = SpringProperties.getFlag(IGNORE_GETPARAMETERTYPE_PROPERTY_NAME);
 
 	// Using a ConcurrentHashMap as a Set (for Java 5 compatibility)
 	static final Map<String, Boolean> driversWithNoSupportForGetParameterType =
 			new ConcurrentHashMap<String, Boolean>(1);
+
+	private static final Log logger = LogFactory.getLog(StatementCreatorUtils.class);
 
 	private static final Map<Class<?>, Integer> javaTypeToSqlTypeMap = new HashMap<Class<?>, Integer>(32);
 
@@ -227,8 +245,8 @@ public abstract class StatementCreatorUtils {
 			Integer sqlTypeToUse = null;
 			DatabaseMetaData dbmd = null;
 			String jdbcDriverName = null;
-			boolean checkGetParameterType = true;
-			if (!driversWithNoSupportForGetParameterType.isEmpty()) {
+			boolean checkGetParameterType = !shouldIgnoreGetParameterType;
+			if (checkGetParameterType && !driversWithNoSupportForGetParameterType.isEmpty()) {
 				try {
 					dbmd = ps.getConnection().getMetaData();
 					jdbcDriverName = dbmd.getDriverName();

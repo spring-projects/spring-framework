@@ -41,6 +41,7 @@ import org.apache.commons.logging.LogFactory;
  * @since 3.2.7
  * @see org.springframework.core.env.AbstractEnvironment#IGNORE_GETENV_PROPERTY_NAME
  * @see org.springframework.beans.CachedIntrospectionResults#IGNORE_BEANINFO_PROPERTY_NAME
+ * @see org.springframework.jdbc.core.StatementCreatorUtils#IGNORE_GETPARAMETERTYPE_PROPERTY_NAME
  */
 public abstract class SpringProperties {
 
