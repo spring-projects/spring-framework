@@ -64,16 +64,18 @@ public abstract class StatementCreatorUtils {
 
 	/**
 	 * System property that instructs Spring to ignore {@link java.sql.ParameterMetaData#getParameterType}
-	 * completely, i.e. to never even attempt to retrieve {@link PreparedStatement#getParameterMetaData()}.
+	 * completely, i.e. to never even attempt to retrieve {@link PreparedStatement#getParameterMetaData()}
+	 * for {@link StatementCreatorUtils#setNull} calls.
 	 * <p>The default is "false", trying {@code getParameterType} calls first and falling back to
 	 * {@link PreparedStatement#setNull} / {@link PreparedStatement#setObject} calls based on well-known
 	 * behavior of common databases. Spring records JDBC drivers with non-working {@code getParameterType}
 	 * implementations and won't attempt to call that method for that driver again, always falling back.
 	 * <p>Consider switching this flag to "true" if you experience misbehavior at runtime, e.g. with
 	 * a connection pool setting back the {@link PreparedStatement} instance in case of an exception
-	 * thrown from {@code getParameterType} (e.g. on JBoss AS 7).
+	 * thrown from {@code getParameterType} (as reported on JBoss AS 7).
 	 */
 	public static final String IGNORE_GETPARAMETERTYPE_PROPERTY_NAME = "spring.jdbc.getParameterType.ignore";
+
 
 	static final boolean shouldIgnoreGetParameterType = SpringProperties.getFlag(IGNORE_GETPARAMETERTYPE_PROPERTY_NAME);
 
