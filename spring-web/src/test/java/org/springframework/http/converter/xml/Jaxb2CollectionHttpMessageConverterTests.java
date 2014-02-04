@@ -126,7 +126,7 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void readXmlRootElementWithExternalEntity() throws Exception {
+	public void readXmlRootElementExternalEntityDisabled() throws Exception {
 
 		Resource external = new ClassPathResource("external.txt", getClass());
 		String content =  "<!DOCTYPE root [" +
@@ -151,7 +151,6 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 				"  <list><rootElement><type s=\"1\"/><external>&ext;</external></rootElement></list>";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
 
-		// Now read with
 		Jaxb2CollectionHttpMessageConverter<?> c = new Jaxb2CollectionHttpMessageConverter<Collection<Object>>() {
 			@Override
 			protected XMLInputFactory createXmlInputFactory() {
