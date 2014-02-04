@@ -66,7 +66,6 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 */
 	public static final String IGNORE_GETENV_PROPERTY_NAME = "spring.getenv.ignore";
 
-
 	/**
 	 * Name of property to set to specify active profiles: {@value}. Value may be comma
 	 * delimited.
@@ -122,14 +121,10 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * @see #customizePropertySources(MutablePropertySources)
 	 */
 	public AbstractEnvironment() {
-		String name = getClass().getSimpleName();
-		if (this.logger.isDebugEnabled()) {
-			this.logger.debug(format("Initializing new %s", name));
-		}
 		customizePropertySources(this.propertySources);
 		if (this.logger.isDebugEnabled()) {
 			this.logger.debug(format(
-					"Initialized %s with PropertySources %s", name, this.propertySources));
+					"Initialized %s with PropertySources %s", getClass().getSimpleName(), this.propertySources));
 		}
 	}
 

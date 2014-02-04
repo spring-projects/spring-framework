@@ -92,13 +92,14 @@ public class CachedIntrospectionResults {
 	public static final String IGNORE_BEANINFO_PROPERTY_NAME = "spring.beaninfo.ignore";
 
 
-	private static final Log logger = LogFactory.getLog(CachedIntrospectionResults.class);
-
-	private static final boolean shouldIntrospectorIgnoreBeaninfoClasses;
+	private static final boolean shouldIntrospectorIgnoreBeaninfoClasses =
+			SpringProperties.getFlag(IGNORE_BEANINFO_PROPERTY_NAME);
 
 	/** Stores the BeanInfoFactory instances */
 	private static List<BeanInfoFactory> beanInfoFactories = SpringFactoriesLoader.loadFactories(
 			BeanInfoFactory.class, CachedIntrospectionResults.class.getClassLoader());
+
+	private static final Log logger = LogFactory.getLog(CachedIntrospectionResults.class);
 
 	/**
 	 * Set of ClassLoaders that this CachedIntrospectionResults class will always
@@ -112,11 +113,6 @@ public class CachedIntrospectionResults {
 	 * for proper garbage collection in case of multiple class loaders.
 	 */
 	static final Map<Class<?>, Object> classCache = new WeakHashMap<Class<?>, Object>();
-
-
-	static {
-		shouldIntrospectorIgnoreBeaninfoClasses = SpringProperties.getFlag(IGNORE_BEANINFO_PROPERTY_NAME);
-	}
 
 
 	/**
