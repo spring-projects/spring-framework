@@ -3524,6 +3524,15 @@ hierarchy runs within a transaction. Test methods that are not annotated with
 Furthermore, tests that are annotated with `@Transactional` but have the `propagation`
 type set to `NOT_SUPPORTED` are not run within a transaction.
 
+[TIP]
+====
+When using TestNG `@BeforeClass`,`@BeforeSuite` methods can not be used with the 
+`@Transactional` annotation, as they are considered non transactional methods by the 
+the spring text contetxt framework. However, you can inject a `PlatfromTransactionManager`
+or a `TransactionTemplate` and use it within `@BeforeClass` method to perform a 
+transaction.
+====
+
 Note that <<testcontext-support-classes-junit4,
 `AbstractTransactionalJUnit4SpringContextTests`>> and
 <<testcontext-support-classes-testng, `AbstractTransactionalTestNGSpringContextTests`>>
