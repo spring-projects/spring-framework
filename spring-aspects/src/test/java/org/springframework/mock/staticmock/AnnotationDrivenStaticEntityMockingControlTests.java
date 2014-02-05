@@ -16,8 +16,6 @@
 
 package org.springframework.mock.staticmock;
 
-import java.rmi.RemoteException;
-
 import javax.persistence.PersistenceException;
 
 import org.junit.Test;
@@ -90,8 +88,8 @@ public class AnnotationDrivenStaticEntityMockingControlTests {
 		long id = 13;
 		Person found = new Person();
 		Person.findPerson(id);
-		AnnotationDrivenStaticEntityMockingControl.expectReturn(found);
-		AnnotationDrivenStaticEntityMockingControl.playback();
+		expectReturn(found);
+		playback();
 		assertEquals(found, Person.findPerson(id + 1));
 	}
 
@@ -100,28 +98,56 @@ public class AnnotationDrivenStaticEntityMockingControlTests {
 		long id = 13;
 		Person found = new Person();
 		Person.findPerson(id);
-		AnnotationDrivenStaticEntityMockingControl.expectThrow(new PersistenceException());
-		AnnotationDrivenStaticEntityMockingControl.playback();
+		expectThrow(new PersistenceException());
+		playback();
 		assertEquals(found, Person.findPerson(id + 1));
 	}
 
 	@Test
-	public void reentrant() {
+	public void reentrantCallToPrivateMethod() {
 		long id = 13;
 		Person found = new Person();
 		Person.findPerson(id);
 		expectReturn(found);
 		playback();
-		called(found, id);
+		privateMethod(found, id);
 	}
 
-	private void called(Person found, long id) {
+	private void privateMethod(Person found, long id) {
 		assertEquals(found, Person.findPerson(id));
 	}
 
+	@Test
+	public void reentrantCallToPublicMethod() {
+		final Long ID = 13L;
+		Person.findPerson(ID);
+		expectReturn(new Person());
+		playback();
+		try {
+			publicMethod();
+			fail("Should have thrown an IllegalStateException");
+		}
+		catch (IllegalStateException e) {
+			assertTrue(e.getMessage().contains("Calls have been recorded, but playback state was never reached."));
+		}
+
+		// Now to keep the mock for "this" method happy:
+		Person.findPerson(ID);
+	}
+
+	public void publicMethod() {
+		// At this point, since publicMethod() is a public method in a class
+		// annotated with @MockStaticEntityMethods, the current mock state is
+		// fresh. In other words, we are again in recording mode. As such, any
+		// call to a mocked method will return null. See the implementation of
+		// the <methodToMock() && cflowbelow(mockStaticsTestMethod())> around
+		// advice in AbstractMethodMockingControl for details.
+		assertNull(Person.findPerson(99L));
+	}
+
 	@Test(expected = IllegalStateException.class)
-	public void rejectUnexpectedCall() {
-		AnnotationDrivenStaticEntityMockingControl.playback();
+	public void unexpectedCall() {
+		playback();
 		Person.countPeople();
 	}
 
@@ -130,16 +156,24 @@ public class AnnotationDrivenStaticEntityMockingControlTests {
 		long id = 13;
 		Person found = new Person();
 		Person.findPerson(id);
-		AnnotationDrivenStaticEntityMockingControl.expectReturn(found);
+		expectReturn(found);
 		Person.countPeople();
-		AnnotationDrivenStaticEntityMockingControl.expectReturn(25);
-		AnnotationDrivenStaticEntityMockingControl.playback();
+		expectReturn(25);
+		playback();
 		assertEquals(found, Person.findPerson(id));
 	}
 
 	@Test
-	public void empty() {
-		// Test that verification check doesn't blow up if no replay() call happened.
+	public void noExpectationsAndNoPlayback() {
+		// Ensure that mock verification doesn't blow up if playback() was not invoked and
+		// no expectations were set.
+	}
+
+	@Test
+	public void noExpectationsButWithPlayback() {
+		// Ensure that mock verification doesn't blow up if playback() was invoked but no
+		// expectations were set.
+		playback();
 	}
 
 	@Test(expected = IllegalStateException.class)
@@ -150,21 +184,30 @@ public class AnnotationDrivenStaticEntityMockingControlTests {
 	@Test(expected = IllegalStateException.class)
 	public void doesNotSetExpectedReturnValue() {
 		Person.countPeople();
-		AnnotationDrivenStaticEntityMockingControl.playback();
+		playback();
 	}
 
 	/**
-	 * Note: this test method currently does NOT actually verify that the mock
-	 * verification fails.
+	 * Currently, the method mocking aspect will not verify the state of the
+	 * expectations within the mock if a test method throws an exception.
+	 *
+	 * <p>The reason is that the {@code mockStaticsTestMethod()} advice in
+	 * {@link AbstractMethodMockingControl} is declared as
+	 * {@code after() returning} instead of simply {@code after()}.
+	 *
+	 * <p>If the aforementioned advice is changed to a generic "after" advice,
+	 * this test method will fail with an {@link IllegalStateException} (thrown
+	 * by the mock aspect) instead of the {@link UnsupportedOperationException}
+	 * thrown by the test method itself.
 	 */
-	// TODO Determine if it's possible for a mock verification failure to fail a test in
-	// JUnit 4+ if the test method itself throws an expected exception.
-	@Test(expected = RemoteException.class)
-	public void verificationFailsEvenWhenTestFailsInExpectedManner() throws Exception {
+	@Test(expected = UnsupportedOperationException.class)
+	public void mockVerificationDoesNotOccurIfTestFailsWithAnExpectedException() {
 		Person.countPeople();
-		AnnotationDrivenStaticEntityMockingControl.playback();
-		// No calls in order to allow verification failure
-		throw new RemoteException();
+		playback();
+		// We intentionally do not execute any of the recorded method invocations in order
+		// to demonstrate that mock verification does not occur if an
+		// exception is thrown.
+		throw new UnsupportedOperationException();
 	}
 
 }

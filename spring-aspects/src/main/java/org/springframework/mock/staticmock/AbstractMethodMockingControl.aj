@@ -190,8 +190,8 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 	after() returning : mockStaticsTestMethod() {
 		if (recording && (expectations.hasCalls())) {
 			throw new IllegalStateException(
-				"Calls recorded, yet playback state never reached: Create expectations then call "
-						+ this.getClass().getSimpleName() + ".playback()");
+				"Calls have been recorded, but playback state was never reached. Set expectations and then call "
+						+ this.getClass().getSimpleName() + ".playback();");
 		}
 		expectations.verify();
 	}
