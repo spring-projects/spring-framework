@@ -21,8 +21,11 @@ package org.springframework.mock.staticmock;
  * on JPA-annotated {@code @Entity} classes, as used by Spring Roo for so-called
  * <em>finder methods</em>.
  *
- * <p>Mocking will occur within the call stack of any method in a class (typically a
- * test class) that is annotated with {@code @MockStaticEntityMethods}.
+ * <p>Mocking will occur within the call stack of any {@code public} method in a
+ * class (typically a test class) that is annotated with {@code @MockStaticEntityMethods}.
+ * Thus mocking is not limited to {@code @Test} methods. Furthermore, new mock
+ * state will be created for the invocation of each such public method, even when
+ * the method is invoked from another such public method.
  *
  * <p>This aspect also provides static methods to simplify the programming model for
  * setting expectations and entering playback mode.
