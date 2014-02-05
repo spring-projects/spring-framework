@@ -18,6 +18,7 @@ package org.springframework.web.servlet.tags;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.jsp.tagext.Tag;
@@ -26,6 +27,7 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.format.annotation.NumberFormat;
 import org.springframework.format.annotation.NumberFormat.Style;
+import org.springframework.format.number.PercentFormatter;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockPageContext;
@@ -70,12 +72,14 @@ public class EvalTagTests extends AbstractTagTests {
 	}
 
 	public void testPrintFormattedScopedAttributeResult() throws Exception {
+		PercentFormatter formatter = new PercentFormatter();
 		tag.setExpression("bean.formattable");
 		int action = tag.doStartTag();
 		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
 		action = tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, action);
-		assertEquals("25%", ((MockHttpServletResponse) context.getResponse()).getContentAsString());
+		assertEquals(formatter.print(new BigDecimal(".25"), Locale.getDefault()),
+				((MockHttpServletResponse) context.getResponse()).getContentAsString());
 	}
 
 	public void testPrintHtmlEscapedAttributeResult() throws Exception {
