@@ -27,18 +27,21 @@ package org.springframework.mock.staticmock;
  * <p>This aspect also provides static methods to simplify the programming model for
  * setting expectations and entering playback mode.
  *
- * <p>Usage:
+ * <h3>Usage</h3>
  * <ol>
  * <li>Annotate a test class with {@code @MockStaticEntityMethods}.
- * <li>In each test method, {@code AnnotationDrivenStaticEntityMockingControl}
+ * <li>In each test method, the {@code AnnotationDrivenStaticEntityMockingControl}
  * will begin in <em>recording</em> mode.
  * <li>Invoke static methods on JPA-annotated {@code @Entity} classes, with each
- * recording-mode invocation being followed by an invocation of either the static
- * {@link #expectReturn(Object)} method or the static {@link #expectThrow(Throwable)}
- * method on {@code AnnotationDrivenStaticEntityMockingControl}.
- * <li>Invoke the static {@link #playback()} method.
- * <li>Call the code you wish to test that uses the static methods.
- * <li>Verification will occur automatically.
+ * recording-mode invocation being followed by an invocation of either
+ * {@link #expectReturn(Object)} or {@link #expectThrow(Throwable)} on the
+ * {@code AnnotationDrivenStaticEntityMockingControl}.
+ * <li>Invoke the {@link #playback()} method.
+ * <li>Call the code you wish to test that uses the static methods on the
+ * JPA-annotated {@code @Entity} classes.
+ * <li>Verification will occur automatically after the test method has executed
+ * and returned. However, mock verification will not occur if the test method
+ * throws an exception.
  * </ol>
  *
  * @author Rod Johnson
