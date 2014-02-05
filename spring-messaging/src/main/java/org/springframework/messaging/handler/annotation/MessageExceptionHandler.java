@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,9 +24,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation for handling exceptions from message-handling methods within specific
- * handler methods.
- *
+ * Annotation for handling exceptions thrown from message-handling methods within a
+ * specific handler class.
+ * 
  * @author Rossen Stoyanchev
  * @since 4.0
  */
@@ -36,8 +36,8 @@ import java.lang.annotation.Target;
 public @interface MessageExceptionHandler {
 
 	/**
-	 * Exceptions handled by the annotation method. If empty, will default
-	 * to any exceptions listed in the method argument list.
+	 * Exceptions handled by the annotated method. If empty, will default to any
+	 * exceptions listed in the method argument list.
 	 */
 	Class<? extends Throwable>[] value() default {};
 
