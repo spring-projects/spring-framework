@@ -128,7 +128,8 @@ public class AnnotationDrivenStaticEntityMockingControlTests {
 			fail("Should have thrown an IllegalStateException");
 		}
 		catch (IllegalStateException e) {
-			assertTrue(e.getMessage().contains("Calls have been recorded, but playback state was never reached."));
+			String snippet = "Calls have been recorded, but playback state was never reached.";
+			assertTrue("Exception message should contain [" + snippet + "]", e.getMessage().contains(snippet));
 		}
 
 		// Now to keep the mock for "this" method happy:
@@ -208,6 +209,92 @@ public class AnnotationDrivenStaticEntityMockingControlTests {
 		// to demonstrate that mock verification does not occur if an
 		// exception is thrown.
 		throw new UnsupportedOperationException();
+	}
+
+	@Test
+	public void resetMockWithoutVerficationAndStartOverWithoutRedeclaringExpectations() {
+		final Long ID = 13L;
+		Person.findPerson(ID);
+		expectReturn(new Person());
+
+		reset();
+
+		Person.findPerson(ID);
+		// Omit expectation.
+		playback();
+
+		try {
+			Person.findPerson(ID);
+			fail("Should have thrown an IllegalStateException");
+		}
+		catch (IllegalStateException e) {
+			String snippet = "Behavior of Call with signature";
+			assertTrue("Exception message should contain [" + snippet + "]", e.getMessage().contains(snippet));
+		}
+	}
+
+	@Test
+	public void resetMockWithoutVerificationAndStartOver() {
+		final Long ID = 13L;
+		Person found = new Person();
+		Person.findPerson(ID);
+		expectReturn(found);
+
+		reset();
+
+		// Intentionally use a different ID:
+		final long ID_2 = ID + 1;
+		Person.findPerson(ID_2);
+		expectReturn(found);
+		playback();
+
+		assertEquals(found, Person.findPerson(ID_2));
+	}
+
+	@Test
+	public void verifyResetAndStartOver() {
+		final Long ID_1 = 13L;
+		Person found1 = new Person();
+		Person.findPerson(ID_1);
+		expectReturn(found1);
+		playback();
+
+		assertEquals(found1, Person.findPerson(ID_1));
+		verify();
+		reset();
+
+		// Intentionally use a different ID:
+		final long ID_2 = ID_1 + 1;
+		Person found2 = new Person();
+		Person.findPerson(ID_2);
+		expectReturn(found2);
+		playback();
+
+		assertEquals(found2, Person.findPerson(ID_2));
+	}
+
+	@Test
+	public void verifyWithTooFewCalls() {
+		final Long ID = 13L;
+		Person found = new Person();
+		Person.findPerson(ID);
+		expectReturn(found);
+		Person.findPerson(ID);
+		expectReturn(found);
+		playback();
+
+		assertEquals(found, Person.findPerson(ID));
+
+		try {
+			verify();
+			fail("Should have thrown an IllegalStateException");
+		}
+		catch (IllegalStateException e) {
+			assertEquals("Expected 2 calls, but received 1", e.getMessage());
+			// Since verify() failed, we need to manually reset so that the test method
+			// does not fail.
+			reset();
+		}
 	}
 
 }

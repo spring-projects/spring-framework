@@ -26,9 +26,9 @@ import org.springframework.util.ObjectUtils;
  *
  * <p>Sub-aspects must define:
  * <ul>
- * <li>the {@link #mockStaticsTestMethod()} pointcut to indicate call stacks
+ * <li>The {@link #mockStaticsTestMethod()} pointcut to indicate call stacks
  * when mocking should be triggered
- * <li>the {@link #methodToMock()} pointcut to pick out method invocations to mock
+ * <li>The {@link #methodToMock()} pointcut to pick out method invocations to mock
  * </ul>
  *
  * @author Rod Johnson
@@ -37,16 +37,41 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMethod()) {
 
-	protected abstract pointcut mockStaticsTestMethod();
-
-	protected abstract pointcut methodToMock();
-
+	private final Expectations expectations = new Expectations();
 
 	private boolean recording = true;
 
 
-	static enum CallResponse {
-		nothing, return_, throw_
+	protected void expectReturnInternal(Object retVal) {
+		if (!recording) {
+			throw new IllegalStateException("Not recording: Cannot set return value");
+		}
+		expectations.expectReturn(retVal);
+	}
+
+	protected void expectThrowInternal(Throwable throwable) {
+		if (!recording) {
+			throw new IllegalStateException("Not recording: Cannot set throwable value");
+		}
+		expectations.expectThrow(throwable);
+	}
+
+	protected void playbackInternal() {
+		recording = false;
+	}
+
+	protected void verifyInternal() {
+		expectations.verify();
+	}
+
+	protected void resetInternal() {
+		expectations.reset();
+		recording = true;
+	}
+
+
+	private static enum CallResponse {
+		undefined, return_, throw_
 	};
 
 	/**
@@ -63,45 +88,45 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 			private final String signature;
 			private final Object[] args;
 
+			private CallResponse responseType = CallResponse.undefined;
 			private Object responseObject; // return value or throwable
-			private CallResponse responseType = CallResponse.nothing;
 
 
-			public Call(String signature, Object[] args) {
+			Call(String signature, Object[] args) {
 				this.signature = signature;
 				this.args = args;
 			}
 
-			public boolean hasResponseSpecified() {
-				return responseType != CallResponse.nothing;
+			boolean responseTypeAlreadySet() {
+				return responseType != CallResponse.undefined;
 			}
 
-			public void setReturnVal(Object retVal) {
+			void setReturnValue(Object retVal) {
 				this.responseObject = retVal;
 				responseType = CallResponse.return_;
 			}
 
-			public void setThrow(Throwable throwable) {
+			void setThrowable(Throwable throwable) {
 				this.responseObject = throwable;
 				responseType = CallResponse.throw_;
 			}
 
-			public Object returnValue(String lastSig, Object[] args) {
+			Object returnValue(String lastSig, Object[] args) {
 				checkSignature(lastSig, args);
 				return responseObject;
 			}
 
-			public Object throwException(String lastSig, Object[] args) {
+			Object throwException(String lastSig, Object[] args) {
 				checkSignature(lastSig, args);
 				throw (RuntimeException) responseObject;
 			}
 
 			private void checkSignature(String lastSig, Object[] args) {
 				if (!signature.equals(lastSig)) {
-					throw new IllegalArgumentException("Signature doesn't match");
+					throw new IllegalArgumentException("Signatures do not match");
 				}
 				if (!Arrays.equals(this.args, args)) {
-					throw new IllegalArgumentException("Arguments don't match");
+					throw new IllegalArgumentException("Arguments do not match");
 				}
 			}
 
@@ -168,24 +193,39 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 
 		public void expectReturn(Object retVal) {
 			Call c = calls.getLast();
-			if (c.hasResponseSpecified()) {
+			if (c.responseTypeAlreadySet()) {
 				throw new IllegalStateException("No method invoked before setting return value");
 			}
-			c.setReturnVal(retVal);
+			c.setReturnValue(retVal);
 		}
 
 		public void expectThrow(Throwable throwable) {
 			Call c = calls.getLast();
-			if (c.hasResponseSpecified()) {
+			if (c.responseTypeAlreadySet()) {
 				throw new IllegalStateException("No method invoked before setting throwable");
 			}
-			c.setThrow(throwable);
+			c.setThrowable(throwable);
+		}
+
+		/**
+		 * Reset the internal state of this {@code Expectations} instance.
+		 */
+		public void reset() {
+			this.calls.clear();
+			this.verified = 0;
 		}
 	}
 
 
-	private final Expectations expectations = new Expectations();
+	/**
+	 * Pointcut that identifies call stacks when mocking should be triggered.
+	 */
+	protected abstract pointcut mockStaticsTestMethod();
 
+	/**
+	 * Pointcut that identifies which method invocations to mock.
+	 */
+	protected abstract pointcut methodToMock();
 
 	after() returning : mockStaticsTestMethod() {
 		if (recording && (expectations.hasCalls())) {
@@ -193,7 +233,7 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 				"Calls have been recorded, but playback state was never reached. Set expectations and then call "
 						+ this.getClass().getSimpleName() + ".playback();");
 		}
-		expectations.verify();
+		verifyInternal();
 	}
 
 	Object around() : methodToMock() && cflowbelow(mockStaticsTestMethod()) {
@@ -205,24 +245,6 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 		else {
 			return expectations.respond(thisJoinPointStaticPart.toLongString(), thisJoinPoint.getArgs());
 		}
-	}
-
-	public void expectReturnInternal(Object retVal) {
-		if (!recording) {
-			throw new IllegalStateException("Not recording: Cannot set return value");
-		}
-		expectations.expectReturn(retVal);
-	}
-
-	public void expectThrowInternal(Throwable throwable) {
-		if (!recording) {
-			throw new IllegalStateException("Not recording: Cannot set throwable value");
-		}
-		expectations.expectThrow(throwable);
-	}
-
-	public void playbackInternal() {
-		recording = false;
 	}
 
 }

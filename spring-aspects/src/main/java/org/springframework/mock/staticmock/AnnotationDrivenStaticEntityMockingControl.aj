@@ -47,6 +47,11 @@ package org.springframework.mock.staticmock;
  * throws an exception.
  * </ol>
  *
+ * <h3>Programmatic Control of the Mock</h3>
+ * <p>For scenarios where it would be convenient to programmatically <em>verify</em>
+ * the recorded expectations or <em>reset</em> the state of the mock, consider
+ * using combinations of {@link #verify()} and {@link #reset()}.
+ *
  * @author Rod Johnson
  * @author Ramnivas Laddad
  * @author Sam Brannen
@@ -80,11 +85,29 @@ public aspect AnnotationDrivenStaticEntityMockingControl extends AbstractMethodM
 	public static void playback() {
 		AnnotationDrivenStaticEntityMockingControl.aspectOf().playbackInternal();
 	}
-	
+
+	/**
+	 * Verify that all expectations have been fulfilled.
+	 * @since 4.0.2
+	 * @see #reset()
+	 */
+	public static void verify() {
+		AnnotationDrivenStaticEntityMockingControl.aspectOf().verifyInternal();
+	}
+
+	/**
+	 * Reset the state of the mock and enter <em>recording</em> mode.
+	 * @since 4.0.2
+	 * @see #verify()
+	 */
+	public static void reset() {
+		AnnotationDrivenStaticEntityMockingControl.aspectOf().resetInternal();
+	}
+
 	// Apparently, the following pointcut was originally defined to only match
 	// methods directly annotated with @Test (in order to allow methods in
-	// @MockStaticEntityMethods classes to invoke each other without resetting
-	// the mocking environment); however, this is no longer the case. The current
+	// @MockStaticEntityMethods classes to invoke each other without creating a
+	// new mocking environment); however, this is no longer the case. The current
 	// pointcut applies to all public methods in @MockStaticEntityMethods classes.
 	protected pointcut mockStaticsTestMethod() : execution(public * (@MockStaticEntityMethods *).*(..));
 
