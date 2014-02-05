@@ -19968,6 +19968,16 @@ __within__ a transaction. In addition, methods annotated with `@BeforeTransactio
 to run within a transaction.
 ====
 
+[TIP]
+====
+
+When using TestNG `@BeforeClass`,`@BeforeSuite` methods can not be used with the 
+`@Transactional` annotation, as they are considered non transactional methods by the 
+the spring text contetxt framework. However, you can inject a `PlatfromTransactionManager`
+or a `TransactionTemplate` and use it within `@BeforeClass` method to perform a 
+transaction.
+===
+
 The following JUnit-based example displays a fictitious integration testing scenario
 highlighting several transaction-related annotations. Consult the
 <<integration-testing-annotations,annotation support>> section for further information
