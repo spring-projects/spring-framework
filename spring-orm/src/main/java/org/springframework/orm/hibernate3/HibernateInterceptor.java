@@ -72,6 +72,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * native Hibernate API usage within transactions, in combination with a general
  * {@link org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor}.
  * Note: This class does not have an equivalent replacement in {@code orm.hibernate4}.
+ * If you desperately need a scoped Session bound through AOP, consider the newly
+ * introduced {@link org.springframework.orm.hibernate3.support.OpenSessionInterceptor}.
  */
 @Deprecated
 public class HibernateInterceptor extends HibernateAccessor implements MethodInterceptor {

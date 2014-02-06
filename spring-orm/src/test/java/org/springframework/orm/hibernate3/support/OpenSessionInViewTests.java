@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,14 @@ package org.springframework.orm.hibernate3.support;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.servlet.*;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.transaction.TransactionManager;
 
 import org.hibernate.FlushMode;
@@ -32,8 +35,15 @@ import org.hibernate.classic.Session;
 import org.hibernate.engine.SessionFactoryImplementor;
 import org.junit.Before;
 import org.junit.Test;
+
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.mock.web.test.*;
+import org.springframework.mock.web.test.MockAsyncContext;
+import org.springframework.mock.web.test.MockFilterConfig;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.mock.web.test.PassThroughFilterChain;
 import org.springframework.orm.hibernate3.HibernateAccessor;
 import org.springframework.orm.hibernate3.HibernateTransactionManager;
 import org.springframework.orm.hibernate3.SessionFactoryUtils;
@@ -80,8 +90,33 @@ public class OpenSessionInViewTests {
 	}
 
 	@Test
-	public void testOpenSessionInViewInterceptorWithSingleSession() throws Exception {
+	public void testOpenSessionInterceptor() throws Exception {
+		final SessionFactory sf = mock(SessionFactory.class);
+		final Session session = mock(Session.class);
 
+		OpenSessionInterceptor interceptor = new OpenSessionInterceptor();
+		interceptor.setSessionFactory(sf);
+
+		Runnable tb = new Runnable() {
+			@Override
+			public void run() {
+				assertTrue(TransactionSynchronizationManager.hasResource(sf));
+				assertEquals(session, SessionFactoryUtils.getSession(sf, false));
+			}
+		};
+		ProxyFactory pf = new ProxyFactory(tb);
+		pf.addAdvice(interceptor);
+		Runnable tbProxy = (Runnable) pf.getProxy();
+
+		given(sf.openSession()).willReturn(session);
+		given(session.isOpen()).willReturn(true);
+		tbProxy.run();
+		verify(session).setFlushMode(FlushMode.MANUAL);
+		verify(session).close();
+	}
+
+	@Test
+	public void testOpenSessionInViewInterceptorWithSingleSession() throws Exception {
 		SessionFactory sf = mock(SessionFactory.class);
 		Session session = mock(Session.class);
 
@@ -123,7 +158,6 @@ public class OpenSessionInViewTests {
 
 	@Test
 	public void testOpenSessionInViewInterceptorAsyncScenario() throws Exception {
-
 		// Initial request thread
 
 		final SessionFactory sf = mock(SessionFactory.class);
@@ -171,7 +205,6 @@ public class OpenSessionInViewTests {
 
 	@Test
 	public void testOpenSessionInViewInterceptorAsyncTimeoutScenario() throws Exception {
-
 		// Initial request thread
 
 		final SessionFactory sf = mock(SessionFactory.class);
@@ -234,7 +267,7 @@ public class OpenSessionInViewTests {
 		interceptor.preHandle(this.webRequest);
 		assertTrue(TransactionSynchronizationManager.hasResource(sf));
 
-		// check that further invocations simply participate
+		// Check that further invocations simply participate
 		interceptor.preHandle(this.webRequest);
 
 		assertEquals(session, SessionFactoryUtils.getSession(sf, false));
@@ -448,7 +481,6 @@ public class OpenSessionInViewTests {
 
 	@Test
 	public void testOpenSessionInViewFilterAsyncTimeoutScenario() throws Exception {
-
 		final SessionFactory sf = mock(SessionFactory.class);
 		Session session = mock(Session.class);
 
@@ -716,4 +748,5 @@ public class OpenSessionInViewTests {
 			task.run();
 		}
 	}
+
 }

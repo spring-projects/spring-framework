@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.orm.hibernate3.support;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.orm.hibernate3.HibernateAccessor;
 import org.springframework.orm.hibernate3.SessionFactoryUtils;
@@ -85,10 +86,11 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
  * @see #setSingleSession
  * @see #setFlushMode
  * @see OpenSessionInViewFilter
- * @see org.springframework.orm.hibernate3.HibernateInterceptor
+ * @see OpenSessionInterceptor
  * @see org.springframework.orm.hibernate3.HibernateTransactionManager
  * @see org.springframework.orm.hibernate3.SessionFactoryUtils#getSession
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
+ * @see org.hibernate.SessionFactory#getCurrentSession()
  */
 public class OpenSessionInViewInterceptor extends HibernateAccessor implements AsyncWebRequestInterceptor {
 
@@ -142,10 +144,9 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements A
 	 */
 	@Override
 	public void preHandle(WebRequest request) throws DataAccessException {
-
-		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 		String participateAttributeName = getParticipateAttributeName();
 
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 		if (asyncManager.hasConcurrentResult()) {
 			if (applySessionBindingInterceptor(asyncManager, participateAttributeName)) {
 				return;
