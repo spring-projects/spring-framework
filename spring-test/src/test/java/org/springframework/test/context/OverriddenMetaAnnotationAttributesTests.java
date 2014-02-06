@@ -74,8 +74,7 @@ public class OverriddenMetaAnnotationAttributesTests {
 
 		// NOTE: we would like to be able to override the 'value' attribute; however,
 		// Spring currently does not allow overrides for the 'value' attribute.
-		// TODO Determine if Spring should allow overrides for the 'value' attribute in
-		// custom annotations.
+		// See SPR-11393 for related discussions.
 		assertArrayEquals(new String[] { "foo.xml" }, attributes.getStringArray("value"));
 	}
 
