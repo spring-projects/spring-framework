@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.simp;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.messaging.Message;
@@ -25,7 +26,10 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.core.AbstractMessageSendingTemplate;
 import org.springframework.messaging.core.MessagePostProcessor;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
@@ -158,6 +162,38 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 		Assert.notNull(user, "User must not be null");
 		user = StringUtils.replace(user, "/", "%2F");
 		super.convertAndSend(this.userDestinationPrefix + user + destination, payload, headers, postProcessor);
+	}
+
+	/**
+	 * Creates a new map and puts the given headers under the key
+	 * {@link org.springframework.messaging.support.NativeMessageHeaderAccessor#NATIVE_HEADERS NATIVE_HEADERS}.
+	 * Effectively this treats all given headers as headers to be sent out to the
+	 * external source.
+	 * <p>
+	 * If the given headers already contain the key
+	 * {@link org.springframework.messaging.support.NativeMessageHeaderAccessor#NATIVE_HEADERS NATIVE_HEADERS}
+	 * then the same header map is returned (i.e. without any changes).
+	 */
+	@Override
+	protected Map<String, Object> processHeadersToSend(Map<String, Object> headers) {
+
+		if (headers == null) {
+			return null;
+		}
+		else if (headers.containsKey(NativeMessageHeaderAccessor.NATIVE_HEADERS)) {
+			return headers;
+		}
+		else {
+			MultiValueMap<String, String> nativeHeaders = new LinkedMultiValueMap<String, String>(headers.size());
+			for (String key : headers.keySet()) {
+				Object value = headers.get(key);
+				nativeHeaders.set(key, (value != null ? value.toString() : null));
+			}
+
+			headers = new HashMap<String, Object>(1);
+			headers.put(NativeMessageHeaderAccessor.NATIVE_HEADERS, nativeHeaders);
+			return headers;
+		}
 	}
 
 }

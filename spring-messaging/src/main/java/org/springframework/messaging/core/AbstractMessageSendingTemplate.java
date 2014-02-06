@@ -129,6 +129,7 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	public void convertAndSend(D destination, Object payload, Map<String, Object> headers,
 			MessagePostProcessor postProcessor) throws MessagingException {
 
+		headers = processHeadersToSend(headers);
 		MessageHeaders messageHeaders = (headers != null) ? new MessageHeaders(headers) : null;
 		Message<?> message = this.converter.toMessage(payload, messageHeaders);
 
@@ -143,6 +144,18 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 			message = postProcessor.postProcessMessage(message);
 		}
 		this.send(destination, message);
+	}
+
+	/**
+	 * Provides access to the map of headers before a send operation.
+	 * Implementations can modify the headers by returning a different map.
+	 * This implementation returns the map that was passed in (i.e. without any changes).
+	 *
+	 * @param headers the headers to send, possibly {@code null}
+	 * @return the actual headers to send
+	 */
+	protected Map<String, Object> processHeadersToSend(Map<String, Object> headers) {
+		return headers;
 	}
 
 }

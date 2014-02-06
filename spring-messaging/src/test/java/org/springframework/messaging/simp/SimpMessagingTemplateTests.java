@@ -20,10 +20,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.StubMessageChannel;
+import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Unit tests for {@link org.springframework.messaging.simp.SimpMessagingTemplate}.
@@ -42,6 +44,7 @@ public class SimpMessagingTemplateTests {
 		this.messageChannel = new StubMessageChannel();
 		this.messagingTemplate = new SimpMessagingTemplate(messageChannel);
 	}
+
 
 	@Test
 	public void convertAndSendToUser() {
@@ -67,6 +70,34 @@ public class SimpMessagingTemplateTests {
 		Message<byte[]> message = messages.get(0);
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 		assertEquals("/user/http:%2F%2Fjoe.openid.example.org%2F/queue/foo", headers.getDestination());
+	}
+
+	@Test
+	public void convertAndSendWithCustomHeader() {
+		Map<String, Object> headers = Collections.singletonMap("key", "value");
+		this.messagingTemplate.convertAndSend("/foo", "data", headers);
+
+		List<Message<byte[]>> messages = this.messageChannel.getMessages();
+		Message<byte[]> message = messages.get(0);
+		SimpMessageHeaderAccessor resultHeaders = SimpMessageHeaderAccessor.wrap(message);
+
+		assertNull(resultHeaders.toMap().get("key"));
+		assertEquals(Arrays.asList("value"), resultHeaders.getNativeHeader("key"));
+	}
+
+	@Test
+	public void convertAndSendWithCustomHeaderNonNative() {
+		Map<String, Object> headers = new HashMap<String, Object>();
+		headers.put("key", "value");
+		headers.put(NativeMessageHeaderAccessor.NATIVE_HEADERS, Collections.emptyMap());
+		this.messagingTemplate.convertAndSend("/foo", "data", headers);
+
+		List<Message<byte[]>> messages = this.messageChannel.getMessages();
+		Message<byte[]> message = messages.get(0);
+		SimpMessageHeaderAccessor resultHeaders = SimpMessageHeaderAccessor.wrap(message);
+
+		assertEquals("value", resultHeaders.toMap().get("key"));
+		assertNull(resultHeaders.getNativeHeader("key"));
 	}
 
 }
