@@ -209,15 +209,14 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	 */
 	public static UriComponentsBuilder fromMethod(Method method, Object... argumentValues) {
 
-		UriComponentsBuilder builder = ServletUriComponentsBuilder.newInstance().path(getMethodRequestMapping(method));
-		UriComponents uriComponents = applyContributors(builder, method, argumentValues);
-
 		String typePath = getTypeRequestMapping(method.getDeclaringClass());
-		String methodPath = uriComponents.getPath();
+		String methodPath = getMethodRequestMapping(method);
 		String path = pathMatcher.combine(typePath, methodPath);
 
-		return ServletUriComponentsBuilder.fromCurrentServletMapping().path(path)
-				.queryParams(uriComponents.getQueryParams());
+		UriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentServletMapping().path(path);
+		UriComponents uriComponents = applyContributors(builder, method, argumentValues);
+
+		return ServletUriComponentsBuilder.newInstance().uriComponents(uriComponents);
 	}
 
 	private static String getMethodRequestMapping(Method method) {
@@ -246,13 +245,21 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 		Assert.isTrue(paramCount == argCount,  "Number of method parameters " + paramCount +
 				" does not match number of argument values " + argCount);
 
-		Map<String, Object> uriVars = new HashMap<String, Object>();
+		final Map<String, Object> uriVars = new HashMap<String, Object>();
 		for (int i=0; i < paramCount; i++) {
 			MethodParameter param = new MethodParameter(method, i);
 			param.initParameterNameDiscovery(parameterNameDiscoverer);
 			contributor.contributeMethodArgument(param, args[i], builder, uriVars);
 		}
-		return builder.buildAndExpand(uriVars);
+
+		// We may not have all URI var values, expand only what we have
+
+		return builder.build().expand(new UriComponents.UriTemplateVariables() {
+			@Override
+			public Object getValue(String name) {
+				return uriVars.containsKey(name) ? uriVars.get(name) : UriComponents.UriTemplateVariables.SKIP_VALUE;
+			}
+		});
 	}
 
 	protected static CompositeUriComponentsContributor getConfiguredUriComponentsContributor() {

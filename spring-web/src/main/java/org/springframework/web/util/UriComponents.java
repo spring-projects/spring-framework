@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -218,6 +218,9 @@ public abstract class UriComponents implements Serializable {
 			String match = matcher.group(1);
 			String variableName = getVariableName(match);
 			Object variableValue = uriVariables.getValue(variableName);
+			if (UriTemplateVariables.SKIP_VALUE.equals(variableValue)) {
+				continue;
+			}
 			String variableValueString = getVariableValueAsString(variableValue);
 			String replacement = Matcher.quoteReplacement(variableValueString);
 			matcher.appendReplacement(sb, replacement);
@@ -242,6 +245,16 @@ public abstract class UriComponents implements Serializable {
 	 */
 	public interface UriTemplateVariables {
 
+		public static final Object SKIP_VALUE = UriTemplateVariables.class;
+
+		/**
+		 * Get the value for the given URI variable name.
+		 * If the value is {@code null}, an empty String is expanded.
+		 * If the value is {@link #SKIP_VALUE}, the URI variable is not expanded.
+		 *
+		 * @param name the variable name
+		 * @return the variable value, possibly {@code null} or {@link #SKIP_VALUE}
+		 */
 		Object getValue(String name);
 	}
 

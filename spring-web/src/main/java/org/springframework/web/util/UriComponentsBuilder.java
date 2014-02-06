@@ -363,7 +363,7 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Initializes all components of this URI builder from the given {@link UriComponents}.
+	 * Set all components of this URI builder from the given {@link UriComponents}.
 	 * @param uriComponents the UriComponents instance
 	 * @return this UriComponentsBuilder
 	 */
@@ -385,7 +385,14 @@ public class UriComponentsBuilder {
 				this.port = uriComponents.getPort();
 			}
 			if (StringUtils.hasLength(uriComponents.getPath())) {
-				this.pathBuilder = new CompositePathComponentBuilder(uriComponents.getPath());
+				List<String> segments = uriComponents.getPathSegments();
+				if (segments.isEmpty()) {
+					// Perhaps "/"
+					this.pathBuilder.addPath(uriComponents.getPath());
+				}
+				else {
+					this.pathBuilder.addPathSegments(segments.toArray(new String[segments.size()]));
+				}
 			}
 			if (!uriComponents.getQueryParams().isEmpty()) {
 				this.queryParams.clear();

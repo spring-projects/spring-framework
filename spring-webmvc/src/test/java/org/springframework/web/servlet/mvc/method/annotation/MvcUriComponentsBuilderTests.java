@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Arrays;
 import java.util.List;
@@ -132,6 +133,15 @@ public class MvcUriComponentsBuilderTests {
 		MultiValueMap<String, String> queryParams = uriComponents.getQueryParams();
 		assertThat(queryParams.get("limit"), contains("5"));
 		assertThat(queryParams.get("offset"), contains("10"));
+	}
+
+	// SPR-11391
+
+	@Test
+	public void testFromMethodNameTypeLevelPathVariableWithoutArgumentValue() throws Exception {
+		UriComponents uriComponents = fromMethodName(UserContactController.class, "showCreate", 123).build();
+
+		assertThat(uriComponents.getPath(), is("/user/123/contacts/create"));
 	}
 
 	@Test
@@ -286,6 +296,15 @@ public class MvcUriComponentsBuilderTests {
 		@RequestMapping(value = "/{id}/foo")
 		HttpEntity<Void> methodWithMultiValueRequestParams(@PathVariable String id,
 				@RequestParam List<Integer> items, @RequestParam Integer limit) {
+			return null;
+		}
+	}
+
+	@RequestMapping("/user/{userId}/contacts")
+	static class UserContactController {
+
+		@RequestMapping("/create")
+		public String showCreate(@PathVariable Integer userId) {
 			return null;
 		}
 	}
