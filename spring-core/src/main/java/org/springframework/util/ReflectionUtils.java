@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,12 @@ import java.util.regex.Pattern;
  */
 public abstract class ReflectionUtils {
 
+	/**
+	 * Pattern for detecting CGLIB-renamed methods.
+	 * @see #isCglibRenamedMethod
+	 */
 	private static final Pattern CGLIB_RENAMED_METHOD_PATTERN = Pattern.compile("CGLIB\\$(.+)\\$\\d+");
+
 
 	/**
 	 * Attempt to find a {@link Field field} on the supplied {@link Class} with the
@@ -373,19 +378,21 @@ public abstract class ReflectionUtils {
 	 * Determine whether the given method is originally declared by {@link java.lang.Object}.
 	 */
 	public static boolean isObjectMethod(Method method) {
+		if (method == null) {
+			return false;
+		}
 		try {
 			Object.class.getDeclaredMethod(method.getName(), method.getParameterTypes());
 			return true;
-		} catch (SecurityException ex) {
-			return false;
-		} catch (NoSuchMethodException ex) {
+		}
+		catch (Exception ex) {
 			return false;
 		}
 	}
 
 	/**
-	 * Determine whether the given method is a CGLIB 'renamed' method, following
-	 * the pattern "CGLIB$methodName$0".
+	 * Determine whether the given method is a CGLIB 'renamed' method,
+	 * following the pattern "CGLIB$methodName$0".
 	 * @param renamedMethod the method to check
 	 * @see org.springframework.cglib.proxy.Enhancer#rename
 	 */
@@ -514,15 +521,15 @@ public abstract class ReflectionUtils {
 			public void doWith(Method method) {
 				boolean knownSignature = false;
 				Method methodBeingOverriddenWithCovariantReturnType = null;
-
 				for (Method existingMethod : methods) {
 					if (method.getName().equals(existingMethod.getName()) &&
 							Arrays.equals(method.getParameterTypes(), existingMethod.getParameterTypes())) {
-						// is this a covariant return type situation?
+						// Is this a covariant return type situation?
 						if (existingMethod.getReturnType() != method.getReturnType() &&
 								existingMethod.getReturnType().isAssignableFrom(method.getReturnType())) {
 							methodBeingOverriddenWithCovariantReturnType = existingMethod;
-						} else {
+						}
+						else {
 							knownSignature = true;
 						}
 						break;

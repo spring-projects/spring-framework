@@ -77,18 +77,16 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("serial")
 public final class ResolvableType implements Serializable {
 
-	private static ConcurrentReferenceHashMap<ResolvableType, ResolvableType> cache =
-			new ConcurrentReferenceHashMap<ResolvableType, ResolvableType>();
-
-
 	/**
 	 * {@code ResolvableType} returned when no value is available. {@code NONE} is used
 	 * in preference to {@code null} so that multiple method calls can be safely chained.
 	 */
 	public static final ResolvableType NONE = new ResolvableType(null, null, null, null);
 
-
 	private static final ResolvableType[] EMPTY_TYPES_ARRAY = new ResolvableType[0];
+
+	private static final ConcurrentReferenceHashMap<ResolvableType, ResolvableType> cache =
+			new ConcurrentReferenceHashMap<ResolvableType, ResolvableType>(256);
 
 
 	/**
@@ -1085,7 +1083,7 @@ public final class ResolvableType implements Serializable {
 	 * @see #forType(Type, ResolvableType)
 	 */
 	public static ResolvableType forType(Type type) {
-		return forType(type, (VariableResolver) null);
+		return forType(type, null, null);
 	}
 
 	/**
