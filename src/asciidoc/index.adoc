@@ -20675,7 +20675,7 @@ Notes:
   `TransactionalTestExecutionListener`).
 * The `clinic` instance variable -- the application object being tested -- is set by
   Dependency Injection through `@Autowired` semantics.
-* The `testGetVets()` method illustrates how you can use the inherited
+* The `getVets()` method illustrates how you can use the inherited
   `countRowsInTable()` method to easily verify the number of rows in a given table, thus
   verifying correct behavior of the application code being tested. This allows for
   stronger tests and lessens dependency on the exact test data. For example, you can add
