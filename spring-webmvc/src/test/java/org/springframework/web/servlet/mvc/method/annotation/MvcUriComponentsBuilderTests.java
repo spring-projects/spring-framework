@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2013 the original author or authors.
+ * Copyright 2012-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void testFromMethodPathVariable() throws Exception {
+	public void testFromMethodNamePathVariable() throws Exception {
 		UriComponents uriComponents = fromMethodName(
 				ControllerWithMethods.class, "methodWithPathVariable", new Object[]{"1"}).build();
 
@@ -106,7 +106,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void testFromMethodTypeLevelPathVariable() throws Exception {
+	public void testFromMethodNameTypeLevelPathVariable() throws Exception {
 		this.request.setContextPath("/myapp");
 		UriComponents uriComponents = fromMethodName(
 				PersonsAddressesController.class, "getAddressesForCountry", "DE").buildAndExpand("1");
@@ -115,7 +115,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void testFromMethodTwoPathVariables() throws Exception {
+	public void testFromMethodNameTwoPathVariables() throws Exception {
 		DateTime now = DateTime.now();
 		UriComponents uriComponents = fromMethodName(
 				ControllerWithMethods.class, "methodWithTwoPathVariables", 1, now).build();
@@ -124,7 +124,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void testFromMethodWithPathVarAndRequestParam() throws Exception {
+	public void testFromMethodNameWithPathVarAndRequestParam() throws Exception {
 		UriComponents uriComponents = fromMethodName(
 				ControllerWithMethods.class, "methodForNextPage", "1", 10, 5).build();
 
@@ -135,7 +135,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void testFromMethodNotMapped() throws Exception {
+	public void testFromMethodNameNotMapped() throws Exception {
 		UriComponents uriComponents = fromMethodName(UnmappedController.class, "unmappedMethod").build();
 
 		assertThat(uriComponents.toUriString(), is("http://localhost/"));
