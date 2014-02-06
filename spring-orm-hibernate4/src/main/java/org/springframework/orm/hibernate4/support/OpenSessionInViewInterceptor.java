@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,7 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
  * @see OpenSessionInViewFilter
  * @see org.springframework.orm.hibernate4.HibernateTransactionManager
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
+ * @see org.hibernate.SessionFactory#getCurrentSession()
  */
 public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor {
 
@@ -79,16 +80,14 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 
 
 	/**
-	 * Set the Hibernate SessionFactory that should be used to create
-	 * Hibernate Sessions.
+	 * Set the Hibernate SessionFactory that should be used to create Hibernate Sessions.
 	 */
 	public void setSessionFactory(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
 	}
 
 	/**
-	 * Return the Hibernate SessionFactory that should be used to create
-	 * Hibernate Sessions.
+	 * Return the Hibernate SessionFactory that should be used to create Hibernate Sessions.
 	 */
 	public SessionFactory getSessionFactory() {
 		return this.sessionFactory;
@@ -169,9 +168,8 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 
 	/**
 	 * Open a Session for the SessionFactory that this interceptor uses.
-	 * <p>The default implementation delegates to the
-	 * {@code SessionFactory.openSession} method and
-	 * sets the {@code Session}'s flush mode to "MANUAL".
+	 * <p>The default implementation delegates to the {@link SessionFactory#openSession}
+	 * method and sets the {@link Session}'s flush mode to "MANUAL".
 	 * @return the Session to use
 	 * @throws DataAccessResourceFailureException if the Session could not be created
 	 * @see org.hibernate.FlushMode#MANUAL

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,17 @@
 
 package org.springframework.orm.hibernate4.support;
 
+import java.io.IOException;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.orm.hibernate4.SessionFactoryUtils;
 import org.springframework.orm.hibernate4.SessionHolder;
@@ -29,12 +36,6 @@ import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
  * Servlet 2.3 Filter that binds a Hibernate Session to the thread for the entire
@@ -72,6 +73,7 @@ import java.io.IOException;
  * @see OpenSessionInViewInterceptor
  * @see org.springframework.orm.hibernate4.HibernateTransactionManager
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
+ * @see org.hibernate.SessionFactory#getCurrentSession()
  */
 public class OpenSessionInViewFilter extends OncePerRequestFilter {
 
@@ -190,9 +192,8 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 
 	/**
 	 * Open a Session for the SessionFactory that this filter uses.
-	 * <p>The default implementation delegates to the
-	 * {@code SessionFactory.openSession} method and
-	 * sets the {@code Session}'s flush mode to "MANUAL".
+	 * <p>The default implementation delegates to the {@link SessionFactory#openSession}
+	 * method and sets the {@link Session}'s flush mode to "MANUAL".
 	 * @param sessionFactory the SessionFactory that this filter uses
 	 * @return the Session to use
 	 * @throws DataAccessResourceFailureException if the Session could not be created

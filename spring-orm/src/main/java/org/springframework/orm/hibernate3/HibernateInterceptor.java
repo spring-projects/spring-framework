@@ -63,17 +63,19 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * configuration just adds value when fine-tuning Session settings like the flush mode
  * - or when relying on exception translation.
  *
+ * <p>This class is effectively deprecated, in favor of either HibernateTemplate usage
+ * or native Hibernate API usage within transactions, in combination with a general
+ * {@link org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor}.
+ * <b>Note: This class does not have an equivalent replacement in {@code orm.hibernate4}.
+ * It is officially deprecated in the Spring 4.0.x line, superseded by a streamlined
+ * OpenSessionInterceptor which also exists in 4.0.2's {@code orm.hibernate4} package.</b>
+ *
  * @author Juergen Hoeller
  * @since 1.2
  * @see org.hibernate.SessionFactory#getCurrentSession()
  * @see HibernateTransactionManager
  * @see HibernateTemplate
- * @deprecated as of Spring 3.2.7, in favor of either HibernateTemplate usage or
- * native Hibernate API usage within transactions, in combination with a general
- * {@link org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor}.
- * Note: This class does not have an equivalent replacement in {@code orm.hibernate4}.
  */
-@Deprecated
 public class HibernateInterceptor extends HibernateAccessor implements MethodInterceptor {
 
 	private boolean exceptionConversionEnabled = true;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,13 +40,12 @@ import org.springframework.util.Assert;
  * candidate exceptions.
  *
 
- * <p>All of Spring's applicable resource factories (e.g. {@link
- * org.springframework.orm.hibernate3.LocalSessionFactoryBean LocalSessionFactoryBean},
- * {@link org.springframework.orm.jpa.LocalEntityManagerFactoryBean
- * LocalEntityManagerFactoryBean}) implement the {@code PersistenceExceptionTranslator}
- * interface out of the box. As a consequence, all that is usually needed to enable
- * automatic exception translation is marking all affected beans (such as Repositories or
- * DAOs) with the {@code @Repository} annotation, along with defining this post-processor
+ * <p>All of Spring's applicable resource factories (e.g.
+ * {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean})
+ * implement the {@code PersistenceExceptionTranslator} interface out of the box.
+ * As a consequence, all that is usually needed to enable automatic exception
+ * translation is marking all affected beans (such as Repositories or DAOs)
+ * with the {@code @Repository} annotation, along with defining this post-processor
  * as a bean in the application context.
  *
  * @author Rod Johnson

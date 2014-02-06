@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 	 * @see #setInterceptors
 	 * @see org.springframework.web.context.request.WebRequestInterceptor
 	 * @see WebRequestHandlerInterceptorAdapter#WebRequestHandlerInterceptorAdapter(WebRequestInterceptor, boolean)
-	 * @see org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor
+	 * @see org.springframework.orm.jpa.support.OpenEntityManagerInViewInterceptor
 	 */
 	public void setApplyWebRequestInterceptorsToRenderPhaseOnly(boolean applyWebRequestInterceptorsToRenderPhaseOnly) {
 		this.applyWebRequestInterceptorsToRenderPhaseOnly = applyWebRequestInterceptorsToRenderPhaseOnly;
@@ -139,7 +139,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 	 * allowing to add further interceptors before as well as after the existing
 	 * interceptors
 	 */
-	protected void extendInterceptors(List interceptors) {
+	protected void extendInterceptors(List<?> interceptors) {
 	}
 
 	/**

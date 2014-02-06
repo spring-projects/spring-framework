@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -214,8 +214,7 @@ public abstract class SessionFactoryUtils {
 	 * <p>Supports setting a Session-level Hibernate entity interceptor that allows
 	 * to inspect and change property values before writing to and reading from the
 	 * database. Such an interceptor can also be set at the SessionFactory level
-	 * (i.e. on LocalSessionFactoryBean), on HibernateTransactionManager, or on
-	 * HibernateInterceptor/HibernateTemplate.
+	 * (i.e. on LocalSessionFactoryBean), on HibernateTransactionManager, etc.
 	 * @param sessionFactory Hibernate SessionFactory to create the session with
 	 * @param entityInterceptor Hibernate entity interceptor, or {@code null} if none
 	 * @param jdbcExceptionTranslator SQLExcepionTranslator to use for flushing the
@@ -224,7 +223,6 @@ public abstract class SessionFactoryUtils {
 	 * @return the Hibernate Session
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
 	 * @see LocalSessionFactoryBean#setEntityInterceptor
-	 * @see HibernateInterceptor#setEntityInterceptor
 	 * @see HibernateTemplate#setEntityInterceptor
 	 */
 	public static Session getSession(
@@ -371,8 +369,8 @@ public abstract class SessionFactoryUtils {
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
 	 */
 	private static Session getJtaSynchronizedSession(
-		SessionHolder sessionHolder, SessionFactory sessionFactory,
-		SQLExceptionTranslator jdbcExceptionTranslator) throws DataAccessResourceFailureException {
+			SessionHolder sessionHolder, SessionFactory sessionFactory,
+			SQLExceptionTranslator jdbcExceptionTranslator) throws DataAccessResourceFailureException {
 
 		// JTA synchronization is only possible with a javax.transaction.TransactionManager.
 		// We'll check the Hibernate SessionFactory: If a TransactionManagerLookup is specified

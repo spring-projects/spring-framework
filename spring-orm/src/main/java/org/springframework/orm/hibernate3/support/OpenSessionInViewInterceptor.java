@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 package org.springframework.orm.hibernate3.support;
 
-import java.util.concurrent.Callable;
-
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.orm.hibernate3.HibernateAccessor;
 import org.springframework.orm.hibernate3.SessionFactoryUtils;
@@ -27,9 +26,9 @@ import org.springframework.orm.hibernate3.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.context.request.AsyncWebRequestInterceptor;
-import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.context.request.async.*;
+import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 
 /**
  * Spring web request interceptor that binds a Hibernate {@code Session} to the
@@ -91,6 +90,7 @@ import org.springframework.web.context.request.async.*;
  * @see org.springframework.orm.hibernate3.HibernateTransactionManager
  * @see org.springframework.orm.hibernate3.SessionFactoryUtils#getSession
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
+ * @see org.hibernate.SessionFactory#getCurrentSession()
  */
 public class OpenSessionInViewInterceptor extends HibernateAccessor implements AsyncWebRequestInterceptor {
 
@@ -143,10 +143,9 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements A
 	 * @see org.springframework.orm.hibernate3.SessionFactoryUtils#getSession
 	 */
 	public void preHandle(WebRequest request) throws DataAccessException {
-
-		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 		String participateAttributeName = getParticipateAttributeName();
 
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 		if (asyncManager.hasConcurrentResult()) {
 			if (applySessionBindingInterceptor(asyncManager, participateAttributeName)) {
 				return;
