@@ -20062,31 +20062,25 @@ The `org.springframework.test.context.junit4` package provides support classes f
 * `AbstractJUnit4SpringContextTests`: Abstract base test class that integrates the
   __Spring TestContext Framework__ with explicit `ApplicationContext` testing support in
   a JUnit 4.5+ environment.
-
-+
-
-When you extend `AbstractJUnit4SpringContextTests`, you can access the following
-`protected` instance variable:
-
+  When you extend `AbstractJUnit4SpringContextTests`, you can access the following
+  `protected` instance variable:
 ** `applicationContext`: Use this variable to perform explicit bean lookups or to test
-the state of the context as a whole.
-
+  the state of the context as a whole.
 * `AbstractTransactionalJUnit4SpringContextTests`: Abstract __transactional__ extension
   of `AbstractJUnit4SpringContextTests` that also adds some convenience functionality
   for JDBC access. Expects a `javax.sql.DataSource` bean and a
-  `PlatformTransactionManager` bean to be defined in the `ApplicationContext`. When you
-  extend `AbstractTransactionalJUnit4SpringContextTests` you can access the following
-  `protected` instance variables:
+  `PlatformTransactionManager` bean to be defined in the `ApplicationContext`.
+  When you extend `AbstractTransactionalJUnit4SpringContextTests` you can access the
+  following `protected` instance variables:
 ** `applicationContext`: Inherited from the `AbstractJUnit4SpringContextTests`
-superclass. Use this variable to perform explicit bean lookups or to test the state of
-the context as a whole.
+  superclass. Use this variable to perform explicit bean lookups or to test the state of
+  the context as a whole.
 ** `jdbcTemplate`: Use this variable to execute SQL statements to query the database.
-Such queries can be used to confirm database state both __prior to__ and __after__
-execution of database-related application code, and Spring ensures that such queries run
-in the scope of the same transaction as the application code. When used in conjunction
-with an ORM tool, be sure to avoid <<testcontext-tx-false-positives,false positives>>.
+  Such queries can be used to confirm database state both __prior to__ and __after__
+  execution of database-related application code, and Spring ensures that such queries run
+  in the scope of the same transaction as the application code. When used in conjunction
+  with an ORM tool, be sure to avoid <<testcontext-tx-false-positives,false positives>>.
 
-+
 
 [TIP]
 ====
@@ -20132,32 +20126,25 @@ TestNG based test cases.
 * `AbstractTestNGSpringContextTests`: Abstract base test class that integrates the
   __Spring TestContext Framework__ with explicit `ApplicationContext` testing support in
   a TestNG environment.
-
-+
-
-When you extend `AbstractTestNGSpringContextTests`, you can access the following
-`protected` instance variable:
-
-+
-
+  When you extend `AbstractTestNGSpringContextTests`, you can access the following
+  `protected` instance variable:
 ** `applicationContext`: Use this variable to perform explicit bean lookups or to test
-the state of the context as a whole.
-** `AbstractTransactionalTestNGSpringContextTests`: Abstract __transactional__ extension
-of `AbstractTestNGSpringContextTests` that adds some convenience functionality for JDBC
-access. Expects a `javax.sql.DataSource` bean and a `PlatformTransactionManager` bean to
-be defined in the `ApplicationContext`. When you extend
-`AbstractTransactionalTestNGSpringContextTests`, you can access the following
-`protected` instance variables:
+  the state of the context as a whole.
+* `AbstractTransactionalTestNGSpringContextTests`: Abstract __transactional__ extension
+  of `AbstractTestNGSpringContextTests` that adds some convenience functionality for JDBC
+  access. Expects a `javax.sql.DataSource` bean and a `PlatformTransactionManager` bean to
+  be defined in the `ApplicationContext`.
+  When you extend `AbstractTransactionalTestNGSpringContextTests`, you can access the following
+  `protected` instance variables:
 ** `applicationContext`: Inherited from the `AbstractTestNGSpringContextTests`
-superclass. Use this variable to perform explicit bean lookups or to test the state of
-the context as a whole.
+  superclass. Use this variable to perform explicit bean lookups or to test the state of
+  the context as a whole.
 ** `jdbcTemplate`: Use this variable to execute SQL statements to query the database.
-Such queries can be used to confirm database state both __prior to__ and __after__
-execution of database-related application code, and Spring ensures that such queries run
-in the scope of the same transaction as the application code. When used in conjunction
-with an ORM tool, be sure to avoid <<testcontext-tx-false-positives,false positives>>.
+  Such queries can be used to confirm database state both __prior to__ and __after__
+  execution of database-related application code, and Spring ensures that such queries run
+  in the scope of the same transaction as the application code. When used in conjunction
+  with an ORM tool, be sure to avoid <<testcontext-tx-false-positives,false positives>>.
 
-+
 
 [TIP]
 ====
