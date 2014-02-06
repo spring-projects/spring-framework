@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanFactory;
-
+import org.springframework.cglib.core.SpringNamingPolicy;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.CallbackFilter;
 import org.springframework.cglib.proxy.Enhancer;
@@ -107,6 +107,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		public Object instantiate(Constructor<?> ctor, Object[] args) {
 			Enhancer enhancer = new Enhancer();
 			enhancer.setSuperclass(this.beanDefinition.getBeanClass());
+			enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
 			enhancer.setCallbackFilter(new CallbackFilterImpl());
 			enhancer.setCallbacks(new Callback[] {
 					NoOp.INSTANCE,
@@ -114,9 +115,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 					new ReplaceOverrideMethodInterceptor()
 			});
 
-			return (ctor == null) ?
-					enhancer.create() :
-					enhancer.create(ctor.getParameterTypes(), args);
+			return (ctor != null ? enhancer.create(ctor.getParameterTypes(), args) : enhancer.create());
 		}
 
 

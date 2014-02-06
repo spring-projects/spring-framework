@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.beans.factory.support.SimpleInstantiationStrategy;
 import org.springframework.cglib.core.ClassGenerator;
 import org.springframework.cglib.core.Constants;
 import org.springframework.cglib.core.DefaultGeneratorStrategy;
+import org.springframework.cglib.core.SpringNamingPolicy;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.CallbackFilter;
 import org.springframework.cglib.proxy.Enhancer;
@@ -66,6 +67,8 @@ class ConfigurationClassEnhancer {
 	};
 
 	private static final ConditionalCallbackFilter CALLBACK_FILTER = new ConditionalCallbackFilter(CALLBACKS);
+
+	private static final DefaultGeneratorStrategy GENERATOR_STRATEGY = new BeanFactoryAwareGeneratorStrategy();
 
 	private static final String BEAN_FACTORY_FIELD = "$$beanFactory";
 
@@ -105,22 +108,10 @@ class ConfigurationClassEnhancer {
 		enhancer.setSuperclass(superclass);
 		enhancer.setInterfaces(new Class<?>[] {EnhancedConfiguration.class});
 		enhancer.setUseFactory(false);
+		enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
+		enhancer.setStrategy(GENERATOR_STRATEGY);
 		enhancer.setCallbackFilter(CALLBACK_FILTER);
 		enhancer.setCallbackTypes(CALLBACK_FILTER.getCallbackTypes());
-		enhancer.setStrategy(new DefaultGeneratorStrategy() {
-			@Override
-			protected ClassGenerator transform(ClassGenerator cg) throws Exception {
-				ClassEmitterTransformer transformer = new ClassEmitterTransformer() {
-					@Override
-					public void end_class() {
-						declare_field(Constants.ACC_PUBLIC, BEAN_FACTORY_FIELD,
-								Type.getType(BeanFactory.class), null);
-						super.end_class();
-					}
-				};
-				return new TransformingClassGenerator(cg, transformer);
-			}
-		});
 		return enhancer;
 	}
 
@@ -200,37 +191,27 @@ class ConfigurationClassEnhancer {
 
 
 	/**
-	 * Intercepts the invocation of any {@link DisposableBean#destroy()} on @Configuration
-	 * class instances for the purpose of de-registering CGLIB callbacks. This helps avoid
-	 * garbage collection issues. See SPR-7901.
-	 * @see EnhancedConfiguration
+	 * Custom extension of CGLIB's DefaultGeneratorStrategy, introducing a {@link BeanFactory} field.
 	 */
-	private static class DisposableBeanMethodInterceptor implements MethodInterceptor, ConditionalCallback {
+	private static class BeanFactoryAwareGeneratorStrategy extends DefaultGeneratorStrategy {
 
 		@Override
-		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
-			Enhancer.registerStaticCallbacks(obj.getClass(), null);
-			// Does the actual (non-CGLIB) superclass actually implement DisposableBean?
-			// If so, call its dispose() method. If not, just exit.
-			if (DisposableBean.class.isAssignableFrom(obj.getClass().getSuperclass())) {
-				return proxy.invokeSuper(obj, args);
-			}
-			return null;
-		}
-
-		@Override
-		public boolean isMatch(Method candidateMethod) {
-			return candidateMethod.getName().equals("destroy") &&
-					candidateMethod.getParameterTypes().length == 0 &&
-					DisposableBean.class.isAssignableFrom(candidateMethod.getDeclaringClass());
+		protected ClassGenerator transform(ClassGenerator cg) throws Exception {
+			ClassEmitterTransformer transformer = new ClassEmitterTransformer() {
+				@Override
+				public void end_class() {
+					declare_field(Constants.ACC_PUBLIC, BEAN_FACTORY_FIELD, Type.getType(BeanFactory.class), null);
+					super.end_class();
+				}
+			};
+			return new TransformingClassGenerator(cg, transformer);
 		}
 	}
 
 
 	/**
-	 * Intercepts the invocation of any
-	 * {@link BeanFactoryAware#setBeanFactory(BeanFactory)} on {@code @Configuration}
-	 * class instances for the purpose of recording the {@link BeanFactory}.
+	 * Intercepts the invocation of any {@link BeanFactoryAware#setBeanFactory(BeanFactory)} on
+	 * {@code @Configuration} class instances for the purpose of recording the {@link BeanFactory}.
 	 * @see EnhancedConfiguration
 	 */
 	private static class BeanFactoryAwareMethodInterceptor implements MethodInterceptor, ConditionalCallback {
@@ -387,6 +368,7 @@ class ConfigurationClassEnhancer {
 			Enhancer enhancer = new Enhancer();
 			enhancer.setSuperclass(fbClass);
 			enhancer.setUseFactory(false);
+			enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
 			enhancer.setCallback(new MethodInterceptor() {
 				@Override
 				public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
@@ -404,13 +386,42 @@ class ConfigurationClassEnhancer {
 			Assert.state(field != null, "Unable to find generated bean factory field");
 			Object beanFactory = ReflectionUtils.getField(field, enhancedConfigInstance);
 			Assert.state(beanFactory != null, "BeanFactory has not been injected into @Configuration class");
-			Assert.state(beanFactory instanceof ConfigurableBeanFactory, "Injected BeanFactory is not a ConfigurableBeanFactory");
+			Assert.state(beanFactory instanceof ConfigurableBeanFactory,
+					"Injected BeanFactory is not a ConfigurableBeanFactory");
 			return (ConfigurableBeanFactory) beanFactory;
 		}
 
 		@Override
 		public boolean isMatch(Method candidateMethod) {
 			return BeanAnnotationHelper.isBeanAnnotated(candidateMethod);
+		}
+	}
+
+
+	/**
+	 * Intercepts the invocation of any {@link DisposableBean#destroy()} on @Configuration
+	 * class instances for the purpose of de-registering CGLIB callbacks. This helps avoid
+	 * garbage collection issues. See SPR-7901.
+	 * @see EnhancedConfiguration
+	 */
+	private static class DisposableBeanMethodInterceptor implements MethodInterceptor, ConditionalCallback {
+
+		@Override
+		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
+			Enhancer.registerStaticCallbacks(obj.getClass(), null);
+			// Does the actual (non-CGLIB) superclass actually implement DisposableBean?
+			// If so, call its dispose() method. If not, just exit.
+			if (DisposableBean.class.isAssignableFrom(obj.getClass().getSuperclass())) {
+				return proxy.invokeSuper(obj, args);
+			}
+			return null;
+		}
+
+		@Override
+		public boolean isMatch(Method candidateMethod) {
+			return candidateMethod.getName().equals("destroy") &&
+					candidateMethod.getParameterTypes().length == 0 &&
+					DisposableBean.class.isAssignableFrom(candidateMethod.getDeclaringClass());
 		}
 	}
 

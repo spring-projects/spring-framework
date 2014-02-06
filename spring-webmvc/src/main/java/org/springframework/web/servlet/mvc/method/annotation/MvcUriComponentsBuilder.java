@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.cglib.core.SpringNamingPolicy;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.Factory;
@@ -72,16 +73,15 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	public static final String MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME = "mvcUriComponentsContributor";
 
 
-	private static final CompositeUriComponentsContributor defaultUriComponentsContributor;
+	private static final Log logger = LogFactory.getLog(MvcUriComponentsBuilder.class);
+
+	private static final ObjenesisStd objenesis = new ObjenesisStd(true);
 
 	private static final PathMatcher pathMatcher = new AntPathMatcher();
 
 	private static final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
-	private static final ObjenesisStd objenesis = new ObjenesisStd(true);
-
-	private static final Log logger = LogFactory.getLog(MvcUriComponentsBuilder.class);
-
+	private static final CompositeUriComponentsContributor defaultUriComponentsContributor;
 
 	static {
 		defaultUriComponentsContributor = new CompositeUriComponentsContributor(
@@ -341,7 +341,8 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 		else {
 			Enhancer enhancer = new Enhancer();
 			enhancer.setSuperclass(type);
-			enhancer.setInterfaces(new Class<?>[]{MethodInvocationInfo.class});
+			enhancer.setInterfaces(new Class<?>[] {MethodInvocationInfo.class});
+			enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
 			enhancer.setCallbackType(org.springframework.cglib.proxy.MethodInterceptor.class);
 			Factory factory = (Factory) objenesis.newInstance(enhancer.createClass());
 			factory.setCallbacks(new Callback[] {interceptor});
