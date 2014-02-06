@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,6 +135,15 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	/**
 	 * Create a new {@code ConcurrentReferenceHashMap} instance.
 	 * @param initialCapacity the initial capacity of the map
+	 * @param referenceType the reference type used for entries (soft or weak)
+	 */
+	public ConcurrentReferenceHashMap(int initialCapacity, ReferenceType referenceType) {
+		this(initialCapacity, DEFAULT_LOAD_FACTOR, DEFAULT_CONCURRENCY_LEVEL, referenceType);
+	}
+
+	/**
+	 * Create a new {@code ConcurrentReferenceHashMap} instance.
+	 * @param initialCapacity the initial capacity of the map
 	 * @param loadFactor the load factor. When the average number of references per
 	 * table exceeds this value, resize will be attempted.
 	 * @param concurrencyLevel the expected number of threads that will concurrently
@@ -151,7 +160,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	 * table exceeds this value, resize will be attempted.
 	 * @param concurrencyLevel the expected number of threads that will concurrently
 	 * write to the map
-	 * @param referenceType the reference type used for entries
+	 * @param referenceType the reference type used for entries (soft or weak)
 	 */
 	@SuppressWarnings("unchecked")
 	public ConcurrentReferenceHashMap(int initialCapacity, float loadFactor, int concurrencyLevel,
@@ -165,10 +174,10 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		this.shift = calculateShift(concurrencyLevel, MAXIMUM_CONCURRENCY_LEVEL);
 		int size = 1 << this.shift;
 		this.referenceType = referenceType;
-		int roundedUpSegmentCapactity = (int) ((initialCapacity + size - 1L) / size);
+		int roundedUpSegmentCapacity = (int) ((initialCapacity + size - 1L) / size);
 		this.segments = (Segment[]) Array.newInstance(Segment.class, size);
 		for (int i = 0; i < this.segments.length; i++) {
-			this.segments[i] = new Segment(roundedUpSegmentCapactity);
+			this.segments[i] = new Segment(roundedUpSegmentCapacity);
 		}
 	}
 
@@ -186,8 +195,8 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	}
 
 	/**
-	 * Factory method that returns the {@link ReferenceManager}. This method will be
-	 * called once for each {@link Segment}.
+	 * Factory method that returns the {@link ReferenceManager}.
+	 * This method will be called once for each {@link Segment}.
 	 * @return a new reference manager
 	 */
 	protected ReferenceManager createReferenceManager() {

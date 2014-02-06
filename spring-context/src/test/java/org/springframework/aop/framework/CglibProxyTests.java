@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,8 +155,8 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 			assertTrue(ex.getCause() instanceof CodeGenerationException ||
 					ex.getCause() instanceof IllegalArgumentException);
 			// Check that error message is helpful
-			assertTrue(ex.getMessage().indexOf("final") != -1);
-			assertTrue(ex.getMessage().indexOf("visible") != -1);
+			assertTrue(ex.getMessage().contains("final"));
+			assertTrue(ex.getMessage().contains("visible"));
 		}
 	}
 
@@ -171,9 +171,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		AopProxy aop = new CglibAopProxy(as);
 
 		CglibTestBean proxy = (CglibTestBean) aop.getProxy();
-
-		assertEquals("The name property has been overwritten by the constructor",
-				"Rob Harrop", proxy.getName());
+		assertEquals("The name property has been overwritten by the constructor", "Rob Harrop", proxy.getName());
 	}
 
 	@Test
@@ -186,9 +184,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		pc.setTarget(target);
 
 		CglibAopProxy aop = new CglibAopProxy(pc);
-
 		CglibTestBean proxy = (CglibTestBean) aop.getProxy();
-
 		assertNotNull("Proxy should not be null", proxy);
 		assertEquals("Constructor overrode the value of name", "Rob Harrop", proxy.getName());
 
@@ -218,14 +214,17 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 			public ClassFilter getClassFilter() {
 				return ClassFilter.TRUE;
 			}
-
 			@Override
 			public MethodMatcher getMethodMatcher() {
 				return MethodMatcher.TRUE;
 			}
-
+			@Override
 			public boolean equals(Object obj) {
 				return true;
+			}
+			@Override
+			public int hashCode() {
+				return 0;
 			}
 		};
 		pf.addAdvisor(new DefaultPointcutAdvisor(pointcut, advice));
@@ -250,7 +249,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 	}
 
 	private ITestBean getIntroductionAdvisorProxy(TestBean target) {
-		ProxyFactory pf = new ProxyFactory(new Class<?>[]{ITestBean.class});
+		ProxyFactory pf = new ProxyFactory(new Class<?>[] {ITestBean.class});
 		pf.setProxyTargetClass(true);
 
 		pf.addAdvisor(new LockMixinAdvisor());
@@ -270,8 +269,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		AdvisedSupport pc = new AdvisedSupport(new Class<?>[]{});
 		pc.setTargetSource(mockTargetSource);
 		CglibAopProxy aop = new CglibAopProxy(pc);
-		aop.setConstructorArguments(new Object[] {"Rob Harrop", new Integer(22)},
-				new Class<?>[] {String.class, int.class});
+		aop.setConstructorArguments(new Object[] {"Rob Harrop", 22}, new Class<?>[] {String.class, int.class});
 
 		NoArgCtorTestBean proxy = (NoArgCtorTestBean) aop.getProxy();
 		proxy = (NoArgCtorTestBean) aop.getProxy();
@@ -347,9 +345,9 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testWithDependencyChecking() {
-		ApplicationContext ctx =
-				new ClassPathXmlApplicationContext(DEPENDENCY_CHECK_CONTEXT, getClass());
+		ApplicationContext ctx = new ClassPathXmlApplicationContext(DEPENDENCY_CHECK_CONTEXT, getClass());
 		ctx.getBean("testBean");
 	}
 
