@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.SimpleInstantiationStrategy;
+import org.springframework.cglib.core.SpringNamingPolicy;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.CallbackFilter;
 import org.springframework.cglib.proxy.Enhancer;
@@ -103,8 +104,9 @@ class ConfigurationClassEnhancer {
 	private Enhancer newEnhancer(Class<?> superclass) {
 		Enhancer enhancer = new Enhancer();
 		enhancer.setSuperclass(superclass);
-		enhancer.setInterfaces(new Class<?>[] {EnhancedConfiguration.class});
+		enhancer.setInterfaces(new Class<?>[]{EnhancedConfiguration.class});
 		enhancer.setUseFactory(false);
+		enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
 		enhancer.setCallbackFilter(CALLBACK_FILTER);
 		enhancer.setCallbackTypes(CALLBACK_TYPES);
 		return enhancer;
@@ -128,9 +130,9 @@ class ConfigurationClassEnhancer {
 	 * Facilitates idempotent behavior for {@link ConfigurationClassEnhancer#enhance(Class)}
 	 * through checking to see if candidate classes are already assignable to it, e.g.
 	 * have already been enhanced.
-	 * <p>Also extends {@link DisposableBean}, as all enhanced
-	 * {@code @Configuration} classes must de-register static CGLIB callbacks on
-	 * destruction, which is handled by the (private) {@code DisposableBeanMethodInterceptor}.
+	 * <p>Also extends {@link DisposableBean}, as all enhanced {@code @Configuration}
+	 * classes must de-register static CGLIB callbacks on destruction, which is handled
+	 * by the (private) {@code DisposableBeanMethodInterceptor}.
 	 * <p>Note that this interface is intended for framework-internal use only, however
 	 * must remain public in order to allow access to subclasses generated from other
 	 * packages (i.e. user code).

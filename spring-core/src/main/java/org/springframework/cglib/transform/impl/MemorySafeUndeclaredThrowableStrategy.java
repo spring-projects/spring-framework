@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,20 +25,22 @@ import org.springframework.cglib.transform.MethodFilterTransformer;
 import org.springframework.cglib.transform.TransformingClassGenerator;
 
 /**
- * Memory safe variant of {@link UndeclaredThrowableStrategy} ported from the latest
- * as yet unreleased cglib code.
+ * Memory-safe variant of {@link UndeclaredThrowableStrategy} ported from the latest
+ * as yet unreleased CGLIB code.
+ *
+ * @author Phillip Webb
+ * @since 3.2.4
  */
 public class MemorySafeUndeclaredThrowableStrategy extends DefaultGeneratorStrategy {
 
 	private static final MethodFilter TRANSFORM_FILTER = new MethodFilter() {
-		public boolean accept(int access, String name, String desc, String signature,
-				String[] exceptions) {
+		public boolean accept(int access, String name, String desc, String signature, String[] exceptions) {
 			return !TypeUtils.isPrivate(access) && name.indexOf('$') < 0;
 		}
 	};
 
 
-	private Class wrapper;
+	private Class<?> wrapper;
 
 
 	public MemorySafeUndeclaredThrowableStrategy(Class wrapper) {
@@ -51,4 +53,5 @@ public class MemorySafeUndeclaredThrowableStrategy extends DefaultGeneratorStrat
 		tr = new MethodFilterTransformer(TRANSFORM_FILTER, tr);
 		return new TransformingClassGenerator(cg, tr);
 	}
+
 }
