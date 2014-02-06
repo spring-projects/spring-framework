@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -278,9 +278,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * Will get applied to any new Session created by this transaction manager.
 	 * <p>Such an interceptor can either be set at the SessionFactory level,
 	 * i.e. on LocalSessionFactoryBean, or at the Session level, i.e. on
-	 * HibernateTemplate, HibernateInterceptor, and HibernateTransactionManager.
-	 * It's preferable to set it on LocalSessionFactoryBean or HibernateTransactionManager
-	 * to avoid repeated configuration and guarantee consistent behavior in transactions.
+	 * HibernateTransactionManager.
 	 * @see LocalSessionFactoryBean#setEntityInterceptor
 	 */
 	public void setEntityInterceptor(Interceptor entityInterceptor) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,8 +69,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  *
  * <p>The "preInterceptors" and "postInterceptors" properties can be set to add
  * additional interceptors to the mix, like
- * {@link org.springframework.aop.interceptor.PerformanceMonitorInterceptor} or
- * {@link org.springframework.orm.hibernate3.HibernateInterceptor}.
+ * {@link org.springframework.aop.interceptor.PerformanceMonitorInterceptor}.
  *
  * <p><b>HINT:</b> This class is often used with parent / child bean definitions.
  * Typically, you will define the transaction manager and default transaction
