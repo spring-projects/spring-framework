@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1009,7 +1009,7 @@ public interface JdbcOperations {
 	 * @param batchArgs the List of Object arrays containing the batch of arguments for the query
 	 * @return an array containing the numbers of rows affected by each update in the batch
 	 */
-	public int[] batchUpdate(String sql, List<Object[]> batchArgs);
+	public int[] batchUpdate(String sql, List<Object[]> batchArgs) throws DataAccessException;
 
 	/**
 	 * Execute a batch using the supplied SQL statement with the batch of supplied arguments.
@@ -1019,7 +1019,8 @@ public interface JdbcOperations {
 	 * (constants from {@code java.sql.Types})
 	 * @return an array containing the numbers of rows affected by each update in the batch
 	 */
-	public int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes);
+	public int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes)
+			throws DataAccessException;
 
 	/**
 	 * Execute multiple batches using the supplied SQL statement with the collect of supplied arguments.
@@ -1032,7 +1033,9 @@ public interface JdbcOperations {
 	 * @return an array containing for each batch another array containing the numbers of rows affected
 	 * by each update in the batch
 	 */
-	public <T> int[][] batchUpdate(String sql, Collection<T> batchArgs, int batchSize, ParameterizedPreparedStatementSetter<T> pss);
+	public <T> int[][] batchUpdate(String sql, Collection<T> batchArgs, int batchSize,
+			ParameterizedPreparedStatementSetter<T> pss) throws DataAccessException;
+
 
 	//-------------------------------------------------------------------------
 	// Methods dealing with callable statements

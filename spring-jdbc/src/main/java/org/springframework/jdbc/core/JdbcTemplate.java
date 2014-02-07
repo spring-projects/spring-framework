@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1028,23 +1028,19 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public int[] batchUpdate(String sql, List<Object[]> batchArgs) {
+	public int[] batchUpdate(String sql, List<Object[]> batchArgs) throws DataAccessException {
 		return batchUpdate(sql, batchArgs, new int[0]);
 	}
 
 	@Override
-	public int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes) {
+	public int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes) throws DataAccessException {
 		return BatchUpdateUtils.executeBatchUpdate(sql, batchArgs, argTypes, this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.jdbc.core.JdbcOperations#batchUpdate(java.lang.String, java.util.Collection, int, org.springframework.jdbc.core.ParameterizedPreparedStatementSetter)
-	 *
-	 * Contribution by Nicolas Fabre
-	 */
 	@Override
-	public <T> int[][] batchUpdate(String sql, final Collection<T> batchArgs, final int batchSize, final ParameterizedPreparedStatementSetter<T> pss) {
+	public <T> int[][] batchUpdate(String sql, final Collection<T> batchArgs, final int batchSize,
+			final ParameterizedPreparedStatementSetter<T> pss) throws DataAccessException {
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL batch update [" + sql + "] with a batch size of " + batchSize);
 		}

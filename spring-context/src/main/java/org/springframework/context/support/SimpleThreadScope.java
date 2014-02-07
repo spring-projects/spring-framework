@@ -33,12 +33,12 @@ import org.springframework.core.NamedThreadLocal;
  * <p><strong>Note</strong> that the {@code SimpleThreadScope} <em>does not clean
  * up any objects</em> associated with it. As such, it's typically preferable to
  * use the {@link org.springframework.web.context.request.RequestScope RequestScope}
- * in Web environments.
+ * in web environments.
  *
  * <p>For an implementation of a thread-based {@code Scope} with support for
- * destruction callbacks, refer to the <a
- * href="http://www.springbyexample.org/examples/custom-thread-scope-module.html">Spring
- * by Example Custom Thread Scope Module</a>.
+ * destruction callbacks, refer to the
+ * <a href="http://www.springbyexample.org/examples/custom-thread-scope-module.html">
+*  Spring by Example Custom Thread Scope Module</a>.
  *
  * <p>Thanks to Eugene Kuleshov for submitting the original prototype for a thread scope!
  *
@@ -59,9 +59,10 @@ public class SimpleThreadScope implements Scope {
 				}
 			};
 
+
 	@Override
 	public Object get(String name, ObjectFactory<?> objectFactory) {
-		Map<String, Object> scope = threadScope.get();
+		Map<String, Object> scope = this.threadScope.get();
 		Object object = scope.get(name);
 		if (object == null) {
 			object = objectFactory.getObject();
@@ -72,14 +73,14 @@ public class SimpleThreadScope implements Scope {
 
 	@Override
 	public Object remove(String name) {
-		Map<String, Object> scope = threadScope.get();
+		Map<String, Object> scope = this.threadScope.get();
 		return scope.remove(name);
 	}
 
 	@Override
 	public void registerDestructionCallback(String name, Runnable callback) {
 		logger.warn("SimpleThreadScope does not support destruction callbacks. " +
-				"Consider using a RequestScope in a Web environment.");
+				"Consider using RequestScope in a web environment.");
 	}
 
 	@Override
