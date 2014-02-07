@@ -549,7 +549,7 @@ project("spring-web") {
 		optional("javax.faces:javax.faces-api:2.2")
 		optional("aopalliance:aopalliance:1.0")
 		optional("com.caucho:hessian:4.0.7")
-		optional("commons-fileupload:commons-fileupload:1.3")
+		optional("commons-fileupload:commons-fileupload:1.3.1")
 		optional("org.apache.httpcomponents:httpclient:4.3.2")
 		optional("org.apache.httpcomponents:httpasyncclient:4.0")
 		optional("org.codehaus.jackson:jackson-mapper-asl:${jackson1Version}")
@@ -716,7 +716,7 @@ project("spring-webmvc") {
 		testCompile("javax.validation:validation-api:1.0.0.GA")
 		testCompile("org.hibernate:hibernate-validator:${hibValVersion}")
 		testCompile("org.apache.httpcomponents:httpclient:4.3.2")
-		testCompile("commons-fileupload:commons-fileupload:1.3")
+		testCompile("commons-fileupload:commons-fileupload:1.3.1")
 		testCompile("commons-io:commons-io:1.3")
 		testCompile("joda-time:joda-time:${jodaVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
@@ -770,7 +770,7 @@ project("spring-webmvc-portlet") {
 		compile(project(":spring-webmvc"))
 		provided("javax.servlet:javax.servlet-api:3.0.1")
 		provided("javax.portlet:portlet-api:2.0")
-		optional("commons-fileupload:commons-fileupload:1.3")
+		optional("commons-fileupload:commons-fileupload:1.3.1")
 	}
 
 	// pick up DispatcherPortlet.properties in src/main
