@@ -26,13 +26,12 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
 import org.springframework.core.NamedThreadLocal;
 
-
 /**
- * Thread-backed {@link Scope} implementation.
+ * A simple thread-backed {@link Scope} implementation.
  *
- * <p><strong>Note</strong> that the {@code SimpleThreadScope} <em>does not clean
- * up any objects</em> associated with it. As such, it's typically preferable to
- * use the {@link org.springframework.web.context.request.RequestScope RequestScope}
+ * <p><strong>Note:</strong> {@code SimpleThreadScope} <em>does not clean up
+ * any objects</em> associated with it. As such, it is typically preferable to
+ * use {@link org.springframework.web.context.request.RequestScope RequestScope}
  * in web environments.
  *
  * <p>For an implementation of a thread-based {@code Scope} with support for

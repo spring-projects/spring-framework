@@ -311,8 +311,7 @@ public interface JdbcOperations {
 	 * @return a result object returned by the action, or {@code null}
 	 * @throws DataAccessException if there is any problem
 	 */
-	<T> T execute(PreparedStatementCreator psc, PreparedStatementCallback<T> action)
-			throws DataAccessException;
+	<T> T execute(PreparedStatementCreator psc, PreparedStatementCallback<T> action) throws DataAccessException;
 
 	/**
 	 * Execute a JDBC data access operation, implemented as callback action
@@ -354,8 +353,7 @@ public interface JdbcOperations {
 	 * @return an arbitrary result object, as returned by the ResultSetExtractor
 	 * @throws DataAccessException if there is any problem
 	 */
-	<T> T query(String sql, PreparedStatementSetter pss, ResultSetExtractor<T> rse)
-			throws DataAccessException;
+	<T> T query(String sql, PreparedStatementSetter pss, ResultSetExtractor<T> rse) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list
@@ -370,8 +368,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @see java.sql.Types
 	 */
-	<T> T query(String sql, Object[] args, int[] argTypes, ResultSetExtractor<T> rse)
-			throws DataAccessException;
+	<T> T query(String sql, Object[] args, int[] argTypes, ResultSetExtractor<T> rse) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list
@@ -428,8 +425,7 @@ public interface JdbcOperations {
 	 * @param rch object that will extract results, one row at a time
 	 * @throws DataAccessException if the query fails
 	 */
-	void query(String sql, PreparedStatementSetter pss, RowCallbackHandler rch)
-			throws DataAccessException;
+	void query(String sql, PreparedStatementSetter pss, RowCallbackHandler rch) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list of
@@ -443,8 +439,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @see java.sql.Types
 	 */
-	void query(String sql, Object[] args, int[] argTypes, RowCallbackHandler rch)
-			throws DataAccessException;
+	void query(String sql, Object[] args, int[] argTypes, RowCallbackHandler rch) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list of
@@ -500,8 +495,7 @@ public interface JdbcOperations {
 	 * @return the result List, containing mapped objects
 	 * @throws DataAccessException if the query fails
 	 */
-	<T> List<T> query(String sql, PreparedStatementSetter pss, RowMapper<T> rowMapper)
-			throws DataAccessException;
+	<T> List<T> query(String sql, PreparedStatementSetter pss, RowMapper<T> rowMapper) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list
@@ -516,8 +510,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @see java.sql.Types
 	 */
-	<T> List<T> query(String sql, Object[] args, int[] argTypes, RowMapper<T> rowMapper)
-			throws DataAccessException;
+	<T> List<T> query(String sql, Object[] args, int[] argTypes, RowMapper<T> rowMapper) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list
@@ -582,8 +575,7 @@ public interface JdbcOperations {
 	 * return exactly one row
 	 * @throws DataAccessException if the query fails
 	 */
-	<T> T queryForObject(String sql, Object[] args, RowMapper<T> rowMapper)
-			throws DataAccessException;
+	<T> T queryForObject(String sql, Object[] args, RowMapper<T> rowMapper) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list
@@ -600,8 +592,7 @@ public interface JdbcOperations {
 	 * return exactly one row
 	 * @throws DataAccessException if the query fails
 	 */
-	<T> T queryForObject(String sql, RowMapper<T> rowMapper, Object... args)
-			throws DataAccessException;
+	<T> T queryForObject(String sql, RowMapper<T> rowMapper, Object... args) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -1019,8 +1010,7 @@ public interface JdbcOperations {
 	 * (constants from {@code java.sql.Types})
 	 * @return an array containing the numbers of rows affected by each update in the batch
 	 */
-	public int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes)
-			throws DataAccessException;
+	public int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes) throws DataAccessException;
 
 	/**
 	 * Execute multiple batches using the supplied SQL statement with the collect of supplied arguments.
@@ -1054,8 +1044,7 @@ public interface JdbcOperations {
 	 * @return a result object returned by the action, or {@code null}
 	 * @throws DataAccessException if there is any problem
 	 */
-	<T> T execute(CallableStatementCreator csc, CallableStatementCallback<T> action)
-			throws DataAccessException;
+	<T> T execute(CallableStatementCreator csc, CallableStatementCallback<T> action) throws DataAccessException;
 
 	/**
 	 * Execute a JDBC data access operation, implemented as callback action
