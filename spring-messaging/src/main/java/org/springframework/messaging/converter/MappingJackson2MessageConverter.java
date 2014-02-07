@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,7 +121,13 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 		}
 		Throwable cause = causeRef.get();
 		if (cause != null) {
-			logger.warn("Failed to evaluate deserialization for type: " + javaType);
+			String msg = "Failed to evaluate deserialization for type " + javaType;
+			if (logger.isDebugEnabled()) {
+				logger.warn(msg, cause);
+			}
+			else {
+				logger.warn(msg + ": " + cause);
+			}
 		}
 		return false;
 	}
@@ -137,7 +143,13 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 		}
 		Throwable cause = causeRef.get();
 		if (cause != null) {
-			logger.warn("Failed to evaluate serialization for type: " + payload.getClass());
+			String msg = "Failed to evaluate serialization for type [" + payload.getClass() + "]";
+			if (logger.isDebugEnabled()) {
+				logger.warn(msg, cause);
+			}
+			else {
+				logger.warn(msg + ": " + cause);
+			}
 		}
 		return false;
 	}
