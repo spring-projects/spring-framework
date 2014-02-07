@@ -16,18 +16,13 @@
 
 package org.springframework.aop.framework;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.Serializable;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
+import test.mixin.LockMixinAdvisor;
+
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
@@ -42,10 +37,11 @@ import org.springframework.tests.aop.interceptor.NopInterceptor;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
-import test.mixin.LockMixinAdvisor;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
- * Additional and overridden tests for the CGLIB proxy.
+ * Additional and overridden tests for CGLIB proxies.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -56,7 +52,8 @@ import test.mixin.LockMixinAdvisor;
 @SuppressWarnings("serial")
 public final class CglibProxyTests extends AbstractAopProxyTests implements Serializable {
 
-	private static final String DEPENDENCY_CHECK_CONTEXT =  CglibProxyTests.class.getSimpleName() + "-with-dependency-checking.xml";
+	private static final String DEPENDENCY_CHECK_CONTEXT =
+			CglibProxyTests.class.getSimpleName() + "-with-dependency-checking.xml";
 
 
 	@Override
@@ -354,7 +351,6 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 	@Test
 	public void testAddAdviceAtRuntime() {
 		TestBean bean = new TestBean();
-
 		CountingBeforeAdvice cba = new CountingBeforeAdvice();
 
 		ProxyFactory pf = new ProxyFactory();
@@ -364,17 +360,13 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		pf.setProxyTargetClass(true);
 
 		TestBean proxy = (TestBean) pf.getProxy();
-
 		assertTrue(AopUtils.isCglibProxy(proxy));
 
 		proxy.getAge();
-
 		assertEquals(0, cba.getCalls());
 
 		((Advised) proxy).addAdvice(cba);
-
 		proxy.getAge();
-
 		assertEquals(1, cba.getCalls());
 	}
 
@@ -386,7 +378,6 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		proxyFactory.setProxyTargetClass(true);
 
 		MyBean proxy = (MyBean) proxyFactory.getProxy();
-
 		assertEquals(4, proxy.add(1, 3));
 		assertEquals(1, advice.getCalls("add"));
 	}
@@ -444,7 +435,6 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		public final void foo() {
 		}
 	}
-
 }
 
 
@@ -481,7 +471,6 @@ class NoArgCtorTestBean {
 	public void reset() {
 		called = false;
 	}
-
 }
 
 
@@ -490,15 +479,11 @@ class ProtectedMethodTestBean {
 	protected String getString() {
 		return "foo";
 	}
-
 }
 
 
 class UnsupportedInterceptor implements MethodInterceptor {
 
-	/**
-	 * @see org.aopalliance.intercept.MethodInterceptor#invoke(org.aopalliance.intercept.MethodInvocation)
-	 */
 	@Override
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		throw new UnsupportedOperationException(mi.getMethod().getName());
