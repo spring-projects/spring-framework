@@ -929,8 +929,8 @@ public class AccountServiceEndpoint {
       beans (through the use of <literal>@Autowired</literal>, as shown
       above).</para>
 
-      <para>Check out <link
-      xl:href="https://jax-ws-commons.dev.java.net/spring/">https://jax-ws-commons.dev.java.net/spring/</link>
+      <para>Check out
+      <link xl:href="https://jax-ws-commons.java.net/spring/">https://jax-ws-commons.java.net/spring/</link>
       for the details on setup and usage style.</para>
     </section>
 
