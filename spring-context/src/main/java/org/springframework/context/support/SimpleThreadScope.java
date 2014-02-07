@@ -74,7 +74,7 @@ public class SimpleThreadScope implements Scope {
 
 	@Override
 	public void registerDestructionCallback(String name, Runnable callback) {
-		logger.warn("SimpleThreadScope does not support descruction callbacks. " +
+		logger.warn("SimpleThreadScope does not support destruction callbacks. " +
 				"Consider using a RequestScope in a Web environment.");
 	}
 
