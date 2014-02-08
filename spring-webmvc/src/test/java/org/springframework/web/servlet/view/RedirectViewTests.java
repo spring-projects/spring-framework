@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import junit.framework.AssertionFailedError;
-
 import org.junit.Test;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -264,7 +263,7 @@ public class RedirectViewTests {
 			String expectedUrlForEncoding = "http://url.somewhere.com?" + key + "=" + val + "&" + key2 + "=" + val2;
 			doTest(model, url, false, expectedUrlForEncoding);
 		}
-		catch (AssertionFailedError err) {
+		catch (AssertionError err) {
 			// OK, so it's the other order... probably on Sun JDK 1.6 or IBM JDK 1.5
 			String expectedUrlForEncoding = "http://url.somewhere.com?" + key2 + "=" + val2 + "&" + key + "=" + val;
 			doTest(model, url, false, expectedUrlForEncoding);
@@ -282,7 +281,7 @@ public class RedirectViewTests {
 			String expectedUrlForEncoding = "http://url.somewhere.com?" + key + "=" + val[0] + "&" + key + "=" + val[1];
 			doTest(model, url, false, expectedUrlForEncoding);
 		}
-		catch (AssertionFailedError err) {
+		catch (AssertionError err) {
 			// OK, so it's the other order... probably on Sun JDK 1.6 or IBM JDK 1.5
 			String expectedUrlForEncoding = "http://url.somewhere.com?" + key + "=" + val[1] + "&" + key + "=" + val[0];
 			doTest(model, url, false, expectedUrlForEncoding);
@@ -302,7 +301,7 @@ public class RedirectViewTests {
 			String expectedUrlForEncoding = "http://url.somewhere.com?" + key + "=" + val.get(0) + "&" + key + "=" + val.get(1);
 			doTest(model, url, false, expectedUrlForEncoding);
 		}
-		catch (AssertionFailedError err) {
+		catch (AssertionError err) {
 			// OK, so it's the other order... probably on Sun JDK 1.6 or IBM JDK 1.5
 			String expectedUrlForEncoding = "http://url.somewhere.com?" + key + "=" + val.get(1) + "&" + key + "=" + val.get(0);
 			doTest(model, url, false, expectedUrlForEncoding);
