@@ -37,7 +37,7 @@ import static org.junit.Assert.*;
  *
  * @author Andy Clement
  */
-public class MapAccessTests extends ExpressionTestCase {
+public class MapAccessTests extends AbstractExpressionTests {
 
 	@Test
 	public void testSimpleMapAccess01() {

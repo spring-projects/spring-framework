@@ -32,7 +32,7 @@ import org.springframework.expression.spel.standard.SpelExpression;
  *
  * @author Andy Clement
  */
-public class InProgressTests extends ExpressionTestCase {
+public class InProgressTests extends AbstractExpressionTests {
 
 	@Test
 	public void testRelOperatorsBetween01() {

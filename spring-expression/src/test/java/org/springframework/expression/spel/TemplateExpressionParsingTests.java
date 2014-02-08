@@ -34,7 +34,7 @@ import static org.junit.Assert.*;
  * @author Andy Clement
  * @author Juergen Hoeller
  */
-public class TemplateExpressionParsingTests extends ExpressionTestCase {
+public class TemplateExpressionParsingTests extends AbstractExpressionTests {
 
 	public static final ParserContext DEFAULT_TEMPLATE_PARSER_CONTEXT = new ParserContext() {
 		@Override

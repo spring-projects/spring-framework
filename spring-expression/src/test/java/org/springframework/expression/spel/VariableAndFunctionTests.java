@@ -27,7 +27,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
  *
  * @author Andy Clement
  */
-public class VariableAndFunctionTests extends ExpressionTestCase {
+public class VariableAndFunctionTests extends AbstractExpressionTests {
 
 	@Test
 	public void testVariableAccess01() {

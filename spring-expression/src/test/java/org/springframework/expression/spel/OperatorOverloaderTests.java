@@ -30,7 +30,7 @@ import org.springframework.expression.spel.standard.SpelExpression;
  *
  * @author Andy Clement
  */
-public class OperatorOverloaderTests extends ExpressionTestCase {
+public class OperatorOverloaderTests extends AbstractExpressionTests {
 
 	static class StringAndBooleanAddition implements OperatorOverloader {
 

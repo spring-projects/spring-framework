@@ -42,7 +42,7 @@ import static org.junit.Assert.*;
  * @author Andy Clement
  * @author Dave Syer
  */
-public class ExpressionWithConversionTests extends ExpressionTestCase {
+public class ExpressionWithConversionTests extends AbstractExpressionTests {
 
 	private static List<String> listOfString = new ArrayList<String>();
 	private static TypeDescriptor typeDescriptorForListOfString = null;

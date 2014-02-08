@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
-import org.junit.Assert;
 import org.junit.Test;
+
 import org.springframework.expression.spel.ast.InlineList;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+
+import static org.junit.Assert.*;
 
 /**
  * Test usage of inline lists.
@@ -31,10 +34,12 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
  * @author Giovanni Dall'Oglio Risso
  * @since 3.0.4
  */
-public class ListTests extends ExpressionTestCase {
+public class ListTests extends AbstractExpressionTests {
 
-	// if the list is full of literals then it will be of the type unmodifiableClass rather than ArrayList
+	// if the list is full of literals then it will be of the type unmodifiableClass
+	// rather than ArrayList
 	Class<?> unmodifiableClass = Collections.unmodifiableList(new ArrayList<Object>()).getClass();
+
 
 	@Test
 	public void testInlineListCreation01() {
@@ -111,10 +116,14 @@ public class ListTests extends ExpressionTestCase {
 
 	@Test
 	public void testRelOperatorsBetween04() {
-		evaluate("new java.math.BigDecimal('1') between {new java.math.BigDecimal('1'),new java.math.BigDecimal('5')}", "true", Boolean.class);
-		evaluate("new java.math.BigDecimal('3') between {new java.math.BigDecimal('1'),new java.math.BigDecimal('5')}", "true", Boolean.class);
-		evaluate("new java.math.BigDecimal('5') between {new java.math.BigDecimal('1'),new java.math.BigDecimal('5')}", "true", Boolean.class);
-		evaluate("new java.math.BigDecimal('8') between {new java.math.BigDecimal('1'),new java.math.BigDecimal('5')}", "false", Boolean.class);
+		evaluate("new java.math.BigDecimal('1') between {new java.math.BigDecimal('1'),new java.math.BigDecimal('5')}",
+			"true", Boolean.class);
+		evaluate("new java.math.BigDecimal('3') between {new java.math.BigDecimal('1'),new java.math.BigDecimal('5')}",
+			"true", Boolean.class);
+		evaluate("new java.math.BigDecimal('5') between {new java.math.BigDecimal('1'),new java.math.BigDecimal('5')}",
+			"true", Boolean.class);
+		evaluate("new java.math.BigDecimal('8') between {new java.math.BigDecimal('1'),new java.math.BigDecimal('5')}",
+			"false", Boolean.class);
 	}
 
 	@Test
@@ -136,23 +145,19 @@ public class ListTests extends ExpressionTestCase {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		SpelExpression expression = (SpelExpression) parser.parseExpression(expressionText);
 		SpelNode node = expression.getAST();
-		Assert.assertTrue(node instanceof InlineList);
+		assertTrue(node instanceof InlineList);
 		InlineList inlineList = (InlineList) node;
 		if (expectedToBeConstant) {
-			Assert.assertTrue(inlineList.isConstant());
-		} else {
-			Assert.assertFalse(inlineList.isConstant());
+			assertTrue(inlineList.isConstant());
+		}
+		else {
+			assertFalse(inlineList.isConstant());
 		}
 	}
 
-	@Test
+	@Test(expected = UnsupportedOperationException.class)
 	public void testInlineListWriting() {
 		// list should be unmodifiable
-		try {
-			evaluate("{1, 2, 3, 4, 5}[0]=6", "[1, 2, 3, 4, 5]", unmodifiableClass);
-			Assert.fail();
-		} catch (UnsupportedOperationException uoe) {
-			// success
-		}
+		evaluate("{1, 2, 3, 4, 5}[0]=6", "[1, 2, 3, 4, 5]", unmodifiableClass);
 	}
 }

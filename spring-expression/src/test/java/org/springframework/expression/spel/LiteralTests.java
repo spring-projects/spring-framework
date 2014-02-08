@@ -27,7 +27,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
  *
  * @author Andy Clement
  */
-public class LiteralTests extends ExpressionTestCase {
+public class LiteralTests extends AbstractExpressionTests {
 
 	@Test
 	public void testLiteralBoolean01() {

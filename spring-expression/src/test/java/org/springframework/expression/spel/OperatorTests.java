@@ -29,7 +29,7 @@ import org.springframework.expression.spel.standard.SpelExpression;
  * @author Andy Clement
  * @author Giovanni Dall'Oglio Risso
  */
-public class OperatorTests extends ExpressionTestCase {
+public class OperatorTests extends AbstractExpressionTests {
 
 	@Test
 	public void testIntegerLiteral() {

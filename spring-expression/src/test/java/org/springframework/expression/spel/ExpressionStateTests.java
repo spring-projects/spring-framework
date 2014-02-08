@@ -39,7 +39,7 @@ import org.springframework.expression.spel.testresources.Inventor;
  *
  * @author Andy Clement
  */
-public class ExpressionStateTests extends ExpressionTestCase {
+public class ExpressionStateTests extends AbstractExpressionTests {
 
 	@Test
 	public void testConstruction() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.test.web.servlet;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+package org.springframework.test.web.servlet;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,8 +36,14 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import static org.junit.Assert.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+
 /**
  * Tests for SPR-10093 (support for OPTIONS requests).
+ *
  * @author Arnaud Cogoluègnes
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -48,47 +51,48 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @ContextConfiguration
 public class Spr10093Tests {
 
-    @Autowired
-    private WebApplicationContext wac;
+	@Autowired
+	private WebApplicationContext wac;
 
-    private MockMvc mockMvc;
-
-    @Before
-    public void setup() {
-        this.mockMvc = webAppContextSetup(this.wac).dispatchOptions(true).build();
-    }
-
-    @Test
-    public void test() throws Exception {
-        MyController controller = this.wac.getBean(MyController.class);
-        int initialCount = controller.counter.get();
-        this.mockMvc.perform(options("/myUrl")).andExpect(status().isOk());
-
-        Assert.assertEquals(initialCount+1,controller.counter.get());
-    }
+	private MockMvc mockMvc;
 
 
-    @Configuration
-    @EnableWebMvc
-    static class WebConfig extends WebMvcConfigurerAdapter {
+	@Before
+	public void setup() {
+		this.mockMvc = webAppContextSetup(this.wac).dispatchOptions(true).build();
+	}
 
-        @Bean
-        public MyController myController() {
-            return new MyController();
-        }
-    }
+	@Test
+	public void test() throws Exception {
+		MyController controller = this.wac.getBean(MyController.class);
+		int initialCount = controller.counter.get();
+		this.mockMvc.perform(options("/myUrl")).andExpect(status().isOk());
 
-    @Controller
-    private static class MyController {
+		assertEquals(initialCount + 1, controller.counter.get());
+	}
 
-        private AtomicInteger counter = new AtomicInteger(0);
 
-        @RequestMapping(value="/myUrl",method=RequestMethod.OPTIONS)
-        @ResponseBody
-        public void handle() {
-            counter.incrementAndGet();
-        }
-    }
+	@Configuration
+	@EnableWebMvc
+	static class WebConfig extends WebMvcConfigurerAdapter {
 
+		@Bean
+		public MyController myController() {
+			return new MyController();
+		}
+	}
+
+	@Controller
+	private static class MyController {
+
+		private AtomicInteger counter = new AtomicInteger(0);
+
+
+		@RequestMapping(value = "/myUrl", method = RequestMethod.OPTIONS)
+		@ResponseBody
+		public void handle() {
+			counter.incrementAndGet();
+		}
+	}
 
 }

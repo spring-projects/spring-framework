@@ -29,7 +29,7 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
-import org.springframework.expression.spel.ExpressionTestCase;
+import org.springframework.expression.spel.AbstractExpressionTests;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelUtilities;
@@ -44,7 +44,7 @@ import static org.junit.Assert.*;
  *
  * @author Andy Clement
  */
-public class ReflectionHelperTests extends ExpressionTestCase {
+public class ReflectionHelperTests extends AbstractExpressionTests {
 
 	@Test
 	public void testFormatHelperForClassName() {

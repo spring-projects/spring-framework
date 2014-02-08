@@ -44,7 +44,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
  *
  * @author Andy Clement
  */
-public class PropertyAccessTests extends ExpressionTestCase {
+public class PropertyAccessTests extends AbstractExpressionTests {
 
 	@Test
 	public void testSimpleAccess01() {

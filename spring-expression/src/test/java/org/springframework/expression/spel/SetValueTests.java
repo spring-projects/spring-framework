@@ -38,7 +38,7 @@ import org.springframework.expression.spel.testresources.PlaceOfBirth;
  * @author Keith Donald
  * @author Andy Clement
  */
-public class SetValueTests extends ExpressionTestCase {
+public class SetValueTests extends AbstractExpressionTests {
 
 	private final static boolean DEBUG = false;
 

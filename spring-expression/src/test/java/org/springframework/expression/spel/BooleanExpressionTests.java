@@ -27,7 +27,7 @@ import org.springframework.expression.spel.support.StandardTypeConverter;
  * @author Andy Clement
  * @author Oliver Becker
  */
-public class BooleanExpressionTests extends ExpressionTestCase {
+public class BooleanExpressionTests extends AbstractExpressionTests {
 
 	@Test
 	public void testBooleanTrue() {

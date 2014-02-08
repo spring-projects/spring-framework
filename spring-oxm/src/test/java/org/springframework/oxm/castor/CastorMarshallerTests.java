@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.custommonkey.xmlunit.NamespaceContext;
 import org.custommonkey.xmlunit.SimpleNamespaceContext;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.custommonkey.xmlunit.XpathEngine;
-import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.springframework.core.io.ClassPathResource;
@@ -42,7 +41,7 @@ import org.xml.sax.ContentHandler;
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
-import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Tests the {@link CastorMarshaller} class.
@@ -55,53 +54,53 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	/**
 	 * Represents the expected result that doesn't contain the xml declaration.
 	 */
-	private static final String DOCUMENT_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-			"<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
-			"<tns:flight><tns:number>42</tns:number></tns:flight></tns:flights>";
+	private static final String DOCUMENT_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+			+ "<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">"
+			+ "<tns:flight><tns:number>42</tns:number></tns:flight></tns:flights>";
 
 	/**
 	 * Represents the expected result that doesn't contain the xml namespaces.
 	 */
-	private static final String SUPPRESSED_NAMESPACE_EXPECTED_STRING =
-			"<?xml version=\"1.0\" encoding=\"UTF-8\"?><flights><flight><number>42</number></flight></flights>";
+	private static final String SUPPRESSED_NAMESPACE_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><flights><flight><number>42</number></flight></flights>";
 
 	/**
 	 * Represents the expected result with modified root element name.
 	 */
-	private static final String ROOT_ELEMENT_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-			"<tns:canceledFlights xmlns:tns=\"http://samples.springframework.org/flight\">" +
-			"<tns:flight><tns:number>42</tns:number></tns:flight></tns:canceledFlights>";
+	private static final String ROOT_ELEMENT_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+			+ "<tns:canceledFlights xmlns:tns=\"http://samples.springframework.org/flight\">"
+			+ "<tns:flight><tns:number>42</tns:number></tns:flight></tns:canceledFlights>";
 
 	/**
 	 * Represents the expected result with 'xsi:type' attribute.
 	 */
-	private static final String XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-			"<objects><castor-object xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
-			" xsi:type=\"java:org.springframework.oxm.castor.CastorObject\">" +
-			"<name>test</name><value>8</value></castor-object></objects>";
+	private static final String XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+			+ "<objects><castor-object xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
+			+ " xsi:type=\"java:org.springframework.oxm.castor.CastorObject\">"
+			+ "<name>test</name><value>8</value></castor-object></objects>";
 
 	/**
 	 * Represents the expected result with suppressed 'xsi:type' attribute.
 	 */
-	private static final String SUPPRESSED_XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-			"<objects><castor-object><name>test</name><value>8</value></castor-object></objects>";
+	private static final String SUPPRESSED_XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+			+ "<objects><castor-object><name>test</name><value>8</value></castor-object></objects>";
 
 	/**
 	 * Represents the expected result with 'xsi:type' attribute for root element.
 	 */
-	private static final String ROOT_WITH_XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-			"<objects xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
-			" xsi:type=\"java:java.util.Arrays$ArrayList\">" +
-			"<castor-object xsi:type=\"java:org.springframework.oxm.castor.CastorObject\">" +
-			"<name>test</name><value>8</value></castor-object></objects>";
+	private static final String ROOT_WITH_XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+			+ "<objects xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
+			+ " xsi:type=\"java:java.util.Arrays$ArrayList\">"
+			+ "<castor-object xsi:type=\"java:org.springframework.oxm.castor.CastorObject\">"
+			+ "<name>test</name><value>8</value></castor-object></objects>";
 
 	/**
 	 * Represents the expected result without 'xsi:type' attribute for root element.
 	 */
-	private static final String ROOT_WITHOUT_XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-			"<objects><castor-object xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
-			" xsi:type=\"java:org.springframework.oxm.castor.CastorObject\">" +
-			"<name>test</name><value>8</value></castor-object></objects>";
+	private static final String ROOT_WITHOUT_XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+			+ "<objects><castor-object xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
+			+ " xsi:type=\"java:org.springframework.oxm.castor.CastorObject\">"
+			+ "<name>test</name><value>8</value></castor-object></objects>";
+
 
 	@Override
 	protected Marshaller createMarshaller() throws Exception {
@@ -129,10 +128,13 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 		InOrder ordered = inOrder(contentHandler);
 		ordered.verify(contentHandler).startDocument();
 		ordered.verify(contentHandler).startPrefixMapping("tns", "http://samples.springframework.org/flight");
-		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"), eq("flights"), eq("tns:flights"), isA(Attributes.class));
-		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"), eq("flight"), eq("tns:flight"), isA(Attributes.class));
-		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"), eq("number"), eq("tns:number"), isA(Attributes.class));
-		ordered.verify(contentHandler).characters(eq(new char[]{'4', '2'}), eq(0), eq(2));
+		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"), eq("flights"),
+			eq("tns:flights"), isA(Attributes.class));
+		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"), eq("flight"),
+			eq("tns:flight"), isA(Attributes.class));
+		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"), eq("number"),
+			eq("tns:number"), isA(Attributes.class));
+		ordered.verify(contentHandler).characters(eq(new char[] { '4', '2' }), eq(0), eq(2));
 		ordered.verify(contentHandler).endElement("http://samples.springframework.org/flight", "number", "tns:number");
 		ordered.verify(contentHandler).endElement("http://samples.springframework.org/flight", "flight", "tns:flight");
 		ordered.verify(contentHandler).endElement("http://samples.springframework.org/flight", "flights", "tns:flights");
@@ -142,8 +144,8 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 
 	@Test
 	public void supports() throws Exception {
-		Assert.assertTrue("CastorMarshaller does not support Flights", marshaller.supports(Flights.class));
-		Assert.assertTrue("CastorMarshaller does not support Flight", marshaller.supports(Flight.class));
+		assertTrue("CastorMarshaller does not support Flights", marshaller.supports(Flights.class));
+		assertTrue("CastorMarshaller does not support Flight", marshaller.supports(Flight.class));
 	}
 
 	@Test
@@ -186,8 +188,8 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 		getCastorMarshaller().setMarshalAsDocument(true);
 		String result = marshalFlights();
 		assertXMLEqual("Marshaller wrote invalid result", DOCUMENT_EXPECTED_STRING, result);
-		Assert.assertTrue("Result doesn't contain xml declaration.",
-				result.contains("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
+		assertTrue("Result doesn't contain xml declaration.",
+			result.contains("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
 	}
 
 	@Test
@@ -196,7 +198,7 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 		getCastorMarshaller().setMarshalAsDocument(true);
 		String result = marshalFlights();
 		assertXMLEqual("Marshaller wrote invalid result", EXPECTED_STRING, result);
-		Assert.assertFalse("Result contains xml declaration.", result.matches("<\\?\\s*xml"));
+		assertFalse("Result contains xml declaration.", result.matches("<\\?\\s*xml"));
 	}
 
 	@Test
@@ -215,7 +217,7 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 		String result = marshalFlights();
 
 		assertXpathEvaluatesTo("The xsi:noNamespaceSchemaLocation hasn't been written or has invalid value.",
-				noNamespaceSchemaLocation, "/tns:flights/@xsi:noNamespaceSchemaLocation", result);
+			noNamespaceSchemaLocation, "/tns:flights/@xsi:noNamespaceSchemaLocation", result);
 		assertXMLEqual("Marshaller wrote invalid result", EXPECTED_STRING, result);
 	}
 
@@ -227,7 +229,7 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 		String result = marshalFlights();
 
 		assertXpathEvaluatesTo("The xsi:noNamespaceSchemaLocation hasn't been written or has invalid value.",
-				schemaLocation, "/tns:flights/@xsi:schemaLocation", result);
+			schemaLocation, "/tns:flights/@xsi:schemaLocation", result);
 		assertXMLEqual("Marshaller wrote invalid result", EXPECTED_STRING, result);
 	}
 
@@ -252,7 +254,6 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 		String result = marshal(Arrays.asList(castorObject));
 		assertXMLEqual("Marshaller wrote invalid result", ROOT_WITHOUT_XSI_EXPECTED_STRING, result);
 	}
-
 
 	private CastorMarshaller getCastorMarshaller() {
 		return (CastorMarshaller) marshaller;

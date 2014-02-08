@@ -45,7 +45,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
  *
  * @author Andy Clement
  */
-public class ScenariosForSpringSecurity extends ExpressionTestCase {
+public class ScenariosForSpringSecurity extends AbstractExpressionTests {
 
 	@Test
 	public void testScenario01_Roles() throws Exception {

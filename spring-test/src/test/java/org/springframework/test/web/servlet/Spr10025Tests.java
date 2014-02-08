@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.servlet;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,6 +35,11 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+
+import static org.junit.Assert.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 /**
  * Test for SPR-10025.
@@ -56,6 +58,7 @@ public class Spr10025Tests {
 	private MockHttpServletRequest servletRequest;
 
 	private MockMvc mockMvc;
+
 
 	@Before
 	public void setup() {
@@ -86,8 +89,8 @@ public class Spr10025Tests {
 		@ResponseBody
 		public void handle() {
 			RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
-			Assert.assertNull(attributes.getAttribute("foo1", RequestAttributes.SCOPE_REQUEST));
-			Assert.assertNotNull(attributes.getAttribute("foo2", RequestAttributes.SCOPE_REQUEST));
+			assertNull(attributes.getAttribute("foo1", RequestAttributes.SCOPE_REQUEST));
+			assertNotNull(attributes.getAttribute("foo2", RequestAttributes.SCOPE_REQUEST));
 		}
 	}
 

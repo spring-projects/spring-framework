@@ -48,7 +48,7 @@ import org.springframework.expression.spel.testresources.PlaceOfBirth;
  *
  * @author Andy Clement
  */
-public class SpelDocumentationTests extends ExpressionTestCase {
+public class SpelDocumentationTests extends AbstractExpressionTests {
 
 	static Inventor tesla ;
 	static Inventor pupin ;

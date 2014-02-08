@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package org.springframework.expression.spel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,12 +26,14 @@ import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import static org.junit.Assert.*;
+
 /**
  * Common superclass for expression tests.
  *
  * @author Andy Clement
  */
-public abstract class ExpressionTestCase {
+public abstract class AbstractExpressionTests {
 
 	private final static boolean DEBUG = false;
 
@@ -44,6 +43,7 @@ public abstract class ExpressionTestCase {
 	protected final ExpressionParser parser = new SpelExpressionParser();
 	protected final StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 
+
 	/**
 	 * Evaluate an expression and check that the actual result matches the expectedValue and the class of the result
 	 * matches the expectedClassOfResult.
@@ -51,7 +51,7 @@ public abstract class ExpressionTestCase {
 	 * @param expectedValue the expected result for evaluating the expression
 	 * @param expectedResultType the expected class of the evaluation result
 	 */
-	public void evaluate(String expression, Object expectedValue, Class<?> expectedResultType) {
+	protected void evaluate(String expression, Object expectedValue, Class<?> expectedResultType) {
 		try {
 			Expression expr = parser.parseExpression(expression);
 			if (expr == null) {
@@ -61,9 +61,9 @@ public abstract class ExpressionTestCase {
 				SpelUtilities.printAbstractSyntaxTree(System.out, expr);
 			}
 			// Class<?> expressionType = expr.getValueType();
-			// assertEquals("Type of the expression is not as expected. Should be '"+expectedResultType+"' but is
-			// '"+expressionType+"'",
-			// expectedResultType,expressionType);
+			// assertEquals("Type of the expression is not as expected. Should be '" +
+			// expectedResultType + "' but is '"
+			// + expressionType + "'", expectedResultType, expressionType);
 
 			Object value = expr.getValue(eContext);
 
@@ -73,7 +73,7 @@ public abstract class ExpressionTestCase {
 					return; // no point doing other checks
 				}
 				assertEquals("Expression returned null value, but expected '" + expectedValue + "'", expectedValue,
-						null);
+					null);
 			}
 
 			Class<?> resultType = value.getClass();
@@ -86,20 +86,23 @@ public abstract class ExpressionTestCase {
 
 			if (expectedValue instanceof String) {
 				assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue,
-						ExpressionTestCase.stringValueOf(value));
-			} else {
+					AbstractExpressionTests.stringValueOf(value));
+			}
+			else {
 				assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue, value);
 			}
-		} catch (EvaluationException ee) {
+		}
+		catch (EvaluationException ee) {
 			ee.printStackTrace();
 			fail("Unexpected Exception: " + ee.getMessage());
-		} catch (ParseException pe) {
+		}
+		catch (ParseException pe) {
 			pe.printStackTrace();
 			fail("Unexpected Exception: " + pe.getMessage());
 		}
 	}
 
-	public void evaluateAndAskForReturnType(String expression, Object expectedValue, Class<?> expectedResultType) {
+	protected void evaluateAndAskForReturnType(String expression, Object expectedValue, Class<?> expectedResultType) {
 		try {
 			Expression expr = parser.parseExpression(expression);
 			if (expr == null) {
@@ -109,16 +112,16 @@ public abstract class ExpressionTestCase {
 				SpelUtilities.printAbstractSyntaxTree(System.out, expr);
 			}
 			// Class<?> expressionType = expr.getValueType();
-			// assertEquals("Type of the expression is not as expected. Should be '"+expectedResultType+"' but is
-			// '"+expressionType+"'",
-			// expectedResultType,expressionType);
+			// assertEquals("Type of the expression is not as expected. Should be '" +
+			// expectedResultType + "' but is '"
+			// + expressionType + "'", expectedResultType, expressionType);
 
 			Object value = expr.getValue(eContext, expectedResultType);
 			if (value == null) {
 				if (expectedValue == null)
 					return; // no point doing other checks
 				assertEquals("Expression returned null value, but expected '" + expectedValue + "'", expectedValue,
-						null);
+					null);
 			}
 
 			Class<?> resultType = value.getClass();
@@ -128,11 +131,13 @@ public abstract class ExpressionTestCase {
 			assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue, value);
 			// isAssignableFrom would allow some room for compatibility
 			// in the above expression...
-		} catch (EvaluationException ee) {
+		}
+		catch (EvaluationException ee) {
 			SpelEvaluationException ex = (SpelEvaluationException) ee;
 			ex.printStackTrace();
 			fail("Unexpected EvaluationException: " + ex.getMessage());
-		} catch (ParseException pe) {
+		}
+		catch (ParseException pe) {
 			fail("Unexpected ParseException: " + pe.getMessage());
 		}
 	}
@@ -147,7 +152,7 @@ public abstract class ExpressionTestCase {
 	 * @param expectedClassOfResult the expected class of the evaluation result
 	 * @param shouldBeWritable should the parsed expression be writable?
 	 */
-	public void evaluate(String expression, Object expectedValue, Class<?> expectedClassOfResult,
+	protected void evaluate(String expression, Object expectedValue, Class<?> expectedClassOfResult,
 			boolean shouldBeWritable) {
 		try {
 			Expression e = parser.parseExpression(expression);
@@ -163,20 +168,21 @@ public abstract class ExpressionTestCase {
 					return; // no point doing other
 				// checks
 				assertEquals("Expression returned null value, but expected '" + expectedValue + "'", expectedValue,
-						null);
+					null);
 			}
 			Class<? extends Object> resultType = value.getClass();
 			if (expectedValue instanceof String) {
 				assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue,
-						ExpressionTestCase.stringValueOf(value));
-			} else {
+					AbstractExpressionTests.stringValueOf(value));
+			}
+			else {
 				assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue, value);
 			}
-//			assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue,
-//					ExpressionTestCase.stringValueOf(value));
+			// assertEquals("Did not get expected value for expression '" + expression +
+			// "'.", expectedValue, stringValueOf(value));
 			assertEquals("Type of the result was not as expected.  Expected '" + expectedClassOfResult
-					+ "' but result was of type '" + resultType + "'", expectedClassOfResult
-					.equals/* isAssignableFrom */(resultType), true);
+					+ "' but result was of type '" + resultType + "'",
+				expectedClassOfResult.equals/* isAssignableFrom */(resultType), true);
 			// TODO isAssignableFrom would allow some room for compatibility
 			// in the above expression...
 
@@ -187,10 +193,12 @@ public abstract class ExpressionTestCase {
 				else
 					fail("Expected the expression to be readonly but it is not");
 			}
-		} catch (EvaluationException ee) {
+		}
+		catch (EvaluationException ee) {
 			ee.printStackTrace();
 			fail("Unexpected Exception: " + ee.getMessage());
-		} catch (ParseException pe) {
+		}
+		catch (ParseException pe) {
 			pe.printStackTrace();
 			fail("Unexpected Exception: " + pe.getMessage());
 		}
@@ -228,15 +236,16 @@ public abstract class ExpressionTestCase {
 			if (expectedReturnType != null) {
 				@SuppressWarnings("unused")
 				Object value = expr.getValue(eContext, expectedReturnType);
-			} else {
+			}
+			else {
 				@SuppressWarnings("unused")
 				Object value = expr.getValue(eContext);
 			}
 			fail("Should have failed with message " + expectedMessage);
-		} catch (EvaluationException ee) {
+		}
+		catch (EvaluationException ee) {
 			SpelEvaluationException ex = (SpelEvaluationException) ee;
 			if (ex.getMessageCode() != expectedMessage) {
-//				System.out.println(ex.getMessage());
 				ex.printStackTrace();
 				assertEquals("Failed to get expected message", expectedMessage, ex.getMessageCode());
 			}
@@ -262,13 +271,15 @@ public abstract class ExpressionTestCase {
 								fail("Insert does not match, expected 'null' but insert value was '" + inserts[i - 1]
 										+ "'");
 							}
-						} else if (inserts[i - 1] == null) {
+						}
+						else if (inserts[i - 1] == null) {
 							if (otherProperties[i] != null) {
 								ex.printStackTrace();
 								fail("Insert does not match, expected '" + otherProperties[i]
 										+ "' but insert value was 'null'");
 							}
-						} else if (!inserts[i - 1].equals(otherProperties[i])) {
+						}
+						else if (!inserts[i - 1].equals(otherProperties[i])) {
 							ex.printStackTrace();
 							fail("Insert does not match, expected '" + otherProperties[i] + "' but insert value was '"
 									+ inserts[i - 1] + "'");
@@ -276,7 +287,8 @@ public abstract class ExpressionTestCase {
 					}
 				}
 			}
-		} catch (ParseException pe) {
+		}
+		catch (ParseException pe) {
 			pe.printStackTrace();
 			fail("Unexpected Exception: " + pe.getMessage());
 		}
@@ -295,21 +307,22 @@ public abstract class ExpressionTestCase {
 			Expression expr = parser.parseExpression(expression);
 			SpelUtilities.printAbstractSyntaxTree(System.out, expr);
 			fail("Parsing should have failed!");
-		} catch (ParseException pe) {
-//			pe.printStackTrace();
-//			Throwable t = pe.getCause();
-//			if (t == null) {
-//				fail("ParseException caught with no defined cause");
-//			}
-//			if (!(t instanceof SpelEvaluationException)) {
-//				t.printStackTrace();
-//				fail("Cause of parse exception is not a SpelException");
-//			}
-//			SpelEvaluationException ex = (SpelEvaluationException) t;
-//			pe.printStackTrace();
-			SpelParseException ex = (SpelParseException)pe;
+		}
+		catch (ParseException pe) {
+			// pe.printStackTrace();
+			// Throwable t = pe.getCause();
+			// if (t == null) {
+			// fail("ParseException caught with no defined cause");
+			// }
+			// if (!(t instanceof SpelEvaluationException)) {
+			// t.printStackTrace();
+			// fail("Cause of parse exception is not a SpelException");
+			// }
+			// SpelEvaluationException ex = (SpelEvaluationException) t;
+			// pe.printStackTrace();
+			SpelParseException ex = (SpelParseException) pe;
 			if (ex.getMessageCode() != expectedMessage) {
-//				System.out.println(ex.getMessage());
+				// System.out.println(ex.getMessage());
 				ex.printStackTrace();
 				assertEquals("Failed to get expected message", expectedMessage, ex.getMessageCode());
 			}
@@ -340,16 +353,17 @@ public abstract class ExpressionTestCase {
 		}
 	}
 
-	public static String stringValueOf(Object value) {
+	protected static String stringValueOf(Object value) {
 		return stringValueOf(value, false);
 	}
+
 	/**
 	 * Produce a nice string representation of the input object.
 	 *
 	 * @param value object to be formatted
 	 * @return a nice string
 	 */
-	public static String stringValueOf(Object value, boolean isNested) {
+	protected static String stringValueOf(Object value, boolean isNested) {
 		// do something nice for arrays
 		if (value == null) {
 			return "null";
@@ -368,7 +382,8 @@ public abstract class ExpressionTestCase {
 						sb.append(stringValueOf(l[j]));
 					}
 					sb.append("}");
-				} else if (primitiveType == Long.TYPE) {
+				}
+				else if (primitiveType == Long.TYPE) {
 					long[] l = (long[]) value;
 					sb.append("long[").append(l.length).append("]{");
 					for (int j = 0; j < l.length; j++) {
@@ -378,11 +393,13 @@ public abstract class ExpressionTestCase {
 						sb.append(stringValueOf(l[j]));
 					}
 					sb.append("}");
-				} else {
+				}
+				else {
 					throw new RuntimeException("Please implement support for type " + primitiveType.getName()
 							+ " in ExpressionTestCase.stringValueOf()");
 				}
-			} else if (value.getClass().getComponentType().isArray()) {
+			}
+			else if (value.getClass().getComponentType().isArray()) {
 				List<Object> l = Arrays.asList((Object[]) value);
 				if (!isNested) {
 					sb.append(value.getClass().getComponentType().getName());
@@ -397,7 +414,8 @@ public abstract class ExpressionTestCase {
 					sb.append(stringValueOf(object, true));
 				}
 				sb.append("}");
-			} else {
+			}
+			else {
 				List<Object> l = Arrays.asList((Object[]) value);
 				if (!isNested) {
 					sb.append(value.getClass().getComponentType().getName());
@@ -414,7 +432,8 @@ public abstract class ExpressionTestCase {
 				sb.append("}");
 			}
 			return sb.toString();
-		} else {
+		}
+		else {
 			return value.toString();
 		}
 	}

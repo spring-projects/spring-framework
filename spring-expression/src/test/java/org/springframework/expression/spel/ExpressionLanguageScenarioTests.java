@@ -60,7 +60,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
  *
  * @author Andy Clement
  */
-public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
+public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 
 	/**
 	 * Scenario: using the standard infrastructure and running simple expression evaluation.

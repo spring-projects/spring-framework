@@ -59,7 +59,7 @@ import org.springframework.expression.spel.testresources.TestPerson;
  * @author Giovanni Dall'Oglio Risso
  * @since 3.0
  */
-public class EvaluationTests extends ExpressionTestCase {
+public class EvaluationTests extends AbstractExpressionTests {
 
 	@Test
 	public void testCreateListsOnAttemptToIndexNull01() throws EvaluationException, ParseException {

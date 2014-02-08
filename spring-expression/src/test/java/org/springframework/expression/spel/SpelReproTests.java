@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.expression.spel;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -66,39 +67,41 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Clark Duplichien
  * @author Phillip Webb
+ * @author Sam Brannen
  */
-public class SpelReproTests extends ExpressionTestCase {
+public class SpelReproTests extends AbstractExpressionTests {
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
+
 	@Test
-	public void testNPE_SPR5661() {
+	public void NPE_SPR5661() {
 		evaluate("joinThreeStrings('a',null,'c')", "anullc", String.class);
 	}
 
 	@Test
-	public void testSWF1086() {
+	public void SWF1086() {
 		evaluate("printDouble(T(java.math.BigDecimal).valueOf(14.35))", "14.35", String.class);
 	}
 
 	@Test
-	public void testDoubleCoercion() {
+	public void doubleCoercion() {
 		evaluate("printDouble(14.35)", "14.35", String.class);
 	}
 
 	@Test
-	public void testDoubleArrayCoercion() {
+	public void doubleArrayCoercion() {
 		evaluate("printDoubles(getDoublesAsStringList())", "{14.35, 15.45}", String.class);
 	}
 
 	@Test
-	public void testSPR5899() throws Exception {
+	public void SPR5899() throws Exception {
 		StandardEvaluationContext eContext = new StandardEvaluationContext(new Spr5899Class());
 		Expression expr = new SpelExpressionParser().parseRaw("tryToInvokeWithNull(12)");
-		assertEquals(12,expr.getValue(eContext));
+		assertEquals(12, expr.getValue(eContext));
 		expr = new SpelExpressionParser().parseRaw("tryToInvokeWithNull(null)");
-		assertEquals(null,expr.getValue(eContext));
+		assertEquals(null, expr.getValue(eContext));
 		try {
 			expr = new SpelExpressionParser().parseRaw("tryToInvokeWithNull2(null)");
 			expr.getValue();
@@ -111,27 +114,28 @@ public class SpelReproTests extends ExpressionTestCase {
 
 		// varargs
 		expr = new SpelExpressionParser().parseRaw("tryToInvokeWithNull3(null,'a','b')");
-		assertEquals("ab",expr.getValue(eContext));
+		assertEquals("ab", expr.getValue(eContext));
 
 		// varargs 2 - null is packed into the varargs
 		expr = new SpelExpressionParser().parseRaw("tryToInvokeWithNull3(12,'a',null,'c')");
-		assertEquals("anullc",expr.getValue(eContext));
+		assertEquals("anullc", expr.getValue(eContext));
 
 		// check we can find the ctor ok
 		expr = new SpelExpressionParser().parseRaw("new Spr5899Class().toString()");
-		assertEquals("instance",expr.getValue(eContext));
+		assertEquals("instance", expr.getValue(eContext));
 
 		expr = new SpelExpressionParser().parseRaw("new Spr5899Class(null).toString()");
-		assertEquals("instance",expr.getValue(eContext));
+		assertEquals("instance", expr.getValue(eContext));
 
 		// ctor varargs
 		expr = new SpelExpressionParser().parseRaw("new Spr5899Class(null,'a','b').toString()");
-		assertEquals("instance",expr.getValue(eContext));
+		assertEquals("instance", expr.getValue(eContext));
 
 		// ctor varargs 2
 		expr = new SpelExpressionParser().parseRaw("new Spr5899Class(null,'a', null, 'b').toString()");
-		assertEquals("instance",expr.getValue(eContext));
+		assertEquals("instance", expr.getValue(eContext));
 	}
+
 
 	static class MyTypeLocator extends StandardTypeLocator {
 
@@ -149,60 +153,63 @@ public class SpelReproTests extends ExpressionTestCase {
 
 	static class Spr5899Class {
 
-		 public Spr5899Class() {
-		 }
+		public Spr5899Class() {
+		}
 
-		 public Spr5899Class(Integer i) {
-		 }
+		public Spr5899Class(Integer i) {
+		}
 
-		 public Spr5899Class(Integer i, String... s) {
-		 }
+		public Spr5899Class(Integer i, String... s) {
+		}
 
-		 public Integer tryToInvokeWithNull(Integer value) {
-			 return value;
-		 }
+		public Integer tryToInvokeWithNull(Integer value) {
+			return value;
+		}
 
-		 public Integer tryToInvokeWithNull2(int i) {
-			 return new Integer(i);
-		 }
+		public Integer tryToInvokeWithNull2(int i) {
+			return new Integer(i);
+		}
 
-		 public String tryToInvokeWithNull3(Integer value, String... strings) {
-			 StringBuilder sb = new StringBuilder();
-			 for (String string : strings) {
-				 if (string == null) {
-					 sb.append("null");
-				 }
-				 else {
-					 sb.append(string);
-				 }
-			 }
-			 return sb.toString();
-		 }
+		public String tryToInvokeWithNull3(Integer value, String... strings) {
+			StringBuilder sb = new StringBuilder();
+			for (String string : strings) {
+				if (string == null) {
+					sb.append("null");
+				}
+				else {
+					sb.append(string);
+				}
+			}
+			return sb.toString();
+		}
 
-		 @Override
-		 public String toString() {
-			 return "instance";
-		 }
+		@Override
+		public String toString() {
+			return "instance";
+		}
 	}
+
 
 	@Test
-	public void testSPR5905_InnerTypeReferences() throws Exception {
+	public void SPR5905_InnerTypeReferences() throws Exception {
 		StandardEvaluationContext eContext = new StandardEvaluationContext(new Spr5899Class());
 		Expression expr = new SpelExpressionParser().parseRaw("T(java.util.Map$Entry)");
-		assertEquals(Map.Entry.class,expr.getValue(eContext));
+		assertEquals(Map.Entry.class, expr.getValue(eContext));
 
 		expr = new SpelExpressionParser().parseRaw("T(org.springframework.expression.spel.SpelReproTests$Outer$Inner).run()");
-		assertEquals(12,expr.getValue(eContext));
+		assertEquals(12, expr.getValue(eContext));
 
 		expr = new SpelExpressionParser().parseRaw("new org.springframework.expression.spel.SpelReproTests$Outer$Inner().run2()");
-		assertEquals(13,expr.getValue(eContext));
+		assertEquals(13, expr.getValue(eContext));
 	}
+
 
 	static class Outer {
 
 		static class Inner {
 
-			public Inner() {}
+			public Inner() {
+			}
 
 			public static int run() {
 				return 12;
@@ -214,59 +221,67 @@ public class SpelReproTests extends ExpressionTestCase {
 		}
 	}
 
+
 	@Test
-	public void testSPR5804() throws Exception {
-		Map<String,String> m = new HashMap<String,String>();
+	public void SPR5804() throws Exception {
+		Map<String, String> m = new HashMap<String, String>();
 		m.put("foo", "bar");
-		StandardEvaluationContext eContext = new StandardEvaluationContext(m); // root is a map instance
+		StandardEvaluationContext eContext = new StandardEvaluationContext(m); // root is
+																				// a map
+																				// instance
 		eContext.addPropertyAccessor(new MapAccessor());
 		Expression expr = new SpelExpressionParser().parseRaw("['foo']");
 		assertEquals("bar", expr.getValue(eContext));
 	}
 
 	@Test
-	public void testSPR5847() throws Exception {
+	public void SPR5847() throws Exception {
 		StandardEvaluationContext eContext = new StandardEvaluationContext(new TestProperties());
 		String name = null;
 		Expression expr = null;
 
 		expr = new SpelExpressionParser().parseRaw("jdbcProperties['username']");
-		name = expr.getValue(eContext,String.class);
-		assertEquals("Dave",name);
+		name = expr.getValue(eContext, String.class);
+		assertEquals("Dave", name);
 
 		expr = new SpelExpressionParser().parseRaw("jdbcProperties[username]");
-		name = expr.getValue(eContext,String.class);
-		assertEquals("Dave",name);
+		name = expr.getValue(eContext, String.class);
+		assertEquals("Dave", name);
 
 		// MapAccessor required for this to work
 		expr = new SpelExpressionParser().parseRaw("jdbcProperties.username");
 		eContext.addPropertyAccessor(new MapAccessor());
-		name = expr.getValue(eContext,String.class);
-		assertEquals("Dave",name);
+		name = expr.getValue(eContext, String.class);
+		assertEquals("Dave", name);
 
 		// --- dotted property names
 
-		// lookup foo on the root, then bar on that, then use that as the key into jdbcProperties
+		// lookup foo on the root, then bar on that, then use that as the key into
+		// jdbcProperties
 		expr = new SpelExpressionParser().parseRaw("jdbcProperties[foo.bar]");
 		eContext.addPropertyAccessor(new MapAccessor());
-		name = expr.getValue(eContext,String.class);
-		assertEquals("Dave2",name);
+		name = expr.getValue(eContext, String.class);
+		assertEquals("Dave2", name);
 
 		// key is foo.bar
 		expr = new SpelExpressionParser().parseRaw("jdbcProperties['foo.bar']");
 		eContext.addPropertyAccessor(new MapAccessor());
-		name = expr.getValue(eContext,String.class);
-		assertEquals("Elephant",name);
+		name = expr.getValue(eContext, String.class);
+		assertEquals("Elephant", name);
 	}
 
+
 	static class TestProperties {
+
 		public Properties jdbcProperties = new Properties();
 		public Properties foo = new Properties();
+
+
 		TestProperties() {
-			jdbcProperties.put("username","Dave");
-			jdbcProperties.put("alias","Dave2");
-			jdbcProperties.put("foo.bar","Elephant");
-			foo.put("bar","alias");
+			jdbcProperties.put("username", "Dave");
+			jdbcProperties.put("alias", "Dave2");
+			jdbcProperties.put("foo.bar", "Elephant");
+			foo.put("bar", "alias");
 		}
 	}
 
@@ -274,12 +289,12 @@ public class SpelReproTests extends ExpressionTestCase {
 
 		@Override
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
-			return (((Map<?,?>) target).containsKey(name));
+			return (((Map<?, ?>) target).containsKey(name));
 		}
 
 		@Override
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-			return new TypedValue(((Map<?,?>) target).get(name));
+			return new TypedValue(((Map<?, ?>) target).get(name));
 		}
 
 		@Override
@@ -289,53 +304,63 @@ public class SpelReproTests extends ExpressionTestCase {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
+		public void write(EvaluationContext context, Object target, String name, Object newValue)
+				throws AccessException {
 			((Map<String, Object>) target).put(name, newValue);
 		}
 
 		@Override
 		public Class<?>[] getSpecificTargetClasses() {
-			return new Class[] {Map.class};
+			return new Class[] { Map.class };
 		}
 	}
 
+
 	@Test
-	public void testNPE_SPR5673() throws Exception {
+	public void NPE_SPR5673() throws Exception {
 		ParserContext hashes = TemplateExpressionParsingTests.HASH_DELIMITED_PARSER_CONTEXT;
 		ParserContext dollars = TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT;
 
-		checkTemplateParsing("abc${'def'} ghi","abcdef ghi");
+		checkTemplateParsing("abc${'def'} ghi", "abcdef ghi");
 
-		checkTemplateParsingError("abc${ {}( 'abc'","Missing closing ')' for '(' at position 8");
-		checkTemplateParsingError("abc${ {}[ 'abc'","Missing closing ']' for '[' at position 8");
-		checkTemplateParsingError("abc${ {}{ 'abc'","Missing closing '}' for '{' at position 8");
-		checkTemplateParsingError("abc${ ( 'abc' }","Found closing '}' at position 14 but most recent opening is '(' at position 6");
-		checkTemplateParsingError("abc${ '... }","Found non terminating string literal starting at position 6");
-		checkTemplateParsingError("abc${ \"... }","Found non terminating string literal starting at position 6");
-		checkTemplateParsingError("abc${ ) }","Found closing ')' at position 6 without an opening '('");
-		checkTemplateParsingError("abc${ ] }","Found closing ']' at position 6 without an opening '['");
-		checkTemplateParsingError("abc${ } }","No expression defined within delimiter '${}' at character 3");
-		checkTemplateParsingError("abc$[ } ]",DOLLARSQUARE_TEMPLATE_PARSER_CONTEXT,"Found closing '}' at position 6 without an opening '{'");
+		checkTemplateParsingError("abc${ {}( 'abc'", "Missing closing ')' for '(' at position 8");
+		checkTemplateParsingError("abc${ {}[ 'abc'", "Missing closing ']' for '[' at position 8");
+		checkTemplateParsingError("abc${ {}{ 'abc'", "Missing closing '}' for '{' at position 8");
+		checkTemplateParsingError("abc${ ( 'abc' }",
+			"Found closing '}' at position 14 but most recent opening is '(' at position 6");
+		checkTemplateParsingError("abc${ '... }", "Found non terminating string literal starting at position 6");
+		checkTemplateParsingError("abc${ \"... }", "Found non terminating string literal starting at position 6");
+		checkTemplateParsingError("abc${ ) }", "Found closing ')' at position 6 without an opening '('");
+		checkTemplateParsingError("abc${ ] }", "Found closing ']' at position 6 without an opening '['");
+		checkTemplateParsingError("abc${ } }", "No expression defined within delimiter '${}' at character 3");
+		checkTemplateParsingError("abc$[ } ]", DOLLARSQUARE_TEMPLATE_PARSER_CONTEXT,
+			"Found closing '}' at position 6 without an opening '{'");
 
-		checkTemplateParsing("abc ${\"def''g}hi\"} jkl","abc def'g}hi jkl");
-		checkTemplateParsing("abc ${'def''g}hi'} jkl","abc def'g}hi jkl");
-		checkTemplateParsing("}","}");
-		checkTemplateParsing("${'hello'} world","hello world");
-		checkTemplateParsing("Hello ${'}'}]","Hello }]");
-		checkTemplateParsing("Hello ${'}'}","Hello }");
-		checkTemplateParsingError("Hello ${ ( ","No ending suffix '}' for expression starting at character 6: ${ ( ");
-		checkTemplateParsingError("Hello ${ ( }","Found closing '}' at position 11 but most recent opening is '(' at position 9");
-		checkTemplateParsing("#{'Unable to render embedded object: File ({#this == 2}'}", hashes,"Unable to render embedded object: File ({#this == 2}");
-		checkTemplateParsing("This is the last odd number in the list: ${listOfNumbersUpToTen.$[#this%2==1]}",dollars,"This is the last odd number in the list: 9");
-		checkTemplateParsing("Hello ${'here is a curly bracket }'}",dollars,"Hello here is a curly bracket }");
-		checkTemplateParsing("He${'${'}llo ${'here is a curly bracket }'}}",dollars,"He${llo here is a curly bracket }}");
-		checkTemplateParsing("Hello ${'()()()}{}{}{][]{}{][}[][][}{()()'} World",dollars,"Hello ()()()}{}{}{][]{}{][}[][][}{()() World");
-		checkTemplateParsing("Hello ${'inner literal that''s got {[(])]}an escaped quote in it'} World","Hello inner literal that's got {[(])]}an escaped quote in it World");
-		checkTemplateParsingError("Hello ${","No ending suffix '}' for expression starting at character 6: ${");
+		checkTemplateParsing("abc ${\"def''g}hi\"} jkl", "abc def'g}hi jkl");
+		checkTemplateParsing("abc ${'def''g}hi'} jkl", "abc def'g}hi jkl");
+		checkTemplateParsing("}", "}");
+		checkTemplateParsing("${'hello'} world", "hello world");
+		checkTemplateParsing("Hello ${'}'}]", "Hello }]");
+		checkTemplateParsing("Hello ${'}'}", "Hello }");
+		checkTemplateParsingError("Hello ${ ( ", "No ending suffix '}' for expression starting at character 6: ${ ( ");
+		checkTemplateParsingError("Hello ${ ( }",
+			"Found closing '}' at position 11 but most recent opening is '(' at position 9");
+		checkTemplateParsing("#{'Unable to render embedded object: File ({#this == 2}'}", hashes,
+			"Unable to render embedded object: File ({#this == 2}");
+		checkTemplateParsing("This is the last odd number in the list: ${listOfNumbersUpToTen.$[#this%2==1]}", dollars,
+			"This is the last odd number in the list: 9");
+		checkTemplateParsing("Hello ${'here is a curly bracket }'}", dollars, "Hello here is a curly bracket }");
+		checkTemplateParsing("He${'${'}llo ${'here is a curly bracket }'}}", dollars,
+			"He${llo here is a curly bracket }}");
+		checkTemplateParsing("Hello ${'()()()}{}{}{][]{}{][}[][][}{()()'} World", dollars,
+			"Hello ()()()}{}{}{][]{}{][}[][][}{()() World");
+		checkTemplateParsing("Hello ${'inner literal that''s got {[(])]}an escaped quote in it'} World",
+			"Hello inner literal that's got {[(])]}an escaped quote in it World");
+		checkTemplateParsingError("Hello ${", "No ending suffix '}' for expression starting at character 6: ${");
 	}
 
 	@Test
-	public void testAccessingNullPropertyViaReflection_SPR5663() throws AccessException {
+	public void accessingNullPropertyViaReflection_SPR5663() throws AccessException {
 		PropertyAccessor propertyAccessor = new ReflectivePropertyAccessor();
 		EvaluationContext context = TestScenarioCreator.getTestEvaluationContext();
 		assertFalse(propertyAccessor.canRead(context, null, "abc"));
@@ -348,7 +373,7 @@ public class SpelReproTests extends ExpressionTestCase {
 			// success
 		}
 		try {
-			propertyAccessor.write(context, null, "abc","foo");
+			propertyAccessor.write(context, null, "abc", "foo");
 			fail("Should have failed with an AccessException");
 		}
 		catch (AccessException ae) {
@@ -356,17 +381,17 @@ public class SpelReproTests extends ExpressionTestCase {
 		}
 	}
 
-
 	@Test
-	public void testNestedProperties_SPR6923() {
+	public void nestedProperties_SPR6923() {
 		StandardEvaluationContext eContext = new StandardEvaluationContext(new Foo());
 		String name = null;
 		Expression expr = null;
 
 		expr = new SpelExpressionParser().parseRaw("resource.resource.server");
-		name = expr.getValue(eContext,String.class);
-		assertEquals("abc",name);
+		name = expr.getValue(eContext, String.class);
+		assertEquals("abc", name);
 	}
+
 
 	static class Foo {
 
@@ -376,6 +401,7 @@ public class SpelReproTests extends ExpressionTestCase {
 	static class ResourceSummary {
 
 		private final Resource resource;
+
 
 		ResourceSummary() {
 			this.resource = new Resource();
@@ -393,86 +419,90 @@ public class SpelReproTests extends ExpressionTestCase {
 		}
 	}
 
+
 	/** Should be accessing Goo.getKey because 'bar' field evaluates to "key" */
 	@Test
-	public void testIndexingAsAPropertyAccess_SPR6968_1() {
+	public void indexingAsAPropertyAccess_SPR6968_1() {
 		StandardEvaluationContext eContext = new StandardEvaluationContext(new Goo());
 		String name = null;
 		Expression expr = null;
 		expr = new SpelExpressionParser().parseRaw("instance[bar]");
-		name = expr.getValue(eContext,String.class);
-		assertEquals("hello",name);
-		name = expr.getValue(eContext,String.class); // will be using the cached accessor this time
-		assertEquals("hello",name);
+		name = expr.getValue(eContext, String.class);
+		assertEquals("hello", name);
+		name = expr.getValue(eContext, String.class); // will be using the cached accessor
+														// this time
+		assertEquals("hello", name);
 	}
 
 	/** Should be accessing Goo.getKey because 'bar' variable evaluates to "key" */
 	@Test
-	public void testIndexingAsAPropertyAccess_SPR6968_2() {
+	public void indexingAsAPropertyAccess_SPR6968_2() {
 		StandardEvaluationContext eContext = new StandardEvaluationContext(new Goo());
-		eContext.setVariable("bar","key");
+		eContext.setVariable("bar", "key");
 		String name = null;
 		Expression expr = null;
 		expr = new SpelExpressionParser().parseRaw("instance[#bar]");
-		name = expr.getValue(eContext,String.class);
-		assertEquals("hello",name);
-		name = expr.getValue(eContext,String.class); // will be using the cached accessor this time
-		assertEquals("hello",name);
+		name = expr.getValue(eContext, String.class);
+		assertEquals("hello", name);
+		name = expr.getValue(eContext, String.class); // will be using the cached accessor
+														// this time
+		assertEquals("hello", name);
 	}
 
 	/** $ related identifiers */
 	@Test
-	public void testDollarPrefixedIdentifier_SPR7100() {
+	public void dollarPrefixedIdentifier_SPR7100() {
 		Holder h = new Holder();
 		StandardEvaluationContext eContext = new StandardEvaluationContext(h);
 		eContext.addPropertyAccessor(new MapAccessor());
-		h.map.put("$foo","wibble");
-		h.map.put("foo$bar","wobble");
-		h.map.put("foobar$$","wabble");
-		h.map.put("$","wubble");
-		h.map.put("$$","webble");
-		h.map.put("$_$","tribble");
+		h.map.put("$foo", "wibble");
+		h.map.put("foo$bar", "wobble");
+		h.map.put("foobar$$", "wabble");
+		h.map.put("$", "wubble");
+		h.map.put("$$", "webble");
+		h.map.put("$_$", "tribble");
 		String name = null;
 		Expression expr = null;
 
 		expr = new SpelExpressionParser().parseRaw("map.$foo");
-		name = expr.getValue(eContext,String.class);
-		assertEquals("wibble",name);
+		name = expr.getValue(eContext, String.class);
+		assertEquals("wibble", name);
 
 		expr = new SpelExpressionParser().parseRaw("map.foo$bar");
-		name = expr.getValue(eContext,String.class);
-		assertEquals("wobble",name);
+		name = expr.getValue(eContext, String.class);
+		assertEquals("wobble", name);
 
 		expr = new SpelExpressionParser().parseRaw("map.foobar$$");
-		name = expr.getValue(eContext,String.class);
-		assertEquals("wabble",name);
+		name = expr.getValue(eContext, String.class);
+		assertEquals("wabble", name);
 
 		expr = new SpelExpressionParser().parseRaw("map.$");
-		name = expr.getValue(eContext,String.class);
-		assertEquals("wubble",name);
+		name = expr.getValue(eContext, String.class);
+		assertEquals("wubble", name);
 
 		expr = new SpelExpressionParser().parseRaw("map.$$");
-		name = expr.getValue(eContext,String.class);
-		assertEquals("webble",name);
+		name = expr.getValue(eContext, String.class);
+		assertEquals("webble", name);
 
 		expr = new SpelExpressionParser().parseRaw("map.$_$");
-		name = expr.getValue(eContext,String.class);
-		assertEquals("tribble",name);
+		name = expr.getValue(eContext, String.class);
+		assertEquals("tribble", name);
 	}
 
 	/** Should be accessing Goo.wibble field because 'bar' variable evaluates to "wibble" */
 	@Test
-	public void testIndexingAsAPropertyAccess_SPR6968_3() {
+	public void indexingAsAPropertyAccess_SPR6968_3() {
 		StandardEvaluationContext eContext = new StandardEvaluationContext(new Goo());
-		eContext.setVariable("bar","wibble");
+		eContext.setVariable("bar", "wibble");
 		String name = null;
 		Expression expr = null;
 		expr = new SpelExpressionParser().parseRaw("instance[#bar]");
 		// will access the field 'wibble' and not use a getter
-		name = expr.getValue(eContext,String.class);
-		assertEquals("wobble",name);
-		name = expr.getValue(eContext,String.class); // will be using the cached accessor this time
-		assertEquals("wobble",name);
+		name = expr.getValue(eContext, String.class);
+		assertEquals("wobble", name);
+		name = expr.getValue(eContext, String.class); // will be using the cached accessor
+														// this time
+		assertEquals("wobble", name);
 	}
 
 	/**
@@ -480,60 +510,64 @@ public class SpelReproTests extends ExpressionTestCase {
 	 * "wibble"
 	 */
 	@Test
-	public void testIndexingAsAPropertyAccess_SPR6968_4() {
+	public void indexingAsAPropertyAccess_SPR6968_4() {
 		Goo g = Goo.instance;
 		StandardEvaluationContext eContext = new StandardEvaluationContext(g);
-		eContext.setVariable("bar","wibble");
+		eContext.setVariable("bar", "wibble");
 		Expression expr = null;
 		expr = new SpelExpressionParser().parseRaw("instance[#bar]='world'");
 		// will access the field 'wibble' and not use a getter
-		expr.getValue(eContext,String.class);
-		assertEquals("world",g.wibble);
-		expr.getValue(eContext,String.class); // will be using the cached accessor this time
-		assertEquals("world",g.wibble);
+		expr.getValue(eContext, String.class);
+		assertEquals("world", g.wibble);
+		expr.getValue(eContext, String.class); // will be using the cached accessor this
+												// time
+		assertEquals("world", g.wibble);
 	}
 
 	/** Should be accessing Goo.setKey field because 'bar' variable evaluates to "key" */
 	@Test
-	public void testIndexingAsAPropertyAccess_SPR6968_5() {
+	public void indexingAsAPropertyAccess_SPR6968_5() {
 		Goo g = Goo.instance;
 		StandardEvaluationContext eContext = new StandardEvaluationContext(g);
 		Expression expr = null;
 		expr = new SpelExpressionParser().parseRaw("instance[bar]='world'");
-		expr.getValue(eContext,String.class);
-		assertEquals("world",g.value);
-		expr.getValue(eContext,String.class); // will be using the cached accessor this time
-		assertEquals("world",g.value);
+		expr.getValue(eContext, String.class);
+		assertEquals("world", g.value);
+		expr.getValue(eContext, String.class); // will be using the cached accessor this
+												// time
+		assertEquals("world", g.value);
 	}
 
 	@Test
-	public void testDollars() {
+	public void dollars() {
 		StandardEvaluationContext eContext = new StandardEvaluationContext(new XX());
 		Expression expr = null;
 		expr = new SpelExpressionParser().parseRaw("m['$foo']");
-		eContext.setVariable("file_name","$foo");
-		assertEquals("wibble",expr.getValue(eContext,String.class));
+		eContext.setVariable("file_name", "$foo");
+		assertEquals("wibble", expr.getValue(eContext, String.class));
 	}
 
 	@Test
-	public void testDollars2() {
+	public void dollars2() {
 		StandardEvaluationContext eContext = new StandardEvaluationContext(new XX());
 		Expression expr = null;
 		expr = new SpelExpressionParser().parseRaw("m[$foo]");
-		eContext.setVariable("file_name","$foo");
-		assertEquals("wibble",expr.getValue(eContext,String.class));
+		eContext.setVariable("file_name", "$foo");
+		assertEquals("wibble", expr.getValue(eContext, String.class));
 	}
+
 
 	static class XX {
 
-		public Map<String,String> m;
+		public Map<String, String> m;
 
-		public String floo ="bar";
+		public String floo = "bar";
+
 
 		public XX() {
-			 m = new HashMap<String,String>();
-			m.put("$foo","wibble");
-			m.put("bar","siddle");
+			m = new HashMap<String, String>();
+			m.put("$foo", "wibble");
+			m.put("bar", "siddle");
 		}
 	}
 
@@ -547,6 +581,7 @@ public class SpelReproTests extends ExpressionTestCase {
 
 		public String wibble = "wobble";
 
+
 		public String getKey() {
 			return "hello";
 		}
@@ -558,8 +593,9 @@ public class SpelReproTests extends ExpressionTestCase {
 
 	static class Holder {
 
-		public Map<String,String> map = new HashMap<String,String>();
+		public Map<String, String> map = new HashMap<String, String>();
 	}
+
 
 	// ---
 
@@ -569,15 +605,17 @@ public class SpelReproTests extends ExpressionTestCase {
 
 	private void checkTemplateParsing(String expression, ParserContext context, String expectedValue) throws Exception {
 		SpelExpressionParser parser = new SpelExpressionParser();
-		Expression expr = parser.parseExpression(expression,context);
+		Expression expr = parser.parseExpression(expression, context);
 		assertEquals(expectedValue, expr.getValue(TestScenarioCreator.getTestEvaluationContext()));
 	}
 
 	private void checkTemplateParsingError(String expression, String expectedMessage) throws Exception {
-		checkTemplateParsingError(expression, TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT, expectedMessage);
+		checkTemplateParsingError(expression, TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT,
+			expectedMessage);
 	}
 
-	private void checkTemplateParsingError(String expression, ParserContext context, String expectedMessage) throws Exception {
+	private void checkTemplateParsingError(String expression, ParserContext context, String expectedMessage)
+			throws Exception {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		try {
 			parser.parseExpression(expression, context);
@@ -595,31 +633,37 @@ public class SpelReproTests extends ExpressionTestCase {
 		}
 	}
 
+
 	private static final ParserContext DOLLARSQUARE_TEMPLATE_PARSER_CONTEXT = new ParserContext() {
+
 		@Override
 		public String getExpressionPrefix() {
 			return "$[";
 		}
+
 		@Override
 		public String getExpressionSuffix() {
 			return "]";
 		}
+
 		@Override
 		public boolean isTemplate() {
 			return true;
 		}
 	};
 
+
 	static class Foo2 {
 
-		public void execute(String str){
+		public void execute(String str) {
 			System.out.println("Value: " + str);
 		}
 	}
 
-	static class Message{
+	static class Message {
 
 		private String payload;
+
 
 		public String getPayload() {
 			return payload;
@@ -629,6 +673,7 @@ public class SpelReproTests extends ExpressionTestCase {
 			this.payload = payload;
 		}
 	}
+
 
 	// bean resolver tests
 
@@ -640,48 +685,49 @@ public class SpelReproTests extends ExpressionTestCase {
 		// no resolver registered == exception
 		try {
 			expr = new SpelExpressionParser().parseRaw("@foo");
-			assertEquals("custard",expr.getValue(eContext,String.class));
+			assertEquals("custard", expr.getValue(eContext, String.class));
 		}
 		catch (SpelEvaluationException see) {
-			assertEquals(SpelMessage.NO_BEAN_RESOLVER_REGISTERED,see.getMessageCode());
-			assertEquals("foo",see.getInserts()[0]);
+			assertEquals(SpelMessage.NO_BEAN_RESOLVER_REGISTERED, see.getMessageCode());
+			assertEquals("foo", see.getInserts()[0]);
 		}
 
 		eContext.setBeanResolver(new MyBeanResolver());
 
 		// bean exists
 		expr = new SpelExpressionParser().parseRaw("@foo");
-		assertEquals("custard",expr.getValue(eContext,String.class));
+		assertEquals("custard", expr.getValue(eContext, String.class));
 
 		// bean does not exist
 		expr = new SpelExpressionParser().parseRaw("@bar");
-		assertEquals(null,expr.getValue(eContext,String.class));
+		assertEquals(null, expr.getValue(eContext, String.class));
 
 		// bean name will cause AccessException
 		expr = new SpelExpressionParser().parseRaw("@goo");
 		try {
-			assertEquals(null,expr.getValue(eContext,String.class));
+			assertEquals(null, expr.getValue(eContext, String.class));
 		}
 		catch (SpelEvaluationException see) {
-			assertEquals(SpelMessage.EXCEPTION_DURING_BEAN_RESOLUTION,see.getMessageCode());
-			assertEquals("goo",see.getInserts()[0]);
+			assertEquals(SpelMessage.EXCEPTION_DURING_BEAN_RESOLUTION, see.getMessageCode());
+			assertEquals("goo", see.getInserts()[0]);
 			assertTrue(see.getCause() instanceof AccessException);
-			assertTrue(((AccessException)see.getCause()).getMessage().startsWith("DONT"));
+			assertTrue(((AccessException) see.getCause()).getMessage().startsWith("DONT"));
 		}
 
 		// bean exists
 		expr = new SpelExpressionParser().parseRaw("@'foo.bar'");
-		assertEquals("trouble",expr.getValue(eContext,String.class));
+		assertEquals("trouble", expr.getValue(eContext, String.class));
 
 		// bean exists
 		try {
 			expr = new SpelExpressionParser().parseRaw("@378");
-			assertEquals("trouble",expr.getValue(eContext,String.class));
+			assertEquals("trouble", expr.getValue(eContext, String.class));
 		}
 		catch (SpelParseException spe) {
-			assertEquals(SpelMessage.INVALID_BEAN_REFERENCE,spe.getMessageCode());
+			assertEquals(SpelMessage.INVALID_BEAN_REFERENCE, spe.getMessageCode());
 		}
 	}
+
 
 	static class MyBeanResolver implements BeanResolver {
 
@@ -699,6 +745,7 @@ public class SpelReproTests extends ExpressionTestCase {
 			return null;
 		}
 	}
+
 
 	// end bean resolver tests
 
@@ -721,8 +768,8 @@ public class SpelReproTests extends ExpressionTestCase {
 			expr.getValue(eContext);
 			fail();
 		}
-		catch (SpelEvaluationException see ) {
-			assertEquals(SpelMessage.TYPE_CONVERSION_ERROR,see.getMessageCode());
+		catch (SpelEvaluationException see) {
+			assertEquals(SpelMessage.TYPE_CONVERSION_ERROR, see.getMessageCode());
 		}
 		expr = new SpelExpressionParser().parseRaw("(false?'abc':null)");
 		assertEquals(null, expr.getValue());
@@ -733,8 +780,8 @@ public class SpelReproTests extends ExpressionTestCase {
 			expr.getValue(eContext);
 			fail();
 		}
-		catch (SpelEvaluationException see ) {
-			assertEquals(SpelMessage.SETVALUE_NOT_SUPPORTED,see.getMessageCode());
+		catch (SpelEvaluationException see) {
+			assertEquals(SpelMessage.SETVALUE_NOT_SUPPORTED, see.getMessageCode());
 		}
 	}
 
@@ -751,10 +798,10 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 	@Test
-	public void testMapOfMap_SPR7244() throws Exception {
-		Map<String,Object> map = new LinkedHashMap<String,Object>();
+	public void mapOfMap_SPR7244() throws Exception {
+		Map<String, Object> map = new LinkedHashMap<String, Object>();
 		map.put("uri", "http:");
-		Map<String,String> nameMap = new LinkedHashMap<String,String>();
+		Map<String, String> nameMap = new LinkedHashMap<String, String>();
 		nameMap.put("givenName", "Arthur");
 		map.put("value", nameMap);
 
@@ -768,78 +815,85 @@ public class SpelReproTests extends ExpressionTestCase {
 		String el2 = "#root['value']['givenName']";
 		exp = parser.parseExpression(el2);
 		evaluated = exp.getValue(ctx);
-		assertEquals("Arthur",evaluated);
+		assertEquals("Arthur", evaluated);
 	}
 
 	@Test
-	public void testProjectionTypeDescriptors_1() throws Exception {
+	public void projectionTypeDescriptors_1() throws Exception {
 		StandardEvaluationContext ctx = new StandardEvaluationContext(new C());
 		SpelExpressionParser parser = new SpelExpressionParser();
 		String el1 = "ls.![#this.equals('abc')]";
 		SpelExpression exp = parser.parseRaw(el1);
-		List<?> value = (List<?>)exp.getValue(ctx);
+		List<?> value = (List<?>) exp.getValue(ctx);
 		// value is list containing [true,false]
-		assertEquals(Boolean.class,value.get(0).getClass());
+		assertEquals(Boolean.class, value.get(0).getClass());
 		TypeDescriptor evaluated = exp.getValueTypeDescriptor(ctx);
 		assertEquals(null, evaluated.getElementTypeDescriptor());
 	}
 
 	@Test
-	public void testProjectionTypeDescriptors_2() throws Exception {
+	public void projectionTypeDescriptors_2() throws Exception {
 		StandardEvaluationContext ctx = new StandardEvaluationContext(new C());
 		SpelExpressionParser parser = new SpelExpressionParser();
 		String el1 = "as.![#this.equals('abc')]";
 		SpelExpression exp = parser.parseRaw(el1);
-		Object[] value = (Object[])exp.getValue(ctx);
+		Object[] value = (Object[]) exp.getValue(ctx);
 		// value is array containing [true,false]
-		assertEquals(Boolean.class,value[0].getClass());
+		assertEquals(Boolean.class, value[0].getClass());
 		TypeDescriptor evaluated = exp.getValueTypeDescriptor(ctx);
 		assertEquals(Boolean.class, evaluated.getElementTypeDescriptor().getType());
 	}
 
 	@Test
-	public void testProjectionTypeDescriptors_3() throws Exception {
+	public void projectionTypeDescriptors_3() throws Exception {
 		StandardEvaluationContext ctx = new StandardEvaluationContext(new C());
 		SpelExpressionParser parser = new SpelExpressionParser();
 		String el1 = "ms.![key.equals('abc')]";
 		SpelExpression exp = parser.parseRaw(el1);
-		List<?> value = (List<?>)exp.getValue(ctx);
+		List<?> value = (List<?>) exp.getValue(ctx);
 		// value is list containing [true,false]
-		assertEquals(Boolean.class,value.get(0).getClass());
+		assertEquals(Boolean.class, value.get(0).getClass());
 		TypeDescriptor evaluated = exp.getValueTypeDescriptor(ctx);
 		assertEquals(null, evaluated.getElementTypeDescriptor());
 	}
 
+
 	static class C {
+
 		public List<String> ls;
 		public String[] as;
-		public Map<String,String> ms;
+		public Map<String, String> ms;
+
+
 		C() {
 			ls = new ArrayList<String>();
 			ls.add("abc");
 			ls.add("def");
-			as = new String[]{"abc","def"};
-			ms = new HashMap<String,String>();
-			ms.put("abc","xyz");
-			ms.put("def","pqr");
+			as = new String[] { "abc", "def" };
+			ms = new HashMap<String, String>();
+			ms.put("abc", "xyz");
+			ms.put("def", "pqr");
 		}
 	}
 
 	static class D {
+
 		public String a;
 
+
 		private D(String s) {
-			a=s;
+			a = s;
 		}
 
 		@Override
 		public String toString() {
-			return "D("+a+")";
+			return "D(" + a + ")";
 		}
 	}
 
+
 	@Test
-	public void testGreaterThanWithNulls_SPR7840() throws Exception {
+	public void greaterThanWithNulls_SPR7840() throws Exception {
 		List<D> list = new ArrayList<D>();
 		list.add(new D("aaa"));
 		list.add(new D("bbb"));
@@ -854,18 +908,18 @@ public class SpelReproTests extends ExpressionTestCase {
 		String el1 = "#root.?[a < 'hhh']";
 		SpelExpression exp = parser.parseRaw(el1);
 		Object value = exp.getValue(ctx);
-		assertEquals("[D(aaa), D(bbb), D(null), D(ccc), D(null)]",value.toString());
+		assertEquals("[D(aaa), D(bbb), D(null), D(ccc), D(null)]", value.toString());
 
 		String el2 = "#root.?[a > 'hhh']";
 		SpelExpression exp2 = parser.parseRaw(el2);
 		Object value2 = exp2.getValue(ctx);
-		assertEquals("[D(zzz)]",value2.toString());
+		assertEquals("[D(zzz)]", value2.toString());
 
 		// trim out the nulls first
 		String el3 = "#root.?[a!=null].?[a < 'hhh']";
 		SpelExpression exp3 = parser.parseRaw(el3);
 		Object value3 = exp3.getValue(ctx);
-		assertEquals("[D(aaa), D(bbb), D(ccc)]",value3.toString());
+		assertEquals("[D(aaa), D(bbb), D(ccc)]", value3.toString());
 	}
 
 	/**
@@ -874,10 +928,11 @@ public class SpelReproTests extends ExpressionTestCase {
 	 * than a unboxing conversion.
 	 */
 	@Test
-	public void testConversionPriority_8224() throws Exception {
+	public void conversionPriority_8224() throws Exception {
 
 		@SuppressWarnings("unused")
 		class ConversionPriority1 {
+
 			public int getX(Number i) {
 				return 20;
 			}
@@ -889,6 +944,7 @@ public class SpelReproTests extends ExpressionTestCase {
 
 		@SuppressWarnings("unused")
 		class ConversionPriority2 {
+
 			public int getX(int i) {
 				return 10;
 			}
@@ -930,7 +986,7 @@ public class SpelReproTests extends ExpressionTestCase {
 	 * method accepting 'long' is ok.
 	 */
 	@Test
-	public void testWideningPrimitiveConversion_8224() throws Exception {
+	public void wideningPrimitiveConversion_8224() throws Exception {
 
 		class WideningPrimitiveConversion {
 
@@ -957,60 +1013,59 @@ public class SpelReproTests extends ExpressionTestCase {
 		assertEquals(compiler, actual);
 	}
 
-
 	@Test
-	public void varargsAndPrimitives_SPR8174() throws Exception  {
+	public void varargsAndPrimitives_SPR8174() throws Exception {
 		EvaluationContext emptyEvalContext = new StandardEvaluationContext();
 		List<TypeDescriptor> args = new ArrayList<TypeDescriptor>();
 
 		args.add(TypeDescriptor.forObject(34L));
 		ReflectionUtil<Integer> ru = new ReflectionUtil<Integer>();
-		MethodExecutor me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"methodToCall",args);
+		MethodExecutor me = new ReflectiveMethodResolver().resolve(emptyEvalContext, ru, "methodToCall", args);
 
-		args.set(0,TypeDescriptor.forObject(23));
-		me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"foo",args);
+		args.set(0, TypeDescriptor.forObject(23));
+		me = new ReflectiveMethodResolver().resolve(emptyEvalContext, ru, "foo", args);
 		me.execute(emptyEvalContext, ru, 45);
 
-		args.set(0,TypeDescriptor.forObject(23f));
-		me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"foo",args);
+		args.set(0, TypeDescriptor.forObject(23f));
+		me = new ReflectiveMethodResolver().resolve(emptyEvalContext, ru, "foo", args);
 		me.execute(emptyEvalContext, ru, 45f);
 
-		args.set(0,TypeDescriptor.forObject(23d));
-		me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"foo",args);
+		args.set(0, TypeDescriptor.forObject(23d));
+		me = new ReflectiveMethodResolver().resolve(emptyEvalContext, ru, "foo", args);
 		me.execute(emptyEvalContext, ru, 23d);
 
-		args.set(0,TypeDescriptor.forObject((short)23));
-		me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"foo",args);
-		me.execute(emptyEvalContext, ru, (short)23);
+		args.set(0, TypeDescriptor.forObject((short) 23));
+		me = new ReflectiveMethodResolver().resolve(emptyEvalContext, ru, "foo", args);
+		me.execute(emptyEvalContext, ru, (short) 23);
 
-		args.set(0,TypeDescriptor.forObject(23L));
-		me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"foo",args);
+		args.set(0, TypeDescriptor.forObject(23L));
+		me = new ReflectiveMethodResolver().resolve(emptyEvalContext, ru, "foo", args);
 		me.execute(emptyEvalContext, ru, 23L);
 
-		args.set(0,TypeDescriptor.forObject((char)65));
-		me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"foo",args);
-		me.execute(emptyEvalContext, ru, (char)65);
+		args.set(0, TypeDescriptor.forObject((char) 65));
+		me = new ReflectiveMethodResolver().resolve(emptyEvalContext, ru, "foo", args);
+		me.execute(emptyEvalContext, ru, (char) 65);
 
-		args.set(0,TypeDescriptor.forObject((byte)23));
-		me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"foo",args);
-		me.execute(emptyEvalContext, ru, (byte)23);
+		args.set(0, TypeDescriptor.forObject((byte) 23));
+		me = new ReflectiveMethodResolver().resolve(emptyEvalContext, ru, "foo", args);
+		me.execute(emptyEvalContext, ru, (byte) 23);
 
-		args.set(0,TypeDescriptor.forObject(true));
-		me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"foo",args);
+		args.set(0, TypeDescriptor.forObject(true));
+		me = new ReflectiveMethodResolver().resolve(emptyEvalContext, ru, "foo", args);
 		me.execute(emptyEvalContext, ru, true);
 
 		// trickier:
-		args.set(0,TypeDescriptor.forObject(12));
+		args.set(0, TypeDescriptor.forObject(12));
 		args.add(TypeDescriptor.forObject(23f));
-		me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"bar",args);
-		me.execute(emptyEvalContext, ru, 12,23f);
+		me = new ReflectiveMethodResolver().resolve(emptyEvalContext, ru, "bar", args);
+		me.execute(emptyEvalContext, ru, 12, 23f);
 	}
 
 
 	public class ReflectionUtil<T extends Number> {
 
 		public Object methodToCall(T param) {
-			System.out.println(param+" "+param.getClass());
+			System.out.println(param + " " + param.getClass());
 			return "Object methodToCall(T param)";
 		}
 
@@ -1019,37 +1074,44 @@ public class SpelReproTests extends ExpressionTestCase {
 				throw new RuntimeException();
 			}
 		}
-		public void foo(float...array) {
+
+		public void foo(float... array) {
 			if (array.length == 0) {
 				throw new RuntimeException();
 			}
 		}
-		public void foo(double...array) {
+
+		public void foo(double... array) {
 			if (array.length == 0) {
 				throw new RuntimeException();
 			}
 		}
-		public void foo(short...array) {
+
+		public void foo(short... array) {
 			if (array.length == 0) {
 				throw new RuntimeException();
 			}
 		}
-		public void foo(long...array) {
+
+		public void foo(long... array) {
 			if (array.length == 0) {
 				throw new RuntimeException();
 			}
 		}
-		public void foo(boolean...array) {
+
+		public void foo(boolean... array) {
 			if (array.length == 0) {
 				throw new RuntimeException();
 			}
 		}
-		public void foo(char...array) {
+
+		public void foo(char... array) {
 			if (array.length == 0) {
 				throw new RuntimeException();
 			}
 		}
-		public void foo(byte...array) {
+
+		public void foo(byte... array) {
 			if (array.length == 0) {
 				throw new RuntimeException();
 			}
@@ -1064,23 +1126,27 @@ public class SpelReproTests extends ExpressionTestCase {
 
 
 	@Test
-	public void testReservedWords_8228() throws Exception {
+	public void reservedWords_8228() throws Exception {
 		// "DIV","EQ","GE","GT","LE","LT","MOD","NE","NOT"
 		@SuppressWarnings("unused")
 		class Reserver {
+
 			public Reserver getReserver() {
 				return this;
 			}
+
+
 			public String NE = "abc";
 			public String ne = "def";
 
 			public int DIV = 1;
 			public int div = 3;
 
-			public Map<String,String> m = new HashMap<String,String>();
+			public Map<String, String> m = new HashMap<String, String>();
+
 
 			Reserver() {
-				m.put("NE","xyz");
+				m.put("NE", "xyz");
 			}
 		}
 
@@ -1114,11 +1180,10 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 	@Test
-	public void testReservedWordProperties_9862() throws Exception {
+	public void reservedWordProperties_9862() throws Exception {
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 		SpelExpressionParser parser = new SpelExpressionParser();
-		SpelExpression expression = parser.parseRaw(
-				"T(org.springframework.expression.spel.testresources.le.div.mod.reserved.Reserver).CONST");
+		SpelExpression expression = parser.parseRaw("T(org.springframework.expression.spel.testresources.le.div.mod.reserved.Reserver).CONST");
 		Object value = expression.getValue(ctx);
 		assertEquals(value, Reserver.CONST);
 	}
@@ -1130,29 +1195,26 @@ public class SpelReproTests extends ExpressionTestCase {
 	 * in evaluation of SPEL expressions for a given context.
 	 */
 	@Test
-	public void testPropertyAccessorOrder_8211() {
+	public void propertyAccessorOrder_8211() {
 		ExpressionParser expressionParser = new SpelExpressionParser();
-		StandardEvaluationContext evaluationContext =
-			new StandardEvaluationContext(new ContextObject());
+		StandardEvaluationContext evaluationContext = new StandardEvaluationContext(new ContextObject());
 
 		evaluationContext.addPropertyAccessor(new TestPropertyAccessor("firstContext"));
 		evaluationContext.addPropertyAccessor(new TestPropertyAccessor("secondContext"));
 		evaluationContext.addPropertyAccessor(new TestPropertyAccessor("thirdContext"));
 		evaluationContext.addPropertyAccessor(new TestPropertyAccessor("fourthContext"));
 
-		assertEquals("first",
-			expressionParser.parseExpression("shouldBeFirst").getValue(evaluationContext));
-		assertEquals("second",
-				expressionParser.parseExpression("shouldBeSecond").getValue(evaluationContext));
-		assertEquals("third",
-				expressionParser.parseExpression("shouldBeThird").getValue(evaluationContext));
-		assertEquals("fourth",
-				expressionParser.parseExpression("shouldBeFourth").getValue(evaluationContext));
+		assertEquals("first", expressionParser.parseExpression("shouldBeFirst").getValue(evaluationContext));
+		assertEquals("second", expressionParser.parseExpression("shouldBeSecond").getValue(evaluationContext));
+		assertEquals("third", expressionParser.parseExpression("shouldBeThird").getValue(evaluationContext));
+		assertEquals("fourth", expressionParser.parseExpression("shouldBeFourth").getValue(evaluationContext));
 	}
+
 
 	class TestPropertyAccessor implements PropertyAccessor {
 
 		private String mapName;
+
 
 		public TestPropertyAccessor(String mapName) {
 			this.mapName = mapName;
@@ -1162,7 +1224,7 @@ public class SpelReproTests extends ExpressionTestCase {
 		public Map<String, String> getMap(Object target) {
 			try {
 				Field f = target.getClass().getDeclaredField(mapName);
-				return (Map<String,String>) f.get(target);
+				return (Map<String, String>) f.get(target);
 			}
 			catch (Exception ex) {
 			}
@@ -1181,7 +1243,7 @@ public class SpelReproTests extends ExpressionTestCase {
 
 		@Override
 		public Class<?>[] getSpecificTargetClasses() {
-			return new Class[] {ContextObject.class};
+			return new Class[] { ContextObject.class };
 		}
 
 		@Override
@@ -1191,7 +1253,7 @@ public class SpelReproTests extends ExpressionTestCase {
 
 		@Override
 		public void write(EvaluationContext context, Object target, String name, Object newValue)
-			throws AccessException {
+				throws AccessException {
 			getMap(target).put(name, (String) newValue);
 		}
 	}
@@ -1202,6 +1264,7 @@ public class SpelReproTests extends ExpressionTestCase {
 		public Map<String, String> secondContext = new HashMap<String, String>();
 		public Map<String, String> thirdContext = new HashMap<String, String>();
 		public Map<String, String> fourthContext = new HashMap<String, String>();
+
 
 		public ContextObject() {
 			firstContext.put("shouldBeFirst", "first");
@@ -1219,27 +1282,40 @@ public class SpelReproTests extends ExpressionTestCase {
 			fourthContext.put("shouldBeFourth", "fourth");
 		}
 
-		public Map<String, String> getFirstContext() {return firstContext;}
-		public Map<String, String> getSecondContext() {return secondContext;}
-		public Map<String, String> getThirdContext() {return thirdContext;}
-		public Map<String, String> getFourthContext() {return fourthContext;}
+		public Map<String, String> getFirstContext() {
+			return firstContext;
+		}
+
+		public Map<String, String> getSecondContext() {
+			return secondContext;
+		}
+
+		public Map<String, String> getThirdContext() {
+			return thirdContext;
+		}
+
+		public Map<String, String> getFourthContext() {
+			return fourthContext;
+		}
 	}
+
 
 	/**
 	 * Test the ability to subclass the ReflectiveMethodResolver and change how it
 	 * determines the set of methods for a type.
 	 */
 	@Test
-	public void testCustomStaticFunctions_SPR9038() {
+	public void customStaticFunctions_SPR9038() {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		List<MethodResolver> methodResolvers = new ArrayList<MethodResolver>();
 		methodResolvers.add(new ReflectiveMethodResolver() {
+
 			@Override
 			protected Method[] getMethods(Class<?> type) {
 				try {
-					return new Method[] {Integer.class.getDeclaredMethod("parseInt",
-							new Class[] {String.class, Integer.TYPE })};
+					return new Method[] { Integer.class.getDeclaredMethod("parseInt", new Class[] { String.class,
+						Integer.TYPE }) };
 				}
 				catch (NoSuchMethodException ex) {
 					return new Method[0];
@@ -1248,15 +1324,14 @@ public class SpelReproTests extends ExpressionTestCase {
 		});
 
 		context.setMethodResolvers(methodResolvers);
-		org.springframework.expression.Expression expression =
-				parser.parseExpression("parseInt('-FF', 16)");
+		Expression expression = parser.parseExpression("parseInt('-FF', 16)");
 
 		Integer result = expression.getValue(context, "", Integer.class);
-		assertEquals("Equal assertion failed: ", -255, result.intValue());
+		assertEquals(-255, result.intValue());
 	}
 
 	@Test
-	public void testArray() {
+	public void array() {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		Expression expression = null;
@@ -1273,7 +1348,7 @@ public class SpelReproTests extends ExpressionTestCase {
 		expression = parser.parseExpression("T(java.lang.String[][][])");
 		result = expression.getValue(context, "");
 		assertEquals("Equal assertion failed: ", "class [[[Ljava.lang.String;", result.toString());
-		assertEquals("T(java.lang.String[][][])",((SpelExpression)expression).toStringAST());
+		assertEquals("T(java.lang.String[][][])", ((SpelExpression) expression).toStringAST());
 
 		expression = parser.parseExpression("new int[0].class");
 		result = expression.getValue(context, "");
@@ -1281,20 +1356,21 @@ public class SpelReproTests extends ExpressionTestCase {
 
 		expression = parser.parseExpression("T(int[][])");
 		result = expression.getValue(context, "");
-		assertEquals("Equal assertion failed: ", "class [[I", result.toString());
+		assertEquals("class [[I", result.toString());
 	}
 
 	@Test
-	public void SPR_9486_floatFunctionResolverTest() throws Exception {
+	public void SPR_9486_floatFunctionResolver() throws Exception {
 		Number expectedResult = Math.abs(-10.2f);
 		ExpressionParser parser = new SpelExpressionParser();
 		SPR_9486_FunctionsClass testObject = new SPR_9486_FunctionsClass();
 
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("abs(-10.2f)");
+		Expression expression = parser.parseExpression("abs(-10.2f)");
 		Number result = expression.getValue(context, testObject, Number.class);
-		assertEquals("Equal assertion failed for SPR_9486_floatFunctionResolverTest Test: ", expectedResult, result);
+		assertEquals(expectedResult, result);
 	}
+
 
 	class SPR_9486_FunctionsClass {
 
@@ -1307,270 +1383,269 @@ public class SpelReproTests extends ExpressionTestCase {
 		}
 	}
 
+
 	@Test
-	public void SPR_9486_addFloatWithDoubleTest() {
+	public void SPR_9486_addFloatWithDouble() {
 		Number expectedNumber = 10.21f + 10.2;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("10.21f + 10.2");
+		Expression expression = parser.parseExpression("10.21f + 10.2");
 		Number result = expression.getValue(context, null, Number.class);
-		assertEquals("Equal assertion failed for SPR_9486_addFloatWithDoubleTest Test: ", expectedNumber, result);
+		assertEquals(expectedNumber, result);
 	}
 
 	@Test
-	public void SPR_9486_addFloatWithFloatTest() {
+	public void SPR_9486_addFloatWithFloat() {
 		Number expectedNumber = 10.21f + 10.2f;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("10.21f + 10.2f");
+		Expression expression = parser.parseExpression("10.21f + 10.2f");
 		Number result = expression.getValue(context, null, Number.class);
-		assertEquals("Equal assertion failed for SPR_9486_addFloatWithFloatTest Test: ", expectedNumber, result);
+		assertEquals(expectedNumber, result);
 	}
 
 	@Test
-	public void SPR_9486_subtractFloatWithDoubleTest() {
+	public void SPR_9486_subtractFloatWithDouble() {
 		Number expectedNumber = 10.21f - 10.2;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("10.21f - 10.2");
+		Expression expression = parser.parseExpression("10.21f - 10.2");
 		Number result = expression.getValue(context, null, Number.class);
-		assertEquals("Equal assertion failed for SPR_9486_subtractFloatWithDoubleTest Test: ", expectedNumber, result);
+		assertEquals(expectedNumber, result);
 	}
 
 	@Test
-	public void SPR_9486_subtractFloatWithFloatTest() {
+	public void SPR_9486_subtractFloatWithFloat() {
 		Number expectedNumber = 10.21f - 10.2f;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("10.21f - 10.2f");
+		Expression expression = parser.parseExpression("10.21f - 10.2f");
 		Number result = expression.getValue(context, null, Number.class);
-		assertEquals("Equal assertion failed for SPR_9486_subtractFloatWithFloatTest Test: ", expectedNumber, result);
+		assertEquals(expectedNumber, result);
 	}
 
 	@Test
-	public void SPR_9486_multiplyFloatWithDoubleTest() {
+	public void SPR_9486_multiplyFloatWithDouble() {
 		Number expectedNumber = 10.21f * 10.2;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("10.21f * 10.2");
+		Expression expression = parser.parseExpression("10.21f * 10.2");
 		Number result = expression.getValue(context, null, Number.class);
-		assertEquals("Equal assertion failed for float multiplied by double Test: ", expectedNumber, result);
+		assertEquals(expectedNumber, result);
 	}
 
 	@Test
-	public void SPR_9486_multiplyFloatWithFloatTest() {
+	public void SPR_9486_multiplyFloatWithFloat() {
 		Number expectedNumber = 10.21f * 10.2f;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("10.21f * 10.2f");
+		Expression expression = parser.parseExpression("10.21f * 10.2f");
 		Number result = expression.getValue(context, null, Number.class);
-		assertEquals("Equal assertion failed for float multiply by another float Test: ", expectedNumber, result);
+		assertEquals(expectedNumber, result);
 	}
 
 	@Test
-	public void SPR_9486_floatDivideByFloatTest() {
-		Number expectedNumber = -10.21f/-10.2f;
+	public void SPR_9486_floatDivideByFloat() {
+		Number expectedNumber = -10.21f / -10.2f;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("-10.21f / -10.2f");
+		Expression expression = parser.parseExpression("-10.21f / -10.2f");
 		Number result = expression.getValue(context, null, Number.class);
-		assertEquals("Equal assertion failed for float divide Test: ", expectedNumber, result);
+		assertEquals(expectedNumber, result);
 	}
 
 	@Test
-	public void SPR_9486_floatDivideByDoubleTest() {
-		Number expectedNumber = -10.21f/-10.2;
+	public void SPR_9486_floatDivideByDouble() {
+		Number expectedNumber = -10.21f / -10.2;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("-10.21f / -10.2");
+		Expression expression = parser.parseExpression("-10.21f / -10.2");
 		Number result = expression.getValue(context, null, Number.class);
-		assertEquals("Equal assertion failed for float divide Test: ", expectedNumber, result);
+		assertEquals(expectedNumber, result);
 	}
 
 	@Test
-	public void SPR_9486_floatEqFloatUnaryMinusTest() {
-		Boolean expectedResult =  -10.21f == -10.2f;
+	public void SPR_9486_floatEqFloatUnaryMinus() {
+		Boolean expectedResult = -10.21f == -10.2f;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("-10.21f == -10.2f");
+		Expression expression = parser.parseExpression("-10.21f == -10.2f");
 		Boolean result = expression.getValue(context, null, Boolean.class);
-		assertEquals("Equal assertion failed for SPR_9486_floatEqFloatUnaryMinusTest Test: ", expectedResult, result);
+		assertEquals(expectedResult, result);
 	}
 
 	@Test
-	public void SPR_9486_floatEqDoubleUnaryMinusTest() {
-		Boolean expectedResult =  -10.21f == -10.2;
+	public void SPR_9486_floatEqDoubleUnaryMinus() {
+		Boolean expectedResult = -10.21f == -10.2;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("-10.21f == -10.2");
+		Expression expression = parser.parseExpression("-10.21f == -10.2");
 		Boolean result = expression.getValue(context, null, Boolean.class);
-		assertEquals("Equal assertion failed for SPR_9486_floatEqDoubleUnaryMinusTest Test: ", expectedResult, result);
+		assertEquals(expectedResult, result);
 	}
 
 	@Test
-	public void SPR_9486_floatEqFloatTest() {
-		Boolean expectedResult =  10.215f == 10.2109f;
+	public void SPR_9486_floatEqFloat() {
+		Boolean expectedResult = 10.215f == 10.2109f;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("10.215f == 10.2109f");
+		Expression expression = parser.parseExpression("10.215f == 10.2109f");
 		Boolean result = expression.getValue(context, null, Boolean.class);
-		assertEquals("Equal assertion failed for SPR_9486_floatEqFloatTest Test: ", expectedResult, result);
+		assertEquals(expectedResult, result);
 	}
 
 	@Test
-	public void SPR_9486_floatEqDoubleTest() {
-		Boolean expectedResult =  10.215f == 10.2109;
+	public void SPR_9486_floatEqDouble() {
+		Boolean expectedResult = 10.215f == 10.2109;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("10.215f == 10.2109");
+		Expression expression = parser.parseExpression("10.215f == 10.2109");
 		Boolean result = expression.getValue(context, null, Boolean.class);
-		assertEquals("Equal assertion failed for SPR_9486_floatEqDoubleTest() Test: ", expectedResult, result);
+		assertEquals(expectedResult, result);
 	}
 
 	@Test
-	public void SPR_9486_floatNotEqFloatTest() {
-		Boolean expectedResult =  10.215f != 10.2109f;
+	public void SPR_9486_floatNotEqFloat() {
+		Boolean expectedResult = 10.215f != 10.2109f;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("10.215f != 10.2109f");
+		Expression expression = parser.parseExpression("10.215f != 10.2109f");
 		Boolean result = expression.getValue(context, null, Boolean.class);
-		assertEquals("Equal assertion failed for SPR_9486_floatEqFloatTest Test: ", expectedResult, result);
+		assertEquals(expectedResult, result);
 	}
 
 	@Test
-	public void SPR_9486_floatNotEqDoubleTest() {
-		Boolean expectedResult =  10.215f != 10.2109;
+	public void SPR_9486_floatNotEqDouble() {
+		Boolean expectedResult = 10.215f != 10.2109;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("10.215f != 10.2109");
+		Expression expression = parser.parseExpression("10.215f != 10.2109");
 		Boolean result = expression.getValue(context, null, Boolean.class);
-		assertEquals("Equal assertion failed for SPR_9486_floatNotEqDoubleTest Test: ", expectedResult, result);
+		assertEquals(expectedResult, result);
 	}
 
-
-
 	@Test
-	public void SPR_9486_floatLessThanFloatTest() {
+	public void SPR_9486_floatLessThanFloat() {
 		Boolean expectedNumber = -10.21f < -10.2f;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("-10.21f < -10.2f");
+		Expression expression = parser.parseExpression("-10.21f < -10.2f");
 		Boolean result = expression.getValue(context, null, Boolean.class);
-		assertEquals("Equal assertion failed for SPR_9486_floatLessThanFloatTest Test: ", expectedNumber, result);
+		assertEquals(expectedNumber, result);
 	}
 
 	@Test
-	public void SPR_9486_floatLessThanDoubleTest() {
+	public void SPR_9486_floatLessThanDouble() {
 		Boolean expectedNumber = -10.21f < -10.2;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("-10.21f < -10.2");
+		Expression expression = parser.parseExpression("-10.21f < -10.2");
 		Boolean result = expression.getValue(context, null, Boolean.class);
-		assertEquals("Equal assertion failed for SPR_9486_floatLessThanDoubleTest Test: ", expectedNumber, result);
+		assertEquals(expectedNumber, result);
 	}
 
 	@Test
-	public void SPR_9486_floatLessThanOrEqualFloatTest() {
+	public void SPR_9486_floatLessThanOrEqualFloat() {
 		Boolean expectedNumber = -10.21f <= -10.22f;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("-10.21f <= -10.22f");
+		Expression expression = parser.parseExpression("-10.21f <= -10.22f");
 		Boolean result = expression.getValue(context, null, Boolean.class);
-		assertEquals("Equal assertion failed for SPR_9486_floatLessThanOrEqualFloatTest Test: ", expectedNumber, result);
+		assertEquals(expectedNumber, result);
 	}
 
 	@Test
-	public void SPR_9486_floatLessThanOrEqualDoubleTest() {
+	public void SPR_9486_floatLessThanOrEqualDouble() {
 		Boolean expectedNumber = -10.21f <= -10.2;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("-10.21f <= -10.2");
+		Expression expression = parser.parseExpression("-10.21f <= -10.2");
 		Boolean result = expression.getValue(context, null, Boolean.class);
-		assertEquals("Equal assertion failed for SPR_9486_floatLessThanOrEqualDoubleTest Test: ", expectedNumber, result);
+		assertEquals(expectedNumber, result);
 	}
 
 	@Test
-	public void SPR_9486_floatGreaterThanFloatTest() {
+	public void SPR_9486_floatGreaterThanFloat() {
 		Boolean expectedNumber = -10.21f > -10.2f;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("-10.21f > -10.2f");
+		Expression expression = parser.parseExpression("-10.21f > -10.2f");
 		Boolean result = expression.getValue(context, null, Boolean.class);
-		assertEquals("Equal assertion failed for SPR_9486_floatGreaterThanFloatTest Test: ", expectedNumber, result);
+		assertEquals(expectedNumber, result);
 	}
 
 	@Test
-	public void SPR_9486_floatGreaterThanDoubleTest() {
+	public void SPR_9486_floatGreaterThanDouble() {
 		Boolean expectedResult = -10.21f > -10.2;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("-10.21f > -10.2");
+		Expression expression = parser.parseExpression("-10.21f > -10.2");
 		Boolean result = expression.getValue(context, null, Boolean.class);
-		assertEquals("Equal assertion failed for SPR_9486_floatGreaterThanDoubleTest Test: ", expectedResult, result);
+		assertEquals(expectedResult, result);
 	}
 
 	@Test
-	public void SPR_9486_floatGreaterThanOrEqualFloatTest() {
+	public void SPR_9486_floatGreaterThanOrEqualFloat() {
 		Boolean expectedNumber = -10.21f >= -10.2f;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("-10.21f >= -10.2f");
+		Expression expression = parser.parseExpression("-10.21f >= -10.2f");
 		Boolean result = expression.getValue(context, null, Boolean.class);
-		assertEquals("Equal assertion failed for SPR_9486_floatGreaterThanFloatTest Test: ", expectedNumber, result);
+		assertEquals(expectedNumber, result);
 	}
 
 	@Test
-	public void SPR_9486_floatGreaterThanEqualDoubleTest() {
+	public void SPR_9486_floatGreaterThanEqualDouble() {
 		Boolean expectedResult = -10.21f >= -10.2;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("-10.21f >= -10.2");
+		Expression expression = parser.parseExpression("-10.21f >= -10.2");
 		Boolean result = expression.getValue(context, null, Boolean.class);
-		assertEquals("Equal assertion failed for SPR_9486_floatGreaterThanDoubleTest Test: ", expectedResult, result);
+		assertEquals(expectedResult, result);
 	}
 
 	@Test
-	public void SPR_9486_floatModulusFloatTest() {
+	public void SPR_9486_floatModulusFloat() {
 		Number expectedResult = 10.21f % 10.2f;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("10.21f % 10.2f");
+		Expression expression = parser.parseExpression("10.21f % 10.2f");
 		Number result = expression.getValue(context, null, Number.class);
-		assertEquals("Equal assertion failed for SPR_9486_floatModulusFloatTest Test: ", expectedResult, result);
+		assertEquals(expectedResult, result);
 	}
 
 	@Test
-	public void SPR_9486_floatModulusDoubleTest() {
+	public void SPR_9486_floatModulusDouble() {
 		Number expectedResult = 10.21f % 10.2;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("10.21f % 10.2");
+		Expression expression = parser.parseExpression("10.21f % 10.2");
 		Number result = expression.getValue(context, null, Number.class);
-		assertEquals("Equal assertion failed for SPR_9486_floatModulusDoubleTest Test: ", expectedResult, result);
+		assertEquals(expectedResult, result);
 	}
 
 	@Test
-	public void SPR_9486_floatPowerFloatTest() {
+	public void SPR_9486_floatPowerFloat() {
 		Number expectedResult = Math.pow(10.21f, -10.2f);
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("10.21f ^ -10.2f");
+		Expression expression = parser.parseExpression("10.21f ^ -10.2f");
 		Number result = expression.getValue(context, null, Number.class);
-		assertEquals("Equal assertion failed for SPR_9486_floatPowerFloatTest Test: ", expectedResult, result);
+		assertEquals(expectedResult, result);
 	}
 
 	@Test
-	public void SPR_9486_floatPowerDoubleTest() {
+	public void SPR_9486_floatPowerDouble() {
 		Number expectedResult = Math.pow(10.21f, 10.2);
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		org.springframework.expression.Expression expression = parser.parseExpression("10.21f ^ 10.2");
+		Expression expression = parser.parseExpression("10.21f ^ 10.2");
 		Number result = expression.getValue(context, null, Number.class);
-		assertEquals("Equal assertion failed for SPR_9486_floatPowerDoubleTest Test: ", expectedResult, result);
+		assertEquals(expectedResult, result);
 	}
 
 	@Test
-	public void SPR_9994_bridgeMethodsTest() throws Exception {
+	public void SPR_9994_bridgeMethods() throws Exception {
 		ReflectivePropertyAccessor accessor = new ReflectivePropertyAccessor();
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		Object target = new GenericImplementation();
@@ -1579,11 +1654,11 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 	@Test
-	public void SPR_10162_onlyBridgeMethodTest() throws Exception {
+	public void SPR_10162_onlyBridgeMethod() throws Exception {
 		ReflectivePropertyAccessor accessor = new ReflectivePropertyAccessor();
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		Object target = new OnlyBridgeMethod();
-		TypedValue value = accessor.read(context, target , "property");
+		TypedValue value = accessor.read(context, target, "property");
 		assertEquals(Integer.class, value.getTypeDescriptor().getType());
 	}
 
@@ -1641,9 +1716,11 @@ public class SpelReproTests extends ExpressionTestCase {
 	@Test
 	public void SPR_10125() throws Exception {
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		String fromInterface = parser.parseExpression("T("+StaticFinalImpl1.class.getName()+").VALUE").getValue(context, String.class);
+		String fromInterface = parser.parseExpression("T(" + StaticFinalImpl1.class.getName() + ").VALUE").getValue(
+			context, String.class);
 		assertThat(fromInterface, is("interfaceValue"));
-		String fromClass = parser.parseExpression("T("+StaticFinalImpl2.class.getName()+").VALUE").getValue(context, String.class);
+		String fromClass = parser.parseExpression("T(" + StaticFinalImpl2.class.getName() + ").VALUE").getValue(
+			context, String.class);
 		assertThat(fromClass, is("interfaceValue"));
 	}
 
@@ -1705,16 +1782,22 @@ public class SpelReproTests extends ExpressionTestCase {
 		assertEquals(ABC.C, Array.get(result, 2));
 
 		context.addMethodResolver(new MethodResolver() {
+
 			@Override
-			public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name, List<TypeDescriptor> argumentTypes) throws AccessException {
+			public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name,
+					List<TypeDescriptor> argumentTypes) throws AccessException {
 				return new MethodExecutor() {
+
 					@Override
-					public TypedValue execute(EvaluationContext context, Object target, Object... arguments) throws AccessException {
+					public TypedValue execute(EvaluationContext context, Object target, Object... arguments)
+							throws AccessException {
 						try {
 							Method method = XYZ.class.getMethod("values");
 							Object value = method.invoke(target, arguments);
-							return new TypedValue(value, new TypeDescriptor(new MethodParameter(method, -1)).narrow(value));
-						} catch (Exception ex) {
+							return new TypedValue(value,
+								new TypeDescriptor(new MethodParameter(method, -1)).narrow(value));
+						}
+						catch (Exception ex) {
 							throw new AccessException(ex.getMessage(), ex);
 						}
 					}
@@ -1736,10 +1819,8 @@ public class SpelReproTests extends ExpressionTestCase {
 		SPR10486 rootObject = new SPR10486();
 		Expression classNameExpression = parser.parseExpression("class.name");
 		Expression nameExpression = parser.parseExpression("name");
-		assertThat(classNameExpression.getValue(context, rootObject),
-				equalTo((Object) SPR10486.class.getName()));
-		assertThat(nameExpression.getValue(context, rootObject),
-				equalTo((Object) "name"));
+		assertThat(classNameExpression.getValue(context, rootObject), equalTo((Object) SPR10486.class.getName()));
+		assertThat(nameExpression.getValue(context, rootObject), equalTo((Object) "name"));
 	}
 
 	@Test
@@ -1777,22 +1858,27 @@ public class SpelReproTests extends ExpressionTestCase {
 		Expression expr = parser.parseExpression("new java.util.ArrayList(#root)");
 		Object value = expr.getValue(coll);
 		assertTrue(value instanceof ArrayList);
+		@SuppressWarnings("rawtypes")
 		ArrayList list = (ArrayList) value;
 		assertEquals("one", list.get(0));
 		assertEquals("two", list.get(1));
 	}
 
 
-	private static enum ABC {A, B, C}
+	private static enum ABC {
+		A, B, C
+	}
 
-	private static enum XYZ {X, Y, Z}
-
+	private static enum XYZ {
+		X, Y, Z
+	}
 
 	public static class BooleanHolder {
 
 		private Boolean simpleProperty = true;
 
 		private boolean primitiveProperty = true;
+
 
 		public Boolean isSimpleProperty() {
 			return simpleProperty;
@@ -1811,12 +1897,10 @@ public class SpelReproTests extends ExpressionTestCase {
 		}
 	}
 
-
 	private static interface GenericInterface<T extends Number> {
 
 		public T getProperty();
 	}
-
 
 	private static class GenericImplementation implements GenericInterface<Integer> {
 
@@ -1826,7 +1910,6 @@ public class SpelReproTests extends ExpressionTestCase {
 		}
 	}
 
-
 	static class PackagePrivateClassWithGetter {
 
 		public Integer getProperty() {
@@ -1834,32 +1917,27 @@ public class SpelReproTests extends ExpressionTestCase {
 		}
 	}
 
-
 	public static class OnlyBridgeMethod extends PackagePrivateClassWithGetter {
 	}
-
 
 	public static interface StaticFinal {
 
 		public static final String VALUE = "interfaceValue";
 	}
 
-
 	public abstract static class AbstractStaticFinal implements StaticFinal {
 	}
-
 
 	public static class StaticFinalImpl1 extends AbstractStaticFinal implements StaticFinal {
 	}
 
-
 	public static class StaticFinalImpl2 extends AbstractStaticFinal {
 	}
-
 
 	public static class SPR10486 {
 
 		private String name = "name";
+
 
 		public String getName() {
 			return name;
@@ -1870,7 +1948,6 @@ public class SpelReproTests extends ExpressionTestCase {
 		}
 	}
 
-
 	static class SPR11142 {
 
 		public String isSomething() {
@@ -1878,10 +1955,10 @@ public class SpelReproTests extends ExpressionTestCase {
 		}
 	}
 
-
 	static class TestClass2 { // SPR-9194
 
 		String string;
+
 
 		public TestClass2(String string) {
 			this.string = string;
@@ -1894,7 +1971,7 @@ public class SpelReproTests extends ExpressionTestCase {
 
 		public boolean equals(Object o) {
 			if (o instanceof TestClass2) {
-				return string.equals(((TestClass2)o).string);
+				return string.equals(((TestClass2) o).string);
 			}
 			return false;
 		}
