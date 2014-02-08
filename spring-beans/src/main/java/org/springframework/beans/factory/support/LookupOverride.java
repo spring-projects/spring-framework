@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,8 @@ public class LookupOverride extends MethodOverride {
 	 * Construct a new LookupOverride.
 	 * @param methodName the name of the method to override.
 	 * This method must have no arguments.
-	 * @param beanName name of the bean in the current BeanFactory
-	 * that the overriden method should return
+	 * @param beanName the name of the bean in the current BeanFactory
+	 * that the overridden method should return
 	 */
 	public LookupOverride(String methodName, String beanName) {
 		super(methodName);
@@ -55,15 +55,13 @@ public class LookupOverride extends MethodOverride {
 		return this.beanName;
 	}
 
-
 	/**
-	 * Match method of the given name, with no parameters.
+	 * Match the method of the given name, with no parameters.
 	 */
 	@Override
 	public boolean matches(Method method) {
 		return (method.getName().equals(getMethodName()) && method.getParameterTypes().length == 0);
 	}
-
 
 	@Override
 	public String toString() {

@@ -56,7 +56,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 
 	/**
 	 * Index in the CGLIB callback array for a method that should
-	 * be overridden using generic Methodreplacer functionality.
+	 * be overridden using generic <em>method replacer</em> functionality.
 	 */
 	private static final int METHOD_REPLACER = 2;
 
@@ -96,13 +96,13 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		}
 
 		/**
-		 * Create a new instance of a dynamically generated subclasses implementing the
+		 * Create a new instance of a dynamically generated subclass implementing the
 		 * required lookups.
 		 * @param ctor constructor to use. If this is {@code null}, use the
 		 * no-arg constructor (no parameterization, or Setter Injection)
 		 * @param args arguments to use for the constructor.
 		 * Ignored if the ctor parameter is {@code null}.
-		 * @return new instance of the dynamically generated class
+		 * @return new instance of the dynamically generated subclass
 		 */
 		public Object instantiate(Constructor<?> ctor, Object[] args) {
 			Enhancer enhancer = new Enhancer();
