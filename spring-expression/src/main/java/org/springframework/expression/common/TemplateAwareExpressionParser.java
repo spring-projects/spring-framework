@@ -28,7 +28,7 @@ import org.springframework.expression.ParserContext;
 /**
  * An expression parser that understands templates. It can be subclassed by expression
  * parsers that do not offer first class support for templating.
- * 
+ *
  * @author Keith Donald
  * @author Juergen Hoeller
  * @author Andy Clement

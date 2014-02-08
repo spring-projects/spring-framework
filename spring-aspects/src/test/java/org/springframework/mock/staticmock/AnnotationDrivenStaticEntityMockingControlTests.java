@@ -26,7 +26,7 @@ import static org.springframework.mock.staticmock.AnnotationDrivenStaticEntityMo
 /**
  * Tests for Spring's static entity mocking framework (i.e., @{@link MockStaticEntityMethods}
  * and {@link AnnotationDrivenStaticEntityMockingControl}).
- * 
+ *
  * @author Rod Johnson
  * @author Ramnivas Laddad
  * @author Sam Brannen

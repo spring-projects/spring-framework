@@ -24,7 +24,7 @@ import org.springframework.util.Assert;
 
 /**
  * Class describing the root object used during the expression evaluation.
- * 
+ *
  * @author Costin Leau
  * @author Sam Brannen
  * @since 3.1

@@ -52,19 +52,19 @@ public class Spr11202Tests {
 		context = new AnnotationConfigApplicationContext(Wrapper.class);
 		assertEquals("foo", context.getBean("value"));
 	}
-	
+
 	@Test // Passes
 	public void testWithoutImporter() {
 		context = new AnnotationConfigApplicationContext(Config.class);
 		assertEquals("foo", context.getBean("value"));
 	}
-	
+
 
 	@Configuration
 	@Import(Selector.class)
 	protected static class Wrapper {
 	}
-	
+
 	protected static class Selector implements ImportSelector {
 
 		@Override

@@ -122,7 +122,7 @@ abstract class MetaAnnotationUtils {
 	 * the specified {@code clazz} itself) which declares at least one of the
 	 * specified {@code annotationTypes}, or {@code null} if none of the
 	 * specified annotation types could be found.
-	 * 
+	 *
 	 * <p>This method traverses the annotations and superclasses of the specified
 	 * {@code clazz} if no annotation can be found on the given class itself.
 	 *

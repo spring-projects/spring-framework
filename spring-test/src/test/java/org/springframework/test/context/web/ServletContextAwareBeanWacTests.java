@@ -24,10 +24,10 @@ import static org.junit.Assert.*;
 
 /**
  * Introduced to investigate claims in SPR-11145.
- * 
+ *
  * <p>
  * Yes, this test class does in fact use JUnit to run JUnit. ;)
- * 
+ *
  * @author Sam Brannen
  * @since 4.0.2
  */

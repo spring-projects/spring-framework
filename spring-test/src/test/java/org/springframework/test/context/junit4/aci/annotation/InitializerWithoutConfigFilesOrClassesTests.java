@@ -33,7 +33,7 @@ import static org.junit.Assert.*;
  * Integration test that verifies support for {@link ApplicationContextInitializer
  * ApplicationContextInitializers} in the TestContext framework when the test class
  * declares neither XML configuration files nor annotated configuration classes.
- * 
+ *
  * @author Sam Brannen
  * @since 3.2
  */

@@ -21,7 +21,7 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Non-public (i.e., package private) custom annotation.
- * 
+ *
  * @author Sam Brannen
  * @since 4.0
  */

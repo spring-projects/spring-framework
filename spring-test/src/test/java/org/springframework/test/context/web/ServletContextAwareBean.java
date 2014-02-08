@@ -22,7 +22,7 @@ import org.springframework.web.context.ServletContextAware;
 
 /**
  * Introduced to investigate claims in SPR-11145.
- * 
+ *
  * @author Sam Brannen
  * @since 4.0.2
  */

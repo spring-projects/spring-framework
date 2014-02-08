@@ -183,11 +183,11 @@ public class ImportResourceTests {
 			reader=XmlBeanDefinitionReader.class)
 	static class SubResourceConfig extends ImportNonXmlResourceConfig {
 	}
-	
+
 	@Test
 	public void importWithPlaceHolder() throws Exception {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		PropertySource<?> propertySource = new MapPropertySource("test", 
+		PropertySource<?> propertySource = new MapPropertySource("test",
 				Collections.<String, Object> singletonMap("test", "springframework"));
 		ctx.getEnvironment().getPropertySources().addFirst(propertySource);
 		ctx.register(ImportXmlConfig.class);
@@ -199,6 +199,6 @@ public class ImportResourceTests {
 	@ImportResource("classpath:org/${test}/context/annotation/configuration/ImportXmlConfig-context.xml")
 	static class ImportWithPlaceHolder {
 	}
-	
-	
+
+
 }

@@ -26,7 +26,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link SharedEntityManagerCreator}.
- * 
+ *
  * @author Oliver Gierke
  */
 public class SharedEntityManagerCreatorTests {

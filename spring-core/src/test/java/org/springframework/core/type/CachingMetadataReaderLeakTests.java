@@ -34,7 +34,7 @@ import static org.junit.Assert.*;
  * Unit tests for checking the behaviour of {@link CachingMetadataReaderFactory} under
  * load. If the cache is not controlled, this test should fail with an out of memory
  * exception around entry 5k.
- * 
+ *
  * @author Costin Leau
  * @author Sam Brannen
  */

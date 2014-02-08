@@ -68,7 +68,7 @@ import java.lang.annotation.Target;
  * The result is that three application contexts will be loaded (one for each
  * declaration of {@code @ContextConfiguration}, and the application context
  * loaded based on the configuration in {@code AbstractWebTests} will be set as
- * the parent context for each of the contexts loaded for the concrete subclasses. 
+ * the parent context for each of the contexts loaded for the concrete subclasses.
  *
  * <pre class="code">
  * &#064;RunWith(SpringJUnit4ClassRunner.class)
@@ -104,7 +104,7 @@ import java.lang.annotation.Target;
  *     &#064;ContextConfiguration(name = "child",  locations = "/user-config.xml")
  * })
  * public class BaseTests {}
- * 
+ *
  * &#064;ContextHierarchy(
  *     &#064;ContextConfiguration(name = "child",  locations = "/order-config.xml")
  * )
@@ -116,7 +116,7 @@ import java.lang.annotation.Target;
  * by setting the {@link ContextConfiguration#inheritLocations} flag to {@code false}.
  * Consequently, the application context for {@code ExtendedTests} will be loaded
  * only from {@code "/test-user-config.xml"} and will have its parent set to the
- * context loaded from {@code "/app-config.xml"}. 
+ * context loaded from {@code "/app-config.xml"}.
  *
  * <pre class="code">
  * &#064;RunWith(SpringJUnit4ClassRunner.class)
@@ -125,7 +125,7 @@ import java.lang.annotation.Target;
  *     &#064;ContextConfiguration(name = "child",  locations = "/user-config.xml")
  * })
  * public class BaseTests {}
- * 
+ *
  * &#064;ContextHierarchy(
  *     &#064;ContextConfiguration(name = "child",  locations = "/test-user-config.xml", inheritLocations=false)
  * )
