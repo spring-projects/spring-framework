@@ -17,7 +17,7 @@ configure(allprojects) { project ->
 	// "Class not found: javac1.8" issue with Ant versions prior to 1.9.x
 	ant.properties["build.compiler"] = "javac1.7"
 
-	ext.aspectjVersion  = "1.7.2"
+	ext.aspectjVersion  = "1.7.4"
 	ext.hsqldbVersion   = "1.8.0.10"
 	ext.junitVersion    = "4.11"
 	ext.slf4jVersion    = "1.6.6"
@@ -328,11 +328,11 @@ project("spring-context") {
 		optional("javax.persistence:persistence-api:1.0")
 		optional("javax.validation:validation-api:1.0.0.GA")
 		optional("org.hibernate:hibernate-validator:4.3.1.Final")
-		optional("joda-time:joda-time:2.1")
+		optional("joda-time:joda-time:2.2")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.codehaus.groovy:groovy-all:1.8.9")
 		optional("org.beanshell:bsh:2.0b4")
-		optional("org.jruby:jruby:1.7.2")
+		optional("org.jruby:jruby:1.7.10")
 		testCompile("javax.inject:javax.inject-tck:1")
 		testCompile("commons-dbcp:commons-dbcp:1.3")
 		testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
@@ -406,7 +406,7 @@ project("spring-jms") {
 		optional("aopalliance:aopalliance:1.0")
 		optional("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1")
 		optional("javax.resource:connector-api:1.5")
-		optional("org.codehaus.jackson:jackson-mapper-asl:1.4.5")
+		optional("org.codehaus.jackson:jackson-mapper-asl:1.7.9")
 		optional("com.fasterxml.jackson.core:jackson-databind:2.0.6")
 	}
 }
@@ -444,7 +444,7 @@ project("spring-context-support") {
 		optional("org.quartz-scheduler:quartz:1.7.3")
 		optional("org.codehaus.fabric3.api:commonj:1.1.0")
 		optional("velocity:velocity:1.5")
-		optional("org.freemarker:freemarker:2.3.19")
+		optional("org.freemarker:freemarker:2.3.20")
 		optional("com.lowagie:itext:2.1.7")
 		optional("jasperreports:jasperreports:2.0.5")
 		testCompile("org.apache.poi:poi:3.0.2-FINAL")
@@ -477,11 +477,11 @@ project("spring-web") {
 		optional("javax.xml.soap:saaj-api:1.3")
 		optional("aopalliance:aopalliance:1.0")
 		optional("com.caucho:hessian:3.2.1")
-		optional("commons-fileupload:commons-fileupload:1.2.2")
+		optional("commons-fileupload:commons-fileupload:1.3.1")
 		optional("commons-io:commons-io:1.3")
 		optional("commons-httpclient:commons-httpclient:3.1")
-		optional("org.apache.httpcomponents:httpclient:4.2")
-		optional("org.codehaus.jackson:jackson-mapper-asl:1.4.5")
+		optional("org.apache.httpcomponents:httpclient:4.2.6")
+		optional("org.codehaus.jackson:jackson-mapper-asl:1.7.9")
 		optional("com.fasterxml.jackson.core:jackson-databind:2.0.6")
 		optional("rome:rome:1.0")
 		optional("taglibs:standard:1.1.2")
@@ -547,8 +547,8 @@ project("spring-orm-hibernate4") {
 		provided(project(":spring-jdbc"))
 		provided(project(":spring-tx"))
 		optional(project(":spring-web"))
-		optional("org.hibernate:hibernate-core:4.1.9.Final")
-		optional("org.hibernate:hibernate-entitymanager:4.1.9.Final")
+		optional("org.hibernate:hibernate-core:4.2.8.Final")
+		optional("org.hibernate:hibernate-entitymanager:4.2.8.Final")
 		optional("javax.servlet:servlet-api:2.5")
 	}
 }
@@ -567,16 +567,16 @@ project("spring-webmvc") {
 		optional(project(":spring-oxm")) // for MarshallingView
 		optional("javax.servlet.jsp:jsp-api:2.1")
 		optional("javax.servlet:jstl:1.2")
-		optional("net.sourceforge.jexcelapi:jxl:2.6.3")
+		optional("net.sourceforge.jexcelapi:jxl:2.6.12")
 		optional("org.apache.poi:poi:3.0.2-FINAL")
 		optional("velocity:velocity:1.5")
 		optional("velocity-tools:velocity-tools-view:1.4")
-		optional("org.freemarker:freemarker:2.3.19")
+		optional("org.freemarker:freemarker:2.3.20")
 		optional("com.lowagie:itext:2.1.7")
 		optional("jasperreports:jasperreports:2.0.5") {
 			exclude group: "xml-apis", module: "xml-apis"
 		}
-		optional("org.codehaus.jackson:jackson-mapper-asl:1.4.5")
+		optional("org.codehaus.jackson:jackson-mapper-asl:1.7.9")
 		optional("com.fasterxml.jackson.core:jackson-databind:2.0.6")
 		optional("rome:rome:1.0")
 		optional("org.apache.tiles:tiles-api:2.1.2")
@@ -602,8 +602,8 @@ project("spring-webmvc") {
 		}
 		testCompile("javax.validation:validation-api:1.0.0.GA")
 		testCompile("org.hibernate:hibernate-validator:4.3.1.Final")
-		testCompile("org.apache.httpcomponents:httpclient:4.2")
-		testCompile("commons-fileupload:commons-fileupload:1.2.2")
+		testCompile("org.apache.httpcomponents:httpclient:4.2.6")
+		testCompile("commons-fileupload:commons-fileupload:1.3.1")
 		testCompile("commons-io:commons-io:1.3")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 	}
@@ -656,7 +656,7 @@ project("spring-webmvc-portlet") {
 		compile(project(":spring-webmvc"))
 		provided("javax.servlet:servlet-api:2.5")
 		provided("javax.portlet:portlet-api:2.0")
-		optional("commons-fileupload:commons-fileupload:1.2.2")
+		optional("commons-fileupload:commons-fileupload:1.3.1")
 	}
 
 	// pick up DispatcherPortlet.properties in src/main
@@ -678,7 +678,7 @@ project("spring-test") {
 		optional(project(":spring-webmvc"))
 		optional(project(":spring-webmvc-portlet"))
 		optional("junit:junit:${junitVersion}")
-		optional("org.testng:testng:6.5.2")
+		optional("org.testng:testng:6.8.7")
 		optional("javax.inject:javax.inject:1")
 		optional("javax.servlet:servlet-api:2.5")
 		optional("javax.servlet.jsp:jsp-api:2.1")
@@ -732,7 +732,7 @@ project("spring-test-mvc") {
 		testCompile("javax.mail:mail:1.4.7")
 		testCompile("org.hibernate:hibernate-validator:4.3.1.Final")
 		testCompile("com.thoughtworks.xstream:xstream:1.3.1")
-		testCompile("org.codehaus.jackson:jackson-mapper-asl:1.4.5")
+		testCompile("org.codehaus.jackson:jackson-mapper-asl:1.7.9")
 		testCompile("com.fasterxml.jackson.core:jackson-databind:2.0.6")
 		testCompile("rome:rome:1.0")
 		testCompile("org.apache.tiles:tiles-request-api:1.0.1")
@@ -865,7 +865,7 @@ configure(rootProject) {
 		testCompile("javax.inject:javax.inject:1")
 		testCompile("javax.resource:connector-api:1.5")
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
-		testCompile("org.hibernate:hibernate-core:4.1.9.Final")
+		testCompile("org.hibernate:hibernate-core:4.2.8.Final")
 		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
 	}
 
@@ -899,7 +899,7 @@ configure(rootProject) {
 
 		doFirst {
 			classpath = files(
-				// ensure Servlet 3.x and Hibernate 4.x have precedence on the Javadoc
+				// ensure Servlet 3.x and Hibernate 4.x have precedence on the javadoc
 				// classpath over their respective 2.5 and 3.x variants
 				project(":spring-webmvc").sourceSets.main.compileClasspath.files.find { it =~ "servlet-api" },
 				rootProject.sourceSets.test.compileClasspath.files.find { it =~ "hibernate-core" },

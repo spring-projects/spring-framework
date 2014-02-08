@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.map.BeanProperty;
 import org.codehaus.jackson.map.JsonSerializer;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
@@ -31,18 +32,20 @@ import org.codehaus.jackson.map.SerializerFactory;
 import org.codehaus.jackson.map.SerializerProvider;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.ser.BeanSerializerFactory;
+import org.codehaus.jackson.type.JavaType;
 import org.junit.Before;
 import org.junit.Test;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.ScriptableObject;
+
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 
 import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Jeremy Grelle
@@ -60,16 +63,16 @@ public class MappingJacksonJsonViewTests {
 
 	private ScriptableObject jsScope;
 
+
 	@Before
 	public void setUp() {
 		request = new MockHttpServletRequest();
 		response = new MockHttpServletResponse();
-
 		jsContext = ContextFactory.getGlobal().enterContext();
 		jsScope = jsContext.initStandardObjects();
-
 		view = new MappingJacksonJsonView();
 	}
+
 
 	@Test
 	public void isExposePathVars() {
@@ -78,7 +81,6 @@ public class MappingJacksonJsonViewTests {
 
 	@Test
 	public void renderSimpleMap() throws Exception {
-
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("bindingResult", mock(BindingResult.class, "binding_result"));
 		model.put("foo", "bar");
@@ -89,13 +91,11 @@ public class MappingJacksonJsonViewTests {
 		assertEquals("no-cache", response.getHeader("Pragma"));
 		assertEquals("no-cache, no-store, max-age=0", response.getHeader("Cache-Control"));
 		assertNotNull(response.getHeader("Expires"));
-
 		assertEquals(MappingJacksonJsonView.DEFAULT_CONTENT_TYPE, response.getContentType());
 
 		String jsonResult = response.getContentAsString();
 		assertTrue(jsonResult.length() > 0);
 		assertEquals(jsonResult.length(), response.getContentLength());
-
 		validateResult();
 	}
 
@@ -106,7 +106,6 @@ public class MappingJacksonJsonViewTests {
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("bindingResult", mock(BindingResult.class, "binding_result"));
 		model.put("foo", "bar");
-
 		view.render(model, request, response);
 
 		assertNull(response.getHeader("Pragma"));
@@ -122,61 +121,58 @@ public class MappingJacksonJsonViewTests {
 
 	@Test
 	public void renderSimpleBean() throws Exception {
-
 		Object bean = new TestBeanSimple();
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("bindingResult", mock(BindingResult.class, "binding_result"));
 		model.put("foo", bean);
-
 		view.setUpdateContentLength(true);
 		view.render(model, request, response);
 
 		assertTrue(response.getContentAsString().length() > 0);
 		assertEquals(response.getContentAsString().length(), response.getContentLength());
-
 		validateResult();
 	}
 
 	@Test
 	public void renderWithPrettyPrint() throws Exception {
-
 		ModelMap model = new ModelMap("foo", new TestBeanSimple());
-
 		view.setPrettyPrint(true);
 		view.render(model, request, response);
 
 		String result = response.getContentAsString().replace("\r\n", "\n");
 		assertTrue("Pretty printing not applied:\n" + result, result.startsWith("{\n  \"foo\" : {\n    "));
-
 		validateResult();
 	}
 
 	@Test
 	public void renderSimpleBeanPrefixed() throws Exception {
-
 		view.setPrefixJson(true);
 		renderSimpleBean();
+		assertTrue(response.getContentAsString().startsWith("{} && "));
+	}
+
+	@Test
+	public void renderSimpleBeanNotPrefixed() throws Exception {
+		view.setPrefixJson(false);
+		renderSimpleBean();
+		assertFalse(response.getContentAsString().startsWith("{} && "));
 	}
 
 	@Test
 	public void renderWithCustomSerializerLocatedByAnnotation() throws Exception {
-
 		Object bean = new TestBeanSimpleAnnotated();
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("foo", bean);
-
 		view.render(model, request, response);
 
 		assertTrue(response.getContentAsString().length() > 0);
 		assertEquals("{\"foo\":{\"testBeanSimple\":\"custom\"}}", response.getContentAsString());
-
 		validateResult();
 	}
 
 	@Test
 	public void renderWithCustomSerializerLocatedByFactory() throws Exception {
-
-		SerializerFactory factory = new DelegatingSerializerFactory();
+		SerializerFactory factory = new DelegatingSerializerFactory(null);
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setSerializerFactory(factory);
 		view.setObjectMapper(mapper);
@@ -185,19 +181,16 @@ public class MappingJacksonJsonViewTests {
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("foo", bean);
 		model.put("bar", new TestChildBean());
-
 		view.render(model, request, response);
 
 		String result = response.getContentAsString();
 		assertTrue(result.length() > 0);
 		assertTrue(result.contains("\"foo\":{\"testBeanSimple\":\"custom\"}"));
-
 		validateResult();
 	}
 
 	@Test
 	public void renderOnlyIncludedAttributes() throws Exception {
-
 		Set<String> attrs = new HashSet<String>();
 		attrs.add("foo");
 		attrs.add("baz");
@@ -208,14 +201,12 @@ public class MappingJacksonJsonViewTests {
 		model.put("foo", "foo");
 		model.put("bar", "bar");
 		model.put("baz", "baz");
-
 		view.render(model, request, response);
 
 		String result = response.getContentAsString();
 		assertTrue(result.length() > 0);
 		assertTrue(result.contains("\"foo\":\"foo\""));
 		assertTrue(result.contains("\"baz\":\"baz\""));
-
 		validateResult();
 	}
 
@@ -226,7 +217,6 @@ public class MappingJacksonJsonViewTests {
 		Map<String, Object> model = new HashMap<String, Object>();
 		TestBeanSimple bean = new TestBeanSimple();
 		model.put("foo", bean);
-
 		Object actual = view.filterModel(model);
 
 		assertSame(bean, actual);
@@ -288,10 +278,11 @@ public class MappingJacksonJsonViewTests {
 		}
 	}
 
-	@JsonSerialize(using=TestBeanSimpleSerializer.class)
-	public static class TestBeanSimpleAnnotated extends TestBeanSimple {
 
+	@JsonSerialize(using = TestBeanSimpleSerializer.class)
+	public static class TestBeanSimpleAnnotated extends TestBeanSimple {
 	}
+
 
 	public static class TestChildBean {
 
@@ -318,12 +309,11 @@ public class MappingJacksonJsonViewTests {
 		}
 	}
 
-	public static class TestBeanSimpleSerializer extends JsonSerializer<TestBeanSimple> {
+
+	public static class TestBeanSimpleSerializer extends JsonSerializer<Object> {
 
 		@Override
-		public void serialize(TestBeanSimple value, JsonGenerator jgen, SerializerProvider provider)
-				throws IOException {
-
+		public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
 			jgen.writeStartObject();
 			jgen.writeFieldName("testBeanSimple");
 			jgen.writeString("custom");
@@ -332,19 +322,22 @@ public class MappingJacksonJsonViewTests {
 		}
 	}
 
-	public static class DelegatingSerializerFactory extends SerializerFactory {
 
-		private SerializerFactory delegate = BeanSerializerFactory.instance;
+	public static class DelegatingSerializerFactory extends BeanSerializerFactory {
+
+		public DelegatingSerializerFactory(Config config) {
+			super(config);
+		}
 
 		@Override
-		@SuppressWarnings("unchecked")
-		public <T> JsonSerializer<T> createSerializer(Class<T> type, SerializationConfig config) {
-			if (type == TestBeanSimple.class) {
-				return (JsonSerializer<T>) new TestBeanSimpleSerializer();
+		public JsonSerializer<Object> createSerializer(SerializationConfig config, JavaType baseType, BeanProperty property) {
+			if (baseType.getRawClass() == TestBeanSimple.class) {
+				return new TestBeanSimpleSerializer();
 			}
 			else {
-				return delegate.createSerializer(type, config);
+				return super.createSerializer(config, baseType, property);
 			}
 		}
 	}
+
 }

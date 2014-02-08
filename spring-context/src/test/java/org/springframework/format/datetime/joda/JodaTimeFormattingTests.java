@@ -16,11 +16,6 @@
 
 package org.springframework.format.datetime.joda;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -37,6 +32,7 @@ import org.joda.time.MutableDateTime;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.TypeDescriptor;
@@ -45,6 +41,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.validation.DataBinder;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Keith Donald
@@ -236,21 +235,10 @@ public class JodaTimeFormattingTests {
 	@Test
 	public void testBindLocalDateTimeAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("localDateTimeAnnotated", "Saturday, October 31, 2009 12:00:00 PM ");
+		propertyValues.add("localDateTimeAnnotated", "Oct 31, 2009 12:00 PM");
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertEquals("Saturday, October 31, 2009 12:00:00 PM ", binder.getBindingResult().getFieldValue(
-				"localDateTimeAnnotated"));
-	}
-
-	@Test
-	public void testBindLocalDateTimeAnnotatedLong() {
-		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("localDateTimeAnnotatedLong", "October 31, 2009 12:00:00 PM ");
-		binder.bind(propertyValues);
-		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertEquals("October 31, 2009 12:00:00 PM ", binder.getBindingResult().getFieldValue(
-				"localDateTimeAnnotatedLong"));
+		assertEquals("Oct 31, 2009 12:00 PM", binder.getBindingResult().getFieldValue("localDateTimeAnnotated"));
 	}
 
 	@Test
@@ -510,11 +498,8 @@ public class JodaTimeFormattingTests {
 
 		private LocalDateTime localDateTime;
 
-		@DateTimeFormat(style="FF")
+		@DateTimeFormat(style="MS")
 		private LocalDateTime localDateTimeAnnotated;
-
-		@DateTimeFormat(style="LL")
-		private LocalDateTime localDateTimeAnnotatedLong;
 
 		private DateTime dateTime;
 
@@ -610,14 +595,6 @@ public class JodaTimeFormattingTests {
 
 		public void setLocalDateTimeAnnotated(LocalDateTime localDateTimeAnnotated) {
 			this.localDateTimeAnnotated = localDateTimeAnnotated;
-		}
-
-		public LocalDateTime getLocalDateTimeAnnotatedLong() {
-			return localDateTimeAnnotatedLong;
-		}
-
-		public void setLocalDateTimeAnnotatedLong(LocalDateTime localDateTimeAnnotatedLong) {
-			this.localDateTimeAnnotatedLong = localDateTimeAnnotatedLong;
 		}
 
 		public DateTime getDateTime() {
