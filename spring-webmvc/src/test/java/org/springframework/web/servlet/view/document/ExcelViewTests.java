@@ -24,7 +24,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import junit.framework.TestCase;
 import jxl.Cell;
 import jxl.Sheet;
 import jxl.Workbook;
@@ -33,12 +32,14 @@ import jxl.read.biff.WorkbookParser;
 import jxl.write.Label;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
-
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.junit.Before;
+import org.junit.Test;
+
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
@@ -47,20 +48,26 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.LocaleResolver;
 
+import static org.junit.Assert.*;
+
 /**
  * Tests for the AbstractExcelView and the AbstractJExcelView classes.
  *
  * @author Alef Arendsen
  * @author Bram Smeets
  */
-public class ExcelViewTests extends TestCase {
+public class ExcelViewTests {
 
 	private MockServletContext servletCtx;
+
 	private MockHttpServletRequest request;
+
 	private MockHttpServletResponse response;
+
 	private StaticWebApplicationContext webAppCtx;
 
-	@Override
+
+	@Before
 	public void setUp() {
 		servletCtx = new MockServletContext("org/springframework/web/servlet/view/document");
 		request = new MockHttpServletRequest(servletCtx);
@@ -69,6 +76,8 @@ public class ExcelViewTests extends TestCase {
 		webAppCtx.setServletContext(servletCtx);
 	}
 
+
+	@Test
 	public void testExcel() throws Exception {
 		AbstractExcelView excelView = new AbstractExcelView() {
 			@Override
@@ -98,6 +107,7 @@ public class ExcelViewTests extends TestCase {
 		assertEquals("Test Value", cell.getStringCellValue());
 	}
 
+	@Test
 	public void testExcelWithTemplateNoLoc() throws Exception {
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE,
 				newDummyLocaleResolver("nl", "nl"));
@@ -131,6 +141,7 @@ public class ExcelViewTests extends TestCase {
 		assertEquals("Test Template", cell.getStringCellValue());
 	}
 
+	@Test
 	public void testExcelWithTemplateAndCountryAndLanguage() throws Exception {
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE,
 				newDummyLocaleResolver("en", "US"));
@@ -164,6 +175,7 @@ public class ExcelViewTests extends TestCase {
 		assertEquals("Test Template American English", cell.getStringCellValue());
 	}
 
+	@Test
 	public void testExcelWithTemplateAndLanguage() throws Exception {
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE,
 				newDummyLocaleResolver("de", ""));
@@ -197,6 +209,7 @@ public class ExcelViewTests extends TestCase {
 		assertEquals("Test Template auf Deutsch", cell.getStringCellValue());
 	}
 
+	@Test
 	public void testJExcel() throws Exception {
 		AbstractJExcelView excelView = new UnixSafeAbstractJExcelView() {
 			@Override
@@ -220,6 +233,7 @@ public class ExcelViewTests extends TestCase {
 		assertEquals("Test Value", cell.getContents());
 	}
 
+	@Test
 	public void testJExcelWithTemplateNoLoc() throws Exception {
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE,
 				newDummyLocaleResolver("nl", "nl"));
@@ -247,6 +261,7 @@ public class ExcelViewTests extends TestCase {
 		assertEquals("Test Template", cell.getContents());
 	}
 
+	@Test
 	public void testJExcelWithTemplateAndCountryAndLanguage() throws Exception {
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE,
 				newDummyLocaleResolver("en", "US"));
@@ -274,6 +289,7 @@ public class ExcelViewTests extends TestCase {
 		assertEquals("Test Template American English", cell.getContents());
 	}
 
+	@Test
 	public void testJExcelWithTemplateAndLanguage() throws Exception {
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE,
 				newDummyLocaleResolver("de", ""));
@@ -301,6 +317,7 @@ public class ExcelViewTests extends TestCase {
 		assertEquals("Test Template auf Deutsch", cell.getContents());
 	}
 
+
 	private LocaleResolver newDummyLocaleResolver(final String lang, final String country) {
 		return new LocaleResolver() {
 			@Override
@@ -318,16 +335,14 @@ public class ExcelViewTests extends TestCase {
 	/**
 	 * Workaround JXL bug that causes ArrayIndexOutOfBounds exceptions when running in
 	 * *nix machines. Same bug as reported at http://jira.pentaho.com/browse/PDI-5031.
-	 *
-	 * We want to use the latest JXL code because it doesn't include log4j config files
-	 * inside the jar. Since the project appears to be abandoned AbstractJExcelView
-	 * will be deprecated.
+	 * <p>We want to use the latest JXL code because it doesn't include log4j config files
+	 * inside the jar. Since the project appears to be abandoned, AbstractJExcelView is
+	 * deprecated as of Spring 4.0.
 	 */
 	private static abstract class UnixSafeAbstractJExcelView extends AbstractJExcelView {
 
 		@Override
-		protected Workbook getTemplateSource(String url, HttpServletRequest request)
-				throws Exception {
+		protected Workbook getTemplateSource(String url, HttpServletRequest request) throws Exception {
 			Workbook workbook = super.getTemplateSource(url, request);
 			Field field = WorkbookParser.class.getDeclaredField("settings");
 			field.setAccessible(true);
@@ -335,6 +350,6 @@ public class ExcelViewTests extends TestCase {
 			settings.setWriteAccess(null);
 			return workbook;
 		}
-
 	}
+
 }
