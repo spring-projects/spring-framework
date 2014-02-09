@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,11 @@
 
 package org.springframework.web.servlet.view.freemarker;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Properties;
 
-import freemarker.cache.ClassTemplateLoader;
-import freemarker.cache.MultiTemplateLoader;
-import freemarker.cache.TemplateLoader;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
@@ -39,28 +30,30 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.ui.freemarker.SpringTemplateLoader;
 
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
 /**
  * @author Juergen Hoeller
  * @since 14.03.2004
  */
-public class FreeMarkerConfigurerTests extends TestCase {
+public class FreeMarkerConfigurerTests {
 
-	public void testFreemarkerConfigurationFactoryBeanWithConfigLocation() throws TemplateException {
+	@Test(expected = IOException.class)
+	public void freemarkerConfigurationFactoryBeanWithConfigLocation() throws Exception {
 		FreeMarkerConfigurationFactoryBean fcfb = new FreeMarkerConfigurationFactoryBean();
 		fcfb.setConfigLocation(new FileSystemResource("myprops.properties"));
 		Properties props = new Properties();
 		props.setProperty("myprop", "/mydir");
 		fcfb.setFreemarkerSettings(props);
-		try {
-			fcfb.afterPropertiesSet();
-			fail("Should have thrown IOException");
-		}
-		catch (IOException ex) {
-			// expected
-		}
+		fcfb.afterPropertiesSet();
 	}
 
-	public void testFreeMarkerConfigurationFactoryBeanWithResourceLoaderPath() throws Exception {
+	@Test
+	public void freeMarkerConfigurationFactoryBeanWithResourceLoaderPath() throws Exception {
 		FreeMarkerConfigurationFactoryBean fcfb = new FreeMarkerConfigurationFactoryBean();
 		fcfb.setTemplateLoaderPath("file:/mydir");
 		fcfb.afterPropertiesSet();
@@ -68,14 +61,16 @@ public class FreeMarkerConfigurerTests extends TestCase {
 		assertTrue(cfg.getTemplateLoader() instanceof SpringTemplateLoader);
 	}
 
-	public void testFreemarkerConfigurationFactoryBeanWithNonFileResourceLoaderPath()
-			throws IOException, TemplateException {
+	@Test
+	@SuppressWarnings("rawtypes")
+	public void freemarkerConfigurationFactoryBeanWithNonFileResourceLoaderPath() throws Exception {
 		FreeMarkerConfigurationFactoryBean fcfb = new FreeMarkerConfigurationFactoryBean();
 		fcfb.setTemplateLoaderPath("file:/mydir");
 		Properties settings = new Properties();
 		settings.setProperty("localized_lookup", "false");
 		fcfb.setFreemarkerSettings(settings);
 		fcfb.setResourceLoader(new ResourceLoader() {
+
 			@Override
 			public Resource getResource(String location) {
 				if (!("file:/mydir".equals(location) || "file:/mydir/test".equals(location))) {
@@ -83,6 +78,7 @@ public class FreeMarkerConfigurerTests extends TestCase {
 				}
 				return new ByteArrayResource("test".getBytes(), "test");
 			}
+
 			@Override
 			public ClassLoader getClassLoader() {
 				return getClass().getClassLoader();
