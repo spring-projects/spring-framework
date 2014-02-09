@@ -48,8 +48,13 @@ import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Enhances {@link Configuration} classes by generating a CGLIB subclass capable of
- * interacting with the Spring container to respect bean semantics.
+ * Enhances {@link Configuration} classes by generating a CGLIB subclass which
+ * interacts with the Spring container to respect bean scoping semantics for
+ * {@code @Bean} methods. Each such {@code @Bean} method will be overridden in
+ * the generated subclass, only delegating to the actual {@code @Bean} method
+ * implementation if the container actually requests the construction of a new
+ * instance. Otherwise, a call to such an {@code @Bean} method serves as a
+ * reference back to the container, obtaining the corresponding bean by name.
  *
  * @author Chris Beams
  * @author Juergen Hoeller

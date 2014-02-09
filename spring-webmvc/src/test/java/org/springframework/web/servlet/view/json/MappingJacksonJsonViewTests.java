@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.junit.Test;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.ScriptableObject;
+
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.ui.ModelMap;
@@ -68,10 +69,8 @@ public class MappingJacksonJsonViewTests {
 	public void setUp() {
 		request = new MockHttpServletRequest();
 		response = new MockHttpServletResponse();
-
 		jsContext = ContextFactory.getGlobal().enterContext();
 		jsScope = jsContext.initStandardObjects();
-
 		view = new MappingJacksonJsonView();
 	}
 
@@ -93,13 +92,11 @@ public class MappingJacksonJsonViewTests {
 		assertEquals("no-cache", response.getHeader("Pragma"));
 		assertEquals("no-cache, no-store, max-age=0", response.getHeader("Cache-Control"));
 		assertNotNull(response.getHeader("Expires"));
-
 		assertEquals(MappingJacksonJsonView.DEFAULT_CONTENT_TYPE, response.getContentType());
 
 		String jsonResult = response.getContentAsString();
 		assertTrue(jsonResult.length() > 0);
 		assertEquals(jsonResult.length(), response.getContentLength());
-
 		validateResult();
 	}
 
@@ -110,7 +107,6 @@ public class MappingJacksonJsonViewTests {
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("bindingResult", mock(BindingResult.class, "binding_result"));
 		model.put("foo", "bar");
-
 		view.render(model, request, response);
 
 		assertNull(response.getHeader("Pragma"));
@@ -130,26 +126,22 @@ public class MappingJacksonJsonViewTests {
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("bindingResult", mock(BindingResult.class, "binding_result"));
 		model.put("foo", bean);
-
 		view.setUpdateContentLength(true);
 		view.render(model, request, response);
 
 		assertTrue(response.getContentAsString().length() > 0);
 		assertEquals(response.getContentAsString().length(), response.getContentLength());
-
 		validateResult();
 	}
 
 	@Test
 	public void renderWithPrettyPrint() throws Exception {
 		ModelMap model = new ModelMap("foo", new TestBeanSimple());
-
 		view.setPrettyPrint(true);
 		view.render(model, request, response);
 
 		String result = response.getContentAsString().replace("\r\n", "\n");
 		assertTrue("Pretty printing not applied:\n" + result, result.startsWith("{\n  \"foo\" : {\n    "));
-
 		validateResult();
 	}
 
@@ -172,12 +164,10 @@ public class MappingJacksonJsonViewTests {
 		Object bean = new TestBeanSimpleAnnotated();
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("foo", bean);
-
 		view.render(model, request, response);
 
 		assertTrue(response.getContentAsString().length() > 0);
 		assertEquals("{\"foo\":{\"testBeanSimple\":\"custom\"}}", response.getContentAsString());
-
 		validateResult();
 	}
 
@@ -192,13 +182,11 @@ public class MappingJacksonJsonViewTests {
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("foo", bean);
 		model.put("bar", new TestChildBean());
-
 		view.render(model, request, response);
 
 		String result = response.getContentAsString();
 		assertTrue(result.length() > 0);
 		assertTrue(result.contains("\"foo\":{\"testBeanSimple\":\"custom\"}"));
-
 		validateResult();
 	}
 
@@ -214,14 +202,12 @@ public class MappingJacksonJsonViewTests {
 		model.put("foo", "foo");
 		model.put("bar", "bar");
 		model.put("baz", "baz");
-
 		view.render(model, request, response);
 
 		String result = response.getContentAsString();
 		assertTrue(result.length() > 0);
 		assertTrue(result.contains("\"foo\":\"foo\""));
 		assertTrue(result.contains("\"baz\":\"baz\""));
-
 		validateResult();
 	}
 
@@ -232,7 +218,6 @@ public class MappingJacksonJsonViewTests {
 		Map<String, Object> model = new HashMap<String, Object>();
 		TestBeanSimple bean = new TestBeanSimple();
 		model.put("foo", bean);
-
 		Object actual = view.filterModel(model);
 
 		assertSame(bean, actual);
@@ -295,7 +280,7 @@ public class MappingJacksonJsonViewTests {
 	}
 
 
-	@JsonSerialize(using=TestBeanSimpleSerializer.class)
+	@JsonSerialize(using = TestBeanSimpleSerializer.class)
 	public static class TestBeanSimpleAnnotated extends TestBeanSimple {
 	}
 
@@ -329,9 +314,7 @@ public class MappingJacksonJsonViewTests {
 	public static class TestBeanSimpleSerializer extends JsonSerializer<Object> {
 
 		@Override
-		public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider)
-				throws IOException {
-
+		public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
 			jgen.writeStartObject();
 			jgen.writeFieldName("testBeanSimple");
 			jgen.writeString("custom");
@@ -348,7 +331,9 @@ public class MappingJacksonJsonViewTests {
 		}
 
 		@Override
-		public JsonSerializer<Object> createSerializer(SerializationConfig config, JavaType baseType, BeanProperty property) throws JsonMappingException {
+		public JsonSerializer<Object> createSerializer(SerializationConfig config, JavaType baseType, BeanProperty property)
+				throws JsonMappingException {
+
 			if (baseType.getRawClass() == TestBeanSimple.class) {
 				return new TestBeanSimpleSerializer();
 			}
