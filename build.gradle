@@ -521,7 +521,7 @@ project("spring-context-support") {
 		optional("org.apache.velocity:velocity:1.7")
 		optional("org.freemarker:freemarker:2.3.20")
 		optional("com.lowagie:itext:2.1.7")
-		optional("net.sf.jasperreports:jasperreports:5.5.0")
+		optional("net.sf.jasperreports:jasperreports:5.5.1")
 		testCompile("org.apache.poi:poi:3.9")
 		testCompile("commons-beanutils:commons-beanutils:1.8.0") // for Velocity/JasperReports
 		testCompile("commons-digester:commons-digester:1.8.1") // for Velocity/JasperReports
@@ -1009,7 +1009,7 @@ configure(rootProject) {
 
 		doFirst {
 			classpath = files(
-				// ensure servlet 3.x and Hibernate 4.x have precedence on the Javadoc
+				// ensure Servlet 3.x and Hibernate 4.x have precedence on the javadoc
 				// classpath over their respective 2.5 and 3.x variants
 				project(":spring-webmvc").sourceSets.main.compileClasspath.files.find { it =~ "servlet-api" },
 				rootProject.sourceSets.test.compileClasspath.files.find { it =~ "hibernate-core" },
