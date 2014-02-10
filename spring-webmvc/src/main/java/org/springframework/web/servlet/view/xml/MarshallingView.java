@@ -28,6 +28,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.oxm.Marshaller;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.AbstractView;
 
@@ -108,8 +109,7 @@ public class MarshallingView extends AbstractView {
 
 		setResponseContentType(request, response);
 		ServletOutputStream os = response.getOutputStream();
-		os.write(bos.toByteArray());
-		os.flush();
+		StreamUtils.copy(bos.toByteArray(),os);
 	}
 
 	/**
