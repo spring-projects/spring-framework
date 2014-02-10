@@ -107,9 +107,9 @@ public class MarshallingView extends AbstractView {
 		marshaller.marshal(toBeMarshalled, new StreamResult(bos));
 
 		setResponseContentType(request, response);
-		response.setContentLength(bos.size());
-
-		FileCopyUtils.copy(bos.toByteArray(), response.getOutputStream());
+		ServletOutputStream os = response.getOutputStream();
+		os.write(bos.toByteArray());
+		os.flush();
 	}
 
 	/**
