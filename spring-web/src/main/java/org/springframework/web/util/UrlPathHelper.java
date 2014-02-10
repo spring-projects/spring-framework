@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -181,11 +181,24 @@ public class UrlPathHelper {
 		}
 		else {
 			// Special case: URI is different from servlet path.
-			// Can happen e.g. with index page: URI="/", servletPath="/index.html"
-			// Use path info if available, as it indicates an index page within
-			// a servlet mapping. Otherwise, use the full servlet path.
 			String pathInfo = request.getPathInfo();
-			return (pathInfo != null ? pathInfo : servletPath);
+			if (pathInfo != null) {
+				// Use path info if available. Indicates index page within a servlet mapping?
+				// e.g. with index page: URI="/", servletPath="/index.html"
+				return pathInfo;
+			}
+			if (this.urlDecode == false) {
+				// No path info... (not mapped by prefix, nor by extension, nor "/*")
+				// For the default servlet mapping (i.e. "/"), urlDecode=false can
+				// cause issues since getServletPath() returns a decoded path.
+				// If decoding pathWithinApp yields a match just use pathWithinApp
+				path = getRemainingPath(decodeInternal(request, pathWithinApp), servletPath, false);
+				if (path != null) {
+					return pathWithinApp;
+				}
+			}
+			// Otherwise, use the full servlet path
+			return servletPath;
 		}
 	}
 
