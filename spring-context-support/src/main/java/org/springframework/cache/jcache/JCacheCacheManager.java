@@ -31,6 +31,7 @@ import org.springframework.cache.transaction.AbstractTransactionSupportingCacheM
  * <p>Note: This class has been updated for JCache 1.0, as of Spring 4.0.
  *
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 3.2
  */
 public class JCacheCacheManager extends AbstractTransactionSupportingCacheManager {
@@ -108,17 +109,13 @@ public class JCacheCacheManager extends AbstractTransactionSupportingCacheManage
 	}
 
 	@Override
-	public Cache getCache(String name) {
-		Cache cache = super.getCache(name);
-		if (cache == null) {
-			// Check the JCache cache again (in case the cache was added at runtime)
-			javax.cache.Cache<Object, Object> jcache = getCacheManager().getCache(name);
-			if (jcache != null) {
-				addCache(new JCacheCache(jcache, isAllowNullValues()));
-				cache = super.getCache(name);  // potentially decorated
-			}
+	protected Cache getMissingCache(String name) {
+		// Check the JCache cache again (in case the cache was added at runtime)
+		javax.cache.Cache<Object, Object> jcache = getCacheManager().getCache(name);
+		if (jcache != null) {
+			return new JCacheCache(jcache, isAllowNullValues());
 		}
-		return cache;
+		return null;
 	}
 
 }

@@ -31,6 +31,7 @@ import org.springframework.util.Assert;
  *
  * @author Costin Leau
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 3.1
  */
 public class EhCacheCacheManager extends AbstractTransactionSupportingCacheManager {
@@ -86,17 +87,14 @@ public class EhCacheCacheManager extends AbstractTransactionSupportingCacheManag
 	}
 
 	@Override
-	public Cache getCache(String name) {
-		Cache cache = super.getCache(name);
-		if (cache == null) {
-			// Check the EhCache cache again (in case the cache was added at runtime)
-			Ehcache ehcache = getCacheManager().getEhcache(name);
-			if (ehcache != null) {
-				addCache(new EhCacheCache(ehcache));
-				cache = super.getCache(name);  // potentially decorated
-			}
+	protected Cache getMissingCache(String name) {
+		// check the EhCache cache again
+		// (in case the cache was added at runtime)
+		Ehcache ehcache = getCacheManager().getEhcache(name);
+		if (ehcache != null) {
+			return new EhCacheCache(ehcache);
 		}
-		return cache;
+		return null;
 	}
 
 }
