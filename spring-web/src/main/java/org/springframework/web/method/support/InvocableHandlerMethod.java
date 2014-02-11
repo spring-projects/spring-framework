@@ -47,15 +47,15 @@ import org.springframework.web.method.HandlerMethod;
  */
 public class InvocableHandlerMethod extends HandlerMethod {
 
-	private HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
-
 	private WebDataBinderFactory dataBinderFactory;
+
+	private HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
 
 	/**
-	 * Creates an instance from the given handler and method.
+	 * Create an instance from the given handler and method.
 	 */
 	public InvocableHandlerMethod(Object bean, Method method) {
 		super(bean, method);
@@ -124,7 +124,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		Object[] args = getMethodArgumentValues(request, mavContainer, providedArgs);
 		if (logger.isTraceEnabled()) {
 			StringBuilder sb = new StringBuilder("Invoking [");
-			sb.append(this.getBeanType().getSimpleName()).append(".");
+			sb.append(getBeanType().getSimpleName()).append(".");
 			sb.append(getMethod().getName()).append("] method with arguments ");
 			sb.append(Arrays.asList(args));
 			logger.trace(sb.toString());
@@ -154,7 +154,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			}
 			if (this.argumentResolvers.supportsParameter(parameter)) {
 				try {
-					args[i] = this.argumentResolvers.resolveArgument(parameter, mavContainer, request, this.dataBinderFactory);
+					args[i] = this.argumentResolvers.resolveArgument(
+							parameter, mavContainer, request, this.dataBinderFactory);
 					continue;
 				}
 				catch (Exception ex) {
@@ -209,17 +210,17 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * Invoke the handler method with the given argument values.
 	 */
 	private Object invoke(Object... args) throws Exception {
-		ReflectionUtils.makeAccessible(this.getBridgedMethod());
+		ReflectionUtils.makeAccessible(getBridgedMethod());
 		try {
-			assertTargetBean(getBridgedMethod(), getBean(), args);
 			return getBridgedMethod().invoke(getBean(), args);
 		}
-		catch (IllegalArgumentException e) {
-			throw new IllegalArgumentException(getInvocationErrorMessage(e.getMessage(), args), e);
+		catch (IllegalArgumentException ex) {
+			assertTargetBean(getBridgedMethod(), getBean(), args);
+			throw new IllegalStateException(getInvocationErrorMessage(ex.getMessage(), args), ex);
 		}
-		catch (InvocationTargetException e) {
+		catch (InvocationTargetException ex) {
 			// Unwrap for HandlerExceptionResolvers ...
-			Throwable targetException = e.getTargetException();
+			Throwable targetException = ex.getTargetException();
 			if (targetException instanceof RuntimeException) {
 				throw (RuntimeException) targetException;
 			}
@@ -247,11 +248,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		Class<?> methodDeclaringClass = method.getDeclaringClass();
 		Class<?> targetBeanClass = targetBean.getClass();
 		if (!methodDeclaringClass.isAssignableFrom(targetBeanClass)) {
-			String message = "The mapped controller method class '" + methodDeclaringClass.getName() +
+			String msg = "The mapped controller method class '" + methodDeclaringClass.getName() +
 					"' is not an instance of the actual controller bean instance '" +
 					targetBeanClass.getName() + "'. If the controller requires proxying " +
 					"(e.g. due to @Transactional), please use class-based proxying.";
-			throw new IllegalArgumentException(getInvocationErrorMessage(message, args));
+			throw new IllegalStateException(getInvocationErrorMessage(msg, args));
 		}
 	}
 
