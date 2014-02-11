@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,8 @@ public class InvocableHandlerMethodTests {
 		try {
 			handlerMethod.invokeForRequest(webRequest, null);
 			fail("Expected exception");
-		} catch (IllegalStateException ex) {
+		}
+		catch (IllegalStateException ex) {
 			assertTrue(ex.getMessage().contains("No suitable resolver for argument [0] [type=java.lang.Integer]"));
 		}
 	}
@@ -131,7 +132,8 @@ public class InvocableHandlerMethodTests {
 		try {
 			handlerMethod.invokeForRequest(webRequest, null);
 			fail("Expected exception");
-		} catch (HttpMessageNotReadableException ex) {
+		}
+		catch (HttpMessageNotReadableException ex) {
 			// Expected..
 			// Allow HandlerMethodArgumentResolver exceptions to propagate..
 		}
@@ -150,7 +152,8 @@ public class InvocableHandlerMethodTests {
 		try {
 			handlerMethod.invokeForRequest(webRequest, null);
 			fail("Expected exception");
-		} catch (IllegalArgumentException ex) {
+		}
+		catch (IllegalStateException ex) {
 			assertNotNull("Exception not wrapped", ex.getCause());
 			assertTrue(ex.getCause() instanceof IllegalArgumentException);
 			assertTrue(ex.getMessage().contains("Controller ["));
@@ -166,28 +169,32 @@ public class InvocableHandlerMethodTests {
 		Throwable expected = new RuntimeException("error");
 		try {
 			invokeExceptionRaisingHandler(expected);
-		} catch (RuntimeException actual) {
+		}
+		catch (RuntimeException actual) {
 			assertSame(expected, actual);
 		}
 
 		expected = new Error("error");
 		try {
 			invokeExceptionRaisingHandler(expected);
-		} catch (Error actual) {
+		}
+		catch (Error actual) {
 			assertSame(expected, actual);
 		}
 
 		expected = new Exception("error");
 		try {
 			invokeExceptionRaisingHandler(expected);
-		} catch (Exception actual) {
+		}
+		catch (Exception actual) {
 			assertSame(expected, actual);
 		}
 
 		expected = new Throwable("error");
 		try {
 			invokeExceptionRaisingHandler(expected);
-		} catch (IllegalStateException actual) {
+		}
+		catch (IllegalStateException actual) {
 			assertNotNull(actual.getCause());
 			assertSame(expected, actual.getCause());
 			assertTrue(actual.getMessage().contains("Failed to invoke controller method"));

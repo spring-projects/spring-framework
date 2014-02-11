@@ -316,7 +316,6 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	}
 
 	private void registerMvcSingletons(StubWebApplicationContext wac) {
-
 		StandaloneConfiguration config = new StandaloneConfiguration();
 
 		StaticRequestMappingHandlerMapping hm = config.getHandlerMapping();
@@ -343,23 +342,19 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	}
 
 	private List<ViewResolver> initViewResolvers(WebApplicationContext wac) {
-
 		this.viewResolvers = (this.viewResolvers == null) ?
 				Arrays.<ViewResolver>asList(new InternalResourceViewResolver()) : this.viewResolvers;
-
 		for (Object viewResolver : this.viewResolvers) {
 			if (viewResolver instanceof WebApplicationObjectSupport) {
 				((WebApplicationObjectSupport) viewResolver).setApplicationContext(wac);
 			}
 		}
-
 		return this.viewResolvers;
 	}
 
 
 	/** Using the MVC Java configuration as the starting point for the "standalone" setup */
 	private class StandaloneConfiguration extends WebMvcConfigurationSupport {
-
 
 		public StaticRequestMappingHandlerMapping getHandlerMapping() {
 			StaticRequestMappingHandlerMapping handlerMapping = new StaticRequestMappingHandlerMapping();
@@ -368,7 +363,6 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 			handlerMapping.setUseTrailingSlashMatch(useTrailingSlashPatternMatch);
 			handlerMapping.setOrder(0);
 			handlerMapping.setInterceptors(getInterceptors());
-
 			if (removeSemicolonContent != null) {
 				handlerMapping.setRemoveSemicolonContent(removeSemicolonContent);
 			}
@@ -437,23 +431,28 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 		}
 	}
 
-	/** A {@code RequestMappingHandlerMapping} that allows registration of controllers */
+
+	/**
+	 * A {@code RequestMappingHandlerMapping} that allows registration of controllers.
+	 */
 	private static class StaticRequestMappingHandlerMapping extends RequestMappingHandlerMapping {
 
 		public void registerHandlers(Object...handlers) {
 			for (Object handler : handlers) {
-				super.detectHandlerMethods(handler);
+				detectHandlerMethods(handler);
 			}
 		}
 	}
 
-	/** A static resolver placeholder for values embedded in request mappings */
+
+	/**
+	 * A static resolver placeholder for values embedded in request mappings.
+	 */
 	private static class StaticStringValueResolver implements StringValueResolver {
 
 		private final PropertyPlaceholderHelper helper;
 
 		private final PlaceholderResolver resolver;
-
 
 		public StaticStringValueResolver(final Map<String, String> values) {
 			this.helper = new PropertyPlaceholderHelper("${", "}", ":", false);
@@ -471,7 +470,10 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 		}
 	}
 
-	/** A {@link ViewResolver} that always returns same View */
+
+	/**
+	 * A {@link ViewResolver} that always returns same View.
+	 */
 	private static class StaticViewResolver implements ViewResolver {
 
 		private final View view;
