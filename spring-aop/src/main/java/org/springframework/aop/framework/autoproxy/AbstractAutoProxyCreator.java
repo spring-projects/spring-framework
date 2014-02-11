@@ -40,14 +40,18 @@ import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.factory.Aware;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.core.Ordered;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * {@link org.springframework.beans.factory.config.BeanPostProcessor} implementation
@@ -465,12 +469,12 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		// Copy our properties (proxyTargetClass etc) inherited from ProxyConfig.
 		proxyFactory.copyFrom(this);
 
-		if (!shouldProxyTargetClass(beanClass, beanName)) {
-			// Must allow for introductions; can't just set interfaces to
-			// the target's interfaces only.
-			Class<?>[] targetInterfaces = ClassUtils.getAllInterfacesForClass(beanClass, this.proxyClassLoader);
-			for (Class<?> targetInterface : targetInterfaces) {
-				proxyFactory.addInterface(targetInterface);
+		if (!proxyFactory.isProxyTargetClass()) {
+			if (shouldProxyTargetClass(beanClass, beanName)) {
+				proxyFactory.setProxyTargetClass(true);
+			}
+			else {
+				evaluateProxyInterfaces(beanClass, proxyFactory);
 			}
 		}
 
@@ -491,10 +495,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	}
 
 	/**
-	 * Determine whether the given bean should be proxied with its target
-	 * class rather than its interfaces. Checks the
-	 * {@link #setProxyTargetClass "proxyTargetClass" setting} as well as the
-	 * {@link AutoProxyUtils#PRESERVE_TARGET_CLASS_ATTRIBUTE "preserveTargetClass" attribute}
+	 * Determine whether the given bean should be proxied with its target class rather than its interfaces.
+	 * <p>Checks the {@link AutoProxyUtils#PRESERVE_TARGET_CLASS_ATTRIBUTE "preserveTargetClass" attribute}
 	 * of the corresponding bean definition.
 	 * @param beanClass the class of the bean
 	 * @param beanName the name of the bean
@@ -502,9 +504,49 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @see AutoProxyUtils#shouldProxyTargetClass
 	 */
 	protected boolean shouldProxyTargetClass(Class<?> beanClass, String beanName) {
-		return (isProxyTargetClass() ||
-				(this.beanFactory instanceof ConfigurableListableBeanFactory &&
-						AutoProxyUtils.shouldProxyTargetClass((ConfigurableListableBeanFactory) this.beanFactory, beanName)));
+		return (this.beanFactory instanceof ConfigurableListableBeanFactory &&
+				AutoProxyUtils.shouldProxyTargetClass((ConfigurableListableBeanFactory) this.beanFactory, beanName));
+	}
+
+	/**
+	 * Check the interfaces on the given bean class and apply them to the ProxyFactory,
+	 * if appropriate.
+	 * <p>Calls {@link #isConfigurationCallbackInterface} to filter for reasonable
+	 * proxy interfaces, falling back to a target-class proxy otherwise.
+	 * @param beanClass the class of the bean
+	 * @param proxyFactory the ProxyFactory for the bean
+	 */
+	private void evaluateProxyInterfaces(Class<?> beanClass, ProxyFactory proxyFactory) {
+		Class<?>[] targetInterfaces = ClassUtils.getAllInterfacesForClass(beanClass, this.proxyClassLoader);
+		boolean hasReasonableProxyInterface = false;
+		for (Class<?> ifc : targetInterfaces) {
+			if (!isConfigurationCallbackInterface(ifc) && ifc.getMethods().length > 0) {
+				hasReasonableProxyInterface = true;
+				break;
+			}
+		}
+		if (hasReasonableProxyInterface) {
+			// Must allow for introductions; can't just set interfaces to the target's interfaces only.
+			for (Class<?> ifc : targetInterfaces) {
+				proxyFactory.addInterface(ifc);
+			}
+		}
+		else {
+			proxyFactory.setProxyTargetClass(true);
+		}
+	}
+
+	/**
+	 * Determine whether the given interface is just a container callback and
+	 * therefore not to be considered as a reasonable proxy interface.
+	 * <p>If no reasonable proxy interface is found for a given bean, it will get
+	 * proxied with its full target class, assuming that as the user's intention.
+	 * @param ifc the interface to check
+	 * @return whether the given interface is just a container callback
+	 */
+	protected boolean isConfigurationCallbackInterface(Class<?> ifc) {
+		return (ifc.equals(InitializingBean.class) || ifc.equals(DisposableBean.class) ||
+				ObjectUtils.containsElement(ifc.getInterfaces(), Aware.class));
 	}
 
 	/**

@@ -158,7 +158,6 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		CglibTestBean proxy = (CglibTestBean) aop.getProxy();
 		assertNotNull("Proxy should not be null", proxy);
 		assertEquals("Constructor overrode the value of name", "Rob Harrop", proxy.getName());
-
 	}
 
 	@Test
@@ -356,6 +355,13 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		assertEquals(1, advice.getCalls("add"));
 	}
 
+	@Test
+	public void testProxyTargetClassInCaseOfNoInterfaces() throws Exception {
+		ProxyFactory proxyFactory = new ProxyFactory(new MyBean());
+		MyBean proxy = (MyBean) proxyFactory.getProxy();
+		assertEquals(4, proxy.add(1, 3));
+	}
+
 
 	public static class MyBean {
 
@@ -462,5 +468,4 @@ class UnsupportedInterceptor implements MethodInterceptor {
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		throw new UnsupportedOperationException(mi.getMethod().getName());
 	}
-
 }
