@@ -28381,7 +28381,7 @@ snippet:
 
 
 [[mvc-ann-requestmapping]]
-==== Mapping Requests With Using @RequestMapping
+==== Mapping Requests With @RequestMapping
 
 You use the `@RequestMapping` annotation to map URLs such as `/appointments` onto an
 entire class or a particular handler method. Typically the class-level annotation maps a
@@ -28472,26 +28472,17 @@ application shows a multi-action controller using `@RequestMapping`:
 	}
 ----
 
-.@RequestMapping On Interface Methods
-[TIP]
-====
+[[mvc-ann-requestmapping-proxying]]
+===== `@Controller`'s and AOP Proxying
 
-A common pitfall when working with annotated controller classes happens when applying
-functionality that requires creating a proxy for the controller object (e.g.
-`@Transactional` methods). Usually you will introduce an interface for the controller in
-order to use JDK dynamic proxies. To make this work you must move the `@RequestMapping`
-annotations, as well as any other type and method-level annotations (e.g.
-`@ModelAttribute`, `@InitBinder`) to the interface as well as the mapping mechanism can
-only "see" the interface exposed by the proxy. Alternatively, you could activate
-`proxy-target-class="true"` in the configuration for the functionality applied to the
-controller (in our transaction scenario in `<tx:annotation-driven />`). Doing so
-indicates that CGLIB-based subclass proxies should be used instead of interface-based
-JDK proxies. For more information on various proxying mechanisms see <<aop-proxying>>.
-
-Note however that method argument annotations, e.g. `@RequestParam`, must be present in
-the method signatures of the controller class.
-====
-
+In some cases a controller may need to be decorated with an AOP proxy at runtime.
+One example is if you choose to have `@Transactional` annotations directly on the
+controller. When this is the case, for controllers specifically, we recommend
+using class-based proxying. This is typically the default choice with controllers.
+However if a controller must implement an interface that is not a Spring Context
+callback (e.g. `InitializingBean`, `*Aware`, etc), you may need to explicitly
+configure class-based proxying. For example with `<tx:annotation-driven />`,
+change to `<tx:annotation-driven proxy-target-class="true" />`.
 
 [[mvc-ann-requestmapping-31-vs-30]]
 ===== New Support Classes for @RequestMapping methods in Spring MVC 3.1
@@ -29464,14 +29455,6 @@ attribute name:
 		// ...
 	}
 ----
-
-[NOTE]
-====
-When using controller interfaces (e.g., for AOP proxying), make sure to consistently put
-__all__ your mapping annotations - such as `@RequestMapping` and `@SessionAttributes` -
-on the controller __interface__ rather than on the implementation class.
-====
-
 
 [[mvc-ann-redirect-attributes]]
 ===== Specifying redirect and flash attributes

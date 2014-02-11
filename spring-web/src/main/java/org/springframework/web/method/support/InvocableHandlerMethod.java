@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -211,11 +211,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	private Object invoke(Object... args) throws Exception {
 		ReflectionUtils.makeAccessible(this.getBridgedMethod());
 		try {
+			assertTargetBean(getBridgedMethod(), getBean(), args);
 			return getBridgedMethod().invoke(getBean(), args);
 		}
 		catch (IllegalArgumentException e) {
-			String msg = getInvocationErrorMessage(e.getMessage(), args);
-			throw new IllegalArgumentException(msg, e);
+			throw new IllegalArgumentException(getInvocationErrorMessage(e.getMessage(), args), e);
 		}
 		catch (InvocationTargetException e) {
 			// Unwrap for HandlerExceptionResolvers ...
@@ -233,6 +233,25 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				String msg = getInvocationErrorMessage("Failed to invoke controller method", args);
 				throw new IllegalStateException(msg, targetException);
 			}
+		}
+	}
+
+	/**
+	 * Assert that the target bean class is an instance of the class where the given
+	 * method is declared. In some cases the actual controller instance at request-
+	 * processing time may be a JDK dynamic proxy (lazy initialization, prototype
+	 * beans, and others). {@code @Controller}'s that require proxying should prefer
+	 * class-based proxy mechanisms.
+	 */
+	private void assertTargetBean(Method method, Object targetBean, Object[] args) {
+		Class<?> methodDeclaringClass = method.getDeclaringClass();
+		Class<?> targetBeanClass = targetBean.getClass();
+		if (!methodDeclaringClass.isAssignableFrom(targetBeanClass)) {
+			String message = "The mapped controller method class '" + methodDeclaringClass.getName() +
+					"' is not an instance of the actual controller bean instance '" +
+					targetBeanClass.getName() + "'. If the controller requires proxying " +
+					"(e.g. due to @Transactional), please use class-based proxying.";
+			throw new IllegalArgumentException(getInvocationErrorMessage(message, args));
 		}
 	}
 
