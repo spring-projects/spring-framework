@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
@@ -105,8 +104,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				getApplicationContext().getBeanNamesForType(Object.class));
 
 		for (String beanName : beanNames) {
-			if (isHandler(getApplicationContext().getType(beanName))){
-				detectHandlerMethods(beanName);
+			Class<?> candidateType = getApplicationContext().getType(beanName);
+			if (isHandler(candidateType)){
+				detectHandlerMethods(beanName, candidateType);
 			}
 		}
 		handlerMethodsInitialized(getHandlerMethods());
@@ -120,22 +120,22 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	protected abstract boolean isHandler(Class<?> beanType);
 
 	/**
-	 * Invoked after all handler methods have been detected.
-	 * @param handlerMethods a read-only map with handler methods and mappings.
-	 */
-	protected void handlerMethodsInitialized(Map<T, HandlerMethod> handlerMethods) {
-	}
-
-	/**
 	 * Look for handler methods in a handler.
+	 * <p>Delegates to {@link #detectHandlerMethods(Object, Class)} for actual processing.
 	 * @param handler the bean name of a handler or a handler instance
 	 */
 	protected void detectHandlerMethods(final Object handler) {
-		Class<?> handlerType = (handler instanceof String) ?
-				getApplicationContext().getType((String) handler) : handler.getClass();
+		Class<?> handlerType =
+				(handler instanceof String ? getApplicationContext().getType((String) handler) : handler.getClass());
+		detectHandlerMethods(handler, handlerType);
+	}
 
+	/**
+	 * Look for handler methods in a handler, against a pre-resolved type.
+	 * @param handler the bean name of a handler or a handler instance
+	 */
+	protected void detectHandlerMethods(Object handler, Class<?> handlerType) {
 		final Class<?> userType = ClassUtils.getUserClass(handlerType);
-
 		Set<Method> methods = HandlerMethodSelector.selectMethods(userType, new MethodFilter() {
 			@Override
 			public boolean matches(Method method) {
@@ -169,11 +169,11 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	protected void registerHandlerMethod(Object handler, Method method, T mapping) {
 		HandlerMethod newHandlerMethod = createHandlerMethod(handler, method);
-		HandlerMethod oldHandlerMethod = handlerMethods.get(mapping);
+		HandlerMethod oldHandlerMethod = this.handlerMethods.get(mapping);
 		if (oldHandlerMethod != null && !oldHandlerMethod.equals(newHandlerMethod)) {
-			throw new IllegalStateException("Ambiguous mapping found. Cannot map '" + newHandlerMethod.getBean()
-					+ "' bean method \n" + newHandlerMethod + "\nto " + mapping + ": There is already '"
-					+ oldHandlerMethod.getBean() + "' bean method\n" + oldHandlerMethod + " mapped.");
+			throw new IllegalStateException("Ambiguous mapping found. Cannot map '" + newHandlerMethod.getBean() +
+					"' bean method \n" + newHandlerMethod + "\nto " + mapping + ": There is already '" +
+					oldHandlerMethod.getBean() + "' bean method\n" + oldHandlerMethod + " mapped.");
 		}
 
 		this.handlerMethods.put(mapping, newHandlerMethod);
@@ -213,6 +213,14 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	protected abstract Set<String> getMappingPathPatterns(T mapping);
 
 	/**
+	 * Invoked after all handler methods have been detected.
+	 * @param handlerMethods a read-only map with handler methods and mappings.
+	 */
+	protected void handlerMethodsInitialized(Map<T, HandlerMethod> handlerMethods) {
+	}
+
+
+	/**
 	 * Look up a handler method for the given request.
 	 */
 	@Override
@@ -221,9 +229,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking up handler method for path " + lookupPath);
 		}
-
 		HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request);
-
 		if (logger.isDebugEnabled()) {
 			if (handlerMethod != null) {
 				logger.debug("Returning handler method [" + handlerMethod + "]");
@@ -232,8 +238,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				logger.debug("Did not find handler method for [" + lookupPath + "]");
 			}
 		}
-
-		return (handlerMethod != null) ? handlerMethod.createWithResolvedBean() : null;
+		return (handlerMethod != null ? handlerMethod.createWithResolvedBean() : null);
 	}
 
 	/**
