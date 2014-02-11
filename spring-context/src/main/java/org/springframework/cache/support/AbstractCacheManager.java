@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.cache.CacheManager;
  *
  * @author Costin Leau
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 3.1
  */
 public abstract class AbstractCacheManager implements CacheManager, InitializingBean {
@@ -70,10 +71,36 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 		return cache;
 	}
 
+	/**
+	 * Return a missing cache with the specified {@code name} or {@code null} if
+	 * such cache does not exist or could not be created on the fly.
+	 * <p>Some caches may be created at runtime in the native provided. If a lookup
+	 * by name does not yield any result, a subclass gets a chance to register
+	 * such a cache at runtime. The returned cache will be automatically added to
+	 * this instance.
+	 * @param name the name of the cache to retrieve
+	 * @return the missing cache or {@code null} if no such cache exists or could be
+	 * created
+	 * @see #getCache(String)
+	 */
+	protected Cache getMissingCache(String name) {
+		return null;
+	}
 
 	@Override
 	public Cache getCache(String name) {
-		return this.cacheMap.get(name);
+		Cache cache = lookupCache(name);
+		if (cache != null) {
+			return cache;
+		}
+		else {
+			Cache missingCache = getMissingCache(name);
+			if (missingCache != null) {
+				addCache(missingCache);
+				return lookupCache(name); // May be decorated
+			}
+			return null;
+		}
 	}
 
 	@Override
@@ -81,6 +108,9 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 		return Collections.unmodifiableSet(this.cacheNames);
 	}
 
+	private Cache lookupCache(String name) {
+		return this.cacheMap.get(name);
+	}
 
 	/**
 	 * Load the caches for this cache manager. Occurs at startup.
