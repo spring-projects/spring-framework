@@ -71,11 +71,6 @@ import org.springframework.util.StringUtils;
  */
 class ConstructorResolver {
 
-	private static final String CONSTRUCTOR_PROPERTIES_CLASS_NAME = "java.beans.ConstructorProperties";
-
-	private static final boolean constructorPropertiesAnnotationAvailable =
-			ClassUtils.isPresent(CONSTRUCTOR_PROPERTIES_CLASS_NAME, ConstructorResolver.class.getClassLoader());
-
 	private final AbstractAutowireCapableBeanFactory beanFactory;
 
 
@@ -183,10 +178,7 @@ class ConstructorResolver {
 				ArgumentsHolder argsHolder;
 				if (resolvedValues != null) {
 					try {
-						String[] paramNames = null;
-						if (constructorPropertiesAnnotationAvailable) {
-							paramNames = ConstructorPropertiesChecker.evaluateAnnotation(candidate, paramTypes.length);
-						}
+						String[] paramNames = ConstructorPropertiesChecker.evaluate(candidate, paramTypes.length);
 						if (paramNames == null) {
 							ParameterNameDiscoverer pnd = this.beanFactory.getParameterNameDiscoverer();
 							if (pnd != null) {
@@ -297,17 +289,21 @@ class ConstructorResolver {
 	 */
 	public void resolveFactoryMethodIfPossible(RootBeanDefinition mbd) {
 		Class<?> factoryClass;
+		boolean isStatic;
 		if (mbd.getFactoryBeanName() != null) {
 			factoryClass = this.beanFactory.getType(mbd.getFactoryBeanName());
+			isStatic = false;
 		}
 		else {
 			factoryClass = mbd.getBeanClass();
+			isStatic = true;
 		}
 		factoryClass = ClassUtils.getUserClass(factoryClass);
-		Method[] candidates = ReflectionUtils.getAllDeclaredMethods(factoryClass);
+
+		Method[] candidates = getCandidateMethods(factoryClass, mbd);
 		Method uniqueCandidate = null;
 		for (Method candidate : candidates) {
-			if (mbd.isFactoryMethod(candidate)) {
+			if (Modifier.isStatic(candidate.getModifiers()) == isStatic && mbd.isFactoryMethod(candidate)) {
 				if (uniqueCandidate == null) {
 					uniqueCandidate = candidate;
 				}
@@ -319,6 +315,27 @@ class ConstructorResolver {
 		}
 		synchronized (mbd.constructorArgumentLock) {
 			mbd.resolvedConstructorOrFactoryMethod = uniqueCandidate;
+		}
+	}
+
+	/**
+	 * Retrieve all candidate methods for the given class, considering
+	 * the {@link RootBeanDefinition#isNonPublicAccessAllowed()} flag.
+	 * Called as the starting point for factory method determination.
+	 */
+	private Method[] getCandidateMethods(final Class<?> factoryClass, final RootBeanDefinition mbd) {
+		if (System.getSecurityManager() != null) {
+			return AccessController.doPrivileged(new PrivilegedAction<Method[]>() {
+				@Override
+				public Method[] run() {
+					return (mbd.isNonPublicAccessAllowed() ?
+							ReflectionUtils.getAllDeclaredMethods(factoryClass) : factoryClass.getMethods());
+				}
+			});
+		}
+		else {
+			return (mbd.isNonPublicAccessAllowed() ?
+					ReflectionUtils.getAllDeclaredMethods(factoryClass) : factoryClass.getMethods());
 		}
 	}
 
@@ -337,7 +354,9 @@ class ConstructorResolver {
 	 * method, or {@code null} if none (-> use constructor argument values from bean definition)
 	 * @return a BeanWrapper for the new instance
 	 */
-	public BeanWrapper instantiateUsingFactoryMethod(final String beanName, final RootBeanDefinition mbd, final Object[] explicitArgs) {
+	public BeanWrapper instantiateUsingFactoryMethod(
+			final String beanName, final RootBeanDefinition mbd, final Object[] explicitArgs) {
+
 		BeanWrapperImpl bw = new BeanWrapperImpl();
 		this.beanFactory.initBeanWrapper(bw);
 
@@ -398,28 +417,11 @@ class ConstructorResolver {
 			// Need to determine the factory method...
 			// Try all methods with this name to see if they match the given arguments.
 			factoryClass = ClassUtils.getUserClass(factoryClass);
-			Method[] rawCandidates;
 
-			final Class<?> factoryClazz = factoryClass;
-			if (System.getSecurityManager() != null) {
-				rawCandidates = AccessController.doPrivileged(new PrivilegedAction<Method[]>() {
-					@Override
-					public Method[] run() {
-						return (mbd.isNonPublicAccessAllowed() ?
-								ReflectionUtils.getAllDeclaredMethods(factoryClazz) : factoryClazz.getMethods());
-					}
-				});
-			}
-			else {
-				rawCandidates = (mbd.isNonPublicAccessAllowed() ?
-						ReflectionUtils.getAllDeclaredMethods(factoryClazz) : factoryClazz.getMethods());
-			}
-
+			Method[] rawCandidates = getCandidateMethods(factoryClass, mbd);
 			List<Method> candidateSet = new ArrayList<Method>();
 			for (Method candidate : rawCandidates) {
-				if (Modifier.isStatic(candidate.getModifiers()) == isStatic &&
-						candidate.getName().equals(mbd.getFactoryMethodName()) &&
-						mbd.isFactoryMethod(candidate)) {
+				if (Modifier.isStatic(candidate.getModifiers()) == isStatic && mbd.isFactoryMethod(candidate)) {
 					candidateSet.add(candidate);
 				}
 			}
@@ -880,11 +882,11 @@ class ConstructorResolver {
 
 
 	/**
-	 * Inner class to avoid a Java 6 dependency.
+	 * Delegate for checking Java 6's {@link ConstructorProperties} annotation.
 	 */
 	private static class ConstructorPropertiesChecker {
 
-		public static String[] evaluateAnnotation(Constructor<?> candidate, int paramCount) {
+		public static String[] evaluate(Constructor<?> candidate, int paramCount) {
 			ConstructorProperties cp = candidate.getAnnotation(ConstructorProperties.class);
 			if (cp != null) {
 				String[] names = cp.value();
