@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
  * A builder that provides a convenient API for constructing an embedded database.
  *
  * <p>Usage example:
- * <pre>
+ * <pre class="code">
  * EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
  * EmbeddedDatabase db = builder.setType(H2).addScript("schema.sql").addScript("data.sql").build();
  * db.shutdown();
@@ -44,6 +44,7 @@ public class EmbeddedDatabaseBuilder {
 
 	private final ResourceLoader resourceLoader;
 
+
 	/**
 	 * Create a new embedded database builder.
 	 */
@@ -61,6 +62,7 @@ public class EmbeddedDatabaseBuilder {
 		this.databaseFactory.setDatabasePopulator(this.databasePopulator);
 		this.resourceLoader = resourceLoader;
 	}
+
 
 	/**
 	 * Set the name of the embedded database.

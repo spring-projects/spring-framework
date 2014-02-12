@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.core.OrderComparator;
 import org.springframework.util.Assert;
 
 /**
- * Central helper that manages resources and transaction synchronizations per thread.
+ * Central delegate that manages resources and transaction synchronizations per thread.
  * To be used by resource management code but not by typical application code.
  *
  * <p>Supports one resource per key without overwriting, that is, a resource needs
@@ -284,7 +284,7 @@ public abstract class TransactionSynchronizationManager {
 	 * @see org.springframework.core.Ordered
 	 */
 	public static void registerSynchronization(TransactionSynchronization synchronization)
-		throws IllegalStateException {
+			throws IllegalStateException {
 
 		Assert.notNull(synchronization, "TransactionSynchronization must not be null");
 		if (!isSynchronizationActive()) {

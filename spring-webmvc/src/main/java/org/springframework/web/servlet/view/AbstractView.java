@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 	/** Whether or not the view should add path variables in the model */
 	private boolean exposePathVariables = true;
+
 
 	/**
 	 * Set the view's name. Helpful for traceability.
@@ -242,8 +243,9 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * Returns the value of the flag indicating whether path variables should be added to the model or not.
 	 */
 	public boolean isExposePathVariables() {
-		return exposePathVariables;
+		return this.exposePathVariables;
 	}
+
 
 	/**
 	 * Prepares the view given the specified model, merging it with static
@@ -258,7 +260,6 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 		}
 
 		Map<String, Object> mergedModel = createMergedOutputModel(model, request, response);
-
 		prepareResponse(request, response);
 		renderMergedOutputModel(mergedModel, request, response);
 	}
@@ -268,11 +269,11 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * Dynamic values take precedence over static attributes.
 	 */
 	protected Map<String, Object> createMergedOutputModel(Map<String, ?> model, HttpServletRequest request,
-
 			HttpServletResponse response) {
+
 		@SuppressWarnings("unchecked")
-		Map<String, Object> pathVars = this.exposePathVariables ?
-			(Map<String, Object>) request.getAttribute(View.PATH_VARIABLES) : null;
+		Map<String, Object> pathVars = (this.exposePathVariables ?
+			(Map<String, Object>) request.getAttribute(View.PATH_VARIABLES) : null);
 
 		// Consolidate static and dynamic model attributes.
 		int size = this.staticAttributes.size();
