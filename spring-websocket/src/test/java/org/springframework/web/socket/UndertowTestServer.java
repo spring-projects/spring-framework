@@ -71,7 +71,7 @@ public class UndertowTestServer implements WebSocketTestServer {
 
 		try {
 			this.server = Undertow.builder()
-					.addListener(this.port, "localhost")
+					.addHttpListener(this.port, "localhost")
 					.setHandler(this.manager.start()).build();
 		}
 		catch (ServletException ex) {
