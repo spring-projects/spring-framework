@@ -25,6 +25,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.springframework.oxm.Marshaller;
 import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.AbstractView;
 
@@ -38,6 +39,7 @@ import org.springframework.web.servlet.view.AbstractView;
  * property or have Spring locate the Source object.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public class MarshallingView extends AbstractView {
@@ -67,7 +69,8 @@ public class MarshallingView extends AbstractView {
 	 */
 	public MarshallingView(Marshaller marshaller) {
 		this();
-		setMarshaller(marshaller);
+		Assert.notNull(marshaller, "Marshaller must not be null");
+		this.marshaller = marshaller;
 	}
 
 
@@ -75,7 +78,6 @@ public class MarshallingView extends AbstractView {
 	 * Sets the {@link Marshaller} to be used by this view.
 	 */
 	public void setMarshaller(Marshaller marshaller) {
-		Assert.notNull(marshaller, "Marshaller must not be null");
 		this.marshaller = marshaller;
 	}
 
@@ -112,9 +114,10 @@ public class MarshallingView extends AbstractView {
 	}
 
 	/**
-	 * Locates the object to be marshalled. The default implementation first attempts to look
-	 * under the configured {@linkplain #setModelKey(String) model key}, if any, before attempting
-	 * to locate an object of {@linkplain Marshaller#supports(Class) supported type}.
+	 * Locate the object to be marshalled.
+	 * <p>The default implementation first attempts to look under the configured
+	 * {@linkplain #setModelKey(String) model key}, if any, before attempting to
+	 * locate an object of {@linkplain Marshaller#supports(Class) supported type}.
 	 * @param model the model Map
 	 * @return the Object to be marshalled (or {@code null} if none found)
 	 * @throws IllegalStateException if the model object specified by the
@@ -134,7 +137,8 @@ public class MarshallingView extends AbstractView {
 			return obj;
 		}
 		for (Object obj : model.values()) {
-			if (obj != null && this.marshaller.supports(obj.getClass())) {
+			if (obj != null && (model.size() == 1 || !(obj instanceof BindingResult)) &&
+					this.marshaller.supports(obj.getClass())) {
 				return obj;
 			}
 		}
