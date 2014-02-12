@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -181,11 +181,24 @@ public class UrlPathHelper {
 		}
 		else {
 			// Special case: URI is different from servlet path.
-			// Can happen e.g. with index page: URI="/", servletPath="/index.html"
-			// Use path info if available, as it indicates an index page within
-			// a servlet mapping. Otherwise, use the full servlet path.
 			String pathInfo = request.getPathInfo();
-			return (pathInfo != null ? pathInfo : servletPath);
+			if (pathInfo != null) {
+				// Use path info if available. Indicates index page within a servlet mapping?
+				// e.g. with index page: URI="/", servletPath="/index.html"
+				return pathInfo;
+			}
+			if (!this.urlDecode) {
+				// No path info... (not mapped by prefix, nor by extension, nor "/*")
+				// For the default servlet mapping (i.e. "/"), urlDecode=false can
+				// cause issues since getServletPath() returns a decoded path.
+				// If decoding pathWithinApp yields a match just use pathWithinApp.
+				path = getRemainingPath(decodeInternal(request, pathWithinApp), servletPath, false);
+				if (path != null) {
+					return pathWithinApp;
+				}
+			}
+			// Otherwise, use the full servlet path.
+			return servletPath;
 		}
 	}
 
@@ -217,7 +230,7 @@ public class UrlPathHelper {
 	private String getRemainingPath(String requestUri, String mapping, boolean ignoreCase) {
 		int index1 = 0;
 		int index2 = 0;
-		for ( ; (index1 < requestUri.length()) && (index2 < mapping.length()); index1++, index2++) {
+		for (; (index1 < requestUri.length()) && (index2 < mapping.length()); index1++, index2++) {
 			char c1 = requestUri.charAt(index1);
 			char c2 = mapping.charAt(index2);
 			if (c1 == ';') {
@@ -244,7 +257,7 @@ public class UrlPathHelper {
 		else if (requestUri.charAt(index1) == ';') {
 			index1 = requestUri.indexOf('/', index1);
 		}
-		return (index1 != -1) ? requestUri.substring(index1) : "";
+		return (index1 != -1 ? requestUri.substring(index1) : "");
 	}
 
 	/**
@@ -299,8 +312,7 @@ public class UrlPathHelper {
 		if (servletPath == null) {
 			servletPath = request.getServletPath();
 		}
-		if (servletPath.length() > 1 && servletPath.endsWith("/") &&
-				shouldRemoveTrailingServletPathSlash(request)) {
+		if (servletPath.length() > 1 && servletPath.endsWith("/") && shouldRemoveTrailingServletPathSlash(request)) {
 			// On WebSphere, in non-compliant mode, for a "/foo/" case that would be "/foo"
 			// on all other servlet containers: removing trailing slash, proceeding with
 			// that remaining slash as final lookup path...
@@ -436,7 +448,6 @@ public class UrlPathHelper {
 	 * Remove ";" (semicolon) content from the given request URI if the
 	 * {@linkplain #setRemoveSemicolonContent(boolean) removeSemicolonContent}
 	 * property is set to "true". Note that "jssessionid" is always removed.
-	 *
 	 * @param requestUri the request URI string to remove ";" content from
 	 * @return the updated URI string
 	 */
@@ -473,7 +484,6 @@ public class UrlPathHelper {
 	 * assumed the URL path from which the variables were extracted is already
 	 * decoded through a call to
 	 * {@link #getLookupPathForRequest(HttpServletRequest)}.
-	 *
 	 * @param request current HTTP request
 	 * @param vars URI variables extracted from the URL path
 	 * @return the same Map or a new Map instance
@@ -498,7 +508,6 @@ public class UrlPathHelper {
 	 * assumed the URL path from which the variables were extracted is already
 	 * decoded through a call to
 	 * {@link #getLookupPathForRequest(HttpServletRequest)}.
-	 *
 	 * @param request current HTTP request
 	 * @param vars URI variables extracted from the URL path
 	 * @return the same Map or a new Map instance

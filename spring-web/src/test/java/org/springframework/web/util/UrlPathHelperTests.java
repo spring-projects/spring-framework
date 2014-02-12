@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,17 +32,19 @@ import static org.junit.Assert.*;
  */
 public class UrlPathHelperTests {
 
+	private static final String WEBSPHERE_URI_ATTRIBUTE = "com.ibm.websphere.servlet.uri_non_decoded";
+
 	private UrlPathHelper helper;
 
 	private MockHttpServletRequest request;
 
-	private static final String WEBSPHERE_URI_ATTRIBUTE = "com.ibm.websphere.servlet.uri_non_decoded";
 
 	@Before
 	public void setUp() {
 		helper = new UrlPathHelper();
 		request = new MockHttpServletRequest();
 	}
+
 
 	@Test
 	public void getPathWithinApplication() {
@@ -75,6 +77,17 @@ public class UrlPathHelperTests {
 		request.setRequestURI("/petclinic/main/welcome.html");
 
 		assertEquals("Incorrect path returned", "/welcome.html", helper.getPathWithinServletMapping(request));
+	}
+
+	@Test  // SPR-11101
+	public void getPathWithinServletWithoutUrlDecoding() {
+		request.setContextPath("/SPR-11101");
+		request.setServletPath("/test_url_decoding/a/b");
+		request.setRequestURI("/test_url_decoding/a%2Fb");
+
+		helper.setUrlDecode(false);
+		String actual = helper.getPathWithinServletMapping(request);
+		assertEquals("/test_url_decoding/a%2Fb", actual);
 	}
 
 	@Test
@@ -141,10 +154,9 @@ public class UrlPathHelperTests {
 
 
 	//
-	// suite of tests root requests for default servlets (SRV 11.2) on Websphere vs Tomcat and other containers
-	// see: http://jira.springframework.org/browse/SPR-7064
+	// Suite of tests root requests for default servlets (SRV 11.2) on WebSphere vs Tomcat and other containers
+	// See: http://jira.springframework.org/browse/SPR-7064
 	//
-
 
 	//
 	// / mapping (default servlet)
