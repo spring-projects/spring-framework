@@ -406,8 +406,9 @@ project("spring-messaging") {
 		testCompile("org.eclipse.jetty:jetty-webapp:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
 		}
-		testCompile("org.apache.tomcat.embed:tomcat-embed-core:8.0.0-RC10")
-		testCompile("org.apache.tomcat.embed:tomcat-embed-logging-juli:8.0.0-RC10")
+		testCompile("org.apache.tomcat.embed:tomcat-embed-core:8.0.3")
+		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:8.0.3")
+		testCompile("org.apache.tomcat.embed:tomcat-embed-logging-juli:8.0.3")
 		testCompile("commons-dbcp:commons-dbcp:1.4")
 		testCompile("log4j:log4j:1.2.17")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
@@ -583,7 +584,7 @@ project("spring-websocket") {
 		optional(project(":spring-webmvc"))
 		optional("javax.servlet:javax.servlet-api:3.1.0")
 		optional("javax.websocket:javax.websocket-api:1.0")
-		optional("org.apache.tomcat:tomcat-websocket:8.0.0-RC10") {
+		optional("org.apache.tomcat:tomcat-websocket:8.0.3") {
 			exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
 			exclude group: "org.apache.tomcat", module: "tomcat-servlet-api"
 		}
@@ -604,7 +605,9 @@ project("spring-websocket") {
 			exclude group: "org.jboss.spec.javax.websocket", module: "jboss-websocket-api_1.0_spec"
 		}
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
-		testCompile("org.apache.tomcat.embed:tomcat-embed-core:8.0.0-RC10")
+		testCompile("org.apache.tomcat.embed:tomcat-embed-core:8.0.3")
+		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:8.0.3")
+		testCompile("org.apache.tomcat.embed:tomcat-embed-logging-juli:8.0.3")
 		testCompile("org.projectreactor:reactor-core:1.0.0.RELEASE")
 		testCompile("org.projectreactor:reactor-tcp:1.0.0.RELEASE")
 		testCompile("log4j:log4j:1.2.17")
