@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,11 +54,8 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Helper class for resolving constructors and factory methods.
+ * Delegate for resolving constructors and factory methods.
  * Performs constructor resolution through argument matching.
- *
- * <p>Operates on an {@link AbstractBeanFactory} and an {@link InstantiationStrategy}.
- * Used by {@link AbstractAutowireCapableBeanFactory}.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -103,12 +100,12 @@ class ConstructorResolver {
 	 * @return a BeanWrapper for the new instance
 	 */
 	public BeanWrapper autowireConstructor(
-			final String beanName, final RootBeanDefinition mbd, Constructor[] chosenCtors, final Object[] explicitArgs) {
+			final String beanName, final RootBeanDefinition mbd, Constructor<?>[] chosenCtors, final Object[] explicitArgs) {
 
 		BeanWrapperImpl bw = new BeanWrapperImpl();
 		this.beanFactory.initBeanWrapper(bw);
 
-		Constructor constructorToUse = null;
+		Constructor<?> constructorToUse = null;
 		ArgumentsHolder argsHolderToUse = null;
 		Object[] argsToUse = null;
 
@@ -118,7 +115,7 @@ class ConstructorResolver {
 		else {
 			Object[] argsToResolve = null;
 			synchronized (mbd.constructorArgumentLock) {
-				constructorToUse = (Constructor) mbd.resolvedConstructorOrFactoryMethod;
+				constructorToUse = (Constructor<?>) mbd.resolvedConstructorOrFactoryMethod;
 				if (constructorToUse != null && mbd.constructorArgumentsResolved) {
 					// Found a cached constructor...
 					argsToUse = mbd.resolvedConstructorArguments;
@@ -149,7 +146,7 @@ class ConstructorResolver {
 			}
 
 			// Take specified constructors, if any.
-			Constructor[] candidates = chosenCtors;
+			Constructor<?>[] candidates = chosenCtors;
 			if (candidates == null) {
 				Class<?> beanClass = mbd.getBeanClass();
 				try {
@@ -164,7 +161,7 @@ class ConstructorResolver {
 			}
 			AutowireUtils.sortConstructors(candidates);
 			int minTypeDiffWeight = Integer.MAX_VALUE;
-			Set<Constructor> ambiguousConstructors = null;
+			Set<Constructor<?>> ambiguousConstructors = null;
 			List<Exception> causes = null;
 
 			for (int i = 0; i < candidates.length; i++) {
@@ -185,7 +182,7 @@ class ConstructorResolver {
 					try {
 						String[] paramNames = null;
 						if (constructorPropertiesAnnotationAvailable) {
-							paramNames = ConstructorPropertiesChecker.evaluateAnnotation(candidate, paramTypes.length);
+							paramNames = ConstructorPropertiesChecker.evaluate(candidate, paramTypes.length);
 						}
 						if (paramNames == null) {
 							ParameterNameDiscoverer pnd = this.beanFactory.getParameterNameDiscoverer();
@@ -239,7 +236,7 @@ class ConstructorResolver {
 				}
 				else if (constructorToUse != null && typeDiffWeight == minTypeDiffWeight) {
 					if (ambiguousConstructors == null) {
-						ambiguousConstructors = new LinkedHashSet<Constructor>();
+						ambiguousConstructors = new LinkedHashSet<Constructor<?>>();
 						ambiguousConstructors.add(constructorToUse);
 					}
 					ambiguousConstructors.add(candidate);
@@ -267,7 +264,7 @@ class ConstructorResolver {
 			Object beanInstance;
 
 			if (System.getSecurityManager() != null) {
-				final Constructor ctorToUse = constructorToUse;
+				final Constructor<?> ctorToUse = constructorToUse;
 				final Object[] argumentsToUse = argsToUse;
 				beanInstance = AccessController.doPrivileged(new PrivilegedAction<Object>() {
 					public Object run() {
@@ -295,18 +292,22 @@ class ConstructorResolver {
 	 * @param mbd the bean definition to check
 	 */
 	public void resolveFactoryMethodIfPossible(RootBeanDefinition mbd) {
-		Class factoryClass;
+		Class<?> factoryClass;
+		boolean isStatic;
 		if (mbd.getFactoryBeanName() != null) {
 			factoryClass = this.beanFactory.getType(mbd.getFactoryBeanName());
+			isStatic = false;
 		}
 		else {
 			factoryClass = mbd.getBeanClass();
+			isStatic = true;
 		}
 		factoryClass = ClassUtils.getUserClass(factoryClass);
-		Method[] candidates = ReflectionUtils.getAllDeclaredMethods(factoryClass);
+
+		Method[] candidates = getCandidateMethods(factoryClass, mbd);
 		Method uniqueCandidate = null;
 		for (Method candidate : candidates) {
-			if (mbd.isFactoryMethod(candidate)) {
+			if (Modifier.isStatic(candidate.getModifiers()) == isStatic && mbd.isFactoryMethod(candidate)) {
 				if (uniqueCandidate == null) {
 					uniqueCandidate = candidate;
 				}
@@ -318,6 +319,27 @@ class ConstructorResolver {
 		}
 		synchronized (mbd.constructorArgumentLock) {
 			mbd.resolvedConstructorOrFactoryMethod = uniqueCandidate;
+		}
+	}
+
+	/**
+	 * Retrieve all candidate methods for the given class, considering
+	 * the {@link RootBeanDefinition#isNonPublicAccessAllowed()} flag.
+	 * Called as the starting point for factory method determination.
+	 */
+	private Method[] getCandidateMethods(final Class<?> factoryClass, final RootBeanDefinition mbd) {
+		if (System.getSecurityManager() != null) {
+			return AccessController.doPrivileged(new PrivilegedAction<Method[]>() {
+				@Override
+				public Method[] run() {
+					return (mbd.isNonPublicAccessAllowed() ?
+							ReflectionUtils.getAllDeclaredMethods(factoryClass) : factoryClass.getMethods());
+				}
+			});
+		}
+		else {
+			return (mbd.isNonPublicAccessAllowed() ?
+					ReflectionUtils.getAllDeclaredMethods(factoryClass) : factoryClass.getMethods());
 		}
 	}
 
@@ -336,7 +358,9 @@ class ConstructorResolver {
 	 * method, or {@code null} if none (-> use constructor argument values from bean definition)
 	 * @return a BeanWrapper for the new instance
 	 */
-	public BeanWrapper instantiateUsingFactoryMethod(final String beanName, final RootBeanDefinition mbd, final Object[] explicitArgs) {
+	public BeanWrapper instantiateUsingFactoryMethod(
+			final String beanName, final RootBeanDefinition mbd, final Object[] explicitArgs) {
+
 		BeanWrapperImpl bw = new BeanWrapperImpl();
 		this.beanFactory.initBeanWrapper(bw);
 
@@ -397,27 +421,11 @@ class ConstructorResolver {
 			// Need to determine the factory method...
 			// Try all methods with this name to see if they match the given arguments.
 			factoryClass = ClassUtils.getUserClass(factoryClass);
-			Method[] rawCandidates;
 
-			final Class<?> factoryClazz = factoryClass;
-			if (System.getSecurityManager() != null) {
-				rawCandidates = AccessController.doPrivileged(new PrivilegedAction<Method[]>() {
-					public Method[] run() {
-						return (mbd.isNonPublicAccessAllowed() ?
-								ReflectionUtils.getAllDeclaredMethods(factoryClazz) : factoryClazz.getMethods());
-					}
-				});
-			}
-			else {
-				rawCandidates = (mbd.isNonPublicAccessAllowed() ?
-						ReflectionUtils.getAllDeclaredMethods(factoryClazz) : factoryClazz.getMethods());
-			}
-
+			Method[] rawCandidates = getCandidateMethods(factoryClass, mbd);
 			List<Method> candidateSet = new ArrayList<Method>();
 			for (Method candidate : rawCandidates) {
-				if (Modifier.isStatic(candidate.getModifiers()) == isStatic &&
-						candidate.getName().equals(mbd.getFactoryMethodName()) &&
-						mbd.isFactoryMethod(candidate)) {
+				if (Modifier.isStatic(candidate.getModifiers()) == isStatic && mbd.isFactoryMethod(candidate)) {
 					candidateSet.add(candidate);
 				}
 			}
@@ -759,7 +767,7 @@ class ConstructorResolver {
 			String beanName, RootBeanDefinition mbd, BeanWrapper bw, Member methodOrCtor, Object[] argsToResolve) {
 
 		Class<?>[] paramTypes = (methodOrCtor instanceof Method ?
-				((Method) methodOrCtor).getParameterTypes() : ((Constructor) methodOrCtor).getParameterTypes());
+				((Method) methodOrCtor).getParameterTypes() : ((Constructor<?>) methodOrCtor).getParameterTypes());
 		TypeConverter converter = (this.beanFactory.getCustomTypeConverter() != null ?
 				this.beanFactory.getCustomTypeConverter() : bw);
 		BeanDefinitionValueResolver valueResolver =
@@ -881,7 +889,7 @@ class ConstructorResolver {
 	 */
 	private static class ConstructorPropertiesChecker {
 
-		public static String[] evaluateAnnotation(Constructor<?> candidate, int paramCount) {
+		public static String[] evaluate(Constructor<?> candidate, int paramCount) {
 			ConstructorProperties cp = candidate.getAnnotation(ConstructorProperties.class);
 			if (cp != null) {
 				String[] names = cp.value();
