@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -31,7 +30,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.springframework.util.Assert;
 import org.springframework.util.DigestUtils;
-import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -48,9 +47,9 @@ import org.springframework.web.util.WebUtils;
  */
 public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 
-	private static String HEADER_ETAG = "ETag";
+	private static final String HEADER_ETAG = "ETag";
 
-	private static String HEADER_IF_NONE_MATCH = "If-None-Match";
+	private static final String HEADER_IF_NONE_MATCH = "If-None-Match";
 
 
 	/**
@@ -117,7 +116,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	private void copyBodyToResponse(byte[] body, HttpServletResponse response) throws IOException {
 		if (body.length > 0) {
 			response.setContentLength(body.length);
-			FileCopyUtils.copy(body, response.getOutputStream());
+			StreamUtils.copy(body, response.getOutputStream());
 		}
 	}
 
@@ -166,7 +165,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 
 		private int statusCode = HttpServletResponse.SC_OK;
 
-		private ShallowEtagResponseWrapper(HttpServletResponse response) {
+		public ShallowEtagResponseWrapper(HttpServletResponse response) {
 			super(response);
 		}
 
@@ -233,6 +232,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 			return this.content.toByteArray();
 		}
 
+
 		private class ResponseServletOutputStream extends ServletOutputStream {
 
 			@Override
@@ -246,9 +246,10 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 			}
 		}
 
+
 		private class ResponsePrintWriter extends PrintWriter {
 
-			private ResponsePrintWriter(String characterEncoding) throws UnsupportedEncodingException {
+			public ResponsePrintWriter(String characterEncoding) throws UnsupportedEncodingException {
 				super(new OutputStreamWriter(content, characterEncoding));
 			}
 

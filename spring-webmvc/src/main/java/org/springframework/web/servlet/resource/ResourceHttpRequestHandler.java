@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.servlet.resource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-
 import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletException;
@@ -28,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -35,7 +35,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -249,7 +249,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	 * @throws IOException in case of errors while writing the content
 	 */
 	protected void writeContent(HttpServletResponse response, Resource resource) throws IOException {
-		FileCopyUtils.copy(resource.getInputStream(), response.getOutputStream());
+		StreamUtils.copy(resource.getInputStream(), response.getOutputStream());
 	}
 
 
