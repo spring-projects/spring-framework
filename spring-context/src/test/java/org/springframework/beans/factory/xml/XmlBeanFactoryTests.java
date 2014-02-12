@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import java.net.URL;
 import java.util.Map;
 
 import org.apache.commons.logging.LogFactory;
+
 import org.junit.Test;
-import org.xml.sax.InputSource;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
@@ -61,20 +61,24 @@ import org.springframework.tests.sample.beans.IndexedTestBean;
 import org.springframework.tests.sample.beans.ResourceTestBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.tests.sample.beans.factory.DummyFactory;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
+
+import org.xml.sax.InputSource;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 /**
  * Miscellaneous tests for XML bean definitions.
- *
+ * 
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @author Rick Evans
  * @author Chris Beams
+ * @author Sam Brannen
  */
 public final class XmlBeanFactoryTests {
 
@@ -1283,6 +1287,31 @@ public final class XmlBeanFactoryTests {
 		}
 	}
 
+	/**
+	 * @since 3.2.8 and 4.0.2
+	 * @see <a href="https://jira.springsource.org/browse/SPR-10785">SPR-10785</a> and <a
+	 *      href="https://jira.springsource.org/browse/SPR-11420">SPR-11420</a>
+	 */
+	@Test
+	public void methodInjectedBeanMustBeOfSameEnhancedCglibSubclassTypeAcrossBeanFactories() {
+		Class<?> firstClass = null;
+
+		for (int i = 1; i <= 10; i++) {
+			DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+			new XmlBeanDefinitionReader(bf).loadBeanDefinitions(OVERRIDES_CONTEXT);
+
+			final Class<?> currentClass = bf.getBean("overrideOneMethod").getClass();
+			assertTrue("Method injected bean class [" + currentClass + "] must be a CGLIB enhanced subclass.",
+				ClassUtils.isCglibProxyClass(currentClass));
+
+			if (firstClass == null) {
+				firstClass = currentClass;
+			}
+			else {
+				assertEquals(firstClass, currentClass);
+			}
+		}
+	}
 
 	@Test
 	public void testLookupOverrideMethodsWithSetterInjection() {
@@ -1915,6 +1944,7 @@ public final class XmlBeanFactoryTests {
 			this.tb = tb;
 		}
 
+		@SuppressWarnings("rawtypes")
 		public LenientDependencyTestBean(Map[] m) {
 			throw new IllegalStateException("Don't pick this constructor");
 		}
