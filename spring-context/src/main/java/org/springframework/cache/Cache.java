@@ -81,6 +81,33 @@ public interface Cache {
 	void put(Object key, Object value);
 
 	/**
+	 * Atomically associate the specified value with the specified key in this cache if
+	 * it is not set already.
+	 * <p>This is equivalent to:
+	 * <pre><code>
+	 * Object existingValue = cache.get(key);
+	 * if (existingValue == null) {
+	 *     cache.put(key, value);
+	 *     return null;
+	 * } else {
+	 *     return existingValue;
+	 * }
+	 * </code></pre>
+	 * except that the action is performed atomically. While all known providers are
+	 * able to perform the put atomically, the returned value may be retrieved after
+	 * the attempt to put (i.e. in a non atomic way). Check the documentation of
+	 * the native cache implementation that you are using for more details.
+	 * @param key the key with which the specified value is to be associated
+	 * @param value the value to be associated with the specified key
+	 * @return the value to which this cache maps the specified key (which may
+	 * be {@code null} itself), or also {@code null} if  the cache did not contain
+	 * any mapping for that key prior to this call. Returning {@code null} is
+	 * therefore an indicator that the given {@code value} has been associated
+	 * with the key
+	 */
+	ValueWrapper putIfAbsent(Object key, Object value);
+
+	/**
 	 * Evict the mapping for this key from this cache if it is present.
 	 * @param key the key whose mapping is to be removed from the cache
 	 */

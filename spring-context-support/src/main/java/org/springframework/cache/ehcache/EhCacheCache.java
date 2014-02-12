@@ -29,6 +29,7 @@ import org.springframework.util.Assert;
  *
  * @author Costin Leau
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 3.1
  */
 public class EhCacheCache implements Cache {
@@ -62,7 +63,7 @@ public class EhCacheCache implements Cache {
 	@Override
 	public ValueWrapper get(Object key) {
 		Element element = this.cache.get(key);
-		return (element != null ? new SimpleValueWrapper(element.getObjectValue()) : null);
+		return toWrapper(element);
 	}
 
 	@Override
@@ -82,6 +83,12 @@ public class EhCacheCache implements Cache {
 	}
 
 	@Override
+	public ValueWrapper putIfAbsent(Object key, Object value) {
+		Element existingElement = this.cache.putIfAbsent(new Element(key, value));
+		return toWrapper(existingElement);
+	}
+
+	@Override
 	public void evict(Object key) {
 		this.cache.remove(key);
 	}
@@ -89,6 +96,10 @@ public class EhCacheCache implements Cache {
 	@Override
 	public void clear() {
 		this.cache.removeAll();
+	}
+
+	private ValueWrapper toWrapper(Element element) {
+		return (element != null ? new SimpleValueWrapper(element.getObjectValue()) : null);
 	}
 
 }

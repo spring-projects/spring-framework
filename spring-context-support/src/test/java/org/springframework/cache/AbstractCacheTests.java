@@ -14,52 +14,37 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.concurrent;
-
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import org.springframework.cache.Cache;
+package org.springframework.cache;
 
 import static org.junit.Assert.*;
 
+import org.junit.Test;
+
 /**
- * @author Costin Leau
- * @author Juergen Hoeller
  * @author Stephane Nicoll
  */
-public class ConcurrentCacheTests  {
+public abstract class AbstractCacheTests<T extends Cache> {
 
 	protected final static String CACHE_NAME = "testCache";
 
-	protected ConcurrentMap<Object, Object> nativeCache;
+	protected abstract T getCache();
 
-	protected Cache cache;
-
-
-	@Before
-	public void setUp() throws Exception {
-		nativeCache = new ConcurrentHashMap<Object, Object>();
-		cache = new ConcurrentMapCache(CACHE_NAME, nativeCache, true);
-		cache.clear();
-	}
-
+	protected abstract Object getNativeCache();
 
 	@Test
 	public void testCacheName() throws Exception {
-		assertEquals(CACHE_NAME, cache.getName());
+		assertEquals(CACHE_NAME, getCache().getName());
 	}
 
 	@Test
 	public void testNativeCache() throws Exception {
-		assertSame(nativeCache, cache.getNativeCache());
+		assertSame(getNativeCache(), getCache().getNativeCache());
 	}
 
 	@Test
 	public void testCachePut() throws Exception {
+		T cache = getCache();
+
 		Object key = "enescu";
 		Object value = "george";
 
@@ -82,6 +67,8 @@ public class ConcurrentCacheTests  {
 
 	@Test
 	public void testCachePutIfAbsent() throws Exception {
+		T cache = getCache();
+
 		Object key = new Object();
 		Object value = "initialValue";
 
@@ -94,6 +81,8 @@ public class ConcurrentCacheTests  {
 
 	@Test
 	public void testCacheRemove() throws Exception {
+		T cache = getCache();
+
 		Object key = "enescu";
 		Object value = "george";
 
@@ -103,6 +92,8 @@ public class ConcurrentCacheTests  {
 
 	@Test
 	public void testCacheClear() throws Exception {
+		T cache = getCache();
+
 		assertNull(cache.get("enescu"));
 		cache.put("enescu", "george");
 		assertNull(cache.get("vlaicu"));
@@ -111,5 +102,4 @@ public class ConcurrentCacheTests  {
 		assertNull(cache.get("vlaicu"));
 		assertNull(cache.get("enescu"));
 	}
-
 }

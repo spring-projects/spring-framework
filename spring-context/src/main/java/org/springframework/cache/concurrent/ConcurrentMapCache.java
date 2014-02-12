@@ -103,7 +103,7 @@ public class ConcurrentMapCache implements Cache {
 	@Override
 	public ValueWrapper get(Object key) {
 		Object value = this.store.get(key);
-		return (value != null ? new SimpleValueWrapper(fromStoreValue(value)) : null);
+		return toWrapper(value);
 	}
 
 	@Override
@@ -119,6 +119,12 @@ public class ConcurrentMapCache implements Cache {
 	@Override
 	public void put(Object key, Object value) {
 		this.store.put(key, toStoreValue(value));
+	}
+
+	@Override
+	public ValueWrapper putIfAbsent(Object key, Object value) {
+		Object existing = this.store.putIfAbsent(key, value);
+		return toWrapper(existing);
 	}
 
 	@Override
@@ -158,6 +164,9 @@ public class ConcurrentMapCache implements Cache {
 		return userValue;
 	}
 
+	private ValueWrapper toWrapper(Object value) {
+		return (value != null ? new SimpleValueWrapper(fromStoreValue(value)) : null);
+	}
 
 	@SuppressWarnings("serial")
 	private static class NullHolder implements Serializable {

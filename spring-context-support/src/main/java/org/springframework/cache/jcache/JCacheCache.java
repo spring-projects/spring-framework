@@ -29,6 +29,7 @@ import org.springframework.util.Assert;
  * <p>Note: This class has been updated for JCache 1.0, as of Spring 4.0.
  *
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 3.2
  */
 public class JCacheCache implements Cache {
@@ -93,6 +94,12 @@ public class JCacheCache implements Cache {
 	@Override
 	public void put(Object key, Object value) {
 		this.cache.put(key, toStoreValue(value));
+	}
+
+	@Override
+	public ValueWrapper putIfAbsent(Object key, Object value) {
+		boolean set = this.cache.putIfAbsent(key, toStoreValue(value));
+		return (set ? null : get(key));
 	}
 
 	@Override

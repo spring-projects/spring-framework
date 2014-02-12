@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.cache.CacheManager;
  * <p>Will simply accept any items into the cache not actually storing them.
  *
  * @author Costin Leau
+ * @author Stephane Nicoll
  * @since 3.1
  * @see CompositeCacheManager
  */
@@ -110,6 +111,11 @@ public class NoOpCacheManager implements CacheManager {
 
 		@Override
 		public void put(Object key, Object value) {
+		}
+
+		@Override
+		public ValueWrapper putIfAbsent(Object key, Object value) {
+			return null;
 		}
 	}
 

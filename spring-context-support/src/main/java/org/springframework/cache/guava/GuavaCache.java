@@ -17,6 +17,8 @@
 package org.springframework.cache.guava;
 
 import java.io.Serializable;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.support.SimpleValueWrapper;
@@ -29,6 +31,7 @@ import org.springframework.util.Assert;
  * <p>Requires Google Guava 12.0 or higher.
  *
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 4.0
  */
 public class GuavaCache implements Cache {
@@ -83,7 +86,7 @@ public class GuavaCache implements Cache {
 	@Override
 	public ValueWrapper get(Object key) {
 		Object value = this.cache.getIfPresent(key);
-		return (value != null ? new SimpleValueWrapper(fromStoreValue(value)) : null);
+		return toWrapper(value);
 	}
 
 	@Override
@@ -99,6 +102,17 @@ public class GuavaCache implements Cache {
 	@Override
 	public void put(Object key, Object value) {
 		this.cache.put(key, toStoreValue(value));
+	}
+
+	@Override
+	public ValueWrapper putIfAbsent(Object key, final Object value) {
+		try {
+			PutIfAbsentCallable callable = new PutIfAbsentCallable(value);
+			Object result = this.cache.get(key, callable);
+			return (callable.called ? null : toWrapper(result));
+		} catch (ExecutionException e) {
+			throw new IllegalArgumentException(e);
+		}
 	}
 
 	@Override
@@ -138,9 +152,29 @@ public class GuavaCache implements Cache {
 		return userValue;
 	}
 
+	private ValueWrapper toWrapper(Object value) {
+		return (value != null ? new SimpleValueWrapper(fromStoreValue(value)) : null);
+	}
+
 
 	@SuppressWarnings("serial")
 	private static class NullHolder implements Serializable {
+	}
+
+	private class PutIfAbsentCallable implements Callable<Object> {
+		private boolean called;
+
+		private final Object value;
+
+		private PutIfAbsentCallable(Object value) {
+			this.value = value;
+		}
+
+		@Override
+		public Object call() throws Exception {
+			called = true;
+			return toStoreValue(value);
+		}
 	}
 
 }
