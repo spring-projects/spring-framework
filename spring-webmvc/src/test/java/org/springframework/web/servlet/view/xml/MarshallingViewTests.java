@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,19 @@
 package org.springframework.web.servlet.view.xml;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
-
 import javax.servlet.ServletException;
 import javax.xml.transform.stream.StreamResult;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.oxm.Marshaller;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
@@ -36,15 +39,17 @@ import static org.mockito.BDDMockito.*;
  */
 public class MarshallingViewTests {
 
+	private Marshaller marshallerMock;
+
 	private MarshallingView view;
 
-	private Marshaller marshallerMock;
 
 	@Before
 	public void createView() throws Exception {
 		marshallerMock = mock(Marshaller.class);
 		view = new MarshallingView(marshallerMock);
 	}
+
 
 	@Test
 	public void getContentType() {
@@ -152,6 +157,26 @@ public class MarshallingViewTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
+		given(marshallerMock.supports(Object.class)).willReturn(true);
+
+		view.render(model, request, response);
+		assertEquals("Invalid content type", "application/xml", response.getContentType());
+		assertEquals("Invalid content length", 0, response.getContentLength());
+		verify(marshallerMock).marshal(eq(toBeMarshalled), isA(StreamResult.class));
+	}
+
+	@Test
+	public void renderNoModelKeyAndBindingResultFirst() throws Exception {
+		Object toBeMarshalled = new Object();
+		String modelKey = "key";
+		Map<String, Object> model = new LinkedHashMap<String, Object>();
+		model.put(BindingResult.MODEL_KEY_PREFIX + modelKey, new BeanPropertyBindingResult(toBeMarshalled, modelKey));
+		model.put(modelKey, toBeMarshalled);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		given(marshallerMock.supports(BeanPropertyBindingResult.class)).willReturn(true);
 		given(marshallerMock.supports(Object.class)).willReturn(true);
 
 		view.render(model, request, response);
