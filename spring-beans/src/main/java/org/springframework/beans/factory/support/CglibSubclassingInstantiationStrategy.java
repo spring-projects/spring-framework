@@ -22,22 +22,27 @@ import java.lang.reflect.Method;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.BeanInstantiationException;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.cglib.core.SpringNamingPolicy;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.CallbackFilter;
 import org.springframework.cglib.proxy.Enhancer;
+import org.springframework.cglib.proxy.Factory;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.cglib.proxy.NoOp;
 
 /**
  * Default object instantiation strategy for use in BeanFactories.
- * Uses CGLIB to generate subclasses dynamically if methods need to be
- * overridden by the container, to implement Method Injection.
+ *
+ * <p>Uses CGLIB to generate subclasses dynamically if methods need to be
+ * overridden by the container to implement <em>Method Injection</em>.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 1.1
  */
 public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationStrategy {
@@ -50,7 +55,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 
 	/**
 	 * Index in the CGLIB callback array for a method that should
-	 * be overridden to provide method lookup.
+	 * be overridden to provide <em>method lookup</em>.
 	 */
 	private static final int LOOKUP_OVERRIDE = 1;
 
@@ -62,18 +67,17 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 
 
 	@Override
-	protected Object instantiateWithMethodInjection(
-			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
+	protected Object instantiateWithMethodInjection(RootBeanDefinition beanDefinition, String beanName,
+			BeanFactory owner) {
 
-		// Must generate CGLIB subclass.
-		return new CglibSubclassCreator(beanDefinition, owner).instantiate(null, null);
+		return instantiateWithMethodInjection(beanDefinition, beanName, owner, null, null);
 	}
 
 	@Override
-	protected Object instantiateWithMethodInjection(
-			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
-			Constructor<?> ctor, Object[] args) {
+	protected Object instantiateWithMethodInjection(RootBeanDefinition beanDefinition, String beanName,
+			BeanFactory owner, Constructor<?> ctor, Object[] args) {
 
+		// Must generate CGLIB subclass.
 		return new CglibSubclassCreator(beanDefinition, owner).instantiate(ctor, args);
 	}
 
@@ -84,13 +88,15 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 	 */
 	private static class CglibSubclassCreator {
 
-		private static final Log logger = LogFactory.getLog(CglibSubclassCreator.class);
+		private static final Class<?>[] CALLBACK_TYPES = new Class<?>[] { NoOp.class,
+			LookupOverrideMethodInterceptor.class, ReplaceOverrideMethodInterceptor.class };
 
 		private final RootBeanDefinition beanDefinition;
 
 		private final BeanFactory owner;
 
-		public CglibSubclassCreator(RootBeanDefinition beanDefinition, BeanFactory owner) {
+
+		CglibSubclassCreator(RootBeanDefinition beanDefinition, BeanFactory owner) {
 			this.beanDefinition = beanDefinition;
 			this.owner = owner;
 		}
@@ -101,105 +107,158 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		 * @param ctor constructor to use. If this is {@code null}, use the
 		 * no-arg constructor (no parameterization, or Setter Injection)
 		 * @param args arguments to use for the constructor.
-		 * Ignored if the ctor parameter is {@code null}.
+		 * Ignored if the {@code ctor} parameter is {@code null}.
 		 * @return new instance of the dynamically generated subclass
 		 */
-		public Object instantiate(Constructor<?> ctor, Object[] args) {
+		Object instantiate(Constructor<?> ctor, Object[] args) {
+			Class<?> subclass = createEnhancedSubclass(this.beanDefinition);
+
+			Object instance;
+			if (ctor == null) {
+				instance = BeanUtils.instantiate(subclass);
+			}
+			else {
+				try {
+					Constructor<?> enhancedSubclassConstructor = subclass.getConstructor(ctor.getParameterTypes());
+					instance = enhancedSubclassConstructor.newInstance(args);
+				}
+				catch (Exception e) {
+					throw new BeanInstantiationException(this.beanDefinition.getBeanClass(), String.format(
+						"Failed to invoke construcor for CGLIB enhanced subclass [%s]", subclass.getName()), e);
+				}
+			}
+
+			// SPR-10785: set callbacks directly on the instance instead of in the
+			// enhanced class (via the Enhancer) in order to avoid memory leaks.
+			Factory factory = (Factory) instance;
+			factory.setCallbacks(new Callback[] { NoOp.INSTANCE,//
+				new LookupOverrideMethodInterceptor(beanDefinition, owner),//
+				new ReplaceOverrideMethodInterceptor(beanDefinition, owner) });
+
+			return instance;
+		}
+
+		/**
+		 * Create an enhanced subclass of the bean class for the provided bean
+		 * definition, using CGLIB.
+		 */
+		private Class<?> createEnhancedSubclass(RootBeanDefinition beanDefinition) {
 			Enhancer enhancer = new Enhancer();
-			enhancer.setSuperclass(this.beanDefinition.getBeanClass());
+			enhancer.setSuperclass(beanDefinition.getBeanClass());
 			enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
-			enhancer.setCallbackFilter(new CallbackFilterImpl());
-			enhancer.setCallbacks(new Callback[] {
-					NoOp.INSTANCE,
-					new LookupOverrideMethodInterceptor(),
-					new ReplaceOverrideMethodInterceptor()
-			});
+			enhancer.setCallbackFilter(new CallbackFilterImpl(beanDefinition));
+			enhancer.setCallbackTypes(CALLBACK_TYPES);
+			return enhancer.createClass();
+		}
+	}
 
-			return (ctor != null ? enhancer.create(ctor.getParameterTypes(), args) : enhancer.create());
+	/**
+	 * Class providing hashCode and equals methods required by CGLIB to
+	 * ensure that CGLIB doesn't generate a distinct class per bean.
+	 * Identity is based on class and bean definition.
+	 */
+	private static class CglibIdentitySupport {
+
+		private final RootBeanDefinition beanDefinition;
+
+
+		CglibIdentitySupport(RootBeanDefinition beanDefinition) {
+			this.beanDefinition = beanDefinition;
 		}
 
-
 		/**
-		 * Class providing hashCode and equals methods required by CGLIB to
-		 * ensure that CGLIB doesn't generate a distinct class per bean.
-		 * Identity is based on class and bean definition.
+		 * Exposed for equals method to allow access to enclosing class field
 		 */
-		private class CglibIdentitySupport {
-
-			/**
-			 * Exposed for equals method to allow access to enclosing class field
-			 */
-			protected RootBeanDefinition getBeanDefinition() {
-				return beanDefinition;
-			}
-
-			@Override
-			public boolean equals(Object other) {
-				return (other.getClass().equals(getClass()) &&
-						((CglibIdentitySupport) other).getBeanDefinition().equals(beanDefinition));
-			}
-
-			@Override
-			public int hashCode() {
-				return beanDefinition.hashCode();
-			}
+		protected RootBeanDefinition getBeanDefinition() {
+			return beanDefinition;
 		}
 
-
-		/**
-		 * CGLIB MethodInterceptor to override methods, replacing them with an
-		 * implementation that returns a bean looked up in the container.
-		 */
-		private class LookupOverrideMethodInterceptor extends CglibIdentitySupport implements MethodInterceptor {
-
-			@Override
-			public Object intercept(Object obj, Method method, Object[] args, MethodProxy mp) throws Throwable {
-				// Cast is safe, as CallbackFilter filters are used selectively.
-				LookupOverride lo = (LookupOverride) beanDefinition.getMethodOverrides().getOverride(method);
-				return owner.getBean(lo.getBeanName());
-			}
+		@Override
+		public boolean equals(Object other) {
+			return (other.getClass().equals(getClass()) && ((CglibIdentitySupport) other).getBeanDefinition().equals(
+				beanDefinition));
 		}
 
+		@Override
+		public int hashCode() {
+			return beanDefinition.hashCode();
+		}
+	}
 
-		/**
-		 * CGLIB MethodInterceptor to override methods, replacing them with a call
-		 * to a generic MethodReplacer.
-		 */
-		private class ReplaceOverrideMethodInterceptor extends CglibIdentitySupport implements MethodInterceptor {
+	/**
+	 * CGLIB object to filter method interception behavior.
+	 */
+	private static class CallbackFilterImpl extends CglibIdentitySupport implements CallbackFilter {
 
-			@Override
-			public Object intercept(Object obj, Method method, Object[] args, MethodProxy mp) throws Throwable {
-				ReplaceOverride ro = (ReplaceOverride) beanDefinition.getMethodOverrides().getOverride(method);
-				// TODO could cache if a singleton for minor performance optimization
-				MethodReplacer mr = (MethodReplacer) owner.getBean(ro.getMethodReplacerBeanName());
-				return mr.reimplement(obj, method, args);
-			}
+		private static final Log logger = LogFactory.getLog(CallbackFilterImpl.class);
+
+
+		CallbackFilterImpl(RootBeanDefinition beanDefinition) {
+			super(beanDefinition);
 		}
 
-
-		/**
-		 * CGLIB object to filter method interception behavior.
-		 */
-		private class CallbackFilterImpl extends CglibIdentitySupport implements CallbackFilter {
-
-			@Override
-			public int accept(Method method) {
-				MethodOverride methodOverride = beanDefinition.getMethodOverrides().getOverride(method);
-				if (logger.isTraceEnabled()) {
-					logger.trace("Override for '" + method.getName() + "' is [" + methodOverride + "]");
-				}
-				if (methodOverride == null) {
-					return PASSTHROUGH;
-				}
-				else if (methodOverride instanceof LookupOverride) {
-					return LOOKUP_OVERRIDE;
-				}
-				else if (methodOverride instanceof ReplaceOverride) {
-					return METHOD_REPLACER;
-				}
-				throw new UnsupportedOperationException(
-						"Unexpected MethodOverride subclass: " + methodOverride.getClass().getName());
+		@Override
+		public int accept(Method method) {
+			MethodOverride methodOverride = getBeanDefinition().getMethodOverrides().getOverride(method);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Override for '" + method.getName() + "' is [" + methodOverride + "]");
 			}
+			if (methodOverride == null) {
+				return PASSTHROUGH;
+			}
+			else if (methodOverride instanceof LookupOverride) {
+				return LOOKUP_OVERRIDE;
+			}
+			else if (methodOverride instanceof ReplaceOverride) {
+				return METHOD_REPLACER;
+			}
+			throw new UnsupportedOperationException("Unexpected MethodOverride subclass: "
+					+ methodOverride.getClass().getName());
+		}
+	}
+
+	/**
+	 * CGLIB MethodInterceptor to override methods, replacing them with an
+	 * implementation that returns a bean looked up in the container.
+	 */
+	private static class LookupOverrideMethodInterceptor extends CglibIdentitySupport implements MethodInterceptor {
+
+		private final BeanFactory owner;
+
+
+		LookupOverrideMethodInterceptor(RootBeanDefinition beanDefinition, BeanFactory owner) {
+			super(beanDefinition);
+			this.owner = owner;
+		}
+
+		@Override
+		public Object intercept(Object obj, Method method, Object[] args, MethodProxy mp) throws Throwable {
+			// Cast is safe, as CallbackFilter filters are used selectively.
+			LookupOverride lo = (LookupOverride) getBeanDefinition().getMethodOverrides().getOverride(method);
+			return this.owner.getBean(lo.getBeanName());
+		}
+	}
+
+	/**
+	 * CGLIB MethodInterceptor to override methods, replacing them with a call
+	 * to a generic MethodReplacer.
+	 */
+	private static class ReplaceOverrideMethodInterceptor extends CglibIdentitySupport implements MethodInterceptor {
+
+		private final BeanFactory owner;
+
+
+		ReplaceOverrideMethodInterceptor(RootBeanDefinition beanDefinition, BeanFactory owner) {
+			super(beanDefinition);
+			this.owner = owner;
+		}
+
+		@Override
+		public Object intercept(Object obj, Method method, Object[] args, MethodProxy mp) throws Throwable {
+			ReplaceOverride ro = (ReplaceOverride) getBeanDefinition().getMethodOverrides().getOverride(method);
+			// TODO could cache if a singleton for minor performance optimization
+			MethodReplacer mr = owner.getBean(ro.getMethodReplacerBeanName(), MethodReplacer.class);
+			return mr.reimplement(obj, method, args);
 		}
 	}
 
