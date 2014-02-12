@@ -45,12 +45,14 @@ public class InvocableHandlerMethodTests {
 
 	private NativeWebRequest webRequest;
 
+
 	@Before
 	public void setUp() throws Exception {
 		Method method = Handler.class.getDeclaredMethod("handle", Integer.class, String.class);
 		this.handlerMethod = new InvocableHandlerMethod(new Handler(), method);
 		this.webRequest = new ServletWebRequest(new MockHttpServletRequest(), new MockHttpServletResponse());
 	}
+
 
 	@Test
 	public void resolveArg() throws Exception {
@@ -63,11 +65,9 @@ public class InvocableHandlerMethodTests {
 		handlerMethod.setHandlerMethodArgumentResolvers(composite);
 
 		Object returnValue = handlerMethod.invokeForRequest(webRequest, null);
-
 		assertEquals(1, intResolver.getResolvedParameters().size());
 		assertEquals(1, stringResolver.getResolvedParameters().size());
 		assertEquals("99-value", returnValue);
-
 		assertEquals("intArg", intResolver.getResolvedParameters().get(0).getParameterName());
 		assertEquals("stringArg", stringResolver.getResolvedParameters().get(0).getParameterName());
 	}
@@ -83,7 +83,6 @@ public class InvocableHandlerMethodTests {
 		handlerMethod.setHandlerMethodArgumentResolvers(composite);
 
 		Object returnValue = handlerMethod.invokeForRequest(webRequest, null);
-
 		assertEquals(1, intResolver.getResolvedParameters().size());
 		assertEquals(1, stringResolver.getResolvedParameters().size());
 		assertEquals("null-null", returnValue);
@@ -119,7 +118,6 @@ public class InvocableHandlerMethodTests {
 		handlerMethod.setHandlerMethodArgumentResolvers(composite);
 
 		Object returnValue = handlerMethod.invokeForRequest(webRequest, null, 2, "value2");
-
 		assertEquals("2-value2", returnValue);
 	}
 
@@ -134,8 +132,7 @@ public class InvocableHandlerMethodTests {
 			fail("Expected exception");
 		}
 		catch (HttpMessageNotReadableException ex) {
-			// Expected..
-			// Allow HandlerMethodArgumentResolver exceptions to propagate..
+			// expected -  allow HandlerMethodArgumentResolver exceptions to propagate
 		}
 	}
 
@@ -208,6 +205,7 @@ public class InvocableHandlerMethodTests {
 		fail("Expected exception");
 	}
 
+
 	@SuppressWarnings("unused")
 	private static class Handler {
 
@@ -215,6 +213,7 @@ public class InvocableHandlerMethodTests {
 			return intArg + "-" + stringArg;
 		}
 	}
+
 
 	@SuppressWarnings("unused")
 	private static class ExceptionRaisingHandler {
@@ -228,8 +227,8 @@ public class InvocableHandlerMethodTests {
 		public void raiseException() throws Throwable {
 			throw t;
 		}
-
 	}
+
 
 	private static class ExceptionRaisingArgumentResolver implements HandlerMethodArgumentResolver {
 

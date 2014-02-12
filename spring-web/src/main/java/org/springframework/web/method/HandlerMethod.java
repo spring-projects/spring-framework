@@ -30,13 +30,13 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Encapsulates information about a bean method consisting of a {@link #getMethod() method}
- * and a {@link #getBean() bean}. Provides convenient access to method parameters,
+ * Encapsulates information about a handler method consisting of a {@linkplain #getMethod() method}
+ * and a {@linkplain #getBean() bean}. Provides convenient access to method parameters,
  * method return value, method annotations.
  *
- * <p>The class may be created with a bean instance or with a bean name (e.g. lazy bean,
- * prototype bean). Use {@link #createWithResolvedBean()} to obtain an {@link HandlerMethod}
- * instance with a bean instance initialized through the bean factory.
+ * <p>The class may be created with a bean instance or with a bean name (e.g. lazy-init bean,
+ * prototype bean). Use {@link #createWithResolvedBean()} to obtain a {@link HandlerMethod}
+ * instance with a bean instance resolved through the associated {@link BeanFactory}.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -228,7 +228,7 @@ public class HandlerMethod {
 		}
 		if (obj != null && obj instanceof HandlerMethod) {
 			HandlerMethod other = (HandlerMethod) obj;
-			return this.bean.equals(other.bean) && this.method.equals(other.method);
+			return (this.bean.equals(other.bean) && this.method.equals(other.method));
 		}
 		return false;
 	}
