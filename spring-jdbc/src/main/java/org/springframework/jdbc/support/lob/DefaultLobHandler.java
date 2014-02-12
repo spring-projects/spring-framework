@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,7 +144,11 @@ public class DefaultLobHandler extends AbstractLobHandler {
 		logger.debug("Returning BLOB as bytes");
 		if (this.wrapAsLob) {
 			Blob blob = rs.getBlob(columnIndex);
-			return blob.getBytes(1, (int) blob.length());
+			try {
+				return blob.getBytes(1, (int) blob.length());
+			} finally {
+				blob.free();
+			}
 		}
 		else {
 			return rs.getBytes(columnIndex);
@@ -168,7 +172,11 @@ public class DefaultLobHandler extends AbstractLobHandler {
 		logger.debug("Returning CLOB as string");
 		if (this.wrapAsLob) {
 			Clob clob = rs.getClob(columnIndex);
-			return clob.getSubString(1, (int) clob.length());
+			try {
+				return clob.getSubString(1, (int) clob.length());
+			} finally {
+				clob.free();
+			}
 		}
 		else {
 			return rs.getString(columnIndex);
