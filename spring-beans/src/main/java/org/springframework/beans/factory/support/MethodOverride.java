@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,15 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Object representing the override of a method on a managed
- * object by the IoC container.
+ * Object representing the override of a method on a managed object by the IoC
+ * container.
  *
- * <p>Note that the override mechanism is <i>not</i> intended as a
- * generic means of inserting crosscutting code: use AOP for that.
+ * <p>Note that the override mechanism is <em>not</em> intended as a generic
+ * means of inserting crosscutting code: use AOP for that.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 1.1
  */
 public abstract class MethodOverride implements BeanMetadataElement {
@@ -59,17 +60,18 @@ public abstract class MethodOverride implements BeanMetadataElement {
 	}
 
 	/**
-	 * Set whether the overridden method has to be considered as overloaded
-	 * (that is, whether arg type matching has to happen).
-	 * <p>Default is "true"; can be switched to "false" to optimize runtime performance.
+	 * Set whether the overridden method is <em>overloaded</em> (i.e., whether argument
+	 * type matching needs to occur to disambiguate methods of the same name).
+	 * <p>Default is {@code true}; can be switched to {@code false} to optimize
+	 * runtime performance.
 	 */
 	protected void setOverloaded(boolean overloaded) {
 		this.overloaded = overloaded;
 	}
 
 	/**
-	 * Return whether the overridden method has to be considered as overloaded
-	 * (that is, whether arg type matching has to happen).
+	 * Return whether the overridden method is <em>overloaded</em> (i.e., whether argument
+	 * type matching needs to occur to disambiguate methods of the same name).
 	 */
 	protected boolean isOverloaded() {
 		return this.overloaded;
@@ -88,16 +90,14 @@ public abstract class MethodOverride implements BeanMetadataElement {
 		return this.source;
 	}
 
-
 	/**
-	 * Subclasses must override this to indicate whether they match
-	 * the given method. This allows for argument list checking
-	 * as well as method name checking.
+	 * Subclasses must override this to indicate whether they <em>match</em> the
+	 * given method. This allows for argument list checking as well as method
+	 * name checking.
 	 * @param method the method to check
 	 * @return whether this override matches the given method
 	 */
 	public abstract boolean matches(Method method);
-
 
 	@Override
 	public boolean equals(Object other) {
@@ -109,7 +109,6 @@ public abstract class MethodOverride implements BeanMetadataElement {
 		}
 		MethodOverride that = (MethodOverride) other;
 		return (ObjectUtils.nullSafeEquals(this.methodName, that.methodName) &&
-				this.overloaded == that.overloaded &&
 				ObjectUtils.nullSafeEquals(this.source, that.source));
 	}
 
@@ -117,7 +116,6 @@ public abstract class MethodOverride implements BeanMetadataElement {
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(this.methodName);
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.source);
-		hashCode = 29 * hashCode + (this.overloaded ? 1 : 0);
 		return hashCode;
 	}
 
