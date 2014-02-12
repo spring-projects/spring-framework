@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1412,7 +1412,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		MutablePropertyValues mpvs = null;
 		List<PropertyValue> original;
 
-		if (System.getSecurityManager()!= null) {
+		if (System.getSecurityManager() != null) {
 			if (bw instanceof BeanWrapperImpl) {
 				((BeanWrapperImpl) bw).setSecurityContext(getAccessControlContext());
 			}
@@ -1709,7 +1709,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 
 	/**
-	 * Special DependencyDescriptor variant for autowire="byType".
+	 * Special DependencyDescriptor variant for Spring's good old autowire="byType" mode.
 	 * Always optional; never considering the parameter name for choosing a primary candidate.
 	 */
 	@SuppressWarnings("serial")

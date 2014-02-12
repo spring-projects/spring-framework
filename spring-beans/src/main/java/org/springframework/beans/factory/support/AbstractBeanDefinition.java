@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -645,6 +645,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Specify whether to allow access to non-public constructors and methods,
 	 * for the case of externalized metadata pointing to those.
+	 * The default is {@code true}; switch this to {@false} for public access only.
 	 * <p>This applies to constructor resolution, factory method resolution,
 	 * and also init/destroy methods. Bean property accessors have to be public
 	 * in any case and are not affected by this setting.
@@ -666,7 +667,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Specify whether to resolve constructors in lenient mode ({@code true},
 	 * which is the default) or to switch to strict resolution (throwing an exception
-	 * in case of ambigious constructors that all match when converting the arguments,
+	 * in case of ambiguous constructors that all match when converting the arguments,
 	 * whereas lenient mode would use the one with the 'closest' type matches).
 	 */
 	public void setLenientConstructorResolution(boolean lenientConstructorResolution) {
