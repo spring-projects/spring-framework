@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.StreamUtils;
@@ -50,6 +51,10 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	private static final String HEADER_ETAG = "ETag";
 
 	private static final String HEADER_IF_NONE_MATCH = "If-None-Match";
+
+	private static final String HEADER_CACHE_CONTROL = "Cache-Control";
+
+	private static final String DIRECTIVE_NO_STORE = "no-store";
 
 
 	/**
@@ -122,7 +127,13 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 
 	/**
 	 * Indicates whether the given request and response are eligible for ETag generation.
-	 * <p>The default implementation returns {@code true} for response status codes in the {@code 2xx} series.
+	 * <p>The default implementation returns {@code true} if all conditions match:
+	 * <ul>
+	 * <li>response status codes in the {@code 2xx} series</li>
+	 * <li>request method is a GET</li>
+	 * <li>response Cache-Control header is null or does not contain a "no-store" directive</li>
+	 * </ul>
+	 *
 	 * @param request the HTTP request
 	 * @param response the HTTP response
 	 * @param responseStatusCode the HTTP response status code
@@ -132,7 +143,10 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	protected boolean isEligibleForEtag(HttpServletRequest request, HttpServletResponse response,
 			int responseStatusCode, byte[] responseBody) {
 
-		return (responseStatusCode >= 200 && responseStatusCode < 300);
+		return (responseStatusCode >= 200 && responseStatusCode < 300)
+				&& HttpMethod.GET.name().equals(request.getMethod())
+				&& (response.getHeader(HEADER_CACHE_CONTROL) == null
+					|| !response.getHeader(HEADER_CACHE_CONTROL).contains(DIRECTIVE_NO_STORE));
 	}
 
 	/**
