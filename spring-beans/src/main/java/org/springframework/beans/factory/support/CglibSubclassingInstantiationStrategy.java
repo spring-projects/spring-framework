@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
+
 import org.springframework.cglib.core.SpringNamingPolicy;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.CallbackFilter;
@@ -146,7 +147,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 			Enhancer enhancer = new Enhancer();
 			enhancer.setSuperclass(beanDefinition.getBeanClass());
 			enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
-			enhancer.setCallbackFilter(new CallbackFilterImpl(beanDefinition));
+			enhancer.setCallbackFilter(new MethodOverrideCallbackFilter(beanDefinition));
 			enhancer.setCallbackTypes(CALLBACK_TYPES);
 			return enhancer.createClass();
 		}
@@ -166,34 +167,31 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 			this.beanDefinition = beanDefinition;
 		}
 
-		/**
-		 * Exposed for equals method to allow access to enclosing class field
-		 */
-		protected RootBeanDefinition getBeanDefinition() {
-			return beanDefinition;
+		RootBeanDefinition getBeanDefinition() {
+			return this.beanDefinition;
 		}
 
 		@Override
 		public boolean equals(Object other) {
-			return (other.getClass().equals(getClass()) && ((CglibIdentitySupport) other).getBeanDefinition().equals(
-				beanDefinition));
+			return other.getClass().equals(this.getClass())
+					&& ((CglibIdentitySupport) other).getBeanDefinition().equals(this.getBeanDefinition());
 		}
 
 		@Override
 		public int hashCode() {
-			return beanDefinition.hashCode();
+			return this.beanDefinition.hashCode();
 		}
 	}
 
 	/**
-	 * CGLIB object to filter method interception behavior.
+	 * CGLIB callback for filtering method interception behavior.
 	 */
-	private static class CallbackFilterImpl extends CglibIdentitySupport implements CallbackFilter {
+	private static class MethodOverrideCallbackFilter extends CglibIdentitySupport implements CallbackFilter {
 
-		private static final Log logger = LogFactory.getLog(CallbackFilterImpl.class);
+		private static final Log logger = LogFactory.getLog(MethodOverrideCallbackFilter.class);
 
 
-		CallbackFilterImpl(RootBeanDefinition beanDefinition) {
+		MethodOverrideCallbackFilter(RootBeanDefinition beanDefinition) {
 			super(beanDefinition);
 		}
 
