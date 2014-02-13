@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,7 @@ import java.util.concurrent.Callable;
  * <li>{@link java.io.OutputStream} / {@link java.io.Writer} for generating
  * the response's content. This will be the raw OutputStream/Writer as
  * exposed by the Servlet/Portlet API.
+ * <li>{@link org.springframework.http.HttpMethod} for the HTTP request method</li>
  * <li>{@link PathVariable @PathVariable} annotated parameters (Servlet-only)
  * for access to URI template values (i.e. /hotels/{hotel}). Variable values will be
  * converted to the declared method argument type. By default, the URI template

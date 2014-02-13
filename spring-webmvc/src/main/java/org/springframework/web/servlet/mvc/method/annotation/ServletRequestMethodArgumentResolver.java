@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
@@ -50,6 +52,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * <li>{@link java.time.ZoneId} (as of Spring 4.0 and Java 8)</li>
  * <li>{@link InputStream}
  * <li>{@link Reader}
+ * <li>{@link org.springframework.http.HttpMethod} (as of Spring 4.0)</li>
  * </ul>
  *
  * @author Arjen Poutsma
@@ -71,7 +74,8 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 				TimeZone.class.equals(paramType) ||
 				"java.time.ZoneId".equals(paramType.getName()) ||
 				InputStream.class.isAssignableFrom(paramType) ||
-				Reader.class.isAssignableFrom(paramType);
+				Reader.class.isAssignableFrom(paramType) ||
+				HttpMethod.class.equals(paramType);
 	}
 
 	@Override
@@ -115,6 +119,9 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 		}
 		else if (Reader.class.isAssignableFrom(paramType)) {
 			return request.getReader();
+		}
+		else if (HttpMethod.class.equals(paramType)) {
+			return ((ServletWebRequest) webRequest).getHttpMethod();
 		}
 		else {
 			// should never happen..

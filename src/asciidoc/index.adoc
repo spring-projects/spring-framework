@@ -28946,6 +28946,7 @@ multiple requests are allowed to access a session concurrently.
   value is the raw InputStream/Reader as exposed by the Servlet API.
 * `java.io.OutputStream` / `java.io.Writer` for generating the response's content. This
   value is the raw OutputStream/Writer as exposed by the Servlet API.
+* `org.springframework.http.HttpMethod` for the HTTP request method.
 * `java.security.Principal` containing the currently authenticated user.
 * `@PathVariable` annotated parameters for access to URI template variables. See
   <<mvc-ann-requestmapping-uri-templates>>.
