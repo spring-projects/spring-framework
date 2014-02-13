@@ -35,6 +35,7 @@ import org.springframework.messaging.simp.stomp.StompDecoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.simp.user.DefaultUserSessionRegistry;
 import org.springframework.messaging.simp.user.DestinationUserNameProvider;
+import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
 import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.socket.TextMessage;
@@ -136,6 +137,22 @@ public class StompSubProtocolHandlerTests {
 		assertEquals("1.1", replyHeaders.getVersion());
 		assertArrayEquals(new long[] {0, 0}, replyHeaders.getHeartbeat());
 		assertEquals("joe", replyHeaders.getNativeHeader("user-name").get(0));
+	}
+
+	@Test
+	public void handleMessageToClientUserDestination() {
+
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.MESSAGE);
+		headers.setMessageId("mess0");
+		headers.setSubscriptionId("sub0");
+		headers.setDestination("/queue/foo-user123");
+		headers.setHeader(UserDestinationMessageHandler.SUBSCRIBE_DESTINATION, "/user/queue/foo");
+		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		this.protocolHandler.handleMessageToClient(this.session, message);
+
+		assertEquals(1, this.session.getSentMessages().size());
+		WebSocketMessage<?> textMessage = this.session.getSentMessages().get(0);
+		assertTrue(((String) textMessage.getPayload()).contains("destination:/user/queue/foo\n"));
 	}
 
 	@Test

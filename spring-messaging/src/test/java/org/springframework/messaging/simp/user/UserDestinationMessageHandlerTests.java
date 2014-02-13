@@ -95,6 +95,8 @@ public class UserDestinationMessageHandlerTests {
 
 		assertEquals("/queue/foo-user123",
 				captor.getValue().getHeaders().get(SimpMessageHeaderAccessor.DESTINATION_HEADER));
+		assertEquals("/user/queue/foo",
+				captor.getValue().getHeaders().get(UserDestinationMessageHandler.SUBSCRIBE_DESTINATION));
 	}
 
 

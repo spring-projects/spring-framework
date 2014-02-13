@@ -36,6 +36,7 @@ import org.springframework.messaging.simp.stomp.StompDecoder;
 import org.springframework.messaging.simp.stomp.StompEncoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.simp.user.DestinationUserNameProvider;
+import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
 import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
@@ -180,9 +181,15 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 			afterStompSessionConnected(headers, session);
 		}
 
-		if (StompCommand.MESSAGE.equals(headers.getCommand()) && (headers.getSubscriptionId() == null)) {
-			logger.error("Ignoring message, no subscriptionId header: " + message);
-			return;
+		if (StompCommand.MESSAGE.equals(headers.getCommand())) {
+			if (headers.getSubscriptionId() == null) {
+				logger.error("Ignoring message, no subscriptionId header: " + message);
+				return;
+			}
+			String header = UserDestinationMessageHandler.SUBSCRIBE_DESTINATION;
+			if (message.getHeaders().containsKey(header)) {
+				headers.setDestination((String) message.getHeaders().get(header));
+			}
 		}
 
 		if (!(message.getPayload() instanceof byte[])) {

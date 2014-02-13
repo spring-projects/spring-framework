@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,38 +21,40 @@ import org.springframework.messaging.Message;
 import java.util.Set;
 
 /**
- * A strategy for resolving unique, user destinations per session. User destinations
- * provide a user with the ability to subscribe to a queue unique to their session
- * as well others with the ability to send messages to those queues.
+ * A strategy for resolving a "user" destination and translating it to one or more
+ * actual destinations unique to the user's active session(s).
  * <p>
- * When a user attempts to subscribe to "/user/queue/position-updates", the
- * "/user" prefix is removed and a unique suffix added, resulting in something
- * like "/queue/position-updates-useri9oqdfzo" where the suffix is based on the
- * user's session and ensures it does not collide with any other users attempting
- * to subscribe to "/user/queue/position-updates".
+ * For messages sent to a user, the destination must contain the name of the target
+ * user, The name, extracted from the destination, is used to look up the active
+ * user session(s), and then translate the destination accordingly.
  * <p>
- * When a message is sent to a user with a destination such as
- * "/user/{username}/queue/position-updates", the "/user/{username}" prefix is
- * removed and the suffix added, resulting in something like
- * "/queue/position-updates-useri9oqdfzo".
+ * For SUBSCRIBE and UNSUBSCRIBE messages, the user is the user associated with
+ * the message. In other words the destination does not contain the user name.
+ * <p>
+ * See the documentation on implementations for specific examples.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  *
+ * @see org.springframework.messaging.simp.user.DefaultUserDestinationResolver
  * @see UserDestinationMessageHandler
  */
 public interface UserDestinationResolver {
 
 	/**
-	 * Resolve the destination of the message to a set of actual target destinations
-	 * to use. If the message is SUBSCRIBE/UNSUBSCRIBE, the returned set will contain
-	 * only target destination. If the message represents data being sent to a user,
-	 * the returned set may contain multiple target destinations, one for each active
-	 * session of the target user.
+	 * Resolve the destination of the message to a set of actual target destinations.
+	 * <p>
+	 * If the message is SUBSCRIBE/UNSUBSCRIBE, the returned set will contain a
+	 * single translated target destination.
+	 * <p>
+	 * If the message represents data being sent to a user, the returned set may
+	 * contain multiple target destinations, one for each active user session.
 	 *
-	 * @param message the message to resolve
-	 * @return the resolved unique user destination(s) or an empty Set
+	 * @param message the message with a user destination to be resolved
+	 *
+	 * @return the result of the resolution, or {@code null} if the resolution
+	 * 	fails (e.g. not a user destination, or no user info available, etc)
 	 */
-	Set<String> resolveDestination(Message<?> message);
+	UserDestinationResult resolveDestination(Message<?> message);
 
 }

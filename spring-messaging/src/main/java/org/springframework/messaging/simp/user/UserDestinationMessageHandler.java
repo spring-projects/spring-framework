@@ -27,7 +27,11 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.core.MessageSendingOperations;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -42,6 +46,8 @@ import org.springframework.util.CollectionUtils;
  * @since 4.0
  */
 public class UserDestinationMessageHandler implements MessageHandler, SmartLifecycle {
+
+	public static final String SUBSCRIBE_DESTINATION = "subscribeDestination";
 
 	private static final Log logger = LogFactory.getLog(UserDestinationMessageHandler.class);
 
@@ -140,9 +146,19 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 	@Override
 	public void handleMessage(Message<?> message) throws MessagingException {
 
-		Set<String> destinations = this.userDestinationResolver.resolveDestination(message);
-		if (CollectionUtils.isEmpty(destinations)) {
+		UserDestinationResult result = this.userDestinationResolver.resolveDestination(message);
+		if (result == null) {
 			return;
+		}
+		Set<String> destinations = result.getTargetDestinations();
+		if (destinations.isEmpty()) {
+			return;
+		}
+
+		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.wrap(message);
+		if (SimpMessageType.MESSAGE.equals(headerAccessor.getMessageType())) {
+			headerAccessor.setHeader(SUBSCRIBE_DESTINATION, result.getSubscribeDestination());
+			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headerAccessor).build();
 		}
 
 		for (String targetDestination : destinations) {
