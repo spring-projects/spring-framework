@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.Conventions;
 import org.springframework.http.HttpStatus;
@@ -30,7 +31,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.StubMvcResult;
-import org.springframework.test.web.servlet.result.StatusResultMatchers;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -41,23 +41,31 @@ import org.springframework.util.StringUtils;
  */
 public class StatusResultMatchersTests {
 
+	private StatusResultMatchers matchers;
+
+	private MockHttpServletRequest request;
+
+
+	@Before
+	public void setup() {
+		this.matchers = new StatusResultMatchers();
+		this.request = new MockHttpServletRequest();
+	}
+
+
 	@Test
 	public void testHttpStatusCodeResultMatchers() throws Exception {
-
-		StatusResultMatchers resultMatchers = new StatusResultMatchers();
 
 		List<AssertionError> failures = new ArrayList<AssertionError>();
 
 		for(HttpStatus status : HttpStatus.values()) {
 			MockHttpServletResponse response = new MockHttpServletResponse();
 			response.setStatus(status.value());
-
-			String methodName = statusToMethodName(status);
-			Method method = StatusResultMatchers.class.getMethod(methodName);
+			MvcResult mvcResult = new StubMvcResult(request, null, null, null, null, null, response);
 			try {
-				ResultMatcher matcher = (ResultMatcher) ReflectionUtils.invokeMethod(method, resultMatchers);
+				Method method = getMethodForHttpStatus(status);
+				ResultMatcher matcher = (ResultMatcher) ReflectionUtils.invokeMethod(method, this.matchers);
 				try {
-					MvcResult mvcResult = new StubMvcResult(new MockHttpServletRequest(), null, null, null, null, null, response);
 					matcher.match(mvcResult);
 				}
 				catch (AssertionError error) {
@@ -65,7 +73,7 @@ public class StatusResultMatchersTests {
 				}
 			}
 			catch (Exception ex) {
-				throw new Exception("Failed to obtain ResultMatcher: " + method.toString(), ex);
+				throw new Exception("Failed to obtain ResultMatcher for status " + status, ex);
 			}
 		}
 
@@ -74,9 +82,40 @@ public class StatusResultMatchersTests {
 		}
 	}
 
-	private String statusToMethodName(HttpStatus status) throws NoSuchMethodException {
+	private Method getMethodForHttpStatus(HttpStatus status) throws NoSuchMethodException {
 		String name = status.name().toLowerCase().replace("_", "-");
-		return "is" + StringUtils.capitalize(Conventions.attributeNameToPropertyName(name));
+		name = "is" + StringUtils.capitalize(Conventions.attributeNameToPropertyName(name));
+		return StatusResultMatchers.class.getMethod(name);
+	}
+
+	@Test
+	public void statusRanges() throws Exception {
+
+		for(HttpStatus status : HttpStatus.values()) {
+
+			MockHttpServletResponse response = new MockHttpServletResponse();
+			response.setStatus(status.value());
+			MvcResult mvcResult = new StubMvcResult(request, null, null, null, null, null, response);
+			switch (status.series().value()) {
+				case 1:
+					this.matchers.is1xxInformational().match(mvcResult);
+					break;
+				case 2:
+					this.matchers.is2xxSuccessful().match(mvcResult);
+					break;
+				case 3:
+					this.matchers.is3xxRedirection().match(mvcResult);
+					break;
+				case 4:
+					this.matchers.is4xxClientError().match(mvcResult);
+					break;
+				case 5:
+					this.matchers.is5xxServerError().match(mvcResult);
+					break;
+				default:
+					fail("Unexpected range for status code value " + status);
+			}
+		}
 	}
 
 }

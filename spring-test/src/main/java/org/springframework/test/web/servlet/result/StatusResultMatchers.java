@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,76 @@ public class StatusResultMatchers {
 		};
 	}
 
+	/**
+	 * Assert the response status code is in the 1xx range.
+	 */
+	public ResultMatcher is1xxInformational() {
+		return new ResultMatcher() {
+			@Override
+			public void match(MvcResult result) throws Exception {
+				assertEquals("Range for response status value " + result.getResponse().getStatus(),
+						getHttpStatusSeries(result), HttpStatus.Series.INFORMATIONAL);
+			}
+		};
+	}
+
+	/**
+	 * Assert the response status code is in the 2xx range.
+	 */
+	public ResultMatcher is2xxSuccessful() {
+		return new ResultMatcher() {
+			@Override
+			public void match(MvcResult result) throws Exception {
+				assertEquals("Range for response status value " + result.getResponse().getStatus(),
+						getHttpStatusSeries(result), HttpStatus.Series.SUCCESSFUL);
+			}
+		};
+	}
+
+	/**
+	 * Assert the response status code is in the 3xx range.
+	 */
+	public ResultMatcher is3xxRedirection() {
+		return new ResultMatcher() {
+			@Override
+			public void match(MvcResult result) throws Exception {
+				assertEquals("Range for response status value " + result.getResponse().getStatus(),
+						getHttpStatusSeries(result), HttpStatus.Series.REDIRECTION);
+			}
+		};
+	}
+
+	/**
+	 * Assert the response status code is in the 4xx range.
+	 */
+	public ResultMatcher is4xxClientError() {
+		return new ResultMatcher() {
+			@Override
+			public void match(MvcResult result) throws Exception {
+				assertEquals("Range for response status value " + result.getResponse().getStatus(),
+						getHttpStatusSeries(result), HttpStatus.Series.CLIENT_ERROR);
+			}
+		};
+	}
+
+	/**
+	 * Assert the response status code is in the 5xx range.
+	 */
+	public ResultMatcher is5xxServerError() {
+		return new ResultMatcher() {
+			@Override
+			public void match(MvcResult result) throws Exception {
+				assertEquals("Range for response status value " + result.getResponse().getStatus(),
+						getHttpStatusSeries(result), HttpStatus.Series.SERVER_ERROR);
+			}
+		};
+	}
+
+	private HttpStatus.Series getHttpStatusSeries(MvcResult result) {
+		int statusValue = result.getResponse().getStatus();
+		HttpStatus status = HttpStatus.valueOf(statusValue);
+		return status.series();
+	}
 
 	/**
 	 * Assert the Servlet response error message with the given Hamcrest {@link Matcher}.
