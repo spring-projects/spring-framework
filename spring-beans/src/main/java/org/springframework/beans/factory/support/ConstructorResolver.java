@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,11 +54,8 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Helper class for resolving constructors and factory methods.
+ * Delegate for resolving constructors and factory methods.
  * Performs constructor resolution through argument matching.
- *
- * <p>Operates on an {@link AbstractBeanFactory} and an {@link InstantiationStrategy}.
- * Used by {@link AbstractAutowireCapableBeanFactory}.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
