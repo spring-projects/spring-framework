@@ -21,7 +21,7 @@ configure(allprojects) { project ->
 	ext.hsqldbVersion     = "2.3.1"
 	ext.jackson1Version   = "1.9.13"
 	ext.jackson2Version   = "2.3.1"
-	ext.jettyVersion      = "9.1.1.v20140108"
+	ext.jettyVersion      = "9.1.2.v20140210"
 	ext.jodaVersion       = "2.3"
 	ext.junitVersion      = "4.11"
 	ext.slf4jVersion      = "1.7.5"
@@ -513,7 +513,7 @@ project("spring-context-support") {
 		optional(project(":spring-tx")) // for Quartz support
 		optional("javax.mail:mail:1.4.7")
 		optional("javax.cache:cache-api:1.0.0-RC1")
-		optional("com.google.guava:guava:16.0")
+		optional("com.google.guava:guava:16.0.1")
 		optional("net.sf.ehcache:ehcache-core:2.6.5")
 		optional("org.quartz-scheduler:quartz:1.8.6") {
 			exclude group: "org.slf4j", module: "slf4j-log4j12"
