@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 import javax.servlet.ServletRequest;
@@ -32,6 +33,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
 import org.springframework.web.util.HtmlUtils;
+import org.springframework.web.util.UriUtils;
 
 /**
  * Databinding-aware JSP tag for rendering an HTML '{@code form}' whose
@@ -442,6 +444,13 @@ public class FormTag extends AbstractHtmlElementTag {
 		}
 		else {
 			String requestUri = getRequestContext().getRequestUri();
+			String encoding = pageContext.getResponse().getCharacterEncoding();
+			try {
+				requestUri = UriUtils.encodePath(requestUri, encoding);
+			}
+			catch (UnsupportedEncodingException e) {
+				throw new JspException(e);
+			}
 			ServletResponse response = this.pageContext.getResponse();
 			if (response instanceof HttpServletResponse) {
 				requestUri = ((HttpServletResponse) response).encodeURL(requestUri);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -338,6 +338,21 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertEquals("<div>\n<input type=\"hidden\" name=\"key\" value=\"value\" />\n</div>", getInputTag(output));
 		assertFormTagOpened(output);
 		assertFormTagClosed(output);
+	}
+
+	public void testDefaultActionEncoded() throws Exception {
+
+		this.request.setRequestURI("/a b c");
+		request.setQueryString("");
+
+		this.tag.doStartTag();
+		this.tag.doEndTag();
+		this.tag.doFinally();
+
+		String output = getOutput();
+		String formOutput = getFormTag(output);
+
+		assertContainsAttribute(formOutput, "action", "/a%20b%20c");
 	}
 
 	private String getFormTag(String output) {
