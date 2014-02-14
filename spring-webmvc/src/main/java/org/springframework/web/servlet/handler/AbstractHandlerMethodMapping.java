@@ -104,9 +104,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				getApplicationContext().getBeanNamesForType(Object.class));
 
 		for (String beanName : beanNames) {
-			Class<?> candidateType = getApplicationContext().getType(beanName);
-			if (isHandler(candidateType)){
-				detectHandlerMethods(beanName, candidateType);
+			if (isHandler(getApplicationContext().getType(beanName))){
+				detectHandlerMethods(beanName);
 			}
 		}
 		handlerMethodsInitialized(getHandlerMethods());
@@ -121,20 +120,12 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 	/**
 	 * Look for handler methods in a handler.
-	 * <p>Delegates to {@link #detectHandlerMethods(Object, Class)} for actual processing.
 	 * @param handler the bean name of a handler or a handler instance
 	 */
 	protected void detectHandlerMethods(final Object handler) {
 		Class<?> handlerType =
 				(handler instanceof String ? getApplicationContext().getType((String) handler) : handler.getClass());
-		detectHandlerMethods(handler, handlerType);
-	}
 
-	/**
-	 * Look for handler methods in a handler, against a pre-resolved type.
-	 * @param handler the bean name of a handler or a handler instance
-	 */
-	protected void detectHandlerMethods(Object handler, Class<?> handlerType) {
 		final Class<?> userType = ClassUtils.getUserClass(handlerType);
 		Set<Method> methods = HandlerMethodSelector.selectMethods(userType, new MethodFilter() {
 			@Override
@@ -342,9 +333,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 
 	/**
-	 * A thin wrapper around a matched HandlerMethod and its matched mapping for
-	 * the purpose of comparing the best match with a comparator in the context
-	 * of the current request.
+	 * A thin wrapper around a matched HandlerMethod and its mapping, for the purpose of
+	 * comparing the best match with a comparator in the context of the current request.
 	 */
 	private class Match {
 
@@ -352,7 +342,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		private final HandlerMethod handlerMethod;
 
-		private Match(T mapping, HandlerMethod handlerMethod) {
+		public Match(T mapping, HandlerMethod handlerMethod) {
 			this.mapping = mapping;
 			this.handlerMethod = handlerMethod;
 		}
