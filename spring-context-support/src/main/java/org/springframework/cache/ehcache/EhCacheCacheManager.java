@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class EhCacheCacheManager extends AbstractTransactionSupportingCacheManag
 	}
 
 	/**
-	 * Create a new EhCacheCacheManager for the given backing EhCache.
+	 * Create a new EhCacheCacheManager for the given backing EhCache CacheManager.
 	 * @param cacheManager the backing EhCache {@link net.sf.ehcache.CacheManager}
 	 */
 	public EhCacheCacheManager(net.sf.ehcache.CacheManager cacheManager) {
@@ -92,8 +92,8 @@ public class EhCacheCacheManager extends AbstractTransactionSupportingCacheManag
 			// (in case the cache was added at runtime)
 			Ehcache ehcache = this.cacheManager.getEhcache(name);
 			if (ehcache != null) {
-				cache = new EhCacheCache(ehcache);
-				addCache(cache);
+				addCache(new EhCacheCache(ehcache));
+				cache = super.getCache(name);  // potentially decorated
 			}
 		}
 		return cache;
