@@ -89,7 +89,6 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	/**
 	 * Check if any of the HTTP request methods match the given request and
 	 * return an instance that contains the matching HTTP request method only.
-	 *
 	 * @param request the current request
 	 * @return the same instance if the condition is empty, a new condition with
 	 * the matched request method, or {@code null} if no request methods match
@@ -114,7 +113,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 		try {
 			return RequestMethod.valueOf(request.getMethod());
 		}
-		catch (IllegalArgumentException e) {
+		catch (IllegalArgumentException ex) {
 			return null;
 		}
 	}

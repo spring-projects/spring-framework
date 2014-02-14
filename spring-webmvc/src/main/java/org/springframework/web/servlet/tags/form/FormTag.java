@@ -383,7 +383,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	private String getHttpMethod() {
-		return isMethodBrowserSupported(getMethod()) ? getMethod() : DEFAULT_METHOD;
+		return (isMethodBrowserSupported(getMethod()) ? getMethod() : DEFAULT_METHOD);
 	}
 
 	private void assertHttpMethod(String method) {

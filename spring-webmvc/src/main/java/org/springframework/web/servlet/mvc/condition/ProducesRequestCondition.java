@@ -226,9 +226,9 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 			}
 			return 0;
 		}
-		catch (HttpMediaTypeNotAcceptableException e) {
+		catch (HttpMediaTypeNotAcceptableException ex) {
 			// should never happen
-			throw new IllegalStateException("Cannot compare without having any requested media types");
+			throw new IllegalStateException("Cannot compare without having any requested media types", ex);
 		}
 	}
 
