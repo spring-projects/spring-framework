@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	/**
 	 * Whether to use suffix pattern match for registered file extensions only
 	 * when matching patterns to requests.
-	 *
 	 * <p>If enabled, a controller method mapped to "/users" also matches to
 	 * "/users.json" assuming ".json" is a file extension registered with the
 	 * provided {@link #setContentNegotiationManager(ContentNegotiationManager)
@@ -87,14 +86,13 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * can lead to ambiguous interpretation of path variable content, (e.g. given
 	 * "/users/{user}" and incoming URLs such as "/users/john.j.joe" and
 	 * "/users/john.j.joe.json").
-	 *
 	 * <p>If enabled, this flag also enables
 	 * {@link #setUseSuffixPatternMatch(boolean) useSuffixPatternMatch}. The
 	 * default value is {@code false}.
 	 */
-	public void setUseRegisteredSuffixPatternMatch(boolean useRegsiteredSuffixPatternMatch) {
-		this.useRegisteredSuffixPatternMatch = useRegsiteredSuffixPatternMatch;
-		this.useSuffixPatternMatch = useRegsiteredSuffixPatternMatch ? true : this.useSuffixPatternMatch;
+	public void setUseRegisteredSuffixPatternMatch(boolean useRegisteredSuffixPatternMatch) {
+		this.useRegisteredSuffixPatternMatch = useRegisteredSuffixPatternMatch;
+		this.useSuffixPatternMatch = (useRegisteredSuffixPatternMatch || this.useSuffixPatternMatch);
 	}
 
 	/**
@@ -106,19 +104,29 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		this.useTrailingSlashMatch = useTrailingSlashMatch;
 	}
 
-	@Override
-	public void setEmbeddedValueResolver(StringValueResolver resolver) {
-		this.embeddedValueResolver  = resolver;
-	}
-
 	/**
 	 * Set the {@link ContentNegotiationManager} to use to determine requested media types.
 	 * If not set, the default constructor is used.
 	 */
 	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
-		Assert.notNull(contentNegotiationManager);
+		Assert.notNull(contentNegotiationManager, "ContentNegotiationManager must not be null");
 		this.contentNegotiationManager = contentNegotiationManager;
 	}
+
+	@Override
+	public void setEmbeddedValueResolver(StringValueResolver resolver) {
+		this.embeddedValueResolver  = resolver;
+	}
+
+	@Override
+	public void afterPropertiesSet() {
+		if (this.useRegisteredSuffixPatternMatch) {
+			this.fileExtensions.addAll(this.contentNegotiationManager.getAllFileExtensions());
+		}
+		super.afterPropertiesSet();
+	}
+
+
 
 	/**
 	 * Whether to use suffix pattern matching.
@@ -131,11 +139,11 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * Whether to use registered suffixes for pattern matching.
 	 */
 	public boolean useRegisteredSuffixPatternMatch() {
-		return useRegisteredSuffixPatternMatch;
+		return this.useRegisteredSuffixPatternMatch;
 	}
 
 	/**
-	 * Whether to match to URLs irrespective of the presence of a trailing  slash.
+	 * Whether to match to URLs irrespective of the presence of a trailing slash.
 	 */
 	public boolean useTrailingSlashMatch() {
 		return this.useTrailingSlashMatch;
@@ -155,13 +163,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		return this.fileExtensions;
 	}
 
-	@Override
-	public void afterPropertiesSet() {
-		if (this.useRegisteredSuffixPatternMatch) {
-			this.fileExtensions.addAll(contentNegotiationManager.getAllFileExtensions());
-		}
-		super.afterPropertiesSet();
-	}
 
 	/**
 	 * {@inheritDoc}
@@ -176,10 +177,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	/**
 	 * Uses method and type-level @{@link RequestMapping} annotations to create
 	 * the RequestMappingInfo.
-	 *
 	 * @return the created RequestMappingInfo, or {@code null} if the method
 	 * does not have a {@code @RequestMapping} annotation.
-	 *
 	 * @see #getCustomMethodCondition(Method)
 	 * @see #getCustomTypeCondition(Class)
 	 */
@@ -204,11 +203,9 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * The custom {@link RequestCondition} can be of any type so long as the
 	 * same condition type is returned from all calls to this method in order
 	 * to ensure custom request conditions can be combined and compared.
-	 *
 	 * <p>Consider extending {@link AbstractRequestCondition} for custom
 	 * condition types and using {@link CompositeRequestCondition} to provide
 	 * multiple custom conditions.
-	 *
 	 * @param handlerType the handler type for which to create the condition
 	 * @return the condition, or {@code null}
 	 */
@@ -221,11 +218,9 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * The custom {@link RequestCondition} can be of any type so long as the
 	 * same condition type is returned from all calls to this method in order
 	 * to ensure custom request conditions can be combined and compared.
-	 *
 	 * <p>Consider extending {@link AbstractRequestCondition} for custom
 	 * condition types and using {@link CompositeRequestCondition} to provide
 	 * multiple custom conditions.
-	 *
 	 * @param method the handler method for which to create the condition
 	 * @return the condition, or {@code null}
 	 */
@@ -236,9 +231,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	/**
 	 * Created a RequestMappingInfo from a RequestMapping annotation.
 	 */
-	protected RequestMappingInfo createRequestMappingInfo(RequestMapping annotation,
-			RequestCondition<?> customCondition) {
-
+	protected RequestMappingInfo createRequestMappingInfo(RequestMapping annotation, RequestCondition<?> customCondition) {
 		String[] patterns = resolveEmbeddedValuesInPatterns(annotation.value());
 		return new RequestMappingInfo(
 				new PatternsRequestCondition(patterns, getUrlPathHelper(), getPathMatcher(),
@@ -261,7 +254,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		}
 		else {
 			String[] resolvedPatterns = new String[patterns.length];
-			for (int i=0; i < patterns.length; i++) {
+			for (int i = 0; i < patterns.length; i++) {
 				resolvedPatterns[i] = this.embeddedValueResolver.resolveStringValue(patterns[i]);
 			}
 			return resolvedPatterns;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,7 @@ package org.springframework.web.servlet.mvc.condition;
 
 import java.util.Collection;
 import java.util.Collections;
-
 import javax.servlet.http.HttpServletRequest;
-
 
 /**
  * A holder for a {@link RequestCondition} useful when the type of the request
@@ -40,6 +38,7 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 
 	private final RequestCondition<Object> condition;
 
+
 	/**
 	 * Create a new holder to wrap the given request condition.
 	 * @param requestCondition the condition to hold, may be {@code null}
@@ -48,6 +47,7 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 	public RequestConditionHolder(RequestCondition<?> requestCondition) {
 		this.condition = (RequestCondition<Object>) requestCondition;
 	}
+
 
 	/**
 	 * Return the held request condition, or {@code null} if not holding one.
@@ -58,7 +58,7 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 
 	@Override
 	protected Collection<?> getContent() {
-		return this.condition != null ? Collections.singleton(this.condition) : Collections.emptyList();
+		return (this.condition != null ? Collections.singleton(this.condition) : Collections.emptyList());
 	}
 
 	@Override
@@ -109,7 +109,7 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 			return this;
 		}
 		RequestCondition<?> match = (RequestCondition<?>) this.condition.getMatchingCondition(request);
-		return (match != null) ? new RequestConditionHolder(match) : null;
+		return (match != null ? new RequestConditionHolder(match) : null);
 	}
 
 	/**
