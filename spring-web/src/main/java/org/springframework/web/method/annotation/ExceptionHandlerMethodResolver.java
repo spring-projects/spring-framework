@@ -33,10 +33,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.HandlerMethodSelector;
 
 /**
- * Discovers {@linkplain ExceptionHandler @ExceptionHandler} methods in a given class
- * type, including all super types, and helps to resolve an Exception to the method
- * its mapped to. Exception mappings are defined through {@code @ExceptionHandler}
- * annotation or by looking at the signature of an {@code @ExceptionHandler} method.
+ * Discovers {@linkplain ExceptionHandler @ExceptionHandler} methods in a given class,
+ * including all of its superclasses, and helps to resolve a given {@link Exception}
+ * to the exception types supported by a given {@link Method}.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -46,12 +45,15 @@ public class ExceptionHandlerMethodResolver {
 	/**
 	 * A filter for selecting {@code @ExceptionHandler} methods.
 	 */
-	public final static MethodFilter EXCEPTION_HANDLER_METHODS = new MethodFilter() {
+	public static final MethodFilter EXCEPTION_HANDLER_METHODS = new MethodFilter() {
 		public boolean matches(Method method) {
 			return (AnnotationUtils.findAnnotation(method, ExceptionHandler.class) != null);
 		}
 	};
 
+	/**
+	 * Arbitrary {@link Method} reference, indicating no method found in the cache.
+	 */
 	private static final Method NO_METHOD_FOUND = ClassUtils.getMethodIfAvailable(System.class, "currentTimeMillis");
 
 
@@ -76,8 +78,8 @@ public class ExceptionHandlerMethodResolver {
 
 
 	/**
-	 * Extract exception mappings from the {@code @ExceptionHandler} annotation
-	 * first and as a fall-back from the method signature.
+	 * Extract exception mappings from the {@code @ExceptionHandler} annotation first,
+	 * and then as a fallback from the method signature itself.
 	 */
 	@SuppressWarnings("unchecked")
 	private List<Class<? extends Throwable>> detectExceptionMappings(Method method) {
@@ -112,36 +114,36 @@ public class ExceptionHandlerMethodResolver {
 	 * Whether the contained type has any exception mappings.
 	 */
 	public boolean hasExceptionMappings() {
-		return (this.mappedMethods.size() > 0);
+		return !this.mappedMethods.isEmpty();
 	}
 
 	/**
-	 * Find a method to handle the given exception.
+	 * Find a {@link Method} to handle the given exception.
 	 * Use {@link ExceptionDepthComparator} if more than one match is found.
 	 * @param exception the exception
-	 * @return a method to handle the exception or {@code null}
+	 * @return a Method to handle the exception, or {@code null} if none found
 	 */
 	public Method resolveMethod(Exception exception) {
 		return resolveMethodByExceptionType(exception.getClass());
 	}
 
 	/**
-	 * Find a method to handle the given exception type. This can be useful if
-	 * an Exception instance is not available (example for tools).
+	 * Find a {@link Method} to handle the given exception type. This can be
+	 * useful if an {@link Exception} instance is not available (e.g. for tools).
 	 * @param exceptionType the exception type
-	 * @return a method to handle the exception or {@code null}
+	 * @return a Method to handle the exception, or {@code null} if none found
 	 */
 	public Method resolveMethodByExceptionType(Class<? extends Exception> exceptionType) {
 		Method method = this.exceptionLookupCache.get(exceptionType);
 		if (method == null) {
 			method = getMappedMethod(exceptionType);
-			this.exceptionLookupCache.put(exceptionType, method != null ? method : NO_METHOD_FOUND);
+			this.exceptionLookupCache.put(exceptionType, (method != null ? method : NO_METHOD_FOUND));
 		}
-		return method != NO_METHOD_FOUND ? method : null;
+		return (method != NO_METHOD_FOUND ? method : null);
 	}
 
 	/**
-	 * Return the method mapped to the given exception type or {@code null}.
+	 * Return the {@link Method} mapped to the given exception type, or {@code null} if none.
 	 */
 	private Method getMappedMethod(Class<? extends Exception> exceptionType) {
 		List<Class<? extends Throwable>> matches = new ArrayList<Class<? extends Throwable>>();
