@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.servlet.mvc.method.annotation;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -29,6 +25,7 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringValueResolver;
@@ -37,6 +34,8 @@ import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests for {@link RequestMappingHandlerMapping}.
@@ -47,14 +46,16 @@ public class RequestMappingHandlerMappingTests {
 
 	private RequestMappingHandlerMapping handlerMapping;
 
+
 	@Before
 	public void setup() {
 		this.handlerMapping = new RequestMappingHandlerMapping();
 		this.handlerMapping.setApplicationContext(new StaticWebApplicationContext());
 	}
 
+
 	@Test
-	public void useRegsiteredSuffixPatternMatch() {
+	public void useRegisteredSuffixPatternMatch() {
 		assertTrue(this.handlerMapping.useSuffixPatternMatch());
 		assertFalse(this.handlerMapping.useRegisteredSuffixPatternMatch());
 
@@ -72,8 +73,7 @@ public class RequestMappingHandlerMappingTests {
 	}
 
 	@Test
-	public void useRegsiteredSuffixPatternMatchInitialization() {
-
+	public void useRegisteredSuffixPatternMatchInitialization() {
 		Map<String, MediaType> fileExtensions = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
 		PathExtensionContentNegotiationStrategy strategy = new PathExtensionContentNegotiationStrategy(fileExtensions);
 		ContentNegotiationManager manager = new ContentNegotiationManager(strategy);

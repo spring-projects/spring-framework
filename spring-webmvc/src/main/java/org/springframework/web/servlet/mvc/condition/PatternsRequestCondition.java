@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,10 +154,10 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * Returns a new instance with URL patterns from the current instance ("this") and
 	 * the "other" instance as follows:
 	 * <ul>
-	 * 	<li>If there are patterns in both instances, combine the patterns in "this" with
-	 * 		the patterns in "other" using {@link PathMatcher#combine(String, String)}.
-	 * 	<li>If only one instance has patterns, use them.
-	 *  <li>If neither instance has patterns, use an empty String (i.e. "").
+	 * <li>If there are patterns in both instances, combine the patterns in "this" with
+	 * the patterns in "other" using {@link PathMatcher#combine(String, String)}.
+	 * <li>If only one instance has patterns, use them.
+	 * <li>If neither instance has patterns, use an empty String (i.e. "").
 	 * </ul>
 	 */
 	@Override
@@ -189,10 +189,10 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * {@link PathMatcher#getPatternComparator(String)}.
 	 * <p>A matching pattern is obtained by making checks in the following order:
 	 * <ul>
-	 * 	<li>Direct match
-	 * 	<li>Pattern match with ".*" appended if the pattern doesn't already contain a "."
-	 * 	<li>Pattern match
-	 * 	<li>Pattern match with "/" appended if the pattern doesn't already end in "/"
+	 * <li>Direct match
+	 * <li>Pattern match with ".*" appended if the pattern doesn't already contain a "."
+	 * <li>Pattern match
+	 * <li>Pattern match with "/" appended if the pattern doesn't already end in "/"
 	 * </ul>
 	 * @param request the current request
 	 * @return the same instance if the condition contains no patterns;
@@ -264,7 +264,6 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	public int compareTo(PatternsRequestCondition other, HttpServletRequest request) {
 		String lookupPath = this.pathHelper.getLookupPathForRequest(request);
 		Comparator<String> patternComparator = this.pathMatcher.getPatternComparator(lookupPath);
-
 		Iterator<String> iterator = this.patterns.iterator();
 		Iterator<String> iteratorOther = other.patterns.iterator();
 		while (iterator.hasNext() && iteratorOther.hasNext()) {
