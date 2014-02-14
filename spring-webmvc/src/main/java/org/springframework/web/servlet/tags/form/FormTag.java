@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
-
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -32,6 +32,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
 import org.springframework.web.util.HtmlUtils;
+import org.springframework.web.util.UriUtils;
 
 /**
  * Databinding-aware JSP tag for rendering an HTML '{@code form}' whose
@@ -352,8 +353,7 @@ public class FormTag extends AbstractHtmlElementTag {
 		tagWriter.startTag(FORM_TAG);
 		writeDefaultAttributes(tagWriter);
 		tagWriter.writeAttribute(ACTION_ATTRIBUTE, resolveAction());
-		writeOptionalAttribute(tagWriter, METHOD_ATTRIBUTE,
-				isMethodBrowserSupported(getMethod()) ? getMethod() : DEFAULT_METHOD);
+		writeOptionalAttribute(tagWriter, METHOD_ATTRIBUTE, getHttpMethod());
 		writeOptionalAttribute(tagWriter, TARGET_ATTRIBUTE, getTarget());
 		writeOptionalAttribute(tagWriter, ENCTYPE_ATTRIBUTE, getEnctype());
 		writeOptionalAttribute(tagWriter, ACCEPT_CHARSET_ATTRIBUTE, getAcceptCharset());
@@ -387,6 +387,10 @@ public class FormTag extends AbstractHtmlElementTag {
 				modelAttribute + PropertyAccessor.NESTED_PROPERTY_SEPARATOR, PageContext.REQUEST_SCOPE);
 
 		return EVAL_BODY_INCLUDE;
+	}
+
+	private String getHttpMethod() {
+		return (isMethodBrowserSupported(getMethod()) ? getMethod() : DEFAULT_METHOD);
 	}
 
 	private void assertHttpMethod(String method) {
@@ -426,7 +430,6 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * with the context and servlet paths, and the result is used. Otherwise, the
 	 * {@link org.springframework.web.servlet.support.RequestContext#getRequestUri()
 	 * originating URI} is used.
-	 *
 	 * @return the value that is to be used for the '{@code action}' attribute
 	 */
 	protected String resolveAction() throws JspException {
@@ -438,7 +441,8 @@ public class FormTag extends AbstractHtmlElementTag {
 		}
 		else if (StringUtils.hasText(servletRelativeAction)) {
 			String pathToServlet = getRequestContext().getPathToServlet();
-			if (servletRelativeAction.startsWith("/") && !servletRelativeAction.startsWith(getRequestContext().getContextPath())) {
+			if (servletRelativeAction.startsWith("/") &&
+					!servletRelativeAction.startsWith(getRequestContext().getContextPath())) {
 				servletRelativeAction = pathToServlet + servletRelativeAction;
 			}
 			servletRelativeAction = getDisplayString(evaluate(ACTION_ATTRIBUTE, servletRelativeAction));
@@ -446,6 +450,13 @@ public class FormTag extends AbstractHtmlElementTag {
 		}
 		else {
 			String requestUri = getRequestContext().getRequestUri();
+			String encoding = this.pageContext.getResponse().getCharacterEncoding();
+			try {
+				requestUri = UriUtils.encodePath(requestUri, encoding);
+			}
+			catch (UnsupportedEncodingException ex) {
+				// shouldn't happen - if it does, proceed with requestUri as-is
+			}
 			ServletResponse response = this.pageContext.getResponse();
 			if (response instanceof HttpServletResponse) {
 				requestUri = ((HttpServletResponse) response).encodeURL(requestUri);
@@ -471,7 +482,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	private String processAction(String action) {
 		RequestDataValueProcessor processor = getRequestContext().getRequestDataValueProcessor();
 		ServletRequest request = this.pageContext.getRequest();
-		if ((processor != null) && (request instanceof HttpServletRequest)) {
+		if (processor != null && request instanceof HttpServletRequest) {
 			action = processor.processAction((HttpServletRequest) request, action);
 		}
 		return action;

@@ -81,9 +81,19 @@ public class MapAccessTests extends ExpressionTestCase {
 		Object bean = new TestBean("name1", new TestBean("name2", null, "Description 2", 15, props1), "description 1", 6, props1);
 
 		ExpressionParser parser = new SpelExpressionParser();
-		Expression exp = parser.parseExpression("testBean.properties['key2']");
-		String key = (String) exp.getValue(bean);
-		assertNotNull(key);
+		Expression expr = parser.parseExpression("testBean.properties['key2']");
+		assertEquals("value2", expr.getValue(bean));
+	}
+
+	@Test
+	public void testGetValueFromRootMap() {
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("key", "value");
+		EvaluationContext context = new StandardEvaluationContext(map);
+
+		ExpressionParser spelExpressionParser = new SpelExpressionParser();
+		Expression expr = spelExpressionParser.parseExpression("#root['key']");
+		assertEquals("value", expr.getValue(map));
 	}
 
 
