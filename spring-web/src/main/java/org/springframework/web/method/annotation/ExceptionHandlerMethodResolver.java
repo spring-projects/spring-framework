@@ -36,7 +36,7 @@ import org.springframework.web.method.HandlerMethodSelector;
  * Discovers {@linkplain ExceptionHandler @ExceptionHandler} methods in a given class,
  * including all of its superclasses, and helps to resolve a given {@link Exception}
  * to the exception types supported by a given {@link Method}.
-  *
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
@@ -79,8 +79,8 @@ public class ExceptionHandlerMethodResolver {
 
 
 	/**
-	 * Extract exception mappings from the {@code @ExceptionHandler} annotation
-	 * first and as a fall-back from the method signature.
+	 * Extract exception mappings from the {@code @ExceptionHandler} annotation first,
+	 * and then as a fallback from the method signature itself.
 	 */
 	@SuppressWarnings("unchecked")
 	private List<Class<? extends Throwable>> detectExceptionMappings(Method method) {
@@ -115,7 +115,7 @@ public class ExceptionHandlerMethodResolver {
 	 * Whether the contained type has any exception mappings.
 	 */
 	public boolean hasExceptionMappings() {
-		return (this.mappedMethods.size() > 0);
+		return !this.mappedMethods.isEmpty();
 	}
 
 	/**
@@ -140,11 +140,11 @@ public class ExceptionHandlerMethodResolver {
 			method = getMappedMethod(exceptionType);
 			this.exceptionLookupCache.put(exceptionType, (method != null ? method : NO_METHOD_FOUND));
 		}
-		return method != NO_METHOD_FOUND ? method : null;
+		return (method != NO_METHOD_FOUND ? method : null);
 	}
 
 	/**
-	 * Return the method mapped to the given exception type or {@code null}.
+	 * Return the {@link Method} mapped to the given exception type, or {@code null} if none.
 	 */
 	private Method getMappedMethod(Class<? extends Exception> exceptionType) {
 		List<Class<? extends Throwable>> matches = new ArrayList<Class<? extends Throwable>>();
