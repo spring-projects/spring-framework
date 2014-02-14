@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,8 +63,6 @@ public class MethodParameter {
 
 	/** Map from Integer level to Integer type index */
 	Map<Integer, Integer> typeIndexesPerLevel;
-
-	private int hash = 0;
 
 
 	/**
@@ -137,7 +135,6 @@ public class MethodParameter {
 		this.parameterName = original.parameterName;
 		this.nestingLevel = original.nestingLevel;
 		this.typeIndexesPerLevel = original.typeIndexesPerLevel;
-		this.hash = original.hash;
 	}
 
 
@@ -450,29 +447,14 @@ public class MethodParameter {
 		}
 		if (obj != null && obj instanceof MethodParameter) {
 			MethodParameter other = (MethodParameter) obj;
-
-			if (this.parameterIndex != other.parameterIndex) {
-				return false;
-			}
-			else if (this.getMember().equals(other.getMember())) {
-				return true;
-			}
-			else {
-				return false;
-			}
+			return (this.parameterIndex == other.parameterIndex && getMember().equals(other.getMember()));
 		}
 		return false;
 	}
 
 	@Override
 	public int hashCode() {
-		int result = this.hash;
-		if (result == 0) {
-			result = getMember().hashCode();
-			result = 31 * result + this.parameterIndex;
-			this.hash = result;
-		}
-		return result;
+		return (getMember().hashCode() * 31 + this.parameterIndex);
 	}
 
 

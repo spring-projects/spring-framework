@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,6 @@ public class SimpMessageMappingInfo implements MessageCondition<SimpMessageMappi
 
 	private final DestinationPatternsMessageCondition destinationConditions;
 
-	private int hash;
-
 
 	public SimpMessageMappingInfo(SimpMessageTypeMessageCondition messageTypeMessageCondition,
 			DestinationPatternsMessageCondition destinationConditions) {
@@ -58,13 +56,10 @@ public class SimpMessageMappingInfo implements MessageCondition<SimpMessageMappi
 
 	@Override
 	public SimpMessageMappingInfo combine(SimpMessageMappingInfo other) {
-
 		SimpMessageTypeMessageCondition typeCond =
 				this.getMessageTypeMessageCondition().combine(other.getMessageTypeMessageCondition());
-
 		DestinationPatternsMessageCondition destCond =
 				this.destinationConditions.combine(other.getDestinationConditions());
-
 		return new SimpMessageMappingInfo(typeCond, destCond);
 	}
 
@@ -102,20 +97,15 @@ public class SimpMessageMappingInfo implements MessageCondition<SimpMessageMappi
 		}
 		if (obj != null && obj instanceof SimpMessageMappingInfo) {
 			SimpMessageMappingInfo other = (SimpMessageMappingInfo) obj;
-			return this.destinationConditions.equals(other.destinationConditions);
+			return (this.destinationConditions.equals(other.destinationConditions) &&
+					this.messageTypeMessageCondition.equals(other.messageTypeMessageCondition));
 		}
 		return false;
 	}
 
 	@Override
 	public int hashCode() {
-		int result = hash;
-		if (result == 0) {
-			result = destinationConditions.hashCode();
-			result = 31 * result + messageTypeMessageCondition.hashCode();
-			hash = result;
-		}
-		return result;
+		return (this.destinationConditions.hashCode() * 31 + this.messageTypeMessageCondition.hashCode());
 	}
 
 	@Override
