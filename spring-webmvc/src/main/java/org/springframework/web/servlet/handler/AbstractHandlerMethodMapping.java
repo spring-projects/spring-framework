@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -126,17 +127,26 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		Class<?> handlerType =
 				(handler instanceof String ? getApplicationContext().getType((String) handler) : handler.getClass());
 
+		// Avoid repeated calls to getMappingForMethod which would rebuild RequestMatchingInfo instances
+		final Map<Method, T> mappings = new IdentityHashMap<Method, T>();
 		final Class<?> userType = ClassUtils.getUserClass(handlerType);
+
 		Set<Method> methods = HandlerMethodSelector.selectMethods(userType, new MethodFilter() {
 			@Override
 			public boolean matches(Method method) {
-				return getMappingForMethod(method, userType) != null;
+				T mapping = getMappingForMethod(method, userType);
+				if (mapping != null) {
+					mappings.put(method, mapping);
+					return true;
+				}
+				else {
+					return false;
+				}
 			}
 		});
 
 		for (Method method : methods) {
-			T mapping = getMappingForMethod(method, userType);
-			registerHandlerMethod(handler, method, mapping);
+			registerHandlerMethod(handler, method, mappings.get(method));
 		}
 	}
 
@@ -243,25 +253,21 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	protected HandlerMethod lookupHandlerMethod(String lookupPath, HttpServletRequest request) throws Exception {
 		List<Match> matches = new ArrayList<Match>();
-
 		List<T> directPathMatches = this.urlMap.get(lookupPath);
 		if (directPathMatches != null) {
 			addMatchingMappings(directPathMatches, matches, request);
 		}
-
 		if (matches.isEmpty()) {
-			// No choice but to go through all mappings
+			// No choice but to go through all mappings...
 			addMatchingMappings(this.handlerMethods.keySet(), matches, request);
 		}
 
 		if (!matches.isEmpty()) {
 			Comparator<Match> comparator = new MatchComparator(getMappingComparator(request));
 			Collections.sort(matches, comparator);
-
 			if (logger.isTraceEnabled()) {
 				logger.trace("Found " + matches.size() + " matching mapping(s) for [" + lookupPath + "] : " + matches);
 			}
-
 			Match bestMatch = matches.get(0);
 			if (matches.size() > 1) {
 				Match secondBestMatch = matches.get(1);
@@ -273,7 +279,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 							m1 + ", " + m2 + "}");
 				}
 			}
-
 			handleMatch(bestMatch.mapping, lookupPath, request);
 			return bestMatch.handlerMethod;
 		}
@@ -286,7 +291,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		for (T mapping : mappings) {
 			T match = getMatchingMapping(mapping, request);
 			if (match != null) {
-				matches.add(new Match(match, handlerMethods.get(mapping)));
+				matches.add(new Match(match, this.handlerMethods.get(mapping)));
 			}
 		}
 	}
