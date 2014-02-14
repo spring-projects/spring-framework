@@ -19,7 +19,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.lang.reflect.Method;
 import java.security.Principal;
 import java.time.ZoneId;
 import java.util.Locale;
@@ -101,6 +100,9 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 		else if (HttpSession.class.isAssignableFrom(paramType)) {
 			return request.getSession();
 		}
+		else if (HttpMethod.class.equals(paramType)) {
+			return ((ServletWebRequest) webRequest).getHttpMethod();
+		}
 		else if (Principal.class.isAssignableFrom(paramType)) {
 			return request.getUserPrincipal();
 		}
@@ -120,13 +122,10 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 		else if (Reader.class.isAssignableFrom(paramType)) {
 			return request.getReader();
 		}
-		else if (HttpMethod.class.equals(paramType)) {
-			return ((ServletWebRequest) webRequest).getHttpMethod();
-		}
 		else {
-			// should never happen..
-			Method method = parameter.getMethod();
-			throw new UnsupportedOperationException("Unknown parameter type: " + paramType + " in method: " + method);
+			// should never happen...
+			throw new UnsupportedOperationException(
+					"Unknown parameter type: " + paramType + " in method: " + parameter.getMethod());
 		}
 	}
 

@@ -31,9 +31,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Provides support for messages sent to "user" destinations, translating the
@@ -60,7 +58,7 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 
 	private final UserDestinationResolver userDestinationResolver;
 
-	private Object lifecycleMonitor = new Object();
+	private final Object lifecycleMonitor = new Object();
 
 	private volatile boolean running = false;
 
@@ -85,12 +83,6 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 		this.userDestinationResolver = userDestinationResolver;
 	}
 
-	/**
-	 * Return the configured {@link UserDestinationResolver}.
-	 */
-	public UserDestinationResolver getUserDestinationResolver() {
-		return this.userDestinationResolver;
-	}
 
 	/**
 	 * Return the configured messaging template for sending messages with
@@ -100,14 +92,22 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 		return this.brokerMessagingTemplate;
 	}
 
-	@Override
-	public boolean isAutoStartup() {
-		return true;
+	/**
+	 * Return the configured {@link UserDestinationResolver}.
+	 */
+	public UserDestinationResolver getUserDestinationResolver() {
+		return this.userDestinationResolver;
 	}
+
 
 	@Override
 	public int getPhase() {
 		return Integer.MAX_VALUE;
+	}
+
+	@Override
+	public boolean isAutoStartup() {
+		return true;
 	}
 
 	@Override
@@ -143,9 +143,9 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 		}
 	}
 
+
 	@Override
 	public void handleMessage(Message<?> message) throws MessagingException {
-
 		UserDestinationResult result = this.userDestinationResolver.resolveDestination(message);
 		if (result == null) {
 			return;
@@ -154,13 +154,11 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 		if (destinations.isEmpty()) {
 			return;
 		}
-
 		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.wrap(message);
 		if (SimpMessageType.MESSAGE.equals(headerAccessor.getMessageType())) {
 			headerAccessor.setHeader(SUBSCRIBE_DESTINATION, result.getSubscribeDestination());
 			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headerAccessor).build();
 		}
-
 		for (String targetDestination : destinations) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Sending message to resolved destination=" + targetDestination);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package org.springframework.transaction.interceptor;
 
-import org.springframework.util.Assert;
-
 import java.io.Serializable;
+
+import org.springframework.util.Assert;
 
 /**
  * Rule determining whether or not a given exception (and any subclasses)
@@ -60,7 +60,7 @@ public class RollbackRuleAttribute implements Serializable{
 	 * not a {@code Throwable} type or is {@code null}
 	 */
 	public RollbackRuleAttribute(Class<?> clazz) {
-		Assert.notNull(clazz, "'clazz' cannot be null.");
+		Assert.notNull(clazz, "'clazz' cannot be null");
 		if (!Throwable.class.isAssignableFrom(clazz)) {
 			throw new IllegalArgumentException(
 					"Cannot construct rollback rule from [" + clazz.getName() + "]: it's not a Throwable");
@@ -87,7 +87,7 @@ public class RollbackRuleAttribute implements Serializable{
 	 * {@code exceptionName} is {@code null} or empty
 	 */
 	public RollbackRuleAttribute(String exceptionName) {
-		Assert.hasText(exceptionName, "'exceptionName' cannot be null or empty.");
+		Assert.hasText(exceptionName, "'exceptionName' cannot be null or empty");
 		this.exceptionName = exceptionName;
 	}
 
@@ -111,7 +111,7 @@ public class RollbackRuleAttribute implements Serializable{
 
 
 	private int getDepth(Class<?> exceptionClass, int depth) {
-		if (exceptionClass.getName().indexOf(this.exceptionName) != -1) {
+		if (exceptionClass.getName().contains(this.exceptionName)) {
 			// Found it!
 			return depth;
 		}

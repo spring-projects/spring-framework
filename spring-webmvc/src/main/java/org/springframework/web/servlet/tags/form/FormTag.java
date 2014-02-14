@@ -18,7 +18,6 @@ package org.springframework.web.servlet.tags.form;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
-
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -424,7 +423,6 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * with the context and servlet paths, and the result is used. Otherwise, the
 	 * {@link org.springframework.web.servlet.support.RequestContext#getRequestUri()
 	 * originating URI} is used.
-	 *
 	 * @return the value that is to be used for the '{@code action}' attribute
 	 */
 	protected String resolveAction() throws JspException {
@@ -436,7 +434,8 @@ public class FormTag extends AbstractHtmlElementTag {
 		}
 		else if (StringUtils.hasText(servletRelativeAction)) {
 			String pathToServlet = getRequestContext().getPathToServlet();
-			if (servletRelativeAction.startsWith("/") && !servletRelativeAction.startsWith(getRequestContext().getContextPath())) {
+			if (servletRelativeAction.startsWith("/") &&
+					!servletRelativeAction.startsWith(getRequestContext().getContextPath())) {
 				servletRelativeAction = pathToServlet + servletRelativeAction;
 			}
 			servletRelativeAction = getDisplayString(evaluate(ACTION_ATTRIBUTE, servletRelativeAction));
@@ -444,12 +443,12 @@ public class FormTag extends AbstractHtmlElementTag {
 		}
 		else {
 			String requestUri = getRequestContext().getRequestUri();
-			String encoding = pageContext.getResponse().getCharacterEncoding();
+			String encoding = this.pageContext.getResponse().getCharacterEncoding();
 			try {
 				requestUri = UriUtils.encodePath(requestUri, encoding);
 			}
-			catch (UnsupportedEncodingException e) {
-				throw new JspException(e);
+			catch (UnsupportedEncodingException ex) {
+				// shouldn't happen - if it does, proceed with requestUri as-is
 			}
 			ServletResponse response = this.pageContext.getResponse();
 			if (response instanceof HttpServletResponse) {
@@ -476,7 +475,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	private String processAction(String action) {
 		RequestDataValueProcessor processor = getRequestContext().getRequestDataValueProcessor();
 		ServletRequest request = this.pageContext.getRequest();
-		if ((processor != null) && (request instanceof HttpServletRequest)) {
+		if (processor != null && request instanceof HttpServletRequest) {
 			action = processor.processAction((HttpServletRequest) request, action, getHttpMethod());
 		}
 		return action;

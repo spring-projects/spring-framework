@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.util.Assert;
 public abstract class SpelNodeImpl implements SpelNode {
 
 	private static SpelNodeImpl[] NO_CHILDREN = new SpelNodeImpl[0];
+
 
 	protected int pos; // start = top 16bits, end = bottom 16bits
 
@@ -152,22 +153,21 @@ public abstract class SpelNodeImpl implements SpelNode {
 		return ExpressionUtils.convertTypedValue(state.getEvaluationContext(), getValueInternal(state), desiredReturnType);
 	}
 
-	public abstract TypedValue getValueInternal(ExpressionState expressionState) throws EvaluationException;
-
-	@Override
-	public abstract String toStringAST();
-
 	@Override
 	public int getStartPosition() {
-		return (this.pos>>16);
+		return (this.pos >> 16);
 	}
 
 	@Override
 	public int getEndPosition() {
-		return (this.pos&0xffff);
+		return (this.pos & 0xffff);
 	}
 
 	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
-		throw new SpelEvaluationException(this.pos,SpelMessage.NOT_ASSIGNABLE,toStringAST());
+		throw new SpelEvaluationException(this.pos, SpelMessage.NOT_ASSIGNABLE, toStringAST());
 	}
+
+
+	public abstract TypedValue getValueInternal(ExpressionState expressionState) throws EvaluationException;
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,10 @@ import org.springframework.expression.spel.SpelEvaluationException;
 public class CompoundExpression extends SpelNodeImpl {
 
 	public CompoundExpression(int pos,SpelNodeImpl... expressionComponents) {
-		super(pos,expressionComponents);
-		if (expressionComponents.length<2) {
-			throw new IllegalStateException("Dont build compound expression less than one entry: "+expressionComponents.length);
+		super(pos, expressionComponents);
+		if (expressionComponents.length < 2) {
+			throw new IllegalStateException("Do not build compound expression less than one entry: " +
+					expressionComponents.length);
 		}
 	}
 
@@ -42,11 +43,9 @@ public class CompoundExpression extends SpelNodeImpl {
 		if (getChildCount() == 1) {
 			return this.children[0].getValueRef(state);
 		}
-		TypedValue result = null;
-		SpelNodeImpl nextNode = null;
+		SpelNodeImpl nextNode = this.children[0];
 		try {
-			nextNode = this.children[0];
-			result = nextNode.getValueInternal(state);
+			TypedValue result = nextNode.getValueInternal(state);
 			int cc = getChildCount();
 			for (int i = 1; i < cc - 1; i++) {
 				try {
@@ -75,8 +74,8 @@ public class CompoundExpression extends SpelNodeImpl {
 	}
 
 	/**
-	 * Evaluates a compound expression. This involves evaluating each piece in turn and the return value from each piece
-	 * is the active context object for the subsequent piece.
+	 * Evaluates a compound expression. This involves evaluating each piece in turn and the
+	 * return value from each piece is the active context object for the subsequent piece.
 	 * @param state the state in which the expression is being evaluated
 	 * @return the final value from the last piece of the compound expression
 	 */
