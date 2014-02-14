@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,12 +89,11 @@ public class EhCacheCacheManager extends AbstractTransactionSupportingCacheManag
 	public Cache getCache(String name) {
 		Cache cache = super.getCache(name);
 		if (cache == null) {
-			// check the EhCache cache again
-			// (in case the cache was added at runtime)
+			// Check the EhCache cache again (in case the cache was added at runtime)
 			Ehcache ehcache = getCacheManager().getEhcache(name);
 			if (ehcache != null) {
-				cache = new EhCacheCache(ehcache);
-				addCache(cache);
+				addCache(new EhCacheCache(ehcache));
+				cache = super.getCache(name);  // potentially decorated
 			}
 		}
 		return cache;
