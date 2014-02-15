@@ -115,6 +115,12 @@ public final class ResolvableType implements Serializable {
 	 */
 	private final Class<?> resolved;
 
+	private ResolvableType superType;
+
+	private ResolvableType[] interfaces;
+
+	private ResolvableType[] generics;
+
 
 	/**
 	 * Private constructor used to create a new {@link ResolvableType} for resolution purposes.
@@ -360,7 +366,11 @@ public final class ResolvableType implements Serializable {
 		if (resolved == null || resolved.getGenericSuperclass() == null) {
 			return NONE;
 		}
-		return forType(SerializableTypeWrapper.forGenericSuperclass(resolved), asVariableResolver());
+		if (this.superType == null) {
+			this.superType = forType(SerializableTypeWrapper.forGenericSuperclass(resolved),
+					asVariableResolver());
+		}
+		return this.superType;
 	}
 
 	/**
@@ -374,7 +384,11 @@ public final class ResolvableType implements Serializable {
 		if (resolved == null || ObjectUtils.isEmpty(resolved.getGenericInterfaces())) {
 			return EMPTY_TYPES_ARRAY;
 		}
-		return forTypes(SerializableTypeWrapper.forGenericInterfaces(resolved), asVariableResolver());
+		if (this.interfaces == null) {
+			this.interfaces = forTypes(SerializableTypeWrapper.forGenericInterfaces(resolved),
+					asVariableResolver());
+		}
+		return this.interfaces;
 	}
 
 	/**
@@ -551,19 +565,24 @@ public final class ResolvableType implements Serializable {
 		if (this == NONE) {
 			return EMPTY_TYPES_ARRAY;
 		}
-		if (this.type instanceof Class<?>) {
-			Class<?> typeClass = (Class<?>) this.type;
-			return forTypes(SerializableTypeWrapper.forTypeParameters(typeClass), this.variableResolver);
-		}
-		if (this.type instanceof ParameterizedType) {
-			Type[] actualTypeArguments = ((ParameterizedType) this.type).getActualTypeArguments();
-			ResolvableType[] generics = new ResolvableType[actualTypeArguments.length];
-			for (int i = 0; i < actualTypeArguments.length; i++) {
-				generics[i] = forType(actualTypeArguments[i], this.variableResolver);
+		if (this.generics == null) {
+			if (this.type instanceof Class<?>) {
+				Class<?> typeClass = (Class<?>) this.type;
+				this.generics = forTypes(SerializableTypeWrapper.forTypeParameters(typeClass), this.variableResolver);
 			}
-			return generics;
+			else if (this.type instanceof ParameterizedType) {
+				Type[] actualTypeArguments = ((ParameterizedType) this.type).getActualTypeArguments();
+				ResolvableType[] generics = new ResolvableType[actualTypeArguments.length];
+				for (int i = 0; i < actualTypeArguments.length; i++) {
+					generics[i] = forType(actualTypeArguments[i], this.variableResolver);
+				}
+				this.generics = generics;
+			}
+			else {
+				this.generics = resolveType().getGenerics();
+			}
 		}
-		return resolveType().getGenerics();
+		return this.generics;
 	}
 
 	/**

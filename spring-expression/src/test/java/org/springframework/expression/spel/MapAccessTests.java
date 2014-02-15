@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
-
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
@@ -29,6 +28,11 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+import org.springframework.util.StopWatch;
+
+import static org.hamcrest.Matchers.*;
 
 import static org.junit.Assert.*;
 
@@ -94,6 +98,25 @@ public class MapAccessTests extends AbstractExpressionTests {
 		ExpressionParser spelExpressionParser = new SpelExpressionParser();
 		Expression expr = spelExpressionParser.parseExpression("#root['key']");
 		assertEquals("value", expr.getValue(map));
+	}
+
+	@Test
+	public void testGetValuePerformance() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("key", "value");
+		EvaluationContext context = new StandardEvaluationContext(map);
+
+		ExpressionParser spelExpressionParser = new SpelExpressionParser();
+		Expression expr = spelExpressionParser.parseExpression("#root['key']");
+
+		StopWatch s = new StopWatch();
+		s.start();
+		for (int i = 0; i < 10000; i++) {
+			expr.getValue(context);
+		}
+		s.stop();
+		assertThat(s.getTotalTimeMillis(), lessThan(200L));
 	}
 
 

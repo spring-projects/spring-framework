@@ -31,6 +31,7 @@ import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -62,6 +63,9 @@ abstract class SerializableTypeWrapper {
 
 	private static final Method GET_TYPE_PROVIDER_METHOD = ReflectionUtils.findMethod(
 			SerializableTypeProxy.class, "getTypeProvider");
+
+	private static final ConcurrentReferenceHashMap<Type, Type> cache =
+			new ConcurrentReferenceHashMap<Type, Type>(256);
 
 	/**
 	 * Return a {@link Serializable} variant of {@link Field#getGenericType()}.
@@ -150,13 +154,19 @@ abstract class SerializableTypeWrapper {
 		if (provider.getType() instanceof Serializable || provider.getType() == null) {
 			return provider.getType();
 		}
+		Type cached = cache.get(provider.getType());
+		if(cached != null) {
+			return cached;
+		}
 		for (Class<?> type : SUPPORTED_SERIALIZABLE_TYPES) {
 			if (type.isAssignableFrom(provider.getType().getClass())) {
 				ClassLoader classLoader = provider.getClass().getClassLoader();
 				Class<?>[] interfaces = new Class<?>[] { type,
 					SerializableTypeProxy.class, Serializable.class };
 				InvocationHandler handler = new TypeProxyInvocationHandler(provider);
-				return (Type) Proxy.newProxyInstance(classLoader, interfaces, handler);
+				cached = (Type) Proxy.newProxyInstance(classLoader, interfaces, handler);
+				cache.put(provider.getType(), cached);
+				return cached;
 			}
 		}
 		throw new IllegalArgumentException("Unsupported Type class " + provider.getType().getClass().getName());
