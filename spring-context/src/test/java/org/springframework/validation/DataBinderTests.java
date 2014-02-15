@@ -35,8 +35,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import junit.framework.TestCase;
 
+import org.junit.Test;
 import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
@@ -59,13 +59,17 @@ import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Biju Kunjummen
  */
-public class DataBinderTests extends TestCase {
+public class DataBinderTests {
 
+	@Test
 	public void testBindingNoErrors() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
@@ -99,6 +103,7 @@ public class DataBinderTests extends TestCase {
 		assertTrue(!other.equals(binder.getBindingResult()));
 	}
 
+	@Test
 	public void testedBindingWithDefaultConversionNoErrors() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
@@ -114,6 +119,7 @@ public class DataBinderTests extends TestCase {
 		assertTrue(rod.isJedi());
 	}
 
+	@Test
 	public void testedNestedBindingWithDefaultConversionNoErrors() throws Exception {
 		TestBean rod = new TestBean(new TestBean());
 		DataBinder binder = new DataBinder(rod, "person");
@@ -129,6 +135,7 @@ public class DataBinderTests extends TestCase {
 		assertTrue(((TestBean) rod.getSpouse()).isJedi());
 	}
 
+	@Test
 	public void testBindingNoErrorsNotIgnoreUnknown() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
@@ -147,6 +154,7 @@ public class DataBinderTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testBindingNoErrorsWithInvalidField() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
@@ -163,6 +171,7 @@ public class DataBinderTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testBindingNoErrorsWithIgnoreInvalid() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
@@ -174,6 +183,7 @@ public class DataBinderTests extends TestCase {
 		binder.bind(pvs);
 	}
 
+	@Test
 	public void testBindingWithErrors() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
@@ -235,6 +245,7 @@ public class DataBinderTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testBindingWithSystemFieldError() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
@@ -251,6 +262,7 @@ public class DataBinderTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testBindingWithErrorsAndCustomEditors() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
@@ -317,6 +329,7 @@ public class DataBinderTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testBindingWithCustomEditorOnObjectField() {
 		BeanWithObjectProperty tb = new BeanWithObjectProperty();
 		DataBinder binder = new DataBinder(tb);
@@ -327,6 +340,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals(new Integer(1), tb.getObject());
 	}
 
+	@Test
 	public void testBindingWithFormatter() {
 		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb);
@@ -358,6 +372,7 @@ public class DataBinderTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testBindingErrorWithFormatter() {
 		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb);
@@ -380,6 +395,7 @@ public class DataBinderTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testBindingErrorWithStringFormatter() {
 		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb);
@@ -404,6 +420,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("test", binder.getBindingResult().getFieldValue("name"));
 	}
 
+	@Test
 	public void testBindingWithFormatterAgainstList() {
 		BeanWithIntegerList tb = new BeanWithIntegerList();
 		DataBinder binder = new DataBinder(tb);
@@ -425,6 +442,7 @@ public class DataBinderTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testBindingErrorWithFormatterAgainstList() {
 		BeanWithIntegerList tb = new BeanWithIntegerList();
 		DataBinder binder = new DataBinder(tb);
@@ -447,6 +465,7 @@ public class DataBinderTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testBindingWithFormatterAgainstFields() {
 		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb);
@@ -479,6 +498,7 @@ public class DataBinderTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testBindingErrorWithFormatterAgainstFields() {
 		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb);
@@ -502,6 +522,7 @@ public class DataBinderTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testBindingWithAllowedFields() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod);
@@ -516,6 +537,7 @@ public class DataBinderTests extends TestCase {
 		assertTrue("did not change age", rod.getAge() == 0);
 	}
 
+	@Test
 	public void testBindingWithDisallowedFields() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod);
@@ -533,6 +555,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("age", disallowedFields[0]);
 	}
 
+	@Test
 	public void testBindingWithAllowedAndDisallowedFields() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod);
@@ -551,6 +574,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("age", disallowedFields[0]);
 	}
 
+	@Test
 	public void testBindingWithOverlappingAllowedAndDisallowedFields() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod);
@@ -569,6 +593,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("age", disallowedFields[0]);
 	}
 
+	@Test
 	public void testBindingWithAllowedFieldsUsingAsterisks() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
@@ -595,6 +620,7 @@ public class DataBinderTests extends TestCase {
 		assertTrue("Same object", tb.equals(rod));
 	}
 
+	@Test
 	public void testBindingWithAllowedAndDisallowedMapFields() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod);
@@ -622,6 +648,7 @@ public class DataBinderTests extends TestCase {
 	/**
 	 * Tests for required field, both null, non-existing and empty strings.
 	 */
+	@Test
 	public void testBindingWithRequiredFields() throws Exception {
 		TestBean tb = new TestBean();
 		tb.setSpouse(new TestBean());
@@ -652,6 +679,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("", br.getFieldValue("spouse.name"));
 	}
 
+	@Test
 	public void testBindingWithRequiredMapFields() throws Exception {
 		TestBean tb = new TestBean();
 		tb.setSpouse(new TestBean());
@@ -671,6 +699,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("required", br.getFieldError("someMap[key4]").getCode());
 	}
 
+	@Test
 	public void testBindingWithNestedObjectCreation() throws Exception {
 		TestBean tb = new TestBean();
 
@@ -691,6 +720,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("test", tb.getSpouse().getName());
 	}
 
+	@Test
 	public void testCustomEditorForSingleProperty() {
 		TestBean tb = new TestBean();
 		tb.setSpouse(new TestBean());
@@ -730,6 +760,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("spouse.name", binder.getBindingResult().getFieldError("spouse.*").getField());
 	}
 
+	@Test
 	public void testCustomEditorForPrimitiveProperty() {
 		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
@@ -753,6 +784,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals(99, tb.getAge());
 	}
 
+	@Test
 	public void testCustomEditorForAllStringProperties() {
 		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
@@ -784,6 +816,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("prefixvalue", tb.getTouchy());
 	}
 
+	@Test
 	public void testCustomEditorWithOldValueAccess() {
 		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
@@ -808,6 +841,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("value", tb.getName());
 	}
 
+	@Test
 	public void testJavaBeanPropertyConventions() {
 		Book book = new Book();
 		DataBinder binder = new DataBinder(book);
@@ -831,6 +865,25 @@ public class DataBinderTests extends TestCase {
 		assertEquals(0, book.getNInStock());
 	}
 
+	@Test
+	public void testAddValidatorsWithSupportedValidator() {
+		TestBean tb = new TestBean();
+		DataBinder db = new DataBinder(tb, "tb");
+		Validator testValidator = new TestBeanValidator();
+		db.addValidators(testValidator);
+		assertEquals(1, db.getValidators().size());
+	}
+
+	@Test
+	public void testAddValidatorsWithUnsupportedValidator() {
+		TestBean tb = new TestBean();
+		DataBinder db = new DataBinder(tb, "tb");
+		Validator testValidator = new TestBeanUnsupportedValidator();
+		db.addValidators(testValidator);
+		assertEquals(0, db.getValidators().size());
+	}
+
+	@Test
 	public void testValidatorNoErrors() {
 		TestBean tb = new TestBean();
 		tb.setAge(33);
@@ -894,6 +947,7 @@ public class DataBinderTests extends TestCase {
 		assertTrue(!errors.hasFieldErrors("name"));
 	}
 
+	@Test
 	public void testValidatorWithErrors() {
 		TestBean tb = new TestBean();
 		tb.setSpouse(new TestBean());
@@ -962,6 +1016,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals(new Integer(0), (errors.getFieldErrors("spouse.age").get(0)).getRejectedValue());
 	}
 
+	@Test
 	public void testValidatorWithErrorsAndCodesPrefix() {
 		TestBean tb = new TestBean();
 		tb.setSpouse(new TestBean());
@@ -1033,6 +1088,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals(new Integer(0), (errors.getFieldErrors("spouse.age").get(0)).getRejectedValue());
 	}
 
+	@Test
 	public void testValidatorWithNestedObjectNull() {
 		TestBean tb = new TestBean();
 		Errors errors = new BeanPropertyBindingResult(tb, "tb");
@@ -1051,6 +1107,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals(null, (errors.getFieldErrors("spouse").get(0)).getRejectedValue());
 	}
 
+	@Test
 	public void testNestedValidatorWithoutNestedPath() {
 		TestBean tb = new TestBean();
 		tb.setName("XXX");
@@ -1064,6 +1121,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("tb", (errors.getGlobalErrors().get(0)).getObjectName());
 	}
 
+	@Test
 	public void testBindingStringArrayToIntegerSet() {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
@@ -1091,6 +1149,7 @@ public class DataBinderTests extends TestCase {
 		assertNull(tb.getSet());
 	}
 
+	@Test
 	public void testBindingNullToEmptyCollection() {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
@@ -1103,6 +1162,7 @@ public class DataBinderTests extends TestCase {
 		assertTrue(tb.getSet().isEmpty());
 	}
 
+	@Test
 	public void testBindingToIndexedField() {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
@@ -1141,6 +1201,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("NOT_ROD", errors.getFieldError("map[key1].name").getCodes()[6]);
 	}
 
+	@Test
 	public void testBindingToNestedIndexedField() {
 		IndexedTestBean tb = new IndexedTestBean();
 		tb.getArray()[0].setNestedIndexedBean(new IndexedTestBean());
@@ -1178,6 +1239,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("NOT_ROD", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[8]);
 	}
 
+	@Test
 	public void testEditorForNestedIndexedField() {
 		IndexedTestBean tb = new IndexedTestBean();
 		tb.getArray()[0].setNestedIndexedBean(new IndexedTestBean());
@@ -1203,6 +1265,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("test2", binder.getBindingResult().getFieldValue("array[1].nestedIndexedBean.list[1].name"));
 	}
 
+	@Test
 	public void testSpecificEditorForNestedIndexedField() {
 		IndexedTestBean tb = new IndexedTestBean();
 		tb.getArray()[0].setNestedIndexedBean(new IndexedTestBean());
@@ -1228,6 +1291,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("test2", binder.getBindingResult().getFieldValue("array[1].nestedIndexedBean.list[1].name"));
 	}
 
+	@Test
 	public void testInnerSpecificEditorForNestedIndexedField() {
 		IndexedTestBean tb = new IndexedTestBean();
 		tb.getArray()[0].setNestedIndexedBean(new IndexedTestBean());
@@ -1253,6 +1317,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("test2", binder.getBindingResult().getFieldValue("array[1].nestedIndexedBean.list[1].name"));
 	}
 
+	@Test
 	public void testDirectBindingToIndexedField() {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
@@ -1305,6 +1370,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("NOT_NULL", errors.getFieldError("map[key0]").getCodes()[4]);
 	}
 
+	@Test
 	public void testDirectBindingToEmptyIndexedFieldWithRegisteredSpecificEditor() {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
@@ -1335,6 +1401,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("NOT_NULL", errors.getFieldError("map[key0]").getCodes()[5]);
 	}
 
+	@Test
 	public void testDirectBindingToEmptyIndexedFieldWithRegisteredGenericEditor() {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
@@ -1365,6 +1432,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("NOT_NULL", errors.getFieldError("map[key0]").getCodes()[5]);
 	}
 
+	@Test
 	public void testCustomEditorWithSubclass() {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
@@ -1398,6 +1466,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("arraya", errors.getFieldValue("array[0]"));
 	}
 
+	@Test
 	public void testBindToStringArrayWithArrayEditor() {
 		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
@@ -1416,6 +1485,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("b2", tb.getStringArray()[1]);
 	}
 
+	@Test
 	public void testBindToStringArrayWithComponentEditor() {
 		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
@@ -1434,6 +1504,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("Xb2", tb.getStringArray()[1]);
 	}
 
+	@Test
 	public void testBindingErrors() {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
@@ -1460,6 +1531,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("Field Person Age did not have correct type", msg);
 	}
 
+	@Test
 	public void testAddAllErrors() {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
@@ -1478,6 +1550,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("badName", nameError.getCode());
 	}
 
+	@Test
 	public void testBindingWithResortedList() {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
@@ -1495,6 +1568,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals(tb1.getName(), binder.getBindingResult().getFieldValue("list[1].name"));
 	}
 
+	@Test
 	public void testRejectWithoutDefaultMessage() throws Exception {
 		TestBean tb = new TestBean();
 		tb.setName("myName");
@@ -1512,6 +1586,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("invalid field", ms.getMessage(ex.getFieldError("age"), Locale.US));
 	}
 
+	@Test
 	public void testBindExceptionSerializable() throws Exception {
 		SerializablePerson tb = new SerializablePerson();
 		tb.setName("myName");
@@ -1540,6 +1615,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("myName", ex2.getFieldValue("name"));
 	}
 
+	@Test
 	public void testTrackDisallowedFields() throws Exception {
 		TestBean testBean = new TestBean();
 		DataBinder binder = new DataBinder(testBean, "testBean");
@@ -1559,6 +1635,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("beanName", disallowedFields[0]);
 	}
 
+	@Test
 	public void testAutoGrowWithinDefaultLimit() throws Exception {
 		TestBean testBean = new TestBean();
 		DataBinder binder = new DataBinder(testBean, "testBean");
@@ -1570,6 +1647,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals(5, testBean.getFriends().size());
 	}
 
+	@Test
 	public void testAutoGrowBeyondDefaultLimit() throws Exception {
 		TestBean testBean = new TestBean();
 		DataBinder binder = new DataBinder(testBean, "testBean");
@@ -1586,6 +1664,7 @@ public class DataBinderTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testAutoGrowWithinCustomLimit() throws Exception {
 		TestBean testBean = new TestBean();
 		DataBinder binder = new DataBinder(testBean, "testBean");
@@ -1598,6 +1677,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals(5, testBean.getFriends().size());
 	}
 
+	@Test
 	public void testAutoGrowBeyondCustomLimit() throws Exception {
 		TestBean testBean = new TestBean();
 		DataBinder binder = new DataBinder(testBean, "testBean");
@@ -1615,6 +1695,7 @@ public class DataBinderTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testNestedGrowingList() {
 		Form form = new Form();
 		DataBinder binder = new DataBinder(form, "form");
@@ -1630,6 +1711,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals(2, list.size());
 	}
 
+	@Test
 	public void testFieldErrorAccessVariations() throws Exception {
 		TestBean testBean = new TestBean();
 		DataBinder binder = new DataBinder(testBean, "testBean");
@@ -1750,6 +1832,18 @@ public class DataBinderTests extends TestCase {
 		}
 	}
 
+	private static class TestBeanUnsupportedValidator implements Validator {
+
+		@Override
+		public boolean supports(Class<?> clazz) {
+			return DataBinderTests.class.isAssignableFrom(clazz);
+		}
+
+		@Override
+		public void validate(Object obj, Errors errors) {
+			//No implementation
+		}
+	}
 
 	@SuppressWarnings("unused")
 	private static class GrowingList<E> extends AbstractList<E> {
