@@ -53,6 +53,7 @@ public class StompBrokerRelayRegistrationTests {
 		registration.setSystemPasscode("syspasscode");
 		registration.setSystemHeartbeatReceiveInterval(123);
 		registration.setSystemHeartbeatSendInterval(456);
+		registration.setVirtualHost("example.org");
 
 		StompBrokerRelayMessageHandler relayMessageHandler = registration.getMessageHandler(brokerChannel);
 
@@ -63,6 +64,7 @@ public class StompBrokerRelayRegistrationTests {
 		assertEquals("syspasscode", relayMessageHandler.getSystemPasscode());
 		assertEquals(123, relayMessageHandler.getSystemHeartbeatReceiveInterval());
 		assertEquals(456, relayMessageHandler.getSystemHeartbeatSendInterval());
+		assertEquals("example.org", relayMessageHandler.getVirtualHost());
 	}
 
 }

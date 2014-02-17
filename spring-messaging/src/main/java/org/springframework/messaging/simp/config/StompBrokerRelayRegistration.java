@@ -45,6 +45,8 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 
 	private Long systemHeartbeatReceiveInterval;
 
+	private String virtualHost;
+
 	private boolean autoStartup = true;
 
 
@@ -147,6 +149,19 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 	}
 
 	/**
+	 * Set the value of the "host" header to use in STOMP CONNECT frames. When this
+	 * property is configured, a "host" header will be added to every STOMP frame sent to
+	 * the STOMP broker. This may be useful for example in a cloud environment where the
+	 * actual host to which the TCP connection is established is different from the host
+	 * providing the cloud-based STOMP service.
+	 * <p>By default this property is not set.
+	 */
+	public StompBrokerRelayRegistration setVirtualHost(String virtualHost) {
+		this.virtualHost = virtualHost;
+		return this;
+	}
+
+	/**
 	 * Configure whether the {@link StompBrokerRelayMessageHandler} should start
 	 * automatically when the Spring ApplicationContext is refreshed.
 	 * <p>The default setting is {@code true}.
@@ -176,6 +191,9 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 		}
 		if (this.systemHeartbeatReceiveInterval != null) {
 			handler.setSystemHeartbeatReceiveInterval(this.systemHeartbeatReceiveInterval);
+		}
+		if(this.virtualHost != null) {
+			handler.setVirtualHost(this.virtualHost);
 		}
 
 		handler.setAutoStartup(this.autoStartup);
