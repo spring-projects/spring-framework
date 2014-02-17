@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.cfg.DeserializerFactoryConfig;
 import com.fasterxml.jackson.databind.cfg.SerializerFactoryConfig;
@@ -49,7 +50,12 @@ import org.junit.Test;
 
 import org.springframework.beans.FatalBeanException;
 
-import static org.junit.Assert.*;
+import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 /**
  * Test cases for {@link Jackson2ObjectMapperFactoryBean} class.
@@ -184,6 +190,16 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 
 	private static DeserializerFactoryConfig getDeserializerFactoryConfig(ObjectMapper objectMapper) {
 		return ((BasicDeserializerFactory) objectMapper.getDeserializationContext().getFactory()).getFactoryConfig();
+	}
+
+	@Test
+	public void testPropertyNamingStrategy() {
+		PropertyNamingStrategy strategy = new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy();
+		this.factory.setPropertyNamingStrategy(strategy);
+		this.factory.afterPropertiesSet();
+
+		assertSame(strategy, this.factory.getObject().getSerializationConfig().getPropertyNamingStrategy());
+		assertSame(strategy, this.factory.getObject().getDeserializationConfig().getPropertyNamingStrategy());
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
@@ -142,6 +143,8 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	private Class<? extends Module>[] modulesToInstall;
 
 	private boolean findModulesViaServiceLoader;
+
+	private PropertyNamingStrategy propertyNamingStrategy;
 
 	private ClassLoader beanClassLoader;
 
@@ -328,6 +331,15 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 		this.findModulesViaServiceLoader = findModules;
 	}
 
+	/**
+	 * Specify a {@link com.fasterxml.jackson.databind.PropertyNamingStrategy} to
+	 * configure the {@link ObjectMapper} with.
+	 * @@since 4.0.2
+	 */
+	public void setPropertyNamingStrategy(PropertyNamingStrategy propertyNamingStrategy) {
+		this.propertyNamingStrategy = propertyNamingStrategy;
+	}
+
 	@Override
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
@@ -384,6 +396,10 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 			else {
 				registerWellKnownModulesIfAvailable();
 			}
+		}
+
+		if (this.propertyNamingStrategy != null) {
+			this.objectMapper.setPropertyNamingStrategy(this.propertyNamingStrategy);
 		}
 	}
 
