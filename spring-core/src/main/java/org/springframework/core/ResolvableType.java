@@ -36,6 +36,7 @@ import org.springframework.core.SerializableTypeWrapper.TypeProvider;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.util.ConcurrentReferenceHashMap.ReferenceType;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -1129,11 +1130,12 @@ public final class ResolvableType implements Serializable {
 			return NONE;
 		}
 		// Check the cache, we may have a ResolvableType that may have already been resolved
+		cache.purgeUnreferencedEntries();
 		ResolvableType key = new ResolvableType(type, typeProvider, variableResolver);
 		ResolvableType resolvableType = cache.get(key);
 		if (resolvableType == null) {
 			resolvableType = new ResolvableType(type, typeProvider, variableResolver, null);
-			cache.put(key, resolvableType);
+			cache.put(resolvableType, resolvableType);
 		}
 		return resolvableType;
 	}
