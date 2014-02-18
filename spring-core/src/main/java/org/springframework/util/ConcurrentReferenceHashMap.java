@@ -334,6 +334,19 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		}
 	}
 
+	/**
+	 * Remove any entries that have been garbage collected and are no longer referenced.
+	 * Under normal circumstances garbage collected entries are automatically purged as
+	 * items are added or removed from the Map. This method can be used to force a purge,
+	 * and is useful when the Map is read frequently but updated less often.
+	 */
+	public void purgeUnreferencedEntries() {
+		for (Segment segment : this.segments) {
+			segment.restructureIfNecessary(false);
+		}
+	}
+
+
 	@Override
 	public int size() {
 		int size = 0;
@@ -508,7 +521,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		 * references that have been garbage collected.
 		 * @param allowResize if resizing is permitted
 		 */
-		private void restructureIfNecessary(boolean allowResize) {
+		protected final void restructureIfNecessary(boolean allowResize) {
 			boolean needsResize = ((this.count > 0) && (this.count >= this.resizeThreshold));
 			Reference<K, V> reference = this.referenceManager.pollForPurge();
 			if ((reference != null) || (needsResize && allowResize)) {
@@ -546,7 +559,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 							restructured[i] = null;
 						}
 						while (reference != null) {
-							if (!toPurge.contains(reference)) {
+							if (!toPurge.contains(reference) && (reference.get() != null)) {
 								int index = getIndex(reference.getHash(), restructured);
 								restructured[index] = this.referenceManager.createReference(
 										reference.get(), reference.getHash(),
@@ -560,7 +573,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 					if (resizing) {
 						setReferences(restructured);
 					}
-					this.count = countAfterRestructure;
+					this.count = Math.max(countAfterRestructure, 0);
 				} finally {
 					unlock();
 				}
@@ -961,6 +974,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 			enqueue();
 			clear();
 		}
+
 	}
 
 
@@ -991,6 +1005,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 			enqueue();
 			clear();
 		}
+
 	}
 
 }
