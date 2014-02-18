@@ -162,6 +162,11 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 		this.encoding = encoding;
 	}
 
+	@Override
+	protected String getDefaultEncoding() {
+		return this.encoding;
+	}
+
 	/**
 	 * Set the locations of the Castor XML mapping files.
 	 */

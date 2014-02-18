@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.oxm.castor;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.concurrent.atomic.AtomicReference;
+import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 
 import org.junit.Ignore;
@@ -28,9 +30,13 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.oxm.AbstractUnmarshallerTests;
 import org.springframework.oxm.MarshallingException;
 import org.springframework.oxm.Unmarshaller;
+import org.xml.sax.InputSource;
+import org.xml.sax.XMLReader;
 
+import static junit.framework.Assert.assertNotNull;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Arjen Poutsma
@@ -203,4 +209,59 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 		StreamSource source = new StreamSource(new StringReader(xml));
 		return unmarshaller.unmarshal(source);
 	}
+
+	@Test
+	public void unmarshalStreamSourceExternalEntities() throws Exception {
+
+		final AtomicReference<XMLReader> result = new AtomicReference<XMLReader>();
+		CastorMarshaller marshaller = new CastorMarshaller() {
+			@Override
+			protected Object unmarshalSaxReader(XMLReader xmlReader, InputSource inputSource) {
+				result.set(xmlReader);
+				return null;
+			}
+		};
+
+		// 1. external-general-entities disabled (default)
+
+		marshaller.unmarshal(new StreamSource("1"));
+		assertNotNull(result.get());
+		assertEquals(false, result.get().getFeature("http://xml.org/sax/features/external-general-entities"));
+
+		// 2. external-general-entities disabled (default)
+
+		result.set(null);
+		marshaller.setProcessExternalEntities(true);
+		marshaller.unmarshal(new StreamSource("1"));
+		assertNotNull(result.get());
+		assertEquals(true, result.get().getFeature("http://xml.org/sax/features/external-general-entities"));
+	}
+
+	@Test
+	public void unmarshalSaxSourceExternalEntities() throws Exception {
+
+		final AtomicReference<XMLReader> result = new AtomicReference<XMLReader>();
+		CastorMarshaller marshaller = new CastorMarshaller() {
+			@Override
+			protected Object unmarshalSaxReader(XMLReader xmlReader, InputSource inputSource) {
+				result.set(xmlReader);
+				return null;
+			}
+		};
+
+		// 1. external-general-entities disabled (default)
+
+		marshaller.unmarshal(new SAXSource(new InputSource("1")));
+		assertNotNull(result.get());
+		assertEquals(false, result.get().getFeature("http://xml.org/sax/features/external-general-entities"));
+
+		// 2. external-general-entities disabled (default)
+
+		result.set(null);
+		marshaller.setProcessExternalEntities(true);
+		marshaller.unmarshal(new SAXSource(new InputSource("1")));
+		assertNotNull(result.get());
+		assertEquals(true, result.get().getFeature("http://xml.org/sax/features/external-general-entities"));
+	}
+
 }

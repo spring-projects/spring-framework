@@ -16,21 +16,34 @@
 
 package org.springframework.oxm.jibx;
 
+import java.io.IOException;
 import java.io.StringWriter;
+import java.util.concurrent.atomic.AtomicReference;
+import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import org.mockito.ArgumentCaptor;
 import org.springframework.oxm.AbstractMarshallerTests;
 import org.springframework.oxm.Marshaller;
+import org.springframework.oxm.XmlMappingException;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
+import org.xml.sax.InputSource;
+import org.xml.sax.XMLReader;
 
 import static org.custommonkey.xmlunit.XMLAssert.*;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Arjen Poutsma
@@ -106,6 +119,5 @@ public class JibxMarshallerTests extends AbstractMarshallerTests {
 		assertTrue("JibxMarshaller does not support FlightType", marshaller.supports(FlightType.class));
 		assertFalse("JibxMarshaller supports illegal type", marshaller.supports(getClass()));
 	}
-
 
 }

@@ -95,6 +95,12 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 		this.processExternalEntities = processExternalEntities;
 	}
 
+	/**
+	 * @return the configured value for whether XML external entities are allowed.
+	 */
+	public boolean isProcessExternalEntities() {
+		return this.processExternalEntities;
+	}
 
 	@Override
 	public boolean supports(Class<?> clazz) {
@@ -159,8 +165,7 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 	private Source readStAXSource(InputStream body) {
 		try {
 			XMLInputFactory inputFactory = XMLInputFactory.newFactory();
-			inputFactory.setProperty(
-					"javax.xml.stream.isSupportingExternalEntities", this.processExternalEntities);
+			inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, this.processExternalEntities);
 			XMLStreamReader streamReader = inputFactory.createXMLStreamReader(body);
 			return new StAXSource(streamReader);
 		}

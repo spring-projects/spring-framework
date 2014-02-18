@@ -27,11 +27,9 @@ import java.lang.reflect.Constructor;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.*;
+import javax.xml.transform.stax.StAXSource;
+import javax.xml.transform.stream.StreamSource;
 
 import com.thoughtworks.xstream.MarshallingStrategy;
 import com.thoughtworks.xstream.XStream;
@@ -340,6 +338,11 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 */
 	public void setEncoding(String encoding) {
 		this.encoding = encoding;
+	}
+
+	@Override
+	protected String getDefaultEncoding() {
+		return this.encoding;
 	}
 
 	/**
@@ -699,6 +702,13 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 
 	// Unmarshalling
+
+	@Override
+	protected Object unmarshalStreamSourceNoExternalEntitities(StreamSource streamSource)
+			throws XmlMappingException, IOException {
+
+		return super.unmarshalStreamSource(streamSource);
+	}
 
 	@Override
 	protected Object unmarshalDomNode(Node node) throws XmlMappingException {
