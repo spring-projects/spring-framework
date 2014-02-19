@@ -112,6 +112,33 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
+	public void findAnnotationOnMetaMetaAnnotatedClass() {
+		Component component = AnnotationUtils.findAnnotation(MetaMetaAnnotatedClass.class, Component.class);
+		assertNotNull("Should find meta-annotation on composed annotation on class", component);
+		assertEquals("meta2", component.value());
+	}
+
+	@Test
+	public void findAnnotationOnMetaMetaMetaAnnotatedClass() {
+		Component component = AnnotationUtils.findAnnotation(MetaMetaMetaAnnotatedClass.class, Component.class);
+		assertNotNull("Should find meta-annotation on meta-annotation on composed annotation on class", component);
+		assertEquals("meta2", component.value());
+	}
+
+	@Test
+	public void findAnnotationOnAnnotatedClassWithMissingTargetMetaAnnotation() {
+		// TransactionalClass is NOT annotated or meta-annotated with @Component
+		Component component = AnnotationUtils.findAnnotation(TransactionalClass.class, Component.class);
+		assertNull("Should not find @Component on TransactionalClass", component);
+	}
+
+	@Test
+	public void findAnnotationOnMetaCycleAnnotatedClassWithMissingTargetMetaAnnotation() {
+		Component component = AnnotationUtils.findAnnotation(MetaCycleAnnotatedClass.class, Component.class);
+		assertNull("Should not find @Component on MetaCycleAnnotatedClass", component);
+	}
+
+	@Test
 	public void testFindAnnotationDeclaringClass() throws Exception {
 		// no class-level annotation
 		assertNull(findAnnotationDeclaringClass(Transactional.class, NonAnnotatedInterface.class));
@@ -335,6 +362,31 @@ public class AnnotationUtilsTests {
 	@interface Meta2 {
 	}
 
+	@Meta2
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface MetaMeta {
+	}
+
+	@MetaMeta
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface MetaMetaMeta {
+	}
+
+	@MetaCycle3
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface MetaCycle1 {
+	}
+
+	@MetaCycle1
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface MetaCycle2 {
+	}
+
+	@MetaCycle2
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface MetaCycle3 {
+	}
+
 	@Meta1
 	static interface InterfaceWithMetaAnnotation {
 	}
@@ -343,6 +395,17 @@ public class AnnotationUtilsTests {
 	static class ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface implements InterfaceWithMetaAnnotation {
 	}
 
+	@MetaMeta
+	static class MetaMetaAnnotatedClass {
+	}
+
+	@MetaMetaMeta
+	static class MetaMetaMetaAnnotatedClass {
+	}
+
+	@MetaCycle3
+	static class MetaCycleAnnotatedClass {
+	}
 
 	public static interface AnnotatedInterface {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -240,52 +240,68 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * Find a single {@link Annotation} of {@code annotationType} from the supplied
-	 * {@link Class}, traversing its annotations, interfaces, and superclasses if
-	 * no annotation can be found on the given class itself.
+	 * Find a single {@link Annotation} of {@code annotationType} on the
+	 * supplied {@link Class}, traversing its interfaces, annotations, and
+	 * superclasses if the annotation is not <em>present</em> on the given class
+	 * itself.
 	 * <p>This method explicitly handles class-level annotations which are not
-	 * declared as {@link java.lang.annotation.Inherited inherited} <i>as well
-	 * as meta-annotations and annotations on interfaces</i>.
+	 * declared as {@link java.lang.annotation.Inherited inherited} <em>as well
+	 * as meta-annotations and annotations on interfaces</em>.
 	 * <p>The algorithm operates as follows:
 	 * <ol>
-	 * <li>Search for an annotation on the given class and return it if found.
-	 * <li>Recursively search through all interfaces that the given class
-	 * declares, returning the annotation from the first matching candidate, if any.
-	 * <li>Recursively search through all annotations that the given class
-	 * declares, returning the annotation from the first matching candidate, if any.
-	 * <li>Proceed with introspection of the superclass hierarchy of the given
-	 * class by returning to step #1 with the superclass as the class to look for
-	 * annotations on.
+	 * <li>Search for the annotation on the given class and return it if found.
+	 * <li>Recursively search through all interfaces that the given class declares.
+	 * <li>Recursively search through all annotations that the given class declares.
+	 * <li>Recursively search through the superclass hierarchy of the given class.
 	 * </ol>
+	 * <p>Note: in this context, the term <em>recursively</em> means that the search
+	 * process continues by returning to step #1 with the current interface,
+	 * annotation, or superclass as the class to look for annotations on.
 	 * @param clazz the class to look for annotations on
-	 * @param annotationType the annotation class to look for
-	 * @return the annotation found, or {@code null} if none found
+	 * @param annotationType the type of annotation to look for
+	 * @return the annotation if found, or {@code null} if not found
 	 */
 	public static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType) {
+		return findAnnotation(clazz, annotationType, new HashSet<Annotation>());
+	}
+
+	/**
+	 * Perform the search algorithm for {@link #findAnnotation(Class, Class)},
+	 * avoiding endless recursion by tracking which annotations have already
+	 * been visited.
+	 * @param clazz the class to look for annotations on
+	 * @param annotationType the type of annotation to look for
+	 * @param visitedAnnotations the set of annotations that have already been visited
+	 * @return the annotation if found, or {@code null} if not found
+	 */
+	private static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType,
+			Set<Annotation> visitedAnnotations) {
 		Assert.notNull(clazz, "Class must not be null");
+
 		A annotation = clazz.getAnnotation(annotationType);
 		if (annotation != null) {
 			return annotation;
 		}
 		for (Class<?> ifc : clazz.getInterfaces()) {
-			annotation = findAnnotation(ifc, annotationType);
+			annotation = findAnnotation(ifc, annotationType, visitedAnnotations);
 			if (annotation != null) {
 				return annotation;
 			}
 		}
-		if (!Annotation.class.isAssignableFrom(clazz)) {
-			for (Annotation ann : clazz.getAnnotations()) {
-				annotation = findAnnotation(ann.annotationType(), annotationType);
+		for (Annotation ann : clazz.getAnnotations()) {
+			if (!visitedAnnotations.contains(ann)) {
+				visitedAnnotations.add(ann);
+				annotation = findAnnotation(ann.annotationType(), annotationType, visitedAnnotations);
 				if (annotation != null) {
 					return annotation;
 				}
 			}
 		}
-		Class<?> superClass = clazz.getSuperclass();
-		if (superClass == null || superClass.equals(Object.class)) {
+		Class<?> superclass = clazz.getSuperclass();
+		if (superclass == null || superclass.equals(Object.class)) {
 			return null;
 		}
-		return findAnnotation(superClass, annotationType);
+		return findAnnotation(superclass, annotationType, visitedAnnotations);
 	}
 
 	/**
