@@ -36,7 +36,6 @@ import org.springframework.core.SerializableTypeWrapper.TypeProvider;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
-import org.springframework.util.ConcurrentReferenceHashMap.ReferenceType;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
