@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.stream.StreamSource;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.ConversionException;
@@ -353,6 +354,11 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 		this.encoding = encoding;
 	}
 
+	@Override
+	protected String getDefaultEncoding() {
+		return this.encoding;
+	}
+
 	/**
 	 * Set the classes supported by this marshaller.
 	 * <p>If this property is empty (the default), all classes are supported.
@@ -481,6 +487,11 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 
 	// Unmarshalling
+
+	@Override
+	protected Object unmarshalStreamSourceNoExternalEntitities(StreamSource streamSource) throws XmlMappingException, IOException {
+		return super.unmarshalStreamSource(streamSource);
+	}
 
 	@Override
 	protected Object unmarshalDomNode(Node node) throws XmlMappingException {

@@ -113,6 +113,10 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 		return this.validating;
 	}
 
+	@Override
+	protected String getDefaultEncoding() {
+		return null;
+	}
 
 	/**
 	 * This implementation returns true if the given class is an implementation of {@link XmlObject}.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,33 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 
 	private final Object documentBuilderFactoryMonitor = new Object();
 
+	private boolean processExternalEntities = false;
+
+
+	/**
+	 * Indicates whether external XML entities are processed when unmarshalling.
+	 * <p>Default is {@code false}, meaning that external entities are not resolved.
+	 * Note that processing of external entities will only be enabled/disabled when the
+	 * {@code Source} passed to {@link #unmarshal(Source)} is a {@link SAXSource} or
+	 * {@link StreamSource}. It has no effect for {@link DOMSource} or {@link StAXSource}
+	 * instances.
+	 */
+	public void setProcessExternalEntities(boolean processExternalEntities) {
+		this.processExternalEntities = processExternalEntities;
+	}
+
+	/**
+	 * @return the configured value for whether XML external entities are allowed.
+	 */
+	public boolean isProcessExternalEntities() {
+		return this.processExternalEntities;
+	}
+
+	/**
+	 * @return the default encoding to use for marshalling or unmarshalling from
+	 * 	a byte stream, or {@code null}.
+	 */
+	abstract protected String getDefaultEncoding();
 
 	/**
 	 * Marshals the object graph with the given root into the provided {@code javax.xml.transform.Result}.
@@ -131,7 +158,7 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 			return unmarshalSaxSource((SAXSource) source);
 		}
 		else if (source instanceof StreamSource) {
-			return unmarshalStreamSource((StreamSource) source);
+			return unmarshalStreamSourceNoExternalEntitities((StreamSource) source);
 		}
 		else {
 			throw new IllegalArgumentException("Unknown Source type: " + source.getClass());
@@ -173,7 +200,9 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	 * @throws SAXException if thrown by JAXP methods
 	 */
 	protected XMLReader createXmlReader() throws SAXException {
-		return XMLReaderFactory.createXMLReader();
+		XMLReader xmlReader = XMLReaderFactory.createXMLReader();
+		xmlReader.setFeature("http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
+		return xmlReader;
 	}
 
 
@@ -356,8 +385,43 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	}
 
 	/**
+	 * Template method for handling {@code StreamSource}s with protection against
+	 * the XML External Entity (XXE) processing vulnerability taking into account
+	 * the value of the {@link #setProcessExternalEntities(boolean)} property.
+	 * <p>
+	 * The default implementation wraps the StreamSource as a SAXSource and delegates
+	 * to {@link #unmarshalSaxSource(javax.xml.transform.sax.SAXSource)}.
+	 *
+	 * @param streamSource the {@code StreamSource}
+	 * @return the object graph
+	 * @throws IOException if an I/O exception occurs
+	 * @throws XmlMappingException if the given source cannot be mapped to an object
+	 *
+	 * @see <a href="https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Processing">XML_External_Entity_(XXE)_Processing</a>
+	 */
+	protected Object unmarshalStreamSourceNoExternalEntitities(StreamSource streamSource)
+			throws XmlMappingException, IOException {
+
+		InputSource inputSource;
+		if (streamSource.getInputStream() != null) {
+			inputSource = new InputSource(streamSource.getInputStream());
+			inputSource.setEncoding(getDefaultEncoding());
+		}
+		else if (streamSource.getReader() != null) {
+			inputSource = new InputSource(streamSource.getReader());
+		}
+		else {
+			inputSource = new InputSource(streamSource.getSystemId());
+		}
+		return unmarshalSaxSource(new SAXSource(inputSource));
+	}
+
+	/**
 	 * Template method for handling {@code StreamSource}s.
-	 * <p>This implementation defers to {@code unmarshalInputStream} or {@code unmarshalReader}.
+	 * <p>As of 3.2.8 and 4.0.2 this method is no longer invoked from
+	 * {@link #unmarshal(javax.xml.transform.Source)}. The method invoked instead is
+	 * {@link #unmarshalStreamSourceNoExternalEntitities(javax.xml.transform.stream.StreamSource)}.
+	 *
 	 * @param streamSource the {@code StreamSource}
 	 * @return the object graph
 	 * @throws IOException if an I/O exception occurs

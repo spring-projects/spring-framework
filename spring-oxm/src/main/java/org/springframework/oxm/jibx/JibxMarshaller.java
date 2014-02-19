@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -146,6 +147,11 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 	 */
 	public void setEncoding(String encoding) {
 		this.encoding = encoding;
+	}
+
+	@Override
+	protected String getDefaultEncoding() {
+		return this.encoding;
 	}
 
 	/**
@@ -389,13 +395,12 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 		}
 	}
 
-
 	// Unsupported Unmarshalling
 
 	@Override
 	protected Object unmarshalDomNode(Node node) throws XmlMappingException {
 		try {
-			return transformAndUnmarshal(new DOMSource(node));
+			return transformAndUnmarshal(new DOMSource(node), null);
 		}
 		catch (IOException ex) {
 			throw new UnmarshallingFailureException("JiBX unmarshalling exception", ex);
@@ -406,12 +411,15 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 	protected Object unmarshalSaxReader(XMLReader xmlReader, InputSource inputSource)
 			throws XmlMappingException, IOException {
 
-		return transformAndUnmarshal(new SAXSource(xmlReader, inputSource));
+		return transformAndUnmarshal(new SAXSource(xmlReader, inputSource), inputSource.getEncoding());
 	}
 
-	private Object transformAndUnmarshal(Source source) throws IOException {
+	private Object transformAndUnmarshal(Source source, String encoding) throws IOException {
 		try {
 			Transformer transformer = this.transformerFactory.newTransformer();
+			if (encoding != null) {
+				transformer.setOutputProperty(OutputKeys.ENCODING, encoding);
+			}
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
 			transformer.transform(source, new StreamResult(os));
 			ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
@@ -419,7 +427,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 		}
 		catch (TransformerException ex) {
 			throw new MarshallingFailureException(
-					"Could not transform from [" + ClassUtils.getShortName(source.getClass()) + "]");
+					"Could not transform from [" + ClassUtils.getShortName(source.getClass()) + "]", ex);
 		}
 	}
 

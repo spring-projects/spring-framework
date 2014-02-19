@@ -90,6 +90,12 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 		this.processExternalEntities = processExternalEntities;
 	}
 
+	/**
+	 * @return the configured value for whether XML external entities are allowed.
+	 */
+	public boolean isProcessExternalEntities() {
+		return this.processExternalEntities;
+	}
 
 	@Override
 	public boolean supports(Class<?> clazz) {

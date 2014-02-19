@@ -32,6 +32,8 @@ import org.junit.Test;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.AopProxy;
 import org.springframework.aop.framework.DefaultAopProxyFactory;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
@@ -96,6 +98,33 @@ public class Jaxb2RootElementHttpMessageConverterTest {
 	}
 
 	@Test
+	public void readXmlRootElementExternalEntityDisabled() throws Exception {
+		Resource external = new ClassPathResource("external.txt", getClass());
+		String content =  "<!DOCTYPE root [" +
+				"  <!ELEMENT external ANY >\n" +
+				"  <!ENTITY ext SYSTEM \"" + external.getURI() + "\" >]>" +
+				"  <rootElement><external>&ext;</external></rootElement>";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
+		RootElement rootElement = (RootElement) converter.read(RootElement.class, inputMessage);
+
+		assertEquals("", rootElement.external);
+	}
+
+	@Test
+	public void readXmlRootElementExternalEntityEnabled() throws Exception {
+		Resource external = new ClassPathResource("external.txt", getClass());
+		String content =  "<!DOCTYPE root [" +
+				"  <!ELEMENT external ANY >\n" +
+				"  <!ENTITY ext SYSTEM \"" + external.getURI() + "\" >]>" +
+				"  <rootElement><external>&ext;</external></rootElement>";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
+		this.converter.setProcessExternalEntities(true);
+		RootElement rootElement = (RootElement) converter.read(RootElement.class, inputMessage);
+
+		assertEquals("Foo Bar", rootElement.external);
+	}
+
+	@Test
 	public void writeXmlRootElement() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		converter.write(rootElement, null, outputMessage);
@@ -120,6 +149,9 @@ public class Jaxb2RootElementHttpMessageConverterTest {
 
 		@XmlElement
 		public Type type = new Type();
+
+		@XmlElement(required=false)
+		public String external;
 
 	}
 

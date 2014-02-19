@@ -28,6 +28,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
@@ -36,6 +38,10 @@ import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.ClassUtils;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter} that can read
@@ -48,6 +54,18 @@ import org.springframework.util.ClassUtils;
  * @since 3.0
  */
 public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessageConverter<Object> {
+
+		private boolean processExternalEntities = false;
+
+
+	/**
+	 * Indicates whether external XML entities are processed when converting to a Source.
+	 * <p>Default is {@code false}, meaning that external entities are not resolved.
+	 */
+	public void setProcessExternalEntities(boolean processExternalEntities) {
+		this.processExternalEntities = processExternalEntities;
+	}
+
 
 	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
@@ -69,6 +87,7 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 	@Override
 	protected Object readFromSource(Class<?> clazz, HttpHeaders headers, Source source) throws IOException {
 		try {
+			source = processSource(source);
 			Unmarshaller unmarshaller = createUnmarshaller(clazz);
 			if (clazz.isAnnotationPresent(XmlRootElement.class)) {
 				return unmarshaller.unmarshal(source);
@@ -84,6 +103,26 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 		}
 		catch (JAXBException ex) {
 			throw new HttpMessageConversionException("Could not instantiate JAXBContext: " + ex.getMessage(), ex);
+		}
+	}
+
+	protected Source processSource(Source source) {
+		if (source instanceof StreamSource) {
+			StreamSource streamSource = (StreamSource) source;
+			InputSource inputSource = new InputSource(streamSource.getInputStream());
+			try {
+				XMLReader xmlReader = XMLReaderFactory.createXMLReader();
+				String featureName = "http://xml.org/sax/features/external-general-entities";
+				xmlReader.setFeature(featureName, this.processExternalEntities);
+				return new SAXSource(xmlReader, inputSource);
+			}
+			catch (SAXException ex) {
+				logger.warn("Processing of external entities could not be disabled", ex);
+				return source;
+			}
+		}
+		else {
+			return source;
 		}
 	}
 
