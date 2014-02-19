@@ -91,6 +91,7 @@ public @interface ContextConfiguration {
 	 *
 	 * <p>This attribute may <strong>not</strong> be used in conjunction with
 	 * {@link #locations}, but it may be used instead of {@link #locations}.
+	 *
 	 * @since 3.0
 	 * @see #inheritLocations
 	 */
@@ -120,6 +121,7 @@ public @interface ContextConfiguration {
 	 *
 	 * <p>This attribute may <strong>not</strong> be used in conjunction with
 	 * {@link #value}, but it may be used instead of {@link #value}.
+	 *
 	 * @since 2.5
 	 * @see #inheritLocations
 	 */

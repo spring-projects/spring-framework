@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context;
+package org.springframework.test.context.support;
 
 import org.junit.Test;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
-import org.springframework.test.context.support.DelegatingSmartContextLoader;
-import org.springframework.test.context.support.GenericPropertiesContextLoader;
-
-import static org.springframework.test.context.ContextLoaderUtils.*;
+import org.springframework.test.context.ContextLoader;
+import org.springframework.test.context.MergedContextConfiguration;
 
 /**
  * Unit tests for {@link ContextLoaderUtils} involving {@link MergedContextConfiguration}.
@@ -33,28 +30,28 @@ public class ContextLoaderUtilsMergedConfigTests extends AbstractContextLoaderUt
 
 	@Test
 	public void buildMergedConfigWithoutAnnotation() {
-		Class<Enigma> testClass = Enigma.class;
-		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass, null, null);
+		Class<?> testClass = Enigma.class;
+		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 
 		assertMergedConfig(mergedConfig, testClass, EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, null);
 	}
 
 	@Test
 	public void buildMergedConfigWithBareAnnotations() {
-		Class<BareAnnotations> testClass = BareAnnotations.class;
-		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass, null, null);
+		Class<?> testClass = BareAnnotations.class;
+		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 
 		assertMergedConfig(
 			mergedConfig,
 			testClass,
-			new String[] { "classpath:/org/springframework/test/context/AbstractContextLoaderUtilsTests$BareAnnotations-context.xml" },
+			new String[] { "classpath:/org/springframework/test/context/support/AbstractContextLoaderUtilsTests$BareAnnotations-context.xml" },
 			EMPTY_CLASS_ARRAY, DelegatingSmartContextLoader.class);
 	}
 
 	@Test
 	public void buildMergedConfigWithLocalAnnotationAndLocations() {
 		Class<?> testClass = LocationsFoo.class;
-		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass, null, null);
+		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 
 		assertMergedConfig(mergedConfig, testClass, new String[] { "classpath:/foo.xml" }, EMPTY_CLASS_ARRAY,
 			DelegatingSmartContextLoader.class);
@@ -63,7 +60,7 @@ public class ContextLoaderUtilsMergedConfigTests extends AbstractContextLoaderUt
 	@Test
 	public void buildMergedConfigWithMetaAnnotationAndLocations() {
 		Class<?> testClass = MetaLocationsFoo.class;
-		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass, null, null);
+		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 
 		assertMergedConfig(mergedConfig, testClass, new String[] { "classpath:/foo.xml" }, EMPTY_CLASS_ARRAY,
 			DelegatingSmartContextLoader.class);
@@ -72,7 +69,7 @@ public class ContextLoaderUtilsMergedConfigTests extends AbstractContextLoaderUt
 	@Test
 	public void buildMergedConfigWithLocalAnnotationAndClasses() {
 		Class<?> testClass = ClassesFoo.class;
-		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass, null, null);
+		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 
 		assertMergedConfig(mergedConfig, testClass, EMPTY_STRING_ARRAY, new Class<?>[] { FooConfig.class },
 			DelegatingSmartContextLoader.class);
@@ -80,21 +77,19 @@ public class ContextLoaderUtilsMergedConfigTests extends AbstractContextLoaderUt
 
 	@Test
 	public void buildMergedConfigWithLocalAnnotationAndOverriddenContextLoaderAndLocations() {
-		Class<?> testClass = LocationsFoo.class;
+		Class<?> testClass = PropertiesLocationsFoo.class;
 		Class<? extends ContextLoader> expectedContextLoaderClass = GenericPropertiesContextLoader.class;
-		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass,
-			expectedContextLoaderClass.getName(), null);
+		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 
-		assertMergedConfig(mergedConfig, testClass, new String[] { "classpath:/foo.xml" }, EMPTY_CLASS_ARRAY,
+		assertMergedConfig(mergedConfig, testClass, new String[] { "classpath:/foo.properties" }, EMPTY_CLASS_ARRAY,
 			expectedContextLoaderClass);
 	}
 
 	@Test
 	public void buildMergedConfigWithLocalAnnotationAndOverriddenContextLoaderAndClasses() {
-		Class<?> testClass = ClassesFoo.class;
+		Class<?> testClass = PropertiesClassesFoo.class;
 		Class<? extends ContextLoader> expectedContextLoaderClass = GenericPropertiesContextLoader.class;
-		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass,
-			expectedContextLoaderClass.getName(), null);
+		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 
 		assertMergedConfig(mergedConfig, testClass, EMPTY_STRING_ARRAY, new Class<?>[] { FooConfig.class },
 			expectedContextLoaderClass);
@@ -104,8 +99,8 @@ public class ContextLoaderUtilsMergedConfigTests extends AbstractContextLoaderUt
 	public void buildMergedConfigWithLocalAndInheritedAnnotationsAndLocations() {
 		Class<?> testClass = LocationsBar.class;
 		String[] expectedLocations = new String[] { "/foo.xml", "/bar.xml" };
+		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 
-		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass, null, null);
 		assertMergedConfig(mergedConfig, testClass, expectedLocations, EMPTY_CLASS_ARRAY,
 			AnnotationConfigContextLoader.class);
 	}
@@ -114,8 +109,8 @@ public class ContextLoaderUtilsMergedConfigTests extends AbstractContextLoaderUt
 	public void buildMergedConfigWithLocalAndInheritedAnnotationsAndClasses() {
 		Class<?> testClass = ClassesBar.class;
 		Class<?>[] expectedClasses = new Class<?>[] { FooConfig.class, BarConfig.class };
+		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 
-		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass, null, null);
 		assertMergedConfig(mergedConfig, testClass, EMPTY_STRING_ARRAY, expectedClasses,
 			AnnotationConfigContextLoader.class);
 	}
@@ -124,8 +119,8 @@ public class ContextLoaderUtilsMergedConfigTests extends AbstractContextLoaderUt
 	public void buildMergedConfigWithAnnotationsAndOverriddenLocations() {
 		Class<?> testClass = OverriddenLocationsBar.class;
 		String[] expectedLocations = new String[] { "/bar.xml" };
+		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 
-		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass, null, null);
 		assertMergedConfig(mergedConfig, testClass, expectedLocations, EMPTY_CLASS_ARRAY,
 			AnnotationConfigContextLoader.class);
 	}
@@ -134,8 +129,8 @@ public class ContextLoaderUtilsMergedConfigTests extends AbstractContextLoaderUt
 	public void buildMergedConfigWithAnnotationsAndOverriddenClasses() {
 		Class<?> testClass = OverriddenClassesBar.class;
 		Class<?>[] expectedClasses = new Class<?>[] { BarConfig.class };
+		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 
-		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass, null, null);
 		assertMergedConfig(mergedConfig, testClass, EMPTY_STRING_ARRAY, expectedClasses,
 			AnnotationConfigContextLoader.class);
 	}

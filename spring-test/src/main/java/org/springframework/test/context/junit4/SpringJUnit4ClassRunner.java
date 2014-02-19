@@ -50,36 +50,32 @@ import org.springframework.test.context.junit4.statements.SpringRepeat;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * <p>
- * {@code SpringJUnit4ClassRunner} is a custom extension of
+ * <p>{@code SpringJUnit4ClassRunner} is a custom extension of JUnit's
  * {@link BlockJUnit4ClassRunner} which provides functionality of the
  * <em>Spring TestContext Framework</em> to standard JUnit 4.5+ tests by means
  * of the {@link TestContextManager} and associated support classes and
  * annotations.
- * </p>
- * <p>
- * The following list constitutes all annotations currently supported directly
+ *
+ * <p>The following list constitutes all annotations currently supported directly
  * by {@code SpringJUnit4ClassRunner}.
- * <em>(Note that additional annotations may be supported by various
- * {@link org.springframework.test.context.TestExecutionListener
- * TestExecutionListeners})</em>
- * </p>
+ * <em>(Note that additional annotations may be supported by various {@link
+ * org.springframework.test.context.TestExecutionListener TestExecutionListeners}
+ * or {@link org.springframework.test.context.TestContextBootstrapper
+ * TestContextBootstrapper} implementations)</em>
+ *
  * <ul>
  * <li>{@link Test#expected() &#064;Test(expected=...)}</li>
  * <li>{@link Test#timeout() &#064;Test(timeout=...)}</li>
  * <li>{@link Timed &#064;Timed}</li>
  * <li>{@link Repeat &#064;Repeat}</li>
  * <li>{@link Ignore &#064;Ignore}</li>
- * <li>
- * {@link org.springframework.test.annotation.ProfileValueSourceConfiguration
+ * <li>{@link org.springframework.test.annotation.ProfileValueSourceConfiguration
  * &#064;ProfileValueSourceConfiguration}</li>
- * <li>{@link org.springframework.test.annotation.IfProfileValue
- * &#064;IfProfileValue}</li>
+ * <li>{@link org.springframework.test.annotation.IfProfileValue &#064;IfProfileValue}</li>
  * </ul>
- * <p>
- * <b>NOTE:</b> As of Spring 3.0, {@code SpringJUnit4ClassRunner} requires
- * JUnit 4.5+.
- * </p>
+ *
+ * <p><strong>NOTE:</strong> As of Spring 3.0, {@code SpringJUnit4ClassRunner}
+ * requires JUnit 4.5 or higher.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
@@ -110,14 +106,12 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	}
 
 	/**
-	 * Creates a new {@link TestContextManager} for the supplied test class and
-	 * the configured <em>default {@code ContextLoader} class name</em>.
-	 * Can be overridden by subclasses.
+	 * Creates a new {@link TestContextManager} for the supplied test class.
+	 * <p>Can be overridden by subclasses.
 	 * @param clazz the test class to be managed
-	 * @see #getDefaultContextLoaderClassName(Class)
 	 */
 	protected TestContextManager createTestContextManager(Class<?> clazz) {
-		return new TestContextManager(clazz, getDefaultContextLoaderClassName(clazz));
+		return new TestContextManager(clazz);
 	}
 
 	/**
@@ -125,21 +119,6 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 */
 	protected final TestContextManager getTestContextManager() {
 		return this.testContextManager;
-	}
-
-	/**
-	 * Get the name of the default {@code ContextLoader} class to use for
-	 * the supplied test class. The named class will be used if the test class
-	 * does not explicitly declare a {@code ContextLoader} class via the
-	 * {@code @ContextConfiguration} annotation.
-	 * <p>The default implementation returns {@code null}, thus implying use
-	 * of the <em>standard</em> default {@code ContextLoader} class name.
-	 * Can be overridden by subclasses.
-	 * @param clazz the test class
-	 * @return {@code null}
-	 */
-	protected String getDefaultContextLoaderClassName(Class<?> clazz) {
-		return null;
 	}
 
 	/**
