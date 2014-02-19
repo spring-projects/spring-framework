@@ -3,6 +3,30 @@ SPRING FRAMEWORK CHANGELOG
 http://www.spring.io
 
 
+Changes in version 3.2.8 (2014-02-18)
+-------------------------------------
+
+* fixed potential LinkageError with aop:scoped-proxy (SPR-11398)
+* fixed various memory leaks (SPR-11440, SPR-10785)
+* added processExternalEntities support to OXM (SPR-11376)
+* fixed URL mapping issue (SPR-11101)
+* prevented unwanted side-effects from PreparedStatements (SPR-11386)
+* restore correct equals/hashCode for AbstractBeanDefinition (SPR-11420)
+* fixed various HTML form issues (SPR-10837, SPR-11426)
+* wraped runtime-registered EhCacheCacheManager caches with TransactionAwareCacheDecorator (SPR-11407)
+* fixed StringIndexOutOfBoundsException in AbstractErrors for class-level JSR-303 validator (SPR-11374)
+* fixed off-by-one regression in AbstractMethodMockingControl (SPR-11385)
+* fixed potential ClassCastException in RequestContextListener when destroying the request object (SPR-11378)
+* fixed various stream closing issues (SPR-11411, SPR-11413)
+* fixed broken documentation links (SPR-11404)
+* improved error reporting for issues related to @Controller types requiring AOP proxing (SPR-11281)
+* consider nonPublicAccessAllowed flag and SecurityManager with resolveFactoryMethodIfPossible method (SPR-11422)
+* don't lazily populate a hash field for Objects with multi-threaded access (SPR-11428)
+* fixed locale specific unit test failures (SPR-11392)
+* explicitly skip BindingResult when searching for a model object in MarshallingView (SPR-11417)
+* fixes potential malformed JSON from LiveBeansView (SPR-11366)
+
+
 Changes in version 3.2.7 (2013-12-12)
 -------------------------------------
 
