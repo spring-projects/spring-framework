@@ -200,4 +200,5 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 		arg1.setId(Long.MIN_VALUE);
 		return arg1;
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,11 +35,12 @@ import org.springframework.util.CollectionUtils;
  * Spring's annotation-driven cache management capability.
  *
  * @author Chris Beams
+ * @author Stephane Nicoll
  * @since 3.1
  * @see EnableCaching
  */
 @Configuration
-public abstract class AbstractCachingConfiguration implements ImportAware {
+public abstract class AbstractCachingConfiguration<C extends CachingConfigurer> implements ImportAware {
 
 	protected AnnotationAttributes enableCaching;
 
@@ -51,7 +52,7 @@ public abstract class AbstractCachingConfiguration implements ImportAware {
 	private Collection<CacheManager> cacheManagerBeans;
 
 	@Autowired(required=false)
-	private Collection<CachingConfigurer> cachingConfigurers;
+	private Collection<C> cachingConfigurers;
 
 
 	@Override
@@ -82,9 +83,8 @@ public abstract class AbstractCachingConfiguration implements ImportAware {
 						"Refactor the configuration such that CachingConfigurer is " +
 						"implemented only once or not at all.");
 			}
-			CachingConfigurer cachingConfigurer = cachingConfigurers.iterator().next();
-			this.cacheManager = cachingConfigurer.cacheManager();
-			this.keyGenerator = cachingConfigurer.keyGenerator();
+			C cachingConfigurer = cachingConfigurers.iterator().next();
+			useCachingConfigurer(cachingConfigurer);
 		}
 		else if (!CollectionUtils.isEmpty(cacheManagerBeans)) {
 			int nManagers = cacheManagerBeans.size();
@@ -95,8 +95,7 @@ public abstract class AbstractCachingConfiguration implements ImportAware {
 						"to make explicit which CacheManager should be used for " +
 						"annotation-driven cache management.");
 			}
-			CacheManager cacheManager = cacheManagerBeans.iterator().next();
-			this.cacheManager = cacheManager;
+			this.cacheManager = cacheManagerBeans.iterator().next();
 			// keyGenerator remains null; will fall back to default within CacheInterceptor
 		}
 		else {
@@ -105,4 +104,13 @@ public abstract class AbstractCachingConfiguration implements ImportAware {
 					"from your configuration.");
 		}
 	}
+
+	/**
+	 * Extract the configuration from the nominated {@link CachingConfigurer}.
+	 */
+	protected void useCachingConfigurer(C config) {
+		this.cacheManager = config.cacheManager();
+		this.keyGenerator = config.keyGenerator();
+	}
+
 }

@@ -182,7 +182,7 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 		return new CacheOperationContext(operation, method, args, target, targetClass);
 	}
 
-	protected Object execute(Invoker invoker, Object target, Method method, Object[] args) {
+	protected Object execute(CacheOperationInvoker invoker, Object target, Method method, Object[] args) {
 		// check whether aspect is enabled
 		// to cope with cases where the AJ is pulled in automatically
 		if (this.initialized) {
@@ -204,7 +204,7 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 		return targetClass;
 	}
 
-	private Object execute(Invoker invoker, CacheOperationContexts contexts) {
+	private Object execute(CacheOperationInvoker invoker, CacheOperationContexts contexts) {
 		// Process any early evictions
 		processCacheEvicts(contexts.get(CacheEvictOperation.class), true, ExpressionEvaluator.NO_RESULT);
 
@@ -340,12 +340,6 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 			logger.trace("Computed cache key " + key + " for operation " + context.operation);
 		}
 		return key;
-	}
-
-
-	public interface Invoker {
-
-		Object invoke();
 	}
 
 

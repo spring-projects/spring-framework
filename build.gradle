@@ -898,9 +898,10 @@ project("spring-aspects") {
 		optional(project(":spring-aop")) // for @Async support
 		optional(project(":spring-beans")) // for @Configurable support
 		optional(project(":spring-context")) // for @Enable* support
-		optional(project(":spring-context-support")) // for JavaMail support
+		optional(project(":spring-context-support")) // for JavaMail and JSR-107 support
 		optional(project(":spring-orm")) // for JPA exception translation support
 		optional(project(":spring-tx")) // for JPA, @Transactional support
+		optional("javax.cache:cache-api:1.0.0-RC1")
 		testCompile(project(":spring-core")) // for CodeStyleAspect
 		testCompile(project(":spring-test"))
 		testCompile("javax.mail:javax.mail-api:1.4.7")

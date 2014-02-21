@@ -75,6 +75,12 @@ import org.springframework.core.Ordered;
  * proxy- or AspectJ-based advice that weaves the interceptor into the call stack when
  * {@link org.springframework.cache.annotation.Cacheable @Cacheable} methods are invoked.
  *
+ * <p>If the JSR-107 API and Spring's JCache implementation are present, the necessary
+ * components to manage standard cache annotations are also registered. This creates the
+ * proxy- or AspectJ-based advice that weaves the interceptor into the call stack when
+ * methods annotated with {@code CacheResult}, {@code CachePut}, {@code CacheRemove} or
+ * {@code CacheRemoveAll} are invoked.
+ *
  * <p><strong>A bean of type {@link org.springframework.cache.CacheManager CacheManager}
  * must be registered</strong>, as there is no reasonable default that the framework can
  * use as a convention. And whereas the {@code <cache:annotation-driven>} element assumes

@@ -28,7 +28,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Abstract implementation of {@link CacheOperation} that caches
@@ -68,13 +67,12 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
-	 * Cache of CacheOperations, keyed by DefaultCacheKey (Method + target Class).
+	 * Cache of CacheOperations, keyed by {@link MethodCacheKey} (Method + target Class).
 	 * <p>As this base class is not marked Serializable, the cache will be recreated
 	 * after serialization - provided that the concrete subclass is Serializable.
 	 */
 	final Map<Object, Collection<CacheOperation>> attributeCache =
 			new ConcurrentHashMap<Object, Collection<CacheOperation>>(1024);
-
 
 	/**
 	 * Determine the caching attribute for this method invocation.
@@ -123,7 +121,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * @return the cache key (never {@code null})
 	 */
 	protected Object getCacheKey(Method method, Class<?> targetClass) {
-		return new DefaultCacheKey(method, targetClass);
+		return new MethodCacheKey(method, targetClass);
 	}
 
 	private Collection<CacheOperation> computeCacheOperations(Method method, Class<?> targetClass) {
@@ -187,39 +185,5 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 */
 	protected boolean allowPublicMethodsOnly() {
 		return false;
-	}
-
-
-	/**
-	 * Default cache key for the CacheOperation cache.
-	 */
-	private static class DefaultCacheKey {
-
-		private final Method method;
-
-		private final Class<?> targetClass;
-
-		public DefaultCacheKey(Method method, Class<?> targetClass) {
-			this.method = method;
-			this.targetClass = targetClass;
-		}
-
-		@Override
-		public boolean equals(Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof DefaultCacheKey)) {
-				return false;
-			}
-			DefaultCacheKey otherKey = (DefaultCacheKey) other;
-			return (this.method.equals(otherKey.method) && ObjectUtils.nullSafeEquals(this.targetClass,
-					otherKey.targetClass));
-		}
-
-		@Override
-		public int hashCode() {
-			return this.method.hashCode() * 29 + (this.targetClass != null ? this.targetClass.hashCode() : 0);
-		}
 	}
 }

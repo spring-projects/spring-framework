@@ -208,4 +208,5 @@ public class DefaultCacheableService implements CacheableService<Long> {
 		arg1.setId(Long.MIN_VALUE);
 		return arg1;
 	}
+
 }

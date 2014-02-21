@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import org.springframework.util.ClassUtils;
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Phillip Webb
+ * @author Stephane Nicoll
  * @since 2.5
  * @see ContextAnnotationAutowireCandidateResolver
  * @see CommonAnnotationBeanPostProcessor
@@ -146,6 +147,48 @@ public class AnnotationConfigUtils {
 	 */
 	public static final String CACHE_ASPECT_CONFIGURATION_CLASS_NAME =
 			"org.springframework.cache.aspectj.AspectJCachingConfiguration";
+
+	/**
+	 * The bean name of the internally managed JSR-107 cache advisor.
+	 */
+	public static final String JCACHE_ADVISOR_BEAN_NAME =
+			"org.springframework.cache.config.internalJCacheAdvisor";
+
+	/**
+	 * The class name of the JSR-107 cache operation source.
+	 */
+	public static final String JCACHE_OPERATION_SOURCE_CLASS
+			= "org.springframework.cache.jcache.interceptor.DefaultJCacheOperationSource";
+
+	/**
+	 * The class name of the JSR-107 cache interceptor.
+	 */
+	public static final String JCACHE_INTERCEPTOR_CLASS =
+			"org.springframework.cache.jcache.interceptor.JCacheInterceptor";
+
+	/**
+	 * The class name of the JSR-107 cache advisor factory.
+	 */
+	public static final String JCACHE_ADVISOR_FACTORY_CLASS =
+			"org.springframework.cache.jcache.interceptor.BeanFactoryJCacheOperationSourceAdvisor";
+
+	/**
+	 * The bean name of the internally managed JSR-107 cache aspect.
+	 */
+	public static final String JCACHE_ASPECT_BEAN_NAME =
+			"org.springframework.cache.config.internalJCacheAspect";
+
+	/**
+	 * The class name of the AspectJ JSR-107 cache aspect.
+	 */
+	public static final String JCACHE_ASPECT_CLASS_NAME =
+			"org.springframework.cache.aspectj.JCacheCacheAspect";
+
+	/**
+	 * The name of the AspectJ JSR-107 cache aspect @{@code Configuration} class.
+	 */
+	public static final String JCACHE_ASPECT_CONFIGURATION_CLASS_NAME =
+			"org.springframework.cache.aspectj.AspectJJCacheConfiguration";
 
 	/**
 	 * The bean name of the internally managed JPA annotation processor.

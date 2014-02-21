@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import org.aspectj.lang.annotation.SuppressAjWarnings;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.cache.interceptor.CacheAspectSupport;
+import org.springframework.cache.interceptor.CacheOperationInvoker;
 import org.springframework.cache.interceptor.CacheOperationSource;
 
 /**
@@ -56,7 +57,7 @@ public abstract aspect AbstractCacheAspect extends CacheAspectSupport {
 		MethodSignature methodSignature = (MethodSignature) thisJoinPoint.getSignature();
 		Method method = methodSignature.getMethod();
 
-		Invoker aspectJInvoker = new Invoker() {
+		CacheOperationInvoker aspectJInvoker = new CacheOperationInvoker() {
 			public Object invoke() {
 				return proceed(cachedObject);
 			}

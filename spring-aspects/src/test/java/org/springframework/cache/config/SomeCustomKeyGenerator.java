@@ -43,4 +43,5 @@ final class SomeCustomKeyGenerator implements KeyGenerator {
         }
         return sb.toString();
     }
+
 }

@@ -82,4 +82,5 @@ public interface CacheableService<T> {
 	T multiUpdate(Object arg1);
 
 	TestEntity putRefersToResult(TestEntity arg1);
+
 }

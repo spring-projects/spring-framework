@@ -71,4 +71,5 @@ public class AspectJAnnotationTests extends AbstractAnnotationTests {
 		assertSame(r3, primary.get(o1).get());
 		assertSame(r4, secondary.get(o1).get());
 	}
+
 }
