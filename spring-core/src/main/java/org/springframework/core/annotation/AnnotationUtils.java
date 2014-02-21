@@ -268,14 +268,14 @@ public abstract class AnnotationUtils {
 	/**
 	 * Perform the search algorithm for {@link #findAnnotation(Class, Class)},
 	 * avoiding endless recursion by tracking which annotations have already
-	 * been visited.
+	 * been <em>visited</em>.
 	 * @param clazz the class to look for annotations on
 	 * @param annotationType the type of annotation to look for
-	 * @param visitedAnnotations the set of annotations that have already been visited
+	 * @param visited the set of annotations that have already been visited
 	 * @return the annotation if found, or {@code null} if not found
 	 */
 	private static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType,
-			Set<Annotation> visitedAnnotations) {
+			Set<Annotation> visited) {
 		Assert.notNull(clazz, "Class must not be null");
 
 		A annotation = clazz.getAnnotation(annotationType);
@@ -283,15 +283,14 @@ public abstract class AnnotationUtils {
 			return annotation;
 		}
 		for (Class<?> ifc : clazz.getInterfaces()) {
-			annotation = findAnnotation(ifc, annotationType, visitedAnnotations);
+			annotation = findAnnotation(ifc, annotationType, visited);
 			if (annotation != null) {
 				return annotation;
 			}
 		}
 		for (Annotation ann : clazz.getAnnotations()) {
-			if (!visitedAnnotations.contains(ann)) {
-				visitedAnnotations.add(ann);
-				annotation = findAnnotation(ann.annotationType(), annotationType, visitedAnnotations);
+			if (visited.add(ann)) {
+				annotation = findAnnotation(ann.annotationType(), annotationType, visited);
 				if (annotation != null) {
 					return annotation;
 				}
@@ -301,7 +300,7 @@ public abstract class AnnotationUtils {
 		if (superclass == null || superclass.equals(Object.class)) {
 			return null;
 		}
-		return findAnnotation(superclass, annotationType, visitedAnnotations);
+		return findAnnotation(superclass, annotationType, visited);
 	}
 
 	/**
@@ -648,7 +647,7 @@ public abstract class AnnotationUtils {
 			}
 			catch (Exception ex) {
 				throw new IllegalStateException("Unable to read value from repeating annotation container "
-								+ this.containerAnnotationType.getName(), ex);
+						+ this.containerAnnotationType.getName(), ex);
 			}
 		}
 
