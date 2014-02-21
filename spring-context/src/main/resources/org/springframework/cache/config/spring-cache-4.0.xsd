@@ -185,6 +185,12 @@
 	The name of the KeyGenerator bean responsible to compute the key, mutually exclusive with the key parameter.]]></xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
+		<xsd:attribute name="cache-manager" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	The name of the CacheManager bean responsible to manage the operation.]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
 		<xsd:attribute name="condition" type="xsd:string" use="optional">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[

@@ -118,6 +118,18 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 	}
 
 	@Override
+	@Cacheable(value = "default", cacheManager = "customCacheManager")
+	public Object customCacheManager(Object arg1) {
+		return counter.getAndIncrement();
+	}
+
+	@Override
+	@Cacheable(value = "default", cacheManager = "unknownBeanName")
+	public Object unknownCustomCacheManager(Object arg1) {
+		return counter.getAndIncrement();
+	}
+
+	@Override
 	@CachePut("default")
 	public Object update(Object arg1) {
 		return counter.getAndIncrement();

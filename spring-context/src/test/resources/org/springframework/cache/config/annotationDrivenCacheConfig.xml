@@ -2,27 +2,27 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:aop="http://www.springframework.org/schema/aop"
        xmlns:p="http://www.springframework.org/schema/p"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd 
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
 
 	<bean id="apc" class="org.springframework.aop.framework.autoproxy.InfrastructureAdvisorAutoProxyCreator"/>
 
 	<bean id="annotationSource" class="org.springframework.cache.annotation.AnnotationCacheOperationSource"/>
-	
+
 	<aop:config>
 		<aop:advisor advice-ref="debugInterceptor" pointcut="execution(* *..CacheableService.*(..))" order="1"/>
 	</aop:config>
-	
+
 	<bean id="cacheInterceptor" class="org.springframework.cache.interceptor.CacheInterceptor">
 		<property name="cacheManager" ref="cacheManager"/>
 		<property name="cacheOperationSources" ref="annotationSource"/>
 	</bean>
-	
+
 	<bean id="advisor" class="org.springframework.cache.interceptor.BeanFactoryCacheOperationSourceAdvisor">
 		<property name="cacheOperationSource" ref="annotationSource"/>
 		<property name="adviceBeanName" value="cacheInterceptor"/>
 	</bean>
-	
+
 
 	<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
 		<property name="caches">
@@ -35,13 +35,21 @@
 	</bean>
 
 	<bean id="debugInterceptor" class="org.springframework.aop.interceptor.DebugInterceptor"/>
-	
+
 	<bean id="service" class="org.springframework.cache.config.DefaultCacheableService"/>
-	
+
 	<bean id="classService" class="org.springframework.cache.config.AnnotatedClassCacheableService"/>
-	
+
 	<bean id="keyGenerator" class="org.springframework.cache.config.SomeKeyGenerator"/>
 
 	<bean id="customKeyGenerator" class="org.springframework.cache.config.SomeCustomKeyGenerator"/>
+
+	<bean id="customCacheManager" class="org.springframework.cache.support.SimpleCacheManager">
+		<property name="caches">
+			<set>
+				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="default"/>
+			</set>
+		</property>
+	</bean>
 
 </beans>

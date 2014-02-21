@@ -37,6 +37,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Phillip Webb
+ * @author Stephane Nicoll
  * @since 3.1
  */
 @SuppressWarnings("serial")
@@ -88,6 +89,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		cuo.setUnless(caching.unless());
 		cuo.setKey(caching.key());
 		cuo.setKeyGenerator(caching.keyGenerator());
+		cuo.setCacheManager(caching.cacheManager());
 		cuo.setName(ae.toString());
 
 		checkKeySourceConsistency(ae, caching.key(), caching.keyGenerator());
@@ -100,6 +102,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		ceo.setCondition(caching.condition());
 		ceo.setKey(caching.key());
 		ceo.setKeyGenerator(caching.keyGenerator());
+		ceo.setCacheManager(caching.cacheManager());
 		ceo.setCacheWide(caching.allEntries());
 		ceo.setBeforeInvocation(caching.beforeInvocation());
 		ceo.setName(ae.toString());
@@ -115,6 +118,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		cuo.setUnless(caching.unless());
 		cuo.setKey(caching.key());
 		cuo.setKeyGenerator(caching.keyGenerator());
+		cuo.setCacheManager(caching.cacheManager());
 		cuo.setName(ae.toString());
 
 		checkKeySourceConsistency(ae, caching.key(), caching.keyGenerator());

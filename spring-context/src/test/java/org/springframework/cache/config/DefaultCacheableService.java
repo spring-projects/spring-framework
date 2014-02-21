@@ -28,6 +28,7 @@ import org.springframework.cache.annotation.Caching;
  *
  * @author Costin Leau
  * @author Phillip Webb
+ * @author Stephane Nicoll
  */
 public class DefaultCacheableService implements CacheableService<Long> {
 
@@ -118,6 +119,18 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	@Override
 	@Cacheable(value = "default", keyGenerator = "unknownBeanName")
 	public Long unknownCustomKeyGenerator(Object arg1) {
+		return counter.getAndIncrement();
+	}
+
+	@Override
+	@Cacheable(value = "default", cacheManager = "customCacheManager")
+	public Long customCacheManager(Object arg1) {
+		return counter.getAndIncrement();
+	}
+
+	@Override
+	@Cacheable(value = "default", cacheManager = "unknownBeanName")
+	public Long unknownCustomCacheManager(Object arg1) {
 		return counter.getAndIncrement();
 	}
 

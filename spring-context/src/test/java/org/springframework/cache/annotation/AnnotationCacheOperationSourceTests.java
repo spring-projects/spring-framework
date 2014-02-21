@@ -34,6 +34,7 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * @author Costin Leau
+ * @author Stephane Nicoll
  */
 public class AnnotationCacheOperationSourceTests {
 
@@ -116,6 +117,22 @@ public class AnnotationCacheOperationSourceTests {
 		}
 	}
 
+	@Test
+	public void testCustomCacheManager() {
+		Collection<CacheOperation> ops = getOps("customCacheManager");
+		assertEquals(1, ops.size());
+		CacheOperation cacheOperation = ops.iterator().next();
+		assertEquals("Custom cache manager not set", "custom", cacheOperation.getCacheManager());
+	}
+
+	@Test
+	public void testCustomCacheManagerInherited() {
+		Collection<CacheOperation> ops = getOps("customCacheManagerInherited");
+		assertEquals(1, ops.size());
+		CacheOperation cacheOperation = ops.iterator().next();
+		assertEquals("Custom cache manager not set", "custom", cacheOperation.getCacheManager());
+	}
+
 	private static class AnnotatedClass {
 		@Cacheable("test")
 		public void singular() {
@@ -132,6 +149,10 @@ public class AnnotationCacheOperationSourceTests {
 
 		@Cacheable(value = "test", keyGenerator = "custom")
 		public void customKeyGenerator() {
+		}
+
+		@Cacheable(value = "test", cacheManager = "custom")
+		public void customCacheManager() {
 		}
 
 		@EvictFoo
@@ -155,6 +176,10 @@ public class AnnotationCacheOperationSourceTests {
 		@Cacheable(value = "test", key = "#root.methodName", keyGenerator = "custom")
 		public void invalidKeyAndKeyGeneratorSet() {
 		}
+
+		@CacheableFooCustomCacheManager
+		public void customCacheManagerInherited() {
+		}
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -167,6 +192,13 @@ public class AnnotationCacheOperationSourceTests {
 	@Target(ElementType.METHOD)
 	@Cacheable(value = "foo", keyGenerator = "custom")
 	public @interface CacheableFooCustomKeyGenerator {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	@Cacheable(value = "foo", cacheManager = "custom")
+	public @interface CacheableFooCustomCacheManager {
+
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

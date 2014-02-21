@@ -45,6 +45,7 @@ import org.w3c.dom.Element;
  *
  * @author Costin Leau
  * @author Phillip Webb
+ * @author Stephane Nicoll
  */
 class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 
@@ -186,6 +187,8 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 
 		private String keyGenerator;
 
+		private String cacheManager;
+
 		private String condition;
 
 		private String method;
@@ -197,6 +200,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			String defaultCache = root.getAttribute("cache");
 			key = root.getAttribute("key");
 			keyGenerator = root.getAttribute("key-generator");
+			cacheManager = root.getAttribute("cache-manager");
 			condition = root.getAttribute("condition");
 			method = root.getAttribute(METHOD_ATTRIBUTE);
 
@@ -222,6 +226,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 
 			op.setKey(getAttributeValue(element, "key", this.key));
 			op.setKeyGenerator(getAttributeValue(element, "key-generator", this.keyGenerator));
+			op.setCacheManager(getAttributeValue(element, "cache-manager", this.cacheManager));
 			op.setCondition(getAttributeValue(element, "condition", this.condition));
 
 			if (StringUtils.hasText(op.getKey()) && StringUtils.hasText(op.getKeyGenerator())) {

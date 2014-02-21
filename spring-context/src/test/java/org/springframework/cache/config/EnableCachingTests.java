@@ -40,6 +40,7 @@ import org.springframework.context.annotation.Configuration;
  * Integration tests for @EnableCaching and its related @Configuration classes.
  *
  * @author Chris Beams
+ * @author Stephane Nicoll
  */
 public class EnableCachingTests extends AbstractAnnotationTests {
 
@@ -144,6 +145,13 @@ public class EnableCachingTests extends AbstractAnnotationTests {
 		@Bean
 		public KeyGenerator customKeyGenerator() {
 			return new SomeCustomKeyGenerator();
+		}
+
+		@Bean
+		public CacheManager customCacheManager() {
+			SimpleCacheManager cm = new SimpleCacheManager();
+			cm.setCaches(Arrays.asList(new ConcurrentMapCache("default")));
+			return cm;
 		}
 	}
 
