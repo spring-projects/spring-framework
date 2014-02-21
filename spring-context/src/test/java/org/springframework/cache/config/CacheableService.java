@@ -21,6 +21,7 @@ package org.springframework.cache.config;
  *
  * @author Costin Leau
  * @author Phillip Webb
+ * @author Stephane Nicoll
  */
 public interface CacheableService<T> {
 
@@ -61,6 +62,10 @@ public interface CacheableService<T> {
 	T customKeyGenerator(Object arg1);
 
 	T unknownCustomKeyGenerator(Object arg1);
+
+	T customCacheManager(Object arg1);
+
+	T unknownCustomCacheManager(Object arg1);
 
 	T throwChecked(Object arg1) throws Exception;
 

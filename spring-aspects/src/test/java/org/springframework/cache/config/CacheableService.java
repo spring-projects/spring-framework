@@ -62,6 +62,10 @@ public interface CacheableService<T> {
 
 	T unknownCustomKeyGenerator(Object arg1);
 
+	T customCacheManager(Object arg1);
+
+	T unknownCustomCacheManager(Object arg1);
+
 	T throwChecked(Object arg1) throws Exception;
 
 	T throwUnchecked(Object arg1);

@@ -36,6 +36,7 @@ import org.springframework.context.ApplicationContext;
  * @author Costin Leau
  * @author Chris Beams
  * @author Phillip Webb
+ * @author Stephane Nicoll
  */
 public abstract class AbstractAnnotationTests {
 
@@ -47,6 +48,8 @@ public abstract class AbstractAnnotationTests {
 
 	protected CacheManager cm;
 
+	protected CacheManager customCm;
+
 	/** @return a refreshed application context */
 	protected abstract ApplicationContext getApplicationContext();
 
@@ -55,7 +58,9 @@ public abstract class AbstractAnnotationTests {
 		ctx = getApplicationContext();
 		cs = ctx.getBean("service", CacheableService.class);
 		ccs = ctx.getBean("classService", CacheableService.class);
-		cm = ctx.getBean(CacheManager.class);
+		cm = ctx.getBean("cacheManager", CacheManager.class);
+		customCm = ctx.getBean("customCacheManager", CacheManager.class);
+
 		Collection<String> cn = cm.getCacheNames();
 		assertTrue(cn.contains("default"));
 		assertTrue(cn.contains("secondary"));
@@ -585,6 +590,26 @@ public abstract class AbstractAnnotationTests {
 		try {
 			Object param = new Object();
 			cs.unknownCustomKeyGenerator(param);
+			fail("should have failed with NoSuchBeanDefinitionException");
+		} catch (NoSuchBeanDefinitionException e) {
+			// expected
+		}
+	}
+
+	@Test
+	public void testCustomCacheManager() {
+		Object key = new Object();
+		Object r1 = cs.customCacheManager(key);
+		assertSame(r1, cs.customCacheManager(key));
+		Cache cache = customCm.getCache("default");
+		assertNotNull(cache.get(key));
+	}
+
+	@Test
+	public void testUnknownCustomCacheManager() {
+		try {
+			Object param = new Object();
+			cs.unknownCustomCacheManager(param);
 			fail("should have failed with NoSuchBeanDefinitionException");
 		} catch (NoSuchBeanDefinitionException e) {
 			// expected

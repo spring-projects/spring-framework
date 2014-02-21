@@ -26,6 +26,7 @@ import org.springframework.util.Assert;
  * Base class for cache operations.
  *
  * @author Costin Leau
+ * @author Stephane Nicoll
  */
 public abstract class CacheOperation {
 
@@ -36,6 +37,8 @@ public abstract class CacheOperation {
 	private String key = "";
 
 	private String keyGenerator = "";
+
+	private String cacheManager = "";
 
 	private String name = "";
 
@@ -54,6 +57,10 @@ public abstract class CacheOperation {
 
 	public String getKeyGenerator() {
 		return keyGenerator;
+	}
+
+	public String getCacheManager() {
+		return cacheManager;
 	}
 
 	public String getName() {
@@ -86,6 +93,11 @@ public abstract class CacheOperation {
 	public void setKeyGenerator(String keyGenerator) {
 		Assert.notNull(keyGenerator);
 		this.keyGenerator = keyGenerator;
+	}
+
+	public void setCacheManager(String cacheManager) {
+		Assert.notNull(cacheManager);
+		this.cacheManager = cacheManager;
 	}
 
 	public void setName(String name) {
@@ -137,6 +149,8 @@ public abstract class CacheOperation {
 		result.append(this.key);
 		result.append("' | keyGenerator='");
 		result.append(this.keyGenerator);
+		result.append("' | cacheManager='");
+		result.append(this.cacheManager);
 		result.append("' | condition='");
 		result.append(this.condition);
 		result.append("'");

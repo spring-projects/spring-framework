@@ -28,6 +28,7 @@ import java.lang.annotation.Target;
  * a cache invalidate operation.
  *
  * @author Costin Leau
+ * @author Stephane Nicoll
  * @since 3.1
  */
 @Target({ElementType.METHOD, ElementType.TYPE})
@@ -55,6 +56,11 @@ public @interface CacheEvict {
 	 * <p>Mutually exclusive with the {@link #key()} attribute.
 	 */
 	String keyGenerator() default "";
+
+	/**
+	 * The bean name of the custom {@link org.springframework.cache.CacheManager} to use.
+	 */
+	String cacheManager() default "";
 
 	/**
 	 * Spring Expression Language (SpEL) attribute used for conditioning the method caching.

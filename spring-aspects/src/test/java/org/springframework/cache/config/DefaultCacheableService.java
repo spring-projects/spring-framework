@@ -122,6 +122,18 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	}
 
 	@Override
+	@Cacheable(value = "default", cacheManager = "customCacheManager")
+	public Long customCacheManager(Object arg1) {
+		return counter.getAndIncrement();
+	}
+
+	@Override
+	@Cacheable(value = "default", cacheManager = "unknownBeanName")
+	public Long unknownCustomCacheManager(Object arg1) {
+		return counter.getAndIncrement();
+	}
+
+	@Override
 	@CachePut("default")
 	public Long update(Object arg1) {
 		return counter.getAndIncrement();

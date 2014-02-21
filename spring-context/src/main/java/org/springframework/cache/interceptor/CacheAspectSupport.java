@@ -88,14 +88,15 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 
 
 	/**
-	 * Set the CacheManager that this cache aspect should delegate to.
+	 * Set the default {@link CacheManager} that this cache aspect should delegate to
+	 * if no specific cache manager has been set for the operation.
 	 */
 	public void setCacheManager(CacheManager cacheManager) {
 		this.cacheManager = cacheManager;
 	}
 
 	/**
-	 * Return the CacheManager that this cache aspect delegates to.
+	 * Return the default {@link CacheManager} that this cache aspect delegates to.
 	 */
 	public CacheManager getCacheManager() {
 		return this.cacheManager;
@@ -164,14 +165,12 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 		return ClassUtils.getQualifiedMethodName(specificMethod);
 	}
 
-	protected Collection<? extends Cache> getCaches(CacheOperation operation) {
+	protected Collection<? extends Cache> getCaches(CacheOperation operation, CacheManager cacheManager) {
 		Set<String> cacheNames = operation.getCacheNames();
 		Collection<Cache> caches = new ArrayList<Cache>(cacheNames.size());
 		for (String cacheName : cacheNames) {
-			Cache cache = this.cacheManager.getCache(cacheName);
-			if (cache == null) {
-				throw new IllegalArgumentException("Cannot find cache named '" + cacheName + "' for " + operation);
-			}
+			Cache cache = cacheManager.getCache(cacheName);
+			Assert.notNull(cache, "Cannot find cache named '" + cacheName + "' for " + operation);
 			caches.add(cache);
 		}
 		return caches;
@@ -386,6 +385,8 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 
 		private final KeyGenerator operationKeyGenerator;
 
+		private final CacheManager operationCacheManager;
+
 		public CacheOperationContext(CacheOperation operation, Method method,
 									 Object[] args, Object target, Class<?> targetClass) {
 			this.operation = operation;
@@ -393,13 +394,20 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 			this.args = extractArgs(method, args);
 			this.target = target;
 			this.targetClass = targetClass;
-			this.caches = CacheAspectSupport.this.getCaches(operation);
 			if (StringUtils.hasText(operation.getKeyGenerator())) { // TODO: exception mgt?
 				this.operationKeyGenerator = BeanFactoryAnnotationUtils.qualifiedBeanOfType(
 						applicationContext, KeyGenerator.class, operation.getKeyGenerator());
 			} else {
 				this.operationKeyGenerator = keyGenerator;
 			}
+			if (StringUtils.hasText(operation.getCacheManager())) {
+				this.operationCacheManager = BeanFactoryAnnotationUtils.qualifiedBeanOfType(
+						applicationContext, CacheManager.class, operation.getCacheManager());
+			}
+			else {
+				this.operationCacheManager = cacheManager;
+			}
+			this.caches = CacheAspectSupport.this.getCaches(operation, operationCacheManager);
 		}
 
 		private Object[] extractArgs(Method method, Object[] args) {
