@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,11 +40,17 @@ import static org.springframework.test.context.MetaAnnotationUtils.*;
  */
 public class MetaAnnotationUtilsTests {
 
-	private void assertComponentOnStereotype(Class<?> startClass, Class<?> declaringClass, String name,
+	private void assertAtComponentOnComposedAnnotation(Class<?> rootDeclaringClass, String name,
+			Class<? extends Annotation> composedAnnotationType) {
+		assertAtComponentOnComposedAnnotation(rootDeclaringClass, rootDeclaringClass, name, composedAnnotationType);
+	}
+
+	private void assertAtComponentOnComposedAnnotation(Class<?> startClass, Class<?> rootDeclaringClass, String name,
 			Class<? extends Annotation> composedAnnotationType) {
 		AnnotationDescriptor<Component> descriptor = findAnnotationDescriptor(startClass, Component.class);
 		assertNotNull(descriptor);
-		assertEquals(declaringClass, descriptor.getRootDeclaringClass());
+		assertEquals(rootDeclaringClass, descriptor.getRootDeclaringClass());
+		assertEquals(composedAnnotationType, descriptor.getDeclaringClass());
 		assertEquals(Component.class, descriptor.getAnnotationType());
 		assertEquals(name, descriptor.getAnnotation().value());
 		assertNotNull(descriptor.getComposedAnnotation());
@@ -52,8 +58,8 @@ public class MetaAnnotationUtilsTests {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void assertComponentOnStereotypeForMultipleCandidateTypes(Class<?> startClass, Class<?> declaringClass,
-			String name, Class<? extends Annotation> composedAnnotationType) {
+	private void assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(Class<?> startClass,
+			Class<?> declaringClass, String name, Class<? extends Annotation> composedAnnotationType) {
 		Class<Component> annotationType = Component.class;
 		UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(startClass, Service.class,
 			annotationType, Order.class, Transactional.class);
@@ -108,8 +114,7 @@ public class MetaAnnotationUtilsTests {
 
 	@Test
 	public void findAnnotationDescriptorWithMetaComponentAnnotation() throws Exception {
-		Class<HasMetaComponentAnnotation> startClass = HasMetaComponentAnnotation.class;
-		assertComponentOnStereotype(startClass, startClass, "meta1", Meta1.class);
+		assertAtComponentOnComposedAnnotation(HasMetaComponentAnnotation.class, "meta1", Meta1.class);
 	}
 
 	@Test
@@ -125,8 +130,7 @@ public class MetaAnnotationUtilsTests {
 
 	@Test
 	public void findAnnotationDescriptorForInterfaceWithMetaAnnotation() {
-		Class<InterfaceWithMetaAnnotation> startClass = InterfaceWithMetaAnnotation.class;
-		assertComponentOnStereotype(startClass, startClass, "meta1", Meta1.class);
+		assertAtComponentOnComposedAnnotation(InterfaceWithMetaAnnotation.class, "meta1", Meta1.class);
 	}
 
 	@Test
@@ -136,13 +140,13 @@ public class MetaAnnotationUtilsTests {
 
 	@Test
 	public void findAnnotationDescriptorForClassWithLocalMetaAnnotationAndMetaAnnotatedInterface() {
-		Class<ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface> startClass = ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class;
-		assertComponentOnStereotype(startClass, startClass, "meta2", Meta2.class);
+		assertAtComponentOnComposedAnnotation(ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, "meta2",
+			Meta2.class);
 	}
 
 	@Test
 	public void findAnnotationDescriptorForSubClassWithLocalMetaAnnotationAndMetaAnnotatedInterface() {
-		assertComponentOnStereotype(SubClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class,
+		assertAtComponentOnComposedAnnotation(SubClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class,
 			ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, "meta2", Meta2.class);
 	}
 
@@ -213,7 +217,7 @@ public class MetaAnnotationUtilsTests {
 	@Test
 	public void findAnnotationDescriptorForTypesWithMetaComponentAnnotation() throws Exception {
 		Class<HasMetaComponentAnnotation> startClass = HasMetaComponentAnnotation.class;
-		assertComponentOnStereotypeForMultipleCandidateTypes(startClass, startClass, "meta1", Meta1.class);
+		assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(startClass, startClass, "meta1", Meta1.class);
 	}
 
 	@Test
@@ -257,7 +261,7 @@ public class MetaAnnotationUtilsTests {
 	@Test
 	public void findAnnotationDescriptorForTypesForInterfaceWithMetaAnnotation() {
 		Class<InterfaceWithMetaAnnotation> startClass = InterfaceWithMetaAnnotation.class;
-		assertComponentOnStereotypeForMultipleCandidateTypes(startClass, startClass, "meta1", Meta1.class);
+		assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(startClass, startClass, "meta1", Meta1.class);
 	}
 
 	@Test
@@ -270,12 +274,12 @@ public class MetaAnnotationUtilsTests {
 	@Test
 	public void findAnnotationDescriptorForTypesForClassWithLocalMetaAnnotationAndMetaAnnotatedInterface() {
 		Class<ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface> startClass = ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class;
-		assertComponentOnStereotypeForMultipleCandidateTypes(startClass, startClass, "meta2", Meta2.class);
+		assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(startClass, startClass, "meta2", Meta2.class);
 	}
 
 	@Test
 	public void findAnnotationDescriptorForTypesForSubClassWithLocalMetaAnnotationAndMetaAnnotatedInterface() {
-		assertComponentOnStereotypeForMultipleCandidateTypes(
+		assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(
 			SubClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class,
 			ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, "meta2", Meta2.class);
 	}
@@ -294,6 +298,22 @@ public class MetaAnnotationUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	static @interface Meta2 {
 	}
+
+	@ContextConfiguration
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface MetaConfig {
+
+		static class DevConfig {
+		}
+
+		static class ProductionConfig {
+		}
+
+
+		Class<?>[] classes() default { DevConfig.class, ProductionConfig.class };
+	}
+
+	// -------------------------------------------------------------------------
 
 	@Meta1
 	static class HasMetaComponentAnnotation {
@@ -318,20 +338,6 @@ public class MetaAnnotationUtilsTests {
 
 	static class SubClassWithLocalMetaAnnotationAndMetaAnnotatedInterface extends
 			ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface {
-	}
-
-	@ContextConfiguration
-	@Retention(RetentionPolicy.RUNTIME)
-	static @interface MetaConfig {
-
-		static class DevConfig {
-		}
-
-		static class ProductionConfig {
-		}
-
-
-		Class<?>[] classes() default { DevConfig.class, ProductionConfig.class };
 	}
 
 	@MetaConfig
