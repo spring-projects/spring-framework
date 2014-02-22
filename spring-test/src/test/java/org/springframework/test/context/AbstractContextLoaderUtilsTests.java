@@ -75,7 +75,6 @@ abstract class AbstractContextLoaderUtilsTests {
 		assertNotNull(mergedConfig.getClasses());
 		assertArrayEquals(expectedClasses, mergedConfig.getClasses());
 		assertNotNull(mergedConfig.getActiveProfiles());
-		System.err.println(expectedContextLoaderClass);
 		if (expectedContextLoaderClass == null) {
 			assertNull(mergedConfig.getContextLoader());
 		}
