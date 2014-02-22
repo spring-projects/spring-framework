@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,29 @@
 
 package org.springframework.test.web.servlet.samples.standalone.resulthandlers;
 
+import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 /**
  * Print debugging information about the executed request and response to System.out.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
+@Ignore("Not intended to be executed with the build. Comment out this line to inspect the output manually.")
 public class PrintingResultHandlerTests {
 
 	@Test
 	public void testPrint() throws Exception {
-
-		// Not testing anything, uncomment to see the output
-
-		// standaloneSetup(new SimpleController()).build().perform(get("/")).andDo(print());
+		standaloneSetup(new SimpleController()).build().perform(get("/")).andDo(print());
 	}
 
 
