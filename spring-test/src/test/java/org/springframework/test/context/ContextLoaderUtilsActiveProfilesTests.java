@@ -21,7 +21,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -38,77 +39,58 @@ import static org.springframework.test.context.ContextLoaderUtils.*;
  */
 public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoaderUtilsTests {
 
+	private void assertResolvedProfiles(Class<?> testClass, String... expected) {
+		assertNotNull(testClass);
+		assertNotNull(expected);
+		String[] actual = resolveActiveProfiles(testClass);
+		Set<String> expectedSet = new HashSet<String>(Arrays.asList(expected));
+		Set<String> actualSet = new HashSet<String>(Arrays.asList(actual));
+		assertEquals(expectedSet, actualSet);
+	}
+
 	@Test
 	public void resolveActiveProfilesWithoutAnnotation() {
-		String[] profiles = resolveActiveProfiles(Enigma.class);
-		assertArrayEquals(EMPTY_STRING_ARRAY, profiles);
+		assertArrayEquals(EMPTY_STRING_ARRAY, resolveActiveProfiles(Enigma.class));
 	}
 
 	@Test
 	public void resolveActiveProfilesWithNoProfilesDeclared() {
-		String[] profiles = resolveActiveProfiles(BareAnnotations.class);
-		assertArrayEquals(EMPTY_STRING_ARRAY, profiles);
+		assertArrayEquals(EMPTY_STRING_ARRAY, resolveActiveProfiles(BareAnnotations.class));
 	}
 
 	@Test
 	public void resolveActiveProfilesWithEmptyProfiles() {
-		String[] profiles = resolveActiveProfiles(EmptyProfiles.class);
-		assertArrayEquals(EMPTY_STRING_ARRAY, profiles);
+		assertArrayEquals(EMPTY_STRING_ARRAY, resolveActiveProfiles(EmptyProfiles.class));
 	}
 
 	@Test
 	public void resolveActiveProfilesWithDuplicatedProfiles() {
-		String[] profiles = resolveActiveProfiles(DuplicatedProfiles.class);
-		assertNotNull(profiles);
-		assertEquals(3, profiles.length);
-
-		List<String> list = Arrays.asList(profiles);
-		assertTrue(list.contains("foo"));
-		assertTrue(list.contains("bar"));
-		assertTrue(list.contains("baz"));
+		assertResolvedProfiles(DuplicatedProfiles.class, "foo", "bar", "baz");
 	}
 
 	@Test
 	public void resolveActiveProfilesWithLocalAnnotation() {
-		String[] profiles = resolveActiveProfiles(LocationsFoo.class);
-		assertNotNull(profiles);
-		assertArrayEquals(new String[] { "foo" }, profiles);
+		assertResolvedProfiles(LocationsFoo.class, "foo");
 	}
 
 	@Test
 	public void resolveActiveProfilesWithInheritedAnnotationAndLocations() {
-		String[] profiles = resolveActiveProfiles(InheritedLocationsFoo.class);
-		assertNotNull(profiles);
-		assertArrayEquals(new String[] { "foo" }, profiles);
+		assertResolvedProfiles(InheritedLocationsFoo.class, "foo");
 	}
 
 	@Test
 	public void resolveActiveProfilesWithInheritedAnnotationAndClasses() {
-		String[] profiles = resolveActiveProfiles(InheritedClassesFoo.class);
-		assertNotNull(profiles);
-		assertArrayEquals(new String[] { "foo" }, profiles);
+		assertResolvedProfiles(InheritedClassesFoo.class, "foo");
 	}
 
 	@Test
 	public void resolveActiveProfilesWithLocalAndInheritedAnnotations() {
-		String[] profiles = resolveActiveProfiles(LocationsBar.class);
-		assertNotNull(profiles);
-		assertEquals(2, profiles.length);
-
-		List<String> list = Arrays.asList(profiles);
-		assertTrue(list.contains("foo"));
-		assertTrue(list.contains("bar"));
+		assertResolvedProfiles(LocationsBar.class, "foo", "bar");
 	}
 
 	@Test
 	public void resolveActiveProfilesWithOverriddenAnnotation() {
-		String[] profiles = resolveActiveProfiles(Animals.class);
-		assertNotNull(profiles);
-		assertEquals(2, profiles.length);
-
-		List<String> list = Arrays.asList(profiles);
-		assertTrue(list.contains("dog"));
-		assertTrue(list.contains("cat"));
+		assertResolvedProfiles(Animals.class, "dog", "cat");
 	}
 
 	/**
@@ -116,9 +98,7 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	 */
 	@Test
 	public void resolveActiveProfilesWithMetaAnnotation() {
-		String[] profiles = resolveActiveProfiles(MetaLocationsFoo.class);
-		assertNotNull(profiles);
-		assertArrayEquals(new String[] { "foo" }, profiles);
+		assertResolvedProfiles(MetaLocationsFoo.class, "foo");
 	}
 
 	/**
@@ -126,9 +106,7 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	 */
 	@Test
 	public void resolveActiveProfilesWithMetaAnnotationAndOverrides() {
-		String[] profiles = resolveActiveProfiles(MetaLocationsFooWithOverrides.class);
-		assertNotNull(profiles);
-		assertArrayEquals(new String[] { "foo" }, profiles);
+		assertResolvedProfiles(MetaLocationsFooWithOverrides.class, "foo");
 	}
 
 	/**
@@ -136,9 +114,7 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	 */
 	@Test
 	public void resolveActiveProfilesWithMetaAnnotationAndOverriddenAttributes() {
-		String[] profiles = resolveActiveProfiles(MetaLocationsFooWithOverriddenAttributes.class);
-		assertNotNull(profiles);
-		assertArrayEquals(new String[] { "foo1", "foo2" }, profiles);
+		assertResolvedProfiles(MetaLocationsFooWithOverriddenAttributes.class, "foo1", "foo2");
 	}
 
 	/**
@@ -146,13 +122,7 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	 */
 	@Test
 	public void resolveActiveProfilesWithLocalAndInheritedMetaAnnotations() {
-		String[] profiles = resolveActiveProfiles(MetaLocationsBar.class);
-		assertNotNull(profiles);
-		assertEquals(2, profiles.length);
-
-		List<String> list = Arrays.asList(profiles);
-		assertTrue(list.contains("foo"));
-		assertTrue(list.contains("bar"));
+		assertResolvedProfiles(MetaLocationsBar.class, "foo", "bar");
 	}
 
 	/**
@@ -160,13 +130,7 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	 */
 	@Test
 	public void resolveActiveProfilesWithOverriddenMetaAnnotation() {
-		String[] profiles = resolveActiveProfiles(MetaAnimals.class);
-		assertNotNull(profiles);
-		assertEquals(2, profiles.length);
-
-		List<String> list = Arrays.asList(profiles);
-		assertTrue(list.contains("dog"));
-		assertTrue(list.contains("cat"));
+		assertResolvedProfiles(MetaAnimals.class, "dog", "cat");
 	}
 
 	/**
@@ -174,10 +138,7 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	 */
 	@Test
 	public void resolveActiveProfilesWithResolver() {
-		String[] profiles = resolveActiveProfiles(FooActiveProfilesResolverTestCase.class);
-		assertNotNull(profiles);
-		assertEquals(1, profiles.length);
-		assertArrayEquals(new String[] { "foo" }, profiles);
+		assertResolvedProfiles(FooActiveProfilesResolverTestCase.class, "foo");
 	}
 
 	/**
@@ -185,10 +146,7 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	 */
 	@Test
 	public void resolveActiveProfilesWithInheritedResolver() {
-		String[] profiles = resolveActiveProfiles(InheritedFooActiveProfilesResolverTestCase.class);
-		assertNotNull(profiles);
-		assertEquals(1, profiles.length);
-		assertArrayEquals(new String[] { "foo" }, profiles);
+		assertResolvedProfiles(InheritedFooActiveProfilesResolverTestCase.class, "foo");
 	}
 
 	/**
@@ -196,12 +154,7 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	 */
 	@Test
 	public void resolveActiveProfilesWithMergedInheritedResolver() {
-		String[] profiles = resolveActiveProfiles(MergedInheritedFooActiveProfilesResolverTestCase.class);
-		assertNotNull(profiles);
-		assertEquals(2, profiles.length);
-		List<String> list = Arrays.asList(profiles);
-		assertTrue(list.contains("foo"));
-		assertTrue(list.contains("bar"));
+		assertResolvedProfiles(MergedInheritedFooActiveProfilesResolverTestCase.class, "foo", "bar");
 	}
 
 	/**
@@ -209,10 +162,7 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	 */
 	@Test
 	public void resolveActiveProfilesWithOverridenInheritedResolver() {
-		String[] profiles = resolveActiveProfiles(OverridenInheritedFooActiveProfilesResolverTestCase.class);
-		assertNotNull(profiles);
-		assertEquals(1, profiles.length);
-		assertArrayEquals(new String[] { "bar" }, profiles);
+		assertResolvedProfiles(OverridenInheritedFooActiveProfilesResolverTestCase.class, "bar");
 	}
 
 	/**
@@ -279,6 +229,7 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	@ActiveProfiles
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
+	// TODO Write test with @MetaProfilesWithOverrides.
 	private static @interface MetaProfilesWithOverrides {
 
 		String[] profiles() default { "dog", "cat" };
