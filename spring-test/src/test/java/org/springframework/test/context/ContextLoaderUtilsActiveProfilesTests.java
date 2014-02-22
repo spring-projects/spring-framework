@@ -238,19 +238,6 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	private static @interface MetaAnimalsConfig {
 	}
 
-	@ActiveProfiles
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.TYPE)
-	// TODO Write test with @MetaProfilesWithOverrides.
-	private static @interface MetaProfilesWithOverrides {
-
-		String[] profiles() default { "dog", "cat" };
-
-		Class<? extends ActiveProfilesResolver> resolver() default ActiveProfilesResolver.class;
-
-		boolean inheritProfiles() default false;
-	}
-
 	@ActiveProfiles(resolver = TestClassVerifyingActiveProfilesResolver.class)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
