@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,11 +47,11 @@ abstract class AbstractContextLoaderUtilsTests {
 	void assertAttributes(ContextConfigurationAttributes attributes, Class<?> expectedDeclaringClass,
 			String[] expectedLocations, Class<?>[] expectedClasses,
 			Class<? extends ContextLoader> expectedContextLoaderClass, boolean expectedInheritLocations) {
-		assertEquals(expectedDeclaringClass, attributes.getDeclaringClass());
-		assertArrayEquals(expectedLocations, attributes.getLocations());
-		assertArrayEquals(expectedClasses, attributes.getClasses());
-		assertEquals(expectedInheritLocations, attributes.isInheritLocations());
-		assertEquals(expectedContextLoaderClass, attributes.getContextLoaderClass());
+		assertEquals("declaring class", expectedDeclaringClass, attributes.getDeclaringClass());
+		assertArrayEquals("locations", expectedLocations, attributes.getLocations());
+		assertArrayEquals("classes", expectedClasses, attributes.getClasses());
+		assertEquals("inherit locations", expectedInheritLocations, attributes.isInheritLocations());
+		assertEquals("context loader", expectedContextLoaderClass, attributes.getContextLoaderClass());
 	}
 
 	void assertMergedConfig(MergedContextConfiguration mergedConfig, Class<?> expectedTestClass,

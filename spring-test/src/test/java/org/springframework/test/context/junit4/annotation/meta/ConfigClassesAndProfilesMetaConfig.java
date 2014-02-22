@@ -16,31 +16,30 @@
 
 package org.springframework.test.context.junit4.annotation.meta;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import static org.junit.Assert.*;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 
 /**
- * Integration tests for meta-meta-annotation support, relying on default attribute
- * values defined in {@link ConfigClassesAndProfilesWithCustomDefaultsMetaConfig} and
- * overrides in {@link MetaMetaConfig}.
+ * Custom configuration annotation with meta-annotation attribute overrides for
+ * {@link ContextConfiguration#classes} and {@link ActiveProfiles#profiles} and
+ * <strong>no</strong> default configuration local to the composed annotation.
  *
  * @author Sam Brannen
  * @since 4.0.3
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@MetaMetaConfig
-public class MetaMetaConfigDefaultsTests {
+@ContextConfiguration
+@ActiveProfiles
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface ConfigClassesAndProfilesMetaConfig {
 
-	@Autowired
-	private String foo;
+	Class<?>[] classes() default {};
 
+	String[] profiles() default {};
 
-	@Test
-	public void foo() {
-		assertEquals("Production Foo", foo);
-	}
 }

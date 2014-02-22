@@ -261,9 +261,9 @@ abstract class ContextLoaderUtils {
 	 * never {@code null}
 	 * @throws IllegalArgumentException if the supplied class is {@code null}; if
 	 * neither {@code @ContextConfiguration} nor {@code @ContextHierarchy} is
-	 * <em>present</em> on the supplied class; or if a given class in the class hierarchy
-	 * declares both {@code @ContextConfiguration} and {@code @ContextHierarchy} as
-	 * top-level annotations.
+	 * <em>present</em> on the supplied class; or if a test class or composed annotation
+	 * in the class hierarchy declares both {@code @ContextConfiguration} and
+	 * {@code @ContextHierarchy} as top-level annotations.
 	 * @throws IllegalStateException if no class in the class hierarchy declares
 	 * {@code @ContextHierarchy}.
 	 *
@@ -296,7 +296,7 @@ abstract class ContextLoaderUtils {
 			if (contextConfigDeclaredLocally && contextHierarchyDeclaredLocally) {
 				String msg = String.format("Class [%s] has been configured with both @ContextConfiguration "
 						+ "and @ContextHierarchy. Only one of these annotations may be declared on a test class "
-						+ "or custom stereotype annotation.", declaringClass.getName());
+						+ "or composed annotation.", declaringClass.getName());
 				logger.error(msg);
 				throw new IllegalStateException(msg);
 			}
@@ -305,12 +305,12 @@ abstract class ContextLoaderUtils {
 
 			if (contextConfigDeclaredLocally) {
 				convertAnnotationAttributesToConfigAttributesAndAddToList(descriptor.getAnnotationAttributes(),
-					declaringClass, configAttributesList);
+					rootDeclaringClass, configAttributesList);
 			}
 			else if (contextHierarchyDeclaredLocally) {
 				ContextHierarchy contextHierarchy = getAnnotation(declaringClass, contextHierarchyType);
 				for (ContextConfiguration contextConfiguration : contextHierarchy.value()) {
-					convertContextConfigToConfigAttributesAndAddToList(contextConfiguration, declaringClass,
+					convertContextConfigToConfigAttributesAndAddToList(contextConfiguration, rootDeclaringClass,
 						configAttributesList);
 				}
 			}
@@ -428,7 +428,7 @@ abstract class ContextLoaderUtils {
 
 		while (descriptor != null) {
 			convertAnnotationAttributesToConfigAttributesAndAddToList(descriptor.getAnnotationAttributes(),
-				descriptor.getDeclaringClass(), attributesList);
+				descriptor.getRootDeclaringClass(), attributesList);
 			descriptor = findAnnotationDescriptor(descriptor.getRootDeclaringClass().getSuperclass(), annotationType);
 		}
 
