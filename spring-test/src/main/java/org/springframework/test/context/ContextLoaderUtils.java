@@ -507,6 +507,7 @@ abstract class ContextLoaderUtils {
 		final Set<String> activeProfiles = new HashSet<String>();
 
 		while (descriptor != null) {
+			Class<?> rootDeclaringClass = descriptor.getRootDeclaringClass();
 			Class<?> declaringClass = descriptor.getDeclaringClass();
 
 			AnnotationAttributes annAttrs = descriptor.getAnnotationAttributes();
@@ -530,12 +531,12 @@ abstract class ContextLoaderUtils {
 				}
 				catch (Exception e) {
 					String msg = String.format("Could not instantiate ActiveProfilesResolver of "
-							+ "type [%s] for test class [%s].", resolverClass.getName(), declaringClass.getName());
+							+ "type [%s] for test class [%s].", resolverClass.getName(), rootDeclaringClass.getName());
 					logger.error(msg);
 					throw new IllegalStateException(msg, e);
 				}
 
-				profiles = resolver.resolve(declaringClass);
+				profiles = resolver.resolve(rootDeclaringClass);
 				if (profiles == null) {
 					String msg = String.format(
 						"ActiveProfilesResolver [%s] returned a null array of bean definition profiles.",
@@ -555,7 +556,7 @@ abstract class ContextLoaderUtils {
 			}
 
 			descriptor = annAttrs.getBoolean("inheritProfiles") ? findAnnotationDescriptor(
-				descriptor.getRootDeclaringClass().getSuperclass(), annotationType) : null;
+				rootDeclaringClass.getSuperclass(), annotationType) : null;
 		}
 
 		return StringUtils.toStringArray(activeProfiles);

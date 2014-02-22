@@ -205,6 +205,18 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 		resolveActiveProfiles(NullActiveProfilesResolverTestCase.class);
 	}
 
+	/**
+	 * This test verifies that the actual test class, not the composed annotation,
+	 * is passed to the resolver.
+	 *
+	 * @since 4.0.3
+	 */
+	@Test
+	public void resolveActiveProfilesWithMetaAnnotationAndTestClassVerifyingResolver() {
+		Class<TestClassVerifyingActiveProfilesResolverTestCase> testClass = TestClassVerifyingActiveProfilesResolverTestCase.class;
+		assertResolvedProfiles(testClass, testClass.getSimpleName());
+	}
+
 
 	// -------------------------------------------------------------------------
 
@@ -237,6 +249,12 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 		Class<? extends ActiveProfilesResolver> resolver() default ActiveProfilesResolver.class;
 
 		boolean inheritProfiles() default false;
+	}
+
+	@ActiveProfiles(resolver = TestClassVerifyingActiveProfilesResolver.class)
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	private static @interface MetaResolverConfig {
 	}
 
 	@MetaAnimalsConfig
@@ -282,6 +300,10 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	private static class ConflictingResolverAndValueTestCase {
 	}
 
+	@MetaResolverConfig
+	private static class TestClassVerifyingActiveProfilesResolverTestCase {
+	}
+
 	@ActiveProfiles(profiles = "conflict", value = "conflict")
 	private static class ConflictingProfilesAndValueTestCase {
 	}
@@ -319,6 +341,15 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 		@Override
 		public String[] resolve(Class<?> testClass) {
 			return null;
+		}
+	}
+
+	private static class TestClassVerifyingActiveProfilesResolver implements ActiveProfilesResolver {
+
+		@Override
+		public String[] resolve(Class<?> testClass) {
+			return testClass.isAnnotation() ? new String[] { "@" + testClass.getSimpleName() }
+					: new String[] { testClass.getSimpleName() };
 		}
 	}
 
