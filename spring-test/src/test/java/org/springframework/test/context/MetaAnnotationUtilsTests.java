@@ -47,28 +47,48 @@ public class MetaAnnotationUtilsTests {
 
 	private void assertAtComponentOnComposedAnnotation(Class<?> startClass, Class<?> rootDeclaringClass, String name,
 			Class<? extends Annotation> composedAnnotationType) {
+		assertAtComponentOnComposedAnnotation(rootDeclaringClass, rootDeclaringClass, composedAnnotationType, name,
+			composedAnnotationType);
+	}
+
+	private void assertAtComponentOnComposedAnnotation(Class<?> startClass, Class<?> rootDeclaringClass,
+			Class<?> declaringClass, String name, Class<? extends Annotation> composedAnnotationType) {
 		AnnotationDescriptor<Component> descriptor = findAnnotationDescriptor(startClass, Component.class);
-		assertNotNull(descriptor);
-		assertEquals(rootDeclaringClass, descriptor.getRootDeclaringClass());
-		assertEquals(composedAnnotationType, descriptor.getDeclaringClass());
-		assertEquals(Component.class, descriptor.getAnnotationType());
-		assertEquals(name, descriptor.getAnnotation().value());
-		assertNotNull(descriptor.getComposedAnnotation());
-		assertEquals(composedAnnotationType, descriptor.getComposedAnnotationType());
+		assertNotNull("AnnotationDescriptor should not be null", descriptor);
+		assertEquals("rootDeclaringClass", rootDeclaringClass, descriptor.getRootDeclaringClass());
+		assertEquals("declaringClass", declaringClass, descriptor.getDeclaringClass());
+		assertEquals("annotationType", Component.class, descriptor.getAnnotationType());
+		assertEquals("component name", name, descriptor.getAnnotation().value());
+		assertNotNull("composedAnnotation should not be null", descriptor.getComposedAnnotation());
+		assertEquals("composedAnnotationType", composedAnnotationType, descriptor.getComposedAnnotationType());
+	}
+
+	private void assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(Class<?> startClass, String name,
+			Class<? extends Annotation> composedAnnotationType) {
+		assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(startClass, startClass, name,
+			composedAnnotationType);
+	}
+
+	private void assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(Class<?> startClass,
+			Class<?> rootDeclaringClass, String name, Class<? extends Annotation> composedAnnotationType) {
+		assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(startClass, rootDeclaringClass,
+			composedAnnotationType, name, composedAnnotationType);
 	}
 
 	@SuppressWarnings("unchecked")
 	private void assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(Class<?> startClass,
-			Class<?> declaringClass, String name, Class<? extends Annotation> composedAnnotationType) {
+			Class<?> rootDeclaringClass, Class<?> declaringClass, String name,
+			Class<? extends Annotation> composedAnnotationType) {
 		Class<Component> annotationType = Component.class;
 		UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(startClass, Service.class,
 			annotationType, Order.class, Transactional.class);
-		assertNotNull(descriptor);
-		assertEquals(declaringClass, descriptor.getRootDeclaringClass());
-		assertEquals(annotationType, descriptor.getAnnotationType());
-		assertEquals(name, ((Component) descriptor.getAnnotation()).value());
-		assertNotNull(descriptor.getComposedAnnotation());
-		assertEquals(composedAnnotationType, descriptor.getComposedAnnotationType());
+		assertNotNull("UntypedAnnotationDescriptor should not be null", descriptor);
+		assertEquals("rootDeclaringClass", rootDeclaringClass, descriptor.getRootDeclaringClass());
+		assertEquals("declaringClass", declaringClass, descriptor.getDeclaringClass());
+		assertEquals("annotationType", annotationType, descriptor.getAnnotationType());
+		assertEquals("component name", name, ((Component) descriptor.getAnnotation()).value());
+		assertNotNull("composedAnnotation should not be null", descriptor.getComposedAnnotation());
+		assertEquals("composedAnnotationType", composedAnnotationType, descriptor.getComposedAnnotationType());
 	}
 
 	@Test
@@ -150,6 +170,45 @@ public class MetaAnnotationUtilsTests {
 			ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, "meta2", Meta2.class);
 	}
 
+	/**
+	 * @since 4.0.3
+	 */
+	@Test
+	public void findAnnotationDescriptorOnMetaMetaAnnotatedClass() {
+		Class<MetaMetaAnnotatedClass> startClass = MetaMetaAnnotatedClass.class;
+		assertAtComponentOnComposedAnnotation(startClass, startClass, Meta2.class, "meta2", MetaMeta.class);
+	}
+
+	/**
+	 * @since 4.0.3
+	 */
+	@Test
+	public void findAnnotationDescriptorOnMetaMetaMetaAnnotatedClass() {
+		Class<MetaMetaMetaAnnotatedClass> startClass = MetaMetaMetaAnnotatedClass.class;
+		assertAtComponentOnComposedAnnotation(startClass, startClass, Meta2.class, "meta2", MetaMetaMeta.class);
+	}
+
+	/**
+	 * @since 4.0.3
+	 */
+	@Test
+	public void findAnnotationDescriptorOnAnnotatedClassWithMissingTargetMetaAnnotation() {
+		// InheritedAnnotationClass is NOT annotated or meta-annotated with @Component
+		AnnotationDescriptor<Component> descriptor = findAnnotationDescriptor(InheritedAnnotationClass.class,
+			Component.class);
+		assertNull("Should not find @Component on InheritedAnnotationClass", descriptor);
+	}
+
+	/**
+	 * @since 4.0.3
+	 */
+	@Test
+	public void findAnnotationDescriptorOnMetaCycleAnnotatedClassWithMissingTargetMetaAnnotation() {
+		AnnotationDescriptor<Component> descriptor = findAnnotationDescriptor(MetaCycleAnnotatedClass.class,
+			Component.class);
+		assertNull("Should not find @Component on MetaCycleAnnotatedClass", descriptor);
+	}
+
 	// -------------------------------------------------------------------------
 
 	@Test
@@ -217,7 +276,7 @@ public class MetaAnnotationUtilsTests {
 	@Test
 	public void findAnnotationDescriptorForTypesWithMetaComponentAnnotation() throws Exception {
 		Class<HasMetaComponentAnnotation> startClass = HasMetaComponentAnnotation.class;
-		assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(startClass, startClass, "meta1", Meta1.class);
+		assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(startClass, "meta1", Meta1.class);
 	}
 
 	@Test
@@ -261,7 +320,7 @@ public class MetaAnnotationUtilsTests {
 	@Test
 	public void findAnnotationDescriptorForTypesForInterfaceWithMetaAnnotation() {
 		Class<InterfaceWithMetaAnnotation> startClass = InterfaceWithMetaAnnotation.class;
-		assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(startClass, startClass, "meta1", Meta1.class);
+		assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(startClass, "meta1", Meta1.class);
 	}
 
 	@Test
@@ -274,7 +333,7 @@ public class MetaAnnotationUtilsTests {
 	@Test
 	public void findAnnotationDescriptorForTypesForClassWithLocalMetaAnnotationAndMetaAnnotatedInterface() {
 		Class<ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface> startClass = ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class;
-		assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(startClass, startClass, "meta2", Meta2.class);
+		assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(startClass, "meta2", Meta2.class);
 	}
 
 	@Test
@@ -282,6 +341,50 @@ public class MetaAnnotationUtilsTests {
 		assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(
 			SubClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class,
 			ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, "meta2", Meta2.class);
+	}
+
+	/**
+	 * @since 4.0.3
+	 */
+	@Test
+	public void findAnnotationDescriptorForTypesOnMetaMetaAnnotatedClass() {
+		Class<MetaMetaAnnotatedClass> startClass = MetaMetaAnnotatedClass.class;
+		assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(startClass, startClass, Meta2.class, "meta2",
+			MetaMeta.class);
+	}
+
+	/**
+	 * @since 4.0.3
+	 */
+	@Test
+	public void findAnnotationDescriptorForTypesOnMetaMetaMetaAnnotatedClass() {
+		Class<MetaMetaMetaAnnotatedClass> startClass = MetaMetaMetaAnnotatedClass.class;
+		assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(startClass, startClass, Meta2.class, "meta2",
+			MetaMetaMeta.class);
+	}
+
+	/**
+	 * @since 4.0.3
+	 */
+	@Test
+	@SuppressWarnings("unchecked")
+	public void findAnnotationDescriptorForTypesOnAnnotatedClassWithMissingTargetMetaAnnotation() {
+		// InheritedAnnotationClass is NOT annotated or meta-annotated with @Component,
+		// @Service, or @Order, but it is annotated with @Transactional.
+		UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(InheritedAnnotationClass.class,
+			Service.class, Component.class, Order.class);
+		assertNull("Should not find @Component on InheritedAnnotationClass", descriptor);
+	}
+
+	/**
+	 * @since 4.0.3
+	 */
+	@Test
+	@SuppressWarnings("unchecked")
+	public void findAnnotationDescriptorForTypesOnMetaCycleAnnotatedClassWithMissingTargetMetaAnnotation() {
+		UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(MetaCycleAnnotatedClass.class,
+			Service.class, Component.class, Order.class);
+		assertNull("Should not find @Component on MetaCycleAnnotatedClass", descriptor);
 	}
 
 
@@ -297,6 +400,31 @@ public class MetaAnnotationUtilsTests {
 	@Transactional
 	@Retention(RetentionPolicy.RUNTIME)
 	static @interface Meta2 {
+	}
+
+	@Meta2
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface MetaMeta {
+	}
+
+	@MetaMeta
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface MetaMetaMeta {
+	}
+
+	@MetaCycle3
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface MetaCycle1 {
+	}
+
+	@MetaCycle1
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface MetaCycle2 {
+	}
+
+	@MetaCycle2
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface MetaCycle3 {
 	}
 
 	@ContextConfiguration
@@ -338,6 +466,18 @@ public class MetaAnnotationUtilsTests {
 
 	static class SubClassWithLocalMetaAnnotationAndMetaAnnotatedInterface extends
 			ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface {
+	}
+
+	@MetaMeta
+	static class MetaMetaAnnotatedClass {
+	}
+
+	@MetaMetaMeta
+	static class MetaMetaMetaAnnotatedClass {
+	}
+
+	@MetaCycle3
+	static class MetaCycleAnnotatedClass {
 	}
 
 	@MetaConfig

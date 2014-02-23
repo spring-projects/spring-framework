@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,30 +16,25 @@
 
 package org.springframework.test.context.junit4.annotation.meta;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import static org.junit.Assert.*;
+import org.springframework.test.context.ActiveProfiles;
 
 /**
- * Integration tests for meta-annotation attribute override support, relying on
- * default attribute values defined in {@link MetaConfig @MetaConfig}.
+ * Custom configuration annotation that is itself meta-annotated with
+ * {@link MetaConfig @MetaConfig} and {@link ActiveProfiles @ActiveProfiles}.
  *
  * @author Sam Brannen
- * @since 4.0
+ * @since 4.0.3
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
 @MetaConfig
-public class MetaConfigDefaultsTests {
+// Override default "dev" profile from @MetaConfig:
+@ActiveProfiles("prod")
+public @interface MetaMetaConfig {
 
-	@Autowired
-	private String foo;
-
-
-	@Test
-	public void foo() {
-		assertEquals("Dev Foo", foo);
-	}
 }

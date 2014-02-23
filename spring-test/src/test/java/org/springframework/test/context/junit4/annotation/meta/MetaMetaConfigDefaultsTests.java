@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,15 +24,16 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import static org.junit.Assert.*;
 
 /**
- * Integration tests for meta-annotation attribute override support, relying on
- * default attribute values defined in {@link MetaConfig @MetaConfig}.
+ * Integration tests for meta-meta-annotation support, relying on
+ * default attribute values defined in {@link MetaConfig @MetaConfig} and
+ * overrides in {@link MetaMetaConfig @MetaMetaConfig}.
  *
  * @author Sam Brannen
- * @since 4.0
+ * @since 4.0.3
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@MetaConfig
-public class MetaConfigDefaultsTests {
+@MetaMetaConfig
+public class MetaMetaConfigDefaultsTests {
 
 	@Autowired
 	private String foo;
@@ -40,6 +41,6 @@ public class MetaConfigDefaultsTests {
 
 	@Test
 	public void foo() {
-		assertEquals("Dev Foo", foo);
+		assertEquals("Production Foo", foo);
 	}
 }
