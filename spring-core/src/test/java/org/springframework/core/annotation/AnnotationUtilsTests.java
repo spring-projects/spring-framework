@@ -100,14 +100,40 @@ public class AnnotationUtilsTests {
 	// }
 
 	@Test
-	public void findAnnotationPrefersInterfacesOverLocalMetaAnnotations() {
+	public void findAnnotationFavorsInterfacesOverLocalMetaAnnotations() {
 		Component component = AnnotationUtils.findAnnotation(
-				ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, Component.class);
+			ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, Component.class);
+		assertNotNull(component);
 
 		// By inspecting ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface, one
 		// might expect that "meta2" should be found; however, with the current
 		// implementation "meta1" will be found.
+		assertEquals("meta1", component.value());
+	}
+
+	@Test
+	public void findAnnotationFavorsInheritedAnnotationsOverMoreLocallyDeclaredComposedAnnotations() {
+		Transactional transactional = AnnotationUtils.findAnnotation(SubSubClassWithInheritedAnnotation.class,
+			Transactional.class);
+		assertNotNull(transactional);
+
+		// By inspecting SubSubClassWithInheritedAnnotation, one might expect that the
+		// readOnly flag should be true, since the immediate superclass is annotated with
+		// @Composed2; however, with the current implementation the readOnly flag will be
+		// false since @Transactional is declared as @Inherited.
+		assertFalse("readOnly flag for SubSubClassWithInheritedAnnotation", transactional.readOnly());
+	}
+
+	@Test
+	public void findAnnotationFavorsInheritedComposedAnnotationsOverMoreLocallyDeclaredComposedAnnotations() {
+		Component component = AnnotationUtils.findAnnotation(SubSubClassWithInheritedMetaAnnotation.class,
+			Component.class);
 		assertNotNull(component);
+
+		// By inspecting SubSubClassWithInheritedMetaAnnotation, one might expect that
+		// "meta2" should be found, since the immediate superclass is annotated with
+		// @Meta2; however, with the current implementation "meta1" will be found since
+		// @Meta1 is declared as @Inherited.
 		assertEquals("meta1", component.value());
 	}
 
@@ -350,14 +376,15 @@ public class AnnotationUtilsTests {
 	}
 
 
-	@Component(value="meta1")
+	@Component(value = "meta1")
 	@Order
 	@Retention(RetentionPolicy.RUNTIME)
+	@Inherited
 	@interface Meta1 {
 	}
 
-	@Component(value="meta2")
-	@Transactional
+	@Component(value = "meta2")
+	@Transactional(readOnly = true)
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface Meta2 {
 	}
@@ -393,6 +420,28 @@ public class AnnotationUtilsTests {
 
 	@Meta2
 	static class ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface implements InterfaceWithMetaAnnotation {
+	}
+
+	@Meta1
+	static class ClassWithInheritedMetaAnnotation {
+	}
+
+	@Meta2
+	static class SubClassWithInheritedMetaAnnotation extends ClassWithInheritedMetaAnnotation {
+	}
+
+	static class SubSubClassWithInheritedMetaAnnotation extends SubClassWithInheritedMetaAnnotation {
+	}
+
+	@Transactional
+	static class ClassWithInheritedAnnotation {
+	}
+
+	@Meta2
+	static class SubClassWithInheritedAnnotation extends ClassWithInheritedAnnotation {
+	}
+
+	static class SubSubClassWithInheritedAnnotation extends SubClassWithInheritedAnnotation {
 	}
 
 	@MetaMeta
@@ -453,6 +502,8 @@ public class AnnotationUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Inherited
 	@interface Transactional {
+
+		boolean readOnly() default false;
 	}
 
 	public static abstract class Foo<T> {
