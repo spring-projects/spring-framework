@@ -13,19 +13,20 @@ configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
 
-	ext.aspectjVersion    = "1.7.4"
-	ext.groovyVersion     = "1.8.9"
-	ext.hibernate3Version = "3.6.10.Final"
-	ext.hibernate4Version = "4.2.8.Final"
-	ext.hibValVersion     = "4.3.1.Final"
-	ext.hsqldbVersion     = "2.3.1"
-	ext.jackson1Version   = "1.9.13"
-	ext.jackson2Version   = "2.3.1"
-	ext.jettyVersion      = "9.1.2.v20140210"
-	ext.jodaVersion       = "2.3"
-	ext.junitVersion      = "4.11"
-	ext.slf4jVersion      = "1.7.5"
-	ext.xstreamVersion    = "1.4.6"
+	ext.aspectjVersion       = "1.7.4"
+	ext.groovyVersion        = "1.8.9"
+	ext.hibernate3Version    = "3.6.10.Final"
+	ext.hibernate4Version    = "4.2.8.Final"
+	ext.hibValVersion        = "4.3.1.Final"
+	ext.hsqldbVersion        = "2.3.1"
+	ext.jackson1Version      = "1.9.13"
+	ext.jackson2Version      = "2.3.1"
+	ext.jasperReportsVersion = "5.5.1"
+	ext.jettyVersion         = "9.1.2.v20140210"
+	ext.jodaVersion          = "2.3"
+	ext.junitVersion         = "4.11"
+	ext.slf4jVersion         = "1.7.5"
+	ext.xstreamVersion       = "1.4.6"
 
 	ext.gradleScriptDir   = "${rootProject.projectDir}/gradle"
 
@@ -522,7 +523,7 @@ project("spring-context-support") {
 		optional("org.apache.velocity:velocity:1.7")
 		optional("org.freemarker:freemarker:2.3.20")
 		optional("com.lowagie:itext:2.1.7")
-		optional("net.sf.jasperreports:jasperreports:5.5.1")
+		optional("net.sf.jasperreports:jasperreports:$jasperReportsVersion")
 		testCompile("org.apache.poi:poi:3.9")
 		testCompile("commons-beanutils:commons-beanutils:1.8.0") // for Velocity/JasperReports
 		testCompile("commons-digester:commons-digester:1.8.1") // for Velocity/JasperReports
@@ -676,7 +677,7 @@ project("spring-webmvc") {
 		optional("velocity-tools:velocity-tools-view:1.4")
 		optional("org.freemarker:freemarker:2.3.20")
 		optional("com.lowagie:itext:2.1.7")
-		optional("net.sf.jasperreports:jasperreports:5.5.0") {
+		optional("net.sf.jasperreports:jasperreports:$jasperReportsVersion") {
 			exclude group: "xml-apis", module: "xml-apis"
 		}
 		optional("org.codehaus.jackson:jackson-mapper-asl:${jackson1Version}")
