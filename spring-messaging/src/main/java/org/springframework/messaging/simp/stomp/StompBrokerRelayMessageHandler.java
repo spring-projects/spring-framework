@@ -469,6 +469,9 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 		@Override
 		public void afterConnected(TcpConnection<byte[]> connection) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Established TCP connection to broker in session=" + this.sessionId);
+			}
 			this.tcpConnection = connection;
 			connection.send(MessageBuilder.withPayload(EMPTY_PAYLOAD).setHeaders(this.connectHeaders).build());
 		}

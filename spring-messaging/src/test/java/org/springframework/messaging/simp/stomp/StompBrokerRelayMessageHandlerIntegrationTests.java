@@ -25,6 +25,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.activemq.broker.BrokerService;
+import org.apache.activemq.store.memory.MemoryPersistenceAdapter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
@@ -89,7 +90,9 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		this.activeMQBroker = new BrokerService();
 		this.activeMQBroker.addConnector("stomp://localhost:" + this.port);
 		this.activeMQBroker.setStartAsync(false);
-		this.activeMQBroker.setDeleteAllMessagesOnStartup(true);
+		this.activeMQBroker.setPersistent(false);
+		this.activeMQBroker.getSystemUsage().getMemoryUsage().setLimit(1024 * 1024 * 5);
+		this.activeMQBroker.getSystemUsage().getTempUsage().setLimit(1024 * 1024 * 5);
 		this.activeMQBroker.start();
 	}
 
