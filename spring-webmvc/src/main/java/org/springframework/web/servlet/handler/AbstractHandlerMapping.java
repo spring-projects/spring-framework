@@ -51,6 +51,7 @@ import org.springframework.web.util.UrlPathHelper;
  * @see #setDefaultHandler
  * @see #setAlwaysUseFullPath
  * @see #setUrlDecode
+ * @see #setUriEncoding(String)
  * @see org.springframework.util.AntPathMatcher
  * @see #setInterceptors
  * @see org.springframework.web.servlet.HandlerInterceptor
@@ -124,6 +125,17 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 */
 	public void setUrlDecode(boolean urlDecode) {
 		this.urlPathHelper.setUrlDecode(urlDecode);
+	}
+
+	/**
+	 * Set the character encoding to use for URL decoding.
+	 * <p>This value <em>must</em> match the encoding used by the servlet
+	 * container so that both servlet decoded and encoded information match
+	 * @param uriEncoding the character encoding to use for URL decoding
+	 * @see UrlPathHelper#setUriEncoding(String)
+	 * */
+	public void setUriEncoding(String uriEncoding) {
+		this.urlPathHelper.setUriEncoding(uriEncoding);
 	}
 
 	/**

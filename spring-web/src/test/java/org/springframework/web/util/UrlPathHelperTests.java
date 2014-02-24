@@ -69,6 +69,46 @@ public class UrlPathHelperTests {
 	}
 
 	@Test
+	public void getPathWithinApplicationDefaultEncoding() throws UnsupportedEncodingException {
+		helper.setAlwaysUseFullPath(true);
+
+		// We should have UTF-8 decoding ideally by default here...
+		testGetPathWithinApplicationEncoding("ISO-8859-1");
+	}
+
+	@SuppressWarnings("deprecation")
+	@Test
+	public void getPathWithinApplicationIgnoreOtherEncodingIfUriEncodingSet()
+			throws UnsupportedEncodingException {
+		helper.setAlwaysUseFullPath(true);
+		helper.setUriEncoding("UTF-8");
+
+		helper.setDefaultEncoding("ISO-8859-15");
+		request.setCharacterEncoding("ISO-8859-1");
+
+		// Other encoding should not override URL encoding
+		testGetPathWithinApplicationEncoding("UTF-8");
+	}
+
+	@Test
+	public void getPathWithinApplicationCustomEncoding() throws UnsupportedEncodingException {
+		helper.setAlwaysUseFullPath(true);
+		helper.setUriEncoding("UTF-8");
+
+		// We should use a custom encoding, if set
+		testGetPathWithinApplicationEncoding("UTF-8");
+	}
+
+	private void testGetPathWithinApplicationEncoding(String expectedEncoding) throws UnsupportedEncodingException {
+		String escapedUtf8Chars = "%2A%2A%2A%C3%A5";
+		request.setContextPath("/petclinic");
+		request.setRequestURI("/petclinic/pet/" + escapedUtf8Chars);
+
+		String expected = "/pet/" + UriUtils.decode(escapedUtf8Chars, expectedEncoding);
+		assertEquals("Incorrect path returned", expected, helper.getPathWithinApplication(request));
+	}
+
+	@Test
 	public void getPathWithinServlet() {
 		request.setContextPath("/petclinic");
 		request.setServletPath("/main");

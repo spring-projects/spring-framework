@@ -67,6 +67,7 @@ public class UrlPathHelper {
 
 	private String defaultEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
 
+	private String uriEncoding = null;
 
 	/**
 	 * Set if URL lookup should always use full path within current servlet
@@ -80,11 +81,16 @@ public class UrlPathHelper {
 
 	/**
 	 * Set if context path and request URI should be URL-decoded.
-	 * Both are returned <i>undecoded</i> by the Servlet API,
+	 * Both are returned <i>encoded</i> by the Servlet API,
 	 * in contrast to the servlet path.
-	 * <p>Uses either the request encoding or the default encoding according
-	 * to the Servlet spec (ISO-8859-1).
+	 * <p>Uses either the specified {@linkplain #setUriEncoding(String) uriEncoding}
+	 * if set, the request encoding or the
+	 * {@linkplain #setDefaultEncoding(String) default encoding}
+	 * according to the Servlet spec (ISO-8859-1).
 	 * <p>Default is "true", as of Spring 2.5.
+	 * <p>As of Spring 4.1, users are strongly encouraged to set the
+	 * uri decoding explicitly instead of relying on the request encoding.
+	 * @see #setUriEncoding(String)
 	 * @see #getServletPath
 	 * @see #getContextPath
 	 * @see #getRequestUri
@@ -118,23 +124,52 @@ public class UrlPathHelper {
 	 * encoding will override this setting. This also allows for generically
 	 * overriding the character encoding in a filter that invokes the
 	 * {@code ServletRequest.setCharacterEncoding} method.
+	 * <p>Deprecated as of Spring 4.1 as relying on the request encoding
+	 * can lead to unexpected results if the web container encoding does
+	 * not match the encoding set in the request.
 	 * @param defaultEncoding the character encoding to use
 	 * @see #determineEncoding
 	 * @see javax.servlet.ServletRequest#getCharacterEncoding()
 	 * @see javax.servlet.ServletRequest#setCharacterEncoding(String)
 	 * @see WebUtils#DEFAULT_CHARACTER_ENCODING
+	 * @deprecated as of Spring 4.0, in favor of {@link #setUriEncoding(String)}
 	 */
+	@Deprecated
 	public void setDefaultEncoding(String defaultEncoding) {
 		this.defaultEncoding = defaultEncoding;
 	}
 
 	/**
 	 * Return the default character encoding to use for URL decoding.
+	 * @deprecated as of Spring 4.0, in favor of {@link #getUriEncoding()}
 	 */
+	@Deprecated
 	protected String getDefaultEncoding() {
 		return this.defaultEncoding;
 	}
 
+	/**
+	 * Set the character encoding to use for URL decoding. Unspecified by
+	 * default, which fallbacks on the {@linkplain #setDefaultEncoding(String) default encoding}.
+	 * <p>This value <em>must</em> match the encoding used by the servlet
+	 * container so that both servlet decoded and encoded information match
+	 * <p>If set, this takes precedence over the default encoding and the
+	 * request encoding.
+	 * @param uriEncoding the character encoding to use for URL decoding
+	 */
+	public void setUriEncoding(String uriEncoding) {
+		this.uriEncoding = uriEncoding;
+	}
+
+	/**
+	 * Return the character encoding to use for URL decoding or {@code null}
+	 * if none is specified. If unspecified,
+	 * {@link #determineEncoding(javax.servlet.http.HttpServletRequest)} is
+	 * invoked to determine the encoding to use.
+	 */
+	protected String getUriEncoding() {
+		return uriEncoding;
+	}
 
 	/**
 	 * Return the mapping lookup path for the given request, within the current
@@ -413,7 +448,7 @@ public class UrlPathHelper {
 
 	@SuppressWarnings("deprecation")
 	private String decodeInternal(HttpServletRequest request, String source) {
-		String enc = determineEncoding(request);
+		String enc = getEncoding(request);
 		try {
 			return UriUtils.decode(source, enc);
 		}
@@ -427,6 +462,24 @@ public class UrlPathHelper {
 	}
 
 	/**
+	 * Return the encoding for the given request.
+	 * <p>If an {@code uriEncoding} is set on this instance, it is used.
+	 * Otherwise {@link #determineEncoding(javax.servlet.http.HttpServletRequest)}
+	 * is invoked to determine the encoding to use.
+	 * @param request current HTTP request
+	 * @return the encoding for the request (never {@code null})
+	 * @see #determineEncoding(javax.servlet.http.HttpServletRequest)
+	 */
+	private String getEncoding(HttpServletRequest request) {
+		String specifiedEncoding = getUriEncoding();
+		if (specifiedEncoding != null) {
+			return specifiedEncoding;
+		} else {
+			return determineEncoding(request);
+		}
+	}
+
+	/**
 	 * Determine the encoding for the given request.
 	 * Can be overridden in subclasses.
 	 * <p>The default implementation checks the request encoding,
@@ -436,6 +489,7 @@ public class UrlPathHelper {
 	 * @see javax.servlet.ServletRequest#getCharacterEncoding()
 	 * @see #setDefaultEncoding
 	 */
+	@SuppressWarnings("deprecation")
 	protected String determineEncoding(HttpServletRequest request) {
 		String enc = request.getCharacterEncoding();
 		if (enc == null) {
