@@ -30,7 +30,7 @@ import org.gradle.api.invocation.*
 
 /**
  * Gradle plugin that allows projects to merged together. Primarily developed to
- * allow Spring to support multiple multiple incompatible versions of third-party
+ * allow Spring to support multiple incompatible versions of third-party
  * dependencies (for example Hibernate v3 and v4).
  * <p>
  * The 'merge' extension should be used to define how projects are merged, for example:
