@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.util.MultiValueMap;
  *
  * @author Phillip Webb
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 4.0
  */
 public class AnnotatedElementUtils {
@@ -159,7 +160,7 @@ public class AnnotatedElementUtils {
 			for (Annotation annotation : element.getAnnotations()) {
 				if (annotation.annotationType().getName().equals(annotationType) || depth > 0) {
 					T result = processor.process(annotation, depth);
-					if (result != null)  {
+					if (result != null) {
 						return result;
 					}
 					result = doProcess(annotation.annotationType(), annotationType, processor, visited, depth + 1);
@@ -170,10 +171,12 @@ public class AnnotatedElementUtils {
 				}
 			}
 			for (Annotation annotation : element.getAnnotations()) {
-				T result = doProcess(annotation.annotationType(), annotationType, processor, visited, depth);
-				if (result != null) {
-					processor.postProcess(annotation, result);
-					return result;
+				if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
+					T result = doProcess(annotation.annotationType(), annotationType, processor, visited, depth);
+					if (result != null) {
+						processor.postProcess(annotation, result);
+						return result;
+					}
 				}
 			}
 		}

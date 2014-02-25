@@ -17,8 +17,11 @@
 package org.springframework.test.context;
 
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 import org.junit.Test;
 import org.springframework.core.annotation.Order;
@@ -393,42 +396,58 @@ public class MetaAnnotationUtilsTests {
 	@Component(value = "meta1")
 	@Order
 	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	@Documented
 	static @interface Meta1 {
 	}
 
 	@Component(value = "meta2")
 	@Transactional
 	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	@Documented
 	static @interface Meta2 {
 	}
 
 	@Meta2
 	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	@Documented
 	@interface MetaMeta {
 	}
 
 	@MetaMeta
 	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	@Documented
 	@interface MetaMetaMeta {
 	}
 
 	@MetaCycle3
 	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.ANNOTATION_TYPE)
+	@Documented
 	@interface MetaCycle1 {
 	}
 
 	@MetaCycle1
 	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.ANNOTATION_TYPE)
+	@Documented
 	@interface MetaCycle2 {
 	}
 
 	@MetaCycle2
 	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	@Documented
 	@interface MetaCycle3 {
 	}
 
 	@ContextConfiguration
 	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	@Documented
 	static @interface MetaConfig {
 
 		static class DevConfig {

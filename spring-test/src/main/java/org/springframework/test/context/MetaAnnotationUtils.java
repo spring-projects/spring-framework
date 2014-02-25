@@ -123,7 +123,7 @@ abstract class MetaAnnotationUtils {
 
 		// Declared on a composed annotation (i.e., as a meta-annotation)?
 		for (Annotation composedAnnotation : clazz.getDeclaredAnnotations()) {
-			if (visited.add(composedAnnotation)) {
+			if (!isInJavaLangAnnotationPackage(composedAnnotation) && visited.add(composedAnnotation)) {
 				AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(composedAnnotation.annotationType(),
 					visited, annotationType);
 				if (descriptor != null) {
@@ -210,7 +210,7 @@ abstract class MetaAnnotationUtils {
 
 		// Declared on a composed annotation (i.e., as a meta-annotation)?
 		for (Annotation composedAnnotation : clazz.getDeclaredAnnotations()) {
-			if (visited.add(composedAnnotation)) {
+			if (!isInJavaLangAnnotationPackage(composedAnnotation) && visited.add(composedAnnotation)) {
 				UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(
 					composedAnnotation.annotationType(), visited, annotationTypes);
 				if (descriptor != null) {

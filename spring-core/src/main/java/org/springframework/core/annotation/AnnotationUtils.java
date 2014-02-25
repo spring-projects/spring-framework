@@ -289,7 +289,7 @@ public abstract class AnnotationUtils {
 			}
 		}
 		for (Annotation ann : clazz.getAnnotations()) {
-			if (visited.add(ann)) {
+			if (!isInJavaLangAnnotationPackage(ann) && visited.add(ann)) {
 				annotation = findAnnotation(ann.annotationType(), annotationType, visited);
 				if (annotation != null) {
 					return annotation;
@@ -420,6 +420,18 @@ public abstract class AnnotationUtils {
 		Assert.notNull(annotationType, "Annotation type must not be null");
 		Assert.notNull(clazz, "Class must not be null");
 		return (clazz.isAnnotationPresent(annotationType) && !isAnnotationDeclaredLocally(annotationType, clazz));
+	}
+
+	/**
+	 * Determine if the supplied {@link Annotation} is defined in the
+	 * {@code java.lang.annotation} package.
+	 *
+	 * @param annotation the annotation to check; never {@code null}
+	 * @return {@code true} if the annotation is in the {@code java.lang.annotation} package
+	 */
+	public static boolean isInJavaLangAnnotationPackage(Annotation annotation) {
+		Assert.notNull(annotation, "Annotation must not be null");
+		return annotation.annotationType().getName().startsWith("java.lang.annotation");
 	}
 
 	/**
@@ -631,7 +643,7 @@ public abstract class AnnotationUtils {
 					else if (ObjectUtils.nullSafeEquals(this.containerAnnotationType, annotation.annotationType())) {
 						result.addAll(Arrays.asList(getValue(annotation)));
 					}
-					else {
+					else if (!isInJavaLangAnnotationPackage(annotation)) {
 						process(annotation.annotationType());
 					}
 				}

@@ -16,9 +16,12 @@
 
 package org.springframework.core.annotation;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 import org.junit.Test;
 
@@ -31,6 +34,13 @@ import static org.junit.Assert.*;
  * @since 4.0.3
  */
 public class AnnotatedElementUtilsTests {
+
+	@Test
+	public void getAnnotationAttributesOnMetaCycleAnnotatedClassWithMissingTargetMetaAnnotation() {
+		AnnotationAttributes attributes = AnnotatedElementUtils.getAnnotationAttributes(MetaCycleAnnotatedClass.class,
+			Transactional.class.getName());
+		assertNull("Should not find annotation attributes for @Transactional on MetaCycleAnnotatedClass", attributes);
+	}
 
 	@Test
 	public void getAnnotationAttributesFavorsInheritedAnnotationsOverMoreLocallyDeclaredComposedAnnotations() {
@@ -61,7 +71,34 @@ public class AnnotatedElementUtilsTests {
 
 	// -------------------------------------------------------------------------
 
+	@MetaCycle3
 	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.ANNOTATION_TYPE)
+	@Documented
+	@interface MetaCycle1 {
+	}
+
+	@MetaCycle1
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.ANNOTATION_TYPE)
+	@Documented
+	@interface MetaCycle2 {
+	}
+
+	@MetaCycle2
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	@Documented
+	@interface MetaCycle3 {
+	}
+
+	@MetaCycle3
+	static class MetaCycleAnnotatedClass {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	@Documented
 	@Inherited
 	@interface Transactional {
 
@@ -70,12 +107,16 @@ public class AnnotatedElementUtilsTests {
 
 	@Transactional
 	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	@Documented
 	@Inherited
 	@interface Composed1 {
 	}
 
 	@Transactional(readOnly = true)
 	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	@Documented
 	@interface Composed2 {
 	}
 
