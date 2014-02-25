@@ -795,7 +795,7 @@ project("spring-test") {
 		optional(project(":spring-webmvc"))
 		optional(project(":spring-webmvc-portlet"))
 		optional("junit:junit:${junitVersion}")
-		optional("org.testng:testng:6.8.7")
+		optional("org.testng:testng:6.8.8")
 		optional("javax.inject:javax.inject:1")
 		optional("javax.servlet:javax.servlet-api:3.0.1")
 		optional("javax.servlet.jsp:jsp-api:2.1")
