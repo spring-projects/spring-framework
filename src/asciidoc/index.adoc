@@ -36680,7 +36680,7 @@ that some functionality may be exposed over both WebSocket and as a REST API in
 order to provide clients with alternatives. Furthermore, a REST API call may need
 to broadcast a message to interested clients connected via WebSocket.
 
-Spring Framework allows `@Controller` classes to have both
+Spring Framework allows `@Controller` and `@RestController` classes to have both
 HTTP request handling and WebSocket message handling methods.
 Furthermore, a Spring MVC request handling method, or any application
 method for that matter, can easily broadcast a message to all interested
@@ -37360,6 +37360,9 @@ https://github.com/sockjs/sockjs-client[sockjs-client]:
 ----
 	var socket = new SockJS("/spring-websocket-portfolio/portfolio");
 	var stompClient = Stomp.over(socket);
+
+	stompClient.connect({}, function(frame) {
+	}
 ----
 
 Or if connecting via WebSocket (without SockJS):
@@ -37369,8 +37372,15 @@ Or if connecting via WebSocket (without SockJS):
 ----
 	var socket = new WebSocket("/spring-websocket-portfolio/portfolio");
 	var stompClient = Stomp.over(socket);
+
+	stompClient.connect({}, function(frame) {
+	}
 ----
 
+Note that the stompClient above need does not specify a `login` and `passcode` headers.
+Even if it did, they would be ignored, or rather overridden, on the server side. See the
+sections <<websocket-stomp-handle-broker-relay-configure>> and
+<<websocket-stomp-handle-user>> for more information on authentication.
 
 
 [[websocket-stomp-handle]]
@@ -37525,7 +37535,8 @@ message to all subscribed, connected clients.
 [[websocket-stomp-handle-annotations]]
 ===== Annotation-based Message Handling
 
-The `@MessageMapping` annotation is supported on methods of `@Controller`-annotated classes.
+The `@MessageMapping` annotation is supported on methods of `@Controller`
+as well as on `@RestController`-annotated classes.
 It can be used for mapping methods to path-like message destinations. It is also
 possible to combine with a type-level `@MessageMapping` for expressing shared
 mappings across all annotated methods within a controller.
@@ -37628,21 +37639,16 @@ to Ant-style destination patterns.
 
 The simple broker is great for getting started but supports only a subset of
 STOMP commands (e.g. no acks, receipts, etc), relies on a simple message
-sending loop, and is not suitable for clustering.
+sending loop, and is not suitable for clustering. Instead, applications can
+upgrade to using a full-featured message broker.
 
-Instead, applications can use a full-featured message broker and use it for
-managing client subscriptions and broadcasting messages; while annotated
-methods can still be used for application processing. In other words, all
-else remains the same, except a full-featured broker replaces the simple
-broker.
-
-Check your message broker STOMP documentation (e.g.
+Check the STOMP documentation for your message broker of choice (e.g.
 http://www.rabbitmq.com/stomp.html[RabbitMQ],
-http://activemq.apache.org/stomp.html[ActiveMQ]), install and run the broker with
-STOMP support enabled. Then enable the STOMP broker relay in the Spring
-configuration as an alternative to the simple broker.
+http://activemq.apache.org/stomp.html[ActiveMQ], or other), install and run the
+broker with STOMP support enabled. Then enable the STOMP broker relay in the
+Spring configuration instead of the simple broker.
 
-Below is example configuration that enables use of a full-featured broker:
+Below is example configuration that enables a full-featured broker:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -37689,17 +37695,73 @@ XML configuration equivalent:
 	</beans>
 ----
 
-The STOMP "broker relay" from the above configuration manages TCP connections
-to the external broker, and forwards messages with matching destination prefixes
-to it. Likewise, any messages received from the external broker are matched and
-routed to connected clients.
+The "STOMP broker relay" in the above configuration is a Spring
+http://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/messaging/MessageHandler.html[MessageHandler]
+that handles messages by forwarding them to an external message broker.
+To do so it establishes TCP connections to the broker, forwards all
+messages to it, and reversely forwards all messages received
+from the broker to clients through their WebSocket sessions. Essentially
+it acts as a "relay" forwarding messages in both directions.
 
-In effect, messages are now broadcast through a full-featured, robust and
-scalable message broker.
+[NOTE]
+====
+Please add a dependency on `org.projectreactor:reactor-tcp` for TCP connection management.
+====
 
+Furthermore, application components (e.g. HTTP request handling methods,
+business services, etc) can also send messages to the broker relay, as described
+in <<websocket-stomp-handle-send>>, in order to broadcast messages to
+subscribed WebSocket clients.
+
+In effect, the broker relay enables robust and scalable message broadcasting.
+
+[[websocket-stomp-handle-broker-relay-configure]]
+===== Configuring Connections To The Full-Featured Broker
+
+A STOMP broker relay maintains a single "system" TCP connection to the broker.
+This connection is used for messages originating from the server-side application
+only, not for receiving messages. You can configure the STOMP credentials
+for this connection, i.e. the STOMP frame `login` and `passcode` headers. This
+is exposed in both the XML namespace and the Java config as the
+`systemLogin`/`systemPasscode` properties with default values `guest`/`guest`.
+
+The STOMP broker relay also creates a separate TCP connection for every connected
+WebSocket client. You can configure the STOMP credentials to use for all TCP
+connections created on behalf of clients. This is exposed in both the XML namespace
+and the Java config as the `clientLogin`/`clientPasscode` properties with default
+values `guest`/`guest`.
+
+[NOTE]
+====
+The STOMP broker relay always sets the `login` and `passcode` headers on every CONNECT
+frame it forwards to the broker on behalf of clients. Therefore WebSocket clients
+need not set those headers, they will be ignored. As the following section explains
+instead WebSocket clients should rely on HTTP authentication to protect the WebSocket
+endpoint and establish the client identity.
+====
+
+The STOMP broker relay also sends and receives heartbeats to and from the message
+broker over the "system" TCP connection. You can configure the intervals for sending
+and receiving heartbeats (10 seconds each by default). If connectivity to the broker
+is lost, the broker relay will continue to try to reconnect, every 5 seconds,
+until it succeeds.
+
+[NOTE]
+====
+A Spring bean can implement `ApplicationListener<BrokerAvailabilityEvent>` in order
+to receive notifications when the "system" connection to the broker is lost and
+re-established. For example a Stock Quote service broadcasting stock quotes can
+stop trying to send messages when there is no active "system" connection.
+====
+
+The STOMP broker relay can also be configured with a `virtualHost` property.
+The value of this property will be set as the `host` header of every CONNECT frame
+and may be useful for example in a cloud environment where the actual host to which
+the TCP connection is established is different from the host providing the
+cloud-based STOMP service.
 
 [[websocket-stomp-handle-user]]
-===== Handling Messages to User Destinations
+===== Authentication and Handling Messages to User Destinations
 
 An application can also send messages targeting a specific user.
 
