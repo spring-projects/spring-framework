@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,15 +71,16 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextLoad
 
 	@Test
 	public void resolveContextHierarchyAttributesForSingleTestClassWithSingleLevelContextHierarchyFromMetaAnnotation() {
-		List<List<ContextConfigurationAttributes>> hierarchyAttributes = resolveContextHierarchyAttributes(SingleTestClassWithSingleLevelContextHierarchyFromMetaAnnotation.class);
+		Class<SingleTestClassWithSingleLevelContextHierarchyFromMetaAnnotation> testClass = SingleTestClassWithSingleLevelContextHierarchyFromMetaAnnotation.class;
+		List<List<ContextConfigurationAttributes>> hierarchyAttributes = resolveContextHierarchyAttributes(testClass);
 		assertEquals(1, hierarchyAttributes.size());
 
 		List<ContextConfigurationAttributes> configAttributesList = hierarchyAttributes.get(0);
 		assertNotNull(configAttributesList);
 		assertEquals(1, configAttributesList.size());
 		debugConfigAttributes(configAttributesList);
-		assertAttributes(configAttributesList.get(0), ContextHierarchyA.class, new String[] { "A.xml" },
-			EMPTY_CLASS_ARRAY, ContextLoader.class, true);
+		assertAttributes(configAttributesList.get(0), testClass, new String[] { "A.xml" }, EMPTY_CLASS_ARRAY,
+			ContextLoader.class, true);
 	}
 
 	@Test
@@ -131,7 +132,8 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextLoad
 		debugConfigAttributes(configAttributesListClassLevel1);
 		assertEquals(1, configAttributesListClassLevel1.size());
 		assertThat(configAttributesListClassLevel1.get(0).getLocations()[0], equalTo("A.xml"));
-		assertAttributes(configAttributesListClassLevel1.get(0), ContextHierarchyA.class, new String[] { "A.xml" },
+		assertAttributes(configAttributesListClassLevel1.get(0),
+			TestClass1WithSingleLevelContextHierarchyFromMetaAnnotation.class, new String[] { "A.xml" },
 			EMPTY_CLASS_ARRAY, ContextLoader.class, true);
 
 		List<ContextConfigurationAttributes> configAttributesListClassLevel2 = hierarchyAttributes.get(1);
@@ -139,14 +141,17 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextLoad
 		assertEquals(1, configAttributesListClassLevel2.size());
 		assertArrayEquals(new String[] { "B-one.xml", "B-two.xml" },
 			configAttributesListClassLevel2.get(0).getLocations());
-		assertAttributes(configAttributesListClassLevel2.get(0), ContextHierarchyB.class, new String[] { "B-one.xml",
+		assertAttributes(configAttributesListClassLevel2.get(0),
+			TestClass2WithSingleLevelContextHierarchyFromMetaAnnotation.class,
+			new String[] { "B-one.xml",
 			"B-two.xml" }, EMPTY_CLASS_ARRAY, ContextLoader.class, true);
 
 		List<ContextConfigurationAttributes> configAttributesListClassLevel3 = hierarchyAttributes.get(2);
 		debugConfigAttributes(configAttributesListClassLevel3);
 		assertEquals(1, configAttributesListClassLevel3.size());
 		assertThat(configAttributesListClassLevel3.get(0).getLocations()[0], equalTo("C.xml"));
-		assertAttributes(configAttributesListClassLevel3.get(0), ContextHierarchyC.class, new String[] { "C.xml" },
+		assertAttributes(configAttributesListClassLevel3.get(0),
+			TestClass3WithSingleLevelContextHierarchyFromMetaAnnotation.class, new String[] { "C.xml" },
 			EMPTY_CLASS_ARRAY, ContextLoader.class, true);
 	}
 

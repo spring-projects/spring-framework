@@ -14,28 +14,33 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.junit4.annotation.meta;
+package org.springframework.test.context.web;
 
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
 
 /**
- * Custom configuration annotation that is itself meta-annotated with {@link
- * ConfigClassesAndProfilesWithCustomDefaultsMetaConfig} and {@link ActiveProfiles}.
+ * Custom <em>composed annotation</em> combining {@link WebAppConfiguration} and
+ * {@link ContextConfiguration} as meta-annotations.
  *
  * @author Sam Brannen
- * @since 4.0.3
+ * @since 4.0
  */
+@WebAppConfiguration
+@ContextConfiguration(classes = FooConfig.class)
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-@ConfigClassesAndProfilesWithCustomDefaultsMetaConfig
-// Override default "dev" profile from
-// @ConfigClassesAndProfilesWithCustomDefaultsMetaConfig:
-@ActiveProfiles("prod")
-public @interface MetaMetaConfig {
+public @interface WebTestConfiguration {
+}
 
+@Configuration
+class FooConfig {
+
+	@Bean
+	public String foo() {
+		return "enigma";
+	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,11 +59,12 @@ public class ContextLoaderUtilsConfigurationAttributesTests extends AbstractCont
 
 	@Test
 	public void resolveConfigAttributesWithBareAnnotations() {
-		List<ContextConfigurationAttributes> attributesList = resolveContextConfigurationAttributes(BareAnnotations.class);
+		Class<BareAnnotations> testClass = BareAnnotations.class;
+		List<ContextConfigurationAttributes> attributesList = resolveContextConfigurationAttributes(testClass);
 		assertNotNull(attributesList);
 		assertEquals(1, attributesList.size());
-		assertAttributes(attributesList.get(0), BareAnnotations.class, EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY,
-			ContextLoader.class, true);
+		assertAttributes(attributesList.get(0), testClass, EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, ContextLoader.class,
+			true);
 	}
 
 	@Test
@@ -76,39 +77,43 @@ public class ContextLoaderUtilsConfigurationAttributesTests extends AbstractCont
 
 	@Test
 	public void resolveConfigAttributesWithMetaAnnotationAndLocations() {
-		List<ContextConfigurationAttributes> attributesList = resolveContextConfigurationAttributes(MetaLocationsFoo.class);
+		Class<MetaLocationsFoo> testClass = MetaLocationsFoo.class;
+		List<ContextConfigurationAttributes> attributesList = resolveContextConfigurationAttributes(testClass);
 		assertNotNull(attributesList);
 		assertEquals(1, attributesList.size());
-		assertAttributes(attributesList.get(0), MetaLocationsFooConfig.class, new String[] { "/foo.xml" },
-			EMPTY_CLASS_ARRAY, ContextLoader.class, true);
+		assertAttributes(attributesList.get(0), testClass, new String[] { "/foo.xml" }, EMPTY_CLASS_ARRAY,
+			ContextLoader.class, true);
 	}
 
 	@Test
 	public void resolveConfigAttributesWithMetaAnnotationAndLocationsAndOverrides() {
-		List<ContextConfigurationAttributes> attributesList = resolveContextConfigurationAttributes(MetaLocationsFooWithOverrides.class);
+		Class<MetaLocationsFooWithOverrides> testClass = MetaLocationsFooWithOverrides.class;
+		List<ContextConfigurationAttributes> attributesList = resolveContextConfigurationAttributes(testClass);
 		assertNotNull(attributesList);
 		assertEquals(1, attributesList.size());
-		assertAttributes(attributesList.get(0), MetaLocationsFooConfigWithOverrides.class, new String[] { "/foo.xml" },
-			EMPTY_CLASS_ARRAY, ContextLoader.class, true);
+		assertAttributes(attributesList.get(0), testClass, new String[] { "/foo.xml" }, EMPTY_CLASS_ARRAY,
+			ContextLoader.class, true);
 	}
 
 	@Test
 	public void resolveConfigAttributesWithMetaAnnotationAndLocationsAndOverriddenAttributes() {
-		List<ContextConfigurationAttributes> attributesList = resolveContextConfigurationAttributes(MetaLocationsFooWithOverriddenAttributes.class);
+		Class<MetaLocationsFooWithOverriddenAttributes> testClass = MetaLocationsFooWithOverriddenAttributes.class;
+		List<ContextConfigurationAttributes> attributesList = resolveContextConfigurationAttributes(testClass);
 		assertNotNull(attributesList);
 		assertEquals(1, attributesList.size());
-		assertAttributes(attributesList.get(0), MetaLocationsFooConfigWithOverrides.class, new String[] { "foo1.xml",
-			"foo2.xml" }, EMPTY_CLASS_ARRAY, ContextLoader.class, true);
+		assertAttributes(attributesList.get(0), testClass, new String[] { "foo1.xml", "foo2.xml" }, EMPTY_CLASS_ARRAY,
+			ContextLoader.class, true);
 	}
 
 	@Test
 	public void resolveConfigAttributesWithMetaAnnotationAndLocationsInClassHierarchy() {
-		List<ContextConfigurationAttributes> attributesList = resolveContextConfigurationAttributes(MetaLocationsBar.class);
+		Class<MetaLocationsBar> testClass = MetaLocationsBar.class;
+		List<ContextConfigurationAttributes> attributesList = resolveContextConfigurationAttributes(testClass);
 		assertNotNull(attributesList);
 		assertEquals(2, attributesList.size());
-		assertAttributes(attributesList.get(0), MetaLocationsBarConfig.class, new String[] { "/bar.xml" },
-			EMPTY_CLASS_ARRAY, ContextLoader.class, true);
-		assertAttributes(attributesList.get(1), MetaLocationsFooConfig.class, new String[] { "/foo.xml" },
+		assertAttributes(attributesList.get(0), testClass, new String[] { "/bar.xml" }, EMPTY_CLASS_ARRAY,
+			ContextLoader.class, true);
+		assertAttributes(attributesList.get(1), MetaLocationsFoo.class, new String[] { "/foo.xml" },
 			EMPTY_CLASS_ARRAY, ContextLoader.class, true);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -29,14 +30,14 @@ import static org.junit.Assert.*;
 
 /**
  * Integration test that verifies meta-annotation support for {@link WebAppConfiguration}
- * and {@link org.springframework.test.context.ContextConfiguration ContextConfiguration}.
+ * and {@link ContextConfiguration}.
  *
  * @author Sam Brannen
  * @since 4.0
- * @see WebTestStereotype
+ * @see WebTestConfiguration
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@WebTestStereotype
+@WebTestConfiguration
 public class MetaAnnotationConfigWacTests {
 
 	@Autowired

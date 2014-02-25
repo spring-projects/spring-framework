@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,20 +25,22 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ActiveProfilesResolver;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
  * Custom configuration annotation with meta-annotation attribute overrides for
- * {@link ContextConfiguration#classes} and {@link ActiveProfiles#profiles}.
+ * {@link ContextConfiguration#classes} and {@link ActiveProfiles#resolver} and
+ * with default configuration local to the composed annotation.
  *
  * @author Sam Brannen
- * @since 4.0
+ * @since 4.0.3
  */
 @ContextConfiguration
 @ActiveProfiles
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface MetaConfig {
+public @interface ConfigClassesAndProfileResolverWithCustomDefaultsMetaConfig {
 
 	@Configuration
 	@Profile("dev")
@@ -60,9 +62,28 @@ public @interface MetaConfig {
 		}
 	}
 
+	@Configuration
+	@Profile("resolver")
+	static class ResolverConfig {
 
-	Class<?>[] classes() default { DevConfig.class, ProductionConfig.class };
+		@Bean
+		public String foo() {
+			return "Resolver Foo";
+		}
+	}
 
-	String[] profiles() default "dev";
+	static class CustomResolver implements ActiveProfilesResolver {
+
+		@Override
+		public String[] resolve(Class<?> testClass) {
+			return testClass.getSimpleName().equals("ConfigClassesAndProfileResolverWithCustomDefaultsMetaConfigTests") ? new String[] { "resolver" }
+					: new String[] {};
+		}
+	}
+
+
+	Class<?>[] classes() default { DevConfig.class, ProductionConfig.class, ResolverConfig.class };
+
+	Class<? extends ActiveProfilesResolver> resolver() default CustomResolver.class;
 
 }
