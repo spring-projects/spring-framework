@@ -50,6 +50,7 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  * @since 09.12.2003
  */
+@SuppressWarnings("resource")
 public final class AutoProxyCreatorTests {
 
 	@Test
@@ -352,6 +353,7 @@ public final class AutoProxyCreatorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class FallbackTestAutoProxyCreator extends TestAutoProxyCreator {
 
 		public FallbackTestAutoProxyCreator() {
@@ -381,6 +383,7 @@ public final class AutoProxyCreatorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class ContainerCallbackInterfacesOnly  // as well as an empty marker interface
 			implements BeanFactoryAware, ApplicationContextAware, InitializingBean, DisposableBean, Serializable {
 
