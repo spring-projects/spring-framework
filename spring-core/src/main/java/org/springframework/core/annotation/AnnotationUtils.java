@@ -278,19 +278,19 @@ public abstract class AnnotationUtils {
 			Set<Annotation> visited) {
 		Assert.notNull(clazz, "Class must not be null");
 
-		A annotation = clazz.getDeclaredAnnotation(annotationType);
-		if (annotation != null) {
-			return annotation;
+		if (isAnnotationDeclaredLocally(annotationType, clazz)) {
+			return clazz.getAnnotation(annotationType);
 		}
 		for (Class<?> ifc : clazz.getInterfaces()) {
-			annotation = findAnnotation(ifc, annotationType, visited);
+			A annotation = findAnnotation(ifc, annotationType, visited);
 			if (annotation != null) {
 				return annotation;
 			}
 		}
 		for (Annotation ann : clazz.getDeclaredAnnotations()) {
 			if (!isInJavaLangAnnotationPackage(ann) && visited.add(ann)) {
-				annotation = findAnnotation(ann.annotationType(), annotationType, visited);
+				A annotation = findAnnotation(ann.annotationType(), annotationType,
+						visited);
 				if (annotation != null) {
 					return annotation;
 				}
