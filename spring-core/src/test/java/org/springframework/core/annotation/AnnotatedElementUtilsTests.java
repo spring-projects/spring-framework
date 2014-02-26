@@ -22,10 +22,13 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Arrays;
 
 import org.junit.Test;
+import org.springframework.util.MultiValueMap;
 
 import static org.junit.Assert.*;
+import static org.springframework.core.annotation.AnnotatedElementUtils.*;
 
 /**
  * Unit tests for {@link AnnotatedElementUtils}.
@@ -36,36 +39,81 @@ import static org.junit.Assert.*;
 public class AnnotatedElementUtilsTests {
 
 	@Test
+	public void getAllAnnotationAttributesOnClassWithLocalAnnotation() {
+		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(TxConfig.class,
+			Transactional.class.getName());
+		assertNotNull("Annotation attributes map for @Transactional on TxConfig", attributes);
+		assertEquals("value for TxConfig.", Arrays.asList("TxConfig"), attributes.get("value"));
+	}
+
+	/**
+	 * If the "value" entry contains both "DerivedTxConfig" AND "TxConfig", then
+	 * the algorithm is accidentally picking up shadowed annotations of the same
+	 * type within the class hierarchy. Such undesirable behavior would cause the
+	 * logic in {@link org.springframework.context.annotation.ProfileCondition}
+	 * to fail.
+	 *
+	 * @see org.springframework.core.env.EnvironmentIntegrationTests#mostSpecificDerivedClassDrivesEnvironment_withDevEnvAndDerivedDevConfigClass
+	 */
+	@Test
+	public void getAllAnnotationAttributesOnClassWithLocalAnnotationThatShadowsAnnotationFromSuperclass() {
+		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(DerivedTxConfig.class,
+			Transactional.class.getName());
+		assertNotNull("Annotation attributes map for @Transactional on DerivedTxConfig", attributes);
+		assertEquals("value for DerivedTxConfig.", Arrays.asList("DerivedTxConfig"), attributes.get("value"));
+	}
+
+	/**
+	 * Note: this functionality is required by {@link org.springframework.context.annotation.ProfileCondition}.
+	 *
+	 * @see org.springframework.core.env.EnvironmentIntegrationTests
+	 */
+	@Test
+	public void getAllAnnotationAttributesOnClassWithMultipleComposedAnnotations() {
+		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(TxFromMultipleComposedAnnotations.class,
+			Transactional.class.getName());
+		assertNotNull("Annotation attributes map for @Transactional on TxFromMultipleComposedAnnotations", attributes);
+		assertEquals("value for TxFromMultipleComposedAnnotations.", Arrays.asList("TxComposed1", "TxComposed2"),
+			attributes.get("value"));
+	}
+
+	@Test
+	public void getAnnotationAttributesOnClassWithLocalAnnotation() {
+		AnnotationAttributes attributes = getAnnotationAttributes(TxConfig.class, Transactional.class.getName());
+		assertNotNull("Annotation attributes for @Transactional on TxConfig", attributes);
+		assertEquals("value for TxConfig.", "TxConfig", attributes.getString("value"));
+	}
+
+	@Test
+	public void getAnnotationAttributesOnClassWithLocalAnnotationThatShadowsAnnotationFromSuperclass() {
+		AnnotationAttributes attributes = getAnnotationAttributes(DerivedTxConfig.class, Transactional.class.getName());
+		assertNotNull("Annotation attributes for @Transactional on DerivedTxConfig", attributes);
+		assertEquals("value for DerivedTxConfig.", "DerivedTxConfig", attributes.getString("value"));
+	}
+
+	@Test
 	public void getAnnotationAttributesOnMetaCycleAnnotatedClassWithMissingTargetMetaAnnotation() {
-		AnnotationAttributes attributes = AnnotatedElementUtils.getAnnotationAttributes(MetaCycleAnnotatedClass.class,
+		AnnotationAttributes attributes = getAnnotationAttributes(MetaCycleAnnotatedClass.class,
 			Transactional.class.getName());
 		assertNull("Should not find annotation attributes for @Transactional on MetaCycleAnnotatedClass", attributes);
 	}
 
 	@Test
 	public void getAnnotationAttributesFavorsInheritedAnnotationsOverMoreLocallyDeclaredComposedAnnotations() {
-		AnnotationAttributes attributes = AnnotatedElementUtils.getAnnotationAttributes(
-			SubSubClassWithInheritedAnnotation.class, Transactional.class.getName());
-		assertNotNull(attributes);
-
-		// By inspecting SubSubClassWithInheritedAnnotation, one might expect that the
-		// readOnly flag should be true, since the immediate superclass is annotated with
-		// @Composed2; however, with the current implementation the readOnly flag will be
-		// false since @Transactional is declared as @Inherited.
-		assertFalse("readOnly flag for SubSubClassWithInheritedAnnotation", attributes.getBoolean("readOnly"));
+		AnnotationAttributes attributes = getAnnotationAttributes(SubSubClassWithInheritedAnnotation.class,
+			Transactional.class.getName());
+		assertNotNull("AnnotationAttributes for @Transactional on SubSubClassWithInheritedAnnotation", attributes);
+		assertEquals("readOnly flag for SubSubClassWithInheritedAnnotation.", true, attributes.getBoolean("readOnly"));
 	}
 
 	@Test
 	public void getAnnotationAttributesFavorsInheritedComposedAnnotationsOverMoreLocallyDeclaredComposedAnnotations() {
-		AnnotationAttributes attributes = AnnotatedElementUtils.getAnnotationAttributes(
-			SubSubClassWithInheritedComposedAnnotation.class, Transactional.class.getName());
-		assertNotNull(attributes);
-
-		// By inspecting SubSubClassWithInheritedComposedAnnotation, one might expect that
-		// the readOnly flag should be true, since the immediate superclass is annotated
-		// with @Composed2; however, with the current implementation the readOnly flag
-		// will be false since @Composed1 is declared as @Inherited.
-		assertFalse("readOnly flag", attributes.getBoolean("readOnly"));
+		AnnotationAttributes attributes = getAnnotationAttributes(SubSubClassWithInheritedComposedAnnotation.class,
+			Transactional.class.getName());
+		assertNotNull("AnnotationAttributtes for @Transactional on SubSubClassWithInheritedComposedAnnotation.",
+			attributes);
+		assertEquals("readOnly flag for SubSubClassWithInheritedComposedAnnotation.", true,
+			attributes.getBoolean("readOnly"));
 	}
 
 
@@ -96,11 +144,15 @@ public class AnnotatedElementUtilsTests {
 	static class MetaCycleAnnotatedClass {
 	}
 
+	// -------------------------------------------------------------------------
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
 	@Documented
 	@Inherited
 	@interface Transactional {
+
+		String value() default "";
 
 		boolean readOnly() default false;
 	}
@@ -119,6 +171,18 @@ public class AnnotatedElementUtilsTests {
 	@Documented
 	@interface Composed2 {
 	}
+
+	@Transactional("TxComposed1")
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface TxComposed1 {
+	}
+
+	@Transactional("TxComposed2")
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface TxComposed2 {
+	}
+
+	// -------------------------------------------------------------------------
 
 	@Transactional
 	static class ClassWithInheritedAnnotation {
@@ -140,6 +204,19 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	static class SubSubClassWithInheritedComposedAnnotation extends SubClassWithInheritedComposedAnnotation {
+	}
+
+	@Transactional("TxConfig")
+	static class TxConfig {
+	}
+
+	@Transactional("DerivedTxConfig")
+	static class DerivedTxConfig extends TxConfig {
+	}
+
+	@TxComposed1
+	@TxComposed2
+	static class TxFromMultipleComposedAnnotations {
 	}
 
 }
