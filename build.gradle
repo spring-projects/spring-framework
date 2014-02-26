@@ -268,8 +268,8 @@ project("spring-beans") {
 	dependencies {
 		compile(project(":spring-core"))
 		compile(files(project(":spring-core").cglibRepackJar))
-		optional("javax.el:javax.el-api:2.2.4")
 		optional("javax.inject:javax.inject:1")
+		optional("javax.el:javax.el-api:2.2.4")
 		testCompile("log4j:log4j:1.2.17")
 	}
 }
@@ -540,7 +540,7 @@ project("spring-web") {
 		compile(project(":spring-core"))
 		provided("javax.servlet:javax.servlet-api:3.0.1")
 		optional(project(":spring-oxm")) // for MarshallingHttpMessageConverter
-		optional("javax.servlet.jsp:jsp-api:2.1")
+		optional("javax.servlet.jsp:jsp-api:2.2")
 		optional("javax.portlet:portlet-api:2.0")
 		optional("javax.el:javax.el-api:2.2.4")
 		optional("javax.faces:javax.faces-api:2.2")
@@ -664,7 +664,7 @@ project("spring-webmvc") {
 		provided("javax.servlet:javax.servlet-api:3.0.1")
 		optional(project(":spring-context-support")) // for Velocity support
 		optional(project(":spring-oxm")) // for MarshallingView
-		optional("javax.servlet.jsp:jsp-api:2.1")
+		optional("javax.servlet.jsp:jsp-api:2.2")
 		optional("javax.servlet:jstl:1.2")
 		optional("net.sourceforge.jexcelapi:jxl:2.6.12")
 		optional("org.apache.poi:poi:3.9")
@@ -733,7 +733,7 @@ project("spring-webmvc-tiles3") {
 		provided(project(":spring-context"))
 		provided(project(":spring-web"))
 		provided("javax.servlet:javax.servlet-api:3.0.1")
-		optional("javax.servlet.jsp:jsp-api:2.1")
+		optional("javax.servlet.jsp:jsp-api:2.2")
 		optional("javax.servlet:jstl:1.2")
 		optional("javax.el:javax.el-api:2.2.4")
 		optional("org.apache.tiles:tiles-request-api:1.0.1")
@@ -793,9 +793,10 @@ project("spring-test") {
 		optional("org.testng:testng:6.8.8")
 		optional("javax.inject:javax.inject:1")
 		optional("javax.servlet:javax.servlet-api:3.0.1")
-		optional("javax.servlet.jsp:jsp-api:2.1")
+		optional("javax.servlet.jsp:jsp-api:2.2")
 		optional("javax.servlet:jstl:1.2")
 		optional("javax.portlet:portlet-api:2.0")
+		optional("javax.el:javax.el-api:2.2.4")
 		optional("org.eclipse.persistence:javax.persistence:2.0.0")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.hamcrest:hamcrest-core:1.3")
