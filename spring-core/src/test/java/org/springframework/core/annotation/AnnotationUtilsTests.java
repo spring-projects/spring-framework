@@ -111,30 +111,26 @@ public class AnnotationUtilsTests {
 		assertEquals("meta1", component.value());
 	}
 
+	/**
+	 * @since 4.0.3
+	 */
 	@Test
 	public void findAnnotationFavorsInheritedAnnotationsOverMoreLocallyDeclaredComposedAnnotations() {
 		Transactional transactional = AnnotationUtils.findAnnotation(SubSubClassWithInheritedAnnotation.class,
 			Transactional.class);
 		assertNotNull(transactional);
-
-		// By inspecting SubSubClassWithInheritedAnnotation, one might expect that the
-		// readOnly flag should be true, since the immediate superclass is annotated with
-		// @Composed2; however, with the current implementation the readOnly flag will be
-		// false since @Transactional is declared as @Inherited.
-		assertFalse("readOnly flag for SubSubClassWithInheritedAnnotation", transactional.readOnly());
+		assertTrue("readOnly flag for SubSubClassWithInheritedAnnotation", transactional.readOnly());
 	}
 
+	/**
+	 * @since 4.0.3
+	 */
 	@Test
 	public void findAnnotationFavorsInheritedComposedAnnotationsOverMoreLocallyDeclaredComposedAnnotations() {
 		Component component = AnnotationUtils.findAnnotation(SubSubClassWithInheritedMetaAnnotation.class,
 			Component.class);
 		assertNotNull(component);
-
-		// By inspecting SubSubClassWithInheritedMetaAnnotation, one might expect that
-		// "meta2" should be found, since the immediate superclass is annotated with
-		// @Meta2; however, with the current implementation "meta1" will be found since
-		// @Meta1 is declared as @Inherited.
-		assertEquals("meta1", component.value());
+		assertEquals("meta2", component.value());
 	}
 
 	@Test
