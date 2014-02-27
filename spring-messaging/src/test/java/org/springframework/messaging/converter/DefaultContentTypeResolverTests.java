@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.DefaultContentTypeResolver;
+import org.springframework.util.InvalidMimeTypeException;
 import org.springframework.util.MimeTypeUtils;
 
 import static org.junit.Assert.*;
@@ -50,6 +51,31 @@ public class DefaultContentTypeResolverTests {
 		MessageHeaders headers = new MessageHeaders(map);
 
 		assertEquals(MimeTypeUtils.APPLICATION_JSON, this.resolver.resolve(headers));
+	}
+
+	@Test
+	public void resolveStringBasedContentType() {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON_VALUE);
+		MessageHeaders headers = new MessageHeaders(map);
+
+		assertEquals(MimeTypeUtils.APPLICATION_JSON, this.resolver.resolve(headers));
+	}
+
+	@Test(expected = InvalidMimeTypeException.class)
+	public void invalidStringBasedContentType() {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put(MessageHeaders.CONTENT_TYPE, "invalidContentType");
+		MessageHeaders headers = new MessageHeaders(map);
+		this.resolver.resolve(headers);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void invalidContentType() {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put(MessageHeaders.CONTENT_TYPE, new Integer(1));
+		MessageHeaders headers = new MessageHeaders(map);
+		this.resolver.resolve(headers);
 	}
 
 	@Test
