@@ -46,7 +46,7 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 
 	private final List<MimeType> supportedMimeTypes;
 
-	private ContentTypeResolver contentTypeResolver;
+	private ContentTypeResolver contentTypeResolver = new DefaultContentTypeResolver();
 
 	private boolean strictContentTypeMatch = false;
 
@@ -83,10 +83,12 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 	 * Configure the {@link ContentTypeResolver} to use to resolve the content
 	 * type of an input message.
 	 * <p>
-	 * By default, no {@code ContentTypeResolver} is configured. When a resolver
-	 * is not configured, then {@link #setStrictContentTypeMatch(boolean)} should
-	 * be left {@code false} (the default) or otherwise this converter will ignore
-	 * all input messages.
+	 * Note that if no resolver is configured, then
+	 * {@link #setStrictContentTypeMatch(boolean) strictContentTypeMatch} should
+	 * be left as {@code false} (the default) or otherwise this converter will
+	 * ignore all messages.
+	 * <p>
+	 * By default, a {@code DefaultContentTypeResolver} instance is used.
 	 */
 	public void setContentTypeResolver(ContentTypeResolver resolver) {
 		this.contentTypeResolver = resolver;

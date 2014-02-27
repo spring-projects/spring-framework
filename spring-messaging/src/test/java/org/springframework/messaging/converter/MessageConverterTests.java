@@ -46,7 +46,6 @@ public class MessageConverterTests {
 	@Before
 	public void setup() {
 		this.converter = new TestMessageConverter();
-		this.converter.setContentTypeResolver(new DefaultContentTypeResolver());
 	}
 
 	@Test
@@ -81,12 +80,9 @@ public class MessageConverterTests {
 
 	@Test
 	public void supportsMimeTypeNoneConfigured() {
-
 		Message<String> message = MessageBuilder.withPayload(
 				"ABC").setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON).build();
-
 		this.converter = new TestMessageConverter(Collections.<MimeType>emptyList());
-		this.converter.setContentTypeResolver(new DefaultContentTypeResolver());
 
 		assertEquals("success-from", this.converter.fromMessage(message, String.class));
 	}
@@ -94,7 +90,6 @@ public class MessageConverterTests {
 	@Test
 	public void canConvertFromStrictContentTypeMatch() {
 		this.converter = new TestMessageConverter(Arrays.asList(MimeTypeUtils.TEXT_PLAIN));
-		this.converter.setContentTypeResolver(new DefaultContentTypeResolver());
 		this.converter.setStrictContentTypeMatch(true);
 
 		Message<String> message = MessageBuilder.withPayload("ABC").build();
@@ -110,7 +105,6 @@ public class MessageConverterTests {
 	public void setStrictContentTypeMatchWithNoSupportedMimeTypes() {
 		Message<String> message = MessageBuilder.withPayload("ABC").build();
 		this.converter = new TestMessageConverter(Collections.<MimeType>emptyList());
-		this.converter.setContentTypeResolver(new DefaultContentTypeResolver());
 		this.converter.setStrictContentTypeMatch(true);
 	}
 
