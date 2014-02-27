@@ -119,7 +119,7 @@ public abstract class BaseCacheOperation<A extends Annotation> implements JCache
 
 	private static List<CacheParameterDetail> initializeAllParameterDetails(Method method) {
 		List<CacheParameterDetail> result = new ArrayList<CacheParameterDetail>();
-		for (int i = 0; i < method.getParameterCount(); i++) {
+		for (int i = 0; i < method.getParameterTypes().length; i++) {
 			CacheParameterDetail detail = new CacheParameterDetail(method, i);
 			result.add(detail);
 		}

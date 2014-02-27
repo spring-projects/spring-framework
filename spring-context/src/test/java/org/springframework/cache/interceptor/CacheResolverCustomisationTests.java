@@ -17,6 +17,7 @@
 package org.springframework.cache.interceptor;
 
 import static org.junit.Assert.*;
+import static org.springframework.cache.CacheTestUtils.*;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -146,19 +147,6 @@ public class CacheResolverCustomisationTests {
 		}
 	}
 
-	protected void assertCacheMiss(Object key, Cache... caches) {
-		for (Cache cache : caches) {
-			assertNull("No entry in " + cache + " should have been found with key " + key, cache.get(key));
-		}
-	}
-
-	protected void assertCacheHit(Object key, Object value, Cache... caches) {
-		for (Cache cache : caches) {
-			Cache.ValueWrapper wrapper = cache.get(key);
-			assertNotNull("An entry in " + cache + " should have been found with key " + key, wrapper);
-			assertEquals("Wrong value in " + cache + " for entry with key " + key, value, wrapper.get());
-		}
-	}
 
 
 	@Configuration

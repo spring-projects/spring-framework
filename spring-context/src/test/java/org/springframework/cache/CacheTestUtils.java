@@ -16,6 +16,8 @@
 
 package org.springframework.cache;
 
+import static org.junit.Assert.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +44,27 @@ public class CacheTestUtils {
 		result.setCaches(caches);
 		result.afterPropertiesSet();
 		return result;
+	}
+
+
+	/**
+	 * Assert the following key is not held within the specified cache(s).
+	 */
+	public static void assertCacheMiss(Object key, Cache... caches) {
+		for (Cache cache : caches) {
+			assertNull("No entry in " + cache + " should have been found with key " + key, cache.get(key));
+		}
+	}
+
+	/**
+	 * Assert the following key has a matching value within the specified cache(s).
+	 */
+	public static void assertCacheHit(Object key, Object value, Cache... caches) {
+		for (Cache cache : caches) {
+			Cache.ValueWrapper wrapper = cache.get(key);
+			assertNotNull("An entry in " + cache + " should have been found with key " + key, wrapper);
+			assertEquals("Wrong value in " + cache + " for entry with key " + key, value, wrapper.get());
+		}
 	}
 
 }
