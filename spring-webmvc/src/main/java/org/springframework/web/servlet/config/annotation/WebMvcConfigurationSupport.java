@@ -191,10 +191,27 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public RequestMappingHandlerMapping requestMappingHandlerMapping() {
+		PathMatchConfigurer configurer = new PathMatchConfigurer();
+		configurePathMatch(configurer);
 		RequestMappingHandlerMapping handlerMapping = new RequestMappingHandlerMapping();
 		handlerMapping.setOrder(0);
 		handlerMapping.setInterceptors(getInterceptors());
 		handlerMapping.setContentNegotiationManager(mvcContentNegotiationManager());
+		if(configurer.isUseSuffixPatternMatch() != null) {
+			handlerMapping.setUseSuffixPatternMatch(configurer.isUseSuffixPatternMatch());
+		}
+		if(configurer.isUseRegisteredSuffixPatternMatch() != null) {
+			handlerMapping.setUseRegisteredSuffixPatternMatch(configurer.isUseRegisteredSuffixPatternMatch());
+		}
+		if(configurer.isUseTrailingSlashMatch() != null) {
+			handlerMapping.setUseTrailingSlashMatch(configurer.isUseTrailingSlashMatch());
+		}
+		if(configurer.getPathMatcher() != null) {
+			handlerMapping.setPathMatcher(configurer.getPathMatcher());
+		}
+		if(configurer.getUrlPathHelper() != null) {
+			handlerMapping.setUrlPathHelper(configurer.getUrlPathHelper());
+		}
 		return handlerMapping;
 	}
 
@@ -561,6 +578,14 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * @see AsyncSupportConfigurer
 	 */
 	public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+	}
+
+	/**
+	 * Override this method to configure path matching options.
+	 * @see PathMatchConfigurer
+	 * @since 4.0.3
+	 */
+	public void configurePathMatch(PathMatchConfigurer configurer) {
 	}
 
 	/**

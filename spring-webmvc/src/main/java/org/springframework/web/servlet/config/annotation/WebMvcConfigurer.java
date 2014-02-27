@@ -80,6 +80,12 @@ public interface WebMvcConfigurer {
 	void configureAsyncSupport(AsyncSupportConfigurer configurer);
 
 	/**
+	 * Configure path matching options.
+	 * @since 4.0.3
+	 */
+	void configurePathMatch(PathMatchConfigurer configurer);
+
+	/**
 	 * Add resolvers to support custom controller method argument types.
 	 * <p>This does not override the built-in support for resolving handler
 	 * method arguments. To customize the built-in support for argument
