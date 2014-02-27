@@ -201,11 +201,19 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 */
 	@Override
 	public PatternsRequestCondition getMatchingCondition(HttpServletRequest request) {
+		String lookupPath = this.pathHelper.getLookupPathForRequest(request);
+		return this.getMatchingCondition(lookupPath);
+	}
+
+	/**
+	 * Checks if any of the patterns match the given lookup path.
+	 *
+	 * @see #getMatchingCondition(javax.servlet.http.HttpServletRequest)
+	 */
+	public PatternsRequestCondition getMatchingCondition(String lookupPath) {
 		if (this.patterns.isEmpty()) {
 			return this;
 		}
-
-		String lookupPath = this.pathHelper.getLookupPathForRequest(request);
 		List<String> matches = new ArrayList<String>();
 		for (String pattern : this.patterns) {
 			String match = getMatchingPattern(pattern, lookupPath);
@@ -215,8 +223,8 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		}
 		Collections.sort(matches, this.pathMatcher.getPatternComparator(lookupPath));
 		return matches.isEmpty() ? null :
-			new PatternsRequestCondition(matches, this.pathHelper, this.pathMatcher, this.useSuffixPatternMatch,
-					this.useTrailingSlashMatch, this.fileExtensions);
+			new PatternsRequestCondition(matches, this.pathHelper, this.pathMatcher,
+				this.useSuffixPatternMatch, this.useTrailingSlashMatch, this.fileExtensions);
 	}
 
 	private String getMatchingPattern(String pattern, String lookupPath) {

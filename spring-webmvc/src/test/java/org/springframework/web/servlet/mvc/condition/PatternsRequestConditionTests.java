@@ -212,4 +212,12 @@ public class PatternsRequestConditionTests {
 		assertEquals(1, match1.compareTo(match2, request));
 	}
 
+	@Test
+	public void getMatchingConditionByLookupPath() {
+		PatternsRequestCondition condition = new PatternsRequestCondition("/foo");
+		PatternsRequestCondition match = condition.getMatchingCondition("/foo");
+
+		assertNotNull(match);
+	}
+
 }
