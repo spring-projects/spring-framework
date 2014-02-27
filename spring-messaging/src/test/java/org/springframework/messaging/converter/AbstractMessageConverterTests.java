@@ -30,6 +30,7 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test fixture for {@link org.springframework.messaging.converter.AbstractMessageConverter}.
@@ -103,6 +104,23 @@ public class AbstractMessageConverterTests {
 	public void toMessageContentTypeHeader() {
 		Message<?> message = this.converter.toMessage("ABC", null);
 		assertEquals(MimeTypeUtils.TEXT_PLAIN, message.getHeaders().get(MessageHeaders.CONTENT_TYPE));
+	}
+
+	@Test
+	public void noContentTypeResolverWhenTypeResolutionRequired() {
+		Message<String> message = MessageBuilder.withPayload("ABC").build();
+		this.converter = new TestMessageConverter();
+		this.converter.setContentTypeResolutionRequired(true);
+		assertNull(this.converter.fromMessage(message, String.class));
+	}
+
+	@Test
+	public void noMimeTypeDefinedWhenTypeResolutionRequired() {
+		Message<String> message = MessageBuilder.withPayload("ABC").build();
+		this.converter = new TestMessageConverter(Collections.<MimeType>emptyList());
+		this.converter.setContentTypeResolver(new DefaultContentTypeResolver());
+		this.converter.setContentTypeResolutionRequired(true);
+		assertNull(this.converter.fromMessage(message, String.class));
 	}
 
 

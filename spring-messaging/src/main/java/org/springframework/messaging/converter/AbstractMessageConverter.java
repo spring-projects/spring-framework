@@ -49,6 +49,7 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 
 	private ContentTypeResolver contentTypeResolver;
 
+	private boolean contentTypeResolutionRequired = false;
 
 	/**
 	 * Construct an {@code AbstractMessageConverter} with one supported MIME type.
@@ -108,6 +109,21 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 	 */
 	public Class<?> getSerializedPayloadClass() {
 		return this.serializedPayloadClass;
+	}
+
+	/**
+	 * When set to true, #supportsMimeType(MessageHeaders) will return false if the
+	 * contentTypeResolver is not defined or if no content-type header is present.
+	 */
+	public void setContentTypeResolutionRequired(boolean contentTypeResolutionRequired) {
+		this.contentTypeResolutionRequired = contentTypeResolutionRequired;
+	}
+
+	/**
+	 * Return the content type resolution required status.
+	 */
+	public boolean isContentTypeResolutionRequired() {
+		return contentTypeResolutionRequired;
 	}
 
 	/**
@@ -179,7 +195,7 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 	protected boolean supportsMimeType(MessageHeaders headers) {
 		MimeType mimeType = getMimeType(headers);
 		if (mimeType == null) {
-			return true;
+			return !contentTypeResolutionRequired;
 		}
 		if (getSupportedMimeTypes().isEmpty()) {
 			return true;
