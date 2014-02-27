@@ -201,11 +201,30 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 */
 	@Override
 	public PatternsRequestCondition getMatchingCondition(HttpServletRequest request) {
+
 		if (this.patterns.isEmpty()) {
 			return this;
 		}
 
 		String lookupPath = this.pathHelper.getLookupPathForRequest(request);
+		List<String> matches = getMatchingPatterns(lookupPath);
+
+		return matches.isEmpty() ? null :
+			new PatternsRequestCondition(matches, this.pathHelper, this.pathMatcher, this.useSuffixPatternMatch,
+					this.useTrailingSlashMatch, this.fileExtensions);
+	}
+
+	/**
+	 * Find the patterns matching the given lookup path. Invoking this method should
+	 * yield results equivalent to those of calling
+	 * {@link #getMatchingCondition(javax.servlet.http.HttpServletRequest)}.
+	 * This method is provided as an alternative to be used if no request is available
+	 * (e.g. introspection, tooling, etc).
+	 *
+	 * @param lookupPath the lookup path to match to existing patterns
+	 * @return a collection of matching patterns sorted with the closest match at the top
+	 */
+	public List<String> getMatchingPatterns(String lookupPath) {
 		List<String> matches = new ArrayList<String>();
 		for (String pattern : this.patterns) {
 			String match = getMatchingPattern(pattern, lookupPath);
@@ -214,9 +233,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 			}
 		}
 		Collections.sort(matches, this.pathMatcher.getPatternComparator(lookupPath));
-		return matches.isEmpty() ? null :
-			new PatternsRequestCondition(matches, this.pathHelper, this.pathMatcher, this.useSuffixPatternMatch,
-					this.useTrailingSlashMatch, this.fileExtensions);
+		return matches;
 	}
 
 	private String getMatchingPattern(String pattern, String lookupPath) {
