@@ -51,6 +51,7 @@ public class DefaultContentTypeResolver implements ContentTypeResolver {
 		return this.defaultMimeType;
 	}
 
+
 	@Override
 	public MimeType resolve(MessageHeaders headers) {
 		if (headers == null || headers.get(MessageHeaders.CONTENT_TYPE) == null) {

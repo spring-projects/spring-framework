@@ -20,13 +20,24 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.MimeType;
 
 /**
- * Resolve the content type for a message given a set of {@link MessageHeaders}.
+ * Resolve the content type for a message.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public interface ContentTypeResolver {
 
+	/**
+	 * Determine the {@link MimeType} of a message from the given MessageHeaders.
+	 *
+	 * @param headers the headers to use for the resolution
+	 * @return the resolved {@code MimeType} of {@code null} if none found
+	 *
+	 * @throws org.springframework.util.InvalidMimeTypeException if the content type
+	 * 	is a String that cannot be parsed
+	 * @throws java.lang.IllegalArgumentException if there is a content type but
+	 * 	its type is unknown
+	 */
 	MimeType resolve(MessageHeaders headers);
 
 }

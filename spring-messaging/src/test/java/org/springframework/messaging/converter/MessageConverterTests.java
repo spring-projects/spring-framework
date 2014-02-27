@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.converter;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,13 +31,14 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test fixture for {@link org.springframework.messaging.converter.AbstractMessageConverter}.
  *
  * @author Rossen Stoyanchev
  */
-public class AbstractMessageConverterTests {
+public class MessageConverterTests {
 
 	private TestMessageConverter converter;
 
@@ -87,6 +89,29 @@ public class AbstractMessageConverterTests {
 		this.converter.setContentTypeResolver(new DefaultContentTypeResolver());
 
 		assertEquals("success-from", this.converter.fromMessage(message, String.class));
+	}
+
+	@Test
+	public void canConvertFromStrictContentTypeMatch() {
+		this.converter = new TestMessageConverter(Arrays.asList(MimeTypeUtils.TEXT_PLAIN));
+		this.converter.setContentTypeResolver(new DefaultContentTypeResolver());
+		this.converter.setStrictContentTypeMatch(true);
+
+		Message<String> message = MessageBuilder.withPayload("ABC").build();
+		assertFalse(this.converter.canConvertFrom(message, String.class));
+
+		message = MessageBuilder.withPayload("ABC")
+				.setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.TEXT_PLAIN).build();
+		assertTrue(this.converter.canConvertFrom(message, String.class));
+
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void setStrictContentTypeMatchWithNoSupportedMimeTypes() {
+		Message<String> message = MessageBuilder.withPayload("ABC").build();
+		this.converter = new TestMessageConverter(Collections.<MimeType>emptyList());
+		this.converter.setContentTypeResolver(new DefaultContentTypeResolver());
+		this.converter.setStrictContentTypeMatch(true);
 	}
 
 	@Test
