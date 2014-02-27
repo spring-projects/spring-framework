@@ -21,8 +21,9 @@ import org.springframework.util.MimeType;
 
 /**
  * A default {@link ContentTypeResolver} that checks the
- * {@link MessageHeaders#CONTENT_TYPE} header or falls back to a default, if a default is
- * configured.
+ * {@link MessageHeaders#CONTENT_TYPE} header or falls back to a default value,
+ * The header value is expected to be a {@link org.springframework.util.MimeType}
+ * or a String that can be parsed into a {@code MimeType}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -33,15 +34,18 @@ public class DefaultContentTypeResolver implements ContentTypeResolver {
 
 
 	/**
-	 * Set the default MIME type to use, if the message headers don't have one.
-	 * By default this property is set to {@code null}.
+	 * Set the default MIME type to use when there is no
+	 * {@link MessageHeaders#CONTENT_TYPE} header present.
+	 * <p>
+	 * This property does not have a default value.
 	 */
 	public void setDefaultMimeType(MimeType defaultMimeType) {
 		this.defaultMimeType = defaultMimeType;
 	}
 
 	/**
-	 * Return the default MIME type to use.
+	 * Return the default MIME type to use if no
+	 * {@link MessageHeaders#CONTENT_TYPE} header is present.
 	 */
 	public MimeType getDefaultMimeType() {
 		return this.defaultMimeType;
@@ -49,15 +53,25 @@ public class DefaultContentTypeResolver implements ContentTypeResolver {
 
 	@Override
 	public MimeType resolve(MessageHeaders headers) {
-		MimeType mimeType = null;
-		if (headers != null) {
-			mimeType = headers.get(MessageHeaders.CONTENT_TYPE, MimeType.class);
+		if (headers == null || headers.get(MessageHeaders.CONTENT_TYPE) == null) {
+			return this.defaultMimeType;
 		}
-		return (mimeType != null) ? mimeType : this.defaultMimeType;
+		Object value = headers.get(MessageHeaders.CONTENT_TYPE);
+		if (value instanceof MimeType) {
+			return (MimeType) value;
+		}
+		else if (value instanceof String) {
+			return MimeType.valueOf((String) value);
+		}
+		else {
+			throw new IllegalArgumentException(
+					"Unknown type for contentType header value: " + value.getClass());
+		}
 	}
 
 	@Override
 	public String toString() {
 		return "DefaultContentTypeResolver[" + "defaultMimeType=" + this.defaultMimeType + "]";
 	}
+
 }

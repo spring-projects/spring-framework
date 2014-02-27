@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.DefaultContentTypeResolver;
+import org.springframework.util.InvalidMimeTypeException;
 import org.springframework.util.MimeTypeUtils;
 
 import static org.junit.Assert.*;
@@ -53,6 +54,31 @@ public class DefaultContentTypeResolverTests {
 	}
 
 	@Test
+	public void resolveStringContentType() {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON_VALUE);
+		MessageHeaders headers = new MessageHeaders(map);
+
+		assertEquals(MimeTypeUtils.APPLICATION_JSON, this.resolver.resolve(headers));
+	}
+
+	@Test(expected = InvalidMimeTypeException.class)
+	public void resolveInvalidStringContentType() {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put(MessageHeaders.CONTENT_TYPE, "invalidContentType");
+		MessageHeaders headers = new MessageHeaders(map);
+		this.resolver.resolve(headers);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void resolveUnknownHeaderType() {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put(MessageHeaders.CONTENT_TYPE, new Integer(1));
+		MessageHeaders headers = new MessageHeaders(map);
+		this.resolver.resolve(headers);
+	}
+
+	@Test
 	public void resolveNoContentTypeHeader() {
 		MessageHeaders headers = new MessageHeaders(Collections.<String, Object>emptyMap());
 
@@ -60,7 +86,7 @@ public class DefaultContentTypeResolverTests {
 	}
 
 	@Test
-	public void resolveFromDefaultMimeType() {
+	public void resolveDefaultMimeType() {
 		this.resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
 		MessageHeaders headers = new MessageHeaders(Collections.<String, Object>emptyMap());
 
