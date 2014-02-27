@@ -25,6 +25,8 @@ import java.util.Comparator;
 
 import javax.cache.annotation.CacheDefaults;
 import javax.cache.annotation.CacheKeyGenerator;
+import javax.cache.annotation.CacheRemove;
+import javax.cache.annotation.CacheRemoveAll;
 import javax.cache.annotation.CacheResult;
 
 import org.junit.Before;
@@ -105,7 +107,7 @@ public class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
 	@Test
 	public void multiAnnotations() {
 		thrown.expect(IllegalStateException.class);
-		getCacheOperation(AnnotatedJCacheableService.class, name.getMethodName());
+		getCacheOperation(InvalidCases.class, name.getMethodName());
 	}
 
 	@Test
@@ -256,6 +258,14 @@ public class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
 		@CacheResult(exceptionCacheName = "exception")
 		public Object customKeyGeneratorAndCacheResolverWithExceptionName(Long id) {
 			return null;
+		}
+	}
+
+	static class InvalidCases {
+
+		@CacheRemove
+		@CacheRemoveAll
+		public void multiAnnotations() {
 		}
 	}
 

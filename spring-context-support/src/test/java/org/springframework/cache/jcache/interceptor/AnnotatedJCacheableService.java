@@ -177,12 +177,6 @@ public class AnnotatedJCacheableService implements JCacheableService<Long> {
 	public void noAnnotation() {
 	}
 
-	@CacheRemove
-	@CacheRemoveAll
-	public void multiAnnotations() {
-
-	}
-
 	@Override
 	public long exceptionInvocations() {
 		return exceptionCounter.get();
