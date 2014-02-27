@@ -53,10 +53,21 @@ public @interface CacheConfig {
 	String keyGenerator() default "";
 
 	/**
-	 * The bean name of the custom {@link org.springframework.cache.CacheManager} to use.
-	 * <p>If none is set at the operation level, this one is used instead of the default.
+	 * The bean name of the custom {@link org.springframework.cache.CacheManager} to use to
+	 * create a default {@link org.springframework.cache.interceptor.CacheResolver} if none
+	 * is set already.
+	 * <p>If no resolver and no cache manager are set at the operation level, and no cache
+	 * resolver is set on this instance, this one is used instead of the default.
+	 * @see org.springframework.cache.interceptor.SimpleCacheResolver
 	 */
 	String cacheManager() default "";
+
+	/**
+	 * The bean name of the custom {@link org.springframework.cache.interceptor.CacheResolver} to use.
+	 * <p>If no resolver and no cache manager are set at the operation level, this one is used
+	 * instead of the default.
+	 */
+	String cacheResolver() default "";
 }
 
 

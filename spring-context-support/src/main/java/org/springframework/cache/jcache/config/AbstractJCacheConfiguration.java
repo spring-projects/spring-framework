@@ -36,13 +36,11 @@ import org.springframework.context.annotation.Role;
 @Configuration
 public class AbstractJCacheConfiguration extends AbstractCachingConfiguration<JCacheConfigurer> {
 
-	protected CacheResolver cacheResolver;
 	protected CacheResolver exceptionCacheResolver;
 
 	@Override
 	protected void useCachingConfigurer(JCacheConfigurer config) {
 		super.useCachingConfigurer(config);
-		this.cacheResolver = config.cacheResolver();
 		this.exceptionCacheResolver = config.exceptionCacheResolver();
 	}
 

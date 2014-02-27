@@ -19,18 +19,14 @@ package org.springframework.cache.jcache.interceptor;
 import static org.junit.Assert.*;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 import org.junit.Test;
 
-import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
+import org.springframework.cache.interceptor.NamedCacheResolver;
 import org.springframework.cache.jcache.AbstractJCacheTests;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.util.ReflectionUtils;
@@ -45,7 +41,7 @@ public class JCacheInterceptorTests extends AbstractJCacheTests {
 	@Test
 	public void severalCachesNotSupported() {
 		JCacheInterceptor interceptor = createInterceptor(createOperationSource(
-				cacheManager, new TestCacheResolver("default", "exception"),
+				cacheManager, new NamedCacheResolver(cacheManager, "default", "simpleCache"),
 				defaultExceptionCacheResolver, defaultKeyGenerator));
 
 		AnnotatedJCacheableService service = new AnnotatedJCacheableService(cacheManager.getCache("default"));
@@ -65,7 +61,7 @@ public class JCacheInterceptorTests extends AbstractJCacheTests {
 	@Test
 	public void noCacheCouldBeResolved() {
 		JCacheInterceptor interceptor = createInterceptor(createOperationSource(
-				cacheManager, new TestCacheResolver(), // Returns empty list
+				cacheManager, new NamedCacheResolver(cacheManager), // Returns empty list
 				defaultExceptionCacheResolver, defaultKeyGenerator));
 
 		AnnotatedJCacheableService service = new AnnotatedJCacheableService(cacheManager.getCache("default"));
@@ -130,25 +126,6 @@ public class JCacheInterceptorTests extends AbstractJCacheTests {
 		interceptor.setCacheOperationSource(source);
 		interceptor.afterPropertiesSet();
 		return interceptor;
-	}
-
-
-	private class TestCacheResolver implements CacheResolver {
-
-		private final String[] cacheNames;
-
-		private TestCacheResolver(String... cacheNames) {
-			this.cacheNames = cacheNames;
-		}
-
-		@Override
-		public Collection<? extends Cache> resolveCaches(CacheOperationInvocationContext<?> context) {
-			List<Cache> result = new ArrayList<Cache>();
-			for (String cacheName : cacheNames) {
-				result.add(cacheManager.getCache(cacheName));
-			}
-			return result;
-		}
 	}
 
 	private static class DummyInvoker implements CacheOperationInvoker {

@@ -22,6 +22,7 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportAware;
@@ -45,6 +46,8 @@ public abstract class AbstractCachingConfiguration<C extends CachingConfigurer> 
 	protected AnnotationAttributes enableCaching;
 
 	protected CacheManager cacheManager;
+
+	protected CacheResolver cacheResolver;
 
 	protected KeyGenerator keyGenerator;
 
@@ -86,7 +89,7 @@ public abstract class AbstractCachingConfiguration<C extends CachingConfigurer> 
 			C cachingConfigurer = cachingConfigurers.iterator().next();
 			useCachingConfigurer(cachingConfigurer);
 		}
-		else if (!CollectionUtils.isEmpty(cacheManagerBeans)) {
+		if (this.cacheManager == null && !CollectionUtils.isEmpty(cacheManagerBeans)) {
 			int nManagers = cacheManagerBeans.size();
 			if (nManagers > 1) {
 				throw new IllegalStateException(nManagers + " beans of type CacheManager " +
@@ -98,7 +101,7 @@ public abstract class AbstractCachingConfiguration<C extends CachingConfigurer> 
 			this.cacheManager = cacheManagerBeans.iterator().next();
 			// keyGenerator remains null; will fall back to default within CacheInterceptor
 		}
-		else {
+		if (this.cacheManager == null) {
 			throw new IllegalStateException("No bean of type CacheManager could be found. " +
 					"Register a CacheManager bean or remove the @EnableCaching annotation " +
 					"from your configuration.");
@@ -110,6 +113,7 @@ public abstract class AbstractCachingConfiguration<C extends CachingConfigurer> 
 	 */
 	protected void useCachingConfigurer(C config) {
 		this.cacheManager = config.cacheManager();
+		this.cacheResolver = config.cacheResolver();
 		this.keyGenerator = config.keyGenerator();
 	}
 

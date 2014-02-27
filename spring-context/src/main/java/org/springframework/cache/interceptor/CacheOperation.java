@@ -28,7 +28,7 @@ import org.springframework.util.Assert;
  * @author Costin Leau
  * @author Stephane Nicoll
  */
-public abstract class CacheOperation {
+public abstract class CacheOperation implements BasicCacheOperation {
 
 	private Set<String> cacheNames = Collections.emptySet();
 
@@ -40,9 +40,12 @@ public abstract class CacheOperation {
 
 	private String cacheManager = "";
 
+	private String cacheResolver = "";
+
 	private String name = "";
 
 
+	@Override
 	public Set<String> getCacheNames() {
 		return cacheNames;
 	}
@@ -61,6 +64,10 @@ public abstract class CacheOperation {
 
 	public String getCacheManager() {
 		return cacheManager;
+	}
+
+	public String getCacheResolver() {
+		return cacheResolver;
 	}
 
 	public String getName() {
@@ -98,6 +105,11 @@ public abstract class CacheOperation {
 	public void setCacheManager(String cacheManager) {
 		Assert.notNull(cacheManager);
 		this.cacheManager = cacheManager;
+	}
+
+	public void setCacheResolver(String cacheResolver) {
+		Assert.notNull(cacheManager);
+		this.cacheResolver = cacheResolver;
 	}
 
 	public void setName(String name) {
@@ -151,6 +163,8 @@ public abstract class CacheOperation {
 		result.append(this.keyGenerator);
 		result.append("' | cacheManager='");
 		result.append(this.cacheManager);
+		result.append("' | cacheResolver='");
+		result.append(this.cacheResolver);
 		result.append("' | condition='");
 		result.append(this.condition);
 		result.append("'");

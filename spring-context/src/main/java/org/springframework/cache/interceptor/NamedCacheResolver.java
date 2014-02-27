@@ -16,29 +16,41 @@
 
 package org.springframework.cache.interceptor;
 
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
-import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 
 /**
- * A simple {@link CacheResolver} that resolves the {@link Cache} instance(s)
- * based on a configurable {@link CacheManager} and the name of the
- * cache(s) as provided by {@link BasicCacheOperation#getCacheNames() getCacheNames()}
+ * A {@link CacheResolver} that forces the resolution to a configurable
+ * collection of name(s) against a given {@link CacheManager}.
  *
  * @author Stephane Nicoll
- * @since 4.1
- * @see BasicCacheOperation#getCacheNames()
  */
-public class SimpleCacheResolver extends BaseCacheResolver {
+public class NamedCacheResolver extends BaseCacheResolver {
 
-	public SimpleCacheResolver(CacheManager cacheManager) {
+	private Collection<String> cacheNames;
+
+	public NamedCacheResolver(CacheManager cacheManager, String... cacheNames) {
 		super(cacheManager);
+		this.cacheNames = new ArrayList<String>(Arrays.asList(cacheNames));
+	}
+
+	public NamedCacheResolver() {
+	}
+
+	/**
+	 * Set the cache name(s) that this resolver should use.
+	 */
+	public void setCacheNames(Collection<String> cacheNames) {
+		this.cacheNames = cacheNames;
 	}
 
 	@Override
 	protected Collection<String> getCacheNames(CacheOperationInvocationContext<?> context) {
-		return context.getOperation().getCacheNames();
+		return cacheNames;
 	}
 
 }

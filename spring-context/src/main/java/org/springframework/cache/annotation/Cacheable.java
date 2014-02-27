@@ -62,9 +62,18 @@ public @interface Cacheable {
 	String keyGenerator() default "";
 
 	/**
-	 * The bean name of the custom {@link org.springframework.cache.CacheManager} to use.
+	 * The bean name of the custom {@link org.springframework.cache.CacheManager} to use to
+	 * create a default {@link org.springframework.cache.interceptor.CacheResolver} if none
+	 * is set already.
+	 * <p>Mutually exclusive with the {@link #cacheResolver()}  attribute.
+	 * @see org.springframework.cache.interceptor.SimpleCacheResolver
 	 */
 	String cacheManager() default "";
+
+	/**
+	 * The bean name of the custom {@link org.springframework.cache.interceptor.CacheResolver} to use.
+	 */
+	String cacheResolver() default "";
 
 	/**
 	 * Spring Expression Language (SpEL) attribute used for conditioning the method caching.

@@ -59,7 +59,10 @@ public class ProxyCachingConfiguration extends AbstractCachingConfiguration<Cach
 	public CacheInterceptor cacheInterceptor() {
 		CacheInterceptor interceptor = new CacheInterceptor();
 		interceptor.setCacheOperationSources(cacheOperationSource());
-		if (this.cacheManager != null) {
+		if (this.cacheResolver != null) {
+			interceptor.setCacheResolver(this.cacheResolver);
+		}
+		else if (this.cacheManager != null) {
 			interceptor.setCacheManager(this.cacheManager);
 		}
 		if (this.keyGenerator != null) {

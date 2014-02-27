@@ -14,31 +14,35 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.interceptor;
+package org.springframework.cache.annotation;
 
-import java.util.Collection;
-
-import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.interceptor.CacheResolver;
+import org.springframework.cache.interceptor.KeyGenerator;
 
 /**
- * A simple {@link CacheResolver} that resolves the {@link Cache} instance(s)
- * based on a configurable {@link CacheManager} and the name of the
- * cache(s) as provided by {@link BasicCacheOperation#getCacheNames() getCacheNames()}
+ * An implementation of {@link CachingConfigurer} with empty methods allowing
+ * sub-classes to override only the methods they're interested in.
  *
  * @author Stephane Nicoll
  * @since 4.1
- * @see BasicCacheOperation#getCacheNames()
+ * @see CachingConfigurer
  */
-public class SimpleCacheResolver extends BaseCacheResolver {
+public class CachingConfigurerSupport implements CachingConfigurer {
 
-	public SimpleCacheResolver(CacheManager cacheManager) {
-		super(cacheManager);
+	@Override
+	public CacheManager cacheManager() {
+		return null;
 	}
 
 	@Override
-	protected Collection<String> getCacheNames(CacheOperationInvocationContext<?> context) {
-		return context.getOperation().getCacheNames();
+	public KeyGenerator keyGenerator() {
+		return null;
+	}
+
+	@Override
+	public CacheResolver cacheResolver() {
+		return null;
 	}
 
 }

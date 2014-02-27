@@ -22,13 +22,14 @@ import static org.junit.Assert.*;
 import java.util.Collection;
 import java.util.UUID;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * Abstract annotation test (containing several reusable methods).
@@ -40,7 +41,7 @@ import org.springframework.context.ApplicationContext;
  */
 public abstract class AbstractAnnotationTests {
 
-	protected ApplicationContext ctx;
+	protected ConfigurableApplicationContext ctx;
 
 	protected CacheableService<?> cs;
 
@@ -51,7 +52,7 @@ public abstract class AbstractAnnotationTests {
 	protected CacheManager customCm;
 
 	/** @return a refreshed application context */
-	protected abstract ApplicationContext getApplicationContext();
+	protected abstract ConfigurableApplicationContext getApplicationContext();
 
 	@Before
 	public void setup() {
@@ -65,6 +66,11 @@ public abstract class AbstractAnnotationTests {
 		assertTrue(cn.contains("default"));
 		assertTrue(cn.contains("secondary"));
 		assertTrue(cn.contains("primary"));
+	}
+
+	@After
+	public void tearDown() {
+		  ctx.close();
 	}
 
 	public void testCacheable(CacheableService<?> service) throws Exception {
