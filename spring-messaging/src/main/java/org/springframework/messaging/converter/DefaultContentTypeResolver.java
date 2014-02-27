@@ -49,11 +49,22 @@ public class DefaultContentTypeResolver implements ContentTypeResolver {
 
 	@Override
 	public MimeType resolve(MessageHeaders headers) {
-		MimeType mimeType = null;
+		Object mimeType = null;
 		if (headers != null) {
-			mimeType = headers.get(MessageHeaders.CONTENT_TYPE, MimeType.class);
+			mimeType = headers.get(MessageHeaders.CONTENT_TYPE);
+			if(mimeType == null) {
+				return this.defaultMimeType;
+			}
+			if(String.class.isAssignableFrom(mimeType.getClass())) {
+				mimeType = MimeType.valueOf((String)mimeType);
+			}
+			if (!MimeType.class.isAssignableFrom(mimeType.getClass())) {
+				throw new IllegalArgumentException("Incorrect type for mime type header. Expected " +
+						"[class org.springframework.util.MimeType] or [class java.lang.String] " +
+						"but actual type is [" + mimeType.getClass() + "]");
+			}
 		}
-		return (mimeType != null) ? mimeType : this.defaultMimeType;
+		return (MimeType)mimeType;
 	}
 
 	@Override
