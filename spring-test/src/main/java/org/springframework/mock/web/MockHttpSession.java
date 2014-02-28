@@ -53,7 +53,7 @@ public class MockHttpSession implements HttpSession {
 
 	private static int nextId = 1;
 
-	private final String id;
+	private String id;
 
 	private final long creationTime = System.currentTimeMillis();
 
@@ -107,6 +107,16 @@ public class MockHttpSession implements HttpSession {
 
 	@Override
 	public String getId() {
+		return this.id;
+	}
+
+	/**
+	 * As of Servlet 3.1 the id of a session can be changed.
+	 * @return the new session id.
+	 * @since 4.0.3
+	 */
+	public String changeSessionId() {
+		this.id = Integer.toString(nextId++);
 		return this.id;
 	}
 

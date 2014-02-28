@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public class MockHttpSession implements HttpSession {
 
 	private static int nextId = 1;
 
-	private final String id;
+	private String id;
 
 	private final long creationTime = System.currentTimeMillis();
 
@@ -108,6 +108,16 @@ public class MockHttpSession implements HttpSession {
 
 	@Override
 	public String getId() {
+		return this.id;
+	}
+
+	/**
+	 * As of Servlet 3.1 the id of a session can be changed.
+	 * @return the new session id.
+	 * @since 4.0.3
+	 */
+	public String changeSessionId() {
+		this.id = Integer.toString(nextId++);
 		return this.id;
 	}
 
