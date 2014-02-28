@@ -310,5 +310,5 @@ need to issue a new pull request when asked to make changes.
 [SpringSource CLA form]: https://support.springsource.com/spring_committer_signup
 [fork-and-edit]: https://github.com/blog/844-forking-with-the-edit-button
 [Spring Framework Code Style]: https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-Code-Style
-[commit guidelines section of Pro Git]: http://progit.org/book/ch5-2.html#commit_guidelines
+[commit guidelines section of Pro Git]: http://git-scm.com/book/en/Distributed-Git-Contributing-to-a-Project#Commit-Guidelines
 [building from source]: https://github.com/spring-projects/spring-framework#building-from-source
