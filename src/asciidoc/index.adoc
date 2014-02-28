@@ -1941,15 +1941,15 @@ use constructor arguments for mandatory dependencies and setters for optional
 dependencies. Note that the use of a <<beans-required-annotation,@Required>> annotation
 on a setter can be used to make setters required dependencies.
 
-The Spring team generally advocates setter injection, because large numbers of
-constructor arguments can get unwieldy, especially when properties are optional. Setter
-methods also make objects of that class amenable to reconfiguration or re-injection
-later. Management through <<jmx,JMX MBeans>> is a compelling use case.
+The Spring team generally advocates constructor injections as it allows to implement
+application components as immutable objects and enforce the dependencies not being
+`null`. Furthermore this has the advantage that objects of this class are in a valid
+state after construction. Also, a large number of constructor arguments is a hint towards
+your class having too many responsibilities.
 
-Some purists favor constructor-based injection. Supplying all object dependencies means
-that the object is always returned to client (calling) code in a totally initialized
-state. The disadvantage is that the object becomes less amenable to reconfiguration and
-re-injection.
+Setter injection should only be used for optional dependencies, that can be reasonably
+defaulted within the class. If not, `null-checks have to be used everywhere the code
+uses the dependency.
 
 Use the DI that makes the most sense for a particular class. Sometimes, when dealing
 with third-party classes to which you do not have the source, the choice is made for
