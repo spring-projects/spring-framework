@@ -67,7 +67,7 @@ dash (-) delimited names, such as 'fix-warnings', 'fix-typo', etc. In
 important, because branch names show up in the merge commits that result from
 accepting pull requests and should be as expressive and concise as possible.
 
-## Use Spring Code Style
+## Use Spring Framework Code Style
 
 The complete [Spring Framework Code Style][] reference is available on the wiki, but
 here's a quick summary:
@@ -309,6 +309,6 @@ need to issue a new pull request when asked to make changes.
 [spring-framework-contrib]: https://groups.google.com/forum/#!forum/spring-framework-contrib
 [SpringSource CLA form]: https://support.springsource.com/spring_committer_signup
 [fork-and-edit]: https://github.com/blog/844-forking-with-the-edit-button
-[Spring Code Style]: https://github.com/spring-projects/spring-framework/wiki/Spring-Code-Style
+[Spring Framework Code Style]: https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-Code-Style
 [commit guidelines section of Pro Git]: http://progit.org/book/ch5-2.html#commit_guidelines
 [building from source]: https://github.com/SpringSource/spring-framework#building-from-source
