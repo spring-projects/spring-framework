@@ -17,15 +17,20 @@
 package org.springframework.http.converter.xml;
 
 import java.nio.charset.Charset;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import static org.custommonkey.xmlunit.XMLAssert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,10 +42,13 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.xml.sax.SAXParseException;
 
-/** @author Arjen Poutsma */
+/**
+ * Tests for {@link Jaxb2RootElementHttpMessageConverter}.
+ *
+ * @author Arjen Poutsma
+ * @author Sebastien Deleuze
+ */
 public class Jaxb2RootElementHttpMessageConverterTests {
 
 	private Jaxb2RootElementHttpMessageConverter converter;
@@ -146,6 +154,25 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 				outputMessage.getBodyAsString(Charset.forName("UTF-8")));
 	}
 
+	@Test
+	public void customizeMarshaller() throws Exception {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		MyJaxb2RootElementHttpMessageConverter myConverter = new MyJaxb2RootElementHttpMessageConverter();
+		myConverter.write(new MyRootElement(new MyCustomElement("a", "b")), null, outputMessage);
+		assertXMLEqual("Invalid result", "<myRootElement><element>a|||b</element></myRootElement>",
+				outputMessage.getBodyAsString(Charset.forName("UTF-8")));
+	}
+
+	@Test
+	public void customizeUnmarshaller() throws Exception {
+		byte[] body = "<myRootElement><element>a|||b</element></myRootElement>".getBytes("UTF-8");
+		MyJaxb2RootElementHttpMessageConverter myConverter = new MyJaxb2RootElementHttpMessageConverter();
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
+		MyRootElement result = (MyRootElement) myConverter.read(MyRootElement.class, inputMessage);
+		assertEquals("a", result.getElement().getField1());
+		assertEquals("b", result.getElement().getField2());
+	}
+
 	@XmlRootElement
 	public static class RootElement {
 
@@ -173,6 +200,86 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 	}
 
 	public static class RootElementSubclass extends RootElement {
+
+	}
+
+	public static class MyJaxb2RootElementHttpMessageConverter extends Jaxb2RootElementHttpMessageConverter {
+
+		@Override
+		protected void customizeMarshaller(Marshaller marshaller) {
+			marshaller.setAdapter(new MyCustomElementAdapter());
+		}
+
+		@Override
+		protected void customizeUnmarshaller(Unmarshaller unmarshaller) {
+			unmarshaller.setAdapter(new MyCustomElementAdapter());
+		}
+	}
+
+	public static class MyCustomElement {
+		private String field1;
+		private String field2;
+
+		public MyCustomElement() {
+		}
+
+		public MyCustomElement(String field1, String field2) {
+			this.field1 = field1;
+			this.field2 = field2;
+		}
+
+		public String getField1() {
+			return field1;
+		}
+
+		public void setField1(String field1) {
+			this.field1 = field1;
+		}
+
+		public String getField2() {
+			return field2;
+		}
+
+		public void setField2(String field2) {
+			this.field2 = field2;
+		}
+	}
+
+	@XmlRootElement
+	public static class MyRootElement {
+
+		private MyCustomElement element;
+
+		public MyRootElement() {
+
+		}
+
+		public MyRootElement(MyCustomElement element) {
+			this.element = element;
+		}
+
+		@XmlJavaTypeAdapter(MyCustomElementAdapter.class)
+		public MyCustomElement getElement() {
+			return element;
+		}
+
+		public void setElement(MyCustomElement element) {
+			this.element = element;
+		}
+	}
+
+	public static class MyCustomElementAdapter extends XmlAdapter<String, MyCustomElement> {
+
+		@Override
+		public String marshal(MyCustomElement c) throws Exception {
+			return c.getField1() + "|||" + c.getField2();
+		}
+
+		@Override
+		public MyCustomElement unmarshal(String c) throws Exception {
+			String[] t = c.split("\\|\\|\\|");
+			return new MyCustomElement(t[0], t[1]);
+		}
 
 	}
 
