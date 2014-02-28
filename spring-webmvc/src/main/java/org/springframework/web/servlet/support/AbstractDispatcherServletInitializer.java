@@ -30,6 +30,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.AbstractContextLoaderInitializer;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.filter.DelegatingFilterProxy;
 import org.springframework.web.servlet.DispatcherServlet;
 
 /**
@@ -162,6 +163,16 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	protected FilterRegistration.Dynamic registerServletFilter(ServletContext servletContext, Filter filter) {
 		String filterName = Conventions.getVariableName(filter);
 		Dynamic registration = servletContext.addFilter(filterName, filter);
+		if (registration == null) {
+			int counter = -1;
+			while (counter == -1 || registration == null) {
+				counter++;
+				registration = servletContext.addFilter(filterName + "#" + counter, filter);
+				Assert.isTrue(counter < 100,
+						"Failed to register filter '" + filter + "'." +
+						"Could the same Filter instance have been registered already?");
+			}
+		}
 		registration.setAsyncSupported(isAsyncSupported());
 		registration.addMappingForServletNames(getDispatcherTypes(), false, getServletName());
 		return registration;
