@@ -356,20 +356,18 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		if (convertersElement == null || Boolean.valueOf(convertersElement.getAttribute("register-defaults"))) {
 			convertersDef.setSource(source);
 			if (jackson2Present) {
-				convertersDef.add(new RootBeanDefinition(MappingJackson2MessageConverter.class));
+				RootBeanDefinition jacksonConverterDef = new RootBeanDefinition(MappingJackson2MessageConverter.class);
+				RootBeanDefinition resolverDef = new RootBeanDefinition(DefaultContentTypeResolver.class);
+				resolverDef.getPropertyValues().add("defaultMimeType", MimeTypeUtils.APPLICATION_JSON);
+				jacksonConverterDef.getPropertyValues().add("contentTypeResolver", resolverDef);
+				convertersDef.add(jacksonConverterDef);
 			}
 			convertersDef.add(new RootBeanDefinition(StringMessageConverter.class));
 			convertersDef.add(new RootBeanDefinition(ByteArrayMessageConverter.class));
 		}
 
-		RootBeanDefinition contentTypeResolverDef = new RootBeanDefinition(DefaultContentTypeResolver.class);
-		if (jackson2Present) {
-			contentTypeResolverDef.getPropertyValues().add("defaultMimeType", MimeTypeUtils.APPLICATION_JSON);
-		}
-
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addIndexedArgumentValue(0, convertersDef);
-		cavs.addIndexedArgumentValue(1, contentTypeResolverDef);
 
 		RootBeanDefinition brokerMessage = new RootBeanDefinition(CompositeMessageConverter.class, cavs, null);
 		return new RuntimeBeanReference(registerBeanDef(brokerMessage, parserCxt, source));

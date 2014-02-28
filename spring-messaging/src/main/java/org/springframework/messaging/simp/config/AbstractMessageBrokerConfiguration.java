@@ -248,26 +248,20 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	@Bean
 	public CompositeMessageConverter brokerMessageConverter() {
-
 		List<MessageConverter> converters = new ArrayList<MessageConverter>();
 		boolean registerDefaults = configureMessageConverters(converters);
 		if (registerDefaults) {
 			if (jackson2Present) {
-				converters.add(new MappingJackson2MessageConverter());
+				DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
+				resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
+				MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
+				converter.setContentTypeResolver(resolver);
+				converters.add(converter);
 			}
 			converters.add(new StringMessageConverter());
 			converters.add(new ByteArrayMessageConverter());
 		}
-
-		ContentTypeResolver contentTypeResolver = getContentTypeResolver();
-		if (contentTypeResolver == null) {
-			contentTypeResolver = new DefaultContentTypeResolver();
-			if (jackson2Present && registerDefaults) {
-				((DefaultContentTypeResolver) contentTypeResolver).setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
-			}
-		}
-
-		return new CompositeMessageConverter(converters, contentTypeResolver);
+		return new CompositeMessageConverter(converters);
 	}
 
 	/**
@@ -279,13 +273,6 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	 */
 	protected boolean configureMessageConverters(List<MessageConverter> messageConverters) {
 		return true;
-	}
-
-	/**
-	 * Override this method to provide a custom {@link ContentTypeResolver}.
-	 */
-	protected ContentTypeResolver getContentTypeResolver() {
-		return null;
 	}
 
 	@Bean

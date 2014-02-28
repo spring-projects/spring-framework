@@ -25,8 +25,8 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
 
 /**
- * A {@link MessageConverter} that delegates to a list of other converters to invoke until
- * one of them returns a non-null value.
+ * A {@link MessageConverter} that delegates to a list of other converters
+ * to be invoked until one of them returns a non-null result.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -35,51 +35,16 @@ public class CompositeMessageConverter implements MessageConverter {
 
 	private final List<MessageConverter> converters;
 
-	private ContentTypeResolver contentTypeResolver;
-
 
 	/**
-	 * Create a new instance with the given {@link MessageConverter}s in turn configuring
-	 * each with a {@link DefaultContentTypeResolver}.
+	 * Create an instance with the given converters.
 	 */
 	public CompositeMessageConverter(Collection<MessageConverter> converters) {
-		this(new ArrayList<MessageConverter>(converters), new DefaultContentTypeResolver());
-	}
-
-	/**
-	 * Create an instance with the given {@link MessageConverter}s and configure all with
-	 * the given {@link ContentTypeResolver}.
-	 */
-	public CompositeMessageConverter(Collection<MessageConverter> converters, ContentTypeResolver resolver) {
-		Assert.notEmpty(converters, "Converters must not be null");
-		Assert.notNull(resolver, "ContentTypeResolver must not be null");
+		Assert.notEmpty(converters, "Converters must not be empty");
 		this.converters = new ArrayList<MessageConverter>(converters);
-		this.contentTypeResolver = resolver;
-		applyContentTypeResolver(converters, resolver);
 	}
 
-
-	private static void applyContentTypeResolver(Collection<MessageConverter> converters,
-			ContentTypeResolver resolver) {
-
-		for (MessageConverter converter : converters) {
-			if (converter instanceof AbstractMessageConverter) {
-				((AbstractMessageConverter) converter).setContentTypeResolver(resolver);
-			}
-		}
-	}
-
-
-	public void setContentTypeResolver(ContentTypeResolver resolver) {
-		this.contentTypeResolver = resolver;
-		applyContentTypeResolver(getConverters(), resolver);
-	}
-
-	public ContentTypeResolver getContentTypeResolver() {
-		return this.contentTypeResolver;
-	}
-
-	public Collection<MessageConverter> getConverters() {
+	public List<MessageConverter> getConverters() {
 		return this.converters;
 	}
 
@@ -108,7 +73,7 @@ public class CompositeMessageConverter implements MessageConverter {
 
 	@Override
 	public String toString() {
-		return "CompositeMessageConverter[contentTypeResolver=" + this.contentTypeResolver +
-				", converters=" + this.converters + "]";
+		return "CompositeMessageConverter[converters=" + this.converters + "]";
 	}
+
 }

@@ -17,7 +17,6 @@
 package org.springframework.messaging.core;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +27,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.*;
 import org.springframework.messaging.support.GenericMessage;
-import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 import static org.junit.Assert.*;
@@ -155,7 +153,7 @@ public class MessageSendingTemplateTests {
 	public void convertAndSendNoMatchingConverter() {
 
 		MessageConverter converter = new CompositeMessageConverter(
-				Arrays.<MessageConverter>asList(new MappingJackson2MessageConverter()), new DefaultContentTypeResolver());
+				Arrays.<MessageConverter>asList(new MappingJackson2MessageConverter()));
 		this.template.setMessageConverter(converter);
 
 		this.headers.put(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_XML);

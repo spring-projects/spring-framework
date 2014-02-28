@@ -27,7 +27,11 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.converter.CompositeMessageConverter;
+import org.springframework.messaging.converter.ContentTypeResolver;
+import org.springframework.messaging.converter.DefaultContentTypeResolver;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -40,6 +44,7 @@ import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.HandlerMapping;
@@ -52,6 +57,7 @@ import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler
 import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test fixture for MessageBrokerBeanDefinitionParser.
@@ -220,7 +226,6 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertNotNull(messageConverter);
 		assertTrue(messageConverter instanceof CompositeMessageConverter);
 
-
 		CompositeMessageConverter compositeMessageConverter = this.appContext.getBean(CompositeMessageConverter.class);
 		assertNotNull(compositeMessageConverter);
 
@@ -228,6 +233,14 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertNotNull(simpMessagingTemplate);
 		assertEquals("/personal", simpMessagingTemplate.getUserDestinationPrefix());
 
+		List<MessageConverter> converters = compositeMessageConverter.getConverters();
+		assertThat(converters.size(), Matchers.is(3));
+		assertThat(converters.get(0), Matchers.instanceOf(MappingJackson2MessageConverter.class));
+		assertThat(converters.get(1), Matchers.instanceOf(StringMessageConverter.class));
+		assertThat(converters.get(2), Matchers.instanceOf(ByteArrayMessageConverter.class));
+
+		ContentTypeResolver resolver = ((MappingJackson2MessageConverter) converters.get(0)).getContentTypeResolver();
+		assertEquals(MimeTypeUtils.APPLICATION_JSON, ((DefaultContentTypeResolver) resolver).getDefaultMimeType());
 	}
 
 	@Test
