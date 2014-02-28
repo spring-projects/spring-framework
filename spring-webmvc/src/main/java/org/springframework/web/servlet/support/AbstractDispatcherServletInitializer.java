@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.support;
 
 import java.util.EnumSet;
+import java.util.Map;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterRegistration;
@@ -51,6 +52,7 @@ import org.springframework.web.servlet.DispatcherServlet;
  * @author Arjen Poutsma
  * @author Chris Beams
  * @author Rossen Stoyanchev
+ * @author Adam J. Weigold
  * @since 3.2
  */
 public abstract class AbstractDispatcherServletInitializer extends AbstractContextLoaderInitializer {
@@ -103,6 +105,12 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 				registerServletFilter(servletContext, filter);
 			}
 		}
+		Map<String, Filter> namedFilters = getNamedServletFilters();
+		if (namedFilters != null) {
+			for (Map.Entry<String, Filter> namedFilter : namedFilters.entrySet()) {
+				registerServletFilter(servletContext, namedFilter.getKey(), namedFilter.getValue());
+			}
+		}
 
 		customizeRegistration(registration);
 	}
@@ -143,6 +151,15 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	}
 
 	/**
+	 * Specify named filters to add and map to the {@code DispatcherServlet}.
+	 * @return a map of filter names to filter or {@code null}
+	 * @see #registerServletFilter(ServletContext, Filter)
+	 */
+	protected Map<String, Filter> getNamedServletFilters() {
+		return null;
+	}
+
+	/**
 	 * Add the given filter to the ServletContext and map it to the
 	 * {@code DispatcherServlet} as follows:
 	 * <ul>
@@ -161,6 +178,27 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	 */
 	protected FilterRegistration.Dynamic registerServletFilter(ServletContext servletContext, Filter filter) {
 		String filterName = Conventions.getVariableName(filter);
+		return registerServletFilter(servletContext, filterName, filter);
+	}
+
+	/**
+	 * Add the given filter to the ServletContext and map it to the
+	 * {@code DispatcherServlet} as follows:
+	 * <ul>
+	 * <li>the {@code asyncSupported} flag is set depending on the
+	 * return value of {@link #isAsyncSupported() asyncSupported}
+	 * <li>a filter mapping is created with dispatcher types {@code REQUEST},
+	 * {@code FORWARD}, {@code INCLUDE}, and conditionally {@code ASYNC} depending
+	 * on the return value of {@link #isAsyncSupported() asyncSupported}
+	 * </ul>
+	 * <p>If the above defaults are not suitable or insufficient, override this
+	 * method and register filters directly with the {@code ServletContext}.
+	 * @param servletContext the servlet context to register filters with
+	 * @param filterName the name of the filter to be registered
+	 * @param filter the filter to be registered
+	 * @return the filter registration
+	 */
+	protected FilterRegistration.Dynamic registerServletFilter(ServletContext servletContext, String filterName, Filter filter) {
 		Dynamic registration = servletContext.addFilter(filterName, filter);
 		registration.setAsyncSupported(isAsyncSupported());
 		registration.addMappingForServletNames(getDispatcherTypes(), false, getServletName());
