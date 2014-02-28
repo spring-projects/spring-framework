@@ -4307,7 +4307,7 @@ dependency type:
 
 | `BootstrapContextAware`
 | Resource adapter `BootstrapContext` the container runs in. Typically available only in
-  JCA aware `ApplicationContext` s
+  JCA aware `ApplicationContext`s
 | <<cci>>
 
 | `LoadTimeWeaverAware`
@@ -4459,7 +4459,7 @@ after the Spring container finishes instantiating, configuring, and initializing
 you can plug in one or more `BeanPostProcessor` implementations.
 
 You can configure multiple `BeanPostProcessor` instances, and you can control the order
-in which these `BeanPostProcessor` s execute by setting the `order` property. You can
+in which these `BeanPostProcessor`s execute by setting the `order` property. You can
 set this property only if the `BeanPostProcessor` implements the `Ordered` interface; if
 you write your own `BeanPostProcessor` you should consider implementing the `Ordered`
 interface too. For further details, consult the javadocs of the `BeanPostProcessor` and
@@ -4469,11 +4469,11 @@ registration of `BeanPostProcessors`>>
 
 [NOTE]
 ====
-`BeanPostProcessor` s operate on bean (or object) __instances__; that is to say, the
-Spring IoC container instantiates a bean instance and __then__ `BeanPostProcessor` s do
+`BeanPostProcessor`s operate on bean (or object) __instances__; that is to say, the
+Spring IoC container instantiates a bean instance and __then__ `BeanPostProcessor`s do
 their work.
 
-`BeanPostProcessor` s are scoped __per-container__. This is only relevant if you are
+`BeanPostProcessor`s are scoped __per-container__. This is only relevant if you are
 using container hierarchies. If you define a `BeanPostProcessor` in one container, it
 will __only__ post-process the beans in that container. In other words, beans that are
 defined in one container are not post-processed by a `BeanPostProcessor` defined in
@@ -4708,8 +4708,8 @@ you would any other bean.
 
 [NOTE]
 ====
-As with `BeanPostProcessor` s , you typically do not want to configure
-`BeanFactoryPostProcessor` s for lazy initialization. If no other bean references a
+As with `BeanPostProcessor`s , you typically do not want to configure
+`BeanFactoryPostProcessor`s for lazy initialization. If no other bean references a
 `Bean(Factory)PostProcessor`, that post-processor will not get instantiated at all.
 Thus, marking it for lazy initialization will be ignored, and the
 `Bean(Factory)PostProcessor` will be instantiated eagerly even if you set the
@@ -5027,7 +5027,7 @@ example:
 This annotation simply indicates that the affected bean property must be populated at
 configuration time, through an explicit property value in a bean definition or through
 autowiring. The container throws an exception if the affected bean property has not been
-populated; this allows for eager and explicit failure, avoiding `NullPointerException` s
+populated; this allows for eager and explicit failure, avoiding `NullPointerException`s
 or the like later on. It is still recommended that you put assertions into the bean
 class itself, for example, into an init method. Doing so enforces those required
 references and values even when you use the class outside of a container.
@@ -5911,7 +5911,7 @@ of the `proxyMode`.
 [[beans-scanning-autodetection]]
 ==== Automatically detecting classes and registering bean definitions
 Spring can automatically detect stereotyped classes and register corresponding
-`BeanDefinition` s with the `ApplicationContext`. For example, the following two classes
+`BeanDefinition`s with the `ApplicationContext`. For example, the following two classes
 are eligible for such autodetection:
 
 [source,java,indent=0]
@@ -7020,7 +7020,7 @@ inter-bean dependencies. See <<beans-java-basic-concepts>> for a general introdu
 
 [[beans-java-injecting-dependencies]]
 ===== Injecting inter-bean dependencies
-When `@Bean` s have dependencies on one another, expressing that dependency is as simple
+When `@Bean`s have dependencies on one another, expressing that dependency is as simple
 as having one bean method call another:
 
 [source,java,indent=0]
@@ -8106,7 +8106,7 @@ For optimal usage and understanding of application contexts, users should genera
 familiarize themselves with Spring's `Resource` abstraction, as described in the chapter
 <<resources>>.
 
-An application context is a `ResourceLoader`, which can be used to load `Resource` s. A
+An application context is a `ResourceLoader`, which can be used to load `Resource`s. A
 `Resource` is essentially a more feature rich version of the JDK class `java.net.URL`,
 in fact, the implementations of the `Resource` wrap an instance of `java.net.URL` where
 appropriate. A `Resource` can obtain low-level resources from almost any location in a
@@ -8202,7 +8202,7 @@ class for the configuration details involved in RAR deployment.
 __For a simple deployment of a Spring ApplicationContext as a J2EE RAR file:__ package
 all application classes into a RAR file, which is a standard JAR file with a different
 file extension. Add all required library JARs into the root of the RAR archive. Add a
-"META-INF/ra.xml" deployment descriptor (as shown in `SpringContextResourceAdapter` s
+"META-INF/ra.xml" deployment descriptor (as shown in `SpringContextResourceAdapter`s
 JavaDoc) and the corresponding Spring XML bean definition file(s) (typically
 "META-INF/applicationContext.xml"), and drop the resulting RAR file into your
 application server's deployment directory.
@@ -8615,7 +8615,7 @@ Similarly, one can force a `UrlResource` to be used by specifying any of the sta
 	Resource template = ctx.getResource("http://myhost.com/resource/path/myTemplate.txt");
 ----
 
-The following table summarizes the strategy for converting `String` s to `Resource` s:
+The following table summarizes the strategy for converting `String`s to `Resource`s:
 
 [[resources-resource-strings]]
 .Resource strings
@@ -11085,7 +11085,7 @@ expression using the methods `setVariable()` and `registerFunction()`. The use o
 variables and functions are described in the language reference sections
 <<expressions-ref-variables,Variables>> and <<expressions-ref-functions,Functions>>. The
 `StandardEvaluationContext` is also where you can register custom
-`ConstructorResolver` s, `MethodResolver` s, and `PropertyAccessor` s to extend how SpEL
+`ConstructorResolver`s, `MethodResolver`s, and `PropertyAccessor`s to extend how SpEL
 evaluates expressions. Please refer to the JavaDoc of these classes for more details.
 
 
@@ -17548,7 +17548,7 @@ depends on environment-specific properties.
 ===== JNDI
 The `org.springframework.mock.jndi` package contains an implementation of the JNDI SPI,
 which you can use to set up a simple JNDI environment for test suites or stand-alone
-applications. If, for example, JDBC `DataSource` s get bound to the same JNDI names in
+applications. If, for example, JDBC `DataSource`s get bound to the same JNDI names in
 test code as within a Java EE container, you can reuse both application code and
 configuration in testing scenarios without modification.
 
@@ -17597,7 +17597,7 @@ dealing with Spring MVC `ModelAndView` objects.
 [TIP]
 ====
 
-To test your Spring MVC `Controller` s, use `ModelAndViewAssert` combined with
+To test your Spring MVC `Controller`s, use `ModelAndViewAssert` combined with
 `MockHttpServletRequest`, `MockHttpSession`, and so on from the <<mock-objects-servlet,
 `org.springframework.mock.web`>> package.
 
@@ -17658,7 +17658,7 @@ configuration details.
 [[testing-ctx-management]]
 ===== Context management and caching
 The Spring TestContext Framework provides consistent loading of Spring
-`ApplicationContext` s and `WebApplicationContext` s as well as caching of those
+`ApplicationContext`s and `WebApplicationContext`s as well as caching of those
 contexts. Support for the caching of loaded contexts is important, because startup time
 can become an issue -- not because of the overhead of Spring itself, but because the
 objects instantiated by the Spring container take time to instantiate. For example, a
@@ -17691,7 +17691,7 @@ configure instances of your test classes via Dependency Injection. This provides
 convenient mechanism for setting up test fixtures using preconfigured beans from your
 application context. A strong benefit here is that you can reuse application contexts
 across various testing scenarios (e.g., for configuring Spring-managed object graphs,
-transactional proxies, `DataSource` s, etc.), thus avoiding the need to duplicate
+transactional proxies, `DataSource`s, etc.), thus avoiding the need to duplicate
 complex test fixture setup for individual test cases.
 
 As an example, consider the scenario where we have a class, `HibernateTitleRepository`,
@@ -17924,7 +17924,7 @@ hierarchy. See the `@WebAppConfiguration` javadocs for further details.
 
 +
 
-A class-level annotation that is used to define a hierarchy of `ApplicationContext` s
+A class-level annotation that is used to define a hierarchy of `ApplicationContext`s
 for integration tests. `@ContextHierarchy` should be declared with a list of one or more
 `@ContextConfiguration` instances, each of which defines a level in the context
 hierarchy. The following examples demonstrate the use of `@ContextHierarchy` within a
@@ -18096,7 +18096,7 @@ hierarchy via `@ContextHierarchy`, the `hierarchyMode` flag can be used to contr
 the context cache is cleared. By default an __exhaustive__ algorithm will be used that
 clears the context cache including not only the current level but also all other context
 hierarchies that share an ancestor context common to the current test; all
-`ApplicationContext` s that reside in a sub-hierarchy of the common ancestor context
+`ApplicationContext`s that reside in a sub-hierarchy of the common ancestor context
 will be removed from the context cache and closed. If the __exhaustive__ algorithm is
 overkill for a particular use case, the simpler __current level__ algorithm can be
 specified instead, as seen below.
@@ -18133,7 +18133,7 @@ For further details regarding the `EXHAUSTIVE` and `CURRENT_LEVEL` algorithms se
 
 +
 
-Defines class-level metadata for configuring which `TestExecutionListener` s should be
+Defines class-level metadata for configuring which `TestExecutionListener`s should be
 registered with the `TestContextManager`. Typically, `@TestExecutionListeners` is used
 in conjunction with `@ContextConfiguration`.
 
@@ -18518,7 +18518,7 @@ and the `TestExecutionListener`, `ContextLoader`, and `SmartContextLoader` inter
 `TestContextManager` is created on a per-test basis (e.g., for the execution of a single
 test method in JUnit). The `TestContextManager` in turn manages a `TestContext` that
 holds the context of the current test. The `TestContextManager` also updates the state
-of the `TestContext` as the test progresses and delegates to `TestExecutionListener` s,
+of the `TestContext` as the test progresses and delegates to `TestExecutionListener`s,
 which instrument the actual test execution by providing dependency injection, managing
 transactions, and so on. A `ContextLoader` (or `SmartContextLoader`) is responsible for
 loading an `ApplicationContext` for a given test class. Consult the javadocs and the
@@ -18531,7 +18531,7 @@ Spring test suite for further information and examples of various implementation
   requested.
 * `TestContextManager`: The main entry point into the __Spring TestContext Framework__,
   which manages a single `TestContext` and signals events to all registered
-  `TestExecutionListener` s at well-defined test execution points:
+  `TestExecutionListener`s at well-defined test execution points:
 ** prior to any __before class methods__ of a particular testing framework
 ** test instance preparation
 ** prior to any __before methods__ of a particular testing framework
@@ -18757,7 +18757,7 @@ The term __annotated class__ can refer to any of the following.
 
 Consult the javadocs of `@Configuration` and `@Bean` for further information regarding
 the configuration and semantics of __annotated classes__, paying special attention to
-the discussion of __ `@Bean` Lite Mode__.
+the discussion of __`@Bean` Lite Mode__.
 ====
 
 If you omit the `classes` attribute from the `@ContextConfiguration` annotation, the
@@ -19501,7 +19501,7 @@ default.
 
 When writing integration tests that rely on a loaded Spring `ApplicationContext`, it is
 often sufficient to test against a single context; however, there are times when it is
-beneficial or even necessary to test against a hierarchy of `ApplicationContext` s. For
+beneficial or even necessary to test against a hierarchy of `ApplicationContext`s. For
 example, if you are developing a Spring MVC web application you will typically have a
 root `WebApplicationContext` loaded via Spring's `ContextLoaderListener` and a child
 `WebApplicationContext` loaded via Spring's `DispatcherServlet`. This results in a
@@ -21589,7 +21589,7 @@ the call stack, and make a determination whether to mark the transaction for rol
 In its default configuration, the Spring Framework's transaction infrastructure code
 __only__ marks a transaction for rollback in the case of runtime, unchecked exceptions;
 that is, when the thrown exception is an instance or subclass of `RuntimeException`. (
-`Error` s will also - by default - result in a rollback). Checked exceptions that are
+`Error`s will also - by default - result in a rollback). Checked exceptions that are
 thrown from a transactional method do __not__ result in rollback in the default
 configuration.
 
@@ -23082,7 +23082,7 @@ creation and release of resources, which helps you avoid common errors such as
 forgetting to close the connection. It performs the basic tasks of the core JDBC
 workflow such as statement creation and execution, leaving application code to provide
 SQL and extract results. The `JdbcTemplate` class executes SQL queries, update
-statements and stored procedure calls, performs iteration over `ResultSet` s and
+statements and stored procedure calls, performs iteration over `ResultSet`s and
 extraction of returned parameter values. It also catches JDBC exceptions and translates
 them to the generic, more informative, exception hierarchy defined in the
 `org.springframework.dao` package.
@@ -25290,8 +25290,8 @@ declaration of an `SqlOutParameter`.
 You use the `SqlTypeValue` to pass in the value of a Java object like `TestItem` into a
 stored procedure. The `SqlTypeValue` interface has a single method named
 `createTypeValue` that you must implement. The active connection is passed in, and you
-can use it to create database-specific objects such as `StructDescriptor` s, as shown in
-the following example, or `ArrayDescriptor` s.
+can use it to create database-specific objects such as `StructDescriptor`s, as shown in
+the following example, or `ArrayDescriptor`s.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -27767,7 +27767,7 @@ set using the `targetClass` property. Optionally, you can set the binding name u
 ----
 
 A `JibxMarshaller` is configured for a single class. If you want to marshal multiple
-classes, you have to configure multiple `JibxMarshaller` s with different `targetClass`
+classes, you have to configure multiple `JibxMarshaller`s with different `targetClass`
 property values.
 
 
@@ -28978,13 +28978,13 @@ multiple requests are allowed to access a session concurrently.
   headers. Parameter values are converted to the declared method argument type.
 * `@RequestBody` annotated parameters for access to the HTTP request body. Parameter
   values are converted to the declared method argument type using
-  `HttpMessageConverter` s. See <<mvc-ann-requestbody>>.
+  `HttpMessageConverter`s. See <<mvc-ann-requestbody>>.
 * `@RequestPart` annotated parameters for access to the content of a
   "multipart/form-data" request part. See <<mvc-multipart-forms-non-browsers>> and
   <<mvc-multipart>>.
 * `HttpEntity<?>` parameters for access to the Servlet request HTTP headers and
   contents. The request stream will be converted to the entity body using
-  `HttpMessageConverter` s. See <<mvc-ann-httpentity>>.
+  `HttpMessageConverter`s. See <<mvc-ann-httpentity>>.
 * `java.util.Map` / `org.springframework.ui.Model` / `org.springframework.ui.ModelMap`
   for enriching the implicit model that is exposed to the web view.
 * `org.springframework.web.servlet.mvc.support.RedirectAttributes` to specify the exact
@@ -29060,10 +29060,10 @@ The following are the supported return types:
   signature).
 * If the method is annotated with `@ResponseBody`, the return type is written to the
   response HTTP body. The return value will be converted to the declared method argument
-  type using `HttpMessageConverter` s. See <<mvc-ann-responsebody>>.
+  type using `HttpMessageConverter`s. See <<mvc-ann-responsebody>>.
 * An `HttpEntity<?>` or `ResponseEntity<?>` object to provide access to the Servlet
   response HTTP headers and contents. The entity body will be converted to the response
-  stream using `HttpMessageConverter` s. See <<mvc-ann-httpentity>>.
+  stream using `HttpMessageConverter`s. See <<mvc-ann-httpentity>>.
 * An `HttpHeaders` object to return a response with no body.
 * A `Callable<?>` can be returned when the application wants to produce the return value
   asynchronously in a thread managed by Spring MVC.
@@ -29989,7 +29989,7 @@ don't need to do that because the `RequestMappingHandlerMapping` automatically l
 all `HandlerMapping` classes extending from `AbstractHandlerMapping` have the following
 properties that you can use to customize their behavior:
 
-* `interceptors` List of interceptors to use. `HandlerInterceptor` s are discussed in
+* `interceptors` List of interceptors to use. `HandlerInterceptor`s are discussed in
   <<mvc-handlermapping-interceptor>>.
 * `defaultHandler` Default handler to use, when this handler mapping does not result in
   a matching handler.
@@ -35397,7 +35397,7 @@ action request, handling a render request, and returning a model and a view.
 ==== AbstractController and PortletContentGenerator
 
 Of course, just a `Controller` interface isn't enough. To provide a basic
-infrastructure, all of Spring Portlet MVC's `Controller` s inherit from
+infrastructure, all of Spring Portlet MVC's `Controller`s inherit from
 `AbstractController`, a class offering access to Spring's `ApplicationContext` and
 control over caching.
 
@@ -35606,7 +35606,7 @@ The rest of this section describes three of Spring Portlet MVC's most commonly u
 handler mappings. They all extend `AbstractHandlerMapping` and share the following
 properties:
 
-* `interceptors`: The list of interceptors to use. `HandlerInterceptor` s are discussed
+* `interceptors`: The list of interceptors to use. `HandlerInterceptor`s are discussed
   in <<portlet-handlermapping-interceptor>>.
 * `defaultHandler`: The default handler to use, when this handler mapping does not
   result in a matching handler.
@@ -36070,7 +36070,7 @@ register any custom property editor because there is no type conversion to be pe
 
 [[portlet-exceptionresolver]]
 === Handling exceptions
-Just like Servlet MVC, Portlet MVC provides `HandlerExceptionResolver` s to ease the
+Just like Servlet MVC, Portlet MVC provides `HandlerExceptionResolver`s to ease the
 pain of unexpected exceptions that occur while your request is being processed by a
 handler that matched the request. Portlet MVC also provides a portlet-specific, concrete
 `SimpleMappingExceptionResolver` that enables you to take the class name of any
@@ -36096,7 +36096,7 @@ a Portlet environment.
 
 [[portlet-ann-setup]]
 ==== Setting up the dispatcher for annotation support
-__ `@RequestMapping` will only be processed if a corresponding `HandlerMapping` (for
+__`@RequestMapping` will only be processed if a corresponding `HandlerMapping` (for
 type level annotations) and/or `HandlerAdapter` (for method level annotations) is
 present in the dispatcher.__ This is the case by default in both `DispatcherServlet` and
 `DispatcherPortlet`.
@@ -39161,7 +39161,7 @@ Concrete implementations for the main media (mime) types are provided in the fra
 and are registered by default with the `RestTemplate` on the client-side and with
 `AnnotationMethodHandlerAdapter` on the server-side.
 
-The implementations of `HttpMessageConverter` s are described in the following sections.
+The implementations of `HttpMessageConverter`s are described in the following sections.
 For all converters a default media type is used but can be overridden by setting the
 `supportedMediaTypes` bean property
 
@@ -41387,7 +41387,7 @@ lists of method names.
 === Controlling the ObjectNames for your beans
 
 Behind the scenes, the `MBeanExporter` delegates to an implementation of the
-`ObjectNamingStrategy` to obtain `ObjectName` s for each of the beans it is registering.
+`ObjectNamingStrategy` to obtain `ObjectName`s for each of the beans it is registering.
 The default implementation, `KeyNamingStrategy`, will, by default, use the key of the
 `beans` `Map` as the `ObjectName`. In addition, the `KeyNamingStrategy` can map the key
 of the `beans` `Map` to an entry in a `Properties` file (or files) to resolve the
@@ -41402,7 +41402,7 @@ uses source level metadata to obtain the `ObjectName`.
 ==== Reading ObjectNames from Properties
 
 You can configure your own `KeyNamingStrategy` instance and configure it to read
-`ObjectName` s from a `Properties` instance rather than use bean key. The
+`ObjectName`s from a `Properties` instance rather than use bean key. The
 `KeyNamingStrategy` will attempt to locate an entry in the `Properties` with a key
 corresponding to the bean key. If no entry is found or if the `Properties` instance is
 `null` then the bean key itself is used.
@@ -44559,7 +44559,7 @@ that this support was added, and __c)__ the Spring developers were most familiar
 them.
 
 There is nothing stopping the inclusion of further languages though. If you want to see
-support for <__insert your favourite dynamic language here__>, you can always raise an
+support for <__insert your favorite dynamic language here__>, you can always raise an
 issue on Spring's
 http://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa[JIRA] page (or
 implement such support yourself).
@@ -45221,7 +45221,7 @@ the standard Java conventions of one (public) class per source file.
 
 
 [[dynamic-language-beans-groovy-customizer]]
-===== Customising Groovy objects via a callback
+===== Customizing Groovy objects via a callback
 The `GroovyObjectCustomizer` interface is a callback that allows you to hook additional
 creation logic into the process of creating a Groovy-backed bean. For example,
 implementations of this interface could invoke any required initialization method(s), or
@@ -45577,7 +45577,7 @@ Some of the more active members of the Spring community have also added support 
 number of additional dynamic languages above and beyond the ones covered in this
 chapter. While it is possible that such third party contributions may be added to the
 list of languages supported by the main Spring distribution, your best bet for seeing if
-your favourite scripting language is supported is the
+your favorite scripting language is supported is the
 https://springmodules.dev.java.net/[Spring Modules project].
 
 
@@ -45764,7 +45764,7 @@ quite different in signatures as the code base grows; while the default strategy
 work for some methods, it rarely does for all methods.
 
 Below are some examples of various SpEL declarations - if you are not familiar with it,
-do yourself a favour and read <<expressions>>:
+do yourself a favor and read <<expressions>>:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -46185,7 +46185,7 @@ we did in the example above by defining the target cache through the `cache:defi
 Out of the box, the cache abstraction provides integration with two storages - one on
 top of the JDK `ConcurrentMap` and one for http://ehcache.org/[EhCache] library. To use
 them, one needs to simply declare an appropriate `CacheManager` - an entity that
-controls and manages `Cache` s and can be used to retrieve these for storage.
+controls and manages `Cache`s and can be used to retrieve these for storage.
 
 
 
@@ -46277,7 +46277,7 @@ performs no caching - that is, forces the cached methods to be executed every ti
 	</bean>
 ----
 
-The `CompositeCacheManager` above chains multiple `CacheManager` s and additionally,
+The `CompositeCacheManager` above chains multiple `CacheManager`s and additionally,
 through the `fallbackToNoOpCache` flag, adds a __no op__ cache that for all the
 definitions not handled by the configured cache managers. That is, every cache
 definition not found in either `jdkCache` or `gemfireCache` (configured above) will be
