@@ -1925,36 +1925,42 @@ on container specific interfaces, base classes or annotations.
 	}
 ----
 
-The `ApplicationContext` supports constructor- and setter-based DI for the beans it
-manages. It also supports setter-based DI after some dependencies are already injected
-through the constructor approach. You configure the dependencies in the form of a
-`BeanDefinition`, which you use with `PropertyEditor` instances to convert properties
-from one format to another. However, most Spring users do not work with these classes
-directly (programmatically), but rather with an XML definition file that is then
-converted internally into instances of these classes, and used to load an entire Spring
-IoC container instance.
+The `ApplicationContext` supports constructor-based and setter-based DI for the beans it
+manages. It also supports setter-based DI after some dependencies have already been
+injected through the constructor approach. You configure the dependencies in the form of
+a `BeanDefinition`, which you use in conjunction with `PropertyEditor` instances to
+convert properties from one format to another. However, most Spring users do not work
+with these classes directly (i.e., programmatically) but rather with XML `bean`
+definitions, annotated components (i.e., classes annotated with `@Component`,
+`@Controller`, etc.), or `@Bean` methods in Java-based `@Configuration` classes. These
+sources are then converted internally into instances of `BeanDefinition` and used to
+load an entire Spring IoC container instance.
 
 .Constructor-based or setter-based DI?
 ****
-Since you can mix both, Constructor- and Setter-based DI, it is a good rule of thumb to
-use constructor arguments for mandatory dependencies and setters for optional
-dependencies. Note that the use of a <<beans-required-annotation,@Required>> annotation
-on a setter can be used to make setters required dependencies.
+Since you can mix constructor-based and setter-based DI, it is a good rule of thumb to
+use constructors for _mandatory dependencies_ and setter methods or configuration methods
+for _optional dependencies_. Note that use of the <<beans-required-annotation,@Required>>
+annotation on a setter method can be used to make the property a required dependency.
 
-The Spring team generally advocates setter injection, because large numbers of
-constructor arguments can get unwieldy, especially when properties are optional. Setter
-methods also make objects of that class amenable to reconfiguration or re-injection
-later. Management through <<jmx,JMX MBeans>> is a compelling use case.
+The Spring team generally advocates constructor injection as it enables one to implement
+application components as _immutable objects_ and to ensure that required dependencies
+are not `null`. Furthermore constructor-injected components are always returned to client
+(calling) code in a fully initialized state. As a side note, a large number of constructor
+arguments is a _bad code smell_, implying that the class likely has too many
+responsibilities and should be refactored to better address proper separation of concerns.
 
-Some purists favor constructor-based injection. Supplying all object dependencies means
-that the object is always returned to client (calling) code in a totally initialized
-state. The disadvantage is that the object becomes less amenable to reconfiguration and
-re-injection.
+Setter injection should primarily only be used for optional dependencies that can be
+assigned reasonable default values within the class. Otherwise, not-null checks must be
+performed everywhere the code uses the dependency. One benefit of setter injection is that
+setter methods make objects of that class amenable to reconfiguration or re-injection
+later. Management through <<jmx,JMX MBeans>> is therefore a compelling use case for setter
+injection.
 
-Use the DI that makes the most sense for a particular class. Sometimes, when dealing
-with third-party classes to which you do not have the source, the choice is made for
-you. A legacy class may not expose any setter methods, and so constructor injection is
-the only available DI.
+Use the DI style that makes the most sense for a particular class. Sometimes, when dealing
+with third-party classes for which you do not have the source, the choice is made for you.
+For example, if a third-party class does not expose any setter methods, then constructor
+injection may be the only available form of DI.
 ****
 
 
@@ -1963,7 +1969,7 @@ the only available DI.
 The container performs bean dependency resolution as follows:
 
 * The `ApplicationContext` is created and initialized with configuration metadata that
-  describes all the beans. Configuration metadata can be specified via XML, Java code or
+  describes all the beans. Configuration metadata can be specified via XML, Java code, or
   annotations.
 * For each bean, its dependencies are expressed in the form of properties, constructor
   arguments, or arguments to the static-factory method if you are using that instead of
