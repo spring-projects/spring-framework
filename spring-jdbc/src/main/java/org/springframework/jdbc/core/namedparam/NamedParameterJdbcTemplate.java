@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,8 @@ import org.springframework.util.Assert;
  * <p>The underlying {@link org.springframework.jdbc.core.JdbcTemplate} is
  * exposed to allow for convenient access to the traditional
  * {@link org.springframework.jdbc.core.JdbcTemplate} methods.
+ *
+ * <p><b>NOTE: An instance of this class is thread-safe once configured.</b>
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller

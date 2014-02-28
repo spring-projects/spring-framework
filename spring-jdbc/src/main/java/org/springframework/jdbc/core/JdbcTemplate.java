@@ -81,6 +81,8 @@ import org.springframework.util.StringUtils;
  * <p>All SQL operations performed by this class are logged at debug level,
  * using "org.springframework.jdbc.core.JdbcTemplate" as log category.
  *
+ * <p><b>NOTE: An instance of this class is thread-safe once configured.</b>
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Thomas Risberg

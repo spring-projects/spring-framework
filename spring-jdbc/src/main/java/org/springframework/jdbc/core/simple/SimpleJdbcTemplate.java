@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,12 @@ package org.springframework.jdbc.core.simple;
 
 import java.util.List;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.BatchUpdateUtils;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.BatchUpdateUtils;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -41,6 +40,8 @@ import org.springframework.util.ObjectUtils;
  * any methods specifying SQL types, methods using less commonly used callbacks
  * such as RowCallbackHandler, updates with PreparedStatementSetters rather than
  * argument arrays, and stored procedures as well as batch operations.
+ *
+ * <p><b>NOTE: An instance of this class is thread-safe once configured.</b>
  *
  * @author Rod Johnson
  * @author Rob Harrop
