@@ -11,7 +11,7 @@ Rod Johnson; Juergen Hoeller; Keith Donald; Colin Sampaleanu; Rob Harrop; Thomas
 The Spring Framework is a lightweight solution and a potential one-stop-shop for
 building your enterprise-ready applications. However, Spring is modular, allowing you to
 use only those parts that you need, without having to bring in the rest. You can use the
-IoC container, with Struts on top, but you can also use only the
+IoC container, with any web framework on top, but you can also use only the
 <<orm-hibernate,Hibernate integration code>> or the <<jdbc-introduction,JDBC abstraction
 layer>>. The Spring Framework supports declarative transaction management, remote access
 to your logic through RMI or web services, and various options for persisting your data.
@@ -878,7 +878,7 @@ directly in your bootstrap code. For example:
 ----
 
 For more information consult the `GroovyBeanDefinitionReader`
-{javadoc-baseurl}/org/springframework/beans/factory/groovy/GroovyBeanDefinitionReader.html[Javadoc].
+{javadoc-baseurl}/org/springframework/beans/factory/groovy/GroovyBeanDefinitionReader.html[javadocs].
 
 
 
@@ -3118,7 +3118,7 @@ The interested reader may also find the `ServiceLocatorFactoryBean` (in the
 `org.springframework.beans.factory.config` package) to be of use. The approach used in
 ServiceLocatorFactoryBean is similar to that of another utility class,
 `ObjectFactoryCreatingFactoryBean`, but it allows you to specify your own lookup
-interface as opposed to a Spring-specific lookup interface. Consult the JavaDocs for
+interface as opposed to a Spring-specific lookup interface. Consult the javadocs of
 these classes for additional information.
 ====
 
@@ -3638,8 +3638,8 @@ To integrate your custom scope(s) into the Spring container, you need to impleme
 `org.springframework.beans.factory.config.Scope` interface, which is described in this
 section. For an idea of how to implement your own scopes, see the `Scope`
 implementations that are supplied with the Spring Framework itself and the
-{javadoc-baseurl}/org/springframework/beans/factory/config/Scope.html[`Scope`
-Javadoc], which explains the methods you need to implement in more detail.
+{javadoc-baseurl}/org/springframework/beans/factory/config/Scope.html[`Scope` javadocs],
+which explains the methods you need to implement in more detail.
 
 The `Scope` interface has four methods to get objects from the scope, remove them from
 the scope, and allow them to be destroyed.
@@ -3667,7 +3667,7 @@ name is not found.
 ----
 
 The following method registers the callbacks the scope should execute when it is
-destroyed or when the specified object in the scope is destroyed. Refer to the Javadoc
+destroyed or when the specified object in the scope is destroyed. Refer to the javadocs
 or a Spring scope implementation for more information on destruction callbacks.
 
 [source,java,indent=0]
@@ -4456,7 +4456,7 @@ You can configure multiple `BeanPostProcessor` instances, and you can control th
 in which these `BeanPostProcessor` s execute by setting the `order` property. You can
 set this property only if the `BeanPostProcessor` implements the `Ordered` interface; if
 you write your own `BeanPostProcessor` you should consider implementing the `Ordered`
-interface too. For further details, consult the Javadoc for the `BeanPostProcessor` and
+interface too. For further details, consult the javadocs of the `BeanPostProcessor` and
 `Ordered` interfaces. See also the note below on
 <<beans-factory-programmatically-registering-beanpostprocessors, programmatic
 registration of `BeanPostProcessors`>>
@@ -4666,7 +4666,7 @@ You can configure multiple `BeanFactoryPostProcessors`, and you can control the 
 which these `BeanFactoryPostProcessors` execute by setting the `order` property.
 However, you can only set this property if the `BeanFactoryPostProcessor` implements the
 `Ordered` interface. If you write your own `BeanFactoryPostProcessor`, you should
-consider implementing the `Ordered` interface too. Consult the Javadoc for the
+consider implementing the `Ordered` interface too. Consult the javadocs of the
 `BeanFactoryPostProcessor` and `Ordered` interfaces for more details.
 
 [NOTE]
@@ -4782,7 +4782,7 @@ the following three supported integer values:
 * __override__ (2): Check system properties first, before trying the specified
   properties files. This allows system properties to override any other property source.
 
-Consult the Javadoc for the `PropertyPlaceholderConfigurer` for more information.
+Consult the `PropertyPlaceholderConfigurer` javadocs for more information.
 
 [TIP]
 ====
@@ -7418,7 +7418,7 @@ method that returns `true` or `false`. For example, here is the actual
 ----
 
 See the {javadoc-baseurl}/org/springframework/context/annotation/Conditional.html[
-`@Conditional` Javadoc] for more detail.
+`@Conditional` javadocs] for more detail.
 
 [[beans-java-combining]]
 ===== Combining Java and XML configuration
@@ -7671,7 +7671,7 @@ Once configured for the `ApplicationContext`. Any bean within that `ApplicationC
 may implement `LoadTimeWeaverAware`, thereby receiving a reference to the load-time
 weaver instance. This is particularly useful in combination with <<orm-jpa,Spring's JPA
 support>> where load-time weaving may be necessary for JPA class transformation. Consult
-the `LocalContainerEntityManagerFactoryBean` Javadoc for more detail. For more on
+the `LocalContainerEntityManagerFactoryBean` javadocs for more detail. For more on
 AspectJ load-time weaving, see <<aop-aj-ltw>>.
 
 
@@ -7905,7 +7905,7 @@ file format but is more flexible than the standard JDK based
 `ResourceBundleMessageSource` implementation.__ In particular, it allows for reading
 files from any Spring resource location (not just from the classpath) and supports hot
 reloading of bundle property files (while efficiently caching them in between). Check
-out the `ReloadableResourceBundleMessageSource` javadoc for details.
+out the `ReloadableResourceBundleMessageSource` javadocs for details.
 ====
 
 
@@ -8810,8 +8810,8 @@ A `ClassPathXmlApplicationContext` instance composed of the beans defined in the
 		new String[] {"services.xml", "daos.xml"}, MessengerService.class);
 ----
 
-Please do consult the Javadocs for the `ClassPathXmlApplicationContext` class for
-details of the various constructors.
+Please do consult the `ClassPathXmlApplicationContext` javadocs for details
+on the various constructors.
 
 
 
@@ -8866,7 +8866,7 @@ a completely portable fashion.
 If the specified path is a classpath location, then the resolver must obtain the last
 non-wildcard path segment URL via a `Classloader.getResource()` call. Since this is just
 a node of the path (not the file at the end) it is actually undefined (in the
-`ClassLoader` Javadocs) exactly what sort of a URL is returned in this case. In
+`ClassLoader` javadocs) exactly what sort of a URL is returned in this case. In
 practice, it is always a `java.io.File` representing the directory, where the classpath
 resource resolves to a filesystem location, or a jar URL of some sort, where the
 classpath resource resolves to a jar location. Still, there is a portability concern on
@@ -9133,8 +9133,8 @@ Implementing a `Validator` is fairly straightforward, especially when you know o
 
 As you can see, the `static` `rejectIfEmpty(..)` method on the `ValidationUtils` class
 is used to reject the `'name'` property if it is `null` or the empty string. Have a look
-at the Javadoc for the `ValidationUtils` class to see what functionality it provides
-besides the example shown previously.
+at the `ValidationUtils` javadocs to see what functionality it provides besides the
+example shown previously.
 
 While it is certainly possible to implement a single `Validator` class to validate each
 of the nested objects in a rich object, it may be better to encapsulate the validation
@@ -9190,7 +9190,7 @@ and use it like so:
 Validation errors are reported to the `Errors` object passed to the validator. In case
 of Spring Web MVC you can use `<spring:bind/>` tag to inspect the error messages, but of
 course you can also inspect the errors object yourself. More information about the
-methods it offers can be found from the Javadoc.
+methods it offers can be found in the javadocs.
 
 
 
@@ -9215,10 +9215,10 @@ the field name and the second will include the type of the field); this is done 
 convenience to aid developers in targeting error messages and suchlike.
 
 More information on the `MessageCodesResolver` and the default strategy can be found
-online with the Javadocs for
+online in the javadocs of
 {javadoc-baseurl}/org/springframework/validation/MessageCodesResolver.html[`MessageCodesResolver`]
 and
-{javadoc-baseurl}/org/springframework/validation/DefaultMessageCodesResolver.html[`DefaultMessageCodesResolver`]
+{javadoc-baseurl}/org/springframework/validation/DefaultMessageCodesResolver.html[`DefaultMessageCodesResolver`],
 respectively.
 
 
@@ -9235,7 +9235,7 @@ more information about JavaBeans and the specification, please refer to Oracle's
 http://docs.oracle.com/javase/6/docs/api/java/beans/package-summary.html[javabeans]).
 
 One quite important class in the beans package is the `BeanWrapper` interface and its
-corresponding implementation ( `BeanWrapperImpl`). As quoted from the Javadoc, the
+corresponding implementation ( `BeanWrapperImpl`). As quoted from the javadocs, the
 `BeanWrapper` offers functionality to set and get property values (individually or in
 bulk), get property descriptors, and to query properties to determine if they are
 readable or writable. Also, the `BeanWrapper` offers support for nested properties,
@@ -9255,7 +9255,7 @@ perform actions on that bean, like setting and retrieving properties.
 ==== Setting and getting basic and nested properties
 Setting and getting properties is done using the `setPropertyValue(s)` and
 `getPropertyValue(s)` methods that both come with a couple of overloaded variants.
-They're all described in more detail in the Javadoc Spring comes with. What's important
+They're all described in more detail in the javadocs Spring comes with. What's important
 to know is that there are a couple of conventions for indicating properties of an
 object. A couple of examples:
 
@@ -9381,7 +9381,7 @@ behavior can be achieved by __registering custom editors__, of type
 `java.beans.PropertyEditor`. Registering custom editors on a `BeanWrapper` or
 alternately in a specific IoC container as mentioned in the previous chapter, gives it
 the knowledge of how to convert properties to the desired type. Read more about
-`PropertyEditors` in the Javadoc of the `java.beans` package provided by Oracle.
+`PropertyEditors` in the javadocs of the `java.beans` package provided by Oracle.
 
 A couple of examples where property editing is used in Spring:
 
@@ -9448,12 +9448,12 @@ course still register your own variant to override the default one:
   Locale provides). Registered by default by `BeanWrapperImpl`.
 
 | `PatternEditor`
-| Capable of resolving Strings to JDK 1.5 `Pattern` objects and vice versa.
+| Capable of resolving Strings to `java.util.regex.Pattern` objects and vice versa.
 
 | `PropertiesEditor`
-| Capable of converting Strings (formatted using the format as defined in the Javadoc
-  for the java.lang.Properties class) to `Properties` objects. Registered by default by
-  `BeanWrapperImpl`.
+| Capable of converting Strings (formatted using the format as defined in the javadocs
+  of the `java.util.Properties` class) to `Properties` objects. Registered by default
+  by `BeanWrapperImpl`.
 
 | `StringTrimmerEditor`
 | Property editor that trims Strings. Optionally allows transforming an empty string
@@ -10548,8 +10548,8 @@ Use the `LocalValidatorFactoryBean` to configure a default Validator as a Spring
 ----
 
 The basic configuration above will trigger Bean Validation to initialize using its
-default bootstrap mechanism. A JSR-303/JSR-349 provider, such as Hibernate Validator, is
-expected to be present in the classpath and will be detected automatically.
+default bootstrap mechanism. A JSR-303/JSR-349 provider, such as Hibernate Validator,
+is expected to be present in the classpath and will be detected automatically.
 
 
 [[validation-beanvalidation-spring-inject]]
@@ -10594,20 +10594,19 @@ the Spring Validation API:
 
 [[validation-beanvalidation-spring-constraints]]
 ===== Configuring Custom Constraints
-Each Bean Validation constraint consists of two parts. First, a @Constraint annotation
+Each Bean Validation constraint consists of two parts. First, a `@Constraint` annotation
 that declares the constraint and its configurable properties. Second, an implementation
 of the `javax.validation.ConstraintValidator` interface that implements the constraint's
-behavior. To associate a declaration with an implementation, each @Constraint annotation
+behavior. To associate a declaration with an implementation, each `@Constraint` annotation
 references a corresponding ValidationConstraint implementation class. At runtime, a
 `ConstraintValidatorFactory` instantiates the referenced implementation when the
 constraint annotation is encountered in your domain model.
 
-By default, the `LocalValidatorFactoryBean` configures a
-`SpringConstraintValidatorFactory` that uses Spring to create ConstraintValidator
-instances. This allows your custom ConstraintValidators to benefit from dependency
-injection like any other Spring bean.
+By default, the `LocalValidatorFactoryBean` configures a `SpringConstraintValidatorFactory`
+that uses Spring to create ConstraintValidator instances. This allows your custom
+ConstraintValidators to benefit from dependency injection like any other Spring bean.
 
-Shown below is an example of a custom @Constraint declaration, followed by an associated
+Shown below is an example of a custom `@Constraint` declaration, followed by an associated
 `ConstraintValidator` implementation that uses Spring for dependency injection:
 
 [source,java,indent=0]
@@ -10638,12 +10637,30 @@ As you can see, a ConstraintValidator implementation may have its dependencies
 @Autowired like any other Spring bean.
 
 
+[[validation-beanvalidation-spring-method]]
+===== Spring-driven Method Validation
+The method validation feature supported by Bean Validation 1.1, and as a custom
+extension also by Hibernate Validator 4.3, can be integrated into a Spring context
+through a `MethodValidationPostProcessor` bean definition:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean class="org.springframework.validation.beanvalidation.MethodValidationPostProcessor"/>
+----
+
+In order to be eligible for Spring-driven method validation, all target classes need
+to be annotated with Spring's `@Validated` annotation, optionally declaring the
+validation groups to use. Check out the `MethodValidationPostProcessor` javadocs
+for setup details with Hibernate Validator and Bean Validation 1.1 providers.
+
+
 [[validation-beanvalidation-spring-other]]
 ===== Additional Configuration Options
 The default `LocalValidatorFactoryBean` configuration should prove sufficient for most
 cases. There are a number of configuration options for various Bean Validation
-constructs, from message interpolation to traversal resolution. See the JavaDocs of
-`LocalValidatorFactoryBean` for more information on these options.
+constructs, from message interpolation to traversal resolution. See the
+`LocalValidatorFactoryBean` javadocs for more information on these options.
 
 
 
@@ -13211,7 +13228,7 @@ a first parameter of type `ProceedingJoinPoint`, which is a subclass of `JoinPoi
 the method arguments), `getThis()` (returns the proxy object), `getTarget()` (returns
 the target object), `getSignature()` (returns a description of the method that is being
 advised) and `toString()` (prints a useful description of the method being advised).
-Please do consult the Javadocs for full details.
+Please do consult the javadocs for full details.
 
 [[aop-ataspectj-advice-params-passing]]
 ====== Passing parameters to advice
@@ -14742,7 +14759,7 @@ aspects.
 
 The class `org.springframework.aop.aspectj.annotation.AspectJProxyFactory` can be used
 to create a proxy for a target object that is advised by one or more @AspectJ aspects.
-Basic usage for this class is very simple, as illustrated below. See the Javadocs for
+Basic usage for this class is very simple, as illustrated below. See the javadocs for
 full information.
 
 [source,java,indent=0]
@@ -15393,7 +15410,7 @@ happens to be the LTW of aspects.
 ====
 
 If you are unfamiliar with the idea of runtime class file transformation, you are
-encouraged to read the Javadoc API documentation for the `java.lang.instrument` package
+encouraged to read the javadoc API documentation for the `java.lang.instrument` package
 before continuing. This is not a huge chore because there is - rather annoyingly -
 precious little documentation there... the key interfaces and classes will at least be
 laid out in front of you for reference as you read through this section.
@@ -15524,7 +15541,7 @@ retrieved from the Spring container using the well-known name ' `loadTimeWeaver`
 Remember that the `LoadTimeWeaver` exists just as a mechanism for Spring's LTW
 infrastructure to add one or more `ClassFileTransformers`. The actual
 `ClassFileTransformer` that does the LTW is the `ClassPreProcessorAgentAdapter` (from
-the `org.aspectj.weaver.loadtime` package) class. See the class-level Javadoc for the
+the `org.aspectj.weaver.loadtime` package) class. See the class-level javadocs of the
 `ClassPreProcessorAgentAdapter` class for further details, because the specifics of how
 the weaving is actually effected is beyond the scope of this section.
 
@@ -17330,7 +17347,7 @@ Sample configuration is shown below:
 
 Note that the target object - "businessObjectTarget" in the example - __must__ be a
 prototype. This allows the `PoolingTargetSource` implementation to create new instances
-of the target to grow the pool as necessary. See the javadoc for
+of the target to grow the pool as necessary. See the javadocs of
 `AbstractPoolingTargetSource` and the concrete subclass you wish to use for information
 about its properties: "maxSize" is the most basic, and always guaranteed to be present.
 
@@ -17446,12 +17463,12 @@ addition to the out-of-the-box interception around advice, before, throws advice
 after returning advice.
 
 The `org.springframework.aop.framework.adapter` package is an SPI package allowing
-support for new custom advice types to be added without changing the core framework. The
-only constraint on a custom `Advice` type is that it must implement the
-`org.aopalliance.aop.Advice` tag interface.
+support for new custom advice types to be added without changing the core framework.
+The only constraint on a custom `Advice` type is that it must implement the
+`org.aopalliance.aop.Advice` marker interface.
 
-Please refer to the `org.springframework.aop.framework.adapter` package's Javadocs for
-further information.
+Please refer to the `org.springframework.aop.framework.adapter` javadocs for further
+information.
 
 
 
@@ -17758,8 +17775,8 @@ details, see <<jdbc-embedded-database-support>> and
 ===== Spring Testing Annotations
 The Spring Framework provides the following set of __Spring-specific__ annotations that
 you can use in your unit and integration tests in conjunction with the TestContext
-framework. Refer to the respective Javadoc for further information, including default
-attribute values, attribute aliases, and so on.
+framework. Refer to the corresponding javadocs for further information, including
+default attribute values, attribute aliases, and so on.
 
 * `@ContextConfiguration`
 
@@ -17844,7 +17861,7 @@ default.
 
 +
 
-See <<testcontext-ctx-management>> and the Javadoc for `@ContextConfiguration` for
+See <<testcontext-ctx-management>> and the `@ContextConfiguration` javadocs for
 further details.
 
 * `@WebAppConfiguration`
@@ -17893,7 +17910,7 @@ resource prefix is supplied the path is assumed to be a file system resource.
 
 Note that `@WebAppConfiguration` must be used in conjunction with
 `@ContextConfiguration`, either within a single test class or within a test class
-hierarchy. See the Javadoc for `@WebAppConfiguration` for further details.
+hierarchy. See the `@WebAppConfiguration` javadocs for further details.
 
 +
 
@@ -17943,7 +17960,7 @@ If you need to merge or override the configuration for a given level of the cont
 hierarchy within a test class hierarchy, you must explicitly name that level by
 supplying the same value to the `name` attribute in `@ContextConfiguration` at each
 corresponding level in the class hierarchy. See
-<<testcontext-ctx-management-ctx-hierarchies>> and the Javadoc for `@ContextHierarchy`
+<<testcontext-ctx-management-ctx-hierarchies>> and the `@ContextHierarchy` javadocs
 for further examples.
 
 * `@ActiveProfiles`
@@ -17990,7 +18007,7 @@ and registering it via the `resolver` attribute of `@ActiveProfiles`.
 
 +
 
-See <<testcontext-ctx-management-env-profiles>> and the Javadoc for `@ActiveProfiles`
+See <<testcontext-ctx-management-env-profiles>> and the `@ActiveProfiles` javadocs
 for examples and further details.
 
 * `@DirtiesContext`
@@ -18104,7 +18121,7 @@ specified instead, as seen below.
 +
 
 For further details regarding the `EXHAUSTIVE` and `CURRENT_LEVEL` algorithms see the
-Javadoc for `DirtiesContext.HierarchyMode`.
+`DirtiesContext.HierarchyMode` javadocs.
 
 * `@TestExecutionListeners`
 
@@ -18128,7 +18145,7 @@ in conjunction with `@ContextConfiguration`.
 
 +
 
-`@TestExecutionListeners` supports __inherited__ listeners by default. See the Javadoc
+`@TestExecutionListeners` supports __inherited__ listeners by default. See the javadocs
 for an example and further details.
 
 * `@TransactionConfiguration`
@@ -18498,7 +18515,7 @@ holds the context of the current test. The `TestContextManager` also updates the
 of the `TestContext` as the test progresses and delegates to `TestExecutionListener` s,
 which instrument the actual test execution by providing dependency injection, managing
 transactions, and so on. A `ContextLoader` (or `SmartContextLoader`) is responsible for
-loading an `ApplicationContext` for a given test class. Consult the Javadoc and the
+loading an `ApplicationContext` for a given test class. Consult the javadocs and the
 Spring test suite for further information and examples of various implementations.
 
 * `TestContext`: Encapsulates the context in which a test is executed, agnostic of the
@@ -18732,7 +18749,7 @@ The term __annotated class__ can refer to any of the following.
 * A JSR-330 compliant class that is annotated with `javax.inject` annotations
 * Any other class that contains `@Bean`-methods
 
-Consult the Javadoc for `@Configuration` and `@Bean` for further information regarding
+Consult the javadocs of `@Configuration` and `@Bean` for further information regarding
 the configuration and semantics of __annotated classes__, paying special attention to
 the discussion of __ `@Bean` Lite Mode__.
 ====
@@ -18741,7 +18758,7 @@ If you omit the `classes` attribute from the `@ContextConfiguration` annotation,
 TestContext framework will attempt to detect the presence of default configuration
 classes. Specifically, `AnnotationConfigContextLoader` will detect all static inner
 classes of the test class that meet the requirements for configuration class
-implementations as specified in the Javadoc for `@Configuration`. In the following
+implementations as specified in the `@Configuration` javadocs. In the following
 example, the `OrderServiceTest` class declares a static inner configuration class named
 `Config` that will be automatically used to load the `ApplicationContext` for the test
 class. Note that the name of the configuration class is arbitrary. In addition, a test
@@ -19229,7 +19246,7 @@ To resolve active bean definition profiles programmatically, simply implement a 
 `ActiveProfilesResolver` and register it via the `resolver` attribute of
 `@ActiveProfiles`. The following example demonstrates how to implement and register a
 custom `OperatingSystemActiveProfilesResolver`. For further information, refer to the
-respective Javadoc.
+corresponding javadocs.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -19628,7 +19645,7 @@ application context for `ExtendedTests` will be loaded only from
 If `@DirtiesContext` is used in a test whose context is configured as part of a context
 hierarchy, the `hierarchyMode` flag can be used to control how the context cache is
 cleared. For further details consult the discussion of `@DirtiesContext` in
-<<integration-testing-annotations-spring>> and the Javadoc for `@DirtiesContext`.
+<<integration-testing-annotations-spring>> and the `@DirtiesContext` javadocs.
 ====
 --
 
@@ -21898,7 +21915,7 @@ attribute explicitly, as in the preceding example.
 ====
 The `@EnableTransactionManagement` annotation provides equivalent support if you are
 using Java based configuration. Simply add the annotation to a `@Configuration` class.
-See Javadoc for full details.
+See the javadocs for full details.
 ====
 
 .Method visibility and @Transactional
@@ -21953,7 +21970,7 @@ any kind of method.
 | XML Attribute| Annotation Attribute| Default| Description
 
 | `transaction-manager`
-| N/A (See `TransactionManagementConfigurer` Javadoc)
+| N/A (See `TransactionManagementConfigurer` javadocs)
 | transactionManager
 | Name of transaction manager to use. Only required if the name of the transaction
   manager is not `transactionManager`, as in the example above.
@@ -22692,7 +22709,7 @@ Spring's `JtaTransactionManager` class, which can optionally perform a JNDI look
 the JTA `UserTransaction` and `TransactionManager` objects, autodetects the location for
 the latter object, which varies by application server. Having access to the JTA
 `TransactionManager` allows for enhanced transaction semantics, in particular supporting
-transaction suspension. See the `JtaTransactionManager` Javadocs for details.
+transaction suspension. See the `JtaTransactionManager` javadocs for details.
 
 Spring's `JtaTransactionManager` is the standard choice to run on Java EE application
 servers, and is known to work on all common servers. Advanced functionality such as
@@ -23091,7 +23108,7 @@ corresponding to the fully qualified class name of the template instance (typica
 ===== Examples of JdbcTemplate class usage
 This section provides some examples of `JdbcTemplate` class usage. These examples are
 not an exhaustive list of all of the functionality exposed by the `JdbcTemplate`; see
-the attendant Javadocs for that.
+the attendant javadocs for that.
 
 [[jdbc-JdbcTemplate-examples-query]]
 ====== Querying (SELECT)
@@ -23928,7 +23945,7 @@ own new code using the higher level abstractions for resource management, such a
 `JdbcTemplate` or `DataSourceUtils`.
 ====
 
-__(See the `TransactionAwareDataSourceProxy` Javadocs for more details.)__
+__(See the `TransactionAwareDataSourceProxy` javadocs for more details.)__
 
 
 
@@ -23979,7 +23996,7 @@ environment:
 * XAPoolNativeJdbcExtractor
 
 Usually the `SimpleNativeJdbcExtractor` is sufficient for unwrapping a `Connection`
-object in most environments. See the Javadocs for more details.
+object in most environments. See the javadocs for more details.
 
 
 
@@ -26636,7 +26653,7 @@ supported by Spring, usually in a vendor-specific manner:
   JDBC-based data access code
 * Advanced translation of `JDOExceptions` to Spring `DataAccessExceptions`
 
-See the `JdoDialect` Javadoc for more details on its operations and how to use them
+See the `JdoDialect` javadocs for more details on its operations and how to use them
 within Spring's JDO support.
 
 
@@ -27130,7 +27147,7 @@ translation of exception. The default implementation used ( `DefaultJpaDialect`)
 not provide any special capabilities and if the above features are required, you have to
 specify the appropriate dialect.
 
-See the `JpaDialect` Javadoc for more details of its operations and how they are used
+See the `JpaDialect` javadocs for more details of its operations and how they are used
 within Spring's JPA support.
 
 
@@ -27861,8 +27878,7 @@ for WebSocket-style messaging in web applications.
 
 Spring Framework's own web framework, <<mvc,Spring Web MVC>>, is covered in the
 first couple of chapters. Subsequent chapters are concerned with Spring Framework's
-integration with other web technologies, such as <<struts,Struts>> <<jsf,JSF>> and
-others.
+integration with other web technologies, such as <<jsf,JSF>> and.
 
 Following that is coverage of Spring Framework's MVC <<portlet,portlet framework>>.
 
@@ -27946,10 +27962,10 @@ format, such as JSP request attributes, a Velocity template model.
 Spring Web Flow (SWF) aims to be the best solution for the management of web application
 page flow.
 
-SWF integrates with existing frameworks like Spring MVC, Struts, and JSF, in both
-servlet and portlet environments. If you have a business process (or processes) that
-would benefit from a conversational model as opposed to a purely request model, then SWF
-may be the solution.
+SWF integrates with existing frameworks like Spring MVC and JSF, in both Servlet and
+Portlet environments. If you have a business process (or processes) that would benefit
+from a conversational model as opposed to a purely request model, then SWF may be the
+solution.
 
 SWF allows you to capture logical page flows as self-contained modules that are reusable
 in different situations, and as such is ideal for building web application modules that
@@ -28003,26 +28019,23 @@ Spring's web module includes many unique web support features:
 [[mvc-introduction-pluggability]]
 ==== Pluggability of other MVC implementations
 Non-Spring MVC implementations are preferable for some projects. Many teams expect to
-leverage their existing investment in skills and tools. A large body of knowledge and
-experience exist for the Struts framework. If you can abide Struts' architectural flaws,
-it can be a viable choice for the web layer; the same applies to JSF and other web
-MVC frameworks.
+leverage their existing investment in skills and tools, for example with JSF.
 
-If you do not want to use Spring's web MVC, but intend to leverage other solutions that
+If you do not want to use Spring's Web MVC, but intend to leverage other solutions that
 Spring offers, you can integrate the web MVC framework of your choice with Spring
 easily. Simply start up a Spring root application context through its
 `ContextLoaderListener`, and access it through its `ServletContext` attribute (or
-Spring's respective helper method) from within a Struts action. No "plug-ins"
+Spring's respective helper method) from within any action object. No "plug-ins"
 are involved, so no dedicated integration is necessary. From the web layer's point of
 view, you simply use Spring as a library, with the root application context instance as
 the entry point.
 
 Your registered beans and Spring's services can be at your fingertips even without
-Spring's Web MVC. Spring does not compete with Struts in this scenario. It
-simply addresses the many areas that the pure web MVC frameworks do not, from bean
+Spring's Web MVC. Spring does not compete with other web frameworks in this scenario.
+It simply addresses the many areas that the pure web MVC frameworks do not, from bean
 configuration to data access and transaction handling. So you can enrich your
-application with a Spring middle tier and/or data access tier, even if you just want to
-use, for example, the transaction abstraction with JDBC or Hibernate.
+application with a Spring middle tier and/or data access tier, even if you just want
+to use, for example, the transaction abstraction with JDBC or Hibernate.
 
 
 
@@ -28661,8 +28674,8 @@ Ant-style globs is also supported (for example, `/owners/*/pets/{petId}`).
 Patterns in `@RequestMapping` annotations support ${...} placeholders against local
 properties and/or system properties and environment variables. This may be useful in
 cases where the path a controller is mapped to may need to be customized through
-configuration. For more information on placeholders see the Javadoc for
-`PropertyPlaceholderConfigurer`.
+configuration. For more information on placeholders, see the javadocs of the
+`PropertyPlaceholderConfigurer` class.
 
 
 [[mvc-ann-matrix-variables]]
@@ -29876,7 +29889,7 @@ If the result is an `Exception`, it will be processed with a matching
 An existing `HandlerInterceptor` can implement `AsyncHandlerInterceptor`, which provides
 one additional method `afterConcurrentHandlingStarted`. It is invoked after async
 processing starts and when the initial request processing thread is being exited. See
-the Javadoc of `AsyncHandlerInterceptor` for more details on that.
+the `AsyncHandlerInterceptor` javadocs for more details on that.
 
 Further options for async request lifecycle callbacks are provided directly on
 `DeferredResult`, which has the methods `onTimeout(Runnable)` and
@@ -30160,7 +30173,7 @@ examples follow.
 | Convenient subclass of `UrlBasedViewResolver` that supports `InternalResourceView` (in
   effect, Servlets and JSPs) and subclasses such as `JstlView` and `TilesView`. You can
   specify the view class for all views generated by this resolver by using
-  `setViewClass(..)`. See the Javadocs for the `UrlBasedViewResolver` class for details.
+  `setViewClass(..)`. See the `UrlBasedViewResolver` javadocs for details.
 
 | `VelocityViewResolver` / `FreeMarkerViewResolver`
 | Convenient subclass of `UrlBasedViewResolver` that supports `VelocityView` (in effect,
@@ -30265,9 +30278,9 @@ in some cases, the resolver simply cannot detect whether or not the view exists.
 example, the `InternalResourceViewResolver` uses the `RequestDispatcher` internally, and
 dispatching is the only way to figure out if a JSP exists, but this action can only
 execute once. The same holds for the `VelocityViewResolver` and some others. Check the
-Javadoc for the view resolver to see whether it reports non-existing views. Thus,
-putting an `InternalResourceViewResolver` in the chain in a place other than the last,
-results in the chain not being fully inspected, because the
+javadocs of the specific view resolver to see whether it reports non-existing views.
+Thus, putting an `InternalResourceViewResolver` in the chain in a place other than
+the last results in the chain not being fully inspected, because the
 `InternalResourceViewResolver` will __always__ return a view!
 
 
@@ -31291,8 +31304,8 @@ If you prefer to write error content via `@ExceptionHandler` methods you can ext
 `ResponseEntityExceptionHandler` instead. This is a convenient base for
 `@ControllerAdvice` classes providing an `@ExceptionHandler` method to handle standard
 Spring MVC exceptions and return `ResponseEntity`. That allows you to customize the
-response and write error content with message converters. See the Javadoc of
-`ResponseEntityExceptionHandler` for more details.
+response and write error content with message converters. See the
+`ResponseEntityExceptionHandler` javadocs for more details.
 
 
 
@@ -31595,8 +31608,8 @@ is not explicitly configured.
 
 Of course, if you need to change the default settings, then you do need to configure
 your own `DefaultRequestToViewNameTranslator` bean explicitly. Consult the comprehensive
-Javadoc for the `DefaultRequestToViewNameTranslator` class for details of the various
-properties that can be configured.
+`DefaultRequestToViewNameTranslator` javadocs for details on the various properties
+that can be configured.
 
 
 
@@ -31857,7 +31870,7 @@ To customize the default configuration in Java you simply implement the
 and override the methods you need. Below is an example of some of the available methods
 to override. See
 {javadoc-baseurl}/org/springframework/web/servlet/config/annotation/WebMvcConfigurer.html[`WebMvcConfigurer`]
-for a list of all methods and the Javadoc for further details:
+for a list of all methods and the javadocs for further details:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -31969,10 +31982,8 @@ discovered via `ServletContext.getMimeType(String)` or the __Java Activation Fra
 {javadoc-baseurl}/org/springframework/web/servlet/mvc/method/annotation/RequestMappingHandlerMapping.html#setUseRegisteredSuffixPatternMatch(boolean)[setUseRegisteredSuffixPatternMatch
 method].
 
-The introduction of `ContentNegotiationManger` also enables selective suffix pattern
-matching for incoming requests. For more details, see the Javadoc of
-
-
+The introduction of `ContentNegotiationManager` also enables selective suffix pattern
+matching for incoming requests. For more details, see its javadocs.
 
 Below is an example of customizing content negotiation options through the MVC Java
 config:
@@ -32332,7 +32343,7 @@ some point you may need more fine-grained control or you may simply wish to unde
 the underlying configuration.
 
 The first step towards more fine-grained control is to see the underlying beans created
-for you. In MVC Java config you can see the Javadoc and the `@Bean` methods in
+for you. In MVC Java config you can see the javadocs and the `@Bean` methods in
 `WebMvcConfigurationSupport`. The configuration in this class is automatically imported
 through the `@EnableWebMvc` annotation. In fact if you open `@EnableWebMvc` you can see
 the `@Import` statement.
@@ -33273,8 +33284,7 @@ applications using Spring. The following describes in a broad way how to do this
 [NOTE]
 ====
 This section focuses on Spring's support for Tiles v3 in the
-`org.springframework.web.servlet.view.tiles3` package. Tiles v1 (a.k.a. "Struts Tiles")
-as well as Tiles v2 are no longer supported by Spring.
+`org.springframework.web.servlet.view.tiles3` package.
 ====
 
 
@@ -34801,10 +34811,10 @@ serializers/deserializers need to be provided for specific types.
 Spring Web Flow (SWF) aims to be the best solution for the management of web application
 page flow.
 
-SWF integrates with existing frameworks like Spring MVC, Struts, and JSF, in both
-servlet and portlet environments. If you have a business process (or processes) that
-would benefit from a conversational model as opposed to a purely request model, then SWF
-may be the solution.
+SWF integrates with existing frameworks like Spring MVC and JSF, in both Servlet and
+Portlet environments. If you have a business process (or processes) that would benefit
+from a conversational model as opposed to a purely request model, then SWF may be the
+solution.
 
 SWF allows you to capture logical page flows as self-contained modules that are reusable
 in different situations, and as such is ideal for building web application modules that
@@ -34814,9 +34824,8 @@ For more information about SWF, consult the
 http://projects.spring.io/spring-webflow/[Spring Web Flow website].
 ****
 
-This chapter details Spring's integration with third party web frameworks such as
-http://www.oracle.com/technetwork/java/javaee/javaserverfaces-139869.html[JSF],
-http://struts.apache.org/[Struts], and http://tapestry.apache.org/[Tapestry].
+This chapter details Spring's integration with third party web frameworks, such as
+http://www.oracle.com/technetwork/java/javaee/javaserverfaces-139869.html[JSF].
 
 One of the core value propositions of the Spring Framework is that of enabling
 __choice__. In a general sense, Spring does not force one to use or buy into any
@@ -34826,7 +34835,7 @@ methodology that is most relevant to a developer and their development team is
 arguably most evident in the web area, where Spring provides its own web framework
 (<<mvc,Spring MVC>>), while at the same time providing integration with a number of
 popular third party web frameworks. This allows one to continue to leverage any and all
-of the skills one may have acquired in a particular web framework such as Struts, while
+of the skills one may have acquired in a particular web framework such as JSF, while
 at the same time being able to enjoy the benefits afforded by Spring in other areas such
 as data access, declarative transaction management, and flexible configuration and
 application assembly.
@@ -34845,9 +34854,9 @@ framework.
 [NOTE]
 ====
 Please note that this chapter does not attempt to explain how to use any of the
-supported web frameworks. For example, if you want to use Struts for the presentation
+supported web frameworks. For example, if you want to use JSF for the presentation
 layer of your web application, the assumption is that you are already familiar with
-Struts. If you need further details about any of the supported web frameworks
+JSF itself. If you need further details about any of the supported web frameworks
 themselves, please do consult <<web-integration-resources>> at the end of this chapter.
 ====
 
@@ -35087,10 +35096,10 @@ generate what is displayed to the user.
 Spring Web Flow (SWF) aims to be the best solution for the management of web application
 page flow.
 
-SWF integrates with existing frameworks like Spring MVC, Struts, and JSF, in both
-servlet and portlet environments. If you have a business process (or processes) that
-would benefit from a conversational model as opposed to a purely request model, then SWF
-may be the solution.
+SWF integrates with existing frameworks like Spring MVC and JSF, in both Servlet and
+Portlet environments. If you have a business process (or processes) that would benefit
+from a conversational model as opposed to a purely request model, then SWF may be the
+solution.
 
 SWF allows you to capture logical page flows as self-contained modules that are reusable
 in different situations, and as such is ideal for building web application modules that
@@ -35520,7 +35529,7 @@ overview of what you can do with them:
 
 These command controllers are quite powerful, but they do require a detailed
 understanding of how they operate in order to use them efficiently. Carefully review the
-Javadocs for this entire hierarchy and then look at some sample implementations before
+javadocs for this entire hierarchy and then look at some sample implementations before
 you start using them.
 
 
@@ -39267,10 +39276,14 @@ implementation like
 may be a good choice.
 ====
 
-See {javadoc-baseurl}/org/springframework/util/concurrent/ListenableFuture.html[`ListenableFuture`
-Javadoc] and
-{javadoc-baseurl}/org/springframework/web/client/AsyncRestTemplate.html[`AsyncRestTemplate`
-Javadoc] for more details.
+See the
+{javadoc-baseurl}/org/springframework/util/concurrent/ListenableFuture.html[`ListenableFuture` javadocs]
+and
+{javadoc-baseurl}/org/springframework/web/client/AsyncRestTemplate.html[`AsyncRestTemplate` javadocs]
+for more details.
+
+
+
 
 
 [[ejb]]
@@ -40027,7 +40040,7 @@ containers that ships with Spring (in this case the `DefaultMessageListenerConta
 	</bean>
 ----
 
-Please refer to the Spring Javadoc of the various message listener containers for a full
+Please refer to the Spring javadocs of the various message listener containers for a full
 description of the features supported by each implementation.
 
 
@@ -40458,9 +40471,9 @@ still benefiting from the convenience of the namespace.
 	</jms:listener-container>
 ----
 
-The following table describes all available attributes. Consult the class-level Javadoc
+The following table describes all available attributes. Consult the class-level javadocs
 of the `AbstractMessageListenerContainer` and its concrete subclasses for more details
-on the individual properties. The Javadoc also provides a discussion of transaction
+on the individual properties. The javadocs also provide a discussion of transaction
 choices and message redelivery scenarios.
 
 [[jms-namespace-listener-container-tbl]]
@@ -41966,7 +41979,7 @@ instance. The `NotificationPublisherAware` interface simply supplies an instance
 `NotificationPublisher` to the implementing bean via a simple setter method, which the
 bean can then use to publish `Notifications`.
 
-As stated in the Javadoc for the `NotificationPublisher` class, managed beans that are
+As stated in the javadocs of the `NotificationPublisher` class, managed beans that are
 publishing events via the `NotificationPublisher` mechanism are __not__ responsible for
 the state management of any notification listeners and the like ... Spring's JMX support
 will take care of handling all the JMX infrastructure issues. All one need do as an
@@ -43234,7 +43247,7 @@ interface; a simple value object encapsulating the properties of a simple mail s
 __from__ and __to__ (plus many others) is the `SimpleMailMessage` class. This package
 also contains a hierarchy of checked exceptions which provide a higher level of
 abstraction over the lower level mail system exceptions with the root exception being
-`MailException`. Please refer to the JavaDocs for more information on the rich mail
+`MailException`. Please refer to the javadocs for more information on the rich mail
 exception hierarchy.
 
 The `org.springframework.mail.javamail.JavaMailSender` interface adds specialized
@@ -43406,7 +43419,7 @@ joinpoints on the `OrderManager` target.
 ====
 
 The Spring Framework's mail support ships with the standard JavaMail implementation.
-Please refer to the relevant JavaDocs for more information.
+Please refer to the relevant javadocs for more information.
 
 
 
@@ -43967,7 +43980,7 @@ To enable support for `@Scheduled` and `@Async` annotations add `@EnableScheduli
 You are free to pick and choose the relevant annotations for your application. For
 example, if you only need support for `@Scheduled`, simply omit `@EnableAsync`. For more
 fine-grained control you can additionally implement the `SchedulingConfigurer` and/or
-`AsyncConfigurer` interfaces. See the Javadoc for full details.
+`AsyncConfigurer` interfaces. See the javadocs for full details.
 
 If you prefer XML configuration use the `<task:annotation-driven>` element.
 
@@ -44505,8 +44518,8 @@ seconds and one every morning at 6 AM. To finalize everything, we need to set up
 More properties are available for the `SchedulerFactoryBean` for you to set, such as the
 calendars used by the job details, properties to customize Quartz with, etc. Have a look
 at the
-{javadoc-baseurl}/org/springframework/scheduling/quartz/SchedulerFactoryBean.html[`SchedulerFactoryBean
-Javadoc`] for more information.
+{javadoc-baseurl}/org/springframework/scheduling/quartz/SchedulerFactoryBean.html[`SchedulerFactoryBean`
+javadocs] for more information.
 
 
 
@@ -45981,7 +45994,7 @@ application through AOP. The configuration is intentionally similar with that of
 | XML Attribute| Annotation Attribute| Default| Description
 
 | `cache-manager`
-| N/A (See `CachingConfigurer` Javadoc)
+| N/A (See `CachingConfigurer` javadocs)
 | cacheManager
 | Name of cache manager to use. Only required if the name of the cache manager is not
   `cacheManager`, as in the example above.
