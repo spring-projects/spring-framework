@@ -62,9 +62,9 @@ build and release FAQ][].
 [Pull requests][] are welcome; see the [contributor guidelines][] for details.
 
 ## Staying in Touch
-Follow [@springframework][] and its [team members][] on Twitter. In-depth
-articles can be found at [The Spring Blog][], and releases are announced via
-our [news feed][].
+Follow [@SpringCentral][] as well as [@SpringFramework][] and its [team members][]
+on Twitter. In-depth articles can be found at [The Spring Blog][], and releases
+are announced via our [news feed][].
 
 ## License
 The Spring Framework is released under version 2.0 of the [Apache License][].
@@ -93,7 +93,8 @@ The Spring Framework is released under version 2.0 of the [Apache License][].
 [Gradle build and release FAQ]: https://github.com/spring-projects/spring-framework/wiki/Gradle-build-and-release-FAQ
 [Pull requests]: http://help.github.com/send-pull-requests
 [contributor guidelines]: https://github.com/spring-projects/spring-framework/blob/master/CONTRIBUTING.md
-[@springframework]: http://twitter.com/springframework
+[@SpringFramework]: https://twitter.com/springframework
+[@SpringCentral]: https://twitter.com/springcentral
 [team members]: https://twitter.com/springframework/team/members
 [The Spring Blog]: http://spring.io/blog/
 [news feed]: http://spring.io/blog/category/news
