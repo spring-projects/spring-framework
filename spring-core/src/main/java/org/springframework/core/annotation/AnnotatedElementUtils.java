@@ -42,7 +42,6 @@ public class AnnotatedElementUtils {
 	public static Set<String> getMetaAnnotationTypes(AnnotatedElement element, String annotationType) {
 		final Set<String> types = new LinkedHashSet<String>();
 		process(element, annotationType, true, new Processor<Object>() {
-
 			@Override
 			public Object process(Annotation annotation, int metaDepth) {
 				if (metaDepth > 0) {
@@ -50,7 +49,6 @@ public class AnnotatedElementUtils {
 				}
 				return null;
 			}
-
 			@Override
 			public void postProcess(Annotation annotation, Object result) {
 			}
@@ -60,7 +58,6 @@ public class AnnotatedElementUtils {
 
 	public static boolean hasMetaAnnotationTypes(AnnotatedElement element, String annotationType) {
 		return Boolean.TRUE.equals(process(element, annotationType, true, new Processor<Boolean>() {
-
 			@Override
 			public Boolean process(Annotation annotation, int metaDepth) {
 				if (metaDepth > 0) {
@@ -68,7 +65,6 @@ public class AnnotatedElementUtils {
 				}
 				return null;
 			}
-
 			@Override
 			public void postProcess(Annotation annotation, Boolean result) {
 			}
@@ -77,12 +73,10 @@ public class AnnotatedElementUtils {
 
 	public static boolean isAnnotated(AnnotatedElement element, String annotationType) {
 		return Boolean.TRUE.equals(process(element, annotationType, true, new Processor<Boolean>() {
-
 			@Override
 			public Boolean process(Annotation annotation, int metaDepth) {
 				return Boolean.TRUE;
 			}
-
 			@Override
 			public void postProcess(Annotation annotation, Boolean result) {
 			}
@@ -97,12 +91,10 @@ public class AnnotatedElementUtils {
 			final boolean classValuesAsString, final boolean nestedAnnotationsAsMap) {
 
 		return process(element, annotationType, true, new Processor<AnnotationAttributes>() {
-
 			@Override
 			public AnnotationAttributes process(Annotation annotation, int metaDepth) {
 				return AnnotationUtils.getAnnotationAttributes(annotation, classValuesAsString, nestedAnnotationsAsMap);
 			}
-
 			@Override
 			public void postProcess(Annotation annotation, AnnotationAttributes result) {
 				for (String key : result.keySet()) {
@@ -117,8 +109,7 @@ public class AnnotatedElementUtils {
 		});
 	}
 
-	public static MultiValueMap<String, Object> getAllAnnotationAttributes(AnnotatedElement element,
-			final String annotationType) {
+	public static MultiValueMap<String, Object> getAllAnnotationAttributes(AnnotatedElement element, String annotationType) {
 		return getAllAnnotationAttributes(element, annotationType, false, false);
 	}
 
@@ -127,7 +118,6 @@ public class AnnotatedElementUtils {
 
 		final MultiValueMap<String, Object> attributes = new LinkedMultiValueMap<String, Object>();
 		process(element, annotationType, false, new Processor<Void>() {
-
 			@Override
 			public Void process(Annotation annotation, int metaDepth) {
 				if (annotation.annotationType().getName().equals(annotationType)) {
@@ -138,7 +128,6 @@ public class AnnotatedElementUtils {
 				}
 				return null;
 			}
-
 			@Override
 			public void postProcess(Annotation annotation, Void result) {
 				for (String key : attributes.keySet()) {
@@ -157,12 +146,10 @@ public class AnnotatedElementUtils {
 	/**
 	 * Process all annotations of the specified {@code annotationType} and
 	 * recursively all meta-annotations on the specified {@code element}.
-	 *
 	 * <p>If the {@code traverseClassHierarchy} flag is {@code true} and the sought
 	 * annotation is neither <em>directly present</em> on the given element nor
 	 * present on the given element as a meta-annotation, then the algorithm will
 	 * recursively search through the class hierarchy of the given element.
-	 *
 	 * @param element the annotated element
 	 * @param annotationType the annotation type to find
 	 * @param traverseClassHierarchy whether or not to traverse up the class
@@ -172,19 +159,23 @@ public class AnnotatedElementUtils {
 	 */
 	private static <T> T process(AnnotatedElement element, String annotationType, boolean traverseClassHierarchy,
 			Processor<T> processor) {
-		return doProcess(element, annotationType, traverseClassHierarchy, processor, new HashSet<AnnotatedElement>(), 0);
+
+		try {
+			return doProcess(element, annotationType, traverseClassHierarchy, processor, new HashSet<AnnotatedElement>(), 0);
+		}
+		catch (Throwable ex) {
+			throw new IllegalStateException("Failed to introspect annotations: " + element, ex);
+		}
 	}
 
 	/**
 	 * Perform the search algorithm for the {@link #process} method, avoiding
 	 * endless recursion by tracking which annotated elements have already been
 	 * <em>visited</em>.
-	 * 
 	 * <p>The {@code metaDepth} parameter represents the depth of the annotation
 	 * relative to the initial element. For example, an annotation that is
 	 * <em>present</em> on the element will have a depth of 0; a meta-annotation
 	 * will have a depth of 1; and a meta-meta-annotation will have a depth of 2.
-	 *
 	 * @param element the annotated element
 	 * @param annotationType the annotation type to find
 	 * @param traverseClassHierarchy whether or not to traverse up the class
@@ -198,10 +189,8 @@ public class AnnotatedElementUtils {
 			Processor<T> processor, Set<AnnotatedElement> visited, int metaDepth) {
 
 		if (visited.add(element)) {
-
-			Annotation[] annotations = traverseClassHierarchy ? element.getDeclaredAnnotations()
-					: element.getAnnotations();
-
+			Annotation[] annotations =
+					(traverseClassHierarchy ? element.getDeclaredAnnotations() : element.getAnnotations());
 			for (Annotation annotation : annotations) {
 				if (annotation.annotationType().getName().equals(annotationType) || metaDepth > 0) {
 					T result = processor.process(annotation, metaDepth);
@@ -216,7 +205,6 @@ public class AnnotatedElementUtils {
 					}
 				}
 			}
-
 			for (Annotation annotation : annotations) {
 				if (!isInJavaLangAnnotationPackage(annotation)) {
 					T result = doProcess(annotation.annotationType(), annotationType, traverseClassHierarchy,
@@ -227,7 +215,6 @@ public class AnnotatedElementUtils {
 					}
 				}
 			}
-
 			if (traverseClassHierarchy && element instanceof Class) {
 				Class<?> superclass = ((Class<?>) element).getSuperclass();
 				if (superclass != null && !superclass.equals(Object.class)) {
@@ -239,7 +226,6 @@ public class AnnotatedElementUtils {
 				}
 			}
 		}
-
 		return null;
 	}
 
@@ -252,13 +238,11 @@ public class AnnotatedElementUtils {
 
 		/**
 		 * Called to process the annotation.
-		 * 
 		 * <p>The {@code metaDepth} parameter represents the depth of the
 		 * annotation relative to the initial element. For example, an annotation
 		 * that is <em>present</em> on the element will have a depth of 0; a
 		 * meta-annotation will have a depth of 1; and a meta-meta-annotation
 		 * will have a depth of 2.
-		 *
 		 * @param annotation the annotation to process
 		 * @param metaDepth the depth of the annotation relative to the initial element
 		 * @return the result of the processing or {@code null} to continue
