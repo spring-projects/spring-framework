@@ -173,10 +173,10 @@ public class Spr8954Tests {
 
 ### Squash commits
 
-Use `git rebase --interactive --autosquash`, `git add --patch` and other tools
-to "squash" multiple commits into atomic changes. In addition to the man pages
-for git, there are many resources online to help you understand how these tools
-work. Here is one: http://book.git-scm.com/4_interactive_rebasing.html.
+Use `git rebase --interactive --autosquash`, `git add --patch`, and other tools
+to "squash" multiple commits into a single atomic commit. In addition to the man
+pages for git, there are many resources online to help you understand how these
+tools work. The [Rewriting History section of Pro Git][] provides a good overview.
 
 
 ### Use real name in git commits
@@ -210,7 +210,7 @@ or _locally_ for the `spring-framework` repository only by omitting the
 
 ### Format commit messages
 
-Please read and follow the [commit guidelines section of Pro Git][].
+Please read and follow the [Commit Guidelines section of Pro Git][].
 
 Most importantly, please format your commit messages in the following way
 (adapted from the commit template in the link above):
@@ -310,5 +310,6 @@ need to issue a new pull request when asked to make changes.
 [SpringSource CLA form]: https://support.springsource.com/spring_committer_signup
 [fork-and-edit]: https://github.com/blog/844-forking-with-the-edit-button
 [Spring Framework Code Style]: https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-Code-Style
-[commit guidelines section of Pro Git]: http://git-scm.com/book/en/Distributed-Git-Contributing-to-a-Project#Commit-Guidelines
+[Rewriting History section of Pro Git]: http://git-scm.com/book/en/Git-Tools-Rewriting-History
+[Commit Guidelines section of Pro Git]: http://git-scm.com/book/en/Distributed-Git-Contributing-to-a-Project#Commit-Guidelines
 [building from source]: https://github.com/spring-projects/spring-framework#building-from-source
