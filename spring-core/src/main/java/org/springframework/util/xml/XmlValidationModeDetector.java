@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,7 +123,7 @@ public class XmlValidationModeDetector {
 	 * Does the content contain the the DTD DOCTYPE declaration?
 	 */
 	private boolean hasDoctype(String content) {
-		return (content.indexOf(DOCTYPE) > -1);
+		return content.contains(DOCTYPE);
 	}
 
 	/**
@@ -136,7 +136,8 @@ public class XmlValidationModeDetector {
 			return false;
 		}
 		int openTagIndex = content.indexOf('<');
-		return (openTagIndex > -1 && content.length() > openTagIndex && Character.isLetter(content.charAt(openTagIndex + 1)));
+		return (openTagIndex > -1 && (content.length() > openTagIndex + 1) &&
+				Character.isLetter(content.charAt(openTagIndex + 1)));
 	}
 
 	/**
@@ -146,7 +147,7 @@ public class XmlValidationModeDetector {
 	 * the DOCTYPE declaration or the root element of the document.
 	 */
 	private String consumeCommentTokens(String line) {
-		if (line.indexOf(START_COMMENT) == -1 && line.indexOf(END_COMMENT) == -1) {
+		if (!line.contains(START_COMMENT) && !line.contains(END_COMMENT)) {
 			return line;
 		}
 		while ((line = consume(line)) != null) {
