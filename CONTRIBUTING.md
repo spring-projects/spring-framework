@@ -248,10 +248,10 @@ Most importantly, please format your commit messages in the following way
 For examples of this style, issue a `git log --author=cbeams` in the
 `spring-framework` git repository. For convenience, here are several such commits:
 
-- https://github.com/SpringSource/spring-framework/commit/08e2669b84ec0faa2f7904441fe39ac70b65b078
-- https://github.com/SpringSource/spring-framework/commit/1d9d3e6ff79ce9f0eca03b02cd1df705925575da
-- https://github.com/SpringSource/spring-framework/commit/8e0b1c3a5f957af3049cfa0438317177e16d6de6
-- https://github.com/SpringSource/spring-framework/commit/b787a68f2050df179f7036b209aa741230a02477
+- https://github.com/spring-projects/spring-framework/commit/08e2669b84ec0faa2f7904441fe39ac70b65b078
+- https://github.com/spring-projects/spring-framework/commit/1d9d3e6ff79ce9f0eca03b02cd1df705925575da
+- https://github.com/spring-projects/spring-framework/commit/8e0b1c3a5f957af3049cfa0438317177e16d6de6
+- https://github.com/spring-projects/spring-framework/commit/b787a68f2050df179f7036b209aa741230a02477
 
 ## Run the Final Checklist
 
@@ -311,4 +311,4 @@ need to issue a new pull request when asked to make changes.
 [fork-and-edit]: https://github.com/blog/844-forking-with-the-edit-button
 [Spring Framework Code Style]: https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-Code-Style
 [commit guidelines section of Pro Git]: http://progit.org/book/ch5-2.html#commit_guidelines
-[building from source]: https://github.com/SpringSource/spring-framework#building-from-source
+[building from source]: https://github.com/spring-projects/spring-framework#building-from-source
