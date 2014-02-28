@@ -69,7 +69,7 @@ accepting pull requests and should be as expressive and concise as possible.
 
 ## Use Spring Code Style
 
-The complete [Spring Code Style][] reference is available on the wiki, but
+The complete [Spring Framework Code Style][] reference is available on the wiki, but
 here's a quick summary:
 
 ### Mind the whitespace
