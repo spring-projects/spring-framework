@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,9 +21,10 @@ import org.springframework.util.MimeType;
 
 /**
  * A default {@link ContentTypeResolver} that checks the
- * {@link MessageHeaders#CONTENT_TYPE} header or falls back to a default value,
- * The header value is expected to be a {@link org.springframework.util.MimeType}
- * or a String that can be parsed into a {@code MimeType}.
+ * {@link MessageHeaders#CONTENT_TYPE} header or falls back to a default value.
+ *
+ * <p>The header value is expected to be a {@link org.springframework.util.MimeType}
+ * or a {@code String} that can be parsed into a {@code MimeType}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -36,8 +37,7 @@ public class DefaultContentTypeResolver implements ContentTypeResolver {
 	/**
 	 * Set the default MIME type to use when there is no
 	 * {@link MessageHeaders#CONTENT_TYPE} header present.
-	 * <p>
-	 * This property does not have a default value.
+	 * <p>This property does not have a default value.
 	 */
 	public void setDefaultMimeType(MimeType defaultMimeType) {
 		this.defaultMimeType = defaultMimeType;
