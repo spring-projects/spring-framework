@@ -89,7 +89,6 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 		try {
 			source = processSource(source);
 			Unmarshaller unmarshaller = createUnmarshaller(clazz);
-			this.customizeUnmarshaller(unmarshaller);
 			if (clazz.isAnnotationPresent(XmlRootElement.class)) {
 				return unmarshaller.unmarshal(source);
 			}
@@ -132,7 +131,6 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 		try {
 			Class<?> clazz = ClassUtils.getUserClass(o);
 			Marshaller marshaller = createMarshaller(clazz);
-			this.customizeMarshaller(marshaller);
 			setCharset(headers.getContentType(), marshaller);
 			marshaller.marshal(o, result);
 		}
@@ -148,28 +146,6 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 		if (contentType != null && contentType.getCharSet() != null) {
 			marshaller.setProperty(Marshaller.JAXB_ENCODING, contentType.getCharSet().name());
 		}
-	}
-
-	/**
-	 * Customize the {@link Marshaller} created by this
-	 * message converter before using it to write the object to the output.
-	 * @param marshaller the marshaller to customize
-	 * @see #createMarshaller(Class)
-	 * @since 4.0.3
-	 */
-	protected void customizeMarshaller(Marshaller marshaller) {
-
-	}
-
-	/**
-	 * Customize the {@link Unmarshaller} created by this
-	 * message converter before using it to read the object from the input.
-	 * @param unmarshaller the unmarshaller to customize
-	 * @see #createUnmarshaller(Class)
-	 * @since 4.0.3
-	 */
-	protected void customizeUnmarshaller(Unmarshaller unmarshaller) {
-
 	}
 
 }

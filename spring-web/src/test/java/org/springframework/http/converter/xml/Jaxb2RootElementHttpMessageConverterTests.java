@@ -154,6 +154,8 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 				outputMessage.getBodyAsString(Charset.forName("UTF-8")));
 	}
 
+	// SPR-11488
+
 	@Test
 	public void customizeMarshaller() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();

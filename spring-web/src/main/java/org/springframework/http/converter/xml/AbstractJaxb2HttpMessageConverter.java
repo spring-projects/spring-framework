@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,12 +47,24 @@ public abstract class AbstractJaxb2HttpMessageConverter<T> extends AbstractXmlHt
 	protected final Marshaller createMarshaller(Class<?> clazz) {
 		try {
 			JAXBContext jaxbContext = getJaxbContext(clazz);
-			return jaxbContext.createMarshaller();
+			Marshaller marshaller = jaxbContext.createMarshaller();
+			customizeMarshaller(marshaller);
+			return marshaller;
 		}
 		catch (JAXBException ex) {
 			throw new HttpMessageConversionException(
 					"Could not create Marshaller for class [" + clazz + "]: " + ex.getMessage(), ex);
 		}
+	}
+
+	/**
+	 * Customize the {@link Marshaller} created by this
+	 * message converter before using it to write the object to the output.
+	 * @param marshaller the marshaller to customize
+	 * @see #createMarshaller(Class)
+	 * @since 4.0.3
+	 */
+	protected void customizeMarshaller(Marshaller marshaller) {
 	}
 
 	/**
@@ -64,12 +76,24 @@ public abstract class AbstractJaxb2HttpMessageConverter<T> extends AbstractXmlHt
 	protected final Unmarshaller createUnmarshaller(Class<?> clazz) throws JAXBException {
 		try {
 			JAXBContext jaxbContext = getJaxbContext(clazz);
-			return jaxbContext.createUnmarshaller();
+			Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+			customizeUnmarshaller(unmarshaller);
+			return unmarshaller;
 		}
 		catch (JAXBException ex) {
 			throw new HttpMessageConversionException(
 					"Could not create Unmarshaller for class [" + clazz + "]: " + ex.getMessage(), ex);
 		}
+	}
+
+	/**
+	 * Customize the {@link Unmarshaller} created by this
+	 * message converter before using it to read the object from the input.
+	 * @param unmarshaller the unmarshaller to customize
+	 * @see #createUnmarshaller(Class)
+	 * @since 4.0.3
+	 */
+	protected void customizeUnmarshaller(Unmarshaller unmarshaller) {
 	}
 
 	/**
