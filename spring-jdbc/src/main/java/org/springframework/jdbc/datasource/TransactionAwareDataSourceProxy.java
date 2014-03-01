@@ -229,6 +229,16 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 				actualTarget = DataSourceUtils.doGetConnection(this.targetDataSource);
 			}
 
+			if (actualTarget != null && Proxy.isProxyClass(actualTarget.getClass())) {
+				InvocationHandler handler = Proxy.getInvocationHandler(actualTarget);
+				if (handler instanceof TransactionAwareInvocationHandler) {
+					TransactionAwareInvocationHandler taHandler = ((TransactionAwareInvocationHandler) handler);
+					if (taHandler.targetDataSource == this.targetDataSource && taHandler.target != null) {
+						actualTarget = taHandler.target;
+					}
+				}
+			}
+
 			if (method.getName().equals("getTargetConnection")) {
 				// Handle getTargetConnection method: return underlying Connection.
 				return actualTarget;
