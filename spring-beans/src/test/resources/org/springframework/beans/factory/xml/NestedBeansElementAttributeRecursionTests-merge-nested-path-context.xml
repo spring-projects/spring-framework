@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+
+	<bean id="parentFoo" class="org.springframework.beans.factory.xml.NestedBeansElementAttributeRecursionTests$FooBean">
+		<property name="mapBean">
+			<bean class="org.springframework.beans.factory.xml.NestedBeansElementAttributeRecursionTests$MapBean">
+				<property name="map">
+					<map>
+						<entry key="kParent" value="vParent"/>
+					</map>
+				</property>
+				<property name="list">
+					<list>
+						<value>lParent</value>
+					</list>
+				</property>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="childFoo" parent="parentFoo">
+		<property name="mapBean.map">
+			<map merge="true">
+				<entry key="kChild" value="vChild"/>
+			</map>
+		</property>
+		<property name="mapBean.list">
+			<list merge="true">
+				<value>lChild</value>
+			</list>
+		</property>
+	</bean>
+</beans>

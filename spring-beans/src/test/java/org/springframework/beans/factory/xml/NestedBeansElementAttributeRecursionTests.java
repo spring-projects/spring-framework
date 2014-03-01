@@ -21,6 +21,9 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertThat;
 
+import java.util.List;
+import java.util.Map;
+
 import org.junit.Test;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -75,6 +78,60 @@ public class NestedBeansElementAttributeRecursionTests {
 		// merges all values
 		assertThat((Iterable<String>)secondLevel.getSomeList(),
 				hasItems("charlie", "delta", "echo", "foxtrot", "golf", "hotel"));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void defaultMergeNestedPath() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
+				new ClassPathResource("NestedBeansElementAttributeRecursionTests-merge-nested-path-context.xml", this.getClass()));
+		FooBean foo = bf.getBean("childFoo", FooBean.class);
+
+		// should contain entries added by child
+		assertThat("missing key 'kChild'", foo.getMapBean().getMap().containsKey("kChild"), is(true));
+        assertThat("missing value 'lChild'", foo.getMapBean().getList().contains("lChild"), is(true));
+        
+		// should also contain entries added by parent
+		assertThat("missing key 'kParent'", foo.getMapBean().getMap().containsKey("kParent"), is(true));
+		assertThat("Missing value 'lParent'", foo.getMapBean().getList().contains("lParent"), is(true));
+	}
+
+	static class FooBean {
+
+		private MapBean mapBean;
+
+		public MapBean getMapBean() {
+			return mapBean;
+		}
+		
+		public void setMapBean(MapBean mapBean) {
+			this.mapBean = mapBean;
+		}
+	}
+
+	@SuppressWarnings("rawtypes")
+	static class MapBean {
+
+		private Map map;
+		private List list;
+		
+		public void setMap(Map map) {
+			this.map = map;
+		}
+
+		public Map getMap() {
+			return map;
+		}
+		
+		public void setList(List list) {
+			this.list = list;
+		}
+		
+		public List getList()
+		{
+			return list;
+		}
 	}
 
 	@Test
