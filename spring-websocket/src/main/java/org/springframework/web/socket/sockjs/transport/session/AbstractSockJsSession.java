@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,18 @@ package org.springframework.web.socket.sockjs.transport.session;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.NestedCheckedException;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -47,6 +51,40 @@ import org.springframework.web.socket.sockjs.transport.SockJsSession;
 public abstract class AbstractSockJsSession implements SockJsSession {
 
 	protected final Log logger = LogFactory.getLog(getClass());
+
+	/**
+	 * Log category to use on network IO exceptions after a client has gone away.
+	 *
+	 * <p>The Servlet API does not provide notifications when a client disconnects,
+	 * see see https://java.net/jira/browse/SERVLET_SPEC-44. Therefore network IO
+	 * failures may occur simply because a client has gone away and that can fill
+	 * the logs with unnecessary stack traces.
+	 *
+	 * <p>We make a best effort to identify such network failures, on a per-server
+	 * basis, and log them under a separate log category. A simple one-line message
+	 * is logged at DEBUG level while a full stack trace is shown at TRACE level.
+	 *
+	 * @see #disconnectedClientLogger
+	 */
+	public static final String DISCONNECTED_CLIENT_LOG_CATEGORY =
+			"org.springframework.web.socket.sockjs.DisconnectedClient";
+
+	/**
+	 * Separate logger to use on network IO failure after a client has gone away.
+	 * @see #DISCONNECTED_CLIENT_LOG_CATEGORY
+	 */
+	protected static final Log disconnectedClientLogger = LogFactory.getLog(DISCONNECTED_CLIENT_LOG_CATEGORY);
+
+
+	private final static Set<String> disconnectedClientExceptions =
+			Collections.newSetFromMap(new HashMap<String, Boolean>(2));
+
+	static {
+		disconnectedClientExceptions.add("ClientAbortException"); // Tomcat
+		disconnectedClientExceptions.add("EofException"); // Jetty
+		// IOException("Broken pipe") on WildFly and Glassfish
+	}
+
 
 	private final String id;
 
@@ -273,9 +311,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 			writeFrameInternal(frame);
 		}
 		catch (Throwable ex) {
-			logger.error("Terminating connection after failure to send message to client. " +
-					"This may be because the client has gone away " +
-					"(see https://java.net/jira/browse/SERVLET_SPEC-44)", ex);
+			logWriteFrameFailure(ex);
 			try {
 				disconnect(CloseStatus.SERVER_ERROR);
 				close(CloseStatus.SERVER_ERROR);
@@ -284,6 +320,28 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 				// ignore
 			}
 			throw new SockJsTransportFailureException("Failed to write " + frame, this.getId(), ex);
+		}
+	}
+
+	private void logWriteFrameFailure(Throwable failure) {
+
+		@SuppressWarnings("serial")
+		NestedCheckedException nestedException = new NestedCheckedException("", failure) {};
+
+		if ("Broken pipe".equalsIgnoreCase(nestedException.getMostSpecificCause().getMessage()) ||
+				disconnectedClientExceptions.contains(failure.getClass().getSimpleName())) {
+
+			if (disconnectedClientLogger.isTraceEnabled()) {
+				disconnectedClientLogger.trace("Looks like the client has gone away", failure);
+			}
+			else if (disconnectedClientLogger.isDebugEnabled()) {
+				disconnectedClientLogger.debug("Looks like the client has gone away: " +
+						nestedException.getMessage() + " (For full stack trace, raise '" +
+						DISCONNECTED_CLIENT_LOG_CATEGORY + "' log category at TRACE level)");
+			}
+		}
+		else {
+			logger.error("Terminating connection after failure to send message to client.", failure);
 		}
 	}
 
@@ -314,7 +372,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 			}
 		}, time);
 		if (logger.isTraceEnabled()) {
-			logger.trace("Scheduled heartbeat after " + this.config.getHeartbeatTime()/1000 + " seconds");
+			logger.trace("Scheduled heartbeat after " + this.config.getHeartbeatTime() / 1000 + " seconds");
 		}
 	}
 
