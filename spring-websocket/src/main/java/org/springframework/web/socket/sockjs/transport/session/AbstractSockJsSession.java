@@ -55,14 +55,14 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	/**
 	 * Log category to use on network IO exceptions after a client has gone away.
 	 *
-	 * <p>The Servlet API does not provide notifications when a client disconnects,
-	 * see see https://java.net/jira/browse/SERVLET_SPEC-44. Therefore network IO
-	 * failures may occur simply because a client has gone away and that can fill
-	 * the logs with unnecessary stack traces.
+	 * <p>The Servlet API does not provide notifications when a client disconnects;
+	 * see <a href="https://java.net/jira/browse/SERVLET_SPEC-44">SERVLET_SPEC-44</a>.
+	 * Therefore network IO failures may occur simply because a client has gone away,
+	 * and that can fill the logs with unnecessary stack traces.
 	 *
 	 * <p>We make a best effort to identify such network failures, on a per-server
 	 * basis, and log them under a separate log category. A simple one-line message
-	 * is logged at DEBUG level while a full stack trace is shown at TRACE level.
+	 * is logged at DEBUG level, while a full stack trace is shown at TRACE level.
 	 *
 	 * @see #disconnectedClientLogger
 	 */
@@ -336,8 +336,8 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 			}
 			else if (disconnectedClientLogger.isDebugEnabled()) {
 				disconnectedClientLogger.debug("Looks like the client has gone away: " +
-						nestedException.getMessage() + " (For full stack trace, raise '" +
-						DISCONNECTED_CLIENT_LOG_CATEGORY + "' log category at TRACE level)");
+						nestedException.getMessage() + " (For full stack trace, set the '" +
+						DISCONNECTED_CLIENT_LOG_CATEGORY + "' log category to TRACE level)");
 			}
 		}
 		else {
