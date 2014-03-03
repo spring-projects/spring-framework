@@ -32253,7 +32253,60 @@ Spring JSP tags:
 	<script src="${resourceUrl}/dojo/dojo.js" type="text/javascript"> </script>
 ----
 
+[[mvc-config-path-matching]]
+==== Configuring Path Matching
+This is a shortcut for configuring `RequestMappingHandlerMapping` path matching properties, without
+having to <<mvc-config-advanced-java,override this Bean with an advanced setup>>.
 
+An example of enabling pattern match features and using custom matchers, in Java:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebMvc
+	public class WebConfig extends WebMvcConfigurerAdapter {
+
+		@Override
+		public void configurePathMatch(PathMatchConfigurer configurer) {
+			configurer.setUseSuffixPatternMatch(true)
+			    .setUseTrailingSlashMatch(false)
+			    .setPathMatcher(antPathMatcher())
+			    .setUrlPathHelper(urlPathHelper());
+		}
+
+		@Bean
+		public UrlPathHelper urlPathHelper() {
+		    //...
+		}
+
+		@Bean
+		public PathMatcher antPathMatcher() {
+		    //...
+		}
+
+	}
+----
+
+For more details, check out the
+{javadoc-baseurl}/org/springframework/web/servlet/config/annotation/PathMatchConfigurer.html[PathMatchConfigurer] API.
+
+And the same in XML, use the `<mvc:path-matching>` element:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+    <mvc:annotation-driven>
+        <mvc:path-matching
+            suffix-pattern="true"
+            trailing-slash="false"
+            path-helper="pathHelper"
+            path-matcher="pathMatcher" />
+    </mvc:annotation-driven>
+
+    <bean id="pathHelper" class="org.example.app.MyPathHelper" />
+    <bean id="pathMatcher" class="org.example.app.MyPathMatcher" />
+----
 
 [[mvc-default-servlet-handler]]
 ==== mvc:default-servlet-handler
