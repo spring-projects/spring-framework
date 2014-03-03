@@ -9760,9 +9760,9 @@ The SPI to implement type conversion logic is simple and strongly typed:
 To create your own Converter, simply implement the interface above. Parameterize S as
 the type you are converting from, and T as the type you are converting to. For each call
 to convert(S), the source argument is guaranteed to be NOT null. Your Converter may
-throw any Exception if conversion fails. An IllegalArgumentException should be thrown to
-report an invalid source value. Take care to ensure your Converter implementation is
-thread-safe.
+throw any unchecked exception if conversion fails. An `IllegalArgumentException` should
+be thrown to report an invalid source value. Take care to ensure your Converter implementation
+is thread-safe.
 
 Several converter implementations are provided in the `core.convert.support` package as
 a convenience. These include converters from Strings to Numbers and other common types.
