@@ -20618,7 +20618,7 @@ requests and provide "stub" responses:
 	RestTemplate restTemplate = new RestTemplate();
 
 	MockRestServiceServer mockServer = MockRestServiceServer.createServer(restTemplate);
-	mockServer.expect(requestTo("/greeting")).andRespond(withSuccess("Hello world", "text/plain"));
+	mockServer.expect(requestTo("/greeting")).andRespond(withSuccess("Hello world", MediaType.TEXT_PLAIN));
 
 	// use RestTemplate ...
 
