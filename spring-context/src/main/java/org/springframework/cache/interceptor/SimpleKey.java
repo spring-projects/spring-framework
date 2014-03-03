@@ -50,12 +50,13 @@ public final class SimpleKey implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		return (this == obj || (obj instanceof SimpleKey && Arrays.equals(this.params, ((SimpleKey) obj).params)));
+		return (this == obj || (obj instanceof SimpleKey
+				&& Arrays.deepEquals(this.params, ((SimpleKey) obj).params)));
 	}
 
 	@Override
 	public int hashCode() {
-		return Arrays.hashCode(this.params);
+		return Arrays.deepHashCode(this.params);
 	}
 
 	@Override
