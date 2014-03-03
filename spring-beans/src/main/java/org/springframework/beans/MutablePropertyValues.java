@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.util.StringUtils;
 
 /**
@@ -171,9 +174,67 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 				setPropertyValueAt(pv, i);
 				return this;
 			}
+			else if (addNestedPropertyValue(pv, currentPv)) {
+				return this;
+			}
 		}
 		this.propertyValueList.add(pv);
 		return this;
+	}
+
+	/**
+	 * Add a PropertyValue object, replacing any existing one for the
+	 * corresponding property or getting merged with it (if applicable),
+	 * after drilling down through any chains of beans to locate nested
+	 * properties.
+	 * @param pv PropertyValue object to add
+	 * @param currentPv
+	 * @return true if a matching property was located and merged if applicable, otherwise false
+	 */
+	private boolean addNestedPropertyValue(PropertyValue pv, PropertyValue currentPv) {
+		String pvName = pv.getName();
+		// Check if the property has a nested path name and we are at the root of the chain
+		if (pvName.startsWith(currentPv.getName()) && pvName.contains(".")) {
+			String[] pvNameComponents = pvName.split("\\.");
+			// The properties of the current bean in the chain
+			MutablePropertyValues values = null;
+			// Counter to track which property we will set in the bean
+			int k = 0;
+			// Walk any chain of inner beans until we get to the end
+			for (int j = 0; j < pvNameComponents.length; j++) {
+				Object value = currentPv.getValue();
+				if (value instanceof BeanDefinitionHolder) {
+					BeanDefinition bd = ((BeanDefinitionHolder) value).getBeanDefinition();
+					values = bd.getPropertyValues();
+					if (values != null) {
+						ListIterator<PropertyValue> pIterator = 
+							values.getPropertyValueList().listIterator();
+						k = 0;
+						boolean found = false;
+						while (pIterator.hasNext()) {
+							PropertyValue v = pIterator.next();
+							// Look for the next bean in the chain
+							if (v.getName().equals(pvNameComponents[j + 1])) {
+								currentPv = v;
+								found = true;
+								break;
+							}
+							k++;
+						}
+						if (!found) {
+							throw new FatalBeanException("Bad nested property " + pvName);
+						}
+					}
+				}
+			}
+			if (pvName.endsWith(currentPv.getName())) {
+				// Add the property to the innermost bean properties
+				pv = mergeIfRequired(pv, currentPv);
+				values.setPropertyValueAt(pv, k);;
+				return true;									
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -220,10 +281,10 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 			Mergeable mergeable = (Mergeable) value;
 			if (mergeable.isMergeEnabled()) {
 				Object merged = mergeable.merge(currentPv.getValue());
-				return new PropertyValue(newPv.getName(), merged);
+				return new PropertyValue(currentPv.getName(), merged);
 			}
 		}
-		return newPv;
+		return new PropertyValue(currentPv.getName(), newPv.getValue());
 	}
 
 	/**

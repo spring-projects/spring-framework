@@ -13,8 +13,22 @@
 				</property>
 				<property name="list">
 					<list>
-						<value>lParent</value>
+						<value>middleList</value>
 					</list>
+				</property>
+				<property name="listBean">
+					<bean class="org.springframework.beans.factory.xml.NestedBeansElementAttributeRecursionTests$ListBean">
+						<property name="list">
+							<list>
+								<value>lParent</value>
+							</list>
+						</property>
+						<property name="replaceList">
+							<list>
+								<value>original</value>
+							</list>
+						</property>
+					</bean>
 				</property>
 			</bean>
 		</property>
@@ -26,9 +40,14 @@
 				<entry key="kChild" value="vChild"/>
 			</map>
 		</property>
-		<property name="mapBean.list">
+		<property name="mapBean.listBean.list">
 			<list merge="true">
 				<value>lChild</value>
+			</list>
+		</property>
+		<property name="mapBean.listBean.replaceList">
+			<list>
+				<value>replace</value>
 			</list>
 		</property>
 	</bean>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,13 +88,17 @@ public class NestedBeansElementAttributeRecursionTests {
 				new ClassPathResource("NestedBeansElementAttributeRecursionTests-merge-nested-path-context.xml", this.getClass()));
 		FooBean foo = bf.getBean("childFoo", FooBean.class);
 
-		// should contain entries added by child
-		assertThat("missing key 'kChild'", foo.getMapBean().getMap().containsKey("kChild"), is(true));
-        assertThat("missing value 'lChild'", foo.getMapBean().getList().contains("lChild"), is(true));
-        
-		// should also contain entries added by parent
+		// should contain entries added by parent
 		assertThat("missing key 'kParent'", foo.getMapBean().getMap().containsKey("kParent"), is(true));
-		assertThat("Missing value 'lParent'", foo.getMapBean().getList().contains("lParent"), is(true));
+		assertThat("missing value 'middleList'", foo.getMapBean().getList().contains("middleList"), is(true));
+		assertThat("too many values in list", foo.getMapBean().getList().size() == 1, is(true));
+		assertThat("missing value 'lParent'", foo.getMapBean().getListBean().getList().contains("lParent"), is(true));
+		
+		// should also contain entries added by child
+		assertThat("missing key 'kChild'", foo.getMapBean().getMap().containsKey("kChild"), is(true));
+        assertThat("missing value 'lChild'", foo.getMapBean().getListBean().getList().contains("lChild"), is(true));
+        assertThat("missing value 'replace'", foo.getMapBean().getListBean().getReplaceList().contains("replace"), is(true));
+        assertThat("too many values in replaceList", foo.getMapBean().getListBean().getReplaceList().size() == 1, is(true));
 	}
 
 	static class FooBean {
@@ -115,6 +119,7 @@ public class NestedBeansElementAttributeRecursionTests {
 
 		private Map map;
 		private List list;
+		private ListBean listBean;
 		
 		public void setMap(Map map) {
 			this.map = map;
@@ -123,7 +128,7 @@ public class NestedBeansElementAttributeRecursionTests {
 		public Map getMap() {
 			return map;
 		}
-		
+
 		public void setList(List list) {
 			this.list = list;
 		}
@@ -131,6 +136,38 @@ public class NestedBeansElementAttributeRecursionTests {
 		public List getList()
 		{
 			return list;
+		}
+
+		public void setListBean(ListBean listBean) {
+			this.listBean = listBean;
+		}
+		
+		public ListBean getListBean() {
+			return listBean;
+		}
+	}
+
+	@SuppressWarnings("rawtypes")
+	static class ListBean {
+		
+		private List list;
+		private List replaceList;
+
+		public void setList(List list) {
+			this.list = list;
+		}
+		
+		public List getList()
+		{
+			return list;
+		}
+		
+		public void setReplaceList(List list) {
+			this.replaceList = list;
+		}
+		
+		public List getReplaceList() {
+			return replaceList;
 		}
 	}
 
