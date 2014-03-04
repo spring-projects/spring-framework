@@ -833,9 +833,7 @@ project("spring-test") {
 		include(["**/testng/**/*Tests.*", "**/testng/**/*Test.*"])
 		// "TestCase" classes are run by other test classes, not the build.
 		exclude(["**/Abstract*.*", "**/*TestCase.class", "**/FailingBeforeAndAfterMethodsTests.class"])
-		// Generate TestNG reports alongside JUnit reports.
-		getReports().getHtml().setEnabled(true)
-		// show standard out and standard error of the test JVM(s) on the console
+		// Show standard out and standard error of the test JVM(s) on the console
 		// testLogging.showStandardStreams = true
 	}
 
@@ -852,6 +850,13 @@ project("spring-test") {
 		// itself runs TestNG manually in order to test our TestNG support.
 		include "**/testng/FailingBeforeAndAfterMethodsTests"
 	}
+
+	task aggregateTestReports(type: TestReport) {
+		destinationDir = test.reports.html.destination
+		reportOn test, testNG
+	}
+
+	check.dependsOn aggregateTestReports
 }
 
 project("spring-aspects") {
