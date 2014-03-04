@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import javax.servlet.ServletContext;
 
 import org.springframework.util.Log4jConfigurer;
 import org.springframework.util.ResourceUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Convenience class that performs custom log4j initialization for web environments,
@@ -136,7 +137,7 @@ public abstract class Log4jWebConfigurer {
 
 				// Check whether refresh interval was specified.
 				String intervalString = servletContext.getInitParameter(REFRESH_INTERVAL_PARAM);
-				if (intervalString != null) {
+				if (StringUtils.hasText(intervalString)) {
 					// Initialize with refresh interval, i.e. with log4j's watchdog thread,
 					// checking the file in the background.
 					try {
