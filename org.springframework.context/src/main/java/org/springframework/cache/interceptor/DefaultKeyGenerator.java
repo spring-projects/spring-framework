@@ -44,9 +44,7 @@ public class DefaultKeyGenerator implements KeyGenerator {
 			return NO_PARAM_KEY;
 		}
 		int hashCode = 17;
-		for (Object object : params) {
-			hashCode = 31 * hashCode + (object == null ? NULL_PARAM_KEY : object.hashCode());
-		}
+		hashCode *= Arrays.deepHashCode(params);
 		return Integer.valueOf(hashCode);
 	}
 
