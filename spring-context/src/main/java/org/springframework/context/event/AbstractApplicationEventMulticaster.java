@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,10 +162,14 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 				BeanFactory beanFactory = getBeanFactory();
 				for (String listenerBeanName : listenerBeans) {
 					try {
-						ApplicationListener<?> listener = beanFactory.getBean(listenerBeanName, ApplicationListener.class);
-						if (!allListeners.contains(listener) && supportsEvent(listener, eventType, sourceType)) {
-							retriever.applicationListenerBeans.add(listenerBeanName);
-							allListeners.add(listener);
+						Class<?> listenerType = beanFactory.getType(listenerBeanName);
+						if (listenerType == null || supportsEvent(listenerType, event)) {
+							ApplicationListener<?> listener =
+									beanFactory.getBean(listenerBeanName, ApplicationListener.class);
+							if (!allListeners.contains(listener) && supportsEvent(listener, eventType, sourceType)) {
+								retriever.applicationListenerBeans.add(listenerBeanName);
+								allListeners.add(listener);
+							}
 						}
 					}
 					catch (NoSuchBeanDefinitionException ex) {
@@ -181,6 +185,25 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 	}
 
 	/**
+	 * Filter a listener early through checking its generically declared event
+	 * type before trying to instantiate it.
+	 * <p>If this method returns {@code true} for a given listener as a first pass,
+	 * the listener instance will get retrieved and fully evaluated through a
+	 * {@link #supportsEvent(ApplicationListener, Class, Class)} call afterwards.
+	 * @param listenerType the listener's type as determined by the BeanFactory
+	 * @param event the event to check
+	 * @return whether the given listener should be included in the candidates
+	 * for the given event type
+	 */
+	protected boolean supportsEvent(Class<?> listenerType, ApplicationEvent event) {
+		if (SmartApplicationListener.class.isAssignableFrom(listenerType)) {
+			return true;
+		}
+		Class<?> declaredEventType = GenericApplicationListenerAdapter.resolveDeclaredEventType(listenerType);
+		return (declaredEventType == null || declaredEventType.isInstance(event));
+	}
+
+	/**
 	 * Determine whether the given listener supports the given event.
 	 * <p>The default implementation detects the {@link SmartApplicationListener}
 	 * interface. In case of a standard {@link ApplicationListener}, a
@@ -189,8 +212,8 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 	 * @param listener the target listener to check
 	 * @param eventType the event type to check against
 	 * @param sourceType the source type to check against
-	 * @return whether the given listener should be included in the
-	 * candidates for the given event type
+	 * @return whether the given listener should be included in the candidates
+	 * for the given event type
 	 */
 	protected boolean supportsEvent(ApplicationListener<?> listener,
 			Class<? extends ApplicationEvent> eventType, Class<?> sourceType) {

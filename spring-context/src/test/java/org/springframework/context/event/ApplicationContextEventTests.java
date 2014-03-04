@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,14 +110,18 @@ public class ApplicationContextEventTests {
 		context.registerBeanDefinition("listener1", new RootBeanDefinition(MyOrderedListener1.class));
 		RootBeanDefinition listener2 = new RootBeanDefinition(MyOrderedListener2.class);
 		listener2.getConstructorArgumentValues().addGenericArgumentValue(new RuntimeBeanReference("listener1"));
+		listener2.setLazyInit(true);
 		context.registerBeanDefinition("listener2", listener2);
 		context.refresh();
+		assertFalse(context.getDefaultListableBeanFactory().containsSingleton("listener2"));
 
 		MyOrderedListener1 listener1 = context.getBean("listener1", MyOrderedListener1.class);
-		MyEvent event1 = new MyEvent(context);
+		MyOtherEvent event1 = new MyOtherEvent(context);
 		context.publishEvent(event1);
-		MyOtherEvent event2 = new MyOtherEvent(context);
+		assertFalse(context.getDefaultListableBeanFactory().containsSingleton("listener2"));
+		MyEvent event2 = new MyEvent(context);
 		context.publishEvent(event2);
+		assertTrue(context.getDefaultListableBeanFactory().containsSingleton("listener2"));
 		MyEvent event3 = new MyEvent(context);
 		context.publishEvent(event3);
 		MyOtherEvent event4 = new MyOtherEvent(context);
