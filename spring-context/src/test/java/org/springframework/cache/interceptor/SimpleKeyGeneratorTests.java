@@ -25,16 +25,17 @@ import static org.junit.Assert.*;
  * Tests for {@link SimpleKeyGenerator} and {@link SimpleKey}.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  */
 public class SimpleKeyGeneratorTests {
 
 	private SimpleKeyGenerator generator = new SimpleKeyGenerator();
 
 	@Test
-	public void noValues() throws Exception {
-		Object k1 = generator.generate(null, null, new Object[] {});
-		Object k2 = generator.generate(null, null, new Object[] {});
-		Object k3 = generator.generate(null, null, new Object[] { "different" });
+	public void noValues() {
+		Object k1 = generateKey(new Object[] {});
+		Object k2 = generateKey(new Object[] {});
+		Object k3 = generateKey(new Object[] { "different" });
 		assertThat(k1.hashCode(), equalTo(k2.hashCode()));
 		assertThat(k1.hashCode(), not(equalTo(k3.hashCode())));
 		assertThat(k1, equalTo(k2));
@@ -42,10 +43,10 @@ public class SimpleKeyGeneratorTests {
 	}
 
 	@Test
-	public void singleValue() throws Exception {
-		Object k1 = generator.generate(null, null, new Object[] { "a" });
-		Object k2 = generator.generate(null, null, new Object[] { "a" });
-		Object k3 = generator.generate(null, null, new Object[] { "different" });
+	public void singleValue(){
+		Object k1 = generateKey(new Object[] { "a" });
+		Object k2 = generateKey(new Object[] { "a" });
+		Object k3 = generateKey(new Object[] { "different" });
 		assertThat(k1.hashCode(), equalTo(k2.hashCode()));
 		assertThat(k1.hashCode(), not(equalTo(k3.hashCode())));
 		assertThat(k1, equalTo(k2));
@@ -54,10 +55,10 @@ public class SimpleKeyGeneratorTests {
 	}
 
 	@Test
-	public void multipleValues() throws Exception {
-		Object k1 = generator.generate(null, null, new Object[] { "a", 1, "b" });
-		Object k2 = generator.generate(null, null, new Object[] { "a", 1, "b" });
-		Object k3 = generator.generate(null, null, new Object[] { "b", 1, "a" });
+	public void multipleValues()  {
+		Object k1 = generateKey(new Object[] { "a", 1, "b" });
+		Object k2 = generateKey(new Object[] { "a", 1, "b" });
+		Object k3 = generateKey(new Object[] { "b", 1, "a" });
 		assertThat(k1.hashCode(), equalTo(k2.hashCode()));
 		assertThat(k1.hashCode(), not(equalTo(k3.hashCode())));
 		assertThat(k1, equalTo(k2));
@@ -65,10 +66,10 @@ public class SimpleKeyGeneratorTests {
 	}
 
 	@Test
-	public void singleNullValue() throws Exception {
-		Object k1 = generator.generate(null, null, new Object[] { null });
-		Object k2 = generator.generate(null, null, new Object[] { null });
-		Object k3 = generator.generate(null, null, new Object[] { "different" });
+	public void singleNullValue() {
+		Object k1 = generateKey(new Object[] { null });
+		Object k2 = generateKey(new Object[] { null });
+		Object k3 = generateKey(new Object[] { "different" });
 		assertThat(k1.hashCode(), equalTo(k2.hashCode()));
 		assertThat(k1.hashCode(), not(equalTo(k3.hashCode())));
 		assertThat(k1, equalTo(k2));
@@ -77,13 +78,28 @@ public class SimpleKeyGeneratorTests {
 	}
 
 	@Test
-	public void multiplNullValues() throws Exception {
-		Object k1 = generator.generate(null, null, new Object[] { "a", null, "b", null });
-		Object k2 = generator.generate(null, null, new Object[] { "a", null, "b", null });
-		Object k3 = generator.generate(null, null, new Object[] { "a", null, "b" });
+	public void multipleNullValues() {
+		Object k1 = generateKey(new Object[] { "a", null, "b", null });
+		Object k2 = generateKey(new Object[] { "a", null, "b", null });
+		Object k3 = generateKey(new Object[] { "a", null, "b" });
 		assertThat(k1.hashCode(), equalTo(k2.hashCode()));
 		assertThat(k1.hashCode(), not(equalTo(k3.hashCode())));
 		assertThat(k1, equalTo(k2));
 		assertThat(k1, not(equalTo(k3)));
+	}
+
+	@Test
+	public void arrays() {
+		Object k1 = generateKey(new Object[] { new String[]{"a", "b"}, "c" });
+		Object k2 = generateKey(new Object[] { new String[]{"a", "b"}, "c"  });
+		Object k3 = generateKey(new Object[] { new String[]{"b", "a"}, "c" });
+		assertThat(k1.hashCode(), equalTo(k2.hashCode()));
+		assertThat(k1.hashCode(), not(equalTo(k3.hashCode())));
+		assertThat(k1, equalTo(k2));
+		assertThat(k1, not(equalTo(k3)));
+	}
+
+	private Object generateKey(Object[] arguments) {
+		return generator.generate(null, null, arguments);
 	}
 }
