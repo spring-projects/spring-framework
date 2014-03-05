@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,7 @@
 package org.springframework.cache.interceptor;
 
 import java.lang.reflect.Method;
-
-import org.springframework.cache.interceptor.KeyGenerator;
+import java.util.Arrays;
 
 /**
  * Default key generator. Returns {@value #NO_PARAM_KEY} if no
@@ -29,25 +28,29 @@ import org.springframework.cache.interceptor.KeyGenerator;
  *
  * @author Costin Leau
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class DefaultKeyGenerator implements KeyGenerator {
 
 	public static final int NO_PARAM_KEY = 0;
+
 	public static final int NULL_PARAM_KEY = 53;
 
 	public Object generate(Object target, Method method, Object... params) {
-		if (params.length == 1) {
-			return (params[0] == null ? NULL_PARAM_KEY : params[0]);
-		}
 		if (params.length == 0) {
 			return NO_PARAM_KEY;
 		}
-		int hashCode = 17;
-		for (Object object : params) {
-			hashCode = 31 * hashCode + (object == null ? NULL_PARAM_KEY : object.hashCode());
+		if (params.length == 1) {
+			Object param = params[0];
+			if (param == null) {
+				return NULL_PARAM_KEY;
+			}
+			if (!param.getClass().isArray()) {
+				return param;
+			}
 		}
-		return Integer.valueOf(hashCode);
+		return Arrays.deepHashCode(params);
 	}
 
 }
