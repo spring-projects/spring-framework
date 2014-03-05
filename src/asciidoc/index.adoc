@@ -1982,14 +1982,14 @@ The container performs bean dependency resolution as follows:
   can convert a value supplied in string format to all built-in types, such as `int`,
   `long`, `String`, `boolean`, etc.
 
-The Spring container validates the configuration of each bean as the container is
-created, including the validation of whether bean reference properties refer to valid
-beans. However, the bean properties themselves are not set until the bean __is actually
-created__. Beans that are singleton-scoped and set to be pre-instantiated (the default)
-are created when the container is created. Scopes are defined in
-<<beans-factory-scopes>>. Otherwise, the bean is created only when it is requested.
-Creation of a bean potentially causes a graph of beans to be created, as the bean's
-dependencies and its dependencies' dependencies (and so on) are created and assigned.
+The Spring container validates the configuration of each bean as the container is created.
+However, the bean properties themselves are not set until the bean __is actually created__.
+Beans that are singleton-scoped and set to be pre-instantiated (the default) are created
+when the container is created. Scopes are defined in <<beans-factory-scopes>>. Otherwise,
+the bean is created only when it is requested. Creation of a bean potentially causes a
+graph of beans to be created, as the bean's dependencies and its dependencies'
+dependencies (and so on) are created and assigned. Note that resolution mismatches among
+those dependencies may show up late, i.e. on first creation of the affected bean.
 
 .Circular dependencies
 ****
