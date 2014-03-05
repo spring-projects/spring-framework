@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
@@ -29,6 +28,8 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -260,6 +261,34 @@ public class FactoryMethodTests {
 	}
 
 	@Test
+	public void testNonExistingFactoryMethod() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
+		try {
+			xbf.getBean("invalidPrototype");
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			assertTrue(ex.getMessage().contains("nonExisting(TestBean)"));
+		}
+	}
+
+	@Test
+	public void testFactoryMethodArgumentsForNonExistingMethod() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
+		try {
+			xbf.getBean("invalidPrototype", new TestBean());
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			assertTrue(ex.getMessage().contains("nonExisting(TestBean)"));
+		}
+	}
+
+	@Test
 	public void testCanSpecifyFactoryMethodArgumentsOnFactoryMethodPrototype() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -360,7 +389,9 @@ public class FactoryMethodTests {
 
 }
 
+
 class MailSession {
+
 	private Properties props;
 
 	private MailSession() {
@@ -377,6 +408,6 @@ class MailSession {
 	}
 
 	public Object getProperty(String key) {
-		return props.get(key);
+		return this.props.get(key);
 	}
 }

@@ -523,24 +523,30 @@ class ConstructorResolver {
 			}
 
 			if (factoryMethodToUse == null) {
-				boolean hasArgs = (resolvedValues.getArgumentCount() > 0);
-				String argDesc = "";
-				if (hasArgs) {
-					List<String> argTypes = new ArrayList<String>();
-					for (ValueHolder value : resolvedValues.getIndexedArgumentValues().values()) {
-						String argType = (value.getType() != null ?
-								ClassUtils.getShortName(value.getType()) : value.getValue().getClass().getSimpleName());
+				List<String> argTypes = new ArrayList<String>(minNrOfArgs);
+				if (explicitArgs != null) {
+					for (Object arg : explicitArgs) {
+						argTypes.add(arg != null ? arg.getClass().getSimpleName() : "null");
+					}
+				}
+				else {
+					Set<ValueHolder> valueHolders = new LinkedHashSet<ValueHolder>(resolvedValues.getArgumentCount());
+					valueHolders.addAll(resolvedValues.getIndexedArgumentValues().values());
+					valueHolders.addAll(resolvedValues.getGenericArgumentValues());
+					for (ValueHolder value : valueHolders) {
+						String argType = (value.getType() != null ? ClassUtils.getShortName(value.getType()) :
+								(value.getValue() != null ? value.getValue().getClass().getSimpleName() : "null"));
 						argTypes.add(argType);
 					}
-					argDesc = StringUtils.collectionToCommaDelimitedString(argTypes);
 				}
+				String argDesc = StringUtils.collectionToCommaDelimitedString(argTypes);
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 						"No matching factory method found: " +
 						(mbd.getFactoryBeanName() != null ?
 							"factory bean '" + mbd.getFactoryBeanName() + "'; " : "") +
 						"factory method '" + mbd.getFactoryMethodName() + "(" + argDesc + ")'. " +
 						"Check that a method with the specified name " +
-						(hasArgs ? "and arguments " : "") +
+						(minNrOfArgs > 0 ? "and arguments " : "") +
 						"exists and that it is " +
 						(isStatic ? "static" : "non-static") + ".");
 			}
