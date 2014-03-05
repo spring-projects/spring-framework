@@ -19,7 +19,6 @@ package org.springframework.expression.spel;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -151,6 +150,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		}
 	}
 
+
 	static class Spr5899Class {
 
 		public Spr5899Class() {
@@ -276,7 +276,6 @@ public class SpelReproTests extends AbstractExpressionTests {
 		public Properties jdbcProperties = new Properties();
 		public Properties foo = new Properties();
 
-
 		TestProperties() {
 			jdbcProperties.put("username", "Dave");
 			jdbcProperties.put("alias", "Dave2");
@@ -284,6 +283,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 			foo.put("bar", "alias");
 		}
 	}
+
 
 	static class MapAccessor implements PropertyAccessor {
 
@@ -304,8 +304,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public void write(EvaluationContext context, Object target, String name, Object newValue)
-				throws AccessException {
+		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
 			((Map<String, Object>) target).put(name, newValue);
 		}
 
@@ -326,15 +325,13 @@ public class SpelReproTests extends AbstractExpressionTests {
 		checkTemplateParsingError("abc${ {}( 'abc'", "Missing closing ')' for '(' at position 8");
 		checkTemplateParsingError("abc${ {}[ 'abc'", "Missing closing ']' for '[' at position 8");
 		checkTemplateParsingError("abc${ {}{ 'abc'", "Missing closing '}' for '{' at position 8");
-		checkTemplateParsingError("abc${ ( 'abc' }",
-			"Found closing '}' at position 14 but most recent opening is '(' at position 6");
+		checkTemplateParsingError("abc${ ( 'abc' }", "Found closing '}' at position 14 but most recent opening is '(' at position 6");
 		checkTemplateParsingError("abc${ '... }", "Found non terminating string literal starting at position 6");
 		checkTemplateParsingError("abc${ \"... }", "Found non terminating string literal starting at position 6");
 		checkTemplateParsingError("abc${ ) }", "Found closing ')' at position 6 without an opening '('");
 		checkTemplateParsingError("abc${ ] }", "Found closing ']' at position 6 without an opening '['");
 		checkTemplateParsingError("abc${ } }", "No expression defined within delimiter '${}' at character 3");
-		checkTemplateParsingError("abc$[ } ]", DOLLARSQUARE_TEMPLATE_PARSER_CONTEXT,
-			"Found closing '}' at position 6 without an opening '{'");
+		checkTemplateParsingError("abc$[ } ]", DOLLARSQUARE_TEMPLATE_PARSER_CONTEXT, "Found closing '}' at position 6 without an opening '{'");
 
 		checkTemplateParsing("abc ${\"def''g}hi\"} jkl", "abc def'g}hi jkl");
 		checkTemplateParsing("abc ${'def''g}hi'} jkl", "abc def'g}hi jkl");
@@ -343,19 +340,13 @@ public class SpelReproTests extends AbstractExpressionTests {
 		checkTemplateParsing("Hello ${'}'}]", "Hello }]");
 		checkTemplateParsing("Hello ${'}'}", "Hello }");
 		checkTemplateParsingError("Hello ${ ( ", "No ending suffix '}' for expression starting at character 6: ${ ( ");
-		checkTemplateParsingError("Hello ${ ( }",
-			"Found closing '}' at position 11 but most recent opening is '(' at position 9");
-		checkTemplateParsing("#{'Unable to render embedded object: File ({#this == 2}'}", hashes,
-			"Unable to render embedded object: File ({#this == 2}");
-		checkTemplateParsing("This is the last odd number in the list: ${listOfNumbersUpToTen.$[#this%2==1]}", dollars,
-			"This is the last odd number in the list: 9");
+		checkTemplateParsingError("Hello ${ ( }", "Found closing '}' at position 11 but most recent opening is '(' at position 9");
+		checkTemplateParsing("#{'Unable to render embedded object: File ({#this == 2}'}", hashes, "Unable to render embedded object: File ({#this == 2}");
+		checkTemplateParsing("This is the last odd number in the list: ${listOfNumbersUpToTen.$[#this%2==1]}", dollars, "This is the last odd number in the list: 9");
 		checkTemplateParsing("Hello ${'here is a curly bracket }'}", dollars, "Hello here is a curly bracket }");
-		checkTemplateParsing("He${'${'}llo ${'here is a curly bracket }'}}", dollars,
-			"He${llo here is a curly bracket }}");
-		checkTemplateParsing("Hello ${'()()()}{}{}{][]{}{][}[][][}{()()'} World", dollars,
-			"Hello ()()()}{}{}{][]{}{][}[][][}{()() World");
-		checkTemplateParsing("Hello ${'inner literal that''s got {[(])]}an escaped quote in it'} World",
-			"Hello inner literal that's got {[(])]}an escaped quote in it World");
+		checkTemplateParsing("He${'${'}llo ${'here is a curly bracket }'}}", dollars, "He${llo here is a curly bracket }}");
+		checkTemplateParsing("Hello ${'()()()}{}{}{][]{}{][}[][][}{()()'} World", dollars, "Hello ()()()}{}{}{][]{}{][}[][][}{()() World");
+		checkTemplateParsing("Hello ${'inner literal that''s got {[(])]}an escaped quote in it'} World", "Hello inner literal that's got {[(])]}an escaped quote in it World");
 		checkTemplateParsingError("Hello ${", "No ending suffix '}' for expression starting at character 6: ${");
 	}
 
@@ -384,11 +375,8 @@ public class SpelReproTests extends AbstractExpressionTests {
 	@Test
 	public void nestedProperties_SPR6923() {
 		StandardEvaluationContext eContext = new StandardEvaluationContext(new Foo());
-		String name = null;
-		Expression expr = null;
-
-		expr = new SpelExpressionParser().parseRaw("resource.resource.server");
-		name = expr.getValue(eContext, String.class);
+		Expression expr = new SpelExpressionParser().parseRaw("resource.resource.server");
+		String name = expr.getValue(eContext, String.class);
 		assertEquals("abc", name);
 	}
 
@@ -398,10 +386,10 @@ public class SpelReproTests extends AbstractExpressionTests {
 		public ResourceSummary resource = new ResourceSummary();
 	}
 
+
 	static class ResourceSummary {
 
 		private final Resource resource;
-
 
 		ResourceSummary() {
 			this.resource = new Resource();
@@ -411,6 +399,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 			return resource;
 		}
 	}
+
 
 	static class Resource {
 
@@ -500,8 +489,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		// will access the field 'wibble' and not use a getter
 		name = expr.getValue(eContext, String.class);
 		assertEquals("wobble", name);
-		name = expr.getValue(eContext, String.class); // will be using the cached accessor
-														// this time
+		name = expr.getValue(eContext, String.class); // will be using the cached accessor this time
 		assertEquals("wobble", name);
 	}
 
@@ -519,8 +507,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		// will access the field 'wibble' and not use a getter
 		expr.getValue(eContext, String.class);
 		assertEquals("world", g.wibble);
-		expr.getValue(eContext, String.class); // will be using the cached accessor this
-												// time
+		expr.getValue(eContext, String.class); // will be using the cached accessor this time
 		assertEquals("world", g.wibble);
 	}
 
@@ -533,8 +520,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		expr = new SpelExpressionParser().parseRaw("instance[bar]='world'");
 		expr.getValue(eContext, String.class);
 		assertEquals("world", g.value);
-		expr.getValue(eContext, String.class); // will be using the cached accessor this
-												// time
+		expr.getValue(eContext, String.class); // will be using the cached accessor this time
 		assertEquals("world", g.value);
 	}
 
@@ -563,13 +549,13 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 		public String floo = "bar";
 
-
 		public XX() {
 			m = new HashMap<String, String>();
 			m.put("$foo", "wibble");
 			m.put("bar", "siddle");
 		}
 	}
+
 
 	static class Goo {
 
@@ -581,7 +567,6 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 		public String wibble = "wobble";
 
-
 		public String getKey() {
 			return "hello";
 		}
@@ -590,6 +575,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 			value = s;
 		}
 	}
+
 
 	static class Holder {
 
@@ -610,12 +596,10 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	private void checkTemplateParsingError(String expression, String expectedMessage) throws Exception {
-		checkTemplateParsingError(expression, TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT,
-			expectedMessage);
+		checkTemplateParsingError(expression, TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT, expectedMessage);
 	}
 
-	private void checkTemplateParsingError(String expression, ParserContext context, String expectedMessage)
-			throws Exception {
+	private void checkTemplateParsingError(String expression, ParserContext context, String expectedMessage) throws Exception {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		try {
 			parser.parseExpression(expression, context);
@@ -635,17 +619,14 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 
 	private static final ParserContext DOLLARSQUARE_TEMPLATE_PARSER_CONTEXT = new ParserContext() {
-
 		@Override
 		public String getExpressionPrefix() {
 			return "$[";
 		}
-
 		@Override
 		public String getExpressionSuffix() {
 			return "]";
 		}
-
 		@Override
 		public boolean isTemplate() {
 			return true;
@@ -660,10 +641,10 @@ public class SpelReproTests extends AbstractExpressionTests {
 		}
 	}
 
+
 	static class Message {
 
 		private String payload;
-
 
 		public String getPayload() {
 			return payload;
@@ -711,7 +692,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 			assertEquals(SpelMessage.EXCEPTION_DURING_BEAN_RESOLUTION, see.getMessageCode());
 			assertEquals("goo", see.getInserts()[0]);
 			assertTrue(see.getCause() instanceof AccessException);
-			assertTrue(((AccessException) see.getCause()).getMessage().startsWith("DONT"));
+			assertTrue(see.getCause().getMessage().startsWith("DONT"));
 		}
 
 		// bean exists
@@ -864,7 +845,6 @@ public class SpelReproTests extends AbstractExpressionTests {
 		public String[] as;
 		public Map<String, String> ms;
 
-
 		C() {
 			ls = new ArrayList<String>();
 			ls.add("abc");
@@ -876,10 +856,10 @@ public class SpelReproTests extends AbstractExpressionTests {
 		}
 	}
 
+
 	static class D {
 
 		public String a;
-
 
 		private D(String s) {
 			a = s;
@@ -932,11 +912,9 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 		@SuppressWarnings("unused")
 		class ConversionPriority1 {
-
 			public int getX(Number i) {
 				return 20;
 			}
-
 			public int getX(int i) {
 				return 10;
 			}
@@ -944,11 +922,9 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 		@SuppressWarnings("unused")
 		class ConversionPriority2 {
-
 			public int getX(int i) {
 				return 10;
 			}
-
 			public int getX(Number i) {
 				return 20;
 			}
@@ -989,27 +965,22 @@ public class SpelReproTests extends AbstractExpressionTests {
 	public void wideningPrimitiveConversion_8224() throws Exception {
 
 		class WideningPrimitiveConversion {
-
 			public int getX(long i) {
 				return 10;
 			}
 		}
 
 		final Integer INTEGER_VALUE = Integer.valueOf(7);
-
 		WideningPrimitiveConversion target = new WideningPrimitiveConversion();
-
 		EvaluationContext emptyEvalContext = new StandardEvaluationContext();
 
 		List<TypeDescriptor> args = new ArrayList<TypeDescriptor>();
 		args.add(TypeDescriptor.forObject(INTEGER_VALUE));
 
 		MethodExecutor me = new ReflectiveMethodResolver(true).resolve(emptyEvalContext, target, "getX", args);
-
 		final int actual = (Integer) me.execute(emptyEvalContext, target, INTEGER_VALUE).getValue();
 
 		final int compiler = target.getX(INTEGER_VALUE);
-
 		assertEquals(compiler, actual);
 	}
 
@@ -1130,12 +1101,9 @@ public class SpelReproTests extends AbstractExpressionTests {
 		// "DIV","EQ","GE","GT","LE","LT","MOD","NE","NOT"
 		@SuppressWarnings("unused")
 		class Reserver {
-
 			public Reserver getReserver() {
 				return this;
 			}
-
-
 			public String NE = "abc";
 			public String ne = "def";
 
@@ -1143,7 +1111,6 @@ public class SpelReproTests extends AbstractExpressionTests {
 			public int div = 3;
 
 			public Map<String, String> m = new HashMap<String, String>();
-
 
 			Reserver() {
 				m.put("NE", "xyz");
@@ -1215,7 +1182,6 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 		private String mapName;
 
-
 		public TestPropertyAccessor(String mapName) {
 			this.mapName = mapName;
 		}
@@ -1252,11 +1218,11 @@ public class SpelReproTests extends AbstractExpressionTests {
 		}
 
 		@Override
-		public void write(EvaluationContext context, Object target, String name, Object newValue)
-				throws AccessException {
+		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
 			getMap(target).put(name, (String) newValue);
 		}
 	}
+
 
 	class ContextObject {
 
@@ -1264,7 +1230,6 @@ public class SpelReproTests extends AbstractExpressionTests {
 		public Map<String, String> secondContext = new HashMap<String, String>();
 		public Map<String, String> thirdContext = new HashMap<String, String>();
 		public Map<String, String> fourthContext = new HashMap<String, String>();
-
 
 		public ContextObject() {
 			firstContext.put("shouldBeFirst", "first");
@@ -1310,7 +1275,6 @@ public class SpelReproTests extends AbstractExpressionTests {
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		List<MethodResolver> methodResolvers = new ArrayList<MethodResolver>();
 		methodResolvers.add(new ReflectiveMethodResolver() {
-
 			@Override
 			protected Method[] getMethods(Class<?> type) {
 				try {
@@ -1360,10 +1324,10 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_floatFunctionResolver() throws Exception {
+	public void SPR9486_floatFunctionResolver() throws Exception {
 		Number expectedResult = Math.abs(-10.2f);
 		ExpressionParser parser = new SpelExpressionParser();
-		SPR_9486_FunctionsClass testObject = new SPR_9486_FunctionsClass();
+		SPR9486_FunctionsClass testObject = new SPR9486_FunctionsClass();
 
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		Expression expression = parser.parseExpression("abs(-10.2f)");
@@ -1372,7 +1336,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 
-	class SPR_9486_FunctionsClass {
+	class SPR9486_FunctionsClass {
 
 		public int abs(int value) {
 			return Math.abs(value);
@@ -1385,7 +1349,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 
 	@Test
-	public void SPR_9486_addFloatWithDouble() {
+	public void SPR9486_addFloatWithDouble() {
 		Number expectedNumber = 10.21f + 10.2;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1395,7 +1359,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_addFloatWithFloat() {
+	public void SPR9486_addFloatWithFloat() {
 		Number expectedNumber = 10.21f + 10.2f;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1405,7 +1369,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_subtractFloatWithDouble() {
+	public void SPR9486_subtractFloatWithDouble() {
 		Number expectedNumber = 10.21f - 10.2;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1415,7 +1379,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_subtractFloatWithFloat() {
+	public void SPR9486_subtractFloatWithFloat() {
 		Number expectedNumber = 10.21f - 10.2f;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1425,7 +1389,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_multiplyFloatWithDouble() {
+	public void SPR9486_multiplyFloatWithDouble() {
 		Number expectedNumber = 10.21f * 10.2;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1435,7 +1399,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_multiplyFloatWithFloat() {
+	public void SPR9486_multiplyFloatWithFloat() {
 		Number expectedNumber = 10.21f * 10.2f;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1445,7 +1409,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_floatDivideByFloat() {
+	public void SPR9486_floatDivideByFloat() {
 		Number expectedNumber = -10.21f / -10.2f;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1455,7 +1419,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_floatDivideByDouble() {
+	public void SPR9486_floatDivideByDouble() {
 		Number expectedNumber = -10.21f / -10.2;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1465,7 +1429,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_floatEqFloatUnaryMinus() {
+	public void SPR9486_floatEqFloatUnaryMinus() {
 		Boolean expectedResult = -10.21f == -10.2f;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1475,7 +1439,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_floatEqDoubleUnaryMinus() {
+	public void SPR9486_floatEqDoubleUnaryMinus() {
 		Boolean expectedResult = -10.21f == -10.2;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1485,7 +1449,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_floatEqFloat() {
+	public void SPR9486_floatEqFloat() {
 		Boolean expectedResult = 10.215f == 10.2109f;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1495,7 +1459,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_floatEqDouble() {
+	public void SPR9486_floatEqDouble() {
 		Boolean expectedResult = 10.215f == 10.2109;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1505,7 +1469,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_floatNotEqFloat() {
+	public void SPR9486_floatNotEqFloat() {
 		Boolean expectedResult = 10.215f != 10.2109f;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1515,7 +1479,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_floatNotEqDouble() {
+	public void SPR9486_floatNotEqDouble() {
 		Boolean expectedResult = 10.215f != 10.2109;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1525,7 +1489,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_floatLessThanFloat() {
+	public void SPR9486_floatLessThanFloat() {
 		Boolean expectedNumber = -10.21f < -10.2f;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1535,7 +1499,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_floatLessThanDouble() {
+	public void SPR9486_floatLessThanDouble() {
 		Boolean expectedNumber = -10.21f < -10.2;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1545,7 +1509,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_floatLessThanOrEqualFloat() {
+	public void SPR9486_floatLessThanOrEqualFloat() {
 		Boolean expectedNumber = -10.21f <= -10.22f;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1555,7 +1519,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_floatLessThanOrEqualDouble() {
+	public void SPR9486_floatLessThanOrEqualDouble() {
 		Boolean expectedNumber = -10.21f <= -10.2;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1565,7 +1529,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_floatGreaterThanFloat() {
+	public void SPR9486_floatGreaterThanFloat() {
 		Boolean expectedNumber = -10.21f > -10.2f;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1575,7 +1539,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_floatGreaterThanDouble() {
+	public void SPR9486_floatGreaterThanDouble() {
 		Boolean expectedResult = -10.21f > -10.2;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1585,7 +1549,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_floatGreaterThanOrEqualFloat() {
+	public void SPR9486_floatGreaterThanOrEqualFloat() {
 		Boolean expectedNumber = -10.21f >= -10.2f;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1595,7 +1559,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_floatGreaterThanEqualDouble() {
+	public void SPR9486_floatGreaterThanEqualDouble() {
 		Boolean expectedResult = -10.21f >= -10.2;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1605,7 +1569,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_floatModulusFloat() {
+	public void SPR9486_floatModulusFloat() {
 		Number expectedResult = 10.21f % 10.2f;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1615,7 +1579,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_floatModulusDouble() {
+	public void SPR9486_floatModulusDouble() {
 		Number expectedResult = 10.21f % 10.2;
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1625,7 +1589,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_floatPowerFloat() {
+	public void SPR9486_floatPowerFloat() {
 		Number expectedResult = Math.pow(10.21f, -10.2f);
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1635,7 +1599,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9486_floatPowerDouble() {
+	public void SPR9486_floatPowerDouble() {
 		Number expectedResult = Math.pow(10.21f, 10.2);
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1645,7 +1609,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9994_bridgeMethods() throws Exception {
+	public void SPR9994_bridgeMethods() throws Exception {
 		ReflectivePropertyAccessor accessor = new ReflectivePropertyAccessor();
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		Object target = new GenericImplementation();
@@ -1654,7 +1618,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_10162_onlyBridgeMethod() throws Exception {
+	public void SPR10162_onlyBridgeMethod() throws Exception {
 		ReflectivePropertyAccessor accessor = new ReflectivePropertyAccessor();
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		Object target = new OnlyBridgeMethod();
@@ -1663,7 +1627,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_10091_simpleTestValueType() {
+	public void SPR10091_simpleTestValueType() {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext evaluationContext = new StandardEvaluationContext(new BooleanHolder());
 		Class<?> valueType = parser.parseExpression("simpleProperty").getValueType(evaluationContext);
@@ -1671,7 +1635,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_10091_simpleTestValue() {
+	public void SPR10091_simpleTestValue() {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext evaluationContext = new StandardEvaluationContext(new BooleanHolder());
 		Object value = parser.parseExpression("simpleProperty").getValue(evaluationContext);
@@ -1679,7 +1643,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_10091_primitiveTestValueType() {
+	public void SPR10091_primitiveTestValueType() {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext evaluationContext = new StandardEvaluationContext(new BooleanHolder());
 		Class<?> valueType = parser.parseExpression("primitiveProperty").getValueType(evaluationContext);
@@ -1687,7 +1651,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_10091_primitiveTestValue() {
+	public void SPR10091_primitiveTestValue() {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext evaluationContext = new StandardEvaluationContext(new BooleanHolder());
 		Object value = parser.parseExpression("primitiveProperty").getValue(evaluationContext);
@@ -1695,7 +1659,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_10146_malformedExpressions() throws Exception {
+	public void SPR10146_malformedExpressions() throws Exception {
 		doTestSpr10146("/foo", "EL1070E:(pos 0): Problem parsing left operand");
 		doTestSpr10146("*foo", "EL1070E:(pos 0): Problem parsing left operand");
 		doTestSpr10146("%foo", "EL1070E:(pos 0): Problem parsing left operand");
@@ -1714,18 +1678,18 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_10125() throws Exception {
+	public void SPR10125() throws Exception {
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		String fromInterface = parser.parseExpression("T(" + StaticFinalImpl1.class.getName() + ").VALUE").getValue(
-			context, String.class);
+				context, String.class);
 		assertThat(fromInterface, is("interfaceValue"));
 		String fromClass = parser.parseExpression("T(" + StaticFinalImpl2.class.getName() + ").VALUE").getValue(
-			context, String.class);
+				context, String.class);
 		assertThat(fromClass, is("interfaceValue"));
 	}
 
 	@Test
-	public void SPR_10210() throws Exception {
+	public void SPR10210() throws Exception {
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		context.setVariable("bridgeExample", new org.springframework.expression.spel.spr10210.D());
 		Expression parseExpression = parser.parseExpression("#bridgeExample.bridgeMethod()");
@@ -1733,7 +1697,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_10328() throws Exception {
+	public void SPR10328() throws Exception {
 		thrown.expect(SpelParseException.class);
 		thrown.expectMessage("EL1071E:(pos 2): A required selection expression has not been specified");
 		Expression exp = parser.parseExpression("$[]");
@@ -1741,7 +1705,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_10452() throws Exception {
+	public void SPR10452() throws Exception {
 		SpelParserConfiguration configuration = new SpelParserConfiguration(false, false);
 		ExpressionParser parser = new SpelExpressionParser(configuration);
 
@@ -1766,7 +1730,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9495() throws Exception {
+	public void SPR9495() throws Exception {
 		SpelParserConfiguration configuration = new SpelParserConfiguration(false, false);
 		ExpressionParser parser = new SpelExpressionParser(configuration);
 
@@ -1782,20 +1746,17 @@ public class SpelReproTests extends AbstractExpressionTests {
 		assertEquals(ABC.C, Array.get(result, 2));
 
 		context.addMethodResolver(new MethodResolver() {
-
 			@Override
 			public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name,
 					List<TypeDescriptor> argumentTypes) throws AccessException {
 				return new MethodExecutor() {
-
 					@Override
 					public TypedValue execute(EvaluationContext context, Object target, Object... arguments)
 							throws AccessException {
 						try {
 							Method method = XYZ.class.getMethod("values");
 							Object value = method.invoke(target, arguments);
-							return new TypedValue(value,
-								new TypeDescriptor(new MethodParameter(method, -1)).narrow(value));
+							return new TypedValue(value, new TypeDescriptor(new MethodParameter(method, -1)).narrow(value));
 						}
 						catch (Exception ex) {
 							throw new AccessException(ex.getMessage(), ex);
@@ -1813,7 +1774,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_10486() throws Exception {
+	public void SPR10486() throws Exception {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		SPR10486 rootObject = new SPR10486();
@@ -1824,7 +1785,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_11142() throws Exception {
+	public void SPR11142() throws Exception {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		SPR11142 rootObject = new SPR11142();
@@ -1835,7 +1796,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_9194() {
+	public void SPR9194() {
 		TestClass2 one = new TestClass2("abc");
 		TestClass2 two = new TestClass2("abc");
 		Map<String, TestClass2> map = new HashMap<String, TestClass2>();
@@ -1848,7 +1809,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR_11348() {
+	public void SPR11348() {
 		Collection<String> coll = new HashSet<String>();
 		coll.add("one");
 		coll.add("two");
@@ -1864,21 +1825,24 @@ public class SpelReproTests extends AbstractExpressionTests {
 		assertEquals("two", list.get(1));
 	}
 
-
-	private static enum ABC {
-		A, B, C
+	@Test
+	public void SPR11494() {
+		Expression exp = new SpelExpressionParser().parseExpression("T(java.util.Arrays).asList('a','b')");
+		List<String> list = (List<String>) exp.getValue();
+		assertThat(list.size(), is(2));
 	}
 
-	private static enum XYZ {
-		X, Y, Z
-	}
+
+	private static enum ABC { A, B, C }
+
+	private static enum XYZ { X, Y, Z }
+
 
 	public static class BooleanHolder {
 
 		private Boolean simpleProperty = true;
 
 		private boolean primitiveProperty = true;
-
 
 		public Boolean isSimpleProperty() {
 			return simpleProperty;
@@ -1897,10 +1861,12 @@ public class SpelReproTests extends AbstractExpressionTests {
 		}
 	}
 
+
 	private static interface GenericInterface<T extends Number> {
 
 		public T getProperty();
 	}
+
 
 	private static class GenericImplementation implements GenericInterface<Integer> {
 
@@ -1910,6 +1876,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		}
 	}
 
+
 	static class PackagePrivateClassWithGetter {
 
 		public Integer getProperty() {
@@ -1917,27 +1884,32 @@ public class SpelReproTests extends AbstractExpressionTests {
 		}
 	}
 
+
 	public static class OnlyBridgeMethod extends PackagePrivateClassWithGetter {
 	}
+
 
 	public static interface StaticFinal {
 
 		public static final String VALUE = "interfaceValue";
 	}
 
+
 	public abstract static class AbstractStaticFinal implements StaticFinal {
 	}
+
 
 	public static class StaticFinalImpl1 extends AbstractStaticFinal implements StaticFinal {
 	}
 
+
 	public static class StaticFinalImpl2 extends AbstractStaticFinal {
 	}
+
 
 	public static class SPR10486 {
 
 		private String name = "name";
-
 
 		public String getName() {
 			return name;
@@ -1948,12 +1920,14 @@ public class SpelReproTests extends AbstractExpressionTests {
 		}
 	}
 
+
 	static class SPR11142 {
 
 		public String isSomething() {
 			return "";
 		}
 	}
+
 
 	static class TestClass2 { // SPR-9194
 

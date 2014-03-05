@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -189,7 +189,8 @@ public class ReflectionHelper {
 		else {
 			// Now... we have the final argument in the method we are checking as a match and we have 0
 			// or more other arguments left to pass to it.
-			Class<?> varargsParamType = expectedArgTypes.get(expectedArgTypes.size() - 1).getElementTypeDescriptor().getType();
+			TypeDescriptor varargsDesc = expectedArgTypes.get(expectedArgTypes.size() - 1);
+			Class<?> varargsParamType = varargsDesc.getElementTypeDescriptor().getType();
 
 			// All remaining parameters must be of this type or convertable to this type
 			for (int i = expectedArgTypes.size() - 1; i < suppliedArgTypes.size(); i++) {
@@ -221,9 +222,8 @@ public class ReflectionHelper {
 	}
 
 	/**
-	 * Takes an input set of argument values and, following the positions specified in the int array,
-	 * it converts them to the types specified as the required parameter types. The arguments are
-	 * converted 'in-place' in the input array.
+	 * Takes an input set of argument values and converts them to the types specified as the
+	 * required parameter types. The arguments are converted 'in-place' in the input array.
 	 * @param converter the type converter to use for attempting conversions
 	 * @param arguments the actual arguments that need conversion
 	 * @param methodOrCtor the target Method or Constructor
@@ -253,7 +253,7 @@ public class ReflectionHelper {
 				arguments[varargsPosition] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
 			}
 			else {
-				TypeDescriptor targetType = TypeDescriptor.nested(methodParam, 1);
+				TypeDescriptor targetType = new TypeDescriptor(methodParam).getElementTypeDescriptor();
 				for (int i = varargsPosition; i < arguments.length; i++) {
 					Object argument = arguments[i];
 					arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);

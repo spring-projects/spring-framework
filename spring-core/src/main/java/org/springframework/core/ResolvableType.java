@@ -631,8 +631,8 @@ public final class ResolvableType implements Serializable {
 	/**
 	 * Resolve this type to a {@link java.lang.Class}, returning {@code null} if the type
 	 * cannot be resolved. This method will consider bounds of {@link TypeVariable}s and
-	 * {@link WildcardType}s if direct resolution fails; however, bounds of Object.class
-	 * will be ignored.
+	 * {@link WildcardType}s if direct resolution fails; however, bounds of
+	 * {@code Object.class} will be ignored.
 	 * @return the resolved {@link Class} or {@code null}
 	 * @see #resolve(Class)
 	 * @see #resolveGeneric(int...)

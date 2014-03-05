@@ -78,7 +78,7 @@ public class TypeDescriptor implements Serializable {
 			throw new IllegalArgumentException("MethodParameter argument must have its nestingLevel set to 1");
 		}
 		this.resolvableType = ResolvableType.forMethodParameter(methodParameter);
-		this.type = this.resolvableType.resolve(Object.class);
+		this.type = this.resolvableType.resolve(methodParameter.getParameterType());
 		this.annotations = (methodParameter.getParameterIndex() == -1 ?
 				nullSafeAnnotations(methodParameter.getMethodAnnotations()) :
 				nullSafeAnnotations(methodParameter.getParameterAnnotations()));
@@ -92,7 +92,7 @@ public class TypeDescriptor implements Serializable {
 	public TypeDescriptor(Field field) {
 		Assert.notNull(field, "Field must not be null");
 		this.resolvableType = ResolvableType.forField(field);
-		this.type = this.resolvableType.resolve(Object.class);
+		this.type = this.resolvableType.resolve(field.getType());
 		this.annotations = nullSafeAnnotations(field.getAnnotations());
 	}
 
@@ -167,15 +167,20 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	/**
-	 * Narrows this {@link TypeDescriptor} by setting its type to the class of the provided value.
-	 * <p>If the value is {@code null}, no narrowing is performed and this TypeDescriptor is returned unchanged.
-	 * <p>Designed to be called by binding frameworks when they read property, field, or method return values.
-	 * Allows such frameworks to narrow a TypeDescriptor built from a declared property, field, or method return value type.
-	 * For example, a field declared as {@code java.lang.Object} would be narrowed to {@code java.util.HashMap}
-	 * if it was set to a {@code java.util.HashMap} value. The narrowed TypeDescriptor can then be used to convert
-	 * the HashMap to some other type. Annotation and nested type context is preserved by the narrowed copy.
+	 * Narrows this {@link TypeDescriptor} by setting its type to the class of the
+	 * provided value.
+	 * <p>If the value is {@code null}, no narrowing is performed and this TypeDescriptor
+	 * is returned unchanged.
+	 * <p>Designed to be called by binding frameworks when they read property, field,
+	 * or method return values. Allows such frameworks to narrow a TypeDescriptor built
+	 * from a declared property, field, or method return value type. For example, a field
+	 * declared as {@code java.lang.Object} would be narrowed to {@code java.util.HashMap}
+	 * if it was set to a {@code java.util.HashMap} value. The narrowed TypeDescriptor
+	 * can then be used to convert the HashMap to some other type. Annotation and nested
+	 * type context is preserved by the narrowed copy.
 	 * @param value the value to use for narrowing this type descriptor
-	 * @return this TypeDescriptor narrowed (returns a copy with its type updated to the class of the provided value)
+	 * @return this TypeDescriptor narrowed (returns a copy with its type updated to the
+	 * class of the provided value)
 	 */
 	public TypeDescriptor narrow(Object value) {
 		if (value == null) {
@@ -254,13 +259,17 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	/**
-	 * Returns true if an object of this type descriptor can be assigned to the location described by the given type descriptor.
-	 * <p>For example, valueOf(String.class).isAssignableTo(valueOf(CharSequence.class)) returns true because a String value can be assigned to a CharSequence variable.
-	 * On the other hand, valueOf(Number.class).isAssignableTo(valueOf(Integer.class)) returns false because, while all Integers are Numbers, not all Numbers are Integers.
-	 * <p>
-	 * For arrays, collections, and maps, element and key/value types are checked if declared.
-	 * For example, a List&lt;String&gt; field value is assignable to a Collection&lt;CharSequence&gt; field, but List&lt;Number&gt; is not assignable to List&lt;Integer&gt;.
-	 * @return true if this type is assignable to the type represented by the provided type descriptor
+	 * Returns true if an object of this type descriptor can be assigned to the location
+	 * described by the given type descriptor.
+	 * <p>For example, {@code valueOf(String.class).isAssignableTo(valueOf(CharSequence.class))}
+	 * returns {@code true} because a String value can be assigned to a CharSequence variable.
+	 * On the other hand, {@code valueOf(Number.class).isAssignableTo(valueOf(Integer.class))}
+	 * returns {@code false} because, while all Integers are Numbers, not all Numbers are Integers.
+	 * <p>For arrays, collections, and maps, element and key/value types are checked if declared.
+	 * For example, a List&lt;String&gt; field value is assignable to a Collection&lt;CharSequence&gt;
+	 * field, but List&lt;Number&gt; is not assignable to List&lt;Integer&gt;.
+	 * @return {@code true} if this type is assignable to the type represented by the provided
+	 * type descriptor
 	 * @see #getObjectType()
 	 */
 	public boolean isAssignableTo(TypeDescriptor typeDescriptor) {
@@ -307,28 +316,36 @@ public class TypeDescriptor implements Serializable {
 	/**
 	 * If this type is an array, returns the array's component type.
 	 * If this type is a {@link Collection} and it is parameterized, returns the Collection's element type.
-	 * If the Collection is not parameterized, returns null indicating the element type is not declared.
-	 * @return the array component type or Collection element type, or {@code null} if this type is a Collection but its element type is not parameterized
-	 * @throws IllegalStateException if this type is not a java.util.Collection or Array type
+	 * If the Collection is not parameterized, returns {@code null} indicating the element type is not declared.
+	 * @return the array component type or Collection element type, or {@code null} if this type is a
+	 * Collection but its element type is not parameterized
+	 * @throws IllegalStateException if this type is not a {@code java.util.Collection} or array type
 	 */
 	public TypeDescriptor getElementTypeDescriptor() {
-		assertCollectionOrArray();
 		if (this.resolvableType.isArray()) {
-			return getRelatedIfResolvable(this, this.resolvableType.getComponentType());
+			return new TypeDescriptor(this.resolvableType.getComponentType(), null, this.annotations);
 		}
+		Assert.state(isCollection(), "Not an array or java.util.Collection");
 		return getRelatedIfResolvable(this, this.resolvableType.asCollection().getGeneric());
 
 	}
 
 	/**
-	 * If this type is a {@link Collection} or an Array, creates a element TypeDescriptor from the provided collection or array element.
-	 * <p>Narrows the {@link #getElementTypeDescriptor() elementType} property to the class of the provided collection or array element.
-	 * For example, if this describes a java.util.List&lt;java.lang.Number&lt; and the element argument is a java.lang.Integer, the returned TypeDescriptor will be java.lang.Integer.
-	 * If this describes a java.util.List&lt;?&gt; and the element argument is a java.lang.Integer, the returned TypeDescriptor will be java.lang.Integer as well.
-	 * <p>Annotation and nested type context will be preserved in the narrowed TypeDescriptor that is returned.
+	 * If this type is a {@link Collection} or an array, creates a element TypeDescriptor
+	 * from the provided collection or array element.
+	 * <p>Narrows the {@link #getElementTypeDescriptor() elementType} property to the class
+	 * of the provided collection or array element. For example, if this describes a
+	 * {@code java.util.List&lt;java.lang.Number&lt;} and the element argument is an
+	 * {@code java.lang.Integer}, the returned TypeDescriptor will be {@code java.lang.Integer}.
+	 * If this describes a {@code java.util.List&lt;?&gt;} and the element argument is an
+	 * {@code java.lang.Integer}, the returned TypeDescriptor will be {@code java.lang.Integer}
+	 * as well.
+	 * <p>Annotation and nested type context will be preserved in the narrowed
+	 * TypeDescriptor that is returned.
 	 * @param element the collection or array element
 	 * @return a element type descriptor, narrowed to the type of the provided element
-	 * @throws IllegalStateException if this type is not a java.util.Collection or Array type
+	 * @throws IllegalStateException if this type is not a {@code java.util.Collection}
+	 * or array type
 	 * @see #narrow(Object)
 	 */
 	public TypeDescriptor elementTypeDescriptor(Object element) {
@@ -343,25 +360,33 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	/**
-	 * If this type is a {@link Map} and its key type is parameterized, returns the map's key type.
-	 * If the Map's key type is not parameterized, returns null indicating the key type is not declared.
-	 * @return the Map key type, or {@code null} if this type is a Map but its key type is not parameterized
-	 * @throws IllegalStateException if this type is not a java.util.Map
+	 * If this type is a {@link Map} and its key type is parameterized,
+	 * returns the map's key type. If the Map's key type is not parameterized,
+	 * returns {@code null} indicating the key type is not declared.
+	 * @return the Map key type, or {@code null} if this type is a Map
+	 * but its key type is not parameterized
+	 * @throws IllegalStateException if this type is not a {@code java.util.Map}
 	 */
 	public TypeDescriptor getMapKeyTypeDescriptor() {
-		assertMap();
+		Assert.state(isMap(), "Not a java.util.Map");
 		return getRelatedIfResolvable(this, this.resolvableType.asMap().getGeneric(0));
 	}
 
 	/**
-	 * If this type is a {@link Map}, creates a mapKey {@link TypeDescriptor} from the provided map key.
-	 * <p>Narrows the {@link #getMapKeyTypeDescriptor() mapKeyType} property to the class of the provided map key.
-	 * For example, if this describes a java.util.Map&lt;java.lang.Number, java.lang.String&lt; and the key argument is a java.lang.Integer, the returned TypeDescriptor will be java.lang.Integer.
-	 * <p>If this describes a java.util.Map&lt;?, ?&gt; and the key argument is a java.lang.Integer, the returned TypeDescriptor will be java.lang.Integer as well.
-	 * <p>Annotation and nested type context will be preserved in the narrowed TypeDescriptor that is returned.
+	 * If this type is a {@link Map}, creates a mapKey {@link TypeDescriptor}
+	 * from the provided map key.
+	 * <p>Narrows the {@link #getMapKeyTypeDescriptor() mapKeyType} property
+	 * to the class of the provided map key. For example, if this describes a
+	 * {@code java.util.Map&lt;java.lang.Number, java.lang.String&lt;} and the key
+	 * argument is a {@code java.lang.Integer}, the returned TypeDescriptor will be
+	 * {@code java.lang.Integer}. If this describes a {@code java.util.Map&lt;?, ?&gt;}
+	 * and the key argument is a {@code java.lang.Integer}, the returned
+	 * TypeDescriptor will be {@code java.lang.Integer} as well.
+	 * <p>Annotation and nested type context will be preserved in the narrowed
+	 * TypeDescriptor that is returned.
 	 * @param mapKey the map key
 	 * @return the map key type descriptor
-	 * @throws IllegalStateException if this type is not a java.util.Map
+	 * @throws IllegalStateException if this type is not a {@code java.util.Map}
 	 * @see #narrow(Object)
 	 */
 	public TypeDescriptor getMapKeyTypeDescriptor(Object mapKey) {
@@ -369,34 +394,45 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	/**
-	 * If this type is a {@link Map} and its value type is parameterized, returns the map's value type.
-	 * <p>If the Map's value type is not parameterized, returns null indicating the value type is not declared.
-	 * @return the Map value type, or {@code null} if this type is a Map but its value type is not parameterized
-	 * @throws IllegalStateException if this type is not a java.util.Map
+	 * If this type is a {@link Map} and its value type is parameterized,
+	 * returns the map's value type.
+	 * <p>If the Map's value type is not parameterized, returns {@code null}
+	 * indicating the value type is not declared.
+	 * @return the Map value type, or {@code null} if this type is a Map
+	 * but its value type is not parameterized
+	 * @throws IllegalStateException if this type is not a {@code java.util.Map}
 	 */
 	public TypeDescriptor getMapValueTypeDescriptor() {
-		assertMap();
+		Assert.state(isMap(), "Not a java.util.Map");
 		return getRelatedIfResolvable(this, this.resolvableType.asMap().getGeneric(1));
 	}
 
 	/**
-	 * If this type is a {@link Map}, creates a mapValue {@link TypeDescriptor} from the provided map value.
-	 * <p>Narrows the {@link #getMapValueTypeDescriptor() mapValueType} property to the class of the provided map value.
-	 * For example, if this describes a java.util.Map&lt;java.lang.String, java.lang.Number&lt; and the value argument is a java.lang.Integer, the returned TypeDescriptor will be java.lang.Integer.
-	 * If this describes a java.util.Map&lt;?, ?&gt; and the value argument is a java.lang.Integer, the returned TypeDescriptor will be java.lang.Integer as well.
-	 * <p>Annotation and nested type context will be preserved in the narrowed TypeDescriptor that is returned.
+	 * If this type is a {@link Map}, creates a mapValue {@link TypeDescriptor}
+	 * from the provided map value.
+	 * <p>Narrows the {@link #getMapValueTypeDescriptor() mapValueType} property
+	 * to the class of the provided map value. For example, if this describes a
+	 * {@code java.util.Map&lt;java.lang.String, java.lang.Number&lt;} and the value
+	 * argument is a {@code java.lang.Integer}, the returned TypeDescriptor will be
+	 * {@code java.lang.Integer}. If this describes a {@code java.util.Map&lt;?, ?&gt;}
+	 * and the value argument is a {@code java.lang.Integer}, the returned
+	 * TypeDescriptor will be {@code java.lang.Integer} as well.
+	 * <p>Annotation and nested type context will be preserved in the narrowed
+	 * TypeDescriptor that is returned.
 	 * @param mapValue the map value
 	 * @return the map value type descriptor
-	 * @throws IllegalStateException if this type is not a java.util.Map
+	 * @throws IllegalStateException if this type is not a {@code java.util.Map}
+	 * @see #narrow(Object)
 	 */
 	public TypeDescriptor getMapValueTypeDescriptor(Object mapValue) {
 		return narrow(mapValue, getMapValueTypeDescriptor());
 	}
 
 	/**
-	 * Returns the value of {@link TypeDescriptor#getType() getType()} for the {@link #getElementTypeDescriptor() elementTypeDescriptor}.
+	 * Returns the value of {@link TypeDescriptor#getType() getType()} for the
+	 * {@link #getElementTypeDescriptor() elementTypeDescriptor}.
 	 * @deprecated in Spring 3.1 in favor of {@link #getElementTypeDescriptor()}
-	 * @throws IllegalStateException if this type is not a java.util.Collection or Array type
+	 * @throws IllegalStateException if this type is not a {@code java.util.Collection} or array type
 	 */
 	@Deprecated
 	public Class<?> getElementType() {
@@ -404,9 +440,10 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	/**
-	 * Returns the value of {@link TypeDescriptor#getType() getType()} for the {@link #getMapKeyTypeDescriptor() getMapKeyTypeDescriptor}.
+	 * Returns the value of {@link TypeDescriptor#getType() getType()} for the
+	 * {@link #getMapKeyTypeDescriptor() getMapKeyTypeDescriptor}.
 	 * @deprecated in Spring 3.1 in favor of {@link #getMapKeyTypeDescriptor()}
-	 * @throws IllegalStateException if this type is not a java.util.Map
+	 * @throws IllegalStateException if this type is not a {@code java.util.Map}
 	 */
 	@Deprecated
 	public Class<?> getMapKeyType() {
@@ -414,9 +451,10 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	/**
-	 * Returns the value of {@link TypeDescriptor#getType() getType()} for the {@link #getMapValueTypeDescriptor() getMapValueTypeDescriptor}.
+	 * Returns the value of {@link TypeDescriptor#getType() getType()} for the
+	 * {@link #getMapValueTypeDescriptor() getMapValueTypeDescriptor}.
 	 * @deprecated in Spring 3.1 in favor of {@link #getMapValueTypeDescriptor()}
-	 * @throws IllegalStateException if this type is not a java.util.Map
+	 * @throws IllegalStateException if this type is not a {@code java.util.Map}
 	 */
 	@Deprecated
 	public Class<?> getMapValueType() {
@@ -424,19 +462,7 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	private Class<?> getType(TypeDescriptor typeDescriptor) {
-		return (typeDescriptor == null ? null : typeDescriptor.getType());
-	}
-
-	private void assertCollectionOrArray() {
-		if (!isCollection() && !isArray()) {
-			throw new IllegalStateException("Not a java.util.Collection or Array");
-		}
-	}
-
-	private void assertMap() {
-		if (!isMap()) {
-			throw new IllegalStateException("Not a java.util.Map");
-		}
+		return (typeDescriptor != null ? typeDescriptor.getType() : null);
 	}
 
 	private TypeDescriptor narrow(Object value, TypeDescriptor typeDescriptor) {
@@ -589,15 +615,15 @@ public class TypeDescriptor implements Serializable {
 	 * @param methodParameter the method parameter with a nestingLevel of 1
 	 * @param nestingLevel the nesting level of the collection/array element or
 	 * map key/value declaration within the method parameter
-	 * @return the nested type descriptor at the specified nesting level, or null
-	 * if it could not be obtained
+	 * @return the nested type descriptor at the specified nesting level,
+	 * or {@code null} if it could not be obtained
 	 * @throws IllegalArgumentException if the nesting level of the input
 	 * {@link MethodParameter} argument is not 1, or if the types up to the
 	 * specified nesting level are not of collection, array, or map types
 	 */
 	public static TypeDescriptor nested(MethodParameter methodParameter, int nestingLevel) {
 		if (methodParameter.getNestingLevel() != 1) {
-			throw new IllegalArgumentException("methodParameter nesting level must be 1: " +
+			throw new IllegalArgumentException("MethodParameter nesting level must be 1: " +
 					"use the nestingLevel parameter to specify the desired nestingLevel for nested type traversal");
 		}
 		return nested(new TypeDescriptor(methodParameter), nestingLevel);
@@ -618,8 +644,8 @@ public class TypeDescriptor implements Serializable {
 	 * @param field the field
 	 * @param nestingLevel the nesting level of the collection/array element or
 	 * map key/value declaration within the field
-	 * @return the nested type descriptor at the specified nesting level, or null
-	 * if it could not be obtained
+	 * @return the nested type descriptor at the specified nesting level,
+	 * or {@code null} if it could not be obtained
 	 * @throws IllegalArgumentException if the types up to the specified nesting
 	 * level are not of collection, array, or map types
 	 */
@@ -669,15 +695,17 @@ public class TypeDescriptor implements Serializable {
 		ResolvableType nested = typeDescriptor.resolvableType;
 		for (int i = 0; i < nestingLevel; i++) {
 			if (Object.class.equals(nested.getType())) {
-				// could be a collection type but we don't know about its element type,
-				// so let's just assume there is an element type of type Object
+				// Could be a collection type but we don't know about its element type,
+				// so let's just assume there is an element type of type Object...
 			}
 			else {
 				nested = nested.getNested(2);
 			}
 		}
-		Assert.state(nested != ResolvableType.NONE, "Unable to obtain nested generic from "
-					+ typeDescriptor + " at level " + nestingLevel);
+		if (nested == ResolvableType.NONE) {
+			throw new IllegalStateException(
+					"Unable to obtain nested generic from " + typeDescriptor + " at level " + nestingLevel);
+		}
 		return getRelatedIfResolvable(typeDescriptor, nested);
 	}
 
