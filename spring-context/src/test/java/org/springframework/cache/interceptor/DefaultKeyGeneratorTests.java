@@ -22,14 +22,14 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Tests for {@link SimpleKeyGenerator} and {@link SimpleKey}.
+ * Tests for {@link DefaultKeyGenerator}.
  *
- * @author Phillip Webb
+ * @author Juergen Hoeller
  * @author Stephane Nicoll
  */
-public class SimpleKeyGeneratorTests {
+public class DefaultKeyGeneratorTests {
 
-	private final SimpleKeyGenerator generator = new SimpleKeyGenerator();
+	private final DefaultKeyGenerator generator = new DefaultKeyGenerator();
 
 
 	@Test
@@ -75,7 +75,7 @@ public class SimpleKeyGeneratorTests {
 		assertThat(k1.hashCode(), not(equalTo(k3.hashCode())));
 		assertThat(k1, equalTo(k2));
 		assertThat(k1, not(equalTo(k3)));
-		assertThat(k1, instanceOf(SimpleKey.class));
+		assertThat(k1, instanceOf(Integer.class));
 	}
 
 	@Test
