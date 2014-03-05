@@ -67,8 +67,13 @@ final class CollectionToCollectionConverter implements ConditionalGenericConvert
 		}
 		Collection<Object> target = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
 		if (targetType.getElementTypeDescriptor() == null) {
-			for (Object element : sourceCollection) {
-				target.add(element);
+			if (copyRequired) { // create a copy only if necessary
+				for (Object element : sourceCollection) {
+					target.add(element);
+				}
+				return target;
+			} else {
+				return source;
 			}
 		}
 		else {
@@ -80,8 +85,8 @@ final class CollectionToCollectionConverter implements ConditionalGenericConvert
 					copyRequired = true;
 				}
 			}
+			return (copyRequired ? target : source);
 		}
-		return (copyRequired ? target : source);
 	}
 
 }
