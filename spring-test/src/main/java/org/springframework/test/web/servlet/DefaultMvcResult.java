@@ -15,7 +15,6 @@
  */
 package org.springframework.test.web.servlet;
 
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -51,8 +50,6 @@ class DefaultMvcResult implements MvcResult {
 	private Exception resolvedException;
 
 	private final AtomicReference<Object> asyncResult = new AtomicReference<Object>(RESULT_NONE);
-
-	private CountDownLatch asyncResultLatch;
 
 
 	/**

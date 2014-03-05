@@ -15,17 +15,11 @@
  */
 package org.springframework.test.web.servlet;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import javax.servlet.AsyncContext;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link DefaultMvcResult}.
@@ -34,22 +28,18 @@ import static org.mockito.BDDMockito.*;
  */
 public class DefaultMvcResultTests {
 
-	private static final long DEFAULT_TIMEOUT = 10000L;
-
 	private DefaultMvcResult mvcResult;
-
 
 	@Before
 	public void setup() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.setAsyncStarted(true);
 		this.mvcResult = new DefaultMvcResult(request, null);
 	}
 
 	@Test
 	public void getAsyncResultSuccess() throws Exception {
 		this.mvcResult.setAsyncResult("Foo");
-		assertEquals("Foo", this.mvcResult.getAsyncResult(10 * 1000));
+		assertEquals("Foo", this.mvcResult.getAsyncResult());
 	}
 
 	@Test(expected = IllegalStateException.class)
