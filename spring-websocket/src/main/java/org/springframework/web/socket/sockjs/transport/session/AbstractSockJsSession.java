@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,9 +43,10 @@ import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.SockJsSession;
 
 /**
- * An abstract base class SockJS sessions implementing {@link SockJsSession}.
- *
+ * An abstract base class for SockJS sessions implementing {@link SockJsSession}.
+ * 
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.0
  */
 public abstract class AbstractSockJsSession implements SockJsSession {
@@ -75,14 +76,14 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	 */
 	protected static final Log disconnectedClientLogger = LogFactory.getLog(DISCONNECTED_CLIENT_LOG_CATEGORY);
 
-
-	private final static Set<String> disconnectedClientExceptions =
-			Collections.newSetFromMap(new HashMap<String, Boolean>(2));
+	private static final Set<String> disconnectedClientExceptions;
 
 	static {
-		disconnectedClientExceptions.add("ClientAbortException"); // Tomcat
-		disconnectedClientExceptions.add("EofException"); // Jetty
+		Set<String> set = new HashSet<String>(2);
+		set.add("ClientAbortException"); // Tomcat
+		set.add("EofException"); // Jetty
 		// IOException("Broken pipe") on WildFly and Glassfish
+		disconnectedClientExceptions = Collections.unmodifiableSet(set);
 	}
 
 
