@@ -59,23 +59,19 @@ public class AsyncTests {
 	}
 
 	@Test
-	@Ignore
 	public void testCallable() throws Exception {
 		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("callable", "true"))
-			.andDo(print())
 			.andExpect(request().asyncStarted())
 			.andExpect(request().asyncResult(new Person("Joe")))
 			.andReturn();
 
 		this.mockMvc.perform(asyncDispatch(mvcResult))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 			.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 	}
 
 	@Test
-	@Ignore
 	public void testDeferredResult() throws Exception {
 		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("deferredResult", "true"))
 			.andExpect(request().asyncStarted())
@@ -90,7 +86,6 @@ public class AsyncTests {
 	}
 
 	@Test
-	@Ignore
 	public void testDeferredResultWithSetValue() throws Exception {
 		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("deferredResultWithSetValue", "true"))
 				.andExpect(request().asyncStarted())

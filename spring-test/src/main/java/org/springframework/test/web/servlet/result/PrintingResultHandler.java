@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.test.web.servlet.result;
 import java.util.Enumeration;
 import java.util.Map;
 
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
@@ -27,7 +26,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultHandler;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.BindingResult;
@@ -47,8 +45,6 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * @since 3.2
  */
 public class PrintingResultHandler implements ResultHandler {
-
-	private static final boolean servlet3Present = ClassUtils.hasMethod(ServletRequest.class, "startAsync");
 
 	private final ResultValuePrinter printer;
 
@@ -80,10 +76,8 @@ public class PrintingResultHandler implements ResultHandler {
 		this.printer.printHeading("Handler");
 		printHandler(result.getHandler(), result.getInterceptors());
 
-		if (servlet3Present) {
-			this.printer.printHeading("Async");
-			printAsyncResult(result);
-		}
+		this.printer.printHeading("Async");
+		printAsyncResult(result);
 
 		this.printer.printHeading("Resolved Exception");
 		printResolvedException(result.getResolvedException());
@@ -133,11 +127,9 @@ public class PrintingResultHandler implements ResultHandler {
 	}
 
 	protected void printAsyncResult(MvcResult result) throws Exception {
-		if (servlet3Present) {
-			HttpServletRequest request = result.getRequest();
-			this.printer.printValue("Was async started", request.isAsyncStarted());
-			this.printer.printValue("Async result", result.getAsyncResult(0));
-		}
+		HttpServletRequest request = result.getRequest();
+		this.printer.printValue("Was async started", request.isAsyncStarted());
+		this.printer.printValue("Async result", (request.isAsyncStarted() ? result.getAsyncResult(0) : null));
 	}
 
 	/** Print the handler */

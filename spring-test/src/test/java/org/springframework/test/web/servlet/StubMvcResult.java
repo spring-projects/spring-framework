@@ -133,7 +133,7 @@ public class StubMvcResult implements MvcResult {
 	}
 
 	@Override
-	public Object getAsyncResult(long timeout) {
+	public Object getAsyncResult(long timeToWait) {
 		return null;
 	}
 
