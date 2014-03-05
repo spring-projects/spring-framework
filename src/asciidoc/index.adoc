@@ -46089,6 +46089,8 @@ into an existing Spring application. Similar to the <<transaction,transaction>> 
 the caching abstraction allows consistent use of various caching solutions with minimal
 impact on the code.
 
+As from Spring 4.1, the cache abstraction has been significantly improved with the
+support of <<cache-jsr-107,JSR-107 annotations>> and more customization options.
 
 
 
@@ -46132,29 +46134,41 @@ output (result) for a given input (or arguments) no matter how many times it is 
 executed.
 ====
 
+Other cache-related operations are provided by the abstraction such as the ability
+to update the content of the cache or remove one of all entries. These are useful if
+the cache deals with data that can change during the course of the application.
+
+Just like other services in the Spring Framework, the caching service is an
+abstraction (not a cache implementation) and requires the use of an actual storage to
+store the cache data - that is, the abstraction frees the developer from having to write
+the caching logic but does not provide the actual stores. This abstraction is
+materialized by the `org.springframework.cache.Cache` and
+`org.springframework.cache.CacheManager` interfaces.
+
+There are <<cache-store-configuration,a few implementations>> of that abstraction
+available out of the box: JDK `java.util.concurrent.ConcurrentMap` based caches,
+http://ehcache.org/[EhCache], Gemfire cache,
+https://code.google.com/p/guava-libraries/wiki/CachesExplained[Guava caches] and
+JSR-107 compliant caches. See <<cache-plug>> for more information on plugging in
+other cache stores/providers.
+
 To use the cache abstraction, the developer needs to take care of two aspects:
 
 * caching declaration - identify the methods that need to be cached and their policy
 * cache configuration - the backing cache where the data is stored and read from
 
-Note that just like other services in Spring Framework, the caching service is an
-abstraction (not a cache implementation) and requires the use of an actual storage to
-store the cache data - that is, the abstraction frees the developer from having to write
-the caching logic but does not provide the actual stores. There are two integrations
-available out of the box, for JDK `java.util.concurrent.ConcurrentMap` and
-http://ehcache.org/[EhCache] - see <<cache-plug>> for more information on plugging in
-other cache stores/providers.
-
-
-
 
 [[cache-annotations]]
 === Declarative annotation-based caching
-For caching declaration, the abstraction provides two Java annotations: `@Cacheable` and
-`@CacheEvict` which allow methods to trigger cache population or cache eviction. Let us
-take a closer look at each annotation:
+For caching declaration, the abstraction provides a set of Java annotations:
 
+* `@Cacheable` triggers cache population
+* `@CacheEvict` triggers cache eviction
+* `@CachePut` updates the cache without interfering with the method execution
+* `@Caching` regroups multiple cache operations to be applied on a method
+* `@CacheConfig` shares some common cache-related settings at class-level
 
+Let us take a closer look at each annotation:
 
 [[cache-annotations-cacheable]]
 ==== @Cacheable annotation
@@ -46176,20 +46190,20 @@ In the snippet above, the method `findBook` is associated with the cache named `
 Each time the method is called, the cache is checked to see whether the invocation has
 been already executed and does not have to be repeated. While in most cases, only one
 cache is declared, the annotation allows multiple names to be specified so that more
-then one cache are being used. In this case, each of the caches will be checked before
+than one cache are being used. In this case, each of the caches will be checked before
 executing the method - if at least one cache is hit, then the associated value will be
 returned:
 
 [NOTE]
 ====
-All the other caches that do not contain the method will be updated as well even though
+All the other caches that do not contain the value will be updated as well even though
 the cached method was not actually executed.
 ====
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable({ "books", "isbns" })
+	@Cacheable({"books", "isbns"})
 	public Book findBook(ISBN isbn) {...}
 ----
 
@@ -46205,13 +46219,11 @@ abstraction uses a simple `KeyGenerator` based on the following algorithm:
 * If more the one param is given, return a `SimpleKey` containing all parameters.
 
 This approach works well for most use-cases; As long as parameters have __natural keys__
-and implement valid `hashCode()` and `equals()` methods. If that is not the case the the
+and implement valid `hashCode()` and `equals()` methods. If that is not the case then the
 strategy needs to be changed.
 
 To provide a different __default__ key generator, one needs to implement the
-`org.springframework.cache.KeyGenerator` interface. Once configured, the generator will
-be used for each declaration that does not specify its own key generation strategy (see
-below).
+`org.springframework.cache.interceptor.KeyGenerator` interface.
 
 
 [NOTE]
@@ -46251,7 +46263,7 @@ generated through its `key` attribute. The developer can use <<expressions,SpEL>
 pick the arguments of interest (or their nested properties), perform operations or even
 invoke arbitrary methods without having to write any code or implement any interface.
 This is the recommended approach over the
-<<cache-annotations-cacheable-default-key,default>> generator since methods tend to be
+<<cache-annotations-cacheable-default-key,default generator>> since methods tend to be
 quite different in signatures as the code base grows; while the default strategy might
 work for some methods, it rarely does for all methods.
 
@@ -46274,6 +46286,75 @@ do yourself a favor and read <<expressions>>:
 The snippets above show how easy it is to select a certain argument, one of its
 properties or even an arbitrary (static) method.
 
+If the algorithm responsible to generate the key is too specific or if it needs
+to be shared, you may define a custom `keyGenerator` on the operation. To do
+this, specify the name of the `KeyGenerator` bean implementation to use:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Cacheable(value="books", **keyGenerator="myKeyGenerator"**)
+	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
+----
+
+
+[NOTE]
+====
+The `key` and `keyGenerator` parameters are mutually exclusive and an operation
+specifying both will result in an exception.
+====
+
+[[cache-annotations-cacheable-default-cache-resolver]]
+===== Default Cache Resolution
+
+Out of the box, the caching abstraction uses a simple `CacheResolver` that
+retrieves the cache(s) defined at the operation level using the configured
+`CacheManager`.
+
+To provide a different __default__ cache resolver, one needs to implement the
+`org.springframework.cache.interceptor.CacheResolver` interface.
+
+
+[[cache-annotations-cacheable-cache-resolver]]
+===== Custom cache resolution
+
+The default cache resolution fits well for applications working with a
+single `CacheManager` and with no complex cache resolution requirements.
+
+For applications working with several cache managers, it is possible
+to set the `cacheManager` to use per operation:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Cacheable(value="books", **cacheManager="anotherCacheManager"**)
+	public Book findBook(ISBN isbn) {...}
+----
+
+It is also possible to replace the `CacheResolver` entirely in a similar
+fashion as for <<cache-annotations-cacheable-key,key generation>>. The
+resolution is requested for every cache operation, giving a chance to
+the implementation to actually resolve the cache(s) to use based on
+runtime arguments:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Cacheable(**cacheResolver="runtimeCacheResolver"**)
+	public Book findBook(ISBN isbn) {...}
+----
+
+[NOTE]
+====
+Since Spring 4.1, the `value` attribute of the cache annotations are no longer
+mandatory since this particular information can be provided by the `CacheResolver`
+regardless of the content of the annotation.
+
+Similarly to `key` and `keyGenerator`, the `cacheManager` and `cacheResolver`
+parameters are mutually exclusive and an operation specifying both will
+result in an exception as a custom `CacheManager` will be ignored by the
+`CacheResolver` implementation. This is probably not what you expect.
+====
 
 [[cache-annotations-cacheable-condition]]
 ===== Conditional caching
@@ -46288,7 +46369,7 @@ only if the argument `name` has a length shorter than 32:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(value="book", condition="#name.length < 32")
+	@Cacheable(value="book", **condition="#name.length < 32"**)
 	public Book findBook(String name)
 ----
 
@@ -46300,7 +46381,7 @@ only want to cache paperback books:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(value="book", condition="#name.length < 32", unless="#result.hardback")
+	@Cacheable(value="book", condition="#name.length < 32", **unless="#result.hardback"**)
 	public Book findBook(String name)
 ----
 
@@ -46312,7 +46393,7 @@ Each `SpEL` expression evaluates again a dedicated
 <<expressions-language-ref,`context`>>. In addition to the build in parameters, the
 framework provides dedicated caching related metadata such as the argument names. The
 next table lists the items made available to the context so one can use them for key and
-conditional (see next section) computations:
+conditional computations:
 
 [[cache-spel-context-tbl]]
 .Cache SpEL available metadata
@@ -46364,7 +46445,6 @@ conditional (see next section) computations:
 |===
 
 
-
 [[cache-annotations-put]]
 ==== @CachePut annotation
 
@@ -46372,15 +46452,25 @@ For cases where the cache needs to be updated without interfering with the metho
 execution, one can use the `@CachePut` annotation. That is, the method will always be
 executed and its result placed into the cache (according to the `@CachePut` options). It
 supports the same options as `@Cacheable` and should be used for cache population rather
-then method flow optimization.
+than method flow optimization:
 
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@CachePut(value="book", key="#isbn")
+	public Book updateBook(ISBN isbn, BookDescriptor descriptor)
+----
+
+
+[IMPORTANT]
+====
 Note that using `@CachePut` and `@Cacheable` annotations on the same method is generally
 discouraged because they have different behaviors. While the latter causes the method
 execution to be skipped by using the cache, the former forces the execution in order to
 execute a cache update. This leads to unexpected behavior and with the exception of
 specific corner-cases (such as annotations having conditions that exclude them from each
 other), such declarations should be avoided.
-
+====
 
 
 [[cache-annotations-evict]]
@@ -46391,20 +46481,21 @@ This process is useful for removing stale or unused data from the cache. Opposed
 `@Cacheable`, annotation `@CacheEvict` demarcates methods that perform cache
 __eviction__, that is methods that act as triggers for removing data from the cache.
 Just like its sibling, `@CacheEvict` requires specifying one (or multiple) caches
-that are affected by the action, allows a key or a condition to be specified but in
-addition, features an extra parameter `allEntries` which indicates whether a cache-wide
-eviction needs to be performed rather then just an entry one (based on the key):
+that are affected by the action, allows a custom cache and key resolution or a
+condition to be specified but in addition, features an extra parameter
+`allEntries` which indicates whether a cache-wide eviction needs to be performed
+rather then just an entry one (based on the key):
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@CacheEvict(value = "books", allEntries=true)
+	@CacheEvict(value="books", **allEntries=true**)
 	public void loadBooks(InputStream batch)
 ----
 
 This option comes in handy when an entire cache region needs to be cleared out - rather
 then evicting each entry (which would take a long time since it is inefficient), all the
-entires are removed in one operation as shown above. Note that the framework will ignore
+entries are removed in one operation as shown above. Note that the framework will ignore
 any key specified in this scenario as it does not apply (the entire cache is evicted not
 just one entry).
 
@@ -46437,18 +46528,49 @@ this case, `@Caching`. `@Caching` allows multiple nested `@Cacheable`, `@CachePu
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Caching(evict = { @CacheEvict("primary"), @CacheEvict(value = "secondary", key = "#p0") })
+	@Caching(evict = { @CacheEvict("primary"), @CacheEvict(value="secondary", key="#p0") })
 	public Book importBooks(String deposit, Date date)
 ----
 
 
+[[cache-annotations-config]]
+==== @CacheConfig annotation
+
+So far we have seen that caching operations offered many customization options and
+these can be set on an operation basis. However, some of the customization options
+can be tedious to configure if they apply to all operations of the class. For
+instance, specifying the name of the cache to use for every cache operation of the
+class could be replaced by a single class-level definition. This is where `@CacheConfig`
+comes into play.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	**@CacheConfig("books")**
+	public class BookRepositoryImpl implements BookRepository {
+
+		@Cacheable
+		public Book findBook(ISBN isbn) {...}
+	}
+----
+
+`@CacheConfig` is a class-level annotation that allows to share the cache names, the custom
+`KeyGenerator`, the custom `CacheManager` and finally the custom `CacheResolver`. Placing
+this annotation on the class does not turn on any caching operation.
+
+An operation-level customization will always override a customization set on `@CacheConfig`. This
+gives therefore three levels of customizations per cache operation:
+
+* Globally configured, available for `CacheManager`, `KeyGenerator`
+* At class level, using `@CacheConfig`
+* At the operation level
 
 [[cache-annotation-enable]]
 ==== Enable caching annotations
 It is important to note that even though declaring the cache annotations does not
 automatically trigger their actions - like many things in Spring, the feature has to be
 declaratively enabled (which means if you ever suspect caching is to blame, you can
-disable it by removing only one configuration line rather then all the annotations in
+disable it by removing only one configuration line rather than all the annotations in
 your code).
 
 To enable caching annotations add the annotation `@EnableCaching` to one of your
@@ -46495,7 +46617,7 @@ application through AOP. The configuration is intentionally similar with that of
 | N/A (See `CachingConfigurer` javadocs)
 | cacheManager
 | Name of cache manager to use. Only required if the name of the cache manager is not
-  `cacheManager`, as in the example above.
+  `cacheManager`.
 
 | `mode`
 | `mode`
@@ -46529,16 +46651,16 @@ application through AOP. The configuration is intentionally similar with that of
 
 [NOTE]
 ====
-`<cache:annotation-driven/>` only looks for `@Cacheable/@CacheEvict` on beans in the
-same application context it is defined in. This means that, if you put
+`<cache:annotation-driven/>` only looks for `@Cacheable/@CachePut/@CacheEvict/@Caching`
+on beans in the same application context it is defined in. This means that, if you put
 `<cache:annotation-driven/>` in a `WebApplicationContext` for a `DispatcherServlet`, it
-only checks for `@Cacheable/@CacheEvict` beans in your controllers, and not your
-services. See <<mvc-servlet>> for more information.
+only checks for beans in your controllers, and not your services. See <<mvc-servlet>>
+for more information.
 ====
 
-.Method visibility and @Cacheable / @CachePut / @CacheEvict
+.Method visibility and cache annotations
 ****
-When using proxies, you should apply the `@Cache*` annotations only to methods with
+When using proxies, you should apply the cache annotations only to methods with
 __public__ visibility. If you do annotate protected, private or package-visible methods
 with these annotations, no error is raised, but the annotated method does not exhibit
 the configured caching settings. Consider the use of AspectJ (see below) if you need to
@@ -46572,13 +46694,13 @@ using the aspectj mode in this case.
 [[cache-annotation-stereotype]]
 ==== Using custom annotations
 The caching abstraction allows you to use your own annotations to identify what method
-trigger cache population or eviction. This is quite handy as a template mechanism as it
+triggers cache population or eviction. This is quite handy as a template mechanism as it
 eliminates the need to duplicate cache annotation declarations (especially useful if the
 key or condition are specified) or if the foreign imports (`org.springframework`) are
 not allowed in your code base. Similar to the rest of the
-<<beans-stereotype-annotations,stereotype>> annotations, both `@Cacheable` and
-`@CacheEvict` can be used as <<beans-meta-annotations,meta-annotations>>, that is
-annotations that can annotate other annotations. To wit, let us replace a common
+<<beans-stereotype-annotations,stereotype>> annotations, `@Cacheable`, `@CachePut`,
+`@CacheEvict` and `@CacheConfig` can be used as <<beans-meta-annotations,meta-annotations>>,
+that is annotations that can annotate other annotations. To wit, let us replace a common
 `@Cacheable` declaration with our own, custom annotation:
 
 [source,java,indent=0]
@@ -46615,6 +46737,133 @@ up its declaration at runtime and understands its meaning. Note that as mentione
 <<cache-annotation-enable,above>>, the annotation-driven behavior needs to be enabled.
 
 
+[[cache-jsr-107]]
+=== JCache (JSR-107) annotations
+
+Since the Spring Framework 4.1, the caching abstraction fully supports the JCache
+standard annotations: these are `@CacheResult`, `@CacheEvict`, `@CacheRemove` and
+`@CacheRemoveAll` as well as the `@CachingDefaults`, `@CacheKey` and `@CacheValue`
+companions. These annotations can be used right the way without migrating your
+cache store to JSR-107: the internal implementation uses Spring's caching abstraction
+and provides default `CacheResolver` and `KeyGenerator` implementations that are
+compliant with the specification. In other words, if you are already using Spring's
+caching abstraction, you can switch to these standard annotations without changing
+your cache storage (or configuration, for that matter).
+
+[[cache-jsr-107-summary]]
+==== Features summary
+
+For those who are familiar with Spring's caching annotations, the following table
+describes the main differences between the Spring annotations and the JSR-107
+counterpart:
+
+.Spring vs. JSR-107 caching annotations
+[cols="1,1,3"]
+|===
+| Spring| JSR-107| Remark
+
+| `@Cacheable`
+| `@CacheResult`
+| Fairly similar. `@CacheResult` can cache specific exceptions and force the
+  execution of the method regardless of the content of the cache.
+
+| `@CachePut`
+| `@CachePut`
+| While Spring updates the cache with the result of the method invocation, JCache
+  requires to pass it as an argument that is annotated with `@CacheValue`. Due
+  to this difference, JCache allows to update the cache before or after the
+  actual method invocation.
+
+| `@CacheEvict`
+| `@CacheRemove`
+| Fairly similar. `@CacheRemove` supports a conditional evict in case the
+  method invocation results in an exception.
+
+| `@CacheEvict(allEntries=true)`
+| `@CacheRemoveAll`
+| See `@CacheRemove`.
+
+| `@CacheConfig`
+| `@CacheDefaults`
+| Allows to configure the same concepts, in a similar fashion.
+|===
+
+JCache has the notion of `javax.cache.annotation.CacheResolver` that is identical
+to the Spring's `CacheResolver` interface, except that JCache only supports a single
+cache. By default, a simple implementation retrieves the cache to use based on
+the name declared on the annotation. It should be noted that if no cache name
+is specified on the annotation, a default is automatically generated, check the
+javadoc of `@CacheResult#cacheName()` for more information.
+
+`CacheResolver` instances are retrieved by a `CacheResolverFactory`. It is
+possible to customize the factory per cache operation:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@CacheResult(value="books", *cacheResolverFactory=MyCacheResolverFactory.class*)
+	public Book findBook(ISBN isbn)
+----
+
+[NOTE]
+====
+For all referenced _classes_, Spring tries to locate a bean with the given type. If
+more than one match exists, a new instance is created and can use the regular
+bean lifecycle callbacks such as dependency injection.
+====
+
+Keys are generated by a `javax.cache.annotation.CacheKeyGenerator` that serves the
+same purpose as Spring's `KeyGenerator`. By default, all method arguments are taken
+into account unless at least one parameter is annotated with `@CacheKey`. This is
+similar to Spring's <<cache-annotations-cacheable-key,custom key generation
+declaration>>. For instance these are identical operations, one using Spring's
+abstraction and the other with JCache:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Cacheable(value="books", **key="#isbn"**)
+	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
+
+	@CacheResult(cacheName="books")
+	public Book findBook(**@CacheKey** ISBN isbn, boolean checkWarehouse, boolean includeUsed)
+----
+
+The `CacheKeyResolver` to use can also be specified on the operation, in a similar
+fashion as the `CacheResolverFactory`.
+
+JCache can manage exceptions thrown by annotated methods: this can prevent an update of
+the cache but it can also cache the exception as an indicator of the failure instead of
+calling the method again. Let's assume that `InvalidIsbnNotFoundException` is thrown if
+the structure of the ISBN is invalid. This is a permanent failure, no book could ever be
+retrieved with such parameter. The following caches the exception so that further calls
+with the same, invalid ISBN, returns the cached exception directly instead of invoking
+the method again.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@CacheResult(cacheName="books", **exceptionCacheName="failures"**
+	             **cachedExceptions = InvalidIsbnNotFoundException.class**)
+	public Book findBook(@CacheKey ISBN isbn)
+----
+
+
+==== Enabling JSR-107 support
+
+Nothing specific needs to be done to enable the JSR-107 support alongside Spring's
+declarative annotation support. Both `@EnableCaching` and the
+`cache:annotation-driven` element will enable automatically the JCache support
+if both the JSR-107 API and the `spring-context-support` module are present in
+the classpath.
+
+[NOTE]
+====
+Depending of your use case, the choice is basically yours. You can even mix
+and match services using the JSR-107 API and others using Spring's own
+annotations. Be aware however that if these services are impacting the same
+caches, a consistent and identical key generation implementation should be used.
+====
 
 
 [[cache-declarative-xml]]
@@ -46674,11 +46923,9 @@ we did in the example above by defining the target cache through the `cache:defi
 
 [[cache-store-configuration]]
 === Configuring the cache storage
-Out of the box, the cache abstraction provides integration with two storages - one on
-top of the JDK `ConcurrentMap` and one for http://ehcache.org/[EhCache] library. To use
+Out of the box, the cache abstraction provides several storages integration. To use
 them, one needs to simply declare an appropriate `CacheManager` - an entity that
 controls and manages ++Cache++s and can be used to retrieve these for storage.
-
 
 
 [[cache-store-configuration-jdk]]
@@ -46691,7 +46938,7 @@ as a backing `Cache` store.
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<!-- generic cache manager -->
+	<!-- simple cache manager -->
 	<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
 		<property name="caches">
 			<set>
@@ -46722,17 +46969,52 @@ Again, to use it, one simply needs to declare the appropriate `CacheManager`:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager" p:cache-manager-ref="ehcache"/>
+	<bean id="cacheManager"
+	      class="org.springframework.cache.ehcache.EhCacheCacheManager" p:cache-manager-ref="ehcache"/>
 
 	<!-- EhCache library setup -->
-	<bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" p:config-location="ehcache.xml"/>
+	<bean id="ehcache"
+	      class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" p:config-location="ehcache.xml"/>
 ----
 
-This setup bootstraps ehcache library inside Spring IoC (through bean `ehcache`) which
+This setup bootstraps the ehcache library inside Spring IoC (through the `ehcache` bean) which
 is then wired into the dedicated `CacheManager` implementation. Note the entire
-ehcache-specific configuration is read from the resource `ehcache.xml`.
+ehcache-specific configuration is read from `ehcache.xml`.
 
+[[cache-store-configuration-guava]]
+==== Guava Cache
 
+The Guava implementation is located under `org.springframework.cache.guava` package and
+provides access to several features of Guava.
+
+Configuring a `CacheManager` that creates the cache on demand is straightforward:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="cacheManager"
+	      class="org.springframework.cache.guava.GuavaCacheManager"/>
+----
+
+It is also possible to provide the caches to use explicitly. In that case, only those
+will be made available by the manager:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="cacheManager" class="org.springframework.cache.guava.GuavaCacheManager">
+		<property name="caches">
+			<set>
+				<value>default</value>
+				<value>books</value>
+			</set>
+		</property>
+	</bean>
+----
+
+The Guava `CacheManager` also supports customs `CacheBuilder` and `CacheLoader`. See
+the https://code.google.com/p/guava-libraries/wiki/CachesExplained[Guava documentation]
+for more information about those.
 
 [[cache-store-configuration-gemfire]]
 ==== GemFire-based Cache
@@ -46741,9 +47023,27 @@ GemFire is a memory-oriented/disk-backed, elastically scalable, continuously ava
 active (with built-in pattern-based subscription notifications), globally replicated
 database and provides fully-featured edge caching. For further information on how to use
 GemFire as a CacheManager (and more), please refer to the
-http://docs.spring.io/spring-gemfire/docs/current/reference/htmlsingle/[Spring GemFire
+http://docs.spring.io/spring-gemfire/docs/current/reference/htmlsingle/[Spring Data GemFire
 reference documentation].
 
+[[cache-store-configuration-jsr107]]
+==== JSR-107 Cache
+
+JSR-107 compliant caches can also be used by Spring's caching abstraction. The JCache
+implementation is located under `org.springframework.cache.jcache` package.
+
+Again, to use it, one simply needs to declare the appropriate `CacheManager`:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="cacheManager"
+	      class="org.springframework.cache.jcache.JCacheCacheManager"
+	      p:cache-manager-ref="jCacheManager"/>
+
+	<!-- JSR-107 cache manager setup  -->
+	<bean id="jCacheManager" .../>
+----
 
 
 [[cache-store-configuration-noop]]
@@ -46784,7 +47084,7 @@ method to be executed every time.
 Clearly there are plenty of caching products out there that can be used as a backing
 store. To plug them in, one needs to provide a `CacheManager` and `Cache` implementation
 since unfortunately there is no available standard that we can use instead. This may
-sound harder then it is since in practice, the classes tend to be simple
+sound harder than it is since in practice, the classes tend to be simple
 http://en.wikipedia.org/wiki/Adapter_pattern[adapter]s that map the caching abstraction
 framework on top of the storage API as the `ehcache` classes can show. Most
 `CacheManager` classes can use the classes in `org.springframework.cache.support`
