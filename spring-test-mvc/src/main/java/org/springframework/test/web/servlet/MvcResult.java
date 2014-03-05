@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License; Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,24 +76,22 @@ public interface MvcResult {
 	FlashMap getFlashMap();
 
 	/**
-	 * Get the result of asynchronous execution or {@code null} if concurrent
-	 * handling did not start. This method will hold and await the completion
-	 * of concurrent handling.
+	 * Get the result of async execution. This method will wait for the async result
+	 * to be set for up to the amount of time configured on the async request,
 	 *
-	 * @throws IllegalStateException if concurrent handling does not complete
-	 * within the allocated async timeout value.
+	 * @throws IllegalStateException if the async result was not set.
 	 */
 	Object getAsyncResult();
 
 	/**
-	 * Get the result of asynchronous execution or {@code null} if concurrent
-	 * handling did not start. This method will wait for up to the given timeout
-	 * for the completion of concurrent handling.
+	 * Get the result of async execution. This method will wait for the async result
+	 * to be set for up to the specified amount of time.
 	 *
-	 * @param timeout how long to wait for the async result to be set in
-	 * milliseconds; if -1, the wait will be as long as the async timeout set
-	 * on the Servlet request
+	 * @param timeToWait how long to wait for the async result to be set, in
+	 * 	milliseconds; if -1, then the async request timeout value is used,
+	 *
+	 * @throws IllegalStateException if the async result was not set.
 	 */
-	Object getAsyncResult(long timeout);
+	Object getAsyncResult(long timeToWait);
 
 }

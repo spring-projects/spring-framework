@@ -135,7 +135,7 @@ public class PrintingResultHandler implements ResultHandler {
 		if (servlet3Present) {
 			HttpServletRequest request = result.getRequest();
 			this.printer.printValue("Was async started", request.isAsyncStarted());
-			this.printer.printValue("Async result", result.getAsyncResult(0));
+			this.printer.printValue("Async result", (request.isAsyncStarted() ? result.getAsyncResult(0) : null));
 		}
 	}
 

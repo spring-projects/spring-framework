@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,34 +58,25 @@ final class TestDispatcherServlet extends DispatcherServlet {
 	}
 
 	@Override
-	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void service(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 
-		CountDownLatch latch = registerAsyncInterceptors(request);
-		getMvcResult(request).setAsyncResultLatch(latch);
-
+		registerAsyncInterceptors(request);
 		super.service(request, response);
 	}
 
-	private CountDownLatch registerAsyncInterceptors(final HttpServletRequest servletRequest) {
-
-		final CountDownLatch asyncResultLatch = new CountDownLatch(1);
-
+	private void registerAsyncInterceptors(final HttpServletRequest servletRequest) {
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(servletRequest);
-
 		asyncManager.registerCallableInterceptor(KEY, new CallableProcessingInterceptorAdapter() {
 			public <T> void postProcess(NativeWebRequest request, Callable<T> task, Object value) throws Exception {
 				getMvcResult(servletRequest).setAsyncResult(value);
-				asyncResultLatch.countDown();
 			}
 		});
 		asyncManager.registerDeferredResultInterceptor(KEY, new DeferredResultProcessingInterceptorAdapter() {
 			public <T> void postProcess(NativeWebRequest request, DeferredResult<T> result, Object value) throws Exception {
 				getMvcResult(servletRequest).setAsyncResult(value);
-				asyncResultLatch.countDown();
 			}
 		});
-
-		return asyncResultLatch;
 	}
 
 	protected DefaultMvcResult getMvcResult(ServletRequest request) {

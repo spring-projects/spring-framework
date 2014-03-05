@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,23 @@
  */
 package org.springframework.test.web.servlet;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import javax.servlet.AsyncContext;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 
-import static org.mockito.BDDMockito.*;
+import javax.servlet.AsyncContext;
+import javax.servlet.DispatcherType;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.Part;
+
+import java.io.IOException;
+import java.util.Collection;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 /**
  * Test fixture for {@link DefaultMvcResult}.
@@ -33,82 +40,73 @@ import static org.mockito.BDDMockito.*;
  */
 public class DefaultMvcResultTests {
 
-	private static final long DEFAULT_TIMEOUT = 10000L;
-
 	private DefaultMvcResult mvcResult;
-
-	private CountDownLatch countDownLatch;
-
 
 	@Before
 	public void setup() {
 		ExtendedMockHttpServletRequest request = new ExtendedMockHttpServletRequest();
-		request.setAsyncStarted(true);
-
-		this.countDownLatch = mock(CountDownLatch.class);
-
 		this.mvcResult = new DefaultMvcResult(request, null);
-		this.mvcResult.setAsyncResultLatch(this.countDownLatch);
 	}
 
 	@Test
-	public void getAsyncResultWithTimeout() throws Exception {
-		long timeout = 1234L;
-		given(this.countDownLatch.await(timeout, TimeUnit.MILLISECONDS)).willReturn(true);
-		this.mvcResult.getAsyncResult(timeout);
-		verify(this.countDownLatch).await(timeout, TimeUnit.MILLISECONDS);
+	public void getAsyncResultSuccess() throws Exception {
+		this.mvcResult.setAsyncResult("Foo");
+		assertEquals("Foo", this.mvcResult.getAsyncResult());
 	}
 
-	@Test
-	public void getAsyncResultWithTimeoutNegativeOne() throws Exception {
-		given(this.countDownLatch.await(DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS)).willReturn(true);
-		this.mvcResult.getAsyncResult(-1);
-		verify(this.countDownLatch).await(DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS);
-	}
-
-	@Test
-	public void getAsyncResultWithoutTimeout() throws Exception {
-		given(this.countDownLatch.await(DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS)).willReturn(true);
-		this.mvcResult.getAsyncResult();
-		verify(this.countDownLatch).await(DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS);
-	}
-
-	@Test
-	public void getAsyncResultWithTimeoutZero() throws Exception {
+	@Test(expected = IllegalStateException.class)
+	public void getAsyncResultFailure() throws Exception {
 		this.mvcResult.getAsyncResult(0);
-		verifyZeroInteractions(this.countDownLatch);
-	}
-
-	@Test(expected=IllegalStateException.class)
-	public void getAsyncResultAndTimeOut() throws Exception {
-		this.mvcResult.getAsyncResult(-1);
-		verify(this.countDownLatch).await(DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS);
 	}
 
 
 	private static class ExtendedMockHttpServletRequest extends MockHttpServletRequest {
 
-		private boolean asyncStarted;
 		private AsyncContext asyncContext;
 
 		public ExtendedMockHttpServletRequest() {
-			super();
 			this.asyncContext = mock(AsyncContext.class);
-			given(this.asyncContext.getTimeout()).willReturn(new Long(DEFAULT_TIMEOUT));
-		}
-
-		public void setAsyncStarted(boolean asyncStarted) {
-			this.asyncStarted = asyncStarted;
+			given(this.asyncContext.getTimeout()).willReturn(0L);
 		}
 
 		@Override
 		public boolean isAsyncStarted() {
-			return this.asyncStarted;
+			return true;
 		}
 
 		@Override
 		public AsyncContext getAsyncContext() {
-			return asyncContext;
+			return this.asyncContext;
+		}
+
+		@Override
+		public Collection<Part> getParts() throws IOException, ServletException {
+			return null;
+		}
+
+		@Override
+		public Part getPart(String name) throws IOException, ServletException {
+			return null;
+		}
+
+		@Override
+		public AsyncContext startAsync() throws IllegalStateException {
+			return this.asyncContext;
+		}
+
+		@Override
+		public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse) {
+			return this.asyncContext;
+		}
+
+		@Override
+		public boolean isAsyncSupported() {
+			return true;
+		}
+
+		@Override
+		public DispatcherType getDispatcherType() {
+			return null;
 		}
 	}
 
