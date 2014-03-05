@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,6 +89,20 @@ public class AsyncTests {
 		.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 	}
 
+	@Test
+	@Ignore
+	public void testDeferredResultWithSetValue() throws Exception {
+		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("deferredResultWithSetValue", "true"))
+				.andExpect(request().asyncStarted())
+				.andExpect(request().asyncResult(new Person("Joe")))
+				.andReturn();
+
+		this.mockMvc.perform(asyncDispatch(mvcResult))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
+	}
+
 
 	@Controller
 	private static class AsyncController {
@@ -112,6 +126,14 @@ public class AsyncTests {
 		public DeferredResult<Person> getDeferredResult() {
 			DeferredResult<Person> deferredResult = new DeferredResult<Person>();
 			this.deferredResults.add(deferredResult);
+			return deferredResult;
+		}
+
+		@RequestMapping(value="/{id}", params="deferredResultWithSetValue", produces="application/json")
+		@ResponseBody
+		public DeferredResult<Person> getDeferredResultWithSetValue() {
+			DeferredResult<Person> deferredResult = new DeferredResult<Person>();
+			deferredResult.setResult(new Person("Joe"));
 			return deferredResult;
 		}
 

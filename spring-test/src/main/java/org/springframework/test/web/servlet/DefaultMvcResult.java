@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,9 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  */
 class DefaultMvcResult implements MvcResult {
 
+	private static final Object RESULT_NONE = new Object();
+
+
 	private final MockHttpServletRequest mockRequest;
 
 	private final MockHttpServletResponse mockResponse;
@@ -48,7 +51,7 @@ class DefaultMvcResult implements MvcResult {
 
 	private Exception resolvedException;
 
-	private Object asyncResult;
+	private Object asyncResult = RESULT_NONE;
 
 	private CountDownLatch asyncResultLatch;
 
@@ -123,18 +126,18 @@ class DefaultMvcResult implements MvcResult {
 
 	@Override
 	public Object getAsyncResult(long timeout) {
-		// MockHttpServletRequest type doesn't have async methods
-		HttpServletRequest request = this.mockRequest;
-		if ((timeout != 0) && request.isAsyncStarted()) {
-			if (timeout == -1) {
-				timeout = request.getAsyncContext().getTimeout();
-			}
-			if (!awaitAsyncResult(timeout)) {
-				throw new IllegalStateException(
-						"Gave up waiting on async result from handler [" + this.handler + "] to complete");
+		if (this.asyncResult == RESULT_NONE) {
+			if ((timeout != 0) && this.mockRequest.isAsyncStarted()) {
+				if (timeout == -1) {
+					timeout = this.mockRequest.getAsyncContext().getTimeout();
+				}
+				if (!awaitAsyncResult(timeout) && this.asyncResult == RESULT_NONE) {
+					throw new IllegalStateException(
+							"Gave up waiting on async result from handler [" + this.handler + "] to complete");
+				}
 			}
 		}
-		return this.asyncResult;
+		return (this.asyncResult == RESULT_NONE ? null : this.asyncResult);
 	}
 
 	private boolean awaitAsyncResult(long timeout) {
