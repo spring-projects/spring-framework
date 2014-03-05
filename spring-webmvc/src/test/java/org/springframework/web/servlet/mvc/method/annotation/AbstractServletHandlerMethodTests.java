@@ -40,7 +40,7 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  *
  * @author Rossen Stoyanchev
  */
-public class AbstractServletHandlerMethodTests {
+public abstract class AbstractServletHandlerMethodTests {
 
 	private DispatcherServlet servlet;
 

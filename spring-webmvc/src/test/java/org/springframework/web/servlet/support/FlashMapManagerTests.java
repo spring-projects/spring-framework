@@ -40,7 +40,7 @@ import static org.junit.Assert.*;
  *
  * @author Rossen Stoyanchev
  */
-public class AbstractFlashMapManagerTests {
+public class FlashMapManagerTests {
 
 	private TestFlashMapManager flashMapManager;
 
