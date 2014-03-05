@@ -66,8 +66,8 @@ configure(allprojects) { project ->
 		systemProperty("java.awt.headless", "true")
 		systemProperty("testGroups", project.properties.get("testGroups"))
 		scanForTestClasses = false
-		include(["**/*Tests.*", "**/*Test.*"])
-		exclude "**/Abstract*.*"
+		include(["**/*Tests.class", "**/*Test.class"])
+		exclude "**/Abstract*.class"
 	}
 
 	repositories {
@@ -830,25 +830,17 @@ project("spring-test") {
 		useTestNG()
 		// forkEvery 1
 		scanForTestClasses = false
-		include(["**/testng/**/*Tests.*", "**/testng/**/*Test.*"])
-		// "TestCase" classes are run by other test classes, not the build.
-		exclude(["**/Abstract*.*", "**/*TestCase.class", "**/FailingBeforeAndAfterMethodsTests.class"])
-		// Show standard out and standard error of the test JVM(s) on the console
+		include(["**/testng/**/*Tests.class", "**/testng/**/*Test.class"])
+		exclude "**/Abstract*.class"
+		// Show STD_OUT & STD_ERR of the test JVM(s) on the console:
 		// testLogging.showStandardStreams = true
 	}
 
 	test {
 		dependsOn testNG
 		useJUnit()
-		include(["**/*Tests.*", "**/*Test.*"])
-		// In general, we exclude all classes under the 'testng' package.
-		// "TestCase" classes are run by other test classes, not the build.
-		// "TestSuite" classes only exist as a convenience to the develper; they
-		// should not be run by the build.
-		exclude(["**/testng/**/*.*", "**/Abstract*.*", "**/*TestCase.class", "**/*TestSuite.class"])
-		// FailingBeforeAndAfterMethodsTests is actually a JUnit-based test which
-		// itself runs TestNG manually in order to test our TestNG support.
-		include "**/testng/FailingBeforeAndAfterMethodsTests"
+		include(["**/*Tests.class", "**/*Test.class"])
+		exclude(["**/Abstract*.class", "**/testng/**/*.*"])
 	}
 
 	task aggregateTestReports(type: TestReport) {

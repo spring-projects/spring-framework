@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.testng;
+package org.springframework.test.context.junit4;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.springframework.test.context.ContextConfiguration;
@@ -32,10 +34,6 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
-import org.testng.ITestContext;
-import org.testng.ITestListener;
-import org.testng.ITestResult;
-import org.testng.TestNG;
 
 /**
  * <p>
@@ -43,7 +41,7 @@ import org.testng.TestNG;
  * methods of {@link TestExecutionListener TestExecutionListeners} as well as
  * {@link BeforeTransaction &#064;BeforeTransaction} and
  * {@link AfterTransaction &#064;AfterTransaction} methods can fail a test in a
- * TestNG environment, as requested in <a
+ * JUnit 4.4 environment, as requested in <a
  * href="http://opensource.atlassian.com/projects/spring/browse/SPR-3960"
  * target="_blank">SPR-3960</a>.
  * </p>
@@ -62,99 +60,40 @@ import org.testng.TestNG;
  * @since 2.5
  */
 @RunWith(Parameterized.class)
-public class FailingBeforeAndAfterMethodsTests {
+public class FailingBeforeAndAfterMethodsJUnitTests {
 
 	protected final Class<?> clazz;
-	protected final int expectedTestStartCount;
-	protected final int expectedTestSuccessCount;
-	protected final int expectedFailureCount;
-	protected final int expectedFailedConfigurationsCount;
 
 
-	public FailingBeforeAndAfterMethodsTests(final Class<?> clazz, final int expectedTestStartCount,
-			final int expectedTestSuccessCount, final int expectedFailureCount,
-			final int expectedFailedConfigurationsCount) {
+	public FailingBeforeAndAfterMethodsJUnitTests(final Class<?> clazz) {
 		this.clazz = clazz;
-		this.expectedTestStartCount = expectedTestStartCount;
-		this.expectedTestSuccessCount = expectedTestSuccessCount;
-		this.expectedFailureCount = expectedFailureCount;
-		this.expectedFailedConfigurationsCount = expectedFailedConfigurationsCount;
 	}
 
 	@Parameters
 	public static Collection<Object[]> testData() {
 		return Arrays.asList(new Object[][] {//
 		//
-			{ AlwaysFailingBeforeTestClassTestCase.class, 1, 0, 0, 1 },//
-			{ AlwaysFailingAfterTestClassTestCase.class, 1, 1, 0, 1 },//
-			{ AlwaysFailingPrepareTestInstanceTestCase.class, 1, 0, 0, 1 },//
-			{ AlwaysFailingBeforeTestMethodTestCase.class, 1, 0, 0, 1 },//
-			{ AlwaysFailingAfterTestMethodTestCase.class, 1, 1, 0, 1 },//
-			{ FailingBeforeTransactionTestCase.class, 1, 0, 0, 1 },//
-			{ FailingAfterTransactionTestCase.class, 1, 1, 0, 1 } //
+			{ AlwaysFailingBeforeTestClassTestCase.class },//
+			{ AlwaysFailingAfterTestClassTestCase.class },//
+			{ AlwaysFailingPrepareTestInstanceTestCase.class },//
+			{ AlwaysFailingBeforeTestMethodTestCase.class },//
+			{ AlwaysFailingAfterTestMethodTestCase.class },//
+			{ FailingBeforeTransactionTestCase.class },//
+			{ FailingAfterTransactionTestCase.class } //
 		});
 	}
 
 	@Test
 	public void runTestAndAssertCounters() throws Exception {
-		final FailureTrackingTestListener listener = new FailureTrackingTestListener();
-		final TestNG testNG = new TestNG();
-		testNG.addListener(listener);
-		testNG.setTestClasses(new Class<?>[] { this.clazz });
-		testNG.setVerbose(0);
-		testNG.run();
+		final TrackingRunListener listener = new TrackingRunListener();
+		final RunNotifier notifier = new RunNotifier();
+		notifier.addListener(listener);
 
-		assertEquals("Verifying number of test starts for test class [" + this.clazz + "].",
-			this.expectedTestStartCount, listener.testStartCount);
-		assertEquals("Verifying number of successful tests for test class [" + this.clazz + "].",
-			this.expectedTestSuccessCount, listener.testSuccessCount);
-		assertEquals("Verifying number of failures for test class [" + this.clazz + "].", this.expectedFailureCount,
-			listener.testFailureCount);
-		assertEquals("Verifying number of failed configurations for test class [" + this.clazz + "].",
-			this.expectedFailedConfigurationsCount, listener.failedConfigurationsCount);
+		new SpringJUnit4ClassRunner(this.clazz).run(notifier);
+		assertEquals("Verifying number of failures for test class [" + this.clazz + "].", 1,
+			listener.getTestFailureCount());
 	}
 
-
-	static class FailureTrackingTestListener implements ITestListener {
-
-		int testStartCount = 0;
-		int testSuccessCount = 0;
-		int testFailureCount = 0;
-		int failedConfigurationsCount = 0;
-
-
-		@Override
-		public void onFinish(ITestContext testContext) {
-			this.failedConfigurationsCount += testContext.getFailedConfigurations().size();
-		}
-
-		@Override
-		public void onStart(ITestContext testContext) {
-		}
-
-		@Override
-		public void onTestFailedButWithinSuccessPercentage(ITestResult testResult) {
-		}
-
-		@Override
-		public void onTestFailure(ITestResult testResult) {
-			this.testFailureCount++;
-		}
-
-		@Override
-		public void onTestSkipped(ITestResult testResult) {
-		}
-
-		@Override
-		public void onTestStart(ITestResult testResult) {
-			this.testStartCount++;
-		}
-
-		@Override
-		public void onTestSuccess(ITestResult testResult) {
-			this.testSuccessCount++;
-		}
-	}
 
 	// -------------------------------------------------------------------
 
@@ -162,7 +101,7 @@ public class FailingBeforeAndAfterMethodsTests {
 
 		@Override
 		public void beforeTestClass(TestContext testContext) {
-			org.testng.Assert.fail("always failing beforeTestClass()");
+			fail("always failing beforeTestClass()");
 		}
 	}
 
@@ -170,7 +109,7 @@ public class FailingBeforeAndAfterMethodsTests {
 
 		@Override
 		public void afterTestClass(TestContext testContext) {
-			org.testng.Assert.fail("always failing afterTestClass()");
+			fail("always failing afterTestClass()");
 		}
 	}
 
@@ -178,7 +117,7 @@ public class FailingBeforeAndAfterMethodsTests {
 
 		@Override
 		public void prepareTestInstance(TestContext testContext) throws Exception {
-			org.testng.Assert.fail("always failing prepareTestInstance()");
+			fail("always failing prepareTestInstance()");
 		}
 	}
 
@@ -186,7 +125,7 @@ public class FailingBeforeAndAfterMethodsTests {
 
 		@Override
 		public void beforeTestMethod(TestContext testContext) {
-			org.testng.Assert.fail("always failing beforeTestMethod()");
+			fail("always failing beforeTestMethod()");
 		}
 	}
 
@@ -194,63 +133,69 @@ public class FailingBeforeAndAfterMethodsTests {
 
 		@Override
 		public void afterTestMethod(TestContext testContext) {
-			org.testng.Assert.fail("always failing afterTestMethod()");
+			fail("always failing afterTestMethod()");
 		}
 	}
 
-	// -------------------------------------------------------------------
+	@RunWith(SpringJUnit4ClassRunner.class)
+	@TestExecutionListeners({})
+	public static abstract class BaseTestCase {
 
-	@TestExecutionListeners(value = {}, inheritListeners = false)
-	public static abstract class BaseTestCase extends AbstractTestNGSpringContextTests {
-
-		@org.testng.annotations.Test
+		@Test
 		public void testNothing() {
 		}
 	}
 
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	@TestExecutionListeners(AlwaysFailingBeforeTestClassTestExecutionListener.class)
 	public static class AlwaysFailingBeforeTestClassTestCase extends BaseTestCase {
 	}
 
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	@TestExecutionListeners(AlwaysFailingAfterTestClassTestExecutionListener.class)
 	public static class AlwaysFailingAfterTestClassTestCase extends BaseTestCase {
 	}
 
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	@TestExecutionListeners(AlwaysFailingPrepareTestInstanceTestExecutionListener.class)
 	public static class AlwaysFailingPrepareTestInstanceTestCase extends BaseTestCase {
 	}
 
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	@TestExecutionListeners(AlwaysFailingBeforeTestMethodTestExecutionListener.class)
 	public static class AlwaysFailingBeforeTestMethodTestCase extends BaseTestCase {
 	}
 
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	@TestExecutionListeners(AlwaysFailingAfterTestMethodTestExecutionListener.class)
 	public static class AlwaysFailingAfterTestMethodTestCase extends BaseTestCase {
 	}
 
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	@ContextConfiguration("FailingBeforeAndAfterMethodsTests-context.xml")
-	public static class FailingBeforeTransactionTestCase extends AbstractTransactionalTestNGSpringContextTests {
+	public static class FailingBeforeTransactionTestCase extends AbstractTransactionalJUnit4SpringContextTests {
 
-		@org.testng.annotations.Test
+		@Test
 		public void testNothing() {
 		}
 
 		@BeforeTransaction
 		public void beforeTransaction() {
-			org.testng.Assert.fail("always failing beforeTransaction()");
+			fail("always failing beforeTransaction()");
 		}
 	}
 
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	@ContextConfiguration("FailingBeforeAndAfterMethodsTests-context.xml")
-	public static class FailingAfterTransactionTestCase extends AbstractTransactionalTestNGSpringContextTests {
+	public static class FailingAfterTransactionTestCase extends AbstractTransactionalJUnit4SpringContextTests {
 
-		@org.testng.annotations.Test
+		@Test
 		public void testNothing() {
 		}
 
 		@AfterTransaction
 		public void afterTransaction() {
-			org.testng.Assert.fail("always failing afterTransaction()");
+			fail("always failing afterTransaction()");
 		}
 	}
 
