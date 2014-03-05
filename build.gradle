@@ -16,7 +16,7 @@ configure(allprojects) { project ->
 	ext.aspectjVersion       = "1.7.4"
 	ext.groovyVersion        = "1.8.9"
 	ext.hibernate3Version    = "3.6.10.Final"
-	ext.hibernate4Version    = "4.2.9.Final"
+	ext.hibernate4Version    = "4.2.10.Final"
 	ext.hibValVersion        = "4.3.1.Final"
 	ext.hsqldbVersion        = "2.3.1"
 	ext.jackson1Version      = "1.9.13"
