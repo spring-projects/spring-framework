@@ -271,10 +271,13 @@ public class FlashMapManagerTests {
 		flashMap.addTargetRequestParam("key", "%D0%90%D0%90");
 		flashMap.addTargetRequestParam("key", "%D0%91%D0%91");
 		flashMap.addTargetRequestParam("key", "%D0%92%D0%92");
+		flashMap.addTargetRequestParam("%3A%2F%3F%23%5B%5D%40", "value");
 		this.flashMapManager.saveOutputFlashMap(flashMap, this.request, this.response);
 
 		assertEquals(Arrays.asList("\u0410\u0410", "\u0411\u0411", "\u0412\u0412"),
 				flashMap.getTargetRequestParams().get("key"));
+		assertEquals(Arrays.asList("value"),
+				flashMap.getTargetRequestParams().get(":/?#[]@"));
 	}
 
 
