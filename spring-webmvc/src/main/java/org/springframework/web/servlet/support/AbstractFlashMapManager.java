@@ -219,7 +219,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 	private void decodeParameters(MultiValueMap<String, String> params, HttpServletRequest request) {
 		for (String name : new ArrayList<String>(params.keySet())) {
 			for (String value : new ArrayList<String>(params.remove(name))) {
-				params.add(name, this.urlPathHelper.decodeRequestString(request, value));
+				params.add(this.urlPathHelper.decodeRequestString(request, name), this.urlPathHelper.decodeRequestString(request, value));
 			}
 		}
 	}
