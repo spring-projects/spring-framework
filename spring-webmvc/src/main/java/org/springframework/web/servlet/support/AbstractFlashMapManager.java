@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,21 +157,21 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 
 	/**
 	 * Whether the given FlashMap matches the current request.
-	 * The default implementation uses the target request path and query
-	 * parameters saved in the FlashMap.
+	 * Uses the expected request path and query parameters saved in the FlashMap.
 	 */
 	protected boolean isFlashMapForRequest(FlashMap flashMap, HttpServletRequest request) {
-		if (flashMap.getTargetRequestPath() != null) {
+		String expectedPath = flashMap.getTargetRequestPath();
+		if (expectedPath != null) {
 			String requestUri = this.urlPathHelper.getOriginatingRequestUri(request);
-			if (!requestUri.equals(flashMap.getTargetRequestPath())
-					&& !requestUri.equals(flashMap.getTargetRequestPath() + "/")) {
+			if (!requestUri.equals(expectedPath)
+					&& !requestUri.equals(expectedPath + "/")) {
 				return false;
 			}
 		}
 		MultiValueMap<String, String> targetParams = flashMap.getTargetRequestParams();
-		for (String paramName : targetParams.keySet()) {
-			for (String targetValue : targetParams.get(paramName)) {
-				if (!ObjectUtils.containsElement(request.getParameterValues(paramName), targetValue)) {
+		for (String expectedName : targetParams.keySet()) {
+			for (String expectedValue : targetParams.get(expectedName)) {
+				if (!ObjectUtils.containsElement(request.getParameterValues(expectedName), expectedValue)) {
 					return false;
 				}
 			}
@@ -219,7 +219,9 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 	private void decodeParameters(MultiValueMap<String, String> params, HttpServletRequest request) {
 		for (String name : new ArrayList<String>(params.keySet())) {
 			for (String value : new ArrayList<String>(params.remove(name))) {
-				params.add(this.urlPathHelper.decodeRequestString(request, name), this.urlPathHelper.decodeRequestString(request, value));
+				name = this.urlPathHelper.decodeRequestString(request, name);
+				value = this.urlPathHelper.decodeRequestString(request, value);
+				params.add(name, value);
 			}
 		}
 	}
