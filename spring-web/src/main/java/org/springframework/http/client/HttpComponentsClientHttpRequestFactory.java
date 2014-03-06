@@ -66,8 +66,8 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 
 	/**
-	 * Create a new instance of the {@code HttpComponentsClientHttpRequestFactory} with
-	 * a default {@link HttpClient}.
+	 * Create a new instance of the {@code HttpComponentsClientHttpRequestFactory}
+	 * with a default {@link HttpClient}.
 	 */
 	public HttpComponentsClientHttpRequestFactory() {
 		this(HttpClients.createSystem());
@@ -76,10 +76,8 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	/**
 	 * Create a new instance of the {@code HttpComponentsClientHttpRequestFactory}
 	 * with the given {@link HttpClient} instance.
-	 * <p>
-	 * As of Spring Framework 4 the given client is expected to be of type
+	 * <p>As of Spring Framework 4.0, the given client is expected to be of type
 	 * CloseableHttpClient (requiring HttpClient 4.3+).
-	 *
 	 * @param httpClient the HttpClient instance to use for this request factory
 	 */
 	public HttpComponentsClientHttpRequestFactory(HttpClient httpClient) {
@@ -91,11 +89,8 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
     /**
      * Set the {@code HttpClient} used for
-	 * <p>
-	 * As of Spring Framework 4 the given client is expected to be of type
+	 * <p>As of Spring Framework 4.0, the given client is expected to be of type
 	 * CloseableHttpClient (requiring HttpClient 4.3+).
-	 *
-     * {@linkplain #createRequest(URI, HttpMethod) synchronous execution}.
      */
     public void setHttpClient(HttpClient httpClient) {
 		Assert.isInstanceOf(CloseableHttpClient.class, httpClient, "'httpClient' is not of type CloseableHttpClient");
