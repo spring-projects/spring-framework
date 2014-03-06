@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.concurrent.atomic.AtomicReference;
+
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 
@@ -33,10 +34,8 @@ import org.springframework.oxm.Unmarshaller;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
-import static junit.framework.Assert.assertNotNull;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Arjen Poutsma

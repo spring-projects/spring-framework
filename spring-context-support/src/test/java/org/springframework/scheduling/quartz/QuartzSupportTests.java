@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,8 @@
 
 package org.springframework.scheduling.quartz;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -49,7 +47,6 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.tests.Assume;
@@ -66,6 +63,7 @@ import static org.mockito.BDDMockito.*;
  * @author Rob Harrop
  * @author Dave Syer
  * @author Mark Fisher
+ * @author Sam Brannen
  * @since 20.02.2004
  */
 public class QuartzSupportTests {
@@ -90,7 +88,7 @@ public class QuartzSupportTests {
 		JobDetailBean jobDetail0 = new JobDetailBean();
 		jobDetail0.setJobClass(Job.class);
 		jobDetail0.setBeanName("myJob0");
-		Map jobData = new HashMap();
+		Map<String, Object> jobData = new HashMap<String, Object>();
 		jobData.put("testBean", tb);
 		jobDetail0.setJobDataAsMap(jobData);
 		jobDetail0.afterPropertiesSet();
@@ -137,7 +135,7 @@ public class QuartzSupportTests {
 			}
 		};
 		schedulerFactoryBean.setJobFactory(null);
-		Map schedulerContext = new HashMap();
+		Map<String, Object> schedulerContext = new HashMap<String, Object>();
 		schedulerContext.put("otherTestBean", tb);
 		schedulerFactoryBean.setSchedulerContextAsMap(schedulerContext);
 		if (explicitJobDetail) {
@@ -177,7 +175,7 @@ public class QuartzSupportTests {
 		JobDetailBean jobDetail0 = new JobDetailBean();
 		jobDetail0.setJobClass(Job.class);
 		jobDetail0.setBeanName("myJob0");
-		Map jobData = new HashMap();
+		Map<String, Object> jobData = new HashMap<String, Object>();
 		jobData.put("testBean", tb);
 		jobDetail0.setJobDataAsMap(jobData);
 		jobDetail0.afterPropertiesSet();
@@ -217,7 +215,7 @@ public class QuartzSupportTests {
 			}
 		};
 		schedulerFactoryBean.setJobFactory(null);
-		Map schedulerContext = new HashMap();
+		Map<String, Object> schedulerContext = new HashMap<String, Object>();
 		schedulerContext.put("otherTestBean", tb);
 		schedulerFactoryBean.setSchedulerContextAsMap(schedulerContext);
 		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
@@ -261,7 +259,7 @@ public class QuartzSupportTests {
 		JobDetailBean jobDetail0 = new JobDetailBean();
 		jobDetail0.setJobClass(Job.class);
 		jobDetail0.setBeanName("myJob0");
-		Map jobData = new HashMap();
+		Map<String, Object> jobData = new HashMap<String, Object>();
 		jobData.put("testBean", tb);
 		jobDetail0.setJobDataAsMap(jobData);
 		jobDetail0.afterPropertiesSet();
@@ -306,7 +304,7 @@ public class QuartzSupportTests {
 			}
 		};
 		schedulerFactoryBean.setJobFactory(null);
-		Map schedulerContext = new HashMap();
+		Map<String, Object> schedulerContext = new HashMap<String, Object>();
 		schedulerContext.put("otherTestBean", tb);
 		schedulerFactoryBean.setSchedulerContextAsMap(schedulerContext);
 		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
@@ -336,6 +334,7 @@ public class QuartzSupportTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void testSchedulerFactoryBeanWithListeners() throws Exception {
 		JobFactory jobFactory = new AdaptableJobFactory();
 
@@ -552,7 +551,7 @@ public class QuartzSupportTests {
 			}
 		};
 		schedulerFactoryBean.setJobFactory(null);
-		Map schedulerContextMap = new HashMap();
+		Map<String, Object> schedulerContextMap = new HashMap<String, Object>();
 		schedulerContextMap.put("testBean", tb);
 		schedulerFactoryBean.setSchedulerContextAsMap(schedulerContextMap);
 		schedulerFactoryBean.setApplicationContext(ac);
@@ -580,7 +579,7 @@ public class QuartzSupportTests {
 		JobDetailBean jobDetail = new JobDetailBean();
 		jobDetail.setJobClass(Job.class);
 		jobDetail.setBeanName("myJob0");
-		Map jobData = new HashMap();
+		Map<String, Object> jobData = new HashMap<String, Object>();
 		jobData.put("testBean", tb);
 		jobDetail.setJobDataAsMap(jobData);
 		jobDetail.setApplicationContext(ac);
@@ -592,6 +591,7 @@ public class QuartzSupportTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void testMethodInvokingJobDetailFactoryBeanWithListenerNames() throws Exception {
 		TestMethodInvokingTask task = new TestMethodInvokingTask();
 		MethodInvokingJobDetailFactoryBean mijdfb = new MethodInvokingJobDetailFactoryBean();
@@ -603,35 +603,34 @@ public class QuartzSupportTests {
 		mijdfb.setJobListenerNames(names);
 		mijdfb.afterPropertiesSet();
 		JobDetail jobDetail = mijdfb.getObject();
-		List result = Arrays.asList(jobDetail.getJobListenerNames());
-		assertEquals(Arrays.asList(names), result);
+		assertArrayEquals(names, jobDetail.getJobListenerNames());
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void testJobDetailBeanWithListenerNames() {
 		JobDetailBean jobDetail = new JobDetailBean();
 		String[] names = new String[] {"test1", "test2"};
 		jobDetail.setJobListenerNames(names);
-		List result = Arrays.asList(jobDetail.getJobListenerNames());
-		assertEquals(Arrays.asList(names), result);
+		assertArrayEquals(names, jobDetail.getJobListenerNames());
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void testCronTriggerBeanWithListenerNames() {
 		CronTriggerBean trigger = new CronTriggerBean();
 		String[] names = new String[] {"test1", "test2"};
 		trigger.setTriggerListenerNames(names);
-		List result = Arrays.asList(trigger.getTriggerListenerNames());
-		assertEquals(Arrays.asList(names), result);
+		assertArrayEquals(names, trigger.getTriggerListenerNames());
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void testSimpleTriggerBeanWithListenerNames() {
 		SimpleTriggerBean trigger = new SimpleTriggerBean();
 		String[] names = new String[] {"test1", "test2"};
 		trigger.setTriggerListenerNames(names);
-		List result = Arrays.asList(trigger.getTriggerListenerNames());
-		assertEquals(Arrays.asList(names), result);
+		assertArrayEquals(names, trigger.getTriggerListenerNames());
 	}
 
 	@Test
@@ -946,6 +945,7 @@ public class QuartzSupportTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testSchedulerAutoStartsOnContextRefreshedEventByDefault() throws Exception {
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.registerBeanDefinition("scheduler", new RootBeanDefinition(SchedulerFactoryBean.class));
@@ -956,6 +956,7 @@ public class QuartzSupportTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testSchedulerAutoStartupFalse() throws Exception {
 		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(
