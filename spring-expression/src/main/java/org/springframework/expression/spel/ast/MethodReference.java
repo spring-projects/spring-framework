@@ -68,7 +68,7 @@ public class MethodReference extends SpelNodeImpl {
 			throwIfNotNullSafe(getArgumentTypes(arguments));
 			return ValueRef.NullValueRef.instance;
 		}
-		return new MethodValueRef(state);
+		return new MethodValueRef(state, arguments);
 	}
 
 	@Override
@@ -246,11 +246,11 @@ public class MethodReference extends SpelNodeImpl {
 
 		private final Object[] arguments;
 
-		public MethodValueRef(ExpressionState state) {
+		public MethodValueRef(ExpressionState state, Object[] arguments) {
 			this.evaluationContext = state.getEvaluationContext();
 			this.value = state.getActiveContextObject().getValue();
 			this.targetType = state.getActiveContextObject().getTypeDescriptor();
-			this.arguments = getArguments(state);
+			this.arguments = arguments;
 		}
 
 		@Override
