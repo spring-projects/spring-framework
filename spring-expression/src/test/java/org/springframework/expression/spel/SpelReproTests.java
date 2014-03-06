@@ -29,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -1823,6 +1824,39 @@ public class SpelReproTests extends AbstractExpressionTests {
 		ArrayList list = (ArrayList) value;
 		assertEquals("one", list.get(0));
 		assertEquals("two", list.get(1));
+	}
+
+	@Test
+	public void SPR11445_simple() {
+		StandardEvaluationContext context = new StandardEvaluationContext(new Spr11445Class());
+		Expression expr = new SpelExpressionParser().parseRaw("echo(parameter())");
+		assertEquals(1, expr.getValue(context));
+	}
+
+	@Test
+	public void SPR11445_beanReference() {
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		context.setBeanResolver(new Spr11445Class());
+		Expression expr = new SpelExpressionParser().parseRaw("@bean.echo(@bean.parameter())");
+		assertEquals(1, expr.getValue(context));
+	}
+
+	static class Spr11445Class implements BeanResolver {
+
+		private final AtomicInteger counter = new AtomicInteger();
+
+		public int echo(int invocation) {
+			return invocation;
+		}
+
+		public int parameter() {
+			return counter.incrementAndGet();
+		}
+
+		@Override
+		public Object resolve(EvaluationContext context, String beanName) throws AccessException {
+			return beanName.equals("bean") ? this : null;
+		}
 	}
 
 	@Test
