@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -322,7 +323,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	public String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
-		if (!isConfigurationFrozen()  || type == null || !allowEagerInit) {
+		if (!isConfigurationFrozen() || type == null || !allowEagerInit) {
 			return doGetBeanNamesForType(type, includeNonSingletons, allowEagerInit);
 		}
 		Map<Class<?>, String[]> cache =
@@ -332,7 +333,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return resolvedBeanNames;
 		}
 		resolvedBeanNames = doGetBeanNamesForType(type, includeNonSingletons, allowEagerInit);
-		cache.put(type, resolvedBeanNames);
+		if (ClassUtils.isCacheSafe(type, getBeanClassLoader())) {
+			cache.put(type, resolvedBeanNames);
+		}
 		return resolvedBeanNames;
 	}
 
@@ -480,7 +483,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * found on the given class itself, as well as checking its raw bean class
 	 * if not found on the exposed bean reference (e.g. in case of a proxy).
 	 */
-	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType) {
+	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
+			throws NoSuchBeanDefinitionException{
+
 		A ann = null;
 		Class<?> beanType = getType(beanName);
 		if (beanType != null) {
