@@ -18,6 +18,8 @@ package org.springframework.http.server;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -26,18 +28,25 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 
 /**
  * {@link ServerHttpResponse} implementation that is based on a {@link HttpServletResponse}.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 3.0
  */
 public class ServletServerHttpResponse implements ServerHttpResponse {
 
+	private static final boolean servlet3Present =
+			ClassUtils.isPresent("javax.servlet.AsyncContext", ServletServerHttpResponse.class.getClassLoader());
+
+
 	private final HttpServletResponse servletResponse;
 
-	private final HttpHeaders headers = new HttpHeaders();
+	private final HttpHeaders headers;
 
 	private boolean headersWritten = false;
 
@@ -49,6 +58,7 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 	public ServletServerHttpResponse(HttpServletResponse servletResponse) {
 		Assert.notNull(servletResponse, "'servletResponse' must not be null");
 		this.servletResponse = servletResponse;
+		this.headers = (servlet3Present ? new ServletResponseHttpHeaders() : new HttpHeaders());
 	}
 
 
@@ -105,4 +115,56 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 			this.headersWritten = true;
 		}
 	}
+
+	/**
+	 * Extends HttpHeaders with the ability to look up headers already present in
+	 * the underlying HttpServletResponse.
+	 *
+	 * The intent is merely to expose what is available through the HttpServletResponse
+	 * i.e. the ability to look up specific header values by name. All other
+	 * map-related operations (e.g. iteration, removal, etc) apply only to values
+	 * added directly through HttpHeaders methods.
+	 *
+	 * @since 4.0.3
+	 */
+	private class ServletResponseHttpHeaders extends HttpHeaders {
+
+		private static final long serialVersionUID = 3410708522401046302L;
+
+		@Override
+		public String getFirst(String headerName) {
+			String value = servletResponse.getHeader(headerName);
+			if (value != null) {
+				return value;
+			}
+			else {
+				return super.getFirst(headerName);
+			}
+		}
+
+		@Override
+		public List<String> get(Object key) {
+
+			Assert.isInstanceOf(String.class, key, "key must be a String-based header name");
+			Collection<String> values1 = servletResponse.getHeaders((String) key);
+			boolean isEmpty1 = CollectionUtils.isEmpty(values1);
+
+			List<String> values2 = super.get(key);
+			boolean isEmpty2 = CollectionUtils.isEmpty(values2);
+
+			if (isEmpty1 && isEmpty2) {
+				return null;
+			}
+
+			List<String> values = new ArrayList<String>();
+			if (!isEmpty1) {
+				values.addAll(values1);
+			}
+			if (!isEmpty2) {
+				values.addAll(values2);
+			}
+			return values;
+		}
+	}
+
 }

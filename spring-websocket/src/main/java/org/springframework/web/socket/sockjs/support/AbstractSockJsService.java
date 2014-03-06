@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.InvalidMediaTypeException;
@@ -352,22 +353,32 @@ public abstract class AbstractSockJsService implements SockJsService {
 
 
 	protected void addCorsHeaders(ServerHttpRequest request, ServerHttpResponse response, HttpMethod... httpMethods) {
-		String origin = request.getHeaders().getFirst("origin");
+
+		HttpHeaders requestHeaders = request.getHeaders();
+		HttpHeaders responseHeaders = response.getHeaders();
+
+		// Perhaps a CORS Filter has already added this?
+		if (!CollectionUtils.isEmpty(responseHeaders.get("Access-Control-Allow-Origin"))) {
+			logger.debug("Skip adding CORS headers, response already contains \"Access-Control-Allow-Origin\"");
+			return;
+		}
+
+		String origin = requestHeaders.getFirst("origin");
 		origin = ((origin == null) || origin.equals("null")) ? "*" : origin;
 
-		response.getHeaders().add("Access-Control-Allow-Origin", origin);
-		response.getHeaders().add("Access-Control-Allow-Credentials", "true");
+		responseHeaders.add("Access-Control-Allow-Origin", origin);
+		responseHeaders.add("Access-Control-Allow-Credentials", "true");
 
-		List<String> accessControllerHeaders = request.getHeaders().get("Access-Control-Request-Headers");
+		List<String> accessControllerHeaders = requestHeaders.get("Access-Control-Request-Headers");
 		if (accessControllerHeaders != null) {
 			for (String header : accessControllerHeaders) {
-				response.getHeaders().add("Access-Control-Allow-Headers", header);
+				responseHeaders.add("Access-Control-Allow-Headers", header);
 			}
 		}
 
 		if (!ObjectUtils.isEmpty(httpMethods)) {
-			response.getHeaders().add("Access-Control-Allow-Methods", StringUtils.arrayToDelimitedString(httpMethods, ", "));
-			response.getHeaders().add("Access-Control-Max-Age", String.valueOf(ONE_YEAR));
+			responseHeaders.add("Access-Control-Allow-Methods", StringUtils.arrayToDelimitedString(httpMethods, ", "));
+			responseHeaders.add("Access-Control-Max-Age", String.valueOf(ONE_YEAR));
 		}
 	}
 

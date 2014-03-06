@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.http.server;
 
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
@@ -69,6 +70,19 @@ public class ServletServerHttpResponseTests {
 		assertEquals("Invalid Content-Type", "text/plain;charset=UTF-8", mockResponse.getHeader("Content-Type"));
 		assertEquals("Invalid Content-Type", "text/plain;charset=UTF-8", mockResponse.getContentType());
 		assertEquals("Invalid Content-Type", "UTF-8", mockResponse.getCharacterEncoding());
+	}
+
+	@Test
+	public void getHeadersFromHttpServletResponse() {
+
+		String headerName = "Access-Control-Allow-Origin";
+		String headerValue = "localhost:8080";
+
+		this.mockResponse.addHeader(headerName, headerValue);
+		this.response = new ServletServerHttpResponse(this.mockResponse);
+
+		assertEquals(headerValue, this.response.getHeaders().getFirst(headerName));
+		assertEquals(Arrays.asList(headerValue), this.response.getHeaders().get(headerName));
 	}
 
 	@Test

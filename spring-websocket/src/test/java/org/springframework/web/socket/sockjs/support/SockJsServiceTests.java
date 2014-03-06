@@ -54,25 +54,25 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 	public void validateRequest() throws Exception {
 
 		this.service.setWebSocketEnabled(false);
-		handleRequest("GET", "/echo/server/session/websocket", HttpStatus.NOT_FOUND);
+		resetResponseAndHandleRequest("GET", "/echo/server/session/websocket", HttpStatus.NOT_FOUND);
 
 		this.service.setWebSocketEnabled(true);
-		handleRequest("GET", "/echo/server/session/websocket", HttpStatus.OK);
+		resetResponseAndHandleRequest("GET", "/echo/server/session/websocket", HttpStatus.OK);
 
-		handleRequest("GET", "/echo//", HttpStatus.NOT_FOUND);
-		handleRequest("GET", "/echo///", HttpStatus.NOT_FOUND);
-		handleRequest("GET", "/echo/other", HttpStatus.NOT_FOUND);
-		handleRequest("GET", "/echo//service/websocket", HttpStatus.NOT_FOUND);
-		handleRequest("GET", "/echo/server//websocket", HttpStatus.NOT_FOUND);
-		handleRequest("GET", "/echo/server/session/", HttpStatus.NOT_FOUND);
-		handleRequest("GET", "/echo/s.erver/session/websocket", HttpStatus.NOT_FOUND);
-		handleRequest("GET", "/echo/server/s.ession/websocket", HttpStatus.NOT_FOUND);
+		resetResponseAndHandleRequest("GET", "/echo//", HttpStatus.NOT_FOUND);
+		resetResponseAndHandleRequest("GET", "/echo///", HttpStatus.NOT_FOUND);
+		resetResponseAndHandleRequest("GET", "/echo/other", HttpStatus.NOT_FOUND);
+		resetResponseAndHandleRequest("GET", "/echo//service/websocket", HttpStatus.NOT_FOUND);
+		resetResponseAndHandleRequest("GET", "/echo/server//websocket", HttpStatus.NOT_FOUND);
+		resetResponseAndHandleRequest("GET", "/echo/server/session/", HttpStatus.NOT_FOUND);
+		resetResponseAndHandleRequest("GET", "/echo/s.erver/session/websocket", HttpStatus.NOT_FOUND);
+		resetResponseAndHandleRequest("GET", "/echo/server/s.ession/websocket", HttpStatus.NOT_FOUND);
 	}
 
 	@Test
 	public void handleInfoGet() throws Exception {
 
-		handleRequest("GET", "/echo/info", HttpStatus.OK);
+		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 
 		assertEquals("application/json;charset=UTF-8", this.servletResponse.getContentType());
 		assertEquals("*", this.servletResponse.getHeader("Access-Control-Allow-Origin"));
@@ -86,11 +86,24 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 
 		this.service.setSessionCookieNeeded(false);
 		this.service.setWebSocketEnabled(false);
-		handleRequest("GET", "/echo/info", HttpStatus.OK);
+		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 
 		body = this.servletResponse.getContentAsString();
 		assertEquals(",\"origins\":[\"*:*\"],\"cookie_needed\":false,\"websocket\":false}",
 				body.substring(body.indexOf(',')));
+	}
+
+	// SPR-11443
+
+	@Test
+	public void handleInfoGetCorsFilter() throws Exception {
+
+		// Simulate scenario where Filter would have already set CORS headers
+		this.servletResponse.setHeader("Access-Control-Allow-Origin", "foobar:123");
+
+		handleRequest("GET", "/echo/info", HttpStatus.OK);
+
+		assertEquals("foobar:123", this.servletResponse.getHeader("Access-Control-Allow-Origin"));
 	}
 
 	@Test
@@ -98,7 +111,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 
 		this.servletRequest.addHeader("Access-Control-Request-Headers", "Last-Modified");
 
-		handleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
+		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		this.response.flush();
 
 		assertEquals("*", this.servletResponse.getHeader("Access-Control-Allow-Origin"));
@@ -111,7 +124,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 	@Test
 	public void handleIframeRequest() throws Exception {
 
-		handleRequest("GET", "/echo/iframe.html", HttpStatus.OK);
+		resetResponseAndHandleRequest("GET", "/echo/iframe.html", HttpStatus.OK);
 
 		assertEquals("text/html;charset=UTF-8", this.servletResponse.getContentType());
 		assertTrue(this.servletResponse.getContentAsString().startsWith("<!DOCTYPE html>\n"));
@@ -125,37 +138,40 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 
 		this.servletRequest.addHeader("If-None-Match", "\"0da1ed070012f304e47b83c81c48ad620\"");
 
-		handleRequest("GET", "/echo/iframe.html", HttpStatus.NOT_MODIFIED);
+		resetResponseAndHandleRequest("GET", "/echo/iframe.html", HttpStatus.NOT_MODIFIED);
 	}
 
 	@Test
 	public void handleRawWebSocketRequest() throws Exception {
 
-		handleRequest("GET", "/echo", HttpStatus.OK);
+		resetResponseAndHandleRequest("GET", "/echo", HttpStatus.OK);
 		assertEquals("Welcome to SockJS!\n", this.servletResponse.getContentAsString());
 
-		handleRequest("GET", "/echo/websocket", HttpStatus.OK);
+		resetResponseAndHandleRequest("GET", "/echo/websocket", HttpStatus.OK);
 		assertNull("Raw WebSocket should not open a SockJS session", this.service.sessionId);
 		assertSame(this.handler, this.service.handler);
-	}
-
-
-	private void handleRequest(String httpMethod, String uri, HttpStatus httpStatus) throws IOException {
-		resetResponse();
-		setRequest(httpMethod, uri);
-		String sockJsPath = uri.substring("/echo".length());
-		this.service.handleRequest(this.request, this.response, sockJsPath, this.handler);
-
-		assertEquals(httpStatus.value(), this.servletResponse.getStatus());
 	}
 
 	@Test
 	public void handleEmptyContentType() throws Exception {
 
 		servletRequest.setContentType("");
-		handleRequest("GET", "/echo/info", HttpStatus.OK);
+		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 
 		assertEquals("Invalid/empty content should have been ignored", 200, this.servletResponse.getStatus());
+	}
+
+	private void resetResponseAndHandleRequest(String httpMethod, String uri, HttpStatus httpStatus) throws IOException {
+		resetResponse();
+		handleRequest(httpMethod, uri, httpStatus);
+	}
+
+	private void handleRequest(String httpMethod, String uri, HttpStatus httpStatus) throws IOException {
+		setRequest(httpMethod, uri);
+		String sockJsPath = uri.substring("/echo".length());
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.handler);
+
+		assertEquals(httpStatus.value(), this.servletResponse.getStatus());
 	}
 
 
