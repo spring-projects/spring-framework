@@ -220,6 +220,7 @@ public final class ResolvableType implements Serializable {
 		}
 
 		// Main assignability check about to follow
+		boolean exactMatch = checkingGeneric;
 		boolean checkGenerics = true;
 		Class<?> ourResolved = null;
 		if (this.type instanceof TypeVariable) {
@@ -241,6 +242,10 @@ public final class ResolvableType implements Serializable {
 					}
 				}
 			}
+			if (ourResolved == null) {
+				// Unresolved type variable, potentially nested -> never insist on exact match
+				exactMatch = false;
+			}
 		}
 		if (ourResolved == null) {
 			ourResolved = resolve(Object.class);
@@ -249,7 +254,7 @@ public final class ResolvableType implements Serializable {
 
 		// We need an exact type match for generics
 		// List<CharSequence> is not assignable from List<String>
-		if (checkingGeneric ? !ourResolved.equals(typeResolved) : !ClassUtils.isAssignable(ourResolved, typeResolved)) {
+		if (exactMatch ? !ourResolved.equals(typeResolved) : !ClassUtils.isAssignable(ourResolved, typeResolved)) {
 			return false;
 		}
 

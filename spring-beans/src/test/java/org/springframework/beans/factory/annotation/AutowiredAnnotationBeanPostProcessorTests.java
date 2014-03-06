@@ -1647,6 +1647,59 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertSame(ngr, bean.integerRepositoryMap.get("simpleRepo"));
 	}
 
+	@Test
+	public void testGenericsBasedInjectionIntoMatchingTypeVariable() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(GenericInterface1Impl.class);
+		bd.setFactoryMethodName("create");
+		bf.registerBeanDefinition("bean1", bd);
+		bf.registerBeanDefinition("bean2", new RootBeanDefinition(GenericInterface2Impl.class));
+
+		GenericInterface1Impl bean1 = (GenericInterface1Impl) bf.getBean("bean1");
+		GenericInterface2Impl bean2 = (GenericInterface2Impl) bf.getBean("bean2");
+		assertSame(bean2, bean1.gi2);
+	}
+
+	@Test
+	public void testGenericsBasedInjectionIntoUnresolvedTypeVariable() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(GenericInterface1Impl.class);
+		bd.setFactoryMethodName("createPlain");
+		bf.registerBeanDefinition("bean1", bd);
+		bf.registerBeanDefinition("bean2", new RootBeanDefinition(GenericInterface2Impl.class));
+
+		GenericInterface1Impl bean1 = (GenericInterface1Impl) bf.getBean("bean1");
+		GenericInterface2Impl bean2 = (GenericInterface2Impl) bf.getBean("bean2");
+		assertSame(bean2, bean1.gi2);
+	}
+
+	@Test
+	public void testGenericsBasedInjectionIntoTypeVariableSelectingBestMatch() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(GenericInterface1Impl.class);
+		bd.setFactoryMethodName("create");
+		bf.registerBeanDefinition("bean1", bd);
+		bf.registerBeanDefinition("bean2", new RootBeanDefinition(GenericInterface2Impl.class));
+		bf.registerBeanDefinition("bean2a", new RootBeanDefinition(ReallyGenericInterface2Impl.class));
+		bf.registerBeanDefinition("bean2b", new RootBeanDefinition(PlainGenericInterface2Impl.class));
+
+		GenericInterface1Impl bean1 = (GenericInterface1Impl) bf.getBean("bean1");
+		GenericInterface2Impl bean2 = (GenericInterface2Impl) bf.getBean("bean2");
+		assertSame(bean2, bean1.gi2);
+	}
+
 
 	public static class ResourceInjectionBean {
 
@@ -2531,6 +2584,69 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 							throw new UnsupportedOperationException("mocked!");
 						}
 					});
+		}
+	}
+
+
+	public interface GenericInterface1<T> {
+
+		public String doSomethingGeneric(T o);
+	}
+
+
+	public static class GenericInterface1Impl<T> implements GenericInterface1<T>{
+
+		@Autowired
+		private GenericInterface2<T> gi2;
+
+		@Override
+		public String doSomethingGeneric(T o) {
+			return gi2.doSomethingMoreGeneric(o) + "_somethingGeneric_" + o;
+		}
+
+		public static GenericInterface1<String> create(){
+			return new StringGenericInterface1Impl();
+		}
+
+		public static GenericInterface1 createPlain(){
+			return new GenericInterface1Impl();
+		}
+	}
+
+
+	public static class StringGenericInterface1Impl extends GenericInterface1Impl<String> {
+	}
+
+
+	public interface GenericInterface2<K> {
+
+		public String doSomethingMoreGeneric(K o);
+	}
+
+
+	public static class GenericInterface2Impl implements GenericInterface2<String>{
+
+		@Override
+		public String doSomethingMoreGeneric(String o) {
+			return "somethingMoreGeneric_" + o;
+		}
+	}
+
+
+	public static class ReallyGenericInterface2Impl implements GenericInterface2<Object> {
+
+		@Override
+		public String doSomethingMoreGeneric(Object o) {
+			return "somethingMoreGeneric_" + o;
+		}
+	}
+
+
+	public static class PlainGenericInterface2Impl implements GenericInterface2{
+
+		@Override
+		public String doSomethingMoreGeneric(Object o) {
+			return "somethingMoreGeneric_" + o;
 		}
 	}
 
