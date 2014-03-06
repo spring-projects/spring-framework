@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1700,6 +1700,22 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertSame(bean2, bean1.gi2);
 	}
 
+	@Test
+	public void testCircularTypeReference() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("bean1", new RootBeanDefinition(StockServiceImpl.class));
+		bf.registerBeanDefinition("bean2", new RootBeanDefinition(StockMovementDaoImpl.class));
+		bf.registerBeanDefinition("bean3", new RootBeanDefinition(StockMovementImpl.class));
+		bf.registerBeanDefinition("bean4", new RootBeanDefinition(StockMovementInstructionImpl.class));
+
+		StockServiceImpl service = bf.getBean(StockServiceImpl.class);
+		assertSame(bf.getBean(StockMovementDaoImpl.class), service.stockMovementDao);
+	}
+
 
 	public static class ResourceInjectionBean {
 
@@ -2648,6 +2664,37 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		public String doSomethingMoreGeneric(Object o) {
 			return "somethingMoreGeneric_" + o;
 		}
+	}
+
+
+	public interface StockMovement<P extends StockMovementInstruction> {
+	}
+
+
+	public interface StockMovementInstruction<C extends StockMovement> {
+	}
+
+
+	public interface StockMovementDao<S extends StockMovement> {
+	}
+
+
+	public static class StockMovementImpl<P extends StockMovementInstruction> implements StockMovement<P> {
+	}
+
+
+	public static class StockMovementInstructionImpl<C extends StockMovement> implements StockMovementInstruction<C> {
+	}
+
+
+	public static class StockMovementDaoImpl<E extends StockMovement> implements StockMovementDao<E> {
+	}
+
+
+	public static class StockServiceImpl {
+
+		@Autowired
+		private StockMovementDao<StockMovement> stockMovementDao;
 	}
 
 }

@@ -28,6 +28,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.Collection;
+import java.util.IdentityHashMap;
 import java.util.Map;
 
 import org.springframework.core.SerializableTypeWrapper.FieldTypeProvider;
@@ -188,10 +189,10 @@ public final class ResolvableType implements Serializable {
 	 * @return {@code true} if the specified {@code type} can be assigned to this {@code type}
 	 */
 	public boolean isAssignableFrom(ResolvableType type) {
-		return isAssignableFrom(type, false);
+		return isAssignableFrom(type, null);
 	}
 
-	private boolean isAssignableFrom(ResolvableType type, boolean checkingGeneric) {
+	private boolean isAssignableFrom(ResolvableType type, Map<ResolvableType, ResolvableType> matchedBefore) {
 		Assert.notNull(type, "Type must not be null");
 
 		// If we cannot resolve types, we are not assignable
@@ -202,6 +203,10 @@ public final class ResolvableType implements Serializable {
 		// Deal with array by delegating to the component type
 		if (isArray()) {
 			return (type.isArray() && getComponentType().isAssignableFrom(type.getComponentType()));
+		}
+
+		if (matchedBefore != null && matchedBefore.get(this) == type) {
+			return true;
 		}
 
 		// Deal with wildcard bounds
@@ -220,7 +225,7 @@ public final class ResolvableType implements Serializable {
 		}
 
 		// Main assignability check about to follow
-		boolean exactMatch = checkingGeneric;
+		boolean exactMatch = (matchedBefore != null);  // We're checking nested generic variables now...
 		boolean checkGenerics = true;
 		Class<?> ourResolved = null;
 		if (this.type instanceof TypeVariable) {
@@ -265,8 +270,12 @@ public final class ResolvableType implements Serializable {
 			if (ourGenerics.length != typeGenerics.length) {
 				return false;
 			}
+			if (matchedBefore == null) {
+				matchedBefore = new IdentityHashMap<ResolvableType, ResolvableType>(1);
+			}
+			matchedBefore.put(this, type);
 			for (int i = 0; i < ourGenerics.length; i++) {
-				if (!ourGenerics[i].isAssignableFrom(typeGenerics[i], true)) {
+				if (!ourGenerics[i].isAssignableFrom(typeGenerics[i], matchedBefore)) {
 					return false;
 				}
 			}
