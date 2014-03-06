@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ package org.springframework.test;
  * test will also fail, this time with a message similar to the following:
  *
  * <pre class="code">
- * "junit.framework.AssertionFailedError: Was expecting a [class java.lang.UnsupportedOperationException] to be thrown, but instead a [class java.lang.IllegalArgumentException] was thrown"</pre>
+ * "java.lang.AssertionError: Was expecting a [class java.lang.UnsupportedOperationException] to be thrown, but instead a [class java.lang.IllegalArgumentException] was thrown"</pre>
  *
  * The test for the correct {@link Exception} respects polymorphism,
  * so you can test that any old {@link Exception} is thrown like so:
@@ -156,7 +156,7 @@ public abstract class AssertThrows {
 	 * Subclass must override this {@code abstract} method and
 	 * provide the test logic.
 	 * @throws Exception if an error occurs during the execution of the
-	 * aformentioned test logic
+	 * aforementioned test logic
 	 */
 	public abstract void test() throws Exception;
 
@@ -186,7 +186,7 @@ public abstract class AssertThrows {
 	 * {@link java.lang.Exception} is <b>not</b> thrown.
 	 * <p>The default implementation simply fails the test via a call to
 	 * {@link org.junit.Assert#fail(String)}.
-	 * <p>If you want to customise the failure message, consider overriding
+	 * <p>If you want to customize the failure message, consider overriding
 	 * {@link #createMessageForNoExceptionThrown()}, and / or supplying an
 	 * extra, contextual failure message via the appropriate constructor overload.
 	 * @see #getFailureMessage()
@@ -215,7 +215,7 @@ public abstract class AssertThrows {
 	 * {@link Exception} that was thrown in the body of a test is
 	 * an instance of the {@link #getExpectedException()} class (or an
 	 * instance of a subclass).
-	 * <p>If you want to customise the failure message, consider overriding
+	 * <p>If you want to customize the failure message, consider overriding
 	 * {@link #createMessageForWrongThrownExceptionType(Exception)}.
 	 * @param actualException the {@link Exception} that has been thrown
 	 * in the body of a test method (will never be {@code null})
