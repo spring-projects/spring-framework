@@ -182,6 +182,7 @@ public abstract class AbstractTransactionalJUnit4SpringContextTests extends Abst
 	 * @see JdbcTestUtils#executeSqlScript(JdbcTemplate, EncodedResource, boolean)
 	 * @see #setSqlScriptEncoding
 	 */
+	@SuppressWarnings("deprecation")
 	protected void executeSqlScript(String sqlResourcePath, boolean continueOnError) throws DataAccessException {
 		Resource resource = this.applicationContext.getResource(sqlResourcePath);
 		JdbcTestUtils.executeSqlScript(this.jdbcTemplate, new EncodedResource(resource, this.sqlScriptEncoding),
