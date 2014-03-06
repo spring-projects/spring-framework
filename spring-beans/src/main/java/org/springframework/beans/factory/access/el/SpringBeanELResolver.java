@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.beans.factory.access.el;
 
 import java.beans.FeatureDescriptor;
 import java.util.Iterator;
-
 import javax.el.ELContext;
 import javax.el.ELException;
 import javax.el.ELResolver;
@@ -78,8 +77,14 @@ public abstract class SpringBeanELResolver extends ELResolver {
 			String beanName = property.toString();
 			BeanFactory bf = getBeanFactory(elContext);
 			if (bf.containsBean(beanName)) {
-				throw new PropertyNotWritableException(
-						"Variable '" + beanName + "' refers to a Spring bean which by definition is not writable");
+				if (value == bf.getBean(beanName)) {
+					// Setting the bean reference to the same value is alright - can simply be ignored...
+					elContext.setPropertyResolved(true);
+				}
+				else {
+					throw new PropertyNotWritableException(
+							"Variable '" + beanName + "' refers to a Spring bean which by definition is not writable");
+				}
 			}
 		}
 	}
