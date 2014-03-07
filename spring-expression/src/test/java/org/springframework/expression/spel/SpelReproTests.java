@@ -24,8 +24,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -227,9 +227,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	public void SPR5804() throws Exception {
 		Map<String, String> m = new HashMap<String, String>();
 		m.put("foo", "bar");
-		StandardEvaluationContext eContext = new StandardEvaluationContext(m); // root is
-																				// a map
-																				// instance
+		StandardEvaluationContext eContext = new StandardEvaluationContext(m); // root is a map instance
 		eContext.addPropertyAccessor(new MapAccessor());
 		Expression expr = new SpelExpressionParser().parseRaw("['foo']");
 		assertEquals("bar", expr.getValue(eContext));
@@ -419,8 +417,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		expr = new SpelExpressionParser().parseRaw("instance[bar]");
 		name = expr.getValue(eContext, String.class);
 		assertEquals("hello", name);
-		name = expr.getValue(eContext, String.class); // will be using the cached accessor
-														// this time
+		name = expr.getValue(eContext, String.class); // will be using the cached accessor this time
 		assertEquals("hello", name);
 	}
 
@@ -434,8 +431,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		expr = new SpelExpressionParser().parseRaw("instance[#bar]");
 		name = expr.getValue(eContext, String.class);
 		assertEquals("hello", name);
-		name = expr.getValue(eContext, String.class); // will be using the cached accessor
-														// this time
+		name = expr.getValue(eContext, String.class); // will be using the cached accessor this time
 		assertEquals("hello", name);
 	}
 
@@ -1279,8 +1275,8 @@ public class SpelReproTests extends AbstractExpressionTests {
 			@Override
 			protected Method[] getMethods(Class<?> type) {
 				try {
-					return new Method[] { Integer.class.getDeclaredMethod("parseInt", new Class[] { String.class,
-						Integer.TYPE }) };
+					return new Method[] {
+							Integer.class.getDeclaredMethod("parseInt", new Class[] { String.class, Integer.TYPE }) };
 				}
 				catch (NoSuchMethodException ex) {
 					return new Method[0];
@@ -1811,7 +1807,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	@Test
 	public void SPR11348() {
-		Collection<String> coll = new HashSet<String>();
+		Collection<String> coll = new LinkedHashSet<String>();
 		coll.add("one");
 		coll.add("two");
 		coll = Collections.unmodifiableCollection(coll);
@@ -1841,6 +1837,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		assertEquals(1, expr.getValue(context));
 	}
 
+
 	static class Spr11445Class implements BeanResolver {
 
 		private final AtomicInteger counter = new AtomicInteger();
@@ -1858,6 +1855,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 			return beanName.equals("bean") ? this : null;
 		}
 	}
+
 
 	@Test
 	public void SPR11494() {
