@@ -67,7 +67,10 @@ configure(allprojects) { project ->
 		systemProperty("testGroups", project.properties.get("testGroups"))
 		scanForTestClasses = false
 		include(["**/*Tests.class", "**/*Test.class"])
-		exclude "**/Abstract*.class"
+		// Since we set scanForTestClasses to false, we need to filter out inner
+		// classes with the "$" pattern; otherwise, using -Dtest.single=MyTests to
+		// run MyTests by itself will fail if MyTests contains any inner classes. 
+		exclude(["**/Abstract*.class", '**/*$*'])
 	}
 
 	repositories {
@@ -828,19 +831,16 @@ project("spring-test") {
 
 	task testNG(type: Test) {
 		useTestNG()
-		// forkEvery 1
-		scanForTestClasses = false
 		include(["**/testng/**/*Tests.class", "**/testng/**/*Test.class"])
-		exclude "**/Abstract*.class"
 		// Show STD_OUT & STD_ERR of the test JVM(s) on the console:
 		// testLogging.showStandardStreams = true
+		// forkEvery 1
 	}
 
 	test {
 		dependsOn testNG
 		useJUnit()
-		include(["**/*Tests.class", "**/*Test.class"])
-		exclude(["**/Abstract*.class", "**/testng/**/*.*"])
+		exclude "**/testng/**/*.*"
 	}
 
 	task aggregateTestReports(type: TestReport) {
