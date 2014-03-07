@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,103 +25,141 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.objects.GenericObject;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Serge Bogatyrjov
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
-public class GenericCollectionTypeResolverTests extends AbstractGenericsTests {
+public class GenericCollectionTypeResolverTests {
 
-	@Override
-	protected void setUp() throws Exception {
+	protected Class<?> targetClass;
+
+	protected String[] methods;
+
+	protected Type[] expectedResults;
+
+	@Before
+	public void setUp() throws Exception {
 		this.targetClass = Foo.class;
-		this.methods = new String[] {"a", "b", "b2", "b3", "c", "d", "d2", "d3", "e", "e2", "e3"};
-		this.expectedResults = new Class[] {
-			Integer.class, null, Set.class, Set.class, null, Integer.class,
-			Integer.class, Integer.class, Integer.class, Integer.class, Integer.class};
+		this.methods = new String[] { "a", "b", "b2", "b3", "c", "d", "d2", "d3", "e",
+			"e2", "e3" };
+		this.expectedResults = new Class[] { Integer.class, null, Set.class, Set.class,
+			null, Integer.class, Integer.class, Integer.class, Integer.class,
+			Integer.class, Integer.class };
 	}
 
-	@Override
+	protected void executeTest(String methodName) throws NoSuchMethodException {
+		for (int i = 0; i < this.methods.length; i++) {
+			if (methodName.equals(this.methods[i])) {
+				Method method = this.targetClass.getMethod(methodName);
+				Type type = getType(method);
+				assertEquals(this.expectedResults[i], type);
+				return;
+			}
+		}
+		throw new IllegalStateException("Bad test data");
+	}
+
 	protected Type getType(Method method) {
 		return GenericCollectionTypeResolver.getMapValueReturnType(method);
 	}
 
-	public void testA() throws Exception {
-		executeTest();
+	@Test
+	public void a() throws Exception {
+		executeTest("a");
 	}
 
-	public void testB() throws Exception {
-		executeTest();
+	@Test
+	public void b() throws Exception {
+		executeTest("b");
 	}
 
-	public void testB2() throws Exception {
-		executeTest();
+	@Test
+	public void b2() throws Exception {
+		executeTest("b2");
 	}
 
-	public void testB3() throws Exception {
-		executeTest();
+	@Test
+	public void b3() throws Exception {
+		executeTest("b3");
 	}
 
-	public void testC() throws Exception {
-		executeTest();
+	@Test
+	public void c() throws Exception {
+		executeTest("c");
 	}
 
-	public void testD() throws Exception {
-		executeTest();
+	@Test
+	public void d() throws Exception {
+		executeTest("d");
 	}
 
-	public void testD2() throws Exception {
-		executeTest();
+	@Test
+	public void d2() throws Exception {
+		executeTest("d2");
 	}
 
-	public void testD3() throws Exception {
-		executeTest();
+	@Test
+	public void d3() throws Exception {
+		executeTest("d3");
 	}
 
-	public void testE() throws Exception {
-		executeTest();
+	@Test
+	public void e() throws Exception {
+		executeTest("e");
 	}
 
-	public void testE2() throws Exception {
-		executeTest();
+	@Test
+	public void e2() throws Exception {
+		executeTest("e2");
 	}
 
-	public void testE3() throws Exception {
-		executeTest();
+	@Test
+	public void e3() throws Exception {
+		executeTest("e3");
 	}
 
-	public void testProgrammaticListIntrospection() throws Exception {
+	@Test
+	public void programmaticListIntrospection() throws Exception {
 		Method setter = GenericObject.class.getMethod("setResourceList", List.class);
-		assertEquals(Resource.class,
-				GenericCollectionTypeResolver.getCollectionParameterType(new MethodParameter(setter, 0)));
+		assertEquals(
+				Resource.class,
+				GenericCollectionTypeResolver.getCollectionParameterType(new MethodParameter(
+						setter, 0)));
 
 		Method getter = GenericObject.class.getMethod("getResourceList");
 		assertEquals(Resource.class,
 				GenericCollectionTypeResolver.getCollectionReturnType(getter));
 	}
 
-	public void testClassResolution() {
-		assertEquals(String.class, GenericCollectionTypeResolver.getCollectionType(CustomSet.class));
-		assertEquals(String.class, GenericCollectionTypeResolver.getMapKeyType(CustomMap.class));
-		assertEquals(Integer.class, GenericCollectionTypeResolver.getMapValueType(CustomMap.class));
+	@Test
+	public void classResolution() {
+		assertEquals(String.class,
+				GenericCollectionTypeResolver.getCollectionType(CustomSet.class));
+		assertEquals(String.class,
+				GenericCollectionTypeResolver.getMapKeyType(CustomMap.class));
+		assertEquals(Integer.class,
+				GenericCollectionTypeResolver.getMapValueType(CustomMap.class));
 	}
 
-
-	private abstract class CustomSet<T> extends AbstractSet<String> {
+	private static abstract class CustomSet<T> extends AbstractSet<String> {
 	}
 
-
-	private abstract class CustomMap<T> extends AbstractMap<String, Integer> {
+	private static abstract class CustomMap<T> extends AbstractMap<String, Integer> {
 	}
 
-
-	private abstract class OtherCustomMap<T> implements Map<String, Integer> {
+	private static abstract class OtherCustomMap<T> implements Map<String, Integer> {
 	}
 
-
-	private interface Foo {
+	@SuppressWarnings("rawtypes")
+	private static interface Foo {
 
 		Map<String, Integer> a();
 

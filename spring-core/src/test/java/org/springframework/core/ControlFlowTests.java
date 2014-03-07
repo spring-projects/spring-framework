@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,71 +16,57 @@
 
 package org.springframework.core;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson
+ * @author Sam Brannen
  */
-public abstract class AbstractControlFlowTests extends TestCase {
+public class ControlFlowTests {
 
-	protected abstract ControlFlow createControlFlow();
-
-	/*
-	 * Class to test for boolean under(Class)
-	 */
-	public void testUnderClassAndMethod() {
+	@Test
+	public void underClassAndMethod() {
 		new One().test();
 		new Two().testing();
 		new Three().test();
 	}
 
-	/*
-	public void testUnderPackage() {
-		ControlFlow cflow = new ControlFlow();
-		assertFalse(cflow.underPackage("org.springframework.aop"));
-		assertTrue(cflow.underPackage("org.springframework.aop.support"));
-		assertFalse(cflow.underPackage("com.interface21"));
-	}
-	*/
+	static class One {
 
-
-	public class One {
-
-		public void test() {
-			ControlFlow cflow = createControlFlow();
+		void test() {
+			ControlFlow cflow = ControlFlowFactory.createControlFlow();
 			assertTrue(cflow.under(One.class));
-			assertTrue(cflow.under(AbstractControlFlowTests.class));
+			assertTrue(cflow.under(ControlFlowTests.class));
 			assertFalse(cflow.under(Two.class));
 			assertTrue(cflow.under(One.class, "test"));
 			assertFalse(cflow.under(One.class, "hashCode"));
 		}
-
 	}
 
+	static class Two {
 
-	public class Two {
-
-		public void testing() {
-			ControlFlow cflow = createControlFlow();
+		void testing() {
+			ControlFlow cflow = ControlFlowFactory.createControlFlow();
 			assertTrue(cflow.under(Two.class));
-			assertTrue(cflow.under(AbstractControlFlowTests.class));
+			assertTrue(cflow.under(ControlFlowTests.class));
 			assertFalse(cflow.under(One.class));
 			assertFalse(cflow.under(Two.class, "test"));
 			assertTrue(cflow.under(Two.class, "testing"));
 		}
 	}
 
+	static class Three {
 
-	public class Three {
-
-		public void test() {
+		void test() {
 			testing();
 		}
 
 		private void testing() {
-			ControlFlow cflow = createControlFlow();
+			ControlFlow cflow = ControlFlowFactory.createControlFlow();
 			assertTrue(cflow.under(Three.class));
-			assertTrue(cflow.under(AbstractControlFlowTests.class));
+			assertTrue(cflow.under(ControlFlowTests.class));
 			assertFalse(cflow.under(One.class));
 			assertTrue(cflow.under(Three.class, "test"));
 			assertTrue(cflow.under(Three.class, "testing"));
