@@ -310,9 +310,9 @@ class ConfigurationClassParser {
 			throw new IllegalArgumentException("At least one @PropertySource(value) location is required");
 		}
 		for (String location : locations) {
-			Resource resource = this.resourceLoader.getResource(
-					this.environment.resolveRequiredPlaceholders(location));
 			try {
+				Resource resource = this.resourceLoader.getResource(
+						this.environment.resolveRequiredPlaceholders(location));
 				if (!StringUtils.hasText(name) || this.propertySources.containsKey(name)) {
 					// We need to ensure unique names when the property source will
 					// ultimately end up in a composite
@@ -323,7 +323,14 @@ class ConfigurationClassParser {
 					this.propertySources.add(name, new ResourcePropertySource(name, resource));
 				}
 			}
+			catch (IllegalArgumentException ex) {
+				// from resolveRequiredPlaceholders
+				if (!ignoreResourceNotFound) {
+					throw ex;
+				}
+			}
 			catch (FileNotFoundException ex) {
+				// from ResourcePropertySource constructor
 				if (!ignoreResourceNotFound) {
 					throw ex;
 				}
