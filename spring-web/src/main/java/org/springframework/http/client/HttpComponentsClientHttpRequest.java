@@ -70,6 +70,9 @@ final class HttpComponentsClientHttpRequest extends AbstractBufferingClientHttpR
 		return this.httpRequest.getURI();
 	}
 
+	HttpContext getHttpContext() {
+		return httpContext;
+	}
 
 	@Override
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, byte[] bufferedOutput) throws IOException {
