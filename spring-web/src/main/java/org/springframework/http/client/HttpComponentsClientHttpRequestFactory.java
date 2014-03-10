@@ -52,6 +52,7 @@ import org.springframework.util.Assert;
  *
  * @author Oleg Kalnichevski
  * @author Arjen Poutsma
+ * @author Stephane Nicoll
  * @since 3.1
  */
 public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequestFactory, DisposableBean {
@@ -77,7 +78,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * Create a new instance of the {@code HttpComponentsClientHttpRequestFactory}
 	 * with the given {@link HttpClient} instance.
 	 * <p>As of Spring Framework 4.0, the given client is expected to be of type
-	 * CloseableHttpClient (requiring HttpClient 4.3+).
+	 * {@link CloseableHttpClient} (requiring HttpClient 4.3+).
 	 * @param httpClient the HttpClient instance to use for this request factory
 	 */
 	public HttpComponentsClientHttpRequestFactory(HttpClient httpClient) {
@@ -90,7 +91,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
     /**
      * Set the {@code HttpClient} used for
 	 * <p>As of Spring Framework 4.0, the given client is expected to be of type
-	 * CloseableHttpClient (requiring HttpClient 4.3+).
+	 * {@link CloseableHttpClient} (requiring HttpClient 4.3+).
      */
     public void setHttpClient(HttpClient httpClient) {
 		Assert.isInstanceOf(CloseableHttpClient.class, httpClient, "'httpClient' is not of type CloseableHttpClient");
@@ -113,7 +114,29 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	public void setConnectTimeout(int timeout) {
 		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
         this.connectTimeout = timeout;
-		setLegacyConnectionTimeout(getHttpClient(), connectTimeout);
+		setLegacyConnectionTimeout(getHttpClient(), timeout);
+	}
+
+	/**
+	 * Apply the specified connection timeout to deprecated {@link HttpClient}
+	 * implementations.
+	 * <p>As of HttpClient 4.3, default parameters have to be exposed through a
+	 * {@link RequestConfig} instance instead of setting the parameters on the
+	 * client. Unfortunately, this behavior is not backward-compatible and older
+	 * {@link HttpClient} implementations will ignore the {@link RequestConfig}
+	 * object set in the context.
+	 * <p>If the specified client is an older implementation, we set the custom
+	 * connection timeout through the deprecated API. Otherwise, we just return
+	 * as it is set through {@link RequestConfig} with newer clients.
+	 * @param client the client to configure
+	 * @param timeout the custom connection timeout
+	 */
+	@SuppressWarnings("deprecation")
+	private void setLegacyConnectionTimeout(HttpClient client, int timeout) {
+		if (org.apache.http.impl.client.AbstractHttpClient.class.isInstance(client)) {
+			client.getParams().setIntParameter(
+					org.apache.http.params.CoreConnectionPNames.CONNECTION_TIMEOUT, timeout);
+		}
 	}
 
 	/**
@@ -123,8 +146,23 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 */
 	public void setReadTimeout(int timeout) {
 		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
-        this.socketTimeout= timeout;
-		setLegacyReadTimeout(getHttpClient(), socketTimeout);
+        this.socketTimeout = timeout;
+		setLegacySocketTimeout(getHttpClient(), timeout);
+	}
+
+	/**
+	 * Apply the specified socket timeout to deprecated {@link HttpClient}
+	 * implementations. See {@link #setLegacyConnectionTimeout}.
+	 * @param client the client to configure
+	 * @param timeout the custom socket timeout
+	 * @see #setLegacyConnectionTimeout
+	 */
+	@SuppressWarnings("deprecation")
+	private void setLegacySocketTimeout(HttpClient client, int timeout) {
+		if (org.apache.http.impl.client.AbstractHttpClient.class.isInstance(client)) {
+			client.getParams().setIntParameter(
+					org.apache.http.params.CoreConnectionPNames.SO_TIMEOUT, timeout);
+		}
 	}
 
 	/**
@@ -224,43 +262,6 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		return null;
 	}
 
-	/**
-	 * Apply the specified custom connection timeout for deprecated {@link HttpClient}
-	 * instances.
-	 * <p>As from HttpClient 4.3, default parameters have to be set in a
-	 * {@link RequestConfig} instance instead of setting the parameters
-	 * on the client.
-	 * <p>Unfortunately, this behaviour is not backward compatible and older
-	 * {@link HttpClient} implementations will ignore the {@link RequestConfig}
-	 * object set in the context.
-	 * <p>If the specified client is an older implementation, we set the
-	 * custom connection timeout through the deprecated API. Otherwise, we just
-	 * return as it is set per request with newer clients
-	 * @param client the client to handle
-	 * @param connectionTimeout the custom connection timeout
-	 */
-	@SuppressWarnings("deprecation")
-	private void setLegacyConnectionTimeout(HttpClient client, int connectionTimeout) {
-		if (org.apache.http.impl.client.AbstractHttpClient.class.isInstance(client)) {
-			client.getParams().setIntParameter(
-					org.apache.http.params.CoreConnectionPNames.CONNECTION_TIMEOUT, connectionTimeout);
-		}
-	}
-
-	/**
-	 * Apply the specified read  timeout for deprecated {@link HttpClient}
-	 * instances.
-	 * @param client the client to handle
-	 * @param readTimeout the custom read timeout
-	 * @see #setLegacyConnectionTimeout(org.apache.http.client.HttpClient, int)
-	 */
-	@SuppressWarnings("deprecation")
-	private void setLegacyReadTimeout(HttpClient client, int readTimeout) {
-		if (org.apache.http.impl.client.AbstractHttpClient.class.isInstance(client)) {
-			client.getParams().setIntParameter(
-					org.apache.http.params.CoreConnectionPNames.SO_TIMEOUT, readTimeout);
-		}
-	}
 
 	/**
 	 * Shutdown hook that closes the underlying
