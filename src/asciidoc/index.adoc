@@ -9759,11 +9759,15 @@ The SPI to implement type conversion logic is simple and strongly typed:
 ----
 
 To create your own Converter, simply implement the interface above. Parameterize S as
-the type you are converting from, and T as the type you are converting to. For each call
-to convert(S), the source argument is guaranteed to be NOT null. Your Converter may
-throw any unchecked exception if conversion fails. An `IllegalArgumentException` should
-be thrown to report an invalid source value. Take care to ensure your Converter implementation
-is thread-safe.
+the type you are converting from, and T as the type you are converting to. Such converter
+can also be applied transparently if a collection or array of S needs to be converted
+to an array or collection of T, provided that the a collection converter has been
+registered. The `DefaultConversionService` does that by default.
+
+For each call to convert(S), the source argument is guaranteed to be NOT null. Your
+Converter may throw any unchecked exception if conversion fails. An `IllegalArgumentException`
+should be thrown to report an invalid source value. Take care to ensure your Converter
+implementation is thread-safe.
 
 Several converter implementations are provided in the `core.convert.support` package as
 a convenience. These include converters from Strings to Numbers and other common types.
@@ -10014,6 +10018,32 @@ it like you would for any other bean:
 	}
 ----
 
+For most use cases, the `convert` method specifying the _targetType_ can be used but it
+will not work with more complex types such as collection of a parameterized element. If
+you want to convert a list of integers to a list of strings programmatically for
+instance, you need to provide a formal definition of the source and target types.
+
+Hopefully, `TypeDescriptor` provides various options to make that easy:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	DefaultConversionService cs = new DefaultConversionService();
+
+	List<Integer> input = ....
+	cs.convert(input,
+		TypeDescriptor.forObject(input), // List<Integer> type descriptor
+		TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(String.class)));
+----
+
+Note that `DefaultConversionService` registers converters automatically that are
+appropriate for most environments. This includes collection converters, scalar
+converters but also basic object to `String` converters. These converters can
+be registered on any `ConverterRegistry` using the _static_ `addDefaultConverters`
+method.
+
+Concretely, the base converters can be reused and there is no need to create a
+specific converter to convert from a `Collection` of `S` to a `Collection` of `T`.
 
 
 
