@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,15 +34,18 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
  * parameterized type to the target collection's parameterized type if necessary.
  *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
 final class CollectionToCollectionConverter implements ConditionalGenericConverter {
 
 	private final ConversionService conversionService;
 
+
 	public CollectionToCollectionConverter(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
+
 
 	@Override
 	public Set<ConvertiblePair> getConvertibleTypes() {
@@ -60,27 +63,34 @@ final class CollectionToCollectionConverter implements ConditionalGenericConvert
 		if (source == null) {
 			return null;
 		}
-		boolean copyRequired = !targetType.getType().isInstance(source);
 		Collection<?> sourceCollection = (Collection<?>) source;
+
+		// Shortcut if possible...
+		boolean copyRequired = !targetType.getType().isInstance(source);
 		if (!copyRequired && sourceCollection.isEmpty()) {
-			return sourceCollection;
+			return source;
 		}
+		TypeDescriptor elementDesc = targetType.getElementTypeDescriptor();
+		if (elementDesc == null && !copyRequired) {
+			return source;
+		}
+
+		// At this point, we need a collection copy in any case, even if just for finding out about element copies...
 		Collection<Object> target = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
-		if (targetType.getElementTypeDescriptor() == null) {
-			for (Object element : sourceCollection) {
-				target.add(element);
-			}
+		if (elementDesc == null) {
+			target.addAll(sourceCollection);
 		}
 		else {
 			for (Object sourceElement : sourceCollection) {
 				Object targetElement = this.conversionService.convert(sourceElement,
-						sourceType.elementTypeDescriptor(sourceElement), targetType.getElementTypeDescriptor());
+						sourceType.elementTypeDescriptor(sourceElement), elementDesc);
 				target.add(targetElement);
 				if (sourceElement != targetElement) {
 					copyRequired = true;
 				}
 			}
 		}
+
 		return (copyRequired ? target : source);
 	}
 
