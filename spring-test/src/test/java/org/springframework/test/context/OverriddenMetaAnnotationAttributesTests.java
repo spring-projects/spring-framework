@@ -30,7 +30,7 @@ import static org.springframework.test.context.MetaAnnotationUtils.*;
  * Unit tests for {@link MetaAnnotationUtils} that verify support for overridden
  * meta-annotation attributes.
  *
- * <p>See <a href="https://jira.springsource.org/browse/SPR-10181">SPR-10181</a>.
+ * <p>See <a href="https://jira.spring.io/browse/SPR-10181">SPR-10181</a>.
  *
  * @author Sam Brannen
  * @since 4.0

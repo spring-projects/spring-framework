@@ -50,7 +50,7 @@ public class DefinitionMetadataEqualsHashCodeTests {
 
 	/**
 	 * @since 3.2.8
-	 * @see <a href="https://jira.springsource.org/browse/SPR-11420">SPR-11420</a>
+	 * @see <a href="https://jira.spring.io/browse/SPR-11420">SPR-11420</a>
 	 */
 	@Test
 	public void rootBeanDefinitionAndMethodOverridesWithDifferentOverloadedValues() {

@@ -33,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Integration tests that verify the behavior requested in
- * <a href="https://jira.springsource.org/browse/SPR-9645">SPR-9645</a>.
+ * <a href="https://jira.spring.io/browse/SPR-9645">SPR-9645</a>.
  *
  * @author Sam Brannen
  * @since 3.2

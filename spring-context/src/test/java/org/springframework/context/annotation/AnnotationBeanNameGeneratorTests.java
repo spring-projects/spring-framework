@@ -108,7 +108,7 @@ public class AnnotationBeanNameGeneratorTests {
 
 	/**
 	 * @since 4.0.1
-	 * @see https://jira.springsource.org/browse/SPR-11360
+	 * @see https://jira.spring.io/browse/SPR-11360
 	 */
 	@Test
 	public void generateBeanNameFromComposedControllerAnnotationWithoutName() {
@@ -121,7 +121,7 @@ public class AnnotationBeanNameGeneratorTests {
 
 	/**
 	 * @since 4.0.1
-	 * @see https://jira.springsource.org/browse/SPR-11360
+	 * @see https://jira.spring.io/browse/SPR-11360
 	 */
 	@Test
 	public void generateBeanNameFromComposedControllerAnnotationWithBlankName() {
@@ -134,7 +134,7 @@ public class AnnotationBeanNameGeneratorTests {
 
 	/**
 	 * @since 4.0.1
-	 * @see https://jira.springsource.org/browse/SPR-11360
+	 * @see https://jira.spring.io/browse/SPR-11360
 	 */
 	@Test
 	public void generateBeanNameFromComposedControllerAnnotationWithStringValue() {

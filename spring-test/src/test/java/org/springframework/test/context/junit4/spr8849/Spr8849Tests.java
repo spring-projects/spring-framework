@@ -22,7 +22,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 /**
  * Test suite to investigate claims raised in
- * <a href="https://jira.springsource.org/browse/SPR-8849">SPR-8849</a>.
+ * <a href="https://jira.spring.io/browse/SPR-8849">SPR-8849</a>.
  *
  * <p>By using a SpEL expression to generate a random {@code id} for the
  * embedded database (see {@code datasource-config.xml}), we ensure that each

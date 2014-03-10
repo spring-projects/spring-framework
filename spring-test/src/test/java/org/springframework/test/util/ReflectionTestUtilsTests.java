@@ -112,7 +112,7 @@ public class ReflectionTestUtilsTests {
 	}
 
 	/**
-	 * Verifies behavior requested in <a href="https://jira.springsource.org/browse/SPR-9571">SPR-9571</a>.
+	 * Verifies behavior requested in <a href="https://jira.spring.io/browse/SPR-9571">SPR-9571</a>.
 	 */
 	@Test
 	public void setFieldOnLegacyEntityWithSideEffectsInToString() {

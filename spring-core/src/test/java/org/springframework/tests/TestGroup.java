@@ -64,7 +64,7 @@ public enum TestGroup {
 	/**
 	 * Tests that require custom compilation beyond that of the standard JDK. This helps to
 	 * allow running tests that will otherwise fail when using JDK >  1.8 b88. See
-	 * <a href="https://jira.springsource.org/browse/SPR-10558">SPR-10558</a>
+	 * <a href="https://jira.spring.io/browse/SPR-10558">SPR-10558</a>
 	 */
 	CUSTOM_COMPILATION;
 

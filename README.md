@@ -82,7 +82,7 @@ The Spring Framework is released under version 2.0 of the [Apache License][].
 [spring-mvc tag]: http://stackoverflow.com/questions/tagged/spring-mvc
 [Stack Overflow]: http://stackoverflow.com/faq
 [Commercial support]: http://spring.io/services
-[Spring Framework JIRA]: http://jira.springsource.org/browse/SPR
+[Spring Framework JIRA]: https://jira.spring.io/browse/SPR
 [the lifecycle of an issue]: https://github.com/spring-projects/spring-framework/wiki/The-Lifecycle-of-an-Issue
 [spring-framework-issues]: https://github.com/spring-projects/spring-framework-issues#readme
 [readme]: https://github.com/spring-projects/spring-framework-issues#readme

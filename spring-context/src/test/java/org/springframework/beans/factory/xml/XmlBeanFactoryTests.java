@@ -1240,8 +1240,8 @@ public final class XmlBeanFactoryTests {
 
 	/**
 	 * @since 3.2.8 and 4.0.2
-	 * @see <a href="https://jira.springsource.org/browse/SPR-10785">SPR-10785</a> and <a
-	 *      href="https://jira.springsource.org/browse/SPR-11420">SPR-11420</a>
+	 * @see <a href="https://jira.spring.io/browse/SPR-10785">SPR-10785</a> and <a
+	 *      href="https://jira.spring.io/browse/SPR-11420">SPR-11420</a>
 	 */
 	@Test
 	public void methodInjectedBeanMustBeOfSameEnhancedCglibSubclassTypeAcrossBeanFactories() {

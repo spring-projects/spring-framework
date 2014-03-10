@@ -10129,8 +10129,8 @@ Consider `DateFormatter` as an example `Formatter` implementation:
 	}
 ----
 
-The Spring team welcomes community-driven Formatter contributions; see
-http://jira.springframework.org[http://jira.springframework.org] to contribute.
+The Spring team welcomes community-driven `Formatter` contributions; see
+https://jira.spring.io/browse/SPR[jira.spring.io] to contribute.
 
 
 
@@ -25404,7 +25404,7 @@ Spring JDBC embedded database support can be extended in two ways:
   connection pool, to manage embedded database connections.
 
 You are encouraged to contribute back extensions to the Spring community at
-jira.springframework.org[jira.springframework.org].
+https://jira.spring.io/browse/SPR[jira.spring.io].
 
 
 
@@ -45786,7 +45786,7 @@ below).
 The default key generation strategy changed with the release of Spring 4.0. Earlier
 versions of Spring used a key generation strategy that, for multiple key parameters,
 only considered the `hashCode()` of parameters and not `equals()`; this could cause
-unexpected key collisions (see https://jira.springsource.org/browse/SPR-10237[SPR-10237]
+unexpected key collisions (see https://jira.spring.io/browse/SPR-10237[SPR-10237]
 for background). The new 'SimpleKeyGenerator' uses a compound key for such scenarios.
 
 If you want to keep using the previous key strategy, you can configure the deprecated

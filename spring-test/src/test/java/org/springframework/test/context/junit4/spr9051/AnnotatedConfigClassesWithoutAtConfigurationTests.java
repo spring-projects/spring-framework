@@ -32,7 +32,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
  * This set of tests refutes the claims made in
- * <a href="https://jira.springsource.org/browse/SPR-9051" target="_blank">SPR-9051</a>.
+ * <a href="https://jira.spring.io/browse/SPR-9051" target="_blank">SPR-9051</a>.
  *
  * <p><b>The Claims</b>:
  *

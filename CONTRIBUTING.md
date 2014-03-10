@@ -305,7 +305,7 @@ against the branch used to submit your pull request. In other words, you do not
 need to issue a new pull request when asked to make changes.
 
 [help documentation]: http://help.github.com/send-pull-requests
-[JIRA issue tracker]: https://jira.springsource.org/browse/SPR
+[JIRA issue tracker]: https://jira.spring.io/browse/SPR
 [spring-framework-contrib]: https://groups.google.com/forum/#!forum/spring-framework-contrib
 [SpringSource CLA form]: https://support.springsource.com/spring_committer_signup
 [fork-and-edit]: https://github.com/blog/844-forking-with-the-edit-button

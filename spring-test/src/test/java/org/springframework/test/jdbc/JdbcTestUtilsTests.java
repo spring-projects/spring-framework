@@ -119,7 +119,7 @@ public class JdbcTestUtilsTests {
 	}
 
 	/**
-	 * See <a href="https://jira.springsource.org/browse/SPR-10330">SPR-10330</a>
+	 * See <a href="https://jira.spring.io/browse/SPR-10330">SPR-10330</a>
 	 * @since 4.0
 	 */
 	@Test
