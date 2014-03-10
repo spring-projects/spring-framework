@@ -397,7 +397,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 
 		if (SimpMessageType.CONNECT.equals(messageType)) {
-			logger.debug("Processing CONNECT in session=" + sessionId);
+			logger.debug("Processing CONNECT in session=" + sessionId +
+					", number of connections=" + this.connectionHandlers.size());
 			headers.setLogin(this.clientLogin);
 			headers.setPasscode(this.clientPasscode);
 			if (getVirtualHost() != null) {

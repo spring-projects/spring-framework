@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -199,6 +199,10 @@ public class SubProtocolWebSocketHandler
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 		this.sessions.put(session.getId(), session);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Started WebSocket session=" + session.getId() +
+					", number of sessions=" + this.sessions.size());
+		}
 		findProtocolHandler(session).afterSessionStarted(session, this.clientInboundChannel);
 	}
 
