@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -39,6 +38,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
+import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
 
 /**
@@ -111,8 +111,8 @@ public class CollectionToCollectionConverterTests {
 	@Test
 	public void collectionToObjectInteraction() throws Exception {
 		List<List<String>> list = new ArrayList<List<String>>();
-		list.add(Arrays.asList("9", "12"));
-		list.add(Arrays.asList("37", "23"));
+		list.add(asList("9", "12"));
+		list.add(asList("37", "23"));
 		conversionService.addConverter(new CollectionToObjectConverter(conversionService));
 		assertTrue(conversionService.canConvert(List.class, List.class));
 		assertSame(list, conversionService.convert(list, List.class));
@@ -122,20 +122,20 @@ public class CollectionToCollectionConverterTests {
 	@SuppressWarnings("unchecked")
 	public void arrayCollectionToObjectInteraction() throws Exception {
 		List<String>[] array = new List[2];
-		array[0] = Arrays.asList("9", "12");
-		array[1] = Arrays.asList("37", "23");
+		array[0] = asList("9", "12");
+		array[1] = asList("37", "23");
 		conversionService.addConverter(new ArrayToCollectionConverter(conversionService));
 		conversionService.addConverter(new CollectionToObjectConverter(conversionService));
 		assertTrue(conversionService.canConvert(String[].class, List.class));
-		assertEquals(Arrays.asList(array), conversionService.convert(array, List.class));
+		assertEquals(asList(array), conversionService.convert(array, List.class));
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
 	public void objectToCollection() throws Exception {
 		List<List<String>> list = new ArrayList<List<String>>();
-		list.add(Arrays.asList("9", "12"));
-		list.add(Arrays.asList("37", "23"));
+		list.add(asList("9", "12"));
+		list.add(asList("37", "23"));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		conversionService.addConverter(new ObjectToCollectionConverter(conversionService));
 		conversionService.addConverter(new CollectionToObjectConverter(conversionService));
@@ -155,8 +155,8 @@ public class CollectionToCollectionConverterTests {
 	@SuppressWarnings("unchecked")
 	public void stringToCollection() throws Exception {
 		List<List<String>> list = new ArrayList<List<String>>();
-		list.add(Arrays.asList("9,12"));
-		list.add(Arrays.asList("37,23"));
+		list.add(asList("9,12"));
+		list.add(asList("37,23"));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		conversionService.addConverter(new StringToCollectionConverter(conversionService));
 		conversionService.addConverter(new ObjectToCollectionConverter(conversionService));
@@ -319,6 +319,16 @@ public class CollectionToCollectionConverterTests {
 				aSource, TypeDescriptor.forObject(aSource), TypeDescriptor.forObject(new ArrayList()));
 		assertTrue(myConverted instanceof ArrayList<?>);
 		assertEquals(aSource.size(), ((ArrayList<?>) myConverted).size());
+	}
+
+	public Collection<?> wildCardCollection = Collections.emptyList();
+
+	@Test
+	public void listToCollectionNoCopyRequired() throws NoSuchFieldException {
+		List<?> input = new ArrayList<String>(asList("foo", "bar"));
+		assertSame(input, conversionService.convert(input,
+				TypeDescriptor.forObject(input),
+				new TypeDescriptor(getClass().getField("wildCardCollection"))));
 	}
 
 }
