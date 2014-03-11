@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 
 /**
  * Decodes STOMP frames from a {@link ByteBuffer}. If the buffer does not contain
@@ -151,9 +152,17 @@ public class StompDecoder {
 	}
 
 	private byte[] readPayload(ByteBuffer buffer, MultiValueMap<String, String> headers) {
-		String contentLengthString = headers.getFirst("content-length");
-		if (contentLengthString != null) {
-			int contentLength = Integer.valueOf(contentLengthString);
+		Integer contentLength = null;
+		if (headers.containsKey("content-length")) {
+			String rawContentLength = headers.getFirst("content-length");
+			try {
+				contentLength = Integer.valueOf(rawContentLength);
+			}
+			catch (NumberFormatException ex) {
+				logger.warn("Ignoring invalid content-length header value: '" + rawContentLength + "'");
+			}
+		}
+		if (contentLength != null && contentLength >= 0) {
 			if (buffer.remaining() > contentLength) {
 				byte[] payload = new byte[contentLength];
 				buffer.get(payload);

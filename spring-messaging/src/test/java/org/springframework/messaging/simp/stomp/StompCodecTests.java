@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,6 +105,36 @@ public class StompCodecTests {
 
 		String bodyText = new String(frame.getPayload());
 		assertEquals("The body of the message", bodyText);
+	}
+
+	// SPR-11528
+
+	@Test
+	public void decodeFrameWithInvalidContentLength() {
+		Message<byte[]> frame = decode("SEND\ncontent-length:-1\n\nThe body of the message\0");
+		StompHeaderAccessor headers = StompHeaderAccessor.wrap(frame);
+
+		assertEquals(StompCommand.SEND, headers.getCommand());
+
+		assertEquals(1, headers.toStompHeaderMap().size());
+		assertEquals(Integer.valueOf(-1), headers.getContentLength());
+
+		String bodyText = new String(frame.getPayload());
+		assertEquals("The body of the message", bodyText);
+	}
+
+	@Test
+	public void decodeFrameWithContentLengthZero() {
+		Message<byte[]> frame = decode("SEND\ncontent-length:0\n\n\0");
+		StompHeaderAccessor headers = StompHeaderAccessor.wrap(frame);
+
+		assertEquals(StompCommand.SEND, headers.getCommand());
+
+		assertEquals(1, headers.toStompHeaderMap().size());
+		assertEquals(Integer.valueOf(0), headers.getContentLength());
+
+		String bodyText = new String(frame.getPayload());
+		assertEquals("", bodyText);
 	}
 
 	@Test
