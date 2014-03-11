@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,34 +16,30 @@
 
 package org.springframework.web.servlet.support;
 
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.util.WebUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for testing {@link AbstractFlashMapManager} methods.
  *
  * @author Rossen Stoyanchev
  */
-public class AbstractFlashMapManagerTests {
+public class FlashMapManagerTests {
 
 	private TestFlashMapManager flashMapManager;
 
@@ -264,6 +260,8 @@ public class AbstractFlashMapManagerTests {
 		assertEquals("/once/only", flashMap.getTargetRequestPath());
 	}
 
+	// SPR-9657, SPR-11504
+
 	@Test
 	public void saveOutputFlashMapDecodeParameters() throws Exception {
 		this.request.setCharacterEncoding("UTF-8");
@@ -274,10 +272,12 @@ public class AbstractFlashMapManagerTests {
 		flashMap.addTargetRequestParam("key", "%D0%90%D0%90");
 		flashMap.addTargetRequestParam("key", "%D0%91%D0%91");
 		flashMap.addTargetRequestParam("key", "%D0%92%D0%92");
+		flashMap.addTargetRequestParam("%3A%2F%3F%23%5B%5D%40", "value");
 		this.flashMapManager.saveOutputFlashMap(flashMap, this.request, this.response);
 
-		assertEquals(Arrays.asList("\u0410\u0410", "\u0411\u0411", "\u0412\u0412"),
-				flashMap.getTargetRequestParams().get("key"));
+		MultiValueMap<String,String> targetRequestParams = flashMap.getTargetRequestParams();
+		assertEquals(Arrays.asList("\u0410\u0410", "\u0411\u0411", "\u0412\u0412"), targetRequestParams.get("key"));
+		assertEquals(Arrays.asList("value"), targetRequestParams.get(":/?#[]@"));
 	}
 
 
@@ -303,8 +303,7 @@ public class AbstractFlashMapManagerTests {
 		}
 
 		@Override
-		protected void updateFlashMaps(List<FlashMap> flashMaps, HttpServletRequest request,
-				HttpServletResponse response) {
+		protected void updateFlashMaps(List<FlashMap> flashMaps, HttpServletRequest request, HttpServletResponse response) {
 			this.flashMaps = flashMaps;
 		}
 	}
