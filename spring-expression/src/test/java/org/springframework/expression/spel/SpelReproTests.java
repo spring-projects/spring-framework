@@ -1788,7 +1788,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		SPR11142 rootObject = new SPR11142();
 		Expression expression = parser.parseExpression("something");
 		thrown.expect(SpelEvaluationException.class);
-		thrown.expectMessage("property 'something' cannot be found");
+		thrown.expectMessage("'something' cannot be found");
 		expression.getValue(context, rootObject);
 	}
 

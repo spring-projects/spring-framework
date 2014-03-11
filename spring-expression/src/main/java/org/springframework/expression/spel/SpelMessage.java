@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.expression.spel;
 import java.text.MessageFormat;
 
 /**
- * Contains all the messages that can be produced by the Spring Expression Language. Each
- * message has a kind (info, warn, error) and a code number. Tests can be written to
+ * Contains all the messages that can be produced by the Spring Expression Language.
+ * Each message has a kind (info, warn, error) and a code number. Tests can be written to
  * expect particular code numbers rather than particular text, enabling the message text
  * to more easily be modified and the tests to run successfully in different locales.
  *
@@ -30,8 +30,8 @@ import java.text.MessageFormat;
  * EL1004E: (pos 34): Type cannot be found 'String'
  * </pre>
  *
- * The prefix captures the code and the error kind, whilst the position is
- * included if it is known.
+ * The prefix captures the code and the error kind, whilst the position is included
+ * if it is known.
  *
  * @author Andy Clement
  * @since 3.0
@@ -42,12 +42,10 @@ public enum SpelMessage {
 			"Type conversion problem, cannot convert from {0} to {1}"),
 
 	CONSTRUCTOR_NOT_FOUND(Kind.ERROR, 1002,
-			"Constructor call: No suitable constructor found on type {0} for " +
-			"arguments {1}"),
+			"Constructor call: No suitable constructor found on type {0} for arguments {1}"),
 
 	CONSTRUCTOR_INVOCATION_PROBLEM(Kind.ERROR, 1003,
-			"A problem occurred whilst attempting to construct an object of type " +
-			"''{0}'' using arguments ''{1}''"),
+			"A problem occurred whilst attempting to construct an object of type ''{0}'' using arguments ''{1}''"),
 
 	METHOD_NOT_FOUND(Kind.ERROR, 1004,
 			"Method call: Method {0} cannot be found on {1} type"),
@@ -59,16 +57,16 @@ public enum SpelMessage {
 			"The function ''{0}'' could not be found"),
 
 	PROPERTY_OR_FIELD_NOT_READABLE_ON_NULL(Kind.ERROR, 1007,
-			"Field or property ''{0}'' cannot be found on null"),
+			"Property or field ''{0}'' cannot be found on null"),
 
 	PROPERTY_OR_FIELD_NOT_READABLE(Kind.ERROR, 1008,
-			"Field or property ''{0}'' cannot be found on object of type ''{1}''"),
+			"Property or field ''{0}'' cannot be found on object of type ''{1}'' - maybe not public?"),
 
 	PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL(Kind.ERROR, 1009,
-			"Field or property ''{0}'' cannot be set on null"),
+			"Property or field ''{0}'' cannot be set on null"),
 
 	PROPERTY_OR_FIELD_NOT_WRITABLE(Kind.ERROR, 1010,
-			"Field or property ''{0}'' cannot be set on object of type ''{1}''"),
+			"Property or field ''{0}'' cannot be set on object of type ''{1}'' - maybe not public?"),
 
 	METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED(Kind.ERROR, 1011,
 			"Method call: Attempted to call method {0} on null context object"),
@@ -80,8 +78,7 @@ public enum SpelMessage {
 			"Cannot compare instances of {0} and {1}"),
 
 	INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION(Kind.ERROR, 1014,
-			"Incorrect number of arguments for function, {0} supplied but " +
-			"function takes {1}"),
+			"Incorrect number of arguments for function, {0} supplied but function takes {1}"),
 
 	INVALID_TYPE_FOR_SELECTION(Kind.ERROR, 1015,
 			"Cannot perform selection on input data of type ''{0}''"),
@@ -99,20 +96,16 @@ public enum SpelMessage {
 			"Projection is not supported on the type ''{0}''"),
 
 	ARGLIST_SHOULD_NOT_BE_EVALUATED(Kind.ERROR, 1020,
-			"The argument list of a lambda expression should never have getValue() " +
-			"called upon it"),
+			"The argument list of a lambda expression should never have getValue() called upon it"),
 
 	EXCEPTION_DURING_PROPERTY_READ(Kind.ERROR, 1021,
-			"A problem occurred whilst attempting to access the property " +
-			"''{0}'': ''{1}''"),
+			"A problem occurred whilst attempting to access the property ''{0}'': ''{1}''"),
 
 	FUNCTION_REFERENCE_CANNOT_BE_INVOKED(Kind.ERROR, 1022,
-			"The function ''{0}'' mapped to an object of type ''{1}'' which " +
-			"cannot be invoked"),
+			"The function ''{0}'' mapped to an object of type ''{1}'' which cannot be invoked"),
 
 	EXCEPTION_DURING_FUNCTION_CALL(Kind.ERROR, 1023,
-			"A problem occurred whilst attempting to invoke the " +
-			"function ''{0}'': ''{1}''"),
+			"A problem occurred whilst attempting to invoke the function ''{0}'': ''{1}''"),
 
 	ARRAY_INDEX_OUT_OF_BOUNDS(Kind.ERROR, 1024,
 			"The array has ''{0}'' elements, index ''{1}'' is invalid"),
@@ -127,16 +120,13 @@ public enum SpelMessage {
 			"Indexing into type ''{0}'' is not supported"),
 
 	INSTANCEOF_OPERATOR_NEEDS_CLASS_OPERAND(Kind.ERROR, 1028,
-			"The operator 'instanceof' needs the right operand to be a class, " +
-			"not a ''{0}''"),
+			"The operator 'instanceof' needs the right operand to be a class, not a ''{0}''"),
 
 	EXCEPTION_DURING_METHOD_INVOCATION(Kind.ERROR, 1029,
-			"A problem occurred when trying to execute method ''{0}'' on object " +
-			"of type ''{1}'': ''{2}''"),
+			"A problem occurred when trying to execute method ''{0}'' on object of type ''{1}'': ''{2}''"),
 
 	OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES(Kind.ERROR, 1030,
-			"The operator ''{0}'' is not supported between objects of type " +
-			"''{1}'' and ''{2}''"),
+			"The operator ''{0}'' is not supported between objects of type ''{1}'' and ''{2}''"),
 
 	PROBLEM_LOCATING_METHOD(Kind.ERROR, 1031,
 			"Problem locating method {0} on type {1}"),
@@ -145,8 +135,7 @@ public enum SpelMessage {
 			"setValue(ExpressionState, Object) not supported for ''{0}''"),
 
 	MULTIPLE_POSSIBLE_METHODS(Kind.ERROR, 1033,
-			"Method call of ''{0}'' is ambiguous, supported type conversions " +
-			"allow multiple variants to match"),
+			"Method call of ''{0}'' is ambiguous, supported type conversions allow multiple variants to match"),
 
 	EXCEPTION_DURING_PROPERTY_WRITE(Kind.ERROR, 1034,
 			"A problem occurred whilst attempting to set the property ''{0}'': {1}"),
@@ -171,8 +160,7 @@ public enum SpelMessage {
 			"The value ''{0}'' cannot be parsed as a double"),
 
 	MORE_INPUT(Kind.ERROR,1041,
-			"After parsing a valid expression, there is still more data in " +
-			"the expression: ''{0}''"),
+			"After parsing a valid expression, there is still more data in the expression: ''{0}''"),
 
 	RIGHT_OPERAND_PROBLEM(Kind.ERROR, 1042,
 			"Problem parsing right operand"),
@@ -263,9 +251,12 @@ public enum SpelMessage {
 	MISSING_SELECTION_EXPRESSION(Kind.ERROR, 1071,
 			"A required selection expression has not been specified");
 
-	private Kind kind;
-	private int code;
-	private String message;
+
+	private final Kind kind;
+
+	private final int code;
+
+	private final String message;
 
 
 	private SpelMessage(Kind kind, int code, String message) {
@@ -276,10 +267,9 @@ public enum SpelMessage {
 
 
 	/**
-	 * Produce a complete message including the prefix, the position (if known) and with the inserts applied to the
-	 * message.
-	 *
-	 * @param pos the position, if less than zero it is ignored and not included in the message
+	 * Produce a complete message including the prefix, the position (if known)
+	 * and with the inserts applied to the message.
+	 * @param pos the position (ignored and not included in the message if less than 0)
 	 * @param inserts the inserts to put into the formatted message
 	 * @return a formatted message
 	 */
@@ -300,8 +290,6 @@ public enum SpelMessage {
 	}
 
 
-	public static enum Kind {
-		INFO, WARNING, ERROR
-	}
+	public static enum Kind { INFO, WARNING, ERROR }
 
 }
