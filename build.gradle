@@ -547,8 +547,8 @@ project("spring-orm-hibernate4") {
 		provided(project(":spring-jdbc"))
 		provided(project(":spring-tx"))
 		optional(project(":spring-web"))
-		optional("org.hibernate:hibernate-core:4.2.8.Final")
-		optional("org.hibernate:hibernate-entitymanager:4.2.8.Final")
+		optional("org.hibernate:hibernate-core:4.2.10.Final")
+		optional("org.hibernate:hibernate-entitymanager:4.2.10.Final")
 		optional("javax.servlet:servlet-api:2.5")
 	}
 }
@@ -678,7 +678,7 @@ project("spring-test") {
 		optional(project(":spring-webmvc"))
 		optional(project(":spring-webmvc-portlet"))
 		optional("junit:junit:${junitVersion}")
-		optional("org.testng:testng:6.8.7")
+		optional("org.testng:testng:6.8.8")
 		optional("javax.inject:javax.inject:1")
 		optional("javax.servlet:servlet-api:2.5")
 		optional("javax.servlet.jsp:jsp-api:2.1")
