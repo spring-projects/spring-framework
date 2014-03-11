@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,9 +42,11 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Simple PropertyAccessor that uses reflection to access properties for reading and writing.
- * A property can be accessed if it is accessible as a field on the object or through a
- * getter (if being read) or a setter (if being written).
+ * Simple {@link PropertyAccessor} that uses reflection to access properties
+ * for reading and writing.
+ *
+ * <p>A property can be accessed through a public getter method (when being read)
+ * or a public setter method (when being written), and also as a public field.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -92,8 +94,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		}
 		Method method = findGetterForProperty(name, type, target);
 		if (method != null) {
-			// Treat it like a property
-			// The readerCache will only contain gettable properties (let's not worry about setters for now)
+			// Treat it like a property...
+			// The readerCache will only contain gettable properties (let's not worry about setters for now).
 			Property property = new Property(type, method, null);
 			TypeDescriptor typeDescriptor = new TypeDescriptor(property);
 			this.readerCache.put(cacheKey, new InvokerPair(method, typeDescriptor));
@@ -134,8 +136,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 				method = findGetterForProperty(name, type, target);
 				if (method != null) {
 					// TODO remove the duplication here between canRead and read
-					// Treat it like a property
-					// The readerCache will only contain gettable properties (let's not worry about setters for now)
+					// Treat it like a property...
+					// The readerCache will only contain gettable properties (let's not worry about setters for now).
 					Property property = new Property(type, method, null);
 					TypeDescriptor typeDescriptor = new TypeDescriptor(property);
 					invoker = new InvokerPair(method, typeDescriptor);
@@ -347,6 +349,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	private Method findMethodForProperty(String[] methodSuffixes, String prefix, Class<?> clazz,
 			boolean mustBeStatic, int numberOfParams, Set<Class<?>> requiredReturnTypes) {
+
 		Method[] methods = getSortedClassMethods(clazz);
 		for (String methodSuffix : methodSuffixes) {
 			for (Method method : methods) {
@@ -401,7 +404,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	}
 
 	/**
-	 * Find a field of a certain name on a specified class
+	 * Find a field of a certain name on a specified class.
 	 */
 	protected Field findField(String name, Class<?> clazz, boolean mustBeStatic) {
 		Field[] fields = clazz.getFields();

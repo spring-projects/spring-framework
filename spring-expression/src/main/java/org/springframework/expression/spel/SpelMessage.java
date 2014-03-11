@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,10 +42,10 @@ public enum SpelMessage {
 	METHOD_NOT_FOUND(Kind.ERROR, 1004, "Method call: Method {0} cannot be found on {1} type"), //
 	TYPE_NOT_FOUND(Kind.ERROR, 1005, "Type cannot be found ''{0}''"), //
 	FUNCTION_NOT_DEFINED(Kind.ERROR, 1006, "The function ''{0}'' could not be found"), //
-	PROPERTY_OR_FIELD_NOT_READABLE_ON_NULL(Kind.ERROR, 1007, "Field or property ''{0}'' cannot be found on null"), //
-	PROPERTY_OR_FIELD_NOT_READABLE(Kind.ERROR, 1008, "Field or property ''{0}'' cannot be found on object of type ''{1}''"), //
-	PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL(Kind.ERROR, 1009, "Field or property ''{0}'' cannot be set on null"), //
-	PROPERTY_OR_FIELD_NOT_WRITABLE(Kind.ERROR, 1010, "Field or property ''{0}'' cannot be set on object of type ''{1}''"), //
+	PROPERTY_OR_FIELD_NOT_READABLE_ON_NULL(Kind.ERROR, 1007, "Property or field ''{0}'' cannot be found on null"), //
+	PROPERTY_OR_FIELD_NOT_READABLE(Kind.ERROR, 1008, "Property or field ''{0}'' cannot be found on object of type ''{1}'' - maybe not public?"), //
+	PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL(Kind.ERROR, 1009, "Property or field ''{0}'' cannot be set on null"), //
+	PROPERTY_OR_FIELD_NOT_WRITABLE(Kind.ERROR, 1010, "Property or field ''{0}'' cannot be set on object of type ''{1}'' - maybe not public?"), //
 	METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED(Kind.ERROR, 1011, "Method call: Attempted to call method {0} on null context object"), //
 	CANNOT_INDEX_INTO_NULL_VALUE(Kind.ERROR, 1012, "Cannot index into a null value"),
 	NOT_COMPARABLE(Kind.ERROR, 1013, "Cannot compare instances of {0} and {1}"), //
