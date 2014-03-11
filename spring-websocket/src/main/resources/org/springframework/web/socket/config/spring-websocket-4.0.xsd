@@ -236,7 +236,7 @@
                 ]]></xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
-        <xsd:attribute name="relay-port" type="xsd:int">
+        <xsd:attribute name="relay-port" type="xsd:string">
             <xsd:annotation>
                 <xsd:documentation source="java:org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler"><![CDATA[
 	The STOMP message broker port.
