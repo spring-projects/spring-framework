@@ -16,12 +16,10 @@
 
 package org.springframework.web.servlet.support;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -305,8 +303,7 @@ public class FlashMapManagerTests {
 		}
 
 		@Override
-		protected void updateFlashMaps(List<FlashMap> flashMaps, HttpServletRequest request,
-				HttpServletResponse response) {
+		protected void updateFlashMaps(List<FlashMap> flashMaps, HttpServletRequest request, HttpServletResponse response) {
 			this.flashMaps = flashMaps;
 		}
 	}

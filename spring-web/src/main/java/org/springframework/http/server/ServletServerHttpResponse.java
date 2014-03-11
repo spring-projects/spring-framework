@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpHeaders;
@@ -116,11 +115,12 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 		}
 	}
 
+
 	/**
 	 * Extends HttpHeaders with the ability to look up headers already present in
 	 * the underlying HttpServletResponse.
 	 *
-	 * The intent is merely to expose what is available through the HttpServletResponse
+	 * <p>The intent is merely to expose what is available through the HttpServletResponse
 	 * i.e. the ability to look up specific header values by name. All other
 	 * map-related operations (e.g. iteration, removal, etc) apply only to values
 	 * added directly through HttpHeaders methods.
@@ -144,8 +144,8 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 
 		@Override
 		public List<String> get(Object key) {
+			Assert.isInstanceOf(String.class, key, "Key must be a String-based header name");
 
-			Assert.isInstanceOf(String.class, key, "key must be a String-based header name");
 			Collection<String> values1 = servletResponse.getHeaders((String) key);
 			boolean isEmpty1 = CollectionUtils.isEmpty(values1);
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.config.annotation;
 
 import org.springframework.util.PathMatcher;
@@ -29,10 +30,15 @@ import org.springframework.web.util.UrlPathHelper;
 public class PathMatchConfigurer {
 
 	private Boolean useSuffixPatternMatch;
+
 	private Boolean useTrailingSlashMatch;
+
 	private Boolean useRegisteredSuffixPatternMatch;
+
 	private UrlPathHelper urlPathHelper;
+
 	private PathMatcher pathMatcher;
+
 
 	/**
 	 * Whether to use suffix pattern match (".*") when matching patterns to
@@ -95,23 +101,25 @@ public class PathMatchConfigurer {
 		return this;
 	}
 
+
 	public Boolean isUseSuffixPatternMatch() {
-		return useSuffixPatternMatch;
+		return this.useSuffixPatternMatch;
 	}
 
 	public Boolean isUseTrailingSlashMatch() {
-		return useTrailingSlashMatch;
+		return this.useTrailingSlashMatch;
 	}
 
 	public Boolean isUseRegisteredSuffixPatternMatch() {
-		return useRegisteredSuffixPatternMatch;
+		return this.useRegisteredSuffixPatternMatch;
 	}
 
 	public UrlPathHelper getUrlPathHelper() {
-		return urlPathHelper;
+		return this.urlPathHelper;
 	}
 
 	public PathMatcher getPathMatcher() {
-		return pathMatcher;
+		return this.pathMatcher;
 	}
+
 }

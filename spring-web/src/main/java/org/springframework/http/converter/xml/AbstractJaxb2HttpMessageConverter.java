@@ -31,6 +31,7 @@ import org.springframework.util.Assert;
  * that use JAXB2. Creates {@link JAXBContext} object lazily.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 3.0
  */
 public abstract class AbstractJaxb2HttpMessageConverter<T> extends AbstractXmlHttpMessageConverter<T> {
@@ -61,8 +62,8 @@ public abstract class AbstractJaxb2HttpMessageConverter<T> extends AbstractXmlHt
 	 * Customize the {@link Marshaller} created by this
 	 * message converter before using it to write the object to the output.
 	 * @param marshaller the marshaller to customize
-	 * @see #createMarshaller(Class)
 	 * @since 4.0.3
+	 * @see #createMarshaller(Class)
 	 */
 	protected void customizeMarshaller(Marshaller marshaller) {
 	}
@@ -90,8 +91,8 @@ public abstract class AbstractJaxb2HttpMessageConverter<T> extends AbstractXmlHt
 	 * Customize the {@link Unmarshaller} created by this
 	 * message converter before using it to read the object from the input.
 	 * @param unmarshaller the unmarshaller to customize
-	 * @see #createUnmarshaller(Class)
 	 * @since 4.0.3
+	 * @see #createUnmarshaller(Class)
 	 */
 	protected void customizeUnmarshaller(Unmarshaller unmarshaller) {
 	}

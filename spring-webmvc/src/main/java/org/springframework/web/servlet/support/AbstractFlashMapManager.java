@@ -20,12 +20,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
@@ -43,13 +43,14 @@ import org.springframework.web.util.UrlPathHelper;
  */
 public abstract class AbstractFlashMapManager implements FlashMapManager {
 
+	private static final Object writeLock = new Object();
+
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private int flashMapTimeout = 180;
 
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
-	private static final Object writeLock = new Object();
 
 	/**
 	 * Set the amount of time in seconds after a {@link FlashMap} is saved
@@ -82,17 +83,17 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 		return this.urlPathHelper;
 	}
 
+
 	@Override
 	public final FlashMap retrieveAndUpdate(HttpServletRequest request, HttpServletResponse response) {
-
 		List<FlashMap> maps = retrieveFlashMaps(request);
 		if (CollectionUtils.isEmpty(maps)) {
 			return null;
 		}
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Retrieved FlashMap(s): " + maps);
 		}
-
 		List<FlashMap> mapsToRemove = getExpiredFlashMaps(maps);
 
 		FlashMap match = getMatchingFlashMap(maps, request);
@@ -163,8 +164,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 		String expectedPath = flashMap.getTargetRequestPath();
 		if (expectedPath != null) {
 			String requestUri = this.urlPathHelper.getOriginatingRequestUri(request);
-			if (!requestUri.equals(expectedPath)
-					&& !requestUri.equals(expectedPath + "/")) {
+			if (!requestUri.equals(expectedPath) && !requestUri.equals(expectedPath + "/")) {
 				return false;
 			}
 		}
@@ -187,18 +187,16 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 
 		String path = decodeAndNormalizePath(flashMap.getTargetRequestPath(), request);
 		flashMap.setTargetRequestPath(path);
-
 		decodeParameters(flashMap.getTargetRequestParams(), request);
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Saving FlashMap=" + flashMap);
 		}
-
 		flashMap.startExpirationPeriod(this.flashMapTimeout);
 
 		synchronized (writeLock) {
 			List<FlashMap> allMaps = retrieveFlashMaps(request);
-			allMaps = (allMaps == null) ? new CopyOnWriteArrayList<FlashMap>() : allMaps;
+			allMaps = (allMaps != null ? allMaps : new CopyOnWriteArrayList<FlashMap>());
 			allMaps.add(flashMap);
 			updateFlashMaps(allMaps, request, response);
 		}
@@ -232,7 +230,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 	 * @param request the current request
 	 * @param response the current response
 	 */
-	protected abstract void updateFlashMaps(List<FlashMap> flashMaps, HttpServletRequest request,
-			HttpServletResponse response);
+	protected abstract void updateFlashMaps(
+			List<FlashMap> flashMaps, HttpServletRequest request, HttpServletResponse response);
 
 }
