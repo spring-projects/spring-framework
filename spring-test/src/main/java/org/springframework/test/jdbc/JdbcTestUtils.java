@@ -22,15 +22,16 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameterValue;
+import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
-import org.springframework.jdbc.datasource.init.ScriptUtils.ScriptStatementExecutor;
 import org.springframework.util.StringUtils;
 
 /**
@@ -47,6 +48,7 @@ import org.springframework.util.StringUtils;
 public class JdbcTestUtils {
 
 	private static final Log logger = LogFactory.getLog(JdbcTestUtils.class);
+
 
 	/**
 	 * Count the rows in the given table.
@@ -117,14 +119,13 @@ public class JdbcTestUtils {
 	 * optionally the scale.
 	 * @return the number of rows deleted from the table
 	 */
-	public static int deleteFromTableWhere(JdbcTemplate jdbcTemplate, String tableName,
-			String whereClause, Object... args) {
+	public static int deleteFromTableWhere(JdbcTemplate jdbcTemplate, String tableName, String whereClause,
+			Object... args) {
 		String sql = "DELETE FROM " + tableName;
 		if (StringUtils.hasText(whereClause)) {
 			sql += " WHERE " + whereClause;
 		}
-		int rowCount = (args != null && args.length > 0 ? jdbcTemplate.update(sql, args)
-				: jdbcTemplate.update(sql));
+		int rowCount = (args != null && args.length > 0 ? jdbcTemplate.update(sql, args) : jdbcTemplate.update(sql));
 		if (logger.isInfoEnabled()) {
 			logger.info("Deleted " + rowCount + " rows from table " + tableName);
 		}
@@ -158,9 +159,11 @@ public class JdbcTestUtils {
 	 * @throws DataAccessException if there is an error executing a statement
 	 * and {@code continueOnError} is {@code false}
 	 * @see ResourceDatabasePopulator
+	 * @see DatabasePopulatorUtils
 	 * @see #executeSqlScript(JdbcTemplate, Resource, boolean)
-	 * @deprecated as of Spring 4.0.3, in favor of using 
-	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#executeSqlScript(ScriptStatementExecutor, EncodedResource, boolean, boolean, String, String, String, String)}  
+	 * @deprecated as of Spring 4.0.3, in favor of using
+	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#executeSqlScript}
+	 * or {@link org.springframework.jdbc.datasource.init.ResourceDatabasePopulator}.
 	 */
 	@Deprecated
 	public static void executeSqlScript(JdbcTemplate jdbcTemplate, ResourceLoader resourceLoader,
@@ -184,9 +187,11 @@ public class JdbcTestUtils {
 	 * @throws DataAccessException if there is an error executing a statement
 	 * and {@code continueOnError} is {@code false}
 	 * @see ResourceDatabasePopulator
+	 * @see DatabasePopulatorUtils
 	 * @see #executeSqlScript(JdbcTemplate, EncodedResource, boolean)
-	 * @deprecated as of Spring 4.0.3, in favor of using 
-	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#executeSqlScript(ScriptStatementExecutor, EncodedResource, boolean, boolean, String, String, String, String)}  
+	 * @deprecated as of Spring 4.0.3, in favor of using
+	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#executeSqlScript}
+	 * or {@link org.springframework.jdbc.datasource.init.ResourceDatabasePopulator}.
 	 */
 	@Deprecated
 	public static void executeSqlScript(JdbcTemplate jdbcTemplate, Resource resource, boolean continueOnError)
@@ -207,36 +212,22 @@ public class JdbcTestUtils {
 	 * @throws DataAccessException if there is an error executing a statement
 	 * and {@code continueOnError} is {@code false}
 	 * @see ResourceDatabasePopulator
-	 * @deprecated as of Spring 4.0.3, in favor of using 
-	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#executeSqlScript(ScriptStatementExecutor, EncodedResource, boolean, boolean, String, String, String, String)}  
+	 * @see DatabasePopulatorUtils
+	 * @deprecated as of Spring 4.0.3, in favor of using
+	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#executeSqlScript}
+	 * or {@link org.springframework.jdbc.datasource.init.ResourceDatabasePopulator}.
 	 */
 	@Deprecated
 	public static void executeSqlScript(JdbcTemplate jdbcTemplate, EncodedResource resource, boolean continueOnError)
 			throws DataAccessException {
-		ScriptUtils.executeSqlScript(new JdbcTemplateScriptStatementExecutor(jdbcTemplate), resource, 
-				continueOnError, continueOnError, ScriptUtils.DEFAULT_COMMENT_PREFIX,
-				ScriptUtils.DEFAULT_STATEMENT_SEPARATOR, ScriptUtils.DEFAULT_BLOCK_COMMENT_START_DELIMITER,
-				ScriptUtils.DEFAULT_BLOCK_COMMENT_END_DELIMITER);
+		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
+		databasePopulator.setContinueOnError(continueOnError);
+		databasePopulator.addScript(resource.getResource());
+		databasePopulator.setSqlScriptEncoding(resource.getEncoding());
+
+		DatabasePopulatorUtils.execute(databasePopulator, jdbcTemplate.getDataSource());
 	}
 
-	private static class JdbcTemplateScriptStatementExecutor implements ScriptStatementExecutor {
-		
-		private JdbcTemplate jdbcTemplate;
-
-		public JdbcTemplateScriptStatementExecutor(JdbcTemplate jdbcTemplate) {
-			super();
-			this.jdbcTemplate = jdbcTemplate;
-		}
-
-		/* (non-Javadoc)
-		 * @see org.springframework.jdbc.support.JdbcUtils.ScriptStatementExecutor#executeScriptStatement(java.lang.String)
-		 */
-		@Override
-		public int executeScriptStatement(String statement) throws DataAccessException {
-			return jdbcTemplate.update(statement);
-		}
-	}
-	
 	/**
 	 * Read a script from the provided {@code LineNumberReader}, using
 	 * "{@code --}" as the comment prefix, and build a {@code String} containing
@@ -245,14 +236,14 @@ public class JdbcTestUtils {
 	 * to be processed
 	 * @return a {@code String} containing the script lines
 	 * @see #readScript(LineNumberReader, String)
-	 * @deprecated as of Spring 4.0.3, in favor of using 
-	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#readScript(LineNumberReader)}  
+	 * @deprecated as of Spring 4.0.3, in favor of using
+	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#readScript(LineNumberReader, String, String)}
 	 */
 	@Deprecated
 	public static String readScript(LineNumberReader lineNumberReader) throws IOException {
-		return ScriptUtils.readScript(lineNumberReader);
+		return readScript(lineNumberReader, ScriptUtils.DEFAULT_COMMENT_PREFIX);
 	}
-	
+
 	/**
 	 * Read a script from the provided {@code LineNumberReader}, using the supplied
 	 * comment prefix, and build a {@code String} containing the lines.
@@ -263,7 +254,7 @@ public class JdbcTestUtils {
 	 * to be processed
 	 * @param commentPrefix the prefix that identifies comments in the SQL script &mdash; typically "--"
 	 * @return a {@code String} containing the script lines
-	 * @deprecated as of Spring 4.0.3, in favor of using 
+	 * @deprecated as of Spring 4.0.3, in favor of using
 	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#readScript(LineNumberReader, String, String)}  
 	 */
 	@Deprecated
@@ -276,14 +267,14 @@ public class JdbcTestUtils {
 	 * @param script the SQL script
 	 * @param delim character delimiting each statement &mdash; typically a ';' character
 	 * @return {@code true} if the script contains the delimiter; {@code false} otherwise
-	 * @deprecated as of Spring 4.0.3, in favor of using 
-	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#containsSqlScriptDelimiters(String, char)}  
+	 * @deprecated as of Spring 4.0.3, in favor of using
+	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#containsSqlScriptDelimiters}
 	 */
 	@Deprecated
 	public static boolean containsSqlScriptDelimiters(String script, char delim) {
-		return ScriptUtils.containsSqlScriptDelimiters(script, delim);
+		return ScriptUtils.containsSqlScriptDelimiters(script, String.valueOf(delim));
 	}
-	
+
 	/**
 	 * Split an SQL script into separate statements delimited by the provided
 	 * delimiter character. Each individual statement will be added to the
@@ -295,7 +286,7 @@ public class JdbcTestUtils {
 	 * @param script the SQL script
 	 * @param delim character delimiting each statement &mdash; typically a ';' character
 	 * @param statements the list that will contain the individual statements
-	 * @deprecated as of Spring 4.0.3, in favor of using 
+	 * @deprecated as of Spring 4.0.3, in favor of using
 	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#splitSqlScript(String, char, List)}  
 	 */
 	@Deprecated

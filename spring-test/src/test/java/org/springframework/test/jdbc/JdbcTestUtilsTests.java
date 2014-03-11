@@ -16,30 +16,29 @@
 
 package org.springframework.test.jdbc;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.mockito.BDDMockito.given;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+
 /**
  * Unit tests for {@link JdbcTestUtils}.
  *
- * @author Thomas Risberg
- * @author Sam Brannen
  * @author Phillip Webb
- * @author Chris Baldwin
  * @since 2.5.4
+ * @see JdbcTestUtilsIntegrationTests
  */
 @RunWith(MockitoJUnitRunner.class)
 public class JdbcTestUtilsTests {
 
 	@Mock
 	private JdbcTemplate jdbcTemplate;
+
 
 	@Test
 	public void deleteWithoutWhereClause() throws Exception {

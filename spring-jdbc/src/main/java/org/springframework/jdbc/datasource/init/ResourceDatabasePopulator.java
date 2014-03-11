@@ -18,16 +18,12 @@ package org.springframework.jdbc.datasource.init;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.UncategorizedSQLException;
-import org.springframework.jdbc.datasource.init.ScriptUtils.ScriptStatementExecutor;
 
 /**
  * Populates a database from SQL scripts defined in external resources.
@@ -55,9 +51,9 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	private String commentPrefix = ScriptUtils.DEFAULT_COMMENT_PREFIX;
 
 	private String blockCommentStartDelimiter = ScriptUtils.DEFAULT_BLOCK_COMMENT_START_DELIMITER;
-	
+
 	private String blockCommentEndDelimiter = ScriptUtils.DEFAULT_BLOCK_COMMENT_END_DELIMITER;
-	
+
 	private boolean continueOnError = false;
 
 	private boolean ignoreFailedDrops = false;
@@ -65,7 +61,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	/**
 	 * Add a script to execute to populate the database.
-	 * @param script the path to a SQL script
+	 * @param script the path to an SQL script
 	 */
 	public void addScript(Resource script) {
 		this.scripts.add(script);
@@ -81,8 +77,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	/**
 	 * Specify the encoding for SQL scripts, if different from the platform encoding.
-	 * Note setting this property has no effect on added scripts that are already
-	 * {@link EncodedResource encoded resources}.
+	 * <p>Note that setting this property has no effect on added scripts that are
+	 * already {@linkplain EncodedResource encoded resources}.
 	 * @see #addScript(Resource)
 	 */
 	public void setSqlScriptEncoding(String sqlScriptEncoding) {
@@ -90,41 +86,46 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 	/**
-	 * Specify the statement separator, if a custom one. Default is ";".
+	 * Specify the statement separator, if a custom one.
+	 * <p>Default is ";".
 	 */
 	public void setSeparator(String separator) {
 		this.separator = separator;
 	}
 
 	/**
-	 * Set the line prefix that identifies comments in the SQL script.
-	 * Default is "--".
+	 * Set the prefix that identifies line comments within the SQL scripts.
+	 * <p>Default is "--".
 	 */
 	public void setCommentPrefix(String commentPrefix) {
 		this.commentPrefix = commentPrefix;
 	}
 
 	/**
-	 * Set the block comment start delimiter in the SQL script.
-	 * Default is "/*"
+	 * Set the start delimiter that identifies block comments within the SQL
+	 * scripts.
+	 * <p>Default is "/*".
 	 * @since 4.0.3
+	 * @see #setBlockCommentEndDelimiter
 	 */
 	public void setBlockCommentStartDelimiter(String blockCommentStartDelimiter) {
-		this.blockCommentStartDelimiter = blockCommentStartDelimiter;		
+		this.blockCommentStartDelimiter = blockCommentStartDelimiter;
 	}
-	
+
 	/**
-	 * Set the block comment end delimiter in the SQL script.
-	 * Default is "*\/"
+	 * Set the end delimiter that identifies block comments within the SQL
+	 * scripts.
+	 * <p>Default is "*&#47;".
 	 * @since 4.0.3
+	 * @see #setBlockCommentStartDelimiter
 	 */
 	public void setBlockCommentEndDelimiter(String blockCommentEndDelimiter) {
 		this.blockCommentEndDelimiter = blockCommentEndDelimiter;
 	}
-	
+
 	/**
 	 * Flag to indicate that all failures in SQL should be logged but not cause a failure.
-	 * Defaults to false.
+	 * <p>Defaults to {@code false}.
 	 */
 	public void setContinueOnError(boolean continueOnError) {
 		this.continueOnError = continueOnError;
@@ -133,44 +134,20 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	/**
 	 * Flag to indicate that a failed SQL {@code DROP} statement can be ignored.
 	 * <p>This is useful for non-embedded databases whose SQL dialect does not support an
-	 * {@code IF EXISTS} clause in a {@code DROP}. The default is false so that if the
-	 * populator runs accidentally, it will fail fast when the script starts with a {@code DROP}.
+	 * {@code IF EXISTS} clause in a {@code DROP} statement.
+	 * <p>The default is {@code false} so that if the populator runs accidentally, it will
+	 * fail fast if the script starts with a {@code DROP} statement.
 	 */
 	public void setIgnoreFailedDrops(boolean ignoreFailedDrops) {
 		this.ignoreFailedDrops = ignoreFailedDrops;
 	}
 
-
 	@Override
 	public void populate(Connection connection) throws SQLException {
-		Statement statement = null;
-		try {
-			statement = connection.createStatement();
-			final Statement stmt = statement; 
-			for (Resource script : this.scripts) {
-				ScriptUtils.executeSqlScript(
-						new ScriptStatementExecutor() {
-							
-							@Override
-							public int executeScriptStatement(String statement) throws DataAccessException {
-								try {
-									stmt.execute(statement);
-									return stmt.getUpdateCount();
-								}
-								catch (SQLException e) {
-									throw new UncategorizedSQLException(getClass().getName(), statement, e);
-								}
-							}
-						}, 
-						applyEncodingIfNecessary(script), this.continueOnError, this.ignoreFailedDrops, 
-						this.commentPrefix, this.separator,	this.blockCommentStartDelimiter, 
-						this.blockCommentEndDelimiter);
-			}
-		}
-		finally {
-			if (statement != null) {
-				statement.close();
-			}
+		for (Resource script : this.scripts) {
+			ScriptUtils.executeSqlScript(connection, applyEncodingIfNecessary(script), this.continueOnError,
+				this.ignoreFailedDrops, this.commentPrefix, this.separator, this.blockCommentStartDelimiter,
+				this.blockCommentEndDelimiter);
 		}
 	}
 
