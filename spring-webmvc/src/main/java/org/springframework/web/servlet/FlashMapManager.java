@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Rossen Stoyanchev
  * @since 3.1
- *
  * @see FlashMap
  */
 public interface FlashMapManager {
@@ -46,7 +45,7 @@ public interface FlashMapManager {
 	/**
 	 * Save the given FlashMap, in some underlying storage and set the start
 	 * of its expiration period.
-	 * <p><strong>Note:</strong> Invoke this method prior to a redirect in order
+	 * <p><strong>NOTE:</strong> Invoke this method prior to a redirect in order
 	 * to allow saving the FlashMap in the HTTP session or in a response
 	 * cookie before the response is committed.
 	 * @param flashMap the FlashMap to save

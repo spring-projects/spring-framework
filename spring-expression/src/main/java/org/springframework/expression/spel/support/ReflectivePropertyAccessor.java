@@ -74,7 +74,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 
 	/**
-	 * @return null which means this is a general purpose accessor
+	 * Returns {@code null} which means this is a general purpose accessor.
 	 */
 	public Class<?>[] getSpecificTargetClasses() {
 		return null;
@@ -502,13 +502,13 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	private static class CacheKey {
 
-		private final Class clazz;
+		private final Class<?> clazz;
 
 		private final String name;
 
 		private boolean targetIsClass;
 
-		public CacheKey(Class clazz, String name, boolean targetIsClass) {
+		public CacheKey(Class<?> clazz, String name, boolean targetIsClass) {
 			this.clazz = clazz;
 			this.name = name;
 			this.targetIsClass = targetIsClass;
@@ -574,7 +574,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			}
 		}
 
-		public Class[] getSpecificTargetClasses() {
+		public Class<?>[] getSpecificTargetClasses() {
 			throw new UnsupportedOperationException("Should not be called on an OptimalPropertyAccessor");
 		}
 

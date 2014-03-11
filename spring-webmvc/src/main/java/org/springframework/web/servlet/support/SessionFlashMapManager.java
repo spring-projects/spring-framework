@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.support;
 
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -30,9 +29,10 @@ import org.springframework.web.servlet.FlashMap;
  * @author Rossen Stoyanchev
  * @since 3.1.1
  */
-public class SessionFlashMapManager extends AbstractFlashMapManager{
+public class SessionFlashMapManager extends AbstractFlashMapManager {
 
 	private static final String FLASH_MAPS_SESSION_ATTRIBUTE = SessionFlashMapManager.class.getName() + ".FLASH_MAPS";
+
 
 	/**
 	 * Retrieve saved FlashMap instances from the HTTP Session.
@@ -43,7 +43,7 @@ public class SessionFlashMapManager extends AbstractFlashMapManager{
 	@SuppressWarnings("unchecked")
 	protected List<FlashMap> retrieveFlashMaps(HttpServletRequest request) {
 		HttpSession session = request.getSession(false);
-		return (session != null) ? (List<FlashMap>) session.getAttribute(FLASH_MAPS_SESSION_ATTRIBUTE) : null;
+		return (session != null ? (List<FlashMap>) session.getAttribute(FLASH_MAPS_SESSION_ATTRIBUTE) : null);
 	}
 
 	/**
