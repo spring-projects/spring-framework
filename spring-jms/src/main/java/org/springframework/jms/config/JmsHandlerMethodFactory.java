@@ -16,24 +16,26 @@
 
 package org.springframework.jms.config;
 
-import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+import java.lang.reflect.Method;
+
+import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
 
 /**
- * A {@link org.springframework.beans.factory.xml.NamespaceHandler}
- * for the JMS namespace.
+ * A factory for {@link InvocableHandlerMethod} that is suitable to process
+ * an incoming JMS message.
  *
- * @author Mark Fisher
- * @author Juergen Hoeller
  * @author Stephane Nicoll
- * @since 2.5
+ * @since 4.1
  */
-public class JmsNamespaceHandler extends NamespaceHandlerSupport {
+public interface JmsHandlerMethodFactory {
 
-	@Override
-	public void init() {
-		registerBeanDefinitionParser("listener-container", new JmsListenerContainerParser());
-		registerBeanDefinitionParser("jca-listener-container", new JcaListenerContainerParser());
-		registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenJmsBeanDefinitionParser());
-	}
+	/**
+	 * Create the {@link InvocableHandlerMethod} that is able to process the specified
+	 * JMS method endpoint.
+	 * @param bean the bean instance
+	 * @param method the method to invoke
+	 * @return an JMS-specific {@link InvocableHandlerMethod} suitable for that method
+	 */
+	InvocableHandlerMethod createInvocableHandlerMethod(Object bean, Method method);
 
 }

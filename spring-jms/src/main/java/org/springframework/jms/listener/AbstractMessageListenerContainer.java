@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import javax.jms.Session;
 import javax.jms.Topic;
 
 import org.springframework.jms.support.JmsUtils;
+import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.ErrorHandler;
 
@@ -114,6 +115,7 @@ import org.springframework.util.ErrorHandler;
  * not just direct JMS Session usage in a {@link SessionAwareMessageListener}.
  *
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 2.0
  * @see #setMessageListener
  * @see javax.jms.MessageListener
@@ -123,7 +125,8 @@ import org.springframework.util.ErrorHandler;
  * @see SimpleMessageListenerContainer
  * @see org.springframework.jms.listener.endpoint.JmsMessageEndpointManager
  */
-public abstract class AbstractMessageListenerContainer extends AbstractJmsListeningContainer {
+public abstract class AbstractMessageListenerContainer
+		extends AbstractJmsListeningContainer implements MessageListenerContainer {
 
 	private volatile Object destination;
 
@@ -138,6 +141,8 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	private ExceptionListener exceptionListener;
 
 	private ErrorHandler errorHandler;
+
+	private MessageConverter messageConverter;
 
 	private boolean exposeListenerSession = true;
 
@@ -359,6 +364,19 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	}
 
 	/**
+	 * Set the {@link MessageConverter} strategy for converting JMS Messages.
+	 * @param messageConverter the message converter to use
+	 */
+	public void setMessageConverter(MessageConverter messageConverter) {
+		this.messageConverter = messageConverter;
+	}
+
+	@Override
+	public MessageConverter getMessageConverter() {
+		return messageConverter;
+	}
+
+	/**
 	 * Set whether to expose the listener JMS Session to a registered
 	 * {@link SessionAwareMessageListener} as well as to
 	 * {@link org.springframework.jms.core.JmsTemplate} calls.
@@ -420,6 +438,10 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 		}
 	}
 
+	@Override
+	public void setupMessageListener(Object messageListener) {
+		setMessageListener(messageListener);
+	}
 
 	//-------------------------------------------------------------------------
 	// Template methods for listener execution

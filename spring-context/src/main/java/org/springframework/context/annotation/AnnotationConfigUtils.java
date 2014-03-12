@@ -191,6 +191,18 @@ public class AnnotationConfigUtils {
 			"org.springframework.cache.aspectj.AspectJJCacheConfiguration";
 
 	/**
+	 * The bean name of the internally managed jms listener annotation processor.
+	 */
+	public static final String JMS_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME =
+			"org.springframework.jms.config.internalJmsListenerAnnotationProcessor";
+
+	/**
+	 * The bean name of the internally managed jms listener endpoint registry.
+	 */
+	public static final String JMS_LISTENER_ENDPOINT_REGISTRY_BEAN_NAME =
+			"org.springframework.jms.config.internalJmsListenerEndpointRegistry";
+
+	/**
 	 * The bean name of the internally managed JPA annotation processor.
 	 */
 	public static final String PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME =

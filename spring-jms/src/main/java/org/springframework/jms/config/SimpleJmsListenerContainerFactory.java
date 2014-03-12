@@ -16,24 +16,21 @@
 
 package org.springframework.jms.config;
 
-import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+import org.springframework.jms.listener.SimpleMessageListenerContainer;
 
 /**
- * A {@link org.springframework.beans.factory.xml.NamespaceHandler}
- * for the JMS namespace.
+ * A {@link JmsListenerContainerFactory} implementation to build
+ * a {@link SimpleMessageListenerContainer}.
  *
- * @author Mark Fisher
- * @author Juergen Hoeller
  * @author Stephane Nicoll
- * @since 2.5
+ * @since 4.1
  */
-public class JmsNamespaceHandler extends NamespaceHandlerSupport {
+public class SimpleJmsListenerContainerFactory
+		extends AbstractJmsListenerContainerFactory<SimpleMessageListenerContainer> {
 
 	@Override
-	public void init() {
-		registerBeanDefinitionParser("listener-container", new JmsListenerContainerParser());
-		registerBeanDefinitionParser("jca-listener-container", new JcaListenerContainerParser());
-		registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenJmsBeanDefinitionParser());
+	protected SimpleMessageListenerContainer createContainerInstance() {
+		return new SimpleMessageListenerContainer();
 	}
 
 }

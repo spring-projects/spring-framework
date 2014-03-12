@@ -1,0 +1,122 @@
+/*
+ * Copyright 2002-2014 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.jms.annotation;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import org.springframework.messaging.handler.annotation.MessageMapping;
+
+/**
+ * Annotation that marks a method to be the target of a JMS message
+ * listener on the specified {@link #destination()}. The {@link #containerFactory()}
+ * identifies the {@link org.springframework.jms.config.JmsListenerContainerFactory
+ * JmsListenerContainerFactory} to use to build the jms listener container. It may
+ * be omitted as long as a <em>default</em> container factory has been defined.
+ *
+ * <p>Processing of {@code @JmsListener} annotations is performed by
+ * registering a {@link JmsListenerAnnotationBeanPostProcessor}. This can be
+ * done manually or, more conveniently, through the {@code <jms:annotation-driven/>}
+ * element or {@link EnableJms} annotation.
+ *
+ * <p>Annotated methods are allowed to have flexible signatures similar to what
+ * {@link MessageMapping} provides, that is
+ * <ul>
+ * <li>{@link javax.jms.Session} to get access to the JMS session</li>
+ * <li>{@link javax.jms.Message} or one if subclass to get access to the raw JMS message</li>
+ * <li>{@link org.springframework.messaging.Message} to use the messaging abstraction counterpart</li>
+ * <li>{@link org.springframework.messaging.handler.annotation.Payload @Payload}-annotated method
+ * arguments including the support of validation</li>
+ * <li>{@link org.springframework.messaging.handler.annotation.Header @Header}-annotated method
+ * arguments to extract a specific header value, including standard JMS headers defined by
+ * {@link org.springframework.jms.support.converter.JmsHeaders JmsHeaders}</li>
+ * <li>{@link org.springframework.messaging.handler.annotation.Headers @Headers}-annotated
+ * argument that must also be assignable to {@link java.util.Map} for getting access to all
+ * headers.</li>
+ * <li>{@link org.springframework.messaging.MessageHeaders MessageHeaders} arguments for
+ * getting access to all headers.</li>
+ * <li>{@link org.springframework.messaging.support.MessageHeaderAccessor MessageHeaderAccessor}
+ * or {@link org.springframework.jms.support.JmsMessageHeaderAccessor JmsMessageHeaderAccessor}
+ * for convenient access to all method arguments.</li>
+ * </ul>
+ *
+ * <p>Annotated method may have a non {@code void} return type. When they do, the result of the
+ * method invocation is sent as a JMS reply to the destination defined by either the
+ * {@code JMSReplyTO} header of the incoming message or the value of {@link #responseDestination()}.
+ *
+ * @author Stephane Nicoll
+ * @since 4.1
+ * @see EnableJms
+ * @see JmsListenerAnnotationBeanPostProcessor
+ */
+@Target({ElementType.METHOD, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@MessageMapping
+@Documented
+public @interface JmsListener {
+
+	/**
+	 * The unique identifier of the container managing this endpoint.
+	 * <p>if none is specified an auto-generated one is provided.
+	 * @see org.springframework.jms.config.JmsListenerEndpointRegistry#getContainer(String)
+	 */
+	String id() default "";
+
+	/**
+	 * The bean name of the {@link org.springframework.jms.config.JmsListenerContainerFactory}
+	 * to use to create the message listener container responsible to serve this endpoint.
+	 * <p>If not specified, the default container factory is used, if any.
+	 */
+	String containerFactory() default "";
+
+	/**
+	 * The destination name for this listener, resolved through the container-wide
+	 * {@link org.springframework.jms.support.destination.DestinationResolver} strategy.
+	 */
+	String destination();
+
+	/**
+	 * Specify if the {@link #destination()} refers to a queue or not. Refer to a
+	 * queue by default.
+	 */
+	boolean queue() default true;
+
+	/**
+	 * The name for the durable subscription, if any.
+	 */
+	String subscription() default "";
+
+	/**
+	 * The JMS message selector expression, if any
+	 * <p>See the JMS specification for a detailed definition of selector expressions.
+	 */
+	String selector() default "";
+
+	/**
+	 * The name of the default response destination to send response messages to.
+	 * <p>This will be applied in case of a request message that does not carry
+	 * a "JMSReplyTo" field. The type of this destination will be determined
+	 * by the listener-container's "destination-type" attribute.
+	 * <p>Note: This only applies to a listener method with a return value,
+	 * for which each result object will be converted into a response message.
+	 */
+	String responseDestination() default "";
+
+}

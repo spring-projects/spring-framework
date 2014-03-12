@@ -14,26 +14,25 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.config;
+package org.springframework.jms.support.converter;
 
-import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+import javax.jms.Message;
+
+import org.springframework.messaging.mapping.HeaderMapper;
 
 /**
- * A {@link org.springframework.beans.factory.xml.NamespaceHandler}
- * for the JMS namespace.
+ * Strategy interface for mapping messaging Message headers to an outbound
+ * JMS Message (e.g. to configure JMS properties) or extracting messaging
+ * header values from an inbound JMS Message.
  *
  * @author Mark Fisher
- * @author Juergen Hoeller
- * @author Stephane Nicoll
- * @since 2.5
+ * @author Oleg Zhurakousky
+ * @author Gary Russell
+ * @since 4.1
  */
-public class JmsNamespaceHandler extends NamespaceHandlerSupport {
+public interface JmsHeaderMapper extends HeaderMapper<Message> {
 
-	@Override
-	public void init() {
-		registerBeanDefinitionParser("listener-container", new JmsListenerContainerParser());
-		registerBeanDefinitionParser("jca-listener-container", new JcaListenerContainerParser());
-		registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenJmsBeanDefinitionParser());
-	}
+	static final String CONTENT_TYPE_PROPERTY = "content_type";
 
 }
+

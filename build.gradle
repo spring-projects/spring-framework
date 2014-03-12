@@ -485,6 +485,7 @@ project("spring-jms") {
 		compile(project(":spring-beans"))
 		compile(project(":spring-aop"))
 		compile(project(":spring-context"))
+		compile(project(":spring-messaging"))
 		compile(project(":spring-tx"))
 		provided("javax.jms:jms-api:1.1-rev-1")
 		optional(project(":spring-oxm"))

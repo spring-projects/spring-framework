@@ -3,12 +3,13 @@
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:jms="http://www.springframework.org/schema/jms"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-				http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-4.0.xsd">
+				http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-4.1.xsd">
 
-	<jms:listener-container connection-factory="testConnectionFactory" task-executor="testTaskExecutor"
+	<jms:listener-container factory-id="testJmsFactory"
+			connection-factory="testConnectionFactory" task-executor="testTaskExecutor"
 			destination-resolver="testDestinationResolver" message-converter="testMessageConverter"
 			transaction-manager="testTransactionManager" error-handler="testErrorHandler"
-			concurrency="1-2" prefetch="50" receive-timeout="100" recovery-interval="1000" phase="99">
+			cache="connection" concurrency="3-5" prefetch="50" receive-timeout="100" recovery-interval="1000" phase="99">
 		<jms:listener id="listener1" destination="testDestination" ref="testBean1" method="setName"/>
 		<jms:listener id="listener2" destination="testDestination" ref="testBean2" method="setName" response-destination="responseDestination"/>
 	</jms:listener-container>
@@ -26,8 +27,9 @@
 		</property>
 	</bean>
 
-	<jms:jca-listener-container resource-adapter="testResourceAdapter" activation-spec-factory="testActivationSpecFactory"
-			message-converter="testMessageConverter" phase="77">
+	<jms:jca-listener-container factory-id="testJcaFactory"
+			resource-adapter="testResourceAdapter" activation-spec-factory="testActivationSpecFactory"
+			message-converter="testMessageConverter" concurrency="5" prefetch="50" phase="77">
 		<jms:listener id="listener3" destination="testDestination" ref="testBean1" method="setName"/>
 		<jms:listener id="listener4" destination="testDestination" ref="testBean2" method="setName" response-destination="responseDestination"/>
 	</jms:jca-listener-container>
@@ -35,6 +37,13 @@
 	<jms:jca-listener-container activation-spec-factory="testActivationSpecFactory">
 		<jms:listener destination="testDestination" ref="testBean3"/>
 	</jms:jca-listener-container>
+
+	<!-- Only export the factory -->
+	<jms:listener-container factory-id="onlyJmsFactory"
+							connection-factory="testConnectionFactory" task-executor="testTaskExecutor"
+							destination-resolver="testDestinationResolver" message-converter="testMessageConverter"
+							transaction-manager="testTransactionManager" error-handler="testErrorHandler"
+							concurrency="3-5" prefetch="50" receive-timeout="100" recovery-interval="1000"/>
 
 	<!-- the default ConnectionFactory -->
 	<bean id="connectionFactory" class="org.springframework.jms.StubConnectionFactory"/>

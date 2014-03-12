@@ -16,24 +16,23 @@
 
 package org.springframework.jms.config;
 
-import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+import org.springframework.jms.listener.MessageListenerContainer;
 
 /**
- * A {@link org.springframework.beans.factory.xml.NamespaceHandler}
- * for the JMS namespace.
+ * Factory of {@link MessageListenerContainer} based on a
+ * {@link JmsListenerEndpoint} definition.
  *
- * @author Mark Fisher
- * @author Juergen Hoeller
  * @author Stephane Nicoll
- * @since 2.5
+ * @since 4.1
+ * @see JmsListenerEndpoint
  */
-public class JmsNamespaceHandler extends NamespaceHandlerSupport {
+public interface JmsListenerContainerFactory<C extends MessageListenerContainer> {
 
-	@Override
-	public void init() {
-		registerBeanDefinitionParser("listener-container", new JmsListenerContainerParser());
-		registerBeanDefinitionParser("jca-listener-container", new JcaListenerContainerParser());
-		registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenJmsBeanDefinitionParser());
-	}
+	/**
+	 * Create a {@link MessageListenerContainer} for the given {@link JmsListenerEndpoint}.
+	 * @param endpoint the endpoint to configure
+	 * @return the created container
+	 */
+	C createMessageListenerContainer(JmsListenerEndpoint endpoint);
 
 }

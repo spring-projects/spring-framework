@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.config;
+package org.springframework.messaging.mapping;
 
-import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+import java.util.Map;
+
+import org.springframework.messaging.MessageHeaders;
 
 /**
- * A {@link org.springframework.beans.factory.xml.NamespaceHandler}
- * for the JMS namespace.
+ * Generic strategy interface for mapping {@link MessageHeaders} to and from other
+ * types of objects. This would typically be used by adapters where the "other type"
+ * has a concept of headers or properties (HTTP, JMS, AMQP, etc).
  *
  * @author Mark Fisher
- * @author Juergen Hoeller
- * @author Stephane Nicoll
- * @since 2.5
+ * @param <T> type of the instance to and from which headers will be mapped.
  */
-public class JmsNamespaceHandler extends NamespaceHandlerSupport {
+public interface HeaderMapper<T> {
 
-	@Override
-	public void init() {
-		registerBeanDefinitionParser("listener-container", new JmsListenerContainerParser());
-		registerBeanDefinitionParser("jca-listener-container", new JcaListenerContainerParser());
-		registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenJmsBeanDefinitionParser());
-	}
+	void fromHeaders(MessageHeaders headers, T target);
+
+	Map<String, Object> toHeaders(T source);
 
 }

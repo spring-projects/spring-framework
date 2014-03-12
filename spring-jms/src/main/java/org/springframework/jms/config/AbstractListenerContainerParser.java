@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyValue;
+import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
@@ -36,9 +39,12 @@ import org.springframework.util.StringUtils;
  * common properties that are identical for all listener container variants.
  *
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 2.5
  */
 abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
+
+	protected static final String FACTORY_ID_ATTRIBUTE = "factory-id";
 
 	protected static final String LISTENER_ELEMENT = "listener";
 
@@ -95,13 +101,21 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 			new CompositeComponentDefinition(element.getTagName(), parserContext.extractSource(element));
 		parserContext.pushContainingComponent(compositeDef);
 
+		// First parse the common configuration of the container
+		PropertyValues containerValues = parseProperties(element, parserContext);
+
+		// Expose the factory if requested
+		parseContainerFactory(element, parserContext, containerValues);
+
 		NodeList childNodes = element.getChildNodes();
 		for (int i = 0; i < childNodes.getLength(); i++) {
 			Node child = childNodes.item(i);
 			if (child.getNodeType() == Node.ELEMENT_NODE) {
 				String localName = parserContext.getDelegate().getLocalName(child);
 				if (LISTENER_ELEMENT.equals(localName)) {
-					parseListener((Element) child, element, parserContext);
+					ListenerContainerParserContext context = new ListenerContainerParserContext(
+							element, (Element) child, containerValues, parserContext);
+					parseListener(context);
 				}
 			}
 		}
@@ -110,9 +124,45 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 		return null;
 	}
 
-	private void parseListener(Element listenerEle, Element containerEle, ParserContext parserContext) {
+	/**
+	 * Parse the common properties for all listeners as defined by the specified
+	 * container {@link Element}.
+	 */
+	protected abstract PropertyValues parseProperties(Element containerEle, ParserContext parserContext);
+
+	/**
+	 * Create the {@link BeanDefinition} for the container factory using the specified
+	 * shared property values.
+	 */
+	protected abstract RootBeanDefinition createContainerFactory(String factoryId,
+			Element containerElement, PropertyValues propertyValues);
+
+	/**
+	 * Create the container {@link BeanDefinition} for the specified  context.
+	 */
+	protected abstract BeanDefinition createContainer(ListenerContainerParserContext context);
+
+
+	private void parseContainerFactory(Element element, ParserContext parserContext, PropertyValues propertyValues) {
+		String factoryId = element.getAttribute(FACTORY_ID_ATTRIBUTE);
+		if (StringUtils.hasText(factoryId)) {
+			RootBeanDefinition beanDefinition = createContainerFactory(factoryId, element, propertyValues);
+			if (beanDefinition != null) {
+				beanDefinition.setSource(parserContext.extractSource(element));
+				parserContext.registerBeanComponent(new BeanComponentDefinition(beanDefinition, factoryId));
+			}
+		}
+	}
+
+	private void parseListener(ListenerContainerParserContext context) {
+		ParserContext parserContext = context.getParserContext();
+		PropertyValues containerValues = context.getContainerValues();
+		Element listenerEle = context.getListenerElement();
+
 		RootBeanDefinition listenerDef = new RootBeanDefinition();
 		listenerDef.setSource(parserContext.extractSource(listenerEle));
+
+		BeanDefinition containerDef = createContainer(context);
 
 		String ref = listenerEle.getAttribute(REF_ATTRIBUTE);
 		if (!StringUtils.hasText(ref)) {
@@ -133,23 +183,15 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 		}
 		listenerDef.getPropertyValues().add("defaultListenerMethod", method);
 
-		if (containerEle.hasAttribute(MESSAGE_CONVERTER_ATTRIBUTE)) {
-			String messageConverter = containerEle.getAttribute(MESSAGE_CONVERTER_ATTRIBUTE);
-			if (!StringUtils.hasText(messageConverter)) {
-				parserContext.getReaderContext().error(
-						"Listener container 'message-converter' attribute contains empty value.", containerEle);
-			}
-			else {
-				listenerDef.getPropertyValues().add("messageConverter",
-						new RuntimeBeanReference(messageConverter));
-			}
+		PropertyValue messageConverterPv = getMessageConverter(containerValues);
+		if (messageConverterPv != null) {
+			listenerDef.getPropertyValues().addPropertyValue(messageConverterPv);
 		}
 
-		BeanDefinition containerDef = parseContainer(listenerEle, containerEle, parserContext);
 
 		if (listenerEle.hasAttribute(RESPONSE_DESTINATION_ATTRIBUTE)) {
 			String responseDestination = listenerEle.getAttribute(RESPONSE_DESTINATION_ATTRIBUTE);
-			boolean pubSubDomain = indicatesPubSub(containerDef);
+			boolean pubSubDomain = indicatesPubSub(containerValues);
 			listenerDef.getPropertyValues().add(
 					pubSubDomain ? "defaultResponseTopicName" : "defaultResponseQueueName", responseDestination);
 			if (containerDef.getPropertyValues().contains("destinationResolver")) {
@@ -172,11 +214,12 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 		parserContext.registerBeanComponent(new BeanComponentDefinition(containerDef, containerBeanName));
 	}
 
-	protected abstract BeanDefinition parseContainer(
-			Element listenerEle, Element containerEle, ParserContext parserContext);
-
-	protected boolean indicatesPubSub(BeanDefinition containerDef) {
+	protected boolean indicatesPubSub(PropertyValues propertyValues) {
 		return false;
+	}
+
+	protected PropertyValue getMessageConverter(PropertyValues containerValues) {
+		return containerValues.getPropertyValue("messageConverter");
 	}
 
 	protected void parseListenerConfiguration(Element ele, ParserContext parserContext, BeanDefinition configDef) {
@@ -206,7 +249,9 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 		}
 	}
 
-	protected void parseContainerConfiguration(Element ele, ParserContext parserContext, BeanDefinition configDef) {
+	protected PropertyValues parseCommonContainerProperties(Element ele, ParserContext parserContext) {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+
 		String destinationType = ele.getAttribute(DESTINATION_TYPE_ATTRIBUTE);
 		boolean pubSubDomain = false;
 		boolean subscriptionDurable = false;
@@ -224,8 +269,8 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 			parserContext.getReaderContext().error("Invalid listener container 'destination-type': " +
 					"only \"queue\", \"topic\" and \"durableTopic\" supported.", ele);
 		}
-		configDef.getPropertyValues().add("pubSubDomain", pubSubDomain);
-		configDef.getPropertyValues().add("subscriptionDurable", subscriptionDurable);
+		propertyValues.add("pubSubDomain", pubSubDomain);
+		propertyValues.add("subscriptionDurable", subscriptionDurable);
 
 		if (ele.hasAttribute(CLIENT_ID_ATTRIBUTE)) {
 			String clientId = ele.getAttribute(CLIENT_ID_ATTRIBUTE);
@@ -233,8 +278,9 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 				parserContext.getReaderContext().error(
 						"Listener 'client-id' attribute contains empty value.", ele);
 			}
-			configDef.getPropertyValues().add("clientId", clientId);
+			propertyValues.add("clientId", clientId);
 		}
+		return propertyValues;
 	}
 
 	protected Integer parseAcknowledgeMode(Element ele, ParserContext parserContext) {
@@ -261,8 +307,45 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 		}
 	}
 
-	protected boolean indicatesPubSubConfig(BeanDefinition configDef) {
-		return (Boolean) configDef.getPropertyValues().getPropertyValue("pubSubDomain").getValue();
+	protected boolean indicatesPubSubConfig(PropertyValues configuration) {
+		return (Boolean) configuration.getPropertyValue("pubSubDomain").getValue();
+	}
+
+
+	protected static class ListenerContainerParserContext {
+		private final Element containerElement;
+		private final Element listenerElement;
+		private final PropertyValues containerValues;
+		private final ParserContext parserContext;
+
+		public ListenerContainerParserContext(Element containerElement, Element listenerElement,
+				PropertyValues containerValues, ParserContext parserContext) {
+			this.containerElement = containerElement;
+			this.listenerElement = listenerElement;
+			this.containerValues = containerValues;
+			this.parserContext = parserContext;
+		}
+
+		public Element getContainerElement() {
+			return containerElement;
+		}
+
+		public Element getListenerElement() {
+			return listenerElement;
+		}
+
+		public PropertyValues getContainerValues() {
+			return containerValues;
+		}
+
+		public ParserContext getParserContext() {
+			return parserContext;
+		}
+
+		public Object getSource() {
+			return parserContext.extractSource(containerElement);
+		}
+
 	}
 
 }

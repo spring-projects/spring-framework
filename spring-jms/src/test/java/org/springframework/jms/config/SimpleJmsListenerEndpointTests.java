@@ -16,24 +16,28 @@
 
 package org.springframework.jms.config;
 
-import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+import static org.junit.Assert.*;
+
+import javax.jms.MessageListener;
+
+import org.junit.Test;
+
+import org.springframework.jms.listener.SimpleMessageListenerContainer;
+import org.springframework.jms.listener.adapter.MessageListenerAdapter;
 
 /**
- * A {@link org.springframework.beans.factory.xml.NamespaceHandler}
- * for the JMS namespace.
  *
- * @author Mark Fisher
- * @author Juergen Hoeller
  * @author Stephane Nicoll
- * @since 2.5
  */
-public class JmsNamespaceHandler extends NamespaceHandlerSupport {
+public class SimpleJmsListenerEndpointTests {
 
-	@Override
-	public void init() {
-		registerBeanDefinitionParser("listener-container", new JmsListenerContainerParser());
-		registerBeanDefinitionParser("jca-listener-container", new JcaListenerContainerParser());
-		registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenJmsBeanDefinitionParser());
+	private final SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+
+	@Test
+	public void createListener() {
+		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
+		MessageListener messageListener = new MessageListenerAdapter();
+		endpoint.setMessageListener(messageListener);
+		assertSame(messageListener, endpoint.createMessageListener(container));
 	}
-
 }

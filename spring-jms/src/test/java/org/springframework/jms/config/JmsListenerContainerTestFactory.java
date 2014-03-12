@@ -16,24 +16,27 @@
 
 package org.springframework.jms.config;
 
-import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * A {@link org.springframework.beans.factory.xml.NamespaceHandler}
- * for the JMS namespace.
  *
- * @author Mark Fisher
- * @author Juergen Hoeller
  * @author Stephane Nicoll
- * @since 2.5
  */
-public class JmsNamespaceHandler extends NamespaceHandlerSupport {
+public class JmsListenerContainerTestFactory implements JmsListenerContainerFactory<MessageListenerTestContainer> {
+
+	private final List<MessageListenerTestContainer> containers =
+			new ArrayList<MessageListenerTestContainer>();
+
+	public List<MessageListenerTestContainer> getContainers() {
+		return containers;
+	}
 
 	@Override
-	public void init() {
-		registerBeanDefinitionParser("listener-container", new JmsListenerContainerParser());
-		registerBeanDefinitionParser("jca-listener-container", new JcaListenerContainerParser());
-		registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenJmsBeanDefinitionParser());
+	public MessageListenerTestContainer createMessageListenerContainer(JmsListenerEndpoint endpoint) {
+		MessageListenerTestContainer container = new MessageListenerTestContainer(endpoint);
+		this.containers.add(container);
+		return container;
 	}
 
 }

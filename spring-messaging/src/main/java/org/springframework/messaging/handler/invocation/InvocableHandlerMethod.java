@@ -32,7 +32,7 @@ import org.springframework.util.ReflectionUtils;
  * Invokes the handler method for a given message after resolving
  * its method argument values through registered {@link HandlerMethodArgumentResolver}s.
  *
- * <p>Use {@link #setMessageMethodArgumentResolvers(HandlerMethodArgumentResolverComposite)}
+ * <p>Use {@link #setMessageMethodArgumentResolvers(HandlerMethodArgumentResolver)}
  * to customize the list of argument resolvers.
  *
  * @author Rossen Stoyanchev
@@ -40,7 +40,7 @@ import org.springframework.util.ReflectionUtils;
  */
 public class InvocableHandlerMethod extends HandlerMethod {
 
-	private HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
+	private HandlerMethodArgumentResolver argumentResolvers = new HandlerMethodArgumentResolverComposite();
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
@@ -74,7 +74,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	/**
 	 * Set {@link HandlerMethodArgumentResolver}s to use to use for resolving method argument values.
 	 */
-	public void setMessageMethodArgumentResolvers(HandlerMethodArgumentResolverComposite argumentResolvers) {
+	public void setMessageMethodArgumentResolvers(HandlerMethodArgumentResolver argumentResolvers) {
 		this.argumentResolvers = argumentResolvers;
 	}
 
