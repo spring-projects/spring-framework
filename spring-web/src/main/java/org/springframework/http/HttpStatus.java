@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -387,6 +387,52 @@ public enum HttpStatus {
 	 */
 	public String getReasonPhrase() {
 		return reasonPhrase;
+	}
+
+	/**
+	 * Whether this status code is in the HTTP series
+	 * {@link org.springframework.http.HttpStatus.Series#INFORMATIONAL}.
+	 * This is a shortcut for checking the value of {@link #series()}.
+	 */
+	public boolean is1xxInformational() {
+		return (Series.INFORMATIONAL.equals(series()));
+	}
+
+	/**
+	 * Whether this status code is in the HTTP series
+	 * {@link org.springframework.http.HttpStatus.Series#SUCCESSFUL}.
+	 * This is a shortcut for checking the value of {@link #series()}.
+	 */
+	public boolean is2xxSuccessful() {
+		return (Series.SUCCESSFUL.equals(series()));
+	}
+
+	/**
+	 * Whether this status code is in the HTTP series
+	 * {@link org.springframework.http.HttpStatus.Series#REDIRECTION}.
+	 * This is a shortcut for checking the value of {@link #series()}.
+	 */
+	public boolean is3xxRedirection() {
+		return (Series.REDIRECTION.equals(series()));
+	}
+
+
+	/**
+	 * Whether this status code is in the HTTP series
+	 * {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR}.
+	 * This is a shortcut for checking the value of {@link #series()}.
+	 */
+	public boolean is4xxClientError() {
+		return (Series.CLIENT_ERROR.equals(series()));
+	}
+
+	/**
+	 * Whether this status code is in the HTTP series
+	 * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR}.
+	 * This is a shortcut for checking the value of {@link #series()}.
+	 */
+	public boolean is5xxServerError() {
+		return (Series.SERVER_ERROR.equals(series()));
 	}
 
 	/**
