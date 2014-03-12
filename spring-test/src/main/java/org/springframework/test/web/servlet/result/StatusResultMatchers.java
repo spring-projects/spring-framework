@@ -73,7 +73,7 @@ public class StatusResultMatchers {
 			@Override
 			public void match(MvcResult result) throws Exception {
 				assertEquals("Range for response status value " + result.getResponse().getStatus(),
-						getHttpStatusSeries(result), HttpStatus.Series.INFORMATIONAL);
+						HttpStatus.Series.INFORMATIONAL, getHttpStatusSeries(result));
 			}
 		};
 	}
@@ -86,7 +86,7 @@ public class StatusResultMatchers {
 			@Override
 			public void match(MvcResult result) throws Exception {
 				assertEquals("Range for response status value " + result.getResponse().getStatus(),
-						getHttpStatusSeries(result), HttpStatus.Series.SUCCESSFUL);
+						HttpStatus.Series.SUCCESSFUL, getHttpStatusSeries(result));
 			}
 		};
 	}
@@ -99,7 +99,7 @@ public class StatusResultMatchers {
 			@Override
 			public void match(MvcResult result) throws Exception {
 				assertEquals("Range for response status value " + result.getResponse().getStatus(),
-						getHttpStatusSeries(result), HttpStatus.Series.REDIRECTION);
+						HttpStatus.Series.REDIRECTION, getHttpStatusSeries(result));
 			}
 		};
 	}
@@ -112,7 +112,7 @@ public class StatusResultMatchers {
 			@Override
 			public void match(MvcResult result) throws Exception {
 				assertEquals("Range for response status value " + result.getResponse().getStatus(),
-						getHttpStatusSeries(result), HttpStatus.Series.CLIENT_ERROR);
+						HttpStatus.Series.CLIENT_ERROR, getHttpStatusSeries(result));
 			}
 		};
 	}
@@ -125,7 +125,7 @@ public class StatusResultMatchers {
 			@Override
 			public void match(MvcResult result) throws Exception {
 				assertEquals("Range for response status value " + result.getResponse().getStatus(),
-						getHttpStatusSeries(result), HttpStatus.Series.SERVER_ERROR);
+						HttpStatus.Series.SERVER_ERROR, getHttpStatusSeries(result));
 			}
 		};
 	}
