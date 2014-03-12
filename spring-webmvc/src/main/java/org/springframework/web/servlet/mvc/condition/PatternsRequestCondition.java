@@ -249,8 +249,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 				}
 			}
 			else {
-				boolean hasSuffix = pattern.indexOf('.') != -1;
-				if (!hasSuffix && this.pathMatcher.match(pattern + ".*", lookupPath)) {
+				if (!hasSuffix(pattern) && this.pathMatcher.match(pattern + ".*", lookupPath)) {
 					return pattern + ".*";
 				}
 			}
@@ -264,6 +263,28 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 			}
 		}
 		return null;
+	}
+
+	private boolean hasSuffix(String pattern) {
+		boolean uriVarMode = false;
+		for (int i = pattern.length(); i > 0; i--) {
+			char c = pattern.charAt(i-1);
+			if (c == '}') {
+				uriVarMode = true;
+			}
+			else if (c == '{') {
+				uriVarMode = false;
+			}
+			else if (c == '/') {
+				return false;
+			}
+			else {
+				if (!uriVarMode && c == '.') {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**

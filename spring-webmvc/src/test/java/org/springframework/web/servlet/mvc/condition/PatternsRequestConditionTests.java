@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,6 +113,26 @@ public class PatternsRequestConditionTests {
 
 		assertNotNull(match);
 		assertEquals("/{foo}", match.getPatterns().iterator().next());
+	}
+
+	// SPR-11532
+
+	@Test
+	public void matchSuffixPatternWithUriVariables() {
+		testSuffixPattern("/employees/{areaOfResponsibility.owner.id}", "/employees/976685.json", false);
+		testSuffixPattern("/establishments/{establishmentId}", "/establishments/123456789.json", false);
+		testSuffixPattern("/a.b/c", "/a.b/c.json", false);
+		testSuffixPattern("/a/b.json", "/a/b.json", true);
+		testSuffixPattern("/a/{b}.{c}", "/a/b.c", true);
+	}
+
+	public void testSuffixPattern(String pattern, String url, boolean patternHasSuffix) {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", url);
+		PatternsRequestCondition condition = new PatternsRequestCondition(pattern);
+		PatternsRequestCondition match = condition.getMatchingCondition(request);
+
+		assertNotNull(match);
+		assertEquals((patternHasSuffix ? pattern : pattern + ".*"), match.getPatterns().iterator().next());
 	}
 
 	// SPR-8410
