@@ -23,6 +23,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.init.DatabasePopulator;
 import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.test.context.ContextConfiguration;
@@ -184,11 +185,8 @@ public abstract class AbstractTransactionalJUnit4SpringContextTests extends Abst
 	 */
 	protected void executeSqlScript(String sqlResourcePath, boolean continueOnError) throws DataAccessException {
 		Resource resource = this.applicationContext.getResource(sqlResourcePath);
-		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
-		databasePopulator.setContinueOnError(continueOnError);
-		databasePopulator.addScript(resource);
-		databasePopulator.setSqlScriptEncoding(this.sqlScriptEncoding);
-
+		DatabasePopulator databasePopulator = new ResourceDatabasePopulator(continueOnError, false,
+			this.sqlScriptEncoding, resource);
 		DatabasePopulatorUtils.execute(databasePopulator, jdbcTemplate.getDataSource());
 	}
 

@@ -29,6 +29,7 @@ import org.springframework.core.io.support.EncodedResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameterValue;
+import org.springframework.jdbc.datasource.init.DatabasePopulator;
 import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
@@ -220,11 +221,8 @@ public class JdbcTestUtils {
 	@Deprecated
 	public static void executeSqlScript(JdbcTemplate jdbcTemplate, EncodedResource resource, boolean continueOnError)
 			throws DataAccessException {
-		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
-		databasePopulator.setContinueOnError(continueOnError);
-		databasePopulator.addScript(resource.getResource());
-		databasePopulator.setSqlScriptEncoding(resource.getEncoding());
-
+		DatabasePopulator databasePopulator = new ResourceDatabasePopulator(continueOnError, false,
+			resource.getEncoding(), resource.getResource());
 		DatabasePopulatorUtils.execute(databasePopulator, jdbcTemplate.getDataSource());
 	}
 

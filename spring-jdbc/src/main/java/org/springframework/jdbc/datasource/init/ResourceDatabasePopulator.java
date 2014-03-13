@@ -39,6 +39,7 @@ import org.springframework.core.io.support.EncodedResource;
  * @author Sam Brannen
  * @author Chris Baldwin
  * @since 3.0
+ * @see DatabasePopulatorUtils
  */
 public class ResourceDatabasePopulator implements DatabasePopulator {
 
@@ -60,6 +61,32 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 
 	/**
+	 * Construct a new {@code ResourceDatabasePopulator} with default settings.
+	 */
+	public ResourceDatabasePopulator() {
+		/* no-op */
+	}
+
+	/**
+	 * Construct a new {@code ResourceDatabasePopulator} with the supplied values.
+	 *
+	 * @param continueOnError flag to indicate that all failures in SQL should be
+	 * logged but not cause a failure
+	 * @param ignoreFailedDrops flag to indicate that a failed SQL {@code DROP}
+	 * statement can be ignored
+	 * @param sqlScriptEncoding the encoding for the supplied SQL scripts, if
+	 * different from the platform encoding; may be {@code null}
+	 * @param scripts the scripts to execute to populate the database
+	 */
+	public ResourceDatabasePopulator(boolean continueOnError, boolean ignoreFailedDrops, String sqlScriptEncoding,
+			Resource... scripts) {
+		this.continueOnError = continueOnError;
+		this.ignoreFailedDrops = ignoreFailedDrops;
+		this.sqlScriptEncoding = sqlScriptEncoding;
+		this.scripts = Arrays.asList(scripts);
+	}
+
+	/**
 	 * Add a script to execute to populate the database.
 	 * @param script the path to an SQL script
 	 */
@@ -77,8 +104,6 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	/**
 	 * Specify the encoding for SQL scripts, if different from the platform encoding.
-	 * <p>Note that setting this property has no effect on added scripts that are
-	 * already {@linkplain EncodedResource encoded resources}.
 	 * @see #addScript(Resource)
 	 */
 	public void setSqlScriptEncoding(String sqlScriptEncoding) {
@@ -145,18 +170,18 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	@Override
 	public void populate(Connection connection) throws SQLException {
 		for (Resource script : this.scripts) {
-			ScriptUtils.executeSqlScript(connection, applyEncodingIfNecessary(script), this.continueOnError,
+			ScriptUtils.executeSqlScript(connection, encodeScript(script), this.continueOnError,
 				this.ignoreFailedDrops, this.commentPrefix, this.separator, this.blockCommentStartDelimiter,
 				this.blockCommentEndDelimiter);
 		}
 	}
 
-	private EncodedResource applyEncodingIfNecessary(Resource script) {
-		if (script instanceof EncodedResource) {
-			return (EncodedResource) script;
-		}
-		else {
-			return new EncodedResource(script, this.sqlScriptEncoding);
-		}
+	/**
+	 * {@link EncodedResource} is not a sub-type of {@link Resource}. Thus we
+	 * always need to wrap each script resource in an encoded resource.
+	 */
+	private EncodedResource encodeScript(Resource script) {
+		return new EncodedResource(script, this.sqlScriptEncoding);
 	}
+
 }

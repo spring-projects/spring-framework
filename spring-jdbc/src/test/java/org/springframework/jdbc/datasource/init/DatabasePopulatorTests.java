@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import org.junit.After;
 import org.junit.Test;
 import org.springframework.core.io.ClassRelativeResourceLoader;
+import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
@@ -29,9 +30,8 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static org.hamcrest.Matchers.*;
-
 import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Dave Syer
@@ -65,6 +65,18 @@ public class DatabasePopulatorTests {
 		}
 	}
 
+	private Resource resource(String path) {
+		return resourceLoader.getResource(path);
+	}
+
+	private Resource defaultSchema() {
+		return resource("db-schema.sql");
+	}
+
+	private Resource usersSchema() {
+		return resource("users-schema.sql");
+	}
+
 	@After
 	public void shutDown() {
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
@@ -75,178 +87,121 @@ public class DatabasePopulatorTests {
 	}
 
 	@Test
-	public void testBuildWithCommentsAndFailedDrop() throws Exception {
-		databasePopulator.addScript(resourceLoader.getResource("db-schema-failed-drop-comments.sql"));
-		databasePopulator.addScript(resourceLoader.getResource("db-test-data.sql"));
+	public void buildWithCommentsAndFailedDrop() throws Exception {
+		databasePopulator.addScript(resource("db-schema-failed-drop-comments.sql"));
+		databasePopulator.addScript(resource("db-test-data.sql"));
 		databasePopulator.setIgnoreFailedDrops(true);
-		Connection connection = db.getConnection();
-		try {
-			databasePopulator.populate(connection);
-		}
-		finally {
-			connection.close();
-		}
-
+		DatabasePopulatorUtils.execute(databasePopulator, db);
 		assertTestDatabaseCreated();
 	}
 
 	@Test
-	public void testBuildWithNormalEscapedLiteral() throws Exception {
-		databasePopulator.addScript(resourceLoader.getResource("db-schema.sql"));
-		databasePopulator.addScript(resourceLoader.getResource("db-test-data-escaped-literal.sql"));
-		Connection connection = db.getConnection();
-		try {
-			databasePopulator.populate(connection);
-		}
-		finally {
-			connection.close();
-		}
-
+	public void buildWithNormalEscapedLiteral() throws Exception {
+		databasePopulator.addScript(defaultSchema());
+		databasePopulator.addScript(resource("db-test-data-escaped-literal.sql"));
+		DatabasePopulatorUtils.execute(databasePopulator, db);
 		assertTestDatabaseCreated("'Keith'");
 	}
 
 	@Test
-	public void testBuildWithMySQLEscapedLiteral() throws Exception {
-		databasePopulator.addScript(resourceLoader.getResource("db-schema.sql"));
-		databasePopulator.addScript(resourceLoader.getResource("db-test-data-mysql-escaped-literal.sql"));
-		Connection connection = db.getConnection();
-		try {
-			databasePopulator.populate(connection);
-		}
-		finally {
-			connection.close();
-		}
-
+	public void buildWithMySQLEscapedLiteral() throws Exception {
+		databasePopulator.addScript(defaultSchema());
+		databasePopulator.addScript(resource("db-test-data-mysql-escaped-literal.sql"));
+		DatabasePopulatorUtils.execute(databasePopulator, db);
 		assertTestDatabaseCreated("\\$Keith\\$");
 	}
 
 	@Test
-	public void testBuildWithMultipleStatements() throws Exception {
-		databasePopulator.addScript(resourceLoader.getResource("db-schema.sql"));
-		databasePopulator.addScript(resourceLoader.getResource("db-test-data-multiple.sql"));
-		Connection connection = db.getConnection();
-		try {
-			databasePopulator.populate(connection);
-		}
-		finally {
-			connection.close();
-		}
-
-		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Keith'", Integer.class), equalTo(1));
-		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Dave'", Integer.class), equalTo(1));
+	public void buildWithMultipleStatements() throws Exception {
+		databasePopulator.addScript(defaultSchema());
+		databasePopulator.addScript(resource("db-test-data-multiple.sql"));
+		DatabasePopulatorUtils.execute(databasePopulator, db);
+		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Keith'", Integer.class),
+			equalTo(1));
+		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Dave'", Integer.class),
+			equalTo(1));
 	}
 
 	@Test
-	public void testBuildWithMultipleStatementsLongSeparator() throws Exception {
-		databasePopulator.addScript(resourceLoader.getResource("db-schema.sql"));
-		databasePopulator.addScript(resourceLoader.getResource("db-test-data-endings.sql"));
+	public void buildWithMultipleStatementsLongSeparator() throws Exception {
+		databasePopulator.addScript(defaultSchema());
+		databasePopulator.addScript(resource("db-test-data-endings.sql"));
 		databasePopulator.setSeparator("@@");
-		Connection connection = db.getConnection();
-		try {
-			databasePopulator.populate(connection);
-		}
-		finally {
-			connection.close();
-		}
-
-		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Keith'", Integer.class), equalTo(1));
-		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Dave'", Integer.class), equalTo(1));
+		DatabasePopulatorUtils.execute(databasePopulator, db);
+		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Keith'", Integer.class),
+			equalTo(1));
+		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Dave'", Integer.class),
+			equalTo(1));
 	}
 
 	@Test
-	public void testBuildWithMultipleStatementsWhitespaceSeparator() throws Exception {
-		databasePopulator.addScript(resourceLoader.getResource("db-schema.sql"));
-		databasePopulator.addScript(resourceLoader.getResource("db-test-data-whitespace.sql"));
+	public void buildWithMultipleStatementsWhitespaceSeparator() throws Exception {
+		databasePopulator.addScript(defaultSchema());
+		databasePopulator.addScript(resource("db-test-data-whitespace.sql"));
 		databasePopulator.setSeparator("/\n");
-		Connection connection = db.getConnection();
-		try {
-			databasePopulator.populate(connection);
-		}
-		finally {
-			connection.close();
-		}
-
-		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Keith'", Integer.class), equalTo(1));
-		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Dave'", Integer.class), equalTo(1));
+		DatabasePopulatorUtils.execute(databasePopulator, db);
+		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Keith'", Integer.class),
+			equalTo(1));
+		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Dave'", Integer.class),
+			equalTo(1));
 	}
 
 	@Test
-	public void testBuildWithMultipleStatementsNewlineSeparator() throws Exception {
-		databasePopulator.addScript(resourceLoader.getResource("db-schema.sql"));
-		databasePopulator.addScript(resourceLoader.getResource("db-test-data-newline.sql"));
-		Connection connection = db.getConnection();
-		try {
-			databasePopulator.populate(connection);
-		}
-		finally {
-			connection.close();
-		}
-
-		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Keith'", Integer.class), equalTo(1));
-		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Dave'", Integer.class), equalTo(1));
+	public void buildWithMultipleStatementsNewlineSeparator() throws Exception {
+		databasePopulator.addScript(defaultSchema());
+		databasePopulator.addScript(resource("db-test-data-newline.sql"));
+		DatabasePopulatorUtils.execute(databasePopulator, db);
+		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Keith'", Integer.class),
+			equalTo(1));
+		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Dave'", Integer.class),
+			equalTo(1));
 	}
 
 	@Test
-	public void testBuildWithMultipleStatementsMultipleNewlineSeparator() throws Exception {
-		databasePopulator.addScript(resourceLoader.getResource("db-schema.sql"));
-		databasePopulator.addScript(resourceLoader.getResource("db-test-data-multi-newline.sql"));
+	public void buildWithMultipleStatementsMultipleNewlineSeparator() throws Exception {
+		databasePopulator.addScript(defaultSchema());
+		databasePopulator.addScript(resource("db-test-data-multi-newline.sql"));
 		databasePopulator.setSeparator("\n\n");
-		Connection connection = db.getConnection();
-		try {
-			databasePopulator.populate(connection);
-		}
-		finally {
-			connection.close();
-		}
-
-		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Keith'", Integer.class), equalTo(1));
-		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Dave'", Integer.class), equalTo(1));
+		DatabasePopulatorUtils.execute(databasePopulator, db);
+		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Keith'", Integer.class),
+			equalTo(1));
+		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Dave'", Integer.class),
+			equalTo(1));
 	}
 
 	@Test
 	public void scriptWithEolBetweenTokens() throws Exception {
-		databasePopulator.addScript(resourceLoader.getResource("users-schema.sql"));
-		databasePopulator.addScript(resourceLoader.getResource("users-data.sql"));
-		Connection connection = db.getConnection();
-		try {
-			databasePopulator.populate(connection);
-		}
-		finally {
-			connection.close();
-		}
-
+		databasePopulator.addScript(usersSchema());
+		databasePopulator.addScript(resource("users-data.sql"));
+		DatabasePopulatorUtils.execute(databasePopulator, db);
 		assertUsersDatabaseCreated("Brannen");
 	}
 
 	@Test
 	public void scriptWithCommentsWithinStatements() throws Exception {
-		databasePopulator.addScript(resourceLoader.getResource("users-schema.sql"));
-		databasePopulator.addScript(resourceLoader.getResource("users-data-with-comments.sql"));
-		Connection connection = db.getConnection();
-		try {
-			databasePopulator.populate(connection);
-		}
-		finally {
-			connection.close();
-		}
-
+		databasePopulator.addScript(usersSchema());
+		databasePopulator.addScript(resource("users-data-with-comments.sql"));
+		DatabasePopulatorUtils.execute(databasePopulator, db);
 		assertUsersDatabaseCreated("Brannen", "Hoeller");
 	}
 
 	@Test
-	public void testBuildWithSelectStatements() throws Exception {
-		databasePopulator.addScript(resourceLoader.getResource("db-schema.sql"));
-		databasePopulator.addScript(resourceLoader.getResource("db-test-data-select.sql"));
-		Connection connection = db.getConnection();
-		try {
-			databasePopulator.populate(connection);
-		}
-		finally {
-			connection.close();
-		}
+	public void constructorWithMultipleScriptResources() throws Exception {
+		final ResourceDatabasePopulator populator = new ResourceDatabasePopulator(false, false, null, usersSchema(),
+			resource("users-data-with-comments.sql"));
+		DatabasePopulatorUtils.execute(populator, db);
+		assertUsersDatabaseCreated("Brannen", "Hoeller");
+	}
 
-		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Keith'", Integer.class), equalTo(1));
-		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Dave'", Integer.class), equalTo(1));
+	@Test
+	public void buildWithSelectStatements() throws Exception {
+		databasePopulator.addScript(defaultSchema());
+		databasePopulator.addScript(resource("db-test-data-select.sql"));
+		DatabasePopulatorUtils.execute(databasePopulator, db);
+		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Keith'", Integer.class),
+			equalTo(1));
+		assertThat(jdbcTemplate.queryForObject("select COUNT(NAME) from T_TEST where NAME='Dave'", Integer.class),
+			equalTo(1));
 	}
 
 	/**
@@ -266,16 +221,9 @@ public class DatabasePopulatorTests {
 	 */
 	@Test(timeout = 1000)
 	public void executesHugeScriptInReasonableTime() throws SQLException {
-		databasePopulator.addScript(resourceLoader.getResource("db-schema.sql"));
-		databasePopulator.addScript(resourceLoader.getResource("db-test-data-huge.sql"));
-
-		Connection connection = db.getConnection();
-		try {
-			databasePopulator.populate(connection);
-		}
-		finally {
-			connection.close();
-		}
+		databasePopulator.addScript(defaultSchema());
+		databasePopulator.addScript(resource("db-test-data-huge.sql"));
+		DatabasePopulatorUtils.execute(databasePopulator, db);
 	}
 
 }
