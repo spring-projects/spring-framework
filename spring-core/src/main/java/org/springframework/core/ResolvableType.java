@@ -180,38 +180,40 @@ public final class ResolvableType implements Serializable {
 	}
 
 	/**
-	 * Determines if this {@code ResolvableType} is assignable from the specified
-	 * {@code type}. Attempts to follow the same rules as the Java compiler, considering
-	 * if both the {@link #resolve() resolved} {@code Class} is
-	 * {@link Class#isAssignableFrom(Class) assignable from} the given {@code type} as
-	 * well as if all {@link #getGenerics() generics} are assignable.
-	 * @param type the type to be checked
-	 * @return {@code true} if the specified {@code type} can be assigned to this {@code type}
+	 * Determine whether this {@code ResolvableType} is assignable from the
+	 * specified other type.
+	 * <p>Attempts to follow the same rules as the Java compiler, considering
+	 * whether both the {@link #resolve() resolved} {@code Class} is
+	 * {@link Class#isAssignableFrom(Class) assignable from} the given type
+	 * as well as whether all {@link #getGenerics() generics} are assignable.
+	 * @param other the type to be checked against
+	 * @return {@code true} if the specified other type can be assigned to this
+	 * {@code ResolvableType}; {@code false} otherwise
 	 */
-	public boolean isAssignableFrom(ResolvableType type) {
-		return isAssignableFrom(type, null);
+	public boolean isAssignableFrom(ResolvableType other) {
+		return isAssignableFrom(other, null);
 	}
 
-	private boolean isAssignableFrom(ResolvableType type, Map<ResolvableType, ResolvableType> matchedBefore) {
-		Assert.notNull(type, "Type must not be null");
+	private boolean isAssignableFrom(ResolvableType other, Map<Type, Type> matchedBefore) {
+		Assert.notNull(other, "ResolvableType must not be null");
 
 		// If we cannot resolve types, we are not assignable
-		if (this == NONE || type == NONE) {
+		if (this == NONE || other == NONE) {
 			return false;
 		}
 
 		// Deal with array by delegating to the component type
 		if (isArray()) {
-			return (type.isArray() && getComponentType().isAssignableFrom(type.getComponentType()));
+			return (other.isArray() && getComponentType().isAssignableFrom(other.getComponentType()));
 		}
 
-		if (matchedBefore != null && matchedBefore.get(this) == type) {
+		if (matchedBefore != null && matchedBefore.get(this.type) == other.type) {
 			return true;
 		}
 
 		// Deal with wildcard bounds
 		WildcardBounds ourBounds = WildcardBounds.get(this);
-		WildcardBounds typeBounds = WildcardBounds.get(type);
+		WildcardBounds typeBounds = WildcardBounds.get(other);
 
 		// In the from X is assignable to <? extends Number>
 		if (typeBounds != null) {
@@ -221,7 +223,7 @@ public final class ResolvableType implements Serializable {
 
 		// In the form <? extends Number> is assignable to X...
 		if (ourBounds != null) {
-			return ourBounds.isAssignableFrom(type);
+			return ourBounds.isAssignableFrom(other);
 		}
 
 		// Main assignability check about to follow
@@ -239,8 +241,8 @@ public final class ResolvableType implements Serializable {
 			}
 			if (ourResolved == null) {
 				// Try variable resolution against target type
-				if (type.variableResolver != null) {
-					ResolvableType resolved = type.variableResolver.resolveVariable(variable);
+				if (other.variableResolver != null) {
+					ResolvableType resolved = other.variableResolver.resolveVariable(variable);
 					if (resolved != null) {
 						ourResolved = resolved.resolve();
 						checkGenerics = false;
@@ -255,25 +257,25 @@ public final class ResolvableType implements Serializable {
 		if (ourResolved == null) {
 			ourResolved = resolve(Object.class);
 		}
-		Class<?> typeResolved = type.resolve(Object.class);
+		Class<?> otherResolved = other.resolve(Object.class);
 
 		// We need an exact type match for generics
 		// List<CharSequence> is not assignable from List<String>
-		if (exactMatch ? !ourResolved.equals(typeResolved) : !ClassUtils.isAssignable(ourResolved, typeResolved)) {
+		if (exactMatch ? !ourResolved.equals(otherResolved) : !ClassUtils.isAssignable(ourResolved, otherResolved)) {
 			return false;
 		}
 
 		if (checkGenerics) {
 			// Recursively check each generic
 			ResolvableType[] ourGenerics = getGenerics();
-			ResolvableType[] typeGenerics = type.as(ourResolved).getGenerics();
+			ResolvableType[] typeGenerics = other.as(ourResolved).getGenerics();
 			if (ourGenerics.length != typeGenerics.length) {
 				return false;
 			}
 			if (matchedBefore == null) {
-				matchedBefore = new IdentityHashMap<ResolvableType, ResolvableType>(1);
+				matchedBefore = new IdentityHashMap<Type, Type>(1);
 			}
-			matchedBefore.put(this, type);
+			matchedBefore.put(this.type, other.type);
 			for (int i = 0; i < ourGenerics.length; i++) {
 				if (!ourGenerics[i].isAssignableFrom(typeGenerics[i], matchedBefore)) {
 					return false;
@@ -599,10 +601,10 @@ public final class ResolvableType implements Serializable {
 	}
 
 	/**
-	 * Convenience method that will {@link #getGenerics() get} and {@link #resolve()
-	 * resolve} generic parameters.
-	 * @return an array of resolved generic parameters (the resulting array will never be
-	 * {@code null}, but it may contain {@code null} elements})
+	 * Convenience method that will {@link #getGenerics() get} and
+	 * {@link #resolve() resolve} generic parameters.
+	 * @return an array of resolved generic parameters (the resulting array
+	 * will never be {@code null}, but it may contain {@code null} elements})
 	 * @see #getGenerics()
 	 * @see #resolve()
 	 */
