@@ -17,7 +17,13 @@
 package org.springframework.messaging.simp.annotation.support;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -33,21 +39,25 @@ import org.springframework.messaging.converter.CompositeMessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.core.AbstractMessageSendingTemplate;
+import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.support.*;
+import org.springframework.messaging.handler.annotation.support.AnnotationExceptionHandlerMethodResolver;
 import org.springframework.messaging.handler.annotation.support.DestinationVariableMethodArgumentResolver;
+import org.springframework.messaging.handler.annotation.support.HeaderMethodArgumentResolver;
+import org.springframework.messaging.handler.annotation.support.HeadersMethodArgumentResolver;
+import org.springframework.messaging.handler.annotation.support.MessageMethodArgumentResolver;
+import org.springframework.messaging.handler.annotation.support.PayloadArgumentResolver;
 import org.springframework.messaging.handler.invocation.AbstractExceptionHandlerMethodResolver;
 import org.springframework.messaging.handler.invocation.AbstractMethodMessageHandler;
-import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessageMappingInfo;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.messaging.simp.SimpMessageTypeMessageCondition;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
-import org.springframework.messaging.simp.SimpMessageMappingInfo;
-import org.springframework.messaging.simp.SimpMessageTypeMessageCondition;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
@@ -58,11 +68,10 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 /**
- * A handler for messages delegating to
- * {@link org.springframework.messaging.simp.annotation.SubscribeMapping @SubscribeMapping} and
- * {@link MessageMapping @MessageMapping} annotated methods.
- * <p>
- * Supports Ant-style path patterns with template variables.
+ * A handler for messages delegating to {@link MessageMapping @MessageMapping}
+ * and {@link SubscribeMapping @SubscribeMapping} annotated methods.
+ *
+ * <p>Supports Ant-style path patterns with template variables.
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
@@ -93,7 +102,6 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	/**
 	 * Create an instance of SimpAnnotationMethodMessageHandler with the given
 	 * message channels and broker messaging template.
-	 *
 	 * @param clientInboundChannel the channel for receiving messages from clients (e.g. WebSocket clients)
 	 * @param clientOutboundChannel the channel for messages to clients (e.g. WebSocket clients)
 	 * @param brokerTemplate a messaging template to send application messages to the broker
@@ -185,6 +193,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		this.validator = validator;
 	}
 
+
 	@Override
 	public boolean isAutoStartup() {
 		return true;
@@ -226,8 +235,8 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		}
 	}
 
-	protected List<HandlerMethodArgumentResolver> initArgumentResolvers() {
 
+	protected List<HandlerMethodArgumentResolver> initArgumentResolvers() {
 		ConfigurableBeanFactory beanFactory =
 				(ClassUtils.isAssignableValue(ConfigurableApplicationContext.class, getApplicationContext())) ?
 						((ConfigurableApplicationContext) getApplicationContext()).getBeanFactory() : null;
@@ -245,14 +254,13 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 		resolvers.addAll(getCustomArgumentResolvers());
 		resolvers.add(new PayloadArgumentResolver(this.messageConverter,
-				this.validator != null ? this.validator : new NoopValidator()));
+				(this.validator != null ? this.validator : new NoopValidator())));
 
 		return resolvers;
 	}
 
 	@Override
 	protected List<? extends HandlerMethodReturnValueHandler> initReturnValueHandlers() {
-
 		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<HandlerMethodReturnValueHandler>();
 
 		// Annotation-based return value types
@@ -276,7 +284,6 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	@Override
 	protected SimpMessageMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
-
 		MessageMapping typeAnnot = AnnotationUtils.findAnnotation(handlerType, MessageMapping.class);
 		MessageMapping messageAnnot = AnnotationUtils.findAnnotation(method, MessageMapping.class);
 		if (messageAnnot != null) {
@@ -312,9 +319,9 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	@Override
 	protected Set<String> getDirectLookupDestinations(SimpMessageMappingInfo mapping) {
 		Set<String> result = new LinkedHashSet<String>();
-		for (String s : mapping.getDestinationConditions().getPatterns()) {
-			if (!this.pathMatcher.isPattern(s)) {
-				result.add(s);
+		for (String pattern : mapping.getDestinationConditions().getPatterns()) {
+			if (!this.pathMatcher.isPattern(pattern)) {
+				result.add(pattern);
 			}
 		}
 		return result;
@@ -362,14 +369,17 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		return new AnnotationExceptionHandlerMethodResolver(beanType);
 	}
 
+
 	private static final class NoopValidator implements Validator {
+
 		@Override
 		public boolean supports(Class<?> clazz) {
 			return false;
 		}
+
 		@Override
 		public void validate(Object target, Errors errors) {
 		}
-	};
+	}
 
 }

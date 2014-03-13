@@ -35,12 +35,14 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * {@link javax.servlet.Filter} that generates an {@code ETag} value based on the content on the response.
- * This ETag is compared to the {@code If-None-Match} header of the request. If these headers are equal,
- * the response content is not sent, but rather a {@code 304 "Not Modified"} status instead.
+ * {@link javax.servlet.Filter} that generates an {@code ETag} value based on the
+ * content on the response. This ETag is compared to the {@code If-None-Match}
+ * header of the request. If these headers are equal, the response content is
+ * not sent, but rather a {@code 304 "Not Modified"} status instead.
  *
- * <p>Since the ETag is based on the response content, the response (or {@link org.springframework.web.servlet.View})
- * is still rendered. As such, this filter only saves bandwidth, not server performance.
+ * <p>Since the ETag is based on the response content, the response
+ * (e.g. a {@link org.springframework.web.servlet.View}) is still rendered.
+ * As such, this filter only saves bandwidth, not server performance.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -82,12 +84,11 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	}
 
 	private void updateResponse(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
-		ShallowEtagResponseWrapper  responseWrapper = WebUtils.getNativeResponse(response, ShallowEtagResponseWrapper.class);
+		ShallowEtagResponseWrapper responseWrapper =
+				WebUtils.getNativeResponse(response, ShallowEtagResponseWrapper.class);
 		Assert.notNull(responseWrapper, "ShallowEtagResponseWrapper not found");
 
 		response = (HttpServletResponse) responseWrapper.getResponse();
-
 		byte[] body = responseWrapper.toByteArray();
 		int statusCode = responseWrapper.getStatusCode();
 
@@ -131,9 +132,8 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	 * <ul>
 	 * <li>response status codes in the {@code 2xx} series</li>
 	 * <li>request method is a GET</li>
-	 * <li>response Cache-Control header is null or does not contain a "no-store" directive</li>
+	 * <li>response Cache-Control header is not set or does not contain a "no-store" directive</li>
 	 * </ul>
-	 *
 	 * @param request the HTTP request
 	 * @param response the HTTP response
 	 * @param responseStatusCode the HTTP response status code
@@ -143,10 +143,14 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	protected boolean isEligibleForEtag(HttpServletRequest request, HttpServletResponse response,
 			int responseStatusCode, byte[] responseBody) {
 
-		return (responseStatusCode >= 200 && responseStatusCode < 300)
-				&& HttpMethod.GET.name().equals(request.getMethod())
-				&& (response.getHeader(HEADER_CACHE_CONTROL) == null
-					|| !response.getHeader(HEADER_CACHE_CONTROL).contains(DIRECTIVE_NO_STORE));
+		if (responseStatusCode >= 200 && responseStatusCode < 300 &&
+				HttpMethod.GET.name().equals(request.getMethod())) {
+			String cacheControl = response.getHeader(HEADER_CACHE_CONTROL);
+			if (cacheControl == null || !cacheControl.contains(DIRECTIVE_NO_STORE)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -239,7 +243,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 		}
 
 		private int getStatusCode() {
-			return statusCode;
+			return this.statusCode;
 		}
 
 		private byte[] toByteArray() {
