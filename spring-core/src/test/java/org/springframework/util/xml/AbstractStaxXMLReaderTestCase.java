@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,14 @@
 package org.springframework.util.xml;
 
 import java.io.InputStream;
-
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 
 import org.junit.Before;
 import org.junit.Test;
+import static org.mockito.BDDMockito.*;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.tests.MockitoUtils;
-import org.springframework.tests.MockitoUtils.InvocationArgumentsAdapter;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
@@ -38,7 +34,10 @@ import org.xml.sax.ext.LexicalHandler;
 import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.XMLReaderFactory;
 
-import static org.mockito.BDDMockito.*;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.tests.MockitoUtils;
+import org.springframework.tests.MockitoUtils.InvocationArgumentsAdapter;
 
 public abstract class AbstractStaxXMLReaderTestCase {
 
@@ -224,6 +223,9 @@ public abstract class AbstractStaxXMLReaderTestCase {
 		@Override
 		public boolean equals(Object obj) {
 			Attributes other = ((PartialAttributes) obj).attributes;
+			if (this.attributes.getLength() != other.getLength()) {
+				return false;
+			}
 			for (int i = 0; i < other.getLength(); i++) {
 				boolean found = false;
 				for (int j = 0; j < attributes.getLength(); j++) {

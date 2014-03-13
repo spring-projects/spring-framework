@@ -27,8 +27,11 @@ import java.lang.reflect.Constructor;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import javax.xml.stream.*;
-import javax.xml.transform.stax.StAXSource;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLEventWriter;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.stream.StreamSource;
 
 import com.thoughtworks.xstream.MarshallingStrategy;
@@ -625,7 +628,11 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	@Override
 	protected void marshalXmlEventWriter(Object graph, XMLEventWriter eventWriter) throws XmlMappingException {
 		ContentHandler contentHandler = StaxUtils.createContentHandler(eventWriter);
-		marshalSaxHandlers(graph, contentHandler, null);
+		LexicalHandler lexicalHandler = null;
+		if (contentHandler instanceof LexicalHandler) {
+			lexicalHandler = (LexicalHandler) contentHandler;
+		}
+		marshalSaxHandlers(graph, contentHandler, lexicalHandler);
 	}
 
 	@Override

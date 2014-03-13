@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -217,7 +217,7 @@ public abstract class StaxUtils {
 	 * @return a content handler writing to the {@code streamWriter}
 	 */
 	public static ContentHandler createContentHandler(XMLStreamWriter streamWriter) {
-		return new StaxStreamContentHandler(streamWriter);
+		return new StaxStreamHandler(streamWriter);
 	}
 
 	/**
@@ -226,7 +226,7 @@ public abstract class StaxUtils {
 	 * @return a content handler writing to the {@code eventWriter}
 	 */
 	public static ContentHandler createContentHandler(XMLEventWriter eventWriter) {
-		return new StaxEventContentHandler(eventWriter);
+		return new StaxEventHandler(eventWriter);
 	}
 
 	/**
