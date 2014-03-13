@@ -145,7 +145,7 @@ abstract class MetaAnnotationUtils {
 	 *
 	 * <p>This method traverses the annotations and superclasses of the specified
 	 * {@code clazz} if no annotation can be found on the given class itself.
-	 * 
+	 *
 	 * <p>This method explicitly handles class-level annotations which are not
 	 * declared as {@linkplain java.lang.annotation.Inherited inherited} <em>as
 	 * well as meta-annotations</em>.

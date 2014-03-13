@@ -255,7 +255,7 @@ public class JdbcTestUtils {
 	 * @param commentPrefix the prefix that identifies comments in the SQL script &mdash; typically "--"
 	 * @return a {@code String} containing the script lines
 	 * @deprecated as of Spring 4.0.3, in favor of using
-	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#readScript(LineNumberReader, String, String)}  
+	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#readScript(LineNumberReader, String, String)} 
 	 */
 	@Deprecated
 	public static String readScript(LineNumberReader lineNumberReader, String commentPrefix) throws IOException {
@@ -287,7 +287,7 @@ public class JdbcTestUtils {
 	 * @param delim character delimiting each statement &mdash; typically a ';' character
 	 * @param statements the list that will contain the individual statements
 	 * @deprecated as of Spring 4.0.3, in favor of using
-	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#splitSqlScript(String, char, List)}  
+	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#splitSqlScript(String, char, List)} 
 	 */
 	@Deprecated
 	public static void splitSqlScript(String script, char delim, List<String> statements) {
