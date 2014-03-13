@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,11 @@ import java.text.ParseException;
  * @since 1.1.2
  */
 public abstract class NumberUtils {
+
+	private static final BigInteger LONG_MIN = BigInteger.valueOf(Long.MIN_VALUE);
+
+	private static final BigInteger LONG_MAX = BigInteger.valueOf(Long.MAX_VALUE);
+
 
 	/**
 	 * Convert the given number into an instance of the given target class.
@@ -81,6 +86,17 @@ public abstract class NumberUtils {
 			return (T) new Integer(number.intValue());
 		}
 		else if (targetClass.equals(Long.class)) {
+			BigInteger bigInt = null;
+			if (number instanceof BigInteger) {
+				bigInt = (BigInteger) number;
+			}
+			else if (number instanceof BigDecimal) {
+				bigInt = ((BigDecimal) number).toBigInteger();
+			}
+			// Effectively analogous to JDK 8's BigInteger.longValueExact()
+			if (bigInt != null && (bigInt.compareTo(LONG_MIN) < 0 || bigInt.compareTo(LONG_MAX) > 0)) {
+				raiseOverflowException(number, targetClass);
+			}
 			return (T) new Long(number.longValue());
 		}
 		else if (targetClass.equals(BigInteger.class)) {
