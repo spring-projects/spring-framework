@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -509,12 +509,22 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 
 	@Override
 	protected void marshalXmlEventWriter(Object graph, XMLEventWriter eventWriter) throws XmlMappingException {
-		marshalSaxHandlers(graph, StaxUtils.createContentHandler(eventWriter), null);
+		ContentHandler contentHandler = StaxUtils.createContentHandler(eventWriter);
+		LexicalHandler lexicalHandler = null;
+		if (contentHandler instanceof LexicalHandler) {
+			lexicalHandler = (LexicalHandler) contentHandler;
+		}
+		marshalSaxHandlers(graph, contentHandler, lexicalHandler);
 	}
 
 	@Override
 	protected void marshalXmlStreamWriter(Object graph, XMLStreamWriter streamWriter) throws XmlMappingException {
-		marshalSaxHandlers(graph, StaxUtils.createContentHandler(streamWriter), null);
+		ContentHandler contentHandler = StaxUtils.createContentHandler(streamWriter);
+		LexicalHandler lexicalHandler = null;
+		if (contentHandler instanceof LexicalHandler) {
+			lexicalHandler = (LexicalHandler) contentHandler;
+		}
+		marshalSaxHandlers(graph, StaxUtils.createContentHandler(streamWriter), lexicalHandler);
 	}
 
 	@Override

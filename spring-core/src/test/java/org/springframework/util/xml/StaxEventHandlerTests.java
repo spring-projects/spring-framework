@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,22 @@
 
 package org.springframework.util.xml;
 
-import java.io.Writer;
+import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.transform.Result;
 
-public class StaxStreamContentHandlerTests extends AbstractStaxContentHandlerTestCase {
+/**
+ * @author Arjen Poutsma
+ */
+public class StaxEventHandlerTests extends AbstractStaxHandlerTestCase {
 
 	@Override
-	protected AbstractStaxContentHandler createStaxContentHandler(Writer writer) throws XMLStreamException {
-		XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
-		return new StaxStreamContentHandler(outputFactory.createXMLStreamWriter(writer));
+	protected AbstractStaxHandler createStaxHandler(Result result)
+			throws XMLStreamException {
+		XMLOutputFactory outputFactory = XMLOutputFactory.newFactory();
+		XMLEventWriter eventWriter = outputFactory.createXMLEventWriter(result);
+		return new StaxEventHandler(eventWriter);
 	}
+
 }

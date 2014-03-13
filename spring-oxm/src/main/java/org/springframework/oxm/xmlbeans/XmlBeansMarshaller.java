@@ -21,10 +21,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
 import java.lang.ref.WeakReference;
 import java.nio.CharBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamReader;
@@ -142,13 +142,21 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 	@Override
 	protected void marshalXmlEventWriter(Object graph, XMLEventWriter eventWriter) {
 		ContentHandler contentHandler = StaxUtils.createContentHandler(eventWriter);
-		marshalSaxHandlers(graph, contentHandler, null);
+		LexicalHandler lexicalHandler = null;
+		if (contentHandler instanceof LexicalHandler) {
+			lexicalHandler = (LexicalHandler) contentHandler;
+		}
+		marshalSaxHandlers(graph, contentHandler, lexicalHandler);
 	}
 
 	@Override
 	protected void marshalXmlStreamWriter(Object graph, XMLStreamWriter streamWriter) throws XmlMappingException {
 		ContentHandler contentHandler = StaxUtils.createContentHandler(streamWriter);
-		marshalSaxHandlers(graph, contentHandler, null);
+		LexicalHandler lexicalHandler = null;
+		if (contentHandler instanceof LexicalHandler) {
+			lexicalHandler = (LexicalHandler) contentHandler;
+		}
+		marshalSaxHandlers(graph, contentHandler, lexicalHandler);
 	}
 
 	@Override
