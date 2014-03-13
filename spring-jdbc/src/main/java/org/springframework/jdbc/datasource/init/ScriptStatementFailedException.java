@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,15 @@ package org.springframework.jdbc.datasource.init;
 import org.springframework.core.io.support.EncodedResource;
 
 /**
- * Thrown by {@link ResourceDatabasePopulator} if a statement in one of its SQL scripts
- * failed when executing it against the target database.
+ * Thrown by {@link ScriptUtils} if a statement in an SQL script failed when
+ * executing it against the target database.
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 3.0.5
  */
 @SuppressWarnings("serial")
-public class ScriptStatementFailedException extends RuntimeException {
+public class ScriptStatementFailedException extends ScriptException {
 
 	/**
 	 * Construct a new {@code ScriptStatementFailedException}.
@@ -37,8 +37,8 @@ public class ScriptStatementFailedException extends RuntimeException {
 	 * @param cause the underlying cause of the failure
 	 */
 	public ScriptStatementFailedException(String statement, int lineNumber, EncodedResource resource, Throwable cause) {
-		super("Failed to execute SQL script statement at line " + lineNumber +
-				" of resource " + resource + ": " + statement, cause);
+		super("Failed to execute SQL script statement at line " + lineNumber + " of resource " + resource + ": "
+				+ statement, cause);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,10 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.EncodedResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
@@ -171,21 +172,24 @@ public abstract class AbstractTransactionalJUnit4SpringContextTests extends Abst
 	/**
 	 * Execute the given SQL script.
 	 * <p>Use with caution outside of a transaction!
-	 * <p>The script will normally be loaded by classpath. There should be one
-	 * statement per line. Any semicolons will be removed. <b>Do not use this
-	 * method to execute DDL if you expect rollback.</b>
+	 * <p>The script will normally be loaded by classpath.
+	 * <p><b>Do not use this method to execute DDL if you expect rollback.</b>
 	 * @param sqlResourcePath the Spring resource path for the SQL script
 	 * @param continueOnError whether or not to continue without throwing an
 	 * exception in the event of an error
 	 * @throws DataAccessException if there is an error executing a statement
-	 * and continueOnError was {@code false}
-	 * @see JdbcTestUtils#executeSqlScript(JdbcTemplate, EncodedResource, boolean)
+	 * @see ResourceDatabasePopulator
+	 * @see DatabasePopulatorUtils
 	 * @see #setSqlScriptEncoding
 	 */
 	protected void executeSqlScript(String sqlResourcePath, boolean continueOnError) throws DataAccessException {
 		Resource resource = this.applicationContext.getResource(sqlResourcePath);
-		JdbcTestUtils.executeSqlScript(this.jdbcTemplate, new EncodedResource(resource, this.sqlScriptEncoding),
-			continueOnError);
+		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
+		databasePopulator.setContinueOnError(continueOnError);
+		databasePopulator.addScript(resource);
+		databasePopulator.setSqlScriptEncoding(this.sqlScriptEncoding);
+
+		DatabasePopulatorUtils.execute(databasePopulator, jdbcTemplate.getDataSource());
 	}
 
 }

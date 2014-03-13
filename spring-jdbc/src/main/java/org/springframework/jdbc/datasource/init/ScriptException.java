@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,25 +16,30 @@
 
 package org.springframework.jdbc.datasource.init;
 
-import org.springframework.core.io.support.EncodedResource;
-
 /**
- * Thrown by {@link ScriptUtils} if an SQL script cannot be read.
+ * Root of the hierarchy of SQL script exceptions.
  *
- * @author Keith Donald
  * @author Sam Brannen
- * @since 3.0
+ * @since 4.0.3
  */
 @SuppressWarnings("serial")
-public class CannotReadScriptException extends ScriptException {
+public abstract class ScriptException extends RuntimeException {
 
 	/**
-	 * Construct a new {@code CannotReadScriptException}.
-	 * @param resource the resource that cannot be read from
-	 * @param cause the underlying cause of the resource access failure
+	 * Constructor for {@code ScriptException}.
+	 * @param message the detail message
 	 */
-	public CannotReadScriptException(EncodedResource resource, Throwable cause) {
-		super("Cannot read SQL script from " + resource, cause);
+	public ScriptException(String message) {
+		super(message);
+	}
+
+	/**
+	 * Constructor for {@code ScriptException}.
+	 * @param message the detail message
+	 * @param cause the root cause
+	 */
+	public ScriptException(String message, Throwable cause) {
+		super(message, cause);
 	}
 
 }

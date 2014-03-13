@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,20 @@ package org.springframework.test.jdbc;
 
 import java.io.IOException;
 import java.io.LineNumberReader;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameterValue;
+import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -41,15 +42,12 @@ import org.springframework.util.StringUtils;
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Chris Baldwin
  * @since 2.5.4
  */
 public class JdbcTestUtils {
 
 	private static final Log logger = LogFactory.getLog(JdbcTestUtils.class);
-
-	private static final String DEFAULT_COMMENT_PREFIX = "--";
-
-	private static final char DEFAULT_STATEMENT_SEPARATOR = ';';
 
 
 	/**
@@ -121,14 +119,13 @@ public class JdbcTestUtils {
 	 * optionally the scale.
 	 * @return the number of rows deleted from the table
 	 */
-	public static int deleteFromTableWhere(JdbcTemplate jdbcTemplate, String tableName,
-			String whereClause, Object... args) {
+	public static int deleteFromTableWhere(JdbcTemplate jdbcTemplate, String tableName, String whereClause,
+			Object... args) {
 		String sql = "DELETE FROM " + tableName;
 		if (StringUtils.hasText(whereClause)) {
 			sql += " WHERE " + whereClause;
 		}
-		int rowCount = (args != null && args.length > 0 ? jdbcTemplate.update(sql, args)
-				: jdbcTemplate.update(sql));
+		int rowCount = (args != null && args.length > 0 ? jdbcTemplate.update(sql, args) : jdbcTemplate.update(sql));
 		if (logger.isInfoEnabled()) {
 			logger.info("Deleted " + rowCount + " rows from table " + tableName);
 		}
@@ -162,8 +159,13 @@ public class JdbcTestUtils {
 	 * @throws DataAccessException if there is an error executing a statement
 	 * and {@code continueOnError} is {@code false}
 	 * @see ResourceDatabasePopulator
+	 * @see DatabasePopulatorUtils
 	 * @see #executeSqlScript(JdbcTemplate, Resource, boolean)
+	 * @deprecated as of Spring 4.0.3, in favor of using
+	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#executeSqlScript}
+	 * or {@link org.springframework.jdbc.datasource.init.ResourceDatabasePopulator}.
 	 */
+	@Deprecated
 	public static void executeSqlScript(JdbcTemplate jdbcTemplate, ResourceLoader resourceLoader,
 			String sqlResourcePath, boolean continueOnError) throws DataAccessException {
 		Resource resource = resourceLoader.getResource(sqlResourcePath);
@@ -185,8 +187,13 @@ public class JdbcTestUtils {
 	 * @throws DataAccessException if there is an error executing a statement
 	 * and {@code continueOnError} is {@code false}
 	 * @see ResourceDatabasePopulator
+	 * @see DatabasePopulatorUtils
 	 * @see #executeSqlScript(JdbcTemplate, EncodedResource, boolean)
+	 * @deprecated as of Spring 4.0.3, in favor of using
+	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#executeSqlScript}
+	 * or {@link org.springframework.jdbc.datasource.init.ResourceDatabasePopulator}.
 	 */
+	@Deprecated
 	public static void executeSqlScript(JdbcTemplate jdbcTemplate, Resource resource, boolean continueOnError)
 			throws DataAccessException {
 		executeSqlScript(jdbcTemplate, new EncodedResource(resource), continueOnError);
@@ -205,63 +212,20 @@ public class JdbcTestUtils {
 	 * @throws DataAccessException if there is an error executing a statement
 	 * and {@code continueOnError} is {@code false}
 	 * @see ResourceDatabasePopulator
+	 * @see DatabasePopulatorUtils
+	 * @deprecated as of Spring 4.0.3, in favor of using
+	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#executeSqlScript}
+	 * or {@link org.springframework.jdbc.datasource.init.ResourceDatabasePopulator}.
 	 */
+	@Deprecated
 	public static void executeSqlScript(JdbcTemplate jdbcTemplate, EncodedResource resource, boolean continueOnError)
 			throws DataAccessException {
+		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
+		databasePopulator.setContinueOnError(continueOnError);
+		databasePopulator.addScript(resource.getResource());
+		databasePopulator.setSqlScriptEncoding(resource.getEncoding());
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Executing SQL script from " + resource);
-		}
-		long startTime = System.currentTimeMillis();
-		List<String> statements = new LinkedList<String>();
-		LineNumberReader reader = null;
-		try {
-			reader = new LineNumberReader(resource.getReader());
-			String script = readScript(reader);
-			char delimiter = DEFAULT_STATEMENT_SEPARATOR;
-			if (!containsSqlScriptDelimiters(script, delimiter)) {
-				delimiter = '\n';
-			}
-			splitSqlScript(script, delimiter, statements);
-			int lineNumber = 0;
-			for (String statement : statements) {
-				lineNumber++;
-				try {
-					int rowsAffected = jdbcTemplate.update(statement);
-					if (logger.isDebugEnabled()) {
-						logger.debug(rowsAffected + " rows affected by SQL: " + statement);
-					}
-				}
-				catch (DataAccessException ex) {
-					if (continueOnError) {
-						if (logger.isWarnEnabled()) {
-							logger.warn("Failed to execute SQL script statement at line " + lineNumber
-									+ " of resource " + resource + ": " + statement, ex);
-						}
-					}
-					else {
-						throw ex;
-					}
-				}
-			}
-			long elapsedTime = System.currentTimeMillis() - startTime;
-			if (logger.isInfoEnabled()) {
-				logger.info(String.format("Executed SQL script from %s in %s ms.", resource, elapsedTime));
-			}
-		}
-		catch (IOException ex) {
-			throw new DataAccessResourceFailureException("Failed to open SQL script from " + resource, ex);
-		}
-		finally {
-			try {
-				if (reader != null) {
-					reader.close();
-				}
-			}
-			catch (IOException ex) {
-				// ignore
-			}
-		}
+		DatabasePopulatorUtils.execute(databasePopulator, jdbcTemplate.getDataSource());
 	}
 
 	/**
@@ -272,9 +236,12 @@ public class JdbcTestUtils {
 	 * to be processed
 	 * @return a {@code String} containing the script lines
 	 * @see #readScript(LineNumberReader, String)
+	 * @deprecated as of Spring 4.0.3, in favor of using
+	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#readScript(LineNumberReader, String, String)}
 	 */
+	@Deprecated
 	public static String readScript(LineNumberReader lineNumberReader) throws IOException {
-		return readScript(lineNumberReader, DEFAULT_COMMENT_PREFIX);
+		return readScript(lineNumberReader, ScriptUtils.DEFAULT_COMMENT_PREFIX);
 	}
 
 	/**
@@ -287,21 +254,12 @@ public class JdbcTestUtils {
 	 * to be processed
 	 * @param commentPrefix the prefix that identifies comments in the SQL script &mdash; typically "--"
 	 * @return a {@code String} containing the script lines
+	 * @deprecated as of Spring 4.0.3, in favor of using
+	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#readScript(LineNumberReader, String, String)}  
 	 */
+	@Deprecated
 	public static String readScript(LineNumberReader lineNumberReader, String commentPrefix) throws IOException {
-		String currentStatement = lineNumberReader.readLine();
-		StringBuilder scriptBuilder = new StringBuilder();
-		while (currentStatement != null) {
-			if (StringUtils.hasText(currentStatement)
-					&& (commentPrefix != null && !currentStatement.startsWith(commentPrefix))) {
-				if (scriptBuilder.length() > 0) {
-					scriptBuilder.append('\n');
-				}
-				scriptBuilder.append(currentStatement);
-			}
-			currentStatement = lineNumberReader.readLine();
-		}
-		return scriptBuilder.toString();
+		return ScriptUtils.readScript(lineNumberReader, commentPrefix, ScriptUtils.DEFAULT_STATEMENT_SEPARATOR);
 	}
 
 	/**
@@ -309,19 +267,12 @@ public class JdbcTestUtils {
 	 * @param script the SQL script
 	 * @param delim character delimiting each statement &mdash; typically a ';' character
 	 * @return {@code true} if the script contains the delimiter; {@code false} otherwise
+	 * @deprecated as of Spring 4.0.3, in favor of using
+	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#containsSqlScriptDelimiters}
 	 */
+	@Deprecated
 	public static boolean containsSqlScriptDelimiters(String script, char delim) {
-		boolean inLiteral = false;
-		char[] content = script.toCharArray();
-		for (int i = 0; i < script.length(); i++) {
-			if (content[i] == '\'') {
-				inLiteral = !inLiteral;
-			}
-			if (content[i] == delim && !inLiteral) {
-				return true;
-			}
-		}
-		return false;
+		return ScriptUtils.containsSqlScriptDelimiters(script, String.valueOf(delim));
 	}
 
 	/**
@@ -335,83 +286,11 @@ public class JdbcTestUtils {
 	 * @param script the SQL script
 	 * @param delim character delimiting each statement &mdash; typically a ';' character
 	 * @param statements the list that will contain the individual statements
+	 * @deprecated as of Spring 4.0.3, in favor of using
+	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#splitSqlScript(String, char, List)}  
 	 */
+	@Deprecated
 	public static void splitSqlScript(String script, char delim, List<String> statements) {
-		splitSqlScript(script, "" + delim, DEFAULT_COMMENT_PREFIX, statements);
+		ScriptUtils.splitSqlScript(script, delim, statements);
 	}
-
-	/**
-	 * Split an SQL script into separate statements delimited by the provided
-	 * delimiter string. Each individual statement will be added to the provided
-	 * {@code List}.
-	 * <p>Within a statement, the provided {@code commentPrefix} will be honored;
-	 * any text beginning with the comment prefix and extending to the end of the
-	 * line will be omitted from the statement. In addition, multiple adjacent
-	 * whitespace characters will be collapsed into a single space.
-	 * @param script the SQL script
-	 * @param delim character delimiting each statement &mdash; typically a ';' character
-	 * @param commentPrefix the prefix that identifies line comments in the SQL script &mdash; typically "--"
-	 * @param statements the List that will contain the individual statements
-	 */
-	private static void splitSqlScript(String script, String delim, String commentPrefix, List<String> statements) {
-		StringBuilder sb = new StringBuilder();
-		boolean inLiteral = false;
-		boolean inEscape = false;
-		char[] content = script.toCharArray();
-		for (int i = 0; i < script.length(); i++) {
-			char c = content[i];
-			if (inEscape) {
-				inEscape = false;
-				sb.append(c);
-				continue;
-			}
-			// MySQL style escapes
-			if (c == '\\') {
-				inEscape = true;
-				sb.append(c);
-				continue;
-			}
-			if (c == '\'') {
-				inLiteral = !inLiteral;
-			}
-			if (!inLiteral) {
-				if (script.startsWith(delim, i)) {
-					// we've reached the end of the current statement
-					if (sb.length() > 0) {
-						statements.add(sb.toString());
-						sb = new StringBuilder();
-					}
-					i += delim.length() - 1;
-					continue;
-				}
-				else if (script.startsWith(commentPrefix, i)) {
-					// skip over any content from the start of the comment to the EOL
-					int indexOfNextNewline = script.indexOf("\n", i);
-					if (indexOfNextNewline > i) {
-						i = indexOfNextNewline;
-						continue;
-					}
-					else {
-						// if there's no newline after the comment, we must be at the end
-						// of the script, so stop here.
-						break;
-					}
-				}
-				else if (c == ' ' || c == '\n' || c == '\t') {
-					// avoid multiple adjacent whitespace characters
-					if (sb.length() > 0 && sb.charAt(sb.length() - 1) != ' ') {
-						c = ' ';
-					}
-					else {
-						continue;
-					}
-				}
-			}
-			sb.append(c);
-		}
-		if (StringUtils.hasText(sb)) {
-			statements.add(sb.toString());
-		}
-	}
-
 }
