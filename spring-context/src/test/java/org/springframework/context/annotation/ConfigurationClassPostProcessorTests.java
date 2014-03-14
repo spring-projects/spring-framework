@@ -19,6 +19,7 @@ package org.springframework.context.annotation;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.aop.scope.ScopedObject;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.io.DescriptiveResource;
+import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.junit.Assert.*;
@@ -137,6 +139,21 @@ public class ConfigurationClassPostProcessorTests {
 		pp.postProcessBeanFactory(beanFactory);
 		beanFactory.getBean("foo", Foo.class);
 		beanFactory.getBean("bar", TestBean.class);
+	}
+
+	@Test
+	public void testScopedProxyTargetMarkedAsNonAutowireCandidate() {
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(bpp);
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(ScopedProxyConfigurationClass.class));
+		beanFactory.registerBeanDefinition("consumer", new RootBeanDefinition(ScopedProxyConsumer.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+		ITestBean injected = beanFactory.getBean("consumer", ScopedProxyConsumer.class).testBean;
+		assertTrue(injected instanceof ScopedObject);
+		assertSame(beanFactory.getBean("scopedClass"), injected);
+		assertSame(beanFactory.getBean(ITestBean.class), injected);
 	}
 
 	@Test
@@ -326,6 +343,23 @@ public class ConfigurationClassPostProcessorTests {
 
 		public @Bean Bar bar() {
 			return new Bar(new Foo());
+		}
+	}
+
+
+	public static class ScopedProxyConsumer {
+
+		@Autowired
+		public ITestBean testBean;
+	}
+
+
+	@Configuration
+	public static class ScopedProxyConfigurationClass {
+
+		@Bean @Lazy @Scope(proxyMode=ScopedProxyMode.INTERFACES)
+		public ITestBean scopedClass() {
+			return new TestBean();
 		}
 	}
 
