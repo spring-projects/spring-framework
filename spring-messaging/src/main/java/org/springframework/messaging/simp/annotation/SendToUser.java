@@ -48,4 +48,11 @@ public @interface SendToUser {
 	 */
 	String[] value() default {};
 
+	/**
+     * A flag indicating whether the message is to be sent to a particular user session.
+     *
+     */
+    boolean singleSession() default false;
+
+
 }
