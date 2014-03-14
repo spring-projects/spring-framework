@@ -18,7 +18,6 @@ package org.springframework.context.annotation;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.FactoryBean;
@@ -39,6 +38,7 @@ import static org.junit.Assert.*;
 /**
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class ConfigurationClassPostProcessorTests {
 
@@ -63,7 +63,7 @@ public class ConfigurationClassPostProcessorTests {
 	 * working.
 	 */
 	@Test
-	public void testEnhancementIsPresentBecauseSingletonSemanticsAreRespected() {
+	public void enhancementIsPresentBecauseSingletonSemanticsAreRespected() {
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(SingletonBeanConfig.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
@@ -77,7 +77,7 @@ public class ConfigurationClassPostProcessorTests {
 	 * over ASM if a bean class is already loaded.
 	 */
 	@Test
-	public void testAlreadyLoadedConfigurationClasses() {
+	public void alreadyLoadedConfigurationClasses() {
 		beanFactory.registerBeanDefinition("unloadedConfig",
 				new RootBeanDefinition(UnloadedConfig.class.getName(), null, null));
 		beanFactory.registerBeanDefinition("loadedConfig", new RootBeanDefinition(LoadedConfig.class));
@@ -92,7 +92,7 @@ public class ConfigurationClassPostProcessorTests {
 	 * correctly.
 	 */
 	@Test
-	public void testPostProcessorIntrospectsInheritedDefinitionsCorrectly() {
+	public void postProcessorIntrospectsInheritedDefinitionsCorrectly() {
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(SingletonBeanConfig.class));
 		beanFactory.registerBeanDefinition("parent", new RootBeanDefinition(TestBean.class));
 		beanFactory.registerBeanDefinition("child", new ChildBeanDefinition("parent"));
@@ -104,7 +104,7 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	public void testPostProcessorOverridesNonApplicationBeanDefinitions() {
+	public void postProcessorOverridesNonApplicationBeanDefinitions() {
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
 		rbd.setRole(RootBeanDefinition.ROLE_SUPPORT);
 		beanFactory.registerBeanDefinition("bar", rbd);
@@ -117,7 +117,7 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	public void testPostProcessorDoesNotOverrideRegularBeanDefinitions() {
+	public void postProcessorDoesNotOverrideRegularBeanDefinitions() {
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
 		rbd.setResource(new DescriptiveResource("XML or something"));
 		beanFactory.registerBeanDefinition("bar", rbd);
@@ -129,7 +129,7 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	public void testPostProcessorDoesNotOverrideRegularBeanDefinitionsEvenWithScopedProxy() {
+	public void postProcessorDoesNotOverrideRegularBeanDefinitionsEvenWithScopedProxy() {
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
 		rbd.setResource(new DescriptiveResource("XML or something"));
 		BeanDefinitionHolder proxied = ScopedProxyUtils.createScopedProxy(new BeanDefinitionHolder(rbd, "bar"), beanFactory, true);
@@ -142,7 +142,7 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	public void testScopedProxyTargetMarkedAsNonAutowireCandidate() {
+	public void scopedProxyTargetMarkedAsNonAutowireCandidate() {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(beanFactory);
 		beanFactory.addBeanPostProcessor(bpp);
@@ -157,7 +157,7 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	public void testProcessingAllowedOnlyOncePerProcessorRegistryPair() {
+	public void processingAllowedOnlyOncePerProcessorRegistryPair() {
 		DefaultListableBeanFactory bf1 = new DefaultListableBeanFactory();
 		DefaultListableBeanFactory bf2 = new DefaultListableBeanFactory();
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
@@ -178,7 +178,7 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	public void testGenericsBasedInjection() {
+	public void genericsBasedInjection() {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(beanFactory);
 		beanFactory.addBeanPostProcessor(bpp);
@@ -195,7 +195,7 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	public void testGenericsBasedInjectionWithScoped() {
+	public void genericsBasedInjectionWithScoped() {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(beanFactory);
 		beanFactory.addBeanPostProcessor(bpp);
@@ -212,7 +212,7 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	public void testGenericsBasedInjectionWithScopedProxy() {
+	public void genericsBasedInjectionWithScopedProxy() {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(beanFactory);
 		beanFactory.addBeanPostProcessor(bpp);
@@ -230,7 +230,7 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	public void testGenericsBasedInjectionWithImplTypeAtInjectionPoint() {
+	public void genericsBasedInjectionWithImplTypeAtInjectionPoint() {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(beanFactory);
 		beanFactory.addBeanPostProcessor(bpp);
@@ -247,7 +247,7 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	public void testGenericsBasedInjectionWithFactoryBean() {
+	public void genericsBasedInjectionWithFactoryBean() {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(beanFactory);
 		beanFactory.addBeanPostProcessor(bpp);
@@ -266,7 +266,7 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	public void testGenericsBasedInjectionWithRawMatch() {
+	public void genericsBasedInjectionWithRawMatch() {
 		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RawMatchingConfiguration.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
@@ -275,7 +275,7 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	public void testGenericsBasedInjectionWithWildcardMatch() {
+	public void genericsBasedInjectionWithWildcardMatch() {
 		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(WildcardMatchingConfiguration.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
@@ -284,7 +284,7 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	public void testGenericsBasedInjectionWithWildcardWithExtendsMatch() {
+	public void genericsBasedInjectionWithWildcardWithExtendsMatch() {
 		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(WildcardWithExtendsConfiguration.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
@@ -293,7 +293,7 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	public void testGenericsBasedInjectionWithWildcardWithGenericExtendsMatch() {
+	public void genericsBasedInjectionWithWildcardWithGenericExtendsMatch() {
 		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(WildcardWithGenericExtendsConfiguration.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
@@ -460,6 +460,7 @@ public class ConfigurationClassPostProcessorTests {
 		}
 
 		@Bean @Scope("prototype")
+		@SuppressWarnings("rawtypes")
 		public Repository genericRepo() {
 			return new Repository<Object>() {
 				@Override
@@ -542,6 +543,7 @@ public class ConfigurationClassPostProcessorTests {
 	public static class RawMatchingConfiguration {
 
 		@Bean
+		@SuppressWarnings("rawtypes")
 		public Repository rawRepo() {
 			return new Repository();
 		}
@@ -557,6 +559,7 @@ public class ConfigurationClassPostProcessorTests {
 	public static class WildcardMatchingConfiguration {
 
 		@Bean
+		@SuppressWarnings("rawtypes")
 		public Repository<?> genericRepo() {
 			return new Repository();
 		}
