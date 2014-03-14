@@ -27,8 +27,8 @@ import java.net.URL;
 import java.util.Map;
 
 import org.apache.commons.logging.LogFactory;
-
 import org.junit.Test;
+import org.xml.sax.InputSource;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
@@ -65,7 +65,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
-import org.xml.sax.InputSource;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -226,6 +225,20 @@ public final class XmlBeanFactoryTests {
 		TestBean innerForConstructor = (TestBean) hasInnerBeansForConstructor.getSpouse();
 		assertNotNull(innerForConstructor);
 		assertEquals("innerBean#3", innerForConstructor.getBeanName());
+		assertEquals("inner1", innerForConstructor.getName());
+		assertEquals(6, innerForConstructor.getAge());
+
+		hasInnerBeansForConstructor = (TestBean) xbf.getBean("hasInnerBeansAsPrototype");
+		innerForConstructor = (TestBean) hasInnerBeansForConstructor.getSpouse();
+		assertNotNull(innerForConstructor);
+		assertEquals("innerBean", innerForConstructor.getBeanName());
+		assertEquals("inner1", innerForConstructor.getName());
+		assertEquals(6, innerForConstructor.getAge());
+
+		hasInnerBeansForConstructor = (TestBean) xbf.getBean("hasInnerBeansAsPrototype");
+		innerForConstructor = (TestBean) hasInnerBeansForConstructor.getSpouse();
+		assertNotNull(innerForConstructor);
+		assertEquals("innerBean", innerForConstructor.getBeanName());
 		assertEquals("inner1", innerForConstructor.getName());
 		assertEquals(6, innerForConstructor.getAge());
 
