@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,34 +36,34 @@ import org.springframework.messaging.Message;
  * flexible signatures. They may have arguments of the following types, in arbitrary
  * order:
  * <ul>
- * 	<li>{@link Message} to get access to the complete message being processed.</li>
- * 	<li>{@link Payload}-annotated method arguments to extract the payload of
- * 	a message and optionally convert it using a
- * 	{@link org.springframework.messaging.converter.MessageConverter}.
- * 	The presence of the annotation is not required since it is assumed by default
- * 	for method arguments that are not annotated. Payload method arguments annotated
- * 	with Validation annotations (like
- * 	{@link org.springframework.validation.annotation.Validated}) will be subject to
- * 	JSR-303 validation.</li>
- * 	<li>{@link Header}-annotated method arguments to extract a specific
- * 	header value along with type conversion with a
- * 	{@link org.springframework.core.convert.converter.Converter} if necessary.</li>
- * 	<li>{@link Headers}-annotated argument that must also be assignable to
- * 	{@link java.util.Map} for getting access to all headers.</li>
- * 	<li>{@link org.springframework.messaging.MessageHeaders} arguments for
- * 	getting access to all headers.</li>
- * 	<li>{@link org.springframework.messaging.support.MessageHeaderAccessor} or
- * 	with STOMP over WebSocket support also sub-classes such as
- * 	{@link org.springframework.messaging.simp.SimpMessageHeaderAccessor}
- * 	for convenient access to all method arguments.</li>
- * 	<li>{@link DestinationVariable}-annotated arguments for access to template
- * 	variable values extracted from the message destination (e.g. /hotels/{hotel}).
- * 	Variable values will be converted to the declared method argument type.</li>
- * 	<li>{@link java.security.Principal} method arguments are supported with
- * 	STOMP over WebSocket messages. It reflects the user logged in to the
- * 	WebSocket session on which the message was received. Regular HTTP-based
- * 	authentication (e.g. Spring Security based) can be used to secure the
- * 	HTTP handshake that initiates WebSocket sessions.</li>
+ * <li>{@link Message} to get access to the complete message being processed.</li>
+ * <li>{@link Payload}-annotated method arguments to extract the payload of
+ * a message and optionally convert it using a
+ * {@link org.springframework.messaging.converter.MessageConverter}.
+ * The presence of the annotation is not required since it is assumed by default
+ * for method arguments that are not annotated. Payload method arguments annotated
+ * with Validation annotations (like
+ * {@link org.springframework.validation.annotation.Validated}) will be subject to
+ * JSR-303 validation.</li>
+ * <li>{@link Header}-annotated method arguments to extract a specific
+ * header value along with type conversion with a
+ * {@link org.springframework.core.convert.converter.Converter} if necessary.</li>
+ * <li>{@link Headers}-annotated argument that must also be assignable to
+ * {@link java.util.Map} for getting access to all headers.</li>
+ * <li>{@link org.springframework.messaging.MessageHeaders} arguments for
+ * getting access to all headers.</li>
+ * <li>{@link org.springframework.messaging.support.MessageHeaderAccessor} or
+ * with STOMP over WebSocket support also sub-classes such as
+ * {@link org.springframework.messaging.simp.SimpMessageHeaderAccessor}
+ * for convenient access to all method arguments.</li>
+ * <li>{@link DestinationVariable}-annotated arguments for access to template
+ * variable values extracted from the message destination (e.g. /hotels/{hotel}).
+ * Variable values will be converted to the declared method argument type.</li>
+ * <li>{@link java.security.Principal} method arguments are supported with
+ * STOMP over WebSocket messages. It reflects the user logged in to the
+ * WebSocket session on which the message was received. Regular HTTP-based
+ * authentication (e.g. Spring Security based) can be used to secure the
+ * HTTP handshake that initiates WebSocket sessions.</li>
  * </ul>
  * <p>By default the return value is wrapped as a message and sent to the destination
  * specified with an {@link SendTo} method-level annotation.
@@ -78,7 +78,6 @@ import org.springframework.messaging.Message;
  *
  * @author Rossen Stoyanchev
  * @since 4.0
- *
  * @see org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler
  */
 @Target({ElementType.TYPE, ElementType.METHOD})

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.servlet.handler;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.BeansException;
@@ -204,29 +203,28 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * <p>Will be invoked before {@link #initInterceptors()} adapts the specified
 	 * interceptors into {@link HandlerInterceptor} instances.
 	 * <p>The default implementation is empty.
-	 * @param interceptors the configured interceptor List (never {@code null}),
-	 * allowing to add further interceptors before as well as after the existing
-	 * interceptors
+	 * @param interceptors the configured interceptor List (never {@code null}), allowing
+	 * to add further interceptors before as well as after the existing interceptors
 	 */
 	protected void extendInterceptors(List<Object> interceptors) {
 	}
 
 	/**
-	 * Detects beans of type {@link MappedInterceptor} and adds them to the list of mapped interceptors.
-	 * This is done in addition to any {@link MappedInterceptor}s that may have been provided via
-	 * {@link #setInterceptors(Object[])}. Subclasses can override this method to change that.
-	 *
-	 * @param mappedInterceptors an empty list to add MappedInterceptor types to
+	 * Detect beans of type {@link MappedInterceptor} and add them to the list of mapped interceptors.
+	 * <p>This is called in addition to any {@link MappedInterceptor}s that may have been provided
+	 * via {@link #setInterceptors}, by default adding all beans of type {@link MappedInterceptor}
+	 * from the current context and its ancestors. Subclasses can override and refine this policy.
+	 * @param mappedInterceptors an empty list to add {@link MappedInterceptor} instances to
 	 */
 	protected void detectMappedInterceptors(List<MappedInterceptor> mappedInterceptors) {
 		mappedInterceptors.addAll(
 				BeanFactoryUtils.beansOfTypeIncludingAncestors(
-						getApplicationContext(),MappedInterceptor.class, true, false).values());
+						getApplicationContext(), MappedInterceptor.class, true, false).values());
 	}
 
 	/**
-	 * Initialize the specified interceptors, checking for {@link MappedInterceptor}s and adapting
-	 * HandlerInterceptors where necessary.
+	 * Initialize the specified interceptors, checking for {@link MappedInterceptor}s and
+	 * adapting {@link HandlerInterceptor}s and {@link WebRequestInterceptor}s if necessary.
 	 * @see #setInterceptors
 	 * @see #adaptInterceptor
 	 */
@@ -238,19 +236,20 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 					throw new IllegalArgumentException("Entry number " + i + " in interceptors array is null");
 				}
 				if (interceptor instanceof MappedInterceptor) {
-					mappedInterceptors.add((MappedInterceptor) interceptor);
+					this.mappedInterceptors.add((MappedInterceptor) interceptor);
 				}
 				else {
-					adaptedInterceptors.add(adaptInterceptor(interceptor));
+					this.adaptedInterceptors.add(adaptInterceptor(interceptor));
 				}
 			}
 		}
 	}
 
 	/**
-	 * Adapt the given interceptor object to the HandlerInterceptor interface.
-	 * <p>Supported interceptor types are HandlerInterceptor and WebRequestInterceptor.
-	 * Each given WebRequestInterceptor will be wrapped in a WebRequestHandlerInterceptorAdapter.
+	 * Adapt the given interceptor object to the {@link HandlerInterceptor} interface.
+	 * <p>By default, the supported interceptor types are {@link HandlerInterceptor}
+	 * and {@link WebRequestInterceptor}. Each given {@link WebRequestInterceptor}
+	 * will be wrapped in a {@link WebRequestHandlerInterceptorAdapter}.
 	 * Can be overridden in subclasses.
 	 * @param interceptor the specified interceptor object
 	 * @return the interceptor wrapped as HandlerInterceptor
@@ -271,12 +270,12 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
-	 * Return the adapted interceptors as HandlerInterceptor array.
-	 * @return the array of HandlerInterceptors, or {@code null} if none
+	 * Return the adapted interceptors as {@link HandlerInterceptor} array.
+	 * @return the array of {@link HandlerInterceptor}s, or {@code null} if none
 	 */
 	protected final HandlerInterceptor[] getAdaptedInterceptors() {
-		int count = adaptedInterceptors.size();
-		return (count > 0) ? adaptedInterceptors.toArray(new HandlerInterceptor[count]) : null;
+		int count = this.adaptedInterceptors.size();
+		return (count > 0 ? this.adaptedInterceptors.toArray(new HandlerInterceptor[count]) : null);
 	}
 
 	/**
@@ -284,8 +283,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @return the array of {@link MappedInterceptor}s, or {@code null} if none
 	 */
 	protected final MappedInterceptor[] getMappedInterceptors() {
-		int count = mappedInterceptors.size();
-		return (count > 0) ? mappedInterceptors.toArray(new MappedInterceptor[count]) : null;
+		int count = this.mappedInterceptors.size();
+		return (count > 0 ? this.mappedInterceptors.toArray(new MappedInterceptor[count]) : null);
 	}
 
 	/**
@@ -326,31 +325,32 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	protected abstract Object getHandlerInternal(HttpServletRequest request) throws Exception;
 
 	/**
-	 * Build a HandlerExecutionChain for the given handler, including applicable interceptors.
-	 * <p>The default implementation simply builds a standard HandlerExecutionChain with
-	 * the given handler, the handler mapping's common interceptors, and any {@link MappedInterceptor}s
-	 * matching to the current request URL. Subclasses may
-	 * override this in order to extend/rearrange the list of interceptors.
-	 * <p><b>NOTE:</b> The passed-in handler object may be a raw handler or a pre-built
-	 * HandlerExecutionChain. This method should handle those two cases explicitly,
-	 * either building a new HandlerExecutionChain or extending the existing chain.
-	 * <p>For simply adding an interceptor, consider calling {@code super.getHandlerExecutionChain}
-	 * and invoking {@link HandlerExecutionChain#addInterceptor} on the returned chain object.
+	 * Build a {@link HandlerExecutionChain} for the given handler, including
+	 * applicable interceptors.
+	 * <p>The default implementation builds a standard {@link HandlerExecutionChain}
+	 * with the given handler, the handler mapping's common interceptors, and any
+	 * {@link MappedInterceptor}s matching to the current request URL. Subclasses
+	 * may override this in order to extend/rearrange the list of interceptors.
+	 * <p><b>NOTE:</b> The passed-in handler object may be a raw handler or a
+	 * pre-built {@link HandlerExecutionChain}. This method should handle those
+	 * two cases explicitly, either building a new {@link HandlerExecutionChain}
+	 * or extending the existing chain.
+	 * <p>For simply adding an interceptor in a custom subclass, consider calling
+	 * {@code super.getHandlerExecutionChain(handler, request)} and invoking
+	 * {@link HandlerExecutionChain#addInterceptor} on the returned chain object.
 	 * @param handler the resolved handler instance (never {@code null})
 	 * @param request current HTTP request
 	 * @return the HandlerExecutionChain (never {@code null})
 	 * @see #getAdaptedInterceptors()
 	 */
 	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
-		HandlerExecutionChain chain =
-			(handler instanceof HandlerExecutionChain) ?
-				(HandlerExecutionChain) handler : new HandlerExecutionChain(handler);
-
+		HandlerExecutionChain chain = (handler instanceof HandlerExecutionChain ?
+				(HandlerExecutionChain) handler : new HandlerExecutionChain(handler));
 		chain.addInterceptors(getAdaptedInterceptors());
 
-		String lookupPath = urlPathHelper.getLookupPathForRequest(request);
-		for (MappedInterceptor mappedInterceptor : mappedInterceptors) {
-			if (mappedInterceptor.matches(lookupPath, pathMatcher)) {
+		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
+		for (MappedInterceptor mappedInterceptor : this.mappedInterceptors) {
+			if (mappedInterceptor.matches(lookupPath, this.pathMatcher)) {
 				chain.addInterceptor(mappedInterceptor.getInterceptor());
 			}
 		}
