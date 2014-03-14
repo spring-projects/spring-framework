@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,34 +16,21 @@
 
 package org.springframework.oxm.jibx;
 
-import java.io.IOException;
 import java.io.StringWriter;
-import java.util.concurrent.atomic.AtomicReference;
-import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import org.mockito.ArgumentCaptor;
 import org.springframework.oxm.AbstractMarshallerTests;
 import org.springframework.oxm.Marshaller;
-import org.springframework.oxm.XmlMappingException;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
-import org.xml.sax.InputSource;
-import org.xml.sax.XMLReader;
 
 import static org.custommonkey.xmlunit.XMLAssert.*;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author Arjen Poutsma
@@ -114,7 +101,7 @@ public class JibxMarshallerTests extends AbstractMarshallerTests {
 	}
 
 	@Test
-	public void testSupports() throws Exception {
+	public void supports() throws Exception {
 		assertTrue("JibxMarshaller does not support Flights", marshaller.supports(Flights.class));
 		assertTrue("JibxMarshaller does not support FlightType", marshaller.supports(FlightType.class));
 		assertFalse("JibxMarshaller supports illegal type", marshaller.supports(getClass()));

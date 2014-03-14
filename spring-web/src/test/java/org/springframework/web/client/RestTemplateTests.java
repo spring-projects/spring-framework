@@ -59,6 +59,7 @@ public class RestTemplateTests {
 
 	private ResponseErrorHandler errorHandler;
 
+	@SuppressWarnings("rawtypes")
 	private HttpMessageConverter converter;
 
 	@Before
@@ -640,6 +641,7 @@ public class RestTemplateTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void exchangeParameterizedType() throws Exception {
 		GenericHttpMessageConverter converter = mock(GenericHttpMessageConverter.class);
 		template.setMessageConverters(Collections.<HttpMessageConverter<?>>singletonList(converter));

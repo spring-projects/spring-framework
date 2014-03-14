@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,36 +16,16 @@
 
 package org.springframework.web.client;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
-import java.util.Collections;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Set;
 
-import javax.servlet.GenericServlet;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileItemFactory;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
@@ -55,14 +35,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.SocketUtils;
 
 import static org.junit.Assert.*;
 
-/** @author Arjen Poutsma */
+/**
+ * @author Arjen Poutsma
+ */
 public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 
 	private RestTemplate template;
@@ -198,11 +178,10 @@ public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void exchangeGet() throws Exception {
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.set("MyHeader", "MyValue");
-		HttpEntity<?> requestEntity = new HttpEntity(requestHeaders);
+		HttpEntity<String> requestEntity = new HttpEntity<String>(requestHeaders);
 		ResponseEntity<String> response =
 				template.exchange(baseUrl + "/{method}", HttpMethod.GET, requestEntity, String.class, "get");
 		assertEquals("Invalid content", helloWorld, response.getBody());

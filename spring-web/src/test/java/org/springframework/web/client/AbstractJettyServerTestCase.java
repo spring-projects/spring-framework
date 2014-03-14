@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.client;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -32,18 +33,23 @@ import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+
 import org.junit.AfterClass;
-import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 
 import org.springframework.http.MediaType;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.SocketUtils;
 
-/** @author Arjen Poutsma */
+import static org.junit.Assert.*;
+
+/**
+ * @author Arjen Poutsma
+ */
 public class AbstractJettyServerTestCase {
 
 	protected static String helloWorld = "H\u00e9llo W\u00f6rld";
@@ -184,15 +190,8 @@ public class AbstractJettyServerTestCase {
 
 		private final String s;
 
-
-		private final byte[] buf;
-
-		private final MediaType contentType;
-
 		private PutServlet(String s, byte[] buf, MediaType contentType) {
 			this.s = s;
-			this.buf = buf;
-			this.contentType = contentType;
 		}
 
 		@Override
@@ -226,24 +225,24 @@ public class AbstractJettyServerTestCase {
 			FileItemFactory factory = new DiskFileItemFactory();
 			ServletFileUpload upload = new ServletFileUpload(factory);
 			try {
-				List items = upload.parseRequest(req);
+				List<FileItem> items = upload.parseRequest(req);
 				assertEquals(4, items.size());
-				FileItem item = (FileItem) items.get(0);
+				FileItem item = items.get(0);
 				assertTrue(item.isFormField());
 				assertEquals("name 1", item.getFieldName());
 				assertEquals("value 1", item.getString());
 
-				item = (FileItem) items.get(1);
+				item = items.get(1);
 				assertTrue(item.isFormField());
 				assertEquals("name 2", item.getFieldName());
 				assertEquals("value 2+1", item.getString());
 
-				item = (FileItem) items.get(2);
+				item = items.get(2);
 				assertTrue(item.isFormField());
 				assertEquals("name 2", item.getFieldName());
 				assertEquals("value 2+2", item.getString());
 
-				item = (FileItem) items.get(3);
+				item = items.get(3);
 				assertFalse(item.isFormField());
 				assertEquals("logo", item.getFieldName());
 				assertEquals("logo.jpg", item.getName());

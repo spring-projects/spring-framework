@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,9 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
-/** @author Arjen Poutsma */
+/**
+ * @author Arjen Poutsma
+ */
 public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 
 	private AsyncRestTemplate template;
@@ -398,7 +400,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void exchangeGet() throws Exception {
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.set("MyHeader", "MyValue");
@@ -411,7 +413,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void exchangeGetCallback() throws Exception {
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.set("MyHeader", "MyValue");

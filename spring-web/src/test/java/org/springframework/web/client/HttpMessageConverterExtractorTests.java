@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import static org.mockito.BDDMockito.*;
  */
 public class HttpMessageConverterExtractorTests {
 
-	private HttpMessageConverterExtractor extractor;
+	private HttpMessageConverterExtractor<?> extractor;
 
 	private ClientHttpResponse response;
 
@@ -152,7 +152,8 @@ public class HttpMessageConverterExtractorTests {
 		assertEquals(expected, result);
 	}
 
-	private List<HttpMessageConverter<?>> createConverterList(HttpMessageConverter converter) {
+	private List<HttpMessageConverter<?>> createConverterList(
+			HttpMessageConverter<?> converter) {
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>(1);
 		converters.add(converter);
 		return converters;
