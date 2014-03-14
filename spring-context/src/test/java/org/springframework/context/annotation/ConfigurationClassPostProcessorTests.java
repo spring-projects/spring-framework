@@ -16,6 +16,11 @@
 
 package org.springframework.context.annotation;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.scope.ScopedObject;
@@ -29,6 +34,8 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.annotation.componentscan.simple.SimpleComponent;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
@@ -101,6 +108,16 @@ public class ConfigurationClassPostProcessorTests {
 		Foo foo = beanFactory.getBean("foo", Foo.class);
 		Bar bar = beanFactory.getBean("bar", Bar.class);
 		assertSame(foo, bar.foo);
+	}
+
+	@Test
+	public void postProcessorWorksWithComposedAnnotations() {
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(ComposedAnnotationConfig.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.setEnvironment(new StandardEnvironment());
+		pp.postProcessBeanFactory(beanFactory);
+		SimpleComponent simpleComponent = beanFactory.getBean(SimpleComponent.class);
+		assertNotNull(simpleComponent);
 	}
 
 	@Test
@@ -608,6 +625,21 @@ public class ConfigurationClassPostProcessorTests {
 		public Object repoConsumer(Repository<String> repo) {
 			return repo;
 		}
+	}
+
+	@Configuration
+	@ComponentScan
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	public static @interface ComposedConfiguration {
+
+		String[] basePackages() default {};
+
+		String[] bundles() default {};
+	}
+
+	@ComposedConfiguration(basePackages = "org.springframework.context.annotation.componentscan.simple")
+	public static class ComposedAnnotationConfig {
 	}
 
 }

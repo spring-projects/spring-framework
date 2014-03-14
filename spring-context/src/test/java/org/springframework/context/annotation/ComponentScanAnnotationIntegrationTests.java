@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,10 @@
 package org.springframework.context.annotation;
 
 import java.io.IOException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.HashSet;
 
 import example.scannable.CustomComponent;
@@ -28,8 +32,8 @@ import example.scannable.ScopedProxyTestBean;
 import example.scannable_implicitbasepackage.ComponentScanAnnotatedConfigWithImplicitBasePackage;
 import example.scannable_scoped.CustomScopeAnnotationBean;
 import example.scannable_scoped.MyScope;
-import org.junit.Test;
 
+import org.junit.Test;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.CustomAutowireConfigurer;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -37,6 +41,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.ComponentScanParserTests.CustomAnnotationAutowiredBean;
+import org.springframework.context.annotation.componentscan.simple.SimpleComponent;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.tests.context.SimpleMapScope;
 import org.springframework.util.SerializationTestUtils;
@@ -50,8 +55,10 @@ import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.1
  */
+@SuppressWarnings("resource")
 public class ComponentScanAnnotationIntegrationTests {
 
 	@Test
@@ -99,6 +106,20 @@ public class ComponentScanAnnotationIntegrationTests {
 		assertThat("@ComponentScan annotated @Configuration class registered directly against " +
 				"AnnotationConfigApplicationContext did not trigger component scanning as expected",
 				ctx.containsBean("scannedComponent"), is(true));
+	}
+
+	@Test
+	public void viaContextRegistration_WithComposedAnnotation() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ComposedAnnotationConfig.class);
+		ctx.refresh();
+		ctx.getBean(ComposedAnnotationConfig.class);
+		ctx.getBean(SimpleComponent.class);
+		assertThat("config class bean not found",
+			ctx.containsBeanDefinition("componentScanAnnotationIntegrationTests.ComposedAnnotationConfig"), is(true));
+		assertThat("@ComponentScan annotated @Configuration class registered directly against "
+				+ "AnnotationConfigApplicationContext did not trigger component scanning as expected",
+			ctx.containsBean("simpleComponent"), is(true));
 	}
 
 	@Test
@@ -207,6 +228,22 @@ public class ComponentScanAnnotationIntegrationTests {
 		ctx.register(ComponentScanWithBasePackagesAndValueAlias.class);
 		ctx.refresh();
 		assertThat(ctx.containsBean("fooServiceImpl"), is(true));
+	}
+
+
+	@Configuration
+	@ComponentScan
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	public static @interface ComposedConfiguration {
+
+		String[] basePackages() default {};
+
+		String[] bundles() default {};
+	}
+
+	@ComposedConfiguration(basePackages = "org.springframework.context.annotation.componentscan.simple")
+	public static class ComposedAnnotationConfig {
 	}
 
 }
