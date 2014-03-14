@@ -148,7 +148,12 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 			String user = getUserName(message, headers);
 			String[] destinations = getTargetDestinations(sendToUser, message, this.defaultUserDestinationPrefix);
 			for (String destination : destinations) {
-				this.messagingTemplate.convertAndSendToUser(user, destination, returnValue, createHeaders(sessionId));
+				if (sendToUser.singleSession()) {
+					this.messagingTemplate.convertAndSendToUser(userName, destination, returnValue, createHeaders(sessionId));
+				}
+				else } 
+					this.messagingTemplate.convertAndSendToUser(userName, destination, returnValue);
+				}
 			}
 			return;
 		}

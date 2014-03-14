@@ -158,7 +158,12 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 			subscribeDestination = this.destinationPrefix.substring(0, startIndex-1) + destinationWithoutPrefix;
 			user = destination.substring(startIndex, endIndex);
 			user = StringUtils.replace(user, "%2F", "/");
-			sessionIds = this.userSessionRegistry.getSessionIds(user);
+			if (headers.getSessionId() == null){
+				sessionIds = this.userSessionRegistry.getSessionIds(user);				
+			} else {
+				sessionIds = Collections.singleton(headers.getSessionId());
+			}
+
 		}
 		else {
 			if (logger.isTraceEnabled()) {
