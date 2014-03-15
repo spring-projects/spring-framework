@@ -111,8 +111,50 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	public void postProcessorWorksWithComposedAnnotations() {
-		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(ComposedAnnotationConfig.class));
+	public void postProcessorWorksWithLocallyDeclaredComposedConfiguration() {
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(ComposedConfigurationClass.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.setEnvironment(new StandardEnvironment());
+		pp.postProcessBeanFactory(beanFactory);
+		SimpleComponent simpleComponent = beanFactory.getBean(SimpleComponent.class);
+		assertNotNull(simpleComponent);
+	}
+
+	@Test
+	public void postProcessorWorksWithLocallyDeclaredComposedComposedConfiguration() {
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(ComposedComposedConfigurationClass.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.setEnvironment(new StandardEnvironment());
+		pp.postProcessBeanFactory(beanFactory);
+		SimpleComponent simpleComponent = beanFactory.getBean(SimpleComponent.class);
+		assertNotNull(simpleComponent);
+	}
+
+	@Test
+	public void postProcessorWorksWithLocallyDeclaredMetaComponentScanConfiguration() {
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(MetaComponentScanConfigurationClass.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.setEnvironment(new StandardEnvironment());
+		pp.postProcessBeanFactory(beanFactory);
+		SimpleComponent simpleComponent = beanFactory.getBean(SimpleComponent.class);
+		assertNotNull(simpleComponent);
+	}
+
+	@Test
+	public void postProcessorWorksWithLocallyDeclaredMetaComponentScanConfigurationSubclass() {
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(
+			SubMetaComponentScanConfigurationClass.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.setEnvironment(new StandardEnvironment());
+		pp.postProcessBeanFactory(beanFactory);
+		SimpleComponent simpleComponent = beanFactory.getBean(SimpleComponent.class);
+		assertNotNull(simpleComponent);
+	}
+
+	@Test
+	public void postProcessorWorksWithExternallyDeclaredComposedAnnotation() {
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(
+			org.springframework.context.annotation.componentscan.meta.ComposedAnnotationConfig.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.setEnvironment(new StandardEnvironment());
 		pp.postProcessBeanFactory(beanFactory);
@@ -632,14 +674,44 @@ public class ConfigurationClassPostProcessorTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
 	public static @interface ComposedConfiguration {
-
 		String[] basePackages() default {};
-
-		String[] bundles() default {};
 	}
 
 	@ComposedConfiguration(basePackages = "org.springframework.context.annotation.componentscan.simple")
-	public static class ComposedAnnotationConfig {
+	public static class ComposedConfigurationClass {
+	}
+
+	@ComposedConfiguration
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	public static @interface ComposedComposedConfiguration {
+		String[] basePackages() default {};
+	}
+
+	@ComposedComposedConfiguration(basePackages = "org.springframework.context.annotation.componentscan.simple")
+	public static class ComposedComposedConfigurationClass {
+	}
+
+	@ComponentScan
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	public static @interface MetaComponentScan {
+	}
+
+	@MetaComponentScan
+	@Configuration
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	public static @interface MetaComponentScanConfiguration {
+		String[] basePackages() default {};
+	}
+
+	@MetaComponentScanConfiguration(basePackages = "org.springframework.context.annotation.componentscan.simple")
+	public static class MetaComponentScanConfigurationClass {
+	}
+
+	@Configuration
+	public static class SubMetaComponentScanConfigurationClass extends MetaComponentScanConfigurationClass {
 	}
 
 }
