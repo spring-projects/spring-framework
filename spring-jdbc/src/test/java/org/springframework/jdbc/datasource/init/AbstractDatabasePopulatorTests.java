@@ -19,14 +19,9 @@ package org.springframework.jdbc.datasource.init;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.junit.After;
 import org.junit.Test;
-import org.springframework.core.io.ClassRelativeResourceLoader;
 import org.springframework.core.io.Resource;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static org.hamcrest.Matchers.*;
@@ -34,57 +29,16 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
+ * Abstract base class for integration tests for {@link ResourceDatabasePopulator}.
+ *
  * @author Dave Syer
  * @author Sam Brannen
  * @author Oliver Gierke
  */
-public class DatabasePopulatorTests {
-
-	private final EmbeddedDatabase db = new EmbeddedDatabaseBuilder().build();
+public abstract class AbstractDatabasePopulatorTests extends AbstractDatabaseInitializationTests {
 
 	private final ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
 
-	private final ClassRelativeResourceLoader resourceLoader = new ClassRelativeResourceLoader(getClass());
-
-	private final JdbcTemplate jdbcTemplate = new JdbcTemplate(db);
-
-
-	private void assertTestDatabaseCreated() {
-		assertTestDatabaseCreated("Keith");
-	}
-
-	private void assertTestDatabaseCreated(String name) {
-		assertEquals(name, jdbcTemplate.queryForObject("select NAME from T_TEST", String.class));
-	}
-
-	private void assertUsersDatabaseCreated(String... lastNames) {
-		for (String lastName : lastNames) {
-			assertThat("Did not find user with last name [" + lastName + "].",
-				jdbcTemplate.queryForObject("select count(0) from users where last_name = ?", Integer.class, lastName),
-				equalTo(1));
-		}
-	}
-
-	private Resource resource(String path) {
-		return resourceLoader.getResource(path);
-	}
-
-	private Resource defaultSchema() {
-		return resource("db-schema.sql");
-	}
-
-	private Resource usersSchema() {
-		return resource("users-schema.sql");
-	}
-
-	@After
-	public void shutDown() {
-		if (TransactionSynchronizationManager.isSynchronizationActive()) {
-			TransactionSynchronizationManager.clear();
-			TransactionSynchronizationManager.unbindResource(db);
-		}
-		db.shutdown();
-	}
 
 	@Test
 	public void buildWithCommentsAndFailedDrop() throws Exception {
@@ -224,6 +178,30 @@ public class DatabasePopulatorTests {
 		databasePopulator.addScript(defaultSchema());
 		databasePopulator.addScript(resource("db-test-data-huge.sql"));
 		DatabasePopulatorUtils.execute(databasePopulator, db);
+	}
+
+	private void assertTestDatabaseCreated() {
+		assertTestDatabaseCreated("Keith");
+	}
+
+	private void assertTestDatabaseCreated(String name) {
+		assertEquals(name, jdbcTemplate.queryForObject("select NAME from T_TEST", String.class));
+	}
+
+	private void assertUsersDatabaseCreated(String... lastNames) {
+		for (String lastName : lastNames) {
+			assertThat("Did not find user with last name [" + lastName + "].",
+				jdbcTemplate.queryForObject("select count(0) from users where last_name = ?", Integer.class, lastName),
+				equalTo(1));
+		}
+	}
+
+	private Resource defaultSchema() {
+		return resource("db-schema.sql");
+	}
+
+	private Resource usersSchema() {
+		return resource("users-schema.sql");
 	}
 
 }

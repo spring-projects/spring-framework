@@ -16,44 +16,27 @@
 
 package org.springframework.jdbc.datasource.init;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.EncodedResource;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.springframework.jdbc.datasource.init.ScriptUtils.*;
 
 /**
- * Unit and integration tests for {@link ScriptUtils}.
+ * Unit tests for {@link ScriptUtils}.
  *
  * @author Thomas Risberg
  * @author Sam Brannen
  * @author Phillip Webb
  * @author Chris Baldwin
+ * @see ScriptUtilsIntegrationTests
+ * @since 4.0.3
  */
-public class ScriptUtilsTests {
-
-	private final EmbeddedDatabase db = new EmbeddedDatabaseBuilder().build();
-
-
-	@After
-	public void shutDown() {
-		if (TransactionSynchronizationManager.isSynchronizationActive()) {
-			TransactionSynchronizationManager.clear();
-			TransactionSynchronizationManager.unbindResource(db);
-		}
-		db.shutdown();
-	}
+public class ScriptUtilsUnitTests {
 
 	@Test
 	public void splitSqlScriptDelimitedWithSemicolon() {
@@ -66,7 +49,7 @@ public class ScriptUtilsTests {
 		char delim = ';';
 		String script = rawStatement1 + delim + rawStatement2 + delim + rawStatement3 + delim;
 		List<String> statements = new ArrayList<String>();
-		ScriptUtils.splitSqlScript(script, delim, statements);
+		splitSqlScript(script, delim, statements);
 		assertEquals("wrong number of statements", 3, statements.size());
 		assertEquals("statement 1 not split correctly", cleanedStatement1, statements.get(0));
 		assertEquals("statement 2 not split correctly", cleanedStatement2, statements.get(1));
@@ -81,7 +64,7 @@ public class ScriptUtilsTests {
 		char delim = '\n';
 		String script = statement1 + delim + statement2 + delim + statement3 + delim;
 		List<String> statements = new ArrayList<String>();
-		ScriptUtils.splitSqlScript(script, delim, statements);
+		splitSqlScript(script, delim, statements);
 		assertEquals("wrong number of statements", 3, statements.size());
 		assertEquals("statement 1 not split correctly", statement1, statements.get(0));
 		assertEquals("statement 2 not split correctly", statement2, statements.get(1));
@@ -89,14 +72,40 @@ public class ScriptUtilsTests {
 	}
 
 	@Test
-	public void readAndSplitScriptContainingComments() throws Exception {
-		EncodedResource resource = new EncodedResource(new ClassPathResource("test-data-with-comments.sql", getClass()));
-
-		String script = ScriptUtils.readScript(resource);
-
-		char delim = ';';
+	public void splitSqlScriptDelimitedWithNewLineButDefaultDelimiterSpecified() {
+		String statement1 = "do something";
+		String statement2 = "do something else";
+		char delim = '\n';
+		String script = statement1 + delim + statement2 + delim;
 		List<String> statements = new ArrayList<String>();
-		ScriptUtils.splitSqlScript(script, delim, statements);
+		splitSqlScript(script, DEFAULT_STATEMENT_SEPARATOR, statements);
+		assertEquals("wrong number of statements", 1, statements.size());
+		assertEquals("script should have been 'stripped' but not actually 'split'", script.replace('\n', ' '),
+			statements.get(0));
+	}
+
+	/**
+	 * See <a href="https://jira.spring.io/browse/SPR-11560">SPR-11560</a>
+	 */
+	@Test
+	public void readAndSplitScriptWithMultipleNewlinesAsSeparator() throws Exception {
+		String script = readScript("db-test-data-multi-newline.sql");
+		List<String> statements = new ArrayList<String>();
+		splitSqlScript(script, "\n\n", statements);
+
+		String statement1 = "insert into T_TEST (NAME) values ('Keith')";
+		String statement2 = "insert into T_TEST (NAME) values ('Dave')";
+
+		assertEquals("wrong number of statements", 2, statements.size());
+		assertEquals("statement 1 not split correctly", statement1, statements.get(0));
+		assertEquals("statement 2 not split correctly", statement2, statements.get(1));
+	}
+
+	@Test
+	public void readAndSplitScriptContainingComments() throws Exception {
+		String script = readScript("test-data-with-comments.sql");
+		List<String> statements = new ArrayList<String>();
+		splitSqlScript(script, ';', statements);
 
 		String statement1 = "insert into customer (id, name) values (1, 'Rod; Johnson'), (2, 'Adrian Collier')";
 		String statement2 = "insert into orders(id, order_date, customer_id) values (1, '2008-01-02', 2)";
@@ -112,18 +121,13 @@ public class ScriptUtilsTests {
 	}
 
 	/**
-	 * See <a href="https://jira.springsource.org/browse/SPR-10330">SPR-10330</a>
+	 * See <a href="https://jira.spring.io/browse/SPR-10330">SPR-10330</a>
 	 */
 	@Test
 	public void readAndSplitScriptContainingCommentsWithLeadingTabs() throws Exception {
-		EncodedResource resource = new EncodedResource(new ClassPathResource(
-			"test-data-with-comments-and-leading-tabs.sql", getClass()));
-
-		String script = ScriptUtils.readScript(resource);
-
-		char delim = ';';
+		String script = readScript("test-data-with-comments-and-leading-tabs.sql");
 		List<String> statements = new ArrayList<String>();
-		ScriptUtils.splitSqlScript(script, delim, statements);
+		splitSqlScript(script, ';', statements);
 
 		String statement1 = "insert into customer (id, name) values (1, 'Sam Brannen')";
 		String statement2 = "insert into orders(id, order_date, customer_id) values (1, '2013-06-08', 1)";
@@ -136,18 +140,13 @@ public class ScriptUtilsTests {
 	}
 
 	/**
-	 * See <a href="https://jira.springsource.org/browse/SPR-9531">SPR-9531</a>
+	 * See <a href="https://jira.spring.io/browse/SPR-9531">SPR-9531</a>
 	 */
 	@Test
 	public void readAndSplitScriptContainingMuliLineComments() throws Exception {
-		EncodedResource resource = new EncodedResource(new ClassPathResource("test-data-with-multi-line-comments.sql",
-			getClass()));
-
-		String script = ScriptUtils.readScript(resource);
-
-		char delim = ';';
+		String script = readScript("test-data-with-multi-line-comments.sql");
 		List<String> statements = new ArrayList<String>();
-		ScriptUtils.splitSqlScript(script, delim, statements);
+		splitSqlScript(script, ';', statements);
 
 		String statement1 = "INSERT INTO users(first_name, last_name) VALUES('Juergen', 'Hoeller')";
 		String statement2 = "INSERT INTO users(first_name, last_name) VALUES( 'Sam' , 'Brannen' )";
@@ -159,38 +158,15 @@ public class ScriptUtilsTests {
 
 	@Test
 	public void containsDelimiters() {
-		assertTrue("test with ';' is wrong", !ScriptUtils.containsSqlScriptDelimiters("select 1\n select ';'", ";"));
-		assertTrue("test with delimiter ; is wrong", ScriptUtils.containsSqlScriptDelimiters("select 1; select 2", ";"));
-		assertTrue("test with '\\n' is wrong",
-			!ScriptUtils.containsSqlScriptDelimiters("select 1; select '\\n\n';", "\n"));
-		assertTrue("test with delimiter \\n is wrong",
-			ScriptUtils.containsSqlScriptDelimiters("select 1\n select 2", "\n"));
+		assertTrue("test with ';' is wrong", !containsSqlScriptDelimiters("select 1\n select ';'", ";"));
+		assertTrue("test with delimiter ; is wrong", containsSqlScriptDelimiters("select 1; select 2", ";"));
+		assertTrue("test with '\\n' is wrong", !containsSqlScriptDelimiters("select 1; select '\\n\n';", "\n"));
+		assertTrue("test with delimiter \\n is wrong", containsSqlScriptDelimiters("select 1\n select 2", "\n"));
 	}
 
-	@Test
-	public void executeSqlScript() throws SQLException {
-		EncodedResource schemaResource = new EncodedResource(new ClassPathResource("users-schema.sql", getClass()));
-		EncodedResource commentResource = new EncodedResource(new ClassPathResource(
-			"test-data-with-multi-line-comments.sql", getClass()));
-		Connection connection = db.getConnection();
-
-		ScriptUtils.executeSqlScript(connection, schemaResource, false, false, ScriptUtils.DEFAULT_COMMENT_PREFIX,
-			ScriptUtils.DEFAULT_STATEMENT_SEPARATOR, ScriptUtils.DEFAULT_BLOCK_COMMENT_START_DELIMITER,
-			ScriptUtils.DEFAULT_BLOCK_COMMENT_END_DELIMITER);
-		ScriptUtils.executeSqlScript(connection, commentResource, false, false, ScriptUtils.DEFAULT_COMMENT_PREFIX,
-			ScriptUtils.DEFAULT_STATEMENT_SEPARATOR, ScriptUtils.DEFAULT_BLOCK_COMMENT_START_DELIMITER,
-			ScriptUtils.DEFAULT_BLOCK_COMMENT_END_DELIMITER);
-
-		assertUsersDatabaseCreated("Hoeller", "Brannen");
-	}
-
-	private void assertUsersDatabaseCreated(String... lastNames) {
-		final JdbcTemplate jdbcTemplate = new JdbcTemplate(db);
-		for (String lastName : lastNames) {
-			assertThat("Did not find user with last name [" + lastName + "].",
-				jdbcTemplate.queryForObject("select count(0) from users where last_name = ?", Integer.class, lastName),
-				equalTo(1));
-		}
+	private String readScript(String path) throws Exception {
+		EncodedResource resource = new EncodedResource(new ClassPathResource(path, getClass()));
+		return ScriptUtils.readScript(resource);
 	}
 
 }
