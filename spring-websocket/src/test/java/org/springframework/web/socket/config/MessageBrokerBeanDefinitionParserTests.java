@@ -16,7 +16,9 @@
 
 package org.springframework.web.socket.config;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.hamcrest.Matchers;
@@ -127,7 +129,8 @@ public class MessageBrokerBeanDefinitionParserTests {
 
 		SimpleBrokerMessageHandler brokerMessageHandler = this.appContext.getBean(SimpleBrokerMessageHandler.class);
 		assertNotNull(brokerMessageHandler);
-		assertEquals(Arrays.asList("/topic", "/queue"), brokerMessageHandler.getDestinationPrefixes());
+		assertEquals(Arrays.asList("/topic", "/queue"),
+				new ArrayList<String>(brokerMessageHandler.getDestinationPrefixes()));
 
 		List<Class<? extends MessageHandler>> subscriberTypes =
 				Arrays.<Class<? extends MessageHandler>>asList(SimpAnnotationMethodMessageHandler.class,

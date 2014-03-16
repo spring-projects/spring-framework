@@ -23,6 +23,7 @@ import org.springframework.messaging.StubMessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
@@ -57,7 +58,9 @@ public class StompBrokerRelayRegistrationTests {
 
 		StompBrokerRelayMessageHandler relayMessageHandler = registration.getMessageHandler(brokerChannel);
 
-		assertEquals(Arrays.asList(destinationPrefixes), relayMessageHandler.getDestinationPrefixes());
+		assertEquals(Arrays.asList(destinationPrefixes),
+				new ArrayList<String>(relayMessageHandler.getDestinationPrefixes()));
+
 		assertEquals("clientlogin", relayMessageHandler.getClientLogin());
 		assertEquals("clientpasscode", relayMessageHandler.getClientPasscode());
 		assertEquals("syslogin", relayMessageHandler.getSystemLogin());

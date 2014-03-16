@@ -164,18 +164,6 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		this.responseHandler.awaitAndAssert();
 	}
 
-	@Test
-	public void brokerUnvailableErrorFrameOnConnect() throws Exception {
-
-		stopActiveMqBrokerAndAwait();
-
-		MessageExchange connect = MessageExchangeBuilder.connectWithError("sess1").build();
-		this.responseHandler.expect(connect);
-
-		this.relay.handleMessage(connect.message);
-		this.responseHandler.awaitAndAssert();
-	}
-
 	@Test(expected=MessageDeliveryException.class)
 	public void messageDeliverExceptionIfSystemSessionForwardFails() throws Exception {
 		stopActiveMqBrokerAndAwait();

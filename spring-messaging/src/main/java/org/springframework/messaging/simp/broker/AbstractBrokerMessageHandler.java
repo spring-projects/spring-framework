@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,10 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.util.CollectionUtils;
 
+
 /**
- * Abstract base class for a {@link MessageHandler} that manages subscriptions and
- * propagates messages to subscribers.
+ * Abstract base class for a {@link MessageHandler} that broker messages to
+ * registered subscribers.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -42,7 +43,7 @@ public abstract class AbstractBrokerMessageHandler
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private Collection<String> destinationPrefixes;
+	private final Collection<String> destinationPrefixes;
 
 	private ApplicationEventPublisher eventPublisher;
 
@@ -55,9 +56,13 @@ public abstract class AbstractBrokerMessageHandler
 	private volatile boolean running = false;
 
 
+	public AbstractBrokerMessageHandler() {
+		this(Collections.<String>emptyList());
+	}
+
 	public AbstractBrokerMessageHandler(Collection<String> destinationPrefixes) {
-		this.destinationPrefixes = (destinationPrefixes != null)
-				? destinationPrefixes : Collections.<String>emptyList();
+		destinationPrefixes = (destinationPrefixes != null) ? destinationPrefixes : Collections.<String>emptyList();
+		this.destinationPrefixes = Collections.unmodifiableCollection(destinationPrefixes);
 	}
 
 
@@ -88,11 +93,35 @@ public abstract class AbstractBrokerMessageHandler
 		return Integer.MAX_VALUE;
 	}
 
+	/**
+	 * Check whether this message handler is currently running.
+	 *
+	 * <p>Note that even when this message handler is running the
+	 * {@link #isBrokerAvailable()} flag may still independently alternate between
+	 * being on and off depending on the concrete sub-class implementation.
+	 */
 	@Override
 	public final boolean isRunning() {
 		synchronized (this.lifecycleMonitor) {
 			return this.running;
 		}
+	}
+
+	/**
+	 * Whether the message broker is currently available and able to process messages.
+	 *
+	 * <p>Note that this is in addition to the {@link #isRunning()} flag, which
+	 * indicates whether this message handler is running. In other words the message
+	 * handler must first be running and then the {@link #isBrokerAvailable()} flag
+	 * may still independently alternate between being on and off depending on the
+	 * concrete sub-class implementation.
+	 *
+	 * <p>Application components may implement
+	 * {@link org.springframework.context.ApplicationListener<BrokerAvailabilityEvent>>}
+	 * to receive notifications when broker becomes available and unavailable.
+	 */
+	public boolean isBrokerAvailable() {
+		return this.brokerAvailable.get();
 	}
 
 	@Override
@@ -157,18 +186,20 @@ public abstract class AbstractBrokerMessageHandler
 	}
 
 	protected void publishBrokerAvailableEvent() {
-		if ((this.eventPublisher != null) && this.brokerAvailable.compareAndSet(false, true)) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Publishing BrokerAvailabilityEvent (available)");
+		boolean shouldPublish = this.brokerAvailable.compareAndSet(false, true);
+		if (this.eventPublisher != null && shouldPublish) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Publishing BrokerAvailabilityEvent (available)");
 			}
 			this.eventPublisher.publishEvent(new BrokerAvailabilityEvent(true, this));
 		}
 	}
 
 	protected void publishBrokerUnavailableEvent() {
-		if ((this.eventPublisher != null) && this.brokerAvailable.compareAndSet(true, false)) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Publishing BrokerAvailabilityEvent (unavailable)");
+		boolean shouldPublish = this.brokerAvailable.compareAndSet(true, false);
+		if (this.eventPublisher != null && shouldPublish) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Publishing BrokerAvailabilityEvent (unavailable)");
 			}
 			this.eventPublisher.publishEvent(new BrokerAvailabilityEvent(false, this));
 		}

@@ -19,13 +19,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.StubMessageChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.simp.broker.BrokerAvailabilityEvent;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.tcp.ReconnectStrategy;
 import org.springframework.messaging.tcp.TcpConnection;
@@ -50,24 +55,33 @@ public class StompBrokerRelayMessageHandlerTests {
 
 	@Before
 	public void setup() {
+
 		this.tcpClient = new StubTcpOperations();
+
 		this.brokerRelay = new StompBrokerRelayMessageHandler(new StubMessageChannel(),
-				new StubMessageChannel(), new StubMessageChannel(), Arrays.asList("/topic"));
+				new StubMessageChannel(), new StubMessageChannel(), Arrays.asList("/topic")) {
+
+			@Override
+			protected void startInternal() {
+				publishBrokerAvailableEvent(); // Force this, since we'll never actually connect
+				super.startInternal();
+			}
+		};
+
 		this.brokerRelay.setTcpClient(this.tcpClient);
 	}
 
 
 	@Test
-	public void testVirtualHostHeader() {
+	public void testVirtualHostHeader() throws Exception {
 
 		String virtualHost = "ABC";
-		String sessionId = "sess1";
-
-		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
-		headers.setSessionId(sessionId);
-
 		this.brokerRelay.setVirtualHost(virtualHost);
 		this.brokerRelay.start();
+
+		String sessionId = "sess1";
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
+		headers.setSessionId(sessionId);
 		this.brokerRelay.handleMessage(MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build());
 
 		List<Message<byte[]>> sent = this.tcpClient.connection.messages;
@@ -82,12 +96,7 @@ public class StompBrokerRelayMessageHandlerTests {
 	}
 
 	@Test
-	public void testLoginPasscode() {
-
-		String sessionId = "sess1";
-
-		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
-		headers.setSessionId(sessionId);
+	public void testLoginPasscode() throws Exception {
 
 		this.brokerRelay.setClientLogin("clientlogin");
 		this.brokerRelay.setClientPasscode("clientpasscode");
@@ -96,6 +105,10 @@ public class StompBrokerRelayMessageHandlerTests {
 		this.brokerRelay.setSystemPasscode("syspasscode");
 
 		this.brokerRelay.start();
+
+		String sessionId = "sess1";
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
+		headers.setSessionId(sessionId);
 		this.brokerRelay.handleMessage(MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build());
 
 		List<Message<byte[]>> sent = this.tcpClient.connection.messages;
@@ -111,13 +124,13 @@ public class StompBrokerRelayMessageHandlerTests {
 	}
 
 	@Test
-	public void testDestinationExcluded() {
+	public void testDestinationExcluded() throws Exception {
+
+		this.brokerRelay.start();
 
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 		headers.setSessionId("sess1");
 		headers.setDestination("/user/daisy/foo");
-
-		this.brokerRelay.start();
 		this.brokerRelay.handleMessage(MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build());
 
 		List<Message<byte[]>> sent = this.tcpClient.connection.messages;
