@@ -26,6 +26,9 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
 /**
  * Abstract base class for integration tests involving database initialization.
  *
@@ -36,8 +39,9 @@ public abstract class AbstractDatabaseInitializationTests {
 
 	private final ClassRelativeResourceLoader resourceLoader = new ClassRelativeResourceLoader(getClass());
 
-	protected EmbeddedDatabase db;
-	protected JdbcTemplate jdbcTemplate;
+	EmbeddedDatabase db;
+
+	JdbcTemplate jdbcTemplate;
 
 
 	@Before
@@ -55,10 +59,26 @@ public abstract class AbstractDatabaseInitializationTests {
 		db.shutdown();
 	}
 
-	protected abstract EmbeddedDatabaseType getEmbeddedDatabaseType();
+	abstract EmbeddedDatabaseType getEmbeddedDatabaseType();
 
-	protected Resource resource(String path) {
+	Resource resource(String path) {
 		return resourceLoader.getResource(path);
+	}
+
+	Resource defaultSchema() {
+		return resource("db-schema.sql");
+	}
+
+	Resource usersSchema() {
+		return resource("users-schema.sql");
+	}
+
+	void assertUsersDatabaseCreated(String... lastNames) {
+		for (String lastName : lastNames) {
+			assertThat("Did not find user with last name [" + lastName + "].",
+				jdbcTemplate.queryForObject("select count(0) from users where last_name = ?", Integer.class, lastName),
+				equalTo(1));
+		}
 	}
 
 }

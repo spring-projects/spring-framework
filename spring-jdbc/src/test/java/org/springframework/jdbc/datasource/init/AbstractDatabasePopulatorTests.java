@@ -20,7 +20,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.junit.Test;
-import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -29,7 +28,8 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Abstract base class for integration tests for {@link ResourceDatabasePopulator}.
+ * Abstract base class for integration tests for {@link ResourceDatabasePopulator}
+ * and {@link DatabasePopulatorUtils}.
  *
  * @author Dave Syer
  * @author Sam Brannen
@@ -141,7 +141,7 @@ public abstract class AbstractDatabasePopulatorTests extends AbstractDatabaseIni
 
 	@Test
 	public void constructorWithMultipleScriptResources() throws Exception {
-		final ResourceDatabasePopulator populator = new ResourceDatabasePopulator(false, false, null, usersSchema(),
+		final ResourceDatabasePopulator populator = new ResourceDatabasePopulator(usersSchema(),
 			resource("users-data-with-comments.sql"));
 		DatabasePopulatorUtils.execute(populator, db);
 		assertUsersDatabaseCreated("Brannen", "Hoeller");
@@ -186,22 +186,6 @@ public abstract class AbstractDatabasePopulatorTests extends AbstractDatabaseIni
 
 	private void assertTestDatabaseCreated(String name) {
 		assertEquals(name, jdbcTemplate.queryForObject("select NAME from T_TEST", String.class));
-	}
-
-	private void assertUsersDatabaseCreated(String... lastNames) {
-		for (String lastName : lastNames) {
-			assertThat("Did not find user with last name [" + lastName + "].",
-				jdbcTemplate.queryForObject("select count(0) from users where last_name = ?", Integer.class, lastName),
-				equalTo(1));
-		}
-	}
-
-	private Resource defaultSchema() {
-		return resource("db-schema.sql");
-	}
-
-	private Resource usersSchema() {
-		return resource("users-schema.sql");
 	}
 
 }

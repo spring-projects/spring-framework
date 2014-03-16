@@ -19,11 +19,9 @@ package org.springframework.jdbc.datasource.init;
 import java.sql.SQLException;
 
 import org.junit.Test;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.springframework.jdbc.datasource.init.ScriptUtils.*;
 
 /**
  * Integration tests for {@link ScriptUtils}.
@@ -39,20 +37,11 @@ public class ScriptUtilsIntegrationTests extends AbstractDatabaseInitializationT
 	}
 
 	@Test
-	public void executeSqlScript() throws SQLException {
-		ScriptUtils.executeSqlScript(db.getConnection(), resource("users-schema.sql"));
-		ScriptUtils.executeSqlScript(db.getConnection(), resource("test-data-with-multi-line-comments.sql"));
+	public void executeSqlScriptContainingMuliLineComments() throws SQLException {
+		executeSqlScript(db.getConnection(), usersSchema());
+		executeSqlScript(db.getConnection(), resource("test-data-with-multi-line-comments.sql"));
 
 		assertUsersDatabaseCreated("Hoeller", "Brannen");
-	}
-
-	private void assertUsersDatabaseCreated(String... lastNames) {
-		final JdbcTemplate jdbcTemplate = new JdbcTemplate(db);
-		for (String lastName : lastNames) {
-			assertThat("Did not find user with last name [" + lastName + "].",
-				jdbcTemplate.queryForObject("select count(0) from users where last_name = ?", Integer.class, lastName),
-				equalTo(1));
-		}
 	}
 
 }

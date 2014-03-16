@@ -62,14 +62,25 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	/**
 	 * Construct a new {@code ResourceDatabasePopulator} with default settings.
+	 * @since 4.0.3
 	 */
 	public ResourceDatabasePopulator() {
 		/* no-op */
 	}
 
 	/**
+	 * Construct a new {@code ResourceDatabasePopulator} with default settings
+	 * for the supplied scripts.
+	 * @param scripts the scripts to execute to populate the database
+	 * @since 4.0.3
+	 */
+	public ResourceDatabasePopulator(Resource... scripts) {
+		this();
+		this.scripts = Arrays.asList(scripts);
+	}
+
+	/**
 	 * Construct a new {@code ResourceDatabasePopulator} with the supplied values.
-	 *
 	 * @param continueOnError flag to indicate that all failures in SQL should be
 	 * logged but not cause a failure
 	 * @param ignoreFailedDrops flag to indicate that a failed SQL {@code DROP}
@@ -77,13 +88,14 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * @param sqlScriptEncoding the encoding for the supplied SQL scripts, if
 	 * different from the platform encoding; may be {@code null}
 	 * @param scripts the scripts to execute to populate the database
+	 * @since 4.0.3
 	 */
 	public ResourceDatabasePopulator(boolean continueOnError, boolean ignoreFailedDrops, String sqlScriptEncoding,
 			Resource... scripts) {
+		this(scripts);
 		this.continueOnError = continueOnError;
 		this.ignoreFailedDrops = ignoreFailedDrops;
 		this.sqlScriptEncoding = sqlScriptEncoding;
-		this.scripts = Arrays.asList(scripts);
 	}
 
 	/**
