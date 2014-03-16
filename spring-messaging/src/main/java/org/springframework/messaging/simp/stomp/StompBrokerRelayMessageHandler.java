@@ -32,7 +32,7 @@ import org.springframework.messaging.tcp.FixedIntervalReconnectStrategy;
 import org.springframework.messaging.tcp.TcpConnection;
 import org.springframework.messaging.tcp.TcpConnectionHandler;
 import org.springframework.messaging.tcp.TcpOperations;
-import org.springframework.messaging.tcp.reactor.ReactorNettyTcpClient;
+import org.springframework.messaging.tcp.reactor.ReactorTcpClient;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
@@ -302,7 +302,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	/**
 	 * Configure a TCP client for managing TCP connections to the STOMP broker.
-	 * By default {@link org.springframework.messaging.tcp.reactor.ReactorNettyTcpClient} is used.
+	 * By default {@link org.springframework.messaging.tcp.reactor.ReactorTcpClient} is used.
 	 */
 	public void setTcpClient(TcpOperations<byte[]> tcpClient) {
 		this.tcpClient = tcpClient;
@@ -750,7 +750,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	private static class StompTcpClientFactory {
 
 		public TcpOperations<byte[]> create(String relayHost, int relayPort) {
-			return new ReactorNettyTcpClient<byte[]>(relayHost, relayPort, new StompCodec());
+			return new ReactorTcpClient<byte[]>(relayHost, relayPort, new StompCodec());
 		}
 	}
 

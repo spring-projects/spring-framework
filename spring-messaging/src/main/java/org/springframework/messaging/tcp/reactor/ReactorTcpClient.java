@@ -53,12 +53,12 @@ import reactor.tuple.Tuple2;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
+public class ReactorTcpClient<P> implements TcpOperations<P> {
 
 	public static final Class<NettyTcpClient> REACTOR_TCP_CLIENT_TYPE = NettyTcpClient.class;
 
 
-	private final static Log logger = LogFactory.getLog(ReactorNettyTcpClient.class);
+	private final static Log logger = LogFactory.getLog(ReactorTcpClient.class);
 
 	private TcpClient<Message<P>, Message<P>> tcpClient;
 
@@ -75,7 +75,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	 * @param port the port to connect to
 	 * @param codec the codec to use for encoding and decoding the TCP stream
 	 */
-	public ReactorNettyTcpClient(String host, int port, Codec<Buffer, Message<P>, Message<P>> codec) {
+	public ReactorTcpClient(String host, int port, Codec<Buffer, Message<P>, Message<P>> codec) {
 		this.tcpClient = new TcpClientSpec<Message<P>, Message<P>>(REACTOR_TCP_CLIENT_TYPE)
 				.env(new Environment())
 				.codec(codec)
@@ -93,7 +93,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	 *
 	 * @param tcpClient the TcpClient to use
 	 */
-	public ReactorNettyTcpClient(TcpClient<Message<P>, Message<P>> tcpClient) {
+	public ReactorTcpClient(TcpClient<Message<P>, Message<P>> tcpClient) {
 		Assert.notNull(tcpClient, "'tcpClient' must not be null");
 		this.tcpClient = tcpClient;
 	}
