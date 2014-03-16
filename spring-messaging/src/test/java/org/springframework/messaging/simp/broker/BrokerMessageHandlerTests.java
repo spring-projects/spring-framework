@@ -68,10 +68,10 @@ public class BrokerMessageHandlerTests {
 	}
 
 	@Test
-	public void stopShouldPublishBrokerAvailabilityEvent() {
+	public void startAndStopShouldNotPublishBrokerAvailabilityEvents() {
 		this.handler.start();
 		this.handler.stop();
-		assertEquals(Arrays.asList(true, false), this.handler.availabilityEvents);
+		assertEquals(Collections.emptyList(), this.handler.availabilityEvents);
 	}
 
 	@Test
@@ -134,11 +134,6 @@ public class BrokerMessageHandlerTests {
 
 		private TestBrokerMesageHandler() {
 			setApplicationEventPublisher(this);
-		}
-
-		@Override
-		protected void startInternal() {
-			publishBrokerAvailableEvent();
 		}
 
 		@Override

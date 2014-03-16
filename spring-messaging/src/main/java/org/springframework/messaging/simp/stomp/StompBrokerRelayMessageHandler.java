@@ -32,6 +32,7 @@ import org.springframework.messaging.tcp.FixedIntervalReconnectStrategy;
 import org.springframework.messaging.tcp.TcpConnection;
 import org.springframework.messaging.tcp.TcpConnectionHandler;
 import org.springframework.messaging.tcp.TcpOperations;
+import org.springframework.messaging.tcp.reactor.ReactorNettyTcpClient;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
@@ -67,9 +68,10 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
-	private static final Message<byte[]> HEARTBEAT_MESSAGE;
-
+	// STOMP recommends error of margin for receiving heartbeats
 	private static final long HEARTBEAT_MULTIPLIER = 3;
+
+	private static final Message<byte[]> HEARTBEAT_MESSAGE;
 
 	static {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.HEARTBEAT);
@@ -299,8 +301,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 	/**
-	 * Configure a TCP client for managing TCP connections to the STOMP broker. By default
-	 * {@link org.springframework.messaging.simp.stomp.StompReactorNettyTcpClient} is used.
+	 * Configure a TCP client for managing TCP connections to the STOMP broker.
+	 * By default {@link org.springframework.messaging.tcp.reactor.ReactorNettyTcpClient} is used.
 	 */
 	public void setTcpClient(TcpOperations<byte[]> tcpClient) {
 		this.tcpClient = tcpClient;
@@ -323,7 +325,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		this.brokerChannel.subscribe(this);
 
 		if (this.tcpClient == null) {
-			this.tcpClient = new StompReactorNettyTcpClient(this.relayHost, this.relayPort);
+			this.tcpClient = new StompTcpClientFactory().create(this.relayHost, this.relayPort);
 		}
 
 		if (logger.isDebugEnabled()) {
@@ -350,15 +352,6 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 		this.clientInboundChannel.unsubscribe(this);
 		this.brokerChannel.unsubscribe(this);
-
-		for (StompConnectionHandler handler : this.connectionHandlers.values()) {
-			try {
-				handler.clearConnection();
-			}
-			catch (Throwable t) {
-				logger.error("Failed to close connection in session " + handler.getSessionId() + ": " + t.getMessage());
-			}
-		}
 
 		try {
 			this.tcpClient.shutdown();
@@ -523,7 +516,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.ERROR);
 				headers.setSessionId(this.sessionId);
 				headers.setMessage(errorText);
-				Message<?> errorMessage = MessageBuilder.withPayload(EMPTY_PAYLOAD).setHeaders(headers).build();
+				Message<?> errorMessage = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 				sendMessageToClient(errorMessage);
 			}
 		}
@@ -751,6 +744,13 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			catch (Throwable t) {
 				throw new MessageDeliveryException(message, t);
 			}
+		}
+	}
+
+	private static class StompTcpClientFactory {
+
+		public TcpOperations<byte[]> create(String relayHost, int relayPort) {
+			return new ReactorNettyTcpClient<byte[]>(relayHost, relayPort, new StompCodec());
 		}
 	}
 

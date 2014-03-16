@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,28 +45,57 @@ import reactor.tcp.spec.TcpClientSpec;
 import reactor.tuple.Tuple;
 import reactor.tuple.Tuple2;
 
+
 /**
- * A Reactor/Netty implementation of {@link org.springframework.messaging.tcp.TcpOperations}.
+ * An implementation of {@link org.springframework.messaging.tcp.TcpOperations}
+ * based on the Reactor project.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 
-	private final static Log logger = LogFactory.getLog(ReactorNettyTcpClient.class);
+	public static final Class<NettyTcpClient> REACTOR_TCP_CLIENT_TYPE = NettyTcpClient.class;
 
-	private Environment environment;
+
+	private final static Log logger = LogFactory.getLog(ReactorNettyTcpClient.class);
 
 	private TcpClient<Message<P>, Message<P>> tcpClient;
 
 
+	/**
+	 * A constructor that creates a {@link reactor.tcp.netty.NettyTcpClient} with
+	 * a {@link reactor.event.dispatch.SynchronousDispatcher} as a result of which
+	 * network I/O is handled in Netty threads.
+	 *
+	 * <p>Also see the constructor accepting a pre-configured Reactor
+	 * {@link reactor.tcp.TcpClient}.
+	 *
+	 * @param host the host to connect to
+	 * @param port the port to connect to
+	 * @param codec the codec to use for encoding and decoding the TCP stream
+	 */
 	public ReactorNettyTcpClient(String host, int port, Codec<Buffer, Message<P>, Message<P>> codec) {
-		this.environment = new Environment();
-		this.tcpClient = new TcpClientSpec<Message<P>, Message<P>>(NettyTcpClient.class)
-				.env(this.environment)
+		this.tcpClient = new TcpClientSpec<Message<P>, Message<P>>(REACTOR_TCP_CLIENT_TYPE)
+				.env(new Environment())
 				.codec(codec)
 				.connect(host, port)
+				.synchronousDispatcher()
 				.get();
+	}
+
+	/**
+	 * A constructor with a pre-configured {@link reactor.tcp.TcpClient}.
+	 *
+	 * <p><strong>NOTE:</strong> if the client is configured with a thread-creating
+	 * dispatcher, you are responsible for shutting down the {@link reactor.core.Environment}
+	 * instance with which the client is configured.
+	 *
+	 * @param tcpClient the TcpClient to use
+	 */
+	public ReactorNettyTcpClient(TcpClient<Message<P>, Message<P>> tcpClient) {
+		Assert.notNull(tcpClient, "'tcpClient' must not be null");
+		this.tcpClient = tcpClient;
 	}
 
 
@@ -121,7 +150,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 						connectionHandler.afterConnectionClosed();
 					}
 				});
-				connection.in().consume(new Consumer<Message<P>>() {
+				connection.consume(new Consumer<Message<P>>() {
 					@Override
 					public void accept(Message<P> message) {
 						connectionHandler.handleMessage(message);
@@ -130,7 +159,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 				connection.when(Throwable.class, new Consumer<Throwable>() {
 					@Override
 					public void accept(Throwable t) {
-					 	logger.error("Exception on connection " + connectionHandler, t);
+						logger.error("Exception on connection " + connectionHandler, t);
 					}
 				});
 				connectionHandler.afterConnected(new ReactorTcpConnection<P>(connection));
@@ -161,18 +190,13 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 
 	@Override
 	public ListenableFuture<Void> shutdown() {
-		try {
-			Promise<Void> promise = this.tcpClient.close();
-			return new AbstractPromiseToListenableFutureAdapter<Void, Void>(promise) {
-				@Override
-				protected Void adapt(Void result) {
-					return result;
-				}
-			};
-		}
-		finally {
-			this.environment.shutdown();
-		}
+		Promise<Void> promise = this.tcpClient.close();
+		return new AbstractPromiseToListenableFutureAdapter<Void, Void>(promise) {
+			@Override
+			protected Void adapt(Void result) {
+				return result;
+			}
+		};
 	}
 
 }
