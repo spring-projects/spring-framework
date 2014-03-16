@@ -45,6 +45,10 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @author Chris Baldwin
  * @since 2.5.4
+ * @see org.springframework.jdbc.core.JdbcTemplate
+ * @see org.springframework.jdbc.datasource.init.ScriptUtils
+ * @see org.springframework.jdbc.datasource.init.ResourceDatabasePopulator
+ * @see org.springframework.jdbc.datasource.init.DatabasePopulatorUtils
  */
 public class JdbcTestUtils {
 
