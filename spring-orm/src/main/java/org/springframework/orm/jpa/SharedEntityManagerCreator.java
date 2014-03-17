@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,32 +24,38 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Factory for a shareable JPA {@link javax.persistence.EntityManager}
- * for a given {@link javax.persistence.EntityManagerFactory}.
+ * Delegate for creating a shareable JPA {@link javax.persistence.EntityManager}
+ * reference for a given {@link javax.persistence.EntityManagerFactory}.
  *
- * <p>The shareable EntityManager will behave just like an EntityManager fetched
- * from an application server's JNDI environment, as defined by the JPA
- * specification. It will delegate all calls to the current transactional
- * EntityManager, if any; otherwise it will fall back to a newly created
- * EntityManager per operation.
+ * <p>A shared EntityManager will behave just like an EntityManager fetched from
+ * an application server's JNDI environment, as defined by the JPA specification.
+ * It will delegate all calls to the current transactional EntityManager, if any;
+ * otherwise it will fall back to a newly created EntityManager per operation.
+ *
+ * <p>For a behavioral definition of such a shared transactional EntityManager,
+ * see {@link javax.persistence.PersistenceContextType#TRANSACTION} and its
+ * discussion in the JPA spec document. This is also the default being used
+ * for the annotation-based {@link javax.persistence.PersistenceContext#type()}.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @author Oliver Gierke
  * @since 2.0
- * @see org.springframework.orm.jpa.LocalEntityManagerFactoryBean
+ * @see javax.persistence.PersistenceContext
+ * @see javax.persistence.PersistenceContextType#TRANSACTION
  * @see org.springframework.orm.jpa.JpaTransactionManager
+ * @see ExtendedEntityManagerCreator
  */
 public abstract class SharedEntityManagerCreator {
 
@@ -57,8 +63,7 @@ public abstract class SharedEntityManagerCreator {
 
 
 	/**
-	 * Create a transactional EntityManager proxy for the given EntityManagerFactory,
-	 * automatically joining ongoing transactions.
+	 * Create a transactional EntityManager proxy for the given EntityManagerFactory.
 	 * @param emf the EntityManagerFactory to delegate to.
 	 * @return a shareable transaction EntityManager proxy
 	 */
@@ -296,7 +301,7 @@ public abstract class SharedEntityManagerCreator {
 
 		private final Query target;
 
-		private final EntityManager em;
+		private EntityManager em;
 
 		public DeferredQueryInvocationHandler(Query target, EntityManager em) {
 			this.target = target;
@@ -334,9 +339,21 @@ public abstract class SharedEntityManagerCreator {
 			finally {
 				if (method.getName().equals("getResultList") || method.getName().equals("getSingleResult") ||
 						method.getName().equals("executeUpdate")) {
+					// Actual execution of the query: close the EntityManager right
+					// afterwards, since that was the only reason we kept it open.
 					EntityManagerFactoryUtils.closeEntityManager(this.em);
+					this.em = null;
 				}
 			}
+		}
+
+		@Override
+		protected void finalize() {
+			// Trigger explicit EntityManager.close() call on garbage collection,
+			// in particular for open/close statistics to be in sync. This is
+			// only relevant if the Query object has not been executed, e.g.
+			// when just used for the early validation of query definitions.
+			EntityManagerFactoryUtils.closeEntityManager(this.em);
 		}
 	}
 
