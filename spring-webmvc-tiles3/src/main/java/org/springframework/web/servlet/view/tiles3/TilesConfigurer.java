@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,6 +99,22 @@ import org.springframework.web.context.ServletContextAware;
  *
  * The values in the list are the actual Tiles XML files containing the definitions.
  * If the list is not specified, the default is {@code "/WEB-INF/tiles.xml"}.
+ *
+ * <p>Since definitions are used to instantiate an
+ * {@link org.apache.tiles.request.locale.URLApplicationResource} that extends
+ * {@link org.apache.tiles.request.locale.PostfixedApplicationResource}, underscores in
+ * filenames are intended to identify the definition locale, for example:
+ *
+ * <pre class="code">
+ * &lt;bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer">
+ *   &lt;property name="definitions">
+ *     &lt;list>
+ *       &lt;value>/WEB-INF/defs/tiles.xml&lt;/value>
+ *       &lt;value>/WEB-INF/defs/tiles_fr_FR.xml&lt;/value>
+ *     &lt;/list>
+ *   &lt;/property>
+ * &lt;/bean>
+ * </pre>
  *
  * @author mick semb wever
  * @author Rossen Stoyanchev
