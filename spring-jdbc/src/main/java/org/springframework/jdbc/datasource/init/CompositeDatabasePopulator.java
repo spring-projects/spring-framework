@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.jdbc.datasource.init;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -44,7 +46,7 @@ public class CompositeDatabasePopulator implements DatabasePopulator {
 	}
 
 	/**
-	 * Add a populator to the list of delegates.
+	 * Add one or more populators to the list of delegates.
 	 */
 	public void addPopulators(DatabasePopulator... populators) {
 		this.populators.addAll(Arrays.asList(populators));

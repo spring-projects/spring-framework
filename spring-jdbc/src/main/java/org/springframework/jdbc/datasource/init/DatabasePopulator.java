@@ -31,7 +31,12 @@ import java.sql.SQLException;
 public interface DatabasePopulator {
 
 	/**
-	 * Populate the database using the JDBC connection provided.
+	 * Populate the database using the provided JDBC connection.
+	 * <p>Concrete implementations <em>may</em> throw an {@link SQLException} if
+	 * an error is encountered but are <em>strongly encouraged</em> to throw a
+	 * specific {@link ScriptException} instead. For example, Spring's
+	 * {@link ResourceDatabasePopulator} and {@link DatabasePopulatorUtils} wrap
+	 * all {@code SQLExceptions} in {@code ScriptExceptions}.
 	 * @param connection the JDBC connection to use to populate the db; already
 	 * configured and ready to use
 	 * @throws SQLException if an unrecoverable data access exception occurs

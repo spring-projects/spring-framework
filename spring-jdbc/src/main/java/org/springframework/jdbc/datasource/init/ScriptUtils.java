@@ -99,6 +99,7 @@ public abstract class ScriptUtils {
 	 * @param script the SQL script
 	 * @param separator character separating each statement &mdash; typically a ';'
 	 * @param statements the list that will contain the individual statements
+	 * @throws ScriptException if an error occurred while splitting the SQL script
 	 * @see #splitSqlScript(String, String, List)
 	 * @see #splitSqlScript(EncodedResource, String, String, String, String, String, List)
 	 */
@@ -121,6 +122,7 @@ public abstract class ScriptUtils {
 	 * @param script the SQL script
 	 * @param separator text separating each statement &mdash; typically a ';' or newline character
 	 * @param statements the list that will contain the individual statements
+	 * @throws ScriptException if an error occurred while splitting the SQL script
 	 * @see #splitSqlScript(String, char, List)
 	 * @see #splitSqlScript(EncodedResource, String, String, String, String, String, List)
 	 */
@@ -151,6 +153,7 @@ public abstract class ScriptUtils {
 	 * @param blockCommentEndDelimiter the <em>end</em> block comment delimiter;
 	 * never {@code null} or empty
 	 * @param statements the list that will contain the individual statements
+	 * @throws ScriptException if an error occurred while splitting the SQL script
 	 */
 	public static void splitSqlScript(EncodedResource resource, String script, String separator, String commentPrefix,
 			String blockCommentStartDelimiter, String blockCommentEndDelimiter, List<String> statements)
@@ -257,6 +260,7 @@ public abstract class ScriptUtils {
 	 * typically "--"
 	 * @param separator the statement separator in the SQL script &mdash; typically ";"
 	 * @return a {@code String} containing the script lines
+	 * @throws IOException in case of I/O errors
 	 */
 	private static String readScript(EncodedResource resource, String commentPrefix, String separator)
 			throws IOException {
@@ -282,6 +286,7 @@ public abstract class ScriptUtils {
 	 * typically "--"
 	 * @param separator the statement separator in the SQL script &mdash; typically ";"
 	 * @return a {@code String} containing the script lines
+	 * @throws IOException in case of I/O errors
 	 */
 	public static String readScript(LineNumberReader lineNumberReader, String commentPrefix, String separator)
 			throws IOException {
@@ -344,13 +349,14 @@ public abstract class ScriptUtils {
 	 * configured and ready to use
 	 * @param resource the resource to load the SQL script from; encoded with the
 	 * current platform's default encoding
+	 * @throws ScriptException if an error occurred while executing the SQL script
 	 * @see #executeSqlScript(Connection, EncodedResource, boolean, boolean, String, String, String, String)
 	 * @see #DEFAULT_COMMENT_PREFIX
 	 * @see #DEFAULT_STATEMENT_SEPARATOR
 	 * @see #DEFAULT_BLOCK_COMMENT_START_DELIMITER
 	 * @see #DEFAULT_BLOCK_COMMENT_END_DELIMITER
 	 */
-	public static void executeSqlScript(Connection connection, Resource resource) throws SQLException, ScriptException {
+	public static void executeSqlScript(Connection connection, Resource resource) throws ScriptException {
 		executeSqlScript(connection, new EncodedResource(resource));
 	}
 
@@ -364,14 +370,14 @@ public abstract class ScriptUtils {
 	 * configured and ready to use
 	 * @param resource the resource (potentially associated with a specific encoding)
 	 * to load the SQL script from
+	 * @throws ScriptException if an error occurred while executing the SQL script
 	 * @see #executeSqlScript(Connection, EncodedResource, boolean, boolean, String, String, String, String)
 	 * @see #DEFAULT_COMMENT_PREFIX
 	 * @see #DEFAULT_STATEMENT_SEPARATOR
 	 * @see #DEFAULT_BLOCK_COMMENT_START_DELIMITER
 	 * @see #DEFAULT_BLOCK_COMMENT_END_DELIMITER
 	 */
-	public static void executeSqlScript(Connection connection, EncodedResource resource) throws SQLException,
-			ScriptException {
+	public static void executeSqlScript(Connection connection, EncodedResource resource) throws ScriptException {
 		executeSqlScript(connection, resource, false, false, DEFAULT_COMMENT_PREFIX, DEFAULT_STATEMENT_SEPARATOR,
 			DEFAULT_BLOCK_COMMENT_START_DELIMITER, DEFAULT_BLOCK_COMMENT_END_DELIMITER);
 	}
@@ -398,71 +404,83 @@ public abstract class ScriptUtils {
 	 * {@code null} or empty
 	 * @param blockCommentEndDelimiter the <em>end</em> block comment delimiter; never
 	 * {@code null} or empty
+	 * @throws ScriptException if an error occurred while executing the SQL script
 	 */
 	public static void executeSqlScript(Connection connection, EncodedResource resource, boolean continueOnError,
 			boolean ignoreFailedDrops, String commentPrefix, String separator, String blockCommentStartDelimiter,
-			String blockCommentEndDelimiter) throws SQLException, ScriptException {
+			String blockCommentEndDelimiter) throws ScriptException {
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Executing SQL script from " + resource);
-		}
-		long startTime = System.currentTimeMillis();
-		List<String> statements = new LinkedList<String>();
-		String script;
 		try {
-			script = readScript(resource, commentPrefix, separator);
-		}
-		catch (IOException ex) {
-			throw new CannotReadScriptException(resource, ex);
-		}
+			if (logger.isInfoEnabled()) {
+				logger.info("Executing SQL script from " + resource);
+			}
 
-		if (separator == null) {
-			separator = DEFAULT_STATEMENT_SEPARATOR;
-		}
-		if (!containsSqlScriptDelimiters(script, separator)) {
-			separator = FALLBACK_STATEMENT_SEPARATOR;
-		}
+			long startTime = System.currentTimeMillis();
+			List<String> statements = new LinkedList<String>();
+			String script;
+			try {
+				script = readScript(resource, commentPrefix, separator);
+			}
+			catch (IOException ex) {
+				throw new CannotReadScriptException(resource, ex);
+			}
 
-		splitSqlScript(resource, script, separator, commentPrefix, blockCommentStartDelimiter,
-			blockCommentEndDelimiter, statements);
-		int lineNumber = 0;
-		Statement stmt = connection.createStatement();
-		try {
-			for (String statement : statements) {
-				lineNumber++;
-				try {
-					stmt.execute(statement);
-					int rowsAffected = stmt.getUpdateCount();
-					if (logger.isDebugEnabled()) {
-						logger.debug(rowsAffected + " returned as updateCount for SQL: " + statement);
-					}
-				}
-				catch (SQLException ex) {
-					boolean dropStatement = StringUtils.startsWithIgnoreCase(statement.trim(), "drop");
-					if (continueOnError || (dropStatement && ignoreFailedDrops)) {
+			if (separator == null) {
+				separator = DEFAULT_STATEMENT_SEPARATOR;
+			}
+			if (!containsSqlScriptDelimiters(script, separator)) {
+				separator = FALLBACK_STATEMENT_SEPARATOR;
+			}
+
+			splitSqlScript(resource, script, separator, commentPrefix, blockCommentStartDelimiter,
+				blockCommentEndDelimiter, statements);
+			int lineNumber = 0;
+			Statement stmt = connection.createStatement();
+			try {
+				for (String statement : statements) {
+					lineNumber++;
+					try {
+						stmt.execute(statement);
+						int rowsAffected = stmt.getUpdateCount();
 						if (logger.isDebugEnabled()) {
-							logger.debug("Failed to execute SQL script statement at line " + lineNumber
-									+ " of resource " + resource + ": " + statement, ex);
+							logger.debug(rowsAffected + " returned as updateCount for SQL: " + statement);
 						}
 					}
-					else {
-						throw new ScriptStatementFailedException(statement, lineNumber, resource, ex);
+					catch (SQLException ex) {
+						boolean dropStatement = StringUtils.startsWithIgnoreCase(statement.trim(), "drop");
+						if (continueOnError || (dropStatement && ignoreFailedDrops)) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Failed to execute SQL script statement at line " + lineNumber
+										+ " of resource " + resource + ": " + statement, ex);
+							}
+						}
+						else {
+							throw new ScriptStatementFailedException(statement, lineNumber, resource, ex);
+						}
 					}
 				}
 			}
-		}
-		finally {
-			try {
-				stmt.close();
+			finally {
+				try {
+					stmt.close();
+				}
+				catch (Throwable ex) {
+					logger.debug("Could not close JDBC Statement", ex);
+				}
 			}
-			catch (Throwable ex) {
-				logger.debug("Could not close JDBC Statement", ex);
-			}
-		}
 
-		long elapsedTime = System.currentTimeMillis() - startTime;
-		if (logger.isInfoEnabled()) {
-			logger.info("Executed SQL script from " + resource + " in " + elapsedTime + " ms.");
+			long elapsedTime = System.currentTimeMillis() - startTime;
+			if (logger.isInfoEnabled()) {
+				logger.info("Executed SQL script from " + resource + " in " + elapsedTime + " ms.");
+			}
+		}
+		catch (Exception ex) {
+			if (ex instanceof ScriptException) {
+				throw (ScriptException) ex;
+			}
+
+			throw new UncategorizedScriptException(
+				"Failed to execute database script from resource [" + resource + "]", ex);
 		}
 	}
 

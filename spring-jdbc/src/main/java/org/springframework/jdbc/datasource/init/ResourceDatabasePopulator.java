@@ -17,7 +17,6 @@
 package org.springframework.jdbc.datasource.init;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -183,7 +182,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void populate(Connection connection) throws SQLException, ScriptException {
+	public void populate(Connection connection) throws ScriptException {
 		for (Resource script : this.scripts) {
 			ScriptUtils.executeSqlScript(connection, encodeScript(script), this.continueOnError,
 				this.ignoreFailedDrops, this.commentPrefix, this.separator, this.blockCommentStartDelimiter,
