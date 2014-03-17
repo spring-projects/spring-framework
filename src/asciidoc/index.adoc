@@ -1,5 +1,5 @@
 = Spring Framework Reference Documentation
-Rod Johnson; Juergen Hoeller; Keith Donald; Colin Sampaleanu; Rob Harrop; Thomas Risberg; Alef Arendsen; Darren Davison; Dmitriy Kopylenko; Mark Pollack; Thierry Templier; Erwin Vervaet; Portia Tung; Ben Hale; Adrian Colyer; John Lewis; Costin Leau; Mark Fisher; Sam Brannen; Ramnivas Laddad; Arjen Poutsma; Chris Beams; Tareq Abedrabbo; Andy Clement; Dave Syer; Oliver Gierke; Rossen Stoyanchev; Phillip Webb; Rob Winch; Brian Clozel; Stephane Nicoll
+Rod Johnson; Juergen Hoeller; Keith Donald; Colin Sampaleanu; Rob Harrop; Thomas Risberg; Alef Arendsen; Darren Davison; Dmitriy Kopylenko; Mark Pollack; Thierry Templier; Erwin Vervaet; Portia Tung; Ben Hale; Adrian Colyer; John Lewis; Costin Leau; Mark Fisher; Sam Brannen; Ramnivas Laddad; Arjen Poutsma; Chris Beams; Tareq Abedrabbo; Andy Clement; Dave Syer; Oliver Gierke; Rossen Stoyanchev; Phillip Webb; Rob Winch; Brian Clozel; Stephane Nicoll; Sebastien Deleuze
 
 
 :javadoc-baseurl: http://docs.spring.io/spring/docs/current/javadoc-api
@@ -37046,7 +37046,7 @@ Each underlying WebSocket engine exposes configuration properties that control
 runtime characteristics such as the size of message buffer sizes, idle timeout,
 and others.
 
-For Tomcat, WildFly, and Glassfish add a `WebSocketContainerFactoryBean` to your
+For Tomcat, WildFly, and Glassfish add a `ServletServerContainerFactoryBean` to your
 WebSocket Java config:
 
 [source,java,indent=0]
@@ -37057,8 +37057,8 @@ WebSocket Java config:
 	public class WebSocketConfig implements WebSocketConfigurer {
 
 		@Bean
-		public WebSocketContainerFactoryBean createWebSocketContainer() {
-			WebSocketContainerFactoryBean container = new WebSocketContainerFactoryBean();
+		public ServletServerContainerFactoryBean createWebSocketContainer() {
+			ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
 			container.setMaxTextMessageBufferSize(8192);
 			container.setMaxBinaryMessageBufferSize(8192);
 			return container;
@@ -37081,13 +37081,19 @@ or WebSocket XML namespace:
 			http://www.springframework.org/schema/websocket
 			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
-		<bean class="org.springframework...WebSocketContainerFactoryBean">
+		<bean class="org.springframework...ServletServerContainerFactoryBean">
 			<property name="maxTextMessageBufferSize" value="8192"/>
 			<property name="maxBinaryMessageBufferSize" value="8192"/>
 		</bean>
 
 	</beans>
 ----
+
+[NOTE]
+====
+For client side WebSocket configuration, you should use `WebSocketContainerFactoryBean`
+(XML) or `ContainerProvider.getWebSocketContainer()` (Java config).
+====
 
 For Jetty, you'll need to supply a pre-configured Jetty `WebSocketServerFactory` and plug
 that into Spring's `DefaultHandshakeHandler` through your WebSocket Java config:
