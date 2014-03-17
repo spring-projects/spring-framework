@@ -21,7 +21,6 @@ import java.sql.Connection;
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.util.Assert;
 
@@ -39,7 +38,7 @@ public abstract class DatabasePopulatorUtils {
 	 * Execute the given {@link DatabasePopulator} against the given {@link DataSource}.
 	 * @param populator the {@code DatabasePopulator} to execute
 	 * @param dataSource the {@code DataSource} to execute against
-	 * @throws DataAccessException if an error occurs
+	 * @throws DataAccessException if an error occurs, specifically a {@link ScriptException}
 	 */
 	public static void execute(DatabasePopulator populator, DataSource dataSource) throws DataAccessException {
 		Assert.notNull(populator, "DatabasePopulator must be provided");
@@ -56,7 +55,11 @@ public abstract class DatabasePopulatorUtils {
 			}
 		}
 		catch (Exception ex) {
-			throw new DataAccessResourceFailureException("Failed to execute database script", ex);
+			if (ex instanceof ScriptException) {
+				throw (ScriptException) ex;
+			}
+
+			throw new UncategorizedScriptException("Failed to execute database script", ex);
 		}
 	}
 

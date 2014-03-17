@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.jdbc.datasource.embedded;
 import org.junit.Test;
 
 import org.springframework.core.io.ClassRelativeResourceLoader;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.CannotReadScriptException;
 
@@ -27,6 +26,7 @@ import static org.junit.Assert.*;
 
 /**
  * @author Keith Donald
+ * @author Sam Brannen
  */
 public class EmbeddedDatabaseBuilderTests {
 
@@ -80,15 +80,9 @@ public class EmbeddedDatabaseBuilderTests {
 		assertDatabaseCreatedAndShutdown(db);
 	}
 
-	@Test
+	@Test(expected = CannotReadScriptException.class)
 	public void testBuildNoSuchScript() {
-		try {
-			new EmbeddedDatabaseBuilder().addScript("bogus.sql").build();
-			fail("Should have failed");
-		}
-		catch (DataAccessResourceFailureException ex) {
-			assertTrue(ex.getCause() instanceof CannotReadScriptException);
-		}
+		new EmbeddedDatabaseBuilder().addScript("bogus.sql").build();
 	}
 
 	private void assertDatabaseCreatedAndShutdown(EmbeddedDatabase db) {

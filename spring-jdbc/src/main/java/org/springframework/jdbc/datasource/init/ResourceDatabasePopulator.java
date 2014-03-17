@@ -179,8 +179,11 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 		this.ignoreFailedDrops = ignoreFailedDrops;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public void populate(Connection connection) throws SQLException {
+	public void populate(Connection connection) throws SQLException, ScriptException {
 		for (Resource script : this.scripts) {
 			ScriptUtils.executeSqlScript(connection, encodeScript(script), this.continueOnError,
 				this.ignoreFailedDrops, this.commentPrefix, this.separator, this.blockCommentStartDelimiter,

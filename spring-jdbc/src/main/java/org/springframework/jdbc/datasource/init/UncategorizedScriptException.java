@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,32 +16,31 @@
 
 package org.springframework.jdbc.datasource.init;
 
-import org.springframework.dao.DataAccessException;
-
 /**
- * Root of the hierarchy of data access exceptions that are related to processing
- * of SQL scripts.
+ * Thrown when we cannot determine anything more specific than "something went
+ * wrong while processing an SQL script": for example, a {@link java.sql.SQLException}
+ * from JDBC that we cannot pinpoint more precisely.
  *
  * @author Sam Brannen
  * @since 4.0.3
  */
 @SuppressWarnings("serial")
-public abstract class ScriptException extends DataAccessException {
+public class UncategorizedScriptException extends ScriptException {
 
 	/**
-	 * Constructor for {@code ScriptException}.
-	 * @param message the detail message
+	 * Construct a new {@code UncategorizedScriptException}.
+	 * @param message detailed message
 	 */
-	public ScriptException(String message) {
+	public UncategorizedScriptException(String message) {
 		super(message);
 	}
 
 	/**
-	 * Constructor for {@code ScriptException}.
-	 * @param message the detail message
+	 * Construct a new {@code UncategorizedScriptException}.
+	 * @param message detailed message
 	 * @param cause the root cause
 	 */
-	public ScriptException(String message, Throwable cause) {
+	public UncategorizedScriptException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
