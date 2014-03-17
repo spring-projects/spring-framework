@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public class EhCacheCache implements Cache {
 	public <T> T get(Object key, Class<T> type) {
 		Element element = this.cache.get(key);
 		Object value = (element != null ? element.getObjectValue() : null);
-		if (type != null && !type.isInstance(value)) {
+		if (value != null && type != null && !type.isInstance(value)) {
 			throw new IllegalStateException("Cached value is not of required type [" + type.getName() + "]: " + value);
 		}
 		return (T) value;
