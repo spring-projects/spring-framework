@@ -15,6 +15,11 @@
 		<level value="debug" />
 	</logger>
 
+	<!-- Enable TRACE level to chase integration test issues on CI servers -->
+	<logger name="org.springframework.messaging.simp.stomp">
+		<level value="trace" />
+	</logger>
+
 	<logger name="org.apache.activemq">
 		<level value="info" />
 	</logger>
