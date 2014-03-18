@@ -1,5 +1,5 @@
 = Spring Framework Reference Documentation
-Rod Johnson; Juergen Hoeller; Keith Donald; Colin Sampaleanu; Rob Harrop; Thomas Risberg; Alef Arendsen; Darren Davison; Dmitriy Kopylenko; Mark Pollack; Thierry Templier; Erwin Vervaet; Portia Tung; Ben Hale; Adrian Colyer; John Lewis; Costin Leau; Mark Fisher; Sam Brannen; Ramnivas Laddad; Arjen Poutsma; Chris Beams; Tareq Abedrabbo; Andy Clement; Dave Syer; Oliver Gierke; Rossen Stoyanchev; Phillip Webb; Rob Winch; Brian Clozel; Stephane Nicoll
+Rod Johnson; Juergen Hoeller; Keith Donald; Colin Sampaleanu; Rob Harrop; Thomas Risberg; Alef Arendsen; Darren Davison; Dmitriy Kopylenko; Mark Pollack; Thierry Templier; Erwin Vervaet; Portia Tung; Ben Hale; Adrian Colyer; John Lewis; Costin Leau; Mark Fisher; Sam Brannen; Ramnivas Laddad; Arjen Poutsma; Chris Beams; Tareq Abedrabbo; Andy Clement; Dave Syer; Oliver Gierke; Rossen Stoyanchev; Phillip Webb; Rob Winch; Brian Clozel; Stephane Nicoll; Sebastien Deleuze
 
 
 :javadoc-baseurl: http://docs.spring.io/spring/docs/current/javadoc-api
@@ -33380,17 +33380,11 @@ This section focuses on Spring's support for Tiles v3 in the
 ====
 
 
-
 [[view-tiles-dependencies]]
 ==== Dependencies
-To be able to use Tiles you have to have a couple of additional dependencies included in
-your project. The following is the list of dependencies you need.
-
-* `Tiles version 2.1.2 or higher`
-* `Commons BeanUtils`
-* `Commons Digester`
-* `Commons Logging`
-
+To be able to use Tiles, you have to add a dependency on Tiles version 3.0.1 or higher
+and http://tiles.apache.org/framework/dependency-management.html[its transitive dependencies]
+to your project.
 
 
 [[view-tiles-integrate]]
@@ -33403,7 +33397,7 @@ look at the following piece of example ApplicationContext configuration:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer">
+	<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer">
 		<property name="definitions">
 			<list>
 				<value>/WEB-INF/defs/general.xml</value>
@@ -33424,6 +33418,31 @@ Spring web application. To be able to use the views you have to have a `ViewReso
 just as with any other view technology used with Spring. Below you can find two
 possibilities, the `UrlBasedViewResolver` and the `ResourceBundleViewResolver`.
 
+You can specify locale specific definitions by suffixing the filename by an underscore
+followed by the locale. For example:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer">
+		<property name="definitions">
+			<list>
+				<value>/WEB-INF/defs/tiles.xml</value>
+				<value>/WEB-INF/defs/tiles_fr_FR.xml</value>
+			</list>
+		</property>
+	</bean>
+----
+
+With this configuration, `tiles_fr_FR.xml` will be used for requests with the `fr_FR` locale,
+and `tiles.xml` will be used for other ones.
+
+[NOTE]
+====
+Since underscores are used to identify locales, you should avoid using them for other
+purposes in your definition filenames.
+====
+
 
 [[view-tiles-url]]
 ===== UrlBasedViewResolver
@@ -33435,7 +33454,7 @@ resolve.
 [subs="verbatim,quotes"]
 ----
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
-		<property name="viewClass" value="org.springframework.web.servlet.view.tiles2.TilesView"/>
+		<property name="viewClass" value="org.springframework.web.servlet.view.tiles3.TilesView"/>
 	</bean>
 ----
 
@@ -33458,10 +33477,10 @@ viewnames and viewclasses the resolver can use:
 [subs="verbatim,quotes"]
 ----
 	...
-	welcomeView.(class)=org.springframework.web.servlet.view.tiles2.TilesView
+	welcomeView.(class)=org.springframework.web.servlet.view.tiles3.TilesView
 	welcomeView.url=welcome (this is the name of a Tiles definition)
 
-	vetsView.(class)=org.springframework.web.servlet.view.tiles2.TilesView
+	vetsView.(class)=org.springframework.web.servlet.view.tiles3.TilesView
 	vetsView.url=vetsView (again, this is the name of a Tiles definition)
 
 	findOwnersForm.(class)=org.springframework.web.servlet.view.JstlView
@@ -33500,7 +33519,7 @@ per preparer name (as used in your Tiles definitions).
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer">
+	<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer">
 		<property name="definitions">
 			<list>
 				<value>/WEB-INF/defs/general.xml</value>
@@ -33513,7 +33532,7 @@ per preparer name (as used in your Tiles definitions).
 
 		<!-- resolving preparer names as Spring bean definition names -->
 		<property name="preparerFactoryClass"
-				value="org.springframework.web.servlet.view.tiles2.SpringBeanPreparerFactory"/>
+				value="org.springframework.web.servlet.view.tiles3.SpringBeanPreparerFactory"/>
 
 	</bean>
 ----
