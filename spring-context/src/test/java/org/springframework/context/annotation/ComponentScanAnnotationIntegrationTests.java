@@ -109,7 +109,7 @@ public class ComponentScanAnnotationIntegrationTests {
 	}
 
 	@Test
-	public void viaContextRegistration_WithLocallyDeclaredComposedAnnotation() {
+	public void viaContextRegistration_WithComposedAnnotation() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ComposedAnnotationConfig.class);
 		ctx.refresh();
@@ -117,19 +117,6 @@ public class ComponentScanAnnotationIntegrationTests {
 		ctx.getBean(SimpleComponent.class);
 		assertThat("config class bean not found",
 			ctx.containsBeanDefinition("componentScanAnnotationIntegrationTests.ComposedAnnotationConfig"), is(true));
-		assertThat("@ComponentScan annotated @Configuration class registered directly against "
-				+ "AnnotationConfigApplicationContext did not trigger component scanning as expected",
-			ctx.containsBean("simpleComponent"), is(true));
-	}
-
-	@Test
-	public void viaContextRegistration_WithExternallyDeclaredComposedAnnotation() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(org.springframework.context.annotation.componentscan.meta.ComposedAnnotationConfig.class);
-		ctx.refresh();
-		ctx.getBean(org.springframework.context.annotation.componentscan.meta.ComposedAnnotationConfig.class);
-		ctx.getBean(SimpleComponent.class);
-		assertThat("config class bean not found", ctx.containsBeanDefinition("composedAnnotationConfig"), is(true));
 		assertThat("@ComponentScan annotated @Configuration class registered directly against "
 				+ "AnnotationConfigApplicationContext did not trigger component scanning as expected",
 			ctx.containsBean("simpleComponent"), is(true));
