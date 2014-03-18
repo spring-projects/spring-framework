@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.simp.stomp;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Callable;
