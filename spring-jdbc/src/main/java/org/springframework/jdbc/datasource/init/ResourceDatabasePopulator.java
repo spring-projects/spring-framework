@@ -25,10 +25,13 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 
 /**
- * Populates a database from SQL scripts defined in external resources.
+ * Populates or initializes a database from SQL scripts defined in external
+ * resources.
  *
- * <p>Call {@link #addScript(Resource)} to add a SQL script location.
- * Call {@link #setSqlScriptEncoding(String)} to set the encoding for all added scripts.
+ * <p>Call {@link #addScript(Resource)} to add a single SQL script location.
+ * Call {@link #addScripts(Resource...)} to add multiple SQL script locations.
+ * Call {@link #setSqlScriptEncoding(String)} to set the encoding for all added
+ * scripts.
  *
  * @author Keith Donald
  * @author Dave Syer
@@ -70,7 +73,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	/**
 	 * Construct a new {@code ResourceDatabasePopulator} with default settings
 	 * for the supplied scripts.
-	 * @param scripts the scripts to execute to populate the database
+	 * @param scripts the scripts to execute to initialize or populate the database
 	 * @since 4.0.3
 	 */
 	public ResourceDatabasePopulator(Resource... scripts) {
@@ -86,7 +89,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * statement can be ignored
 	 * @param sqlScriptEncoding the encoding for the supplied SQL scripts, if
 	 * different from the platform encoding; may be {@code null}
-	 * @param scripts the scripts to execute to populate the database
+	 * @param scripts the scripts to execute to initialize or populate the database
 	 * @since 4.0.3
 	 */
 	public ResourceDatabasePopulator(boolean continueOnError, boolean ignoreFailedDrops, String sqlScriptEncoding,
@@ -98,7 +101,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 	/**
-	 * Add a script to execute to populate the database.
+	 * Add a script to execute to initialize or populate the database.
 	 * @param script the path to an SQL script
 	 */
 	public void addScript(Resource script) {
@@ -106,7 +109,16 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 	/**
-	 * Set the scripts to execute to populate the database.
+	 * Add multiple scripts to execute to initialize or populate the database.
+	 * @param scripts the scripts to execute
+	 */
+	public void addScripts(Resource... scripts) {
+		this.scripts.addAll(Arrays.asList(scripts));
+	}
+
+	/**
+	 * Set the scripts to execute to initialize or populate the database,
+	 * replacing any previously added scripts.
 	 * @param scripts the scripts to execute
 	 */
 	public void setScripts(Resource... scripts) {
@@ -115,6 +127,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	/**
 	 * Specify the encoding for SQL scripts, if different from the platform encoding.
+	 * @param sqlScriptEncoding the encoding used in scripts
 	 * @see #addScript(Resource)
 	 */
 	public void setSqlScriptEncoding(String sqlScriptEncoding) {
@@ -124,6 +137,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	/**
 	 * Specify the statement separator, if a custom one.
 	 * <p>Default is ";".
+	 * @param separator the statement separator
 	 */
 	public void setSeparator(String separator) {
 		this.separator = separator;
@@ -132,6 +146,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	/**
 	 * Set the prefix that identifies line comments within the SQL scripts.
 	 * <p>Default is "--".
+	 * @param commentPrefix the prefix for single-line comments
 	 */
 	public void setCommentPrefix(String commentPrefix) {
 		this.commentPrefix = commentPrefix;
@@ -141,6 +156,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * Set the start delimiter that identifies block comments within the SQL
 	 * scripts.
 	 * <p>Default is "/*".
+	 * @param blockCommentStartDelimiter the start delimiter for block comments
 	 * @since 4.0.3
 	 * @see #setBlockCommentEndDelimiter
 	 */
@@ -152,6 +168,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * Set the end delimiter that identifies block comments within the SQL
 	 * scripts.
 	 * <p>Default is "*&#47;".
+	 * @param blockCommentEndDelimiter the end delimiter for block comments
 	 * @since 4.0.3
 	 * @see #setBlockCommentStartDelimiter
 	 */
@@ -162,6 +179,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	/**
 	 * Flag to indicate that all failures in SQL should be logged but not cause a failure.
 	 * <p>Defaults to {@code false}.
+	 * @param continueOnError {@code true} if script execution should continue on error
 	 */
 	public void setContinueOnError(boolean continueOnError) {
 		this.continueOnError = continueOnError;
@@ -173,6 +191,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * {@code IF EXISTS} clause in a {@code DROP} statement.
 	 * <p>The default is {@code false} so that if the populator runs accidentally, it will
 	 * fail fast if the script starts with a {@code DROP} statement.
+	 * @param ignoreFailedDrops {@code true} if failed drop statements should be ignored
 	 */
 	public void setIgnoreFailedDrops(boolean ignoreFailedDrops) {
 		this.ignoreFailedDrops = ignoreFailedDrops;

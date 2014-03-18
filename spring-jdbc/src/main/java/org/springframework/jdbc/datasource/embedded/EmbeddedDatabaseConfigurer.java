@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,23 +19,28 @@ package org.springframework.jdbc.datasource.embedded;
 import javax.sql.DataSource;
 
 /**
- * Encapsulates the configuration required to create, connect to, and shutdown a specific type of embedded database such as HSQL or H2.
- * Create a implementation for each database type you wish to support; for example HSQL, H2, or some other type.
+ * {@code EmbeddedDatabaseConfigurer} encapsulates the configuration required to
+ * create, connect to, and shutdown a specific type of embedded database such as
+ * HSQL or H2.
+ * <p>Create an implementation for each database type you wish to support; for
+ * example HSQL, H2, or some other type.
  *
  * @author Keith Donald
+ * @author Sam Brannen
  * @since 3.0
  */
 public interface EmbeddedDatabaseConfigurer {
 
 	/**
-	 * Configure the properties required to create and connect to the embedded database instance.
+	 * Configure the properties required to create and connect to the embedded
+	 * database instance.
 	 * @param properties connection properties to configure
-	 * @param databaseName the name of the test database
+	 * @param databaseName the name of the embedded database
 	 */
 	void configureConnectionProperties(ConnectionProperties properties, String databaseName);
 
 	/**
-	 * Shutdown the embedded database instance that backs dataSource.
+	 * Shutdown the embedded database instance that backs the supplied {@link DataSource}.
 	 * @param dataSource the data source
 	 * @param databaseName the name of the database being shutdown
 	 */

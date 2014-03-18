@@ -118,14 +118,14 @@ public class EmbeddedDatabaseFactory {
 	 * Set the strategy that will be used to initialize or populate the embedded
 	 * database.
 	 * <p>Defaults to {@code null}.
-	 * @see org.springframework.jdbc.datasource.init.DataSourceInitializer#setDatabasePopulator
 	 */
 	public void setDatabasePopulator(DatabasePopulator populator) {
 		this.databasePopulator = populator;
 	}
 
 	/**
-	 * Factory method that returns the embedded database instance.
+	 * Factory method that returns the {@link EmbeddedDatabase embedded database}
+	 * instance, which is also a {@link DataSource}.
 	 */
 	public EmbeddedDatabase getDatabase() {
 		if (this.dataSource == null) {
