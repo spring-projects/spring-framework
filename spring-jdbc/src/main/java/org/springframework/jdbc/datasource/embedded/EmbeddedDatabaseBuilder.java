@@ -16,17 +16,28 @@
 
 package org.springframework.jdbc.datasource.embedded;
 
+import javax.sql.DataSource;
+
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import org.springframework.util.Assert;
 
 /**
  * A builder that provides a convenient API for constructing an embedded database.
  *
  * <h3>Usage Example</h3>
  * <pre class="code">
- * EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
- * EmbeddedDatabase db = builder.setType(H2).addScript("schema.sql").addScript("data.sql").build();
+ * EmbeddedDatabase db = new EmbeddedDatabaseBuilder()
+ *     .setType(H2)
+ *     .setScriptEncoding("UTF-8")
+ *     .ignoreFailedDrops(true)
+ *     .addScript("schema.sql")
+ *     .addScripts("user_data.sql", "country_data.sql")
+ *     .build();
+ *
+ * // ...
+ *
  * db.shutdown();
  * </pre>
  *
@@ -35,6 +46,9 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
  * @author Dave Syer
  * @author Sam Brannen
  * @since 3.0
+ * @see org.springframework.jdbc.datasource.init.ScriptUtils
+ * @see org.springframework.jdbc.datasource.init.ResourceDatabasePopulator
+ * @see org.springframework.jdbc.datasource.init.DatabasePopulatorUtils
  */
 public class EmbeddedDatabaseBuilder {
 
@@ -46,15 +60,15 @@ public class EmbeddedDatabaseBuilder {
 
 
 	/**
-	 * Create a new embedded database builder.
+	 * Create a new embedded database builder with a {@link DefaultResourceLoader}.
 	 */
 	public EmbeddedDatabaseBuilder() {
 		this(new DefaultResourceLoader());
 	}
 
 	/**
-	 * Create a new embedded database builder with the given ResourceLoader.
-	 * @param resourceLoader the ResourceLoader to delegate to
+	 * Create a new embedded database builder with the given {@link ResourceLoader}.
+	 * @param resourceLoader the {@code ResourceLoader} to delegate to
 	 */
 	public EmbeddedDatabaseBuilder(ResourceLoader resourceLoader) {
 		this.databaseFactory = new EmbeddedDatabaseFactory();
@@ -63,12 +77,11 @@ public class EmbeddedDatabaseBuilder {
 		this.resourceLoader = resourceLoader;
 	}
 
-
 	/**
 	 * Set the name of the embedded database.
 	 * <p>Defaults to {@link EmbeddedDatabaseFactory#DEFAULT_DATABASE_NAME} if
 	 * not called.
-	 * @param databaseName the database name
+	 * @param databaseName the name of the embedded database to build
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public EmbeddedDatabaseBuilder setName(String databaseName) {
@@ -79,7 +92,7 @@ public class EmbeddedDatabaseBuilder {
 	/**
 	 * Set the type of embedded database.
 	 * <p>Defaults to HSQL if not called.
-	 * @param databaseType the database type
+	 * @param databaseType the type of embedded database to build
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public EmbeddedDatabaseBuilder setType(EmbeddedDatabaseType databaseType) {
@@ -88,24 +101,142 @@ public class EmbeddedDatabaseBuilder {
 	}
 
 	/**
-	 * Add an SQL script to execute to initialize or populate the database.
-	 * @param sqlResource the sql resource location
+	 * Set the factory to use to create the {@link DataSource} instance that
+	 * connects to the embedded database.
+	 * <p>Defaults to {@link SimpleDriverDataSourceFactory} but can be overridden,
+	 * for example to introduce connection pooling.
 	 * @return {@code this}, to facilitate method chaining
+	 * @since 4.0.3
 	 */
-	public EmbeddedDatabaseBuilder addScript(String sqlResource) {
-		this.databasePopulator.addScript(this.resourceLoader.getResource(sqlResource));
+	public EmbeddedDatabaseBuilder setDataSourceFactory(DataSourceFactory dataSourceFactory) {
+		Assert.notNull(dataSourceFactory, "DataSourceFactory is required");
+		this.databaseFactory.setDataSourceFactory(dataSourceFactory);
 		return this;
 	}
 
 	/**
-	 * Add default scripts to execute to populate the database.
+	 * Add default SQL scripts to execute to populate the database.
 	 * <p>The default scripts are {@code "schema.sql"} to create the database
 	 * schema and {@code "data.sql"} to populate the database with data.
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public EmbeddedDatabaseBuilder addDefaultScripts() {
-		addScript("schema.sql");
-		addScript("data.sql");
+		return addScripts("schema.sql", "data.sql");
+	}
+
+	/**
+	 * Add an SQL script to execute to initialize or populate the database.
+	 * @param script the script to execute
+	 * @return {@code this}, to facilitate method chaining
+	 */
+	public EmbeddedDatabaseBuilder addScript(String script) {
+		this.databasePopulator.addScript(this.resourceLoader.getResource(script));
+		return this;
+	}
+
+	/**
+	 * Add multiple SQL scripts to execute to initialize or populate the database.
+	 * @param scripts the scripts to execute
+	 * @return {@code this}, to facilitate method chaining
+	 * @since 4.0.3
+	 */
+	public EmbeddedDatabaseBuilder addScripts(String... scripts) {
+		for (String script : scripts) {
+			addScript(script);
+		}
+		return this;
+	}
+
+	/**
+	 * Specify the character encoding used in all SQL scripts, if different from
+	 * the platform encoding.
+	 * @param scriptEncoding the encoding used in scripts
+	 * @return {@code this}, to facilitate method chaining
+	 * @since 4.0.3
+	 */
+	public EmbeddedDatabaseBuilder setScriptEncoding(String scriptEncoding) {
+		this.databasePopulator.setSqlScriptEncoding(scriptEncoding);
+		return this;
+	}
+
+	/**
+	 * Specify the statement separator used in all SQL scripts, if a custom one.
+	 * <p>Default is ";".
+	 * @param separator the statement separator
+	 * @return {@code this}, to facilitate method chaining
+	 * @since 4.0.3
+	 */
+	public EmbeddedDatabaseBuilder setSeparator(String separator) {
+		this.databasePopulator.setSeparator(separator);
+		return this;
+	}
+
+	/**
+	 * Specify the single-line comment prefix used in all SQL scripts.
+	 * <p>Default is "--".
+	 * @param commentPrefix the prefix for single-line comments
+	 * @return {@code this}, to facilitate method chaining
+	 * @since 4.0.3
+	 */
+	public EmbeddedDatabaseBuilder setCommentPrefix(String commentPrefix) {
+		this.databasePopulator.setCommentPrefix(commentPrefix);
+		return this;
+	}
+
+	/**
+	 * Specify the start delimiter for block comments in all SQL scripts.
+	 * <p>Default is "/*".
+	 * @param blockCommentStartDelimiter the start delimiter for block comments
+	 * @return {@code this}, to facilitate method chaining
+	 * @since 4.0.3
+	 * @see #setBlockCommentEndDelimiter
+	 * @since 4.0.3
+	 */
+	public EmbeddedDatabaseBuilder setBlockCommentStartDelimiter(String blockCommentStartDelimiter) {
+		this.databasePopulator.setBlockCommentStartDelimiter(blockCommentStartDelimiter);
+		return this;
+	}
+
+	/**
+	 * Specify the end delimiter for block comments in all SQL scripts.
+	 * <p>Default is "*&#47;".
+	 * @param blockCommentEndDelimiter the end delimiter for block comments
+	 * @return {@code this}, to facilitate method chaining
+	 * @since 4.0.3
+	 * @see #setBlockCommentStartDelimiter
+	 * @since 4.0.3
+	 */
+	public EmbeddedDatabaseBuilder setBlockCommentEndDelimiter(String blockCommentEndDelimiter) {
+		this.databasePopulator.setBlockCommentEndDelimiter(blockCommentEndDelimiter);
+		return this;
+	}
+
+	/**
+	 * Specify that all failures which occur while executing SQL scripts should
+	 * be logged but should not cause a failure.
+	 * <p>Defaults to {@code false}.
+	 * @param flag {@code true} if script execution should continue on error
+	 * @return {@code this}, to facilitate method chaining
+	 * @since 4.0.3
+	 */
+	public EmbeddedDatabaseBuilder continueOnError(boolean flag) {
+		this.databasePopulator.setContinueOnError(flag);
+		return this;
+	}
+
+	/**
+	 * Specify that a failed SQL {@code DROP} statement within an executed
+	 * script can be ignored.
+	 * <p>This is useful for a database whose SQL dialect does not support an
+	 * {@code IF EXISTS} clause in a {@code DROP} statement.
+	 * <p>The default is {@code false} so that {@link #build building} will fail
+	 * fast if a script starts with a {@code DROP} statement.
+	 * @param flag {@code true} if failed drop statements should be ignored
+	 * @return {@code this}, to facilitate method chaining
+	 * @since 4.0.3
+	 */
+	public EmbeddedDatabaseBuilder ignoreFailedDrops(boolean flag) {
+		this.databasePopulator.setIgnoreFailedDrops(flag);
 		return this;
 	}
 

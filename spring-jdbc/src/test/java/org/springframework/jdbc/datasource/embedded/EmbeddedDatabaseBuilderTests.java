@@ -17,72 +17,151 @@
 package org.springframework.jdbc.datasource.embedded;
 
 import org.junit.Test;
-
 import org.springframework.core.io.ClassRelativeResourceLoader;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.CannotReadScriptException;
 
 import static org.junit.Assert.*;
+import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.*;
 
 /**
+ * Integration tests for {@link EmbeddedDatabaseBuilder}.
+ *
  * @author Keith Donald
  * @author Sam Brannen
  */
 public class EmbeddedDatabaseBuilderTests {
 
-	@Test
-	public void testBuildDefaultScripts() {
-		EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
-		EmbeddedDatabase db = builder.addDefaultScripts().build();
-		assertDatabaseCreatedAndShutdown(db);
+	private final EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(
+		getClass()));
 
-		db = builder.addDefaultScripts().build();
-		assertDatabaseCreatedAndShutdown(db);
-	}
 
 	@Test
-	public void testBuild() {
-		EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()));
-		EmbeddedDatabase db = builder.addScript("db-schema.sql").addScript("db-test-data.sql").build();
-		assertDatabaseCreatedAndShutdown(db);
+	public void addDefaultScripts() throws Exception {
+		doTwice(new Runnable() {
 
-		db = builder.addScript("db-schema.sql").addScript("db-test-data.sql").build();
-		assertDatabaseCreatedAndShutdown(db);
-	}
-
-	@Test
-	public void testBuildWithComments() {
-		EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()));
-		EmbeddedDatabase db = builder.addScript("db-schema-comments.sql").addScript("db-test-data.sql").build();
-		assertDatabaseCreatedAndShutdown(db);
-
-		db = builder.addScript("db-schema-comments.sql").addScript("db-test-data.sql").build();
-		assertDatabaseCreatedAndShutdown(db);
-	}
-
-	@Test
-	public void testBuildH2() {
-		EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()));
-		EmbeddedDatabase db = builder.setType(EmbeddedDatabaseType.H2).addScript("db-schema.sql").addScript("db-test-data.sql").build();
-		assertDatabaseCreatedAndShutdown(db);
-
-		db = builder.setType(EmbeddedDatabaseType.H2).addScript("db-schema.sql").addScript("db-test-data.sql").build();
-		assertDatabaseCreatedAndShutdown(db);
-	}
-
-	@Test
-	public void testBuildDerby() {
-		EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()));
-		EmbeddedDatabase db = builder.setType(EmbeddedDatabaseType.DERBY).addScript("db-schema-derby.sql").addScript("db-test-data.sql").build();
-		assertDatabaseCreatedAndShutdown(db);
-
-		db = builder.setType(EmbeddedDatabaseType.DERBY).addScript("db-schema-derby-with-drop.sql").addScript("db-test-data.sql").build();
-		assertDatabaseCreatedAndShutdown(db);
+			@Override
+			public void run() {
+				EmbeddedDatabase db = new EmbeddedDatabaseBuilder()//
+				.addDefaultScripts()//
+				.build();
+				assertDatabaseCreatedAndShutdown(db);
+			}
+		});
 	}
 
 	@Test(expected = CannotReadScriptException.class)
-	public void testBuildNoSuchScript() {
+	public void addScriptWithBogusFileName() {
 		new EmbeddedDatabaseBuilder().addScript("bogus.sql").build();
+	}
+
+	@Test
+	public void addScript() throws Exception {
+		doTwice(new Runnable() {
+
+			@Override
+			public void run() {
+				EmbeddedDatabase db = builder//
+				.addScript("db-schema.sql")//
+				.addScript("db-test-data.sql")//
+				.build();
+				assertDatabaseCreatedAndShutdown(db);
+			}
+		});
+	}
+
+	@Test
+	public void addScripts() throws Exception {
+		doTwice(new Runnable() {
+
+			@Override
+			public void run() {
+				EmbeddedDatabase db = builder//
+				.addScripts("db-schema.sql", "db-test-data.sql")//
+				.build();
+				assertDatabaseCreatedAndShutdown(db);
+			}
+		});
+	}
+
+	@Test
+	public void addScriptsWithDefaultCommentPrefix() throws Exception {
+		doTwice(new Runnable() {
+
+			@Override
+			public void run() {
+				EmbeddedDatabase db = builder//
+				.addScripts("db-schema-comments.sql", "db-test-data.sql")//
+				.build();
+				assertDatabaseCreatedAndShutdown(db);
+			}
+		});
+	}
+
+	@Test
+	public void addScriptsWithCustomCommentPrefix() throws Exception {
+		doTwice(new Runnable() {
+
+			@Override
+			public void run() {
+				EmbeddedDatabase db = builder//
+				.addScripts("db-schema-custom-comments.sql", "db-test-data.sql")//
+				.setCommentPrefix("~")//
+				.build();
+				assertDatabaseCreatedAndShutdown(db);
+			}
+		});
+	}
+
+	@Test
+	public void addScriptsWithCustomBlockComments() throws Exception {
+		doTwice(new Runnable() {
+
+			@Override
+			public void run() {
+				EmbeddedDatabase db = builder//
+				.addScripts("db-schema-block-comments.sql", "db-test-data.sql")//
+				.setBlockCommentStartDelimiter("{*")//
+				.setBlockCommentEndDelimiter("*}")//
+				.build();
+				assertDatabaseCreatedAndShutdown(db);
+			}
+		});
+	}
+
+	@Test
+	public void setTypeToH2() throws Exception {
+		doTwice(new Runnable() {
+
+			@Override
+			public void run() {
+				EmbeddedDatabase db = builder//
+				.setType(H2)//
+				.addScripts("db-schema.sql", "db-test-data.sql")//
+				.build();
+				assertDatabaseCreatedAndShutdown(db);
+			}
+		});
+	}
+
+	@Test
+	public void setTypeToDerbyAndIgnoreFailedDrops() throws Exception {
+		doTwice(new Runnable() {
+
+			@Override
+			public void run() {
+				EmbeddedDatabase db = builder//
+				.setType(DERBY)//
+				.ignoreFailedDrops(true)//
+				.addScripts("db-schema-derby-with-drop.sql", "db-test-data.sql").build();
+				assertDatabaseCreatedAndShutdown(db);
+			}
+		});
+	}
+
+	private void doTwice(Runnable test) {
+		test.run();
+		test.run();
 	}
 
 	private void assertDatabaseCreatedAndShutdown(EmbeddedDatabase db) {
