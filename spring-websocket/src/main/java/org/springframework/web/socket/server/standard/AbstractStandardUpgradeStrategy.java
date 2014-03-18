@@ -48,8 +48,8 @@ import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 
 /**
- * A base class for {@link RequestUpgradeStrategy} implementations that build on the
- * standard WebSocket API for Java.
+ * A base class for {@link RequestUpgradeStrategy} implementations that build
+ * on the standard WebSocket API for Java (JSR-356).
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -61,15 +61,6 @@ public abstract class AbstractStandardUpgradeStrategy implements RequestUpgradeS
 	private volatile List<WebSocketExtension> extensions;
 
 
-	@Override
-	public List<WebSocketExtension> getSupportedExtensions(ServerHttpRequest request) {
-		if(this.extensions == null) {
-			HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
-			this.extensions = getInstalledExtensions(getContainer(servletRequest));
-		}
-		return this.extensions;
-	}
-
 	protected ServerContainer getContainer(HttpServletRequest request) {
 		ServletContext servletContext = request.getServletContext();
 		String attrName = "javax.websocket.server.ServerContainer";
@@ -77,6 +68,26 @@ public abstract class AbstractStandardUpgradeStrategy implements RequestUpgradeS
 		Assert.notNull(container, "No 'javax.websocket.server.ServerContainer' ServletContext attribute. " +
 				"Are you running in a Servlet container that supports JSR-356?");
 		return container;
+	}
+
+	protected final HttpServletRequest getHttpServletRequest(ServerHttpRequest request) {
+		Assert.isTrue(request instanceof ServletServerHttpRequest);
+		return ((ServletServerHttpRequest) request).getServletRequest();
+	}
+
+	protected final HttpServletResponse getHttpServletResponse(ServerHttpResponse response) {
+		Assert.isTrue(response instanceof ServletServerHttpResponse);
+		return ((ServletServerHttpResponse) response).getServletResponse();
+	}
+
+
+	@Override
+	public List<WebSocketExtension> getSupportedExtensions(ServerHttpRequest request) {
+		if (this.extensions == null) {
+			HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
+			this.extensions = getInstalledExtensions(getContainer(servletRequest));
+		}
+		return this.extensions;
 	}
 
 	protected List<WebSocketExtension> getInstalledExtensions(WebSocketContainer container) {
@@ -87,15 +98,6 @@ public abstract class AbstractStandardUpgradeStrategy implements RequestUpgradeS
 		return result;
 	}
 
-	protected final HttpServletResponse getHttpServletResponse(ServerHttpResponse response) {
-		Assert.isTrue(response instanceof ServletServerHttpResponse);
-		return ((ServletServerHttpResponse) response).getServletResponse();
-	}
-
-	protected final HttpServletRequest getHttpServletRequest(ServerHttpRequest request) {
-		Assert.isTrue(request instanceof ServletServerHttpRequest);
-		return ((ServletServerHttpRequest) request).getServletRequest();
-	}
 
 	@Override
 	public void upgrade(ServerHttpRequest request, ServerHttpResponse response,
@@ -103,7 +105,6 @@ public abstract class AbstractStandardUpgradeStrategy implements RequestUpgradeS
 			WebSocketHandler wsHandler, Map<String, Object> attrs) throws HandshakeFailureException {
 
 		HttpHeaders headers = request.getHeaders();
-
 		InetSocketAddress localAddr = request.getLocalAddress();
 		InetSocketAddress remoteAddr = request.getRemoteAddress();
 
