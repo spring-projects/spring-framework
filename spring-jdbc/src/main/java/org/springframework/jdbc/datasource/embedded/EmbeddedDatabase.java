@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,14 @@ package org.springframework.jdbc.datasource.embedded;
 import javax.sql.DataSource;
 
 /**
- * A handle to an EmbeddedDatabase instance.
- * Is a {@link DataSource}.
- * Adds a shutdown operation so the embedded database instance can be shutdown.
+ * {@code EmbeddedDatabase} serves as a handle to an embedded database instance.
+ *
+ * <p>An {@code EmbeddedDatabase} is also a {@link DataSource} and adds a
+ * {@link #shutdown} operation so that the embedded database instance can be
+ * shutdown.
  *
  * @author Keith Donald
+ * @author Sam Brannen
  * @since 3.0
  */
 public interface EmbeddedDatabase extends DataSource {
