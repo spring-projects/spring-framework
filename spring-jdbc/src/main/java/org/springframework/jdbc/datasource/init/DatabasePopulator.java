@@ -20,18 +20,20 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
- * Strategy used to populate a database during initialization.
+ * Strategy used to populate, initialize, or clean up a database.
  *
  * @author Keith Donald
  * @author Sam Brannen
  * @since 3.0
  * @see ResourceDatabasePopulator
  * @see DatabasePopulatorUtils
+ * @see DataSourceInitializer
  */
 public interface DatabasePopulator {
 
 	/**
-	 * Populate the database using the provided JDBC connection.
+	 * Populate, initialize, or clean up the database using the provided JDBC
+	 * connection.
 	 * <p>Concrete implementations <em>may</em> throw an {@link SQLException} if
 	 * an error is encountered but are <em>strongly encouraged</em> to throw a
 	 * specific {@link ScriptException} instead. For example, Spring's
