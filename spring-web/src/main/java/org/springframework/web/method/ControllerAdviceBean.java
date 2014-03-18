@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.method;
 
 import java.lang.annotation.Annotation;
@@ -22,7 +23,9 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -67,10 +70,10 @@ public class ControllerAdviceBean implements Ordered {
 	 * @param beanFactory a BeanFactory that can be used later to resolve the bean
 	 */
 	public ControllerAdviceBean(String beanName, BeanFactory beanFactory) {
-		Assert.hasText(beanName, "'beanName' must not be null");
-		Assert.notNull(beanFactory, "'beanFactory' must not be null");
+		Assert.hasText(beanName, "Bean name must not be null");
+		Assert.notNull(beanFactory, "BeanFactory must not be null");
 		Assert.isTrue(beanFactory.containsBean(beanName),
-				"Bean factory [" + beanFactory + "] does not contain bean " + "with name [" + beanName + "]");
+				"BeanFactory [" + beanFactory + "] does not contain bean with name '" + beanName + "'");
 
 		this.bean = beanName;
 		this.beanFactory = beanFactory;
@@ -86,52 +89,18 @@ public class ControllerAdviceBean implements Ordered {
 		this.assignableTypes.addAll(Arrays.asList(annotation.assignableTypes()));
 	}
 
-	private static int initOrderFromBeanType(Class<?> beanType) {
-		Order annot = AnnotationUtils.findAnnotation(beanType, Order.class);
-		return (annot != null) ? annot.value() : Ordered.LOWEST_PRECEDENCE;
-	}
-
-	private static List<Package> initBasePackagesFromBeanType(Class<?> beanType, ControllerAdvice annotation) {
-		List<Package> basePackages = new ArrayList<Package>();
-		List<String> basePackageNames = new ArrayList<String>();
-		basePackageNames.addAll(Arrays.asList(annotation.value()));
-		basePackageNames.addAll(Arrays.asList(annotation.basePackages()));
-		for (String pkgName : basePackageNames) {
-			if (StringUtils.hasText(pkgName)) {
-				Package pkg = Package.getPackage(pkgName);
-				if(pkg != null) {
-					basePackages.add(pkg);
-				}
-				else {
-					logger.warn("Package [" + pkgName + "] was not found, see [" + beanType.getName() + "]");
-				}
-			}
-		}
-		for (Class<?> markerClass : annotation.basePackageClasses()) {
-			Package pack = markerClass.getPackage();
-			if (pack != null) {
-				basePackages.add(pack);
-			}
-			else {
-				logger.warn("Package was not found for class [" + markerClass.getName()
-						+ "], see [" + beanType.getName() + "]");
-			}
-		}
-		return basePackages;
-	}
-
 	/**
 	 * Create an instance using the given bean instance.
 	 * @param bean the bean
 	 */
 	public ControllerAdviceBean(Object bean) {
-		Assert.notNull(bean, "'bean' must not be null");
+		Assert.notNull(bean, "Bean must not be null");
 		this.bean = bean;
 		this.order = initOrderFromBean(bean);
 
-		Class<? extends Object> beanType = bean.getClass();
+		Class<?> beanType = bean.getClass();
 		ControllerAdvice annotation = AnnotationUtils.findAnnotation(beanType,ControllerAdvice.class);
-		Assert.notNull(annotation, "BeanType [" + beanType.getName() + "] is not annotated @ControllerAdvice");
+		Assert.notNull(annotation, "Bean type [" + beanType.getName() + "] is not annotated @ControllerAdvice");
 
 		this.basePackages.addAll(initBasePackagesFromBeanType(beanType, annotation));
 		this.annotations.addAll(Arrays.asList(annotation.annotations()));
@@ -139,24 +108,6 @@ public class ControllerAdviceBean implements Ordered {
 		this.beanFactory = null;
 	}
 
-	private static int initOrderFromBean(Object bean) {
-		return (bean instanceof Ordered) ? ((Ordered) bean).getOrder() : initOrderFromBeanType(bean.getClass());
-	}
-
-	/**
-	 * Find the names of beans annotated with
-	 * {@linkplain ControllerAdvice @ControllerAdvice} in the given
-	 * ApplicationContext and wrap them as {@code ControllerAdviceBean} instances.
-	 */
-	public static List<ControllerAdviceBean> findAnnotatedBeans(ApplicationContext applicationContext) {
-		List<ControllerAdviceBean> beans = new ArrayList<ControllerAdviceBean>();
-		for (String name : applicationContext.getBeanDefinitionNames()) {
-			if (applicationContext.findAnnotationOnBean(name, ControllerAdvice.class) != null) {
-				beans.add(new ControllerAdviceBean(name, applicationContext));
-			}
-		}
-		return beans;
-	}
 
 	/**
 	 * Returns the order value extracted from the {@link ControllerAdvice}
@@ -172,9 +123,8 @@ public class ControllerAdviceBean implements Ordered {
 	 * If the bean type is a CGLIB-generated class, the original, user-defined class is returned.
 	 */
 	public Class<?> getBeanType() {
-		Class<?> clazz = (this.bean instanceof String)
-				? this.beanFactory.getType((String) this.bean) : this.bean.getClass();
-
+		Class<?> clazz = (this.bean instanceof String ?
+				this.beanFactory.getType((String) this.bean) : this.bean.getClass());
 		return ClassUtils.getUserClass(clazz);
 	}
 
@@ -241,7 +191,61 @@ public class ControllerAdviceBean implements Ordered {
 
 	@Override
 	public String toString() {
-		return bean.toString();
+		return this.bean.toString();
+	}
+
+
+	/**
+	 * Find the names of beans annotated with
+	 * {@linkplain ControllerAdvice @ControllerAdvice} in the given
+	 * ApplicationContext and wrap them as {@code ControllerAdviceBean} instances.
+	 */
+	public static List<ControllerAdviceBean> findAnnotatedBeans(ApplicationContext applicationContext) {
+		List<ControllerAdviceBean> beans = new ArrayList<ControllerAdviceBean>();
+		for (String name : BeanFactoryUtils.beanNamesForTypeIncludingAncestors(applicationContext, Object.class)) {
+			if (applicationContext.findAnnotationOnBean(name, ControllerAdvice.class) != null) {
+				beans.add(new ControllerAdviceBean(name, applicationContext));
+			}
+		}
+		return beans;
+	}
+
+	private static int initOrderFromBean(Object bean) {
+		return (bean instanceof Ordered ? ((Ordered) bean).getOrder() : initOrderFromBeanType(bean.getClass()));
+	}
+
+	private static int initOrderFromBeanType(Class<?> beanType) {
+		Order ann = AnnotationUtils.findAnnotation(beanType, Order.class);
+		return (ann != null ? ann.value() : Ordered.LOWEST_PRECEDENCE);
+	}
+
+	private static List<Package> initBasePackagesFromBeanType(Class<?> beanType, ControllerAdvice annotation) {
+		List<Package> basePackages = new ArrayList<Package>();
+		List<String> basePackageNames = new ArrayList<String>();
+		basePackageNames.addAll(Arrays.asList(annotation.value()));
+		basePackageNames.addAll(Arrays.asList(annotation.basePackages()));
+		for (String pkgName : basePackageNames) {
+			if (StringUtils.hasText(pkgName)) {
+				Package pkg = Package.getPackage(pkgName);
+				if(pkg != null) {
+					basePackages.add(pkg);
+				}
+				else {
+					logger.warn("Package [" + pkgName + "] was not found, see [" + beanType.getName() + "]");
+				}
+			}
+		}
+		for (Class<?> markerClass : annotation.basePackageClasses()) {
+			Package pack = markerClass.getPackage();
+			if (pack != null) {
+				basePackages.add(pack);
+			}
+			else {
+				logger.warn("Package was not found for class [" + markerClass.getName() +
+						"], see [" + beanType.getName() + "]");
+			}
+		}
+		return basePackages;
 	}
 
 }

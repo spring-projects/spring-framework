@@ -45,7 +45,6 @@ import static org.junit.Assert.*;
  * Unit tests for {@link RequestMappingHandlerAdapter}.
  *
  * @author Rossen Stoyanchev
- *
  * @see ServletAnnotationControllerHandlerMethodTests
  * @see HandlerMethodAnnotationDetectionTests
  * @see RequestMappingHandlerAdapterIntegrationTests
@@ -177,6 +176,22 @@ public class RequestMappingHandlerAdapterTests {
 	@Test
 	public void modelAttributeAdvice() throws Exception {
 		this.webAppContext.registerSingleton("maa", ModelAttributeAdvice.class);
+		this.webAppContext.refresh();
+
+		HandlerMethod handlerMethod = handlerMethod(new SimpleController(), "handle");
+		this.handlerAdapter.afterPropertiesSet();
+		ModelAndView mav = this.handlerAdapter.handle(this.request, this.response, handlerMethod);
+
+		assertEquals("lAttr1", mav.getModel().get("attr1"));
+		assertEquals("gAttr2", mav.getModel().get("attr2"));
+	}
+
+	@Test
+	public void modelAttributeAdviceInParentContext() throws Exception {
+		StaticWebApplicationContext parent = new StaticWebApplicationContext();
+		parent.registerSingleton("maa", ModelAttributeAdvice.class);
+		parent.refresh();
+		this.webAppContext.setParent(parent);
 		this.webAppContext.refresh();
 
 		HandlerMethod handlerMethod = handlerMethod(new SimpleController(), "handle");
