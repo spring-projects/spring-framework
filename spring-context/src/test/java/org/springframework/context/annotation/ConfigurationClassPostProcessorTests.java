@@ -130,7 +130,7 @@ public class ConfigurationClassPostProcessorTests {
 		postProcessorWorksWithComposedConfigurationWithAttributeOverrides(beanDefinition);
 	}
 
-	// TODO Remove expected exception when SPR-XXXXX is resolved.
+	// TODO Remove expected exception when SPR-11574 is resolved.
 	@Test(expected = ConflictingBeanDefinitionException.class)
 	public void postProcessorWorksWithComposedConfigurationWithAttributeOverridesUsingAsm() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
@@ -145,7 +145,7 @@ public class ConfigurationClassPostProcessorTests {
 		postProcessorWorksWithComposedComposedConfigurationWithAttributeOverrides(beanDefinition);
 	}
 
-	// TODO Remove expected exception when SPR-XXXXX is resolved.
+	// TODO Remove expected exception when SPR-11574 is resolved.
 	@Test(expected = ConflictingBeanDefinitionException.class)
 	public void postProcessorWorksWithComposedComposedConfigurationWithAttributeOverridesUsingAsm() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
@@ -160,7 +160,7 @@ public class ConfigurationClassPostProcessorTests {
 		postProcessorWorksWithMetaComponentScanConfigurationWithAttributeOverrides(beanDefinition);
 	}
 
-	// TODO Remove expected exception when SPR-XXXXX is resolved.
+	// TODO Remove expected exception when SPR-11574 is resolved.
 	@Test(expected = ConflictingBeanDefinitionException.class)
 	public void postProcessorWorksWithMetaComponentScanConfigurationWithAttributeOverridesUsingAsm() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
@@ -175,7 +175,7 @@ public class ConfigurationClassPostProcessorTests {
 		postProcessorWorksWithMetaComponentScanConfigurationWithAttributeOverridesSubclass(beanDefinition);
 	}
 
-	// TODO Remove expected exception when SPR-XXXXX is resolved.
+	// TODO Remove expected exception when SPR-11574 is resolved.
 	@Test(expected = ConflictingBeanDefinitionException.class)
 	public void postProcessorWorksWithMetaComponentScanConfigurationWithAttributeOverridesSubclassUsingAsm() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
