@@ -18,6 +18,7 @@ package org.springframework.web.socket.adapter;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,16 +44,19 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 
 	private T nativeSession;
 
-	private final Map<String, Object> attributes;
+	private final Map<String, Object> attributes = new ConcurrentHashMap<String, Object>();
 
 
 	/**
 	 * Create a new instance and associate the given attributes with it.
 	 *
-	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket session
+	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket
+	 * session; the provided attributes are copied, the original map is not used.
 	 */
 	public AbstractWebSocketSession(Map<String, Object> attributes) {
-		this.attributes = attributes;
+		if (attributes != null) {
+			this.attributes.putAll(attributes);
+		}
 	}
 
 

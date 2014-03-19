@@ -63,7 +63,8 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	 * Class constructor.
 	 *
 	 * @param headers the headers of the handshake request
-	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket session
+	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket
+	 * session; the provided attributes are copied, the original map is not used.
 	 * @param localAddress the address on which the request was received
 	 * @param remoteAddress the address of the remote client
 	 */

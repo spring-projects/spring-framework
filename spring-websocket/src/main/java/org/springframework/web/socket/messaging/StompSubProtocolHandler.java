@@ -133,6 +133,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 			}
 
 			headers.setSessionId(session.getId());
+			headers.setSessionAttributes(session.getAttributes());
 			headers.setUser(session.getPrincipal());
 
 			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();

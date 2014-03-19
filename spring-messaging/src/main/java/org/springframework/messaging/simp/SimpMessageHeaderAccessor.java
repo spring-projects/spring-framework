@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,8 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	public static final String MESSAGE_TYPE_HEADER = "simpMessageType";
 
 	public static final String SESSION_ID_HEADER = "simpSessionId";
+
+	public static final String SESSION_ATTRIBUTES = "simpSessionAttributes";
 
 	public static final String SUBSCRIPTION_ID_HEADER = "simpSubscriptionId";
 
@@ -125,6 +127,15 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
 	public void setSessionId(String sessionId) {
 		setHeader(SESSION_ID_HEADER, sessionId);
+	}
+
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getSessionAttributes() {
+		return (Map<String, Object>) getHeader(SESSION_ATTRIBUTES);
+	}
+
+	public void setSessionAttributes(Map<String, Object> attributes) {
+		setHeader(SESSION_ATTRIBUTES, attributes);
 	}
 
 	public Principal getUser() {

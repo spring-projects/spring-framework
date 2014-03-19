@@ -170,6 +170,7 @@ public class StompSubProtocolHandlerTests {
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(actual);
 		assertEquals(StompCommand.CONNECT, headers.getCommand());
 		assertEquals("s1", headers.getSessionId());
+		assertNotNull(headers.getSessionAttributes());
 		assertEquals("joe", headers.getUser().getName());
 		assertEquals("guest", headers.getLogin());
 		assertEquals("PROTECTED", headers.getPasscode());
