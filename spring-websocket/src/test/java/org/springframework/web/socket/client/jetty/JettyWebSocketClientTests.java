@@ -28,6 +28,7 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.SocketUtils;
 import org.springframework.web.socket.WebSocketHandler;
@@ -82,6 +83,19 @@ public class JettyWebSocketClientTests {
 		WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 		headers.setSecWebSocketProtocol(Arrays.asList("echo"));
 
+		this.wsSession = this.client.doHandshake(new TextWebSocketHandler(), headers, new URI(this.wsUrl)).get();
+
+		assertEquals(this.wsUrl, this.wsSession.getUri().toString());
+		assertEquals("echo", this.wsSession.getAcceptedProtocol());
+	}
+
+	@Test
+	public void doHandshakeWithTaskExecutor() throws Exception {
+
+		WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
+		headers.setSecWebSocketProtocol(Arrays.asList("echo"));
+
+		this.client.setTaskExecutor(new SimpleAsyncTaskExecutor());
 		this.wsSession = this.client.doHandshake(new TextWebSocketHandler(), headers, new URI(this.wsUrl)).get();
 
 		assertEquals(this.wsUrl, this.wsSession.getUri().toString());

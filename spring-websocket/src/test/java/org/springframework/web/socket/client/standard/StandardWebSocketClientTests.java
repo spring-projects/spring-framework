@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import org.springframework.core.task.AsyncListenableTaskExecutor;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
@@ -132,6 +135,16 @@ public class StandardWebSocketClientTests {
 		Map<String, List<String>> map = new HashMap<>();
 		endpointConfig.getConfigurator().beforeRequest(map);
 		assertEquals(Collections.singletonMap("foo", Arrays.asList("bar")), map);
+	}
+
+	@Test
+	public void taskExecutor() throws Exception {
+
+		URI uri = new URI("ws://example.com/abc");
+		this.wsClient.setTaskExecutor(new SimpleAsyncTaskExecutor());
+		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
+
+		assertNotNull(session);
 	}
 
 }
