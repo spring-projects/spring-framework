@@ -114,73 +114,69 @@ public class ConfigurationClassPostProcessorTests {
 	@Test
 	public void postProcessorWorksWithComposedConfigurationUsingReflection() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(ComposedConfigurationClass.class);
-		postProcessorWorksWithComposedConfiguration(beanDefinition);
+		assertSupportForComposedAnnotation(beanDefinition);
 	}
 
 	@Test
 	public void postProcessorWorksWithComposedConfigurationUsingAsm() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(ComposedConfigurationClass.class.getName());
-		postProcessorWorksWithComposedConfiguration(beanDefinition);
+		assertSupportForComposedAnnotation(beanDefinition);
 	}
 
 	@Test
 	public void postProcessorWorksWithComposedConfigurationWithAttributeOverridesUsingReflection() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
 			ComposedConfigurationWithAttributeOverridesClass.class);
-		postProcessorWorksWithComposedConfigurationWithAttributeOverrides(beanDefinition);
+		assertSupportForComposedAnnotation(beanDefinition);
 	}
 
-	// TODO Remove expected exception when SPR-11574 is resolved.
-	@Test(expected = ConflictingBeanDefinitionException.class)
+	@Test
 	public void postProcessorWorksWithComposedConfigurationWithAttributeOverridesUsingAsm() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
 			ComposedConfigurationWithAttributeOverridesClass.class.getName());
-		postProcessorWorksWithComposedConfigurationWithAttributeOverrides(beanDefinition);
+		assertSupportForComposedAnnotation(beanDefinition);
 	}
 
 	@Test
 	public void postProcessorWorksWithComposedComposedConfigurationWithAttributeOverridesUsingReflection() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
 			ComposedComposedConfigurationWithAttributeOverridesClass.class);
-		postProcessorWorksWithComposedComposedConfigurationWithAttributeOverrides(beanDefinition);
+		assertSupportForComposedAnnotation(beanDefinition);
 	}
 
-	// TODO Remove expected exception when SPR-11574 is resolved.
-	@Test(expected = ConflictingBeanDefinitionException.class)
+	@Test
 	public void postProcessorWorksWithComposedComposedConfigurationWithAttributeOverridesUsingAsm() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
 			ComposedComposedConfigurationWithAttributeOverridesClass.class.getName());
-		postProcessorWorksWithComposedComposedConfigurationWithAttributeOverrides(beanDefinition);
+		assertSupportForComposedAnnotation(beanDefinition);
 	}
 
 	@Test
 	public void postProcessorWorksWithMetaComponentScanConfigurationWithAttributeOverridesUsingReflection() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
 			MetaComponentScanConfigurationWithAttributeOverridesClass.class);
-		postProcessorWorksWithMetaComponentScanConfigurationWithAttributeOverrides(beanDefinition);
+		assertSupportForComposedAnnotation(beanDefinition);
 	}
 
-	// TODO Remove expected exception when SPR-11574 is resolved.
-	@Test(expected = ConflictingBeanDefinitionException.class)
+	@Test
 	public void postProcessorWorksWithMetaComponentScanConfigurationWithAttributeOverridesUsingAsm() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
 			MetaComponentScanConfigurationWithAttributeOverridesClass.class.getName());
-		postProcessorWorksWithMetaComponentScanConfigurationWithAttributeOverrides(beanDefinition);
+		assertSupportForComposedAnnotation(beanDefinition);
 	}
 
 	@Test
 	public void postProcessorWorksWithMetaComponentScanConfigurationWithAttributeOverridesSubclassUsingReflection() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
 			SubMetaComponentScanConfigurationWithAttributeOverridesClass.class);
-		postProcessorWorksWithMetaComponentScanConfigurationWithAttributeOverridesSubclass(beanDefinition);
+		assertSupportForComposedAnnotation(beanDefinition);
 	}
 
-	// TODO Remove expected exception when SPR-11574 is resolved.
-	@Test(expected = ConflictingBeanDefinitionException.class)
+	@Test
 	public void postProcessorWorksWithMetaComponentScanConfigurationWithAttributeOverridesSubclassUsingAsm() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
 			SubMetaComponentScanConfigurationWithAttributeOverridesClass.class.getName());
-		postProcessorWorksWithMetaComponentScanConfigurationWithAttributeOverridesSubclass(beanDefinition);
+		assertSupportForComposedAnnotation(beanDefinition);
 	}
 
 	@Test
@@ -386,46 +382,7 @@ public class ConfigurationClassPostProcessorTests {
 		assertSame(beanFactory.getBean("genericRepo"), beanFactory.getBean("repoConsumer"));
 	}
 
-	private void postProcessorWorksWithComposedConfiguration(RootBeanDefinition beanDefinition) {
-		beanFactory.registerBeanDefinition("config", beanDefinition);
-		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
-		pp.setEnvironment(new StandardEnvironment());
-		pp.postProcessBeanFactory(beanFactory);
-		SimpleComponent simpleComponent = beanFactory.getBean(SimpleComponent.class);
-		assertNotNull(simpleComponent);
-	}
-
-	private void postProcessorWorksWithComposedConfigurationWithAttributeOverrides(RootBeanDefinition beanDefinition) {
-		beanFactory.registerBeanDefinition("config", beanDefinition);
-		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
-		pp.setEnvironment(new StandardEnvironment());
-		pp.postProcessBeanFactory(beanFactory);
-		SimpleComponent simpleComponent = beanFactory.getBean(SimpleComponent.class);
-		assertNotNull(simpleComponent);
-	}
-
-	private void postProcessorWorksWithComposedComposedConfigurationWithAttributeOverrides(
-			RootBeanDefinition beanDefinition) {
-		beanFactory.registerBeanDefinition("config", beanDefinition);
-		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
-		pp.setEnvironment(new StandardEnvironment());
-		pp.postProcessBeanFactory(beanFactory);
-		SimpleComponent simpleComponent = beanFactory.getBean(SimpleComponent.class);
-		assertNotNull(simpleComponent);
-	}
-
-	private void postProcessorWorksWithMetaComponentScanConfigurationWithAttributeOverrides(
-			RootBeanDefinition beanDefinition) {
-		beanFactory.registerBeanDefinition("config", beanDefinition);
-		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
-		pp.setEnvironment(new StandardEnvironment());
-		pp.postProcessBeanFactory(beanFactory);
-		SimpleComponent simpleComponent = beanFactory.getBean(SimpleComponent.class);
-		assertNotNull(simpleComponent);
-	}
-
-	private void postProcessorWorksWithMetaComponentScanConfigurationWithAttributeOverridesSubclass(
-			RootBeanDefinition beanDefinition) {
+	private void assertSupportForComposedAnnotation(RootBeanDefinition beanDefinition) {
 		beanFactory.registerBeanDefinition("config", beanDefinition);
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.setEnvironment(new StandardEnvironment());

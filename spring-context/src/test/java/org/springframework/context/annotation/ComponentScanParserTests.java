@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import example.scannable.AutowiredQualifierFooService;
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Sam Brannen
  */
 public class ComponentScanParserTests {
 
@@ -84,7 +85,7 @@ public class ComponentScanParserTests {
 	public void testCustomAnnotationUsedForBothComponentScanAndQualifier() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/customAnnotationUsedForBothComponentScanAndQualifierTests.xml");
-		CustomAnnotationAutowiredBean testBean = (CustomAnnotationAutowiredBean) context.getBean("testBean");
+		KustomAnnotationAutowiredBean testBean = (KustomAnnotationAutowiredBean) context.getBean("testBean");
 		assertNotNull(testBean.getDependency());
 	}
 
@@ -92,7 +93,7 @@ public class ComponentScanParserTests {
 	public void testCustomTypeFilter() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/customTypeFilterTests.xml");
-		CustomAnnotationAutowiredBean testBean = (CustomAnnotationAutowiredBean) context.getBean("testBean");
+		KustomAnnotationAutowiredBean testBean = (KustomAnnotationAutowiredBean) context.getBean("testBean");
 		assertNotNull(testBean.getDependency());
 	}
 
@@ -128,28 +129,36 @@ public class ComponentScanParserTests {
 	}
 
 
-	public static class CustomAnnotationAutowiredBean {
+	/**
+	 * Intentionally spelling "custom" with a "k" since there are numerous
+	 * classes in this package named *Custom*.
+	 */
+	public static class KustomAnnotationAutowiredBean {
 
 		@Autowired
 		@CustomAnnotation
-		private CustomAnnotationDependencyBean dependency;
+		private KustomAnnotationDependencyBean dependency;
 
-		public CustomAnnotationDependencyBean getDependency() {
+		public KustomAnnotationDependencyBean getDependency() {
 			return this.dependency;
 		}
 	}
 
 
 	@CustomAnnotation
-	public static class CustomAnnotationDependencyBean {
+	public static class KustomAnnotationDependencyBean {
 	}
 
 
 	public static class CustomTypeFilter implements TypeFilter {
 
+		/**
+		 * Intentionally spelling "custom" with a "k" since there are numerous
+		 * classes in this package named *Custom*.
+		 */
 		@Override
 		public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) {
-			return metadataReader.getClassMetadata().getClassName().contains("Custom");
+			return metadataReader.getClassMetadata().getClassName().contains("Kustom");
 		}
 	}
 

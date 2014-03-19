@@ -17,6 +17,6 @@
 		</property>
 	</bean>
 
-	<bean id="testBean" class="org.springframework.context.annotation.ComponentScanParserTests$CustomAnnotationAutowiredBean"/>
+	<bean id="testBean" class="org.springframework.context.annotation.ComponentScanParserTests$KustomAnnotationAutowiredBean"/>
 
 </beans>

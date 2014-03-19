@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.util.MultiValueMap;
  * @author Mark Fisher
  * @author Costin Leau
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 2.5
  */
 public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor implements AnnotationMetadata {
@@ -51,7 +52,13 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 
 	protected final Map<String, Set<String>> metaAnnotationMap = new LinkedHashMap<String, Set<String>>(4);
 
-	protected final MultiValueMap<String, AnnotationAttributes> attributeMap = new LinkedMultiValueMap<String, AnnotationAttributes>(4);
+	/**
+	 * Declared as a {@link LinkedMultiValueMap} instead of {@link MultiValueMap}
+	 * in order to ensure that ordering of entries is enforced.
+	 * @see AnnotationReadingVisitorUtils#getMergedAnnotationAttributes(LinkedMultiValueMap, String)
+	 */
+	protected final LinkedMultiValueMap<String, AnnotationAttributes> attributeMap = new LinkedMultiValueMap<String, AnnotationAttributes>(
+		4);
 
 	protected final Set<MethodMetadata> methodMetadataSet = new LinkedHashSet<MethodMetadata>(4);
 
@@ -112,8 +119,8 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 
 	@Override
 	public AnnotationAttributes getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
-		List<AnnotationAttributes> attributes = this.attributeMap.get(annotationType);
-		AnnotationAttributes raw = (attributes == null ? null : attributes.get(0));
+		AnnotationAttributes raw = AnnotationReadingVisitorUtils.getMergedAnnotationAttributes(this.attributeMap,
+			annotationType);
 		return AnnotationReadingVisitorUtils.convertClassValues(this.classLoader, raw, classValuesAsString);
 	}
 

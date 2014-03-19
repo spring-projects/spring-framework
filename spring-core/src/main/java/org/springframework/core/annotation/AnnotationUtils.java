@@ -61,7 +61,7 @@ import org.springframework.util.ReflectionUtils;
 public abstract class AnnotationUtils {
 
 	/** The attribute name for annotations with a single element */
-	static final String VALUE = "value";
+	public static final String VALUE = "value";
 
 	private static final Map<Class<?>, Boolean> annotatedInterfaceCache = new WeakHashMap<Class<?>, Boolean>();
 

@@ -23,6 +23,19 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.HashSet;
 
+import org.junit.Test;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.annotation.CustomAutowireConfigurer;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.annotation.ComponentScan.Filter;
+import org.springframework.context.annotation.ComponentScanParserTests.KustomAnnotationAutowiredBean;
+import org.springframework.context.annotation.componentscan.simple.SimpleComponent;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.tests.context.SimpleMapScope;
+import org.springframework.util.SerializationTestUtils;
+
 import example.scannable.CustomComponent;
 import example.scannable.CustomStereotype;
 import example.scannable.DefaultNamedComponent;
@@ -32,19 +45,6 @@ import example.scannable.ScopedProxyTestBean;
 import example.scannable_implicitbasepackage.ComponentScanAnnotatedConfigWithImplicitBasePackage;
 import example.scannable_scoped.CustomScopeAnnotationBean;
 import example.scannable_scoped.MyScope;
-
-import org.junit.Test;
-import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.annotation.CustomAutowireConfigurer;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.context.annotation.ComponentScan.Filter;
-import org.springframework.context.annotation.ComponentScanParserTests.CustomAnnotationAutowiredBean;
-import org.springframework.context.annotation.componentscan.simple.SimpleComponent;
-import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.tests.context.SimpleMapScope;
-import org.springframework.util.SerializationTestUtils;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -159,7 +159,7 @@ public class ComponentScanAnnotationIntegrationTests {
 	@Test
 	public void withCustomTypeFilter() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ComponentScanWithCustomTypeFilter.class);
-		CustomAnnotationAutowiredBean testBean = ctx.getBean(CustomAnnotationAutowiredBean.class);
+		KustomAnnotationAutowiredBean testBean = ctx.getBean(KustomAnnotationAutowiredBean.class);
 		assertThat(testBean.getDependency(), notNullValue());
 	}
 
@@ -304,8 +304,8 @@ class ComponentScanWithCustomTypeFilter {
 		return cac;
 	}
 
-	public ComponentScanParserTests.CustomAnnotationAutowiredBean testBean() {
-		return new ComponentScanParserTests.CustomAnnotationAutowiredBean();
+	public ComponentScanParserTests.KustomAnnotationAutowiredBean testBean() {
+		return new ComponentScanParserTests.KustomAnnotationAutowiredBean();
 	}
 }
 
