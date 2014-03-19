@@ -26,6 +26,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Oliver Gierke
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  */
 final class H2EmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigurer {
@@ -36,7 +37,7 @@ final class H2EmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigu
 
 
 	/**
-	 * Get the singleton {@link H2EmbeddedDatabaseConfigurer} instance.
+	 * Get the singleton {@code H2EmbeddedDatabaseConfigurer} instance.
 	 * @return the configurer
 	 * @throws ClassNotFoundException if H2 is not on the classpath
 	 */
@@ -57,7 +58,7 @@ final class H2EmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigu
 	@Override
 	public void configureConnectionProperties(ConnectionProperties properties, String databaseName) {
 		properties.setDriverClass(this.driverClass);
-		properties.setUrl(String.format("jdbc:h2:mem:%s;DB_CLOSE_DELAY=-1", databaseName));
+		properties.setUrl(String.format("jdbc:h2:mem:%s;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false", databaseName));
 		properties.setUsername("sa");
 		properties.setPassword("");
 	}
