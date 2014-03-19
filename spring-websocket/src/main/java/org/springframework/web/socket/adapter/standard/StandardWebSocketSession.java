@@ -63,38 +63,38 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	 * Class constructor.
 	 *
 	 * @param headers the headers of the handshake request
-	 * @param handshakeAttributes attributes from the HTTP handshake to make available
-	 * through the WebSocket session
+	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket session
 	 * @param localAddress the address on which the request was received
 	 * @param remoteAddress the address of the remote client
 	 */
-	public StandardWebSocketSession(HttpHeaders headers, Map<String, Object> handshakeAttributes,
+	public StandardWebSocketSession(HttpHeaders headers, Map<String, Object> attributes,
 			InetSocketAddress localAddress, InetSocketAddress remoteAddress) {
 
-		this(headers, handshakeAttributes, localAddress, remoteAddress, null);
+		this(headers, attributes, localAddress, remoteAddress, null);
 	}
 
 	/**
 	 * Class constructor that associates a user with the WebSocket session.
 	 *
 	 * @param headers the headers of the handshake request
-	 * @param handshakeAttributes attributes from the HTTP handshake to make available
-	 * through the WebSocket session
+	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket session
 	 * @param localAddress the address on which the request was received
 	 * @param remoteAddress the address of the remote client
-	 * @param user the user associated with the session; can be left
-	 * 	{@code null} in which case, we'll fallback on the user available via
+	 * @param user the user associated with the session; if {@code null} we'll
+	 * 	fallback on the user available in the underlying WebSocket session
 	 */
-	public StandardWebSocketSession(HttpHeaders headers, Map<String, Object> handshakeAttributes,
+	public StandardWebSocketSession(HttpHeaders headers, Map<String, Object> attributes,
 			InetSocketAddress localAddress, InetSocketAddress remoteAddress, Principal user) {
 
-		super(handshakeAttributes);
+		super(attributes);
+
 		headers = (headers != null) ? headers : new HttpHeaders();
 		this.handshakeHeaders = HttpHeaders.readOnlyHttpHeaders(headers);
 		this.localAddress = localAddress;
 		this.remoteAddress = remoteAddress;
 		this.user = user;
 	}
+
 
 	@Override
 	public String getId() {

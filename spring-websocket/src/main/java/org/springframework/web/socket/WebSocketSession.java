@@ -50,11 +50,15 @@ public interface WebSocketSession {
 	HttpHeaders getHandshakeHeaders();
 
 	/**
-	 * Handshake request specific attributes.
-	 * To add attributes to a server-side WebSocket session see
-	 * {@link org.springframework.web.socket.server.HandshakeInterceptor}.
+	 * Return the map with attributes associated with the WebSocket session.
+	 *
+	 * <p>When the WebSocketSession is created, on the server side, the map can be
+	 * through a {@link org.springframework.web.socket.server.HandshakeInterceptor}.
+	 * On the client side, the map can be populated by passing attributes to the
+	 * {@link org.springframework.web.socket.client.WebSocketClient} handshake
+	 * methods.
 	 */
-	Map<String, Object> getHandshakeAttributes();
+	Map<String, Object> getAttributes();
 
 	/**
 	 * Return a {@link java.security.Principal} instance containing the name of the

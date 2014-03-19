@@ -93,7 +93,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 	private final WebSocketHandler handler;
 
-	private final Map<String, Object> handshakeAttributes;
+	private final Map<String, Object> attributes;
 
 	private State state = State.NEW;
 
@@ -105,12 +105,15 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 
 	/**
+	 * Create a new instance.
+	 *
 	 * @param id the session ID
 	 * @param config SockJS service configuration options
 	 * @param handler the recipient of SockJS messages
+	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket session
 	 */
-	public AbstractSockJsSession(String id, SockJsServiceConfig config,
-			WebSocketHandler handler, Map<String, Object> handshakeAttributes) {
+	public AbstractSockJsSession(String id, SockJsServiceConfig config, WebSocketHandler handler,
+			Map<String, Object> attributes) {
 
 		Assert.notNull(id, "SessionId must not be null");
 		Assert.notNull(config, "SockJsConfig must not be null");
@@ -119,7 +122,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 		this.id = id;
 		this.config = config;
 		this.handler = handler;
-		this.handshakeAttributes = handshakeAttributes;
+		this.attributes = attributes;
 	}
 
 
@@ -133,8 +136,8 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	}
 
 	@Override
-	public Map<String, Object> getHandshakeAttributes() {
-		return this.handshakeAttributes;
+	public Map<String, Object> getAttributes() {
+		return this.attributes;
 	}
 
 	public boolean isNew() {

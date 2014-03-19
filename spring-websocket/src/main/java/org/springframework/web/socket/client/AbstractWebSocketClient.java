@@ -103,18 +103,20 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 
 	/**
 	 * Perform the actual handshake to establish a connection to the server.
+	 *
 	 * @param webSocketHandler the client-side handler for WebSocket messages
 	 * @param headers HTTP headers to use for the handshake, with unwanted (forbidden)
 	 * headers filtered out, never {@code null}
 	 * @param uri the target URI for the handshake, never {@code null}
 	 * @param subProtocols requested sub-protocols, or an empty list
 	 * @param extensions requested WebSocket extensions, or an empty list
-	 * @param handshakeAttributes attributes to make available via
-	 * {@link WebSocketSession#getHandshakeAttributes()}; currently always an empty map.
+	 * @param attributes attributes to associate with the WebSocketSession, i.e. via
+	 * {@link WebSocketSession#getAttributes()}; currently always an empty map.
+	 *
 	 * @return the established WebSocket session wrapped in a ListenableFuture.
 	 */
 	protected abstract ListenableFuture<WebSocketSession> doHandshakeInternal(WebSocketHandler webSocketHandler,
 			HttpHeaders headers, URI uri, List<String> subProtocols, List<WebSocketExtension> extensions,
-			Map<String, Object> handshakeAttributes);
+			Map<String, Object> attributes);
 
 }

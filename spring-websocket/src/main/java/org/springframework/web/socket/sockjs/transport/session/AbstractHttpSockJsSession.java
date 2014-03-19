@@ -72,9 +72,9 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 
 
 	public AbstractHttpSockJsSession(String id, SockJsServiceConfig config,
-			WebSocketHandler wsHandler, Map<String, Object> handshakeAttributes) {
+			WebSocketHandler wsHandler, Map<String, Object> attributes) {
 
-		super(id, config, wsHandler, handshakeAttributes);
+		super(id, config, wsHandler, attributes);
 		this.messageCache = new ArrayBlockingQueue<String>(config.getHttpMessageCacheSize());
 	}
 

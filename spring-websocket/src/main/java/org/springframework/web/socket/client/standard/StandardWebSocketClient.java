@@ -104,14 +104,14 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 	@Override
 	protected ListenableFuture<WebSocketSession> doHandshakeInternal(WebSocketHandler webSocketHandler,
 			HttpHeaders headers, final URI uri, List<String> protocols,
-			List<WebSocketExtension> extensions, Map<String, Object> handshakeAttributes) {
+			List<WebSocketExtension> extensions, Map<String, Object> attributes) {
 
 		int port = getPort(uri);
 		InetSocketAddress localAddress = new InetSocketAddress(getLocalHost(), port);
 		InetSocketAddress remoteAddress = new InetSocketAddress(uri.getHost(), port);
 
 		final StandardWebSocketSession session = new StandardWebSocketSession(headers,
-				handshakeAttributes, localAddress, remoteAddress);
+				attributes, localAddress, remoteAddress);
 
 		final ClientEndpointConfig.Builder configBuidler = ClientEndpointConfig.Builder.create();
 		configBuidler.configurator(new StandardWebSocketClientConfigurator(headers));

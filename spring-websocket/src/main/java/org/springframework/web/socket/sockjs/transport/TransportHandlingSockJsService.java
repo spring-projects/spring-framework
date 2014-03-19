@@ -269,7 +269,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 	}
 
 	private SockJsSession createSockJsSession(String sessionId, SockJsSessionFactory sessionFactory,
-			WebSocketHandler handler, Map<String, Object> handshakeAttributes) {
+			WebSocketHandler handler, Map<String, Object> attributes) {
 
 		synchronized (this.sessions) {
 			SockJsSession session = this.sessions.get(sessionId);
@@ -283,7 +283,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			if (logger.isDebugEnabled()) {
 				logger.debug("Creating new session with session id \"" + sessionId + "\"");
 			}
-			session = sessionFactory.createSession(sessionId, handler, handshakeAttributes);
+			session = sessionFactory.createSession(sessionId, handler, attributes);
 			this.sessions.put(sessionId, session);
 			return session;
 		}

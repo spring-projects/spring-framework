@@ -172,7 +172,7 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Sma
 	@Override
 	public ListenableFuture<WebSocketSession> doHandshakeInternal(WebSocketHandler wsHandler,
 			HttpHeaders headers, final URI uri, List<String> protocols,
-			List<WebSocketExtension> extensions,  Map<String, Object> handshakeAttributes) {
+			List<WebSocketExtension> extensions,  Map<String, Object> attributes) {
 
 		final ClientUpgradeRequest request = new ClientUpgradeRequest();
 		request.setSubProtocols(protocols);
@@ -186,7 +186,7 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Sma
 		}
 
 		Principal user = getUser();
-		final JettyWebSocketSession wsSession = new JettyWebSocketSession(handshakeAttributes, user);
+		final JettyWebSocketSession wsSession = new JettyWebSocketSession(attributes, user);
 		final JettyWebSocketHandlerAdapter listener = new JettyWebSocketHandlerAdapter(wsHandler, wsSession);
 
 		Callable<WebSocketSession> connectTask = new Callable<WebSocketSession>() {

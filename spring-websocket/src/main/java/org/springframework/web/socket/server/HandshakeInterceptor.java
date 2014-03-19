@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,8 @@ public interface HandshakeInterceptor {
 	 * @param request the current request
 	 * @param response the current response
 	 * @param wsHandler the target WebSocket handler
-	 * @param attributes attributes to make available via
-	 * {@link WebSocketSession#getHandshakeAttributes()}
+	 * @param attributes attributes from the HTTP handshake to associate with the
+	 *  WebSocket session, i.e. via {@link WebSocketSession#getAttributes()}
 	 * @return whether to proceed with the handshake {@code true} or abort {@code false}
 	 */
 	boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,

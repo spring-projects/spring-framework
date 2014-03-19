@@ -34,7 +34,7 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 
 /**
  * An interceptor to copy HTTP session attributes into the map of "handshake attributes"
- * made available through {@link WebSocketSession#getHandshakeAttributes()}.
+ * made available through {@link WebSocketSession#getAttributes()}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

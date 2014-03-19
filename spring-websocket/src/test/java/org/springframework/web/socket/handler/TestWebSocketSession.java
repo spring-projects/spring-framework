@@ -95,12 +95,12 @@ public class TestWebSocketSession implements WebSocketSession {
 		this.headers = headers;
 	}
 
-	public void setHandshakeAttributes(Map<String, Object> attributes) {
+	public void setAttributes(Map<String, Object> attributes) {
 		this.attributes = attributes;
 	}
 
 	@Override
-	public Map<String, Object> getHandshakeAttributes() {
+	public Map<String, Object> getAttributes() {
 		return this.attributes;
 	}
 

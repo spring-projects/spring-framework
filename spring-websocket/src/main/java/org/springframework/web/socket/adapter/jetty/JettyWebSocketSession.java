@@ -56,24 +56,21 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 	/**
 	 * Create a new {@link JettyWebSocketSession} instance.
 	 *
-	 * @param handshakeAttributes attributes from the HTTP handshake to make available
-	 *        through the WebSocket session
+	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket session
 	 */
-	public JettyWebSocketSession(Map<String, Object> handshakeAttributes) {
-		this(handshakeAttributes, null);
+	public JettyWebSocketSession(Map<String, Object> attributes) {
+		this(attributes, null);
 	}
 
 	/**
 	 * Create a new {@link JettyWebSocketSession} instance associated with the given user.
 	 *
-	 * @param handshakeAttributes attributes from the HTTP handshake to make available
-	 *        through the WebSocket session
-	 * @param user the user associated with the session; can be left
-	 * 	{@code null} in which case, we'll fallback on the user available via
-	 * 	{@link org.eclipse.jetty.websocket.api.Session#getUpgradeRequest()}
+	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket session
+	 * @param user the user associated with the session; if {@code null} we'll fallback on the user
+	 *  available via {@link org.eclipse.jetty.websocket.api.Session#getUpgradeRequest()}
 	 */
-	public JettyWebSocketSession(Map<String, Object> handshakeAttributes, Principal user) {
-		super(handshakeAttributes);
+	public JettyWebSocketSession(Map<String, Object> attributes, Principal user) {
+		super(attributes);
 		this.user = user;
 	}
 

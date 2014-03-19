@@ -43,22 +43,22 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 
 	private T nativeSession;
 
-	private final Map<String, Object> handshakeAttributes;
+	private final Map<String, Object> attributes;
 
 
 	/**
-	 * Class constructor
-	 * @param handshakeAttributes attributes from the HTTP handshake to make available
-	 * through the WebSocket session
+	 * Create a new instance and associate the given attributes with it.
+	 *
+	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket session
 	 */
-	public AbstractWebSocketSession(Map<String, Object> handshakeAttributes) {
-		this.handshakeAttributes = handshakeAttributes;
+	public AbstractWebSocketSession(Map<String, Object> attributes) {
+		this.attributes = attributes;
 	}
 
 
 	@Override
-	public Map<String, Object> getHandshakeAttributes() {
-		return this.handshakeAttributes;
+	public Map<String, Object> getAttributes() {
+		return this.attributes;
 	}
 
 	@Override
