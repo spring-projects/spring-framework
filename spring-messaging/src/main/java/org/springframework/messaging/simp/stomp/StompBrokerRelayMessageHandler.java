@@ -81,6 +81,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	static {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.HEARTBEAT);
 		HEARTBEAT_MESSAGE = MessageBuilder.withPayload(new byte[] {'\n'}).setHeaders(headers).build();
+		EMPTY_TASK.run();
 	}
 
 
