@@ -35,7 +35,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
@@ -51,6 +50,8 @@ import static org.junit.Assert.*;
  */
 public class SimpAnnotationMethodMessageHandlerTests {
 
+	private static final String TEST_INVALID_VALUE = "invalidValue";
+
 	private TestSimpAnnotationMethodMessageHandler messageHandler;
 
 	private TestController testController;
@@ -64,7 +65,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 		this.messageHandler = new TestSimpAnnotationMethodMessageHandler(brokerTemplate, channel, channel);
 		this.messageHandler.setApplicationContext(new StaticApplicationContext());
-		this.messageHandler.setValidator(new StringNotEmptyValidator());
+		this.messageHandler.setValidator(new StringTestValidator(TEST_INVALID_VALUE));
 		this.messageHandler.afterPropertiesSet();
 
 		testController = new TestController();
@@ -126,7 +127,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	public void validationError() {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
 		headers.setDestination("/pre/validation/payload");
-		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		Message<?> message = MessageBuilder.withPayload(TEST_INVALID_VALUE.getBytes()).setHeaders(headers).build();
 		this.messageHandler.handleMessage(message);
 		assertEquals("handleValidationException", this.testController.method);
 	}
@@ -196,7 +197,14 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		}
 	}
 
-	private static class StringNotEmptyValidator implements Validator {
+	private static class StringTestValidator implements Validator {
+
+		private final String invalidValue;
+
+		private StringTestValidator(String invalidValue) {
+			this.invalidValue = invalidValue;
+		}
+
 		@Override
 		public boolean supports(Class<?> clazz) {
 			return String.class.isAssignableFrom(clazz);
@@ -204,8 +212,8 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		@Override
 		public void validate(Object target, Errors errors) {
 			String value = (String) target;
-			if (StringUtils.isEmpty(value.toString())) {
-				errors.reject("empty value");
+			if (invalidValue.equals(value)) {
+				errors.reject("invalid value '"+invalidValue+"'");
 			}
 		}
 	}

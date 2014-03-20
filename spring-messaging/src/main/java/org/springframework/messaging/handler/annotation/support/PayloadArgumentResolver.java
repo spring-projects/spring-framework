@@ -42,6 +42,7 @@ import java.lang.annotation.Annotation;
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Stephane Nicoll
  * @since 4.0
  */
 public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
@@ -65,36 +66,53 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 
 	@Override
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
-
-		Class<?> sourceClass = message.getPayload().getClass();
-		Class<?> targetClass = parameter.getParameterType();
-
-		if (ClassUtils.isAssignable(targetClass,sourceClass)) {
-			return message.getPayload();
-		}
-
 		Payload annot = parameter.getParameterAnnotation(Payload.class);
-
-		if (isEmptyPayload(message)) {
-			if ((annot != null) && !annot.required()) {
-				return null;
-			}
-		}
-
 		if ((annot != null) && StringUtils.hasText(annot.value())) {
 			throw new IllegalStateException("@Payload SpEL expressions not supported by this resolver.");
 		}
 
-		Object target = this.converter.fromMessage(message, targetClass);
-		validate(message, parameter, target);
+		Object target = getTargetPayload(parameter, message);
+		if (annot != null && isEmptyPayload(target)) {
+			if (annot.required()) {
+				throw new MethodArgumentNotValidException(message, createPayloadRequiredExceptionMessage(parameter, target));
+			}
+			else {
+				return null;
+			}
+		}
 
+		if (annot != null) { // Only validate @Payload
+			validate(message, parameter, target);
+		}
 		return target;
 	}
 
-	protected boolean isEmptyPayload(Message<?> message) {
-		Object payload = message.getPayload();
-		if (payload instanceof byte[]) {
-			return ((byte[]) message.getPayload()).length == 0;
+	/**
+	 * Return the target payload to handle for the specified message. Can either
+	 * be the payload itself if the parameter type supports it or the converted
+	 * one otherwise. While the payload of a {@link Message} cannot be null by
+	 * design, this method may return a {@code null} payload if the conversion
+	 * result is {@code null}.
+	 */
+	protected Object getTargetPayload(MethodParameter parameter, Message<?> message) {
+		Class<?> sourceClass = message.getPayload().getClass();
+		Class<?> targetClass = parameter.getParameterType();
+		if (ClassUtils.isAssignable(targetClass,sourceClass)) {
+			return message.getPayload();
+		}
+		return this.converter.fromMessage(message, targetClass);
+	}
+
+	/**
+	 * Specify if the given {@code payload} is empty.
+	 * @param payload the payload to check (can be {@code null})
+	 */
+	protected boolean isEmptyPayload(Object payload) {
+		if (payload == null) {
+			return true;
+		}
+		else if (payload instanceof byte[]) {
+			return ((byte[]) payload).length == 0;
 		}
 		else if (payload instanceof String) {
 			return ((String) payload).trim().equals("");
@@ -126,6 +144,21 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 				break;
 			}
 		}
+	}
+
+	private String createPayloadRequiredExceptionMessage(MethodParameter parameter, Object payload) {
+		String name = parameter.getParameterName() != null
+				? parameter.getParameterName() : "arg" + parameter.getParameterIndex();
+		StringBuilder sb = new StringBuilder("Payload parameter '").append(name)
+				.append(" at index ").append(parameter.getParameterIndex()).append(" ");
+		if (payload == null) {
+			sb.append("could not be converted to '").append(parameter.getParameterType().getName())
+					.append("' and is required");
+		}
+		else {
+			sb.append("is required");
+		}
+		return sb.toString();
 	}
 
 }

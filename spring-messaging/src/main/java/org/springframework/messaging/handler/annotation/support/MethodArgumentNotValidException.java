@@ -23,31 +23,39 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 
 /**
- * Exception to be thrown when validation on an method parameter annotated with {@code @Valid} fails.
+ * Exception to be thrown when a method argument is not valid. For instance, this
+ * can be issued if a validation on a method parameter annotated with
+ * {@code @Valid} fails.
+ *
  * @author Brian Clozel
  * @since 4.0.1
  */
 @SuppressWarnings("serial")
 public class MethodArgumentNotValidException extends MessagingException {
 
-	private final MethodParameter parameter;
-
-	private final BindingResult bindingResult;
-
-
-	public MethodArgumentNotValidException(Message<?> message, MethodParameter parameter, BindingResult bindingResult) {
-		super(message);
-		this.parameter = parameter;
-		this.bindingResult = bindingResult;
+	/**
+	 * Create a new message with the given description.
+	 * @see #getMessage()
+	 */
+	public MethodArgumentNotValidException(Message<?> message, String description) {
+		super(message, description);
 	}
 
-	@Override
-	public String getMessage() {
+	/**
+	 * Create a new instance with a failed validation described by
+	 * the given {@link BindingResult}.
+	 */
+	public MethodArgumentNotValidException(Message<?> message,
+			MethodParameter parameter, BindingResult bindingResult) {
+		this(message, generateMessage(parameter, bindingResult));
+	}
+
+	private static String generateMessage(MethodParameter parameter, BindingResult bindingResult) {
 		StringBuilder sb = new StringBuilder("Validation failed for parameter at index ")
-				.append(this.parameter.getParameterIndex()).append(" in method: ")
-				.append(this.parameter.getMethod().toGenericString())
-				.append(", with ").append(this.bindingResult.getErrorCount()).append(" error(s): ");
-		for (ObjectError error : this.bindingResult.getAllErrors()) {
+				.append(parameter.getParameterIndex()).append(" in method: ")
+				.append(parameter.getMethod().toGenericString())
+				.append(", with ").append(bindingResult.getErrorCount()).append(" error(s): ");
+		for (ObjectError error : bindingResult.getAllErrors()) {
 			sb.append("[").append(error).append("] ");
 		}
 		return sb.toString();
