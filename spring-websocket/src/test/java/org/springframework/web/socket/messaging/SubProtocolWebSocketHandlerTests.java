@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,12 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 import org.springframework.web.socket.handler.TestWebSocketSession;
 
 import static org.mockito.Mockito.*;
@@ -71,7 +74,8 @@ public class SubProtocolWebSocketHandlerTests {
 		this.session.setAcceptedProtocol("v12.sToMp");
 		this.webSocketHandler.afterConnectionEstablished(session);
 
-		verify(this.stompHandler).afterSessionStarted(session, this.inClientChannel);
+		verify(this.stompHandler).afterSessionStarted(
+				isA(ConcurrentWebSocketSessionDecorator.class), eq(this.inClientChannel));
 		verify(this.mqttHandler, times(0)).afterSessionStarted(session, this.inClientChannel);
 	}
 
@@ -81,7 +85,8 @@ public class SubProtocolWebSocketHandlerTests {
 		this.session.setAcceptedProtocol("v12.sToMp");
 		this.webSocketHandler.afterConnectionEstablished(session);
 
-		verify(this.stompHandler).afterSessionStarted(session, this.inClientChannel);
+		verify(this.stompHandler).afterSessionStarted(
+				isA(ConcurrentWebSocketSessionDecorator.class), eq(this.inClientChannel));
 	}
 
 	@Test(expected=IllegalStateException.class)
@@ -98,7 +103,8 @@ public class SubProtocolWebSocketHandlerTests {
 		this.webSocketHandler.setDefaultProtocolHandler(defaultHandler);
 		this.webSocketHandler.afterConnectionEstablished(session);
 
-		verify(this.defaultHandler).afterSessionStarted(session, this.inClientChannel);
+		verify(this.defaultHandler).afterSessionStarted(
+				isA(ConcurrentWebSocketSessionDecorator.class), eq(this.inClientChannel));
 		verify(this.stompHandler, times(0)).afterSessionStarted(session, this.inClientChannel);
 		verify(this.mqttHandler, times(0)).afterSessionStarted(session, this.inClientChannel);
 	}
@@ -109,7 +115,8 @@ public class SubProtocolWebSocketHandlerTests {
 		this.webSocketHandler.setDefaultProtocolHandler(defaultHandler);
 		this.webSocketHandler.afterConnectionEstablished(session);
 
-		verify(this.defaultHandler).afterSessionStarted(session, this.inClientChannel);
+		verify(this.defaultHandler).afterSessionStarted(
+				isA(ConcurrentWebSocketSessionDecorator.class), eq(this.inClientChannel));
 		verify(this.stompHandler, times(0)).afterSessionStarted(session, this.inClientChannel);
 		verify(this.mqttHandler, times(0)).afterSessionStarted(session, this.inClientChannel);
 	}
@@ -119,7 +126,8 @@ public class SubProtocolWebSocketHandlerTests {
 		this.webSocketHandler.setProtocolHandlers(Arrays.asList(stompHandler));
 		this.webSocketHandler.afterConnectionEstablished(session);
 
-		verify(this.stompHandler).afterSessionStarted(session, this.inClientChannel);
+		verify(this.stompHandler).afterSessionStarted(
+				isA(ConcurrentWebSocketSessionDecorator.class), eq(this.inClientChannel));
 	}
 
 	@Test(expected=IllegalStateException.class)

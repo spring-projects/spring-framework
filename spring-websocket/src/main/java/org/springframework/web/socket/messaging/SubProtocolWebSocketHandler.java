@@ -42,6 +42,7 @@ import org.springframework.web.socket.SubProtocolCapable;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 
 /**
  * An implementation of {@link WebSocketHandler} that delegates incoming WebSocket
@@ -73,6 +74,10 @@ public class SubProtocolWebSocketHandler
 	private SubProtocolHandler defaultProtocolHandler;
 
 	private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<String, WebSocketSession>();
+
+	private int sendTimeLimit = 20 * 1000;
+
+	private int sendBufferSizeLimit = 1024 * 1024;
 
 	private Object lifecycleMonitor = new Object();
 
@@ -155,6 +160,24 @@ public class SubProtocolWebSocketHandler
 		return new ArrayList<String>(this.protocolHandlers.keySet());
 	}
 
+
+	public void setSendTimeLimit(int sendTimeLimit) {
+		this.sendTimeLimit = sendTimeLimit;
+	}
+
+	public int getSendTimeLimit() {
+		return this.sendTimeLimit;
+	}
+
+	public void setSendBufferSizeLimit(int sendBufferSizeLimit) {
+		this.sendBufferSizeLimit = sendBufferSizeLimit;
+	}
+
+	public int getSendBufferSizeLimit() {
+		return sendBufferSizeLimit;
+	}
+
+
 	@Override
 	public boolean isAutoStartup() {
 		return true;
@@ -198,11 +221,15 @@ public class SubProtocolWebSocketHandler
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+
+		session = new ConcurrentWebSocketSessionDecorator(session, getSendTimeLimit(), getSendBufferSizeLimit());
+
 		this.sessions.put(session.getId(), session);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Started WebSocket session=" + session.getId() +
 					", number of sessions=" + this.sessions.size());
 		}
+
 		findProtocolHandler(session).afterSessionStarted(session, this.clientInboundChannel);
 	}
 
