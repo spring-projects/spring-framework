@@ -33,31 +33,61 @@ import org.springframework.validation.ObjectError;
 @SuppressWarnings("serial")
 public class MethodArgumentNotValidException extends MessagingException {
 
+	private final MethodParameter parameter;
+
+	private final BindingResult bindingResult;
+
+
 	/**
-	 * Create a new message with the given description.
-	 * @see #getMessage()
+	 * Create a new instance with the invalid {@code MethodParameter}.
 	 */
-	public MethodArgumentNotValidException(Message<?> message, String description) {
-		super(message, description);
+
+	public MethodArgumentNotValidException(Message<?> message, MethodParameter parameter) {
+		this(message, parameter, null);
 	}
 
 	/**
-	 * Create a new instance with a failed validation described by
-	 * the given {@link BindingResult}.
+	 * Create a new instance with the invalid {@code MethodParameter} and a
+	 * {@link org.springframework.validation.BindingResult}.
 	 */
-	public MethodArgumentNotValidException(Message<?> message,
-			MethodParameter parameter, BindingResult bindingResult) {
-		this(message, generateMessage(parameter, bindingResult));
+	public MethodArgumentNotValidException(Message<?> message, MethodParameter parameter,
+			BindingResult bindingResult) {
+
+		super(message, generateMessage(parameter, bindingResult));
+		this.parameter = parameter;
+		this.bindingResult = bindingResult;
 	}
+
+
+	/**
+	 * Return the MethodParameter that was rejected.
+	 */
+	public MethodParameter getMethodParameter() {
+		return this.parameter;
+	}
+
+	/**
+	 * Return the BindingResult if the failure is validation-related or {@code null}.
+	 */
+	public BindingResult getBindingResult() {
+		return this.bindingResult;
+	}
+
 
 	private static String generateMessage(MethodParameter parameter, BindingResult bindingResult) {
-		StringBuilder sb = new StringBuilder("Validation failed for parameter at index ")
+
+		StringBuilder sb = new StringBuilder("Invalid parameter at index ")
 				.append(parameter.getParameterIndex()).append(" in method: ")
-				.append(parameter.getMethod().toGenericString())
-				.append(", with ").append(bindingResult.getErrorCount()).append(" error(s): ");
-		for (ObjectError error : bindingResult.getAllErrors()) {
-			sb.append("[").append(error).append("] ");
+				.append(parameter.getMethod().toGenericString());
+
+
+		if (bindingResult != null) {
+			sb.append(", with ").append(bindingResult.getErrorCount()).append(" error(s): ");
+			for (ObjectError error : bindingResult.getAllErrors()) {
+				sb.append("[").append(error).append("] ");
+			}
 		}
+
 		return sb.toString();
 	}
 

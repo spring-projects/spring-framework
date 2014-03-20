@@ -27,6 +27,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.validation.SmartValidator;
 import org.springframework.validation.Validator;
 
@@ -65,16 +67,21 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 	}
 
 	@Override
-	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
-		Payload annot = parameter.getParameterAnnotation(Payload.class);
+	public Object resolveArgument(MethodParameter param, Message<?> message) throws Exception {
+
+		Payload annot = param.getParameterAnnotation(Payload.class);
 		if ((annot != null) && StringUtils.hasText(annot.value())) {
 			throw new IllegalStateException("@Payload SpEL expressions not supported by this resolver.");
 		}
 
-		Object target = getTargetPayload(parameter, message);
-		if (annot != null && isEmptyPayload(target)) {
-			if (annot.required()) {
-				throw new MethodArgumentNotValidException(message, createPayloadRequiredExceptionMessage(parameter, target));
+		Object target = getTargetPayload(param, message);
+		if (isEmptyPayload(target)) {
+			if (annot == null || annot.required()) {
+				String paramName = param.getParameterName();
+				paramName = (paramName == null ? "Arg" + param.getParameterIndex() : paramName);
+				BindingResult bindingResult = new BeanPropertyBindingResult(target, paramName);
+				bindingResult.addError(new ObjectError(paramName, "@Payload param is required"));
+				throw new MethodArgumentNotValidException(message, param, bindingResult);
 			}
 			else {
 				return null;
@@ -82,17 +89,18 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 		}
 
 		if (annot != null) { // Only validate @Payload
-			validate(message, parameter, target);
+			validate(message, param, target);
 		}
 		return target;
 	}
 
 	/**
-	 * Return the target payload to handle for the specified message. Can either
-	 * be the payload itself if the parameter type supports it or the converted
-	 * one otherwise. While the payload of a {@link Message} cannot be null by
-	 * design, this method may return a {@code null} payload if the conversion
-	 * result is {@code null}.
+	 * Return the payload for the specified message, which can be the payload
+	 * itself if it matches the parameter type or the result of message conversion
+	 * otherwise.
+	 *
+	 * <p>While the payload of a {@link Message} cannot be {@code null} by design,
+	 * this method may return {@code null} if the message converter returns that.
 	 */
 	protected Object getTargetPayload(MethodParameter parameter, Message<?> message) {
 		Class<?> sourceClass = message.getPayload().getClass();
@@ -144,21 +152,6 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 				break;
 			}
 		}
-	}
-
-	private String createPayloadRequiredExceptionMessage(MethodParameter parameter, Object payload) {
-		String name = parameter.getParameterName() != null
-				? parameter.getParameterName() : "arg" + parameter.getParameterIndex();
-		StringBuilder sb = new StringBuilder("Payload parameter '").append(name)
-				.append(" at index ").append(parameter.getParameterIndex()).append(" ");
-		if (payload == null) {
-			sb.append("could not be converted to '").append(parameter.getParameterType().getName())
-					.append("' and is required");
-		}
-		else {
-			sb.append("is required");
-		}
-		return sb.toString();
 	}
 
 }
