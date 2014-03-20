@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.cache.interceptor.CacheOperation;
 import org.springframework.cache.interceptor.CachePutOperation;
 import org.springframework.cache.interceptor.CacheableOperation;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Strategy implementation for parsing Spring's {@link Caching}, {@link Cacheable},
@@ -36,6 +37,7 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Phillip Webb
+ * @author Stephane Nicoll
  * @since 3.1
  */
 @SuppressWarnings("serial")
@@ -86,7 +88,11 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		cuo.setCondition(caching.condition());
 		cuo.setUnless(caching.unless());
 		cuo.setKey(caching.key());
+		cuo.setKeyGenerator(caching.keyGenerator());
+		cuo.setCacheManager(caching.cacheManager());
 		cuo.setName(ae.toString());
+
+		checkKeySourceConsistency(ae, caching.key(), caching.keyGenerator());
 		return cuo;
 	}
 
@@ -95,9 +101,13 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		ceo.setCacheNames(caching.value());
 		ceo.setCondition(caching.condition());
 		ceo.setKey(caching.key());
+		ceo.setKeyGenerator(caching.keyGenerator());
+		ceo.setCacheManager(caching.cacheManager());
 		ceo.setCacheWide(caching.allEntries());
 		ceo.setBeforeInvocation(caching.beforeInvocation());
 		ceo.setName(ae.toString());
+
+		checkKeySourceConsistency(ae, caching.key(), caching.keyGenerator());
 		return ceo;
 	}
 
@@ -107,7 +117,11 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		cuo.setCondition(caching.condition());
 		cuo.setUnless(caching.unless());
 		cuo.setKey(caching.key());
+		cuo.setKeyGenerator(caching.keyGenerator());
+		cuo.setCacheManager(caching.cacheManager());
 		cuo.setName(ae.toString());
+
+		checkKeySourceConsistency(ae, caching.key(), caching.keyGenerator());
 		return cuo;
 	}
 
@@ -157,6 +171,15 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		}
 
 		return (anns.isEmpty() ? null : anns);
+	}
+
+	private void checkKeySourceConsistency(AnnotatedElement ae, String key, String keyGenerator) {
+		if (StringUtils.hasText(key) && StringUtils.hasText(keyGenerator)) {
+			throw new IllegalStateException("Invalid cache annotation configuration on '"
+					+ ae.toString() + "'. Both 'key' and 'keyGenerator' attributes have been set. " +
+					"These attributes are mutually exclusive: either set the SpEL expression used to" +
+					"compute the key at runtime or set the name of the KeyGenerator bean to use.");
+		}
 	}
 
 	@Override

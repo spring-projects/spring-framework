@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import org.w3c.dom.Element;
  *
  * @author Costin Leau
  * @author Phillip Webb
+ * @author Stephane Nicoll
  */
 class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 
@@ -168,7 +169,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 
 	private static String getAttributeValue(Element element, String attributeName, String defaultValue) {
 		String attribute = element.getAttribute(attributeName);
-		if(StringUtils.hasText(attribute)) {
+		if (StringUtils.hasText(attribute)) {
 			return attribute.trim();
 		}
 		return defaultValue;
@@ -184,6 +185,10 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 
 		private String key;
 
+		private String keyGenerator;
+
+		private String cacheManager;
+
 		private String condition;
 
 		private String method;
@@ -194,6 +199,8 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 		Props(Element root) {
 			String defaultCache = root.getAttribute("cache");
 			key = root.getAttribute("key");
+			keyGenerator = root.getAttribute("key-generator");
+			cacheManager = root.getAttribute("cache-manager");
 			condition = root.getAttribute("condition");
 			method = root.getAttribute(METHOD_ATTRIBUTE);
 
@@ -218,7 +225,16 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			op.setCacheNames(localCaches);
 
 			op.setKey(getAttributeValue(element, "key", this.key));
+			op.setKeyGenerator(getAttributeValue(element, "key-generator", this.keyGenerator));
+			op.setCacheManager(getAttributeValue(element, "cache-manager", this.cacheManager));
 			op.setCondition(getAttributeValue(element, "condition", this.condition));
+
+			if (StringUtils.hasText(op.getKey()) && StringUtils.hasText(op.getKeyGenerator())) {
+				throw new IllegalStateException("Invalid cache advice configuration on '"
+						+ element.toString() + "'. Both 'key' and 'keyGenerator' attributes have been set. " +
+						"These attributes are mutually exclusive: either set the SpEL expression used to" +
+						"compute the key at runtime or set the name of the KeyGenerator bean to use.");
+			}
 
 			return op;
 		}

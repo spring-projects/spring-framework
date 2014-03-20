@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,6 +102,30 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 	@Override
 	@Cacheable(value = "default", key = "#root.methodName + #root.method.name + #root.targetClass + #root.target")
 	public Object rootVars(Object arg1) {
+		return counter.getAndIncrement();
+	}
+
+	@Override
+	@Cacheable(value = "default", keyGenerator = "customKyeGenerator")
+	public Object customKeyGenerator(Object arg1) {
+		return counter.getAndIncrement();
+	}
+
+	@Override
+	@Cacheable(value = "default", keyGenerator = "unknownBeanName")
+	public Object unknownCustomKeyGenerator(Object arg1) {
+		return counter.getAndIncrement();
+	}
+
+	@Override
+	@Cacheable(value = "default", cacheManager = "customCacheManager")
+	public Object customCacheManager(Object arg1) {
+		return counter.getAndIncrement();
+	}
+
+	@Override
+	@Cacheable(value = "default", cacheManager = "unknownBeanName")
+	public Object unknownCustomCacheManager(Object arg1) {
 		return counter.getAndIncrement();
 	}
 

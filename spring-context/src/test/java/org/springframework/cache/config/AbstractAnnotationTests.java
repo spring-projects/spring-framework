@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 package org.springframework.cache.config;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.util.Collection;
@@ -26,6 +25,7 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.framework.AopProxyUtils;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.ApplicationContext;
@@ -36,6 +36,7 @@ import org.springframework.context.ApplicationContext;
  * @author Costin Leau
  * @author Chris Beams
  * @author Phillip Webb
+ * @author Stephane Nicoll
  */
 public abstract class AbstractAnnotationTests {
 
@@ -47,6 +48,8 @@ public abstract class AbstractAnnotationTests {
 
 	protected CacheManager cm;
 
+	protected CacheManager customCm;
+
 	/** @return a refreshed application context */
 	protected abstract ApplicationContext getApplicationContext();
 
@@ -55,7 +58,9 @@ public abstract class AbstractAnnotationTests {
 		ctx = getApplicationContext();
 		cs = ctx.getBean("service", CacheableService.class);
 		ccs = ctx.getBean("classService", CacheableService.class);
-		cm = ctx.getBean(CacheManager.class);
+		cm = ctx.getBean("cacheManager", CacheManager.class);
+		customCm = ctx.getBean("customCacheManager", CacheManager.class);
+
 		Collection<String> cn = cm.getCacheNames();
 		assertTrue(cn.contains("default"));
 		assertTrue(cn.contains("secondary"));
@@ -567,6 +572,48 @@ public abstract class AbstractAnnotationTests {
 	@Test
 	public void testClassRootVars() throws Exception {
 		testRootVars(ccs);
+	}
+
+	@Test
+	public void testCustomKeyGenerator() {
+		Object param = new Object();
+		Object r1 = cs.customKeyGenerator(param);
+		assertSame(r1, cs.customKeyGenerator(param));
+		Cache cache = cm.getCache("default");
+		// Checks that the custom keyGenerator was used
+		Object expectedKey = SomeCustomKeyGenerator.generateKey("customKeyGenerator", param);
+		assertNotNull(cache.get(expectedKey));
+	}
+
+	@Test
+	public void testUnknownCustomKeyGenerator() {
+		try {
+			Object param = new Object();
+			cs.unknownCustomKeyGenerator(param);
+			fail("should have failed with NoSuchBeanDefinitionException");
+		} catch (NoSuchBeanDefinitionException e) {
+			// expected
+		}
+	}
+
+	@Test
+	public void testCustomCacheManager() {
+		Object key = new Object();
+		Object r1 = cs.customCacheManager(key);
+		assertSame(r1, cs.customCacheManager(key));
+		Cache cache = customCm.getCache("default");
+		assertNotNull(cache.get(key));
+	}
+
+	@Test
+	public void testUnknownCustomCacheManager() {
+		try {
+			Object param = new Object();
+			cs.unknownCustomCacheManager(param);
+			fail("should have failed with NoSuchBeanDefinitionException");
+		} catch (NoSuchBeanDefinitionException e) {
+			// expected
+		}
 	}
 
 	@Test
