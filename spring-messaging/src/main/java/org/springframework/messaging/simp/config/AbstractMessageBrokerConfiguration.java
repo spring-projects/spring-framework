@@ -17,7 +17,13 @@
 package org.springframework.messaging.simp.config;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.AbstractExecutorService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
@@ -93,17 +99,15 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	@Bean
 	public AbstractSubscribableChannel clientInboundChannel() {
 		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientInboundChannelExecutor());
-		ChannelRegistration r = getClientInboundChannelRegistration();
-		if (r.hasInterceptors()) {
-			channel.setInterceptors(r.getInterceptors());
-		}
+		ChannelRegistration reg = getClientInboundChannelRegistration();
+		channel.setInterceptors(reg.getInterceptors());
 		return channel;
 	}
 
 	@Bean
 	public ThreadPoolTaskExecutor clientInboundChannelExecutor() {
-		TaskExecutorRegistration r = getClientInboundChannelRegistration().getTaskExecutorRegistration();
-		ThreadPoolTaskExecutor executor = (r != null) ? r.getTaskExecutor() : new ThreadPoolTaskExecutor();
+		TaskExecutorRegistration reg = getClientInboundChannelRegistration().getOrCreateTaskExecRegistration();
+		ThreadPoolTaskExecutor executor = reg.getTaskExecutor();
 		executor.setThreadNamePrefix("clientInboundChannel-");
 		return executor;
 	}
@@ -129,17 +133,15 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	@Bean
 	public AbstractSubscribableChannel clientOutboundChannel() {
 		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientOutboundChannelExecutor());
-		ChannelRegistration r = getClientOutboundChannelRegistration();
-		if (r.hasInterceptors()) {
-			channel.setInterceptors(r.getInterceptors());
-		}
+		ChannelRegistration reg = getClientOutboundChannelRegistration();
+		channel.setInterceptors(reg.getInterceptors());
 		return channel;
 	}
 
 	@Bean
 	public ThreadPoolTaskExecutor clientOutboundChannelExecutor() {
-		TaskExecutorRegistration r = getClientOutboundChannelRegistration().getTaskExecutorRegistration();
-		ThreadPoolTaskExecutor executor = (r != null) ? r.getTaskExecutor() : new ThreadPoolTaskExecutor();
+		TaskExecutorRegistration reg = getClientOutboundChannelRegistration().getOrCreateTaskExecRegistration();
+		ThreadPoolTaskExecutor executor = reg.getTaskExecutor();
 		executor.setThreadNamePrefix("clientOutboundChannel-");
 		return executor;
 	}
@@ -162,24 +164,27 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	@Bean
 	public AbstractSubscribableChannel brokerChannel() {
-		ChannelRegistration r = getBrokerRegistry().getBrokerChannelRegistration();
-		ExecutorSubscribableChannel channel;
-		if (r.hasTaskExecutor()) {
-			channel = new ExecutorSubscribableChannel(); // synchronous by default
-		}
-		else {
-			channel = new ExecutorSubscribableChannel(brokerChannelExecutor());
-		}
-		if (r.hasInterceptors()) {
-			channel.setInterceptors(r.getInterceptors());
-		}
+		ChannelRegistration reg = getBrokerRegistry().getBrokerChannelRegistration();
+		ExecutorSubscribableChannel channel = reg.hasTaskExecutor() ?
+				new ExecutorSubscribableChannel(brokerChannelExecutor()) : new ExecutorSubscribableChannel();
+		channel.setInterceptors(reg.getInterceptors());
 		return channel;
 	}
 
 	@Bean
 	public ThreadPoolTaskExecutor brokerChannelExecutor() {
-		TaskExecutorRegistration r = getBrokerRegistry().getBrokerChannelRegistration().getTaskExecutorRegistration();
-		ThreadPoolTaskExecutor executor = (r != null) ? r.getTaskExecutor() : new ThreadPoolTaskExecutor();
+		ChannelRegistration reg = getBrokerRegistry().getBrokerChannelRegistration();
+		ThreadPoolTaskExecutor executor;
+		if (reg.hasTaskExecutor()) {
+			executor = reg.taskExecutor().getTaskExecutor();
+		}
+		else {
+			// Should never be used
+			executor = new ThreadPoolTaskExecutor();
+			executor.setCorePoolSize(0);
+			executor.setMaxPoolSize(1);
+			executor.setQueueCapacity(0);
+		}
 		executor.setThreadNamePrefix("brokerChannel-");
 		return executor;
 	}

@@ -136,11 +136,11 @@ public class MessageBrokerBeanDefinitionParserTests {
 				Arrays.<Class<? extends MessageHandler>>asList(SimpAnnotationMethodMessageHandler.class,
 						UserDestinationMessageHandler.class, SimpleBrokerMessageHandler.class);
 		testChannel("clientInboundChannel", subscriberTypes, 0);
-		testExecutor("clientInboundChannel", 1, Integer.MAX_VALUE, 60);
+		testExecutor("clientInboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
 
 		subscriberTypes = Arrays.<Class<? extends MessageHandler>>asList(SubProtocolWebSocketHandler.class);
 		testChannel("clientOutboundChannel", subscriberTypes, 0);
-		testExecutor("clientOutboundChannel", 1, Integer.MAX_VALUE, 60);
+		testExecutor("clientOutboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
 
 		subscriberTypes = Arrays.<Class<? extends MessageHandler>>asList(
 				SimpleBrokerMessageHandler.class, UserDestinationMessageHandler.class);
@@ -199,11 +199,11 @@ public class MessageBrokerBeanDefinitionParserTests {
 				Arrays.<Class<? extends MessageHandler>>asList(SimpAnnotationMethodMessageHandler.class,
 						UserDestinationMessageHandler.class, StompBrokerRelayMessageHandler.class);
 		testChannel("clientInboundChannel", subscriberTypes, 0);
-		testExecutor("clientInboundChannel", 1, Integer.MAX_VALUE, 60);
+		testExecutor("clientInboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
 
 		subscriberTypes = Arrays.<Class<? extends MessageHandler>>asList(SubProtocolWebSocketHandler.class);
 		testChannel("clientOutboundChannel", subscriberTypes, 0);
-		testExecutor("clientOutboundChannel", 1, Integer.MAX_VALUE, 60);
+		testExecutor("clientOutboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
 
 		subscriberTypes = Arrays.<Class<? extends MessageHandler>>asList(
 				StompBrokerRelayMessageHandler.class, UserDestinationMessageHandler.class);

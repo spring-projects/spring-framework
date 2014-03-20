@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,17 +31,19 @@ import org.springframework.messaging.support.ChannelInterceptor;
  */
 public class ChannelRegistration {
 
-	private TaskExecutorRegistration taskExecutorRegistration;
+	private TaskExecutorRegistration registration;
 
-	private List<ChannelInterceptor> interceptors = new ArrayList<ChannelInterceptor>();
+	private final List<ChannelInterceptor> interceptors = new ArrayList<ChannelInterceptor>();
 
 
 	/**
-	 * Configure properties of the ThreadPoolTaskExecutor backing the message channel.
+	 * Configure the thread pool backing this message channel.
 	 */
 	public TaskExecutorRegistration taskExecutor() {
-		this.taskExecutorRegistration = new TaskExecutorRegistration();
-		return this.taskExecutorRegistration;
+		if (this.registration == null) {
+			this.registration = new TaskExecutorRegistration();
+		}
+		return this.registration;
 	}
 
 	/**
@@ -56,11 +58,15 @@ public class ChannelRegistration {
 
 
 	protected boolean hasTaskExecutor() {
-		return (this.taskExecutorRegistration != null);
+		return (this.registration != null);
 	}
 
-	protected TaskExecutorRegistration getTaskExecutorRegistration() {
-		return this.taskExecutorRegistration;
+	protected TaskExecutorRegistration getTaskExecRegistration() {
+		return this.registration;
+	}
+
+	protected TaskExecutorRegistration getOrCreateTaskExecRegistration() {
+		return taskExecutor();
 	}
 
 	protected boolean hasInterceptors() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.messaging.simp.config;
 
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+
 /**
  * A registration class for customizing the properties of {@link ThreadPoolTaskExecutor}.
  *
@@ -26,18 +27,28 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 public class TaskExecutorRegistration {
 
-	private int corePoolSize = 1;
+	private int corePoolSize = Runtime.getRuntime().availableProcessors() * 2;
 
 	private int maxPoolSize = Integer.MAX_VALUE;
 
-	private int keepAliveSeconds = 60;
-
 	private int queueCapacity = Integer.MAX_VALUE;
+
+	private int keepAliveSeconds = 60;
 
 
 	/**
-	 * Set the ThreadPoolExecutor's core pool size.
-	 * Default is 1.
+	 * Set the core pool size of the ThreadPoolExecutor.
+	 *
+	 * <p><strong>NOTE:</strong> the core pool size is effectively the max pool size
+	 * when an unbounded {@link #queueCapacity(int) queueCapacity} is configured
+	 * (the default). This is essentially the "Unbounded queues" strategy as explained
+	 * in {@link java.util.concurrent.ThreadPoolExecutor ThreadPoolExecutor}. When
+	 * this strategy is used, the {@link #maxPoolSize(int) maxPoolSize} is ignored.
+	 *
+	 * <p>By default this is set to twice the value of
+	 * {@link Runtime#availableProcessors()}. In an an application where tasks do not
+	 * block frequently, the number should be closer to or equal to the number of
+	 * available CPUs/cores.
 	 */
 	public TaskExecutorRegistration corePoolSize(int corePoolSize) {
 		this.corePoolSize = corePoolSize;
@@ -45,8 +56,15 @@ public class TaskExecutorRegistration {
 	}
 
 	/**
-	 * Set the ThreadPoolExecutor's maximum pool size.
-	 * Default is {@code Integer.MAX_VALUE}.
+	 * Set the max pool size of the ThreadPoolExecutor.
+	 *
+	 * <p><strong>NOTE:</strong> when an unbounded
+	 * {@link #queueCapacity(int) queueCapacity} is configured (the default), the
+	 * max pool size is effectively ignored. See the "Unbounded queues" strategy
+	 * in {@link java.util.concurrent.ThreadPoolExecutor ThreadPoolExecutor} for
+	 * more details.
+	 *
+	 * <p>By default this is set to {@code Integer.MAX_VALUE}.
 	 */
 	public TaskExecutorRegistration maxPoolSize(int maxPoolSize) {
 		this.maxPoolSize = maxPoolSize;
@@ -54,24 +72,32 @@ public class TaskExecutorRegistration {
 	}
 
 	/**
-	 * Set the ThreadPoolExecutor's keep-alive seconds.
-	 * Default is 60.
+	 * Set the queue capacity for the ThreadPoolExecutor.
+	 *
+	 * <p><strong>NOTE:</strong> when an unbounded
+	 * {@link #queueCapacity(int) queueCapacity} is configured (the default) the
+	 * core pool size is effectively the max pool size. This is essentially the
+	 * "Unbounded queues" strategy as explained in
+	 * {@link java.util.concurrent.ThreadPoolExecutor ThreadPoolExecutor}. When
+	 * this strategy is used, the {@link #maxPoolSize(int) maxPoolSize} is ignored.
+	 *
+	 * <p>By default this is set to {@code Integer.MAX_VALUE}.
 	 */
-	public TaskExecutorRegistration keepAliveSeconds(int keepAliveSeconds) {
-		this.keepAliveSeconds = keepAliveSeconds;
+	public TaskExecutorRegistration queueCapacity(int queueCapacity) {
+		this.queueCapacity = queueCapacity;
 		return this;
 	}
 
 	/**
-	 * Set the capacity for the ThreadPoolExecutor's BlockingQueue.
-	 * Default is {@code Integer.MAX_VALUE}.
-	 * <p>Any positive value will lead to a LinkedBlockingQueue instance;
-	 * any other value will lead to a SynchronousQueue instance.
-	 * @see java.util.concurrent.LinkedBlockingQueue
-	 * @see java.util.concurrent.SynchronousQueue
+	 * Set the time limit for which threads may remain idle before being terminated.
+	 * If there are more than the core number of threads currently in the pool,
+	 * after waiting this amount of time without processing a task, excess threads
+	 * will be terminated.  This overrides any value set in the constructor.
+	 *
+	 * <p>By default this is set to 60.
 	 */
-	public TaskExecutorRegistration queueCapacity(int queueCapacity) {
-		this.queueCapacity = queueCapacity;
+	public TaskExecutorRegistration keepAliveSeconds(int keepAliveSeconds) {
+		this.keepAliveSeconds = keepAliveSeconds;
 		return this;
 	}
 

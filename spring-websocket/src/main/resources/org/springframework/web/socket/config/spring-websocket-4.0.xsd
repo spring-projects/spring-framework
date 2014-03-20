@@ -152,7 +152,7 @@
             <xsd:annotation>
                 <xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
 	Minimum number of bytes that can be send over a single HTTP streaming request before it will be closed.
-	Defaults to 128K (i.e. 128 * 1024).
+	Defaults to 128K (i.e. 128 1024).
                 ]]></xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
@@ -346,31 +346,44 @@
         <xsd:attribute name="core-pool-size" type="xsd:int" use="optional">
             <xsd:annotation>
                 <xsd:documentation source="java:org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"><![CDATA[
-	The core pool size. Default value is 1.
+	Set the core pool size of the ThreadPoolExecutor.
+	NOTE: the core pool size is effectively the max pool size when an unbounded queue-capacity is configured (the default).
+	This is essentially the "Unbounded queues" strategy as explained in java.util.concurrent.ThreadPoolExecutor.
+	When this strategy is used, the max pool size is effectively ignored.
+	By default this is set to twice the value of Runtime.availableProcessors().
+	In an an application where tasks do not block frequently,
+	the number should be closer to or equal to the number of available CPUs/cores.
                 ]]></xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
         <xsd:attribute name="max-pool-size" type="xsd:int" use="optional">
             <xsd:annotation>
                 <xsd:documentation source="java:org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"><![CDATA[
-	The maximum pool size. Default value is Integer.MAX_VALUE.
+	 Set the max pool size of the ThreadPoolExecutor.
+	 NOTE: when an unbounded queue-capacity is configured (the default), the max pool size is effectively ignored.
+	 See the "Unbounded queues" strategy in java.util.concurrent.ThreadPoolExecutor for more details.
+	 By default this is set to Integer.MAX_VALUE.
                 ]]></xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
         <xsd:attribute name="keep-alive-seconds" type="xsd:int" use="optional">
             <xsd:annotation>
                 <xsd:documentation source="java:org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"><![CDATA[
-	The keep-alive value in seconds. Default value 60.
+	 Set the time limit for which threads may remain idle before being terminated.
+	 If there are more than the core number of threads currently in the pool, after waiting this amount of time without
+	 processing a task, excess threads will be terminated.  This overrides any value set in the constructor.
+	 By default this is set to 60.
                 ]]></xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
         <xsd:attribute name="queue-capacity" type="xsd:int" use="optional">
             <xsd:annotation>
                 <xsd:documentation source="java:org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"><![CDATA[
-	The capacity for the executor's BlockingQueue.
-	Default is Integer.MAX_VALUE.
-	Any positive value will lead to a LinkedBlockingQueue instance;
-	any other value will lead to a SynchronousQueue instance.
+	 Set the queue capacity for the ThreadPoolExecutor.
+	 NOTE: when an unbounded queue-capacity is configured (the default) the core pool size is effectively the max pool size.
+	 This is essentially the "Unbounded queues" strategy as explained in java.util.concurrent.ThreadPoolExecutor.
+	 When this strategy is used, the max pool size is effectively ignored.
+	 By default this is set to Integer.MAX_VALUE.
                 ]]></xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
