@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package org.springframework.asm;
 
 /**
  * Utility class exposing constants related to Spring's internal repackaging
- * of the ASM bytecode manipulation library.
+ * of the ASM bytecode manipulation library (currently based on version 5.0).
  *
- * <p>See <a href="package-summary.html">package-level javadoc</a> for more
+ * <p>See <a href="package-summary.html">package-level javadocs</a> for more
  * information on {@code org.springframework.asm}.
  *
  * @author Chris Beams
@@ -30,9 +30,9 @@ public final class SpringAsmInfo {
 
 	/**
 	 * The ASM compatibility version for Spring's ASM visitor implementations:
-	 * as of Spring 3.2, it's ASM4. To be updated once we upgrade to ASM 5.0.
-	 * @see Opcodes#ASM4
+	 * as of Spring 4.0.3, it's ASM5.
+	 * @see Opcodes#ASM5
 	 */
-	public static final int ASM_VERSION = Opcodes.ASM4;
+	public static final int ASM_VERSION = Opcodes.ASM5;
 
 }
