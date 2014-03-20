@@ -18,7 +18,6 @@ package org.springframework.web.socket.messaging;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
@@ -56,12 +55,10 @@ import org.springframework.web.socket.WebSocketSession;
 public class StompSubProtocolHandler implements SubProtocolHandler {
 
 	/**
-	 * The name of the header set on the CONNECTED frame indicating the name of the user
-	 * authenticated on the WebSocket session.
+	 * The name of the header set on the CONNECTED frame indicating the name
+	 * of the user authenticated on the WebSocket session.
 	 */
 	public static final String CONNECTED_USER_HEADER = "user-name";
-
-	private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
 	private static final Log logger = LogFactory.getLog(StompSubProtocolHandler.class);
 
@@ -103,12 +100,12 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 		Throwable decodeFailure = null;
 		try {
 			Assert.isInstanceOf(TextMessage.class,  webSocketMessage);
-			String payload = ((TextMessage) webSocketMessage).getPayload();
-			ByteBuffer byteBuffer = ByteBuffer.wrap(payload.getBytes(UTF8_CHARSET));
+			TextMessage textMessage = (TextMessage) webSocketMessage;
+			ByteBuffer byteBuffer = ByteBuffer.wrap(textMessage.asBytes());
 
 			message = this.stompDecoder.decode(byteBuffer);
 			if (message == null) {
-				decodeFailure = new IllegalStateException("Not a valid STOMP frame: " + payload);
+				decodeFailure = new IllegalStateException("Not a valid STOMP frame: " + textMessage.getPayload());
 			}
 		}
 		catch (Throwable ex) {
@@ -150,9 +147,9 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.ERROR);
 		headers.setMessage(error.getMessage());
 		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
-		String payload = new String(this.stompEncoder.encode(message), UTF8_CHARSET);
+		byte[] bytes = this.stompEncoder.encode(message);
 		try {
-			session.sendMessage(new TextMessage(payload));
+			session.sendMessage(new TextMessage(bytes));
 		}
 		catch (Throwable ex) {
 			// ignore
@@ -203,7 +200,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 			byte[] bytes = this.stompEncoder.encode((Message<byte[]>) message);
 
 			synchronized(session) {
-				session.sendMessage(new TextMessage(new String(bytes, UTF8_CHARSET)));
+				session.sendMessage(new TextMessage(bytes));
 			}
 
 		}

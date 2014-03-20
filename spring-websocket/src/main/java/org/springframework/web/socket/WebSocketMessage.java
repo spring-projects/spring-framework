@@ -29,6 +29,12 @@ public interface WebSocketMessage<T> {
 	 */
 	T getPayload();
 
+
+	/**
+	 * Return the number of bytes contained in the message.
+	 */
+	int getPayloadLength();
+
 	/**
 	 * When partial message support is available and requested via
 	 * {@link org.springframework.web.socket.WebSocketHandler#supportsPartialMessages()},
