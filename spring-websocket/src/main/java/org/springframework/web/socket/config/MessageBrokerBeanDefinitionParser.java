@@ -249,9 +249,6 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 
 		RootBeanDefinition httpRequestHandlerDef;
 
-		RuntimeBeanReference handshakeHandler =
-				WebSocketNamespaceUtils.registerHandshakeHandler(stompEndpointElement, parserCxt, source);
-
 		RuntimeBeanReference sockJsService = WebSocketNamespaceUtils.registerSockJsService(
 				stompEndpointElement, SOCKJS_SCHEDULER_BEAN_NAME, parserCxt, source);
 
@@ -262,6 +259,8 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			httpRequestHandlerDef = new RootBeanDefinition(SockJsHttpRequestHandler.class, cavs, null);
 		}
 		else {
+			RuntimeBeanReference handshakeHandler =
+					WebSocketNamespaceUtils.registerHandshakeHandler(stompEndpointElement, parserCxt, source);
 			ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 			cavs.addIndexedArgumentValue(0, subProtocolWebSocketHandler);
 			if(handshakeHandler != null) {

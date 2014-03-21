@@ -18,13 +18,13 @@ package org.springframework.web.socket.config;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
@@ -55,8 +55,12 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
 import org.springframework.web.socket.messaging.StompSubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
+import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
 import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
+import org.springframework.web.socket.sockjs.transport.TransportType;
+import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
+import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
 
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
@@ -93,6 +97,12 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertThat(httpRequestHandler, Matchers.instanceOf(WebSocketHttpRequestHandler.class));
 
 		WebSocketHttpRequestHandler wsHttpRequestHandler = (WebSocketHttpRequestHandler) httpRequestHandler;
+
+		HandshakeHandler handshakeHandler = (HandshakeHandler)
+				new DirectFieldAccessor(wsHttpRequestHandler).getPropertyValue("handshakeHandler");
+		assertNotNull(handshakeHandler);
+		assertTrue(handshakeHandler instanceof TestHandshakeHandler);
+
 		WebSocketHandler wsHandler = unwrapWebSocketHandler(wsHttpRequestHandler.getWebSocketHandler());
 		assertNotNull(wsHandler);
 		assertThat(wsHandler, Matchers.instanceOf(SubProtocolWebSocketHandler.class));
@@ -113,6 +123,13 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertNotNull(wsHandler);
 		assertThat(wsHandler, Matchers.instanceOf(SubProtocolWebSocketHandler.class));
 		assertNotNull(sockJsHttpRequestHandler.getSockJsService());
+		assertThat(sockJsHttpRequestHandler.getSockJsService(), Matchers.instanceOf(DefaultSockJsService.class));
+
+		DefaultSockJsService defaultSockJsService = (DefaultSockJsService) sockJsHttpRequestHandler.getSockJsService();
+		WebSocketTransportHandler wsTransportHandler = (WebSocketTransportHandler) defaultSockJsService
+				.getTransportHandlers().get(TransportType.WEBSOCKET);
+		assertNotNull(wsTransportHandler.getHandshakeHandler());
+		assertThat(wsTransportHandler.getHandshakeHandler(), Matchers.instanceOf(TestHandshakeHandler.class));
 
 		UserSessionRegistry userSessionRegistry = this.appContext.getBean(UserSessionRegistry.class);
 		assertNotNull(userSessionRegistry);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.util.xml.DomUtils;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
+import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
 
 /**
  * Provides utility methods for parsing common WebSocket XML namespace elements.
@@ -61,6 +62,8 @@ class WebSocketNamespaceUtils {
 		Element sockJsElement = DomUtils.getChildElementByTagName(element, "sockjs");
 
 		if (sockJsElement != null) {
+			Element handshakeHandlerElement = DomUtils.getChildElementByTagName(element, "handshake-handler");
+
 			RootBeanDefinition sockJsServiceDef = new RootBeanDefinition(DefaultSockJsService.class);
 			sockJsServiceDef.setSource(source);
 
@@ -82,6 +85,13 @@ class WebSocketNamespaceUtils {
 				}
 				ManagedList<?> transportHandlersList = parseBeanSubElements(transportHandlersElement, parserContext);
 				sockJsServiceDef.getConstructorArgumentValues().addIndexedArgumentValue(1, transportHandlersList);
+			} else if(handshakeHandlerElement != null){
+				RuntimeBeanReference handshakeHandlerRef = new RuntimeBeanReference(handshakeHandlerElement.getAttribute("ref"));
+
+				RootBeanDefinition wsTransportHandler = new RootBeanDefinition(WebSocketTransportHandler.class);
+				wsTransportHandler.setSource(source);
+				wsTransportHandler.getConstructorArgumentValues().addIndexedArgumentValue(0, handshakeHandlerRef);
+				sockJsServiceDef.getConstructorArgumentValues().addIndexedArgumentValue(1, wsTransportHandler);
 			}
 
 			String attrValue = sockJsElement.getAttribute("name");

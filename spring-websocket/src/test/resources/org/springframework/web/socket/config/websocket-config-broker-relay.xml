@@ -6,7 +6,6 @@
 
     <websocket:message-broker order="2">
         <websocket:stomp-endpoint path="/foo">
-            <websocket:handshake-handler ref="myHandler"/>
             <websocket:sockjs/>
         </websocket:stomp-endpoint>
         <websocket:stomp-broker-relay prefix="/topic,/queue" relay-host="relayhost" relay-port="1234"
