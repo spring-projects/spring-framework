@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,9 @@ import java.nio.ByteBuffer;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.simp.stomp.BufferingStompDecoder;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompConversionException;
 import org.springframework.messaging.simp.stomp.StompDecoder;
@@ -66,12 +69,30 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 	private static final Log logger = LogFactory.getLog(StompSubProtocolHandler.class);
 
 
-	private final StompDecoder stompDecoder = new StompDecoder();
+	private int messageBufferSizeLimit = 64 * 1024;
+
+	private final Map<String, BufferingStompDecoder> decoders = new ConcurrentHashMap<String, BufferingStompDecoder>();
 
 	private final StompEncoder stompEncoder = new StompEncoder();
 
 	private UserSessionRegistry userSessionRegistry;
 
+
+	/**
+	 * TODO
+	 * @param messageBufferSizeLimit
+	 */
+	public void setMessageBufferSizeLimit(int messageBufferSizeLimit) {
+		this.messageBufferSizeLimit = messageBufferSizeLimit;
+	}
+
+	/**
+	 * TODO
+	 * @return
+	 */
+	public int getMessageBufferSizeLimit() {
+		return this.messageBufferSizeLimit;
+	}
 
 	/**
 	 * Provide a registry with which to register active user session ids.
@@ -99,49 +120,53 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 	public void handleMessageFromClient(WebSocketSession session,
 			WebSocketMessage<?> webSocketMessage, MessageChannel outputChannel) {
 
-		Message<?> message = null;
-		Throwable decodeFailure = null;
+		List<Message<byte[]>> messages = null;
 		try {
 			Assert.isInstanceOf(TextMessage.class,  webSocketMessage);
 			TextMessage textMessage = (TextMessage) webSocketMessage;
 			ByteBuffer byteBuffer = ByteBuffer.wrap(textMessage.asBytes());
 
-			message = this.stompDecoder.decode(byteBuffer);
-			if (message == null) {
-				decodeFailure = new IllegalStateException("Not a valid STOMP frame: " + textMessage.getPayload());
+			BufferingStompDecoder decoder = this.decoders.get(session.getId());
+			if (decoder == null) {
+				throw new IllegalStateException("No decoder for session id '" + session.getId() + "'");
+			}
+
+			messages = decoder.decode(byteBuffer);
+			if (messages.isEmpty()) {
+				logger.debug("Incomplete STOMP frame content received," + "buffered=" +
+						decoder.getBufferSize() + ", buffer size limit=" + decoder.getBufferSizeLimit());
+				return;
 			}
 		}
 		catch (Throwable ex) {
-			decodeFailure = ex;
-		}
-
-		if (decodeFailure != null) {
-			logger.error("Failed to parse WebSocket message as STOMP frame", decodeFailure);
-			sendErrorMessage(session, decodeFailure);
+			logger.error("Failed to parse WebSocket message to STOMP frame(s)", ex);
+			sendErrorMessage(session, ex);
 			return;
 		}
 
-		try {
-			StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-			if (logger.isTraceEnabled()) {
-				if (SimpMessageType.HEARTBEAT.equals(headers.getMessageType())) {
-					logger.trace("Received heartbeat from client session=" + session.getId());
+		for (Message<byte[]> message : messages) {
+			try {
+				StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
+				if (logger.isTraceEnabled()) {
+					if (SimpMessageType.HEARTBEAT.equals(headers.getMessageType())) {
+						logger.trace("Received heartbeat from client session=" + session.getId());
+					}
+					else {
+						logger.trace("Received message from client session=" + session.getId());
+					}
 				}
-				else {
-					logger.trace("Received message from client session=" + session.getId());
-				}
+
+				headers.setSessionId(session.getId());
+				headers.setSessionAttributes(session.getAttributes());
+				headers.setUser(session.getPrincipal());
+
+				message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
+				outputChannel.send(message);
 			}
-
-			headers.setSessionId(session.getId());
-			headers.setSessionAttributes(session.getAttributes());
-			headers.setUser(session.getPrincipal());
-
-			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
-			outputChannel.send(message);
-		}
-		catch (Throwable ex) {
-			logger.error("Terminating STOMP session due to failure to send message", ex);
-			sendErrorMessage(session, ex);
+			catch (Throwable ex) {
+				logger.error("Terminating STOMP session due to failure to send message", ex);
+				sendErrorMessage(session, ex);
+			}
 		}
 	}
 
@@ -281,10 +306,13 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 
 	@Override
 	public void afterSessionStarted(WebSocketSession session, MessageChannel outputChannel) {
+		this.decoders.put(session.getId(), new BufferingStompDecoder(getMessageBufferSizeLimit()));
 	}
 
 	@Override
 	public void afterSessionEnded(WebSocketSession session, CloseStatus closeStatus, MessageChannel outputChannel) {
+
+		this.decoders.remove(session.getId());
 
 		Principal principal = session.getPrincipal();
 		if ((this.userSessionRegistry != null) && (principal != null)) {

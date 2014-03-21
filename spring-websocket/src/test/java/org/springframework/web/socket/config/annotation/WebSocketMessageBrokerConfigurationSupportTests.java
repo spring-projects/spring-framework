@@ -41,6 +41,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TestWebSocketSession;
 import org.springframework.web.socket.messaging.StompTextMessageBuilder;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
@@ -81,8 +82,11 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		TestChannel channel = this.config.getBean("clientInboundChannel", TestChannel.class);
 		SubProtocolWebSocketHandler webSocketHandler = this.config.getBean(SubProtocolWebSocketHandler.class);
 
+		WebSocketSession session = new TestWebSocketSession("s1");
+		webSocketHandler.afterConnectionEstablished(session);
+
 		TextMessage textMessage = StompTextMessageBuilder.create(StompCommand.SEND).headers("destination:/foo").build();
-		webSocketHandler.handleMessage(new TestWebSocketSession(), textMessage);
+		webSocketHandler.handleMessage(session, textMessage);
 
 		Message<?> message = channel.messages.get(0);
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);

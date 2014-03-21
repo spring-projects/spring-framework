@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,13 @@ import reactor.function.Function;
 import reactor.io.Buffer;
 import reactor.tcp.encoding.Codec;
 
+import java.util.List;
+
 /**
- * A Reactor TCP {@link Codec} for sending and receiving STOMP messages
+ * A Reactor TCP {@link Codec} for sending and receiving STOMP messages.
  *
  * @author Andy Wilkinson
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
 public class StompCodec implements Codec<Buffer, Message<byte[]>, Message<byte[]>> {
@@ -49,14 +52,8 @@ public class StompCodec implements Codec<Buffer, Message<byte[]>, Message<byte[]
 
 			@Override
 			public Message<byte[]> apply(Buffer buffer) {
-				while (buffer.remaining() > 0) {
-					Message<byte[]> message = DECODER.decode(buffer.byteBuffer());
-					if (message != null) {
-						next.accept(message);
-					}
-					else {
-						break;
-					}
+				for (Message<byte[]> message : DECODER.decode(buffer.byteBuffer())) {
+					next.accept(message);
 				}
 				return null;
 			}

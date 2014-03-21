@@ -19,6 +19,8 @@ package org.springframework.messaging.simp.stomp;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,9 +32,10 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Decodes STOMP frames from a {@link ByteBuffer}. If the buffer does not contain
- * enough data to form a complete STOMP frame, the buffer is reset and the value
- * returned is {@code null} indicating that no message could be read.
+ * Decodes one or more STOMP frames from a {@link ByteBuffer}. If the buffer
+ * contains any additional (incomplete) data, or perhaps not enough data to
+ * form even one Message, the the buffer is reset and the value returned is
+ * an empty list indicating that no more message can be read.
  *
  * @author Andy Wilkinson
  * @author Rossen Stoyanchev
@@ -47,21 +50,66 @@ public class StompDecoder {
 	private final Log logger = LogFactory.getLog(StompDecoder.class);
 
 
+
 	/**
-	 * Decodes a STOMP frame in the given {@code buffer} into a {@link Message}.
-	 * If the given ByteBuffer contains partial STOMP frame content, the method
-	 * resets the buffer and returns {@code null}.
-	 * @param buffer the buffer to decode the frame from
-	 * @return the decoded message or {@code null}
+	 * Decodes one or more STOMP frames from the given {@code buffer} into a
+	 * list of {@link Message}s.
+	 *
+	 * <p>If the given ByteBuffer contains partial STOMP frame content, or additional
+	 * content with a partial STOMP frame, the buffer is reset and {@code null} is
+	 * returned.
+	 *
+	 * @param buffer The buffer to decode the STOMP frame from
+	 *
+	 * @return the decoded messages or an empty list
 	 */
-	public Message<byte[]> decode(ByteBuffer buffer) {
+	public List<Message<byte[]>> decode(ByteBuffer buffer) {
+		return decode(buffer, new LinkedMultiValueMap<String, String>());
+	}
+
+	/**
+	 * Decodes one or more STOMP frames from the given {@code buffer} into a
+	 * list of {@link Message}s.
+	 *
+	 * <p>If the given ByteBuffer contains partial STOMP frame content, or additional
+	 * content with a partial STOMP frame, the buffer is reset and {@code null} is
+	 * returned.
+	 *
+	 * @param buffer The buffer to decode the STOMP frame from
+	 * @param headers an empty map that will be filled with the successfully parsed
+	 * 	headers of the last decoded message, or the last attempt at decoding an
+	 *  (incomplete) STOMP frame. This can be useful for detecting 'content-length'.
+	 *
+	 * @return the decoded messages or an empty list
+	 */
+	public List<Message<byte[]>> decode(ByteBuffer buffer, MultiValueMap<String, String> headers) {
+		List<Message<byte[]>> messages = new ArrayList<Message<byte[]>>();
+		while (buffer.hasRemaining()) {
+			headers.clear();
+			Message<byte[]> m = decodeMessage(buffer, headers);
+			if (m != null) {
+				messages.add(m);
+			}
+			else {
+				break;
+			}
+		}
+		return messages;
+	}
+
+	/**
+	 * Decode a single STOMP frame from the given {@code buffer} into a {@link Message}.
+	 */
+	private Message<byte[]> decodeMessage(ByteBuffer buffer, MultiValueMap<String, String> headers) {
+
 		Message<byte[]> decodedMessage = null;
 		skipLeadingEol(buffer);
 		buffer.mark();
 
 		String command = readCommand(buffer);
 		if (command.length() > 0) {
-			MultiValueMap<String, String> headers = readHeaders(buffer);
+
+			readHeaders(buffer, headers);
 			byte[] payload = readPayload(buffer, headers);
 
 			if (payload != null) {
@@ -78,7 +126,7 @@ public class StompDecoder {
 			}
 			else {
 				if (logger.isTraceEnabled()) {
-					logger.trace("Received incomplete frame. Resetting buffer");
+					logger.trace("Received incomplete frame. Resetting buffer.");
 				}
 				buffer.reset();
 			}
@@ -93,9 +141,14 @@ public class StompDecoder {
 		return decodedMessage;
 	}
 
-	private void skipLeadingEol(ByteBuffer buffer) {
+
+	/**
+	 * Skip one ore more EOL characters at the start of the given ByteBuffer.
+	 * Those are STOMP heartbeat frames.
+	 */
+	protected void skipLeadingEol(ByteBuffer buffer) {
 		while (true) {
-			if (!isEol(buffer)) {
+			if (!tryConsumeEndOfLine(buffer)) {
 				break;
 			}
 		}
@@ -103,17 +156,16 @@ public class StompDecoder {
 
 	private String readCommand(ByteBuffer buffer) {
 		ByteArrayOutputStream command = new ByteArrayOutputStream(256);
-		while (buffer.remaining() > 0 && !isEol(buffer)) {
+		while (buffer.remaining() > 0 && !tryConsumeEndOfLine(buffer)) {
 			command.write(buffer.get());
 		}
 		return new String(command.toByteArray(), UTF8_CHARSET);
 	}
 
-	private MultiValueMap<String, String> readHeaders(ByteBuffer buffer) {
-		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+	private void readHeaders(ByteBuffer buffer, MultiValueMap<String, String> headers) {
 		while (true) {
 			ByteArrayOutputStream headerStream = new ByteArrayOutputStream(256);
-			while (buffer.remaining() > 0 && !isEol(buffer)) {
+			while (buffer.remaining() > 0 && !tryConsumeEndOfLine(buffer)) {
 				headerStream.write(buffer.get());
 			}
 			if (headerStream.size() > 0) {
@@ -135,7 +187,6 @@ public class StompDecoder {
 				break;
 			}
 		}
-		return headers;
 	}
 
 	private String unescape(String input) {
@@ -146,16 +197,7 @@ public class StompDecoder {
 	}
 
 	private byte[] readPayload(ByteBuffer buffer, MultiValueMap<String, String> headers) {
-		Integer contentLength = null;
-		if (headers.containsKey("content-length")) {
-			String rawContentLength = headers.getFirst("content-length");
-			try {
-				contentLength = Integer.valueOf(rawContentLength);
-			}
-			catch (NumberFormatException ex) {
-				logger.warn("Ignoring invalid content-length header value: '" + rawContentLength + "'");
-			}
-		}
+		Integer contentLength = getContentLength(headers);
 		if (contentLength != null && contentLength >= 0) {
 			if (buffer.remaining() > contentLength) {
 				byte[] payload = new byte[contentLength];
@@ -184,7 +226,25 @@ public class StompDecoder {
 		return null;
 	}
 
-	private boolean isEol(ByteBuffer buffer) {
+	protected Integer getContentLength(MultiValueMap<String, String> headers) {
+		if (headers.containsKey(StompHeaderAccessor.STOMP_CONTENT_LENGTH_HEADER)) {
+			String rawContentLength = headers.getFirst(StompHeaderAccessor.STOMP_CONTENT_LENGTH_HEADER);
+			try {
+				return Integer.valueOf(rawContentLength);
+			}
+			catch (NumberFormatException ex) {
+				logger.warn("Ignoring invalid content-length header value: '" + rawContentLength + "'");
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Try to read an EOL incrementing the buffer position if successful.
+	 *
+	 * @return whether an EOL was consumed
+	 */
+	private boolean tryConsumeEndOfLine(ByteBuffer buffer) {
 		if (buffer.remaining() > 0) {
 			byte b = buffer.get();
 			if (b == '\n') {

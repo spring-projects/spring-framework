@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -145,8 +146,8 @@ public class StompSubProtocolHandlerTests {
 
 		assertEquals(1, this.session.getSentMessages().size());
 		TextMessage textMessage = (TextMessage) this.session.getSentMessages().get(0);
-		Message<?> message = new StompDecoder().decode(ByteBuffer.wrap(textMessage.getPayload().getBytes()));
-		StompHeaderAccessor replyHeaders = StompHeaderAccessor.wrap(message);
+		List<Message<byte[]>> message = new StompDecoder().decode(ByteBuffer.wrap(textMessage.getPayload().getBytes()));
+		StompHeaderAccessor replyHeaders = StompHeaderAccessor.wrap(message.get(0));
 
 		assertEquals(StompCommand.CONNECTED, replyHeaders.getCommand());
 		assertEquals("1.1", replyHeaders.getVersion());
@@ -176,6 +177,7 @@ public class StompSubProtocolHandlerTests {
 		TextMessage textMessage = StompTextMessageBuilder.create(StompCommand.CONNECT).headers(
 				"login:guest", "passcode:guest", "accept-version:1.1,1.0", "heart-beat:10000,10000").build();
 
+		this.protocolHandler.afterSessionStarted(this.session, this.channel);
 		this.protocolHandler.handleMessageFromClient(this.session, textMessage, this.channel);
 
 		verify(this.channel).send(this.messageCaptor.capture());
