@@ -118,6 +118,11 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 	}
 
 	private void checkSessionLimits() throws IOException {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Another send already in progress, session id '" + getId() + "'" +
+					", in-progress send time " + getInProgressSendTime() + " (ms), " +
+					", buffer size " + this.bufferSize + " bytes");
+		}
 		if (getInProgressSendTime() > this.sendTimeLimit) {
 			logError("A message could not be sent due to a timeout");
 			getDelegate().close();

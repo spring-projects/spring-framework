@@ -174,7 +174,7 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 
 	@Override
 	protected void disconnect(CloseStatus status) throws IOException {
-		if (this.webSocketSession != null) {
+		if (isActive()) {
 			this.webSocketSession.close(status);
 		}
 	}

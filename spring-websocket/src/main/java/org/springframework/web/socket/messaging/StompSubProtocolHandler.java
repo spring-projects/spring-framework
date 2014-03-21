@@ -198,11 +198,9 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 		try {
 			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
 			byte[] bytes = this.stompEncoder.encode((Message<byte[]>) message);
+			TextMessage textMessage = new TextMessage(bytes);
 
-			synchronized(session) {
-				session.sendMessage(new TextMessage(bytes));
-			}
-
+			session.sendMessage(textMessage);
 		}
 		catch (Throwable ex) {
 			sendErrorMessage(session, ex);
