@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,14 +70,25 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 
 
 	public BufferedImageHttpMessageConverter() {
-		String[] readerMediaTypes = ImageIO.getReaderMIMETypes();
-		for (String mediaType : readerMediaTypes) {
+		for (String mediaType : ImageIO.getReaderMIMETypes()) {
+			if (mediaType.isEmpty()) {
+				// Installing JAI causes getReaderMIMETypes to output a leading empty entry, which
+				// makes MimeTypeUtils.parseMimeType throw an InvalidMimeTypeException
+				continue;
+			}
 			this.readableMediaTypes.add(MediaType.parseMediaType(mediaType));
 		}
 
-		String[] writerMediaTypes = ImageIO.getWriterMIMETypes();
-		if (writerMediaTypes.length > 0) {
-			this.defaultContentType = MediaType.parseMediaType(writerMediaTypes[0]);
+		for (String mediaType : ImageIO.getWriterMIMETypes()) {
+			if (mediaType.isEmpty()) {
+				// Installing JAI causes getWriterMIMETypes to output a leading empty entry, which
+				// makes MimeTypeUtils.parseMimeType throw an InvalidMimeTypeException
+				continue;
+			}
+			this.defaultContentType = MediaType.parseMediaType(mediaType);
+
+			// Once we find a valid writeable MIME type and set the default, break out of the loop
+			break;
 		}
 	}
 
