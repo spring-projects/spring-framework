@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,20 +42,24 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
- * Implementation of {@link HttpMessageConverter} that can read and write {@link BufferedImage BufferedImages}.
+ * Implementation of {@link HttpMessageConverter} that can read and write
+ * {@link BufferedImage BufferedImages}.
  *
- * <p>By default, this converter can read all media types that are supported by the {@linkplain
- * ImageIO#getReaderMIMETypes() registered image readers}, and writes using the media type of the first available
- * {@linkplain javax.imageio.ImageIO#getWriterMIMETypes() registered image writer}. This behavior can be overriden by
- * setting the #setContentType(org.springframework.http.MediaType) contentType} properties.
+ * <p>By default, this converter can read all media types that are supported
+ * by the {@linkplain ImageIO#getReaderMIMETypes() registered image readers},
+ * and writes using the media type of the first available
+ * {@linkplain javax.imageio.ImageIO#getWriterMIMETypes() registered image writer}.
+ * The latter can be overridden by setting the
+ * {@link #setDefaultContentType defaultContentType} property.
  *
- * <p>If the {@link #setCacheDir(java.io.File) cacheDir} property is set to an existing directory, this converter will
- * cache image data.
+ * <p>If the {@link #setCacheDir cacheDir} property is set, this converter
+ * will cache image data.
  *
- * <p>The {@link #process(ImageReadParam)} and {@link #process(ImageWriteParam)} template methods allow subclasses to
- * override Image I/O parameters.
+ * <p>The {@link #process(ImageReadParam)} and {@link #process(ImageWriteParam)}
+ * template methods allow subclasses to override Image I/O parameters.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -72,14 +76,20 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 	public BufferedImageHttpMessageConverter() {
 		String[] readerMediaTypes = ImageIO.getReaderMIMETypes();
 		for (String mediaType : readerMediaTypes) {
-			this.readableMediaTypes.add(MediaType.parseMediaType(mediaType));
+			if (StringUtils.hasText(mediaType)) {
+				this.readableMediaTypes.add(MediaType.parseMediaType(mediaType));
+			}
 		}
 
 		String[] writerMediaTypes = ImageIO.getWriterMIMETypes();
-		if (writerMediaTypes.length > 0) {
-			this.defaultContentType = MediaType.parseMediaType(writerMediaTypes[0]);
+		for (String mediaType : writerMediaTypes) {
+			if (StringUtils.hasText(mediaType)) {
+				this.defaultContentType = MediaType.parseMediaType(mediaType);
+				break;
+			}
 		}
 	}
+
 
 	/**
 	 * Sets the default {@code Content-Type} to be used for writing.
@@ -90,7 +100,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 		Iterator<ImageWriter> imageWriters = ImageIO.getImageWritersByMIMEType(defaultContentType.toString());
 		if (!imageWriters.hasNext()) {
 			throw new IllegalArgumentException(
-					"ContentType [" + defaultContentType + "] is not supported by the Java Image I/O API");
+					"Content-Type [" + defaultContentType + "] is not supported by the Java Image I/O API");
 		}
 
 		this.defaultContentType = defaultContentType;
@@ -245,15 +255,17 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 
 
 	/**
-	 * Template method that allows for manipulating the {@link ImageReadParam} before it is used to read an image.
-	 * <p>Default implementation is empty.
+	 * Template method that allows for manipulating the {@link ImageReadParam}
+	 * before it is used to read an image.
+	 * <p>The default implementation is empty.
 	 */
 	protected void process(ImageReadParam irp) {
 	}
 
 	/**
-	 * Template method that allows for manipulating the {@link ImageWriteParam} before it is used to write an image.
-	 * <p>Default implementation is empty.
+	 * Template method that allows for manipulating the {@link ImageWriteParam}
+	 * before it is used to write an image.
+	 * <p>The default implementation is empty.
 	 */
 	protected void process(ImageWriteParam iwp) {
 	}
