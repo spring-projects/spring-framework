@@ -19,6 +19,7 @@ package org.springframework.messaging.handler.annotation.support;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.converter.MessageConverter;
@@ -74,12 +75,12 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 			throw new IllegalStateException("@Payload SpEL expressions not supported by this resolver.");
 		}
 
-		Object target = getTargetPayload(param, message);
-		if (isEmptyPayload(target)) {
+		Object payload = message.getPayload();
+
+		if (isEmptyPayload(payload)) {
 			if (annot == null || annot.required()) {
-				String paramName = param.getParameterName();
-				paramName = (paramName == null ? "Arg" + param.getParameterIndex() : paramName);
-				BindingResult bindingResult = new BeanPropertyBindingResult(target, paramName);
+				String paramName = getParameterName(param);
+				BindingResult bindingResult = new BeanPropertyBindingResult(payload, paramName);
 				bindingResult.addError(new ObjectError(paramName, "@Payload param is required"));
 				throw new MethodArgumentNotValidException(message, param, bindingResult);
 			}
@@ -88,27 +89,25 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 			}
 		}
 
-		if (annot != null) { // Only validate @Payload
-			validate(message, param, target);
+		Class<?> targetClass = param.getParameterType();
+		if (ClassUtils.isAssignable(targetClass, payload.getClass())) {
+			validate(message, param, payload);
+			return payload;
 		}
-		return target;
+		else {
+			payload = this.converter.fromMessage(message, targetClass);
+			if (payload == null) {
+				throw new MessageConversionException(message,
+						"No converter found to convert to " + targetClass + ", message=" + message, null);
+			}
+			validate(message, param, payload);
+			return payload;
+		}
 	}
 
-	/**
-	 * Return the payload for the specified message, which can be the payload
-	 * itself if it matches the parameter type or the result of message conversion
-	 * otherwise.
-	 *
-	 * <p>While the payload of a {@link Message} cannot be {@code null} by design,
-	 * this method may return {@code null} if the message converter returns that.
-	 */
-	protected Object getTargetPayload(MethodParameter parameter, Message<?> message) {
-		Class<?> sourceClass = message.getPayload().getClass();
-		Class<?> targetClass = parameter.getParameterType();
-		if (ClassUtils.isAssignable(targetClass,sourceClass)) {
-			return message.getPayload();
-		}
-		return this.converter.fromMessage(message, targetClass);
+	private String getParameterName(MethodParameter param) {
+		String paramName = param.getParameterName();
+		return (paramName == null ? "Arg " + param.getParameterIndex() : paramName);
 	}
 
 	/**
@@ -131,17 +130,24 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 	}
 
 	protected void validate(Message<?> message, MethodParameter parameter, Object target) {
-		Annotation[] annotations = parameter.getParameterAnnotations();
-		for (Annotation annot : annotations) {
+
+		if (this.validator == null) {
+			return;
+		}
+
+		for (Annotation annot : parameter.getParameterAnnotations()) {
 			if (annot.annotationType().getSimpleName().startsWith("Valid")) {
-				BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(target, parameter.getParameterName());
+
+				BeanPropertyBindingResult bindingResult =
+						new BeanPropertyBindingResult(target, getParameterName(parameter));
+
 				Object hints = AnnotationUtils.getValue(annot);
-				Object[] validationHints = hints instanceof Object[] ? (Object[]) hints : new Object[] {hints};
+				Object[] validationHints = (hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
 
 				if (!ObjectUtils.isEmpty(validationHints) && this.validator instanceof SmartValidator) {
 					((SmartValidator) this.validator).validate(target, bindingResult, validationHints);
 				}
-				else if (this.validator != null) {
+				else {
 					this.validator.validate(target, bindingResult);
 				}
 

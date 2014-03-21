@@ -29,6 +29,7 @@ import org.junit.rules.ExpectedException;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.support.MessageBuilder;
@@ -129,9 +130,8 @@ public class PayloadArgumentResolverTests {
 	public void resolveNonConvertibleParam() throws Exception {
 		Message<?> notEmptyMessage = MessageBuilder.withPayload(123).build();
 
-		// Could not convert from int to Locale so will be "empty" after conversion
-	  	thrown.expect(MethodArgumentNotValidException.class);
-		thrown.expectMessage(Locale.class.getName()); // reference to the type that could not be converted
+		thrown.expect(MessageConversionException.class);
+		thrown.expectMessage("No converter found");
 		this.resolver.resolveArgument(this.paramAnnotatedRequired, notEmptyMessage);
 	}
 
@@ -183,8 +183,9 @@ public class PayloadArgumentResolverTests {
 		// See testValidator()
 		Message<?> message = MessageBuilder.withPayload("invalidValue".getBytes()).build();
 
-		assertEquals("invalidValue",
-				this.resolver.resolveArgument(paramValidatedNotAnnotated, message));
+		thrown.expect(MethodArgumentNotValidException.class);
+		thrown.expectMessage("invalid value");
+		assertEquals("invalidValue", this.resolver.resolveArgument(this.paramValidatedNotAnnotated, message));
 	}
 
 	private Validator testValidator() {
