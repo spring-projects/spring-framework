@@ -18,6 +18,7 @@ package org.springframework.core.type.classreading;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,7 +27,7 @@ import org.springframework.asm.Type;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.util.LinkedMultiValueMap;
 
-import static org.springframework.core.annotation.AnnotationUtils.*;
+import static org.springframework.core.annotation.AnnotationUtils.VALUE;
 
 /**
  * Internal utility class used when reading annotations.
@@ -98,22 +99,22 @@ abstract class AnnotationReadingVisitorUtils {
 
 	/**
 	 * Retrieve the merged attributes of the annotation of the given type, if any,
-	 * from the supplied {@code attributeMap}.
+	 * from the supplied {@code attributesMap}.
 	 * <p>Annotation attribute values appearing <em>lower</em> in the annotation
 	 * hierarchy (i.e., closer to the declaring class) will override those
 	 * defined <em>higher</em> in the annotation hierarchy.
-	 * @param attributeMap the map of annotation attribute lists, keyed by
-	 * annotation type
-	 * @param annotationType the annotation type to look for
+	 * @param attributesMap the map of annotation attribute lists, keyed by
+	 * annotation type name
+	 * @param annotationType the name of the annotation type to look for
 	 * @return the merged annotation attributes; or {@code null} if no matching
-	 * annotation is present in the {@code attributeMap}
+	 * annotation is present in the {@code attributesMap}
 	 * @since 4.0.3
 	 */
 	public static AnnotationAttributes getMergedAnnotationAttributes(
-			LinkedMultiValueMap<String, AnnotationAttributes> attributeMap, String annotationType) {
+			LinkedMultiValueMap<String, AnnotationAttributes> attributesMap, String annotationType) {
 
 		// Get the unmerged list of attributes for the target annotation.
-		List<AnnotationAttributes> attributesList = attributeMap.get(annotationType);
+		List<AnnotationAttributes> attributesList = attributesMap.get(annotationType);
 		if (attributesList == null || attributesList.isEmpty()) {
 			return null;
 		}
@@ -121,28 +122,27 @@ abstract class AnnotationReadingVisitorUtils {
 		// To start with, we populate the results with all attribute values from the
 		// target annotation.
 		AnnotationAttributes results = attributesList.get(0);
-		Set<String> supportedAttributeNames = results.keySet();
+
+		Set<String> overridableAttributeNames = new HashSet<String>(results.keySet());
+		overridableAttributeNames.remove(VALUE);
 
 		// Since the map is a LinkedMultiValueMap, we depend on the ordering of
 		// elements in the map and reverse the order of the keys in order to traverse
-		// "down" the meta-annotation hierarchy.
-		List<String> annotationTypes = new ArrayList<String>(attributeMap.keySet());
+		// "down" the annotation hierarchy.
+		List<String> annotationTypes = new ArrayList<String>(attributesMap.keySet());
 		Collections.reverse(annotationTypes);
 
 		for (String currentAnnotationType : annotationTypes) {
-			if (!currentAnnotationType.startsWith("java.lang.annotation")) {
-				for (String attributeName : supportedAttributeNames) {
-					if (!VALUE.equals(attributeName)) {
-						List<AnnotationAttributes> currentAttributes = attributeMap.get(currentAnnotationType);
-						if (currentAttributes != null && !currentAttributes.isEmpty()) {
-							Object value = currentAttributes.get(0).get(attributeName);
-							if (value != null) {
-								// Overwrite value from target annotation with the value
-								// from an attribute of the same name found lower in the
-								// meta-annotation hierarchy.
-								results.put(attributeName, value);
-							}
-						}
+			List<AnnotationAttributes> currentAttributesList = attributesMap.get(currentAnnotationType);
+			if (currentAttributesList != null && !currentAttributesList.isEmpty()) {
+				AnnotationAttributes currentAttributes = currentAttributesList.get(0);
+				for (String overridableAttributeName : overridableAttributeNames) {
+					Object value = currentAttributes.get(overridableAttributeName);
+					if (value != null) {
+						// Store the value, potentially overriding a value from an
+						// attribute of the same name found higher in the annotation
+						// hierarchy.
+						results.put(overridableAttributeName, value);
 					}
 				}
 			}
