@@ -43,6 +43,7 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.SessionLimitExceededException;
 
 /**
  * A {@link SubProtocolHandler} for STOMP that supports versions 1.0, 1.1, and 1.2
@@ -201,6 +202,10 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 			TextMessage textMessage = new TextMessage(bytes);
 
 			session.sendMessage(textMessage);
+		}
+		catch (SessionLimitExceededException ex) {
+			// Bad session, just get out
+			throw ex;
 		}
 		catch (Throwable ex) {
 			sendErrorMessage(session, ex);

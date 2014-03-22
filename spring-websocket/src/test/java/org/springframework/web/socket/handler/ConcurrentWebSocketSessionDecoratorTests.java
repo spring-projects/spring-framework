@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Unit tests for
@@ -55,7 +56,7 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 		assertEquals(textMessage, session.getSentMessages().get(0));
 
 		assertEquals(0, concurrentSession.getBufferSize());
-		assertEquals(0, concurrentSession.getInProgressSendTime());
+		assertEquals(0, concurrentSession.getTimeSinceSendStarted());
 		assertTrue(session.isOpen());
 	}
 
@@ -86,14 +87,14 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 
 		// ensure some send time elapses
 		Thread.sleep(100);
-		assertTrue(concurrentSession.getInProgressSendTime() > 0);
+		assertTrue(concurrentSession.getTimeSinceSendStarted() > 0);
 
 		TextMessage payload = new TextMessage("payload");
 		for (int i=0; i < 5; i++) {
 			concurrentSession.sendMessage(payload);
 		}
 
-		assertTrue(concurrentSession.getInProgressSendTime() > 0);
+		assertTrue(concurrentSession.getTimeSinceSendStarted() > 0);
 		assertEquals(5 * payload.getPayloadLength(), concurrentSession.getBufferSize());
 		assertTrue(blockingSession.isOpen());
 	}
@@ -129,10 +130,13 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 		// ensure some send time elapses
 		Thread.sleep(sendTimeLimit + 100);
 
-		TextMessage payload = new TextMessage("payload");
-		concurrentSession.sendMessage(payload);
-
-		assertFalse(blockingSession.isOpen());
+		try {
+			TextMessage payload = new TextMessage("payload");
+			concurrentSession.sendMessage(payload);
+			fail("Expected exception");
+		}
+		catch (SessionLimitExceededException ex) {
+		}
 	}
 
 	@Test
@@ -174,8 +178,12 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 		assertEquals(1023, concurrentSession.getBufferSize());
 		assertTrue(blockingSession.isOpen());
 
-		concurrentSession.sendMessage(message);
-		assertFalse(blockingSession.isOpen());
+		try {
+			concurrentSession.sendMessage(message);
+			fail("Expected exception");
+		}
+		catch (SessionLimitExceededException ex) {
+		}
 	}
 
 
@@ -216,5 +224,48 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 			}
 		}
 	}
+
+//	@Test
+//	public void sendSessionLimitException() throws IOException, InterruptedException {
+//
+//		BlockingSession blockingSession = new BlockingSession();
+//		blockingSession.setOpen(true);
+//		CountDownLatch sentMessageLatch = blockingSession.getSentMessageLatch();
+//
+//		int sendTimeLimit = 10 * 1000;
+//		int bufferSizeLimit = 1024;
+//
+//		final ConcurrentWebSocketSessionDecorator concurrentSession =
+//				new ConcurrentWebSocketSessionDecorator(blockingSession, sendTimeLimit, bufferSizeLimit);
+//
+//		Executors.newSingleThreadExecutor().submit(new Runnable() {
+//			@Override
+//			public void run() {
+//				TextMessage textMessage = new TextMessage("slow message");
+//				try {
+//					concurrentSession.sendMessage(textMessage);
+//				}
+//				catch (IOException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		});
+//
+//		assertTrue(sentMessageLatch.await(5, TimeUnit.SECONDS));
+//
+//		StringBuilder sb = new StringBuilder();
+//		for (int i=0 ; i < 1023; i++) {
+//			sb.append("a");
+//		}
+//
+//		TextMessage message = new TextMessage(sb.toString());
+//		concurrentSession.sendMessage(message);
+//
+//		assertEquals(1023, concurrentSession.getBufferSize());
+//		assertTrue(blockingSession.isOpen());
+//
+//		concurrentSession.sendMessage(message);
+//		assertFalse(blockingSession.isOpen());
+//	}
 
 }

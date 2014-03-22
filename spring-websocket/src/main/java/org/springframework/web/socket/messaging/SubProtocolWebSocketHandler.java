@@ -43,6 +43,7 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
+import org.springframework.web.socket.handler.SessionLimitExceededException;
 
 /**
  * An implementation of {@link WebSocketHandler} that delegates incoming WebSocket
@@ -75,9 +76,9 @@ public class SubProtocolWebSocketHandler
 
 	private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<String, WebSocketSession>();
 
-	private int sendTimeLimit = 20 * 1000;
+	private int sendTimeLimit = 10 * 1000;
 
-	private int sendBufferSizeLimit = 1024 * 1024;
+	private int sendBufferSizeLimit = 64 * 1024;
 
 	private Object lifecycleMonitor = new Object();
 
@@ -282,6 +283,18 @@ public class SubProtocolWebSocketHandler
 		try {
 			findProtocolHandler(session).handleMessageToClient(session, message);
 		}
+		catch (SessionLimitExceededException e) {
+			try {
+				logger.error("Terminating session id '" + sessionId + "'", e);
+
+				// Session may be unresponsive so clear first
+				clearSession(session, CloseStatus.NO_STATUS_CODE);
+				session.close();
+			}
+			catch (Exception secondException) {
+				logger.error("Exception terminating session id '" + sessionId + "'", secondException);
+			}
+		}
 		catch (Exception e) {
 			logger.error("Failed to send message to client " + message, e);
 		}
@@ -309,6 +322,10 @@ public class SubProtocolWebSocketHandler
 
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
+		clearSession(session, closeStatus);
+	}
+
+	private void clearSession(WebSocketSession session, CloseStatus closeStatus) throws Exception {
 		this.sessions.remove(session.getId());
 		findProtocolHandler(session).afterSessionEnded(session, closeStatus, this.clientInboundChannel);
 	}
