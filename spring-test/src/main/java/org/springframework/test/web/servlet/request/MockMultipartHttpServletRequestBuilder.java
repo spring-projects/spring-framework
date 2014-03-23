@@ -16,6 +16,7 @@
 
 package org.springframework.test.web.servlet.request;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.ServletContext;
@@ -49,6 +50,20 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 	 */
 	MockMultipartHttpServletRequestBuilder(String urlTemplate, Object... urlVariables) {
 		super(HttpMethod.POST, urlTemplate, urlVariables);
+		super.contentType(MediaType.MULTIPART_FORM_DATA);
+	}
+
+	/**
+	 * Package-private constructor. Use static factory methods in
+	 * {@link MockMvcRequestBuilders}.
+	 * <p>For other ways to initialize a {@code MockMultipartHttpServletRequest},
+	 * see {@link #with(RequestPostProcessor)} and the
+	 * {@link RequestPostProcessor} extension point.
+	 * @param url the URL
+	 * @since 4.0.3
+	 */
+	MockMultipartHttpServletRequestBuilder(URI url) {
+		super(HttpMethod.POST, url);
 		super.contentType(MediaType.MULTIPART_FORM_DATA);
 	}
 
