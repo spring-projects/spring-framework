@@ -70,8 +70,7 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 	}
 
 	private static SubProtocolWebSocketHandler unwrapSubProtocolWebSocketHandler(WebSocketHandler webSocketHandler) {
-		WebSocketHandler actual = (webSocketHandler instanceof WebSocketHandlerDecorator) ?
-				((WebSocketHandlerDecorator) webSocketHandler).getLastHandler() : webSocketHandler;
+		WebSocketHandler actual = WebSocketHandlerDecorator.unwrap(webSocketHandler);
 		Assert.isInstanceOf(SubProtocolWebSocketHandler.class, actual,
 						"No SubProtocolWebSocketHandler found: " + webSocketHandler);
 		return (SubProtocolWebSocketHandler) actual;

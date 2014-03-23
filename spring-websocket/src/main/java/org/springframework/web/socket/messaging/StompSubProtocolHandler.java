@@ -44,6 +44,8 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.SessionLimitExceededException;
+import org.springframework.web.socket.handler.WebSocketSessionDecorator;
+import org.springframework.web.socket.sockjs.transport.SockJsSession;
 
 /**
  * A {@link SubProtocolHandler} for STOMP that supports versions 1.0, 1.1, and 1.2
@@ -251,6 +253,14 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 			if (this.userSessionRegistry != null) {
 				String userName = resolveNameForUserSessionRegistry(principal);
 				this.userSessionRegistry.registerSessionId(userName, session.getId());
+			}
+		}
+		long[] heartbeat = headers.getHeartbeat();
+		if (heartbeat[1] > 0) {
+			session = WebSocketSessionDecorator.unwrap(session);
+			if (session instanceof SockJsSession) {
+				logger.debug("STOMP heartbeats negotiated, disabling SockJS heartbeats.");
+				((SockJsSession) session).disableHeartbeat();
 			}
 		}
 	}

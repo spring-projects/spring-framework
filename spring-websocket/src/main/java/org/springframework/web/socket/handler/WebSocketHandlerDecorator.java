@@ -56,6 +56,15 @@ public class WebSocketHandlerDecorator implements WebSocketHandler {
 		return result;
 	}
 
+	public static WebSocketHandler unwrap(WebSocketHandler handler) {
+		if (handler instanceof WebSocketHandlerDecorator) {
+			return ((WebSocketHandlerDecorator) handler).getLastHandler();
+		}
+		else {
+			return handler;
+		}
+	}
+
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 		this.delegate.afterConnectionEstablished(session);

@@ -99,11 +99,15 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 	private volatile State state = State.NEW;
 
+
 	private final long timeCreated = System.currentTimeMillis();
 
 	private volatile long timeLastActive = this.timeCreated;
 
+
 	private volatile ScheduledFuture<?> heartbeatTask;
+
+	private volatile boolean heartbeatDisabled;
 
 
 	/**
@@ -180,6 +184,12 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	 */
 	protected void updateLastActiveTime() {
 		this.timeLastActive = System.currentTimeMillis();
+	}
+
+	@Override
+	public void disableHeartbeat() {
+		this.heartbeatDisabled = true;
+		cancelHeartbeat();
 	}
 
 	public void delegateConnectionEstablished() throws Exception {
@@ -366,6 +376,9 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	}
 
 	protected void scheduleHeartbeat() {
+		if (this.heartbeatDisabled) {
+			return;
+		}
 		Assert.state(this.config.getTaskScheduler() != null, "No TaskScheduler configured for heartbeat");
 		cancelHeartbeat();
 		if (!isActive()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -248,14 +248,6 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void sendHeartbeatWhenNotActive() throws Exception {
-		this.session.setActive(false);
-		this.session.sendHeartbeat();
-
-		assertEquals(Collections.emptyList(), this.session.getSockJsFramesWritten());
-	}
-
-	@Test
 	public void sendHeartbeat() throws Exception {
 		this.session.setActive(true);
 		this.session.sendHeartbeat();
@@ -273,6 +265,14 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 		this.session.scheduleHeartbeat();
 
 		verifyNoMoreInteractions(this.taskScheduler);
+	}
+
+	@Test
+	public void sendHeartbeatWhenDisabled() throws Exception {
+		this.session.disableHeartbeat();
+		this.session.sendHeartbeat();
+
+		assertEquals(Collections.emptyList(), this.session.getSockJsFramesWritten());
 	}
 
 	@Test

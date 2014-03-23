@@ -301,15 +301,10 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 	 * @return a list of supported protocols or an empty list
 	 */
 	protected final List<String> determineHandlerSupportedProtocols(WebSocketHandler handler) {
+		handler = WebSocketHandlerDecorator.unwrap(handler);
 		List<String> subProtocols = null;
 		if (handler instanceof SubProtocolCapable) {
 			subProtocols = ((SubProtocolCapable) handler).getSubProtocols();
-		}
-		else if (handler instanceof WebSocketHandlerDecorator) {
-			WebSocketHandler lastHandler = ((WebSocketHandlerDecorator) handler).getLastHandler();
-			if (lastHandler instanceof SubProtocolCapable) {
-				subProtocols = ((SubProtocolCapable) lastHandler).getSubProtocols();;
-			}
 		}
 		return (subProtocols != null) ? subProtocols : Collections.<String>emptyList();
 	}

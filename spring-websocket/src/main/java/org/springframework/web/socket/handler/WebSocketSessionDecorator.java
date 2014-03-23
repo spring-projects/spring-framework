@@ -52,6 +52,27 @@ public class WebSocketSessionDecorator implements WebSocketSession {
 	}
 
 
+	public WebSocketSession getDelegate() {
+		return this.delegate;
+	}
+
+	public WebSocketSession getLastSession() {
+		WebSocketSession result = this.delegate;
+		while (result instanceof WebSocketSessionDecorator) {
+			result = ((WebSocketSessionDecorator) result).getDelegate();
+		}
+		return result;
+	}
+
+	public static WebSocketSession unwrap(WebSocketSession session) {
+		if (session instanceof WebSocketSessionDecorator) {
+			return ((WebSocketSessionDecorator) session).getLastSession();
+		}
+		else {
+			return session;
+		}
+	}
+
 	@Override
 	public String getId() {
 		return this.delegate.getId();
@@ -115,18 +136,6 @@ public class WebSocketSessionDecorator implements WebSocketSession {
 	@Override
 	public void close(CloseStatus status) throws IOException {
 		this.delegate.close(status);
-	}
-
-	public WebSocketSession getDelegate() {
-		return this.delegate;
-	}
-
-	public WebSocketSession getLastSession() {
-		WebSocketSession result = this.delegate;
-		while (result instanceof WebSocketSessionDecorator) {
-			result = ((WebSocketSessionDecorator) result).getDelegate();
-		}
-		return result;
 	}
 
 	@Override

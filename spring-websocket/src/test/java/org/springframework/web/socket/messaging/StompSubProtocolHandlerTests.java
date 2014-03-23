@@ -41,6 +41,8 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.handler.TestWebSocketSession;
+import org.springframework.web.socket.sockjs.transport.SockJsSession;
+import org.springframework.web.socket.sockjs.transport.session.TestSockJsSession;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -108,6 +110,19 @@ public class StompSubProtocolHandlerTests {
 
 		assertEquals(Collections.<String>emptySet(), registry.getSessionIds("joe"));
 		assertEquals(Collections.singleton("s1"), registry.getSessionIds("Me myself and I"));
+	}
+
+	@Test
+	public void handleMessageToClientConnectedWithHeartbeats() {
+
+		SockJsSession sockJsSession = Mockito.mock(SockJsSession.class);
+
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECTED);
+		headers.setHeartbeat(0,10);
+		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		this.protocolHandler.handleMessageToClient(sockJsSession, message);
+
+		verify(sockJsSession).disableHeartbeat();
 	}
 
 	@Test
