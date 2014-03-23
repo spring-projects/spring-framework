@@ -48,17 +48,6 @@ import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
  */
 public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 
-	private final Queue<String> messageCache;
-
-
-	private volatile ServerHttpResponse response;
-
-	private volatile ServerHttpAsyncRequestControl asyncRequestControl;
-
-	private volatile SockJsFrameFormat frameFormat;
-
-	private volatile boolean requestInitialized;
-
 
 	private volatile URI uri;
 
@@ -71,6 +60,18 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	private volatile InetSocketAddress remoteAddress;
 
 	private volatile String acceptedProtocol;
+
+
+	private volatile ServerHttpResponse response;
+
+	private volatile ServerHttpAsyncRequestControl asyncRequestControl;
+
+	private volatile SockJsFrameFormat frameFormat;
+
+	private volatile boolean requestInitialized;
+
+
+	private final Queue<String> messageCache;
 
 
 	public AbstractHttpSockJsSession(String id, SockJsServiceConfig config,
@@ -107,9 +108,9 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	}
 
 	/**
-	 * Unlike WebSocket where sub-protocol negotiation is part of the
-	 * initial handshake, in HTTP transports the same negotiation must
-	 * be emulated and the selected protocol set through this setter.
+	 * Unlike WebSocket where sub-protocol negotiation is part of the initial
+	 * handshake, in HTTP transports the same negotiation must be emulated and
+	 * the selected protocol set through this setter.
 	 * @param protocol the sub-protocol to set
 	 */
 	public void setAcceptedProtocol(String protocol) {
@@ -121,6 +122,30 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	 */
 	public String getAcceptedProtocol() {
 		return this.acceptedProtocol;
+	}
+
+	/**
+	 * Return response for the current request, or {@code null} if between requests.
+	 */
+	protected ServerHttpResponse getResponse() {
+		return this.response;
+	}
+
+	/**
+	 * Return the SockJS buffer for messages stored transparently between polling
+	 * requests. If the polling request takes longer than 5 seconds, the session
+	 * will be closed.
+	 *
+	 * @see org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsService
+	 */
+	protected Queue<String> getMessageCache() {
+		return this.messageCache;
+	}
+
+	@Override
+	public boolean isActive() {
+		ServerHttpAsyncRequestControl control = this.asyncRequestControl;
+		return (control != null && !control.isCompleted());
 	}
 
 	@Override
@@ -244,20 +269,6 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 			tryCloseWithSockJsTransportError(ex, CloseStatus.SERVER_ERROR);
 			throw new SockJsTransportFailureException("Failed to flush messages", getId(), ex);
 		}
-	}
-
-	@Override
-	public boolean isActive() {
-		ServerHttpAsyncRequestControl control = this.asyncRequestControl;
-		return (control != null && !control.isCompleted());
-	}
-
-	protected Queue<String> getMessageCache() {
-		return this.messageCache;
-	}
-
-	protected ServerHttpResponse getResponse() {
-		return this.response;
 	}
 
 	@Override
