@@ -37188,7 +37188,7 @@ or WebSocket XML namespace:
 
 
 [[websocket-fallback]]
-=== Fallback Options
+=== SockJS Fallback Options
 As explained in the <<websocket-into-fallback-options,introduction>>, WebSocket is not
 supported in all browsers yet and may be precluded by restrictive network proxies.
 This is why Spring provides fallback options that emulate the WebSocket API as close
@@ -37258,6 +37258,102 @@ https://github.com/sockjs/sockjs-client[sockjs-client] page and the list of
 transport types supported by browser. The client also provides several
 configuration options, for example, to specify which transports to include.
 
+[[websocket-fallback-sockjs-transport]]
+==== SockJS Transports
+
+The SockJS client simulates the WebSocket API in a wide range of browsers.
+For the full list of transports by browser see the
+https://github.com/sockjs/sockjs-client[SockJS client] page. The transport types
+fall in 3 categories: WebSocket, HTTP Streaming, and HTTP Long Polling. For more
+background on those techniques see
+https://spring.io/blog/2012/05/08/spring-mvc-3-2-preview-techniques-for-real-time-updates/[this blog post].
+An important goal of SockJS is to support at least one streaming transport
+per browser, for efficiency reasons, but when necessary fall back on
+long polling.
+
+The next few sections cover various aspects of confugring and using SockJS
+in Spring applications.
+
+[[websocket-fallback-xhr-vs-iframe]]
+==== HTTP Streaming in IE 8, 9: Ajax/XHR vs IFrame
+
+Internet Explorer 8 and 9 are and will remain common for some time. They are
+a key reason for having SockJS. This section covers important
+considerations about running in those browsers.
+
+SockJS client supports Ajax/XHR streaming in IE 8, 9 via Microsoft's
+http://blogs.msdn.com/b/ieinternals/archive/2010/05/13/xdomainrequest-restrictions-limitations-and-workarounds.aspx[XDomainRequest].
+That works across domains but does not support sending cookies.
+Cookies are very often essential for Java applications.
+However since the SockJS client can be used with many server
+types (not just Java ones), it needs to know whether cookies do matter.
+If so the SockJS client prefers Ajax/XHR for streaming or otherwise it
+relies on a iframe-based technique.
+
+The very first `"/info"` request from the SockJS client is a request for
+information that can influence the client's choice of transports.
+One of those details is whether the server application relies on cookies,
+e.g. for authentication purposes or clustering with sticky sessions.
+Spring's SockJS support includes a property called `sessionCookieNeeded`.
+It is enabled by default since most Java applications rely on the `JSESSIONID`
+cookie. If your application does not need it, you can turn off this option
+and the SockJS client should choose the `xhr-streaming` transport in IE 8 and 9.
+
+If you do use an iframe-based transport, and in any case, it is good to know
+that browsers can be instructed to block the use of iframes on a given page by
+setting the HTTP response header `X-Frame-Options` to `DENY`,
+`SAMEORIGIN`, or `ALLOW-FROM <origin>`. This is used to prevent
+https://www.owasp.org/index.php/Clickjacking[clickjacking].
+
+[NOTE]
+====
+Spring Security 3.2+ provides support for setting `X-Frame-Options` on every
+response. By default the Spring Security Java config sets it to `DENY`.
+In 3.2 the Spring Security XML namespace does not set that header by default
+but may be configured to do so, and in the future it may set it by default.
+
+See http://docs.spring.io/spring-security/site/docs/3.2.2.RELEASE/reference/htmlsingle/#headers[Section 7.1. "Default Security Headers"]
+of the Spring Security documentation for details no how to configure the
+setting of the `X-Frame-Options` header. You may also check or watch
+https://jira.spring.io/browse/SEC-2501[SEC-2501] for additional background.
+====
+
+If your application adds the `X-Frame-Options` response header (as it should!)
+and relies on an iframe-based transport, you will need to set the header value to
+`SAMEORIGIN` or `ALLOW-FROM <origin>`. Along with that the Spring SockJS
+support also needs to know the location of the SockJS client because it is loaded
+from the iframe. By default the iframe is set to download the SockJS client
+from a CDN location. It is a good idea to configure this option to
+a URL from the same origin as the application.
+
+In Java config this can be done as shown below. The XML namespace provides a
+similar option on the `<websocket:sockjs>` element:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebSocket
+	public class WebSocketConfig implements WebSocketConfigurer {
+
+		@Override
+		public void registerStompEndpoints(StompEndpointRegistry registry) {
+			registry.addEndpoint("/portfolio").withSockJS()
+					.setClientLibraryUrl("http://localhost:8080/myapp/js/sockjs-client.js");
+		}
+
+		// ...
+
+	}
+----
+
+[NOTE]
+====
+During initial development, do enable the SockJS client `devel` mode that prevents
+the browser from caching SockJS requests (like the iframe) that would otherwise
+be cached. For details on how to enable it see the
+https://github.com/sockjs/sockjs-client[SockJS client] page.
+====
 
 
 [[websocket-fallback-sockjs-servlet3-async]]

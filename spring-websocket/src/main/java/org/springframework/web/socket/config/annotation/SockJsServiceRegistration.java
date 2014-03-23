@@ -78,8 +78,9 @@ public class SockJsServiceRegistration {
 	 * "foreign" domain) from an invisible iframe. Code run from this iframe
 	 * doesn't need to worry about cross-domain issues since it is running from
 	 * a domain local to the SockJS server. The iframe does need to load the
-	 * SockJS javascript client library and this option allows configuring its
-	 * url.
+	 * SockJS javascript client library and this option allows configuring its url.
+	 * See the reference documentation for more details on this.
+	 *
 	 * <p>By default this is set to point to
 	 * "https://d1fxtkz8shb9d2.cloudfront.net/sockjs-0.3.4.min.js".
 	 */
@@ -108,10 +109,12 @@ public class SockJsServiceRegistration {
 	 * from clients with a "cookie_needed" boolean property that indicates whether the use
 	 * of a JSESSIONID cookie is required for the application to function correctly, e.g.
 	 * for load balancing or in Java Servlet containers for the use of an HTTP session.
+	 *
 	 * <p>This is especially important for IE 8,9 that support XDomainRequest -- a modified
 	 * AJAX/XHR -- that can do requests across domains but does not send any cookies. In
 	 * those cases, the SockJS client prefers the "iframe-htmlfile" transport over
 	 * "xdr-streaming" in order to be able to send cookies.
+	 *
 	 * <p>The default value is "true" to maximize the chance for applications to work
 	 * correctly in IE 8,9 with support for cookies (and the JSESSIONID cookie in
 	 * particular). However, an application can choose to set this to "false" if the use
