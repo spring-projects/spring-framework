@@ -72,6 +72,7 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	@Bean
 	public ThreadPoolTaskScheduler messageBrokerSockJsTaskScheduler() {
 		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+		scheduler.setPoolSize(Runtime.getRuntime().availableProcessors());
 		scheduler.setThreadNamePrefix("MessageBrokerSockJS-");
 		return scheduler;
 	}
