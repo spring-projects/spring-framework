@@ -23,8 +23,8 @@ import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpAsyncRequestControl;
@@ -48,34 +48,36 @@ import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
  */
 public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 
-	private final BlockingQueue<String> messageCache;
+	private final Queue<String> messageCache;
 
-	private ServerHttpRequest request;
 
-	private ServerHttpResponse response;
+	private volatile ServerHttpResponse response;
 
-	private ServerHttpAsyncRequestControl asyncRequestControl;
+	private volatile ServerHttpAsyncRequestControl asyncRequestControl;
 
-	private SockJsFrameFormat frameFormat;
+	private volatile SockJsFrameFormat frameFormat;
 
-	private URI uri;
+	private volatile boolean requestInitialized;
 
-	private HttpHeaders handshakeHeaders;
 
-	private Principal principal;
+	private volatile URI uri;
 
-	private InetSocketAddress localAddress;
+	private volatile HttpHeaders handshakeHeaders;
 
-	private InetSocketAddress remoteAddress;
+	private volatile Principal principal;
 
-	private String acceptedProtocol;
+	private volatile InetSocketAddress localAddress;
+
+	private volatile InetSocketAddress remoteAddress;
+
+	private volatile String acceptedProtocol;
 
 
 	public AbstractHttpSockJsSession(String id, SockJsServiceConfig config,
 			WebSocketHandler wsHandler, Map<String, Object> attributes) {
 
 		super(id, config, wsHandler, attributes);
-		this.messageCache = new ArrayBlockingQueue<String>(config.getHttpMessageCacheSize());
+		this.messageCache = new LinkedBlockingQueue<String>(config.getHttpMessageCacheSize());
 	}
 
 
@@ -150,7 +152,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	 *
 	 * @see #handleSuccessiveRequest(org.springframework.http.server.ServerHttpRequest, org.springframework.http.server.ServerHttpResponse, org.springframework.web.socket.sockjs.frame.SockJsFrameFormat)
 	 */
-	public synchronized void handleInitialRequest(ServerHttpRequest request, ServerHttpResponse response,
+	public void handleInitialRequest(ServerHttpRequest request, ServerHttpResponse response,
 			SockJsFrameFormat frameFormat) throws SockJsException {
 
 		initRequest(request, response, frameFormat);
@@ -162,7 +164,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		this.remoteAddress = request.getRemoteAddress();
 
 		try {
-			writePrelude();
+			writePrelude(request, response);
 			writeFrame(SockJsFrame.openFrame());
 		}
 		catch (Throwable ex) {
@@ -171,6 +173,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		}
 
 		try {
+			this.requestInitialized = true;
 			delegateConnectionEstablished();
 		}
 		catch (Throwable ex) {
@@ -185,13 +188,12 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		Assert.notNull(response, "Response must not be null");
 		Assert.notNull(frameFormat, "SockJsFrameFormat must not be null");
 
-		this.request = request;
 		this.response = response;
-		this.asyncRequestControl = request.getAsyncRequestControl(response);
 		this.frameFormat = frameFormat;
+		this.asyncRequestControl = request.getAsyncRequestControl(response);
 	}
 
-	protected void writePrelude() throws IOException {
+	protected void writePrelude(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
 	}
 
 	/**
@@ -217,12 +219,12 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	 *
 	 * @see #handleInitialRequest(org.springframework.http.server.ServerHttpRequest, org.springframework.http.server.ServerHttpResponse, org.springframework.web.socket.sockjs.frame.SockJsFrameFormat)
 	 */
-	public synchronized void handleSuccessiveRequest(ServerHttpRequest request,
+	public void handleSuccessiveRequest(ServerHttpRequest request,
 			ServerHttpResponse response, SockJsFrameFormat frameFormat) throws SockJsException {
 
 		initRequest(request, response, frameFormat);
 		try {
-			writePrelude();
+			writePrelude(request, response);
 		}
 		catch (Throwable ex) {
 			tryCloseWithSockJsTransportError(ex, CloseStatus.SERVER_ERROR);
@@ -234,6 +236,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	protected void startAsyncRequest() throws SockJsException {
 		try {
 			this.asyncRequestControl.start(-1);
+			this.requestInitialized = true;
 			scheduleHeartbeat();
 			tryFlushCache();
 		}
@@ -244,16 +247,13 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	}
 
 	@Override
-	public synchronized boolean isActive() {
-		return (this.asyncRequestControl != null && !this.asyncRequestControl.isCompleted());
+	public boolean isActive() {
+		ServerHttpAsyncRequestControl control = this.asyncRequestControl;
+		return (control != null && !control.isCompleted());
 	}
 
-	protected BlockingQueue<String> getMessageCache() {
+	protected Queue<String> getMessageCache() {
 		return this.messageCache;
-	}
-
-	protected ServerHttpRequest getRequest() {
-		return this.request;
 	}
 
 	protected ServerHttpResponse getResponse() {
@@ -261,7 +261,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	}
 
 	@Override
-	protected final synchronized void sendMessageInternal(String message) throws SockJsTransportFailureException {
+	protected final void sendMessageInternal(String message) throws SockJsTransportFailureException {
 		this.messageCache.add(message);
 		tryFlushCache();
 	}
@@ -274,7 +274,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		if (logger.isTraceEnabled()) {
 			logger.trace(this.messageCache.size() + " message(s) to flush");
 		}
-		if (isActive()) {
+		if (isActive() && this.requestInitialized) {
 			logger.trace("Flushing messages");
 			flushCache();
 		}
@@ -295,30 +295,36 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		resetRequest();
 	}
 
-	protected synchronized void resetRequest() {
+	protected void resetRequest() {
+
+		this.requestInitialized = false;
 		updateLastActiveTime();
-		if (isActive() && this.asyncRequestControl.isStarted()) {
-			try {
-				logger.debug("Completing asynchronous request");
-				this.asyncRequestControl.complete();
-			}
-			catch (Throwable ex) {
-				logger.error("Failed to complete request: " + ex.getMessage());
+
+		if (isActive()) {
+			ServerHttpAsyncRequestControl control = this.asyncRequestControl;
+			if (control.isStarted()) {
+				try {
+					logger.debug("Completing asynchronous request");
+					control.complete();
+				}
+				catch (Throwable ex) {
+					logger.error("Failed to complete request: " + ex.getMessage());
+				}
 			}
 		}
-		this.request = null;
+
 		this.response = null;
 		this.asyncRequestControl = null;
 	}
 
 	@Override
-	protected synchronized void writeFrameInternal(SockJsFrame frame) throws IOException {
+	protected void writeFrameInternal(SockJsFrame frame) throws IOException {
 		if (isActive()) {
 			frame = this.frameFormat.format(frame);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Writing " + frame);
 			}
-			this.response.getBody().write(frame.getContentBytes());
+			getResponse().getBody().write(frame.getContentBytes());
 		}
 	}
 

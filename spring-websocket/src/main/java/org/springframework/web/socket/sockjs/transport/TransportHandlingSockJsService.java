@@ -271,53 +271,59 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 	private SockJsSession createSockJsSession(String sessionId, SockJsSessionFactory sessionFactory,
 			WebSocketHandler handler, Map<String, Object> attributes) {
 
-		synchronized (this.sessions) {
-			SockJsSession session = this.sessions.get(sessionId);
-			if (session != null) {
-				return session;
-			}
-			if (this.sessionCleanupTask == null) {
-				scheduleSessionTask();
-			}
-
-			if (logger.isDebugEnabled()) {
-				logger.debug("Creating new session with session id \"" + sessionId + "\"");
-			}
-			session = sessionFactory.createSession(sessionId, handler, attributes);
-			this.sessions.put(sessionId, session);
+		SockJsSession session = this.sessions.get(sessionId);
+		if (session != null) {
 			return session;
 		}
+
+		if (this.sessionCleanupTask == null) {
+			scheduleSessionTask();
+		}
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Creating new session with session id \"" + sessionId + "\"");
+		}
+		session = sessionFactory.createSession(sessionId, handler, attributes);
+		this.sessions.put(sessionId, session);
+
+		return session;
 	}
 
 	private void scheduleSessionTask() {
-		this.sessionCleanupTask = getTaskScheduler().scheduleAtFixedRate(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					int count = sessions.size();
-					if (logger.isTraceEnabled() && (count != 0)) {
-						logger.trace("Checking " + count + " session(s) for timeouts [" + getName() + "]");
-					}
-					for (SockJsSession session : sessions.values()) {
-						if (session.getTimeSinceLastActive() > getDisconnectDelay()) {
-							if (logger.isTraceEnabled()) {
-								logger.trace("Removing " + session + " for [" + getName() + "]");
+
+		synchronized (this.sessions) {
+			if (this.sessionCleanupTask != null) {
+				return;
+			}
+			this.sessionCleanupTask = getTaskScheduler().scheduleAtFixedRate(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						int count = sessions.size();
+						if (logger.isTraceEnabled() && (count != 0)) {
+							logger.trace("Checking " + count + " session(s) for timeouts [" + getName() + "]");
+						}
+						for (SockJsSession session : sessions.values()) {
+							if (session.getTimeSinceLastActive() > getDisconnectDelay()) {
+								if (logger.isTraceEnabled()) {
+									logger.trace("Removing " + session + " for [" + getName() + "]");
+								}
+								session.close();
+								sessions.remove(session.getId());
 							}
-							session.close();
-							sessions.remove(session.getId());
+						}
+						if (logger.isTraceEnabled() && count > 0) {
+							logger.trace(sessions.size() + " remaining session(s) [" + getName() + "]");
 						}
 					}
-					if (logger.isTraceEnabled() && count > 0) {
-						logger.trace(sessions.size() + " remaining session(s) [" + getName() + "]");
+					catch (Throwable ex) {
+						if (logger.isErrorEnabled()) {
+							logger.error("Failed to complete session timeout checks for [" + getName() + "]", ex);
+						}
 					}
 				}
-				catch (Throwable ex) {
-					if (logger.isErrorEnabled()) {
-						logger.error("Failed to complete session timeout checks for [" + getName() + "]", ex);
-					}
-				}
-			}
-		}, getDisconnectDelay());
+			}, getDisconnectDelay());
+		}
 	}
 
 }

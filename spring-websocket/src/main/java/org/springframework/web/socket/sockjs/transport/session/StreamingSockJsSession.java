@@ -48,7 +48,7 @@ public class StreamingSockJsSession extends AbstractHttpSockJsSession {
 
 
 	@Override
-	public synchronized void handleInitialRequest(ServerHttpRequest request, ServerHttpResponse response,
+	public void handleInitialRequest(ServerHttpRequest request, ServerHttpResponse response,
 			SockJsFrameFormat frameFormat) throws SockJsException {
 
 		super.handleInitialRequest(request, response, frameFormat);
@@ -87,13 +87,13 @@ public class StreamingSockJsSession extends AbstractHttpSockJsSession {
 	}
 
 	@Override
-	protected synchronized void resetRequest() {
+	protected void resetRequest() {
 		super.resetRequest();
 		this.byteCount = 0;
 	}
 
 	@Override
-	protected synchronized void writeFrameInternal(SockJsFrame frame) throws IOException {
+	protected void writeFrameInternal(SockJsFrame frame) throws IOException {
 		if (isActive()) {
 			super.writeFrameInternal(frame);
 			getResponse().flush();

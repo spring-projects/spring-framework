@@ -81,9 +81,6 @@ public class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstr
 
 		this.session.handleInitialRequest(this.request, this.response, this.frameFormat);
 
-		assertTrue(this.session.hasRequest());
-		assertTrue(this.session.hasResponse());
-
 		assertEquals("hhh\no", this.servletResponse.getContentAsString());
 		assertFalse(this.servletRequest.isAsyncStarted());
 
@@ -96,8 +93,6 @@ public class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstr
 		this.session.getMessageCache().add("x");
 		this.session.handleSuccessiveRequest(this.request, this.response, this.frameFormat);
 
-		assertTrue(this.session.hasRequest());
-		assertTrue(this.session.hasResponse());
 		assertTrue(this.servletRequest.isAsyncStarted());
 
 		assertTrue(this.session.wasHeartbeatScheduled());
@@ -125,8 +120,8 @@ public class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstr
 		}
 
 		@Override
-		protected void writePrelude() throws IOException {
-			getResponse().getBody().write("hhh\n".getBytes());
+		protected void writePrelude(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
+			response.getBody().write("hhh\n".getBytes());
 		}
 
 		public boolean wasCacheFlushed() {
@@ -135,14 +130,6 @@ public class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstr
 
 		public boolean wasHeartbeatScheduled() {
 			return this.heartbeatScheduled;
-		}
-
-		public boolean hasRequest() {
-			return getRequest() != null;
-		}
-
-		public boolean hasResponse() {
-			return getResponse() != null;
 		}
 
 		public void setExceptionOnWriteFrame(IOException exceptionOnWriteFrame) {

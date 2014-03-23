@@ -79,10 +79,11 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	private static final Set<String> disconnectedClientExceptions;
 
 	static {
+
 		Set<String> set = new HashSet<String>(2);
 		set.add("ClientAbortException"); // Tomcat
 		set.add("EofException"); // Jetty
-		// IOException("Broken pipe") on WildFly and Glassfish
+		// java.io.IOException "Broken pipe" on WildFly, Glassfish (already covered)
 		disconnectedClientExceptions = Collections.unmodifiableSet(set);
 	}
 
@@ -95,13 +96,13 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 	private final Map<String, Object> attributes;
 
-	private State state = State.NEW;
+	private volatile State state = State.NEW;
 
 	private final long timeCreated = System.currentTimeMillis();
 
-	private long timeLastActive = this.timeCreated;
+	private volatile long timeLastActive = this.timeCreated;
 
-	private ScheduledFuture<?> heartbeatTask;
+	private volatile ScheduledFuture<?> heartbeatTask;
 
 
 	/**
@@ -229,7 +230,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 		this.handler.handleTransportError(this, ex);
 	}
 
-	public final synchronized void sendMessage(WebSocketMessage<?> message) throws IOException {
+	public final void sendMessage(WebSocketMessage<?> message) throws IOException {
 		Assert.isTrue(!isClosed(), "Cannot send a message when session is closed");
 		Assert.isInstanceOf(TextMessage.class, message, "Expected text message: " + message);
 		sendMessageInternal(((TextMessage) message).getPayload());
@@ -352,7 +353,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 	protected abstract void writeFrameInternal(SockJsFrame frame) throws IOException;
 
-	public synchronized void sendHeartbeat() throws SockJsTransportFailureException {
+	public void sendHeartbeat() throws SockJsTransportFailureException {
 		if (isActive()) {
 			writeFrame(SockJsFrame.heartbeatFrame());
 			scheduleHeartbeat();
@@ -382,13 +383,16 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	}
 
 	protected void cancelHeartbeat() {
-		if ((this.heartbeatTask != null) && !this.heartbeatTask.isDone()) {
+
+		ScheduledFuture<?> task = this.heartbeatTask;
+		this.heartbeatTask = null;
+
+		if ((task != null) && !task.isDone()) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Cancelling heartbeat");
 			}
-			this.heartbeatTask.cancel(false);
+			task.cancel(false);
 		}
-		this.heartbeatTask = null;
 	}
 
 

@@ -17,6 +17,7 @@
 package org.springframework.web.socket.sockjs.transport.session;
 
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 
 import org.springframework.web.socket.WebSocketHandler;
@@ -43,7 +44,7 @@ public class PollingSockJsSession extends AbstractHttpSockJsSession {
 	@Override
 	protected void flushCache() throws SockJsTransportFailureException {
 		cancelHeartbeat();
-		BlockingQueue<String> messageCache = getMessageCache();
+		Queue<String> messageCache = getMessageCache();
 		String[] messages = messageCache.toArray(new String[messageCache.size()]);
 		messageCache.clear();
 

@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.frame.DefaultSockJsFrameFormat;
 import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
@@ -69,12 +70,12 @@ public class XhrStreamingTransportHandler extends AbstractHttpSendingTransportHa
 		}
 
 		@Override
-		protected void writePrelude() throws IOException {
+		protected void writePrelude(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
 			for (int i=0; i < 2048; i++) {
-				getResponse().getBody().write('h');
+				response.getBody().write('h');
 			}
-			getResponse().getBody().write('\n');
-			getResponse().flush();
+			response.getBody().write('\n');
+			response.flush();
 		}
 	}
 }
