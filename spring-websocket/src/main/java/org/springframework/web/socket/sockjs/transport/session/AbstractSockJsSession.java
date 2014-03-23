@@ -96,6 +96,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 	private final Map<String, Object> attributes;
 
+
 	private volatile State state = State.NEW;
 
 	private final long timeCreated = System.currentTimeMillis();
@@ -259,7 +260,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 				logger.debug("Closing " + this + ", " + status);
 			}
 			try {
-				if (isActive()) {
+				if (isActive() && !CloseStatus.SESSION_NOT_RELIABLE.equals(status)) {
 					try {
 						// bypass writeFrame
 						writeFrameInternal(SockJsFrame.closeFrame(status.getCode(), status.getReason()));
@@ -284,6 +285,10 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 		}
 	}
 
+	/**
+	 * Actually close the underlying WebSocket session or in the case of HTTP
+	 * transports complete the underlying request.
+	 */
 	protected abstract void disconnect(CloseStatus status) throws IOException;
 
 	/**

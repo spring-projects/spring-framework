@@ -134,6 +134,17 @@ public final class CloseStatus {
 	public static final CloseStatus TLS_HANDSHAKE_FAILURE = new CloseStatus(1015);
 
 
+	/**
+	 * Indicates that a session has become unreliable (e.g. timed out while sending
+	 * a message) and extra care should be exercised while closing the session in
+	 * order to avoid locking additional threads.
+	 *
+	 * <p><strong>NOTE:</strong> Spring Framework specific status code.
+	 */
+	public static final CloseStatus SESSION_NOT_RELIABLE = new CloseStatus(4500);
+
+
+
 	private final int code;
 
 	private final String reason;

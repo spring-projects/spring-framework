@@ -17,6 +17,7 @@
 package org.springframework.web.socket.handler;
 
 import org.junit.Test;
+import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
 
@@ -136,6 +137,7 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 			fail("Expected exception");
 		}
 		catch (SessionLimitExceededException ex) {
+			assertEquals(CloseStatus.SESSION_NOT_RELIABLE, ex.getStatus());
 		}
 	}
 

@@ -235,8 +235,16 @@ public class SubProtocolWebSocketHandler
 	}
 
 	protected final SubProtocolHandler findProtocolHandler(WebSocketSession session) {
+
+		String protocol = null;
+		try {
+			protocol = session.getAcceptedProtocol();
+		}
+		catch (Exception ex) {
+			logger.warn("Ignoring protocol in WebSocket session after failure to obtain it: " + ex.toString());
+		}
+
 		SubProtocolHandler handler;
-		String protocol = session.getAcceptedProtocol();
 		if (!StringUtils.isEmpty(protocol)) {
 			handler = this.protocolHandlers.get(protocol);
 			Assert.state(handler != null,
@@ -283,13 +291,13 @@ public class SubProtocolWebSocketHandler
 		try {
 			findProtocolHandler(session).handleMessageToClient(session, message);
 		}
-		catch (SessionLimitExceededException e) {
+		catch (SessionLimitExceededException ex) {
 			try {
-				logger.error("Terminating session id '" + sessionId + "'", e);
+				logger.error("Terminating session id '" + sessionId + "'", ex);
 
 				// Session may be unresponsive so clear first
-				clearSession(session, CloseStatus.NO_STATUS_CODE);
-				session.close();
+				clearSession(session, ex.getStatus());
+				session.close(ex.getStatus());
 			}
 			catch (Exception secondException) {
 				logger.error("Exception terminating session id '" + sessionId + "'", secondException);
