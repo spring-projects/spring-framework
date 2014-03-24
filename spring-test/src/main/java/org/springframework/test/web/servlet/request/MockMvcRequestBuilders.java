@@ -48,12 +48,30 @@ public abstract class MockMvcRequestBuilders {
 	}
 
 	/**
+	 * Create a {@link MockHttpServletRequestBuilder} for a GET request.
+	 * @param uri the URL
+	 * @since 4.0.3
+	 */
+	public static MockHttpServletRequestBuilder get(URI uri) {
+		return new MockHttpServletRequestBuilder(HttpMethod.GET, uri);
+	}
+
+	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a POST request.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
 	 */
 	public static MockHttpServletRequestBuilder post(String urlTemplate, Object... urlVariables) {
 		return new MockHttpServletRequestBuilder(HttpMethod.POST, urlTemplate, urlVariables);
+	}
+
+	/**
+	 * Create a {@link MockHttpServletRequestBuilder} for a POST request.
+	 * @param uri the URL
+	 * @since 4.0.3
+	 */
+	public static MockHttpServletRequestBuilder post(URI uri) {
+		return new MockHttpServletRequestBuilder(HttpMethod.POST, uri);
 	}
 
 	/**
@@ -66,12 +84,30 @@ public abstract class MockMvcRequestBuilders {
 	}
 
 	/**
+	 * Create a {@link MockHttpServletRequestBuilder} for a PUT request.
+	 * @param uri the URL
+	 * @since 4.0.3
+	 */
+	public static MockHttpServletRequestBuilder put(URI uri) {
+		return new MockHttpServletRequestBuilder(HttpMethod.PUT, uri);
+	}
+
+	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a PATCH request.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
 	 */
 	public static MockHttpServletRequestBuilder patch(String urlTemplate, Object... urlVariables) {
 		return new MockHttpServletRequestBuilder(HttpMethod.PATCH, urlTemplate, urlVariables);
+	}
+
+	/**
+	 * Create a {@link MockHttpServletRequestBuilder} for a PATCH request.
+	 * @param uri the URL
+	 * @since 4.0.3
+	 */
+	public static MockHttpServletRequestBuilder patch(URI uri) {
+		return new MockHttpServletRequestBuilder(HttpMethod.PATCH, uri);
 	}
 
 	/**
@@ -84,6 +120,15 @@ public abstract class MockMvcRequestBuilders {
 	}
 
 	/**
+	 * Create a {@link MockHttpServletRequestBuilder} for a DELETE request.
+	 * @param uri the URL
+	 * @since 4.0.3
+	 */
+	public static MockHttpServletRequestBuilder delete(URI uri) {
+		return new MockHttpServletRequestBuilder(HttpMethod.DELETE, uri);
+	}
+
+	/**
      * Create a {@link MockHttpServletRequestBuilder} for an OPTIONS request.
      * @param urlTemplate a URL template; the resulting URL will be encoded
      * @param urlVariables zero or more URL variables
@@ -92,6 +137,14 @@ public abstract class MockMvcRequestBuilders {
         return new MockHttpServletRequestBuilder(HttpMethod.OPTIONS, urlTemplate, urlVariables);
     }
 
+	/**
+	 * Create a {@link MockHttpServletRequestBuilder} for an OPTIONS request.
+	 * @param uri the URL
+	 * @since 4.0.3
+	 */
+	public static MockHttpServletRequestBuilder options(URI uri) {
+		return new MockHttpServletRequestBuilder(HttpMethod.OPTIONS, uri);
+	}
 
 	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a request with the given HTTP method.
@@ -104,6 +157,16 @@ public abstract class MockMvcRequestBuilders {
 	}
 
 	/**
+	 * Create a {@link MockHttpServletRequestBuilder} for a request with the given HTTP method.
+	 * @param httpMethod the HTTP method (GET, POST, etc)
+	 * @param uri the URL
+	 * @since 4.0.3
+	 */
+	public static MockHttpServletRequestBuilder request(HttpMethod httpMethod, URI uri) {
+		return new MockHttpServletRequestBuilder(httpMethod, uri);
+	}
+
+	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a multipart request.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
@@ -112,78 +175,13 @@ public abstract class MockMvcRequestBuilders {
 		return new MockMultipartHttpServletRequestBuilder(urlTemplate, urlVariables);
 	}
 
-
-	/**
-	 * Create a {@link MockHttpServletRequestBuilder} for a GET request.
-	 * @param url the URL
-	 * @since 4.0.3
-	 */
-	public static MockHttpServletRequestBuilder get(URI url) {
-		return new MockHttpServletRequestBuilder(HttpMethod.GET, url);
-	}
-
-	/**
-	 * Create a {@link MockHttpServletRequestBuilder} for a POST request.
-	 * @param url the URL
-	 * @since 4.0.3
-	 */
-	public static MockHttpServletRequestBuilder post(URI url) {
-		return new MockHttpServletRequestBuilder(HttpMethod.POST, url);
-	}
-
-	/**
-	 * Create a {@link MockHttpServletRequestBuilder} for a PUT request.
-	 * @param url the URL
-	 * @since 4.0.3
-	 */
-	public static MockHttpServletRequestBuilder put(URI url) {
-		return new MockHttpServletRequestBuilder(HttpMethod.PUT, url);
-	}
-
-	/**
-	 * Create a {@link MockHttpServletRequestBuilder} for a PATCH request.
-	 * @param url the URL
-	 * @since 4.0.3
-	 */
-	public static MockHttpServletRequestBuilder patch(URI url) {
-		return new MockHttpServletRequestBuilder(HttpMethod.PATCH, url);
-	}
-
-	/**
-	 * Create a {@link MockHttpServletRequestBuilder} for a DELETE request.
-	 * @param url the URL
-	 * @since 4.0.3
-	 */
-	public static MockHttpServletRequestBuilder delete(URI url) {
-		return new MockHttpServletRequestBuilder(HttpMethod.DELETE, url);
-	}
-
-	/**
-	 * Create a {@link MockHttpServletRequestBuilder} for an OPTIONS request.
-	 * @param url the URL
-	 * @since 4.0.3
-	 */
-	public static MockHttpServletRequestBuilder options(URI url) {
-		return new MockHttpServletRequestBuilder(HttpMethod.OPTIONS, url);
-	}
-
-	/**
-	 * Create a {@link MockHttpServletRequestBuilder} for a request with the given HTTP method.
-	 * @param httpMethod the HTTP method (GET, POST, etc)
-	 * @param url the URL
-	 * @since 4.0.3
-	 */
-	public static MockHttpServletRequestBuilder request(HttpMethod httpMethod, URI url) {
-		return new MockHttpServletRequestBuilder(httpMethod, url);
-	}
-
 	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a multipart request.
-	 * @param url the URL
+	 * @param uri the URL
 	 * @since 4.0.3
 	 */
-	public static MockMultipartHttpServletRequestBuilder fileUpload(URI url) {
-		return new MockMultipartHttpServletRequestBuilder(url);
+	public static MockMultipartHttpServletRequestBuilder fileUpload(URI uri) {
+		return new MockMultipartHttpServletRequestBuilder(uri);
 	}
 
 	/**

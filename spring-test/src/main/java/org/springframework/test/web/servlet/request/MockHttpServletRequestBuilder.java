@@ -133,14 +133,14 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	 * the {@code MockHttpServletRequest} can be plugged in via
 	 * {@link #with(RequestPostProcessor)}.
 	 * @param httpMethod the HTTP method (GET, POST, etc)
-	 * @param url the URL
+	 * @param uri the URL
 	 * @since 4.0.3
 	 */
-	MockHttpServletRequestBuilder(HttpMethod httpMethod, URI url) {
+	MockHttpServletRequestBuilder(HttpMethod httpMethod, URI uri) {
 		Assert.notNull(httpMethod, "httpMethod is required");
-		Assert.notNull(url, "url is required");
+		Assert.notNull(uri, "uri is required");
 		this.method = httpMethod;
-		this.uriComponents = UriComponentsBuilder.fromUri(url).build();
+		this.uriComponents = UriComponentsBuilder.fromUri(uri).build();
 	}
 
 	/**
