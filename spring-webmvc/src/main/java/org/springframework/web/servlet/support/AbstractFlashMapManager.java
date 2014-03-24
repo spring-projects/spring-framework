@@ -18,6 +18,7 @@ package org.springframework.web.servlet.support;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.servlet.http.HttpServletRequest;
@@ -39,11 +40,13 @@ import org.springframework.web.util.UrlPathHelper;
  * A base class for {@link FlashMapManager} implementations.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1.1
  */
 public abstract class AbstractFlashMapManager implements FlashMapManager {
 
-	private static final Object writeLock = new Object();
+	private static final Object DEFAULT_FLASH_MAPS_MUTEX = new Object();
+
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -86,17 +89,16 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 
 	@Override
 	public final FlashMap retrieveAndUpdate(HttpServletRequest request, HttpServletResponse response) {
-		List<FlashMap> maps = retrieveFlashMaps(request);
-		if (CollectionUtils.isEmpty(maps)) {
+		List<FlashMap> allFlashMaps = retrieveFlashMaps(request);
+		if (CollectionUtils.isEmpty(allFlashMaps)) {
 			return null;
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Retrieved FlashMap(s): " + maps);
+			logger.debug("Retrieved FlashMap(s): " + allFlashMaps);
 		}
-		List<FlashMap> mapsToRemove = getExpiredFlashMaps(maps);
-
-		FlashMap match = getMatchingFlashMap(maps, request);
+		List<FlashMap> mapsToRemove = getExpiredFlashMaps(allFlashMaps);
+		FlashMap match = getMatchingFlashMap(allFlashMaps, request);
 		if (match != null) {
 			mapsToRemove.add(match);
 		}
@@ -105,10 +107,19 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Removing FlashMap(s): " + mapsToRemove);
 			}
-			synchronized (writeLock) {
-				maps = retrieveFlashMaps(request);
-				maps.removeAll(mapsToRemove);
-				updateFlashMaps(maps, request, response);
+			Object mutex = getFlashMapsMutex(request);
+			if (mutex != null) {
+				synchronized (mutex) {
+					allFlashMaps = retrieveFlashMaps(request);
+					if (allFlashMaps != null) {
+						allFlashMaps.removeAll(mapsToRemove);
+						updateFlashMaps(allFlashMaps, request, response);
+					}
+				}
+			}
+			else {
+				allFlashMaps.removeAll(mapsToRemove);
+				updateFlashMaps(allFlashMaps, request, response);
 			}
 		}
 
@@ -116,17 +127,10 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 	}
 
 	/**
-	 * Retrieve saved FlashMap instances from underlying storage.
-	 * @param request the current request
-	 * @return a List with FlashMap instances or {@code null}
-	 */
-	protected abstract List<FlashMap> retrieveFlashMaps(HttpServletRequest request);
-
-	/**
 	 * Return a list of expired FlashMap instances contained in the given list.
 	 */
 	private List<FlashMap> getExpiredFlashMaps(List<FlashMap> allMaps) {
-		List<FlashMap> result = new ArrayList<FlashMap>();
+		List<FlashMap> result = new LinkedList<FlashMap>();
 		for (FlashMap map : allMaps) {
 			if (map.isExpired()) {
 				result.add(map);
@@ -140,7 +144,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 	 * @return a matching FlashMap or {@code null}
 	 */
 	private FlashMap getMatchingFlashMap(List<FlashMap> allMaps, HttpServletRequest request) {
-		List<FlashMap> result = new ArrayList<FlashMap>();
+		List<FlashMap> result = new LinkedList<FlashMap>();
 		for (FlashMap flashMap : allMaps) {
 			if (isFlashMapForRequest(flashMap, request)) {
 				result.add(flashMap);
@@ -163,7 +167,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 	protected boolean isFlashMapForRequest(FlashMap flashMap, HttpServletRequest request) {
 		String expectedPath = flashMap.getTargetRequestPath();
 		if (expectedPath != null) {
-			String requestUri = this.urlPathHelper.getOriginatingRequestUri(request);
+			String requestUri = getUrlPathHelper().getOriginatingRequestUri(request);
 			if (!requestUri.equals(expectedPath) && !requestUri.equals(expectedPath + "/")) {
 				return false;
 			}
@@ -192,21 +196,30 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Saving FlashMap=" + flashMap);
 		}
-		flashMap.startExpirationPeriod(this.flashMapTimeout);
+		flashMap.startExpirationPeriod(getFlashMapTimeout());
 
-		synchronized (writeLock) {
-			List<FlashMap> allMaps = retrieveFlashMaps(request);
-			allMaps = (allMaps != null ? allMaps : new CopyOnWriteArrayList<FlashMap>());
-			allMaps.add(flashMap);
-			updateFlashMaps(allMaps, request, response);
+		Object mutex = getFlashMapsMutex(request);
+		if (mutex != null) {
+			synchronized (mutex) {
+				List<FlashMap> allFlashMaps = retrieveFlashMaps(request);
+				allFlashMaps = (allFlashMaps != null ? allFlashMaps : new CopyOnWriteArrayList<FlashMap>());
+				allFlashMaps.add(flashMap);
+				updateFlashMaps(allFlashMaps, request, response);
+			}
+		}
+		else {
+			List<FlashMap> allFlashMaps = retrieveFlashMaps(request);
+			allFlashMaps = (allFlashMaps != null ? allFlashMaps : new LinkedList<FlashMap>());
+			allFlashMaps.add(flashMap);
+			updateFlashMaps(allFlashMaps, request, response);
 		}
 	}
 
 	private String decodeAndNormalizePath(String path, HttpServletRequest request) {
 		if (path != null) {
-			path = this.urlPathHelper.decodeRequestString(request, path);
+			path = getUrlPathHelper().decodeRequestString(request, path);
 			if (path.charAt(0) != '/') {
-				String requestUri = this.urlPathHelper.getRequestUri(request);
+				String requestUri = getUrlPathHelper().getRequestUri(request);
 				path = requestUri.substring(0, requestUri.lastIndexOf('/') + 1) + path;
 				path = StringUtils.cleanPath(path);
 			}
@@ -217,20 +230,42 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 	private void decodeParameters(MultiValueMap<String, String> params, HttpServletRequest request) {
 		for (String name : new ArrayList<String>(params.keySet())) {
 			for (String value : new ArrayList<String>(params.remove(name))) {
-				name = this.urlPathHelper.decodeRequestString(request, name);
-				value = this.urlPathHelper.decodeRequestString(request, value);
+				name = getUrlPathHelper().decodeRequestString(request, name);
+				value = getUrlPathHelper().decodeRequestString(request, value);
 				params.add(name, value);
 			}
 		}
 	}
 
+
 	/**
-	 * Update the FlashMap instances in some underlying storage.
-	 * @param flashMaps a non-empty list of FlashMap instances to save
+	 * Retrieve saved FlashMap instances from the underlying storage.
+	 * @param request the current request
+	 * @return a List with FlashMap instances, or {@code null} if none found
+	 */
+	protected abstract List<FlashMap> retrieveFlashMaps(HttpServletRequest request);
+
+	/**
+	 * Update the FlashMap instances in the underlying storage.
+	 * @param flashMaps a (potentially empty) list of FlashMap instances to save
 	 * @param request the current request
 	 * @param response the current response
 	 */
 	protected abstract void updateFlashMaps(
 			List<FlashMap> flashMaps, HttpServletRequest request, HttpServletResponse response);
+
+	/**
+	 * Obtain a mutex for modifying the FlashMap List as handled by
+	 * {@link #retrieveFlashMaps} and {@link #updateFlashMaps},
+	 * <p>The default implementation returns a shared static mutex.
+	 * Subclasses are encouraged to return a more specific mutex, or
+	 * {@code null} to indicate that no synchronization is necessary.
+	 * @param request the current request
+	 * @return the mutex to use (may be {@code null} if none applicable)
+	 * @since 4.0.3
+	 */
+	protected Object getFlashMapsMutex(HttpServletRequest request) {
+		return DEFAULT_FLASH_MAPS_MUTEX;
+	}
 
 }
