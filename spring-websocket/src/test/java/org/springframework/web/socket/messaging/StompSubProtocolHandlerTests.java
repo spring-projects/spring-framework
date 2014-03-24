@@ -146,8 +146,10 @@ public class StompSubProtocolHandlerTests {
 
 		assertEquals(1, this.session.getSentMessages().size());
 		TextMessage textMessage = (TextMessage) this.session.getSentMessages().get(0);
-		List<Message<byte[]>> message = new StompDecoder().decode(ByteBuffer.wrap(textMessage.getPayload().getBytes()));
-		StompHeaderAccessor replyHeaders = StompHeaderAccessor.wrap(message.get(0));
+
+		List<Message<byte[]>> messages = new StompDecoder().decode(ByteBuffer.wrap(textMessage.getPayload().getBytes()));
+		assertEquals(1, messages.size());
+		StompHeaderAccessor replyHeaders = StompHeaderAccessor.wrap(messages.get(0));
 
 		assertEquals(StompCommand.CONNECTED, replyHeaders.getCommand());
 		assertEquals("1.1", replyHeaders.getVersion());

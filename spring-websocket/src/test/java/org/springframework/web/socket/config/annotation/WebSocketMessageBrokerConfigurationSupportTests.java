@@ -24,11 +24,13 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -43,7 +45,9 @@ import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TestWebSocketSession;
+import org.springframework.web.socket.messaging.StompSubProtocolHandler;
 import org.springframework.web.socket.messaging.StompTextMessageBuilder;
+import org.springframework.web.socket.messaging.SubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 
 import static org.junit.Assert.*;
@@ -104,6 +108,18 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		assertTrue(handlers.iterator().next() instanceof SubProtocolWebSocketHandler);
 	}
 
+	@Test
+	public void maxFrameBufferSize() {
+		SubProtocolWebSocketHandler subProtocolWebSocketHandler = this.config.getBean("subProtocolWebSocketHandler", SubProtocolWebSocketHandler.class);
+
+		List<SubProtocolHandler> protocolHandlers = subProtocolWebSocketHandler.getProtocolHandlers();
+		for(SubProtocolHandler protocolHandler : protocolHandlers) {
+			assertTrue(protocolHandler instanceof StompSubProtocolHandler);
+			DirectFieldAccessor protocolHandlerFieldAccessor = new DirectFieldAccessor(protocolHandler);
+			assertEquals(123, protocolHandlerFieldAccessor.getPropertyValue("messageBufferSizeLimit"));
+		}
+	}
+
 
 	@Controller
 	static class TestController {
@@ -131,6 +147,11 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		@Override
 		public void registerStompEndpoints(StompEndpointRegistry registry) {
 			registry.addEndpoint("/simpleBroker");
+		}
+
+		@Override
+		public void configureMessageBroker(MessageBrokerRegistry registry) {
+			registry.setMessageBufferSizeLimit(123);
 		}
 
 	}

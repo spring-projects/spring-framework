@@ -4,7 +4,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
 
-    <websocket:message-broker application-destination-prefix="/app" user-destination-prefix="/personal">
+    <websocket:message-broker application-destination-prefix="/app" user-destination-prefix="/personal" message-buffer-size="123">
         <websocket:stomp-endpoint path=" /foo,/bar">
             <websocket:handshake-handler ref="myHandler"/>
         </websocket:stomp-endpoint>

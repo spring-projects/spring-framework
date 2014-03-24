@@ -37563,7 +37563,8 @@ The Spring Framework provides support for using STOMP over WebSocket through
 the +spring-messaging+ and +spring-websocket+ modules. It's easy to enable it.
 
 Here is an example of configuring a STOMP WebSocket endpoint with SockJS fallback
-options. The endpoint is available for clients to connect to at URL path `/portfolio`:
+options. The endpoint is available for clients to connect to at URL path `/app/portfolio`.
+It is configured with a 1 Mbytes message buffer size limit (64 Kbytes by default):
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -37574,6 +37575,13 @@ options. The endpoint is available for clients to connect to at URL path `/portf
 	@Configuration
 	@EnableWebSocketMessageBroker
 	public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+		@Override
+        public void configureMessageBroker(MessageBrokerRegistry config) {
+            config.setApplicationDestinationPrefixes("/app")
+                .setMessageBufferSizeLimit(1024*1024)
+                .enableSimpleBroker("/queue", "/topic");
+        }
 
 		@Override
 		public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -37599,10 +37607,11 @@ XML configuration equivalent:
 			http://www.springframework.org/schema/websocket
 			http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
 
-		<websocket:message-broker>
+		<websocket:message-broker application-destination-prefix="/app" message-buffer-size="1048576">
 			<websocket:stomp-endpoint path="/portfolio">
 				<websocket:sockjs/>
 			</websocket:stomp-endpoint>
+			<websocket:simple-broker prefix="/queue, /topic"/>
 			...
 		</websocket:message-broker>
 

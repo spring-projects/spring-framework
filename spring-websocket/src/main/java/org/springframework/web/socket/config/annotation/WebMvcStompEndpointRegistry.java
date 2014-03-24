@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
@@ -57,7 +58,8 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 
 
 	public WebMvcStompEndpointRegistry(WebSocketHandler webSocketHandler,
-			UserSessionRegistry userSessionRegistry, TaskScheduler defaultSockJsTaskScheduler) {
+			UserSessionRegistry userSessionRegistry, TaskScheduler defaultSockJsTaskScheduler,
+			MessageBrokerRegistry brokerRegistry) {
 
 		Assert.notNull(webSocketHandler);
 		Assert.notNull(userSessionRegistry);
@@ -67,6 +69,9 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 		this.stompHandler = new StompSubProtocolHandler();
 		this.stompHandler.setUserSessionRegistry(userSessionRegistry);
 		this.sockJsScheduler = defaultSockJsTaskScheduler;
+		if(brokerRegistry.getMessageBufferSizeLimit() != null) {
+			this.stompHandler.setMessageBufferSizeLimit(brokerRegistry.getMessageBufferSizeLimit());
+		}
 	}
 
 	private static SubProtocolWebSocketHandler unwrapSubProtocolWebSocketHandler(WebSocketHandler webSocketHandler) {

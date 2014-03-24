@@ -31,7 +31,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 
 /**
- * A an extension of {@link org.springframework.messaging.simp.stomp.StompDecoder}
+ * An extension of {@link org.springframework.messaging.simp.stomp.StompDecoder}
  * that chunks any bytes remaining after a single full STOMP frame has been read.
  * The remaining bytes may contain more STOMP frames or an incomplete STOMP frame.
  *

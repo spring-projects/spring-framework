@@ -79,16 +79,16 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 
 
 	/**
-	 * TODO
-	 * @param messageBufferSizeLimit
+	 * Set the message buffer size limit in bytes.
+	 * @since 4.0.3
 	 */
 	public void setMessageBufferSizeLimit(int messageBufferSizeLimit) {
 		this.messageBufferSizeLimit = messageBufferSizeLimit;
 	}
 
 	/**
-	 * TODO
-	 * @return
+	 * Get the message buffer size limit in bytes.
+	 * @since 4.0.3
 	 */
 	public int getMessageBufferSizeLimit() {
 		return this.messageBufferSizeLimit;

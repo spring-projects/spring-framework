@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
+import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.user.DefaultUserSessionRegistry;
 import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.scheduling.TaskScheduler;
@@ -47,15 +47,19 @@ public class WebMvcStompEndpointRegistryTests {
 
 	private UserSessionRegistry userSessionRegistry;
 
+	private MessageBrokerRegistry messageBrokerRegistry;
+
 
 	@Before
 	public void setup() {
-		MessageChannel inChannel = Mockito.mock(MessageChannel.class);
+		SubscribableChannel inChannel = Mockito.mock(SubscribableChannel.class);
 		SubscribableChannel outChannel = Mockito.mock(SubscribableChannel.class);
 		this.webSocketHandler = new SubProtocolWebSocketHandler(inChannel, outChannel);
 		this.userSessionRegistry = new DefaultUserSessionRegistry();
+		this.messageBrokerRegistry = new MessageBrokerRegistry(inChannel, outChannel);
 		TaskScheduler taskScheduler = Mockito.mock(TaskScheduler.class);
-		this.registry = new WebMvcStompEndpointRegistry(webSocketHandler, userSessionRegistry, taskScheduler);
+		this.registry = new WebMvcStompEndpointRegistry(webSocketHandler, userSessionRegistry,
+				taskScheduler, messageBrokerRegistry);
 	}
 
 

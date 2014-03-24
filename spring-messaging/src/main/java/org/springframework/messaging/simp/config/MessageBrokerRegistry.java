@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,8 @@ public class MessageBrokerRegistry {
 	private String userDestinationPrefix;
 
 	private ChannelRegistration brokerChannelRegistration = new ChannelRegistration();
+
+	private Integer messageBufferSizeLimit;
 
 
 	public MessageBrokerRegistry(SubscribableChannel clientInboundChannel, MessageChannel clientOutboundChannel) {
@@ -119,6 +121,22 @@ public class MessageBrokerRegistry {
 		return this.brokerChannelRegistration;
 	}
 
+	/**
+	 * Configure the message buffer size limit in bytes.
+	 * @since 4.0.3
+	 */
+	public MessageBrokerRegistry setMessageBufferSizeLimit(Integer messageBufferSizeLimit) {
+		this.messageBufferSizeLimit = messageBufferSizeLimit;
+		return this;
+	}
+
+	/**
+	 * Get the message buffer size limit in bytes.
+	 * @since 4.0.3
+	 */
+	public Integer getMessageBufferSizeLimit() {
+		return this.messageBufferSizeLimit;
+	}
 
 	protected SimpleBrokerMessageHandler getSimpleBroker(SubscribableChannel brokerChannel) {
 		if ((this.simpleBrokerRegistration == null) && (this.brokerRelayRegistration == null)) {

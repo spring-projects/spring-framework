@@ -114,6 +114,9 @@ public class MessageBrokerBeanDefinitionParserTests {
 				(StompSubProtocolHandler) subProtocolWsHandler.getProtocolHandlerMap().get("v12.stomp");
 		assertNotNull(stompHandler);
 
+		int messageBufferSizeLimit = (int)new  DirectFieldAccessor(stompHandler).getPropertyValue("messageBufferSizeLimit");
+		assertEquals(123, messageBufferSizeLimit);
+
 		httpRequestHandler = (HttpRequestHandler) suhm.getUrlMap().get("/test/**");
 		assertNotNull(httpRequestHandler);
 		assertThat(httpRequestHandler, Matchers.instanceOf(SockJsHttpRequestHandler.class));

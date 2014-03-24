@@ -575,6 +575,13 @@
                     ]]></xsd:documentation>
                 </xsd:annotation>
             </xsd:attribute>
+			<xsd:attribute name="message-buffer-size" type="xsd:int">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The message buffer size limit in bytes for simple messaging protocols like STOMP.
+                    ]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
             <xsd:attribute name="order" type="xsd:token">
                 <xsd:annotation>
                     <xsd:documentation><![CDATA[

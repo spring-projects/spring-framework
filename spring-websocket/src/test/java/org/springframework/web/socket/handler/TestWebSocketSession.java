@@ -62,6 +62,12 @@ public class TestWebSocketSession implements WebSocketSession {
 
 	private HttpHeaders headers;
 
+	public TestWebSocketSession() {
+	}
+
+	public TestWebSocketSession(String id) {
+		this.id = id;
+	}
 
 	@Override
 	public String getId() {
