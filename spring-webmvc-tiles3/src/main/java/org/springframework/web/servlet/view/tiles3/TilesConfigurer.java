@@ -116,6 +116,7 @@ import org.springframework.web.context.ServletContextAware;
  *
  * @author mick semb wever
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.2
  * @see TilesView
  * @see TilesViewResolver
@@ -315,7 +316,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 				LocaleResolver resolver) {
 			BaseLocaleUrlDefinitionDAO dao = super.instantiateLocaleDefinitionDao(applicationContext, resolver);
 			if (checkRefresh && dao instanceof CachingLocaleUrlDefinitionDAO) {
-				((CachingLocaleUrlDefinitionDAO) dao).setCheckRefresh(checkRefresh);
+				((CachingLocaleUrlDefinitionDAO) dao).setCheckRefresh(true);
 			}
 			return dao;
 		}
@@ -354,7 +355,8 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 		protected PreparerFactory createPreparerFactory(ApplicationContext context) {
 			if (preparerFactoryClass != null) {
 				return BeanUtils.instantiate(preparerFactoryClass);
-			} else {
+			}
+			else {
 				return super.createPreparerFactory(context);
 			}
 		}
@@ -394,7 +396,6 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 		protected LocaleResolver createLocaleResolver(ApplicationContext applicationContext) {
 			return new SpringLocaleResolver();
 		}
-
 	}
 
 
