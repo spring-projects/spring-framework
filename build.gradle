@@ -26,7 +26,6 @@ configure(allprojects) { project ->
 	ext.jodaVersion          = "2.3"
 	ext.junitVersion         = "4.11"
 	ext.slf4jVersion         = "1.7.5"
-	ext.tilesRequestVersion  = "1.0.3"
 	ext.tiles2Version        = "2.2.2"
 	ext.tiles3Version        = "3.0.3"
 	ext.xstreamVersion       = "1.4.6"
@@ -820,7 +819,6 @@ project("spring-test") {
 		testCompile("org.codehaus.jackson:jackson-mapper-asl:${jackson1Version}")
 		testCompile("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		testCompile("rome:rome:1.0")
-		testCompile("org.apache.tiles:tiles-request-api:${tilesRequestVersion}")
 		testCompile("org.apache.tiles:tiles-api:${tiles3Version}")
 		testCompile("org.apache.tiles:tiles-core:${tiles3Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
@@ -860,8 +858,8 @@ project("spring-aspects") {
 
 	dependencies {
 		aspects(project(":spring-orm"))
-		ajc("org.aspectj:aspectjtools:1.8.0.M1") // needed for ajc on JDK 8 only
-		rt("org.aspectj:aspectjrt:1.8.0.M1") // needed for ajc on JDK 8 only
+		ajc("org.aspectj:aspectjtools:1.8.0.RC2") // needed for ajc on JDK 8 only
+		rt("org.aspectj:aspectjrt:1.8.0.RC2") // needed for ajc on JDK 8 only
 		compile("org.aspectj:aspectjweaver:${aspectjVersion}") // exposing regular AspectJ version to users
 		provided("org.eclipse.persistence:javax.persistence:2.0.0")
 		optional(project(":spring-aop")) // for @Async support
