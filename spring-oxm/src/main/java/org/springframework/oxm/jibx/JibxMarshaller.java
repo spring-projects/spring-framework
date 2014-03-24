@@ -128,6 +128,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 	public void setTargetPackage(String targetPackage) {
 		this.targetPackage = targetPackage;
 	}
+
 	/**
 	 * Set the optional binding name for this instance.
 	 */
@@ -333,7 +334,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 
 	private void transformAndMarshal(Object graph, Result result) throws IOException {
 		try {
-			ByteArrayOutputStream os = new ByteArrayOutputStream();
+			ByteArrayOutputStream os = new ByteArrayOutputStream(1024);
 			marshalOutputStream(graph, os);
 			ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
 			Transformer transformer = this.transformerFactory.newTransformer();
@@ -341,7 +342,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 		}
 		catch (TransformerException ex) {
 			throw new MarshallingFailureException(
-					"Could not transform to [" + ClassUtils.getShortName(result.getClass()) + "]");
+					"Could not transform to [" + ClassUtils.getShortName(result.getClass()) + "]", ex);
 		}
 
 	}
@@ -395,6 +396,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 		}
 	}
 
+
 	// Unsupported Unmarshalling
 
 	@Override
@@ -420,7 +422,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 			if (encoding != null) {
 				transformer.setOutputProperty(OutputKeys.ENCODING, encoding);
 			}
-			ByteArrayOutputStream os = new ByteArrayOutputStream();
+			ByteArrayOutputStream os = new ByteArrayOutputStream(1024);
 			transformer.transform(source, new StreamResult(os));
 			ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
 			return unmarshalInputStream(is);

@@ -34,12 +34,14 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * {@link javax.servlet.Filter} that generates an {@code ETag} value based on the content on the response.
- * This ETag is compared to the {@code If-None-Match} header of the request. If these headers are equal,
- * the response content is not sent, but rather a {@code 304 "Not Modified"} status instead.
+ * {@link javax.servlet.Filter} that generates an {@code ETag} value based on the
+ * content on the response. This ETag is compared to the {@code If-None-Match}
+ * header of the request. If these headers are equal, the response content is
+ * not sent, but rather a {@code 304 "Not Modified"} status instead.
  *
- * <p>Since the ETag is based on the response content, the response (or {@link org.springframework.web.servlet.View})
- * is still rendered. As such, this filter only saves bandwidth, not server performance.
+ * <p>Since the ETag is based on the response content, the response
+ * (e.g. a {@link org.springframework.web.servlet.View}) is still rendered.
+ * As such, this filter only saves bandwidth, not server performance.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -77,12 +79,11 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	}
 
 	private void updateResponse(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
-		ShallowEtagResponseWrapper  responseWrapper = WebUtils.getNativeResponse(response, ShallowEtagResponseWrapper.class);
+		ShallowEtagResponseWrapper responseWrapper =
+				WebUtils.getNativeResponse(response, ShallowEtagResponseWrapper.class);
 		Assert.notNull(responseWrapper, "ShallowEtagResponseWrapper not found");
 
 		response = (HttpServletResponse) responseWrapper.getResponse();
-
 		byte[] body = responseWrapper.toByteArray();
 		int statusCode = responseWrapper.getStatusCode();
 
@@ -157,7 +158,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	 */
 	private static class ShallowEtagResponseWrapper extends HttpServletResponseWrapper {
 
-		private final ByteArrayOutputStream content = new ByteArrayOutputStream();
+		private final ByteArrayOutputStream content = new ByteArrayOutputStream(1024);
 
 		private final ServletOutputStream outputStream = new ResponseServletOutputStream();
 
@@ -214,21 +215,21 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 		}
 
 		@Override
-		public void resetBuffer() {
-			this.content.reset();
-		}
-
-		@Override
 		public void reset() {
 			super.reset();
 			resetBuffer();
 		}
 
-		private int getStatusCode() {
-			return statusCode;
+		@Override
+		public void resetBuffer() {
+			this.content.reset();
 		}
 
-		private byte[] toByteArray() {
+		public int getStatusCode() {
+			return this.statusCode;
+		}
+
+		public byte[] toByteArray() {
 			return this.content.toByteArray();
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
@@ -54,6 +53,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	private static final String METHOD_POST = "POST";
 
+
 	private final HttpServletRequest servletRequest;
 
 	private HttpHeaders headers;
@@ -64,7 +64,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	 * @param servletRequest the servlet request
 	 */
 	public ServletServerHttpRequest(HttpServletRequest servletRequest) {
-		Assert.notNull(servletRequest, "'servletRequest' must not be null");
+		Assert.notNull(servletRequest, "HttpServletRequest must not be null");
 		this.servletRequest = servletRequest;
 	}
 
@@ -144,7 +144,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	 * to access a parameter thus causing the input stream to be "consumed".
 	 */
 	private InputStream getBodyFromServletRequestParameters(HttpServletRequest request) throws IOException {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(1024);
 		Writer writer = new OutputStreamWriter(bos, FORM_CHARSET);
 
 		Map<String, String[]> form = request.getParameterMap();
