@@ -31,7 +31,7 @@ import org.springframework.http.HttpHeaders;
  */
 abstract class AbstractBufferingClientHttpRequest extends AbstractClientHttpRequest {
 
-	private ByteArrayOutputStream bufferedOutput = new ByteArrayOutputStream();
+	private ByteArrayOutputStream bufferedOutput = new ByteArrayOutputStream(1024);
 
 
 	@Override

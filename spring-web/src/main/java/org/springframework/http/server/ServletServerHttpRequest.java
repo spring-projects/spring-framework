@@ -34,7 +34,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
@@ -55,6 +54,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	protected static final String FORM_CHARSET = "UTF-8";
 
 	private static final String METHOD_POST = "POST";
+
 
 	private final HttpServletRequest servletRequest;
 
@@ -167,7 +167,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	 * to access a parameter thus causing the input stream to be "consumed".
 	 */
 	private InputStream getBodyFromServletRequestParameters(HttpServletRequest request) throws IOException {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(1024);
 		Writer writer = new OutputStreamWriter(bos, FORM_CHARSET);
 
 		Map<String, String[]> form = request.getParameterMap();

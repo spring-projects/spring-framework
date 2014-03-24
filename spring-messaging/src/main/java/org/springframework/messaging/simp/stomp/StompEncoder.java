@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageType;
 
@@ -45,23 +46,22 @@ public final class StompEncoder  {
 
 	private final Log logger = LogFactory.getLog(StompEncoder.class);
 
+
 	/**
 	 * Encodes the given STOMP {@code message} into a {@code byte[]}
-	 *
-	 * @param message The message to encode
-	 *
-	 * @return The encoded message
+	 * @param message the message to encode
+	 * @return the encoded message
 	 */
 	public byte[] encode(Message<byte[]> message) {
 		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			ByteArrayOutputStream baos = new ByteArrayOutputStream(256);
 			DataOutputStream output = new DataOutputStream(baos);
 
 			StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-
 			if (isHeartbeat(headers)) {
 				output.write(message.getPayload());
-			} else {
+			}
+			else {
 				writeCommand(headers, output);
 				writeHeaders(headers, message, output);
 				output.write(LF);
@@ -77,7 +77,7 @@ public final class StompEncoder  {
 	}
 
 	private boolean isHeartbeat(StompHeaderAccessor headers) {
-		return headers.getMessageType() == SimpMessageType.HEARTBEAT;
+		return (headers.getMessageType() == SimpMessageType.HEARTBEAT);
 	}
 
 	private void writeCommand(StompHeaderAccessor headers, DataOutputStream output) throws IOException {
@@ -132,4 +132,5 @@ public final class StompEncoder  {
 				.replaceAll("\n", "\\\\n")
 				.replaceAll("\r", "\\\\r");
 	}
+
 }

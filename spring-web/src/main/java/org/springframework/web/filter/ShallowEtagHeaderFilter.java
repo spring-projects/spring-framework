@@ -29,8 +29,8 @@ import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
-import org.springframework.util.ResizableByteArrayOutputStream;
 import org.springframework.util.DigestUtils;
+import org.springframework.util.ResizableByteArrayOutputStream;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.util.WebUtils;
 
@@ -175,7 +175,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	 */
 	private static class ShallowEtagResponseWrapper extends HttpServletResponseWrapper {
 
-		private final ResizableByteArrayOutputStream content = new ResizableByteArrayOutputStream();
+		private final ResizableByteArrayOutputStream content = new ResizableByteArrayOutputStream(1024);
 
 		private final ServletOutputStream outputStream = new ResponseServletOutputStream();
 
@@ -233,21 +233,21 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 		}
 
 		@Override
-		public void resetBuffer() {
-			this.content.reset();
-		}
-
-		@Override
 		public void reset() {
 			super.reset();
 			resetBuffer();
 		}
 
-		private int getStatusCode() {
+		@Override
+		public void resetBuffer() {
+			this.content.reset();
+		}
+
+		public int getStatusCode() {
 			return this.statusCode;
 		}
 
-		private byte[] toByteArray() {
+		public byte[] toByteArray() {
 			return this.content.toByteArray();
 		}
 

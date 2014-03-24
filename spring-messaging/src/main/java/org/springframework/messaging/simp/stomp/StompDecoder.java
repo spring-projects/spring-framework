@@ -28,7 +28,6 @@ import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 
 /**
  * Decodes STOMP frames from a {@link ByteBuffer}. If the buffer does not contain
@@ -52,20 +51,15 @@ public class StompDecoder {
 	 * Decodes a STOMP frame in the given {@code buffer} into a {@link Message}.
 	 * If the given ByteBuffer contains partial STOMP frame content, the method
 	 * resets the buffer and returns {@code null}.
-	 *
-	 * @param buffer The buffer to decode the frame from
-	 *
-	 * @return The decoded message or {@code null}
+	 * @param buffer the buffer to decode the frame from
+	 * @return the decoded message or {@code null}
 	 */
 	public Message<byte[]> decode(ByteBuffer buffer) {
-
 		Message<byte[]> decodedMessage = null;
-
 		skipLeadingEol(buffer);
 		buffer.mark();
 
 		String command = readCommand(buffer);
-
 		if (command.length() > 0) {
 			MultiValueMap<String, String> headers = readHeaders(buffer);
 			byte[] payload = readPayload(buffer, headers);
@@ -108,7 +102,7 @@ public class StompDecoder {
 	}
 
 	private String readCommand(ByteBuffer buffer) {
-		ByteArrayOutputStream command = new ByteArrayOutputStream();
+		ByteArrayOutputStream command = new ByteArrayOutputStream(256);
 		while (buffer.remaining() > 0 && !isEol(buffer)) {
 			command.write(buffer.get());
 		}
@@ -118,7 +112,7 @@ public class StompDecoder {
 	private MultiValueMap<String, String> readHeaders(ByteBuffer buffer) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		while (true) {
-			ByteArrayOutputStream headerStream = new ByteArrayOutputStream();
+			ByteArrayOutputStream headerStream = new ByteArrayOutputStream(256);
 			while (buffer.remaining() > 0 && !isEol(buffer)) {
 				headerStream.write(buffer.get());
 			}
@@ -176,7 +170,7 @@ public class StompDecoder {
 			}
 		}
 		else {
-			ByteArrayOutputStream payload = new ByteArrayOutputStream();
+			ByteArrayOutputStream payload = new ByteArrayOutputStream(256);
 			while (buffer.remaining() > 0) {
 				byte b = buffer.get();
 				if (b == 0) {
@@ -208,4 +202,5 @@ public class StompDecoder {
 		}
 		return false;
 	}
+
 }

@@ -32,7 +32,7 @@ import org.springframework.util.concurrent.ListenableFuture;
  */
 abstract class AbstractBufferingAsyncClientHttpRequest extends AbstractAsyncClientHttpRequest {
 
-	private ByteArrayOutputStream bufferedOutput = new ByteArrayOutputStream();
+	private ByteArrayOutputStream bufferedOutput = new ByteArrayOutputStream(1024);
 
 
 	@Override

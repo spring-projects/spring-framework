@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private boolean charset = false;
 
-	private final ByteArrayOutputStream content = new ByteArrayOutputStream();
+	private final ByteArrayOutputStream content = new ByteArrayOutputStream(1024);
 
 	private final ServletOutputStream outputStream = new ResponseServletOutputStream(this.content);
 
@@ -189,8 +189,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	public String getContentAsString() throws UnsupportedEncodingException {
 		flushBuffer();
-		return (this.characterEncoding != null) ?
-				this.content.toString(this.characterEncoding) : this.content.toString();
+		return (this.characterEncoding != null ?
+				this.content.toString(this.characterEncoding) : this.content.toString());
 	}
 
 	@Override
@@ -218,8 +218,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		if (contentType != null) {
 			int charsetIndex = contentType.toLowerCase().indexOf(CHARSET_PREFIX);
 			if (charsetIndex != -1) {
-				String encoding = contentType.substring(charsetIndex + CHARSET_PREFIX.length());
-				this.characterEncoding = encoding;
+				this.characterEncoding = contentType.substring(charsetIndex + CHARSET_PREFIX.length());
 				this.charset = true;
 			}
 			updateContentTypeHeader();

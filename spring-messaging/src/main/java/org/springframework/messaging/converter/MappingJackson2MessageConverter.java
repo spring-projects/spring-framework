@@ -181,7 +181,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	public Object convertToInternal(Object payload, MessageHeaders headers) {
 		try {
 			if (byte[].class.equals(getSerializedPayloadClass())) {
-				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				ByteArrayOutputStream out = new ByteArrayOutputStream(1024);
 				JsonEncoding encoding = getJsonEncoding(getMimeType(headers));
 
 				// The following has been deprecated as late as Jackson 2.2 (April 2013);

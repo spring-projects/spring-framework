@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.util;
 
 import org.junit.Before;
@@ -22,56 +23,56 @@ import static org.junit.Assert.*;
 
 /**
  * @author Brian Clozel
+ * @author Juergen Hoeller
  */
 public class ResizableByteArrayOutputStreamTests {
 
-	private ResizableByteArrayOutputStream baos;
+	private static final int INITIAL_CAPACITY = 256;
 
-	private String helloString;
+	private ResizableByteArrayOutputStream baos;
 
 	private byte[] helloBytes;
 
-	private static final int INITIAL_SIZE = 32;
 
 	@Before
 	public void setUp() throws Exception {
-		this.baos = new ResizableByteArrayOutputStream(INITIAL_SIZE);
-		this.helloString = "Hello World";
-		this.helloBytes = helloString.getBytes("UTF-8");
+		this.baos = new ResizableByteArrayOutputStream(INITIAL_CAPACITY);
+		this.helloBytes = "Hello World".getBytes("UTF-8");
 	}
+
 
 	@Test
 	public void resize() throws Exception {
-		assertEquals(INITIAL_SIZE, this.baos.buffer.length);
+		assertEquals(INITIAL_CAPACITY, this.baos.capacity());
 		this.baos.write(helloBytes);
 		int size = 64;
 		this.baos.resize(size);
-		assertEquals(size, this.baos.buffer.length);
-		assertByteArrayEqualsString(helloString, this.baos);
+		assertEquals(size, this.baos.capacity());
+		assertByteArrayEqualsString(this.baos);
 	}
 
 	@Test
 	public void autoGrow() {
-		assertEquals(INITIAL_SIZE, this.baos.buffer.length);
-		for(int i= 0; i < 33; i++) {
+		assertEquals(INITIAL_CAPACITY, this.baos.capacity());
+		for(int i = 0; i < 129; i++) {
 			this.baos.write(0);
 		}
-		assertEquals(64, this.baos.buffer.length);
+		assertEquals(256, this.baos.capacity());
 	}
 
 	@Test
 	public void grow() throws Exception {
-		assertEquals(INITIAL_SIZE, this.baos.buffer.length);
+		assertEquals(INITIAL_CAPACITY, this.baos.capacity());
 		this.baos.write(helloBytes);
-		this.baos.grow(100);
-		assertEquals(this.helloString.length() + 100, this.baos.buffer.length);
-		assertByteArrayEqualsString(helloString, this.baos);
+		this.baos.grow(1000);
+		assertEquals(this.helloBytes.length + 1000, this.baos.capacity());
+		assertByteArrayEqualsString(this.baos);
 	}
 
 	@Test
 	public void write() throws Exception{
 		this.baos.write(helloBytes);
-		assertByteArrayEqualsString(helloString, this.baos);
+		assertByteArrayEqualsString(this.baos);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -80,9 +81,9 @@ public class ResizableByteArrayOutputStreamTests {
 		this.baos.resize(5);
 	}
 
-	private void assertByteArrayEqualsString(String expected, ResizableByteArrayOutputStream actual) {
-		String actualString = new String(actual.buffer, 0, actual.count());
-		assertEquals(expected, actualString);
+
+	private void assertByteArrayEqualsString(ResizableByteArrayOutputStream actual) {
+		assertArrayEquals(helloBytes, actual.toByteArray());
 	}
 
 }

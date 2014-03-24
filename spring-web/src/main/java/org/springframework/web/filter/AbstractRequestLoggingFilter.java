@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
@@ -53,9 +52,9 @@ import org.springframework.web.util.WebUtils;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
+ * @since 1.2.5
  * @see #beforeRequest
  * @see #afterRequest
- * @since 1.2.5
  */
 public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter {
 
@@ -68,6 +67,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	public static final String DEFAULT_AFTER_MESSAGE_SUFFIX = "]";
 
 	private static final int DEFAULT_MAX_PAYLOAD_LENGTH = 50;
+
 
 	private boolean includeQueryString = false;
 
@@ -84,6 +84,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	private String afterMessagePrefix = DEFAULT_AFTER_MESSAGE_PREFIX;
 
 	private String afterMessageSuffix = DEFAULT_AFTER_MESSAGE_SUFFIX;
+
 
 	/**
 	 * Set whether or not the query string should be included in the log message. <p>Should be configured using an
@@ -177,6 +178,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 		this.afterMessageSuffix = afterMessageSuffix;
 	}
 
+
 	/**
 	 * The default value is "false" so that the filter may log a "before" message
 	 * at the start of request processing and an "after" message at the end from
@@ -188,9 +190,8 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	}
 
 	/**
-	 * Forwards the request to the next filter in the chain and delegates down to the subclasses to perform the actual
-	 * request logging both before and after the request is processed.
-	 *
+	 * Forwards the request to the next filter in the chain and delegates down to the subclasses
+	 * to perform the actual request logging both before and after the request is processed.
 	 * @see #beforeRequest
 	 * @see #afterRequest
 	 */
@@ -221,7 +222,6 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 	/**
 	 * Get the message to write to the log before the request.
-	 *
 	 * @see #createMessage
 	 */
 	private String getBeforeMessage(HttpServletRequest request) {
@@ -230,7 +230,6 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 	/**
 	 * Get the message to write to the log after the request.
-	 *
 	 * @see #createMessage
 	 */
 	private String getAfterMessage(HttpServletRequest request) {
@@ -238,10 +237,12 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	}
 
 	/**
-	 * Create a log message for the given request, prefix and suffix. <p>If {@code includeQueryString} is
-	 * {@code true} then the inner part of the log message will take the form {@code request_uri?query_string}
-	 * otherwise the message will simply be of the form {@code request_uri}. <p>The final message is composed of the
-	 * inner part as described and the supplied prefix and suffix.
+	 * Create a log message for the given request, prefix and suffix.
+	 * <p>If {@code includeQueryString} is {@code true}, then the inner part
+	 * of the log message will take the form {@code request_uri?query_string};
+	 * otherwise the message will simply be of the form {@code request_uri}.
+	 * <p>The final message is composed of the inner part as described and
+	 * the supplied prefix and suffix.
 	 */
 	protected String createMessage(HttpServletRequest request, String prefix, String suffix) {
 		StringBuilder msg = new StringBuilder();
@@ -285,16 +286,16 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	}
 
 	/**
-	 * Concrete subclasses should implement this method to write a log message <i>before</i> the request is processed.
-	 *
+	 * Concrete subclasses should implement this method to write a log message
+	 * <i>before</i> the request is processed.
 	 * @param request current HTTP request
 	 * @param message the message to log
 	 */
 	protected abstract void beforeRequest(HttpServletRequest request, String message);
 
 	/**
-	 * Concrete subclasses should implement this method to write a log message <i>after</i> the request is processed.
-	 *
+	 * Concrete subclasses should implement this method to write a log message
+	 * <i>after</i> the request is processed.
 	 * @param request current HTTP request
 	 * @param message the message to log
 	 */
@@ -303,7 +304,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 	private static class RequestCachingRequestWrapper extends HttpServletRequestWrapper {
 
-		private final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		private final ByteArrayOutputStream bos = new ByteArrayOutputStream(1024);
 
 		private final ServletInputStream inputStream;
 
@@ -316,19 +317,19 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 		@Override
 		public ServletInputStream getInputStream() throws IOException {
-			return inputStream;
+			return this.inputStream;
 		}
 
 		@Override
 		public String getCharacterEncoding() {
-			return super.getCharacterEncoding() != null ? super.getCharacterEncoding() :
-					WebUtils.DEFAULT_CHARACTER_ENCODING;
+			String enc = super.getCharacterEncoding();
+			return (enc != null ? enc : WebUtils.DEFAULT_CHARACTER_ENCODING);
 		}
 
 		@Override
 		public BufferedReader getReader() throws IOException {
 			if (this.reader == null) {
-				this.reader = new BufferedReader(new InputStreamReader(inputStream, getCharacterEncoding()));
+				this.reader = new BufferedReader(new InputStreamReader(this.inputStream, getCharacterEncoding()));
 			}
 			return this.reader;
 		}
@@ -337,17 +338,18 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 			return this.bos.toByteArray();
 		}
 
+
 		private class RequestCachingInputStream extends ServletInputStream {
 
 			private final ServletInputStream is;
 
-			private RequestCachingInputStream(ServletInputStream is) {
+			public RequestCachingInputStream(ServletInputStream is) {
 				this.is = is;
 			}
 
 			@Override
 			public int read() throws IOException {
-				int ch = is.read();
+				int ch = this.is.read();
 				if (ch != -1) {
 					bos.write(ch);
 				}

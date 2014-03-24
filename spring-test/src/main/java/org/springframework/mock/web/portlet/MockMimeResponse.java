@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public class MockMimeResponse extends MockPortletResponse implements MimeRespons
 
 	private int bufferSize = 4096;
 
-	private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+	private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream(1024);
 
 	private final CacheControl cacheControl = new MockCacheControl();
 
@@ -130,9 +130,9 @@ public class MockMimeResponse extends MockPortletResponse implements MimeRespons
 	@Override
 	public PrintWriter getWriter() throws UnsupportedEncodingException {
 		if (this.writer == null) {
-			Writer targetWriter = (this.characterEncoding != null
-					? new OutputStreamWriter(this.outputStream, this.characterEncoding)
-					: new OutputStreamWriter(this.outputStream));
+			Writer targetWriter = (this.characterEncoding != null ?
+					new OutputStreamWriter(this.outputStream, this.characterEncoding) :
+					new OutputStreamWriter(this.outputStream));
 			this.writer = new PrintWriter(targetWriter);
 		}
 		return this.writer;
@@ -145,9 +145,8 @@ public class MockMimeResponse extends MockPortletResponse implements MimeRespons
 
 	public String getContentAsString() throws UnsupportedEncodingException {
 		flushBuffer();
-		return (this.characterEncoding != null)
-				? this.outputStream.toString(this.characterEncoding)
-				: this.outputStream.toString();
+		return (this.characterEncoding != null ?
+				this.outputStream.toString(this.characterEncoding) : this.outputStream.toString());
 	}
 
 	public void setLocale(Locale locale) {
@@ -174,13 +173,11 @@ public class MockMimeResponse extends MockPortletResponse implements MimeRespons
 		if (this.writer != null) {
 			this.writer.flush();
 		}
-		if (this.outputStream != null) {
-			try {
-				this.outputStream.flush();
-			}
-			catch (IOException ex) {
-				throw new IllegalStateException("Could not flush OutputStream: " + ex.getMessage());
-			}
+		try {
+			this.outputStream.flush();
+		}
+		catch (IOException ex) {
+			throw new IllegalStateException("Could not flush OutputStream: " + ex.getMessage());
 		}
 		this.committed = true;
 	}

@@ -104,7 +104,7 @@ public class MarshallingView extends AbstractView {
 		if (toBeMarshalled == null) {
 			throw new IllegalStateException("Unable to locate object to be marshalled in model: " + model);
 		}
-		ByteArrayOutputStream bos = new ByteArrayOutputStream(2048);
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(1024);
 		this.marshaller.marshal(toBeMarshalled, new StreamResult(bos));
 
 		setResponseContentType(request, response);
