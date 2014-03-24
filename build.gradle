@@ -26,6 +26,9 @@ configure(allprojects) { project ->
 	ext.jodaVersion          = "2.3"
 	ext.junitVersion         = "4.11"
 	ext.slf4jVersion         = "1.7.5"
+	ext.tilesRequestVersion  = "1.0.3"
+	ext.tiles2Version        = "2.2.2"
+	ext.tiles3Version        = "3.0.3"
 	ext.xstreamVersion       = "1.4.6"
 
 	ext.gradleScriptDir   = "${rootProject.projectDir}/gradle"
@@ -682,20 +685,20 @@ project("spring-webmvc") {
 		optional("org.codehaus.jackson:jackson-mapper-asl:${jackson1Version}")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("rome:rome:1.0")
-		optional("org.apache.tiles:tiles-api:2.2.2")
-		optional("org.apache.tiles:tiles-core:2.2.2") {
+		optional("org.apache.tiles:tiles-api:${tiles2Version}")
+		optional("org.apache.tiles:tiles-core:${tiles2Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		optional("org.apache.tiles:tiles-servlet:2.2.2") {
+		optional("org.apache.tiles:tiles-servlet:${tiles2Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		optional("org.apache.tiles:tiles-jsp:2.2.2") {
+		optional("org.apache.tiles:tiles-jsp:${tiles2Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		optional("org.apache.tiles:tiles-el:2.2.2") {
+		optional("org.apache.tiles:tiles-el:${tiles2Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		optional("org.apache.tiles:tiles-extras:2.2.2") {
+		optional("org.apache.tiles:tiles-extras:${tiles2Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 			exclude group: "org.springframework", module: "spring-web"
 		}
@@ -740,20 +743,20 @@ project("spring-webmvc-tiles3") {
 		optional("javax.servlet.jsp:jsp-api:2.2")
 		optional("javax.servlet:jstl:1.2")
 		optional("javax.el:javax.el-api:2.2.4")
-		optional("org.apache.tiles:tiles-api:3.0.3")
-		optional("org.apache.tiles:tiles-core:3.0.3") {
+		optional("org.apache.tiles:tiles-api:${tiles3Version}")
+		optional("org.apache.tiles:tiles-core:${tiles3Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		optional("org.apache.tiles:tiles-servlet:3.0.3") {
+		optional("org.apache.tiles:tiles-servlet:${tiles3Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		optional("org.apache.tiles:tiles-jsp:3.0.3") {
+		optional("org.apache.tiles:tiles-jsp:${tiles3Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		optional("org.apache.tiles:tiles-el:3.0.3") {
+		optional("org.apache.tiles:tiles-el:${tiles3Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		optional("org.apache.tiles:tiles-extras:3.0.3") {
+		optional("org.apache.tiles:tiles-extras:${tiles3Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 			exclude group: "org.springframework", module: "spring-web"
 		}
@@ -817,12 +820,12 @@ project("spring-test") {
 		testCompile("org.codehaus.jackson:jackson-mapper-asl:${jackson1Version}")
 		testCompile("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		testCompile("rome:rome:1.0")
-		testCompile("org.apache.tiles:tiles-request-api:1.0.1")
-		testCompile("org.apache.tiles:tiles-api:3.0.1")
-		testCompile("org.apache.tiles:tiles-core:3.0.1") {
+		testCompile("org.apache.tiles:tiles-request-api:${tilesRequestVersion}")
+		testCompile("org.apache.tiles:tiles-api:${tiles3Version}")
+		testCompile("org.apache.tiles:tiles-core:${tiles3Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		testCompile("org.apache.tiles:tiles-servlet:3.0.1") {
+		testCompile("org.apache.tiles:tiles-servlet:${tiles3Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
