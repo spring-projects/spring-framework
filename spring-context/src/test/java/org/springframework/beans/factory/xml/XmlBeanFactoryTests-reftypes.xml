@@ -129,6 +129,15 @@
 		</constructor-arg>
 	</bean>
 
+	<bean id="hasInnerBeansAsPrototype" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
+		<constructor-arg>
+			<bean id="innerBean" class="org.springframework.tests.sample.beans.TestBean" destroy-method="destroy">
+				<constructor-arg><value>inner1</value></constructor-arg>
+				<constructor-arg type="int"><value>6</value></constructor-arg>
+			</bean>
+		</constructor-arg>
+	</bean>
+
 	<bean id="hasInnerBeansWithoutDestroy" class="org.springframework.tests.sample.beans.TestBean">
 		<constructor-arg><value>hasInner</value></constructor-arg>
 		<constructor-arg index="1" type="int"><value>5</value></constructor-arg>
