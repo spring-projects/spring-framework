@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,16 @@
 package org.springframework.web.servlet.config.annotation;
 
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
@@ -49,10 +51,10 @@ import org.springframework.web.servlet.handler.ConversionServiceExposingIntercep
 import org.springframework.web.servlet.handler.HandlerExceptionResolverComposite;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
-import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
 import static org.junit.Assert.*;
 
@@ -60,6 +62,7 @@ import static org.junit.Assert.*;
  * A test fixture with an {@link WebMvcConfigurationSupport} instance.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  */
 public class WebMvcConfigurationSupportTests {
 
@@ -68,29 +71,34 @@ public class WebMvcConfigurationSupportTests {
 
 	@Before
 	public void setUp() {
-
 		AnnotationConfigWebApplicationContext cxt = new AnnotationConfigWebApplicationContext();
 		cxt.setServletContext(new MockServletContext());
-		cxt.register(TestConfig.class);
+		cxt.register(TestConfig.class, ScopedController.class, ScopedProxyController.class);
 		cxt.refresh();
 
 		this.wac = cxt;
 	}
 
+
 	@Test
 	public void requestMappingHandlerMapping() throws Exception {
-
 		RequestMappingHandlerMapping handlerMapping = this.wac.getBean(RequestMappingHandlerMapping.class);
 		assertEquals(0, handlerMapping.getOrder());
 
 		HandlerExecutionChain chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/"));
+		assertNotNull(chain);
 		assertNotNull(chain.getInterceptors());
 		assertEquals(ConversionServiceExposingInterceptor.class, chain.getInterceptors()[0].getClass());
+
+		chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/scoped"));
+		assertNotNull(chain);
+
+		chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/scopedProxy"));
+		assertNotNull(chain);
 	}
 
 	@Test
 	public void emptyViewControllerHandlerMapping() {
-
 		AbstractHandlerMapping handlerMapping = this.wac.getBean(
 				"viewControllerHandlerMapping", AbstractHandlerMapping.class);
 
@@ -101,7 +109,6 @@ public class WebMvcConfigurationSupportTests {
 
 	@Test
 	public void beanNameHandlerMapping() throws Exception {
-
 		BeanNameUrlHandlerMapping handlerMapping = this.wac.getBean(BeanNameUrlHandlerMapping.class);
 		assertEquals(2, handlerMapping.getOrder());
 
@@ -115,7 +122,6 @@ public class WebMvcConfigurationSupportTests {
 
 	@Test
 	public void emptyResourceHandlerMapping() {
-
 		AbstractHandlerMapping handlerMapping = this.wac.getBean(
 				"resourceHandlerMapping", AbstractHandlerMapping.class);
 
@@ -126,7 +132,6 @@ public class WebMvcConfigurationSupportTests {
 
 	@Test
 	public void emptyDefaultServletHandlerMapping() {
-
 		AbstractHandlerMapping handlerMapping = this.wac.getBean(
 				"defaultServletHandlerMapping", AbstractHandlerMapping.class);
 
@@ -137,9 +142,7 @@ public class WebMvcConfigurationSupportTests {
 
 	@Test
 	public void requestMappingHandlerAdapter() throws Exception {
-
 		RequestMappingHandlerAdapter adapter = this.wac.getBean(RequestMappingHandlerAdapter.class);
-
 		assertEquals(9, adapter.getMessageConverters().size());
 
 		ConfigurableWebBindingInitializer initializer = (ConfigurableWebBindingInitializer) adapter.getWebBindingInitializer();
@@ -156,7 +159,6 @@ public class WebMvcConfigurationSupportTests {
 
 	@Test
 	public void uriComponentsContributor() throws Exception {
-
 		CompositeUriComponentsContributor uriComponentsContributor = this.wac.getBean(
 				MvcUriComponentsBuilder.MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME,
 				CompositeUriComponentsContributor.class);
@@ -166,7 +168,6 @@ public class WebMvcConfigurationSupportTests {
 
 	@Test
 	public void handlerExceptionResolver() throws Exception {
-
 		HandlerExceptionResolverComposite compositeResolver =
 			this.wac.getBean("handlerExceptionResolver", HandlerExceptionResolverComposite.class);
 
@@ -187,14 +188,15 @@ public class WebMvcConfigurationSupportTests {
 	@Configuration
 	public static class TestConfig {
 
-		@Bean(name={"/testController"})
+		@Bean(name="/testController")
 		public TestController testController() {
 			return new TestController();
 		}
 	}
 
+
 	@Controller
-	private static class TestController {
+	public static class TestController {
 
 		@RequestMapping("/")
 		public void handle() {
@@ -204,6 +206,26 @@ public class WebMvcConfigurationSupportTests {
 		public HttpEntity<Void> methodWithTwoPathVariables(@PathVariable Integer id,
 				@DateTimeFormat(iso = ISO.DATE) @PathVariable DateTime date) {
 			return null;
+		}
+	}
+
+
+	@Controller
+	@Scope("prototype")
+	public static class ScopedController {
+
+		@RequestMapping("/scoped")
+		public void handle() {
+		}
+	}
+
+
+	@Controller
+	@Scope(value="prototype", proxyMode=ScopedProxyMode.TARGET_CLASS)
+	public static class ScopedProxyController {
+
+		@RequestMapping("/scopedProxy")
+		public void handle() {
 		}
 	}
 

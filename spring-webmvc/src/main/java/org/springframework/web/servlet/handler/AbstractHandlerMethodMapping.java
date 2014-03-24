@@ -51,9 +51,23 @@ import org.springframework.web.servlet.HandlerMapping;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMapping implements InitializingBean {
+
+	/**
+	 * Bean name prefix for target beans behind scoped proxies. Used to exclude those
+	 * targets from handler method detection, in favor of the corresponding proxies.
+	 * <p>We're not checking the autowire-candidate status here, which is how the
+	 * proxy target filtering problem is being handled at the autowiring level,
+	 * since autowire-candidate may have been turned to {@code false} for other
+	 * reasons, while still expecting the bean to be eligible for handler methods.
+	 * <p>Originally defined in {@link org.springframework.aop.scope.ScopedProxyUtils}
+	 * but duplicated here to avoid a hard dependency on the spring-aop module.
+	 */
+	private static final String SCOPED_TARGET_NAME_PREFIX = "scopedTarget.";
+
 
 	private boolean detectHandlerMethodsInAncestorContexts = false;
 
@@ -105,7 +119,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				getApplicationContext().getBeanNamesForType(Object.class));
 
 		for (String beanName : beanNames) {
-			if (isHandler(getApplicationContext().getType(beanName))){
+			if (!beanName.startsWith(SCOPED_TARGET_NAME_PREFIX) &&
+					isHandler(getApplicationContext().getType(beanName))){
 				detectHandlerMethods(beanName);
 			}
 		}
@@ -127,7 +142,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		Class<?> handlerType =
 				(handler instanceof String ? getApplicationContext().getType((String) handler) : handler.getClass());
 
-		// Avoid repeated calls to getMappingForMethod which would rebuild RequestMatchingInfo instances
+		// Avoid repeated calls to getMappingForMethod which would rebuild RequestMappingInfo instances
 		final Map<Method, T> mappings = new IdentityHashMap<Method, T>();
 		final Class<?> userType = ClassUtils.getUserClass(handlerType);
 
