@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.web.servlet;
+package org.springframework.test.web.servlet.samples.spr;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -29,6 +29,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -49,7 +50,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration
-public class Spr10093Tests {
+public class HttpOptionsTests {
 
 	@Autowired
 	private WebApplicationContext wac;

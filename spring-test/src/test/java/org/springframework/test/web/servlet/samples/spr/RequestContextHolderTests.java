@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.web.servlet;
+package org.springframework.test.web.servlet.samples.spr;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +28,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.WebApplicationContext;
@@ -42,14 +43,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 /**
- * Test for SPR-10025.
+ * Test for SPR-10025 (access to request attributes via RequestContextHolder).
  *
  * @author Rossen Stoyanchev
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration
-public class Spr10025Tests {
+public class RequestContextHolderTests {
 
 	@Autowired
 	private WebApplicationContext wac;

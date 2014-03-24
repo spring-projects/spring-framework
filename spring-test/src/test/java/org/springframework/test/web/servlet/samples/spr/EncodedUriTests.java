@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.web.servlet;
+package org.springframework.test.web.servlet.samples.spr;
 
 
 import org.junit.Before;
@@ -31,6 +31,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,14 +53,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 /**
- * Tests for SPR-11441 (MockMvc needs to accept prepared URI with encoded URI path variables).
+ * Tests for SPR-11441 (MockMvc accepts an already encoded URI).
  *
  * @author Sebastien Deleuze
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration
-public class Spr11441Tests {
+public class EncodedUriTests {
 
 	@Autowired
 	private WebApplicationContext wac;
