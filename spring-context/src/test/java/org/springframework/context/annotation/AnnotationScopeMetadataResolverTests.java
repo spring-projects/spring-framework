@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.context.annotation;
 
+import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -27,6 +28,9 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 
 import static org.junit.Assert.*;
 
@@ -85,8 +89,30 @@ public final class AnnotationScopeMetadataResolverTests {
 	}
 
 	@Test
+	public void testCustomRequestScopeViaAsm() throws IOException {
+		MetadataReaderFactory readerFactory = new SimpleMetadataReaderFactory();
+		MetadataReader reader = readerFactory.getMetadataReader(AnnotatedWithCustomRequestScope.class.getName());
+		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(reader.getAnnotationMetadata());
+		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(bd);
+		assertNotNull("resolveScopeMetadata(..) must *never* return null.", scopeMetadata);
+		assertEquals("request", scopeMetadata.getScopeName());
+		assertEquals(ScopedProxyMode.NO, scopeMetadata.getScopedProxyMode());
+	}
+
+	@Test
 	public void testCustomRequestScopeWithAttribute() {
 		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(AnnotatedWithCustomRequestScopeWithAttribute.class);
+		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(bd);
+		assertNotNull("resolveScopeMetadata(..) must *never* return null.", scopeMetadata);
+		assertEquals("request", scopeMetadata.getScopeName());
+		assertEquals(ScopedProxyMode.TARGET_CLASS, scopeMetadata.getScopedProxyMode());
+	}
+
+	@Test
+	public void testCustomRequestScopeWithAttributeViaAsm() throws IOException {
+		MetadataReaderFactory readerFactory = new SimpleMetadataReaderFactory();
+		MetadataReader reader = readerFactory.getMetadataReader(AnnotatedWithCustomRequestScopeWithAttribute.class.getName());
+		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(reader.getAnnotationMetadata());
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(bd);
 		assertNotNull("resolveScopeMetadata(..) must *never* return null.", scopeMetadata);
 		assertEquals("request", scopeMetadata.getScopeName());
