@@ -59,6 +59,13 @@ public class DelegatingWebSocketMessageBrokerConfiguration extends WebSocketMess
 	}
 
 	@Override
+	protected void configureWebSocketTransport(WebSocketTransportRegistration registration) {
+		for (WebSocketMessageBrokerConfigurer c : this.configurers) {
+			c.configureWebSocketTransport(registration);
+		}
+	}
+
+	@Override
 	protected void configureClientInboundChannel(ChannelRegistration registration) {
 		for (WebSocketMessageBrokerConfigurer c : this.configurers) {
 			c.configureClientInboundChannel(registration);

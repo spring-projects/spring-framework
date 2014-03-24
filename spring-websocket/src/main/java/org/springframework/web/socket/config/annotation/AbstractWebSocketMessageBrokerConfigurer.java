@@ -33,7 +33,7 @@ public abstract class AbstractWebSocketMessageBrokerConfigurer implements WebSoc
 
 
 	@Override
-	public void configureWebSocketTransport(WebSocketTransportRegistration registry) {
+	public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
 	}
 
 	@Override

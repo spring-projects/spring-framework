@@ -124,11 +124,8 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		beanName = registerBeanDef(beanDef, parserCxt, source);
 		RuntimeBeanReference userSessionRegistry = new RuntimeBeanReference(beanName);
 
-		String frameBufferSizeAttribute = element.getAttribute("message-buffer-size");
-		Integer messageBufferSizeLimit = frameBufferSizeAttribute.isEmpty() ? null : Integer.parseInt(frameBufferSizeAttribute);
-
 		RuntimeBeanReference subProtocolWsHandler = registerSubProtocolWebSocketHandler(
-				clientInChannel, clientOutChannel, userSessionRegistry, messageBufferSizeLimit, parserCxt, source);
+				element, clientInChannel, clientOutChannel, userSessionRegistry, parserCxt, source);
 
 		for(Element stompEndpointElem : DomUtils.getChildElementsByTagName(element, "stomp-endpoint")) {
 
@@ -229,16 +226,12 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		return new RuntimeBeanReference(channelName);
 	}
 
-	private RuntimeBeanReference registerSubProtocolWebSocketHandler(
+	private RuntimeBeanReference registerSubProtocolWebSocketHandler(Element element,
 			RuntimeBeanReference clientInChannel, RuntimeBeanReference clientOutChannel,
-			RuntimeBeanReference userSessionRegistry, Integer messageBufferSizeLimit,
-			ParserContext parserCxt, Object source) {
+			RuntimeBeanReference userSessionRegistry, ParserContext parserCxt, Object source) {
 
 		RootBeanDefinition stompHandlerDef = new RootBeanDefinition(StompSubProtocolHandler.class);
 		stompHandlerDef.getPropertyValues().add("userSessionRegistry", userSessionRegistry);
-		if(messageBufferSizeLimit != null) {
-			stompHandlerDef.getPropertyValues().add("messageBufferSizeLimit", messageBufferSizeLimit);
-		}
 		registerBeanDef(stompHandlerDef, parserCxt, source);
 
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
@@ -248,6 +241,23 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		RootBeanDefinition subProtocolWshDef = new RootBeanDefinition(SubProtocolWebSocketHandler.class, cavs, null);
 		subProtocolWshDef.getPropertyValues().addPropertyValue("protocolHandlers", stompHandlerDef);
 		String subProtocolWshName = registerBeanDef(subProtocolWshDef, parserCxt, source);
+
+		Element transportElem = DomUtils.getChildElementByTagName(element, "transport");
+		if (transportElem != null) {
+			String messageSize = transportElem.getAttribute("message-size");
+			if (messageSize != null) {
+				stompHandlerDef.getPropertyValues().add("messageSizeLimit", messageSize);
+			}
+			String sendTimeLimit = transportElem.getAttribute("send-timeout");
+			if (sendTimeLimit != null) {
+				subProtocolWshDef.getPropertyValues().add("sendTimeLimit", sendTimeLimit);
+			}
+			String sendBufferSizeLimit = transportElem.getAttribute("send-buffer-size");
+			if (sendBufferSizeLimit != null) {
+				subProtocolWshDef.getPropertyValues().add("sendBufferSizeLimit", sendBufferSizeLimit);
+			}
+		}
+
 		return new RuntimeBeanReference(subProtocolWshName);
 	}
 

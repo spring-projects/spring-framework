@@ -24,13 +24,11 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -53,7 +51,8 @@ import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import static org.junit.Assert.*;
 
 /**
- * Test fixture for {@link org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurationSupport}.
+ * Test fixture for
+ * {@link org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurationSupport}.
  *
  * @author Rossen Stoyanchev
  */
@@ -109,14 +108,17 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 	}
 
 	@Test
-	public void maxFrameBufferSize() {
-		SubProtocolWebSocketHandler subProtocolWebSocketHandler = this.config.getBean("subProtocolWebSocketHandler", SubProtocolWebSocketHandler.class);
+	public void webSocketTransportOptions() {
+		SubProtocolWebSocketHandler subProtocolWebSocketHandler =
+				this.config.getBean("subProtocolWebSocketHandler", SubProtocolWebSocketHandler.class);
+
+		assertEquals(1024 * 1024, subProtocolWebSocketHandler.getSendBufferSizeLimit());
+		assertEquals(25 * 1000, subProtocolWebSocketHandler.getSendTimeLimit());
 
 		List<SubProtocolHandler> protocolHandlers = subProtocolWebSocketHandler.getProtocolHandlers();
 		for(SubProtocolHandler protocolHandler : protocolHandlers) {
 			assertTrue(protocolHandler instanceof StompSubProtocolHandler);
-			DirectFieldAccessor protocolHandlerFieldAccessor = new DirectFieldAccessor(protocolHandler);
-			assertEquals(123, protocolHandlerFieldAccessor.getPropertyValue("messageBufferSizeLimit"));
+			assertEquals(128 * 1024, ((StompSubProtocolHandler) protocolHandler).getMessageSizeLimit());
 		}
 	}
 
@@ -150,10 +152,11 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		}
 
 		@Override
-		public void configureMessageBroker(MessageBrokerRegistry registry) {
-			registry.setMessageBufferSizeLimit(123);
+		public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
+			registration.setMessageSizeLimit(128 * 1024);
+			registration.setSendTimeLimit(25 * 1000);
+			registration.setSendBufferSizeLimit(1024 * 1024);
 		}
-
 	}
 
 	@Configuration

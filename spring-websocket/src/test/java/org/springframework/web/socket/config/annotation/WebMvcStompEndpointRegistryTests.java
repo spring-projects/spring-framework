@@ -23,7 +23,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import org.springframework.messaging.SubscribableChannel;
-import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.user.DefaultUserSessionRegistry;
 import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.scheduling.TaskScheduler;
@@ -47,19 +46,18 @@ public class WebMvcStompEndpointRegistryTests {
 
 	private UserSessionRegistry userSessionRegistry;
 
-	private MessageBrokerRegistry messageBrokerRegistry;
-
 
 	@Before
 	public void setup() {
+
 		SubscribableChannel inChannel = Mockito.mock(SubscribableChannel.class);
 		SubscribableChannel outChannel = Mockito.mock(SubscribableChannel.class);
+
 		this.webSocketHandler = new SubProtocolWebSocketHandler(inChannel, outChannel);
 		this.userSessionRegistry = new DefaultUserSessionRegistry();
-		this.messageBrokerRegistry = new MessageBrokerRegistry(inChannel, outChannel);
-		TaskScheduler taskScheduler = Mockito.mock(TaskScheduler.class);
-		this.registry = new WebMvcStompEndpointRegistry(webSocketHandler, transportRegistration, userSessionRegistry,
-				taskScheduler, messageBrokerRegistry);
+
+		this.registry = new WebMvcStompEndpointRegistry(this.webSocketHandler,
+				new WebSocketTransportRegistration(), this.userSessionRegistry, Mockito.mock(TaskScheduler.class));
 	}
 
 

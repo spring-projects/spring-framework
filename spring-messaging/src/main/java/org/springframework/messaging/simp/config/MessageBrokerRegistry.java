@@ -47,8 +47,6 @@ public class MessageBrokerRegistry {
 
 	private ChannelRegistration brokerChannelRegistration = new ChannelRegistration();
 
-	private Integer messageBufferSizeLimit;
-
 
 	public MessageBrokerRegistry(SubscribableChannel clientInboundChannel, MessageChannel clientOutboundChannel) {
 		Assert.notNull(clientInboundChannel);
@@ -119,23 +117,6 @@ public class MessageBrokerRegistry {
 	 */
 	public ChannelRegistration configureBrokerChannel() {
 		return this.brokerChannelRegistration;
-	}
-
-	/**
-	 * Configure the message buffer size limit in bytes.
-	 * @since 4.0.3
-	 */
-	public MessageBrokerRegistry setMessageBufferSizeLimit(Integer messageBufferSizeLimit) {
-		this.messageBufferSizeLimit = messageBufferSizeLimit;
-		return this;
-	}
-
-	/**
-	 * Get the message buffer size limit in bytes.
-	 * @since 4.0.3
-	 */
-	public Integer getMessageBufferSizeLimit() {
-		return this.messageBufferSizeLimit;
 	}
 
 	protected SimpleBrokerMessageHandler getSimpleBroker(SubscribableChannel brokerChannel) {

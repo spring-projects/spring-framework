@@ -34,7 +34,6 @@ import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.stomp.BufferingStompDecoder;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompConversionException;
-import org.springframework.messaging.simp.stomp.StompDecoder;
 import org.springframework.messaging.simp.stomp.StompEncoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.simp.user.DestinationUserNameProvider;
@@ -69,7 +68,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 	private static final Log logger = LogFactory.getLog(StompSubProtocolHandler.class);
 
 
-	private int messageBufferSizeLimit = 64 * 1024;
+	private int messageSizeLimit = 64 * 1024;
 
 	private final Map<String, BufferingStompDecoder> decoders = new ConcurrentHashMap<String, BufferingStompDecoder>();
 
@@ -79,20 +78,17 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 
 
 	/**
-	 * Configure the maximum size of the buffer used when a STOMP message has been
-	 * split over multiple WebSocket messages.
-	 *
-	 * <p>While the STOMP spec version 1.2 (current as of 4.0.3) does not discuss
-	 * STOMP over WebSocket explicitly, a number of clients already split messages
-	 * around 16K boundaries. Therefore partial content must be buffered before a
-	 * full message can be assembled.
+	 * Configure the maximum size allowed for an incoming STOMP message.
+	 * Since a STOMP message can be received in multiple WebSocket messages,
+	 * buffering may be required and therefore it is necessary to know the maximum
+	 * allowed message size.
 	 *
 	 * <p>By default this property is set to 64K.
 	 *
 	 * @since 4.0.3
 	 */
-	public void setMessageBufferSizeLimit(int messageBufferSizeLimit) {
-		this.messageBufferSizeLimit = messageBufferSizeLimit;
+	public void setMessageSizeLimit(int messageSizeLimit) {
+		this.messageSizeLimit = messageSizeLimit;
 	}
 
 	/**
@@ -100,8 +96,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 	 *
 	 * @since 4.0.3
 	 */
-	public int getMessageBufferSizeLimit() {
-		return this.messageBufferSizeLimit;
+	public int getMessageSizeLimit() {
+		return this.messageSizeLimit;
 	}
 
 	/**
@@ -316,7 +312,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 
 	@Override
 	public void afterSessionStarted(WebSocketSession session, MessageChannel outputChannel) {
-		this.decoders.put(session.getId(), new BufferingStompDecoder(getMessageBufferSizeLimit()));
+		this.decoders.put(session.getId(), new BufferingStompDecoder(getMessageSizeLimit()));
 	}
 
 	@Override

@@ -51,10 +51,9 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 		UserSessionRegistry sessionRegistry = userSessionRegistry();
 		WebSocketTransportRegistration transportRegistration = getTransportRegistration();
 		ThreadPoolTaskScheduler taskScheduler = messageBrokerSockJsTaskScheduler();
-		MessageBrokerRegistry brokerRegistry = getBrokerRegistry();
 
 		WebMvcStompEndpointRegistry registry = new WebMvcStompEndpointRegistry(
-				webSocketHandler, transportRegistration, sessionRegistry, taskScheduler, brokerRegistry);
+				webSocketHandler, transportRegistration, sessionRegistry, taskScheduler);
 
 		registerStompEndpoints(registry);
 

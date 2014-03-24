@@ -4,15 +4,22 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
 
-    <websocket:message-broker application-destination-prefix="/app" user-destination-prefix="/personal" message-buffer-size="123">
+    <websocket:message-broker application-destination-prefix="/app" user-destination-prefix="/personal">
+
+        <!-- message-size=128*1024, send-buffer-size=1024*1024 -->
+        <websocket:transport message-size="131072" send-timeout="25000" send-buffer-size="1048576" />
+
         <websocket:stomp-endpoint path=" /foo,/bar">
             <websocket:handshake-handler ref="myHandler"/>
         </websocket:stomp-endpoint>
+
         <websocket:stomp-endpoint path="/test,/sockjs">
             <websocket:handshake-handler ref="myHandler"/>
             <websocket:sockjs/>
         </websocket:stomp-endpoint>
+
         <websocket:simple-broker prefix="/topic, /queue"/>
+
     </websocket:message-broker>
 
     <bean id="myHandler" class="org.springframework.web.socket.config.TestHandshakeHandler"/>

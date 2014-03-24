@@ -24,7 +24,7 @@ package org.springframework.web.socket.config.annotation;
  */
 public class WebSocketTransportRegistration {
 
-	private Integer messageBufferSizeLimit;
+	private Integer messageSizeLimit;
 
 	private Integer sendTimeLimit;
 
@@ -32,9 +32,9 @@ public class WebSocketTransportRegistration {
 
 
 	/**
-	 * Configure the maximum size of the buffer to use when an incoming message
-	 * for a sub-protocol (e.g. STOMP) has been split into multiple WebSocket
-	 * messages or multiple HTTP POSTs when SockJS fallback options are in use.
+	 * Configure the maximum size for an incoming sub-protocol message.
+	 * For example a STOMP message may be received as multiple WebSocket messages
+	 * or multiple HTTP POST requests when SockJS fallback options are in use.
 	 *
 	 * <p>In theory a WebSocket message can be almost unlimited in size.
 	 * In practice WebSocket servers impose limits on incoming message size.
@@ -50,16 +50,16 @@ public class WebSocketTransportRegistration {
 	 * Version 2 of the spec will but in the mean time existing client libraries
 	 * have already established a practice that servers must handle.
 	 */
-	public WebSocketTransportRegistration setMessageBufferSizeLimit(int bufferSizeLimit) {
-		this.messageBufferSizeLimit = bufferSizeLimit;
+	public WebSocketTransportRegistration setMessageSizeLimit(int messageSizeLimit) {
+		this.messageSizeLimit = messageSizeLimit;
 		return this;
 	}
 
 	/**
 	 * Protected accessor for internal use.
 	 */
-	protected Integer getMessageBufferSizeLimit() {
-		return this.messageBufferSizeLimit;
+	protected Integer getMessageSizeLimit() {
+		return this.messageSizeLimit;
 	}
 
 	/**

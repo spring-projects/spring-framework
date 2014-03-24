@@ -109,13 +109,13 @@ public class MessageBrokerBeanDefinitionParserTests {
 
 		SubProtocolWebSocketHandler subProtocolWsHandler = (SubProtocolWebSocketHandler) wsHandler;
 		assertEquals(Arrays.asList("v10.stomp", "v11.stomp", "v12.stomp"), subProtocolWsHandler.getSubProtocols());
+		assertEquals(25 * 1000, subProtocolWsHandler.getSendTimeLimit());
+		assertEquals(1024 * 1024, subProtocolWsHandler.getSendBufferSizeLimit());
 
 		StompSubProtocolHandler stompHandler =
 				(StompSubProtocolHandler) subProtocolWsHandler.getProtocolHandlerMap().get("v12.stomp");
 		assertNotNull(stompHandler);
-
-		int messageBufferSizeLimit = (int)new  DirectFieldAccessor(stompHandler).getPropertyValue("messageBufferSizeLimit");
-		assertEquals(123, messageBufferSizeLimit);
+		assertEquals(128 * 1024, stompHandler.getMessageSizeLimit());
 
 		httpRequestHandler = (HttpRequestHandler) suhm.getUrlMap().get("/test/**");
 		assertNotNull(httpRequestHandler);
