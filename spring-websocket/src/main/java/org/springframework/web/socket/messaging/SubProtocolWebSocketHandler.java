@@ -78,7 +78,7 @@ public class SubProtocolWebSocketHandler
 
 	private int sendTimeLimit = 10 * 1000;
 
-	private int sendBufferSizeLimit = 64 * 1024;
+	private int sendBufferSizeLimit = 512 * 1024;
 
 	private Object lifecycleMonitor = new Object();
 

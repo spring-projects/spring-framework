@@ -18,6 +18,8 @@ package org.springframework.web.socket.config.annotation;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.simp.config.AbstractMessageBrokerConfiguration;
+import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
@@ -36,21 +38,43 @@ import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
  */
 public abstract class WebSocketMessageBrokerConfigurationSupport extends AbstractMessageBrokerConfiguration {
 
+	private WebSocketTransportRegistration transportRegistration;
+
+
 	protected WebSocketMessageBrokerConfigurationSupport() {
 	}
 
 	@Bean
 	public HandlerMapping stompWebSocketHandlerMapping() {
+
+		WebSocketHandler webSocketHandler = subProtocolWebSocketHandler();
+		UserSessionRegistry sessionRegistry = userSessionRegistry();
+		WebSocketTransportRegistration transportRegistration = getTransportRegistration();
+		ThreadPoolTaskScheduler taskScheduler = messageBrokerSockJsTaskScheduler();
+		MessageBrokerRegistry brokerRegistry = getBrokerRegistry();
+
 		WebMvcStompEndpointRegistry registry = new WebMvcStompEndpointRegistry(
-				subProtocolWebSocketHandler(), userSessionRegistry(),
-				messageBrokerSockJsTaskScheduler(), getBrokerRegistry());
+				webSocketHandler, transportRegistration, sessionRegistry, taskScheduler, brokerRegistry);
+
 		registerStompEndpoints(registry);
+
 		return registry.getHandlerMapping();
 	}
 
 	@Bean
 	public WebSocketHandler subProtocolWebSocketHandler() {
 		return new SubProtocolWebSocketHandler(clientInboundChannel(), clientOutboundChannel());
+	}
+
+	protected final WebSocketTransportRegistration getTransportRegistration() {
+		if (this.transportRegistration == null) {
+			this.transportRegistration = new WebSocketTransportRegistration();
+			configureWebSocketTransport(this.transportRegistration);
+		}
+		return this.transportRegistration;
+	}
+
+	protected void configureWebSocketTransport(WebSocketTransportRegistration registry) {
 	}
 
 	/**

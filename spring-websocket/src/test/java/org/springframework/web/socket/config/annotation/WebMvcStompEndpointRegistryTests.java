@@ -58,7 +58,7 @@ public class WebMvcStompEndpointRegistryTests {
 		this.userSessionRegistry = new DefaultUserSessionRegistry();
 		this.messageBrokerRegistry = new MessageBrokerRegistry(inChannel, outChannel);
 		TaskScheduler taskScheduler = Mockito.mock(TaskScheduler.class);
-		this.registry = new WebMvcStompEndpointRegistry(webSocketHandler, userSessionRegistry,
+		this.registry = new WebMvcStompEndpointRegistry(webSocketHandler, transportRegistration, userSessionRegistry,
 				taskScheduler, messageBrokerRegistry);
 	}
 

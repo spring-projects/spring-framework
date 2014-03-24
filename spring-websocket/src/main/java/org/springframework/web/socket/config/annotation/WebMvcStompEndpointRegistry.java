@@ -58,26 +58,40 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 
 
 	public WebMvcStompEndpointRegistry(WebSocketHandler webSocketHandler,
-			UserSessionRegistry userSessionRegistry, TaskScheduler defaultSockJsTaskScheduler,
-			MessageBrokerRegistry brokerRegistry) {
+			WebSocketTransportRegistration transportRegistration, UserSessionRegistry userSessionRegistry,
+			TaskScheduler defaultSockJsTaskScheduler, MessageBrokerRegistry brokerRegistry) {
 
-		Assert.notNull(webSocketHandler);
-		Assert.notNull(userSessionRegistry);
+		Assert.notNull(webSocketHandler, "'webSocketHandler' is required ");
+		Assert.notNull(transportRegistration, "'transportRegistration' is required");
+		Assert.notNull(userSessionRegistry, "'userSessionRegistry' is required");
 
 		this.webSocketHandler = webSocketHandler;
 		this.subProtocolWebSocketHandler = unwrapSubProtocolWebSocketHandler(webSocketHandler);
+
+		if (transportRegistration.getSendTimeLimit() != null) {
+			this.subProtocolWebSocketHandler.setSendTimeLimit(transportRegistration.getSendTimeLimit());
+		}
+		if (transportRegistration.getSendBufferSizeLimit() != null) {
+			this.subProtocolWebSocketHandler.setSendBufferSizeLimit(transportRegistration.getSendBufferSizeLimit());
+		}
+
 		this.stompHandler = new StompSubProtocolHandler();
 		this.stompHandler.setUserSessionRegistry(userSessionRegistry);
+
+		if (transportRegistration.getMessageBufferSizeLimit() != null) {
+			this.stompHandler.setMessageBufferSizeLimit(transportRegistration.getMessageBufferSizeLimit());
+		}
+
 		this.sockJsScheduler = defaultSockJsTaskScheduler;
+
 		if(brokerRegistry.getMessageBufferSizeLimit() != null) {
 			this.stompHandler.setMessageBufferSizeLimit(brokerRegistry.getMessageBufferSizeLimit());
 		}
 	}
 
-	private static SubProtocolWebSocketHandler unwrapSubProtocolWebSocketHandler(WebSocketHandler webSocketHandler) {
-		WebSocketHandler actual = WebSocketHandlerDecorator.unwrap(webSocketHandler);
-		Assert.isInstanceOf(SubProtocolWebSocketHandler.class, actual,
-						"No SubProtocolWebSocketHandler found: " + webSocketHandler);
+	private static SubProtocolWebSocketHandler unwrapSubProtocolWebSocketHandler(WebSocketHandler wsHandler) {
+		WebSocketHandler actual = WebSocketHandlerDecorator.unwrap(wsHandler);
+		Assert.isInstanceOf(SubProtocolWebSocketHandler.class, actual, "No SubProtocolWebSocketHandler in " + wsHandler);
 		return (SubProtocolWebSocketHandler) actual;
 	}
 
@@ -85,8 +99,8 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 	@Override
 	public StompWebSocketEndpointRegistration addEndpoint(String... paths) {
 		this.subProtocolWebSocketHandler.addProtocolHandler(this.stompHandler);
-		WebMvcStompWebSocketEndpointRegistration registration = new WebMvcStompWebSocketEndpointRegistration(
-				paths, this.webSocketHandler, this.sockJsScheduler);
+		WebMvcStompWebSocketEndpointRegistration registration =
+				new WebMvcStompWebSocketEndpointRegistration(paths, this.webSocketHandler, this.sockJsScheduler);
 		this.registrations.add(registration);
 		return registration;
 	}
