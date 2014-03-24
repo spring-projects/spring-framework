@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 
+import java.net.URI;
+
 /**
  * Static factory methods for {@link RequestBuilder}s.
  *
@@ -31,6 +33,7 @@ import org.springframework.test.web.servlet.RequestBuilder;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Greg Turnquist
+ * @author Sebastien Deleuze
  * @since 3.2
  */
 public abstract class MockMvcRequestBuilders {
@@ -107,6 +110,80 @@ public abstract class MockMvcRequestBuilders {
 	 */
 	public static MockMultipartHttpServletRequestBuilder fileUpload(String urlTemplate, Object... urlVariables) {
 		return new MockMultipartHttpServletRequestBuilder(urlTemplate, urlVariables);
+	}
+
+
+	/**
+	 * Create a {@link MockHttpServletRequestBuilder} for a GET request.
+	 * @param url the URL
+	 * @since 4.0.3
+	 */
+	public static MockHttpServletRequestBuilder get(URI url) {
+		return new MockHttpServletRequestBuilder(HttpMethod.GET, url);
+	}
+
+	/**
+	 * Create a {@link MockHttpServletRequestBuilder} for a POST request.
+	 * @param url the URL
+	 * @since 4.0.3
+	 */
+	public static MockHttpServletRequestBuilder post(URI url) {
+		return new MockHttpServletRequestBuilder(HttpMethod.POST, url);
+	}
+
+	/**
+	 * Create a {@link MockHttpServletRequestBuilder} for a PUT request.
+	 * @param url the URL
+	 * @since 4.0.3
+	 */
+	public static MockHttpServletRequestBuilder put(URI url) {
+		return new MockHttpServletRequestBuilder(HttpMethod.PUT, url);
+	}
+
+	/**
+	 * Create a {@link MockHttpServletRequestBuilder} for a PATCH request.
+	 * @param url the URL
+	 * @since 4.0.3
+	 */
+	public static MockHttpServletRequestBuilder patch(URI url) {
+		return new MockHttpServletRequestBuilder(HttpMethod.PATCH, url);
+	}
+
+	/**
+	 * Create a {@link MockHttpServletRequestBuilder} for a DELETE request.
+	 * @param url the URL
+	 * @since 4.0.3
+	 */
+	public static MockHttpServletRequestBuilder delete(URI url) {
+		return new MockHttpServletRequestBuilder(HttpMethod.DELETE, url);
+	}
+
+	/**
+	 * Create a {@link MockHttpServletRequestBuilder} for an OPTIONS request.
+	 * @param url the URL
+	 * @since 4.0.3
+	 */
+	public static MockHttpServletRequestBuilder options(URI url) {
+		return new MockHttpServletRequestBuilder(HttpMethod.OPTIONS, url);
+	}
+
+	/**
+	 * Create a {@link MockHttpServletRequestBuilder} for a request with the given HTTP method.
+	 * @param httpMethod the HTTP method (GET, POST, etc)
+	 * @param url the URL
+	 * @since 4.0.3
+	 */
+	public static MockHttpServletRequestBuilder request(HttpMethod httpMethod, URI url) {
+		return new MockHttpServletRequestBuilder(httpMethod, url);
+	}
+
+	/**
+	 * Create a {@link MockHttpServletRequestBuilder} for a multipart request.
+	 * @param url the URL
+	 * @since 4.0.3
+	 */
+	public static MockMultipartHttpServletRequestBuilder fileUpload(URI url) {
+		return new MockMultipartHttpServletRequestBuilder(url);
 	}
 
 	/**

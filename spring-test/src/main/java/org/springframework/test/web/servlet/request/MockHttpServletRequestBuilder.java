@@ -17,6 +17,7 @@
 package org.springframework.test.web.servlet.request;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -114,6 +115,7 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	 * <p>Although this class cannot be extended, additional ways to initialize
 	 * the {@code MockHttpServletRequest} can be plugged in via
 	 * {@link #with(RequestPostProcessor)}.
+	 * @param httpMethod the HTTP method (GET, POST, etc)
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
 	 */
@@ -122,6 +124,23 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 		Assert.notNull(urlTemplate, "uriTemplate is required");
 		this.method = httpMethod;
 		this.uriComponents = UriComponentsBuilder.fromUriString(urlTemplate).buildAndExpand(urlVariables).encode();
+	}
+
+	/**
+	 * Package private constructor. To get an instance, use static factory
+	 * methods in {@link MockMvcRequestBuilders}.
+	 * <p>Although this class cannot be extended, additional ways to initialize
+	 * the {@code MockHttpServletRequest} can be plugged in via
+	 * {@link #with(RequestPostProcessor)}.
+	 * @param httpMethod the HTTP method (GET, POST, etc)
+	 * @param url the URL
+	 * @since 4.0.3
+	 */
+	MockHttpServletRequestBuilder(HttpMethod httpMethod, URI url) {
+		Assert.notNull(httpMethod, "httpMethod is required");
+		Assert.notNull(url, "url is required");
+		this.method = httpMethod;
+		this.uriComponents = UriComponentsBuilder.fromUri(url).build();
 	}
 
 	/**
