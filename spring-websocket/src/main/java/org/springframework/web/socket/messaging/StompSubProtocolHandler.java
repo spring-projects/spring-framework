@@ -79,7 +79,16 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 
 
 	/**
-	 * Set the message buffer size limit in bytes.
+	 * Configure the maximum size of the buffer used when a STOMP message has been
+	 * split over multiple WebSocket messages.
+	 *
+	 * <p>While the STOMP spec version 1.2 (current as of 4.0.3) does not discuss
+	 * STOMP over WebSocket explicitly, a number of clients already split messages
+	 * around 16K boundaries. Therefore partial content must be buffered before a
+	 * full message can be assembled.
+	 *
+	 * <p>By default this property is set to 64K.
+	 *
 	 * @since 4.0.3
 	 */
 	public void setMessageBufferSizeLimit(int messageBufferSizeLimit) {
@@ -87,7 +96,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 	}
 
 	/**
-	 * Get the message buffer size limit in bytes.
+	 * Get the configured message buffer size limit in bytes.
+	 *
 	 * @since 4.0.3
 	 */
 	public int getMessageBufferSizeLimit() {

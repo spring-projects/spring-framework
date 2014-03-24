@@ -23,7 +23,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
@@ -32,13 +31,17 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * An extension of {@link org.springframework.messaging.simp.stomp.StompDecoder}
- * that chunks any bytes remaining after a single full STOMP frame has been read.
- * The remaining bytes may contain more STOMP frames or an incomplete STOMP frame.
+ * that buffers content remaining in the input ByteBuffer after the parent
+ * class has read all (complete) STOMP frames from it. The remaining content
+ * represents an incomplete STOMP frame. When called repeatedly with additional
+ * data, the decode method returns one or more messages or, if there is not
+ * enough data still, continues to buffer.
  *
- * <p>Similarly if there is not enough content for a full STOMP frame, the content
- * is buffered until more input is received. That means the
- * {@link #decode(java.nio.ByteBuffer)} effectively never returns {@code null} as
- * the parent class does.
+ * <p>A single instance of this decoder can be invoked repeatedly to read all
+ * messages from a single stream (e.g. WebSocket session) as long as decoding
+ * does not fail. If there is an exception, StompDecoder instance should not
+ * be used any more as its internal state is not guaranteed to be consistent.
+ * It is expected that the underlying session is closed at that point.
  *
  * @author Rossen Stoyanchev
  * @since 4.0.3
@@ -58,10 +61,16 @@ public class BufferingStompDecoder extends StompDecoder {
 	}
 
 
+	/**
+	 * Return the configured buffer size limit.
+	 */
 	public int getBufferSizeLimit() {
 		return this.bufferSizeLimit;
 	}
 
+	/**
+	 * Calculate the current buffer size.
+	 */
 	public int getBufferSize() {
 		int size = 0;
 		for (ByteBuffer buffer : this.chunks) {
@@ -70,15 +79,36 @@ public class BufferingStompDecoder extends StompDecoder {
 		return size;
 	}
 
+	/**
+	 * Get the expected content length of the currently buffered, incomplete STOMP frame.
+	 */
 	public Integer getExpectedContentLength() {
 		return this.expectedContentLength;
 	}
 
 
+	/**
+	 * Decodes one or more STOMP frames from the given {@code ByteBuffer} into a
+	 * list of {@link Message}s.
+	 *
+	 * <p>If there was enough data to parse a "content-length" header, then the
+	 * value is used to determine how much more data is needed before a new
+	 * attempt to decode is made.
+	 *
+	 * <p>If there was not enough data to parse the "content-length", or if there
+	 * is "content-length" header, every subsequent call to decode attempts to
+	 * parse again with all available data. Therefore the presence of a "content-length"
+	 * header helps to optimize the decoding of large messages.
+	 *
+	 * @param newBuffer a buffer containing new data to decode
+	 *
+	 * @return decoded messages or an empty list
+	 * @throws StompConversionException raised in case of decoding issues
+	 */
 	@Override
-	public List<Message<byte[]>> decode(ByteBuffer newData) {
+	public List<Message<byte[]>> decode(ByteBuffer newBuffer) {
 
-		this.chunks.add(newData);
+		this.chunks.add(newBuffer);
 
 		checkBufferLimits();
 
@@ -86,13 +116,13 @@ public class BufferingStompDecoder extends StompDecoder {
 			return Collections.<Message<byte[]>>emptyList();
 		}
 
-		ByteBuffer buffer = assembleChunksAndReset();
+		ByteBuffer bufferToDecode = assembleChunksAndReset();
 
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		List<Message<byte[]>> messages = decode(buffer, headers);
+		List<Message<byte[]>> messages = decode(bufferToDecode, headers);
 
-		if (buffer.hasRemaining()) {
-			this.chunks.add(buffer);
+		if (bufferToDecode.hasRemaining()) {
+			this.chunks.add(bufferToDecode);
 			this.expectedContentLength = getContentLength(headers);
 		}
 

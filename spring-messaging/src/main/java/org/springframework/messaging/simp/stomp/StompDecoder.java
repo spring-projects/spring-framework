@@ -28,14 +28,18 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Decodes one or more STOMP frames from a {@link ByteBuffer}. If the buffer
- * contains any additional (incomplete) data, or perhaps not enough data to
- * form even one Message, the the buffer is reset and the value returned is
- * an empty list indicating that no more message can be read.
+ * Decodes one or more STOMP frames contained in a {@link ByteBuffer}.
+ *
+ * <p>An attempt is made to read all complete STOMP frames from the buffer, which
+ * could be zero, one, or more. If there is any left-over content, i.e. an incomplete
+ * STOMP frame, at the end the buffer is reset to point to the beginning of the
+ * partial content. The caller is then responsible for dealing with that
+ * incomplete content by buffering until there is more input available.
  *
  * @author Andy Wilkinson
  * @author Rossen Stoyanchev
@@ -52,10 +56,8 @@ public class StompDecoder {
 
 
 	/**
-	 * Decodes one or more STOMP frames from the given {@code buffer} into a
-	 * list of {@link Message}s.
-	 *
-	 * <p>If the given ByteBuffer contains partial STOMP frame content, or additional
+	 * Decodes one or more STOMP frames from the given {@code ByteBuffer} into a
+	 * list of {@link Message}s. If the input buffer contains any incplcontains partial STOMP frame content, or additional
 	 * content with a partial STOMP frame, the buffer is reset and {@code null} is
 	 * returned.
 	 *
@@ -68,27 +70,37 @@ public class StompDecoder {
 	}
 
 	/**
-	 * Decodes one or more STOMP frames from the given {@code buffer} into a
-	 * list of {@link Message}s.
+	 * Decodes one or more STOMP frames from the given {@code buffer} and returns
+	 * a list of {@link Message}s.
 	 *
-	 * <p>If the given ByteBuffer contains partial STOMP frame content, or additional
-	 * content with a partial STOMP frame, the buffer is reset and {@code null} is
-	 * returned.
+	 * <p>If the given ByteBuffer contains only partial STOMP frame content and no
+	 * complete STOMP frames, an empty list is returned, and the buffer is reset to
+	 * to where it was.
+	 *
+	 * <p>If the buffer contains one ore more STOMP frames, those are returned and
+	 * the buffer reset to point to the beginning of the unused partial content.
+	 *
+	 * <p>The input headers map is used to store successfully parsed headers and
+	 * is cleared after ever successfully read message. So when partial content is
+	 * read the caller can check if a "content-length" header was read, which helps
+	 * to determine how much more content is needed before the next STOMP frame
+	 * can be decoded.
 	 *
 	 * @param buffer The buffer to decode the STOMP frame from
-	 * @param headers an empty map that will be filled with the successfully parsed
-	 * 	headers of the last decoded message, or the last attempt at decoding an
-	 *  (incomplete) STOMP frame. This can be useful for detecting 'content-length'.
+	 * @param headers an empty map that will contain successfully parsed headers
+	 * in cases where the partial buffer ended with a partial STOMP frame
 	 *
-	 * @return the decoded messages or an empty list
+	 * @return decoded messages or an empty list
+	 * @throws StompConversionException raised in case of decoding issues
 	 */
 	public List<Message<byte[]>> decode(ByteBuffer buffer, MultiValueMap<String, String> headers) {
+		Assert.notNull(headers, "headers is required");
 		List<Message<byte[]>> messages = new ArrayList<Message<byte[]>>();
 		while (buffer.hasRemaining()) {
-			headers.clear();
 			Message<byte[]> m = decodeMessage(buffer, headers);
 			if (m != null) {
 				messages.add(m);
+				headers.clear();
 			}
 			else {
 				break;
