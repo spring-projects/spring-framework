@@ -37355,25 +37355,26 @@ be cached. For details on how to enable it see the
 https://github.com/sockjs/sockjs-client[SockJS client] page.
 ====
 
-[[websocket-fallback-cors]]
-==== SockJS and CORS
+[[websocket-fallback-sockjs-heartbeat]]
+==== Heartbeat Support in SockJS
 
-The SockJS protocol uses CORS for cross-domain support in the XHR streaming and
-XHR polling transports. CORS headers are automatically added to SockJS requests
-for transports that require it as well as for the initial `"/info"` request.
+The SockJS protocol requires servers to send heartbeat messages to preclude proxies
+from concluding a connection is hung. The Spring SockJS configuiration has a property
+called `heartbeatTime` that can be used to customize the frequency. By default a
+heartbeat is sent after 25 seconds assuming no other messages were sent on that
+connection. This 25 seconds value is in line with the following
+http://tools.ietf.org/html/rfc6202[IETF recommendation] for public Internet applications.
 
-Spring's `SockJsServce` implementation checks for the presence of the CORS
-`"Access-Control-Allow-Origin"` header in the response. If present, no new CORS
-headers are added, essentially assuming that CORS support is configured
-centrally, e.g. through a Servlet Filter. Otherwise the following are added:
+[NOTE]
+====
+When using STOMP over WebSocket/SockJS, if the STOMP client and server negotiate
+heartbeats to be exchanged, the SockJS heartbeats are disabled.
+====
 
-* `"Access-Control-Allow-Origin"` - intitialized from the value of the "origin" request header or "*".
-* `"Access-Control-Allow-Credentials"` - always set to `true`.
-* `"Access-Control-Request-Headers"` - initialized from values from the equivalent request header.
-* `"Access-Control-Allow-Methods"` - the HTTP methods a transport supports (see `TransportType` enum).
-* `"Access-Control-Max-Age"` - set to 31536000 (1 year).
-
-For the exact implementation, see `addCorsHeaders` in `AbstractSockJsService`.
+The Spring SockJS support also allows configuring the `TaskScheduler` to use
+for scheduling heartbeats tasks. The task scheduler is backed by a thread pool
+with default settings based on the number of available processors. Applications
+should consider customizing the settings according to their specific needs.
 
 [[websocket-fallback-sockjs-servlet3-async]]
 ==== SockJS and Servlet 3 Async Support
@@ -37402,6 +37403,26 @@ a more minimal message using the dedicated log category `DISCONNECTED_CLIENT_LOG
 defined in `AbstractSockJsSession`. If you need to see the stack traces, set that
 log category to TRACE.
 ====
+
+[[websocket-fallback-cors]]
+==== SockJS and CORS
+
+The SockJS protocol uses CORS for cross-domain support in the XHR streaming and
+XHR polling transports. CORS headers are automatically added to SockJS requests
+for transports that require it as well as for the initial `"/info"` request.
+
+Spring's `SockJsServce` implementation checks for the presence of the CORS
+`"Access-Control-Allow-Origin"` header in the response. If present, no new CORS
+headers are added, essentially assuming that CORS support is configured
+centrally, e.g. through a Servlet Filter. Otherwise the following are added:
+
+* `"Access-Control-Allow-Origin"` - intitialized from the value of the "origin" request header or "*".
+* `"Access-Control-Allow-Credentials"` - always set to `true`.
+* `"Access-Control-Request-Headers"` - initialized from values from the equivalent request header.
+* `"Access-Control-Allow-Methods"` - the HTTP methods a transport supports (see `TransportType` enum).
+* `"Access-Control-Max-Age"` - set to 31536000 (1 year).
+
+For the exact implementation, see `addCorsHeaders` in `AbstractSockJsService`.
 
 [[websocket-fallback-sockjs-explained]]
 ==== How SockJS Works
