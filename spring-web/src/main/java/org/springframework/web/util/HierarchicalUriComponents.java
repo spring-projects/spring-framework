@@ -180,7 +180,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		if (this.encoded) {
 			return this;
 		}
-		String encodedScheme = encodeUriComponent(this.getScheme(), encoding, Type.SCHEME);
+		String encodedScheme = encodeUriComponent(getScheme(), encoding, Type.SCHEME);
 		String encodedUserInfo = encodeUriComponent(this.userInfo, encoding, Type.USER_INFO);
 		String encodedHost = encodeUriComponent(this.host, encoding, getHostType());
 
@@ -245,6 +245,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		return (this.host != null && this.host.startsWith("[")) ? Type.HOST_IPV6 : Type.HOST_IPV4;
 	}
 
+
 	// verifying
 
 	/**
@@ -257,8 +258,8 @@ final class HierarchicalUriComponents extends UriComponents {
 			return;
 		}
 		verifyUriComponent(getScheme(), Type.SCHEME);
-		verifyUriComponent(userInfo, Type.USER_INFO);
-		verifyUriComponent(host, getHostType());
+		verifyUriComponent(this.userInfo, Type.USER_INFO);
+		verifyUriComponent(this.host, getHostType());
 		this.path.verify();
 		for (Map.Entry<String, List<String>> entry : queryParams.entrySet()) {
 			verifyUriComponent(entry.getKey(), Type.QUERY_PARAM);
@@ -304,7 +305,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	@Override
 	protected HierarchicalUriComponents expandInternal(UriTemplateVariables uriVariables) {
 		Assert.state(!this.encoded, "Cannot expand an already encoded UriComponents object");
-		String expandedScheme = expandUriComponent(this.getScheme(), uriVariables);
+		String expandedScheme = expandUriComponent(getScheme(), uriVariables);
 		String expandedUserInfo = expandUriComponent(this.userInfo, uriVariables);
 		String expandedHost = expandUriComponent(this.host, uriVariables);
 		PathComponent expandedPath = this.path.expand(uriVariables);

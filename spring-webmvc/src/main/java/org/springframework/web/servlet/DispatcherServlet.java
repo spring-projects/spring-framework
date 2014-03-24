@@ -272,11 +272,11 @@ public class DispatcherServlet extends FrameworkServlet {
 	/** Detect all ViewResolvers or just expect "viewResolver" bean? */
 	private boolean detectAllViewResolvers = true;
 
-	/** Perform cleanup of request attributes after include request? */
-	private boolean cleanupAfterInclude = true;
-
 	/** Throw a NoHandlerFoundException if no Handler was found to process this request? **/
 	private boolean throwExceptionIfNoHandlerFound = false;
+
+	/** Perform cleanup of request attributes after include request? */
+	private boolean cleanupAfterInclude = true;
 
 	/** MultipartResolver used by this servlet */
 	private MultipartResolver multipartResolver;
@@ -413,12 +413,11 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Set whether to throw a NoHandlerFoundException when no Handler was found for this request.
 	 * This exception can then be caught with a HandlerExceptionResolver or an
 	 * {@code @ExceptionHandler} controller method.
-	 * <p>Note that if
-	 * {@link org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler}
-	 * is used, then requests will always be forwarded to the default servlet and
-	 * a NoHandlerFoundException would never be thrown in that case.
-	 * <p>Default is "false", meaning the DispatcherServlet sends a NOT_FOUND error
-	 * through the Servlet response.
+	 * <p>Note that if {@link org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler}
+	 * is used, then requests will always be forwarded to the default servlet and a
+	 * NoHandlerFoundException would never be thrown in that case.
+	 * <p>Default is "false", meaning the DispatcherServlet sends a NOT_FOUND error through the
+	 * Servlet response.
 	 * @since 4.0
 	 */
 	public void setThrowExceptionIfNoHandlerFound(boolean throwExceptionIfNoHandlerFound) {
@@ -1111,10 +1110,10 @@ public class DispatcherServlet extends FrameworkServlet {
 			pageNotFoundLogger.warn("No mapping found for HTTP request with URI [" + getRequestUri(request) +
 					"] in DispatcherServlet with name '" + getServletName() + "'");
 		}
-		if (throwExceptionIfNoHandlerFound) {
-			ServletServerHttpRequest req = new ServletServerHttpRequest(request);
-			throw new NoHandlerFoundException(req.getMethod().name(),
-					req.getServletRequest().getRequestURI(),req.getHeaders());
+		if (this.throwExceptionIfNoHandlerFound) {
+			ServletServerHttpRequest sshr = new ServletServerHttpRequest(request);
+			throw new NoHandlerFoundException(
+					sshr.getMethod().name(), sshr.getServletRequest().getRequestURI(), sshr.getHeaders());
 		}
 		else {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
