@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,7 +176,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	 */
 	@Override
 	public HierarchicalUriComponents encode(String encoding) throws UnsupportedEncodingException {
-		Assert.hasLength(encoding, "'encoding' must not be empty");
+		Assert.hasLength(encoding, "Encoding must not be empty");
 		if (this.encoded) {
 			return this;
 		}
@@ -214,14 +214,14 @@ final class HierarchicalUriComponents extends UriComponents {
 		if (source == null) {
 			return null;
 		}
-		Assert.hasLength(encoding, "'encoding' must not be empty");
+		Assert.hasLength(encoding, "Encoding must not be empty");
 		byte[] bytes = encodeBytes(source.getBytes(encoding), type);
 		return new String(bytes, "US-ASCII");
 	}
 
 	private static byte[] encodeBytes(byte[] source, Type type) {
-		Assert.notNull(source, "'source' must not be null");
-		Assert.notNull(type, "'type' must not be null");
+		Assert.notNull(source, "Source must not be null");
+		Assert.notNull(type, "Type must not be null");
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(source.length);
 		for (byte b : source) {
 			if (b < 0) {
@@ -242,7 +242,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 	private Type getHostType() {
-		return ((this.host != null) && this.host.startsWith("[")) ? Type.HOST_IPV6 : Type.HOST_IPV4;
+		return (this.host != null && this.host.startsWith("[")) ? Type.HOST_IPV6 : Type.HOST_IPV4;
 	}
 
 	// verifying
