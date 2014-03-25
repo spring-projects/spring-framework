@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,7 +103,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 	 * @param cacheOperationSources must not be {@code null}
 	 */
 	public void setCacheOperationSources(CacheOperationSource... cacheOperationSources) {
-		Assert.notEmpty(cacheOperationSources);
+		Assert.notEmpty(cacheOperationSources, "At least 1 CacheOperationSource needs to be specified");
 		this.cacheOperationSource = (cacheOperationSources.length > 1 ?
 				new CompositeCacheOperationSource(cacheOperationSources) : cacheOperationSources[0]);
 	}
@@ -132,10 +132,10 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 	public void afterPropertiesSet() {
 		if (this.cacheManager == null) {
-			throw new IllegalStateException("'cacheManager' is required");
+			throw new IllegalStateException("Property 'cacheManager' is required");
 		}
 		if (this.cacheOperationSource == null) {
-			throw new IllegalStateException("The 'cacheOperationSources' property is required: " +
+			throw new IllegalStateException("Property 'cacheOperationSources' is required: " +
 					"If there are no cacheable methods, then don't use a cache aspect.");
 		}
 
