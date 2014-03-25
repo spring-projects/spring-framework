@@ -43,7 +43,7 @@ class MethodWriter extends MethodVisitor {
      * Pseudo access flag used to denote constructors.
      */
     static final int ACC_CONSTRUCTOR = 0x80000;
-    
+
     /**
      * Frame has exactly the same locals as the previous stack map frame and
      * number of stack items is zero.
@@ -1401,6 +1401,14 @@ class MethodWriter extends MethodVisitor {
 
     @Override
     public void visitMaxs(final int maxStack, final int maxLocals) {
+        if (resize) {
+            // replaces the temporary jump opcodes introduced by Label.resolve.
+            if (ClassReader.RESIZE) {
+                resizeInstructions();
+            } else {
+                throw new RuntimeException("Method code too large!");
+            }
+        }
         if (ClassReader.FRAMES && compute == FRAMES) {
             // completes the control flow graph with exception handler blocks
             Handler handler = firstHandler;
@@ -2021,14 +2029,6 @@ class MethodWriter extends MethodVisitor {
     final int getSize() {
         if (classReaderOffset != 0) {
             return 6 + classReaderLength;
-        }
-        if (resize) {
-            // replaces the temporary jump opcodes introduced by Label.resolve.
-            if (ClassReader.RESIZE) {
-                resizeInstructions();
-            } else {
-                throw new RuntimeException("Method code too large!");
-            }
         }
         int size = 8;
         if (code.length > 0) {
@@ -2686,49 +2686,50 @@ class MethodWriter extends MethodVisitor {
             }
         }
 
-        // recomputes the stack map frames
-        if (frameCount > 0) {
-            if (compute == FRAMES) {
-                frameCount = 0;
-                stackMap = null;
-                previousFrame = null;
-                frame = null;
-                Frame f = new Frame();
-                f.owner = labels;
-                Type[] args = Type.getArgumentTypes(descriptor);
-                f.initInputFrame(cw, access, args, maxLocals);
-                visitFrame(f);
-                Label l = labels;
-                while (l != null) {
-                    /*
-                     * here we need the original label position. getNewOffset
-                     * must therefore never have been called for this label.
-                     */
-                    u = l.position - 3;
-                    if ((l.status & Label.STORE) != 0 || (u >= 0 && resize[u])) {
-                        getNewOffset(allIndexes, allSizes, l);
-                        // TODO update offsets in UNINITIALIZED values
-                        visitFrame(l.frame);
-                    }
-                    l = l.successor;
-                }
-            } else {
+        // updates the stack map frame labels
+        if (compute == FRAMES) {
+            Label l = labels;
+            while (l != null) {
                 /*
-                 * Resizing an existing stack map frame table is really hard.
-                 * Not only the table must be parsed to update the offets, but
-                 * new frames may be needed for jump instructions that were
-                 * inserted by this method. And updating the offsets or
-                 * inserting frames can change the format of the following
-                 * frames, in case of packed frames. In practice the whole table
-                 * must be recomputed. For this the frames are marked as
-                 * potentially invalid. This will cause the whole class to be
-                 * reread and rewritten with the COMPUTE_FRAMES option (see the
-                 * ClassWriter.toByteArray method). This is not very efficient
-                 * but is much easier and requires much less code than any other
-                 * method I can think of.
+                 * Detects the labels that are just after an IF instruction that
+                 * has been resized with the IFNOT GOTO_W pattern. These labels
+                 * are now the target of a jump instruction (the IFNOT
+                 * instruction). Note that we need the original label position
+                 * here. getNewOffset must therefore never have been called for
+                 * this label.
                  */
-                cw.invalidFrames = true;
+                u = l.position - 3;
+                if (u >= 0 && resize[u]) {
+                    l.status |= Label.TARGET;
+                }
+                getNewOffset(allIndexes, allSizes, l);
+                l = l.successor;
             }
+            // Update the offsets in the uninitialized types
+            for (i = 0; i < cw.typeTable.length; ++i) {
+                Item item = cw.typeTable[i];
+                if (item != null && item.type == ClassWriter.TYPE_UNINIT) {
+                    item.intVal = getNewOffset(allIndexes, allSizes, 0,
+                            item.intVal);
+                }
+            }
+            // The stack map frames are not serialized yet, so we don't need
+            // to update them. They will be serialized in visitMaxs.
+        } else if (frameCount > 0) {
+            /*
+             * Resizing an existing stack map frame table is really hard. Not
+             * only the table must be parsed to update the offets, but new
+             * frames may be needed for jump instructions that were inserted by
+             * this method. And updating the offsets or inserting frames can
+             * change the format of the following frames, in case of packed
+             * frames. In practice the whole table must be recomputed. For this
+             * the frames are marked as potentially invalid. This will cause the
+             * whole class to be reread and rewritten with the COMPUTE_FRAMES
+             * option (see the ClassWriter.toByteArray method). This is not very
+             * efficient but is much easier and requires much less code than any
+             * other method I can think of.
+             */
+            cw.invalidFrames = true;
         }
         // updates the exception handler block labels
         Handler h = firstHandler;
