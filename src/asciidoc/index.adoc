@@ -37195,6 +37195,64 @@ supported in all browsers yet and may be precluded by restrictive network proxie
 This is why Spring provides fallback options that emulate the WebSocket API as close
 as possible based on the https://github.com/sockjs/sockjs-protocol[SockJS protocol].
 
+[[websocket-fallback-sockjs-overview]]
+==== Overview of SockJS
+
+The goal of SockJS is to let applications use a WebSocket API but fall back to
+non-WebSocket alternatives when necessary at runtime, i.e. without the need to
+change application code.
+
+SockJS consists of:
+
+* The https://github.com/sockjs/sockjs-protocol[SockJS protocol]
+defined in the form of executable
+http://sockjs.github.io/sockjs-protocol/sockjs-protocol-0.3.3.html[narrated tests].
+* The https://github.com/sockjs/sockjs-client[SockJS client] - a JavaScript library for use in browsers.
+* SockJS server implementations including one in the Spring Framework `spring-websocket` module.
+
+SockJS is designed for use in browsers. It goes to great lengths
+to support a wide range of browser versions using a variety of techniques.
+For the full list of SockJS transport types and browsers see the
+https://github.com/sockjs/sockjs-client[SockJS client] page. Transports
+fall in 3 general categories: WebSocket, HTTP Streaming, and HTTP Long Polling.
+For an overview of these categories see
+https://spring.io/blog/2012/05/08/spring-mvc-3-2-preview-techniques-for-real-time-updates/[this blog post].
+
+The SockJS client begins by sending `"GET /info"` to
+obtain basic information from the server. After that it must decide what transport
+to use. If possible WebSocket is used. If not, in most browsers
+there is at least one HTTP streaming option and if not then HTTP (long)
+polling is used.
+
+All transport requests have the following URL structure:
+----
+http://host:port/myApp/myEndpoint/{server-id}/{session-id}/{transport}
+----
+
+* `{server-id}` - useful for routing requests in a cluster but not used otherwise.
+* `{session-id}` - correlates HTTP requests belonging to a SockJS session.
+* `{transport}` - indicates the transport type, e.g. "websocket", "xhr-streaming", etc.
+
+The WebSocket transport needs only a single HTTP request to do the WebSocket handshake.
+All messages thereafter are exchanged on that socket.
+
+HTTP transports require more requests. Ajax/XHR streaming for example relies on
+one long-running request for server-to-client messages and additional HTTP POST
+requests for client-to-server messages. Long polling is similar except it
+ends the current request after each server-to-client send.
+
+SockJS adds minimal message framing. For example the server sends the letter +o+
+("open" frame) initially, messages are sent as +a["message1","message2"]+
+(JSON-encoded array), the letter +h+ ("heartbeat" frame) if no messages flow
+for 25 seconds by default, and the letter +c+ ("close" frame) to close the session.
+
+To learn more run an example in a browser and watch HTTP requests.
+The SockJS client allows fixing the list of transports so it is possible to
+see each transport one at a time. The SockJS client also provides a debug flag
+which enables helpful messages in the browser console. On the server side enable
+TRACE logging for `org.springframework.web.socket`.
+For even more detail refer to the SockJS protocol
+http://sockjs.github.io/sockjs-protocol/sockjs-protocol-0.3.3.html[narrated test].
 
 
 [[websocket-fallback-sockjs-enable]]
@@ -37258,22 +37316,6 @@ transport option depending on the browser it's running in. Review the
 https://github.com/sockjs/sockjs-client[sockjs-client] page and the list of
 transport types supported by browser. The client also provides several
 configuration options, for example, to specify which transports to include.
-
-[[websocket-fallback-sockjs-transport]]
-==== SockJS Transports
-
-The SockJS client simulates the WebSocket API in a wide range of browsers.
-For the full list of transports by browser see the
-https://github.com/sockjs/sockjs-client[SockJS client] page. The transport types
-fall in 3 categories: WebSocket, HTTP Streaming, and HTTP Long Polling. For more
-background on those techniques see
-https://spring.io/blog/2012/05/08/spring-mvc-3-2-preview-techniques-for-real-time-updates/[this blog post].
-An important goal of SockJS is to support at least one streaming transport
-per browser, for efficiency reasons, but when necessary fall back on
-long polling.
-
-The next few sections cover various aspects of confugring and using SockJS
-in Spring applications.
 
 [[websocket-fallback-xhr-vs-iframe]]
 ==== HTTP Streaming in IE 8, 9: Ajax/XHR vs IFrame
@@ -37357,7 +37399,7 @@ https://github.com/sockjs/sockjs-client[SockJS client] page.
 ====
 
 [[websocket-fallback-sockjs-heartbeat]]
-==== Heartbeat Support in SockJS
+==== Heartbeat Messages
 
 The SockJS protocol requires servers to send heartbeat messages to preclude proxies
 from concluding a connection is hung. The Spring SockJS configuiration has a property
@@ -37378,7 +37420,7 @@ with default settings based on the number of available processors. Applications
 should consider customizing the settings according to their specific needs.
 
 [[websocket-fallback-sockjs-servlet3-async]]
-==== SockJS and Servlet 3 Async Support
+==== Servlet 3 Async Requests
 
 HTTP streaming and HTTP long polling SockJS transports require a connection to remain
 open longer than usual. For an overview of these techniques see
@@ -37406,16 +37448,15 @@ log category to TRACE.
 ====
 
 [[websocket-fallback-cors]]
-==== SockJS and CORS
+==== CORS Headers for SockJS Requests
 
 The SockJS protocol uses CORS for cross-domain support in the XHR streaming and
-XHR polling transports. CORS headers are automatically added to SockJS requests
-for transports that require it as well as for the initial `"/info"` request.
+polling transports. Therefore CORS headers are added automatically unless the
+presence of CORS headers in the response is detected. So if an application is
+already configured to provide CORS support, e.g. through a Servlet Filter,
+Spring's SockJsService will skip this part.
 
-Spring's `SockJsServce` implementation checks for the presence of the CORS
-`"Access-Control-Allow-Origin"` header in the response. If present, no new CORS
-headers are added, essentially assuming that CORS support is configured
-centrally, e.g. through a Servlet Filter. Otherwise the following are added:
+The following is the list of headers and values expected by SockJS:
 
 * `"Access-Control-Allow-Origin"` - intitialized from the value of the "origin" request header or "*".
 * `"Access-Control-Allow-Credentials"` - always set to `true`.
@@ -37423,36 +37464,11 @@ centrally, e.g. through a Servlet Filter. Otherwise the following are added:
 * `"Access-Control-Allow-Methods"` - the HTTP methods a transport supports (see `TransportType` enum).
 * `"Access-Control-Max-Age"` - set to 31536000 (1 year).
 
-For the exact implementation, see `addCorsHeaders` in `AbstractSockJsService`.
+For the exact implementation see `addCorsHeaders` in `AbstractSockJsService` as well
+as the `TransportType` enum in the source code.
 
-[[websocket-fallback-sockjs-explained]]
-==== How SockJS Works
-This is a question beyond the scope of this document. The SockJS protocol
-is defined in the form of a Python
-https://github.com/sockjs/sockjs-protocol/blob/master/sockjs-protocol-0.3.3.py[test suite],
-with narrative in comments. There is an
-http://sockjs.github.io/sockjs-protocol/sockjs-protocol-0.3.3.html[HTML formatted version]
-of the test showing narrative on the right and client code on the left.
-
-The SockJS client begins with an initial `"/info"` request to obtain basic
-information from the server. Then the client selects a transport and sends
-a series of session requests:
-
-----
-http://host:port/{sockjs-endpoint}/{server-id}/{session-id}/{transport}
-----
-
-The WebSocket transport type only needs a single HTTP connection for the handshake.
-HTTP-based transports use one connection for sending messages from server to client
-and separate requests for sending messages from client to server.
-The session id is used to correlate HTTP requests belonging to the same SockJS
-session. The server id is not used in the protocol but is added to help in
-clustered environments.
-
-The SockJS protocol requires minimal message framing. The server for examples sends
-an "open frame" (the letter +o+), a "heartbeat frame" (the letter +h+), or a
-"close frame" (the letter +c+); while the client sends messages as a JSON-encoded
-array prepended with the letter `a` (e.g. +a["message1","message2"]+).
+Alternatively if the CORS configuration allows it consider excluding URLs with the
+SockJS endpoint prefix thus letting Spring's SockJsService handle it.
 
 
 [[websocket-stomp]]
