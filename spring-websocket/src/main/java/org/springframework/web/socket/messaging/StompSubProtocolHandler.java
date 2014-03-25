@@ -28,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.messaging.Message;
@@ -62,12 +63,10 @@ import org.springframework.web.socket.sockjs.transport.SockJsSession;
 public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationEventPublisherAware {
 
 	/**
-	 * This protocol handler supports assembling large STOMP messages split into
-	 * multiple WebSocket messages. STOMP clients (like stomp.js) split large STOMP
-	 * messages at 16K boundaries.
-	 *
-	 * <p>We need to ensure the WebSocket server buffer is configured to support
-	 * that size at a minimum plus a little extra for any potential SockJS framing.
+	 * This handler supports assembling large STOMP messages split into multiple
+	 * WebSocket messages and STOMP clients (like stomp.js) indeed split large STOMP
+	 * messages at 16K boundaries. Therefore the WebSocket server input message
+	 * buffer size must allow 16K at least plus a little extra for SockJS framing.
 	 */
 	public static final int MINIMUM_WEBSOCKET_MESSAGE_SIZE = 16 * 1024 + 256;
 
@@ -188,8 +187,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 				message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
 
-				if (SimpMessageType.CONNECT.equals(headers.getMessageType()) && this.eventPublisher != null) {
-					this.eventPublisher.publishEvent(new SessionConnectEvent(this, message));
+				if (this.eventPublisher != null && StompCommand.CONNECT.equals(headers.getMessageType())) {
+					publishEvent(new SessionConnectEvent(this, message));
 				}
 
 				outputChannel.send(message);
@@ -198,6 +197,15 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 				logger.error("Terminating STOMP session due to failure to send message", ex);
 				sendErrorMessage(session, ex);
 			}
+		}
+	}
+
+	private void publishEvent(ApplicationEvent event) {
+		try {
+			this.eventPublisher.publishEvent(event);
+		}
+		catch (Throwable ex) {
+			logger.error("Failed to publish event " + event, ex);
 		}
 	}
 
@@ -257,8 +265,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		try {
 			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
 
-			if (headers.getCommand() == StompCommand.CONNECTED && this.eventPublisher != null) {
-				this.eventPublisher.publishEvent(new SessionConnectedEvent(this, (Message<byte[]>) message));
+			if (this.eventPublisher != null && StompCommand.CONNECTED.equals(headers.getMessageType())) {
+				publishEvent(new SessionConnectedEvent(this, (Message<byte[]>) message));
 			}
 
 			byte[] bytes = this.stompEncoder.encode((Message<byte[]>) message);
@@ -364,7 +372,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 
 		if (this.eventPublisher != null) {
-			this.eventPublisher.publishEvent(new SessionDisconnectEvent(this, session.getId(), closeStatus));
+			publishEvent(new SessionDisconnectEvent(this, session.getId(), closeStatus));
 		}
 
 		outputChannel.send(message);
