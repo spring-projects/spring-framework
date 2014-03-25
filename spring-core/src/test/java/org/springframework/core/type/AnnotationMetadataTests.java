@@ -64,6 +64,20 @@ public class AnnotationMetadataTests {
 		doTestMethodAnnotationInfo(metadata);
 	}
 
+	@Test
+	public void standardAnnotationMetadataForSubclass() throws Exception {
+		AnnotationMetadata metadata = new StandardAnnotationMetadata(AnnotatedComponentSubClass.class, true);
+		doTestSubClassAnnotationInfo(metadata);
+	}
+
+	@Test
+	public void asmAnnotationMetadataForSubclass() throws Exception {
+		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
+		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(AnnotatedComponentSubClass.class.getName());
+		AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
+		doTestSubClassAnnotationInfo(metadata);
+	}
+
 	/**
 	 * In order to preserve backward-compatibility, {@link StandardAnnotationMetadata}
 	 * defaults to return nested annotations and annotation arrays as actual
@@ -211,6 +225,21 @@ public class AnnotationMetadataTests {
 		}
 	}
 
+	private void doTestSubClassAnnotationInfo(AnnotationMetadata metadata) {
+		assertThat(metadata.getClassName(), is(AnnotatedComponentSubClass.class.getName()));
+		assertThat(metadata.isAnnotated(Component.class.getName()), is(false));
+		assertThat(metadata.isAnnotated(Scope.class.getName()), is(false));
+		assertThat(metadata.isAnnotated(SpecialAttr.class.getName()), is(false));
+		assertThat(metadata.hasAnnotation(Component.class.getName()), is(false));
+		assertThat(metadata.hasAnnotation(Scope.class.getName()), is(false));
+		assertThat(metadata.hasAnnotation(SpecialAttr.class.getName()), is(false));
+		assertThat(metadata.getAnnotationTypes().size(), is(0));
+		assertThat(metadata.getAnnotationAttributes(Component.class.getName()), nullValue());
+		assertThat(metadata.getAnnotatedMethods(DirectAnnotation.class.getName()).size(), equalTo(0));
+		assertThat(metadata.isAnnotated(IsAnnotatedAnnotation.class.getName()), equalTo(false));
+		assertThat(metadata.getAllAnnotationAttributes(DirectAnnotation.class.getName()), nullValue());
+	}
+
 	private void doTestMethodAnnotationInfo(AnnotationMetadata classMetadata) {
 		Set<MethodMetadata> methods = classMetadata.getAnnotatedMethods(TestAutowired.class.getName());
 		assertThat(methods.size(), is(1));
@@ -315,6 +344,10 @@ public class AnnotationMetadataTests {
 		@MetaMetaAnnotation
 		public void meta() {
 		}
+	}
+
+	private static class AnnotatedComponentSubClass extends AnnotatedComponent {
+
 	}
 
 	@Target(ElementType.TYPE)

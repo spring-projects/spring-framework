@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.util.MultiValueMap;
  * @author Mark Pollack
  * @author Chris Beams
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 4.0
  * @see AnnotationMetadata
  * @see MethodMetadata
@@ -73,17 +74,20 @@ public interface AnnotatedTypeMetadata {
 
 	/**
 	 * Retrieve all attributes of all annotations of the given type, if any (i.e. if
-	 * defined on the underlying method, as direct annotation or as meta-annotation).
+	 * defined on the underlying type ({@link AnnotationMetadata class} or
+	 * {@link MethodMetadata method}), as direct annotation or as meta-annotation).
 	 * @param annotationType the annotation type to look for
 	 * @return a MultiMap of attributes, with the attribute name as key (e.g. "value")
 	 * and a list of the defined attribute values as Map value. This return value will
 	 * be {@code null} if no matching annotation is defined.
+	 * @see #getAllAnnotationAttributes(String, boolean)
 	 */
 	MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationType);
 
 	/**
 	 * Retrieve all attributes of all annotations of the given type, if any (i.e. if
-	 * defined on the underlying method, as direct annotation or as meta-annotation).
+	 * defined on the underlying type ({@link AnnotationMetadata class} or
+	 * {@link MethodMetadata method}), as direct annotation or as meta-annotation).
 	 * @param annotationType the annotation type to look for
 	 * @param classValuesAsString  whether to convert class references to String
 	 * @return a MultiMap of attributes, with the attribute name as key (e.g. "value")
