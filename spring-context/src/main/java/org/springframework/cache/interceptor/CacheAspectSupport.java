@@ -103,7 +103,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 	 * @param cacheOperationSources must not be {@code null}
 	 */
 	public void setCacheOperationSources(CacheOperationSource... cacheOperationSources) {
-		Assert.notEmpty(cacheOperationSources);
+		Assert.notEmpty(cacheOperationSources, "At least 1 CacheOperationSource needs to be specified");
 		this.cacheOperationSource = (cacheOperationSources.length > 1 ?
 				new CompositeCacheOperationSource(cacheOperationSources) : cacheOperationSources[0]);
 	}
@@ -131,8 +131,8 @@ public abstract class CacheAspectSupport implements InitializingBean {
 	}
 
 	public void afterPropertiesSet() {
-		Assert.state(this.cacheManager != null, "'cacheManager' is required");
-		Assert.state(this.cacheOperationSource != null, "The 'cacheOperationSources' property is required: " +
+		Assert.state(this.cacheManager != null, "Property 'cacheManager' is required");
+		Assert.state(this.cacheOperationSource != null, "Property 'cacheOperationSources' is required: " +
 				"If there are no cacheable methods, then don't use a cache aspect.");
 		this.initialized = true;
 	}
@@ -157,7 +157,9 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		Collection<Cache> caches = new ArrayList<Cache>(cacheNames.size());
 		for (String cacheName : cacheNames) {
 			Cache cache = this.cacheManager.getCache(cacheName);
-			Assert.notNull(cache, "Cannot find cache named '" + cacheName + "' for " + operation);
+			if (cache == null) {
+				throw new IllegalArgumentException("Cannot find cache named '" + cacheName + "' for " + operation);
+			}
 			caches.add(cache);
 		}
 		return caches;

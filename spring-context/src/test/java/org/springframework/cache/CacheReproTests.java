@@ -66,9 +66,9 @@ public class CacheReproTests {
 	}
 
 	@Test
-	public void spr11595GetSimple() {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr11595Config.class);
-		Spr11595Service bean = context.getBean(Spr11595Service.class);
+	public void spr11592GetSimple() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr11592Config.class);
+		Spr11592Service bean = context.getBean(Spr11592Service.class);
 		Cache cache = context.getBean("cache", Cache.class);
 
 		String key = "1";
@@ -83,9 +83,9 @@ public class CacheReproTests {
 	}
 
 	@Test
-	public void spr11595GetNeverCache(){
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr11595Config.class);
-		Spr11595Service bean = context.getBean(Spr11595Service.class);
+	public void spr11592GetNeverCache(){
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr11592Config.class);
+		Spr11592Service bean = context.getBean(Spr11592Service.class);
 		Cache cache = context.getBean("cache", Cache.class);
 
 		String key = "1";
@@ -179,7 +179,7 @@ public class CacheReproTests {
 
 	@Configuration
 	@EnableCaching
-	public static class Spr11595Config {
+	public static class Spr11592Config {
 
 		@Bean
 		public CacheManager cacheManager() {
@@ -195,14 +195,13 @@ public class CacheReproTests {
 		}
 
 		@Bean
-		public Spr11595Service service() {
-			return new Spr11595Service();
+		public Spr11592Service service() {
+			return new Spr11592Service();
 		}
-
 	}
 
 
-	public static class Spr11595Service {
+	public static class Spr11592Service {
 
 		@Cacheable("cache")
 		public Object getSimple(String key) {
