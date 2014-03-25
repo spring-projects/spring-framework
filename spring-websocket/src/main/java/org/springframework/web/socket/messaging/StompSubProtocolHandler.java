@@ -187,7 +187,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 				message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
 
-				if (this.eventPublisher != null && StompCommand.CONNECT.equals(headers.getMessageType())) {
+				if (this.eventPublisher != null && StompCommand.CONNECT.equals(headers.getCommand())) {
 					publishEvent(new SessionConnectEvent(this, message));
 				}
 
@@ -265,7 +265,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		try {
 			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
 
-			if (this.eventPublisher != null && StompCommand.CONNECTED.equals(headers.getMessageType())) {
+			if (this.eventPublisher != null && StompCommand.CONNECTED.equals(headers.getCommand())) {
 				publishEvent(new SessionConnectedEvent(this, (Message<byte[]>) message));
 			}
 
