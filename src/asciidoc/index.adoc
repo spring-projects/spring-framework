@@ -12704,7 +12704,7 @@ this purpose. A typical such aspect would look as follows:
 		 * "service" package, and that implementation types are in sub-packages.
 		 *
 		 * If you group service interfaces by functional area (for example,
-		 * in packages com.xyz.someapp.abc.service and com.xyz.def.service) then
+		 * in packages com.xyz.someapp.abc.service and com.xyz.someapp.def.service) then
 		 * the pointcut expression "execution(* com.xyz.someapp..service.*.*(..))"
 		 * could be used instead.
 		 *
@@ -12712,7 +12712,7 @@ this purpose. A typical such aspect would look as follows:
 		 * PCD, like so "bean(*Service)". (This assumes that you have
 		 * named your Spring service beans in a consistent fashion.)
 		 */
-		@Pointcut("execution(* com.xyz.someapp.service.*.*(..))")
+		@Pointcut("execution(* com.xyz.someapp..service.*.*(..))")
 		public void businessService() {}
 
 		/**
