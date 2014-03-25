@@ -17,6 +17,7 @@
 package org.springframework.web.socket.messaging;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -26,6 +27,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -33,17 +36,18 @@ import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompDecoder;
+import org.springframework.messaging.simp.stomp.StompEncoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.simp.user.DefaultUserSessionRegistry;
 import org.springframework.messaging.simp.user.DestinationUserNameProvider;
 import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
 import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.handler.TestWebSocketSession;
 import org.springframework.web.socket.sockjs.transport.SockJsSession;
-import org.springframework.web.socket.sockjs.transport.session.TestSockJsSession;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -158,6 +162,33 @@ public class StompSubProtocolHandlerTests {
 	}
 
 	@Test
+	public void eventPublication() {
+
+		TestPublisher publisher = new TestPublisher();
+
+		UserSessionRegistry registry = new DefaultUserSessionRegistry();
+		this.protocolHandler.setUserSessionRegistry(registry);
+		this.protocolHandler.setApplicationEventPublisher(publisher);
+		this.protocolHandler.afterSessionStarted(this.session, this.channel);
+
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
+		TextMessage textMessage = new TextMessage(new StompEncoder().encode(
+				MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build()));
+		this.protocolHandler.handleMessageFromClient(this.session, textMessage, this.channel);
+
+		headers = StompHeaderAccessor.create(StompCommand.CONNECTED);
+		Message<byte[]> connectedMessage = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		this.protocolHandler.handleMessageToClient(this.session, connectedMessage);
+
+		this.protocolHandler.afterSessionEnded(this.session, CloseStatus.BAD_DATA, this.channel);
+
+		assertEquals(3, publisher.events.size());
+		assertEquals(SessionConnectEvent.class, publisher.events.get(0).getClass());
+		assertEquals(SessionConnectedEvent.class, publisher.events.get(1).getClass());
+		assertEquals(SessionDisconnectEvent.class, publisher.events.get(2).getClass());
+	}
+
+	@Test
 	public void handleMessageToClientUserDestination() {
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.MESSAGE);
@@ -222,6 +253,16 @@ public class StompSubProtocolHandlerTests {
 		@Override
 		public String getDestinationUserName() {
 			return "Me myself and I";
+		}
+	}
+
+	private static class TestPublisher implements ApplicationEventPublisher {
+
+		private final List<ApplicationEvent> events = new ArrayList<ApplicationEvent>();
+
+		@Override
+		public void publishEvent(ApplicationEvent event) {
+			events.add(event);
 		}
 	}
 

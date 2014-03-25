@@ -28,6 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -60,8 +62,8 @@ import org.springframework.web.socket.handler.SessionLimitExceededException;
  * @author Andy Wilkinson
  * @since 4.0
  */
-public class SubProtocolWebSocketHandler
-		implements WebSocketHandler, SubProtocolCapable, MessageHandler, SmartLifecycle {
+public class SubProtocolWebSocketHandler implements WebSocketHandler,
+		SubProtocolCapable, MessageHandler, SmartLifecycle, ApplicationEventPublisherAware {
 
 	private final Log logger = LogFactory.getLog(SubProtocolWebSocketHandler.class);
 
@@ -83,6 +85,8 @@ public class SubProtocolWebSocketHandler
 	private Object lifecycleMonitor = new Object();
 
 	private volatile boolean running = false;
+
+	private ApplicationEventPublisher eventPublisher;
 
 
 	public SubProtocolWebSocketHandler(MessageChannel clientInboundChannel, SubscribableChannel clientOutboundChannel) {
@@ -114,17 +118,23 @@ public class SubProtocolWebSocketHandler
 	 * Register a sub-protocol handler.
 	 */
 	public void addProtocolHandler(SubProtocolHandler handler) {
+
 		List<String> protocols = handler.getSupportedProtocols();
 		if (CollectionUtils.isEmpty(protocols)) {
 			logger.warn("No sub-protocols, ignoring handler " + handler);
 			return;
 		}
+
 		for (String protocol: protocols) {
 			SubProtocolHandler replaced = this.protocolHandlers.put(protocol, handler);
 			if ((replaced != null) && (replaced != handler) ) {
 				throw new IllegalStateException("Failed to map handler " + handler
 						+ " to protocol '" + protocol + "', it is already mapped to handler " + replaced);
 			}
+		}
+
+		if (handler instanceof ApplicationEventPublisherAware) {
+			((ApplicationEventPublisherAware) handler).setApplicationEventPublisher(this.eventPublisher);
 		}
 	}
 
@@ -178,6 +188,10 @@ public class SubProtocolWebSocketHandler
 		return sendBufferSizeLimit;
 	}
 
+	@Override
+	public void setApplicationEventPublisher(ApplicationEventPublisher eventPublisher) {
+		this.eventPublisher = eventPublisher;
+	}
 
 	@Override
 	public boolean isAutoStartup() {

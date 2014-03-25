@@ -28,6 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.SimpMessageType;
@@ -57,7 +59,7 @@ import org.springframework.web.socket.sockjs.transport.SockJsSession;
  * @author Andy Wilkinson
  * @since 4.0
  */
-public class StompSubProtocolHandler implements SubProtocolHandler {
+public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationEventPublisherAware {
 
 	/**
 	 * The name of the header set on the CONNECTED frame indicating the name
@@ -75,6 +77,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 	private final StompEncoder stompEncoder = new StompEncoder();
 
 	private UserSessionRegistry userSessionRegistry;
+
+	private ApplicationEventPublisher eventPublisher;
 
 
 	/**
@@ -119,6 +123,12 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 	public List<String> getSupportedProtocols() {
 		return Arrays.asList("v10.stomp", "v11.stomp", "v12.stomp");
 	}
+
+	@Override
+	public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+		this.eventPublisher = applicationEventPublisher;
+	}
+
 
 	/**
 	 * Handle incoming WebSocket messages from clients.
@@ -167,6 +177,11 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 				headers.setUser(session.getPrincipal());
 
 				message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
+
+				if (SimpMessageType.CONNECT.equals(headers.getMessageType()) && this.eventPublisher != null) {
+					this.eventPublisher.publishEvent(new SessionConnectEvent(this, message));
+				}
+
 				outputChannel.send(message);
 			}
 			catch (Throwable ex) {
@@ -231,6 +246,11 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 
 		try {
 			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
+
+			if (headers.getCommand() == StompCommand.CONNECTED && this.eventPublisher != null) {
+				this.eventPublisher.publishEvent(new SessionConnectedEvent(this, (Message<byte[]>) message));
+			}
+
 			byte[] bytes = this.stompEncoder.encode((Message<byte[]>) message);
 			TextMessage textMessage = new TextMessage(bytes);
 
@@ -329,6 +349,11 @@ public class StompSubProtocolHandler implements SubProtocolHandler {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		headers.setSessionId(session.getId());
 		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+
+		if (this.eventPublisher != null) {
+			this.eventPublisher.publishEvent(new SessionDisconnectEvent(this, session.getId(), closeStatus));
+		}
+
 		outputChannel.send(message);
 	}
 
