@@ -37,6 +37,7 @@ import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
@@ -120,6 +121,15 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 			assertTrue(protocolHandler instanceof StompSubProtocolHandler);
 			assertEquals(128 * 1024, ((StompSubProtocolHandler) protocolHandler).getMessageSizeLimit());
 		}
+	}
+
+	@Test
+	public void messageBrokerSockJsTaskScheduler() {
+		ThreadPoolTaskScheduler taskScheduler =
+				this.config.getBean("messageBrokerSockJsTaskScheduler", ThreadPoolTaskScheduler.class);
+
+		assertEquals(Runtime.getRuntime().availableProcessors(),
+				taskScheduler.getScheduledThreadPoolExecutor().getCorePoolSize());
 	}
 
 

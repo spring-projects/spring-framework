@@ -85,7 +85,7 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 
 		SimpleController controller = this.wac.getBean(SimpleController.class);
 		try {
-			assertTrue(controller.latch.await(2, TimeUnit.SECONDS));
+			assertTrue(controller.latch.await(10, TimeUnit.SECONDS));
 		}
 		finally {
 			session.close();

@@ -46,6 +46,7 @@ import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.context.support.GenericWebApplicationContext;
@@ -133,6 +134,9 @@ public class MessageBrokerBeanDefinitionParserTests {
 				.getTransportHandlers().get(TransportType.WEBSOCKET);
 		assertNotNull(wsTransportHandler.getHandshakeHandler());
 		assertThat(wsTransportHandler.getHandshakeHandler(), Matchers.instanceOf(TestHandshakeHandler.class));
+
+		ThreadPoolTaskScheduler scheduler = (ThreadPoolTaskScheduler) defaultSockJsService.getTaskScheduler();
+		assertEquals(Runtime.getRuntime().availableProcessors(), scheduler.getScheduledThreadPoolExecutor().getCorePoolSize());
 
 		UserSessionRegistry userSessionRegistry = this.appContext.getBean(UserSessionRegistry.class);
 		assertNotNull(userSessionRegistry);
