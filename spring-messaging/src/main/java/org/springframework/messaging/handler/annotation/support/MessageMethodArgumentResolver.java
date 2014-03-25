@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import org.springframework.core.ResolvableType;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 
+import java.lang.reflect.Type;
+
 /**
  * A {@link HandlerMethodArgumentResolver} for {@link Message} parameters. Validates
  * that the generic type of the payload matches with the message value.
@@ -39,28 +41,30 @@ public class MessageMethodArgumentResolver implements HandlerMethodArgumentResol
 
 	@Override
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
-		// Validate the message type is assignable
-		if (!parameter.getParameterType().isAssignableFrom(message.getClass())) {
-			throw new MethodArgumentTypeMismatchException(message,
-					"Could not resolve Message parameter: invalid message type:"
-							+ "expected [" + message.getClass().getName() + "] but got ["
-							+ parameter.getParameterType().getName() + "]");
+
+		Class<?> paramType = parameter.getParameterType();
+
+		if (!paramType.isAssignableFrom(message.getClass())) {
+				throw new MethodArgumentTypeMismatchException(message, parameter,
+						"The actual message type [" + message.getClass().getName() + "] " +
+						"does not match the expected type [" + paramType.getName() + "]");
 		}
 
-		// validate that the payload type matches
-		Class<?> effectivePayloadType = getPayloadType(parameter);
-		if (effectivePayloadType != null && !effectivePayloadType.isInstance(message.getPayload())) {
-			throw new MethodArgumentTypeMismatchException(message,
-					"Could not resolve Message parameter: invalid payload type: "
-							+ "expected [" + effectivePayloadType.getName() + "] but got ["
-							+ message.getPayload().getClass().getName() + "]");
+		Class<?> expectedPayloadType = getPayloadType(parameter);
+		Object payload = message.getPayload();
+
+		if (expectedPayloadType != null && !expectedPayloadType.isInstance(payload)) {
+			throw new MethodArgumentTypeMismatchException(message, parameter,
+					"The expected Message<?> payload type [" + expectedPayloadType.getClass().getName() +
+					"] does not match the actual payload type [" + payload.getClass().getName() + "]");
 		}
+
 		return message;
 	}
 
 	private Class<?> getPayloadType(MethodParameter parameter) {
-		ResolvableType resolvableType = ResolvableType
-				.forType(parameter.getGenericParameterType()).as(Message.class);
+		Type genericParamType = parameter.getGenericParameterType();
+		ResolvableType resolvableType = ResolvableType.forType(genericParamType).as(Message.class);
 		return resolvableType.getGeneric(0).resolve(Object.class);
 	}
 

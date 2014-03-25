@@ -18,22 +18,19 @@ package org.springframework.messaging.handler.annotation.support;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessagingException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 
 /**
- * Exception to be thrown when a method argument is not valid. For instance, this
- * can be issued if a validation on a method parameter annotated with
- * {@code @Valid} fails.
+ * Exception to be thrown when a method argument fails validation perhaps as a
+ * result of {@code @Valid} style validation, or perhaps because it is required.
  *
  * @author Brian Clozel
+ * @author Rossen Stoyanchev
  * @since 4.0.1
  */
 @SuppressWarnings("serial")
-public class MethodArgumentNotValidException extends MessagingException {
-
-	private final MethodParameter parameter;
+public class MethodArgumentNotValidException extends AbstractMethodArgumentResolutionException {
 
 	private final BindingResult bindingResult;
 
@@ -41,7 +38,6 @@ public class MethodArgumentNotValidException extends MessagingException {
 	/**
 	 * Create a new instance with the invalid {@code MethodParameter}.
 	 */
-
 	public MethodArgumentNotValidException(Message<?> message, MethodParameter parameter) {
 		this(message, parameter, null);
 	}
@@ -53,18 +49,12 @@ public class MethodArgumentNotValidException extends MessagingException {
 	public MethodArgumentNotValidException(Message<?> message, MethodParameter parameter,
 			BindingResult bindingResult) {
 
-		super(message, generateMessage(parameter, bindingResult));
-		this.parameter = parameter;
+		super(message, parameter, getMethodParamMessage(parameter) +
+				getValidationErrorMessage(parameter, bindingResult));
+
 		this.bindingResult = bindingResult;
 	}
 
-
-	/**
-	 * Return the MethodParameter that was rejected.
-	 */
-	public MethodParameter getMethodParameter() {
-		return this.parameter;
-	}
 
 	/**
 	 * Return the BindingResult if the failure is validation-related or {@code null}.
@@ -74,21 +64,18 @@ public class MethodArgumentNotValidException extends MessagingException {
 	}
 
 
-	private static String generateMessage(MethodParameter parameter, BindingResult bindingResult) {
-
-		StringBuilder sb = new StringBuilder("Invalid parameter at index ")
-				.append(parameter.getParameterIndex()).append(" in method: ")
-				.append(parameter.getMethod().toGenericString());
-
-
+	private static String getValidationErrorMessage(MethodParameter parameter, BindingResult bindingResult) {
 		if (bindingResult != null) {
+			StringBuilder sb = new StringBuilder();
 			sb.append(", with ").append(bindingResult.getErrorCount()).append(" error(s): ");
 			for (ObjectError error : bindingResult.getAllErrors()) {
 				sb.append("[").append(error).append("] ");
 			}
+			return sb.toString();
 		}
-
-		return sb.toString();
+		else {
+			return "";
+		}
 	}
 
 }

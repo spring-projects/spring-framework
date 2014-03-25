@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.handler.annotation.support;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
@@ -26,9 +27,14 @@ import org.springframework.messaging.MessagingException;
  * @author Stephane Nicoll
  * @since 4.0.3
  */
-public class MethodArgumentTypeMismatchException extends MessagingException {
+@SuppressWarnings("serial")
+public class MethodArgumentTypeMismatchException extends AbstractMethodArgumentResolutionException {
 
-	public MethodArgumentTypeMismatchException(Message<?> message, String description) {
-		super(message, description);
+
+	/**
+	 * Create a new instance with the invalid {@code MethodParameter}.
+	 */
+	public MethodArgumentTypeMismatchException(Message<?> message, MethodParameter parameter, String description) {
+		super(message, parameter, getMethodParamMessage(parameter) + description);
 	}
 }

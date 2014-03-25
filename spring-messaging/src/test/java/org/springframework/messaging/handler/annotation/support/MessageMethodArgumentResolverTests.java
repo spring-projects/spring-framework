@@ -33,6 +33,8 @@ import org.springframework.messaging.support.GenericMessage;
 import org.springframework.messaging.support.MessageBuilder;
 
 /**
+ * Unit tests for
+ * {@link org.springframework.messaging.handler.annotation.support.MessageMethodArgumentResolver}.
  *
  * @author Stephane Nicoll
  */
@@ -45,101 +47,102 @@ public class MessageMethodArgumentResolverTests {
 
 	private Method method;
 
+
 	@Before
 	public void setup() throws Exception {
-		method = MessageMethodArgumentResolverTests.class.getDeclaredMethod("handleMessage",
+		this.method = MessageMethodArgumentResolverTests.class.getDeclaredMethod("handleMessage",
 				Message.class, Message.class, Message.class, Message.class, ErrorMessage.class);
 	}
+
 
 	@Test
 	public void resolveAnyPayloadType() throws Exception {
 		Message<String> message = MessageBuilder.withPayload("test").build();
-		MethodParameter parameter = new MethodParameter(method, 0);
+		MethodParameter parameter = new MethodParameter(this.method, 0);
 
-		assertTrue("Parameter '" + parameter + "' should be supported", resolver.supportsParameter(parameter));
-		assertSame(message, resolver.resolveArgument(parameter, message));
+		assertTrue("Parameter '" + parameter + "' should be supported", this.resolver.supportsParameter(parameter));
+		assertSame(message, this.resolver.resolveArgument(parameter, message));
 	}
 
 	@Test
 	public void resolvePayloadTypeExactType() throws Exception {
 		Message<Integer> message = MessageBuilder.withPayload(123).build();
-		MethodParameter parameter = new MethodParameter(method, 1);
+		MethodParameter parameter = new MethodParameter(this.method, 1);
 
-		assertTrue("Parameter '" + parameter + "' should be supported", resolver.supportsParameter(parameter));
-		assertSame(message, resolver.resolveArgument(parameter, message));
+		assertTrue("Parameter '" + parameter + "' should be supported", this.resolver.supportsParameter(parameter));
+		assertSame(message, this.resolver.resolveArgument(parameter, message));
 	}
 
 	@Test
 	public void resolvePayloadTypeSubClass() throws Exception {
 		Message<Integer> message = MessageBuilder.withPayload(123).build();
-		MethodParameter parameter = new MethodParameter(method, 2);
+		MethodParameter parameter = new MethodParameter(this.method, 2);
 
-		assertTrue("Parameter '" + parameter + "' should be supported", resolver.supportsParameter(parameter));
-		assertSame(message, resolver.resolveArgument(parameter, message));
+		assertTrue("Parameter '" + parameter + "' should be supported", this.resolver.supportsParameter(parameter));
+		assertSame(message, this.resolver.resolveArgument(parameter, message));
 	}
 
 	@Test
 	public void resolveInvalidPayloadType() throws Exception {
 		Message<String> message = MessageBuilder.withPayload("test").build();
-		MethodParameter parameter = new MethodParameter(method, 1);
+		MethodParameter parameter = new MethodParameter(this.method, 1);
 
-		assertTrue("Parameter '" + parameter + "' should be supported", resolver.supportsParameter(parameter));
+		assertTrue("Parameter '" + parameter + "' should be supported", this.resolver.supportsParameter(parameter));
 		thrown.expect(MethodArgumentTypeMismatchException.class);
 		thrown.expectMessage(Integer.class.getName());
 		thrown.expectMessage(String.class.getName());
-		resolver.resolveArgument(parameter, message);
+		this.resolver.resolveArgument(parameter, message);
 	}
 
 	@Test
 	public void resolveUpperBoundPayloadType() throws Exception {
 		Message<Integer> message = MessageBuilder.withPayload(123).build();
-		MethodParameter parameter = new MethodParameter(method, 3);
+		MethodParameter parameter = new MethodParameter(this.method, 3);
 
-		assertTrue("Parameter '" + parameter + "' should be supported", resolver.supportsParameter(parameter));
-		assertSame(message, resolver.resolveArgument(parameter, message));
+		assertTrue("Parameter '" + parameter + "' should be supported", this.resolver.supportsParameter(parameter));
+		assertSame(message, this.resolver.resolveArgument(parameter, message));
 	}
 
 	@Test
 	public void resolveOutOfBoundPayloadType() throws Exception {
 		Message<Locale> message = MessageBuilder.withPayload(Locale.getDefault()).build();
-		MethodParameter parameter = new MethodParameter(method, 3);
+		MethodParameter parameter = new MethodParameter(this.method, 3);
 
-		assertTrue("Parameter '" + parameter + "' should be supported", resolver.supportsParameter(parameter));
+		assertTrue("Parameter '" + parameter + "' should be supported", this.resolver.supportsParameter(parameter));
 		thrown.expect(MethodArgumentTypeMismatchException.class);
 		thrown.expectMessage(Number.class.getName());
 		thrown.expectMessage(Locale.class.getName());
-		resolver.resolveArgument(parameter, message);
+		this.resolver.resolveArgument(parameter, message);
 	}
 
 	@Test
 	public void resolveMessageSubTypeExactMatch() throws Exception {
 		ErrorMessage message = new ErrorMessage(new UnsupportedOperationException());
-		MethodParameter parameter = new MethodParameter(method, 4);
+		MethodParameter parameter = new MethodParameter(this.method, 4);
 
-		assertTrue("Parameter '" + parameter + "' should be supported", resolver.supportsParameter(parameter));
-		assertSame(message, resolver.resolveArgument(parameter, message));
+		assertTrue("Parameter '" + parameter + "' should be supported", this.resolver.supportsParameter(parameter));
+		assertSame(message, this.resolver.resolveArgument(parameter, message));
 	}
 
 	@Test
 	public void resolveMessageSubTypeSubClass() throws Exception {
 		ErrorMessage message = new ErrorMessage(new UnsupportedOperationException());
-		MethodParameter parameter = new MethodParameter(method, 0);
+		MethodParameter parameter = new MethodParameter(this.method, 0);
 
-		assertTrue("Parameter '" + parameter + "' should be supported", resolver.supportsParameter(parameter));
-		assertSame(message, resolver.resolveArgument(parameter, message));
+		assertTrue("Parameter '" + parameter + "' should be supported", this.resolver.supportsParameter(parameter));
+		assertSame(message, this.resolver.resolveArgument(parameter, message));
 	}
 
 	@Test
 	public void resolveWrongMessageType() throws Exception {
-		Message<? extends Throwable> message = new GenericMessage<Throwable>(
-				new UnsupportedOperationException());
-		MethodParameter parameter = new MethodParameter(method, 4);
+		Message<? extends Throwable> message = new GenericMessage<Throwable>(new UnsupportedOperationException());
+		MethodParameter parameter = new MethodParameter(this.method, 4);
 
-		assertTrue("Parameter '" + parameter + "' should be supported", resolver.supportsParameter(parameter));
+		assertTrue("Parameter '" + parameter + "' should be supported", this.resolver.supportsParameter(parameter));
 		thrown.expect(MethodArgumentTypeMismatchException.class);
 		thrown.expectMessage(ErrorMessage.class.getName());
 		thrown.expectMessage(GenericMessage.class.getName());
-		assertSame(message, resolver.resolveArgument(parameter, message));
+		assertSame(message, this.resolver.resolveArgument(parameter, message));
 	}
 
 	@SuppressWarnings("unused")
