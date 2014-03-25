@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,26 +16,32 @@
 
 package org.springframework.cache;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Tests to reproduce raised caching issues.
  *
  * @author Phillip Webb
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  */
 public class CacheReproTests {
 
@@ -56,6 +62,40 @@ public class CacheReproTests {
 		Spr11249Service bean = context.getBean(Spr11249Service.class);
 		Object result = bean.doSomething("op", 2, 3);
 		assertSame(result, bean.doSomething("op", 2, 3));
+		context.close();
+	}
+
+	@Test
+	public void spr11595GetSimple() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr11595Config.class);
+		Spr11595Service bean = context.getBean(Spr11595Service.class);
+		Cache cache = context.getBean("cache", Cache.class);
+
+		String key = "1";
+		Object result = bean.getSimple("1");
+		verify(cache, times(1)).get(key); // first call: cache miss
+
+		Object cachedResult = bean.getSimple("1");
+		assertSame(result, cachedResult);
+		verify(cache, times(2)).get(key); // second call: cache hit
+
+		context.close();
+	}
+
+	@Test
+	public void spr11595GetNeverCache(){
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr11595Config.class);
+		Spr11595Service bean = context.getBean(Spr11595Service.class);
+		Cache cache = context.getBean("cache", Cache.class);
+
+		String key = "1";
+		Object result = bean.getNeverCache("1");
+		verify(cache, times(0)).get(key); // no cache hit at all, caching disabled
+
+		Object cachedResult = bean.getNeverCache("1");
+		assertNotSame(result, cachedResult);
+		verify(cache, times(0)).get(key); // caching disabled
+
 		context.close();
 	}
 
@@ -100,8 +140,8 @@ public class CacheReproTests {
 
 		@Override
 		@Caching(cacheable = {
-			@Cacheable(value = "bigCache", unless = "#result.size() < 4"),
-			@Cacheable(value = "smallCache", unless = "#result.size() > 3") })
+				@Cacheable(value = "bigCache", unless = "#result.size() < 4"),
+				@Cacheable(value = "smallCache", unless = "#result.size() > 3") })
 		public List<String> multiple(int id) {
 			if (this.multipleCount > 0) {
 				fail("Called too many times");
@@ -132,6 +172,45 @@ public class CacheReproTests {
 
 		@Cacheable("smallCache")
 		public Object doSomething(String name, int... values) {
+			return new Object();
+		}
+	}
+
+
+	@Configuration
+	@EnableCaching
+	public static class Spr11595Config {
+
+		@Bean
+		public CacheManager cacheManager() {
+			SimpleCacheManager cacheManager = new SimpleCacheManager();
+			cacheManager.setCaches(Arrays.asList(cache()));
+			return cacheManager;
+		}
+
+		@Bean
+		public Cache cache() {
+			Cache cache = new ConcurrentMapCache("cache");
+			return Mockito.spy(cache);
+		}
+
+		@Bean
+		public Spr11595Service service() {
+			return new Spr11595Service();
+		}
+
+	}
+
+
+	public static class Spr11595Service {
+
+		@Cacheable("cache")
+		public Object getSimple(String key) {
+			return new Object();
+		}
+
+		@Cacheable(value = "cache", condition = "false")
+		public Object getNeverCache(String key) {
 			return new Object();
 		}
 	}
