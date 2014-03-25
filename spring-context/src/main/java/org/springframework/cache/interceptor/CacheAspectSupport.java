@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,7 @@ import org.springframework.util.StringUtils;
  * @author Chris Beams
  * @author Phillip Webb
  * @author Sam Brannen
+ * @author Stephane Nicoll
  * @since 3.1
  */
 public abstract class CacheAspectSupport implements InitializingBean {
@@ -194,15 +195,18 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		// Process any early evictions
 		processCacheEvicts(contexts.get(CacheEvictOperation.class), true, ExpressionEvaluator.NO_RESULT);
 
-		// Collect puts from any @Cachable miss
-		List<CachePutRequest> cachePutRequests = new ArrayList<CachePutRequest>();
-		collectPutRequests(contexts.get(CacheableOperation.class), ExpressionEvaluator.NO_RESULT, cachePutRequests, true);
+		// Check if we have a cached item matching the conditions
+		ValueWrapper cacheHit = findCachedItem(contexts.get(CacheableOperation.class));
+
+		// Collect puts from any @Cacheable miss, if no cached item is found
+		List<CachePutRequest> cachePutRequests = createInitialPutRequests(
+				contexts.get(CacheableOperation.class), cacheHit == null);
 
 		ValueWrapper result = null;
 
-		// We only attempt to get a cached result if there are no put requests
+		// If there are no put requests, just use the cache hit
 		if (cachePutRequests.isEmpty() && contexts.get(CachePutOperation.class).isEmpty()) {
-			result = findCachedResult(contexts.get(CacheableOperation.class));
+			result = cacheHit;
 		}
 
 		// Invoke the method if don't have a cache hit
@@ -211,7 +215,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		}
 
 		// Collect any explicit @CachePuts
-		collectPutRequests(contexts.get(CachePutOperation.class), result.get(), cachePutRequests, false);
+		collectPutRequests(contexts.get(CachePutOperation.class), result.get(), cachePutRequests);
 
 		// Process any collected put requests, either from @CachePut or a @Cacheable miss
 		for (CachePutRequest cachePutRequest : cachePutRequests) {
@@ -257,39 +261,61 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		}
 	}
 
+	/**
+	 * Find a cached item only for {@link CacheableOperation} that passes
+	 * the condition.
+	 * @param contexts the cacheable operations
+	 * @return a {@link ValueWrapper} holding the cached item or {@code null} if none is found
+	 */
+	private ValueWrapper findCachedItem(Collection<CacheOperationContext> contexts) {
+		for (CacheOperationContext context : contexts) {
+			Object result = ExpressionEvaluator.NO_RESULT;
+			if (isConditionPassing(context, result)) {
+				Object key = generateKey(context, result);
+				ValueWrapper cached = findInCaches(context, key);
+				if (cached != null) {
+					return cached;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Create the initial put requests with all the {@link CacheableOperation} that
+	 * pass the condition if no cached item was found.
+	 * <p>If no cache holds the item, each cacheable operation that pass the
+	 * condition will be added to the list in order to update its cache with
+	 * the result of the invocation.
+	 * @param contexts the contexts to handle
+	 * @param cacheMiss {@code true} if no cached item was found
+	 * @return the list of cacheable operations that should update their caches
+	 */
+	private List<CachePutRequest> createInitialPutRequests(
+			Collection<CacheOperationContext> contexts, boolean cacheMiss) {
+		List<CachePutRequest> requests = new ArrayList<CachePutRequest>();
+		if (cacheMiss) {
+			collectPutRequests(contexts, ExpressionEvaluator.NO_RESULT, requests);
+		}
+		return requests;
+	}
+
+	/**
+	 * Collect the {@link CachePutRequest} for all {@link CacheOperation} using
+	 * the specified result item.
+	 * @param contexts the contexts to handle
+	 * @param result the result item (never {@code null})
+	 * @param putRequests the collection to update
+	 */
 	private void collectPutRequests(Collection<CacheOperationContext> contexts,
-			Object result, Collection<CachePutRequest> putRequests, boolean whenNotInCache) {
+			Object result, Collection<CachePutRequest> putRequests) {
 
 		for (CacheOperationContext context : contexts) {
 			if (isConditionPassing(context, result)) {
 				Object key = generateKey(context, result);
-				if (!whenNotInCache || findInAnyCaches(contexts, key) == null) {
-					putRequests.add(new CachePutRequest(context, key));
-				}
+				putRequests.add(new CachePutRequest(context, key));
 			}
 		}
-	}
-
-	private Cache.ValueWrapper findCachedResult(Collection<CacheOperationContext> contexts) {
-		ValueWrapper result = null;
-		for (CacheOperationContext context : contexts) {
-			if (isConditionPassing(context, ExpressionEvaluator.NO_RESULT)) {
-				if (result == null) {
-					result = findInCaches(context, generateKey(context, ExpressionEvaluator.NO_RESULT));
-				}
-			}
-		}
-		return result;
-	}
-
-	private Cache.ValueWrapper  findInAnyCaches(Collection<CacheOperationContext> contexts, Object key) {
-		for (CacheOperationContext context : contexts) {
-			ValueWrapper wrapper = findInCaches(context, key);
-			if (wrapper != null) {
-				return wrapper;
-			}
-		}
-		return null;
 	}
 
 	private Cache.ValueWrapper findInCaches(CacheOperationContext context, Object key) {
@@ -342,7 +368,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 		public Collection<CacheOperationContext> get(Class<? extends CacheOperation> operationClass) {
 			Collection<CacheOperationContext> result = this.contexts.get(operationClass);
-			return (result != null ? result : Collections.<CacheOperationContext> emptyList());
+			return (result != null ? result : Collections.<CacheOperationContext>emptyList());
 		}
 	}
 
