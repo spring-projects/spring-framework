@@ -62,7 +62,7 @@ public abstract class AbstractMethodArgumentResolutionException extends Messagin
 	protected static String getMethodParamMessage(MethodParameter param) {
 		return new StringBuilder("Could not resolve method parameter at index ")
 				.append(param.getParameterIndex()).append(" in method: ")
-				.append(param.getMethod().toGenericString()).toString();
+				.append(param.getMethod().toGenericString()).append(" ").toString();
 	}
 
 }

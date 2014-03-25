@@ -55,7 +55,7 @@ public class MessageMethodArgumentResolver implements HandlerMethodArgumentResol
 
 		if (expectedPayloadType != null && !expectedPayloadType.isInstance(payload)) {
 			throw new MethodArgumentTypeMismatchException(message, parameter,
-					"The expected Message<?> payload type [" + expectedPayloadType.getClass().getName() +
+					"The expected Message<?> payload type [" + expectedPayloadType.getName() +
 					"] does not match the actual payload type [" + payload.getClass().getName() + "]");
 		}
 
