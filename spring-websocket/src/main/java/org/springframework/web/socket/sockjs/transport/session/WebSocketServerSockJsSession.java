@@ -92,6 +92,30 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 	}
 
 	@Override
+	public void setTextMessageSizeLimit(int messageSizeLimit) {
+		checkDelegateSessionInitialized();
+		this.webSocketSession.setTextMessageSizeLimit(messageSizeLimit);
+	}
+
+	@Override
+	public int getTextMessageSizeLimit() {
+		checkDelegateSessionInitialized();
+		return this.webSocketSession.getTextMessageSizeLimit();
+	}
+
+	@Override
+	public void setBinaryMessageSizeLimit(int messageSizeLimit) {
+		checkDelegateSessionInitialized();
+		this.webSocketSession.setBinaryMessageSizeLimit(messageSizeLimit);
+	}
+
+	@Override
+	public int getBinaryMessageSizeLimit() {
+		checkDelegateSessionInitialized();
+		return this.webSocketSession.getBinaryMessageSizeLimit();
+	}
+
+	@Override
 	public List<WebSocketExtension> getExtensions() {
 		checkDelegateSessionInitialized();
 		return this.webSocketSession.getExtensions();

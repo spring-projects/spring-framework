@@ -84,6 +84,26 @@ public interface WebSocketSession {
 	String getAcceptedProtocol();
 
 	/**
+	 * Configure the maximum size for an incoming text message.
+	 */
+	void setTextMessageSizeLimit(int messageSizeLimit);
+
+	/**
+	 * Get the configured maximum size for an incoming text message.
+	 */
+	int getTextMessageSizeLimit();
+
+	/**
+	 * Configure the maximum size for an incoming binary message.
+	 */
+	void setBinaryMessageSizeLimit(int messageSizeLimit);
+
+	/**
+	 * Get the configured maximum size for an incoming binary message.
+	 */
+	int getBinaryMessageSizeLimit();
+
+	/**
 	 * Return the negotiated extensions or {@code null} if none was specified or
 	 * negotiated successfully.
 	 */

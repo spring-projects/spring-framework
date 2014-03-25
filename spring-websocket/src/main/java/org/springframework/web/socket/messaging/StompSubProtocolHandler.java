@@ -62,6 +62,16 @@ import org.springframework.web.socket.sockjs.transport.SockJsSession;
 public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationEventPublisherAware {
 
 	/**
+	 * This protocol handler supports assembling large STOMP messages split into
+	 * multiple WebSocket messages. STOMP clients (like stomp.js) split large STOMP
+	 * messages at 16K boundaries.
+	 *
+	 * <p>We need to ensure the WebSocket server buffer is configured to support
+	 * that size at a minimum plus a little extra for any potential SockJS framing.
+	 */
+	public static final int MINIMUM_WEBSOCKET_MESSAGE_SIZE = 16 * 1024 + 256;
+
+	/**
 	 * The name of the header set on the CONNECTED frame indicating the name
 	 * of the user authenticated on the WebSocket session.
 	 */
@@ -332,6 +342,9 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 	@Override
 	public void afterSessionStarted(WebSocketSession session, MessageChannel outputChannel) {
+		if (session.getTextMessageSizeLimit() < MINIMUM_WEBSOCKET_MESSAGE_SIZE) {
+			session.setTextMessageSizeLimit(MINIMUM_WEBSOCKET_MESSAGE_SIZE);
+		}
 		this.decoders.put(session.getId(), new BufferingStompDecoder(getMessageSizeLimit()));
 	}
 

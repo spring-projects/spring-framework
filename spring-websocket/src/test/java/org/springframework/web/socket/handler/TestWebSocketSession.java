@@ -146,6 +146,24 @@ public class TestWebSocketSession implements WebSocketSession {
 	}
 
 	@Override
+	public void setTextMessageSizeLimit(int messageSizeLimit) {
+	}
+
+	@Override
+	public int getTextMessageSizeLimit() {
+		return 0;
+	}
+
+	@Override
+	public void setBinaryMessageSizeLimit(int messageSizeLimit) {
+	}
+
+	@Override
+	public int getBinaryMessageSizeLimit() {
+		return 0;
+	}
+
+	@Override
 	public List<WebSocketExtension> getExtensions() {
 		return this.extensions;
 	}

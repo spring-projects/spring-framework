@@ -127,6 +127,30 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 	}
 
 	@Override
+	public void setTextMessageSizeLimit(int messageSizeLimit) {
+		checkNativeSessionInitialized();
+		getNativeSession().getPolicy().setMaxTextMessageSize(messageSizeLimit);
+	}
+
+	@Override
+	public int getTextMessageSizeLimit() {
+		checkNativeSessionInitialized();
+		return getNativeSession().getPolicy().getMaxTextMessageSize();
+	}
+
+	@Override
+	public void setBinaryMessageSizeLimit(int messageSizeLimit) {
+		checkNativeSessionInitialized();
+		getNativeSession().getPolicy().setMaxBinaryMessageSize(messageSizeLimit);
+	}
+
+	@Override
+	public int getBinaryMessageSizeLimit() {
+		checkNativeSessionInitialized();
+		return getNativeSession().getPolicy().getMaxBinaryMessageSize();
+	}
+
+	@Override
 	public List<WebSocketExtension> getExtensions() {
 		checkNativeSessionInitialized();
 		if(this.extensions == null) {

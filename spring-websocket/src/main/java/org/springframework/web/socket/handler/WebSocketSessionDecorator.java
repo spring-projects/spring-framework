@@ -119,6 +119,26 @@ public class WebSocketSessionDecorator implements WebSocketSession {
 	}
 
 	@Override
+	public void setTextMessageSizeLimit(int messageSizeLimit) {
+		this.delegate.setTextMessageSizeLimit(messageSizeLimit);
+	}
+
+	@Override
+	public int getTextMessageSizeLimit() {
+		return this.delegate.getTextMessageSizeLimit();
+	}
+
+	@Override
+	public void setBinaryMessageSizeLimit(int messageSizeLimit) {
+		this.delegate.setBinaryMessageSizeLimit(messageSizeLimit);
+	}
+
+	@Override
+	public int getBinaryMessageSizeLimit() {
+		return this.delegate.getBinaryMessageSizeLimit();
+	}
+
+	@Override
 	public boolean isOpen() {
 		return this.delegate.isOpen();
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,6 +138,30 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 		checkNativeSessionInitialized();
 		String protocol = getNativeSession().getNegotiatedSubprotocol();
 		return StringUtils.isEmpty(protocol)? null : protocol;
+	}
+
+	@Override
+	public void setTextMessageSizeLimit(int messageSizeLimit) {
+		checkNativeSessionInitialized();
+		getNativeSession().setMaxTextMessageBufferSize(messageSizeLimit);
+	}
+
+	@Override
+	public int getTextMessageSizeLimit() {
+		checkNativeSessionInitialized();
+		return getNativeSession().getMaxTextMessageBufferSize();
+	}
+
+	@Override
+	public void setBinaryMessageSizeLimit(int messageSizeLimit) {
+		checkNativeSessionInitialized();
+		getNativeSession().setMaxBinaryMessageBufferSize(messageSizeLimit);
+	}
+
+	@Override
+	public int getBinaryMessageSizeLimit() {
+		checkNativeSessionInitialized();
+		return getNativeSession().getMaxBinaryMessageBufferSize();
 	}
 
 	@Override
