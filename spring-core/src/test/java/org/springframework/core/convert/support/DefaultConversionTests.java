@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,8 @@ import static org.junit.Assert.*;
  */
 public class DefaultConversionTests {
 
-	private DefaultConversionService conversionService = new DefaultConversionService();
+	private final DefaultConversionService conversionService = new DefaultConversionService();
+
 
 	@Test
 	public void testStringToCharacter() {
@@ -724,62 +725,6 @@ public class DefaultConversionTests {
 		conversionService.convert(new Long(3), SSN.class);
 	}
 
-	public Object assignableTarget;
-
-	private static class SSN {
-
-		private String value;
-
-		public SSN(String value) {
-			this.value = value;
-		}
-
-		public boolean equals(Object o) {
-			if (!(o instanceof SSN)) {
-				return false;
-			}
-			SSN ssn = (SSN) o;
-			return this.value.equals(ssn.value);
-		}
-
-		public int hashCode() {
-			return value.hashCode();
-		}
-
-		public String toString() {
-			return value;
-		}
-	}
-
-	private static class ISBN {
-
-		private String value;
-
-		private ISBN(String value) {
-			this.value = value;
-		}
-
-		public boolean equals(Object o) {
-			if (!(o instanceof ISBN)) {
-				return false;
-			}
-			ISBN isbn = (ISBN) o;
-			return this.value.equals(isbn.value);
-		}
-
-		public int hashCode() {
-			return value.hashCode();
-		}
-
-		public String toString() {
-			return value;
-		}
-
-		public static ISBN valueOf(String value) {
-			return new ISBN(value);
-		}
-	}
-
 	@Test
 	public void convertObjectToObjectFinderMethod() {
 		TestEntity e = conversionService.convert(1L, TestEntity.class);
@@ -822,6 +767,16 @@ public class DefaultConversionTests {
 		assertThat(converted, equalTo(new char[] { 'a', 'b', 'c' }));
 	}
 
+	@Test
+	public void multidimensionalArrayToListConversionShouldConvertEntriesCorrectly() {
+		String[][] grid = new String[][] { new String[] { "1", "2", "3", "4" }, new String[] { "5", "6", "7", "8" },
+				new String[] { "9", "10", "11", "12" } };
+		List<String[]> converted = conversionService.convert(grid, List.class);
+		String[][] convertedBack = conversionService.convert(converted, String[][].class);
+		assertArrayEquals(grid, convertedBack);
+	}
+
+
 	public static class TestEntity {
 
 		private Long id;
@@ -839,6 +794,7 @@ public class DefaultConversionTests {
 		}
 	}
 
+
 	private static class ListWrapper {
 
 		private List<?> list;
@@ -849,6 +805,71 @@ public class DefaultConversionTests {
 
 		public List<?> getList() {
 			return list;
+		}
+	}
+
+
+	public Object assignableTarget;
+
+
+	private static class SSN {
+
+		private String value;
+
+		public SSN(String value) {
+			this.value = value;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (!(o instanceof SSN)) {
+				return false;
+			}
+			SSN ssn = (SSN) o;
+			return this.value.equals(ssn.value);
+		}
+
+		@Override
+		public int hashCode() {
+			return value.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return value;
+		}
+	}
+
+
+	private static class ISBN {
+
+		private String value;
+
+		private ISBN(String value) {
+			this.value = value;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (!(o instanceof ISBN)) {
+				return false;
+			}
+			ISBN isbn = (ISBN) o;
+			return this.value.equals(isbn.value);
+		}
+
+		@Override
+		public int hashCode() {
+			return value.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return value;
+		}
+
+		public static ISBN valueOf(String value) {
+			return new ISBN(value);
 		}
 	}
 
