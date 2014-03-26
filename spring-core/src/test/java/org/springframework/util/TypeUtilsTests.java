@@ -125,4 +125,9 @@ public class TypeUtilsTests {
 		assertTrue(TypeUtils.isAssignable(openArrayType, arrayType));
 	}
 
+	@Test
+	public void dummyMethodForTesting() {
+		assertTrue(true);
+	}
+
 }
