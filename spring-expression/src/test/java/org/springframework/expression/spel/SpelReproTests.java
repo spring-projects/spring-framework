@@ -286,6 +286,11 @@ public class SpelReproTests extends ExpressionTestCase {
 	static class MapAccessor implements PropertyAccessor {
 
 		@Override
+		public Class<?>[] getSpecificTargetClasses() {
+			return new Class<?>[] {Map.class};
+		}
+
+		@Override
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
 			return (((Map<?, ?>) target).containsKey(name));
 		}
@@ -304,11 +309,6 @@ public class SpelReproTests extends ExpressionTestCase {
 		@SuppressWarnings("unchecked")
 		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
 			((Map<String, Object>) target).put(name, newValue);
-		}
-
-		@Override
-		public Class<?>[] getSpecificTargetClasses() {
-			return new Class[] { Map.class };
 		}
 	}
 
@@ -1828,9 +1828,11 @@ public class SpelReproTests extends ExpressionTestCase {
 
 	@Test
 	public void SPR11609() {
+		StandardEvaluationContext sec = new StandardEvaluationContext();
+		sec.addPropertyAccessor(new MapAccessor());
 		Expression exp = new SpelExpressionParser().parseExpression(
 				"T(org.springframework.expression.spel.SpelReproTests$MapWithConstant).X");
-		assertEquals(1, exp.getValue());
+		assertEquals(1, exp.getValue(sec));
 	}
 
 
