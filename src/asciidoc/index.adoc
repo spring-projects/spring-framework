@@ -37340,7 +37340,7 @@ e.g. for authentication purposes or clustering with sticky sessions.
 Spring's SockJS support includes a property called `sessionCookieNeeded`.
 It is enabled by default since most Java applications rely on the `JSESSIONID`
 cookie. If your application does not need it, you can turn off this option
-and the SockJS client should choose the `xhr-streaming` transport in IE 8 and 9.
+and the SockJS client should choose `xdr-streaming` in IE 8 and 9.
 
 If you do use an iframe-based transport, and in any case, it is good to know
 that browsers can be instructed to block the use of iframes on a given page by
@@ -38202,11 +38202,11 @@ Here is example configuration:
 ----
 
 An important point about scaling is using multiple application instances.
-Currently this is not possible to do that with the simple broker.
+Currently it is not possible to do that with the simple broker.
 However when using a full-featured broker such as RabbitMQ, each application
 instance connects to the broker and messages broadcast from one application
-instance are broadcast to WebSocket clients connected through all
-application instances.
+instance can be broadcast through the broker to WebSocket clients connected
+through any other application instances.
 
 
 
