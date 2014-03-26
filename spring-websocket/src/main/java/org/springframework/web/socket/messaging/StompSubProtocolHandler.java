@@ -205,7 +205,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			this.eventPublisher.publishEvent(event);
 		}
 		catch (Throwable ex) {
-			logger.error("Failed to publish event " + event, ex);
+			logger.error("Error while publishing " + event, ex);
 		}
 	}
 
