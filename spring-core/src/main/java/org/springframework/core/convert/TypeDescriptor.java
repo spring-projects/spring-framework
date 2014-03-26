@@ -325,9 +325,7 @@ public class TypeDescriptor implements Serializable {
 		if (this.resolvableType.isArray()) {
 			return new TypeDescriptor(this.resolvableType.getComponentType(), null, this.annotations);
 		}
-		Assert.state(isCollection(), "Not an array or java.util.Collection");
 		return getRelatedIfResolvable(this, this.resolvableType.asCollection().getGeneric());
-
 	}
 
 	/**
