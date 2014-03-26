@@ -23,12 +23,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.OrderComparator;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -50,12 +53,15 @@ import org.springframework.util.ObjectUtils;
  * @see #getApplicationListeners(ApplicationEvent)
  * @see SimpleApplicationEventMulticaster
  */
-public abstract class AbstractApplicationEventMulticaster implements ApplicationEventMulticaster, BeanFactoryAware {
+public abstract class AbstractApplicationEventMulticaster
+		implements ApplicationEventMulticaster, BeanClassLoaderAware, BeanFactoryAware {
 
 	private final ListenerRetriever defaultRetriever = new ListenerRetriever(false);
 
 	private final Map<ListenerCacheKey, ListenerRetriever> retrieverCache =
 			new ConcurrentHashMap<ListenerCacheKey, ListenerRetriever>(64);
+
+	private ClassLoader beanClassLoader;
 
 	private BeanFactory beanFactory;
 
@@ -102,8 +108,16 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 	}
 
 	@Override
-	public final void setBeanFactory(BeanFactory beanFactory) {
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
+	}
+
+	@Override
+	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
+		if (this.beanClassLoader == null && beanFactory instanceof ConfigurableBeanFactory) {
+			this.beanClassLoader = ((ConfigurableBeanFactory) beanFactory).getBeanClassLoader();
+		}
 	}
 
 	private BeanFactory getBeanFactory() {
@@ -179,7 +193,11 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 				}
 			}
 			OrderComparator.sort(allListeners);
-			this.retrieverCache.put(cacheKey, retriever);
+			if (this.beanClassLoader == null ||
+					(ClassUtils.isCacheSafe(eventType, this.beanClassLoader) &&
+							(sourceType == null || ClassUtils.isCacheSafe(sourceType, this.beanClassLoader)))) {
+				this.retrieverCache.put(cacheKey, retriever);
+			}
 			return allListeners;
 		}
 	}
