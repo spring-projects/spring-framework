@@ -378,14 +378,14 @@ project("spring-oxm") {
 	dependencies {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
-		optional("com.thoughtworks.xstream:xstream:1.4.4")
-		optional("org.jibx:jibx-run:1.2.5")
-		optional("org.apache.xmlbeans:xmlbeans:2.6.0")
 		optional("org.codehaus.castor:castor-xml:1.3.2")
+		optional("org.apache.xmlbeans:xmlbeans:2.6.0")
+		optional("com.thoughtworks.xstream:xstream:1.4.7")
+		optional("org.jibx:jibx-run:1.2.5")
 		testCompile(project(":spring-context"))
-		testCompile("org.codehaus.jettison:jettison:1.0.1")
 		testCompile("xmlunit:xmlunit:1.3")
 		testCompile("xmlpull:xmlpull:1.1.3.4a")
+		testCompile("org.codehaus.jettison:jettison:1.0.1")
 		testCompile(files(genCastor.classesDir).builtBy(genCastor))
 		testCompile(files(genJaxb.classesDir).builtBy(genJaxb))
 		testCompile(files(genXmlbeans.classesDir).builtBy(genXmlbeans))
@@ -547,8 +547,8 @@ project("spring-orm-hibernate4") {
 		provided(project(":spring-jdbc"))
 		provided(project(":spring-tx"))
 		optional(project(":spring-web"))
-		optional("org.hibernate:hibernate-core:4.2.10.Final")
-		optional("org.hibernate:hibernate-entitymanager:4.2.10.Final")
+		optional("org.hibernate:hibernate-core:4.2.11.Final")
+		optional("org.hibernate:hibernate-entitymanager:4.2.11.Final")
 		optional("javax.servlet:servlet-api:2.5")
 	}
 }
@@ -623,21 +623,20 @@ project("spring-webmvc-tiles3") {
 		optional("javax.servlet.jsp:jsp-api:2.1")
 		optional("javax.servlet:jstl:1.2")
 		optional("javax.el:el-api:1.0")
-		optional("org.apache.tiles:tiles-request-api:1.0.1")
-		optional("org.apache.tiles:tiles-api:3.0.1")
-		optional("org.apache.tiles:tiles-core:3.0.1") {
+		optional("org.apache.tiles:tiles-api:3.0.3")
+		optional("org.apache.tiles:tiles-core:3.0.3") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		optional("org.apache.tiles:tiles-servlet:3.0.1") {
+		optional("org.apache.tiles:tiles-servlet:3.0.3") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		optional("org.apache.tiles:tiles-jsp:3.0.1") {
+		optional("org.apache.tiles:tiles-jsp:3.0.3") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		optional("org.apache.tiles:tiles-el:3.0.1") {
+		optional("org.apache.tiles:tiles-el:3.0.3") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		optional("org.apache.tiles:tiles-extras:3.0.1") {
+		optional("org.apache.tiles:tiles-extras:3.0.3") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 			exclude group: "org.springframework", module: "spring-web"
 		}
@@ -731,16 +730,15 @@ project("spring-test-mvc") {
 		testCompile("javax.servlet:jstl:1.2")
 		testCompile("javax.mail:mail:1.4.7")
 		testCompile("org.hibernate:hibernate-validator:4.3.1.Final")
-		testCompile("com.thoughtworks.xstream:xstream:1.3.1")
+		testCompile("com.thoughtworks.xstream:xstream:1.4.7")
 		testCompile("org.codehaus.jackson:jackson-mapper-asl:1.7.9")
 		testCompile("com.fasterxml.jackson.core:jackson-databind:2.0.6")
 		testCompile("rome:rome:1.0")
-		testCompile("org.apache.tiles:tiles-request-api:1.0.1")
-		testCompile("org.apache.tiles:tiles-api:3.0.1")
-		testCompile("org.apache.tiles:tiles-core:3.0.1") {
+		testCompile("org.apache.tiles:tiles-api:3.0.3")
+		testCompile("org.apache.tiles:tiles-core:3.0.3") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		testCompile("org.apache.tiles:tiles-servlet:3.0.1") {
+		testCompile("org.apache.tiles:tiles-servlet:3.0.3") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
@@ -865,7 +863,7 @@ configure(rootProject) {
 		testCompile("javax.inject:javax.inject:1")
 		testCompile("javax.resource:connector-api:1.5")
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
-		testCompile("org.hibernate:hibernate-core:4.2.8.Final")
+		testCompile("org.hibernate:hibernate-core:4.2.11.Final")
 		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
 	}
 
