@@ -30,8 +30,7 @@ import org.springframework.util.ClassUtils;
  * @author Ramnivas Laddad
  * @author Juergen Hoeller
  * @author Chris Beams
- * @author Jemma Lee
- * @author Taehyun
+ * @author Youngjee Lee
  * @since 2.0.7
  */
 public abstract class TypeUtils {
