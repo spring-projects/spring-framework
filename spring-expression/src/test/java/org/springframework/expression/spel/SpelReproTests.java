@@ -1769,10 +1769,10 @@ public class SpelReproTests extends ExpressionTestCase {
 	public void SPR10486() throws Exception {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		SPR10486 rootObject = new SPR10486();
+		Spr10486 rootObject = new Spr10486();
 		Expression classNameExpression = parser.parseExpression("class.name");
 		Expression nameExpression = parser.parseExpression("name");
-		assertThat(classNameExpression.getValue(context, rootObject), equalTo((Object) SPR10486.class.getName()));
+		assertThat(classNameExpression.getValue(context, rootObject), equalTo((Object) Spr10486.class.getName()));
 		assertThat(nameExpression.getValue(context, rootObject), equalTo((Object) "name"));
 	}
 
@@ -1780,7 +1780,7 @@ public class SpelReproTests extends ExpressionTestCase {
 	public void SPR11142() throws Exception {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		SPR11142 rootObject = new SPR11142();
+		Spr11142 rootObject = new Spr11142();
 		Expression expression = parser.parseExpression("something");
 		thrown.expect(SpelEvaluationException.class);
 		thrown.expectMessage("'something' cannot be found");
@@ -1819,31 +1819,18 @@ public class SpelReproTests extends ExpressionTestCase {
 		assertEquals(1, expr.getValue(context));
 	}
 
-
-	static class Spr11445Class implements BeanResolver {
-
-		private final AtomicInteger counter = new AtomicInteger();
-
-		public int echo(int invocation) {
-			return invocation;
-		}
-
-		public int parameter() {
-			return counter.incrementAndGet();
-		}
-
-		@Override
-		public Object resolve(EvaluationContext context, String beanName) throws AccessException {
-			return beanName.equals("bean") ? this : null;
-		}
-	}
-
-
 	@Test
 	public void SPR11494() {
 		Expression exp = new SpelExpressionParser().parseExpression("T(java.util.Arrays).asList('a','b')");
 		List<String> list = (List<String>) exp.getValue();
 		assertThat(list.size(), is(2));
+	}
+
+	@Test
+	public void SPR11609() {
+		Expression exp = new SpelExpressionParser().parseExpression(
+				"T(org.springframework.expression.spel.SpelReproTests$MapWithConstant).X");
+		assertEquals(1, exp.getValue());
 	}
 
 
@@ -1921,7 +1908,7 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 
-	public static class SPR10486 {
+	public static class Spr10486 {
 
 		private String name = "name";
 
@@ -1935,7 +1922,7 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 
-	static class SPR11142 {
+	static class Spr11142 {
 
 		public String isSomething() {
 			return "";
@@ -1963,6 +1950,31 @@ public class SpelReproTests extends ExpressionTestCase {
 			}
 			return false;
 		}
+	}
+
+
+	static class Spr11445Class implements BeanResolver {
+
+		private final AtomicInteger counter = new AtomicInteger();
+
+		public int echo(int invocation) {
+			return invocation;
+		}
+
+		public int parameter() {
+			return counter.incrementAndGet();
+		}
+
+		@Override
+		public Object resolve(EvaluationContext context, String beanName) throws AccessException {
+			return beanName.equals("bean") ? this : null;
+		}
+	}
+
+
+	public static class MapWithConstant extends HashMap {
+
+		public static final int X = 1;
 	}
 
 }

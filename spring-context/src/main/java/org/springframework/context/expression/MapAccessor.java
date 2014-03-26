@@ -57,8 +57,8 @@ public class MapAccessor implements PropertyAccessor {
 		map.put(name, newValue);
 	}
 
-	public Class[] getSpecificTargetClasses() {
-		return new Class[] {Map.class};
+	public Class<?>[] getSpecificTargetClasses() {
+		return new Class<?>[] {Map.class};
 	}
 
 
