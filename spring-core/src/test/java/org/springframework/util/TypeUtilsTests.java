@@ -127,6 +127,7 @@ public class TypeUtilsTests {
 
 	@Test
 	public void dummyMethodForTesting() {
+		//Test
 		assertTrue(true);
 	}
 
