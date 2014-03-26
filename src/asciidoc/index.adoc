@@ -29960,7 +29960,8 @@ To use Servlet 3 async request processing, you need to update `web.xml` to versi
 ----
 	<web-app xmlns="http://java.sun.com/xml/ns/javaee"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+				http://java.sun.com/xml/ns/javaee
+				http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 		version="3.0">
 
 		...
@@ -29974,6 +29975,43 @@ also needs to get involved in async dispatches should also be configured to supp
 ASYNC dispatcher type. Note that it is safe to enable the ASYNC dispatcher type for all
 filters provided with the Spring Framework since they will not get involved in async
 dispatches unless needed.
+
+[WARNING]
+====
+Note that for some Filters it is absolutely critical to ensure they are mapped to
+be invoked during asynchronous dispatches. For example if a filter such as the
+`OpenEntityManagerInViewFilter` is responsible for releasing database connection
+resources and must be invoked at the end of an async request.
+
+Below is an example of a propertly configured filter:
+====
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="
+				http://java.sun.com/xml/ns/javaee
+				http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+		version="3.0">
+
+		<filter>
+			<filter-name>Spring OpenEntityManagerInViewFilter</filter-name>
+			<filter-class>org.springframework.~.OpenEntityManagerInViewFilter</filter-class>
+			<async-supported>true</async-supported>
+		</filter>
+
+		<filter-mapping>
+			<filter-name>Spring OpenEntityManagerInViewFilter</filter-name>
+			<url-pattern>/*</url-pattern>
+			<dispatcher>REQUEST</dispatcher>
+			<dispatcher>ASYNC</dispatcher>
+		</filter-mapping>
+
+	</web-app>
+
+----
 
 If using Servlet 3, Java based configuration, e.g. via `WebApplicationInitializer`,
 you'll also need to set the "asyncSupported" flag as well as the ASYNC dispatcher type
