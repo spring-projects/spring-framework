@@ -37697,10 +37697,10 @@ Or if connecting via WebSocket (without SockJS):
 	}
 ----
 
-Note that the stompClient above need does not specify a `login` and `passcode` headers.
+Note that the stompClient above does not need to specify a `login` and `passcode` headers.
 Even if it did, they would be ignored, or rather overridden, on the server side. See the
 sections <<websocket-stomp-handle-broker-relay-configure>> and
-<<websocket-stomp-handle-user>> for more information on authentication.
+<<websocket-stomp-authentication>> for more information on authentication.
 
 
 [[websocket-stomp-message-flow]]
@@ -38042,20 +38042,48 @@ and may be useful for example in a cloud environment where the actual host to wh
 the TCP connection is established is different from the host providing the
 cloud-based STOMP service.
 
-[[websocket-stomp-handle-user]]
-==== Authentication and User Destinations
+[[websocket-stomp-authentication]]
+==== Authentication
 
-An application can also send messages targeting a specific user.
+In a WebSocket-style application it is often useful to know who sent a message.
+Therefore some form of authentication is needed to establish the user identity
+and associate it with the current session.
 
-To do so a user must first be authenticated. Although the STOMP `CONNECT` frame
-has authentication headers when used over WebSocket, it makes more sense to use
-the same HTTP-based authentication already used to secure the application.
+Existing Web applications already use HTTP based authentication.
+For example Spring Security can secure the HTTP URLs of the application as usual.
+Since a WebSocket session begins with an HTTP handshake, that means URLs mapped
+to STOMP/WebSocket are already automatically protected and require authentication.
+Moreover the page that opens the WebSocket connection is itself likely protected
+and so by the time of the actual handshake, the user should have been authenticated.
 
-For example, an application can use Spring Security as usual to protect HTTP URLs,
-including paths to STOMP WebSocket endpoint(s). The authenticanted user, based
-on the value returned from `HttpServletRequest.getUserPrincipal()`, will be
-saved in the WebSocket session and subsequently added as a header named `user`
-to all incoming messages for that STOMP/WebSocket session.
+When a WebSocket handshake is made and a new WebSocket session created,
+Spring's WebSocket support automatically transfers the `java.security.Principal`
+from the HTTP request to the WebSocket session. After that every message flowing
+through the application on that WebSocket session is enriched with
+the user information. It's present in the message as a header.
+Controller methods can access the current user by adding a method argument of
+type `javax.security.Principal`.
+
+Note that even though the STOMP `CONNECT` frame has "login" and "passcode" headers
+that can be used for authentication, Spring's STOMP WebSocket support ignores them
+and currently expects users to have been authenticated already via HTTP.
+
+In some cases it may be useful to assign an identity to WebSocket session even
+when the user has not formally authenticated. For example a mobile app might
+assign some identity to anonymous users, perhaps based on geographical location.
+The do that currently, an application can sub-class `DefaultHandshakeHandler`
+and override the `determineUser` method. The custom handshake handler can then
+be plugged in (see examples in <<websocket-server-deployment>>).
+
+
+
+[[websocket-stomp-user-destination]]
+==== User Destinations
+
+An application can send messages targeting a specific user.
+In order for a connected user to receive messages, they must be authenticated
+so that their session is associated with a concrete user name.
+See the previous section on information about authentication.
 
 Spring's STOMP support recognizes destinations prefixed with `/user/`.
 For example, a client can subscribe to destination `/user/position-updates`.
