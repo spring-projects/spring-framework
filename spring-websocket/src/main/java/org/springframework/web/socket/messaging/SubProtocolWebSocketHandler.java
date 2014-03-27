@@ -16,6 +16,7 @@
 
 package org.springframework.web.socket.messaging;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -221,8 +222,19 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 	@Override
 	public final void stop() {
 		synchronized (this.lifecycleMonitor) {
+
 			this.running = false;
 			this.clientOutboundChannel.unsubscribe(this);
+
+			// Notify sessions to stop flushing messages
+			for (WebSocketSession session : this.sessions.values()) {
+				try {
+					session.close(CloseStatus.GOING_AWAY);
+				}
+				catch (Throwable t) {
+					logger.error("Failed to close session id '" + session.getId() + "': " + t.getMessage());
+				}
+			}
 		}
 	}
 
@@ -298,7 +310,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 
 		WebSocketSession session = this.sessions.get(sessionId);
 		if (session == null) {
-			logger.error("Session not found for session with id " + sessionId);
+			logger.error("Session not found for session with id '" + sessionId + "', ignoring message " + message);
 			return;
 		}
 
