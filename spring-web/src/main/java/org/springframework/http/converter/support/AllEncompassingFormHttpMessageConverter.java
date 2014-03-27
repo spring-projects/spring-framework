@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.converter.support;
 
 import javax.xml.transform.Source;
@@ -39,10 +40,6 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", AllEncompassingFormHttpMessageConverter.class.getClassLoader()) &&
 					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", AllEncompassingFormHttpMessageConverter.class.getClassLoader());
 
-	private static final boolean jacksonPresent =
-			ClassUtils.isPresent("org.codehaus.jackson.map.ObjectMapper", AllEncompassingFormHttpMessageConverter.class.getClassLoader()) &&
-					ClassUtils.isPresent("org.codehaus.jackson.JsonGenerator", AllEncompassingFormHttpMessageConverter.class.getClassLoader());
-
 
 	@SuppressWarnings("deprecation")
 	public AllEncompassingFormHttpMessageConverter() {
@@ -52,9 +49,6 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 		}
 		if (jackson2Present) {
 			addPartConverter(new MappingJackson2HttpMessageConverter());
-		}
-		else if (jacksonPresent) {
-			addPartConverter(new org.springframework.http.converter.json.MappingJacksonHttpMessageConverter());
 		}
 	}
 

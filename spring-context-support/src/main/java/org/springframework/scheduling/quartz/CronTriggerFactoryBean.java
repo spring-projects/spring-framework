@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.scheduling.quartz;
 
-import java.lang.reflect.Method;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
@@ -25,16 +25,13 @@ import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
+import org.quartz.impl.triggers.CronTriggerImpl;
 
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Constants;
 import org.springframework.util.Assert;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * A Spring {@link FactoryBean} for creating a Quartz {@link org.quartz.CronTrigger}
@@ -49,9 +46,6 @@ import org.springframework.util.ReflectionUtils;
  * to automatically register a trigger for the corresponding JobDetail,
  * instead of registering the JobDetail separately.
  *
- * <p><b>NOTE:</b> This FactoryBean works against both Quartz 1.x and Quartz 2.x,
- * in contrast to the older {@link CronTriggerBean} class.
- *
  * @author Juergen Hoeller
  * @since 3.1
  * @see #setName
@@ -60,7 +54,6 @@ import org.springframework.util.ReflectionUtils;
  * @see #setJobDetail
  * @see SchedulerFactoryBean#setTriggers
  * @see SchedulerFactoryBean#setJobDetails
- * @see SimpleTriggerBean
  */
 public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNameAware, InitializingBean {
 
@@ -139,7 +132,6 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 	 * in contrast to objects in the JobDetail's data map.
 	 * @param jobDataAsMap Map with String keys and any objects as values
 	 * (for example Spring-managed beans)
-	 * @see org.springframework.scheduling.quartz.JobDetailBean#setJobDataAsMap
 	 */
 	public void setJobDataAsMap(Map<String, ?> jobDataAsMap) {
 		this.jobDataMap.putAll(jobDataAsMap);
@@ -225,7 +217,7 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 
 
 	@Override
-	public void afterPropertiesSet() {
+	public void afterPropertiesSet() throws ParseException {
 		if (this.name == null) {
 			this.name = this.beanName;
 		}
@@ -233,7 +225,7 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 			this.group = Scheduler.DEFAULT_GROUP;
 		}
 		if (this.jobDetail != null) {
-			this.jobDataMap.put(JobDetailAwareTrigger.JOB_DETAIL_KEY, this.jobDetail);
+			this.jobDataMap.put("jobDetail", this.jobDetail);
 		}
 		if (this.startDelay > 0 || this.startTime == null) {
 			this.startTime = new Date(System.currentTimeMillis() + this.startDelay);
@@ -242,7 +234,6 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 			this.timeZone = TimeZone.getDefault();
 		}
 
-		/*
 		CronTriggerImpl cti = new CronTriggerImpl();
 		cti.setName(this.name);
 		cti.setGroup(this.group);
@@ -256,42 +247,6 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 		cti.setMisfireInstruction(this.misfireInstruction);
 		cti.setDescription(this.description);
 		this.cronTrigger = cti;
-		*/
-
-		Class<?> cronTriggerClass;
-		Method jobKeyMethod;
-		try {
-			cronTriggerClass = getClass().getClassLoader().loadClass("org.quartz.impl.triggers.CronTriggerImpl");
-			jobKeyMethod = JobDetail.class.getMethod("getKey");
-		}
-		catch (ClassNotFoundException ex) {
-			cronTriggerClass = CronTrigger.class;
-			jobKeyMethod = null;
-		}
-		catch (NoSuchMethodException ex) {
-			throw new IllegalStateException("Incompatible Quartz version");
-		}
-		BeanWrapper bw = new BeanWrapperImpl(cronTriggerClass);
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.add("name", this.name);
-		pvs.add("group", this.group);
-		if (jobKeyMethod != null) {
-			pvs.add("jobKey", ReflectionUtils.invokeMethod(jobKeyMethod, this.jobDetail));
-		}
-		else {
-			pvs.add("jobName", this.jobDetail.getName());
-			pvs.add("jobGroup", this.jobDetail.getGroup());
-		}
-		pvs.add("jobDataMap", this.jobDataMap);
-		pvs.add("startTime", this.startTime);
-		pvs.add("cronExpression", this.cronExpression);
-		pvs.add("timeZone", this.timeZone);
-		pvs.add("calendarName", this.calendarName);
-		pvs.add("priority", this.priority);
-		pvs.add("misfireInstruction", this.misfireInstruction);
-		pvs.add("description", this.description);
-		bw.setPropertyValues(pvs);
-		this.cronTrigger = (CronTrigger) bw.getWrappedInstance();
 	}
 
 

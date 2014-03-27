@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,9 +52,8 @@ import org.springframework.util.ClassUtils;
  * <p>Note: If the named Cache instance is found, the properties will be ignored and the
  * Cache instance will be retrieved from the CacheManager.
  *
- * <p>Note: As of Spring 4.0, Spring's EhCache support requires EhCache 2.1 or higher.
- * We recommend the use of EhCache 2.5 or higher.
-
+ * <p>Note: As of Spring 4.1, Spring's EhCache support requires EhCache 2.5 or higher.
+ *
  * @author Juergen Hoeller
  * @author Dmitriy Kopylenko
  * @since 1.1.1
@@ -92,10 +91,8 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 	private Ehcache cache;
 
 
-	@SuppressWarnings("deprecation")
 	public EhCacheFactoryBean() {
-		// Using deprecated setMaxElementsInMemory method for EhCache 2.1-2.4 compatibility
-		setMaxElementsInMemory(10000);
+		setMaxEntriesLocalHeap(10000);
 		setMaxElementsOnDisk(10000000);
 		setTimeToLiveSeconds(120);
 		setTimeToIdleSeconds(120);

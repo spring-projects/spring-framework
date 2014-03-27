@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
  * Spring bean-style class for accessing a Quartz Scheduler, i.e. for registering jobs,
  * triggers and listeners on a given {@link org.quartz.Scheduler} instance.
  *
- * <p>Compatible with Quartz 1.8 as well as Quartz 2.0-2.2, as of Spring 4.0.
- * <b>Note:</b> Quartz 1.x support is deprecated - please upgrade to Quartz 2.0+.
+ * <p>Compatible with Quartz 2.1.4 and higher, as of Spring 4.1.
  *
  * @author Juergen Hoeller
  * @since 2.5.6

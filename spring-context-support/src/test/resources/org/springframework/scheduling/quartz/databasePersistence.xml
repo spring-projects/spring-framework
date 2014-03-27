@@ -10,11 +10,11 @@
 		<property name="dataSource" ref="dataSource"/>
 	</bean>
 
-	<bean id="trigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
+	<bean id="trigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
 		<property name="repeatInterval" value="1000" />
 		<property name="repeatCount" value="1" />
 		<property name="jobDetail">
-			<bean class="org.springframework.scheduling.quartz.JobDetailBean">
+			<bean class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
 				<property name="jobDataAsMap">
 					<map>
 						<entry key="param" value="10" />

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.scheduling.quartz;
 
-import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.Map;
 
@@ -24,16 +23,13 @@ import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SimpleTrigger;
+import org.quartz.impl.triggers.SimpleTriggerImpl;
 
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Constants;
 import org.springframework.util.Assert;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * A Spring {@link FactoryBean} for creating a Quartz {@link org.quartz.SimpleTrigger}
@@ -48,9 +44,6 @@ import org.springframework.util.ReflectionUtils;
  * to automatically register a trigger for the corresponding JobDetail,
  * instead of registering the JobDetail separately.
  *
- * <p><b>NOTE:</b> This FactoryBean works against both Quartz 1.x and Quartz 2.x,
- * in contrast to the older {@link SimpleTriggerBean} class.
- *
  * @author Juergen Hoeller
  * @since 3.1
  * @see #setName
@@ -59,7 +52,6 @@ import org.springframework.util.ReflectionUtils;
  * @see #setJobDetail
  * @see SchedulerFactoryBean#setTriggers
  * @see SchedulerFactoryBean#setJobDetails
- * @see CronTriggerBean
  */
 public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, BeanNameAware, InitializingBean {
 
@@ -136,7 +128,6 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 	 * in contrast to objects in the JobDetail's data map.
 	 * @param jobDataAsMap Map with String keys and any objects as values
 	 * (for example Spring-managed beans)
-	 * @see org.springframework.scheduling.quartz.JobDetailBean#setJobDataAsMap
 	 */
 	public void setJobDataAsMap(Map<String, ?> jobDataAsMap) {
 		this.jobDataMap.putAll(jobDataAsMap);
@@ -228,13 +219,12 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 			this.group = Scheduler.DEFAULT_GROUP;
 		}
 		if (this.jobDetail != null) {
-			this.jobDataMap.put(JobDetailAwareTrigger.JOB_DETAIL_KEY, this.jobDetail);
+			this.jobDataMap.put("jobDetail", this.jobDetail);
 		}
 		if (this.startDelay > 0 || this.startTime == null) {
 			this.startTime = new Date(System.currentTimeMillis() + this.startDelay);
 		}
 
-		/*
 		SimpleTriggerImpl sti = new SimpleTriggerImpl();
 		sti.setName(this.name);
 		sti.setGroup(this.group);
@@ -245,43 +235,8 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 		sti.setRepeatCount(this.repeatCount);
 		sti.setPriority(this.priority);
 		sti.setMisfireInstruction(this.misfireInstruction);
-		cti.setDescription(this.description);
+		sti.setDescription(this.description);
 		this.simpleTrigger = sti;
-		*/
-
-		Class<?> simpleTriggerClass;
-		Method jobKeyMethod;
-		try {
-			simpleTriggerClass = getClass().getClassLoader().loadClass("org.quartz.impl.triggers.SimpleTriggerImpl");
-			jobKeyMethod = JobDetail.class.getMethod("getKey");
-		}
-		catch (ClassNotFoundException ex) {
-			simpleTriggerClass = SimpleTrigger.class;
-			jobKeyMethod = null;
-		}
-		catch (NoSuchMethodException ex) {
-			throw new IllegalStateException("Incompatible Quartz version");
-		}
-		BeanWrapper bw = new BeanWrapperImpl(simpleTriggerClass);
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.add("name", this.name);
-		pvs.add("group", this.group);
-		if (jobKeyMethod != null) {
-			pvs.add("jobKey", ReflectionUtils.invokeMethod(jobKeyMethod, this.jobDetail));
-		}
-		else {
-			pvs.add("jobName", this.jobDetail.getName());
-			pvs.add("jobGroup", this.jobDetail.getGroup());
-		}
-		pvs.add("jobDataMap", this.jobDataMap);
-		pvs.add("startTime", this.startTime);
-		pvs.add("repeatInterval", this.repeatInterval);
-		pvs.add("repeatCount", this.repeatCount);
-		pvs.add("priority", this.priority);
-		pvs.add("misfireInstruction", this.misfireInstruction);
-		pvs.add("description", this.description);
-		bw.setPropertyValues(pvs);
-		this.simpleTrigger = (SimpleTrigger) bw.getWrappedInstance();
 	}
 
 
