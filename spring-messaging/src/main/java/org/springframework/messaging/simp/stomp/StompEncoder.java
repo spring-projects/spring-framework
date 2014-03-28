@@ -34,6 +34,7 @@ import org.springframework.messaging.simp.SimpMessageType;
  * An encoder for STOMP frames.
  *
  * @author Andy Wilkinson
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
 public final class StompEncoder  {
@@ -95,42 +96,64 @@ public final class StompEncoder  {
 		else if (logger.isDebugEnabled()) {
 			logger.debug("Encoded STOMP command=" + headers.getCommand() + " headers=" + stompHeaders);
 		}
+		boolean escapeHeaders = shouldEscapeHeaders(headers);
 		for (Entry<String, List<String>> entry : stompHeaders.entrySet()) {
-			byte[] key = getUtf8BytesEscapingIfNecessary(entry.getKey(), headers);
+			byte[] key = toUtf8Bytes(entry.getKey(), escapeHeaders);
 			for (String value : entry.getValue()) {
 				output.write(key);
 				output.write(COLON);
-				output.write(getUtf8BytesEscapingIfNecessary(value, headers));
+				output.write(toUtf8Bytes(value, escapeHeaders));
 				output.write(LF);
 			}
 		}
 		if ((headers.getCommand() == StompCommand.SEND) || (headers.getCommand() == StompCommand.MESSAGE) ||
 				(headers.getCommand() == StompCommand.ERROR)) {
 
+			int contentLength = message.getPayload().length;
 			output.write("content-length:".getBytes(UTF8_CHARSET));
-			output.write(Integer.toString(message.getPayload().length).getBytes(UTF8_CHARSET));
+			output.write(Integer.toString(contentLength).getBytes(UTF8_CHARSET));
 			output.write(LF);
 		}
 	}
 
+	private boolean shouldEscapeHeaders(StompHeaderAccessor headers) {
+		return (headers.getCommand() != StompCommand.CONNECT && headers.getCommand() != StompCommand.CONNECTED);
+	}
+
+	private byte[] toUtf8Bytes(String input, boolean escape) {
+		input = escape ? escape(input) : input;
+		return input.getBytes(UTF8_CHARSET);
+	}
+
+	/**
+	 * See STOMP Spec 1.2:
+	 * <a href="http://stomp.github.io/stomp-specification-1.2.html#Value_Encoding">"Value Encoding"</a>.
+	 */
+	private String escape(String inString) {
+		StringBuilder sb = new StringBuilder(inString.length());
+		for (int i = 0; i < inString.length(); i++) {
+			char c = inString.charAt(i);
+			if (c == '\\') {
+				sb.append("\\\\");
+			}
+			else if (c == ':') {
+				sb.append("\\c");
+			}
+			else if (c == '\n') {
+				 sb.append("\\n");
+			}
+			else if (c == '\r') {
+				sb.append("\\r");
+			}
+			else {
+				sb.append(c);
+			}
+		}
+		return sb.toString();
+	}
+
 	private void writeBody(Message<byte[]> message, DataOutputStream output) throws IOException {
 		output.write(message.getPayload());
-	}
-
-	private byte[] getUtf8BytesEscapingIfNecessary(String input, StompHeaderAccessor headers) {
-		if (headers.getCommand() != StompCommand.CONNECT && headers.getCommand() != StompCommand.CONNECTED) {
-			return escape(input).getBytes(UTF8_CHARSET);
-		}
-		else {
-			return input.getBytes(UTF8_CHARSET);
-		}
-	}
-
-	private String escape(String input) {
-		return input.replaceAll("\\\\", "\\\\\\\\")
-				.replaceAll(":", "\\\\c")
-				.replaceAll("\n", "\\\\n")
-				.replaceAll("\r", "\\\\r");
 	}
 
 }
