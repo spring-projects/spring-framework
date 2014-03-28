@@ -54,7 +54,6 @@ public class StompDecoder {
 	private final Log logger = LogFactory.getLog(StompDecoder.class);
 
 
-
 	/**
 	 * Decodes one or more STOMP frames from the given {@code ByteBuffer} into a
 	 * list of {@link Message}s. If the input buffer contains any incplcontains partial STOMP frame content, or additional
@@ -201,11 +200,41 @@ public class StompDecoder {
 		}
 	}
 
-	private String unescape(String input) {
-		return input.replaceAll("\\\\n", "\n")
-				.replaceAll("\\\\r", "\r")
-				.replaceAll("\\\\c", ":")
-				.replaceAll("\\\\\\\\", "\\\\");
+	/**
+	 * See STOMP Spec 1.2:
+	 * <a href="http://stomp.github.io/stomp-specification-1.2.html#Value_Encoding">"Value Encoding"</a>.
+	 */
+	private String unescape(String inString) {
+
+		StringBuilder sb = new StringBuilder();
+		int pos = 0; // position in the old string
+		int index = inString.indexOf("\\");
+
+		while (index >= 0) {
+			sb.append(inString.substring(pos, index));
+			Character c = inString.charAt(index + 1);
+			if (c == 'r') {
+				sb.append('\r');
+			}
+			else if (c == 'n') {
+				sb.append('\n');
+			}
+			else if (c == 'c') {
+				sb.append(':');
+			}
+			else if (c == '\\') {
+				sb.append('\\');
+			}
+			else {
+				// should never happen
+				throw new StompConversionException("Illegal escape sequence at index " + index + ": " + inString);
+			}
+			pos = index + 2;
+			index = inString.indexOf("\\", pos);
+		}
+
+		sb.append(inString.substring(pos));
+		return sb.toString();
 	}
 
 	private byte[] readPayload(ByteBuffer buffer, MultiValueMap<String, String> headers) {

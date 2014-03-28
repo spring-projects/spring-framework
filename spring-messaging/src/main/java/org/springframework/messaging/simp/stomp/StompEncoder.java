@@ -34,6 +34,7 @@ import org.springframework.messaging.simp.SimpMessageType;
  * An encoder for STOMP frames.
  *
  * @author Andy Wilkinson
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
 public final class StompEncoder  {
@@ -54,19 +55,21 @@ public final class StompEncoder  {
 	 */
 	public byte[] encode(Message<byte[]> message) {
 		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream(256);
+			ByteArrayOutputStream baos = new ByteArrayOutputStream(128 + message.getPayload().length);
 			DataOutputStream output = new DataOutputStream(baos);
 
 			StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-			if (isHeartbeat(headers)) {
+			if (SimpMessageType.HEARTBEAT == headers.getMessageType()) {
+				logger.trace("Encoded heartbeat");
 				output.write(message.getPayload());
 			}
 			else {
-				writeCommand(headers, output);
+				output.write(headers.getCommand().toString().getBytes(UTF8_CHARSET));
+				output.write(LF);
 				writeHeaders(headers, message, output);
 				output.write(LF);
 				writeBody(message, output);
-				output.write((byte)0);
+				output.write((byte) 0);
 			}
 
 			return baos.toByteArray();
@@ -76,61 +79,68 @@ public final class StompEncoder  {
 		}
 	}
 
-	private boolean isHeartbeat(StompHeaderAccessor headers) {
-		return (headers.getMessageType() == SimpMessageType.HEARTBEAT);
-	}
-
-	private void writeCommand(StompHeaderAccessor headers, DataOutputStream output) throws IOException {
-		output.write(headers.getCommand().toString().getBytes(UTF8_CHARSET));
-		output.write(LF);
-	}
-
 	private void writeHeaders(StompHeaderAccessor headers, Message<byte[]> message, DataOutputStream output)
 			throws IOException {
 
+		StompCommand command = headers.getCommand();
 		Map<String,List<String>> stompHeaders = headers.toStompHeaderMap();
-		if (SimpMessageType.HEARTBEAT.equals(headers.getMessageType())) {
-			logger.trace("Encoded heartbeat");
+		boolean shouldEscape = (command != StompCommand.CONNECT && command != StompCommand.CONNECTED);
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Encoded STOMP " + command + ", headers=" + stompHeaders);
 		}
-		else if (logger.isDebugEnabled()) {
-			logger.debug("Encoded STOMP command=" + headers.getCommand() + " headers=" + stompHeaders);
-		}
+
 		for (Entry<String, List<String>> entry : stompHeaders.entrySet()) {
-			byte[] key = getUtf8BytesEscapingIfNecessary(entry.getKey(), headers);
+			byte[] key = encodeHeaderString(entry.getKey(), shouldEscape);
 			for (String value : entry.getValue()) {
 				output.write(key);
 				output.write(COLON);
-				output.write(getUtf8BytesEscapingIfNecessary(value, headers));
+				output.write(encodeHeaderString(value, shouldEscape));
 				output.write(LF);
 			}
 		}
-		if ((headers.getCommand() == StompCommand.SEND) || (headers.getCommand() == StompCommand.MESSAGE) ||
-				(headers.getCommand() == StompCommand.ERROR)) {
-
+		if (command.requiresContentLength()) {
+			int contentLength = message.getPayload().length;
 			output.write("content-length:".getBytes(UTF8_CHARSET));
-			output.write(Integer.toString(message.getPayload().length).getBytes(UTF8_CHARSET));
+			output.write(Integer.toString(contentLength).getBytes(UTF8_CHARSET));
 			output.write(LF);
 		}
 	}
 
+	private byte[] encodeHeaderString(String input, boolean escape) {
+		input = escape ? escape(input) : input;
+		return input.getBytes(UTF8_CHARSET);
+	}
+
+	/**
+	 * See STOMP Spec 1.2:
+	 * <a href="http://stomp.github.io/stomp-specification-1.2.html#Value_Encoding">"Value Encoding"</a>.
+	 */
+	private String escape(String inString) {
+		StringBuilder sb = new StringBuilder(inString.length());
+		for (int i = 0; i < inString.length(); i++) {
+			char c = inString.charAt(i);
+			if (c == '\\') {
+				sb.append("\\\\");
+			}
+			else if (c == ':') {
+				sb.append("\\c");
+			}
+			else if (c == '\n') {
+				 sb.append("\\n");
+			}
+			else if (c == '\r') {
+				sb.append("\\r");
+			}
+			else {
+				sb.append(c);
+			}
+		}
+		return sb.toString();
+	}
+
 	private void writeBody(Message<byte[]> message, DataOutputStream output) throws IOException {
 		output.write(message.getPayload());
-	}
-
-	private byte[] getUtf8BytesEscapingIfNecessary(String input, StompHeaderAccessor headers) {
-		if (headers.getCommand() != StompCommand.CONNECT && headers.getCommand() != StompCommand.CONNECTED) {
-			return escape(input).getBytes(UTF8_CHARSET);
-		}
-		else {
-			return input.getBytes(UTF8_CHARSET);
-		}
-	}
-
-	private String escape(String input) {
-		return input.replaceAll("\\\\", "\\\\\\\\")
-				.replaceAll(":", "\\\\c")
-				.replaceAll("\n", "\\\\n")
-				.replaceAll("\r", "\\\\r");
 	}
 
 }
