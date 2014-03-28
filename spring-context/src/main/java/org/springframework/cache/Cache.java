@@ -29,6 +29,7 @@ package org.springframework.cache;
  */
 public interface Cache {
 
+	
 	/**
 	 * Return the cache name.
 	 */
