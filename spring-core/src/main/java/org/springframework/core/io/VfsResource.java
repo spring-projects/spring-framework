@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
 
 /**
  * VFS based {@link Resource} implementation.
- * Supports the corresponding VFS API versions on JBoss AS 5.x as well as 6.x and 7.x.
+ * Supports the corresponding VFS API versions on JBoss AS 6.x as well as 7.x.
  *
  * @author Ales Justin
  * @author Juergen Hoeller
