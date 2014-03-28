@@ -240,6 +240,7 @@ public class ServletInvocableHandlerMethodTests {
 
 	private static class ResponseEntityHandler {
 
+		@SuppressWarnings("unused")
 		public DeferredResult<ResponseEntity<String>> handle() {
 			return new DeferredResult<>();
 		}

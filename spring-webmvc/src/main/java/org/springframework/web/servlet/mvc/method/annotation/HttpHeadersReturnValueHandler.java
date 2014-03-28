@@ -40,6 +40,7 @@ public class HttpHeadersReturnValueHandler implements HandlerMethodReturnValueHa
 	}
 
 	@Override
+	@SuppressWarnings("resource")
 	public void handleReturnValue(Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
@@ -55,4 +56,5 @@ public class HttpHeadersReturnValueHandler implements HandlerMethodReturnValueHa
 			outputMessage.getBody(); // flush headers
 		}
 	}
+
 }

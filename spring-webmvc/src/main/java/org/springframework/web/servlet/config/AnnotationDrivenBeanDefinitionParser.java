@@ -449,7 +449,6 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return null;
 	}
 
-	@SuppressWarnings("deprecation")
 	private ManagedList<?> getMessageConverters(Element element, Object source, ParserContext parserContext) {
 		Element convertersElement = DomUtils.getChildElementByTagName(element, "message-converters");
 		ManagedList<? super Object> messageConverters = new ManagedList<Object>();

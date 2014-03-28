@@ -173,6 +173,7 @@ public class HttpEntityMethodProcessorTests {
 			return name;
 		}
 
+		@SuppressWarnings("unused")
 		public void setName(String name) {
 			this.name = name;
 		}

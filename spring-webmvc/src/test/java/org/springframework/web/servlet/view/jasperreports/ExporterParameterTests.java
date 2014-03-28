@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.view.jasperreports;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 
@@ -36,17 +35,20 @@ import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
+ * @author Sam Brannen
  */
 public class ExporterParameterTests extends AbstractJasperReportsTests {
 
 	@Test
-	public void testParameterParsing() throws Exception {
-		Map params = new HashMap();
+	public void parameterParsing() throws Exception {
+		Map<String, String> params = new HashMap<String, String>();
 		params.put("net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI", "/foo/bar");
 
 		AbstractJasperReportsView view = new AbstractJasperReportsView() {
+
 			@Override
-			protected void renderReport(JasperPrint filledReport, Map model, HttpServletResponse response)
+			@SuppressWarnings("deprecation")
+			protected void renderReport(JasperPrint filledReport, Map<String, Object> model, HttpServletResponse response)
 					throws Exception {
 
 				assertEquals("Invalid number of exporter parameters", 1, getConvertedExporterParameters().size());
@@ -58,29 +60,6 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 				assertEquals("Incorrect value for parameter", "/foo/bar", value);
 			}
 
-			/**
-			 * Merges the configured {@link net.sf.jasperreports.engine.JRExporterParameter JRExporterParameters} with any specified
-			 * in the supplied model data. {@link net.sf.jasperreports.engine.JRExporterParameter JRExporterParameters} in the model
-			 * override those specified in the configuration.
-			 * @see #setExporterParameters(java.util.Map)
-			 */
-			protected Map mergeExporterParameters(Map model) {
-				Map mergedParameters = new HashMap(getConvertedExporterParameters());
-				for (Iterator iterator = model.keySet().iterator(); iterator.hasNext();) {
-					Object key = iterator.next();
-
-					if (key instanceof JRExporterParameter) {
-						Object value = model.get(key);
-						if (value instanceof String) {
-							mergedParameters.put(key, value);
-						}
-						else {
-							logger.warn("Ignoring exporter parameter [" + key + "]. Value is not a String.");
-						}
-					}
-				}
-				return mergedParameters;
-			}
 		};
 
 		view.setExporterParameters(params);
@@ -88,64 +67,45 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 		view.render(getModel(), request, response);
 	}
 
-	@Test
-	public void testInvalidClass() throws Exception {
-		Map params = new HashMap();
+	@Test(expected = IllegalArgumentException.class)
+	public void invalidClass() throws Exception {
+		Map<String, String> params = new HashMap<String, String>();
 		params.put("foo.net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI", "/foo");
 
 		AbstractJasperReportsView view = new JasperReportsHtmlView();
 		setViewProperties(view);
 
-		try {
-			view.setExporterParameters(params);
-			view.convertExporterParameters();
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		view.setExporterParameters(params);
+		view.convertExporterParameters();
 	}
 
-	@Test
-	public void testInvalidField() {
-		Map params = new HashMap();
+	@Test(expected = IllegalArgumentException.class)
+	public void invalidField() {
+		Map<String, String> params = new HashMap<String, String>();
 		params.put("net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI_FOO", "/foo");
 
 		AbstractJasperReportsView view = new JasperReportsHtmlView();
 		setViewProperties(view);
 
-		try {
-			view.setExporterParameters(params);
-			view.convertExporterParameters();
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		view.setExporterParameters(params);
+		view.convertExporterParameters();
 	}
 
-	@Test
-	public void testInvalidType() {
-		Map params = new HashMap();
+	@Test(expected = IllegalArgumentException.class)
+	public void invalidType() {
+		Map<String, String> params = new HashMap<String, String>();
 		params.put("java.lang.Boolean.TRUE", "/foo");
 
 		AbstractJasperReportsView view = new JasperReportsHtmlView();
 		setViewProperties(view);
 
-		try {
-			view.setExporterParameters(params);
-			view.convertExporterParameters();
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		view.setExporterParameters(params);
+		view.convertExporterParameters();
 	}
 
-
 	@Test
-	public void testTypeConversion() {
-		Map params = new HashMap();
+	public void typeConversion() {
+		Map<String, String> params = new HashMap<String, String>();
 		params.put("net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IS_USING_IMAGES_TO_ALIGN", "true");
 
 		AbstractJasperReportsView view = new JasperReportsHtmlView();

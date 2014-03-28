@@ -334,6 +334,7 @@ public class RequestResponseBodyMethodProcessorTests {
 			return name;
 		}
 
+		@SuppressWarnings("unused")
 		public void setName(String name) {
 			this.name = name;
 		}

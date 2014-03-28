@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -32,6 +33,7 @@ import jxl.read.biff.WorkbookParser;
 import jxl.write.Label;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
+
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -56,6 +58,7 @@ import static org.junit.Assert.*;
  * @author Alef Arendsen
  * @author Bram Smeets
  */
+@SuppressWarnings("deprecation")
 public class ExcelViewTests {
 
 	private MockServletContext servletCtx;
