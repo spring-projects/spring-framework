@@ -44,7 +44,7 @@ public class DefaultKeyGenerator implements KeyGenerator {
 
 	public static final int NO_PARAM_KEY = 0;
 
-	public static final int NULL_PARAM_KEY = 53;
+	public static final int NULL_PARAM_KEY = Integer.MIN_VALUE + 1 ;
 
 
 	@Override
