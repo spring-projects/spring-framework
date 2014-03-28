@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import javax.servlet.http.HttpServletResponse;
 import net.sf.jasperreports.engine.JasperPrint;
 
 import org.junit.Test;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 
 import static org.junit.Assert.*;
 
@@ -41,6 +43,8 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 
 	@Test
 	public void testSimpleHtmlRender() throws Exception {
+		Assume.group(TestGroup.CUSTOM_COMPILATION);
+
 		if (!canCompileReport) {
 			return;
 		}
@@ -58,6 +62,8 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 	@Override
 	@Test
 	public void testOverrideContentDisposition() throws Exception {
+		Assume.group(TestGroup.CUSTOM_COMPILATION);
+
 		if (!canCompileReport) {
 			return;
 		}
@@ -82,6 +88,8 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 
 	@Test
 	public void testExporterParametersAreCarriedAcross() throws Exception {
+		Assume.group(TestGroup.CUSTOM_COMPILATION);
+
 		if (!canCompileReport) {
 			return;
 		}
@@ -134,7 +142,7 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 		public static final String TEST_PARAM = "net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI";
 
 		@Override
-		protected void renderReport(JasperPrint filledReport, Map parameters, HttpServletResponse response) {
+		protected void renderReport(JasperPrint filledReport, Map<String, Object> parameters, HttpServletResponse response) {
 			assertNotNull("Exporter parameters are null", getExporterParameters());
 			assertEquals("Incorrect number of exporter parameters", 1, getExporterParameters().size());
 		}

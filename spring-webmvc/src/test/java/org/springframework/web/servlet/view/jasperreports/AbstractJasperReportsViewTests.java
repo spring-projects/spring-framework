@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,11 @@ import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
 import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.context.ApplicationContextException;
 import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 import org.springframework.ui.jasperreports.PersonBean;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -47,6 +50,7 @@ import static org.mockito.BDDMockito.*;
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public abstract class AbstractJasperReportsViewTests extends AbstractJasperReportsTests {
 
@@ -79,6 +83,8 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 
 	@Test
 	public void testUncompiledReport() throws Exception {
+		Assume.group(TestGroup.CUSTOM_COMPILATION);
+
 		if (!canCompileReport) {
 			return;
 		}
@@ -88,26 +94,14 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		assertTrue(response.getContentAsByteArray().length > 0);
 	}
 
-	@Test
+	@Test(expected = ApplicationContextException.class)
 	public void testWithInvalidPath() throws Exception {
-		try {
-			getView("foo.jasper");
-			fail("Invalid path should throw ApplicationContextException");
-		}
-		catch (ApplicationContextException ex) {
-			// good!
-		}
+		getView("foo.jasper");
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testInvalidExtension() throws Exception {
-		try {
-			getView("foo.bar");
-			fail("Invalid extension should throw IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		getView("foo.bar");
 	}
 
 	@Test
@@ -119,7 +113,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 
 	@Test
 	public void testWithoutDatasource() throws Exception {
-		Map model = getModel();
+		Map<String, Object> model = getModel();
 		model.remove("dataSource");
 		AbstractJasperReportsView view = getView(COMPILED_REPORT);
 		view.render(model, request, response);
@@ -128,7 +122,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 
 	@Test
 	public void testWithCollection() throws Exception {
-		Map model = getModel();
+		Map<String, Object> model = getModel();
 		model.remove("dataSource");
 		model.put("reportData", getData());
 		AbstractJasperReportsView view = getView(COMPILED_REPORT);
@@ -137,8 +131,9 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void testWithMultipleCollections() throws Exception {
-		Map model = getModel();
+		Map<String, Object> model = getModel();
 		model.remove("dataSource");
 		model.put("reportData", getData());
 		model.put("otherData", new LinkedList());
@@ -149,7 +144,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 
 	@Test
 	public void testWithJRDataSourceProvider() throws Exception {
-		Map model = getModel();
+		Map<String, Object> model = getModel();
 		model.remove("dataSource");
 		model.put("dataSource", new MockDataSourceProvider(PersonBean.class));
 		AbstractJasperReportsView view = getView(COMPILED_REPORT);
@@ -158,8 +153,9 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void testWithSpecificCollection() throws Exception {
-		Map model = getModel();
+		Map<String, Object> model = getModel();
 		model.remove("dataSource");
 		model.put("reportData", getData());
 		model.put("otherData", new LinkedList());
@@ -171,7 +167,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 
 	@Test
 	public void testWithArray() throws Exception {
-		Map model = getModel();
+		Map<String, Object> model = getModel();
 		model.remove("dataSource");
 		model.put("reportData", getData().toArray());
 		AbstractJasperReportsView view = getView(COMPILED_REPORT);
@@ -181,7 +177,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 
 	@Test
 	public void testWithMultipleArrays() throws Exception {
-		Map model = getModel();
+		Map<String, Object> model = getModel();
 		model.remove("dataSource");
 		model.put("reportData", getData().toArray());
 		model.put("otherData", new String[0]);
@@ -192,7 +188,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 
 	@Test
 	public void testWithSpecificArray() throws Exception {
-		Map model = getModel();
+		Map<String, Object> model = getModel();
 		model.remove("dataSource");
 		model.put("reportData", getData().toArray());
 		model.put("otherData", new String[0]);
@@ -208,7 +204,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 			return;
 		}
 
-		Map model = getModel();
+		Map<String, Object> model = getModel();
 		model.put("SubReportData", getProductData());
 
 		Properties subReports = new Properties();
@@ -230,7 +226,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 			return;
 		}
 
-		Map model = getModel();
+		Map<String, Object> model = getModel();
 		model.put("SubReportData", getProductData());
 
 		Properties subReports = new Properties();
@@ -243,7 +239,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 
 		try {
 			view.initApplicationContext();
-			fail("Invalid report URL should throw ApplicationContext Exception");
+			fail("Invalid report URL should throw ApplicationContextException");
 		}
 		catch (ApplicationContextException ex) {
 			// success
@@ -261,14 +257,14 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		String characterEncoding = "UTF-8";
 		String overiddenCharacterEncoding = "ASCII";
 
-		Map parameters = new HashMap();
+		Map<Object, Object> parameters = new HashMap<Object, Object>();
 		parameters.put(JRExporterParameter.CHARACTER_ENCODING, characterEncoding);
 
 		view.setExporterParameters(parameters);
 		view.convertExporterParameters();
 
-		Map model = getModel();
-		model.put(JRExporterParameter.CHARACTER_ENCODING, overiddenCharacterEncoding);
+		Map<String, Object> model = getModel();
+		model.put(JRExporterParameter.CHARACTER_ENCODING.toString(), overiddenCharacterEncoding);
 
 		view.render(model, this.request, this.response);
 
@@ -281,7 +277,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 			return;
 		}
 
-		Map model = getModel();
+		Map<String, Object> model = getModel();
 		model.put("SubReportData", getProductData());
 
 		Properties subReports = new Properties();
@@ -339,6 +335,8 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 
 	@Test
 	public void testWithJdbcDataSource() throws Exception {
+		Assume.group(TestGroup.CUSTOM_COMPILATION);
+
 		if (!canCompileReport) {
 			return;
 		}
@@ -346,7 +344,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		AbstractJasperReportsView view = getView(UNCOMPILED_REPORT);
 		view.setJdbcDataSource(getMockJdbcDataSource());
 
-		Map model = getModel();
+		Map<String, Object> model = getModel();
 		model.remove("dataSource");
 
 		try {
@@ -360,13 +358,15 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 
 	@Test
 	public void testWithJdbcDataSourceInModel() throws Exception {
+		Assume.group(TestGroup.CUSTOM_COMPILATION);
+
 		if (!canCompileReport) {
 			return;
 		}
 
 		AbstractJasperReportsView view = getView(UNCOMPILED_REPORT);
 
-		Map model = getModel();
+		Map<String, Object> model = getModel();
 		model.remove("dataSource");
 		model.put("someKey", getMockJdbcDataSource());
 
@@ -381,6 +381,8 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 
 	@Test
 	public void testJRDataSourceOverridesJdbcDataSource() throws Exception {
+		Assume.group(TestGroup.CUSTOM_COMPILATION);
+
 		if (!canCompileReport) {
 			return;
 		}
@@ -412,7 +414,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 
 		String characterEncoding = "UTF-8";
 
-		Map parameters = new HashMap();
+		Map<Object, Object> parameters = new HashMap<Object, Object>();
 		parameters.put(JRExporterParameter.CHARACTER_ENCODING, characterEncoding);
 
 		view.setExporterParameters(parameters);
@@ -430,7 +432,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 
 	private class MockDataSourceProvider extends JRAbstractBeanDataSourceProvider {
 
-		public MockDataSourceProvider(Class clazz) {
+		public MockDataSourceProvider(Class<?> clazz) {
 			super(clazz);
 		}
 
