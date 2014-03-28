@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,11 @@ import org.springframework.core.NestedIOException;
 import org.springframework.util.Assert;
 
 /**
- * VFS based {@link Resource} implementation.
- * Supports the corresponding VFS API versions on JBoss AS 5.x as well as 6.x and 7.x.
+ * JBoss VFS based {@link Resource} implementation.
+ *
+ * <p>As of Spring 4.0, this class supports VFS 3.x on JBoss AS 6+ (package
+ * {@code org.jboss.vfs}) and is in particular compatible with JBoss AS 7 and
+ * WildFly 8.
  *
  * @author Ales Justin
  * @author Juergen Hoeller
@@ -40,9 +43,9 @@ public class VfsResource extends AbstractResource {
 	private final Object resource;
 
 
-	public VfsResource(Object resources) {
-		Assert.notNull(resources, "VirtualFile must not be null");
-		this.resource = resources;
+	public VfsResource(Object resource) {
+		Assert.notNull(resource, "VirtualFile must not be null");
+		this.resource = resource;
 	}
 
 

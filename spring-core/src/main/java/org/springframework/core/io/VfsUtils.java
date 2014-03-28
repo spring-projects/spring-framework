@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,10 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Utility for detecting and accessing JBoss VFS in the classpath.
- * As of Spring 4.0, supports VFS 3.x on JBoss AS 6+ (package {@code org.jboss.vfs})
- * and is in particular compatible with JBoss AS 7 and WildFly 8.
+ *
+ * <p>As of Spring 4.0, this class supports VFS 3.x on JBoss AS 6+ (package
+ * {@code org.jboss.vfs}) and is in particular compatible with JBoss AS 7 and
+ * WildFly 8.
  *
  * <p>Thanks go to Marius Bogoevici for the initial patch.
  * <b>Note:</b> This is an internal class and should not be used outside the framework.
