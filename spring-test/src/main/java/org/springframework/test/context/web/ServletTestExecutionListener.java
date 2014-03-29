@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -115,11 +116,14 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 	}
 
 	/**
-	 * Cleans up thread-local state after each test method by {@linkplain
+	 * If the {@link #RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE} in the supplied
+	 * {@code TestContext} has a value of {@link Boolean#TRUE}, this method will
+	 * (1) clean up thread-local state after each test method by {@linkplain
 	 * RequestContextHolder#resetRequestAttributes() resetting} Spring Web's
-	 * {@code RequestContextHolder}, but only if the {@link
-	 * #RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE} in the supplied {@code TestContext}
-	 * has a value of {@link Boolean#TRUE}.
+	 * {@code RequestContextHolder} and (2) ensure that new mocks are injected
+	 * into the test instance for subsequent tests by setting the
+	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE}
+	 * in the test context to {@code true}.
 	 *
 	 * <p>The {@link #RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE} and
 	 * {@link #POPULATED_REQUEST_CONTEXT_HOLDER_ATTRIBUTE} will be subsequently
@@ -134,6 +138,8 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 				logger.debug(String.format("Resetting RequestContextHolder for test context %s.", testContext));
 			}
 			RequestContextHolder.resetRequestAttributes();
+			testContext.setAttribute(DependencyInjectionTestExecutionListener.REINJECT_DEPENDENCIES_ATTRIBUTE,
+				Boolean.TRUE);
 		}
 		testContext.removeAttribute(POPULATED_REQUEST_CONTEXT_HOLDER_ATTRIBUTE);
 		testContext.removeAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE);
