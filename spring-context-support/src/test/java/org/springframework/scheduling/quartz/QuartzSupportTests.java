@@ -18,9 +18,11 @@ package org.springframework.scheduling.quartz;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.junit.Test;
+
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -56,7 +58,7 @@ import static org.mockito.BDDMockito.*;
 public class QuartzSupportTests {
 
 	@Test
-	public void testSchedulerFactoryBeanWithApplicationContext() throws Exception {
+	public void schedulerFactoryBeanWithApplicationContext() throws Exception {
 		TestBean tb = new TestBean("tb", 99);
 		StaticApplicationContext ac = new StaticApplicationContext();
 
@@ -92,13 +94,14 @@ public class QuartzSupportTests {
 	}
 
 	@Test
-	public void testSchedulerWithTaskExecutor() throws Exception {
+	public void schedulerWithTaskExecutor() throws Exception {
 		Assume.group(TestGroup.PERFORMANCE);
 
 		CountingTaskExecutor taskExecutor = new CountingTaskExecutor();
 		DummyJob.count = 0;
 
 		JobDetailImpl jobDetail = new JobDetailImpl();
+		jobDetail.setDurability(true);
 		jobDetail.setJobClass(DummyJob.class);
 		jobDetail.setName("myJob");
 
@@ -124,44 +127,22 @@ public class QuartzSupportTests {
 		bean.destroy();
 	}
 
-	@Test
-	public void testSchedulerWithRunnable() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
-		DummyRunnable.count = 0;
-
+	@Test(expected = IllegalArgumentException.class)
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void jobDetailWithRunnableInsteadOfJob() {
 		JobDetailImpl jobDetail = new JobDetailImpl();
 		jobDetail.setJobClass((Class) DummyRunnable.class);
-		jobDetail.setName("myJob");
-
-		SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
-		trigger.setName("myTrigger");
-		trigger.setJobDetail(jobDetail);
-		trigger.setStartDelay(1);
-		trigger.setRepeatInterval(500);
-		trigger.setRepeatCount(1);
-		trigger.afterPropertiesSet();
-
-		SchedulerFactoryBean bean = new SchedulerFactoryBean();
-		bean.setTriggers(trigger.getObject());
-		bean.setJobDetails(jobDetail);
-		bean.afterPropertiesSet();
-		bean.start();
-
-		Thread.sleep(500);
-		assertTrue(DummyRunnable.count > 0);
-
-		bean.destroy();
 	}
 
 	@Test
-	public void testSchedulerWithQuartzJobBean() throws Exception {
+	public void schedulerWithQuartzJobBean() throws Exception {
 		Assume.group(TestGroup.PERFORMANCE);
 
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
 		JobDetailImpl jobDetail = new JobDetailImpl();
+		jobDetail.setDurability(true);
 		jobDetail.setJobClass(DummyJobBean.class);
 		jobDetail.setName("myJob");
 		jobDetail.getJobDataMap().put("param", "10");
@@ -188,13 +169,14 @@ public class QuartzSupportTests {
 	}
 
 	@Test
-	public void testSchedulerWithSpringBeanJobFactory() throws Exception {
+	public void schedulerWithSpringBeanJobFactory() throws Exception {
 		Assume.group(TestGroup.PERFORMANCE);
 
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
 		JobDetailImpl jobDetail = new JobDetailImpl();
+		jobDetail.setDurability(true);
 		jobDetail.setJobClass(DummyJob.class);
 		jobDetail.setName("myJob");
 		jobDetail.getJobDataMap().put("param", "10");
@@ -223,13 +205,14 @@ public class QuartzSupportTests {
 	}
 
 	@Test
-	public void testSchedulerWithSpringBeanJobFactoryAndParamMismatchNotIgnored() throws Exception {
+	public void schedulerWithSpringBeanJobFactoryAndParamMismatchNotIgnored() throws Exception {
 		Assume.group(TestGroup.PERFORMANCE);
 
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
 		JobDetailImpl jobDetail = new JobDetailImpl();
+		jobDetail.setDurability(true);
 		jobDetail.setJobClass(DummyJob.class);
 		jobDetail.setName("myJob");
 		jobDetail.getJobDataMap().put("para", "10");
@@ -259,46 +242,13 @@ public class QuartzSupportTests {
 	}
 
 	@Test
-	public void testSchedulerWithSpringBeanJobFactoryAndRunnable() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
-		DummyRunnable.param = 0;
-		DummyRunnable.count = 0;
-
-		JobDetailImpl jobDetail = new JobDetailImpl();
-		jobDetail.setJobClass((Class) DummyRunnable.class);
-		jobDetail.setName("myJob");
-		jobDetail.getJobDataMap().put("param", "10");
-
-		SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
-		trigger.setName("myTrigger");
-		trigger.setJobDetail(jobDetail);
-		trigger.setStartDelay(1);
-		trigger.setRepeatInterval(500);
-		trigger.setRepeatCount(1);
-		trigger.afterPropertiesSet();
-
-		SchedulerFactoryBean bean = new SchedulerFactoryBean();
-		bean.setJobFactory(new SpringBeanJobFactory());
-		bean.setTriggers(trigger.getObject());
-		bean.setJobDetails(jobDetail);
-		bean.afterPropertiesSet();
-		bean.start();
-
-		Thread.sleep(500);
-		assertEquals(10, DummyRunnable.param);
-		assertTrue(DummyRunnable.count > 0);
-
-		bean.destroy();
-	}
-
-	@Test
-	public void testSchedulerWithSpringBeanJobFactoryAndQuartzJobBean() throws Exception {
+	public void schedulerWithSpringBeanJobFactoryAndQuartzJobBean() throws Exception {
 		Assume.group(TestGroup.PERFORMANCE);
 		DummyJobBean.param = 0;
 		DummyJobBean.count = 0;
 
 		JobDetailImpl jobDetail = new JobDetailImpl();
+		jobDetail.setDurability(true);
 		jobDetail.setJobClass(DummyJobBean.class);
 		jobDetail.setName("myJob");
 		jobDetail.getJobDataMap().put("param", "10");
@@ -326,7 +276,7 @@ public class QuartzSupportTests {
 	}
 
 	@Test
-	public void testSchedulerWithSpringBeanJobFactoryAndJobSchedulingData() throws Exception {
+	public void schedulerWithSpringBeanJobFactoryAndJobSchedulingData() throws Exception {
 		Assume.group(TestGroup.PERFORMANCE);
 		DummyJob.param = 0;
 		DummyJob.count = 0;
@@ -348,9 +298,8 @@ public class QuartzSupportTests {
 	 * Tests the creation of multiple schedulers (SPR-772)
 	 */
 	@Test
-	public void testMultipleSchedulers() throws Exception {
-		ClassPathXmlApplicationContext ctx =
-				new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/multipleSchedulers.xml");
+	public void multipleSchedulers() throws Exception {
+		ClassPathXmlApplicationContext ctx = context("multipleSchedulers.xml");
 		try {
 			Scheduler scheduler1 = (Scheduler) ctx.getBean("scheduler1");
 			Scheduler scheduler2 = (Scheduler) ctx.getBean("scheduler2");
@@ -364,10 +313,9 @@ public class QuartzSupportTests {
 	}
 
 	@Test
-	public void testWithTwoAnonymousMethodInvokingJobDetailFactoryBeans() throws InterruptedException {
+	public void twoAnonymousMethodInvokingJobDetailFactoryBeans() throws Exception {
 		Assume.group(TestGroup.PERFORMANCE);
-		ClassPathXmlApplicationContext ctx =
-				new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/multipleAnonymousMethodInvokingJobDetailFB.xml");
+		ClassPathXmlApplicationContext ctx = context("multipleAnonymousMethodInvokingJobDetailFB.xml");
 		Thread.sleep(3000);
 		try {
 			QuartzTestBean exportService = (QuartzTestBean) ctx.getBean("exportService");
@@ -384,10 +332,9 @@ public class QuartzSupportTests {
 	}
 
 	@Test
-	public void testSchedulerAccessorBean() throws InterruptedException {
+	public void schedulerAccessorBean() throws Exception {
 		Assume.group(TestGroup.PERFORMANCE);
-		ClassPathXmlApplicationContext ctx =
-				new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/schedulerAccessorBean.xml");
+		ClassPathXmlApplicationContext ctx = context("schedulerAccessorBean.xml");
 		Thread.sleep(3000);
 		try {
 			QuartzTestBean exportService = (QuartzTestBean) ctx.getBean("exportService");
@@ -405,7 +352,7 @@ public class QuartzSupportTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void testSchedulerAutoStartsOnContextRefreshedEventByDefault() throws Exception {
+	public void schedulerAutoStartsOnContextRefreshedEventByDefault() throws Exception {
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.registerBeanDefinition("scheduler", new RootBeanDefinition(SchedulerFactoryBean.class));
 		Scheduler bean = context.getBean("scheduler", Scheduler.class);
@@ -416,7 +363,7 @@ public class QuartzSupportTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void testSchedulerAutoStartupFalse() throws Exception {
+	public void schedulerAutoStartupFalse() throws Exception {
 		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(
 				SchedulerFactoryBean.class).addPropertyValue("autoStartup", false).getBeanDefinition();
@@ -428,33 +375,36 @@ public class QuartzSupportTests {
 	}
 
 	@Test
-	public void testSchedulerRepositoryExposure() throws InterruptedException {
-		ClassPathXmlApplicationContext ctx =
-				new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/schedulerRepositoryExposure.xml");
+	public void schedulerRepositoryExposure() throws Exception {
+		ClassPathXmlApplicationContext ctx = context("schedulerRepositoryExposure.xml");
 		assertSame(SchedulerRepository.getInstance().lookup("myScheduler"), ctx.getBean("scheduler"));
 		ctx.close();
 	}
 
-	// SPR-6038: detect HSQL and stop illegal locks being taken
+	/**
+	 * SPR-6038: detect HSQL and stop illegal locks being taken.
+	 */
 	@Test
-	public void testSchedulerWithHsqlDataSource() throws Exception {
+	public void schedulerWithHsqlDataSource() throws Exception {
 		Assume.group(TestGroup.PERFORMANCE);
 
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
-		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
-				"/org/springframework/scheduling/quartz/databasePersistence.xml");
+		ClassPathXmlApplicationContext ctx = context("databasePersistence.xml");
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ctx.getBean(DataSource.class));
 		assertTrue("No triggers were persisted", jdbcTemplate.queryForList("SELECT * FROM qrtz_triggers").size()>0);
 		Thread.sleep(3000);
 		try {
-			// assertEquals(10, DummyJob.param);
 			assertTrue(DummyJob.count > 0);
 		}
 		finally {
 			ctx.close();
 		}
+	}
+
+	private ClassPathXmlApplicationContext context(String path) {
+		return new ClassPathXmlApplicationContext(path, getClass());
 	}
 
 
@@ -512,20 +462,9 @@ public class QuartzSupportTests {
 
 	public static class DummyRunnable implements Runnable {
 
-		private static int param;
-
-		private static int count;
-
-		public void setParam(int value) {
-			if (param > 0) {
-				throw new IllegalStateException("Param already set");
-			}
-			param = value;
-		}
-
 		@Override
 		public void run() {
-			count++;
+			/* no-op */
 		}
 	}
 
