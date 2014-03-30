@@ -29,8 +29,6 @@ import org.springframework.core.io.support.EncodedResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameterValue;
-import org.springframework.jdbc.datasource.init.DatabasePopulator;
-import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.util.StringUtils;
@@ -164,7 +162,6 @@ public class JdbcTestUtils {
 	 * @throws DataAccessException if there is an error executing a statement
 	 * and {@code continueOnError} is {@code false}
 	 * @see ResourceDatabasePopulator
-	 * @see DatabasePopulatorUtils
 	 * @see #executeSqlScript(JdbcTemplate, Resource, boolean)
 	 * @deprecated as of Spring 4.0.3, in favor of using
 	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#executeSqlScript}
@@ -192,7 +189,6 @@ public class JdbcTestUtils {
 	 * @throws DataAccessException if there is an error executing a statement
 	 * and {@code continueOnError} is {@code false}
 	 * @see ResourceDatabasePopulator
-	 * @see DatabasePopulatorUtils
 	 * @see #executeSqlScript(JdbcTemplate, EncodedResource, boolean)
 	 * @deprecated as of Spring 4.0.3, in favor of using
 	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#executeSqlScript}
@@ -217,7 +213,6 @@ public class JdbcTestUtils {
 	 * @throws DataAccessException if there is an error executing a statement
 	 * and {@code continueOnError} is {@code false}
 	 * @see ResourceDatabasePopulator
-	 * @see DatabasePopulatorUtils
 	 * @deprecated as of Spring 4.0.3, in favor of using
 	 * {@link org.springframework.jdbc.datasource.init.ScriptUtils#executeSqlScript}
 	 * or {@link org.springframework.jdbc.datasource.init.ResourceDatabasePopulator}.
@@ -225,9 +220,7 @@ public class JdbcTestUtils {
 	@Deprecated
 	public static void executeSqlScript(JdbcTemplate jdbcTemplate, EncodedResource resource, boolean continueOnError)
 			throws DataAccessException {
-		DatabasePopulator databasePopulator = new ResourceDatabasePopulator(continueOnError, false,
-			resource.getEncoding(), resource.getResource());
-		DatabasePopulatorUtils.execute(databasePopulator, jdbcTemplate.getDataSource());
+		new ResourceDatabasePopulator(continueOnError, false, resource.getEncoding(), resource.getResource()).execute(jdbcTemplate.getDataSource());
 	}
 
 	/**

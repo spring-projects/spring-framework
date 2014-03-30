@@ -16,22 +16,28 @@
 
 package org.springframework.jdbc.datasource.init;
 
+
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.sql.DataSource;
+
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 
 /**
- * Populates or initializes a database from SQL scripts defined in external
- * resources.
+ * Populates, initializes, or cleans up a database using SQL scripts defined in
+ * external resources.
  *
- * <p>Call {@link #addScript(Resource)} to add a single SQL script location.
- * Call {@link #addScripts(Resource...)} to add multiple SQL script locations.
- * Call {@link #setSqlScriptEncoding(String)} to set the encoding for all added
- * scripts.
+ * <ul>
+ * <li>Call {@link #addScript} to add a single SQL script location.
+ * <li>Call {@link #addScripts} to add multiple SQL script locations.
+ * <li>Consult the setter methods in this class for further configuration options.
+ * <li>Call {@link #populate} or {@link #execute} to initialize or clean up the
+ * database using the configured scripts.
+ * </ul>
  *
  * @author Keith Donald
  * @author Dave Syer
@@ -199,6 +205,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	/**
 	 * {@inheritDoc}
+	 * @see #execute(DataSource)
 	 */
 	@Override
 	public void populate(Connection connection) throws ScriptException {
@@ -210,8 +217,20 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 	/**
-	 * {@link EncodedResource} is not a sub-type of {@link Resource}. Thus we
-	 * always need to wrap each script resource in an encoded resource.
+	 * Execute this {@code DatabasePopulator} against the given {@link DataSource}.
+	 * <p>Delegates to {@link DatabasePopulatorUtils#execute}.
+	 * @param dataSource the {@code DataSource} to execute against
+	 * @throws ScriptException if an error occurs
+	 * @since 4.1
+	 * @see #populate(Connection)
+	 */
+	public void execute(DataSource dataSource) throws ScriptException {
+		DatabasePopulatorUtils.execute(this, dataSource);
+	}
+
+	/**
+	 * {@link EncodedResource} is not a sub-type of {@link Resource}. Thus we always need
+	 * to wrap each script resource in an encoded resource.
 	 */
 	private EncodedResource encodeScript(Resource script) {
 		return new EncodedResource(script, this.sqlScriptEncoding);

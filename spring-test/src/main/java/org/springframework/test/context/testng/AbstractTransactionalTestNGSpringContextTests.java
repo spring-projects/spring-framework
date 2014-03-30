@@ -23,8 +23,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.init.DatabasePopulator;
-import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
@@ -171,14 +169,11 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	 * exception in the event of an error
 	 * @throws DataAccessException if there is an error executing a statement
 	 * @see ResourceDatabasePopulator
-	 * @see DatabasePopulatorUtils
 	 * @see #setSqlScriptEncoding
 	 */
 	protected void executeSqlScript(String sqlResourcePath, boolean continueOnError) throws DataAccessException {
 		Resource resource = this.applicationContext.getResource(sqlResourcePath);
-		DatabasePopulator databasePopulator = new ResourceDatabasePopulator(continueOnError, false,
-			this.sqlScriptEncoding, resource);
-		DatabasePopulatorUtils.execute(databasePopulator, jdbcTemplate.getDataSource());
+		new ResourceDatabasePopulator(continueOnError, false, this.sqlScriptEncoding, resource).execute(jdbcTemplate.getDataSource());
 	}
 
 }
