@@ -190,7 +190,6 @@ public class EmbeddedDatabaseBuilder {
 	 * @return {@code this}, to facilitate method chaining
 	 * @since 4.0.3
 	 * @see #setBlockCommentEndDelimiter
-	 * @since 4.0.3
 	 */
 	public EmbeddedDatabaseBuilder setBlockCommentStartDelimiter(String blockCommentStartDelimiter) {
 		this.databasePopulator.setBlockCommentStartDelimiter(blockCommentStartDelimiter);
@@ -204,7 +203,6 @@ public class EmbeddedDatabaseBuilder {
 	 * @return {@code this}, to facilitate method chaining
 	 * @since 4.0.3
 	 * @see #setBlockCommentStartDelimiter
-	 * @since 4.0.3
 	 */
 	public EmbeddedDatabaseBuilder setBlockCommentEndDelimiter(String blockCommentEndDelimiter) {
 		this.databasePopulator.setBlockCommentEndDelimiter(blockCommentEndDelimiter);
