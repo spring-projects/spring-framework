@@ -16,12 +16,14 @@
 
 package org.springframework.web.socket.messaging;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import javax.websocket.Session;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -46,6 +48,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
+import org.springframework.web.socket.adapter.standard.StandardWebSocketSession;
 import org.springframework.web.socket.handler.TestWebSocketSession;
 import org.springframework.web.socket.sockjs.transport.SockJsSession;
 
@@ -285,6 +288,23 @@ public class StompSubProtocolHandlerTests {
 		assertEquals(1, this.session.getSentMessages().size());
 		TextMessage actual = (TextMessage) this.session.getSentMessages().get(0);
 		assertTrue(actual.getPayload().startsWith("ERROR"));
+	}
+
+	// SPR-11621
+
+	@Test
+	public void availableSessionFieldsAfterSessionEnded() throws IOException {
+		Session nativeSession = Mockito.mock(Session.class);
+		when(nativeSession.getId()).thenReturn("1");
+		when(nativeSession.getUserPrincipal()).thenReturn(new org.springframework.web.socket.handler.TestPrincipal("test"));
+		when(nativeSession.getNegotiatedSubprotocol()).thenReturn("v12.sToMp");
+		StandardWebSocketSession standardWebsocketSession = new StandardWebSocketSession(null, null, null, null);
+		standardWebsocketSession.initializeNativeSession(nativeSession);
+		this.protocolHandler.afterSessionStarted(standardWebsocketSession, this.channel);
+		standardWebsocketSession.close(CloseStatus.NORMAL);
+		this.protocolHandler.afterSessionEnded(standardWebsocketSession, CloseStatus.NORMAL, this.channel);
+		assertEquals("v12.sToMp", standardWebsocketSession.getAcceptedProtocol());
+		assertNotNull(standardWebsocketSession.getPrincipal());
 	}
 
 
