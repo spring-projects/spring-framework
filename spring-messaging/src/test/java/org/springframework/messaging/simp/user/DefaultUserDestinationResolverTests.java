@@ -109,7 +109,7 @@ public class DefaultUserDestinationResolverTests {
 		String userName = "http://joe.openid.example.org/";
 		this.registry.registerSessionId(userName, "openid123");
 		String destination = "/user/" + StringUtils.replace(userName, "/", "%2F") + "/queue/foo";
-		Message<?> message = createMessage(SimpMessageType.MESSAGE, this.user, SESSION_ID, destination);
+		Message<?> message = createMessage(SimpMessageType.MESSAGE, this.user, null, destination);
 		UserDestinationResult actual = this.resolver.resolveDestination(message);
 
 		assertEquals(1, actual.getTargetDestinations().size());
