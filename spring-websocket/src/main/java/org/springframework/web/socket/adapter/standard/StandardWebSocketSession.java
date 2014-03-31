@@ -54,7 +54,9 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 
 	private final InetSocketAddress remoteAddress;
 
-	private final Principal user;
+	private Principal user;
+
+	private String acceptedProtocol;
 
 	private List<WebSocketExtension> extensions;
 
@@ -120,7 +122,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 			return this.user;
 		}
 		checkNativeSessionInitialized();
-		return getNativeSession().getUserPrincipal();
+		return (isOpen() ? getNativeSession().getUserPrincipal() : null);
 	}
 
 	@Override
@@ -136,8 +138,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	@Override
 	public String getAcceptedProtocol() {
 		checkNativeSessionInitialized();
-		String protocol = getNativeSession().getNegotiatedSubprotocol();
-		return StringUtils.isEmpty(protocol)? null : protocol;
+		return this.acceptedProtocol;
 	}
 
 	@Override
@@ -180,6 +181,15 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	@Override
 	public boolean isOpen() {
 		return (getNativeSession() != null && getNativeSession().isOpen());
+	}
+
+	@Override
+	public void initializeNativeSession(Session session) {
+		super.initializeNativeSession(session);
+		if(this.user == null) {
+			this.user = session.getUserPrincipal();
+		}
+		this.acceptedProtocol = session.getNegotiatedSubprotocol();
 	}
 
 	@Override
