@@ -397,7 +397,8 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 			if (StringUtils.hasText(operation.getKeyGenerator())) { // TODO: exception mgt?
 				this.operationKeyGenerator = BeanFactoryAnnotationUtils.qualifiedBeanOfType(
 						applicationContext, KeyGenerator.class, operation.getKeyGenerator());
-			} else {
+			}
+			else {
 				this.operationKeyGenerator = keyGenerator;
 			}
 			if (StringUtils.hasText(operation.getCacheManager())) {
@@ -433,7 +434,8 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 			String unless = "";
 			if (this.operation instanceof CacheableOperation) {
 				unless = ((CacheableOperation) this.operation).getUnless();
-			} else if (this.operation instanceof CachePutOperation) {
+			}
+			else if (this.operation instanceof CachePutOperation) {
 				unless = ((CachePutOperation) this.operation).getUnless();
 			}
 			if (StringUtils.hasText(unless)) {
