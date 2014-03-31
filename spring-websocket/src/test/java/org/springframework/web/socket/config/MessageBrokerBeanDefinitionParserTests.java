@@ -293,6 +293,15 @@ public class MessageBrokerBeanDefinitionParserTests {
 		testExecutor("brokerChannel", 102, 202, 602);
 	}
 
+	// SPR-11623
+
+	@Test
+	public void customChannelsWithDefaultExecutor() {
+		loadBeanDefinitions("websocket-config-broker-customchannels-default-executor.xml");
+		List<Class<? extends MessageHandler>> subscriberTypes = Arrays.<Class<? extends MessageHandler>>asList(SubProtocolWebSocketHandler.class);
+		testExecutor("clientOutboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
+	}
+
 	@Test
 	public void messageConverters() {
 		loadBeanDefinitions("websocket-config-broker-converters.xml");
