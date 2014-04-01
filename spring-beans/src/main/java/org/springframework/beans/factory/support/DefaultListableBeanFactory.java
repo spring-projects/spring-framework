@@ -60,6 +60,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.OrderUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -1156,12 +1157,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * @return the priority assigned to that bean or {@code null} if none is set
 	 */
 	protected Integer getPriority(Object beanInstance) {
-		for (Annotation annotation : beanInstance.getClass().getAnnotations()) {
-			if ("javax.annotation.Priority".equals(annotation.annotationType().getName())) {
-				return (Integer) AnnotationUtils.getValue(annotation);
-			}
-		}
-		return null;
+		return OrderUtils.getPriorityValue(beanInstance.getClass());
 	}
 
 	/**

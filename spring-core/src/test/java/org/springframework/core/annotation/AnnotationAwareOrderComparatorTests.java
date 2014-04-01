@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import org.junit.Test;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
+import javax.annotation.Priority;
+
 /**
  * @author Juergen Hoeller
  * @author Oliver Gierke
@@ -42,6 +44,26 @@ public class AnnotationAwareOrderComparatorTests {
 		list.add(new A());
 		AnnotationAwareOrderComparator.sort(list);
 		assertTrue(list.get(0) instanceof A);
+		assertTrue(list.get(1) instanceof B);
+	}
+
+	@Test
+	public void sortInstancesWithPriority() {
+		List<Object> list = new ArrayList<>();
+		list.add(new B2());
+		list.add(new A2());
+		AnnotationAwareOrderComparator.sort(list);
+		assertTrue(list.get(0) instanceof A2);
+		assertTrue(list.get(1) instanceof B2);
+	}
+
+	@Test
+	public void sortInstancesWithOrderAndPriority() {
+		List<Object> list = new ArrayList<>();
+		list.add(new B());
+		list.add(new A2());
+		AnnotationAwareOrderComparator.sort(list);
+		assertTrue(list.get(0) instanceof A2);
 		assertTrue(list.get(1) instanceof B);
 	}
 
@@ -85,6 +107,14 @@ public class AnnotationAwareOrderComparatorTests {
 	}
 
 	private static class C extends A {
+	}
+
+	@Priority(1)
+	private static class A2 {
+	}
+
+	@Priority(2)
+	private static class B2 {
 	}
 
 }

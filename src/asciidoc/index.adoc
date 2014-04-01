@@ -894,7 +894,7 @@ There have been several general improvements to the core container:
 * If you use Spring's meta-annotation support, you can now develop custom annotations that
   <<beans-meta-annotations,expose specific attributes from the source annotation>>.
 * Beans can now be __ordered__ when they are <<beans-autowired-annotation,autowired into
-  lists and arrays>>. Both the `@Ordered` annotation and `Ordered` interface are
+  lists and arrays>>. Both the `@Order` annotation and `Ordered` interface are
   supported.
 * The `@Lazy` annotation can now be used on injection points, as well as on `@Bean`
   definitions.
@@ -5147,9 +5147,9 @@ The same applies for typed collections:
 
 [TIP]
 ====
-Your beans can implement the `org.springframework.core.Ordered` interface or use the
-the `@Ordered` annotation if you want items in the array or list to be sorted into a
-specific order.
+Your beans can implement the `org.springframework.core.Ordered` interface or either use
+the `@Order` or standard `@Priority` annotation if you want items in the array or list
+to be sorted into a specific order.
 ====
 
 
@@ -18867,8 +18867,8 @@ the concrete `ConfigurableApplicationContext` type supported by each declared
 initializer must be compatible with the type of `ApplicationContext` created by the
 `SmartContextLoader` in use (i.e., typically a `GenericApplicationContext`).
 Furthermore, the order in which the initializers are invoked depends on whether they
-implement Spring's `Ordered` interface or are annotated with Spring's `@Order`
-annotation.
+implement Spring's `Ordered` interface, are annotated with Spring's `@Order` or the
+standard `@Priority` annotation.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -18969,8 +18969,8 @@ override (i.e., replace) those defined in `BaseConfig`.
 In the following example that uses context initializers, the `ApplicationContext` for
 `ExtendedTest` will be initialized using `BaseInitializer` __and__
 `ExtendedInitializer`. Note, however, that the order in which the initializers are
-invoked depends on whether they implement Spring's `Ordered` interface or are annotated
-with Spring's `@Order` annotation.
+invoked depends on whether they implement Spring's `Ordered` interface, are annotated
+with Spring's `@Order` or the standard `@Priority` annotation.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]

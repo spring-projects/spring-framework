@@ -29,7 +29,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.core.annotation.Order;
+import org.springframework.core.annotation.OrderUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -215,8 +215,7 @@ public class ControllerAdviceBean implements Ordered {
 	}
 
 	private static int initOrderFromBeanType(Class<?> beanType) {
-		Order ann = AnnotationUtils.findAnnotation(beanType, Order.class);
-		return (ann != null ? ann.value() : Ordered.LOWEST_PRECEDENCE);
+		return OrderUtils.getOrder(beanType, Ordered.LOWEST_PRECEDENCE);
 	}
 
 	private static List<Package> initBasePackagesFromBeanType(Class<?> beanType, ControllerAdvice annotation) {

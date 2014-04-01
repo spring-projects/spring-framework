@@ -92,7 +92,7 @@ configure(allprojects) { project ->
 
 	ext.javadocLinks = [
 		"http://docs.oracle.com/javase/7/docs/api/",
-		"http://docs.oracle.com/javaee/6/api/",
+		"http://docs.oracle.com/javaee/7/api/",
 		"http://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs/", // CommonJ
 		"http://pic.dhe.ibm.com/infocenter/wasinfo/v7r0/topic/com.ibm.websphere.javadoc.doc/web/apidocs/",
 		"http://glassfish.java.net/nonav/docs/v3/api/",
@@ -245,6 +245,7 @@ project("spring-core") {
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("net.sf.jopt-simple:jopt-simple:4.6")
 		optional("log4j:log4j:1.2.17")
+		testCompile("org.apache.tomcat.embed:tomcat-embed-core:8.0.3")
 		testCompile("xmlunit:xmlunit:1.5")
 		testCompile("org.codehaus.woodstox:wstx-asl:3.2.7") {
 			exclude group: "stax", module: "stax-api"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.core.Ordered;
  *
  * @author Juergen Hoeller
  * @author Oliver Gierke
+ * @author Stephane Nicoll
  * @since 2.0.1
  * @see org.springframework.core.Ordered
  * @see Order
@@ -51,10 +52,7 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 		}
 		if (obj != null) {
 			Class<?> clazz = (obj instanceof Class ? (Class<?>) obj : obj.getClass());
-			Order order = AnnotationUtils.findAnnotation(clazz, Order.class);
-			if (order != null) {
-				return order.value();
-			}
+			return OrderUtils.getOrder(clazz, Ordered.LOWEST_PRECEDENCE);
 		}
 		return Ordered.LOWEST_PRECEDENCE;
 	}
