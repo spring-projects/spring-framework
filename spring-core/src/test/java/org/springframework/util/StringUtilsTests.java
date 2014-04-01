@@ -426,14 +426,14 @@ public class StringUtilsTests extends TestCase {
 				sa[0].equals("a") && sa[1].equals("b ") && sa[2].equals("c"));
 	}
 
-	public void testCommaDelimitedListToStringArrayWithNullProducesEmptyArray() {
-		String[] sa = StringUtils.commaDelimitedListToStringArray(null);
-		assertTrue("String array isn't null with null input", sa != null);
-		assertTrue("String array length == 0 with null input", sa.length == 0);
-	}
-
 	public void testCommaDelimitedListToStringArrayWithEmptyStringProducesEmptyArray() {
 		String[] sa = StringUtils.commaDelimitedListToStringArray("");
+		assertEquals(1, sa.length);
+		assertTrue("component is correct", sa[0].equals(""));
+	}
+
+	public void testCommaDelimitedListToStringArrayWithNullProducesEmptyArray() {
+		String[] sa = StringUtils.commaDelimitedListToStringArray(null);
 		assertTrue("String array isn't null with null input", sa != null);
 		assertTrue("String array length == 0 with null input", sa.length == 0);
 	}
