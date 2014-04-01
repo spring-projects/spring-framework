@@ -176,10 +176,15 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			ParserContext parserCxt, Object source) {
 
 		RootBeanDefinition executorDef = null;
-
-		if (channelElement != null) {
+		if (channelElement == null) {
+			executorDef = getDefaultExecutorBeanDefinition(channelName);
+		}
+		else {
 			Element executor = DomUtils.getChildElementByTagName(channelElement, "executor");
-			if (executor != null) {
+			if (executor == null) {
+				executorDef = getDefaultExecutorBeanDefinition(channelName);
+			}
+			else {
 				executorDef = new RootBeanDefinition(ThreadPoolTaskExecutor.class);
 				String attrValue = executor.getAttribute("core-pool-size");
 				if (!StringUtils.isEmpty(attrValue)) {
@@ -199,22 +204,16 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 				}
 			}
 		}
-		else if (!channelName.equals("brokerChannel")) {
-			executorDef = new RootBeanDefinition(ThreadPoolTaskExecutor.class);
-			executorDef.getPropertyValues().add("corePoolSize", Runtime.getRuntime().availableProcessors() * 2);
-			executorDef.getPropertyValues().add("maxPoolSize", Integer.MAX_VALUE);
-			executorDef.getPropertyValues().add("queueCapacity", Integer.MAX_VALUE);
-		}
 
-		ConstructorArgumentValues values = new ConstructorArgumentValues();
+		ConstructorArgumentValues argValues = new ConstructorArgumentValues();
 		if (executorDef != null) {
 			executorDef.getPropertyValues().add("threadNamePrefix", channelName + "-");
 			String executorName = channelName + "Executor";
 			registerBeanDefByName(executorName, executorDef, parserCxt, source);
-			values.addIndexedArgumentValue(0, new RuntimeBeanReference(executorName));
+			argValues.addIndexedArgumentValue(0, new RuntimeBeanReference(executorName));
 		}
 
-		RootBeanDefinition channelDef = new RootBeanDefinition(ExecutorSubscribableChannel.class, values, null);
+		RootBeanDefinition channelDef = new RootBeanDefinition(ExecutorSubscribableChannel.class, argValues, null);
 
 		if (channelElement != null) {
 			Element interceptorsElement = DomUtils.getChildElementByTagName(channelElement, "interceptors");
@@ -224,6 +223,17 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 
 		registerBeanDefByName(channelName, channelDef, parserCxt, source);
 		return new RuntimeBeanReference(channelName);
+	}
+
+	private RootBeanDefinition getDefaultExecutorBeanDefinition(String channelName) {
+		if (channelName.equals("brokerChannel")) {
+			return null;
+		}
+		RootBeanDefinition executorDef = new RootBeanDefinition(ThreadPoolTaskExecutor.class);
+		executorDef.getPropertyValues().add("corePoolSize", Runtime.getRuntime().availableProcessors() * 2);
+		executorDef.getPropertyValues().add("maxPoolSize", Integer.MAX_VALUE);
+		executorDef.getPropertyValues().add("queueCapacity", Integer.MAX_VALUE);
+		return executorDef;
 	}
 
 	private RuntimeBeanReference registerSubProtocolWebSocketHandler(Element element,
