@@ -298,8 +298,10 @@ public class MessageBrokerBeanDefinitionParserTests {
 	@Test
 	public void customChannelsWithDefaultExecutor() {
 		loadBeanDefinitions("websocket-config-broker-customchannels-default-executor.xml");
-		List<Class<? extends MessageHandler>> subscriberTypes = Arrays.<Class<? extends MessageHandler>>asList(SubProtocolWebSocketHandler.class);
+
+		testExecutor("clientInboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
 		testExecutor("clientOutboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
+		assertFalse(this.appContext.containsBean("brokerChannelExecutor"));
 	}
 
 	@Test
