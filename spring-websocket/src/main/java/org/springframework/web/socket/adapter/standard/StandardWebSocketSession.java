@@ -122,7 +122,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 			return this.user;
 		}
 		checkNativeSessionInitialized();
-		return getNativeSession().getUserPrincipal();
+		return (isOpen() ? getNativeSession().getUserPrincipal() : null);
 	}
 
 	@Override

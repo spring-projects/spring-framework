@@ -50,7 +50,9 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	private List<WebSocketExtension> extensions;
 
-	private final Principal user;
+	private Principal user;
+
+	private String acceptedProtocol;
 
 
 	/**
@@ -105,7 +107,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 			return this.user;
 		}
 		checkNativeSessionInitialized();
-		return getNativeSession().getUpgradeRequest().getUserPrincipal();
+		return (isOpen() ? getNativeSession().getUpgradeRequest().getUserPrincipal() : null);
 	}
 
 	@Override
@@ -123,7 +125,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 	@Override
 	public String getAcceptedProtocol() {
 		checkNativeSessionInitialized();
-		return getNativeSession().getUpgradeResponse().getAcceptedSubProtocol();
+		return this.acceptedProtocol;
 	}
 
 	@Override
@@ -166,6 +168,15 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 	@Override
 	public boolean isOpen() {
 		return ((getNativeSession() != null) && getNativeSession().isOpen());
+	}
+
+	@Override
+	public void initializeNativeSession(Session session) {
+		super.initializeNativeSession(session);
+		if (this.user == null) {
+			this.user = session.getUpgradeRequest().getUserPrincipal();
+		}
+		this.acceptedProtocol = session.getUpgradeResponse().getAcceptedSubProtocol();
 	}
 
 	@Override

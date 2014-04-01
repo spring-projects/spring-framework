@@ -24,16 +24,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
-import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.adapter.standard.StandardWebSocketSession;
 import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
-import org.springframework.web.socket.handler.TestPrincipal;
 import org.springframework.web.socket.handler.TestWebSocketSession;
 
-import javax.websocket.Session;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 
 /**
@@ -58,9 +51,6 @@ public class SubProtocolWebSocketHandlerTests {
 
 	@Mock
 	SubscribableChannel outClientChannel;
-
-	@Mock
-	private Session nativeSession;
 
 
 	@Before
@@ -148,23 +138,6 @@ public class SubProtocolWebSocketHandlerTests {
 	public void noSubProtocolNoDefaultHandler() throws Exception {
 		this.webSocketHandler.setProtocolHandlers(Arrays.asList(stompHandler, mqttHandler));
 		this.webSocketHandler.afterConnectionEstablished(session);
-	}
-
-	// SPR-11621
-
-	@Test
-	public void availableSessionFieldsafterConnectionClosed() throws Exception {
-		this.webSocketHandler.setDefaultProtocolHandler(stompHandler);
-		when(nativeSession.getId()).thenReturn("1");
-		when(nativeSession.getUserPrincipal()).thenReturn(new TestPrincipal("test"));
-		when(nativeSession.getNegotiatedSubprotocol()).thenReturn("v12.sToMp");
-		StandardWebSocketSession standardWebsocketSession = new StandardWebSocketSession(null, null, null, null);
-		standardWebsocketSession.initializeNativeSession(this.nativeSession);
-		this.webSocketHandler.afterConnectionEstablished(standardWebsocketSession);
-		standardWebsocketSession.close(CloseStatus.NORMAL);
-		this.webSocketHandler.afterConnectionClosed(standardWebsocketSession, CloseStatus.NORMAL);
-		assertEquals("v12.sToMp", standardWebsocketSession.getAcceptedProtocol());
-		assertNotNull(standardWebsocketSession.getPrincipal());
 	}
 
 }
