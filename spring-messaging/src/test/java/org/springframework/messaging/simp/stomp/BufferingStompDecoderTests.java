@@ -52,7 +52,7 @@ public class BufferingStompDecoderTests {
 		assertEquals(0, stompDecoder.getBufferSize());
 		assertNull(stompDecoder.getExpectedContentLength());
 	}
-	
+
 	@Test
 	public void oneMessageInTwoChunks() throws InterruptedException {
 
