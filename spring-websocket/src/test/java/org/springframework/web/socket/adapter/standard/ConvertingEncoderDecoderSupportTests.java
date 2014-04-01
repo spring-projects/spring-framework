@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.adapter;
+package org.springframework.web.socket.adapter.standard;
 
 import java.nio.ByteBuffer;
 import javax.websocket.DecodeException;
