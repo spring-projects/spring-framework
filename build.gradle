@@ -70,7 +70,7 @@ configure(allprojects) { project ->
 		include(["**/*Tests.class", "**/*Test.class"])
 		// Since we set scanForTestClasses to false, we need to filter out inner
 		// classes with the "$" pattern; otherwise, using -Dtest.single=MyTests to
-		// run MyTests by itself will fail if MyTests contains any inner classes. 
+		// run MyTests by itself will fail if MyTests contains any inner classes.
 		exclude(["**/Abstract*.class", '**/*$*'])
 	}
 
@@ -527,7 +527,7 @@ project("spring-context-support") {
 		compile(project(":spring-context"))
 		optional(project(":spring-jdbc")) // for Quartz support
 		optional(project(":spring-tx")) // for Quartz support
-		optional("javax.mail:mail:1.4.7")
+		optional("javax.mail:javax.mail-api:1.4.7")
 		optional("javax.cache:cache-api:1.0.0-RC1")
 		optional("com.google.guava:guava:16.0.1")
 		optional("net.sf.ehcache:ehcache-core:2.6.5")
@@ -542,6 +542,7 @@ project("spring-context-support") {
 		testCompile("commons-digester:commons-digester:1.8.1") // for Velocity/JasperReports
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
 		testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
+		testRuntime("com.sun.mail:javax.mail:1.4.7")
 	}
 
 	// pick up **/*.types files in src/main
@@ -558,7 +559,7 @@ project("spring-web") {
 		compile(project(":spring-core"))
 		provided("javax.servlet:javax.servlet-api:3.0.1")
 		optional(project(":spring-oxm")) // for MarshallingHttpMessageConverter
-		optional("javax.servlet.jsp:jsp-api:2.2")
+		optional("javax.servlet.jsp:javax.servlet.jsp-api:2.2.1")
 		optional("javax.portlet:portlet-api:2.0")
 		optional("javax.el:javax.el-api:2.2.4")
 		optional("javax.faces:javax.faces-api:2.2")
@@ -569,7 +570,6 @@ project("spring-web") {
 		optional("org.apache.httpcomponents:httpasyncclient:4.0.1")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("rome:rome:1.0")
-		optional("taglibs:standard:1.1.2")
 		optional("org.eclipse.jetty:jetty-servlet:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
 		}
@@ -580,6 +580,9 @@ project("spring-web") {
 		testCompile(project(":spring-context-support"))  // for JafMediaTypeFactory
 		testCompile("xmlunit:xmlunit:1.5")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
+		testCompile("org.apache.taglibs:taglibs-standard-jstlel:1.2.1") {
+			exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
+		}
 	}
 
 	// pick up ContextLoader.properties in src/main
@@ -696,8 +699,8 @@ project("spring-webmvc") {
 		provided("javax.servlet:javax.servlet-api:3.0.1")
 		optional(project(":spring-context-support")) // for Velocity support
 		optional(project(":spring-oxm")) // for MarshallingView
-		optional("javax.servlet.jsp:jsp-api:2.2")
-		optional("javax.servlet:jstl:1.2")
+		optional("javax.servlet.jsp:javax.servlet.jsp-api:2.2.1")
+		optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
 		optional("net.sourceforge.jexcelapi:jxl:2.6.12")
 		optional("org.apache.poi:poi:3.9")
 		optional("org.apache.velocity:velocity:1.7")
@@ -765,8 +768,8 @@ project("spring-webmvc-tiles3") {
 		provided(project(":spring-context"))
 		provided(project(":spring-web"))
 		provided("javax.servlet:javax.servlet-api:3.0.1")
-		optional("javax.servlet.jsp:jsp-api:2.2")
-		optional("javax.servlet:jstl:1.2")
+		optional("javax.servlet.jsp:javax.servlet.jsp-api:2.2.1")
+		optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
 		optional("javax.el:javax.el-api:2.2.4")
 		optional("org.apache.tiles:tiles-api:${tiles3Version}")
 		optional("org.apache.tiles:tiles-core:${tiles3Version}") {
@@ -824,8 +827,11 @@ project("spring-test") {
 		optional("org.testng:testng:6.8.8")
 		optional("javax.inject:javax.inject:1")
 		optional("javax.servlet:javax.servlet-api:3.0.1")
-		optional("javax.servlet.jsp:jsp-api:2.2")
-		optional("javax.servlet:jstl:1.2")
+		optional("javax.servlet.jsp:javax.servlet.jsp-api:2.2.1")
+		optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
+		optional("org.apache.taglibs:taglibs-standard-jstlel:1.2.1") {
+			exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
+		}
 		optional("javax.portlet:portlet-api:2.0")
 		optional("javax.el:javax.el-api:2.2.4")
 		optional("org.eclipse.persistence:javax.persistence:2.0.0")
@@ -836,7 +842,7 @@ project("spring-test") {
 		testCompile(project(":spring-context-support"))
 		testCompile(project(":spring-oxm"))
 		testCompile(project(":spring-webmvc-tiles3"))
-		testCompile("javax.mail:mail:1.4.7")
+		testCompile("javax.mail:javax.mail-api:1.4.7")
 		testCompile("javax.ejb:ejb-api:3.0")
 		testCompile("org.hibernate:hibernate-core:${hibernate3Version}") {
 			exclude group: 'org.hibernate.javax.persistence', module: 'hibernate-jpa-2.0-api'
@@ -897,7 +903,7 @@ project("spring-aspects") {
 		optional(project(":spring-tx")) // for JPA, @Transactional support
 		testCompile(project(":spring-core")) // for CodeStyleAspect
 		testCompile(project(":spring-test"))
-		testCompile("javax.mail:mail:1.4.7")
+		testCompile("javax.mail:javax.mail-api:1.4.7")
 	}
 
 	eclipse.project {
