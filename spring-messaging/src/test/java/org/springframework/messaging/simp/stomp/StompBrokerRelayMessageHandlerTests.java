@@ -19,18 +19,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.StubMessageChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
-import org.springframework.messaging.simp.broker.BrokerAvailabilityEvent;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.tcp.ReconnectStrategy;
 import org.springframework.messaging.tcp.TcpConnection;
@@ -139,10 +134,21 @@ public class StompBrokerRelayMessageHandlerTests {
 	}
 
 
-	private static ListenableFutureTask<Void> getFuture() {
+	private static ListenableFutureTask<Void> getVoidFuture() {
 		ListenableFutureTask<Void> futureTask = new ListenableFutureTask<>(new Callable<Void>() {
 			@Override
 			public Void call() throws Exception {
+				return null;
+			}
+		});
+		futureTask.run();
+		return futureTask;
+	}
+
+	private static ListenableFutureTask<Boolean> getBooleanFuture() {
+		ListenableFutureTask<Boolean> futureTask = new ListenableFutureTask<>(new Callable<Boolean>() {
+			@Override
+			public Boolean call() throws Exception {
 				return null;
 			}
 		});
@@ -159,18 +165,18 @@ public class StompBrokerRelayMessageHandlerTests {
 		@Override
 		public ListenableFuture<Void> connect(TcpConnectionHandler<byte[]> connectionHandler) {
 			connectionHandler.afterConnected(this.connection);
-			return getFuture();
+			return getVoidFuture();
 		}
 
 		@Override
 		public ListenableFuture<Void> connect(TcpConnectionHandler<byte[]> connectionHandler, ReconnectStrategy reconnectStrategy) {
 			connectionHandler.afterConnected(this.connection);
-			return getFuture();
+			return getVoidFuture();
 		}
 
 		@Override
-		public ListenableFuture<Void> shutdown() {
-			return getFuture();
+		public ListenableFuture<Boolean> shutdown() {
+			return getBooleanFuture();
 		}
 	}
 
@@ -183,7 +189,7 @@ public class StompBrokerRelayMessageHandlerTests {
 		@Override
 		public ListenableFuture<Void> send(Message<byte[]> message) {
 			this.messages.add(message);
-			return getFuture();
+			return getVoidFuture();
 		}
 
 		@Override

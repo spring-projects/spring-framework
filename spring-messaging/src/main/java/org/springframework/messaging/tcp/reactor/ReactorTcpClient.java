@@ -16,10 +16,8 @@
 
 package org.springframework.messaging.tcp.reactor;
 
-import java.lang.reflect.Modifier;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -33,7 +31,6 @@ import org.springframework.util.concurrent.ListenableFuture;
 
 import reactor.core.Environment;
 import reactor.core.composable.Composable;
-import reactor.core.composable.Deferred;
 import reactor.core.composable.Promise;
 import reactor.core.composable.Stream;
 import reactor.core.composable.spec.Promises;
@@ -41,14 +38,14 @@ import reactor.core.configuration.ConfigurationReader;
 import reactor.core.configuration.DispatcherConfiguration;
 import reactor.core.configuration.ReactorConfiguration;
 import reactor.function.Consumer;
-import reactor.function.support.SingleUseConsumer;
+import reactor.function.Function;
 import reactor.io.Buffer;
-import reactor.tcp.Reconnect;
-import reactor.tcp.TcpClient;
-import reactor.tcp.TcpConnection;
-import reactor.tcp.encoding.Codec;
-import reactor.tcp.netty.NettyTcpClient;
-import reactor.tcp.spec.TcpClientSpec;
+import reactor.io.encoding.Codec;
+import reactor.net.NetChannel;
+import reactor.net.Reconnect;
+import reactor.net.netty.tcp.NettyTcpClient;
+import reactor.net.tcp.TcpClient;
+import reactor.net.tcp.spec.TcpClientSpec;
 import reactor.tuple.Tuple;
 import reactor.tuple.Tuple2;
 
@@ -73,12 +70,12 @@ public class ReactorTcpClient<P> implements TcpOperations<P> {
 
 
 	/**
-	 * A constructor that creates a {@link reactor.tcp.netty.NettyTcpClient} with
+	 * A constructor that creates a {@link reactor.net.netty.tcp.NettyTcpClient} with
 	 * a {@link reactor.event.dispatch.SynchronousDispatcher} as a result of which
 	 * network I/O is handled in Netty threads.
 	 *
 	 * <p>Also see the constructor accepting a pre-configured Reactor
-	 * {@link reactor.tcp.TcpClient}.
+	 * {@link reactor.net.tcp.TcpClient}.
 	 *
 	 * @param host the host to connect to
 	 * @param port the port to connect to
@@ -94,12 +91,10 @@ public class ReactorTcpClient<P> implements TcpOperations<P> {
 				.codec(codec)
 				.connect(host, port)
 				.get();
-
-		checkReactorVersion();
 	}
 
 	/**
-	 * A constructor with a pre-configured {@link reactor.tcp.TcpClient}.
+	 * A constructor with a pre-configured {@link reactor.net.tcp.TcpClient}.
 	 *
 	 * <p><strong>NOTE:</strong> if the client is configured with a thread-creating
 	 * dispatcher, you are responsible for shutting down the {@link reactor.core.Environment}
@@ -111,31 +106,18 @@ public class ReactorTcpClient<P> implements TcpOperations<P> {
 		Assert.notNull(tcpClient, "'tcpClient' must not be null");
 		this.tcpClient = tcpClient;
 		this.environment = null;
-		checkReactorVersion();
-	}
-
-	private static void checkReactorVersion() {
-		Class<?> type = null;
-		try {
-			type = ReactorTcpClient.class.getClassLoader().loadClass("reactor.event.dispatch.BaseDispatcher");
-			Assert.isTrue(Modifier.isPublic(type.getModifiers()),
-					"Detected older version of reactor-tcp. Switch to 1.0.1.RELEASE or higher.");
-		}
-		catch (ClassNotFoundException e) {
-			// Ignore, must be 1.1+
-		}
 	}
 
 
 	@Override
 	public ListenableFuture<Void> connect(TcpConnectionHandler<P> connectionHandler) {
 
-		Promise<TcpConnection<Message<P>, Message<P>>> promise = this.tcpClient.open();
+		Promise<NetChannel<Message<P>, Message<P>>> promise = this.tcpClient.open();
 		composeConnectionHandling(promise, connectionHandler);
 
-		return new AbstractPromiseToListenableFutureAdapter<TcpConnection<Message<P>, Message<P>>, Void>(promise) {
+		return new AbstractPromiseToListenableFutureAdapter<NetChannel<Message<P>, Message<P>>, Void>(promise) {
 			@Override
-			protected Void adapt(TcpConnection<Message<P>, Message<P>> result) {
+			protected Void adapt(NetChannel<Message<P>, Message<P>> result) {
 				return null;
 			}
 		};
@@ -147,82 +129,71 @@ public class ReactorTcpClient<P> implements TcpOperations<P> {
 
 		Assert.notNull(reconnectStrategy, "ReconnectStrategy must not be null");
 
-		Stream<TcpConnection<Message<P>, Message<P>>> stream =
-				this.tcpClient.open(new Reconnect() {
-					@Override
-					public Tuple2<InetSocketAddress, Long> reconnect(InetSocketAddress address, int attempt) {
-						return Tuple.of(address, reconnectStrategy.getTimeToNextAttempt(attempt));
-					}
-				});
+		Reconnect reconnect = new Reconnect() {
+			@Override
+			public Tuple2<InetSocketAddress, Long> reconnect(InetSocketAddress address, int attempt) {
+				return Tuple.of(address, reconnectStrategy.getTimeToNextAttempt(attempt));
+			}
+		};
+
+		Stream<NetChannel<Message<P>, Message<P>>> stream = this.tcpClient.open(reconnect);
 		composeConnectionHandling(stream, connectionHandler);
 
-		return new PassThroughPromiseToListenableFutureAdapter<Void>(toPromise(stream));
+		Promise<Void> promise = Promises.next(stream).map(
+				new Function<NetChannel<Message<P>, Message<P>>, Void>() {
+					@Override
+					public Void apply(NetChannel<Message<P>, Message<P>> ch) {
+						return null;
+					}
+				});
+		return new PassThroughPromiseToListenableFutureAdapter<Void>(promise);
 	}
 
-	private void composeConnectionHandling(Composable<TcpConnection<Message<P>, Message<P>>> composable,
+	private void composeConnectionHandling(Composable<NetChannel<Message<P>, Message<P>>> composable,
 			final TcpConnectionHandler<P> connectionHandler) {
 
-		composable.when(Throwable.class, new Consumer<Throwable>() {
-			@Override
-			public void accept(Throwable ex) {
-				connectionHandler.afterConnectFailure(ex);
-			}
-		});
-
-		composable.consume(new Consumer<TcpConnection<Message<P>, Message<P>>>() {
-			@Override
-			public void accept(TcpConnection<Message<P>, Message<P>> connection) {
-				connection.on().close(new Runnable() {
+		composable
+				.when(Throwable.class, new Consumer<Throwable>() {
 					@Override
-					public void run() {
-						connectionHandler.afterConnectionClosed();
+					public void accept(Throwable ex) {
+						connectionHandler.afterConnectFailure(ex);
+					}
+				})
+				.consume(new Consumer<NetChannel<Message<P>, Message<P>>>() {
+					@Override
+					public void accept(NetChannel<Message<P>, Message<P>> connection) {
+						connection
+								.when(Throwable.class, new Consumer<Throwable>() {
+									@Override
+									public void accept(Throwable t) {
+										logger.error("Exception on connection " + connectionHandler, t);
+									}
+								})
+								.consume(new Consumer<Message<P>>() {
+									@Override
+									public void accept(Message<P> message) {
+										connectionHandler.handleMessage(message);
+									}
+								})
+								.on()
+								.close(new Runnable() {
+									@Override
+									public void run() {
+										connectionHandler.afterConnectionClosed();
+									}
+								});
+						connectionHandler.afterConnected(new ReactorTcpConnection<P>(connection));
 					}
 				});
-				connection.consume(new Consumer<Message<P>>() {
-					@Override
-					public void accept(Message<P> message) {
-						connectionHandler.handleMessage(message);
-					}
-				});
-				connection.when(Throwable.class, new Consumer<Throwable>() {
-					@Override
-					public void accept(Throwable t) {
-						logger.error("Exception on connection " + connectionHandler, t);
-					}
-				});
-				connectionHandler.afterConnected(new ReactorTcpConnection<P>(connection));
-			}
-		});
-	}
-
-	private Promise<Void> toPromise(Stream<TcpConnection<Message<P>, Message<P>>> stream) {
-
-		final Deferred<Void,Promise<Void>> deferred = Promises.<Void>defer().get();
-
-		stream.consume(SingleUseConsumer.once(new Consumer<TcpConnection<Message<P>, Message<P>>>() {
-			@Override
-			public void accept(TcpConnection<Message<P>, Message<P>> conn) {
-				deferred.accept((Void) null);
-			}
-		}));
-
-		stream.when(Throwable.class, SingleUseConsumer.once(new Consumer<Throwable>() {
-			@Override
-			public void accept(Throwable throwable) {
-				deferred.accept(throwable);
-			}
-		}));
-
-		return deferred.compose();
 	}
 
 	@Override
-	public ListenableFuture<Void> shutdown() {
+	public ListenableFuture<Boolean> shutdown() {
 		try {
-			Promise<Void> promise = this.tcpClient.close();
-			return new AbstractPromiseToListenableFutureAdapter<Void, Void>(promise) {
+			Promise<Boolean> promise = this.tcpClient.close();
+			return new AbstractPromiseToListenableFutureAdapter<Boolean, Boolean>(promise) {
 				@Override
-				protected Void adapt(Void result) {
+				protected Boolean adapt(Boolean result) {
 					return result;
 				}
 			};
@@ -232,7 +203,6 @@ public class ReactorTcpClient<P> implements TcpOperations<P> {
 
 		}
 	}
-
 
 	/**
 	 * A ConfigurationReader that enforces the use of a SynchronousDispatcher.

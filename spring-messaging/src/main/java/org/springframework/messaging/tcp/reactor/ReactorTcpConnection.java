@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,35 +21,46 @@ import org.springframework.messaging.tcp.TcpConnection;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import reactor.core.composable.Promise;
+import reactor.net.NetChannel;
 
+
+/**
+ * An implementation of {@link org.springframework.messaging.tcp.TcpConnection}
+ * based on the TCP client support of the Reactor project.
+ *
+ * @param <P> the payload type of Spring Message's read from
+ * and written to the TCP stream
+ *
+ * @author Rossen Stoyanchev
+ */
 public class ReactorTcpConnection<P> implements TcpConnection<P> {
 
-	private final reactor.tcp.TcpConnection<Message<P>, Message<P>> reactorTcpConnection;
+	private final NetChannel<Message<P>, Message<P>> channel;
 
 
-	public ReactorTcpConnection(reactor.tcp.TcpConnection<Message<P>, Message<P>> connection) {
-		this.reactorTcpConnection = connection;
+	public ReactorTcpConnection(NetChannel<Message<P>, Message<P>> connection) {
+		this.channel = connection;
 	}
 
 	@Override
 	public ListenableFuture<Void> send(Message<P> message) {
-		Promise<Void> promise = this.reactorTcpConnection.send(message);
+		Promise<Void> promise = this.channel.send(message);
 		return new PassThroughPromiseToListenableFutureAdapter<Void>(promise);
 	}
 
 	@Override
 	public void onReadInactivity(Runnable runnable, long inactivityDuration) {
-		this.reactorTcpConnection.on().readIdle(inactivityDuration, runnable);
+		this.channel.on().readIdle(inactivityDuration, runnable);
 	}
 
 	@Override
 	public void onWriteInactivity(Runnable runnable, long inactivityDuration) {
-		this.reactorTcpConnection.on().writeIdle(inactivityDuration, runnable);
+		this.channel.on().writeIdle(inactivityDuration, runnable);
 	}
 
 	@Override
 	public void close() {
-		this.reactorTcpConnection.close();
+		this.channel.close();
 	}
 
 }
