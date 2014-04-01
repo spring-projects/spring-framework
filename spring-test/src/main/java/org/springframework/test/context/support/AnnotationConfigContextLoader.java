@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,9 +76,8 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	 */
 	@Override
 	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
-		if (ObjectUtils.isEmpty(configAttributes.getClasses()) && isGenerateDefaultLocations()) {
-			Class<?>[] defaultConfigClasses = detectDefaultConfigurationClasses(configAttributes.getDeclaringClass());
-			configAttributes.setClasses(defaultConfigClasses);
+		if (!configAttributes.hasClasses() && isGenerateDefaultLocations()) {
+			configAttributes.setClasses(detectDefaultConfigurationClasses(configAttributes.getDeclaringClass()));
 		}
 	}
 
@@ -147,6 +146,24 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	}
 
 	// --- AbstractGenericContextLoader ----------------------------------------
+
+	/**
+	 * Ensure that the supplied {@link MergedContextConfiguration} does not
+	 * contain {@link MergedContextConfiguration#getLocations() locations}.
+	 * @since 4.0.4
+	 * @see AbstractGenericContextLoader#validateMergedContextConfiguration
+	 */
+	@Override
+	protected void validateMergedContextConfiguration(MergedContextConfiguration mergedConfig) {
+		if (mergedConfig.hasLocations()) {
+			String msg = String.format(
+				"Test class [%s] has been configured with @ContextConfiguration's 'locations' (or 'value') attribute %s, "
+						+ "but %s does not support resource locations.", mergedConfig.getTestClass().getName(),
+				ObjectUtils.nullSafeToString(mergedConfig.getLocations()), getClass().getSimpleName());
+			logger.error(msg);
+			throw new IllegalStateException(msg);
+		}
+	}
 
 	/**
 	 * Register classes in the supplied {@link GenericApplicationContext context}

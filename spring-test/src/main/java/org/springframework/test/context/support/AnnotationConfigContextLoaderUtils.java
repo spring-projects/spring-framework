@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ public abstract class AnnotationConfigContextLoaderUtils {
 	 * configuration classes that comply with the constraints required of
 	 * {@code @Configuration} class implementations. If a potential candidate
 	 * configuration class does not meet these requirements, this method will log a
-	 * warning, and the potential candidate class will be ignored.
+	 * debug message, and the potential candidate class will be ignored.
 	 * @param declaringClass the test class that declared {@code @ContextConfiguration}
 	 * @return an array of default configuration classes, potentially empty but
 	 * never {@code null}

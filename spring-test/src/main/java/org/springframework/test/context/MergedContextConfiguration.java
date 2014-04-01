@@ -227,6 +227,46 @@ public class MergedContextConfiguration implements Serializable {
 	}
 
 	/**
+	 * Determine if this {@code MergedContextConfiguration} instance has
+	 * path-based resource locations.
+	 *
+	 * @return {@code true} if the {@link #getLocations() locations} array is not empty
+	 * @since 4.0.4
+	 * @see #hasResources()
+	 * @see #hasClasses()
+	 */
+	public boolean hasLocations() {
+		return !ObjectUtils.isEmpty(getLocations());
+	}
+
+	/**
+	 * Determine if this {@code MergedContextConfiguration} instance has
+	 * class-based resources.
+	 *
+	 * @return {@code true} if the {@link #getClasses() classes} array is not empty
+	 * @since 4.0.4
+	 * @see #hasResources()
+	 * @see #hasLocations()
+	 */
+	public boolean hasClasses() {
+		return !ObjectUtils.isEmpty(getClasses());
+	}
+
+	/**
+	 * Determine if this {@code MergedContextConfiguration} instance has
+	 * either path-based resource locations or class-based resources.
+	 *
+	 * @return {@code true} if either the {@link #getLocations() locations}
+	 * or the {@link #getClasses() classes} array is not empty
+	 * @since 4.0.4
+	 * @see #hasLocations()
+	 * @see #hasClasses()
+	 */
+	public boolean hasResources() {
+		return hasLocations() || hasClasses();
+	}
+
+	/**
 	 * Get the merged {@code ApplicationContextInitializer} classes for the
 	 * {@linkplain #getTestClass() test class}.
 	 */
