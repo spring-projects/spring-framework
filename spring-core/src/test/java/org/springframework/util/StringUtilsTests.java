@@ -434,8 +434,8 @@ public class StringUtilsTests extends TestCase {
 
 	public void testCommaDelimitedListToStringArrayWithEmptyStringProducesEmptyArray() {
 		String[] sa = StringUtils.commaDelimitedListToStringArray("");
-		assertTrue("String array isn't null with null input", sa != null);
-		assertTrue("String array length == 0 with null input", sa.length == 0);
+		assertEquals(1, sa.length);
+		assertTrue("component is correct", sa[0].equals(""));
 	}
 
 	private void testStringArrayReverseTransformationMatches(String[] sa) {

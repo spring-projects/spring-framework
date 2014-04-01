@@ -1045,6 +1045,9 @@ public abstract class StringUtils {
 		if (str == null) {
 			return new String[0];
 		}
+		else if ("".equals(str)) {
+			return new String[] {""};
+		}
 		if (delimiter == null) {
 			return new String[] {str};
 		}
