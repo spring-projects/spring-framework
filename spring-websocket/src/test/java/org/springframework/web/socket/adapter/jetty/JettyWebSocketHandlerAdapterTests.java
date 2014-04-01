@@ -17,8 +17,11 @@
 package org.springframework.web.socket.adapter.jetty;
 
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.UpgradeRequest;
+import org.eclipse.jetty.websocket.api.UpgradeResponse;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.adapter.jetty.JettyWebSocketHandlerAdapter;
@@ -45,6 +48,9 @@ public class JettyWebSocketHandlerAdapterTests {
 	@Before
 	public void setup() {
 		this.session = mock(Session.class);
+		when(this.session.getUpgradeRequest()).thenReturn(Mockito.mock(UpgradeRequest.class));
+		when(this.session.getUpgradeResponse()).thenReturn(Mockito.mock(UpgradeResponse.class));
+
 		this.webSocketHandler = mock(WebSocketHandler.class);
 		this.webSocketSession = new JettyWebSocketSession(null, null);
 		this.adapter = new JettyWebSocketHandlerAdapter(this.webSocketHandler, this.webSocketSession);
