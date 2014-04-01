@@ -143,9 +143,26 @@ public class ContextLoaderUtilsConfigurationAttributesTests extends AbstractCont
 		assertClassesFooAttributes(attributesList.get(1));
 	}
 
+	/**
+	 * Verifies change requested in <a href="https://jira.spring.io/browse/SPR-11634">SPR-11634</a>.
+	 * @since 4.0.4
+	 */
+	@Test
+	public void resolveConfigAttributesWithLocationsAndClasses() {
+		List<ContextConfigurationAttributes> attributesList = resolveContextConfigurationAttributes(LocationsAndClasses.class);
+		assertNotNull(attributesList);
+		assertEquals(1, attributesList.size());
+	}
+
+
+	// -------------------------------------------------------------------------
 
 	@ContextConfiguration(value = "x", locations = "y")
 	private static class ConflictingLocations {
+	}
+
+	@ContextConfiguration(locations = "x", classes = Object.class)
+	private static class LocationsAndClasses {
 	}
 
 }

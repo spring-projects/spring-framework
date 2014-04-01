@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -59,7 +58,7 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
  */
 public abstract class AbstractGenericWebContextLoader extends AbstractContextLoader {
 
-	private static final Log logger = LogFactory.getLog(AbstractGenericWebContextLoader.class);
+	protected static final Log logger = LogFactory.getLog(AbstractGenericWebContextLoader.class);
 
 
 	// --- SmartContextLoader -----------------------------------------------
@@ -71,6 +70,8 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	 * <p>Implementation details:
 	 *
 	 * <ul>
+	 * <li>Calls {@link #validateMergedContextConfiguration(WebMergedContextConfiguration)}
+	 * to allow subclasses to validate the supplied configuration before proceeding.</li>
 	 * <li>Creates a {@link GenericWebApplicationContext} instance.</li>
 	 * <li>If the supplied {@code MergedContextConfiguration} references a
 	 * {@linkplain MergedContextConfiguration#getParent() parent configuration},
@@ -114,6 +115,8 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 				webMergedConfig));
 		}
 
+		validateMergedContextConfiguration(webMergedConfig);
+
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
 
 		ApplicationContext parent = mergedConfig.getParentApplicationContext();
@@ -129,6 +132,20 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 		context.refresh();
 		context.registerShutdownHook();
 		return context;
+	}
+
+	/**
+	 * Validate the supplied {@link WebMergedContextConfiguration} with respect to
+	 * what this context loader supports.
+	 * <p>The default implementation is a <em>no-op</em> but can be overridden by
+	 * subclasses as appropriate.
+	 * @param mergedConfig the merged configuration to validate
+	 * @throws IllegalStateException if the supplied configuration is not valid
+	 * for this context loader
+	 * @since 4.0.4
+	 */
+	protected void validateMergedContextConfiguration(WebMergedContextConfiguration mergedConfig) {
+		/* no-op */
 	}
 
 	/**
