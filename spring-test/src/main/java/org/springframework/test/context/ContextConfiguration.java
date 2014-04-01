@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,11 +36,14 @@ import org.springframework.context.ConfigurableApplicationContext;
  *
  * <p>Prior to Spring 3.1, only path-based resource locations were supported.
  * As of Spring 3.1, {@linkplain #loader context loaders} may choose to support
- * either path-based or class-based resources (but not both). Consequently
+ * <em>either</em> path-based <em>or</em> class-based resources. As of Spring
+ * 4.0.4, {@linkplain #loader context loaders} may choose to support path-based
+ * <em>and</em> class-based resources simultaneously. Consequently
  * {@code @ContextConfiguration} can be used to declare either path-based
- * resource locations (via the {@link #locations} or {@link #value}
- * attribute) <i>or</i> annotated classes (via the {@link #classes}
- * attribute).
+ * resource locations (via the {@link #locations} or {@link #value} attribute)
+ * <em>or</em> annotated classes (via the {@link #classes} attribute). Note,
+ * however, that most implementations of {@link SmartContextLoader} only support
+ * a single resource type.
  *
  * <h3>Annotated Classes</h3>
  *
@@ -86,9 +89,8 @@ public @interface ContextConfiguration {
 	/**
 	 * Alias for {@link #locations}.
 	 *
-	 * <p>This attribute may <strong>not</strong> be used in conjunction
-	 * with {@link #locations} or {@link #classes}, but it may be used
-	 * instead of {@link #locations}.
+	 * <p>This attribute may <strong>not</strong> be used in conjunction with
+	 * {@link #locations}, but it may be used instead of {@link #locations}.
 	 * @since 3.0
 	 * @see #inheritLocations
 	 */
@@ -117,8 +119,7 @@ public @interface ContextConfiguration {
 	 * loaders.
 	 *
 	 * <p>This attribute may <strong>not</strong> be used in conjunction with
-	 * {@link #value} or {@link #classes}, but it may be used instead of
-	 * {@link #value}.
+	 * {@link #value}, but it may be used instead of {@link #value}.
 	 * @since 2.5
 	 * @see #inheritLocations
 	 */
@@ -134,9 +135,6 @@ public @interface ContextConfiguration {
 	 * on how default configuration classes will be detected if no
 	 * <em>annotated classes</em> are specified. See the documentation for
 	 * {@link #loader} for further details regarding default loaders.
-	 *
-	 * <p>This attribute may <strong>not</strong> be used in conjunction with
-	 * {@link #locations} or {@link #value}.
 	 *
 	 * @since 3.1
 	 * @see org.springframework.context.annotation.Configuration

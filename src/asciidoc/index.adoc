@@ -17823,8 +17823,8 @@ default attribute values, attribute aliases, and so on.
 
 Defines class-level metadata that is used to determine how to load and configure an
 `ApplicationContext` for integration tests. Specifically, `@ContextConfiguration`
-declares __either__ the application context resource `locations` __or__ the annotated
-`classes` that will be used to load the context.
+declares the application context resource `locations` or the annotated `classes`
+that will be used to load the context.
 
 +
 
@@ -18841,9 +18841,18 @@ It may sometimes be desirable to mix XML resources and annotated classes (i.e.,
 typically `@Configuration` classes) to configure an `ApplicationContext` for your tests.
 For example, if you use XML configuration in production, you may decide that you want to
 use `@Configuration` classes to configure specific Spring-managed components for your
-tests, or vice versa. As mentioned in <<integration-testing-annotations-spring>> the
-TestContext framework does not allow you to declare __both__ via
-`@ContextConfiguration`, but this does not mean that you cannot use both.
+tests, or vice versa.
+
+Furthermore, some third-party frameworks (like Spring Boot) provide first-class
+support for loading an `ApplicationContext` from different types of resources
+simultaneously (e.g., XML configuration files and `@Configuration` classes). The Spring
+Framework historically has not supported this for standard deployments. Consequently,
+each of the `SmartContextLoader` implementations that the Spring Framework delivers in
+the `spring-test` module supports only one resource type per test context;
+however, this does not mean that you cannot use both. Third-party frameworks may
+choose to support the declaration of both `locations` and `classes` via
+`@ContextConfiguration`, and with the standard testing support in the TestContext
+framework, you have the following options.
 
 If you want to use XML __and__ `@Configuration` classes to configure your tests, you
 will have to pick one as the __entry point__, and that one will have to include or
@@ -18977,14 +18986,14 @@ with Spring's `@Order` or the standard `@Priority` annotation.
 ----
 	@RunWith(SpringJUnit4ClassRunner.class)
 	// ApplicationContext will be initialized by BaseInitializer
-	**@ContextConfiguration(initializers=BaseInitializer.class)**
+	**@ContextConfiguration(initializers = BaseInitializer.class)**
 	public class BaseTest {
 		// class body...
 	}
 
 	// ApplicationContext will be initialized by BaseInitializer
 	// and ExtendedInitializer
-	**@ContextConfiguration(initializers=ExtendedInitializer.class)**
+	**@ContextConfiguration(initializers = ExtendedInitializer.class)**
 	public class ExtendedTest extends BaseTest {
 		// class body...
 	}

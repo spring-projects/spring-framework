@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,8 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * <p>Implementation details:
 	 *
 	 * <ul>
+	 * <li>Calls {@link #validateMergedContextConfiguration(MergedContextConfiguration)}
+	 * to allow subclasses to validate the supplied configuration before proceeding.</li>
 	 * <li>Creates a {@link GenericApplicationContext} instance.</li>
 	 * <li>If the supplied {@code MergedContextConfiguration} references a
 	 * {@linkplain MergedContextConfiguration#getParent() parent configuration},
@@ -106,6 +108,8 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 				mergedConfig));
 		}
 
+		validateMergedContextConfiguration(mergedConfig);
+
 		GenericApplicationContext context = new GenericApplicationContext();
 
 		ApplicationContext parent = mergedConfig.getParentApplicationContext();
@@ -121,6 +125,20 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 		context.refresh();
 		context.registerShutdownHook();
 		return context;
+	}
+
+	/**
+	 * Validate the supplied {@link MergedContextConfiguration} with respect to
+	 * what this context loader supports.
+	 * <p>The default implementation is a <em>no-op</em> but can be overridden by
+	 * subclasses as appropriate.
+	 * @param mergedConfig the merged configuration to validate
+	 * @throws IllegalStateException if the supplied configuration is not valid
+	 * for this context loader
+	 * @since 4.0.4
+	 */
+	protected void validateMergedContextConfiguration(MergedContextConfiguration mergedConfig) {
+		/* no-op */
 	}
 
 	/**
