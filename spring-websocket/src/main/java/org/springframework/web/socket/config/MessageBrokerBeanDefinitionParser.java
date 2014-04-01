@@ -176,9 +176,10 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			ParserContext parserCxt, Object source) {
 
 		RootBeanDefinition executorDef = null;
+		Element executor = null;
 
 		if (channelElement != null) {
-			Element executor = DomUtils.getChildElementByTagName(channelElement, "executor");
+			executor = DomUtils.getChildElementByTagName(channelElement, "executor");
 			if (executor != null) {
 				executorDef = new RootBeanDefinition(ThreadPoolTaskExecutor.class);
 				String attrValue = executor.getAttribute("core-pool-size");
@@ -199,7 +200,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 				}
 			}
 		}
-		else if (!channelName.equals("brokerChannel")) {
+		if ((channelElement == null && !channelName.equals("brokerChannel")) || (channelElement != null && executor == null)) {
 			executorDef = new RootBeanDefinition(ThreadPoolTaskExecutor.class);
 			executorDef.getPropertyValues().add("corePoolSize", Runtime.getRuntime().availableProcessors() * 2);
 			executorDef.getPropertyValues().add("maxPoolSize", Integer.MAX_VALUE);
