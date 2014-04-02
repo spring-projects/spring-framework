@@ -122,7 +122,7 @@ public class JasperReportsUtilsTests extends TestCase {
 	public void testRenderAsPdfWithExporterParameters() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		Map<JRExporterParameter, Object> exporterParameters = new HashMap<JRExporterParameter, Object>();
-		exporterParameters.put(JRPdfExporterParameter.PDF_VERSION, JRPdfExporterParameter.PDF_VERSION_1_6.toString());
+		exporterParameters.put(JRPdfExporterParameter.PDF_VERSION, JRPdfExporterParameter.PDF_VERSION_1_6);
 		JasperReportsUtils.renderAsPdf(getReport(), getParameters(), getData(), os, exporterParameters);
 		byte[] output = os.toByteArray();
 		assertPdfOutputCorrect(output);

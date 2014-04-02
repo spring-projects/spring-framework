@@ -446,8 +446,8 @@ project("spring-context-support") {
 		optional("velocity:velocity:1.5")
 		optional("org.freemarker:freemarker:2.3.20")
 		optional("com.lowagie:itext:2.1.7")
-		optional("jasperreports:jasperreports:2.0.5")
-		testCompile("org.apache.poi:poi:3.0.2-FINAL")
+		optional("net.sf.jasperreports:jasperreports:3.7.6")
+		testCompile("org.apache.poi:poi:3.6")
 		testCompile("commons-beanutils:commons-beanutils:1.8.0") // for Velocity/JasperReports
 		testCompile("commons-digester:commons-digester:1.8.1") // for Velocity/JasperReports
 		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
@@ -568,12 +568,12 @@ project("spring-webmvc") {
 		optional("javax.servlet.jsp:jsp-api:2.1")
 		optional("javax.servlet:jstl:1.2")
 		optional("net.sourceforge.jexcelapi:jxl:2.6.12")
-		optional("org.apache.poi:poi:3.0.2-FINAL")
+		optional("org.apache.poi:poi:3.6")
 		optional("velocity:velocity:1.5")
 		optional("velocity-tools:velocity-tools-view:1.4")
 		optional("org.freemarker:freemarker:2.3.20")
 		optional("com.lowagie:itext:2.1.7")
-		optional("jasperreports:jasperreports:2.0.5") {
+		optional("net.sf.jasperreports:jasperreports:3.7.6") {
 			exclude group: "xml-apis", module: "xml-apis"
 		}
 		optional("org.codehaus.jackson:jackson-mapper-asl:1.7.9")
