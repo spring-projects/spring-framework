@@ -251,7 +251,17 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	 * @throws IOException in case of errors while writing the content
 	 */
 	protected void writeContent(HttpServletResponse response, Resource resource) throws IOException {
-		StreamUtils.copy(resource.getInputStream(), response.getOutputStream());
+		InputStream in = resource.getInputStream();
+		try {
+			StreamUtils.copy(in, response.getOutputStream());
+		}
+		finally {
+			try {
+				in.close();
+			}
+			catch (IOException ex) {
+			}
+		}
 	}
 
 
