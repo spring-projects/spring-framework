@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ public class LocalTaskExecutorThreadPool implements ThreadPool {
 
 	@Override
 	public int blockForAvailableThreads() {
-		// The present implementation always returns 1, making Quartz (1.6)
+		// The present implementation always returns 1, making Quartz
 		// always schedule any tasks that it feels like scheduling.
 		// This could be made smarter for specific TaskExecutors,
 		// for example calling {@code getMaximumPoolSize() - getActiveCount()}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -209,7 +209,7 @@ public class MappingJackson2JsonView extends AbstractView {
 	/**
 	 * Set whether to serialize models containing a single attribute as a map or whether to
 	 * extract the single value from the model and serialize it directly.
-	 * <p>The effect of setting this flag is similar to using {@code MappingJacksonHttpMessageConverter}
+	 * <p>The effect of setting this flag is similar to using {@code MappingJackson2HttpMessageConverter}
 	 * with an {@code @ResponseBody} request-handling method.
 	 * <p>Default is {@code false}.
 	 */

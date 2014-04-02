@@ -151,8 +151,6 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	 * in combination with the Trigger.
 	 * @see #setTriggers
 	 * @see org.quartz.JobDetail
-	 * @see JobDetailBean
-	 * @see JobDetailAwareTrigger
 	 */
 	public void setJobDetails(JobDetail... jobDetails) {
 		// Use modifiable ArrayList here, to allow for further adding of
@@ -180,14 +178,10 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	 * "jobDetails" property of this FactoryBean.
 	 * @see #setJobDetails
 	 * @see org.quartz.JobDetail
-	 * @see JobDetailAwareTrigger
-	 * @see CronTriggerBean
-	 * @see SimpleTriggerBean
 	 */
 	public void setTriggers(Trigger... triggers) {
 		this.triggers = Arrays.asList(triggers);
 	}
-
 
 	/**
 	 * Specify Quartz SchedulerListeners to be registered with the Scheduler.
