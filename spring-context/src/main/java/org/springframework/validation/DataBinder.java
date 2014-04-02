@@ -93,6 +93,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Biju Kunjummen
  * @see #setAllowedFields
  * @see #setRequiredFields
  * @see #registerCustomEditor
@@ -479,43 +480,52 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	/**
 	 * Set the Validator to apply after each binding step.
+	 * Validator will be set only if it is applicable for the target type
+	 *
 	 * @see #addValidators(Validator...)
 	 * @see #replaceValidators(Validator...)
 	 */
 	public void setValidator(Validator validator) {
-		assertValidators(validator);
+		Assert.notNull(validator, "Validators required");
 		this.validators.clear();
-		this.validators.add(validator);
+		if (validatorSupportsTarget(validator)) {
+			this.validators.add(validator);
+		}
 	}
 
-	private void assertValidators(Validator... validators) {
+	private boolean validatorSupportsTarget(Validator validator) {
+		if (validator != null && (getTarget() != null && validator.supports(getTarget().getClass()))) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Add Validators to apply after each binding step.
+	 * Validators will be added in only if applicable for the target type
+	 *
+	 * @see #setValidator(Validator)
+	 * @see #replaceValidators(Validator...)
+	 */
+	public void addValidators(Validator... validators) {
 		Assert.notNull(validators, "Validators required");
-		for (Validator validator : validators) {
-			if (validator != null && (getTarget() != null && !validator.supports(getTarget().getClass()))) {
-				throw new IllegalStateException("Invalid target for Validator [" + validator + "]: " + getTarget());
+		for (Validator validator: validators) {
+			if (validatorSupportsTarget(validator)) {
+				this.validators.add(validator);
 			}
 		}
 	}
 
 	/**
-	 * Add Validators to apply after each binding step.
-	 * @see #setValidator(Validator)
-	 * @see #replaceValidators(Validator...)
-	 */
-	public void addValidators(Validator... validators) {
-		assertValidators(validators);
-		this.validators.addAll(Arrays.asList(validators));
-	}
-
-	/**
 	 * Replace the Validators to apply after each binding step.
+	 * Validators will be replaced only if applicable for the target type
+	 *
 	 * @see #setValidator(Validator)
 	 * @see #addValidators(Validator...)
 	 */
 	public void replaceValidators(Validator... validators) {
-		assertValidators(validators);
 		this.validators.clear();
-		this.validators.addAll(Arrays.asList(validators));
+		addValidators(validators);
 	}
 
 	/**
