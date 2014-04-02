@@ -1031,14 +1031,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/**
 	 * Determine the autowire candidate in the given set of beans.
 	 * <p>Looks for {@code @Primary} and {@code @Priority} (in that order).
-	 *
 	 * @param candidateBeans a Map of candidate names and candidate instances
 	 * that match the required type, as returned by {@link #findAutowireCandidates}
 	 * @param descriptor the target dependency to match against
 	 * @return the name of the autowire candidate, or {@code null} if none found
 	 */
-	protected String determineAutowireCandidate(Map<String, Object> candidateBeans,
-												DependencyDescriptor descriptor) {
+	protected String determineAutowireCandidate(Map<String, Object> candidateBeans, DependencyDescriptor descriptor) {
 		Class<?> requiredType = descriptor.getDependencyType();
 		String primaryCandidate =
 				determinePrimaryCandidate(candidateBeans, requiredType);
@@ -1064,7 +1062,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	/**
 	 * Determine the primary candidate in the given set of beans.
-	 *
 	 * @param candidateBeans a Map of candidate names and candidate instances
 	 * that match the required type
 	 * @param requiredType the target dependency type to match against
@@ -1098,15 +1095,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	/**
 	 * Determine the candidate with the highest priority in the given set of beans.
-	 *
 	 * @param candidateBeans a Map of candidate names and candidate instances
 	 * that match the required type
 	 * @param requiredType the target dependency type to match against
-	 * @return the name of the candidate with the highest priority, or {@code null} if none found
+	 * @return the name of the candidate with the highest priority,
+	 * or {@code null} if none found
 	 * @see #getPriority(Object)
 	 */
-	protected String determineHighestPriorityCandidate(Map<String, Object> candidateBeans,
-													   Class<?> requiredType) {
+	protected String determineHighestPriorityCandidate(Map<String, Object> candidateBeans, Class<?> requiredType) {
 		String highestPriorityBeanName = null;
 		Integer highestPriority = null;
 		for (Map.Entry<String, Object> entry : candidateBeans.entrySet()) {
@@ -1119,11 +1115,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						throw new NoUniqueBeanDefinitionException(requiredType, candidateBeans.size(),
 								"Multiple beans found with the same priority ('" + highestPriority + "') " +
 										"among candidates: " + candidateBeans.keySet());
-					} else if (candidatePriority > highestPriority) {
+					}
+					else if (candidatePriority > highestPriority) {
 						highestPriorityBeanName = candidateBeanName;
 						highestPriority = candidatePriority;
 					}
-				} else {
+				}
+				else {
 					highestPriorityBeanName = candidateBeanName;
 					highestPriority = candidatePriority;
 				}
@@ -1152,7 +1150,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * Return the priority assigned for the given bean instance by
 	 * the {@code javax.annotation.Priority} annotation.
 	 * <p>If the annotation is not present, returns {@code null}.
-	 *
 	 * @param beanInstance the bean instance to check
 	 * @return the priority assigned to that bean or {@code null} if none is set
 	 */
