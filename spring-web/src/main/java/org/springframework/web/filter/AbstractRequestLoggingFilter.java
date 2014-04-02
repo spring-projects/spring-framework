@@ -267,7 +267,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 		}
 		if (isIncludePayload() && request instanceof RequestCachingRequestWrapper) {
 			RequestCachingRequestWrapper wrapper = (RequestCachingRequestWrapper) request;
-			byte[] buf = wrapper.toByteArray();
+			byte[] buf = wrapper.getContentAsByteArray();
 			if (buf.length > 0) {
 				int length = Math.min(buf.length, getMaxPayloadLength());
 				String payload;
@@ -304,7 +304,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 	private static class RequestCachingRequestWrapper extends HttpServletRequestWrapper {
 
-		private final ByteArrayOutputStream bos = new ByteArrayOutputStream(1024);
+		private final ByteArrayOutputStream cachedContent = new ByteArrayOutputStream(1024);
 
 		private final ServletInputStream inputStream;
 
@@ -334,8 +334,8 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 			return this.reader;
 		}
 
-		private byte[] toByteArray() {
-			return this.bos.toByteArray();
+		private byte[] getContentAsByteArray() {
+			return this.cachedContent.toByteArray();
 		}
 
 
@@ -351,7 +351,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 			public int read() throws IOException {
 				int ch = this.is.read();
 				if (ch != -1) {
-					bos.write(ch);
+					cachedContent.write(ch);
 				}
 				return ch;
 			}
