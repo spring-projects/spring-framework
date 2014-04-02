@@ -24,7 +24,6 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.springframework.oxm.Marshaller;
 import org.springframework.util.Assert;
-import org.springframework.util.StreamUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.AbstractView;
@@ -104,13 +103,12 @@ public class MarshallingView extends AbstractView {
 		if (toBeMarshalled == null) {
 			throw new IllegalStateException("Unable to locate object to be marshalled in model: " + model);
 		}
-		ByteArrayOutputStream bos = new ByteArrayOutputStream(1024);
-		this.marshaller.marshal(toBeMarshalled, new StreamResult(bos));
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+		this.marshaller.marshal(toBeMarshalled, new StreamResult(baos));
 
 		setResponseContentType(request, response);
-		response.setContentLength(bos.size());
-
-		StreamUtils.copy(bos.toByteArray(), response.getOutputStream());
+		response.setContentLength(baos.size());
+		baos.writeTo(response.getOutputStream());
 	}
 
 	/**

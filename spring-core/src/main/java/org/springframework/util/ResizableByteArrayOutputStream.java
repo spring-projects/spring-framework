@@ -29,7 +29,7 @@ import java.io.ByteArrayOutputStream;
  *
  * @author Brian Clozel
  * @author Juergen Hoeller
- * @since 4.0
+ * @since 4.0.3
  */
 public class ResizableByteArrayOutputStream extends ByteArrayOutputStream {
 
