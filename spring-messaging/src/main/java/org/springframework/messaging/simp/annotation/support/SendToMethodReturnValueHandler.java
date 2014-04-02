@@ -24,6 +24,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.core.MessagePostProcessor;
+import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -158,7 +159,8 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 				return value;
 			}
 		}
-		return new String[] { defaultPrefix + inputHeaders.getDestination() };
+		return new String[] { defaultPrefix +
+				inputHeaders.getHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER) };
 	}
 
 

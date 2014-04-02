@@ -32,6 +32,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -116,7 +117,7 @@ public class SendToMethodReturnValueHandlerTests {
 
 		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
 
-		Message<?> inputMessage = createInputMessage("sess1", "sub1", "/dest", null);
+		Message<?> inputMessage = createInputMessage("sess1", "sub1", "/app", "/dest", null);
 		this.handler.handleReturnValue(payloadContent, this.noAnnotationsReturnType, inputMessage);
 
 		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
@@ -134,7 +135,7 @@ public class SendToMethodReturnValueHandlerTests {
 		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
 
 		String sessionId = "sess1";
-		Message<?> inputMessage = createInputMessage(sessionId, "sub1", null, null);
+		Message<?> inputMessage = createInputMessage(sessionId, "sub1", null, null, null);
 		this.handler.handleReturnValue(payloadContent, this.sendToReturnType, inputMessage);
 
 		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
@@ -158,7 +159,7 @@ public class SendToMethodReturnValueHandlerTests {
 		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
 
 		String sessionId = "sess1";
-		Message<?> inputMessage = createInputMessage(sessionId, "sub1", "/dest", null);
+		Message<?> inputMessage = createInputMessage(sessionId, "sub1", "/app", "/dest", null);
 		this.handler.handleReturnValue(payloadContent, this.sendToDefaultDestReturnType, inputMessage);
 
 		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
@@ -177,7 +178,7 @@ public class SendToMethodReturnValueHandlerTests {
 
 		String sessionId = "sess1";
 		TestUser user = new TestUser();
-		Message<?> inputMessage = createInputMessage(sessionId, "sub1", null, user);
+		Message<?> inputMessage = createInputMessage(sessionId, "sub1", null, null, user);
 		this.handler.handleReturnValue(payloadContent, this.sendToUserReturnType, inputMessage);
 
 		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
@@ -202,7 +203,7 @@ public class SendToMethodReturnValueHandlerTests {
 
 		String sessionId = "sess1";
 		TestUser user = new UniqueUser();
-		Message<?> inputMessage = createInputMessage(sessionId, "sub1", null, user);
+		Message<?> inputMessage = createInputMessage(sessionId, "sub1", null, null, user);
 		this.handler.handleReturnValue(payloadContent, this.sendToUserReturnType, inputMessage);
 
 		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
@@ -221,7 +222,7 @@ public class SendToMethodReturnValueHandlerTests {
 
 		String sessionId = "sess1";
 		TestUser user = new TestUser();
-		Message<?> inputMessage = createInputMessage(sessionId, "sub1", "/dest", user);
+		Message<?> inputMessage = createInputMessage(sessionId, "sub1", "/app", "/dest", user);
 		this.handler.handleReturnValue(payloadContent, this.sendToUserDefaultDestReturnType, inputMessage);
 
 		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
@@ -234,12 +235,14 @@ public class SendToMethodReturnValueHandlerTests {
 	}
 
 
-	private Message<?> createInputMessage(String sessId, String subsId, String destination, Principal principal) {
+	private Message<?> createInputMessage(String sessId, String subsId, String destinationPrefix,
+            String destination, Principal principal) {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
 		headers.setSessionId(sessId);
 		headers.setSubscriptionId(subsId);
-		if (destination != null) {
-			headers.setDestination(destination);
+		if (destination != null && destinationPrefix != null) {
+			headers.setDestination(destinationPrefix + destination);
+			headers.setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, destination);
 		}
 		if (principal != null) {
 			headers.setUser(principal);

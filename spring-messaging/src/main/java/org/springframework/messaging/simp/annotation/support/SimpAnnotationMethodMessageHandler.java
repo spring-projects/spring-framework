@@ -357,7 +357,6 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		String matchedPattern = mapping.getDestinationConditions().getPatterns().iterator().next();
 		Map<String, String> vars = getPathMatcher().extractUriTemplateVariables(matchedPattern, lookupDestination);
 
-		headers.setDestination(lookupDestination);
 		headers.setHeader(DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER, vars);
 		message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
 

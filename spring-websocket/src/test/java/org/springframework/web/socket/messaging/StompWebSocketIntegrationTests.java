@@ -36,6 +36,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.support.AbstractSubscribableChannel;
@@ -134,6 +135,28 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 		}
 	}
 
+	// SPR-11648
+
+	@Test
+	public void sendSubscribeToControllerAndReceiveReply() throws Exception {
+
+		TextMessage message = create(StompCommand.SUBSCRIBE).headers(
+				"id:subs1", "destination:/app/number").build();
+
+		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(1, message);
+		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
+
+		try {
+			assertTrue(clientHandler.latch.await(2, TimeUnit.SECONDS));
+			String payload = clientHandler.actual.get(0).getPayload();
+			assertTrue("Expected STOMP destination=/app/number, got " + payload, payload.contains("destination:/app/number"));
+			assertTrue("Expected STOMP Payload=42, got " + payload, payload.contains("42"));
+		}
+		finally {
+			session.close();
+		}
+	}
+
 
 	@IntegrationTestController
 	static class SimpleController {
@@ -163,6 +186,11 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 		@MessageMapping(value="/increment")
 		public int handle(int i) {
 			return i + 1;
+		}
+
+		@SubscribeMapping("/number")
+		public int number() {
+			return 42;
 		}
 	}
 
