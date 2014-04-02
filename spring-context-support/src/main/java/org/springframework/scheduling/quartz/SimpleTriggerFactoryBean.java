@@ -243,7 +243,7 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 		sti.setRepeatCount(this.repeatCount);
 		sti.setPriority(this.priority);
 		sti.setMisfireInstruction(this.misfireInstruction);
-		cti.setDescription(this.description);
+		sti.setDescription(this.description);
 		this.simpleTrigger = sti;
 		*/
 

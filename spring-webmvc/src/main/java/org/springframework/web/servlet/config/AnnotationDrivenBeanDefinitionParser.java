@@ -129,6 +129,9 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	private static final boolean javaxValidationPresent = ClassUtils.isPresent(
 			"javax.validation.Validator", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
 
+	private static boolean romePresent =
+			ClassUtils.isPresent("com.sun.syndication.feed.WireFeed", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+
 	private static final boolean jaxb2Present =
 			ClassUtils.isPresent("javax.xml.bind.Binder", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
 
@@ -139,9 +142,6 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	private static final boolean jacksonPresent =
 			ClassUtils.isPresent("org.codehaus.jackson.map.ObjectMapper", AnnotationDrivenBeanDefinitionParser.class.getClassLoader()) &&
 					ClassUtils.isPresent("org.codehaus.jackson.JsonGenerator", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
-
-	private static boolean romePresent =
-			ClassUtils.isPresent("com.sun.syndication.feed.WireFeed", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
 
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
@@ -315,11 +315,11 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			props.put("atom", MediaType.APPLICATION_ATOM_XML_VALUE);
 			props.put("rss", "application/rss+xml");
 		}
-		if (jackson2Present || jacksonPresent) {
-			props.put("json", MediaType.APPLICATION_JSON_VALUE);
-		}
 		if (jaxb2Present) {
 			props.put("xml", MediaType.APPLICATION_XML_VALUE);
+		}
+		if (jackson2Present || jacksonPresent) {
+			props.put("json", MediaType.APPLICATION_JSON_VALUE);
 		}
 		return props;
 	}
@@ -429,7 +429,6 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			if (jaxb2Present) {
 				messageConverters.add(createConverterDefinition(Jaxb2RootElementHttpMessageConverter.class, source));
 			}
-
 			if (jackson2Present) {
 				messageConverters.add(createConverterDefinition(MappingJackson2HttpMessageConverter.class, source));
 			}
