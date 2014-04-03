@@ -176,8 +176,8 @@ project("spring-core") {
 	// avoids including two different copies of asm unnecessarily. If however future cglib
 	// versions drift from the version of asm used by Spring internally, this duplication
 	// will become necessary.
-	def asmVersion = "4.0"
-	def cglibVersion = "3.0"
+	def asmVersion = "5.0"
+	def cglibVersion = "3.1"
 
 	configurations {
 		jarjar

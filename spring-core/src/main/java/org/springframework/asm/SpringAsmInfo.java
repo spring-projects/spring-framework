@@ -33,6 +33,6 @@ public final class SpringAsmInfo {
 	 *
 	 * @see Opcodes#ASM4
 	 */
-	public static final int ASM_VERSION = Opcodes.ASM4;
+	public static final int ASM_VERSION = Opcodes.ASM5;
 
 }
