@@ -142,13 +142,13 @@ public class MessageHeadersTests {
 	}
 
 	@Test
-	public void subclass() {
+	public void subClassWithCustomIdAndNoTimestamp() {
 		final AtomicLong id = new AtomicLong();
 		@SuppressWarnings("serial")
 		class MyMH extends MessageHeaders {
 
 			public MyMH() {
-				this.getRawHeaders().put(ID, new UUID(0, id.incrementAndGet()));
+				super(null, new UUID(0, id.incrementAndGet()), null);
 			}
 
 		}
