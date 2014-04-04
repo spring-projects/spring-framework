@@ -45,8 +45,6 @@ import org.springframework.util.Assert;
  */
 public class UserDestinationMessageHandler implements MessageHandler, SmartLifecycle {
 
-	public static final String SUBSCRIBE_DESTINATION = "subscribeDestination";
-
 	private static final Log logger = LogFactory.getLog(UserDestinationMessageHandler.class);
 
 
@@ -156,7 +154,7 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 		}
 		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.wrap(message);
 		if (SimpMessageType.MESSAGE.equals(headerAccessor.getMessageType())) {
-			headerAccessor.setHeader(SUBSCRIBE_DESTINATION, result.getSubscribeDestination());
+			headerAccessor.setHeader(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION, result.getSubscribeDestination());
 			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headerAccessor).build();
 		}
 		for (String targetDestination : destinations) {

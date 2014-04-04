@@ -52,6 +52,16 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
 	public static final String USER_HEADER = "simpUser";
 
+	/**
+	 * For internal use.
+	 *
+	 * <p>The original destination used by a client when subscribing. Such a
+	 * destination may have been modified (e.g. user destinations) on the server
+	 * side. This header provides a hint so messages sent to clients may have
+	 * a destination matching to their original subscription.
+	 */
+	public static final String ORIGINAL_DESTINATION = "simpOrigDestination";
+
 
 	/**
 	 * A constructor for creating new message headers.
@@ -100,6 +110,9 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 		}
 	}
 
+	/**
+	 * @return the message type
+	 */
 	public SimpMessageType getMessageType() {
 		return (SimpMessageType) getHeader(MESSAGE_TYPE_HEADER);
 	}
@@ -109,10 +122,16 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 		setHeader(DESTINATION_HEADER, destination);
 	}
 
+	/**
+	 * @return the message destination
+	 */
 	public String getDestination() {
 		return (String) getHeader(DESTINATION_HEADER);
 	}
 
+	/**
+	 * @return the subscription id (if any) of the message
+	 */
 	public String getSubscriptionId() {
 		return (String) getHeader(SUBSCRIPTION_ID_HEADER);
 	}
@@ -121,6 +140,9 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 		setHeader(SUBSCRIPTION_ID_HEADER, subscriptionId);
 	}
 
+	/**
+	 * @return the id of the current session
+	 */
 	public String getSessionId() {
 		return (String) getHeader(SESSION_ID_HEADER);
 	}
@@ -129,6 +151,9 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 		setHeader(SESSION_ID_HEADER, sessionId);
 	}
 
+	/**
+	 * @return attributes associated with the current session.
+	 */
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> getSessionAttributes() {
 		return (Map<String, Object>) getHeader(SESSION_ATTRIBUTES);
@@ -138,6 +163,9 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 		setHeader(SESSION_ATTRIBUTES, attributes);
 	}
 
+	/**
+	 * @return the user associated with the current session.
+	 */
 	public Principal getUser() {
 		return (Principal) getHeader(USER_HEADER);
 	}

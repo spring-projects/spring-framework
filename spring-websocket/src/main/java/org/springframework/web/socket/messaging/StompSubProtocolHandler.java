@@ -33,6 +33,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.stomp.BufferingStompDecoder;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -251,7 +252,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 				logger.error("Ignoring message, no subscriptionId header: " + message);
 				return;
 			}
-			String header = UserDestinationMessageHandler.SUBSCRIBE_DESTINATION;
+			String header = SimpMessageHeaderAccessor.ORIGINAL_DESTINATION;
 			if (message.getHeaders().containsKey(header)) {
 				headers.setDestination((String) message.getHeaders().get(header));
 			}
