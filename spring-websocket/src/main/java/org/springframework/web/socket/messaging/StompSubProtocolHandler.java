@@ -367,6 +367,10 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			this.userSessionRegistry.unregisterSessionId(userName, session.getId());
 		}
 
+		if (logger.isDebugEnabled()) {
+			logger.debug("WebSocket session ended, sending DISCONNECT message to broker");
+		}
+
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		headers.setSessionId(session.getId());
 		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();

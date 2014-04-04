@@ -36,7 +36,7 @@ public interface TcpConnectionHandler<P> {
 	void afterConnected(TcpConnection<P> connection);
 
 	/**
-	 * Invoked after a connection failure.
+	 * Invoked on failure to connect.
 	 * @param ex the exception
 	 */
 	void afterConnectFailure(Throwable ex);
@@ -46,6 +46,12 @@ public interface TcpConnectionHandler<P> {
 	 * @param message the message
 	 */
 	void handleMessage(Message<P> message);
+
+	/**
+	 * Handle a failure on the connection.
+	 * @param ex the exception
+	 */
+	void handleFailure(Throwable ex);
 
 	/**
 	 * Invoked after the connection is closed.

@@ -16,11 +16,11 @@
 
 package org.springframework.messaging.simp.stomp;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -607,6 +607,14 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 
 		@Override
+		public void handleFailure(Throwable ex) {
+			if (this.tcpConnection == null) {
+				return;
+			}
+			handleTcpConnectionFailure("Closing connection after TCP failure", ex);
+		}
+
+		@Override
 		public void afterConnectionClosed() {
 			if (this.tcpConnection == null) {
 				return;
@@ -629,21 +637,45 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			}
 		}
 
+		/**
+		 * Forward the given message to the STOMP broker.
+		 *
+		 * <p>The method checks whether we have an active TCP connection and have
+		 * received the STOMP CONNECTED frame. For client messages this should be
+		 * false only if we lose the TCP connection around the same time when a
+		 * client message is being forwarded, so we simply log the ignored message
+		 * at trace level. For messages from within the application being sent on
+		 * the "system" connection an exception is raised so that components sending
+		 * the message have a chance to handle it -- by default the broker message
+		 * channel is synchronous.
+		 *
+		 * <p>Note that if messages arrive concurrently around the same time a TCP
+		 * connection is lost, there is a brief period of time before the connection
+		 * is reset when one or more messages may sneak through and an attempt made
+		 * to forward them. Rather than synchronizing to guard against that, this
+		 * method simply lets them try and fail. For client sessions that may
+		 * result in an additional STOMP ERROR frame(s) being sent downstream but
+		 * code handling that downstream should be idempotent in such cases.
+		 *
+		 * @param message the message to send, never {@code null}
+		 * @return a future to wait for the result
+		 */
+		@SuppressWarnings("unchecked")
 		public ListenableFuture<Void> forward(final Message<?> message) {
+
+			TcpConnection<byte[]> conn = this.tcpConnection;
 
 			if (!this.isStompConnected) {
 				if (this.isRemoteClientSession) {
-					if (StompCommand.DISCONNECT.equals(StompHeaderAccessor.wrap(message).getCommand())) {
-						return EMPTY_TASK;
+					if (logger.isTraceEnabled()) {
+						logger.trace("Ignoring client message received " + message +
+								(conn != null ? "before CONNECTED frame" : "after TCP connection closed"));
 					}
-					// Should never happen
-					throw new IllegalStateException("Unexpected client message " + message +
-							(this.tcpConnection != null ?
-									"before STOMP CONNECTED frame" : "after TCP connection closed"));
+					return EMPTY_TASK;
 				}
 				else {
 					throw new IllegalStateException("Cannot forward messages on system connection " +
-							(this.tcpConnection != null ? "before STOMP CONNECTED frame" : "while inactive") +
+							(conn != null ? "before STOMP CONNECTED frame" : "while inactive") +
 							". Try listening for BrokerAvailabilityEvent ApplicationContext events.");
 
 				}
@@ -659,8 +691,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				}
 			}
 
-			@SuppressWarnings("unchecked")
-			ListenableFuture<Void> future = this.tcpConnection.send((Message<byte[]>) message);
+			ListenableFuture<Void> future = conn.send((Message<byte[]>) message);
 
 			future.addCallback(new ListenableFutureCallback<Void>() {
 				@Override
@@ -672,7 +703,12 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				}
 				@Override
 				public void onFailure(Throwable t) {
-					handleTcpConnectionFailure("Failed to send message " + message, t);
+					if (tcpConnection == null) {
+						// already reset
+					}
+					else {
+						handleTcpConnectionFailure("Failed to send message " + message, t);
+					}
 				}
 			});
 
