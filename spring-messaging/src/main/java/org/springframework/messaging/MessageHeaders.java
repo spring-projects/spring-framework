@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.AlternativeJdkIdGenerator;
+import org.springframework.util.Assert;
 import org.springframework.util.IdGenerator;
 
 /**
@@ -42,6 +43,7 @@ import org.springframework.util.IdGenerator;
  * <b>IMPORTANT</b>: This class is immutable. Any mutating operation such as
  * {@code put(..)}, {@code putAll(..)} and others will throw
  * {@link UnsupportedOperationException}.
+ * <p>Subclasses do have access to the raw headers, however, via {@link #getRawHeaders()}.
  * <p>
  * One way to create message headers is to use the
  * {@link org.springframework.messaging.support.MessageBuilder MessageBuilder}:
@@ -66,7 +68,7 @@ import org.springframework.util.IdGenerator;
  * @see org.springframework.messaging.support.MessageBuilder
  * @see org.springframework.messaging.support.MessageHeaderAccessor
  */
-public final class MessageHeaders implements Map<String, Object>, Serializable {
+public class MessageHeaders implements Map<String, Object>, Serializable {
 
 	private static final long serialVersionUID = -4615750558355702881L;
 
@@ -96,12 +98,38 @@ public final class MessageHeaders implements Map<String, Object>, Serializable {
 	private final Map<String, Object> headers;
 
 
+	/**
+	 * Consructs a {@link MessageHeaders} from the headers map; adding (or
+	 * overwriting) the {@link #ID} and {@link #TIMESTAMP} headers.
+	 * @param headers a map with headers to add
+	 */
 	public MessageHeaders(Map<String, Object> headers) {
-		this.headers = (headers != null) ? new HashMap<String, Object>(headers) : new HashMap<String, Object>();
-		this.headers.put(ID, ((idGenerator != null) ? idGenerator : defaultIdGenerator).generateId());
-		this.headers.put(TIMESTAMP, System.currentTimeMillis());
+		this(headers, ((idGenerator != null) ? idGenerator : defaultIdGenerator).generateId(),
+				System.currentTimeMillis());
 	}
 
+	/**
+	 * Constructor allowing a sub-class to access the (mutable) header map as well
+	 * to provide the ID and TIMESTAMP header values.
+	 *
+	 * @param headers a map with headers to add
+	 * @param id the value for the {@link #ID} header, never {@code null}
+	 * @param timestamp the value for the {@link #TIMESTAMP} header,
+	 *    or {@code null} meaning no timestamp header
+	 */
+	protected MessageHeaders(Map<String, Object> headers, UUID id, Long timestamp) {
+		Assert.notNull(id, "'id' is required");
+		this.headers = (headers != null) ? new HashMap<String, Object>(headers) : new HashMap<String, Object>();
+		this.headers.put(ID, id);
+		if (timestamp != null) {
+			this.headers.put(TIMESTAMP, timestamp);
+		}
+	}
+
+
+	protected Map<String, Object> getRawHeaders() {
+		return this.headers;
+	}
 
 	public UUID getId() {
 		return this.get(ID, UUID.class);

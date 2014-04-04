@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Test;
 
@@ -32,6 +34,7 @@ import static org.junit.Assert.*;
  * Test fixture for {@link MessageHeaders}.
  *
  * @author Rossen Stoyanchev
+ * @author Gary Russell
  */
 public class MessageHeadersTests {
 
@@ -138,6 +141,21 @@ public class MessageHeadersTests {
 		assertNull(output.get("address"));
 	}
 
+	@Test
+	public void subClassWithCustomIdAndNoTimestamp() {
+		final AtomicLong id = new AtomicLong();
+		@SuppressWarnings("serial")
+		class MyMH extends MessageHeaders {
+
+			public MyMH() {
+				super(null, new UUID(0, id.incrementAndGet()), null);
+			}
+
+		}
+		MessageHeaders headers = new MyMH();
+		assertEquals("00000000-0000-0000-0000-000000000001", headers.getId().toString());
+		assertEquals(1, headers.size());
+	}
 
 	private static Object serializeAndDeserialize(Object object) throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
