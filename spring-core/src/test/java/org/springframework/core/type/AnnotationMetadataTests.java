@@ -346,6 +346,7 @@ public class AnnotationMetadataTests {
 		}
 	}
 
+	@SuppressWarnings({ "serial" })
 	private static class AnnotatedComponentSubClass extends AnnotatedComponent {
 
 	}

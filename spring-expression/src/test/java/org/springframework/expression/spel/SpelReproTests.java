@@ -1838,6 +1838,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void SPR11494() {
 		Expression exp = new SpelExpressionParser().parseExpression("T(java.util.Arrays).asList('a','b')");
 		List<String> list = (List<String>) exp.getValue();
@@ -1992,6 +1993,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 
+	@SuppressWarnings({ "rawtypes", "serial" })
 	public static class MapWithConstant extends HashMap {
 
 		public static final int X = 1;
