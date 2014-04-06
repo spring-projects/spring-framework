@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.StubMessageChannel;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
+import org.springframework.util.LinkedMultiValueMap;
 
 import java.util.*;
 
@@ -87,9 +88,9 @@ public class SimpMessagingTemplateTests {
 
 	@Test
 	public void convertAndSendWithCustomHeaderNonNative() {
-		Map<String, Object> headers = new HashMap<String, Object>();
+		Map<String, Object> headers = new HashMap<>();
 		headers.put("key", "value");
-		headers.put(NativeMessageHeaderAccessor.NATIVE_HEADERS, Collections.emptyMap());
+		headers.put(NativeMessageHeaderAccessor.NATIVE_HEADERS, new LinkedMultiValueMap<String, String>());
 		this.messagingTemplate.convertAndSend("/foo", "data", headers);
 
 		List<Message<byte[]>> messages = this.messageChannel.getMessages();

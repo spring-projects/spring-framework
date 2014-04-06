@@ -164,7 +164,7 @@ public abstract class AbstractBrokerMessageHandler
 	public final void handleMessage(Message<?> message) {
 		if (!this.running) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Message broker is not running. Ignoring message id=" + message.getHeaders().getId());
+				logger.trace("Message broker is not running. Ignoring message=" + message);
 			}
 			return;
 		}

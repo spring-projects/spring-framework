@@ -268,7 +268,7 @@ public class StompSubProtocolHandlerTests {
 		assertNotNull(headers.getSessionAttributes());
 		assertEquals("joe", headers.getUser().getName());
 		assertEquals("guest", headers.getLogin());
-		assertEquals("PROTECTED", headers.getPasscode());
+		assertEquals("guest", headers.getPasscode());
 		assertArrayEquals(new long[] {10000, 10000}, headers.getHeartbeat());
 		assertEquals(new HashSet<>(Arrays.asList("1.1","1.0")), headers.getAcceptVersion());
 

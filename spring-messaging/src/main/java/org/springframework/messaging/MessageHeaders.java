@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,7 +33,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.AlternativeJdkIdGenerator;
-import org.springframework.util.Assert;
 import org.springframework.util.IdGenerator;
 
 /**
@@ -70,9 +68,11 @@ import org.springframework.util.IdGenerator;
  */
 public class MessageHeaders implements Map<String, Object>, Serializable {
 
-	private static final long serialVersionUID = -4615750558355702881L;
+	private static final long serialVersionUID = 7035068984263400920L;
 
 	private static final Log logger = LogFactory.getLog(MessageHeaders.class);
+
+	public static final UUID ID_VALUE_NONE = new UUID(0,0);
 
 	private static volatile IdGenerator idGenerator = null;
 
@@ -99,29 +99,43 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 
 
 	/**
-	 * Consructs a {@link MessageHeaders} from the headers map; adding (or
-	 * overwriting) the {@link #ID} and {@link #TIMESTAMP} headers.
+	 * Construct a {@link MessageHeaders} with the given headers. An {@link #ID} and
+	 * {@link #TIMESTAMP} headers will also be added, overriding any existing values.
+	 *
 	 * @param headers a map with headers to add
 	 */
 	public MessageHeaders(Map<String, Object> headers) {
-		this(headers, ((idGenerator != null) ? idGenerator : defaultIdGenerator).generateId(),
-				System.currentTimeMillis());
+		this(headers, null, null);
 	}
 
 	/**
-	 * Constructor allowing a sub-class to access the (mutable) header map as well
-	 * to provide the ID and TIMESTAMP header values.
+	 * Constructor providing control over the ID and TIMESTAMP header values.
 	 *
 	 * @param headers a map with headers to add
-	 * @param id the value for the {@link #ID} header, never {@code null}
-	 * @param timestamp the value for the {@link #TIMESTAMP} header,
-	 *    or {@code null} meaning no timestamp header
+	 * @param id the {@link #ID} header value
+	 * @param timestamp the {@link #TIMESTAMP} header value
 	 */
 	protected MessageHeaders(Map<String, Object> headers, UUID id, Long timestamp) {
-		Assert.notNull(id, "'id' is required");
+
 		this.headers = (headers != null) ? new HashMap<String, Object>(headers) : new HashMap<String, Object>();
-		this.headers.put(ID, id);
-		if (timestamp != null) {
+
+		if (id == null) {
+			this.headers.put(ID, getIdGenerator().generateId());
+		}
+		else if (id == ID_VALUE_NONE) {
+			this.headers.remove(ID);
+		}
+		else {
+			this.headers.put(ID, id);
+		}
+
+		if (timestamp == null) {
+			this.headers.put(TIMESTAMP, System.currentTimeMillis());
+		}
+		else if (timestamp < 0) {
+			this.headers.remove(TIMESTAMP);
+		}
+		else {
 			this.headers.put(TIMESTAMP, timestamp);
 		}
 	}
@@ -129,6 +143,10 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 
 	protected Map<String, Object> getRawHeaders() {
 		return this.headers;
+	}
+
+	protected static IdGenerator getIdGenerator() {
+		return ((idGenerator != null) ? idGenerator : defaultIdGenerator);
 	}
 
 	public UUID getId() {
@@ -179,10 +197,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 
 	@Override
 	public String toString() {
-		Map<String, Object> map = new LinkedHashMap<String, Object>(this.headers);
-		map.put(ID,  map.remove(ID)); // remove and add again at the end
-		map.put(TIMESTAMP, map.remove(TIMESTAMP));
-		return map.toString();
+		return this.headers.toString();
 	}
 
 	/*

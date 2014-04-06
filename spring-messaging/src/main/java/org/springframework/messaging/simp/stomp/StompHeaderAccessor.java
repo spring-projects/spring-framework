@@ -26,26 +26,44 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
- * Can be used to prepare headers for a new STOMP message, or to access and/or modify
- * STOMP-specific headers of an existing message.
+ * A {@code MessageHeaderAccessor} to use when creating a {@code Message} from a
+ * decoded STOMP frame, or when encoding a {@code Message} to a STOMP frame.
  *
- * <p>Use one of the static factory method in this class, then call getters and setters,
- * and at the end if necessary call {@link #toMap()} to obtain the updated headers
- * or call {@link #toNativeHeaderMap()} to obtain only the STOMP-specific headers.
+ * <p>When created from STOMP frame content, the actual STOMP headers are stored
+ * in the native header sub-map managed by the parent class
+ * {@link org.springframework.messaging.support.NativeMessageHeaderAccessor}
+ * while the parent class
+ * {@link org.springframework.messaging.simp.SimpMessageHeaderAccessor} manages
+ * common processing headers some of which are based on STOMP headers (e.g.
+ * destination, content-type, etc).
+ *
+ * <p>An instance of this class can also be created by wrapping an existing
+ * {@code Message}. That message may have been created with the more generic
+ * {@link org.springframework.messaging.simp.SimpMessageHeaderAccessor} in
+ * which case STOMP headers are created from common processing headers.
+ * In this case it is also necessary to invoke either
+ * {@link #updateStompCommandAsClientMessage()} or
+ * {@link #updateStompCommandAsServerMessage()} if sending a message and
+ * depending on whether a message is sent to a client or the message broker.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 
+	private static final StompHeaderAccessorFactory factory = new DefaultStompHeaderAccessorFactory();
+
 	private static final AtomicLong messageIdCounter = new AtomicLong();
+
+	private static final long[] DEFAULT_HEARTBEAT = new long[] {0, 0};
 
 	// STOMP header names
 
@@ -83,9 +101,6 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 
 	public static final String STOMP_HEARTBEAT_HEADER = "heart-beat";
 
-	private static final long[] DEFAULT_HEARTBEAT = new long[] {0, 0};
-
-
 	// Other header names
 
 	private static final String COMMAND_HEADER = "stompCommand";
@@ -94,135 +109,113 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 
 
 	/**
-	 * A constructor for creating new STOMP message headers.
+	 * A constructor for creating message headers from a parsed STOMP frame.
 	 */
-	private StompHeaderAccessor(StompCommand command, Map<String, List<String>> externalSourceHeaders) {
-
+	StompHeaderAccessor(StompCommand command, Map<String, List<String>> externalSourceHeaders) {
 		super(command.getMessageType(), externalSourceHeaders);
-
-		Assert.notNull(command, "Command must not be null");
 		setHeader(COMMAND_HEADER, command);
-
-		if (externalSourceHeaders != null) {
-			setSimpMessageHeaders(command, externalSourceHeaders);
-		}
-	}
-
-	private void setSimpMessageHeaders(StompCommand command, Map<String, List<String>> extHeaders) {
-
-		List<String> values = extHeaders.get(StompHeaderAccessor.STOMP_DESTINATION_HEADER);
-		if (!CollectionUtils.isEmpty(values)) {
-			super.setDestination(values.get(0));
-		}
-
-		values = extHeaders.get(StompHeaderAccessor.STOMP_CONTENT_TYPE_HEADER);
-		if (!CollectionUtils.isEmpty(values)) {
-			super.setContentType(MimeTypeUtils.parseMimeType(values.get(0)));
-		}
-
-		if (StompCommand.SUBSCRIBE.equals(command) || StompCommand.UNSUBSCRIBE.equals(command)) {
-			values = extHeaders.get(StompHeaderAccessor.STOMP_ID_HEADER);
-			if (!CollectionUtils.isEmpty(values)) {
-				super.setSubscriptionId(values.get(0));
-			}
-		}
-		else if (StompCommand.MESSAGE.equals(command)) {
-			values = extHeaders.get(StompHeaderAccessor.STOMP_SUBSCRIPTION_HEADER);
-			if (!CollectionUtils.isEmpty(values)) {
-				super.setSubscriptionId(values.get(0));
-			}
-		}
-		else if (StompCommand.CONNECT.equals(command)) {
-			if (!StringUtils.isEmpty(getPasscode())) {
-				setHeader(CREDENTIALS_HEADER, new StompPasscode(getPasscode()));
-				setPasscode("PROTECTED");
-			}
-		}
+		updateSimpMessageHeadersFromStompHeaders();
 	}
 
 	/**
 	 * A constructor for accessing and modifying existing message headers.
+	 * Note that the message headers may not have been created from a STOMP frame
+	 * but may have rather originated from using the more generic
+	 * {@link org.springframework.messaging.simp.SimpMessageHeaderAccessor}.
 	 */
-	private StompHeaderAccessor(Message<?> message) {
+	StompHeaderAccessor(Message<?> message) {
 		super(message);
+		updateStompHeadersFromSimpMessageHeaders();
+	}
+
+	StompHeaderAccessor() {
+		super(SimpMessageType.HEARTBEAT, null);
+	}
+
+	void updateSimpMessageHeadersFromStompHeaders() {
+		if (getNativeHeaders() == null) {
+			return;
+		}
+		String value = getFirstNativeHeader(STOMP_DESTINATION_HEADER);
+		if (value != null) {
+			super.setDestination(value);
+		}
+		value = getFirstNativeHeader(STOMP_CONTENT_TYPE_HEADER);
+		if (value != null) {
+			super.setContentType(MimeTypeUtils.parseMimeType(value));
+		}
+		StompCommand command = getCommand();
+		if (StompCommand.MESSAGE.equals(command)) {
+			value = getFirstNativeHeader(STOMP_SUBSCRIPTION_HEADER);
+			if (value != null) {
+				super.setSubscriptionId(value);
+			}
+		}
+		else if (StompCommand.SUBSCRIBE.equals(command) || StompCommand.UNSUBSCRIBE.equals(command)) {
+			value = getFirstNativeHeader(STOMP_ID_HEADER);
+			if (value != null) {
+				super.setSubscriptionId(value);
+			}
+		}
+		else if (StompCommand.CONNECT.equals(command)) {
+			protectPasscode();
+		}
+	}
+
+	private void updateStompHeadersFromSimpMessageHeaders() {
+		if (getDestination() != null) {
+			setNativeHeader(STOMP_DESTINATION_HEADER, getDestination());
+		}
+		if (getContentType() != null) {
+			setNativeHeader(STOMP_CONTENT_TYPE_HEADER, getContentType().toString());
+		}
+		trySetStompHeaderForSubscriptionId();
 	}
 
 	/**
-	 * Create {@link StompHeaderAccessor} for a new {@link Message}.
+	 * Create an instance for the given STOMP command.
 	 */
 	public static StompHeaderAccessor create(StompCommand command) {
-		return new StompHeaderAccessor(command, null);
+		return factory.create(command);
 	}
 
 	/**
-	 * Create {@link StompHeaderAccessor} from parsed STOP frame content.
+	 * Create an instance for the given STOMP command and headers.
 	 */
 	public static StompHeaderAccessor create(StompCommand command, Map<String, List<String>> headers) {
-		return new StompHeaderAccessor(command, headers);
+		return factory.create(command, headers);
 	}
 
 	/**
-	 * Create {@link StompHeaderAccessor} from the headers of an existing {@link Message}.
+	 * Create headers for a heartbeat. While a STOMP heartbeat frame does not
+	 * have headers, a session id is needed for processing purposes at a minimum.
+	 */
+	public static StompHeaderAccessor createForHeartbeat() {
+		return factory.createForHeartbeat();
+	}
+
+	/**
+	 * Create an instance from the payload and headers of the given Message.
 	 */
 	public static StompHeaderAccessor wrap(Message<?> message) {
-		return new StompHeaderAccessor(message);
+		return factory.wrap(message);
 	}
 
 
-	/**
-	 * Return STOMP headers including original, wrapped STOMP headers (if any) plus
-	 * additional header updates made through accessor methods.
-	 */
 	@Override
-	public Map<String, List<String>> toNativeHeaderMap() {
-
-		Map<String, List<String>> result = super.toNativeHeaderMap();
-
-		String destination = super.getDestination();
-		if (destination != null) {
-			result.put(STOMP_DESTINATION_HEADER, Arrays.asList(destination));
-		}
-
-		MimeType contentType = super.getContentType();
-		if (contentType != null) {
-			result.put(STOMP_CONTENT_TYPE_HEADER, Arrays.asList(contentType.toString()));
-		}
-
-		if (getCommand() != null && getCommand().requiresSubscriptionId()) {
-			String subscriptionId = getSubscriptionId();
-			if (subscriptionId != null) {
-				String name = StompCommand.MESSAGE.equals(getCommand()) ? STOMP_SUBSCRIPTION_HEADER : STOMP_ID_HEADER;
-				result.put(name, Arrays.asList(subscriptionId));
-			}
-			else {
-				logger.warn(getCommand() + " frame does not have a subscription identifier" + this.toString());
-			}
-		}
-
-		if (StompCommand.MESSAGE.equals(getCommand()) && ((getMessageId() == null))) {
-			String messageId = getSessionId() + "-" + messageIdCounter.getAndIncrement();
-			result.put(STOMP_MESSAGE_ID_HEADER, Arrays.asList(messageId));
-		}
-
-		return result;
+	protected MessageHeaderAccessor createAccessor(Message<?> message) {
+		return factory.wrap(message);
 	}
 
-	public Map<String, List<String>> toStompHeaderMap() {
-		if (StompCommand.CONNECT.equals(getCommand())) {
-			StompPasscode credentials = (StompPasscode) getHeader(CREDENTIALS_HEADER);
-			if (credentials != null) {
-				Map<String, List<String>> headers = toNativeHeaderMap();
-				headers.put(STOMP_PASSCODE_HEADER, Arrays.asList(credentials.passcode));
-				return headers;
-			}
-		}
-		return toNativeHeaderMap();
+	Map<String, List<String>> getNativeHeaders() {
+		@SuppressWarnings("unchecked")
+		Map<String, List<String>> map = (Map<String, List<String>>) getHeader(NATIVE_HEADERS);
+		return (map != null ? map : Collections.<String, List<String>>emptyMap());
 	}
 
 	public StompCommand updateStompCommandAsClientMessage() {
 
-		Assert.state(SimpMessageType.MESSAGE.equals(getMessageType()),
-				"Unexpected message type " + getMessage());
+		Assert.state(SimpMessageType.MESSAGE.equals(getMessageType()), "Unexpected message type " + getMessage());
 
 		if (getCommand() == null) {
 			setHeader(COMMAND_HEADER, StompCommand.SEND);
@@ -236,24 +229,45 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 
 	public void updateStompCommandAsServerMessage() {
 
-		Assert.state(SimpMessageType.MESSAGE.equals(getMessageType()),
-				"Unexpected message type " + getMessage());
+		Assert.state(SimpMessageType.MESSAGE.equals(getMessageType()), "Unexpected message type " + getMessage());
 
-		if ((getCommand() == null) || getCommand().equals(StompCommand.SEND)) {
+		StompCommand command = getCommand();
+		if ((command == null) || StompCommand.SEND.equals(command)) {
 			setHeader(COMMAND_HEADER, StompCommand.MESSAGE);
 		}
-		else if (!getCommand().equals(StompCommand.MESSAGE)) {
-			throw new IllegalStateException("Unexpected STOMP command " + getCommand());
+		else if (!StompCommand.MESSAGE.equals(command)) {
+			throw new IllegalStateException("Unexpected STOMP command " + command);
+		}
+
+		trySetStompHeaderForSubscriptionId();
+
+		if (getMessageId() == null) {
+			String messageId = getSessionId() + "-" + messageIdCounter.getAndIncrement();
+			setNativeHeader(STOMP_MESSAGE_ID_HEADER, messageId);
 		}
 	}
 
+	/**
+	 * @return the STOMP command, or {@code null} if not yet set.
+	 */
 	public StompCommand getCommand() {
 		return (StompCommand) getHeader(COMMAND_HEADER);
+	}
+
+	/**
+	 * A static alternative for access to the STOMP command.
+	 */
+	public static StompCommand getCommand(Map<String, Object> headers) {
+		return (StompCommand) headers.get(COMMAND_HEADER);
 	}
 
 	public Set<String> getAcceptVersion() {
 		String rawValue = getFirstNativeHeader(STOMP_ACCEPT_VERSION_HEADER);
 		return (rawValue != null) ? StringUtils.commaDelimitedListToSet(rawValue) : Collections.<String>emptySet();
+	}
+
+	public boolean isHeartbeat() {
+		return (SimpMessageType.HEARTBEAT == getMessageType());
 	}
 
 	public void setAcceptVersion(String acceptVersion) {
@@ -288,9 +302,41 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		setNativeHeader(STOMP_CONTENT_TYPE_HEADER, contentType.toString());
 	}
 
+	@Override
+	public void setSubscriptionId(String subscriptionId) {
+		super.setSubscriptionId(subscriptionId);
+		trySetStompHeaderForSubscriptionId();
+	}
+
+	private void trySetStompHeaderForSubscriptionId() {
+		String subscriptionId = getSubscriptionId();
+		if (subscriptionId != null) {
+			if (getCommand() != null && StompCommand.MESSAGE.equals(getCommand())) {
+				setNativeHeader(STOMP_SUBSCRIPTION_HEADER, subscriptionId);
+			}
+			else {
+				SimpMessageType messageType = getMessageType();
+				if (SimpMessageType.SUBSCRIBE.equals(messageType) || SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
+					setNativeHeader(STOMP_ID_HEADER, subscriptionId);
+				}
+			}
+		}
+	}
+
 	public Integer getContentLength() {
-		String contentLength = getFirstNativeHeader(STOMP_CONTENT_LENGTH_HEADER);
-		return StringUtils.hasText(contentLength) ? new Integer(contentLength) : null;
+		if (containsNativeHeader(STOMP_CONTENT_LENGTH_HEADER)) {
+			return Integer.valueOf(getFirstNativeHeader(STOMP_CONTENT_LENGTH_HEADER));
+		}
+		return null;
+	}
+
+	public static Integer getContentLength(Map<String, List<String>> nativeHeaders) {
+		if (nativeHeaders.containsKey(STOMP_CONTENT_LENGTH_HEADER)) {
+			List<String> values = nativeHeaders.get(STOMP_CONTENT_LENGTH_HEADER);
+			String value = (values != null ? values.get(0) : null);
+			return Integer.valueOf(value);
+		}
+		return null;
 	}
 
 	public void setContentLength(int contentLength) {
@@ -298,7 +344,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	}
 
 	public void setHeartbeat(long cx, long cy) {
-		setNativeHeader(STOMP_HEARTBEAT_HEADER, StringUtils.arrayToCommaDelimitedString(new Object[] {cx, cy}));
+		setNativeHeader(STOMP_HEARTBEAT_HEADER, StringUtils.arrayToCommaDelimitedString(new Object[]{cx, cy}));
 	}
 
 	public void setAck(String ack) {
@@ -328,10 +374,31 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 
 	public void setPasscode(String passcode) {
 		setNativeHeader(STOMP_PASSCODE_HEADER, passcode);
+		protectPasscode();
 	}
 
+	private void protectPasscode() {
+		String value = getFirstNativeHeader(STOMP_PASSCODE_HEADER);
+		if (value != null && !"PROTECTED".equals(value)) {
+			setHeader(CREDENTIALS_HEADER, new StompPasscode(value));
+			setNativeHeader(STOMP_PASSCODE_HEADER, "PROTECTED");
+		}
+	}
+
+	/**
+	 * @return the passcode header value or {@code null}.
+	 */
 	public String getPasscode() {
-		return getFirstNativeHeader(STOMP_PASSCODE_HEADER);
+		StompPasscode credentials = (StompPasscode) getHeader(CREDENTIALS_HEADER);
+		return (credentials != null ? credentials.passcode : null);
+	}
+
+	/**
+	 * A static alternative for access to the passcode header.
+	 */
+	public static String getPasscode(Map<String, Object> headers) {
+		StompPasscode credentials = (StompPasscode) headers.get(CREDENTIALS_HEADER);
+		return (credentials != null ? credentials.passcode : null);
 	}
 
 	public void setReceiptId(String receiptId) {

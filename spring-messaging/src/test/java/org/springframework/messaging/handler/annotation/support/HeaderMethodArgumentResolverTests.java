@@ -17,6 +17,8 @@
 package org.springframework.messaging.handler.annotation.support;
 
 import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -149,7 +151,7 @@ public class HeaderMethodArgumentResolverTests {
 	public static class TestMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
 		protected TestMessageHeaderAccessor() {
-			super((Message<?>) null);
+			super((Map<String, List<String>>) null);
 		}
 	}
 

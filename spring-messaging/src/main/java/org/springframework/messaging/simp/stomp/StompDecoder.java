@@ -26,10 +26,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.messaging.Message;
-import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.util.Assert;
-import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.messaging.support.NativeMessageHeaderAccessor;
+import org.springframework.util.InvalidMimeTypeException;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -47,9 +46,9 @@ import org.springframework.util.MultiValueMap;
  */
 public class StompDecoder {
 
-	private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
+	static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
-	private static final byte[] HEARTBEAT_PAYLOAD = new byte[] {'\n'};
+	static final byte[] HEARTBEAT_PAYLOAD = new byte[] {'\n'};
 
 	private final Log logger = LogFactory.getLog(StompDecoder.class);
 
@@ -65,7 +64,7 @@ public class StompDecoder {
 	 * @return the decoded messages or an empty list
 	 */
 	public List<Message<byte[]>> decode(ByteBuffer buffer) {
-		return decode(buffer, new LinkedMultiValueMap<String, String>());
+		return decode(buffer, null);
 	}
 
 	/**
@@ -79,27 +78,25 @@ public class StompDecoder {
 	 * <p>If the buffer contains one ore more STOMP frames, those are returned and
 	 * the buffer reset to point to the beginning of the unused partial content.
 	 *
-	 * <p>The input headers map is used to store successfully parsed headers and
-	 * is cleared after ever successfully read message. So when partial content is
-	 * read the caller can check if a "content-length" header was read, which helps
-	 * to determine how much more content is needed before the next STOMP frame
-	 * can be decoded.
+	 * <p>The output partialMessageHeaders map is used to store successfully parsed
+	 * headers in case of partial content. The caller can then check if a
+	 * "content-length" header was read, which helps to determine how much more
+	 * content is needed before the next attempt to decode.
 	 *
 	 * @param buffer The buffer to decode the STOMP frame from
-	 * @param headers an empty map that will contain successfully parsed headers
+	 * @param partialMessageHeaders an empty output map that will store the last
+	 * successfully parsed partialMessageHeaders in case of partial message content
 	 * in cases where the partial buffer ended with a partial STOMP frame
 	 *
 	 * @return decoded messages or an empty list
 	 * @throws StompConversionException raised in case of decoding issues
 	 */
-	public List<Message<byte[]>> decode(ByteBuffer buffer, MultiValueMap<String, String> headers) {
-		Assert.notNull(headers, "headers is required");
+	public List<Message<byte[]>> decode(ByteBuffer buffer, MultiValueMap<String, String> partialMessageHeaders) {
 		List<Message<byte[]>> messages = new ArrayList<Message<byte[]>>();
 		while (buffer.hasRemaining()) {
-			Message<byte[]> m = decodeMessage(buffer, headers);
+			Message<byte[]> m = decodeMessage(buffer, partialMessageHeaders);
 			if (m != null) {
 				messages.add(m);
-				headers.clear();
 			}
 			else {
 				break;
@@ -120,17 +117,25 @@ public class StompDecoder {
 		String command = readCommand(buffer);
 		if (command.length() > 0) {
 
-			readHeaders(buffer, headers);
-			byte[] payload = readPayload(buffer, headers);
+			StompHeaderAccessor headerAccessor = null;
+			byte[] payload = null;
+
+			if (buffer.remaining() > 0) {
+				StompCommand stompCommand = StompCommand.valueOf(command);
+				headerAccessor = StompHeaderAccessor.create(stompCommand);
+
+				readHeaders(buffer, headerAccessor);
+				payload = readPayload(buffer, headerAccessor);
+			}
 
 			if (payload != null) {
-				StompCommand stompCommand = StompCommand.valueOf(command);
-				if ((payload.length > 0) && (!stompCommand.isBodyAllowed())) {
-					throw new StompConversionException(stompCommand + " shouldn't have but " +
-							"has a payload with length=" + payload.length + ", headers=" + headers);
+				if ((payload.length > 0) && (!headerAccessor.getCommand().isBodyAllowed())) {
+					throw new StompConversionException(headerAccessor.getCommand() +
+							" shouldn't have a payload: length=" + payload.length + ", headers=" + headers);
 				}
-				decodedMessage = MessageBuilder.withPayload(payload)
-						.setHeaders(StompHeaderAccessor.create(stompCommand, headers)).build();
+				headerAccessor.updateSimpMessageHeadersFromStompHeaders();
+				headerAccessor.setLeaveMutable(true);
+				decodedMessage = MessageBuilder.createMessage(payload, headerAccessor.getMessageHeaders());
 				if (logger.isDebugEnabled()) {
 					logger.debug("Decoded " + decodedMessage);
 				}
@@ -139,6 +144,14 @@ public class StompDecoder {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Received incomplete frame. Resetting buffer.");
 				}
+				if (headers != null && headerAccessor != null) {
+					String name = NativeMessageHeaderAccessor.NATIVE_HEADERS;
+					@SuppressWarnings("unchecked")
+					MultiValueMap<String, String> map = (MultiValueMap<String, String>) headerAccessor.getHeader(name);
+					if (map != null) {
+						headers.putAll(map);
+					}
+				}
 				buffer.reset();
 			}
 		}
@@ -146,8 +159,9 @@ public class StompDecoder {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Decoded heartbeat");
 			}
-			decodedMessage = MessageBuilder.withPayload(HEARTBEAT_PAYLOAD).setHeaders(
-					StompHeaderAccessor.create(SimpMessageType.HEARTBEAT)).build();
+			StompHeaderAccessor headerAccessor = StompHeaderAccessor.createForHeartbeat();
+			headerAccessor.setLeaveMutable(true);
+			decodedMessage = MessageBuilder.createMessage(HEARTBEAT_PAYLOAD, headerAccessor.getMessageHeaders());
 		}
 		return decodedMessage;
 	}
@@ -173,7 +187,7 @@ public class StompDecoder {
 		return new String(command.toByteArray(), UTF8_CHARSET);
 	}
 
-	private void readHeaders(ByteBuffer buffer, MultiValueMap<String, String> headers) {
+	private void readHeaders(ByteBuffer buffer, StompHeaderAccessor headerAccessor) {
 		while (true) {
 			ByteArrayOutputStream headerStream = new ByteArrayOutputStream(256);
 			while (buffer.remaining() > 0 && !tryConsumeEndOfLine(buffer)) {
@@ -191,7 +205,14 @@ public class StompDecoder {
 				else {
 					String headerName = unescape(header.substring(0, colonIndex));
 					String headerValue = unescape(header.substring(colonIndex + 1));
-					headers.add(headerName,  headerValue);
+					try {
+						headerAccessor.addNativeHeader(headerName, headerValue);
+					}
+					catch (InvalidMimeTypeException ex) {
+						if (buffer.remaining() > 0) {
+							throw ex;
+						}
+					}
 				}
 			}
 			else {
@@ -237,8 +258,17 @@ public class StompDecoder {
 		return sb.toString();
 	}
 
-	private byte[] readPayload(ByteBuffer buffer, MultiValueMap<String, String> headers) {
-		Integer contentLength = getContentLength(headers);
+	private byte[] readPayload(ByteBuffer buffer, StompHeaderAccessor headerAccessor) {
+
+		Integer contentLength;
+		try {
+			contentLength = headerAccessor.getContentLength();
+		}
+		catch (NumberFormatException ex) {
+			logger.warn("Ignoring invalid content-length: '" + headerAccessor);
+			contentLength = null;
+		}
+
 		if (contentLength != null && contentLength >= 0) {
 			if (buffer.remaining() > contentLength) {
 				byte[] payload = new byte[contentLength];
@@ -262,19 +292,6 @@ public class StompDecoder {
 				else {
 					payload.write(b);
 				}
-			}
-		}
-		return null;
-	}
-
-	protected Integer getContentLength(MultiValueMap<String, String> headers) {
-		if (headers.containsKey(StompHeaderAccessor.STOMP_CONTENT_LENGTH_HEADER)) {
-			String rawContentLength = headers.getFirst(StompHeaderAccessor.STOMP_CONTENT_LENGTH_HEADER);
-			try {
-				return Integer.valueOf(rawContentLength);
-			}
-			catch (NumberFormatException ex) {
-				logger.warn("Ignoring invalid content-length header value: '" + rawContentLength + "'");
 			}
 		}
 		return null;
