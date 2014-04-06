@@ -41,7 +41,6 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", AllEncompassingFormHttpMessageConverter.class.getClassLoader());
 
 
-	@SuppressWarnings("deprecation")
 	public AllEncompassingFormHttpMessageConverter() {
 		addPartConverter(new SourceHttpMessageConverter<Source>());
 		if (jaxb2Present) {
