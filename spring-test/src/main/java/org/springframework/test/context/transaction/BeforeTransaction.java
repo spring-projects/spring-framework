@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,12 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 
 /**
- * <p>Test annotation to indicate that the annotated {@code public void}
- * method should be executed <em>before</em> a transaction is started for test
- * methods configured to run within a transaction via the
- * {@code &#064;Transactional} annotation.
+ * <p>Test annotation to indicate that the annotated {@code public void} method
+ * should be executed <em>before</em> a transaction is started for a test method
+ * configured to run within a transaction via the {@code @Transactional} annotation.
  *
- * <p>The {@code &#064;BeforeTransaction} methods of superclasses will be
- * executed before those of the current class.
- * </p>
+ * <p>The {@code @BeforeTransaction} methods of superclasses will be executed
+ * before those of the current class.
  *
  * <p>As of Spring Framework 4.0, this annotation may be used as a
  * <em>meta-annotation</em> to create custom <em>composed annotations</em>.
