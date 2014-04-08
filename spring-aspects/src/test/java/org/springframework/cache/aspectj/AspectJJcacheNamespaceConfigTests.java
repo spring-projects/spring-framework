@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.jcache.config.aspectj;
+package org.springframework.cache.aspectj;
 
 import org.springframework.cache.jcache.config.AbstractJCacheAnnotationTests;
 import org.springframework.context.ApplicationContext;

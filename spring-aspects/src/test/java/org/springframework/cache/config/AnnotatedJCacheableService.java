@@ -16,6 +16,10 @@
 
 package org.springframework.cache.config;
 
+import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
+
 import javax.cache.annotation.CacheDefaults;
 import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CachePut;
@@ -23,8 +27,6 @@ import javax.cache.annotation.CacheRemove;
 import javax.cache.annotation.CacheRemoveAll;
 import javax.cache.annotation.CacheResult;
 import javax.cache.annotation.CacheValue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.jcache.config.JCacheableService;
@@ -61,6 +63,13 @@ public class AnnotatedJCacheableService implements JCacheableService<Long> {
 	@CacheResult(exceptionCacheName = "exception", nonCachedExceptions = NullPointerException.class)
 	public Long cacheWithException(@CacheKey String id, boolean matchFilter) {
 		throwException(matchFilter);
+		return 0L; // Never reached
+	}
+
+	@Override
+	@CacheResult(exceptionCacheName = "exception", nonCachedExceptions = NullPointerException.class)
+	public Long cacheWithCheckedException(@CacheKey String id, boolean matchFilter) throws IOException {
+		throwCheckedException(matchFilter);
 		return 0L; // Never reached
 	}
 
@@ -177,12 +186,6 @@ public class AnnotatedJCacheableService implements JCacheableService<Long> {
 	public void noAnnotation() {
 	}
 
-	@CacheRemove
-	@CacheRemoveAll
-	public void multiAnnotations() {
-
-	}
-
 	@Override
 	public long exceptionInvocations() {
 		return exceptionCounter.get();
@@ -192,6 +195,16 @@ public class AnnotatedJCacheableService implements JCacheableService<Long> {
 		long count = exceptionCounter.getAndIncrement();
 		if (matchFilter) {
 			throw new UnsupportedOperationException("Expected exception (" + count + ")");
+		}
+		else {
+			throw new NullPointerException("Expected exception (" + count + ")");
+		}
+	}
+
+	private void throwCheckedException(boolean matchFilter) throws IOException {
+		long count = exceptionCounter.getAndIncrement();
+		if (matchFilter) {
+			throw new IOException("Expected exception (" + count + ")");
 		}
 		else {
 			throw new NullPointerException("Expected exception (" + count + ")");

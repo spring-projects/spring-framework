@@ -16,6 +16,8 @@
 
 package org.springframework.cache.jcache.config;
 
+import java.io.IOException;
+
 /**
  * @author Stephane Nicoll
  */
@@ -24,6 +26,8 @@ public interface JCacheableService<T> {
 	T cache(String id);
 
 	T cacheWithException(String id, boolean matchFilter);
+
+	T cacheWithCheckedException(String id, boolean matchFilter) throws IOException;
 
 	T cacheAlwaysInvoke(String id);
 

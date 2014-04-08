@@ -67,10 +67,8 @@ public aspect JCacheCacheAspect extends JCacheAspectSupport {
 			return execute(aspectJInvoker, thisJoinPoint.getTarget(), method, thisJoinPoint.getArgs());
 		}
 		catch (CacheOperationInvoker.ThrowableWrapper th) {
-			if (th.getOriginal() instanceof RuntimeException) {
-				throw (RuntimeException) th.getOriginal();
-			}
-			throw th; // Lose original checked exception
+			AnyThrow.throwUnchecked(th.getOriginal());
+			return null; // never reached
 		}
 	}
 
@@ -108,5 +106,18 @@ public aspect JCacheCacheAspect extends JCacheAspectSupport {
 	 */
 	private pointcut executionOfCacheRemoveAllMethod() :
 		execution(@CacheRemoveAll * *(..));
+
+
+	private static class AnyThrow {
+
+		private static void throwUnchecked(Throwable e) {
+			AnyThrow.<RuntimeException>throwAny(e);
+		}
+
+		@SuppressWarnings("unchecked")
+		private static <E extends Throwable> void throwAny(Throwable e) throws E {
+			throw (E)e;
+		}
+	}
 
 }
