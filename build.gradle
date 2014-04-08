@@ -528,7 +528,7 @@ project("spring-context-support") {
 		optional(project(":spring-jdbc")) // for Quartz support
 		optional(project(":spring-tx")) // for Quartz support
 		optional("javax.mail:javax.mail-api:1.4.7")
-		optional("javax.cache:cache-api:1.0.0-RC1")
+		optional("javax.cache:cache-api:1.0.0")
 		optional("com.google.guava:guava:16.0.1")
 		optional("net.sf.ehcache:ehcache-core:2.6.5")
 		optional("org.quartz-scheduler:quartz:2.1.7")
@@ -901,7 +901,7 @@ project("spring-aspects") {
 		optional(project(":spring-context-support")) // for JavaMail and JSR-107 support
 		optional(project(":spring-orm")) // for JPA exception translation support
 		optional(project(":spring-tx")) // for JPA, @Transactional support
-		optional("javax.cache:cache-api:1.0.0-RC1")
+		optional("javax.cache:cache-api:1.0.0")
 		testCompile(project(":spring-core")) // for CodeStyleAspect
 		testCompile(project(":spring-test"))
 		testCompile("javax.mail:javax.mail-api:1.4.7")
