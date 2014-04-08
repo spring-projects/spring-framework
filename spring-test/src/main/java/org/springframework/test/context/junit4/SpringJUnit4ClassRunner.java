@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,7 +131,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * Get the name of the default {@code ContextLoader} class to use for
 	 * the supplied test class. The named class will be used if the test class
 	 * does not explicitly declare a {@code ContextLoader} class via the
-	 * {@code &#064;ContextConfiguration} annotation.
+	 * {@code @ContextConfiguration} annotation.
 	 * <p>The default implementation returns {@code null}, thus implying use
 	 * of the <em>standard</em> default {@code ContextLoader} class name.
 	 * Can be overridden by subclasses.
@@ -144,7 +144,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 
 	/**
 	 * Returns a description suitable for an ignored test class if the test is
-	 * disabled via {@code &#064;IfProfileValue} at the class-level, and
+	 * disabled via {@code @IfProfileValue} at the class-level, and
 	 * otherwise delegates to the parent implementation.
 	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment(Class)
 	 */
@@ -158,7 +158,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 
 	/**
 	 * Check whether the test is enabled in the first place. This prevents
-	 * classes with a non-matching {@code &#064;IfProfileValue} annotation
+	 * classes with a non-matching {@code @IfProfileValue} annotation
 	 * from running altogether, even skipping the execution of
 	 * {@code prepareTestInstance()} {@code TestExecutionListener}
 	 * methods.
@@ -263,10 +263,10 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * in order to include execution of {@link org.junit.Before &#064;Before}
 	 * and {@link org.junit.After &#064;After} methods within the timed
 	 * execution. Note that this differs from the default JUnit behavior of
-	 * executing {@code &#064;Before} and {@code &#064;After} methods
+	 * executing {@code @Before} and {@code @After} methods
 	 * in the main thread while executing the actual test method in a separate
-	 * thread. Thus, the end effect is that {@code &#064;Before} and
-	 * {@code &#064;After} methods will be executed in the same thread as
+	 * thread. Thus, the end effect is that {@code @Before} and
+	 * {@code @After} methods will be executed in the same thread as
 	 * the test method. As a consequence, JUnit-specified timeouts will work
 	 * fine in combination with Spring transactions. Note that JUnit-specific
 	 * timeouts still differ from Spring-specific timeouts in that the former
@@ -326,7 +326,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	/**
 	 * Returns {@code true} if {@link Ignore &#064;Ignore} is present for
 	 * the supplied {@link FrameworkMethod test method} or if the test method is
-	 * disabled via {@code &#064;IfProfileValue}.
+	 * disabled via {@code @IfProfileValue}.
 	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment(Method, Class)
 	 */
 	protected boolean isTestMethodIgnored(FrameworkMethod frameworkMethod) {
