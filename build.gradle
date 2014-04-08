@@ -527,7 +527,7 @@ project("spring-context-support") {
 		optional(project(":spring-jdbc")) // for Quartz support
 		optional(project(":spring-tx")) // for Quartz support
 		optional("javax.mail:mail:1.4.7")
-		optional("javax.cache:cache-api:1.0.0-RC1")
+		optional("javax.cache:cache-api:1.0.0")
 		optional("com.google.guava:guava:16.0.1")
 		optional("net.sf.ehcache:ehcache-core:2.6.5")
 		optional("org.quartz-scheduler:quartz:1.8.6") {
