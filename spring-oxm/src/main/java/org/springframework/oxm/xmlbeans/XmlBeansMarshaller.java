@@ -113,10 +113,6 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 		return this.validating;
 	}
 
-	@Override
-	protected String getDefaultEncoding() {
-		return null;
-	}
 
 	/**
 	 * This implementation returns true if the given class is an implementation of {@link XmlObject}.
@@ -327,14 +323,11 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 	}
 
 
-	/**
-	 * See SPR-7034
-	 */
 	private static class NonClosingInputStream extends InputStream {
 
 		private final WeakReference<InputStream> in;
 
-		private NonClosingInputStream(InputStream in) {
+		public NonClosingInputStream(InputStream in) {
 			this.in = new WeakReference<InputStream>(in);
 		}
 
@@ -345,31 +338,31 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 		@Override
 		public int read() throws IOException {
 			InputStream in = getInputStream();
-			return in != null ? in.read() : -1;
+			return (in != null ? in.read() : -1);
 		}
 
 		@Override
 		public int read(byte[] b) throws IOException {
 			InputStream in = getInputStream();
-			return in != null ? in.read(b) : -1;
+			return (in != null ? in.read(b) : -1);
 		}
 
 		@Override
 		public int read(byte[] b, int off, int len) throws IOException {
 			InputStream in = getInputStream();
-			return in != null ? in.read(b, off, len) : -1;
+			return (in != null ? in.read(b, off, len) : -1);
 		}
 
 		@Override
 		public long skip(long n) throws IOException {
 			InputStream in = getInputStream();
-			return in != null ? in.skip(n) : 0;
+			return (in != null ? in.skip(n) : 0);
 		}
 
 		@Override
 		public boolean markSupported() {
 			InputStream in = getInputStream();
-			return in != null && in.markSupported();
+			return (in != null && in.markSupported());
 		}
 
 		@Override
@@ -391,14 +384,14 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 		@Override
 		public int available() throws IOException {
 			InputStream in = getInputStream();
-			return in != null ? in.available() : 0;
+			return (in != null ? in.available() : 0);
 		}
 
 		@Override
 		public void close() throws IOException {
 			InputStream in = getInputStream();
-			if(in != null) {
-			  this.in.clear();
+			if (in != null) {
+				this.in.clear();
 			}
 		}
 	}
@@ -408,7 +401,7 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 
 		private final WeakReference<Reader> reader;
 
-		private NonClosingReader(Reader reader) {
+		public NonClosingReader(Reader reader) {
 			this.reader = new WeakReference<Reader>(reader);
 		}
 
@@ -419,43 +412,43 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 		@Override
 		public int read(CharBuffer target) throws IOException {
 			Reader rdr = getReader();
-			return rdr != null ? rdr.read(target) : -1;
+			return (rdr != null ? rdr.read(target) : -1);
 		}
 
 		@Override
 		public int read() throws IOException {
 			Reader rdr = getReader();
-			return rdr != null ? rdr.read() : -1;
+			return (rdr != null ? rdr.read() : -1);
 		}
 
 		@Override
 		public int read(char[] cbuf) throws IOException {
 			Reader rdr = getReader();
-			return rdr != null ? rdr.read(cbuf) : -1;
+			return (rdr != null ? rdr.read(cbuf) : -1);
 		}
 
 		@Override
 		public int read(char[] cbuf, int off, int len) throws IOException {
 			Reader rdr = getReader();
-			return rdr != null ? rdr.read(cbuf, off, len) : -1;
+			return (rdr != null ? rdr.read(cbuf, off, len) : -1);
 		}
 
 		@Override
 		public long skip(long n) throws IOException {
 			Reader rdr = getReader();
-			return rdr != null ? rdr.skip(n) : 0;
+			return (rdr != null ? rdr.skip(n) : 0);
 		}
 
 		@Override
 		public boolean ready() throws IOException {
 			Reader rdr = getReader();
-			return rdr != null && rdr.ready();
+			return (rdr != null && rdr.ready());
 		}
 
 		@Override
 		public boolean markSupported() {
 			Reader rdr = getReader();
-			return rdr != null && rdr.markSupported();
+			return (rdr != null && rdr.markSupported());
 		}
 
 		@Override
@@ -481,7 +474,6 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 				this.reader.clear();
 			}
 		}
-
 	}
 
 }
