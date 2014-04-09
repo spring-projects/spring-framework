@@ -125,18 +125,6 @@ public class PropertySourceAnnotationTests {
 	}
 
 	/**
-	 * Corner bug reported in SPR-9127.
-	 */
-	@Test
-	public void withNameAndMultipleResourceLocations() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(ConfigWithNameAndMultipleResourceLocations.class);
-		ctx.refresh();
-		assertThat(ctx.getEnvironment().containsProperty("from.p1"), is(true));
-		assertThat(ctx.getEnvironment().containsProperty("from.p2"), is(true));
-	}
-
-	/**
 	 * SPR-10820
 	 */
 	@Test
@@ -153,6 +141,24 @@ public class PropertySourceAnnotationTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigWithEmptyResourceLocations.class);
 		ctx.refresh();
+	}
+
+	@Test
+	public void withNameAndMultipleResourceLocations() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithNameAndMultipleResourceLocations.class);
+		assertThat(ctx.getEnvironment().containsProperty("from.p1"), is(true));
+		assertThat(ctx.getEnvironment().containsProperty("from.p2"), is(true));
+		// p2 should 'win' as it was registered last
+		assertThat(ctx.getEnvironment().getProperty("testbean.name"), equalTo("p2TestBean"));
+	}
+
+	@Test
+	public void withMultipleResourceLocations() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithMultipleResourceLocations.class);
+		assertThat(ctx.getEnvironment().containsProperty("from.p1"), is(true));
+		assertThat(ctx.getEnvironment().containsProperty("from.p2"), is(true));
+		// p2 should 'win' as it was registered last
+		assertThat(ctx.getEnvironment().getProperty("testbean.name"), equalTo("p2TestBean"));
 	}
 
 	@Test
