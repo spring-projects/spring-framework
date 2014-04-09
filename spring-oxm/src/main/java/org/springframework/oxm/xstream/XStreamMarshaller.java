@@ -124,7 +124,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	private HierarchicalStreamDriver streamDriver;
 
-	private final XppDriver fallbackDriver = new XppDriver();
+	private HierarchicalStreamDriver defaultDriver;
 
 	private Mapper mapper;
 
@@ -182,6 +182,14 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 */
 	public void setStreamDriver(HierarchicalStreamDriver streamDriver) {
 		this.streamDriver = streamDriver;
+		this.defaultDriver = streamDriver;
+	}
+
+	private HierarchicalStreamDriver getDefaultDriver() {
+		if (this.defaultDriver == null) {
+			this.defaultDriver = new XppDriver();
+		}
+		return this.defaultDriver;
 	}
 
 	/**
@@ -389,7 +397,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	protected XStream constructXStream() {
 		// The referenced XStream constructor has been deprecated as of 1.4.5.
 		// We're preserving this call for broader XStream 1.4.x compatibility.
-		return new XStream(this.reflectionProvider, this.streamDriver,
+		return new XStream(this.reflectionProvider, getDefaultDriver(),
 				this.beanClassLoader, this.mapper, this.converterLookup, this.converterRegistry) {
 			@Override
 			protected MapperWrapper wrapMapper(MapperWrapper next) {
@@ -545,7 +553,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 			xstream.processAnnotations(this.annotatedClasses);
 		}
 		if (this.autodetectAnnotations) {
-			xstream.autodetectAnnotations(this.autodetectAnnotations);
+			xstream.autodetectAnnotations(true);
 		}
 	}
 
@@ -776,12 +784,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	}
 
 	public Object unmarshalReader(Reader reader, DataHolder dataHolder) throws XmlMappingException, IOException {
-        if (this.streamDriver != null) {
-            return doUnmarshal(this.streamDriver.createReader(reader), dataHolder);
-        }
-        else {
-            return doUnmarshal(this.fallbackDriver.createReader(reader), dataHolder);
-        }
+		return doUnmarshal(getDefaultDriver().createReader(reader), dataHolder);
 	}
 
     /**
