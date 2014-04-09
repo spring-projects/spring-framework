@@ -25,12 +25,10 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextHierarchy;
-import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.SmartContextLoader;
 import org.springframework.test.util.MetaAnnotationUtils.AnnotationDescriptor;
 import org.springframework.test.util.MetaAnnotationUtils.UntypedAnnotationDescriptor;
@@ -41,17 +39,16 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
 import static org.springframework.test.util.MetaAnnotationUtils.*;
 
 /**
- * Utility methods for working with {@link ContextLoader ContextLoaders} and
- * {@link SmartContextLoader SmartContextLoaders} and resolving resource locations,
- * annotated classes, and application context initializers.
+ * Utility methods for resolving {@link ContextConfigurationAttributes} from the
+ * {@link ContextConfiguration @ContextConfiguration} and
+ * {@link ContextHierarchy @ContextHierarchy} annotations for use with
+ * {@link SmartContextLoader SmartContextLoaders}.
  *
  * @author Sam Brannen
  * @since 3.1
- * @see ContextLoader
  * @see SmartContextLoader
- * @see ContextConfiguration
  * @see ContextConfigurationAttributes
- * @see ApplicationContextInitializer
+ * @see ContextConfiguration
  * @see ContextHierarchy
  */
 abstract class ContextLoaderUtils {
@@ -63,46 +60,6 @@ abstract class ContextLoaderUtils {
 
 	private ContextLoaderUtils() {
 		/* no-op */
-	}
-
-	/**
-	 * Convenience method for creating a {@link ContextConfigurationAttributes}
-	 * instance from the supplied {@link ContextConfiguration} annotation and
-	 * declaring class and then adding the attributes to the supplied list.
-	 */
-	private static void convertContextConfigToConfigAttributesAndAddToList(ContextConfiguration contextConfiguration,
-			Class<?> declaringClass, final List<ContextConfigurationAttributes> attributesList) {
-		if (logger.isTraceEnabled()) {
-			logger.trace(String.format("Retrieved @ContextConfiguration [%s] for declaring class [%s].",
-				contextConfiguration, declaringClass.getName()));
-		}
-
-		ContextConfigurationAttributes attributes = new ContextConfigurationAttributes(declaringClass,
-			contextConfiguration);
-		if (logger.isTraceEnabled()) {
-			logger.trace("Resolved context configuration attributes: " + attributes);
-		}
-		attributesList.add(attributes);
-	}
-
-	/**
-	 * Convenience method for creating a {@link ContextConfigurationAttributes}
-	 * instance from the supplied {@link AnnotationAttributes} and declaring
-	 * class and then adding the attributes to the supplied list.
-	 * @since 4.0
-	 */
-	private static void convertAnnotationAttributesToConfigAttributesAndAddToList(AnnotationAttributes annAttrs,
-			Class<?> declaringClass, final List<ContextConfigurationAttributes> attributesList) {
-		if (logger.isTraceEnabled()) {
-			logger.trace(String.format("Retrieved @ContextConfiguration attributes [%s] for declaring class [%s].",
-				annAttrs, declaringClass.getName()));
-		}
-
-		ContextConfigurationAttributes attributes = new ContextConfigurationAttributes(declaringClass, annAttrs);
-		if (logger.isTraceEnabled()) {
-			logger.trace("Resolved context configuration attributes: " + attributes);
-		}
-		attributesList.add(attributes);
 	}
 
 	/**
@@ -306,6 +263,46 @@ abstract class ContextLoaderUtils {
 		}
 
 		return attributesList;
+	}
+
+	/**
+	 * Convenience method for creating a {@link ContextConfigurationAttributes}
+	 * instance from the supplied {@link ContextConfiguration} annotation and
+	 * declaring class and then adding the attributes to the supplied list.
+	 */
+	private static void convertContextConfigToConfigAttributesAndAddToList(ContextConfiguration contextConfiguration,
+			Class<?> declaringClass, final List<ContextConfigurationAttributes> attributesList) {
+		if (logger.isTraceEnabled()) {
+			logger.trace(String.format("Retrieved @ContextConfiguration [%s] for declaring class [%s].",
+				contextConfiguration, declaringClass.getName()));
+		}
+
+		ContextConfigurationAttributes attributes = new ContextConfigurationAttributes(declaringClass,
+			contextConfiguration);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Resolved context configuration attributes: " + attributes);
+		}
+		attributesList.add(attributes);
+	}
+
+	/**
+	 * Convenience method for creating a {@link ContextConfigurationAttributes}
+	 * instance from the supplied {@link AnnotationAttributes} and declaring
+	 * class and then adding the attributes to the supplied list.
+	 * @since 4.0
+	 */
+	private static void convertAnnotationAttributesToConfigAttributesAndAddToList(AnnotationAttributes annAttrs,
+			Class<?> declaringClass, final List<ContextConfigurationAttributes> attributesList) {
+		if (logger.isTraceEnabled()) {
+			logger.trace(String.format("Retrieved @ContextConfiguration attributes [%s] for declaring class [%s].",
+				annAttrs, declaringClass.getName()));
+		}
+
+		ContextConfigurationAttributes attributes = new ContextConfigurationAttributes(declaringClass, annAttrs);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Resolved context configuration attributes: " + attributes);
+		}
+		attributesList.add(attributes);
 	}
 
 }
