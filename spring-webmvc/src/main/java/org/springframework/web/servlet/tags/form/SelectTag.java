@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -249,7 +249,8 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 
 	private boolean isMultiple() throws JspException {
 		Object multiple = getMultiple();
-		if (Boolean.TRUE.equals(multiple) || "multiple".equals(multiple)) {
+		if (multiple != null && (Boolean.TRUE.equals(multiple) ||
+				Boolean.parseBoolean(multiple.toString()) || "multiple".equals(multiple))) {
 			return true;
 		}
 		return forceMultiple();
