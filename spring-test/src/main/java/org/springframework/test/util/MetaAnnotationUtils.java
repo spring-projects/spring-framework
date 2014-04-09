@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context;
+package org.springframework.test.util;
 
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
@@ -27,8 +27,6 @@ import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
-import static org.springframework.core.annotation.AnnotationUtils.*;
-
 /**
  * {@code MetaAnnotationUtils} is a collection of utility methods that complements
  * the standard support already available in {@link AnnotationUtils}.
@@ -36,24 +34,26 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  * <p>Whereas {@code AnnotationUtils} provides utilities for <em>getting</em> or
  * <em>finding</em> an annotation, {@code MetaAnnotationUtils} goes a step further
  * by providing support for determining the <em>root class</em> on which an
- * annotation is declared, either directly or via a <em>composed annotation</em>.
- * This additional information is encapsulated in an {@link AnnotationDescriptor}.
+ * annotation is declared, either directly or indirectly via a <em>composed
+ * annotation</em>. This additional information is encapsulated in an
+ * {@link AnnotationDescriptor}.
  *
  * <p>The additional information provided by an {@code AnnotationDescriptor} is
  * required by the <em>Spring TestContext Framework</em> in order to be able to
  * support class hierarchy traversals for annotations such as
- * {@link ContextConfiguration @ContextConfiguration},
- * {@link TestExecutionListeners @TestExecutionListeners}, and
- * {@link ActiveProfiles @ActiveProfiles} which offer support for merging and
- * overriding various <em>inherited</em> annotation attributes (e.g., {@link
- * ContextConfiguration#inheritLocations}).
+ * {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration},
+ * {@link org.springframework.test.context.TestExecutionListeners @TestExecutionListeners},
+ * and {@link org.springframework.test.context.ActiveProfiles @ActiveProfiles}
+ * which offer support for merging and overriding various <em>inherited</em>
+ * annotation attributes (e.g., {@link
+ * org.springframework.test.context.ContextConfiguration#inheritLocations}).
  *
  * @author Sam Brannen
  * @since 4.0
  * @see AnnotationUtils
  * @see AnnotationDescriptor
  */
-abstract class MetaAnnotationUtils {
+public abstract class MetaAnnotationUtils {
 
 	private MetaAnnotationUtils() {
 		/* no-op */
@@ -117,13 +117,13 @@ abstract class MetaAnnotationUtils {
 		}
 
 		// Declared locally?
-		if (isAnnotationDeclaredLocally(annotationType, clazz)) {
+		if (AnnotationUtils.isAnnotationDeclaredLocally(annotationType, clazz)) {
 			return new AnnotationDescriptor<T>(clazz, clazz.getAnnotation(annotationType));
 		}
 
 		// Declared on a composed annotation (i.e., as a meta-annotation)?
 		for (Annotation composedAnnotation : clazz.getDeclaredAnnotations()) {
-			if (!isInJavaLangAnnotationPackage(composedAnnotation) && visited.add(composedAnnotation)) {
+			if (!AnnotationUtils.isInJavaLangAnnotationPackage(composedAnnotation) && visited.add(composedAnnotation)) {
 				AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(composedAnnotation.annotationType(),
 					visited, annotationType);
 				if (descriptor != null) {
@@ -203,14 +203,14 @@ abstract class MetaAnnotationUtils {
 
 		// Declared locally?
 		for (Class<? extends Annotation> annotationType : annotationTypes) {
-			if (isAnnotationDeclaredLocally(annotationType, clazz)) {
+			if (AnnotationUtils.isAnnotationDeclaredLocally(annotationType, clazz)) {
 				return new UntypedAnnotationDescriptor(clazz, clazz.getAnnotation(annotationType));
 			}
 		}
 
 		// Declared on a composed annotation (i.e., as a meta-annotation)?
 		for (Annotation composedAnnotation : clazz.getDeclaredAnnotations()) {
-			if (!isInJavaLangAnnotationPackage(composedAnnotation) && visited.add(composedAnnotation)) {
+			if (!AnnotationUtils.isInJavaLangAnnotationPackage(composedAnnotation) && visited.add(composedAnnotation)) {
 				UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(
 					composedAnnotation.annotationType(), visited, annotationTypes);
 				if (descriptor != null) {

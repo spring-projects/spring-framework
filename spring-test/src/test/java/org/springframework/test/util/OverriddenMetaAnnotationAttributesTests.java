@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context;
+package org.springframework.test.util;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import org.junit.Test;
 import org.springframework.core.annotation.AnnotationAttributes;
-import org.springframework.test.context.MetaAnnotationUtils.AnnotationDescriptor;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.util.MetaAnnotationUtils;
+import org.springframework.test.util.MetaAnnotationUtils.AnnotationDescriptor;
+
+import static org.springframework.test.util.MetaAnnotationUtils.*;
 
 import static org.junit.Assert.*;
-import static org.springframework.test.context.MetaAnnotationUtils.*;
 
 /**
  * Unit tests for {@link MetaAnnotationUtils} that verify support for overridden

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context;
+package org.springframework.test.context.support;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -23,10 +23,9 @@ import org.junit.Test;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.test.context.support.DelegatingSmartContextLoader;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.web.context.support.GenericWebApplicationContext;
-
-import static org.springframework.test.context.ContextLoaderUtils.*;
 
 /**
  * Unit tests for {@link ContextLoaderUtils} involving {@link ApplicationContextInitializer}s.
@@ -44,7 +43,8 @@ public class ContextLoaderUtilsContextInitializerTests extends AbstractContextLo
 		= new HashSet<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>>();
 		expectedInitializerClasses.add(FooInitializer.class);
 
-		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass, null, null);
+		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
+
 		assertMergedConfig(mergedConfig, testClass, EMPTY_STRING_ARRAY, expectedClasses, expectedInitializerClasses,
 			DelegatingSmartContextLoader.class);
 	}
@@ -58,7 +58,8 @@ public class ContextLoaderUtilsContextInitializerTests extends AbstractContextLo
 		expectedInitializerClasses.add(FooInitializer.class);
 		expectedInitializerClasses.add(BarInitializer.class);
 
-		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass, null, null);
+		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
+
 		assertMergedConfig(mergedConfig, testClass, EMPTY_STRING_ARRAY, expectedClasses, expectedInitializerClasses,
 			DelegatingSmartContextLoader.class);
 	}
@@ -71,7 +72,8 @@ public class ContextLoaderUtilsContextInitializerTests extends AbstractContextLo
 		= new HashSet<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>>();
 		expectedInitializerClasses.add(BarInitializer.class);
 
-		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass, null, null);
+		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
+
 		assertMergedConfig(mergedConfig, testClass, EMPTY_STRING_ARRAY, expectedClasses, expectedInitializerClasses,
 			DelegatingSmartContextLoader.class);
 	}
@@ -84,7 +86,8 @@ public class ContextLoaderUtilsContextInitializerTests extends AbstractContextLo
 		= new HashSet<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>>();
 		expectedInitializerClasses.add(BarInitializer.class);
 
-		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass, null, null);
+		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
+
 		assertMergedConfig(mergedConfig, testClass, EMPTY_STRING_ARRAY, expectedClasses, expectedInitializerClasses,
 			DelegatingSmartContextLoader.class);
 	}

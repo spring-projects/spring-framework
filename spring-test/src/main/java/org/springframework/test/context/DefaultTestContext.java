@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,6 @@ class DefaultTestContext extends AttributeAccessorSupport implements TestContext
 
 	private static final long serialVersionUID = -5827157174866681233L;
 
-	private final ContextCache contextCache;
-
 	private final CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate;
 
 	private final MergedContextConfiguration mergedContextConfiguration;
@@ -56,42 +54,17 @@ class DefaultTestContext extends AttributeAccessorSupport implements TestContext
 
 
 	/**
-	 * Delegates to {@link #DefaultTestContext(Class, ContextCache, String)} with a
-	 * value of {@code null} for the default {@code ContextLoader} class name.
+	 * Construct a new test context using the supplied {@link TestContextBootstrapper}.
+	 * @param testContextBootstrapper the {@code TestContextBootstrapper} to use
+	 * to construct the test context (must not be {@code null})
 	 */
-	DefaultTestContext(Class<?> testClass, ContextCache contextCache) {
-		this(testClass, contextCache, null);
-	}
+	DefaultTestContext(TestContextBootstrapper testContextBootstrapper) {
+		Assert.notNull(testContextBootstrapper, "TestContextBootstrapper must not be null");
 
-	/**
-	 * Construct a new test context for the supplied {@linkplain Class test class}
-	 * and {@linkplain ContextCache context cache} and parse the corresponding
-	 * {@link ContextConfiguration &#064;ContextConfiguration} or
-	 * {@link ContextHierarchy &#064;ContextHierarchy} annotation, if present.
-	 * <p>If the supplied class name for the default {@code ContextLoader}
-	 * is {@code null} or <em>empty</em> and no concrete {@code ContextLoader}
-	 * class is explicitly supplied via {@code @ContextConfiguration}, a
-	 * {@link org.springframework.test.context.support.DelegatingSmartContextLoader
-	 * DelegatingSmartContextLoader} or
-	 * {@link org.springframework.test.context.web.WebDelegatingSmartContextLoader
-	 * WebDelegatingSmartContextLoader} will be used instead.
-	 * @param testClass the test class for which the test context should be
-	 * constructed (must not be {@code null})
-	 * @param contextCache the context cache from which the constructed test
-	 * context should retrieve application contexts (must not be
-	 * {@code null})
-	 * @param defaultContextLoaderClassName the name of the default
-	 * {@code ContextLoader} class to use (may be {@code null})
-	 */
-	DefaultTestContext(Class<?> testClass, ContextCache contextCache, String defaultContextLoaderClassName) {
-		Assert.notNull(testClass, "Test class must not be null");
-		Assert.notNull(contextCache, "ContextCache must not be null");
-
-		this.testClass = testClass;
-		this.contextCache = contextCache;
-		this.cacheAwareContextLoaderDelegate = new CacheAwareContextLoaderDelegate(contextCache);
-		this.mergedContextConfiguration = ContextLoaderUtils.buildMergedContextConfiguration(testClass,
-			defaultContextLoaderClassName, cacheAwareContextLoaderDelegate);
+		BootstrapContext bootstrapContext = testContextBootstrapper.getBootstrapContext();
+		this.testClass = bootstrapContext.getTestClass();
+		this.cacheAwareContextLoaderDelegate = bootstrapContext.getCacheAwareContextLoaderDelegate();
+		this.mergedContextConfiguration = testContextBootstrapper.buildMergedContextConfiguration();
 	}
 
 	/**
@@ -99,6 +72,13 @@ class DefaultTestContext extends AttributeAccessorSupport implements TestContext
 	 */
 	public ApplicationContext getApplicationContext() {
 		return cacheAwareContextLoaderDelegate.loadContext(mergedContextConfiguration);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void markApplicationContextDirty(HierarchyMode hierarchyMode) {
+		cacheAwareContextLoaderDelegate.closeContext(mergedContextConfiguration, hierarchyMode);
 	}
 
 	/**
@@ -127,13 +107,6 @@ class DefaultTestContext extends AttributeAccessorSupport implements TestContext
 	 */
 	public final Throwable getTestException() {
 		return testException;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void markApplicationContextDirty(HierarchyMode hierarchyMode) {
-		contextCache.remove(mergedContextConfiguration, hierarchyMode);
 	}
 
 	/**

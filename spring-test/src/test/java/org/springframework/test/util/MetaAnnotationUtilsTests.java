@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context;
+package org.springframework.test.util;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
@@ -27,12 +27,15 @@ import org.junit.Test;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import org.springframework.test.context.MetaAnnotationUtils.AnnotationDescriptor;
-import org.springframework.test.context.MetaAnnotationUtils.UntypedAnnotationDescriptor;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.util.MetaAnnotationUtils;
+import org.springframework.test.util.MetaAnnotationUtils.AnnotationDescriptor;
+import org.springframework.test.util.MetaAnnotationUtils.UntypedAnnotationDescriptor;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.springframework.test.util.MetaAnnotationUtils.*;
+
 import static org.junit.Assert.*;
-import static org.springframework.test.context.MetaAnnotationUtils.*;
 
 /**
  * Unit tests for {@link MetaAnnotationUtils}.

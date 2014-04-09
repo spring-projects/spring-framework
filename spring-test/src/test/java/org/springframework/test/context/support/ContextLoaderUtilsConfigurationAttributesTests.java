@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context;
+package org.springframework.test.context.support;
 
 import java.util.List;
 
 import org.junit.Test;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.ContextConfigurationAttributes;
+import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.test.context.support.ContextLoaderUtils;
 
+import static org.springframework.test.context.support.ContextLoaderUtils.*;
 import static org.junit.Assert.*;
-import static org.springframework.test.context.ContextLoaderUtils.*;
 
 /**
  * Unit tests for {@link ContextLoaderUtils} involving {@link ContextConfigurationAttributes}.

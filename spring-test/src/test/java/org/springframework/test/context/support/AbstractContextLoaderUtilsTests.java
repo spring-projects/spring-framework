@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context;
+package org.springframework.test.context.support;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -23,10 +23,19 @@ import java.lang.annotation.Target;
 import java.util.Collections;
 import java.util.Set;
 
+import org.mockito.Mockito;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.BootstrapContext;
+import org.springframework.test.context.BootstrapTestUtils;
+import org.springframework.test.context.CacheAwareContextLoaderDelegate;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.ContextConfigurationAttributes;
+import org.springframework.test.context.ContextLoader;
+import org.springframework.test.context.MergedContextConfiguration;
+import org.springframework.test.context.TestContextBootstrapper;
 
 import static org.junit.Assert.*;
 
@@ -43,6 +52,14 @@ abstract class AbstractContextLoaderUtilsTests {
 	static final Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> EMPTY_INITIALIZER_CLASSES = //
 	Collections.<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> emptySet();
 
+
+	MergedContextConfiguration buildMergedContextConfiguration(Class<?> testClass) {
+		CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate = Mockito.mock(CacheAwareContextLoaderDelegate.class);
+		BootstrapContext bootstrapContext = BootstrapTestUtils.buildBootstrapContext(testClass,
+			cacheAwareContextLoaderDelegate);
+		TestContextBootstrapper bootstrapper = BootstrapTestUtils.resolveTestContextBootstrapper(bootstrapContext);
+		return bootstrapper.buildMergedContextConfiguration();
+	}
 
 	void assertAttributes(ContextConfigurationAttributes attributes, Class<?> expectedDeclaringClass,
 			String[] expectedLocations, Class<?>[] expectedClasses,
@@ -171,6 +188,18 @@ abstract class AbstractContextLoaderUtilsTests {
 	@ContextConfiguration(classes = BarConfig.class, inheritLocations = false, loader = AnnotationConfigContextLoader.class)
 	@ActiveProfiles("bar")
 	static class OverriddenClassesBar extends ClassesFoo {
+	}
+
+	@ContextConfiguration(locations = "/foo.properties", loader = GenericPropertiesContextLoader.class)
+	@ActiveProfiles(profiles = "foo")
+	static class PropertiesLocationsFoo {
+	}
+
+	// Combining @Configuration classes with a Properties based loader doesn't really make
+	// sense, but that's OK for unit testing purposes.
+	@ContextConfiguration(classes = FooConfig.class, loader = GenericPropertiesContextLoader.class)
+	@ActiveProfiles(profiles = "foo")
+	static class PropertiesClassesFoo {
 	}
 
 }

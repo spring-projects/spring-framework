@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context;
+package org.springframework.test.context.support;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -25,19 +25,21 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Test;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ActiveProfilesResolver;
 
 import static org.junit.Assert.*;
-import static org.springframework.test.context.ContextLoaderUtils.*;
+import static org.springframework.test.context.support.ActiveProfilesUtils.*;
 
 /**
- * Unit tests for {@link ContextLoaderUtils} involving resolution of active bean
+ * Unit tests for {@link ActiveProfilesUtils} involving resolution of active bean
  * definition profiles.
  *
  * @author Sam Brannen
  * @author Michail Nikolaev
  * @since 3.1
  */
-public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoaderUtilsTests {
+public class ActiveProfilesUtilsTests extends AbstractContextLoaderUtilsTests {
 
 	private void assertResolvedProfiles(Class<?> testClass, String... expected) {
 		assertNotNull(testClass);
@@ -168,17 +170,17 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	/**
 	 * @since 4.0
 	 */
-	@Test(expected = IllegalStateException.class)
-	public void resolveActiveProfilesWithConflictingResolverAndProfiles() {
-		resolveActiveProfiles(ConflictingResolverAndProfilesTestCase.class);
+	@Test
+	public void resolveActiveProfilesWithResolverAndProfiles() {
+		assertResolvedProfiles(ResolverAndProfilesTestCase.class, "bar");
 	}
 
 	/**
 	 * @since 4.0
 	 */
-	@Test(expected = IllegalStateException.class)
-	public void resolveActiveProfilesWithConflictingResolverAndValue() {
-		resolveActiveProfiles(ConflictingResolverAndValueTestCase.class);
+	@Test
+	public void resolveActiveProfilesWithResolverAndValue() {
+		assertResolvedProfiles(ResolverAndValueTestCase.class, "bar");
 	}
 
 	/**
@@ -279,19 +281,19 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 			InheritedFooActiveProfilesResolverTestCase {
 	}
 
-	@ActiveProfiles(resolver = BarActiveProfilesResolver.class, profiles = "conflict")
-	private static class ConflictingResolverAndProfilesTestCase {
+	@ActiveProfiles(resolver = BarActiveProfilesResolver.class, profiles = "ignored by custom resolver")
+	private static class ResolverAndProfilesTestCase {
 	}
 
-	@ActiveProfiles(resolver = BarActiveProfilesResolver.class, value = "conflict")
-	private static class ConflictingResolverAndValueTestCase {
+	@ActiveProfiles(resolver = BarActiveProfilesResolver.class, value = "ignored by custom resolver")
+	private static class ResolverAndValueTestCase {
 	}
 
 	@MetaResolverConfig
 	private static class TestClassVerifyingActiveProfilesResolverTestCase {
 	}
 
-	@ActiveProfiles(profiles = "conflict", value = "conflict")
+	@ActiveProfiles(profiles = "conflict 1", value = "conflict 2")
 	private static class ConflictingProfilesAndValueTestCase {
 	}
 
