@@ -86,6 +86,7 @@ public interface TestContextBootstrapper {
 	 * <li>Active bean definition profiles declared via {@link ActiveProfiles @ActiveProfiles}</li>
 	 * <li>{@linkplain org.springframework.context.ApplicationContextInitializer
 	 * Context initializers} declared via {@link ContextConfiguration#initializers}</li>
+	 * </ul>
 	 * <p>Consult the Javadoc for the aforementioned annotations for details on
 	 * the required semantics.
 	 * <p>When determining which {@link ContextLoader} to use for a given test
@@ -93,11 +94,9 @@ public interface TestContextBootstrapper {
 	 * <ol>
 	 * <li>If a {@code ContextLoader} class has been explicitly declared via
 	 * {@link ContextConfiguration#loader}, use it.</li>
-	 * <li>Otherwise, if the name of a {@linkplain BootstrapContext#getCustomDefaultContextLoaderClassName
-	 * custom default ContextLoader class} has been provided in the {@link BootstrapContext},
-	 * use it.</li>
 	 * <li>Otherwise, concrete implementations are free to determine which
 	 * {@code ContextLoader} class to use as as default.</li>
+	 * </ol>
 	 * @return the merged context configuration, never {@code null}
 	 */
 	MergedContextConfiguration buildMergedContextConfiguration();
