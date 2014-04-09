@@ -60,19 +60,9 @@ class DefaultBootstrapContext implements BootstrapContext {
 	@Override
 	public String toString() {
 		return new ToStringCreator(this)//
-		.append("testClass", testClass)//
-		.append("cacheAwareContextLoaderDelegate", nullSafeToString(cacheAwareContextLoaderDelegate))//
+		.append("testClass", testClass.getName())//
+		.append("cacheAwareContextLoaderDelegate", cacheAwareContextLoaderDelegate.getClass().getName())//
 		.toString();
-	}
-
-	/**
-	 * Generate a null-safe {@link String} representation of the supplied
-	 * {@link CacheAwareContextLoaderDelegate} based solely on the fully qualified
-	 * name of the delegate or &quot;null&quot; if the supplied delegate is
-	 * {@code null}.
-	 */
-	private static String nullSafeToString(CacheAwareContextLoaderDelegate delegate) {
-		return delegate == null ? "null" : delegate.getClass().getName();
 	}
 
 }
