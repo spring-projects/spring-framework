@@ -305,8 +305,7 @@ class ConfigurationClassParser {
 		String name = propertySource.getString("name");
 		String[] locations = propertySource.getStringArray("value");
 		boolean ignoreResourceNotFound = propertySource.getBoolean("ignoreResourceNotFound");
-		int locationCount = locations.length;
-		if (locationCount == 0) {
+		if (locations.length == 0) {
 			throw new IllegalArgumentException("At least one @PropertySource(value) location is required");
 		}
 		for (String location : locations) {
@@ -314,8 +313,7 @@ class ConfigurationClassParser {
 				Resource resource = this.resourceLoader.getResource(
 						this.environment.resolveRequiredPlaceholders(location));
 				if (!StringUtils.hasText(name) || this.propertySources.containsKey(name)) {
-					// We need to ensure unique names when the property source will
-					// ultimately end up in a composite
+					// We need to ensure unique names when the property source will ultimately end up in a composite
 					ResourcePropertySource ps = new ResourcePropertySource(resource);
 					this.propertySources.add((StringUtils.hasText(name) ? name : ps.getName()), ps);
 				}
