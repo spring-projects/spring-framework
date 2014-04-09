@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,11 @@ import java.util.Set;
  */
 public class CompositePropertySource extends PropertySource<Object> {
 
-	private Set<PropertySource<?>> propertySources = new LinkedHashSet<PropertySource<?>>();
+	private final Set<PropertySource<?>> propertySources = new LinkedHashSet<PropertySource<?>>();
 
 
 	/**
 	 * Create a new {@code CompositePropertySource}.
-	 *
 	 * @param name the name of the property source
 	 */
 	public CompositePropertySource(String name) {
@@ -60,6 +59,7 @@ public class CompositePropertySource extends PropertySource<Object> {
 	@Override
 	public String toString() {
 		return String.format("%s [name='%s', propertySources=%s]",
-				this.getClass().getSimpleName(), this.name, this.propertySources);
+				getClass().getSimpleName(), this.name, this.propertySources);
 	}
+
 }
