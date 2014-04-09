@@ -99,7 +99,8 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 
 
 	/**
-	 * Build a new {@link Document} from this marshaller's {@link DocumentBuilderFactory}.
+	 * Build a new {@link Document} from this marshaller's {@link DocumentBuilderFactory},
+	 * as a placeholder for a DOM node.
 	 * @see #createDocumentBuilderFactory()
 	 * @see #createDocumentBuilder(DocumentBuilderFactory)
 	 */
@@ -114,8 +115,7 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 			return documentBuilder.newDocument();
 		}
 		catch (ParserConfigurationException ex) {
-			throw new UnmarshallingFailureException(
-					"Could not create document placeholder for DOMSource: " + ex.getMessage(), ex);
+			throw new UnmarshallingFailureException("Could not create document placeholder: " + ex.getMessage(), ex);
 		}
 	}
 
