@@ -16,12 +16,12 @@ configure(allprojects) { project ->
 	ext.aspectjVersion       = "1.7.4"
 	ext.groovyVersion        = "1.8.9"
 	ext.hibernate3Version    = "3.6.10.Final"
-	ext.hibernate4Version    = "4.2.11.Final"
+	ext.hibernate4Version    = "4.2.12.Final"
 	ext.hibValVersion        = "4.3.1.Final"
 	ext.hsqldbVersion        = "2.3.2"
-	ext.jackson2Version      = "2.3.1"
+	ext.jackson2Version      = "2.3.2"
 	ext.jasperReportsVersion = "5.5.1"
-	ext.jettyVersion         = "9.1.3.v20140225"
+	ext.jettyVersion         = "9.1.4.v20140401"
 	ext.jodaVersion          = "2.3"
 	ext.junitVersion         = "4.11"
 	ext.slf4jVersion         = "1.7.6"
@@ -75,10 +75,9 @@ configure(allprojects) { project ->
 	}
 
 	repositories {
-		maven { url "http://repo.spring.io/snapshot" }  // temporarily until Reactor 1.1.0.M4
 		maven { url "http://repo.spring.io/libs-release" }
-		maven { url "http://repo.spring.io/milestone" }  // for AspectJ 1.8.0.M1
-		maven { url "https://oss.sonatype.org/content/repositories/releases" }  // javax.cache
+		maven { url "http://repo.spring.io/milestone" }  // for AspectJ 1.8.0.RC2
+		maven { url "http://repo.spring.io/snapshot" }  // temporarily until Reactor 1.1.0.M4
 	}
 
 	dependencies {
