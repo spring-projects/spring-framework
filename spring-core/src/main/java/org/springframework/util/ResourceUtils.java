@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,14 +66,14 @@ public abstract class ResourceUtils {
 	/** URL protocol for an entry from a zip file: "zip" */
 	public static final String URL_PROTOCOL_ZIP = "zip";
 
+	/** URL protocol for an entry from a WebSphere jar file: "wsjar" */
+	public static final String URL_PROTOCOL_WSJAR = "wsjar";
+
 	/** URL protocol for an entry from a JBoss jar file: "vfszip" */
 	public static final String URL_PROTOCOL_VFSZIP = "vfszip";
 
 	/** URL protocol for a JBoss VFS resource: "vfs" */
 	public static final String URL_PROTOCOL_VFS = "vfs";
-
-	/** URL protocol for an entry from a WebSphere jar file: "wsjar" */
-	public static final String URL_PROTOCOL_WSJAR = "wsjar";
 
 	/** Separator between JAR URL and file path within the JAR */
 	public static final String JAR_URL_SEPARATOR = "!/";
@@ -252,7 +252,7 @@ public abstract class ResourceUtils {
 	 */
 	public static boolean isFileURL(URL url) {
 		String protocol = url.getProtocol();
-		return (URL_PROTOCOL_FILE.equals(protocol) || protocol.startsWith(URL_PROTOCOL_VFS));
+		return (URL_PROTOCOL_FILE.equals(protocol) || URL_PROTOCOL_VFS.equals(protocol));
 	}
 
 	/**
@@ -264,8 +264,9 @@ public abstract class ResourceUtils {
 	 * @return whether the URL has been identified as a JAR URL
 	 */
 	public static boolean isJarURL(URL url) {
-		String up = url.getProtocol();
-		return (URL_PROTOCOL_JAR.equals(up) || URL_PROTOCOL_ZIP.equals(up) || URL_PROTOCOL_WSJAR.equals(up));
+		String protocol = url.getProtocol();
+		return (URL_PROTOCOL_JAR.equals(protocol) || URL_PROTOCOL_ZIP.equals(protocol) ||
+				URL_PROTOCOL_WSJAR.equals(protocol) || URL_PROTOCOL_VFSZIP.equals(protocol));
 	}
 
 	/**
