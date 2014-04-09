@@ -46742,7 +46742,7 @@ up its declaration at runtime and understands its meaning. Note that as mentione
 
 Since the Spring Framework 4.1, the caching abstraction fully supports the JCache
 standard annotations: these are `@CacheResult`, `@CacheEvict`, `@CacheRemove` and
-`@CacheRemoveAll` as well as the `@CachingDefaults`, `@CacheKey` and `@CacheValue`
+`@CacheRemoveAll` as well as the `@CacheDefaults`, `@CacheKey` and `@CacheValue`
 companions. These annotations can be used right the way without migrating your
 cache store to JSR-107: the internal implementation uses Spring's caching abstraction
 and provides default `CacheResolver` and `KeyGenerator` implementations that are
@@ -46837,7 +46837,7 @@ the cache but it can also cache the exception as an indicator of the failure ins
 calling the method again. Let's assume that `InvalidIsbnNotFoundException` is thrown if
 the structure of the ISBN is invalid. This is a permanent failure, no book could ever be
 retrieved with such parameter. The following caches the exception so that further calls
-with the same, invalid ISBN, returns the cached exception directly instead of invoking
+with the same, invalid ISBN, throws the cached exception directly instead of invoking
 the method again.
 
 [source,java,indent=0]
@@ -46845,7 +46845,7 @@ the method again.
 ----
 	@CacheResult(cacheName="books", **exceptionCacheName="failures"**
 	             **cachedExceptions = InvalidIsbnNotFoundException.class**)
-	public Book findBook(@CacheKey ISBN isbn)
+	public Book findBook(ISBN isbn)
 ----
 
 
