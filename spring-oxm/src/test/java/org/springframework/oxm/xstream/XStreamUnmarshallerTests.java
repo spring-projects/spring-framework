@@ -49,7 +49,7 @@ public class XStreamUnmarshallerTests {
 	private XStreamMarshaller unmarshaller;
 
 	@Before
-	public void creteUnmarshaller() throws Exception {
+	public void createUnmarshaller() throws Exception {
 		unmarshaller = new XStreamMarshaller();
 		Map<String, Class<?>> aliases = new HashMap<String, Class<?>>();
 		aliases.put("flight", Flight.class);
