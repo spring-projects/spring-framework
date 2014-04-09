@@ -170,14 +170,14 @@ project("spring-build-src") {
 project("spring-core") {
 	description = "Spring Core"
 
-	// As of Spring 3.2 spring-core repackages both asm 4.0 and cglib 3.0 and inlines both
-	// into the spring-core jar. cglib 3.0 itself depends on asm 4.0, and is therefore
+	// As of Spring 3.2.9, spring-core repackages asm 5.0 and cglib 3.1, inlining both
+	// into the spring-core jar. cglib 3.1 itself depends on asm 4+, and is therefore
 	// further transformed by the JarJar task to depend on org.springframework.asm; this
 	// avoids including two different copies of asm unnecessarily. If however future cglib
 	// versions drift from the version of asm used by Spring internally, this duplication
 	// will become necessary.
-	def asmVersion = "4.0"
-	def cglibVersion = "3.0"
+	def asmVersion = "5.0.1"
+	def cglibVersion = "3.1"
 
 	configurations {
 		jarjar
@@ -547,8 +547,8 @@ project("spring-orm-hibernate4") {
 		provided(project(":spring-jdbc"))
 		provided(project(":spring-tx"))
 		optional(project(":spring-web"))
-		optional("org.hibernate:hibernate-core:4.2.11.Final")
-		optional("org.hibernate:hibernate-entitymanager:4.2.11.Final")
+		optional("org.hibernate:hibernate-core:4.2.12.Final")
+		optional("org.hibernate:hibernate-entitymanager:4.2.12.Final")
 		optional("javax.servlet:servlet-api:2.5")
 	}
 }
