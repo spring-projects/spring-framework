@@ -18,6 +18,7 @@ package org.springframework.context.event;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
@@ -33,6 +34,7 @@ import org.springframework.context.BeanThatListens;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.Ordered;
+import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.junit.Assert.*;
@@ -57,6 +59,60 @@ public class ApplicationContextEventTests {
 
 		smc.multicastEvent(evt);
 		verify(listener).onApplicationEvent(evt);
+	}
+
+	@Test
+	public void simpleApplicationEventMulticasterWithTaskExecutor() {
+		@SuppressWarnings("unchecked")
+		ApplicationListener<ApplicationEvent> listener = mock(ApplicationListener.class);
+		ApplicationEvent evt = new ContextClosedEvent(new StaticApplicationContext());
+
+		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
+		smc.setTaskExecutor(new Executor() {
+			@Override
+			public void execute(Runnable command) {
+				command.run();
+				command.run();
+			}
+		});
+		smc.addApplicationListener(listener);
+
+		smc.multicastEvent(evt);
+		verify(listener, times(2)).onApplicationEvent(evt);
+	}
+
+	@Test
+	public void simpleApplicationEventMulticasterWithException() {
+		@SuppressWarnings("unchecked")
+		ApplicationListener<ApplicationEvent> listener = mock(ApplicationListener.class);
+		ApplicationEvent evt = new ContextClosedEvent(new StaticApplicationContext());
+
+		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
+		smc.addApplicationListener(listener);
+
+		RuntimeException thrown = new RuntimeException();
+		doThrow(thrown).when(listener).onApplicationEvent(evt);
+		try {
+			smc.multicastEvent(evt);
+			fail("Should have thrown RuntimeException");
+		}
+		catch (RuntimeException ex) {
+			assertSame(thrown, ex);
+		}
+	}
+
+	@Test
+	public void simpleApplicationEventMulticasterWithErrorHandler() {
+		@SuppressWarnings("unchecked")
+		ApplicationListener<ApplicationEvent> listener = mock(ApplicationListener.class);
+		ApplicationEvent evt = new ContextClosedEvent(new StaticApplicationContext());
+
+		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
+		smc.setErrorHandler(TaskUtils.LOG_AND_SUPPRESS_ERROR_HANDLER);
+		smc.addApplicationListener(listener);
+
+		doThrow(new RuntimeException()).when(listener).onApplicationEvent(evt);
+		smc.multicastEvent(evt);
 	}
 
 	@Test
