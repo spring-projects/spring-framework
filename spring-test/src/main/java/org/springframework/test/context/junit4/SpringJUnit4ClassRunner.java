@@ -57,21 +57,20 @@ import org.springframework.util.ReflectionUtils;
  * annotations.
  *
  * <p>The following list constitutes all annotations currently supported directly
- * by {@code SpringJUnit4ClassRunner}.
+ * or indirectly by {@code SpringJUnit4ClassRunner}.
  * <em>(Note that additional annotations may be supported by various {@link
  * org.springframework.test.context.TestExecutionListener TestExecutionListeners}
  * or {@link org.springframework.test.context.TestContextBootstrapper
- * TestContextBootstrapper} implementations)</em>
+ * TestContextBootstrapper} implementations.)</em>
  *
  * <ul>
- * <li>{@link Test#expected() &#064;Test(expected=...)}</li>
- * <li>{@link Test#timeout() &#064;Test(timeout=...)}</li>
- * <li>{@link Timed &#064;Timed}</li>
- * <li>{@link Repeat &#064;Repeat}</li>
- * <li>{@link Ignore &#064;Ignore}</li>
- * <li>{@link org.springframework.test.annotation.ProfileValueSourceConfiguration
- * &#064;ProfileValueSourceConfiguration}</li>
- * <li>{@link org.springframework.test.annotation.IfProfileValue &#064;IfProfileValue}</li>
+ * <li>{@link Test#expected() @Test(expected=...)}</li>
+ * <li>{@link Test#timeout() @Test(timeout=...)}</li>
+ * <li>{@link Timed @Timed}</li>
+ * <li>{@link Repeat @Repeat}</li>
+ * <li>{@link Ignore @Ignore}</li>
+ * <li>{@link org.springframework.test.annotation.ProfileValueSourceConfiguration @ProfileValueSourceConfiguration}</li>
+ * <li>{@link org.springframework.test.annotation.IfProfileValue @IfProfileValue}</li>
  * </ul>
  *
  * <p><strong>NOTE:</strong> As of Spring 3.0, {@code SpringJUnit4ClassRunner}
@@ -137,10 +136,9 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 
 	/**
 	 * Check whether the test is enabled in the first place. This prevents
-	 * classes with a non-matching {@code @IfProfileValue} annotation
-	 * from running altogether, even skipping the execution of
-	 * {@code prepareTestInstance()} {@code TestExecutionListener}
-	 * methods.
+	 * classes with a non-matching {@code @IfProfileValue} annotation from
+	 * running altogether, even skipping the execution of
+	 * {@code prepareTestInstance()} {@code TestExecutionListener} methods.
 	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment(Class)
 	 * @see org.springframework.test.annotation.IfProfileValue
 	 * @see org.springframework.test.context.TestExecutionListener
@@ -239,8 +237,8 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * {@link #withPotentialRepeat(FrameworkMethod, Object, Statement) with
 	 * potential repeats} of the entire execution chain.
 	 * <p>Furthermore, support for timeouts has been moved down the execution chain
-	 * in order to include execution of {@link org.junit.Before &#064;Before}
-	 * and {@link org.junit.After &#064;After} methods within the timed
+	 * in order to include execution of {@link org.junit.Before @Before}
+	 * and {@link org.junit.After @After} methods within the timed
 	 * execution. Note that this differs from the default JUnit behavior of
 	 * executing {@code @Before} and {@code @After} methods
 	 * in the main thread while executing the actual test method in a separate
@@ -285,9 +283,9 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	}
 
 	/**
-	 * Invokes JUnit 4.7's private {@code withRules()} method using
-	 * reflection. This is necessary for backwards compatibility with the JUnit
-	 * 4.5 and 4.6 implementations of {@link BlockJUnit4ClassRunner}.
+	 * Invokes JUnit 4.7's private {@code withRules()} method using reflection.
+	 * <p>This is necessary for backwards compatibility with the JUnit 4.5 and
+	 * 4.6 implementations of {@link BlockJUnit4ClassRunner}.
 	 */
 	private Statement withRulesReflectively(FrameworkMethod frameworkMethod, Object testInstance, Statement statement) {
 		Method withRulesMethod = ReflectionUtils.findMethod(getClass(), "withRules", FrameworkMethod.class,
@@ -303,9 +301,9 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	}
 
 	/**
-	 * Returns {@code true} if {@link Ignore &#064;Ignore} is present for
-	 * the supplied {@link FrameworkMethod test method} or if the test method is
-	 * disabled via {@code @IfProfileValue}.
+	 * Returns {@code true} if {@link Ignore @Ignore} is present for the supplied
+	 * {@link FrameworkMethod test method} or if the test method is disabled via
+	 * {@code @IfProfileValue}.
 	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment(Method, Class)
 	 */
 	protected boolean isTestMethodIgnored(FrameworkMethod frameworkMethod) {
@@ -341,8 +339,8 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	}
 
 	/**
-	 * Supports both Spring's {@link Timed &#064;Timed} and JUnit's
-	 * {@link Test#timeout() &#064;Test(timeout=...)} annotations, but not both
+	 * Supports both Spring's {@link Timed @Timed} and JUnit's
+	 * {@link Test#timeout() @Test(timeout=...)} annotations, but not both
 	 * simultaneously. Returns either a {@link SpringFailOnTimeout}, a
 	 * {@link FailOnTimeout}, or the unmodified, supplied {@link Statement} as
 	 * appropriate.
@@ -376,8 +374,8 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	}
 
 	/**
-	 * Retrieves the configured JUnit {@code timeout} from the {@link Test
-	 * &#064;Test} annotation on the supplied {@link FrameworkMethod test method}.
+	 * Retrieves the configured JUnit {@code timeout} from the {@link Test @Test}
+	 * annotation on the supplied {@link FrameworkMethod test method}.
 	 * @return the timeout, or {@code 0} if none was specified.
 	 */
 	protected long getJUnitTimeout(FrameworkMethod frameworkMethod) {
@@ -387,7 +385,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 
 	/**
 	 * Retrieves the configured Spring-specific {@code timeout} from the
-	 * {@link Timed &#064;Timed} annotation on the supplied
+	 * {@link Timed @Timed} annotation on the supplied
 	 * {@link FrameworkMethod test method}.
 	 * @return the timeout, or {@code 0} if none was specified.
 	 */
@@ -432,7 +430,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	}
 
 	/**
-	 * Supports Spring's {@link Repeat &#064;Repeat} annotation by returning a
+	 * Supports Spring's {@link Repeat @Repeat} annotation by returning a
 	 * {@link SpringRepeat} statement initialized with the configured repeat
 	 * count or {@code 1} if no repeat count is configured.
 	 * @see SpringRepeat
