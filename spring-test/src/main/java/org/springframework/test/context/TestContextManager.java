@@ -53,18 +53,18 @@ import static org.springframework.test.context.MetaAnnotationUtils.*;
  * <ul>
  * <li>{@link #beforeTestClass() before test class execution}: prior to any
  * <em>before class methods</em> of a particular testing framework (e.g., JUnit
- * 4's {@link org.junit.BeforeClass &#064;BeforeClass})</li>
+ * 4's {@link org.junit.BeforeClass @BeforeClass})</li>
  * <li>{@link #prepareTestInstance(Object) test instance preparation}:
  * immediately following instantiation of the test instance</li>
  * <li>{@link #beforeTestMethod(Object, Method) before test method execution}:
  * prior to any <em>before methods</em> of a particular testing framework (e.g.,
- * JUnit 4's {@link org.junit.Before &#064;Before})</li>
+ * JUnit 4's {@link org.junit.Before @Before})</li>
  * <li>{@link #afterTestMethod(Object, Method, Throwable) after test method
  * execution}: after any <em>after methods</em> of a particular testing
- * framework (e.g., JUnit 4's {@link org.junit.After &#064;After})</li>
+ * framework (e.g., JUnit 4's {@link org.junit.After @After})</li>
  * <li>{@link #afterTestClass() after test class execution}: after any
  * <em>after class methods</em> of a particular testing framework (e.g., JUnit
- * 4's {@link org.junit.AfterClass &#064;AfterClass})</li>
+ * 4's {@link org.junit.AfterClass @AfterClass})</li>
  * </ul>
  *
  * @author Sam Brannen
@@ -109,12 +109,15 @@ public class TestContextManager {
 	 * Constructs a new {@code TestContextManager} for the specified {@linkplain Class
 	 * test class} and automatically {@link #registerTestExecutionListeners registers} the
 	 * {@link TestExecutionListener TestExecutionListeners} configured for the test class
-	 * via the {@link TestExecutionListeners &#064;TestExecutionListeners} annotation.
+	 * via the {@link TestExecutionListeners @TestExecutionListeners} annotation.
 	 * @param testClass the test class to be managed
 	 * @param defaultContextLoaderClassName the name of the default {@code ContextLoader}
 	 * class to use (may be {@code null})
 	 * @see #registerTestExecutionListeners(TestExecutionListener...)
+	 * @deprecated Spring Framework 4.1 will introduce a bootstrap strategy for
+	 * the TestContext framework at which point this constructor will be removed.
 	 */
+	@Deprecated
 	public TestContextManager(Class<?> testClass, String defaultContextLoaderClassName) {
 		this.testContext = new DefaultTestContext(testClass, contextCache, defaultContextLoaderClassName);
 		registerTestExecutionListeners(retrieveTestExecutionListeners(testClass));
@@ -164,10 +167,10 @@ public class TestContextManager {
 
 	/**
 	 * Retrieve an array of newly instantiated {@link TestExecutionListener TestExecutionListeners}
-	 * for the specified {@link Class class}. If {@link TestExecutionListeners &#064;TestExecutionListeners}
+	 * for the specified {@link Class class}. If {@link TestExecutionListeners @TestExecutionListeners}
 	 * is not <em>present</em> on the supplied class, the default listeners will be returned.
 	 * <p>Note that the {@link TestExecutionListeners#inheritListeners() inheritListeners} flag of
-	 * {@link TestExecutionListeners &#064;TestExecutionListeners} will be taken into consideration.
+	 * {@link TestExecutionListeners @TestExecutionListeners} will be taken into consideration.
 	 * Specifically, if the {@code inheritListeners} flag is set to {@code true}, listeners
 	 * defined in the annotated class will be appended to the listeners defined in superclasses.
 	 * @param clazz the test class for which the listeners should be retrieved
@@ -268,7 +271,7 @@ public class TestContextManager {
 	 * Hook for pre-processing a test class <em>before</em> execution of any
 	 * tests within the class. Should be called prior to any framework-specific
 	 * <em>before class methods</em> (e.g., methods annotated with JUnit's
-	 * {@link org.junit.BeforeClass &#064;BeforeClass}).
+	 * {@link org.junit.BeforeClass @BeforeClass}).
 	 * <p>An attempt will be made to give each registered
 	 * {@link TestExecutionListener} a chance to pre-process the test class
 	 * execution. If a listener throws an exception, however, the remaining
@@ -334,7 +337,7 @@ public class TestContextManager {
 	 * {@link Method test method}, for example for setting up test fixtures,
 	 * starting a transaction, etc. Should be called prior to any
 	 * framework-specific <em>before methods</em> (e.g., methods annotated with
-	 * JUnit's {@link org.junit.Before &#064;Before}).
+	 * JUnit's {@link org.junit.Before @Before}).
 	 * <p>The managed {@link TestContext} will be updated with the supplied
 	 * {@code testInstance} and {@code testMethod}.
 	 * <p>An attempt will be made to give each registered
@@ -372,7 +375,7 @@ public class TestContextManager {
 	 * {@link Method test method}, for example for tearing down test fixtures,
 	 * ending a transaction, etc. Should be called after any framework-specific
 	 * <em>after methods</em> (e.g., methods annotated with JUnit's
-	 * {@link org.junit.After &#064;After}).
+	 * {@link org.junit.After @After}).
 	 * <p>The managed {@link TestContext} will be updated with the supplied
 	 * {@code testInstance}, {@code testMethod}, and
 	 * {@code exception}.
@@ -424,7 +427,7 @@ public class TestContextManager {
 	 * Hook for post-processing a test class <em>after</em> execution of all
 	 * tests within the class. Should be called after any framework-specific
 	 * <em>after class methods</em> (e.g., methods annotated with JUnit's
-	 * {@link org.junit.AfterClass &#064;AfterClass}).
+	 * {@link org.junit.AfterClass @AfterClass}).
 	 * <p>Each registered {@link TestExecutionListener} will be given a chance to
 	 * post-process the test class. If a listener throws an exception, the
 	 * remaining registered listeners will still be called, but the first
