@@ -1,15 +1,31 @@
+/*
+ * Copyright 2002-2014 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.jdbc.support.incrementer;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.Statement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * {@link DataFieldMaxValueIncrementer} that increments the maximum value of a given SQL Server table
@@ -32,8 +48,8 @@ import java.sql.SQLException;
  * is rolled back, the unused values will never be served. The maximum hole size in
  * numbering is consequently the value of cacheSize.
  *
- * <b>HINT:</b>  Since Microsoft SQL Server supports the JDBC 3.0 {@code getGeneratedKeys} method,
- * it is recommended to use IDENTITY columns directly in the tables and then using a
+ * <b>HINT:</b> Since Microsoft SQL Server supports the JDBC 3.0 {@code getGeneratedKeys}
+ * method, it is recommended to use IDENTITY columns directly in the tables and then using a
  * {@link org.springframework.jdbc.core.simple.SimpleJdbcInsert} or utilizing
  * a {@link org.springframework.jdbc.support.KeyHolder} when calling the with the
  * {@code update(PreparedStatementCreator psc, KeyHolder generatedKeyHolder)}
