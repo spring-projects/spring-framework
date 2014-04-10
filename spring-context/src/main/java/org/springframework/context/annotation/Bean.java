@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -197,25 +197,26 @@ public @interface Bean {
 	/**
 	 * The optional name of a method to call on the bean instance during initialization.
 	 * Not commonly used, given that the method may be called programmatically directly
-	 * within the body of a Bean-annotated method. Default value is {@code ""}, indicating
-	 * that no init method should be called.
+	 * within the body of a Bean-annotated method.
+	 * <p>The default value is {@code ""}, indicating no init method to be called.
 	 */
 	String initMethod() default "";
 
 	/**
 	 * The optional name of a method to call on the bean instance upon closing the
-	 * application context, for example a {@code close()} method on a JDBC {@code
-	 * DataSource} implementation, or a Hibernate {@code SessionFactory} object.
+	 * application context, for example a {@code close()} method on a JDBC
+	 * {@code DataSource} implementation, or a Hibernate {@code SessionFactory} object.
 	 * The method must have no arguments but may throw any exception.
 	 * <p>As a convenience to the user, the container will attempt to infer a destroy
-	 * method against an object returned from the {@code @Bean} method. For example, given a
-	 * {@code @Bean} method returning an Apache Commons DBCP {@code BasicDataSource}, the
-	 * container will notice the {@code close()} method available on that object and
+	 * method against an object returned from the {@code @Bean} method. For example, given
+	 * an {@code @Bean} method returning an Apache Commons DBCP {@code BasicDataSource},
+	 * the container will notice the {@code close()} method available on that object and
 	 * automatically register it as the {@code destroyMethod}. This 'destroy method
 	 * inference' is currently limited to detecting only public, no-arg methods named
-	 * 'close'. The method may be declared at any level of the inheritance hierarchy and
-	 * will be detected regardless of the return type of the {@code @Bean} method (i.e.,
-	 * detection occurs reflectively against the bean instance itself at creation time).
+	 * 'close' or 'shutdown'. The method may be declared at any level of the inheritance
+	 * hierarchy and will be detected regardless of the return type of the {@code @Bean}
+	 * method (i.e., detection occurs reflectively against the bean instance itself at
+	 * creation time).
 	 * <p>To disable destroy method inference for a particular {@code @Bean}, specify an
 	 * empty string as the value, e.g. {@code @Bean(destroyMethod="")}. Note that the
 	 * {@link org.springframework.beans.factory.DisposableBean} and the
