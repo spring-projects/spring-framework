@@ -87,10 +87,8 @@ public abstract class StatementCreatorUtils {
 	private static final Map<Class<?>, Integer> javaTypeToSqlTypeMap = new HashMap<Class<?>, Integer>(32);
 
 	static {
-		/* JDBC 3.0 only - not compatible with e.g. MySQL at present
-		javaTypeToSqlTypeMap.put(boolean.class, new Integer(Types.BOOLEAN));
-		javaTypeToSqlTypeMap.put(Boolean.class, new Integer(Types.BOOLEAN));
-		*/
+		javaTypeToSqlTypeMap.put(boolean.class, Types.BOOLEAN);
+		javaTypeToSqlTypeMap.put(Boolean.class, Types.BOOLEAN);
 		javaTypeToSqlTypeMap.put(byte.class, Types.TINYINT);
 		javaTypeToSqlTypeMap.put(Byte.class, Types.TINYINT);
 		javaTypeToSqlTypeMap.put(short.class, Types.SMALLINT);

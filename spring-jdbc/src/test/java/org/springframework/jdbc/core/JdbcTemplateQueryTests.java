@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 
 import static org.junit.Assert.*;
@@ -177,7 +177,7 @@ public class JdbcTemplateQueryTests {
 	public void testQueryForObjectWithBigInteger() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
-		given(this.resultSet.getObject(1)).willReturn("22");
+		given(this.resultSet.getObject(1, BigInteger.class)).willReturn(new BigInteger("22"));
 		assertEquals(new BigInteger("22"), this.template.queryForObject(sql, BigInteger.class));
 		verify(this.resultSet).close();
 		verify(this.statement).close();

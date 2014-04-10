@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.jdbc.datasource;
 
+import java.sql.SQLException;
 import java.sql.Savepoint;
 
 import org.apache.commons.logging.Log;
@@ -40,9 +41,6 @@ import org.springframework.transaction.support.SmartTransactionObject;
  * {@link org.springframework.transaction.support.DefaultTransactionStatus}
  * will automatically delegate to this, as it autodetects transaction
  * objects that implement the SavepointManager interface.
- *
- * <p>Note that savepoints are only supported for drivers which
- * support JDBC 3.0 or higher.
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -109,15 +107,9 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 				throw new NestedTransactionNotSupportedException(
 						"Cannot create a nested transaction because savepoints are not supported by your JDBC driver");
 			}
-		}
-		catch (Throwable ex) {
-			throw new NestedTransactionNotSupportedException(
-					"Cannot create a nested transaction because your JDBC driver is not a JDBC 3.0 driver", ex);
-		}
-		try {
 			return conHolder.createSavepoint();
 		}
-		catch (Throwable ex) {
+		catch (SQLException ex) {
 			throw new CannotCreateTransactionException("Could not create JDBC savepoint", ex);
 		}
 	}
