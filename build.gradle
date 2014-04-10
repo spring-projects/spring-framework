@@ -64,8 +64,12 @@ configure(allprojects) { project ->
 		systemProperty("java.awt.headless", "true")
 		systemProperty("testGroups", project.properties.get("testGroups"))
 		scanForTestClasses = false
-		include '**/*Tests.*'
-		exclude '**/*Abstract*.*'
+		// Do not include "**/*Test.class" since some *Test classes are broken.
+		include(["**/*Tests.class"])
+		// Since we set scanForTestClasses to false, we need to filter out inner
+		// classes with the "$" pattern; otherwise, using -Dtest.single=MyTests to
+		// run MyTests by itself will fail if MyTests contains any inner classes. 
+		exclude(["**/Abstract*.class", '**/*$*'])
 	}
 
 	repositories {
