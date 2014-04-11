@@ -152,16 +152,16 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 		if (destinations.isEmpty()) {
 			return;
 		}
-		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.wrap(message);
-		if (SimpMessageType.MESSAGE.equals(headerAccessor.getMessageType())) {
+		if (SimpMessageType.MESSAGE.equals(SimpMessageHeaderAccessor.getMessageType(message.getHeaders()))) {
+			SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.wrap(message);
 			headerAccessor.setHeader(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION, result.getSubscribeDestination());
-			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headerAccessor).build();
+			message = MessageBuilder.createMessage(message.getPayload(), headerAccessor.getMessageHeaders());
 		}
-		for (String targetDestination : destinations) {
+		for (String destination : destinations) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Sending message to resolved destination=" + targetDestination);
+				logger.debug("Sending message to resolved destination=" + destination);
 			}
-			this.brokerMessagingTemplate.send(targetDestination, message);
+			this.brokerMessagingTemplate.send(destination, message);
 		}
 	}
 

@@ -112,10 +112,12 @@ public class MessageConverterTests {
 	public void toMessageHeadersCopied() {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("foo", "bar");
-		MessageHeaders headers = new MessageHeaders(map );
+		MessageHeaders headers = new MessageHeaders(map);
 		Message<?> message = this.converter.toMessage("ABC", headers);
 
 		assertEquals("bar", message.getHeaders().get("foo"));
+		assertNotNull(message.getHeaders().getId());
+		assertNotNull(message.getHeaders().getTimestamp());
 	}
 
 	@Test

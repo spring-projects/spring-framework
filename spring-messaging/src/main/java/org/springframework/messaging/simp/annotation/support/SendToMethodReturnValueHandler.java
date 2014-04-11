@@ -23,6 +23,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.core.MessagePostProcessor;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -113,29 +114,28 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> inputMessage)
+	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message)
 			throws Exception {
 
 		if (returnValue == null) {
 			return;
 		}
 
-		SimpMessageHeaderAccessor inputHeaders = SimpMessageHeaderAccessor.wrap(inputMessage);
-
-		String sessionId = inputHeaders.getSessionId();
+		MessageHeaders headers = message.getHeaders();
+		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 		MessagePostProcessor postProcessor = new SessionHeaderPostProcessor(sessionId);
 
 		SendToUser sendToUser = returnType.getMethodAnnotation(SendToUser.class);
 		if (sendToUser != null) {
-			Principal principal = inputHeaders.getUser();
+			Principal principal = SimpMessageHeaderAccessor.getUser(headers);
 			if (principal == null) {
-				throw new MissingSessionUserException(inputMessage);
+				throw new MissingSessionUserException(message);
 			}
 			String userName = principal.getName();
 			if (principal instanceof DestinationUserNameProvider) {
 				userName = ((DestinationUserNameProvider) principal).getDestinationUserName();
 			}
-			String[] destinations = getTargetDestinations(sendToUser, inputHeaders, this.defaultUserDestinationPrefix);
+			String[] destinations = getTargetDestinations(sendToUser, message, this.defaultUserDestinationPrefix);
 			for (String destination : destinations) {
 				this.messagingTemplate.convertAndSendToUser(userName, destination, returnValue, postProcessor);
 			}
@@ -143,15 +143,14 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 		}
 		else {
 			SendTo sendTo = returnType.getMethodAnnotation(SendTo.class);
-			String[] destinations = getTargetDestinations(sendTo, inputHeaders, this.defaultDestinationPrefix);
+			String[] destinations = getTargetDestinations(sendTo, message, this.defaultDestinationPrefix);
 			for (String destination : destinations) {
 				this.messagingTemplate.convertAndSend(destination, returnValue, postProcessor);
 			}
 		}
 	}
 
-	protected String[] getTargetDestinations(Annotation annot, SimpMessageHeaderAccessor inputHeaders,
-			String defaultPrefix) {
+	protected String[] getTargetDestinations(Annotation annot, Message<?> message, String defaultPrefix) {
 
 		if (annot != null) {
 			String[] value = (String[]) AnnotationUtils.getValue(annot);
@@ -159,8 +158,8 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 				return value;
 			}
 		}
-		return new String[] { defaultPrefix +
-				inputHeaders.getHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER) };
+		String name = DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER;
+		return new String[] { defaultPrefix + message.getHeaders().get(name) };
 	}
 
 
@@ -176,7 +175,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 		public Message<?> postProcessMessage(Message<?> message) {
 			SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 			headers.setSessionId(this.sessionId);
-			return MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
+			return MessageBuilder.createMessage(message.getPayload(), headers.getMessageHeaders());
 		}
 	}
 

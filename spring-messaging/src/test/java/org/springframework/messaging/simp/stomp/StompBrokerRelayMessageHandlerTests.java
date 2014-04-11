@@ -27,6 +27,7 @@ import org.springframework.messaging.StubMessageChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.tcp.ReconnectStrategy;
 import org.springframework.messaging.tcp.TcpConnection;
 import org.springframework.messaging.tcp.TcpConnectionHandler;
@@ -77,17 +78,21 @@ public class StompBrokerRelayMessageHandlerTests {
 		String sessionId = "sess1";
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
 		headers.setSessionId(sessionId);
-		this.brokerRelay.handleMessage(MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build());
+		this.brokerRelay.handleMessage(MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders()));
 
 		List<Message<byte[]>> sent = this.tcpClient.connection.messages;
 		assertEquals(2, sent.size());
 
 		StompHeaderAccessor headers1 = StompHeaderAccessor.wrap(sent.get(0));
 		assertEquals(virtualHost, headers1.getHost());
+		assertNotNull("The prepared message does not have an accessor",
+				MessageHeaderAccessor.getAccessor(sent.get(0), MessageHeaderAccessor.class));
 
 		StompHeaderAccessor headers2 = StompHeaderAccessor.wrap(sent.get(1));
 		assertEquals(sessionId, headers2.getSessionId());
 		assertEquals(virtualHost, headers2.getHost());
+		assertNotNull("The prepared message does not have an accessor",
+				MessageHeaderAccessor.getAccessor(sent.get(1), MessageHeaderAccessor.class));
 	}
 
 	@Test
@@ -104,7 +109,7 @@ public class StompBrokerRelayMessageHandlerTests {
 		String sessionId = "sess1";
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
 		headers.setSessionId(sessionId);
-		this.brokerRelay.handleMessage(MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build());
+		this.brokerRelay.handleMessage(MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders()));
 
 		List<Message<byte[]>> sent = this.tcpClient.connection.messages;
 		assertEquals(2, sent.size());
@@ -126,11 +131,13 @@ public class StompBrokerRelayMessageHandlerTests {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 		headers.setSessionId("sess1");
 		headers.setDestination("/user/daisy/foo");
-		this.brokerRelay.handleMessage(MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build());
+		this.brokerRelay.handleMessage(MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders()));
 
 		List<Message<byte[]>> sent = this.tcpClient.connection.messages;
 		assertEquals(1, sent.size());
 		assertEquals(StompCommand.CONNECT, StompHeaderAccessor.wrap(sent.get(0)).getCommand());
+		assertNotNull("The prepared message does not have an accessor",
+				MessageHeaderAccessor.getAccessor(sent.get(0), MessageHeaderAccessor.class));
 	}
 
 

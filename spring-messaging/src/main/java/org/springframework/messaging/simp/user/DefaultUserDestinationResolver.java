@@ -19,6 +19,7 @@ package org.springframework.messaging.simp.user;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.util.Assert;
@@ -100,33 +101,33 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 	@Override
 	public UserDestinationResult resolveDestination(Message<?> message) {
 
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		DestinationInfo info = parseUserDestination(headers);
+		String destination = SimpMessageHeaderAccessor.getDestination(message.getHeaders());
+		DestinationInfo info = parseUserDestination(message);
 		if (info == null) {
 			return null;
 		}
 
 		Set<String> targetDestinations = new HashSet<String>();
 		for (String sessionId : info.getSessionIds()) {
-			targetDestinations.add(getTargetDestination(
-					headers.getDestination(), info.getDestinationWithoutPrefix(), sessionId, info.getUser()));
+			targetDestinations.add(getTargetDestination(destination,
+					info.getDestinationWithoutPrefix(), sessionId, info.getUser()));
 		}
 
-		return new UserDestinationResult(headers.getDestination(),
+		return new UserDestinationResult(destination,
 				targetDestinations, info.getSubscribeDestination(), info.getUser());
 	}
 
-	private DestinationInfo parseUserDestination(SimpMessageHeaderAccessor headers) {
+	private DestinationInfo parseUserDestination(Message<?> message) {
 
-		String destination = headers.getDestination();
+		MessageHeaders headers = message.getHeaders();
+		SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(headers);
+		String destination = SimpMessageHeaderAccessor.getDestination(headers);
+		Principal principal = SimpMessageHeaderAccessor.getUser(headers);
 
 		String destinationWithoutPrefix;
 		String subscribeDestination;
 		String user;
 		Set<String> sessionIds;
-
-		Principal principal = headers.getUser();
-		SimpMessageType messageType = headers.getMessageType();
 
 		if (SimpMessageType.SUBSCRIBE.equals(messageType) || SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
 			if (!checkDestination(destination, this.destinationPrefix)) {
@@ -136,14 +137,15 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 				logger.error("Ignoring message, no principal info available");
 				return null;
 			}
-			if (headers.getSessionId() == null) {
+			String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
+			if (sessionId == null) {
 				logger.error("Ignoring message, no session id available");
 				return null;
 			}
 			destinationWithoutPrefix = destination.substring(this.destinationPrefix.length()-1);
 			subscribeDestination = destination;
 			user = principal.getName();
-			sessionIds = Collections.singleton(headers.getSessionId());
+			sessionIds = Collections.singleton(sessionId);
 		}
 		else if (SimpMessageType.MESSAGE.equals(messageType)) {
 			if (!checkDestination(destination, this.destinationPrefix)) {

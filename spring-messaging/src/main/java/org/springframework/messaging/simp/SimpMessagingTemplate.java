@@ -108,8 +108,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 	@Override
 	public void send(Message<?> message) {
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		String destination = headers.getDestination();
+		String destination = SimpMessageHeaderAccessor.getDestination(message.getHeaders());
 		destination = (destination != null) ? destination : getRequiredDefaultDestination();
 		doSend(destination, message);
 	}
@@ -118,10 +117,10 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	protected void doSend(String destination, Message<?> message) {
 		Assert.notNull(destination, "Destination must not be null");
 
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		headers.setDestination(destination);
-		headers.setMessageTypeIfNotSet(SimpMessageType.MESSAGE);
-		message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
+		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.wrap(message);
+		headerAccessor.setDestination(destination);
+		headerAccessor.setMessageTypeIfNotSet(SimpMessageType.MESSAGE);
+		message = MessageBuilder.createMessage(message.getPayload(), headerAccessor.getMessageHeaders());
 
 		long timeout = this.sendTimeout;
 		boolean sent = (timeout >= 0)

@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -30,6 +29,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.tcp.FixedIntervalReconnectStrategy;
 import org.springframework.messaging.tcp.TcpConnection;
 import org.springframework.messaging.tcp.TcpConnectionHandler;
@@ -79,9 +79,9 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	private static final Message<byte[]> HEARTBEAT_MESSAGE;
 
 	static {
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.HEARTBEAT);
-		HEARTBEAT_MESSAGE = MessageBuilder.withPayload(new byte[] {'\n'}).setHeaders(headers).build();
 		EMPTY_TASK.run();
+		StompHeaderAccessor accessor = StompHeaderAccessor.createForHeartbeat();
+		HEARTBEAT_MESSAGE = MessageBuilder.createMessage(StompDecoder.HEARTBEAT_PAYLOAD, accessor.getMessageHeaders());
 	}
 
 
@@ -370,37 +370,53 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	@Override
 	protected void handleMessageInternal(Message<?> message) {
 
-		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-		String sessionId = headers.getSessionId();
+		String sessionId = SimpMessageHeaderAccessor.getSessionId(message.getHeaders());
 
 		if (!isBrokerAvailable()) {
-			if (sessionId == null || sessionId == SystemStompConnectionHandler.SESSION_ID) {
+			if (sessionId == null || SystemStompConnectionHandler.SESSION_ID.equals(sessionId)) {
 				throw new MessageDeliveryException("Message broker is not active.");
 			}
 			if (logger.isTraceEnabled()) {
-				logger.trace("Message broker is not active. Ignoring message id=" + message.getHeaders().getId());
+				logger.trace("Message broker is not active. Ignoring: " + message);
 			}
 			return;
 		}
 
-		String destination = headers.getDestination();
-		StompCommand command = headers.getCommand();
-		SimpMessageType messageType = headers.getMessageType();
+		StompHeaderAccessor stompAccessor;
+		StompCommand command;
 
-		if (SimpMessageType.MESSAGE.equals(messageType)) {
-			sessionId = (sessionId == null) ? SystemStompConnectionHandler.SESSION_ID : sessionId;
-			headers.setSessionId(sessionId);
-			command = headers.updateStompCommandAsClientMessage();
-			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
+		MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
+		if (accessor == null) {
+			logger.error("No header accessor, please use SimpMessagingTemplate. Ignoring: " + message);
+			return;
+		}
+		else if (accessor instanceof StompHeaderAccessor) {
+			stompAccessor = (StompHeaderAccessor) accessor;
+			command = stompAccessor.getCommand();
+		}
+		else if (accessor instanceof SimpMessageHeaderAccessor) {
+			stompAccessor = StompHeaderAccessor.wrap(message);
+			command = stompAccessor.getCommand();
+			if (command == null) {
+				command = stompAccessor.updateStompCommandAsClientMessage();
+			}
+		}
+		else {
+			// Should not happen
+			logger.error("Unexpected header accessor type: " + accessor + ". Ignoring: " + message);
+			return;
 		}
 
 		if (sessionId == null) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("No sessionId, ignoring message: " + message);
+			if (!SimpMessageType.MESSAGE.equals(stompAccessor.getMessageType())) {
+				logger.error("Only STOMP SEND frames supported on \"system\" connection. Ignoring: " + message);
+				return;
 			}
-			return;
+			sessionId = SystemStompConnectionHandler.SESSION_ID;
+			stompAccessor.setSessionId(sessionId);
 		}
 
+		String destination = stompAccessor.getDestination();
 		if ((command != null) && command.requiresDestination() && !checkDestinationPrefix(destination)) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Ignoring message to destination=" + destination);
@@ -412,20 +428,21 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			logger.trace("Processing message=" + message);
 		}
 
-		if (SimpMessageType.CONNECT.equals(messageType)) {
+		if (StompCommand.CONNECT.equals(command)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Processing CONNECT (total connected=" + this.connectionHandlers.size() + ")");
 			}
-			headers.setLogin(this.clientLogin);
-			headers.setPasscode(this.clientPasscode);
+			stompAccessor = (stompAccessor.isMutable() ? stompAccessor : StompHeaderAccessor.wrap(message));
+			stompAccessor.setLogin(this.clientLogin);
+			stompAccessor.setPasscode(this.clientPasscode);
 			if (getVirtualHost() != null) {
-				headers.setHost(getVirtualHost());
+				stompAccessor.setHost(getVirtualHost());
 			}
-			StompConnectionHandler handler = new StompConnectionHandler(sessionId, headers);
+			StompConnectionHandler handler = new StompConnectionHandler(sessionId, stompAccessor);
 			this.connectionHandlers.put(sessionId, handler);
 			this.tcpClient.connect(handler);
 		}
-		else if (SimpMessageType.DISCONNECT.equals(messageType)) {
+		else if (StompCommand.DISCONNECT.equals(command)) {
 			StompConnectionHandler handler = this.connectionHandlers.get(sessionId);
 			if (handler == null) {
 				if (logger.isTraceEnabled()) {
@@ -433,7 +450,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				}
 				return;
 			}
-			handler.forward(message);
+			handler.forward(message, stompAccessor);
 		}
 		else {
 			StompConnectionHandler handler = this.connectionHandlers.get(sessionId);
@@ -443,7 +460,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				}
 				return;
 			}
-			handler.forward(message);
+			handler.forward(message, stompAccessor);
 		}
 	}
 
@@ -486,7 +503,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				logger.debug("Established TCP connection to broker in session '" + this.sessionId + "'");
 			}
 			this.tcpConnection = connection;
-			connection.send(MessageBuilder.withPayload(EMPTY_PAYLOAD).setHeaders(this.connectHeaders).build());
+			connection.send(MessageBuilder.createMessage(EMPTY_PAYLOAD, this.connectHeaders.getMessageHeaders()));
 		}
 
 		@Override
@@ -522,7 +539,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.ERROR);
 				headers.setSessionId(this.sessionId);
 				headers.setMessage(errorText);
-				Message<?> errorMessage = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+				Message<?> errorMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
 				sendMessageToClient(errorMessage);
 			}
 		}
@@ -536,20 +553,23 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		@Override
 		public void handleMessage(Message<byte[]> message) {
 
-			StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-			if (SimpMessageType.HEARTBEAT.equals(headers.getMessageType())) {
+			StompHeaderAccessor headerAccessor =
+					MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+
+			if (headerAccessor.isHeartbeat()) {
 				logger.trace("Received broker heartbeat");
 			}
 			else if (logger.isDebugEnabled()) {
 				logger.debug("Received message from broker in session '" + this.sessionId + "'");
 			}
 
-			if (StompCommand.CONNECTED == headers.getCommand()) {
-				afterStompConnected(headers);
+			if (StompCommand.CONNECTED == headerAccessor.getCommand()) {
+				afterStompConnected(headerAccessor);
 			}
 
-			headers.setSessionId(this.sessionId);
-			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
+			headerAccessor.setSessionId(this.sessionId);
+			headerAccessor.setImmutable();
+
 			sendMessageToClient(message);
 		}
 
@@ -630,9 +650,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 					clearConnection();
 				}
 				catch (Throwable t) {
-					if (logger.isErrorEnabled()) {
-						// Ignore
-					}
+					// Ignore
 				}
 			}
 		}
@@ -661,7 +679,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		 * @return a future to wait for the result
 		 */
 		@SuppressWarnings("unchecked")
-		public ListenableFuture<Void> forward(final Message<?> message) {
+		public ListenableFuture<Void> forward(Message<?> message, final StompHeaderAccessor headerAccessor) {
 
 			TcpConnection<byte[]> conn = this.tcpConnection;
 
@@ -682,8 +700,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			}
 
 			if (logger.isDebugEnabled()) {
-				StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-				if (SimpMessageType.HEARTBEAT.equals(headers.getMessageType())) {
+				if (headerAccessor.isHeartbeat()) {
 					logger.trace("Forwarding heartbeat to broker");
 				}
 				else {
@@ -691,13 +708,16 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				}
 			}
 
+			if (headerAccessor.isMutable() && headerAccessor.isModified()) {
+				message = MessageBuilder.createMessage(message.getPayload(), headerAccessor.getMessageHeaders());
+			}
+
 			ListenableFuture<Void> future = conn.send((Message<byte[]>) message);
 
 			future.addCallback(new ListenableFutureCallback<Void>() {
 				@Override
 				public void onSuccess(Void result) {
-					StompCommand command = StompHeaderAccessor.wrap(message).getCommand();
-					if (command == StompCommand.DISCONNECT) {
+					if (headerAccessor.getCommand() == StompCommand.DISCONNECT) {
 						clearConnection();
 					}
 				}
@@ -707,7 +727,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 						// already reset
 					}
 					else {
-						handleTcpConnectionFailure("Failed to send message " + message, t);
+						handleTcpConnectionFailure("Failed to send message " + headerAccessor, t);
 					}
 				}
 			});
@@ -777,9 +797,9 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 
 		@Override
-		public ListenableFuture<Void> forward(Message<?> message) {
+		public ListenableFuture<Void> forward(Message<?> message, StompHeaderAccessor headerAccessor) {
 			try {
-				ListenableFuture<Void> future = super.forward(message);
+				ListenableFuture<Void> future = super.forward(message, headerAccessor);
 				future.get();
 				return future;
 			}

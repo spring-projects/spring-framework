@@ -19,8 +19,10 @@ package org.springframework.messaging.simp.broker;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -38,29 +40,31 @@ public abstract class AbstractSubscriptionRegistry implements SubscriptionRegist
 
 	@Override
 	public final void registerSubscription(Message<?> message) {
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		if (!SimpMessageType.SUBSCRIBE.equals(headers.getMessageType())) {
+
+		MessageHeaders headers = message.getHeaders();
+		SimpMessageType type = SimpMessageHeaderAccessor.getMessageType(headers);
+
+		if (!SimpMessageType.SUBSCRIBE.equals(type)) {
 			logger.error("Expected SUBSCRIBE message: " + message);
 			return;
 		}
-		String sessionId = headers.getSessionId();
+		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 		if (sessionId == null) {
 			logger.error("Ignoring subscription. No sessionId in message: " + message);
 			return;
 		}
-		String subscriptionId = headers.getSubscriptionId();
+		String subscriptionId = SimpMessageHeaderAccessor.getSubscriptionId(headers);
 		if (subscriptionId == null) {
 			logger.error("Ignoring subscription. No subscriptionId in message: " + message);
 			return;
 		}
-		String destination = headers.getDestination();
+		String destination = SimpMessageHeaderAccessor.getDestination(headers);
 		if (destination == null) {
 			logger.error("Ignoring destination. No destination in message: " + message);
 			return;
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Adding subscription id=" + headers.getSubscriptionId()
-					+ ", destination=" + headers.getDestination());
+			logger.debug("Adding subscription id=" + subscriptionId + ", destination=" + destination);
 		}
 		addSubscriptionInternal(sessionId, subscriptionId, destination, message);
 	}
@@ -70,17 +74,20 @@ public abstract class AbstractSubscriptionRegistry implements SubscriptionRegist
 
 	@Override
 	public final void unregisterSubscription(Message<?> message) {
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		if (!SimpMessageType.UNSUBSCRIBE.equals(headers.getMessageType())) {
+
+		MessageHeaders headers = message.getHeaders();
+		SimpMessageType type = SimpMessageHeaderAccessor.getMessageType(headers);
+
+		if (!SimpMessageType.UNSUBSCRIBE.equals(type)) {
 			logger.error("Expected UNSUBSCRIBE message: " + message);
 			return;
 		}
-		String sessionId = headers.getSessionId();
+		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 		if (sessionId == null) {
 			logger.error("Ignoring subscription. No sessionId in message: " + message);
 			return;
 		}
-		String subscriptionId = headers.getSubscriptionId();
+		String subscriptionId = SimpMessageHeaderAccessor.getSubscriptionId(headers);
 		if (subscriptionId == null) {
 			logger.error("Ignoring subscription. No subscriptionId in message: " + message);
 			return;
@@ -98,19 +105,22 @@ public abstract class AbstractSubscriptionRegistry implements SubscriptionRegist
 
 	@Override
 	public final MultiValueMap<String, String> findSubscriptions(Message<?> message) {
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		if (!SimpMessageType.MESSAGE.equals(headers.getMessageType())) {
-			logger.trace("Ignoring message type " + headers.getMessageType());
+
+		MessageHeaders headers = message.getHeaders();
+		SimpMessageType type = SimpMessageHeaderAccessor.getMessageType(headers);
+
+		if (!SimpMessageType.MESSAGE.equals(type)) {
+			logger.trace("Ignoring message type " + type);
 			return null;
 		}
-		String destination = headers.getDestination();
+		String destination = SimpMessageHeaderAccessor.getDestination(headers);
 		if (destination == null) {
 			logger.trace("Ignoring message, no destination");
 			return null;
 		}
 		MultiValueMap<String, String> result = findSubscriptionsInternal(destination, message);
 		if (logger.isTraceEnabled()) {
-			logger.trace("Found " + result.size() + " subscriptions for destination=" + headers.getDestination());
+			logger.trace("Found " + result.size() + " subscriptions for destination=" + destination);
 		}
 		return result;
 	}

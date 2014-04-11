@@ -42,6 +42,7 @@ import org.springframework.messaging.handler.DestinationPatternsMessageCondition
 import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.messaging.handler.HandlerMethodSelector;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -339,8 +340,9 @@ public abstract class AbstractMethodMessageHandler<T>
 			logger.debug("Handling message, lookupDestination=" + lookupDestination);
 		}
 
-		message = MessageBuilder.fromMessage(message).setHeader(
-				DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, lookupDestination).build();
+		MessageHeaderAccessor headerAccessor = MessageHeaderAccessor.getMutableAccessor(message);
+		headerAccessor.setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, lookupDestination);
+		message = MessageBuilder.createMessage(message.getPayload(), headerAccessor.getMessageHeaders());
 
 		handleMessageInternal(message, lookupDestination);
 	}

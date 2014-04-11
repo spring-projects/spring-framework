@@ -20,6 +20,7 @@ import java.util.Collection;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
@@ -111,9 +112,10 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	@Override
 	protected void handleMessageInternal(Message<?> message) {
 
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		SimpMessageType messageType = headers.getMessageType();
-		String destination = headers.getDestination();
+		MessageHeaders headers = message.getHeaders();
+		SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(headers);
+		String destination = SimpMessageHeaderAccessor.getDestination(headers);
+		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 
 		if (!checkDestinationPrefix(destination)) {
 			if (logger.isTraceEnabled()) {
@@ -122,26 +124,29 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 			return;
 		}
 
-		if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
+		if (SimpMessageType.MESSAGE.equals(messageType)) {
+			sendMessageToSubscribers(destination, message);
+		}
+		else if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
 			this.subscriptionRegistry.registerSubscription(message);
 		}
 		else if (SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
 			this.subscriptionRegistry.unregisterSubscription(message);
 		}
-		else if (SimpMessageType.MESSAGE.equals(messageType)) {
-			sendMessageToSubscribers(headers.getDestination(), message);
-		}
 		else if (SimpMessageType.DISCONNECT.equals(messageType)) {
-			String sessionId = headers.getSessionId();
-			this.subscriptionRegistry.unregisterAllSubscriptions(sessionId);
+				this.subscriptionRegistry.unregisterAllSubscriptions(sessionId);
 		}
 		else if (SimpMessageType.CONNECT.equals(messageType)) {
-			SimpMessageHeaderAccessor replyHeaders = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
-			replyHeaders.setSessionId(headers.getSessionId());
-			replyHeaders.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, message);
-
-			Message<byte[]> connectAck = MessageBuilder.withPayload(EMPTY_PAYLOAD).setHeaders(replyHeaders).build();
+			SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
+			accessor.setSessionId(sessionId);
+			accessor.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, message);
+			Message<byte[]> connectAck = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
 			this.clientOutboundChannel.send(connectAck);
+		}
+		else {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Message type not supported. Ignoring: " + message);
+			}
 		}
 	}
 
@@ -153,17 +158,17 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		}
 		for (String sessionId : subscriptions.keySet()) {
 			for (String subscriptionId : subscriptions.get(sessionId)) {
-				SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-				headers.setSessionId(sessionId);
-				headers.setSubscriptionId(subscriptionId);
+				SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+				headerAccessor.setSessionId(sessionId);
+				headerAccessor.setSubscriptionId(subscriptionId);
+				headerAccessor.copyHeadersIfAbsent(message.getHeaders());
 				Object payload = message.getPayload();
-				Message<?> clientMessage = MessageBuilder.withPayload(payload).setHeaders(headers).build();
+				Message<?> reply = MessageBuilder.createMessage(payload, headerAccessor.getMessageHeaders());
 				try {
-					this.clientOutboundChannel.send(clientMessage);
+					this.clientOutboundChannel.send(reply);
 				}
 				catch (Throwable ex) {
-					logger.error("Failed to send message to destination=" + destination +
-							", sessionId=" + sessionId + ", subscriptionId=" + subscriptionId, ex);
+					logger.error("Failed to send message=" + message, ex);
 				}
 			}
 		}

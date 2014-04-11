@@ -18,6 +18,7 @@ package org.springframework.messaging.simp.annotation.support;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.core.MessagePostProcessor;
 import org.springframework.messaging.core.MessageSendingOperations;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -71,13 +72,12 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 			return;
 		}
 
-		SimpMessageHeaderAccessor inputHeaders = SimpMessageHeaderAccessor.wrap(message);
-		String sessionId = inputHeaders.getSessionId();
-		String subscriptionId = inputHeaders.getSubscriptionId();
-		String destination = inputHeaders.getDestination();
+		MessageHeaders headers = message.getHeaders();
+		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
+		String subscriptionId = SimpMessageHeaderAccessor.getSubscriptionId(headers);
+		String destination = SimpMessageHeaderAccessor.getDestination(headers);
 
-		Assert.state(inputHeaders.getSubscriptionId() != null,
-				"No subsriptiondId in input message to method " + returnType.getMethod());
+		Assert.state(subscriptionId != null, "No subsriptiondId in input message to method " + returnType.getMethod());
 
 		MessagePostProcessor postProcessor = new SubscriptionHeaderPostProcessor(sessionId, subscriptionId);
 		this.messagingTemplate.convertAndSend(destination, returnValue, postProcessor);
@@ -98,11 +98,11 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 
 		@Override
 		public Message<?> postProcessMessage(Message<?> message) {
-			SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-			headers.setSessionId(this.sessionId);
-			headers.setSubscriptionId(this.subscriptionId);
-			headers.setMessageTypeIfNotSet(SimpMessageType.MESSAGE);
-			return MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
+			SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.wrap(message);
+			headerAccessor.setSessionId(this.sessionId);
+			headerAccessor.setSubscriptionId(this.subscriptionId);
+			headerAccessor.setMessageTypeIfNotSet(SimpMessageType.MESSAGE);
+			return MessageBuilder.createMessage(message.getPayload(), headerAccessor.getMessageHeaders());
 		}
 	}
 }

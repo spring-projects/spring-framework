@@ -26,6 +26,7 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.SimpleMessageConverter;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.Assert;
 
 /**
@@ -130,6 +131,13 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 			MessagePostProcessor postProcessor) throws MessagingException {
 
 		headers = processHeadersToSend(headers);
+
+		MessageHeaders messageHeaders;
+		if (headers != null && headers instanceof MessageHeaders) {
+			MessageHeaderAccessor.getAccessor()
+
+		}
+
 		MessageHeaders messageHeaders = (headers != null) ? new MessageHeaders(headers) : null;
 		Message<?> message = this.converter.toMessage(payload, messageHeaders);
 

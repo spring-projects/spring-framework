@@ -73,7 +73,7 @@ public class SimpMessageTypeMessageCondition extends AbstractMessageCondition<Si
 	@Override
 	public SimpMessageTypeMessageCondition getMatchingCondition(Message<?> message) {
 
-		Object actualMessageType = message.getHeaders().get(SimpMessageHeaderAccessor.MESSAGE_TYPE_HEADER);
+		Object actualMessageType = SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
 		if (actualMessageType == null) {
 			return null;
 		}
@@ -83,7 +83,7 @@ public class SimpMessageTypeMessageCondition extends AbstractMessageCondition<Si
 
 	@Override
 	public int compareTo(SimpMessageTypeMessageCondition other, Message<?> message) {
-		Object actualMessageType = message.getHeaders().get(SimpMessageHeaderAccessor.MESSAGE_TYPE_HEADER);
+		Object actualMessageType = SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
 		if (actualMessageType != null) {
 			if (actualMessageType.equals(this.getMessageType()) && actualMessageType.equals(other.getMessageType())) {
 				return 0;
