@@ -70,7 +70,7 @@ public abstract class ScriptUtils {
 	 * such a script should not actually contain this value; it is merely a
 	 * <em>virtual</em> statement separator.
 	 */
-	public static final String EOF_STATEMENT_SEPARATOR = "<<< END OF SCRIPT >>>";
+	public static final String EOF_STATEMENT_SEPARATOR = "^^^ END OF SCRIPT ^^^";
 
 	/**
 	 * Default prefix for line comments within SQL scripts.
