@@ -85,18 +85,19 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	}
 
 	/**
-	 * Set the {@link ErrorHandler} to invoke in case of an exception thrown
+	 * Set the {@link ErrorHandler} to invoke in case an exception is thrown
 	 * from a listener.
 	 * <p>Default is none, with a listener exception stopping the current
 	 * multicast and getting propagated to the publisher of the current event.
-	 * In case of a {@link #setTaskExecutor task executor} specified, each
+	 * If a {@linkplain #setTaskExecutor task executor} is specified, each
 	 * individual listener exception will get propagated to the executor but
 	 * won't necessarily stop execution of other listeners.
 	 * <p>Consider setting an {@link ErrorHandler} implementation that catches
 	 * and logs exceptions (a la
 	 * {@link org.springframework.scheduling.support.TaskUtils#LOG_AND_SUPPRESS_ERROR_HANDLER})
 	 * or an implementation that logs exceptions while nevertheless propagating them
-	 * ({@link org.springframework.scheduling.support.TaskUtils#LOG_AND_PROPAGATE_ERROR_HANDLER}).
+	 * (e.g.,
+	 * {@link org.springframework.scheduling.support.TaskUtils#LOG_AND_PROPAGATE_ERROR_HANDLER}).
 	 * @since 4.1
 	 */
 	public void setErrorHandler(ErrorHandler errorHandler) {
