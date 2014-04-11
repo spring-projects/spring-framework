@@ -21,6 +21,7 @@ import javax.sql.DataSource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.util.Assert;
 
 /**
@@ -161,7 +162,9 @@ public class EmbeddedDatabaseBuilder {
 
 	/**
 	 * Specify the statement separator used in all SQL scripts, if a custom one.
-	 * <p>Default is ";".
+	 * <p>Defaults to {@code ";"} if not specified and falls back to {@code "\n"}
+	 * as a last resort; may be set to {@link ScriptUtils#EOF_STATEMENT_SEPARATOR}
+	 * to signal that each script contains a single statement without a separator.
 	 * @param separator the statement separator
 	 * @return {@code this}, to facilitate method chaining
 	 * @since 4.0.3
@@ -173,7 +176,7 @@ public class EmbeddedDatabaseBuilder {
 
 	/**
 	 * Specify the single-line comment prefix used in all SQL scripts.
-	 * <p>Default is "--".
+	 * <p>Defaults to {@code "--"}.
 	 * @param commentPrefix the prefix for single-line comments
 	 * @return {@code this}, to facilitate method chaining
 	 * @since 4.0.3
@@ -185,7 +188,7 @@ public class EmbeddedDatabaseBuilder {
 
 	/**
 	 * Specify the start delimiter for block comments in all SQL scripts.
-	 * <p>Default is "/*".
+	 * <p>Defaults to {@code "/*"}.
 	 * @param blockCommentStartDelimiter the start delimiter for block comments
 	 * @return {@code this}, to facilitate method chaining
 	 * @since 4.0.3
@@ -198,7 +201,7 @@ public class EmbeddedDatabaseBuilder {
 
 	/**
 	 * Specify the end delimiter for block comments in all SQL scripts.
-	 * <p>Default is "*&#47;".
+	 * <p>Defaults to <code>"*&#47;"</code>.
 	 * @param blockCommentEndDelimiter the end delimiter for block comments
 	 * @return {@code this}, to facilitate method chaining
 	 * @since 4.0.3

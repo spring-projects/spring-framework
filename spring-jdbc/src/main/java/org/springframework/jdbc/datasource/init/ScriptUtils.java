@@ -62,6 +62,17 @@ public abstract class ScriptUtils {
 	public static final String FALLBACK_STATEMENT_SEPARATOR = "\n";
 
 	/**
+	 * End of file (EOF) SQL statement separator.
+	 * <p>This value may be supplied as the {@code separator} to {@link
+	 * #executeSqlScript(Connection, EncodedResource, boolean, boolean, String, String, String, String)}
+	 * to denote that an SQL script contains a single statement (potentially
+	 * spanning multiple lines) with no explicit statement separator. Note that
+	 * such a script should not actually contain this value; it is merely a
+	 * <em>virtual</em> statement separator.
+	 */
+	public static final String EOF_STATEMENT_SEPARATOR = "<<< END OF SCRIPT >>>";
+
+	/**
 	 * Default prefix for line comments within SQL scripts.
 	 */
 	public static final String DEFAULT_COMMENT_PREFIX = "--";
@@ -399,12 +410,17 @@ public abstract class ScriptUtils {
 	 * typically "--"
 	 * @param separator the script statement separator; defaults to
 	 * {@value #DEFAULT_STATEMENT_SEPARATOR} if not specified and falls back to
-	 * {@value #FALLBACK_STATEMENT_SEPARATOR} as a last resort
+	 * {@value #FALLBACK_STATEMENT_SEPARATOR} as a last resort; may be set to
+	 * {@value #EOF_STATEMENT_SEPARATOR} to signal that the script contains a
+	 * single statement without a separator
 	 * @param blockCommentStartDelimiter the <em>start</em> block comment delimiter; never
 	 * {@code null} or empty
 	 * @param blockCommentEndDelimiter the <em>end</em> block comment delimiter; never
 	 * {@code null} or empty
 	 * @throws ScriptException if an error occurred while executing the SQL script
+	 * @see #DEFAULT_STATEMENT_SEPARATOR
+	 * @see #FALLBACK_STATEMENT_SEPARATOR
+	 * @see #EOF_STATEMENT_SEPARATOR
 	 */
 	public static void executeSqlScript(Connection connection, EncodedResource resource, boolean continueOnError,
 			boolean ignoreFailedDrops, String commentPrefix, String separator, String blockCommentStartDelimiter,
@@ -428,7 +444,7 @@ public abstract class ScriptUtils {
 			if (separator == null) {
 				separator = DEFAULT_STATEMENT_SEPARATOR;
 			}
-			if (!containsSqlScriptDelimiters(script, separator)) {
+			if (!EOF_STATEMENT_SEPARATOR.equals(separator) && !containsSqlScriptDelimiters(script, separator)) {
 				separator = FALLBACK_STATEMENT_SEPARATOR;
 			}
 

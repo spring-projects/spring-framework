@@ -140,6 +140,17 @@ public abstract class AbstractDatabasePopulatorTests extends AbstractDatabaseIni
 	}
 
 	@Test
+	public void scriptWithoutStatementSeparator() throws Exception {
+		databasePopulator.setSeparator(ScriptUtils.EOF_STATEMENT_SEPARATOR);
+		databasePopulator.addScript(resource("drop-users-schema.sql"));
+		databasePopulator.addScript(resource("users-schema-without-separator.sql"));
+		databasePopulator.addScript(resource("users-data.sql"));
+		DatabasePopulatorUtils.execute(databasePopulator, db);
+
+		assertUsersDatabaseCreated("Brannen");
+	}
+
+	@Test
 	public void constructorWithMultipleScriptResources() throws Exception {
 		final ResourceDatabasePopulator populator = new ResourceDatabasePopulator(usersSchema(),
 			resource("users-data-with-comments.sql"));

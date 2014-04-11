@@ -142,16 +142,18 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	/**
 	 * Specify the statement separator, if a custom one.
-	 * <p>Default is ";".
-	 * @param separator the statement separator
+	 * <p>Defaults to {@code ";"} if not specified and falls back to {@code "\n"}
+	 * as a last resort; may be set to {@link ScriptUtils#EOF_STATEMENT_SEPARATOR}
+	 * to signal that each script contains a single statement without a separator.
+	 * @param separator the script statement separator
 	 */
 	public void setSeparator(String separator) {
 		this.separator = separator;
 	}
 
 	/**
-	 * Set the prefix that identifies line comments within the SQL scripts.
-	 * <p>Default is "--".
+	 * Set the prefix that identifies single-line comments within the SQL scripts.
+	 * <p>Defaults to {@code "--"}.
 	 * @param commentPrefix the prefix for single-line comments
 	 */
 	public void setCommentPrefix(String commentPrefix) {
@@ -161,7 +163,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	/**
 	 * Set the start delimiter that identifies block comments within the SQL
 	 * scripts.
-	 * <p>Default is "/*".
+	 * <p>Defaults to {@code "/*"}.
 	 * @param blockCommentStartDelimiter the start delimiter for block comments
 	 * @since 4.0.3
 	 * @see #setBlockCommentEndDelimiter
@@ -173,7 +175,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	/**
 	 * Set the end delimiter that identifies block comments within the SQL
 	 * scripts.
-	 * <p>Default is "*&#47;".
+	 * <p>Defaults to <code>"*&#47;"</code>.
 	 * @param blockCommentEndDelimiter the end delimiter for block comments
 	 * @since 4.0.3
 	 * @see #setBlockCommentStartDelimiter
