@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
@@ -194,18 +195,27 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 
 	@Override
 	public final Message<?> toMessage(Object payload, MessageHeaders headers) {
+
 		if (!canConvertTo(payload, headers)) {
 			return null;
 		}
+
 		payload = convertToInternal(payload, headers);
+		MimeType mimeType = getDefaultContentType(payload);
+
+		if (headers != null) {
+			MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(headers, MessageHeaderAccessor.class);
+			if (accessor != null && accessor.isMutable()) {
+				accessor.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, mimeType);
+				return MessageBuilder.createMessage(payload, accessor.getMessageHeaders());
+			}
+		}
+
 		MessageBuilder<?> builder = MessageBuilder.withPayload(payload);
 		if (headers != null) {
 			builder.copyHeaders(headers);
 		}
-		MimeType mimeType = getDefaultContentType(payload);
-		if (mimeType != null) {
-			builder.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, mimeType);
-		}
+		builder.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, mimeType);
 		return builder.build();
 	}
 

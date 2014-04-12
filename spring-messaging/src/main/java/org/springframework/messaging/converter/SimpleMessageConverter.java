@@ -19,6 +19,7 @@ package org.springframework.messaging.converter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -44,7 +45,16 @@ public class SimpleMessageConverter implements MessageConverter {
 
 	@Override
 	public Message<?> toMessage(Object payload, MessageHeaders headers) {
-		return (payload != null ? MessageBuilder.withPayload(payload).copyHeaders(headers).build() : null);
+		if (payload == null) {
+			return null;
+		}
+		if (headers != null) {
+			MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(headers, MessageHeaderAccessor.class);
+			if (accessor != null && accessor.isMutable()) {
+				return MessageBuilder.createMessage(payload, accessor.getMessageHeaders());
+			}
+		}
+		return MessageBuilder.withPayload(payload).copyHeaders(headers).build();
 	}
 
 }

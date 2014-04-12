@@ -322,6 +322,7 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	@Override
 	public void handleMessage(Message<?> message) throws MessagingException {
+
 		String destination = getDestination(message);
 		if (destination == null) {
 			logger.trace("Ignoring message, no destination");
@@ -342,9 +343,11 @@ public abstract class AbstractMethodMessageHandler<T>
 
 		MessageHeaderAccessor headerAccessor = MessageHeaderAccessor.getMutableAccessor(message);
 		headerAccessor.setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, lookupDestination);
+		headerAccessor.setLeaveMutable(true);
 		message = MessageBuilder.createMessage(message.getPayload(), headerAccessor.getMessageHeaders());
 
 		handleMessageInternal(message, lookupDestination);
+		headerAccessor.setImmutable();
 	}
 
 	protected abstract String getDestination(Message<?> message);

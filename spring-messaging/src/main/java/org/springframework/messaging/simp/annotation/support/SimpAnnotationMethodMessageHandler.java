@@ -58,7 +58,7 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.SimpMessageTypeMessageCondition;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
-import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
@@ -330,7 +330,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	@Override
 	protected String getDestination(Message<?> message) {
-		return (String) SimpMessageHeaderAccessor.getDestination(message.getHeaders());
+		return SimpMessageHeaderAccessor.getDestination(message.getHeaders());
 	}
 
 	@Override
@@ -357,10 +357,9 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		Map<String, String> vars = getPathMatcher().extractUriTemplateVariables(matchedPattern, lookupDestination);
 
 		if (!CollectionUtils.isEmpty(vars)) {
-			SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-			headers.setHeader(DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER, vars);
-			message = MessageBuilder.createMessage(message.getPayload(), headers.getMessageHeaders());
-
+			MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
+			Assert.state(accessor != null && accessor.isMutable());
+			accessor.setHeader(DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER, vars);
 		}
 
 		super.handleMatch(mapping, handlerMethod, lookupDestination, message);

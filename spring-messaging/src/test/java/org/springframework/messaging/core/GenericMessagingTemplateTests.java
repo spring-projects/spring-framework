@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.core;
 
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -27,10 +28,13 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.StubMessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.GenericMessage;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import static org.junit.Assert.*;
@@ -44,12 +48,17 @@ public class GenericMessagingTemplateTests {
 
 	private GenericMessagingTemplate template;
 
+	private StubMessageChannel messageChannel;
+
 	private ThreadPoolTaskExecutor executor;
 
 
 	@Before
 	public void setup() {
+		this.messageChannel = new StubMessageChannel();
 		this.template = new GenericMessagingTemplate();
+		this.template.setDefaultDestination(this.messageChannel);
+		this.template.setDestinationResolver(new TestDestinationResolver());
 		this.executor = new ThreadPoolTaskExecutor();
 		this.executor.afterPropertiesSet();
 	}
@@ -114,4 +123,26 @@ public class GenericMessagingTemplateTests {
 		}
 	}
 
+	@Test
+	public void convertAndSendWithSimpMessageHeaders() {
+		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
+		accessor.setHeader("key", "value");
+		accessor.setLeaveMutable(true);
+		MessageHeaders headers = accessor.getMessageHeaders();
+
+		this.template.convertAndSend("channel", "data", headers);
+		List<Message<byte[]>> messages = this.messageChannel.getMessages();
+		Message<byte[]> message = messages.get(0);
+
+		assertSame(headers, message.getHeaders());
+		assertFalse(accessor.isMutable());
+	}
+
+	private class TestDestinationResolver implements DestinationResolver<MessageChannel> {
+
+		@Override
+		public MessageChannel resolveDestination(String name) throws DestinationResolutionException {
+			return messageChannel;
+		}
+	}
 }

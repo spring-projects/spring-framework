@@ -31,6 +31,7 @@ import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.PollableChannel;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.Assert;
 
 /**
@@ -109,6 +110,11 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 	protected final void doSend(MessageChannel channel, Message<?> message) {
 
 		Assert.notNull(channel, "channel must not be null");
+
+		MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
+		if (accessor != null && accessor.isMutable()) {
+			accessor.setImmutable();
+		}
 
 		long timeout = this.sendTimeout;
 		boolean sent = (timeout >= 0) ? channel.send(message, timeout) : channel.send(message);
