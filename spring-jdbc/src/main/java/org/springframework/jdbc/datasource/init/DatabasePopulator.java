@@ -40,7 +40,7 @@ public interface DatabasePopulator {
 	 * {@link ResourceDatabasePopulator} and {@link DatabasePopulatorUtils} wrap
 	 * all {@code SQLExceptions} in {@code ScriptExceptions}.
 	 * @param connection the JDBC connection to use to populate the db; already
-	 * configured and ready to use
+	 * configured and ready to use; never {@code null}
 	 * @throws SQLException if an unrecoverable data access exception occurs
 	 * during database population
 	 * @throws ScriptException in all other error cases
