@@ -19,7 +19,7 @@ package org.springframework.messaging.simp.stomp;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -28,7 +28,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.messaging.Message;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.support.NativeMessageHeaderAccessor;
+import org.springframework.util.Assert;
 
 /**
  * An encoder for STOMP frames.
@@ -43,32 +46,45 @@ public final class StompEncoder  {
 
 	private static final byte COLON = ':';
 
-	private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
-
 	private final Log logger = LogFactory.getLog(StompEncoder.class);
 
 
 	/**
 	 * Encodes the given STOMP {@code message} into a {@code byte[]}
+	 *
 	 * @param message the message to encode
 	 * @return the encoded message
 	 */
 	public byte[] encode(Message<byte[]> message) {
+		return encode(message.getHeaders(), message.getPayload());
+	}
+
+	/**
+	 * Encodes the given payload and headers into a {@code byte[]}.
+	 *
+	 * @param headers the headers
+	 * @param payload the payload
+	 * @return the encoded message
+	 */
+	public byte[] encode(Map<String, Object> headers, byte[] payload) {
+		Assert.notNull(headers, "'headers' is required");
+		Assert.notNull(payload, "'payload' is required");
 		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream(128 + message.getPayload().length);
+			ByteArrayOutputStream baos = new ByteArrayOutputStream(128 + payload.length);
 			DataOutputStream output = new DataOutputStream(baos);
 
-			StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-			if (SimpMessageType.HEARTBEAT == headers.getMessageType()) {
+			if (SimpMessageType.HEARTBEAT.equals(SimpMessageHeaderAccessor.getMessageType(headers))) {
 				logger.trace("Encoded heartbeat");
-				output.write(message.getPayload());
+				output.write(StompDecoder.HEARTBEAT_PAYLOAD);
 			}
 			else {
-				output.write(headers.getCommand().toString().getBytes(UTF8_CHARSET));
+				StompCommand command = StompHeaderAccessor.getCommand(headers);
+				Assert.notNull(command, "Missing STOMP command: " + headers);
+				output.write(command.toString().getBytes(StompDecoder.UTF8_CHARSET));
 				output.write(LF);
-				writeHeaders(headers, message, output);
+				writeHeaders(command, headers, payload, output);
 				output.write(LF);
-				writeBody(message, output);
+				writeBody(payload, output);
 				output.write((byte) 0);
 			}
 
@@ -79,20 +95,30 @@ public final class StompEncoder  {
 		}
 	}
 
-	private void writeHeaders(StompHeaderAccessor headers, Message<byte[]> message, DataOutputStream output)
+	private void writeHeaders(StompCommand command, Map<String, Object> headers, byte[] payload, DataOutputStream output)
 			throws IOException {
 
-		StompCommand command = headers.getCommand();
-		Map<String,List<String>> stompHeaders = headers.toStompHeaderMap();
-		boolean shouldEscape = (command != StompCommand.CONNECT && command != StompCommand.CONNECTED);
+		@SuppressWarnings("unchecked")
+		Map<String,List<String>> nativeHeaders =
+				(Map<String, List<String>>) headers.get(NativeMessageHeaderAccessor.NATIVE_HEADERS);
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Encoded STOMP " + command + ", headers=" + stompHeaders);
+			logger.debug("Encoding STOMP " + command + ", headers=" + nativeHeaders);
 		}
 
-		for (Entry<String, List<String>> entry : stompHeaders.entrySet()) {
+		if (nativeHeaders == null) {
+			return;
+		}
+
+		boolean shouldEscape = (command != StompCommand.CONNECT && command != StompCommand.CONNECTED);
+
+		for (Entry<String, List<String>> entry : nativeHeaders.entrySet()) {
 			byte[] key = encodeHeaderString(entry.getKey(), shouldEscape);
-			for (String value : entry.getValue()) {
+			List<String> values = entry.getValue();
+			if (StompHeaderAccessor.STOMP_PASSCODE_HEADER.equals(entry.getKey())) {
+				values = Arrays.asList(StompHeaderAccessor.getPasscode(headers));
+			}
+			for (String value : values) {
 				output.write(key);
 				output.write(COLON);
 				output.write(encodeHeaderString(value, shouldEscape));
@@ -100,16 +126,16 @@ public final class StompEncoder  {
 			}
 		}
 		if (command.requiresContentLength()) {
-			int contentLength = message.getPayload().length;
-			output.write("content-length:".getBytes(UTF8_CHARSET));
-			output.write(Integer.toString(contentLength).getBytes(UTF8_CHARSET));
+			int contentLength = payload.length;
+			output.write("content-length:".getBytes(StompDecoder.UTF8_CHARSET));
+			output.write(Integer.toString(contentLength).getBytes(StompDecoder.UTF8_CHARSET));
 			output.write(LF);
 		}
 	}
 
 	private byte[] encodeHeaderString(String input, boolean escape) {
 		input = escape ? escape(input) : input;
-		return input.getBytes(UTF8_CHARSET);
+		return input.getBytes(StompDecoder.UTF8_CHARSET);
 	}
 
 	/**
@@ -139,8 +165,8 @@ public final class StompEncoder  {
 		return sb.toString();
 	}
 
-	private void writeBody(Message<byte[]> message, DataOutputStream output) throws IOException {
-		output.write(message.getPayload());
+	private void writeBody(byte[] payload, DataOutputStream output) throws IOException {
+		output.write(payload);
 	}
 
 }

@@ -41,9 +41,9 @@ import org.springframework.messaging.simp.stomp.StompConversionException;
 import org.springframework.messaging.simp.stomp.StompEncoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.simp.user.DestinationUserNameProvider;
-import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
 import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -78,6 +78,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	public static final String CONNECTED_USER_HEADER = "user-name";
 
 	private static final Log logger = LogFactory.getLog(StompSubProtocolHandler.class);
+
+	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
 
 	private int messageSizeLimit = 64 * 1024;
@@ -172,9 +174,12 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 		for (Message<byte[]> message : messages) {
 			try {
-				StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
+
+				StompHeaderAccessor headerAccessor =
+						MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+
 				if (logger.isTraceEnabled()) {
-					if (SimpMessageType.HEARTBEAT.equals(headers.getMessageType())) {
+					if (headerAccessor.isHeartbeat()) {
 						logger.trace("Received heartbeat from client session=" + session.getId());
 					}
 					else {
@@ -182,13 +187,12 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 					}
 				}
 
-				headers.setSessionId(session.getId());
-				headers.setSessionAttributes(session.getAttributes());
-				headers.setUser(session.getPrincipal());
+				headerAccessor.setSessionId(session.getId());
+				headerAccessor.setSessionAttributes(session.getAttributes());
+				headerAccessor.setUser(session.getPrincipal());
+				headerAccessor.setImmutable();
 
-				message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
-
-				if (this.eventPublisher != null && StompCommand.CONNECT.equals(headers.getCommand())) {
+				if (this.eventPublisher != null && StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
 					publishEvent(new SessionConnectEvent(this, message));
 				}
 
@@ -212,10 +216,9 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 	protected void sendErrorMessage(WebSocketSession session, Throwable error) {
 
-		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.ERROR);
-		headers.setMessage(error.getMessage());
-		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
-		byte[] bytes = this.stompEncoder.encode(message);
+		StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.ERROR);
+		headerAccessor.setMessage(error.getMessage());
+		byte[] bytes = this.stompEncoder.encode(headerAccessor.getMessageHeaders(), EMPTY_PAYLOAD);
 		try {
 			session.sendMessage(new TextMessage(bytes));
 		}
@@ -231,46 +234,60 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	@Override
 	public void handleMessageToClient(WebSocketSession session, Message<?> message) {
 
-		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-
-		if (headers.getMessageType() == SimpMessageType.CONNECT_ACK) {
-			StompHeaderAccessor connectedHeaders = StompHeaderAccessor.create(StompCommand.CONNECTED);
-			connectedHeaders.setVersion(getVersion(headers));
-			connectedHeaders.setHeartbeat(0, 0); // no heart-beat support with simple broker
-			headers = connectedHeaders;
-		}
-		else if (SimpMessageType.MESSAGE.equals(headers.getMessageType())) {
-			headers.updateStompCommandAsServerMessage();
-		}
-
-		if (headers.getCommand() == StompCommand.CONNECTED) {
-			afterStompSessionConnected(headers, session);
-		}
-
-		if (StompCommand.MESSAGE.equals(headers.getCommand())) {
-			if (headers.getSubscriptionId() == null) {
-				logger.error("Ignoring message, no subscriptionId header: " + message);
-				return;
-			}
-			String header = SimpMessageHeaderAccessor.ORIGINAL_DESTINATION;
-			if (message.getHeaders().containsKey(header)) {
-				headers.setDestination((String) message.getHeaders().get(header));
-			}
-		}
-
 		if (!(message.getPayload() instanceof byte[])) {
 			logger.error("Ignoring message, expected byte[] content: " + message);
 			return;
 		}
 
-		try {
-			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
+		MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
+		if (accessor == null) {
+			logger.error("No header accessor: " + message);
+			return;
+		}
 
-			if (this.eventPublisher != null && StompCommand.CONNECTED.equals(headers.getCommand())) {
+		StompHeaderAccessor stompAccessor;
+		if (accessor instanceof StompHeaderAccessor) {
+			stompAccessor = (StompHeaderAccessor) accessor;
+		}
+		else if (accessor instanceof SimpMessageHeaderAccessor) {
+			stompAccessor = StompHeaderAccessor.wrap(message);
+			if (SimpMessageType.CONNECT_ACK.equals(stompAccessor.getMessageType())) {
+				StompHeaderAccessor connectedHeaders = StompHeaderAccessor.create(StompCommand.CONNECTED);
+				connectedHeaders.setVersion(getVersion(stompAccessor));
+				connectedHeaders.setHeartbeat(0, 0); // no heart-beat support with simple broker
+				stompAccessor = connectedHeaders;
+			}
+			else if (stompAccessor.getCommand() == null || StompCommand.SEND.equals(stompAccessor.getCommand())) {
+				stompAccessor.updateStompCommandAsServerMessage();
+			}
+		}
+		else {
+			// Should not happen
+			logger.error("Unexpected header accessor type: " + accessor);
+			return;
+		}
+
+		StompCommand command = stompAccessor.getCommand();
+		if (StompCommand.MESSAGE.equals(command)) {
+			if (stompAccessor.getSubscriptionId() == null) {
+				logger.error("Ignoring message, no subscriptionId header: " + message);
+				return;
+			}
+			String header = SimpMessageHeaderAccessor.ORIGINAL_DESTINATION;
+			if (message.getHeaders().containsKey(header)) {
+				stompAccessor = toMutableAccessor(stompAccessor, message);
+				stompAccessor.setDestination((String) message.getHeaders().get(header));
+			}
+		}
+		else if (StompCommand.CONNECTED.equals(command)) {
+			stompAccessor = afterStompSessionConnected(message, stompAccessor, session);
+			if (this.eventPublisher != null && StompCommand.CONNECTED.equals(command)) {
 				publishEvent(new SessionConnectedEvent(this, (Message<byte[]>) message));
 			}
+		}
 
-			byte[] bytes = this.stompEncoder.encode((Message<byte[]>) message);
+		try {
+			byte[] bytes = this.stompEncoder.encode(stompAccessor.getMessageHeaders(), (byte[]) message.getPayload());
 			TextMessage textMessage = new TextMessage(bytes);
 
 			session.sendMessage(textMessage);
@@ -283,7 +300,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			sendErrorMessage(session, ex);
 		}
 		finally {
-			if (StompCommand.ERROR.equals(headers.getCommand())) {
+			if (StompCommand.ERROR.equals(command)) {
 				try {
 					session.close(CloseStatus.PROTOCOL_ERROR);
 				}
@@ -294,12 +311,18 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		}
 	}
 
+	protected StompHeaderAccessor toMutableAccessor(StompHeaderAccessor headerAccessor, Message<?> message) {
+		return (headerAccessor.isMutable() ? headerAccessor : StompHeaderAccessor.wrap(message));
+	}
+
 	private String getVersion(StompHeaderAccessor connectAckHeaders) {
 
 		String name = StompHeaderAccessor.CONNECT_MESSAGE_HEADER;
 		Message<?> connectMessage = (Message<?>) connectAckHeaders.getHeader(name);
-		StompHeaderAccessor connectHeaders = StompHeaderAccessor.wrap(connectMessage);
 		Assert.notNull(connectMessage, "CONNECT_ACK does not contain original CONNECT " + connectAckHeaders);
+
+		StompHeaderAccessor connectHeaders =
+				MessageHeaderAccessor.getAccessor(connectMessage, StompHeaderAccessor.class);
 
 		Set<String> acceptVersions = connectHeaders.getAcceptVersion();
 		if (acceptVersions.contains("1.2")) {
@@ -316,16 +339,19 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		}
 	}
 
-	private void afterStompSessionConnected(StompHeaderAccessor headers, WebSocketSession session) {
+	private StompHeaderAccessor afterStompSessionConnected(
+			Message<?> message, StompHeaderAccessor headerAccessor, WebSocketSession session) {
+
 		Principal principal = session.getPrincipal();
 		if (principal != null) {
-			headers.setNativeHeader(CONNECTED_USER_HEADER, principal.getName());
+			headerAccessor = toMutableAccessor(headerAccessor, message);
+			headerAccessor.setNativeHeader(CONNECTED_USER_HEADER, principal.getName());
 			if (this.userSessionRegistry != null) {
 				String userName = resolveNameForUserSessionRegistry(principal);
 				this.userSessionRegistry.registerSessionId(userName, session.getId());
 			}
 		}
-		long[] heartbeat = headers.getHeartbeat();
+		long[] heartbeat = headerAccessor.getHeartbeat();
 		if (heartbeat[1] > 0) {
 			session = WebSocketSessionDecorator.unwrap(session);
 			if (session instanceof SockJsSession) {
@@ -333,6 +359,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 				((SockJsSession) session).disableHeartbeat();
 			}
 		}
+		return headerAccessor;
 	}
 
 	private String resolveNameForUserSessionRegistry(Principal principal) {
@@ -345,8 +372,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 	@Override
 	public String resolveSessionId(Message<?> message) {
-		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-		return headers.getSessionId();
+		return SimpMessageHeaderAccessor.getSessionId(message.getHeaders());
 	}
 
 	@Override
@@ -374,7 +400,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		headers.setSessionId(session.getId());
-		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		Message<?> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
 
 		if (this.eventPublisher != null) {
 			publishEvent(new SessionDisconnectEvent(this, session.getId(), closeStatus));

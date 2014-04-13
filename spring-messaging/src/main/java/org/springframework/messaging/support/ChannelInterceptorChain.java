@@ -57,7 +57,7 @@ class ChannelInterceptorChain {
 
 
 	public Message<?> preSend(Message<?> message, MessageChannel channel) {
-		UUID originalId = message.getHeaders().getId();
+		Message<?> originalMessage = message;
 		for (ChannelInterceptor interceptor : this.interceptors) {
 			message = interceptor.preSend(message, channel);
 			if (message == null) {
@@ -68,8 +68,8 @@ class ChannelInterceptorChain {
 			}
 		}
 		if (logger.isDebugEnabled()) {
-			if (!message.getHeaders().getId().equals(originalId)) {
-				logger.debug("preSend returned modified message, new message id=" + message.getHeaders().getId());
+			if (message != originalMessage) {
+				logger.debug("preSend returned modified message, new message=" + message);
 			}
 		}
 		return message;
@@ -77,7 +77,7 @@ class ChannelInterceptorChain {
 
 	public void postSend(Message<?> message, MessageChannel channel, boolean sent) {
 		if (logger.isTraceEnabled()) {
-			logger.trace("postSend (sent=" + sent + ") message id " + message.getHeaders().getId());
+			logger.trace("postSend (sent=" + sent + ")");
 		}
 		for (ChannelInterceptor interceptor : this.interceptors) {
 			interceptor.postSend(message, channel, sent);

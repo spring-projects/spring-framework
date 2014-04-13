@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -54,6 +55,25 @@ public class MessageHeadersTests {
 	}
 
 	@Test
+	public void testTimestampProvided() throws Exception {
+		MessageHeaders headers = new MessageHeaders(null, null, 10L);
+		assertEquals(10L, (long) headers.getTimestamp());
+	}
+
+	@Test
+	public void testTimestampProvidedNullValue() throws Exception {
+		Map<String, Object> input = Collections.<String, Object>singletonMap(MessageHeaders.TIMESTAMP, 1L);
+		MessageHeaders headers = new MessageHeaders(input, null, null);
+		assertNotNull(headers.getTimestamp());
+	}
+
+	@Test
+	public void testTimestampNone() throws Exception {
+		MessageHeaders headers = new MessageHeaders(null, null, -1L);
+		assertNull(headers.getTimestamp());
+	}
+
+	@Test
 	public void testIdOverwritten() throws Exception {
 		MessageHeaders headers1 = new MessageHeaders(null);
 		MessageHeaders headers2 = new MessageHeaders(headers1);
@@ -64,6 +84,26 @@ public class MessageHeadersTests {
 	public void testId() {
 		MessageHeaders headers = new MessageHeaders(null);
 		assertNotNull(headers.getId());
+	}
+
+	@Test
+	public void testIdProvided() {
+		UUID id = new UUID(0L, 25L);
+		MessageHeaders headers = new MessageHeaders(null, id, null);
+		assertEquals(id, headers.getId());
+	}
+
+	@Test
+	public void testIdProvidedNullValue() {
+		Map<String, Object> input = Collections.<String, Object>singletonMap(MessageHeaders.ID, new UUID(0L, 25L));
+		MessageHeaders headers = new MessageHeaders(input, null, null);
+		assertNotNull(headers.getId());
+	}
+
+	@Test
+	public void testIdNone() {
+		MessageHeaders headers = new MessageHeaders(null, MessageHeaders.ID_VALUE_NONE, null);
+		assertNull(headers.getId());
 	}
 
 	@Test
@@ -148,7 +188,7 @@ public class MessageHeadersTests {
 		class MyMH extends MessageHeaders {
 
 			public MyMH() {
-				super(null, new UUID(0, id.incrementAndGet()), null);
+				super(null, new UUID(0, id.incrementAndGet()), -1L);
 			}
 
 		}

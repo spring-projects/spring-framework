@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.core;
 
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +28,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.*;
 import org.springframework.messaging.support.GenericMessage;
+import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 import static org.junit.Assert.*;
@@ -120,6 +123,22 @@ public class MessageSendingTemplateTests {
 		assertNotNull(this.template.message);
 		assertEquals("value", this.template.message.getHeaders().get("key"));
 		assertEquals("payload", this.template.message.getPayload());
+	}
+
+	@Test
+	public void convertAndSendPayloadAndMutableHeadersToDestination() {
+		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
+		accessor.setHeader("foo", "bar");
+		accessor.setLeaveMutable(true);
+		MessageHeaders messageHeaders = accessor.getMessageHeaders();
+
+		this.template.setMessageConverter(new StringMessageConverter());
+		this.template.convertAndSend("somewhere", "payload", messageHeaders);
+
+		MessageHeaders actual = this.template.message.getHeaders();
+		assertSame(messageHeaders, actual);
+		assertEquals(new MimeType("text", "plain", Charset.forName("UTF-8")), actual.get(MessageHeaders.CONTENT_TYPE));
+		assertEquals("bar", actual.get("foo"));
 	}
 
 	@Test

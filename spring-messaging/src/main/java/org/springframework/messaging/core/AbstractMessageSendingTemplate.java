@@ -108,8 +108,7 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 
 	@Override
 	public void convertAndSend(D destination, Object payload, Map<String, Object> headers) throws MessagingException {
-		MessagePostProcessor postProcessor = null;
-		this.convertAndSend(destination, payload, headers, postProcessor);
+		this.convertAndSend(destination, payload, headers, null);
 	}
 
 	@Override
@@ -121,38 +120,49 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	public void convertAndSend(D destination, Object payload, MessagePostProcessor postProcessor)
 			throws MessagingException {
 
-		Map<String, Object> headers = null;
-		this.convertAndSend(destination, payload, headers, postProcessor);
+		this.convertAndSend(destination, payload, null, postProcessor);
 	}
 
 	@Override
 	public void convertAndSend(D destination, Object payload, Map<String, Object> headers,
 			MessagePostProcessor postProcessor) throws MessagingException {
 
+		MessageHeaders messageHeaders = null;
+
 		headers = processHeadersToSend(headers);
-		MessageHeaders messageHeaders = (headers != null) ? new MessageHeaders(headers) : null;
+		if (headers != null) {
+			if (headers instanceof MessageHeaders) {
+				messageHeaders = (MessageHeaders) headers;
+			}
+			else {
+				messageHeaders = new MessageHeaders(headers);
+			}
+		}
+
 		Message<?> message = this.converter.toMessage(payload, messageHeaders);
 
 		if (message == null) {
 			String payloadType = (payload != null) ? payload.getClass().getName() : null;
+			Object contentType = (messageHeaders != null) ? messageHeaders.get(MessageHeaders.CONTENT_TYPE) : null;
 			throw new MessageConversionException("Unable to convert payload type '"
-					+ payloadType + "', Content-Type=" + messageHeaders.get(MessageHeaders.CONTENT_TYPE)
-					+ ", converter=" + this.converter, null);
+					+ payloadType + "', Content-Type=" + contentType + ", converter=" + this.converter, null);
 		}
 
 		if (postProcessor != null) {
 			message = postProcessor.postProcessMessage(message);
 		}
+
 		this.send(destination, message);
 	}
 
 	/**
-	 * Provides access to the map of headers before a send operation.
-	 * Implementations can modify the headers by returning a different map.
-	 * This implementation returns the map that was passed in (i.e. without any changes).
+	 * Provides access to the map of input headers before a send operation. Sub-classes
+	 * can modify the headers and then return the same or a different map.
 	 *
-	 * @param headers the headers to send, possibly {@code null}
-	 * @return the actual headers to send
+	 * <p>This default implementation in this class returns the input map.
+	 *
+	 * @param headers the headers to send or {@code null}.
+	 * @return the actual headers to send or {@code null}.
 	 */
 	protected Map<String, Object> processHeadersToSend(Map<String, Object> headers) {
 		return headers;

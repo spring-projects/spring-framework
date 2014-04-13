@@ -38,6 +38,7 @@ import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.StubMessageChannel;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.broker.BrokerAvailabilityEvent;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
@@ -168,7 +169,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 	public void messageDeliverExceptionIfSystemSessionForwardFails() throws Exception {
 		stopActiveMqBrokerAndAwait();
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
-		this.relay.handleMessage(MessageBuilder.withPayload("test".getBytes()).setHeaders(headers).build());
+		this.relay.handleMessage(MessageBuilder.createMessage("test".getBytes(), headers.getMessageHeaders()));
 	}
 
 	@Test
@@ -244,7 +245,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		headers.setSessionId("sess1");
-		this.relay.handleMessage(MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build());
+		this.relay.handleMessage(MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders()));
 
 		Thread.sleep(2000);
 
@@ -394,7 +395,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 			headers.setSessionId(sessionId);
 			headers.setAcceptVersion("1.1,1.2");
 			headers.setHeartbeat(0, 0);
-			Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+			Message<?> message = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
 
 			MessageExchangeBuilder builder = new MessageExchangeBuilder(message);
 			builder.expected.add(new StompConnectedFrameMessageMatcher(sessionId));
@@ -405,7 +406,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 			StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
 			headers.setSessionId(sessionId);
 			headers.setAcceptVersion("1.1,1.2");
-			Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+			Message<?> message = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
 			MessageExchangeBuilder builder = new MessageExchangeBuilder(message);
 			return builder.andExpectError();
 		}
@@ -418,7 +419,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 			headers.setSubscriptionId(subscriptionId);
 			headers.setDestination(destination);
 			headers.setReceipt(receiptId);
-			Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+			Message<?> message = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
 
 			MessageExchangeBuilder builder = new MessageExchangeBuilder(message);
 			builder.expected.add(new StompReceiptFrameMessageMatcher(sessionId, receiptId));
@@ -426,14 +427,14 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		}
 
 		public static MessageExchangeBuilder send(String destination, String payload) {
-			StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
+			SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 			headers.setDestination(destination);
-			Message<?> message = MessageBuilder.withPayload(payload.getBytes(UTF_8)).setHeaders(headers).build();
+			Message<?> message = MessageBuilder.createMessage(payload.getBytes(UTF_8), headers.getMessageHeaders());
 			return new MessageExchangeBuilder(message);
 		}
 
 		public MessageExchangeBuilder andExpectMessage(String sessionId, String subscriptionId) {
-			Assert.isTrue(StompCommand.SEND.equals(headers.getCommand()), "MESSAGE can only be expected after SEND");
+			Assert.isTrue(SimpMessageType.MESSAGE.equals(headers.getMessageType()));
 			String destination = this.headers.getDestination();
 			Object payload = this.message.getPayload();
 			this.expected.add(new StompMessageFrameMessageMatcher(sessionId, subscriptionId, destination, payload));

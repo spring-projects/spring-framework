@@ -19,6 +19,7 @@ package org.springframework.messaging.simp.stomp;
 import org.junit.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MessageConversionException;
+import org.springframework.util.LinkedMultiValueMap;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -173,6 +174,17 @@ public class BufferingStompDecoderTests {
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(10);
 		String payload = "SEND\na:alpha\n\nMessage body";
 		stompDecoder.decode(toByteBuffer(payload));
+	}
+
+	@Test
+	public void incompleteCommand() throws InterruptedException {
+
+		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(128);
+		String chunk = "MESSAG";
+
+		LinkedMultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+		List<Message<byte[]>> messages = stompDecoder.decode(toByteBuffer(chunk), headers);
+		assertEquals(0, messages.size());
 	}
 
 

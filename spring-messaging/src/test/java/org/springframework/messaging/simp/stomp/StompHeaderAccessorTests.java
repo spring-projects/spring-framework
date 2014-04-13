@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,28 @@
 
 package org.springframework.messaging.simp.stomp;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.util.AlternativeJdkIdGenerator;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
- * Test fixture for {@link StompHeaderAccessor}.
+ * Unit tests for {@link StompHeaderAccessor}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -99,17 +105,18 @@ public class StompHeaderAccessorTests {
 		extHeaders.add(StompHeaderAccessor.STOMP_LOGIN_HEADER, "joe");
 		extHeaders.add(StompHeaderAccessor.STOMP_PASSCODE_HEADER, "joe123");
 
-		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT, extHeaders);
+		StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.CONNECT, extHeaders);
 
-		assertEquals(StompCommand.CONNECT, headers.getCommand());
-		assertEquals(SimpMessageType.CONNECT, headers.getMessageType());
-		assertNotNull(headers.getHeader("stompCredentials"));
-		assertEquals("joe", headers.getLogin());
-		assertEquals("PROTECTED", headers.getPasscode());
+		assertEquals(StompCommand.CONNECT, headerAccessor.getCommand());
+		assertEquals(SimpMessageType.CONNECT, headerAccessor.getMessageType());
+		assertNotNull(headerAccessor.getHeader("stompCredentials"));
+		assertEquals("joe", headerAccessor.getLogin());
+		assertEquals("joe123", headerAccessor.getPasscode());
+		assertThat(headerAccessor.toString(), CoreMatchers.containsString("passcode=[PROTECTED]"));
 
-		Map<String, List<String>> output = headers.toStompHeaderMap();
+		Map<String, List<String>> output = headerAccessor.toNativeHeaderMap();
 		assertEquals("joe", output.get(StompHeaderAccessor.STOMP_LOGIN_HEADER).get(0));
-		assertEquals("joe123", output.get(StompHeaderAccessor.STOMP_PASSCODE_HEADER).get(0));
+		assertEquals("PROTECTED", output.get(StompHeaderAccessor.STOMP_PASSCODE_HEADER).get(0));
 	}
 
 	@Test
@@ -145,10 +152,11 @@ public class StompHeaderAccessorTests {
 		headers.setSubscriptionId("s1");
 		headers.setDestination("/d");
 		headers.setContentType(MimeTypeUtils.APPLICATION_JSON);
+		headers.updateStompCommandAsServerMessage();
 
 		Map<String, List<String>> actual = headers.toNativeHeaderMap();
 
-		assertEquals(4, actual.size());
+		assertEquals(actual.toString(), 4, actual.size());
 		assertEquals("s1", actual.get(StompHeaderAccessor.STOMP_SUBSCRIPTION_HEADER).get(0));
 		assertEquals("/d", actual.get(StompHeaderAccessor.STOMP_DESTINATION_HEADER).get(0));
 		assertEquals("application/json", actual.get(StompHeaderAccessor.STOMP_CONTENT_TYPE_HEADER).get(0));
@@ -158,13 +166,28 @@ public class StompHeaderAccessorTests {
 	@Test
 	public void toNativeHeadersContentType() {
 
-		Message<byte[]> message = MessageBuilder.withPayload(new byte[0])
-				.setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_ATOM_XML).build();
+		SimpMessageHeaderAccessor simpHeaderAccessor = SimpMessageHeaderAccessor.create();
+		simpHeaderAccessor.setContentType(MimeTypeUtils.APPLICATION_ATOM_XML);
+		Message<byte[]> message = MessageBuilder.createMessage(new byte[0], simpHeaderAccessor.getMessageHeaders());
 
-		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-		Map<String, List<String>> map = headers.toNativeHeaderMap();
+		StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(message);
+		Map<String, List<String>> map = stompHeaderAccessor.toNativeHeaderMap();
 
 		assertEquals("application/atom+xml", map.get(StompHeaderAccessor.STOMP_CONTENT_TYPE_HEADER).get(0));
+	}
+
+	@Test
+	public void encodeConnectWithLoginAndPasscode() throws UnsupportedEncodingException {
+
+		MultiValueMap<String, String> extHeaders = new LinkedMultiValueMap<>();
+		extHeaders.add(StompHeaderAccessor.STOMP_LOGIN_HEADER, "joe");
+		extHeaders.add(StompHeaderAccessor.STOMP_PASSCODE_HEADER, "joe123");
+
+		StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.CONNECT, extHeaders);
+		Message<byte[]> message = MessageBuilder.createMessage(new byte[0], headerAccessor.getMessageHeaders());
+		byte[] bytes = new StompEncoder().encode(message);
+
+		assertEquals("CONNECT\nlogin:joe\npasscode:joe123\n\n\0", new String(bytes, "UTF-8"));
 	}
 
 	@Test
@@ -187,5 +210,34 @@ public class StompHeaderAccessorTests {
 		assertNotNull("abc123", actual.get("accountId").get(0));
 	}
 
+	@Test
+	public void messageIdAndTimestampDefaultBehavior() {
+		StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.SEND);
+		MessageHeaders headers = headerAccessor.getMessageHeaders();
+
+		assertNull(headers.getId());
+		assertNull(headers.getTimestamp());
+	}
+
+	@Test
+	public void messageIdAndTimestampEnabled() {
+		DefaultStompHeaderAccessorFactory factory = new DefaultStompHeaderAccessorFactory();
+		factory.setIdGenerator(new AlternativeJdkIdGenerator());
+		factory.setEnableTimestamp(true);
+
+		StompHeaderAccessor headerAccessor = factory.create(StompCommand.SEND);
+		MessageHeaders headers = headerAccessor.getMessageHeaders();
+
+		assertNotNull(headers.getId());
+		assertNotNull(headers.getTimestamp());
+	}
+
+	@Test
+	public void getAccessor() {
+		StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.CONNECT);
+		Message<byte[]> message = MessageBuilder.createMessage(new byte[0], headerAccessor.getMessageHeaders());
+
+		assertSame(headerAccessor, MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class));
+	}
 
 }

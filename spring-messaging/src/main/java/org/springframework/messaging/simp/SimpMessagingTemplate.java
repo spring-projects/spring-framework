@@ -16,29 +16,25 @@
 
 package org.springframework.messaging.simp;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.core.AbstractMessageSendingTemplate;
 import org.springframework.messaging.core.MessagePostProcessor;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.Assert;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
- * A specialization of {@link AbstractMessageSendingTemplate} that interprets a
- * String-based destination as the
- * {@link org.springframework.messaging.simp.SimpMessageHeaderAccessor#DESTINATION_HEADER DESTINATION_HEADER}
- * to be added to the headers of sent messages.
- * <p>
- * Also provides methods for sending messages to a user. See
+ * An implementation of {@link org.springframework.messaging.simp.SimpMessageSendingOperations}.
+ *
+ * <p>Also provides methods for sending messages to a user. See
  * {@link org.springframework.messaging.simp.user.UserDestinationResolver UserDestinationResolver}
  * for more on user destinations.
  *
@@ -106,22 +102,66 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	}
 
 
+	/**
+	 * If the headers of the given message already contain a
+	 * {@link org.springframework.messaging.simp.SimpMessageHeaderAccessor#DESTINATION_HEADER
+	 * SimpMessageHeaderAccessor#DESTINATION_HEADER} then the message is sent without
+	 * further changes.
+	 *
+	 * <p>If a destination header is not already present ,the message is sent
+	 * to the configured {@link #setDefaultDestination(Object) defaultDestination}
+	 * or an exception an {@code IllegalStateException} is raised if that isn't
+	 * configured.
+	 *
+	 * @param message the message to send, never {@code null}
+	 */
 	@Override
 	public void send(Message<?> message) {
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		String destination = headers.getDestination();
-		destination = (destination != null) ? destination : getRequiredDefaultDestination();
-		doSend(destination, message);
+		Assert.notNull(message, "'message' is required");
+		String destination = SimpMessageHeaderAccessor.getDestination(message.getHeaders());
+		if (destination != null) {
+			sendInternal(message);
+			return;
+		}
+		doSend(getRequiredDefaultDestination(), message);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void doSend(String destination, Message<?> message) {
+
 		Assert.notNull(destination, "Destination must not be null");
 
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		headers.setDestination(destination);
-		headers.setMessageTypeIfNotSet(SimpMessageType.MESSAGE);
-		message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
+		SimpMessageHeaderAccessor simpAccessor =
+				MessageHeaderAccessor.getAccessor(message, SimpMessageHeaderAccessor.class);
+
+		if (simpAccessor != null) {
+			if (simpAccessor.isMutable()) {
+				simpAccessor.setDestination(destination);
+				simpAccessor.setMessageTypeIfNotSet(SimpMessageType.MESSAGE);
+				simpAccessor.setImmutable();
+				sendInternal(message);
+				return;
+			}
+			else {
+				// Try and keep the original accessor type
+				simpAccessor = (SimpMessageHeaderAccessor) MessageHeaderAccessor.getMutableAccessor(message);
+			}
+		}
+		else {
+			simpAccessor = SimpMessageHeaderAccessor.wrap(message);
+		}
+
+		simpAccessor.setDestination(destination);
+		simpAccessor.setMessageTypeIfNotSet(SimpMessageType.MESSAGE);
+		message = MessageBuilder.createMessage(message.getPayload(), simpAccessor.getMessageHeaders());
+		sendInternal(message);
+	}
+
+	private void sendInternal(Message<?> message) {
+
+		String destination = SimpMessageHeaderAccessor.getDestination(message.getHeaders());
+		Assert.notNull(destination);
 
 		long timeout = this.sendTimeout;
 		boolean sent = (timeout >= 0)
@@ -130,10 +170,9 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 		if (!sent) {
 			throw new MessageDeliveryException(message,
-					"failed to send message to destination '" + destination + "' within timeout: " + timeout);
+					"Failed to send message to destination '" + destination + "' within timeout: " + timeout);
 		}
 	}
-
 
 
 	@Override
@@ -166,34 +205,45 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 	/**
 	 * Creates a new map and puts the given headers under the key
-	 * {@link org.springframework.messaging.support.NativeMessageHeaderAccessor#NATIVE_HEADERS NATIVE_HEADERS}.
-	 * Effectively this treats all given headers as headers to be sent out to the
-	 * external source.
-	 * <p>
-	 * If the given headers already contain the key
-	 * {@link org.springframework.messaging.support.NativeMessageHeaderAccessor#NATIVE_HEADERS NATIVE_HEADERS}
-	 * then the same header map is returned (i.e. without any changes).
+	 * {@link org.springframework.messaging.support.NativeMessageHeaderAccessor#NATIVE_HEADERS NATIVE_HEADERS NATIVE_HEADERS NATIVE_HEADERS}.
+	 * effectively treats the input header map as headers to be sent out to the
+	 * destination.
+	 *
+	 * <p>However if the given headers already contain the key
+	 * {@code NATIVE_HEADERS NATIVE_HEADERS} then the same headers instance is
+	 * returned without changes.
+	 *
+	 * <p>Also if the given headers were prepared and obtained with
+	 * {@link SimpMessageHeaderAccessor#getMessageHeaders()} then the same headers
+	 * instance is also returned without changes.
 	 */
 	@Override
 	protected Map<String, Object> processHeadersToSend(Map<String, Object> headers) {
 
 		if (headers == null) {
-			return null;
+			SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+			headerAccessor.setLeaveMutable(true);
+			return headerAccessor.getMessageHeaders();
 		}
-		else if (headers.containsKey(NativeMessageHeaderAccessor.NATIVE_HEADERS)) {
-			return headers;
-		}
-		else {
-			MultiValueMap<String, String> nativeHeaders = new LinkedMultiValueMap<String, String>(headers.size());
-			for (String key : headers.keySet()) {
-				Object value = headers.get(key);
-				nativeHeaders.set(key, (value != null ? value.toString() : null));
-			}
 
-			headers = new HashMap<String, Object>(1);
-			headers.put(NativeMessageHeaderAccessor.NATIVE_HEADERS, nativeHeaders);
+		if (headers.containsKey(NativeMessageHeaderAccessor.NATIVE_HEADERS)) {
 			return headers;
 		}
+
+		if (headers instanceof MessageHeaders) {
+			SimpMessageHeaderAccessor accessor =
+					MessageHeaderAccessor.getAccessor((MessageHeaders) headers, SimpMessageHeaderAccessor.class);
+			if (accessor != null) {
+				return headers;
+			}
+		}
+
+		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+		for (String key : headers.keySet()) {
+			Object value = headers.get(key);
+			headerAccessor.setNativeHeader(key, (value != null ? value.toString() : null));
+		}
+		return headerAccessor.getMessageHeaders();
 	}
 
 }

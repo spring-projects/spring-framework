@@ -49,18 +49,33 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 	 * @param payload the message payload, never {@code null}
 	 */
 	public GenericMessage(T payload) {
-		this(payload, null);
+		this(payload, new MessageHeaders(null));
 	}
 
 	/**
 	 * Create a new message with the given payload and headers.
+	 * The content of the given header map is copied.
+	 *
+	 * @param payload the message payload, never {@code null}
+	 * @param headers message headers to use for initialization
+	 */
+	public GenericMessage(T payload, Map<String, Object> headers) {
+		this(payload, new MessageHeaders(headers));
+	}
+
+	/**
+	 * A constructor with the {@link MessageHeaders} instance to use.
+	 *
+	 * <p><strong>Note:</strong> the given {@code MessageHeaders} instance is used
+	 * directly in the new message, i.e. it is not copied.
 	 *
 	 * @param payload the message payload, never {@code null}
 	 * @param headers message headers
 	 */
-	public GenericMessage(T payload, Map<String, Object> headers) {
+	public GenericMessage(T payload, MessageHeaders headers) {
+		Assert.notNull(headers, "'headers' must not be null");
 		Assert.notNull(payload, "payload must not be null");
-		this.headers = new MessageHeaders(headers);
+		this.headers = headers;
 		this.payload = payload;
 	}
 
@@ -96,7 +111,7 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 		}
 		if (obj != null && obj instanceof GenericMessage<?>) {
 			GenericMessage<?> other = (GenericMessage<?>) obj;
-			return (this.headers.getId().equals(other.headers.getId()) &&
+			return (ObjectUtils.nullSafeEquals(this.headers.getId(), other.headers.getId()) &&
 					this.headers.equals(other.headers) && this.payload.equals(other.payload));
 		}
 		return false;

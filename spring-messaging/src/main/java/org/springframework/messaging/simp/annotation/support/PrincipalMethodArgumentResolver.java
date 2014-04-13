@@ -37,8 +37,7 @@ public class PrincipalMethodArgumentResolver implements HandlerMethodArgumentRes
 
 	@Override
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		Principal user = headers.getUser();
+		Principal user = SimpMessageHeaderAccessor.getUser(message.getHeaders());
 		if (user == null) {
 			throw new MissingSessionUserException(message);
 		}

@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.Assert;
 
@@ -37,6 +39,10 @@ import org.springframework.util.Assert;
  * @since 4.0
  */
 public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
+
+	private static final SimpMessageHeaderAccessorFactory factory = new DefaultSimpMessageHeaderAccessorFactory();
+
+	// SiMP header names
 
 	public static final String CONNECT_MESSAGE_HEADER = "simpConnectMessage";
 
@@ -83,25 +89,32 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
 
 	/**
-	 * Create {@link SimpMessageHeaderAccessor} for a new {@link Message} with
-	 * {@link SimpMessageType#MESSAGE}.
+	 * Create an instance with
+	 * {@link org.springframework.messaging.simp.SimpMessageType} {@code MESSAGE}.
 	 */
 	public static SimpMessageHeaderAccessor create() {
-		return new SimpMessageHeaderAccessor(SimpMessageType.MESSAGE, null);
+		return factory.create();
 	}
 
 	/**
-	 * Create {@link SimpMessageHeaderAccessor} for a new {@link Message} of a specific type.
+	 * Create an instance with the given
+	 * {@link org.springframework.messaging.simp.SimpMessageType}.
 	 */
 	public static SimpMessageHeaderAccessor create(SimpMessageType messageType) {
-		return new SimpMessageHeaderAccessor(messageType, null);
+		return factory.create(messageType);
 	}
 
 	/**
-	 * Create {@link SimpMessageHeaderAccessor} from the headers of an existing message.
+	 * Create an instance from the payload and headers of the given Message.
 	 */
 	public static SimpMessageHeaderAccessor wrap(Message<?> message) {
-		return new SimpMessageHeaderAccessor(message);
+		return factory.wrap(message);
+	}
+
+
+	@Override
+	protected MessageHeaderAccessor createAccessor(Message<?> message) {
+		return factory.wrap(message);
 	}
 
 	public void setMessageTypeIfNotSet(SimpMessageType messageType) {
@@ -117,6 +130,13 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 		return (SimpMessageType) getHeader(MESSAGE_TYPE_HEADER);
 	}
 
+	/**
+	 * A static alternative for access to the message type.
+	 */
+	public static SimpMessageType getMessageType(Map<String, Object> headers) {
+		return (SimpMessageType) headers.get(MESSAGE_TYPE_HEADER);
+	}
+
 	public void setDestination(String destination) {
 		Assert.notNull(destination, "Destination must not be null");
 		setHeader(DESTINATION_HEADER, destination);
@@ -130,14 +150,32 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	}
 
 	/**
+	 * A static alternative for access to the destination header.
+	 */
+	public static String getDestination(Map<String, Object> headers) {
+		return (String) headers.get(DESTINATION_HEADER);
+	}
+
+	public void setSubscriptionId(String subscriptionId) {
+		setHeader(SUBSCRIPTION_ID_HEADER, subscriptionId);
+	}
+
+	/**
 	 * @return the subscription id (if any) of the message
 	 */
 	public String getSubscriptionId() {
 		return (String) getHeader(SUBSCRIPTION_ID_HEADER);
 	}
 
-	public void setSubscriptionId(String subscriptionId) {
-		setHeader(SUBSCRIPTION_ID_HEADER, subscriptionId);
+	/**
+	 * A static alternative for access to the subscription id header.
+	 */
+	public static String getSubscriptionId(Map<String, Object> headers) {
+		return (String) headers.get(SUBSCRIPTION_ID_HEADER);
+	}
+
+	public void setSessionId(String sessionId) {
+		setHeader(SESSION_ID_HEADER, sessionId);
 	}
 
 	/**
@@ -147,8 +185,18 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 		return (String) getHeader(SESSION_ID_HEADER);
 	}
 
-	public void setSessionId(String sessionId) {
-		setHeader(SESSION_ID_HEADER, sessionId);
+	/**
+	 * A static alternative for access to the session id header.
+	 */
+	public static String getSessionId(Map<String, Object> headers) {
+		return (String) headers.get(SESSION_ID_HEADER);
+	}
+
+	/**
+	 * A static alternative for access to the session attributes header.
+	 */
+	public void setSessionAttributes(Map<String, Object> attributes) {
+		setHeader(SESSION_ATTRIBUTES, attributes);
 	}
 
 	/**
@@ -159,8 +207,16 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 		return (Map<String, Object>) getHeader(SESSION_ATTRIBUTES);
 	}
 
-	public void setSessionAttributes(Map<String, Object> attributes) {
-		setHeader(SESSION_ATTRIBUTES, attributes);
+	/**
+	 * A static alternative for access to the session attributes header.
+	 */
+	@SuppressWarnings("unchecked")
+	public static Map<String, Object> getSessionAttributes(Map<String, Object> headers) {
+		return (Map<String, Object>) headers.get(SESSION_ATTRIBUTES);
+	}
+
+	public void setUser(Principal principal) {
+		setHeader(USER_HEADER, principal);
 	}
 
 	/**
@@ -170,8 +226,11 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 		return (Principal) getHeader(USER_HEADER);
 	}
 
-	public void setUser(Principal principal) {
-		setHeader(USER_HEADER, principal);
+	/**
+	 * A static alternative for access to the user header.
+	 */
+	public static Principal getUser(Map<String, Object> headers) {
+		return (Principal) headers.get(USER_HEADER);
 	}
 
 }

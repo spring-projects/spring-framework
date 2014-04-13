@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.messaging.support;
+
+import org.springframework.messaging.MessageHeaders;
 
 import java.util.Map;
 
@@ -43,11 +45,25 @@ public class ErrorMessage extends GenericMessage<Throwable> {
 
 	/**
 	 * Create a new message with the given payload and headers.
+	 * The content of the given header map is copied.
+	 *
+	 * @param payload the message payload, never {@code null}
+	 * @param headers message headers to use for initialization
+	 */
+	public ErrorMessage(Throwable payload, Map<String, Object> headers) {
+		super(payload, headers);
+	}
+
+	/**
+	 * A constructor with the {@link MessageHeaders} instance to use.
+	 *
+	 * <p><strong>Note:</strong> the given {@code MessageHeaders} instance is used
+	 * directly in the new message, i.e. it is not copied.
 	 *
 	 * @param payload the message payload, never {@code null}
 	 * @param headers message headers
 	 */
-	public ErrorMessage(Throwable payload, Map<String, Object> headers) {
+	public ErrorMessage(Throwable payload, MessageHeaders headers) {
 		super(payload, headers);
 	}
 

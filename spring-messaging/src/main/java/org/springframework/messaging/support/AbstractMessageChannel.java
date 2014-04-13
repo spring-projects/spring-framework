@@ -104,7 +104,7 @@ public abstract class AbstractMessageChannel implements MessageChannel, BeanName
 		Assert.notNull(message, "Message must not be null");
 
 		if (logger.isTraceEnabled()) {
-			logger.trace("[" + this.beanName + "] sending message id=" + message.getHeaders().getId());
+			logger.trace("[" + this.beanName + "] sending message=" + message);
 		}
 
 		message = this.interceptorChain.preSend(message, this);

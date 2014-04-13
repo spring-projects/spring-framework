@@ -123,7 +123,7 @@ public class BufferingStompDecoder extends StompDecoder {
 
 		if (bufferToDecode.hasRemaining()) {
 			this.chunks.add(bufferToDecode);
-			this.expectedContentLength = getContentLength(headers);
+			this.expectedContentLength = StompHeaderAccessor.getContentLength(headers);
 		}
 
 		return messages;

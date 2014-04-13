@@ -16,7 +16,6 @@
 
 package org.springframework.web.socket.messaging;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,7 +40,6 @@ import org.springframework.messaging.simp.stomp.StompEncoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.simp.user.DefaultUserSessionRegistry;
 import org.springframework.messaging.simp.user.DestinationUserNameProvider;
-import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
 import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.socket.CloseStatus;
@@ -60,6 +58,8 @@ import static org.mockito.Mockito.*;
  * @author Rossen Stoyanchev
  */
 public class StompSubProtocolHandlerTests {
+
+	public static final byte[] EMPTY_PAYLOAD = new byte[0];
 
 	private StompSubProtocolHandler protocolHandler;
 
@@ -89,7 +89,7 @@ public class StompSubProtocolHandlerTests {
 		this.protocolHandler.setUserSessionRegistry(registry);
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECTED);
-		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(this.session, message);
 
 		assertEquals(1, this.session.getSentMessages().size());
@@ -108,7 +108,7 @@ public class StompSubProtocolHandlerTests {
 		this.protocolHandler.setUserSessionRegistry(registry);
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECTED);
-		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(this.session, message);
 
 		assertEquals(1, this.session.getSentMessages().size());
@@ -126,7 +126,7 @@ public class StompSubProtocolHandlerTests {
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECTED);
 		headers.setHeartbeat(0,10);
-		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(sockJsSession, message);
 
 		verify(sockJsSession).disableHeartbeat();
@@ -137,12 +137,12 @@ public class StompSubProtocolHandlerTests {
 
 		StompHeaderAccessor connectHeaders = StompHeaderAccessor.create(StompCommand.CONNECT);
 		connectHeaders.setHeartbeat(10000, 10000);
-		connectHeaders.setNativeHeader(StompHeaderAccessor.STOMP_ACCEPT_VERSION_HEADER, "1.0,1.1");
-		Message<?> connectMessage = MessageBuilder.withPayload(new byte[0]).setHeaders(connectHeaders).build();
+		connectHeaders.setAcceptVersion("1.0,1.1");
+		Message<?> connectMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, connectHeaders.getMessageHeaders());
 
 		SimpMessageHeaderAccessor connectAckHeaders = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
 		connectAckHeaders.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, connectMessage);
-		Message<byte[]> connectAckMessage = MessageBuilder.withPayload(new byte[0]).setHeaders(connectAckHeaders).build();
+		Message<byte[]> connectAckMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, connectAckHeaders.getMessageHeaders());
 
 		this.protocolHandler.handleMessageToClient(this.session, connectAckMessage);
 
@@ -174,12 +174,12 @@ public class StompSubProtocolHandlerTests {
 		this.protocolHandler.afterSessionStarted(this.session, this.channel);
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
-		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
 		TextMessage textMessage = new TextMessage(new StompEncoder().encode(message));
 		this.protocolHandler.handleMessageFromClient(this.session, textMessage, this.channel);
 
 		headers = StompHeaderAccessor.create(StompCommand.CONNECTED);
-		message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(this.session, message);
 
 		this.protocolHandler.afterSessionEnded(this.session, CloseStatus.BAD_DATA, this.channel);
@@ -207,7 +207,7 @@ public class StompSubProtocolHandlerTests {
 		this.protocolHandler.afterSessionStarted(this.session, this.channel);
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
-		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
 		TextMessage textMessage = new TextMessage(new StompEncoder().encode(message));
 		this.protocolHandler.handleMessageFromClient(this.session, textMessage, this.channel);
 
@@ -218,7 +218,7 @@ public class StompSubProtocolHandlerTests {
 		reset(this.channel);
 
 		headers = StompHeaderAccessor.create(StompCommand.CONNECTED);
-		message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(this.session, message);
 
 		assertEquals(1, this.session.getSentMessages().size());
@@ -241,7 +241,7 @@ public class StompSubProtocolHandlerTests {
 		headers.setSubscriptionId("sub0");
 		headers.setDestination("/queue/foo-user123");
 		headers.setHeader(StompHeaderAccessor.ORIGINAL_DESTINATION, "/user/queue/foo");
-		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(this.session, message);
 
 		assertEquals(1, this.session.getSentMessages().size());
@@ -268,7 +268,7 @@ public class StompSubProtocolHandlerTests {
 		assertNotNull(headers.getSessionAttributes());
 		assertEquals("joe", headers.getUser().getName());
 		assertEquals("guest", headers.getLogin());
-		assertEquals("PROTECTED", headers.getPasscode());
+		assertEquals("guest", headers.getPasscode());
 		assertArrayEquals(new long[] {10000, 10000}, headers.getHeartbeat());
 		assertEquals(new HashSet<>(Arrays.asList("1.1","1.0")), headers.getAcceptVersion());
 
@@ -278,8 +278,9 @@ public class StompSubProtocolHandlerTests {
 	@Test
 	public void handleMessageFromClientInvalidStompCommand() {
 
-		TextMessage textMessage = new TextMessage("FOO");
+		TextMessage textMessage = new TextMessage("FOO\n\n\0");
 
+		this.protocolHandler.afterSessionStarted(this.session, this.channel);
 		this.protocolHandler.handleMessageFromClient(this.session, textMessage, this.channel);
 
 		verifyZeroInteractions(this.channel);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -34,7 +36,8 @@ import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Test fixture for {@link org.springframework.messaging.converter.AbstractMessageConverter}.
+ * Unit tests for
+ * {@link org.springframework.messaging.converter.AbstractMessageConverter}.
  *
  * @author Rossen Stoyanchev
  */
@@ -109,13 +112,32 @@ public class MessageConverterTests {
 	}
 
 	@Test
-	public void toMessageHeadersCopied() {
+	public void toMessageWithHeaders() {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("foo", "bar");
-		MessageHeaders headers = new MessageHeaders(map );
+		MessageHeaders headers = new MessageHeaders(map);
 		Message<?> message = this.converter.toMessage("ABC", headers);
 
+		assertNotNull(message.getHeaders().getId());
+		assertNotNull(message.getHeaders().getTimestamp());
+		assertEquals(MimeTypeUtils.TEXT_PLAIN, message.getHeaders().get(MessageHeaders.CONTENT_TYPE));
 		assertEquals("bar", message.getHeaders().get("foo"));
+	}
+
+	@Test
+	public void toMessageWithMutableMessageHeaders() {
+		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+		accessor.setHeader("foo", "bar");
+		accessor.setNativeHeader("fooNative", "barNative");
+		accessor.setLeaveMutable(true);
+
+		MessageHeaders headers = accessor.getMessageHeaders();
+		Message<?> message = this.converter.toMessage("ABC", headers);
+
+		assertSame(headers, message.getHeaders());
+		assertNull(message.getHeaders().getId());
+		assertNull(message.getHeaders().getTimestamp());
+		assertEquals(MimeTypeUtils.TEXT_PLAIN, message.getHeaders().get(MessageHeaders.CONTENT_TYPE));
 	}
 
 	@Test
