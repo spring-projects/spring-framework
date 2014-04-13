@@ -50,19 +50,19 @@ public abstract class ScriptUtils {
 	private static final Log logger = LogFactory.getLog(ScriptUtils.class);
 
 	/**
-	 * Default statement separator within SQL scripts.
+	 * Default statement separator within SQL scripts: {@code ";"}.
 	 */
 	public static final String DEFAULT_STATEMENT_SEPARATOR = ";";
 
 	/**
-	 * Fallback statement separator within SQL scripts.
-	 * <p>Used if neither a custom defined separator nor the
+	 * Fallback statement separator within SQL scripts: {@code "\n"}.
+	 * <p>Used if neither a custom separator nor the
 	 * {@link #DEFAULT_STATEMENT_SEPARATOR} is present in a given script.
 	 */
 	public static final String FALLBACK_STATEMENT_SEPARATOR = "\n";
 
 	/**
-	 * End of file (EOF) SQL statement separator.
+	 * End of file (EOF) SQL statement separator: {@code "^^^ END OF SCRIPT ^^^"}.
 	 * <p>This value may be supplied as the {@code separator} to {@link
 	 * #executeSqlScript(Connection, EncodedResource, boolean, boolean, String, String, String, String)}
 	 * to denote that an SQL script contains a single statement (potentially
@@ -73,17 +73,17 @@ public abstract class ScriptUtils {
 	public static final String EOF_STATEMENT_SEPARATOR = "^^^ END OF SCRIPT ^^^";
 
 	/**
-	 * Default prefix for line comments within SQL scripts.
+	 * Default prefix for single-line comments within SQL scripts: {@code "--"}.
 	 */
 	public static final String DEFAULT_COMMENT_PREFIX = "--";
 
 	/**
-	 * Default start delimiter for block comments within SQL scripts.
+	 * Default start delimiter for block comments within SQL scripts: {@code "/*"}.
 	 */
 	public static final String DEFAULT_BLOCK_COMMENT_START_DELIMITER = "/*";
 
 	/**
-	 * Default end delimiter for block comments within SQL scripts.
+	 * Default end delimiter for block comments within SQL scripts: <code>"*&#47;"</code>.
 	 */
 	public static final String DEFAULT_BLOCK_COMMENT_END_DELIMITER = "*/";
 
@@ -351,8 +351,8 @@ public abstract class ScriptUtils {
 	}
 
 	/**
-	 * Execute the given SQL script using default settings for separator separators,
-	 * comment delimiters, and exception handling flags.
+	 * Execute the given SQL script using default settings for statement
+	 * separators, comment delimiters, and exception handling flags.
 	 * <p>Statement separators and comments will be removed before executing
 	 * individual statements within the supplied script.
 	 * <p><b>Do not use this method to execute DDL if you expect rollback.</b>
@@ -362,8 +362,8 @@ public abstract class ScriptUtils {
 	 * current platform's default encoding
 	 * @throws ScriptException if an error occurred while executing the SQL script
 	 * @see #executeSqlScript(Connection, EncodedResource, boolean, boolean, String, String, String, String)
-	 * @see #DEFAULT_COMMENT_PREFIX
 	 * @see #DEFAULT_STATEMENT_SEPARATOR
+	 * @see #DEFAULT_COMMENT_PREFIX
 	 * @see #DEFAULT_BLOCK_COMMENT_START_DELIMITER
 	 * @see #DEFAULT_BLOCK_COMMENT_END_DELIMITER
 	 */
@@ -372,8 +372,8 @@ public abstract class ScriptUtils {
 	}
 
 	/**
-	 * Execute the given SQL script using default settings for separator separators,
-	 * comment delimiters, and exception handling flags.
+	 * Execute the given SQL script using default settings for statement
+	 * separators, comment delimiters, and exception handling flags.
 	 * <p>Statement separators and comments will be removed before executing
 	 * individual statements within the supplied script.
 	 * <p><b>Do not use this method to execute DDL if you expect rollback.</b>
@@ -383,8 +383,8 @@ public abstract class ScriptUtils {
 	 * to load the SQL script from
 	 * @throws ScriptException if an error occurred while executing the SQL script
 	 * @see #executeSqlScript(Connection, EncodedResource, boolean, boolean, String, String, String, String)
-	 * @see #DEFAULT_COMMENT_PREFIX
 	 * @see #DEFAULT_STATEMENT_SEPARATOR
+	 * @see #DEFAULT_COMMENT_PREFIX
 	 * @see #DEFAULT_BLOCK_COMMENT_START_DELIMITER
 	 * @see #DEFAULT_BLOCK_COMMENT_END_DELIMITER
 	 */
@@ -406,8 +406,8 @@ public abstract class ScriptUtils {
 	 * in the event of an error
 	 * @param ignoreFailedDrops whether or not to continue in the event of specifically
 	 * an error on a {@code DROP} statement
-	 * @param commentPrefix the prefix that identifies comments in the SQL script &mdash;
-	 * typically "--"
+	 * @param commentPrefix the prefix that identifies single-line comments in the
+	 * SQL script &mdash; typically "--"
 	 * @param separator the script statement separator; defaults to
 	 * {@value #DEFAULT_STATEMENT_SEPARATOR} if not specified and falls back to
 	 * {@value #FALLBACK_STATEMENT_SEPARATOR} as a last resort; may be set to

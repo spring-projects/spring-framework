@@ -48,6 +48,7 @@ import org.springframework.core.io.support.EncodedResource;
  * @author Chris Baldwin
  * @since 3.0
  * @see DatabasePopulatorUtils
+ * @see ScriptUtils
  */
 public class ResourceDatabasePopulator implements DatabasePopulator {
 
@@ -195,10 +196,10 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	/**
 	 * Flag to indicate that a failed SQL {@code DROP} statement can be ignored.
-	 * <p>This is useful for non-embedded databases whose SQL dialect does not support an
-	 * {@code IF EXISTS} clause in a {@code DROP} statement.
+	 * <p>This is useful for a non-embedded database whose SQL dialect does not
+	 * support an {@code IF EXISTS} clause in a {@code DROP} statement.
 	 * <p>The default is {@code false} so that if the populator runs accidentally, it will
-	 * fail fast if the script starts with a {@code DROP} statement.
+	 * fail fast if a script starts with a {@code DROP} statement.
 	 * @param ignoreFailedDrops {@code true} if failed drop statements should be ignored
 	 */
 	public void setIgnoreFailedDrops(boolean ignoreFailedDrops) {
@@ -219,7 +220,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 	/**
-	 * Execute this {@code DatabasePopulator} against the given {@link DataSource}.
+	 * Execute this {@code ResourceDatabasePopulator} against the given
+	 * {@link DataSource}.
 	 * <p>Delegates to {@link DatabasePopulatorUtils#execute}.
 	 * @param dataSource the {@code DataSource} to execute against
 	 * @throws ScriptException if an error occurs
@@ -231,8 +233,10 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 	/**
-	 * {@link EncodedResource} is not a sub-type of {@link Resource}. Thus we always need
-	 * to wrap each script resource in an encoded resource.
+	 * {@link EncodedResource} is not a sub-type of {@link Resource}. Thus we
+	 * always need to wrap each script resource in an {@code EncodedResource}
+	 * using the configured {@linkplain #setSqlScriptEncoding encoding}.
+	 * @param script the script to wrap
 	 */
 	private EncodedResource encodeScript(Resource script) {
 		return new EncodedResource(script, this.sqlScriptEncoding);
