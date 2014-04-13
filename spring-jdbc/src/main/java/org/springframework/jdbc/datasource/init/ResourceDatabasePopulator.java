@@ -133,7 +133,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 */
 	public void setScripts(Resource... scripts) {
 		assertContentsOfScriptArray(scripts);
-		this.scripts = Arrays.asList(scripts);
+		// Ensure that the list is modifiable
+		this.scripts = new ArrayList<Resource>(Arrays.asList(scripts));
 	}
 
 	/**

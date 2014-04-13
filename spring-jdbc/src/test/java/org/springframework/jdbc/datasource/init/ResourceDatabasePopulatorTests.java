@@ -33,6 +33,7 @@ public class ResourceDatabasePopulatorTests {
 
 	private static final Resource script1 = resource("script1");
 	private static final Resource script2 = resource("script2");
+	private static final Resource script3 = resource("script3");
 
 
 	@Test(expected = IllegalArgumentException.class)
@@ -57,6 +58,15 @@ public class ResourceDatabasePopulatorTests {
 		assertEquals(2, databasePopulator.getScripts().size());
 	}
 
+	@Test
+	public void constructWithMulipleResourcesAndThenAddScript() {
+		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator(script1, script2);
+		assertEquals(2, databasePopulator.getScripts().size());
+
+		databasePopulator.addScript(script3);
+		assertEquals(3, databasePopulator.getScripts().size());
+	}
+
 	@Test(expected = IllegalArgumentException.class)
 	public void addScriptsWithNullResource() {
 		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
@@ -79,6 +89,18 @@ public class ResourceDatabasePopulatorTests {
 	public void setScriptsWithNullResourceArray() {
 		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
 		databasePopulator.setScripts((Resource[]) null);
+	}
+
+	@Test
+	public void setScriptsAndThenAddScript() {
+		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
+		assertEquals(0, databasePopulator.getScripts().size());
+
+		databasePopulator.setScripts(script1, script2);
+		assertEquals(2, databasePopulator.getScripts().size());
+
+		databasePopulator.addScript(script3);
+		assertEquals(3, databasePopulator.getScripts().size());
 	}
 
 	private static Resource resource(String path) {
