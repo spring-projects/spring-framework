@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.util.ObjectUtils;
  * (rather then a dedicated 'closure'-like class for deferred execution).
  *
  * @author Costin Leau
+ * @author Stephane Nicoll
  * @since 3.1
  */
 class LazyParamAwareEvaluationContext extends StandardEvaluationContext {
@@ -45,13 +46,13 @@ class LazyParamAwareEvaluationContext extends StandardEvaluationContext {
 
 	private final Class<?> targetClass;
 
-	private final Map<String, Method> methodCache;
+	private final Map<MethodCacheKey, Method> methodCache;
 
 	private boolean paramLoaded = false;
 
 
 	LazyParamAwareEvaluationContext(Object rootObject, ParameterNameDiscoverer paramDiscoverer, Method method,
-			Object[] args, Class<?> targetClass, Map<String, Method> methodCache) {
+			Object[] args, Class<?> targetClass, Map<MethodCacheKey, Method> methodCache) {
 		super(rootObject);
 
 		this.paramDiscoverer = paramDiscoverer;
@@ -85,7 +86,7 @@ class LazyParamAwareEvaluationContext extends StandardEvaluationContext {
 			return;
 		}
 
-		String methodKey = toString(this.method);
+		MethodCacheKey methodKey = new MethodCacheKey(this.method, this.targetClass);
 		Method targetMethod = this.methodCache.get(methodKey);
 		if (targetMethod == null) {
 			targetMethod = AopUtils.getMostSpecificMethod(this.method, this.targetClass);
@@ -110,11 +111,4 @@ class LazyParamAwareEvaluationContext extends StandardEvaluationContext {
 		}
 	}
 
-	private String toString(Method m) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(m.getDeclaringClass().getName());
-		sb.append("#");
-		sb.append(m.toString());
-		return sb.toString();
-	}
 }

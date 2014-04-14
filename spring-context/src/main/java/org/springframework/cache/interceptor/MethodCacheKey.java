@@ -27,7 +27,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Costin Leau
  * @author Stephane Nicoll
- * @since 4.1
+ * @since 4.0.4
  */
 public final class MethodCacheKey {
 

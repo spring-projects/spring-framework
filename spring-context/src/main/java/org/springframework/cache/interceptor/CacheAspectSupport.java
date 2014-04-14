@@ -483,12 +483,15 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 
 		private final Collection<? extends Cache> caches;
 
+		private final MethodCacheKey methodCacheKey;
+
 		public CacheOperationContext(CacheOperationMetadata metadata,
 									 Object[] args, Object target) {
 			this.metadata = metadata;
 			this.args = extractArgs(metadata.method, args);
 			this.target = target;
 			this.caches = CacheAspectSupport.this.getCaches(this, metadata.cacheResolver);
+			this.methodCacheKey = new MethodCacheKey(metadata.method, metadata.targetClass);
 		}
 
 		@Override
@@ -525,7 +528,7 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 		protected boolean isConditionPassing(Object result) {
 			if (StringUtils.hasText(this.metadata.operation.getCondition())) {
 				EvaluationContext evaluationContext = createEvaluationContext(result);
-				return evaluator.condition(this.metadata.operation.getCondition(), this.metadata.method, evaluationContext);
+				return evaluator.condition(this.metadata.operation.getCondition(), this.methodCacheKey, evaluationContext);
 			}
 			return true;
 		}
@@ -540,7 +543,7 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 			}
 			if (StringUtils.hasText(unless)) {
 				EvaluationContext evaluationContext = createEvaluationContext(value);
-				return !evaluator.unless(unless, this.metadata.method, evaluationContext);
+				return !evaluator.unless(unless, this.methodCacheKey, evaluationContext);
 			}
 			return true;
 		}
@@ -552,7 +555,7 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 		protected Object generateKey(Object result) {
 			if (StringUtils.hasText(this.metadata.operation.getKey())) {
 				EvaluationContext evaluationContext = createEvaluationContext(result);
-				return evaluator.key(this.metadata.operation.getKey(), this.metadata.method, evaluationContext);
+				return evaluator.key(this.metadata.operation.getKey(), this.methodCacheKey, evaluationContext);
 			}
 			return metadata.keyGenerator.generate(this.target, this.metadata.method, this.args);
 		}
