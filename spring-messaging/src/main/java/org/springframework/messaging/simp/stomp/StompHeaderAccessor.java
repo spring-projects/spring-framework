@@ -30,7 +30,6 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
@@ -58,8 +57,6 @@ import org.springframework.util.StringUtils;
  * @since 4.0
  */
 public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
-
-	private static final StompHeaderAccessorFactory factory = new DefaultStompHeaderAccessorFactory();
 
 	private static final AtomicLong messageIdCounter = new AtomicLong();
 
@@ -176,14 +173,14 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	 * Create an instance for the given STOMP command.
 	 */
 	public static StompHeaderAccessor create(StompCommand command) {
-		return factory.create(command);
+		return new StompHeaderAccessor(command, null);
 	}
 
 	/**
 	 * Create an instance for the given STOMP command and headers.
 	 */
 	public static StompHeaderAccessor create(StompCommand command, Map<String, List<String>> headers) {
-		return factory.create(command, headers);
+		return new StompHeaderAccessor(command, headers);
 	}
 
 	/**
@@ -191,20 +188,20 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	 * have headers, a session id is needed for processing purposes at a minimum.
 	 */
 	public static StompHeaderAccessor createForHeartbeat() {
-		return factory.createForHeartbeat();
+		return new StompHeaderAccessor();
 	}
 
 	/**
 	 * Create an instance from the payload and headers of the given Message.
 	 */
 	public static StompHeaderAccessor wrap(Message<?> message) {
-		return factory.wrap(message);
+		return new StompHeaderAccessor(message);
 	}
 
 
 	@Override
 	protected MessageHeaderAccessor createAccessor(Message<?> message) {
-		return factory.wrap(message);
+		return wrap(message);
 	}
 
 	Map<String, List<String>> getNativeHeaders() {

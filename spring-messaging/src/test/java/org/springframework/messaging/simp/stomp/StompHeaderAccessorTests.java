@@ -26,6 +26,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.support.IdTimestampMessageHeaderInitializer;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.AlternativeJdkIdGenerator;
@@ -221,15 +222,15 @@ public class StompHeaderAccessorTests {
 
 	@Test
 	public void messageIdAndTimestampEnabled() {
-		DefaultStompHeaderAccessorFactory factory = new DefaultStompHeaderAccessorFactory();
-		factory.setIdGenerator(new AlternativeJdkIdGenerator());
-		factory.setEnableTimestamp(true);
+		IdTimestampMessageHeaderInitializer headerInitializer = new IdTimestampMessageHeaderInitializer();
+		headerInitializer.setIdGenerator(new AlternativeJdkIdGenerator());
+		headerInitializer.setEnableTimestamp(true);
 
-		StompHeaderAccessor headerAccessor = factory.create(StompCommand.SEND);
-		MessageHeaders headers = headerAccessor.getMessageHeaders();
+		StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.SEND);
+		headerInitializer.initHeaders(headerAccessor);
 
-		assertNotNull(headers.getId());
-		assertNotNull(headers.getTimestamp());
+		assertNotNull(headerAccessor.getMessageHeaders().getId());
+		assertNotNull(headerAccessor.getMessageHeaders().getTimestamp());
 	}
 
 	@Test

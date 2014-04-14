@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.support.IdTimestampMessageHeaderInitializer;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.Assert;
@@ -40,7 +40,13 @@ import org.springframework.util.Assert;
  */
 public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
-	private static final SimpMessageHeaderAccessorFactory factory = new DefaultSimpMessageHeaderAccessorFactory();
+	private static final IdTimestampMessageHeaderInitializer headerInitializer;
+
+	static {
+		headerInitializer = new IdTimestampMessageHeaderInitializer();
+		headerInitializer.setDisableIdGeneration();
+		headerInitializer.setEnableTimestamp(false);
+	}
 
 	// SiMP header names
 
@@ -77,6 +83,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 		super(externalSourceHeaders);
 		Assert.notNull(messageType, "MessageType must not be null");
 		setHeader(MESSAGE_TYPE_HEADER, messageType);
+		headerInitializer.initHeaders(this);
 	}
 
 	/**
@@ -85,6 +92,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	 */
 	protected SimpMessageHeaderAccessor(Message<?> message) {
 		super(message);
+		headerInitializer.initHeaders(this);
 	}
 
 
@@ -93,7 +101,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	 * {@link org.springframework.messaging.simp.SimpMessageType} {@code MESSAGE}.
 	 */
 	public static SimpMessageHeaderAccessor create() {
-		return factory.create();
+		return new SimpMessageHeaderAccessor(SimpMessageType.MESSAGE, null);
 	}
 
 	/**
@@ -101,20 +109,20 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	 * {@link org.springframework.messaging.simp.SimpMessageType}.
 	 */
 	public static SimpMessageHeaderAccessor create(SimpMessageType messageType) {
-		return factory.create(messageType);
+		return new SimpMessageHeaderAccessor(messageType, null);
 	}
 
 	/**
 	 * Create an instance from the payload and headers of the given Message.
 	 */
 	public static SimpMessageHeaderAccessor wrap(Message<?> message) {
-		return factory.wrap(message);
+		return new SimpMessageHeaderAccessor(message);
 	}
 
 
 	@Override
 	protected MessageHeaderAccessor createAccessor(Message<?> message) {
-		return factory.wrap(message);
+		return wrap(message);
 	}
 
 	public void setMessageTypeIfNotSet(SimpMessageType messageType) {

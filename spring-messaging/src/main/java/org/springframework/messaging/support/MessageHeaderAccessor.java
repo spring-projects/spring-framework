@@ -129,11 +129,6 @@ public class MessageHeaderAccessor {
 	public MessageHeaderAccessor(Message<?> message) {
 		if (message != null) {
 			this.headers = new MutableMessageHeaders(message.getHeaders());
-			MessageHeaderAccessor accessor = getAccessor(message, MessageHeaderAccessor.class);
-			if (accessor != null) {
-				this.idGenerator = accessor.idGenerator;
-				this.enableTimestamp = accessor.enableTimestamp;
-			}
 		}
 		else {
 			this.headers = new MutableMessageHeaders();
@@ -276,23 +271,24 @@ public class MessageHeaderAccessor {
 	}
 
 	/**
-	 * A private mechanism for providing an alternate IdGenerator strategy.
+	 * A package private mechanism to configure the IdGenerator strategy to use.
 	 *
 	 * <p>By default this property is not set in which case the default IdGenerator
-	 * of {@link org.springframework.messaging.MessageHeaders} is used.
+	 * in {@link org.springframework.messaging.MessageHeaders} is used.
 	 *
-	 * @see org.springframework.messaging.support.MessageHeaderAccessorFactorySupport
+	 * @see org.springframework.messaging.support.IdTimestampMessageHeaderInitializer
 	 */
 	void setIdGenerator(IdGenerator idGenerator) {
 		this.idGenerator = idGenerator;
 	}
 
 	/**
-	 * A private mechanism to enable having a timestamp added to every message.
+	 * A package private mechanism to enables the automatic addition of the
+	 * {@link org.springframework.messaging.MessageHeaders#TIMESTAMP} header.
 	 *
 	 * <p>By default this property is set to false.
 	 *
-	 * @see org.springframework.messaging.support.MessageHeaderAccessorFactorySupport
+	 * @see org.springframework.messaging.support.IdTimestampMessageHeaderInitializer
 	 */
 	void setEnableTimestamp(boolean enableTimestamp) {
 		this.enableTimestamp = enableTimestamp;
