@@ -17,7 +17,7 @@
 package org.springframework.jdbc.datasource.init;
 
 import org.junit.Test;
-import org.springframework.core.io.ClassPathResource;
+import org.mockito.Mockito;
 import org.springframework.core.io.Resource;
 
 import static org.junit.Assert.*;
@@ -31,9 +31,9 @@ import static org.junit.Assert.*;
  */
 public class ResourceDatabasePopulatorTests {
 
-	private static final Resource script1 = resource("script1");
-	private static final Resource script2 = resource("script2");
-	private static final Resource script3 = resource("script3");
+	private static final Resource script1 = Mockito.mock(Resource.class);
+	private static final Resource script2 = Mockito.mock(Resource.class);
+	private static final Resource script3 = Mockito.mock(Resource.class);
 
 
 	@Test(expected = IllegalArgumentException.class)
@@ -53,13 +53,13 @@ public class ResourceDatabasePopulatorTests {
 	}
 
 	@Test
-	public void constructWithMulipleResources() {
+	public void constructWithMultipleResources() {
 		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator(script1, script2);
 		assertEquals(2, databasePopulator.getScripts().size());
 	}
 
 	@Test
-	public void constructWithMulipleResourcesAndThenAddScript() {
+	public void constructWithMultipleResourcesAndThenAddScript() {
 		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator(script1, script2);
 		assertEquals(2, databasePopulator.getScripts().size());
 
@@ -101,10 +101,6 @@ public class ResourceDatabasePopulatorTests {
 
 		databasePopulator.addScript(script3);
 		assertEquals(3, databasePopulator.getScripts().size());
-	}
-
-	private static Resource resource(String path) {
-		return new ClassPathResource(path);
 	}
 
 }
