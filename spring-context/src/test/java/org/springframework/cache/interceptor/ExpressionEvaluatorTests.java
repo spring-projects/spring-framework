@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import static org.junit.Assert.*;
  * @author Costin Leau
  * @author Phillip Webb
  * @author Sam Brannen
+ * @author Stephane Nicoll
  */
 public class ExpressionEvaluatorTests {
 
@@ -82,8 +83,10 @@ public class ExpressionEvaluatorTests {
 
 		Iterator<CacheOperation> it = ops.iterator();
 
-		Object keyA = eval.key(it.next().getKey(), method, evalCtx);
-		Object keyB = eval.key(it.next().getKey(), method, evalCtx);
+		MethodCacheKey key = new MethodCacheKey(method, AnnotatedClass.class);
+
+		Object keyA = eval.key(it.next().getKey(), key, evalCtx);
+		Object keyB = eval.key(it.next().getKey(), key, evalCtx);
 
 		assertEquals(args[0], keyA);
 		assertEquals(args[1], keyB);

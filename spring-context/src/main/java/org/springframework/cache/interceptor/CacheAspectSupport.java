@@ -372,6 +372,8 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 		private final Collection<? extends Cache> caches;
 
+		private final MethodCacheKey methodCacheKey;
+
 		public CacheOperationContext(CacheOperation operation, Method method,
 				Object[] args, Object target, Class<?> targetClass) {
 			this.operation = operation;
@@ -380,6 +382,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 			this.target = target;
 			this.targetClass = targetClass;
 			this.caches = CacheAspectSupport.this.getCaches(operation);
+			this.methodCacheKey = new MethodCacheKey(method, targetClass);
 		}
 
 		private Object[] extractArgs(Method method, Object[] args) {
@@ -396,7 +399,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		protected boolean isConditionPassing(Object result) {
 			if (StringUtils.hasText(this.operation.getCondition())) {
 				EvaluationContext evaluationContext = createEvaluationContext(result);
-				return evaluator.condition(this.operation.getCondition(), this.method, evaluationContext);
+				return evaluator.condition(this.operation.getCondition(), this.methodCacheKey, evaluationContext);
 			}
 			return true;
 		}
@@ -411,7 +414,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 			}
 			if (StringUtils.hasText(unless)) {
 				EvaluationContext evaluationContext = createEvaluationContext(value);
-				return !evaluator.unless(unless, this.method, evaluationContext);
+				return !evaluator.unless(unless, this.methodCacheKey, evaluationContext);
 			}
 			return true;
 		}
@@ -423,7 +426,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		protected Object generateKey(Object result) {
 			if (StringUtils.hasText(this.operation.getKey())) {
 				EvaluationContext evaluationContext = createEvaluationContext(result);
-				return evaluator.key(this.operation.getKey(), this.method, evaluationContext);
+				return evaluator.key(this.operation.getKey(), this.methodCacheKey, evaluationContext);
 			}
 			return keyGenerator.generate(this.target, this.method, this.args);
 		}
