@@ -46,7 +46,9 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @author Rossen Stoyanchev
  * @since 4.0.3
  */
-public class BufferingStompDecoder extends StompDecoder {
+public class BufferingStompDecoder {
+
+	private final StompDecoder stompDecoder;
 
 	private final int bufferSizeLimit;
 
@@ -55,11 +57,21 @@ public class BufferingStompDecoder extends StompDecoder {
 	private volatile Integer expectedContentLength;
 
 
-	public BufferingStompDecoder(int bufferSizeLimit) {
+	public BufferingStompDecoder(StompDecoder stompDecoder, int bufferSizeLimit) {
+		Assert.notNull(stompDecoder, "'stompDecoder' is required");
 		Assert.isTrue(bufferSizeLimit > 0, "Buffer size must be greater than 0");
+		this.stompDecoder = stompDecoder;
 		this.bufferSizeLimit = bufferSizeLimit;
 	}
 
+
+	/**
+	 * Return the wrapped
+	 * {@link org.springframework.messaging.simp.stomp.StompDecoder}.
+	 */
+	public StompDecoder getStompDecoder() {
+		return this.stompDecoder;
+	}
 
 	/**
 	 * Return the configured buffer size limit.
@@ -105,7 +117,6 @@ public class BufferingStompDecoder extends StompDecoder {
 	 * @return decoded messages or an empty list
 	 * @throws StompConversionException raised in case of decoding issues
 	 */
-	@Override
 	public List<Message<byte[]>> decode(ByteBuffer newBuffer) {
 
 		this.chunks.add(newBuffer);
@@ -119,7 +130,7 @@ public class BufferingStompDecoder extends StompDecoder {
 		ByteBuffer bufferToDecode = assembleChunksAndReset();
 
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		List<Message<byte[]>> messages = decode(bufferToDecode, headers);
+		List<Message<byte[]>> messages = this.stompDecoder.decode(bufferToDecode, headers);
 
 		if (bufferToDecode.hasRemaining()) {
 			this.chunks.add(bufferToDecode);

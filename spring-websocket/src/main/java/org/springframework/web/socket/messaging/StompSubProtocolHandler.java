@@ -38,6 +38,7 @@ import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.stomp.BufferingStompDecoder;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompConversionException;
+import org.springframework.messaging.simp.stomp.StompDecoder;
 import org.springframework.messaging.simp.stomp.StompEncoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.simp.user.DestinationUserNameProvider;
@@ -84,9 +85,11 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 	private int messageSizeLimit = 64 * 1024;
 
-	private final Map<String, BufferingStompDecoder> decoders = new ConcurrentHashMap<String, BufferingStompDecoder>();
-
 	private final StompEncoder stompEncoder = new StompEncoder();
+
+	private final StompDecoder stompDecoder = new StompDecoder();
+
+	private final Map<String, BufferingStompDecoder> decoders = new ConcurrentHashMap<String, BufferingStompDecoder>();
 
 	private UserSessionRegistry userSessionRegistry;
 
@@ -148,7 +151,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	public void handleMessageFromClient(WebSocketSession session,
 			WebSocketMessage<?> webSocketMessage, MessageChannel outputChannel) {
 
-		List<Message<byte[]>> messages = null;
+		List<Message<byte[]>> messages;
 		try {
 			Assert.isInstanceOf(TextMessage.class,  webSocketMessage);
 			TextMessage textMessage = (TextMessage) webSocketMessage;
@@ -380,7 +383,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		if (session.getTextMessageSizeLimit() < MINIMUM_WEBSOCKET_MESSAGE_SIZE) {
 			session.setTextMessageSizeLimit(MINIMUM_WEBSOCKET_MESSAGE_SIZE);
 		}
-		this.decoders.put(session.getId(), new BufferingStompDecoder(getMessageSizeLimit()));
+		this.decoders.put(session.getId(), new BufferingStompDecoder(this.stompDecoder, getMessageSizeLimit()));
 	}
 
 	@Override
