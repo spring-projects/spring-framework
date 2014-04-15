@@ -1867,7 +1867,7 @@ You can also use the constructor parameter name for value disambiguation:
 ----
 	<bean id="exampleBean" class="examples.ExampleBean">
 		<constructor-arg name="years" value="7500000"/>
-		<constructor-arg name="ultimateanswer" value="42"/>
+		<constructor-arg name="ultimateAnswer" value="42"/>
 	</bean>
 ----
 
