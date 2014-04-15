@@ -289,37 +289,40 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	 */
 	private boolean addTriggerToScheduler(Trigger trigger) throws SchedulerException {
 		boolean triggerExists = (getScheduler().getTrigger(trigger.getKey()) != null);
-		if (!triggerExists || this.overwriteExistingJobs) {
-			// Check if the Trigger is aware of an associated JobDetail.
-			JobDetail jobDetail = (JobDetail) trigger.getJobDataMap().remove("jobDetail");
-			if (jobDetail != null) {
-				// Automatically register the JobDetail too.
-				if (!this.jobDetails.contains(jobDetail) && addJobToScheduler(jobDetail)) {
-					this.jobDetails.add(jobDetail);
-				}
-			}
-			if (!triggerExists) {
-				try {
-					getScheduler().scheduleJob(trigger);
-				}
-				catch (ObjectAlreadyExistsException ex) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Unexpectedly found existing trigger, assumably due to cluster race condition: " +
-								ex.getMessage() + " - can safely be ignored");
-					}
-					if (this.overwriteExistingJobs) {
-						getScheduler().rescheduleJob(trigger.getKey(), trigger);
-					}
-				}
-			}
-			else {
-				getScheduler().rescheduleJob(trigger.getKey(), trigger);
-			}
-			return true;
-		}
-		else {
+		if (triggerExists && !this.overwriteExistingJobs) {
 			return false;
 		}
+
+		// Check if the Trigger is aware of an associated JobDetail.
+		JobDetail jobDetail = (JobDetail) trigger.getJobDataMap().remove("jobDetail");
+		if (triggerExists) {
+			if (jobDetail != null && !this.jobDetails.contains(jobDetail) && addJobToScheduler(jobDetail)) {
+				this.jobDetails.add(jobDetail);
+			}
+			getScheduler().rescheduleJob(trigger.getKey(), trigger);
+		}
+		else {
+			try {
+				if (jobDetail != null && !this.jobDetails.contains(jobDetail) &&
+						(this.overwriteExistingJobs || getScheduler().getJobDetail(jobDetail.getKey()) == null)) {
+					getScheduler().scheduleJob(jobDetail, trigger);
+					this.jobDetails.add(jobDetail);
+				}
+				else {
+					getScheduler().scheduleJob(trigger);
+				}
+			}
+			catch (ObjectAlreadyExistsException ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Unexpectedly found existing trigger, assumably due to cluster race condition: " +
+							ex.getMessage() + " - can safely be ignored");
+				}
+				if (this.overwriteExistingJobs) {
+					getScheduler().rescheduleJob(trigger.getKey(), trigger);
+				}
+			}
+		}
+		return true;
 	}
 
 	/**
