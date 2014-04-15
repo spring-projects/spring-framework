@@ -25,6 +25,7 @@ import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
@@ -47,6 +48,8 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	private final SubscribableChannel brokerChannel;
 
 	private SubscriptionRegistry subscriptionRegistry = new DefaultSubscriptionRegistry();
+
+	private MessageHeaderInitializer headerInitializer;
 
 
 	/**
@@ -94,6 +97,23 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		return this.subscriptionRegistry;
 	}
 
+	/**
+	 * Configure a {@link MessageHeaderInitializer} to apply to the headers of all
+	 * messages sent to the client outbound channel.
+	 *
+	 * <p>By default this property is not set.
+	 */
+	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
+		this.headerInitializer = headerInitializer;
+	}
+
+	/**
+	 * @return the configured header initializer.
+	 */
+	public MessageHeaderInitializer getHeaderInitializer() {
+		return this.headerInitializer;
+	}
+
 
 	@Override
 	public void startInternal() {
@@ -138,6 +158,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		}
 		else if (SimpMessageType.CONNECT.equals(messageType)) {
 			SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
+			initHeaders(accessor);
 			accessor.setSessionId(sessionId);
 			accessor.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, message);
 			Message<byte[]> connectAck = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
@@ -150,6 +171,12 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		}
 	}
 
+	private void initHeaders(SimpMessageHeaderAccessor accessor) {
+		if (getHeaderInitializer() != null) {
+			getHeaderInitializer().initHeaders(accessor);
+		}
+	}
+
 	protected void sendMessageToSubscribers(String destination, Message<?> message) {
 		MultiValueMap<String,String> subscriptions = this.subscriptionRegistry.findSubscriptions(message);
 		if ((subscriptions.size() > 0) && logger.isDebugEnabled()) {
@@ -159,6 +186,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		for (String sessionId : subscriptions.keySet()) {
 			for (String subscriptionId : subscriptions.get(sessionId)) {
 				SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+				initHeaders(headerAccessor);
 				headerAccessor.setSessionId(sessionId);
 				headerAccessor.setSubscriptionId(subscriptionId);
 				headerAccessor.copyHeadersIfAbsent(message.getHeaders());

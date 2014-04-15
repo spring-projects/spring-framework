@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.InvalidMimeTypeException;
 import org.springframework.util.MultiValueMap;
@@ -52,6 +53,24 @@ public class StompDecoder {
 
 	private final Log logger = LogFactory.getLog(StompDecoder.class);
 
+	private MessageHeaderInitializer headerInitializer;
+
+
+	/**
+	 * Configure a
+	 * {@link org.springframework.messaging.support.MessageHeaderInitializer MessageHeaderInitializer}
+	 * to apply to the headers of {@link Message}s from decoded STOMP frames.
+	 */
+	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
+		this.headerInitializer = headerInitializer;
+	}
+
+	/**
+	 * @return the configured {@code MessageHeaderInitializer} if any.
+	 */
+	public MessageHeaderInitializer getHeaderInitializer() {
+		return this.headerInitializer;
+	}
 
 	/**
 	 * Decodes one or more STOMP frames from the given {@code ByteBuffer} into a
@@ -123,6 +142,7 @@ public class StompDecoder {
 			if (buffer.remaining() > 0) {
 				StompCommand stompCommand = StompCommand.valueOf(command);
 				headerAccessor = StompHeaderAccessor.create(stompCommand);
+				initHeaders(headerAccessor);
 
 				readHeaders(buffer, headerAccessor);
 				payload = readPayload(buffer, headerAccessor);
@@ -160,12 +180,18 @@ public class StompDecoder {
 				logger.trace("Decoded heartbeat");
 			}
 			StompHeaderAccessor headerAccessor = StompHeaderAccessor.createForHeartbeat();
+			initHeaders(headerAccessor);
 			headerAccessor.setLeaveMutable(true);
 			decodedMessage = MessageBuilder.createMessage(HEARTBEAT_PAYLOAD, headerAccessor.getMessageHeaders());
 		}
 		return decodedMessage;
 	}
 
+	private void initHeaders(StompHeaderAccessor headerAccessor) {
+		if (getHeaderInitializer() != null) {
+			getHeaderInitializer().initHeaders(headerAccessor);
+		}
+	}
 
 	/**
 	 * Skip one ore more EOL characters at the start of the given ByteBuffer.

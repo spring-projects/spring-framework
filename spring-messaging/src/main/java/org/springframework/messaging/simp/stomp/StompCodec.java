@@ -18,12 +18,13 @@ package org.springframework.messaging.simp.stomp;
 
 import org.springframework.messaging.Message;
 
+import org.springframework.util.Assert;
 import reactor.function.Consumer;
 import reactor.function.Function;
 import reactor.io.Buffer;
 import reactor.io.encoding.Codec;
 
-import java.util.List;
+import java.nio.ByteBuffer;
 
 /**
  * A Reactor TCP {@link Codec} for sending and receiving STOMP messages.
@@ -34,35 +35,68 @@ import java.util.List;
  */
 public class StompCodec implements Codec<Buffer, Message<byte[]>, Message<byte[]>> {
 
-	private static final StompDecoder DECODER = new StompDecoder();
+	private final StompDecoder stompDecoder;
 
-	private static final Function<Message<byte[]>, Buffer> ENCODER_FUNCTION = new Function<Message<byte[]>, Buffer>() {
+	private final StompEncoder stompEncoder;
 
-		private final StompEncoder encoder = new StompEncoder();
+	private final Function<Message<byte[]>, Buffer> encodingFunction;
 
-		@Override
-		public Buffer apply(Message<byte[]> message) {
-			return Buffer.wrap(this.encoder.encode(message));
-		}
-	};
+
+	public StompCodec() {
+		this(new StompEncoder(), new StompDecoder());
+	}
+
+	public StompCodec(StompEncoder encoder, StompDecoder decoder) {
+		Assert.notNull(encoder, "'encoder' is required");
+		Assert.notNull(decoder, "'decoder' is required");
+		this.stompEncoder = encoder;
+		this.stompDecoder = decoder;
+		this.encodingFunction = new EncodingFunction(this.stompEncoder);
+	}
 
 	@Override
-	public Function<Buffer, Message<byte[]>> decoder(final Consumer<Message<byte[]>> next) {
-		return new Function<Buffer, Message<byte[]>>() {
-
-			@Override
-			public Message<byte[]> apply(Buffer buffer) {
-				for (Message<byte[]> message : DECODER.decode(buffer.byteBuffer())) {
-					next.accept(message);
-				}
-				return null;
-			}
-		};
+	public Function<Buffer, Message<byte[]>> decoder(final Consumer<Message<byte[]>> messageConsumer) {
+		return new DecodingFunction(this.stompDecoder, messageConsumer);
 	}
 
 	@Override
 	public Function<Message<byte[]>, Buffer> encoder() {
-		return ENCODER_FUNCTION;
+		return this.encodingFunction;
 	}
 
+
+	private static class EncodingFunction implements Function<Message<byte[]>, Buffer> {
+
+		private final StompEncoder encoder;
+
+		private EncodingFunction(StompEncoder encoder) {
+			this.encoder = encoder;
+		}
+
+		@Override
+		public Buffer apply(Message<byte[]> message) {
+			byte[] bytes = this.encoder.encode(message);
+			return new Buffer(ByteBuffer.wrap(bytes));
+		}
+	}
+
+	private static class DecodingFunction implements Function<Buffer, Message<byte[]>> {
+
+		private final StompDecoder decoder;
+
+		private final Consumer<Message<byte[]>> messageConsumer;
+
+		public DecodingFunction(StompDecoder decoder, Consumer<Message<byte[]>> next) {
+			this.decoder = decoder;
+			this.messageConsumer = next;
+		}
+
+		@Override
+		public Message<byte[]> apply(Buffer buffer) {
+			for (Message<byte[]> message : this.decoder.decode(buffer.byteBuffer())) {
+				this.messageConsumer.accept(message);
+			}
+			return null;
+		}
+	}
 }

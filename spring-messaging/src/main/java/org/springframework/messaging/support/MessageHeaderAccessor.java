@@ -38,65 +38,73 @@ import org.springframework.util.StringUtils;
 /**
  * A base for classes providing strongly typed getters and setters as well as
  * behavior around specific categories of headers (e.g. STOMP headers).
- * Supports creating new headers (default constructor), modifying existing headers
- * (when still mutable), or copying and modifying existing headers.
+ * Supports creating new headers, modifying existing headers (when still mutable),
+ * or copying and modifying existing headers.
  *
- * <p>The {@link #getMessageHeaders()} method provides access to the underlying,
- * fully-prepared {@code MessageHeaders} instance that can then be used as-is
- * to create a single message as follows:
+ * <p>The method {@link #getMessageHeaders()} provides access to the underlying,
+ * fully-prepared {@link MessageHeaders} that can then be used as-is (i.e.
+ * without copying) to create a single message as follows:
  *
  * <pre class="code">
- * MessageHeaderAccessor headerAccessor = new MessageHeaderAccessor();
- * headerAccessor.set("foo", "bar");
- * Message message = MessageBuilder.createMessage("payload", headerAccessor.getMessageHeaders());
+ * MessageHeaderAccessor accessor = new MessageHeaderAccessor();
+ * accessor.set("foo", "bar");
+ * Message message = MessageBuilder.createMessage("payload", accessor.getMessageHeaders());
  * </pre>
  *
- * <p>After the above is executed, by default the {@code MessageHeaderAccessor}
- * is immutable. It is also possible to leave it mutable, for example for further
- * initialization of the message in the same thread:
+ * <p>After the above, by default the {@code MessageHeaderAccessor} becomes
+ * immutable. However it is possible to leave it mutable for further initialization
+ * in the same thread, for example:
  *
  * <pre class="code">
- * MessageHeaderAccessor headerAccessor = new MessageHeaderAccessor();
- * headerAccessor.set("foo", "bar");
- * headerAccessor.setLeaveMutable(true);
- * Message message = MessageBuilder.createMessage("payload", headerAccessor.getMessageHeaders());
+ * MessageHeaderAccessor accessor = new MessageHeaderAccessor();
+ * accessor.set("foo", "bar");
+ * accessor.setLeaveMutable(true);
+ * Message message = MessageBuilder.createMessage("payload", accessor.getMessageHeaders());
  *
  * // later on in the same thread...
  *
- * MessageHeaderAccessor headerAccessor = MessageHeaderAccessor.getAccessor(message);
- * headerAccessor.set("bar", "baz");
- * headerAccessor.setImmutable();
+ * MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message);
+ * accessor.set("bar", "baz");
+ * accessor.setImmutable();
  * </pre>
  *
- * <p>To re-obtain the {@code MessageHeaderAccessor} for a {@code MessageHeaders}
- * instance, use the following:
- *
+ * <p>The method {@link #toMap()} returns a copy of the underlying headers. It can
+ * be used to prepare multiple messages from the same {@code MessageHeaderAccessor}
+ * instance:
  * <pre class="code">
- * MessageHeaderAccessor headerAccessor = new MessageHeaderAccessor();
- * headerAccessor.set("foo", "bar");
- * Message message = MessageBuilder.createMessage("payload", headerAccessor.getMessageHeaders());
+ * MessageHeaderAccessor accessor = new MessageHeaderAccessor();
+ * MessageBuilder builder = MessageBuilder.withPayload("payload").setHeaders(accessor);
  *
- * // later on (any thread)...
- * MessageHeaderAccessor headerAccessor = MessageHeaderAccessor.getAccessor(message);
- * headerAccessor.get("foo");
- * </pre>
- *
- * <p>To prepare multiple messages with the same {@code MessageHeaderAccessor}
- * instance, use the code below. However note that this usage style does not allow
- * re-obtaining a header accessor later on:
- * <pre class="code">
- * MessageHeaderAccessor headerAccessor = new MessageHeaderAccessor();
- * MessageBuilder builder = MessageBuilder.withPayload("payload").setHeaders(headerAccessor);
- *
- * headerAccessor.setHeader("foo", "bar1");
+ * accessor.setHeader("foo", "bar1");
  * Message message1 = builder.build();
  *
- * headerAccessor.setHeader("foo", "bar2");
+ * accessor.setHeader("foo", "bar2");
  * Message message2 = builder.build();
  *
- * headerAccessor.setHeader("foo", "bar3");
+ * accessor.setHeader("foo", "bar3");
  * Message  message3 = builder.build();
  * </pre>
+ *
+ * <p>However note that with the above style, the header accessor is shared and
+ * cannot be re-obtained later on. Alternatively it is also possible to create
+ * one {@code MessageHeaderAccessor} per message:
+ *
+ * <pre class="code">
+ * MessageHeaderAccessor accessor1 = new MessageHeaderAccessor();
+ * accessor.set("foo", "bar1");
+ * Message message1 = MessageBuilder.createMessage("payload", accessor1.getMessageHeaders());
+ *
+ * MessageHeaderAccessor accessor2 = new MessageHeaderAccessor();
+ * accessor.set("foo", "bar2");
+ * Message message2 = MessageBuilder.createMessage("payload", accessor2.getMessageHeaders());
+ *
+ * MessageHeaderAccessor accessor3 = new MessageHeaderAccessor();
+ * accessor.set("foo", "bar3");
+ * Message message3 = MessageBuilder.createMessage("payload", accessor3.getMessageHeaders());
+ * </pre>
+ *
+ * <p>Note that the above examples aim to demonstrate the general idea of using
+ * header accessors. The most likely usage however is through sub-classes.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -210,7 +218,6 @@ public class MessageHeaderAccessor {
 	 * use {@link #toMap()}.
 	 */
 	public MessageHeaders getMessageHeaders() {
-		this.headers.setIdAndTimestamp();
 		if (!this.leaveMutable) {
 			setImmutable();
 		}
@@ -259,6 +266,7 @@ public class MessageHeaderAccessor {
 	 * @since 4.1
 	 */
 	public void setImmutable() {
+		this.headers.setIdAndTimestamp();
 		this.headers.setImmutable();
 	}
 
@@ -500,6 +508,9 @@ public class MessageHeaderAccessor {
 		}
 
 		public void setIdAndTimestamp() {
+			if (!isMutable()) {
+				return;
+			}
 			if (getId() == null) {
 				IdGenerator idGenerator = (MessageHeaderAccessor.this.idGenerator != null) ?
 						MessageHeaderAccessor.this.idGenerator :

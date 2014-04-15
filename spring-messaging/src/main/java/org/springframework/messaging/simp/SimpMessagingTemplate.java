@@ -27,6 +27,7 @@ import org.springframework.messaging.core.AbstractMessageSendingTemplate;
 import org.springframework.messaging.core.MessagePostProcessor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -47,6 +48,8 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	private final MessageChannel messageChannel;
 
 	private String userDestinationPrefix = "/user/";
+
+	private MessageHeaderInitializer headerInitializer;
 
 	private volatile long sendTimeout = -1;
 
@@ -76,6 +79,23 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	 */
 	public String getUserDestinationPrefix() {
 		return this.userDestinationPrefix;
+	}
+
+	/**
+	 * Configure a {@link MessageHeaderInitializer} to apply to the headers of all
+	 * messages created through the {@code SimpMessagingTemplate}.
+	 *
+	 * <p>By default this property is not set.
+	 */
+	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
+		this.headerInitializer = headerInitializer;
+	}
+
+	/**
+	 * @return the configured header initializer.
+	 */
+	public MessageHeaderInitializer getHeaderInitializer() {
+		return this.headerInitializer;
 	}
 
 	/**
@@ -146,10 +166,12 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 			else {
 				// Try and keep the original accessor type
 				simpAccessor = (SimpMessageHeaderAccessor) MessageHeaderAccessor.getMutableAccessor(message);
+				initHeaders(simpAccessor);
 			}
 		}
 		else {
 			simpAccessor = SimpMessageHeaderAccessor.wrap(message);
+			initHeaders(simpAccessor);
 		}
 
 		simpAccessor.setDestination(destination);
@@ -174,6 +196,11 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 		}
 	}
 
+	private void initHeaders(SimpMessageHeaderAccessor simpAccessor) {
+		if (getHeaderInitializer() != null) {
+			getHeaderInitializer().initHeaders(simpAccessor);
+		}
+	}
 
 	@Override
 	public void convertAndSendToUser(String user, String destination, Object payload) throws MessagingException {
@@ -222,6 +249,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 		if (headers == null) {
 			SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+			initHeaders(headerAccessor);
 			headerAccessor.setLeaveMutable(true);
 			return headerAccessor.getMessageHeaders();
 		}
@@ -239,6 +267,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 		}
 
 		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+		initHeaders(headerAccessor);
 		for (String key : headers.keySet()) {
 			Object value = headers.get(key);
 			headerAccessor.setNativeHeader(key, (value != null ? value.toString() : null));

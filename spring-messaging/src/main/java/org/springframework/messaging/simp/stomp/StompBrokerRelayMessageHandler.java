@@ -30,6 +30,7 @@ import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.messaging.tcp.FixedIntervalReconnectStrategy;
 import org.springframework.messaging.tcp.TcpConnection;
 import org.springframework.messaging.tcp.TcpConnectionHandler;
@@ -110,6 +111,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	private String virtualHost;
 
 	private TcpOperations<byte[]> tcpClient;
+
+	private MessageHeaderInitializer headerInitializer;
 
 	private final Map<String, StompConnectionHandler> connectionHandlers =
 			new ConcurrentHashMap<String, StompConnectionHandler>();
@@ -323,6 +326,24 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		return this.tcpClient;
 	}
 
+	/**
+	 * Configure a {@link MessageHeaderInitializer} to apply to the headers of all
+	 * messages created through the {@code StompBrokerRelayMessageHandler} that
+	 * are sent to the client outbound message channel.
+	 *
+	 * <p>By default this property is not set.
+	 */
+	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
+		this.headerInitializer = headerInitializer;
+	}
+
+	/**
+	 * @return the configured header initializer.
+	 */
+	public MessageHeaderInitializer getHeaderInitializer() {
+		return this.headerInitializer;
+	}
+
 
 	@Override
 	protected void startInternal() {
@@ -331,7 +352,10 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		this.brokerChannel.subscribe(this);
 
 		if (this.tcpClient == null) {
-			this.tcpClient = new StompTcpClientFactory().create(this.relayHost, this.relayPort);
+			StompDecoder decoder = new StompDecoder();
+			decoder.setHeaderInitializer(getHeaderInitializer());
+			StompCodec codec = new StompCodec(new StompEncoder(), decoder);
+			this.tcpClient = new StompTcpClientFactory().create(this.relayHost, this.relayPort, codec);
 		}
 
 		if (logger.isDebugEnabled()) {
@@ -536,10 +560,13 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 		private void sendStompErrorToClient(String errorText) {
 			if (this.isRemoteClientSession) {
-				StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.ERROR);
-				headers.setSessionId(this.sessionId);
-				headers.setMessage(errorText);
-				Message<?> errorMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
+				StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.ERROR);
+				if (getHeaderInitializer() != null) {
+					getHeaderInitializer().initHeaders(headerAccessor);
+				}
+				headerAccessor.setSessionId(this.sessionId);
+				headerAccessor.setMessage(errorText);
+				Message<?> errorMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, headerAccessor.getMessageHeaders());
 				sendMessageToClient(errorMessage);
 			}
 		}
@@ -811,8 +838,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	private static class StompTcpClientFactory {
 
-		public TcpOperations<byte[]> create(String relayHost, int relayPort) {
-			return new ReactorTcpClient<byte[]>(relayHost, relayPort, new StompCodec());
+		public TcpOperations<byte[]> create(String relayHost, int relayPort, StompCodec codec) {
+			return new ReactorTcpClient<byte[]>(relayHost, relayPort, codec);
 		}
 	}
 

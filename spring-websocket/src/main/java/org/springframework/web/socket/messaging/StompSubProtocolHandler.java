@@ -45,6 +45,7 @@ import org.springframework.messaging.simp.user.DestinationUserNameProvider;
 import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -85,13 +86,15 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 	private int messageSizeLimit = 64 * 1024;
 
+	private UserSessionRegistry userSessionRegistry;
+
 	private final StompEncoder stompEncoder = new StompEncoder();
 
 	private final StompDecoder stompDecoder = new StompDecoder();
 
 	private final Map<String, BufferingStompDecoder> decoders = new ConcurrentHashMap<String, BufferingStompDecoder>();
 
-	private UserSessionRegistry userSessionRegistry;
+	private MessageHeaderInitializer headerInitializer;
 
 	private ApplicationEventPublisher eventPublisher;
 
@@ -132,6 +135,25 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	 */
 	public UserSessionRegistry getUserSessionRegistry() {
 		return this.userSessionRegistry;
+	}
+
+	/**
+	 * Configure a {@link MessageHeaderInitializer} to apply to the headers of all
+	 * messages created from decoded STOMP frames and other messages sent to the
+	 * client inbound channel.
+	 *
+	 * <p>By default this property is not set.
+	 */
+	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
+		this.headerInitializer = headerInitializer;
+		this.stompDecoder.setHeaderInitializer(headerInitializer);
+	}
+
+	/**
+	 * @return the configured header initializer.
+	 */
+	public MessageHeaderInitializer getHeaderInitializer() {
+		return this.headerInitializer;
 	}
 
 	@Override
@@ -401,9 +423,12 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			logger.debug("WebSocket session ended, sending DISCONNECT message to broker");
 		}
 
-		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
-		headers.setSessionId(session.getId());
-		Message<?> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
+		StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.DISCONNECT);
+		if (getHeaderInitializer() != null) {
+			getHeaderInitializer().initHeaders(headerAccessor);
+		}
+		headerAccessor.setSessionId(session.getId());
+		Message<?> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headerAccessor.getMessageHeaders());
 
 		if (this.eventPublisher != null) {
 			publishEvent(new SessionDisconnectEvent(this, session.getId(), closeStatus));

@@ -202,15 +202,6 @@ public class MessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void timestampBehaviorCopyFromExistingMessage() {
-		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
-		accessor.setEnableTimestamp(true);
-		Message<?> message = MessageBuilder.createMessage("payload", accessor.getMessageHeaders());
-		MessageHeaderAccessor secondAccessor = new MessageHeaderAccessor(message);
-		assertNotNull(secondAccessor.getMessageHeaders().getTimestamp());
-	}
-
-	@Test
 	public void idGeneratorCustom() {
 		final UUID id = new UUID(0L, 23L);
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
@@ -229,19 +220,35 @@ public class MessageHeaderAccessorTests {
 		assertNotNull(accessor.getMessageHeaders().getId());
 	}
 
+
 	@Test
-	public void idGeneratorCopyFromExistingMessage() {
-		final UUID id = new UUID(0L, 23L);
+	public void idTimestampWithMutableHeaders() {
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
+		accessor.setIdGenerator(new IdGenerator() {
+			@Override
+			public UUID generateId() {
+				return MessageHeaders.ID_VALUE_NONE;
+			}
+		});
+		accessor.setEnableTimestamp(false);
+		accessor.setLeaveMutable(true);
+		MessageHeaders headers = accessor.getMessageHeaders();
+
+		assertNull(headers.getId());
+		assertNull(headers.getTimestamp());
+
+		final UUID id = new UUID(0L, 23L);
 		accessor.setIdGenerator(new IdGenerator() {
 			@Override
 			public UUID generateId() {
 				return id;
 			}
 		});
-		Message<?> message = MessageBuilder.createMessage("payload", accessor.getMessageHeaders());
-		MessageHeaderAccessor secondAccessor = new MessageHeaderAccessor(message);
-		assertSame(id, secondAccessor.getMessageHeaders().getId());
+		accessor.setEnableTimestamp(true);
+		accessor.setImmutable();
+
+		assertSame(id, accessor.getMessageHeaders().getId());
+		assertNotNull(headers.getTimestamp());
 	}
 
 

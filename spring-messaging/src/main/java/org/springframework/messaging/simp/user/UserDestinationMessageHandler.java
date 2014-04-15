@@ -31,6 +31,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.util.Assert;
 
 /**
@@ -55,6 +56,8 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 	private final MessageSendingOperations<String> brokerMessagingTemplate;
 
 	private final UserDestinationResolver userDestinationResolver;
+
+	private MessageHeaderInitializer headerInitializer;
 
 	private final Object lifecycleMonitor = new Object();
 
@@ -95,6 +98,24 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 	 */
 	public UserDestinationResolver getUserDestinationResolver() {
 		return this.userDestinationResolver;
+	}
+
+	/**
+	 * Configure a {@link MessageHeaderInitializer} to pass on to
+	 * {@link org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler}s
+	 * that send messages from controller return values.
+	 *
+	 * <p>By default this property is not set.
+	 */
+	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
+		this.headerInitializer = headerInitializer;
+	}
+
+	/**
+	 * @return the configured header initializer.
+	 */
+	public MessageHeaderInitializer getHeaderInitializer() {
+		return this.headerInitializer;
 	}
 
 
@@ -154,6 +175,9 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 		}
 		if (SimpMessageType.MESSAGE.equals(SimpMessageHeaderAccessor.getMessageType(message.getHeaders()))) {
 			SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.wrap(message);
+			if (getHeaderInitializer() != null) {
+				getHeaderInitializer().initHeaders(headerAccessor);
+			}
 			headerAccessor.setHeader(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION, result.getSubscribeDestination());
 			message = MessageBuilder.createMessage(message.getPayload(), headerAccessor.getMessageHeaders());
 		}

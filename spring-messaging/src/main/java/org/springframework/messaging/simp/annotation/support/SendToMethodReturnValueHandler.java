@@ -32,6 +32,7 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.simp.user.DestinationUserNameProvider;
+import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -57,6 +58,8 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	private String defaultDestinationPrefix = "/topic";
 
 	private String defaultUserDestinationPrefix = "/queue";
+
+	private MessageHeaderInitializer headerInitializer;
 
 
 	public SendToMethodReturnValueHandler(SimpMessageSendingOperations messagingTemplate, boolean annotationRequired) {
@@ -100,6 +103,23 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	 */
 	public String getDefaultUserDestinationPrefix() {
 		return this.defaultUserDestinationPrefix;
+	}
+
+	/**
+	 * Configure a {@link MessageHeaderInitializer} to apply to the headers of all
+	 * messages sent to the client outbound channel.
+	 *
+	 * <p>By default this property is not set.
+	 */
+	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
+		this.headerInitializer = headerInitializer;
+	}
+
+	/**
+	 * @return the configured header initializer.
+	 */
+	public MessageHeaderInitializer getHeaderInitializer() {
+		return this.headerInitializer;
 	}
 
 
@@ -166,6 +186,9 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 
 	private MessageHeaders createHeaders(String sessionId) {
 		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+		if (getHeaderInitializer() != null) {
+			getHeaderInitializer().initHeaders(headerAccessor);
+		}
 		headerAccessor.setSessionId(sessionId);
 		headerAccessor.setLeaveMutable(true);
 		return headerAccessor.getMessageHeaders();

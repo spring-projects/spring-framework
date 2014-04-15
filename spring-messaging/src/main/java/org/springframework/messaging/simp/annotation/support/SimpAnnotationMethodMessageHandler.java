@@ -59,6 +59,7 @@ import org.springframework.messaging.simp.SimpMessageTypeMessageCondition;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
@@ -94,6 +95,8 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
 	private Validator validator;
+
+	private MessageHeaderInitializer headerInitializer;
 
 	private final Object lifecycleMonitor = new Object();
 
@@ -194,6 +197,24 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		this.validator = validator;
 	}
 
+	/**
+	 * Configure a {@link MessageHeaderInitializer} to pass on to
+	 * {@link org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler}s
+	 * that send messages from controller return values.
+	 *
+	 * <p>By default this property is not set.
+	 */
+	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
+		this.headerInitializer = headerInitializer;
+	}
+
+	/**
+	 * @return the configured header initializer.
+	 */
+	public MessageHeaderInitializer getHeaderInitializer() {
+		return this.headerInitializer;
+	}
+
 
 	@Override
 	public boolean isAutoStartup() {
@@ -265,14 +286,21 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<HandlerMethodReturnValueHandler>();
 
 		// Annotation-based return value types
-		handlers.add(new SendToMethodReturnValueHandler(this.brokerTemplate, true));
-		handlers.add(new SubscriptionMethodReturnValueHandler(this.clientMessagingTemplate));
+		SendToMethodReturnValueHandler sth = new SendToMethodReturnValueHandler(this.brokerTemplate, true);
+		sth.setHeaderInitializer(this.headerInitializer);
+		handlers.add(sth);
+
+		SubscriptionMethodReturnValueHandler sh = new SubscriptionMethodReturnValueHandler(this.clientMessagingTemplate);
+		sh.setHeaderInitializer(this.headerInitializer);
+		handlers.add(sh);
 
 		// custom return value types
 		handlers.addAll(getCustomReturnValueHandlers());
 
 		// catch-all
-		handlers.add(new SendToMethodReturnValueHandler(this.brokerTemplate, false));
+		sth = new SendToMethodReturnValueHandler(this.brokerTemplate, false);
+		sth.setHeaderInitializer(this.headerInitializer);
+		handlers.add(sth);
 
 		return handlers;
 	}

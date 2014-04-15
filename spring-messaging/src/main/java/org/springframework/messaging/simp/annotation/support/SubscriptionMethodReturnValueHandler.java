@@ -26,6 +26,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
+import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.util.Assert;
 
 /**
@@ -46,6 +47,8 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 
 	private final MessageSendingOperations<String> messagingTemplate;
 
+	private MessageHeaderInitializer headerInitializer;
+
 
 	/**
 	 * Class constructor.
@@ -56,6 +59,23 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 	public SubscriptionMethodReturnValueHandler(MessageSendingOperations<String> messagingTemplate) {
 		Assert.notNull(messagingTemplate, "messagingTemplate must not be null");
 		this.messagingTemplate = messagingTemplate;
+	}
+
+	/**
+	 * Configure a {@link MessageHeaderInitializer} to apply to the headers of all
+	 * messages sent to the client outbound channel.
+	 *
+	 * <p>By default this property is not set.
+	 */
+	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
+		this.headerInitializer = headerInitializer;
+	}
+
+	/**
+	 * @return the configured header initializer.
+	 */
+	public MessageHeaderInitializer getHeaderInitializer() {
+		return this.headerInitializer;
 	}
 
 
@@ -87,6 +107,9 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 
 	private MessageHeaders createHeaders(String sessionId, String subscriptionId) {
 		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+		if (getHeaderInitializer() != null) {
+			getHeaderInitializer().initHeaders(headerAccessor);
+		}
 		headerAccessor.setSessionId(sessionId);
 		headerAccessor.setSubscriptionId(subscriptionId);
 		headerAccessor.setLeaveMutable(true);
