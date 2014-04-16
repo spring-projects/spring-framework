@@ -261,7 +261,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 				if (!Object.class.equals(method.getDeclaringClass()) && !Modifier.isStatic(method.getModifiers()) &&
 						Modifier.isFinal(method.getModifiers())) {
 					logger.warn("Unable to proxy method [" + method + "] because it is final: " +
-							"All calls to this method via a proxy will be routed directly to the proxy.");
+							"All calls to this method via a proxy will NOT be routed to the target instance.");
 				}
 			}
 		}
@@ -604,7 +604,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 */
 	private static class DynamicAdvisedInterceptor implements MethodInterceptor, Serializable {
 
-		private AdvisedSupport advised;
+		private final AdvisedSupport advised;
 
 		public DynamicAdvisedInterceptor(AdvisedSupport advised) {
 			this.advised = advised;
@@ -622,8 +622,8 @@ class CglibAopProxy implements AopProxy, Serializable {
 					oldProxy = AopContext.setCurrentProxy(proxy);
 					setProxyContext = true;
 				}
-				// May be null Get as late as possible to minimize the time we
-				// "own" the target, in case it comes from a pool.
+				// May be null. Get as late as possible to minimize the time we
+				// "own" the target, in case it comes from a pool...
 				target = getTarget();
 				if (target != null) {
 					targetClass = target.getClass();
@@ -689,13 +689,13 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 		private final MethodProxy methodProxy;
 
-		private boolean protectedMethod;
+		private final boolean publicMethod;
 
 		public CglibMethodInvocation(Object proxy, Object target, Method method, Object[] arguments,
 				Class<?> targetClass, List<Object> interceptorsAndDynamicMethodMatchers, MethodProxy methodProxy) {
 			super(proxy, target, method, arguments, targetClass, interceptorsAndDynamicMethodMatchers);
 			this.methodProxy = methodProxy;
-			this.protectedMethod = Modifier.isProtected(method.getModifiers());
+			this.publicMethod = Modifier.isPublic(method.getModifiers());
 		}
 
 		/**
@@ -704,11 +704,11 @@ class CglibAopProxy implements AopProxy, Serializable {
 		 */
 		@Override
 		protected Object invokeJoinpoint() throws Throwable {
-			if (this.protectedMethod) {
-				return super.invokeJoinpoint();
+			if (this.publicMethod) {
+				return this.methodProxy.invoke(this.target, this.arguments);
 			}
 			else {
-				return this.methodProxy.invoke(this.target, this.arguments);
+				return super.invokeJoinpoint();
 			}
 		}
 	}
@@ -829,8 +829,8 @@ class CglibAopProxy implements AopProxy, Serializable {
 				// of the target type. If so we know it never needs to have return type
 				// massage and can use a dispatcher.
 				// If the proxy is being exposed, then must use the interceptor the
-				// correct one is already configured. If the target is not static cannot
-				// use a Dispatcher because the target can not then be released.
+				// correct one is already configured. If the target is not static, then
+				// cannot use a dispatcher because the target cannot be released.
 				if (exposeProxy || !isStatic) {
 					return INVOKE_TARGET;
 				}
