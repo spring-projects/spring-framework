@@ -110,9 +110,11 @@ public abstract class MethodVisitor {
      *            allowed (see {@link Opcodes}).
      */
     public void visitParameter(String name, int access) {
+		/* SPRING PATCH: REMOVED FOR COMPATIBILITY WITH CGLIB 3.1
         if (api < Opcodes.ASM5) {
             throw new RuntimeException();
         }
+        */
         if (mv != null) {
             mv.visitParameter(name, access);
         }
@@ -179,9 +181,11 @@ public abstract class MethodVisitor {
      */
     public AnnotationVisitor visitTypeAnnotation(int typeRef,
             TypePath typePath, String desc, boolean visible) {
+		/* SPRING PATCH: REMOVED FOR COMPATIBILITY WITH CGLIB 3.1
         if (api < Opcodes.ASM5) {
             throw new RuntimeException();
         }
+        */
         if (mv != null) {
             return mv.visitTypeAnnotation(typeRef, typePath, desc, visible);
         }
@@ -693,9 +697,11 @@ public abstract class MethodVisitor {
      */
     public AnnotationVisitor visitInsnAnnotation(int typeRef,
             TypePath typePath, String desc, boolean visible) {
+		/* SPRING PATCH: REMOVED FOR COMPATIBILITY WITH CGLIB 3.1
         if (api < Opcodes.ASM5) {
             throw new RuntimeException();
         }
+        */
         if (mv != null) {
             return mv.visitInsnAnnotation(typeRef, typePath, desc, visible);
         }
@@ -753,9 +759,11 @@ public abstract class MethodVisitor {
      */
     public AnnotationVisitor visitTryCatchAnnotation(int typeRef,
             TypePath typePath, String desc, boolean visible) {
+		/* SPRING PATCH: REMOVED FOR COMPATIBILITY WITH CGLIB 3.1
         if (api < Opcodes.ASM5) {
             throw new RuntimeException();
         }
+        */
         if (mv != null) {
             return mv.visitTryCatchAnnotation(typeRef, typePath, desc, visible);
         }
@@ -824,9 +832,11 @@ public abstract class MethodVisitor {
     public AnnotationVisitor visitLocalVariableAnnotation(int typeRef,
             TypePath typePath, Label[] start, Label[] end, int[] index,
             String desc, boolean visible) {
+		/* SPRING PATCH: REMOVED FOR COMPATIBILITY WITH CGLIB 3.1
         if (api < Opcodes.ASM5) {
             throw new RuntimeException();
         }
+        */
         if (mv != null) {
             return mv.visitLocalVariableAnnotation(typeRef, typePath, start,
                     end, index, desc, visible);

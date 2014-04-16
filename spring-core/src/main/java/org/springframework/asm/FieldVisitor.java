@@ -116,9 +116,11 @@ public abstract class FieldVisitor {
      */
     public AnnotationVisitor visitTypeAnnotation(int typeRef,
             TypePath typePath, String desc, boolean visible) {
+		/* SPRING PATCH: REMOVED FOR COMPATIBILITY WITH CGLIB 3.1
         if (api < Opcodes.ASM5) {
             throw new RuntimeException();
         }
+        */
         if (fv != null) {
             return fv.visitTypeAnnotation(typeRef, typePath, desc, visible);
         }
