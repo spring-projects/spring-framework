@@ -50,6 +50,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamDriver;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.StreamException;
+import com.thoughtworks.xstream.io.naming.NameCoder;
 import com.thoughtworks.xstream.io.xml.CompactWriter;
 import com.thoughtworks.xstream.io.xml.DomReader;
 import com.thoughtworks.xstream.io.xml.DomWriter;
@@ -159,6 +160,8 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	private boolean autodetectAnnotations;
 
 	private String encoding = DEFAULT_ENCODING;
+
+	private NameCoder nameCoder = new XmlFriendlyNameCoder();
 
 	private Class<?>[] supportedClasses;
 
@@ -354,6 +357,15 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	@Override
 	protected String getDefaultEncoding() {
 		return this.encoding;
+	}
+
+	/**
+	 * Set a custom XStream {@link NameCoder} to use.
+	 * The default is an {@link XmlFriendlyNameCoder}.
+	 * @since 4.0.4
+	 */
+	public void setNameCoder(NameCoder nameCoder) {
+		this.nameCoder = nameCoder;
 	}
 
 	/**
@@ -622,10 +634,10 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	protected void marshalDomNode(Object graph, Node node) throws XmlMappingException {
 		HierarchicalStreamWriter streamWriter;
 		if (node instanceof Document) {
-			streamWriter = new DomWriter((Document) node);
+			streamWriter = new DomWriter((Document) node, this.nameCoder);
 		}
 		else if (node instanceof Element) {
-			streamWriter = new DomWriter((Element) node, node.getOwnerDocument(), new XmlFriendlyNameCoder());
+			streamWriter = new DomWriter((Element) node, node.getOwnerDocument(), this.nameCoder);
 		}
 		else {
 			throw new IllegalArgumentException("DOMResult contains neither Document nor Element");
@@ -646,7 +658,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	@Override
 	protected void marshalXmlStreamWriter(Object graph, XMLStreamWriter streamWriter) throws XmlMappingException {
 		try {
-			doMarshal(graph, new StaxWriter(new QNameMap(), streamWriter), null);
+			doMarshal(graph, new StaxWriter(new QNameMap(), streamWriter, this.nameCoder), null);
 		}
 		catch (XMLStreamException ex) {
 			throw convertXStreamException(ex, true);
@@ -657,7 +669,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	protected void marshalSaxHandlers(Object graph, ContentHandler contentHandler, LexicalHandler lexicalHandler)
 			throws XmlMappingException {
 
-		SaxWriter saxWriter = new SaxWriter();
+		SaxWriter saxWriter = new SaxWriter(this.nameCoder);
 		saxWriter.setContentHandler(contentHandler);
 		doMarshal(graph, saxWriter, null);
 	}
@@ -729,10 +741,10 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	protected Object unmarshalDomNode(Node node) throws XmlMappingException {
 		HierarchicalStreamReader streamReader;
 		if (node instanceof Document) {
-			streamReader = new DomReader((Document) node);
+			streamReader = new DomReader((Document) node, this.nameCoder);
 		}
 		else if (node instanceof Element) {
-			streamReader = new DomReader((Element) node);
+			streamReader = new DomReader((Element) node, this.nameCoder);
 		}
 		else {
 			throw new IllegalArgumentException("DOMSource contains neither Document nor Element");
@@ -753,7 +765,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	@Override
 	protected Object unmarshalXmlStreamReader(XMLStreamReader streamReader) throws XmlMappingException {
-        return doUnmarshal(new StaxReader(new QNameMap(), streamReader), null);
+        return doUnmarshal(new StaxReader(new QNameMap(), streamReader, this.nameCoder), null);
 	}
 
 	@Override
