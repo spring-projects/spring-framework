@@ -57,8 +57,9 @@ configure(allprojects) { project ->
 	}
 
 	compileTestJava {
-		sourceCompatibility=1.7
-		targetCompatibility=1.7
+		sourceCompatibility=1.8
+		targetCompatibility=1.8
+		options.compilerArgs += "-parameters"
 	}
 
 	sourceSets.test.resources.srcDirs = ["src/test/resources", "src/test/java"]
@@ -76,7 +77,7 @@ configure(allprojects) { project ->
 
 	repositories {
 		maven { url "http://repo.spring.io/libs-release" }
-		maven { url "http://repo.spring.io/milestone" }  // for AspectJ 1.8.0.RC2
+		maven { url "http://repo.spring.io/milestone" }  // for AspectJ 1.8.0.RC3
 		maven { url "http://repo.spring.io/snapshot" }  // temporarily until Reactor 1.1.0.M4
 	}
 
@@ -263,12 +264,6 @@ project("spring-core") {
 		from(zipTree(objenesisRepackJar.archivePath)) {
 			include "org/springframework/objenesis/**"
 		}
-	}
-
-	compileTestJava {
-		sourceCompatibility=1.8
-		targetCompatibility=1.8
-		compileTestJava.options.compilerArgs += "-parameters"
 	}
 }
 
@@ -864,6 +859,7 @@ project("spring-test") {
 
 	task testNG(type: Test) {
 		useTestNG()
+		scanForTestClasses = false
 		include(["**/testng/**/*Tests.class", "**/testng/**/*Test.class"])
 		// Show STD_OUT & STD_ERR of the test JVM(s) on the console:
 		// testLogging.showStandardStreams = true
@@ -890,8 +886,8 @@ project("spring-aspects") {
 
 	dependencies {
 		aspects(project(":spring-orm"))
-		ajc("org.aspectj:aspectjtools:1.8.0.RC2") // needed for ajc on JDK 8 only
-		rt("org.aspectj:aspectjrt:1.8.0.RC2") // needed for ajc on JDK 8 only
+		ajc("org.aspectj:aspectjtools:1.8.0.RC3") // needed for ajc on JDK 8 only
+		rt("org.aspectj:aspectjrt:1.8.0.RC3") // needed for ajc on JDK 8 only
 		compile("org.aspectj:aspectjweaver:${aspectjVersion}") // exposing regular AspectJ version to users
 		provided("org.eclipse.persistence:javax.persistence:2.0.0")
 		optional(project(":spring-aop")) // for @Async support
