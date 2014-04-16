@@ -36701,9 +36701,9 @@ how to configure and use it.
 
 <<websocket-stomp-overview>> introduces the STOMP messaging protocol.
 <<websocket-stomp-enable>> demonstrates how to configure STOMP support in Spring.
-<<websocket-stomp-handle>> explains how to use it including writing annotated message
-handling methods, sending messages, choosing message broker options, as
-well as working with the special "user" destinations. Finally
+<<websocket-stomp-handle-annotations>> and the following sections explain how to
+write annotated message handling methods, send messages, choose message broker
+options, as well as work with the special "user" destinations. Finally,
 <<websocket-stomp-testing>> lists three approaches to testing STOMP/WebSocket
 applications.
 
