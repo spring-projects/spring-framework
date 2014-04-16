@@ -102,6 +102,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 	@Test
 	public void testProtectedMethodInvocation() {
 		ProtectedMethodTestBean bean = new ProtectedMethodTestBean();
+		bean.value = "foo";
 		mockTargetSource.setTarget(bean);
 
 		AdvisedSupport as = new AdvisedSupport(new Class<?>[]{});
@@ -109,8 +110,47 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		as.addAdvice(new NopInterceptor());
 		AopProxy aop = new CglibAopProxy(as);
 
-		Object proxy = aop.getProxy();
+		ProtectedMethodTestBean proxy = (ProtectedMethodTestBean) aop.getProxy();
 		assertTrue(AopUtils.isCglibProxy(proxy));
+		assertEquals(proxy.getClass().getClassLoader(), bean.getClass().getClassLoader());
+		assertEquals("foo", proxy.getString());
+	}
+
+	@Test
+	public void testPackageMethodInvocation() {
+		PackageMethodTestBean bean = new PackageMethodTestBean();
+		bean.value = "foo";
+		mockTargetSource.setTarget(bean);
+
+		AdvisedSupport as = new AdvisedSupport(new Class<?>[]{});
+		as.setTargetSource(mockTargetSource);
+		as.addAdvice(new NopInterceptor());
+		AopProxy aop = new CglibAopProxy(as);
+
+		PackageMethodTestBean proxy = (PackageMethodTestBean) aop.getProxy();
+		assertTrue(AopUtils.isCglibProxy(proxy));
+		assertEquals(proxy.getClass().getClassLoader(), bean.getClass().getClassLoader());
+		assertEquals("foo", proxy.getString());
+	}
+
+	@Test
+	public void testPackageMethodInvocationWithDifferentClassLoader() {
+		ClassLoader child = new ClassLoader(getClass().getClassLoader()) {
+		};
+
+		PackageMethodTestBean bean = new PackageMethodTestBean();
+		bean.value = "foo";
+		mockTargetSource.setTarget(bean);
+
+		AdvisedSupport as = new AdvisedSupport(new Class<?>[]{});
+		as.setTargetSource(mockTargetSource);
+		as.addAdvice(new NopInterceptor());
+		AopProxy aop = new CglibAopProxy(as);
+
+		PackageMethodTestBean proxy = (PackageMethodTestBean) aop.getProxy(child);
+		assertTrue(AopUtils.isCglibProxy(proxy));
+		assertNotEquals(proxy.getClass().getClassLoader(), bean.getClass().getClassLoader());
+		assertNull(proxy.getString());  // we're stuck in the proxy instance
 	}
 
 	@Test
@@ -410,9 +450,40 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 	}
 
 
-	public static class HasFinalMethod {
+	public static class NoArgCtorTestBean {
 
-		public final void foo() {
+		private boolean called = false;
+
+		public NoArgCtorTestBean(String x, int y) {
+			called = true;
+		}
+
+		public boolean wasCalled() {
+			return called;
+		}
+
+		public void reset() {
+			called = false;
+		}
+	}
+
+
+	public static class ProtectedMethodTestBean {
+
+		public String value;
+
+		protected String getString() {
+			return this.value;
+		}
+	}
+
+
+	public static class PackageMethodTestBean {
+
+		public String value;
+
+		String getString() {
+			return this.value;
 		}
 	}
 }
@@ -432,32 +503,6 @@ class CglibTestBean {
 
 	public String getName() {
 		return this.name;
-	}
-}
-
-
-class NoArgCtorTestBean {
-
-	private boolean called = false;
-
-	public NoArgCtorTestBean(String x, int y) {
-		called = true;
-	}
-
-	public boolean wasCalled() {
-		return called;
-	}
-
-	public void reset() {
-		called = false;
-	}
-}
-
-
-class ProtectedMethodTestBean {
-
-	protected String getString() {
-		return "foo";
 	}
 }
 
