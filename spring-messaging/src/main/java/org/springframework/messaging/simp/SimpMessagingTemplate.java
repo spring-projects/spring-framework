@@ -65,6 +65,13 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 
 	/**
+	 * Return the configured message channel.
+	 */
+	public MessageChannel getMessageChannel() {
+		return this.messageChannel;
+	}
+
+	/**
 	 * Configure the prefix to use for destinations targeting a specific user.
 	 * <p>The default value is "/user/".
 	 * @see org.springframework.messaging.simp.user.UserDestinationMessageHandler
@@ -75,7 +82,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	}
 
 	/**
-	 * @return the userDestinationPrefix
+	 * Return the configured user destination prefix.
 	 */
 	public String getUserDestinationPrefix() {
 		return this.userDestinationPrefix;
@@ -98,22 +105,14 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	}
 
 	/**
-	 * Return the configured message channel.
-	 */
-	public MessageChannel getMessageChannel() {
-		return this.messageChannel;
-	}
-
-	/**
-	 * Specify the timeout value to use for send operations.
-	 * @param sendTimeout the send timeout in milliseconds
+	 * Specify the timeout value to use for send operations (in milliseconds).
 	 */
 	public void setSendTimeout(long sendTimeout) {
 		this.sendTimeout = sendTimeout;
 	}
 
 	/**
-	 * Return the configured send timeout.
+	 * Return the configured send timeout (in milliseconds).
 	 */
 	public long getSendTimeout() {
 		return this.sendTimeout;
@@ -194,6 +193,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 		}
 	}
 
+
 	@Override
 	public void convertAndSendToUser(String user, String destination, Object payload) throws MessagingException {
 		convertAndSendToUser(user, destination, payload, (MessagePostProcessor) null);
@@ -222,6 +222,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 		super.convertAndSend(this.userDestinationPrefix + user + destination, payload, headers, postProcessor);
 	}
 
+
 	/**
 	 * Creates a new map and puts the given headers under the key
 	 * {@link org.springframework.messaging.support.NativeMessageHeaderAccessor#NATIVE_HEADERS NATIVE_HEADERS NATIVE_HEADERS NATIVE_HEADERS}.
@@ -236,18 +237,15 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	 */
 	@Override
 	protected Map<String, Object> processHeadersToSend(Map<String, Object> headers) {
-
 		if (headers == null) {
 			SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 			initHeaders(headerAccessor);
 			headerAccessor.setLeaveMutable(true);
 			return headerAccessor.getMessageHeaders();
 		}
-
 		if (headers.containsKey(NativeMessageHeaderAccessor.NATIVE_HEADERS)) {
 			return headers;
 		}
-
 		if (headers instanceof MessageHeaders) {
 			SimpMessageHeaderAccessor accessor =
 					MessageHeaderAccessor.getAccessor((MessageHeaders) headers, SimpMessageHeaderAccessor.class);
