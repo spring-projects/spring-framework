@@ -23,7 +23,7 @@ import org.springframework.web.socket.CloseStatus;
  * for, e.g. timeout, buffer size, etc.
  *
  * @author Rossen Stoyanchev
- * @since 3.0.4
+ * @since 4.0.3
  */
 @SuppressWarnings("serial")
 public class SessionLimitExceededException extends RuntimeException {
