@@ -66,6 +66,13 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 
 	/**
+	 * Return the configured message channel.
+	 */
+	public MessageChannel getMessageChannel() {
+		return this.messageChannel;
+	}
+
+	/**
 	 * Configure the prefix to use for destinations targeting a specific user.
 	 * <p>The default value is "/user/".
 	 * @see org.springframework.messaging.simp.user.UserDestinationMessageHandler
@@ -76,30 +83,21 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	}
 
 	/**
-	 * @return the userDestinationPrefix
+	 * Return the configured user destination prefix.
 	 */
 	public String getUserDestinationPrefix() {
 		return this.userDestinationPrefix;
 	}
 
 	/**
-	 * @return the messageChannel
-	 */
-	public MessageChannel getMessageChannel() {
-		return this.messageChannel;
-	}
-
-	/**
-	 * Specify the timeout value to use for send operations.
-	 *
-	 * @param sendTimeout the send timeout in milliseconds
+	 * Specify the timeout value to use for send operations (in milliseconds).
 	 */
 	public void setSendTimeout(long sendTimeout) {
 		this.sendTimeout = sendTimeout;
 	}
 
 	/**
-	 * @return the sendTimeout
+	 * Return the configured send timeout (in milliseconds).
 	 */
 	public long getSendTimeout() {
 		return this.sendTimeout;
@@ -124,13 +122,11 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 		message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
 
 		long timeout = this.sendTimeout;
-		boolean sent = (timeout >= 0)
-				? this.messageChannel.send(message, timeout)
-				: this.messageChannel.send(message);
+		boolean sent = (timeout >= 0 ? this.messageChannel.send(message, timeout) : this.messageChannel.send(message));
 
 		if (!sent) {
 			throw new MessageDeliveryException(message,
-					"failed to send message to destination '" + destination + "' within timeout: " + timeout);
+					"Failed to send message to destination '" + destination + "' within timeout: " + timeout);
 		}
 	}
 
@@ -138,21 +134,21 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 	@Override
 	public void convertAndSendToUser(String user, String destination, Object payload) throws MessagingException {
-		this.convertAndSendToUser(user, destination, payload, (MessagePostProcessor) null);
+		convertAndSendToUser(user, destination, payload, (MessagePostProcessor) null);
 	}
 
 	@Override
 	public void convertAndSendToUser(String user, String destination, Object payload,
 			Map<String, Object> headers) throws MessagingException {
 
-		this.convertAndSendToUser(user, destination, payload, headers, null);
+		convertAndSendToUser(user, destination, payload, headers, null);
 	}
 
 	@Override
 	public void convertAndSendToUser(String user, String destination, Object payload,
 			MessagePostProcessor postProcessor) throws MessagingException {
 
-		this.convertAndSendToUser(user, destination, payload, null, postProcessor);
+		convertAndSendToUser(user, destination, payload, null, postProcessor);
 	}
 
 	@Override
@@ -169,31 +165,28 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	 * {@link org.springframework.messaging.support.NativeMessageHeaderAccessor#NATIVE_HEADERS NATIVE_HEADERS}.
 	 * Effectively this treats all given headers as headers to be sent out to the
 	 * external source.
-	 * <p>
-	 * If the given headers already contain the key
+	 * <p>If the given headers already contain the key
 	 * {@link org.springframework.messaging.support.NativeMessageHeaderAccessor#NATIVE_HEADERS NATIVE_HEADERS}
 	 * then the same header map is returned (i.e. without any changes).
 	 */
 	@Override
 	protected Map<String, Object> processHeadersToSend(Map<String, Object> headers) {
-
 		if (headers == null) {
 			return null;
 		}
-		else if (headers.containsKey(NativeMessageHeaderAccessor.NATIVE_HEADERS)) {
+		if (headers.containsKey(NativeMessageHeaderAccessor.NATIVE_HEADERS)) {
 			return headers;
 		}
-		else {
-			MultiValueMap<String, String> nativeHeaders = new LinkedMultiValueMap<String, String>(headers.size());
-			for (String key : headers.keySet()) {
-				Object value = headers.get(key);
-				nativeHeaders.set(key, (value != null ? value.toString() : null));
-			}
 
-			headers = new HashMap<String, Object>(1);
-			headers.put(NativeMessageHeaderAccessor.NATIVE_HEADERS, nativeHeaders);
-			return headers;
+		MultiValueMap<String, String> nativeHeaders = new LinkedMultiValueMap<String, String>(headers.size());
+		for (String key : headers.keySet()) {
+			Object value = headers.get(key);
+			nativeHeaders.set(key, (value != null ? value.toString() : null));
 		}
+
+		headers = new HashMap<String, Object>(1);
+		headers.put(NativeMessageHeaderAccessor.NATIVE_HEADERS, nativeHeaders);
+		return headers;
 	}
 
 }
