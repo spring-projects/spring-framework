@@ -108,7 +108,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	public void send(Message<?> message) {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 		String destination = headers.getDestination();
-		destination = (destination != null) ? destination : getRequiredDefaultDestination();
+		destination = (destination != null ? destination : getRequiredDefaultDestination());
 		doSend(destination, message);
 	}
 
@@ -129,7 +129,6 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 					"Failed to send message to destination '" + destination + "' within timeout: " + timeout);
 		}
 	}
-
 
 
 	@Override
@@ -159,6 +158,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 		user = StringUtils.replace(user, "/", "%2F");
 		super.convertAndSend(this.userDestinationPrefix + user + destination, payload, headers, postProcessor);
 	}
+
 
 	/**
 	 * Creates a new map and puts the given headers under the key
