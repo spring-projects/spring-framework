@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
@@ -37,7 +38,7 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractMessageSendingTemplate<D> implements MessageSendingOperations<D> {
 
-	protected final Log logger = LogFactory.getLog(this.getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private volatile D defaultDestination;
 
@@ -80,17 +81,17 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 
 	@Override
 	public void send(Message<?> message) {
-		this.send(getRequiredDefaultDestination(), message);
+		send(getRequiredDefaultDestination(), message);
 	}
 
 	protected final D getRequiredDefaultDestination() {
-		Assert.state(this.defaultDestination != null, "No 'defaultDestination' configured.");
+		Assert.state(this.defaultDestination != null, "No 'defaultDestination' configured");
 		return this.defaultDestination;
 	}
 
 	@Override
 	public void send(D destination, Message<?> message) {
-		this.doSend(destination, message);
+		doSend(destination, message);
 	}
 
 	protected abstract void doSend(D destination, Message<?> message);
@@ -98,29 +99,29 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 
 	@Override
 	public void convertAndSend(Object payload) throws MessagingException {
-		this.convertAndSend(getRequiredDefaultDestination(), payload);
+		convertAndSend(getRequiredDefaultDestination(), payload);
 	}
 
 	@Override
 	public void convertAndSend(D destination, Object payload) throws MessagingException {
-		this.convertAndSend(destination, payload, (Map<String, Object>) null);
+		convertAndSend(destination, payload, (Map<String, Object>) null);
 	}
 
 	@Override
 	public void convertAndSend(D destination, Object payload, Map<String, Object> headers) throws MessagingException {
-		this.convertAndSend(destination, payload, headers, null);
+		convertAndSend(destination, payload, headers, null);
 	}
 
 	@Override
 	public void convertAndSend(Object payload, MessagePostProcessor postProcessor) throws MessagingException {
-		this.convertAndSend(getRequiredDefaultDestination(), payload, postProcessor);
+		convertAndSend(getRequiredDefaultDestination(), payload, postProcessor);
 	}
 
 	@Override
 	public void convertAndSend(D destination, Object payload, MessagePostProcessor postProcessor)
 			throws MessagingException {
 
-		this.convertAndSend(destination, payload, null, postProcessor);
+		convertAndSend(destination, payload, null, postProcessor);
 	}
 
 	@Override
@@ -128,41 +129,35 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 			MessagePostProcessor postProcessor) throws MessagingException {
 
 		MessageHeaders messageHeaders = null;
-
-		headers = processHeadersToSend(headers);
-		if (headers != null) {
-			if (headers instanceof MessageHeaders) {
-				messageHeaders = (MessageHeaders) headers;
+		Map<String, Object> headersToUse = processHeadersToSend(headers);
+		if (headersToUse != null) {
+			if (headersToUse instanceof MessageHeaders) {
+				messageHeaders = (MessageHeaders) headersToUse;
 			}
 			else {
-				messageHeaders = new MessageHeaders(headers);
+				messageHeaders = new MessageHeaders(headersToUse);
 			}
 		}
 
-		Message<?> message = this.converter.toMessage(payload, messageHeaders);
-
+		Message<?> message = getMessageConverter().toMessage(payload, messageHeaders);
 		if (message == null) {
-			String payloadType = (payload != null) ? payload.getClass().getName() : null;
-			Object contentType = (messageHeaders != null) ? messageHeaders.get(MessageHeaders.CONTENT_TYPE) : null;
-			throw new MessageConversionException("Unable to convert payload type '"
-					+ payloadType + "', Content-Type=" + contentType + ", converter=" + this.converter, null);
+			String payloadType = (payload != null ? payload.getClass().getName() : null);
+			Object contentType = (messageHeaders != null ? messageHeaders.get(MessageHeaders.CONTENT_TYPE) : null);
+			throw new MessageConversionException("Unable to convert payload with type='" + payloadType +
+					"', contentType='" + contentType + "', converter=[" + getMessageConverter() + "]");
 		}
-
 		if (postProcessor != null) {
 			message = postProcessor.postProcessMessage(message);
 		}
-
-		this.send(destination, message);
+		send(destination, message);
 	}
 
 	/**
 	 * Provides access to the map of input headers before a send operation. Sub-classes
 	 * can modify the headers and then return the same or a different map.
-	 *
 	 * <p>This default implementation in this class returns the input map.
-	 *
-	 * @param headers the headers to send or {@code null}.
-	 * @return the actual headers to send or {@code null}.
+	 * @param headers the headers to send or {@code null}
+	 * @return the actual headers to send or {@code null}
 	 */
 	protected Map<String, Object> processHeadersToSend(Map<String, Object> headers) {
 		return headers;

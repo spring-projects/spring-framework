@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ import org.springframework.util.Assert;
  * An extension of {@link AbstractMessagingTemplate} that adds operations for sending
  * messages to a resolvable destination name as defined by the following interfaces:
  * <ul>
- *     <li>{@link DestinationResolvingMessageSendingOperations}</li>
- *     <li>{@link DestinationResolvingMessageReceivingOperations}</li>
- *     <li>{@link DestinationResolvingMessageRequestReplyOperations}</li>
+ * <li>{@link DestinationResolvingMessageSendingOperations}</li>
+ * <li>{@link DestinationResolvingMessageReceivingOperations}</li>
+ * <li>{@link DestinationResolvingMessageRequestReplyOperations}</li>
  * </ul>
  *
  * @author Mark Fisher
@@ -65,36 +65,31 @@ public abstract class AbstractDestinationResolvingMessagingTemplate<D> extends A
 	@Override
 	public void send(String destinationName, Message<?> message) {
 		D destination = resolveDestination(destinationName);
-		this.doSend(destination, message);
+		doSend(destination, message);
 	}
 
 	protected final D resolveDestination(String destinationName) {
-		Assert.state(this.destinationResolver != null, "destinationResolver is required to resolve destination names");
+		Assert.state(this.destinationResolver != null, "DestinationResolver is required to resolve destination names");
 		return this.destinationResolver.resolveDestination(destinationName);
 	}
 
 	@Override
 	public <T> void convertAndSend(String destinationName, T payload) {
-		Map<String, Object> headers = null;
-		this.convertAndSend(destinationName, payload, headers);
+		convertAndSend(destinationName, payload, null, null);
 	}
 
 	@Override
 	public <T> void convertAndSend(String destinationName, T payload, Map<String, Object> headers) {
-		MessagePostProcessor postProcessor = null;
-		this.convertAndSend(destinationName, payload, headers, postProcessor);
+		convertAndSend(destinationName, payload, headers, null);
 	}
 
 	@Override
 	public <T> void convertAndSend(String destinationName, T payload, MessagePostProcessor postProcessor) {
-		Map<String, Object> headers = null;
-		this.convertAndSend(destinationName, payload, headers, postProcessor);
+		convertAndSend(destinationName, payload, null, postProcessor);
 	}
 
 	@Override
-	public <T> void convertAndSend(String destinationName, T payload, Map<String, Object> headers,
-			MessagePostProcessor postProcessor) {
-
+	public <T> void convertAndSend(String destinationName, T payload, Map<String, Object> headers, MessagePostProcessor postProcessor) {
 		D destination = resolveDestination(destinationName);
 		super.convertAndSend(destination, payload, headers, postProcessor);
 	}

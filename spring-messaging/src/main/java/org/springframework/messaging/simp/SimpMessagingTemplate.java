@@ -84,22 +84,21 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	/**
 	 * Configure a {@link MessageHeaderInitializer} to apply to the headers of all
 	 * messages created through the {@code SimpMessagingTemplate}.
-	 *
-	 * <p>By default this property is not set.
+	 * <p>By default, this property is not set.
 	 */
 	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
 		this.headerInitializer = headerInitializer;
 	}
 
 	/**
-	 * @return the configured header initializer.
+	 * Return the configured header initializer.
 	 */
 	public MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
 	}
 
 	/**
-	 * @return the messageChannel
+	 * Return the configured message channel.
 	 */
 	public MessageChannel getMessageChannel() {
 		return this.messageChannel;
@@ -107,7 +106,6 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 	/**
 	 * Specify the timeout value to use for send operations.
-	 *
 	 * @param sendTimeout the send timeout in milliseconds
 	 */
 	public void setSendTimeout(long sendTimeout) {
@@ -115,7 +113,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	}
 
 	/**
-	 * @return the sendTimeout
+	 * Return the configured send timeout.
 	 */
 	public long getSendTimeout() {
 		return this.sendTimeout;
@@ -127,13 +125,11 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	 * {@link org.springframework.messaging.simp.SimpMessageHeaderAccessor#DESTINATION_HEADER
 	 * SimpMessageHeaderAccessor#DESTINATION_HEADER} then the message is sent without
 	 * further changes.
-	 *
 	 * <p>If a destination header is not already present ,the message is sent
 	 * to the configured {@link #setDefaultDestination(Object) defaultDestination}
 	 * or an exception an {@code IllegalStateException} is raised if that isn't
 	 * configured.
-	 *
-	 * @param message the message to send, never {@code null}
+	 * @param message the message to send (never {@code null})
 	 */
 	@Override
 	public void send(Message<?> message) {
@@ -149,7 +145,6 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void doSend(String destination, Message<?> message) {
-
 		Assert.notNull(destination, "Destination must not be null");
 
 		SimpMessageHeaderAccessor simpAccessor =
@@ -181,14 +176,11 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	}
 
 	private void sendInternal(Message<?> message) {
-
 		String destination = SimpMessageHeaderAccessor.getDestination(message.getHeaders());
 		Assert.notNull(destination);
 
 		long timeout = this.sendTimeout;
-		boolean sent = (timeout >= 0)
-				? this.messageChannel.send(message, timeout)
-				: this.messageChannel.send(message);
+		boolean sent = (timeout >= 0 ? this.messageChannel.send(message, timeout) : this.messageChannel.send(message));
 
 		if (!sent) {
 			throw new MessageDeliveryException(message,
@@ -204,21 +196,21 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 	@Override
 	public void convertAndSendToUser(String user, String destination, Object payload) throws MessagingException {
-		this.convertAndSendToUser(user, destination, payload, (MessagePostProcessor) null);
+		convertAndSendToUser(user, destination, payload, (MessagePostProcessor) null);
 	}
 
 	@Override
 	public void convertAndSendToUser(String user, String destination, Object payload,
 			Map<String, Object> headers) throws MessagingException {
 
-		this.convertAndSendToUser(user, destination, payload, headers, null);
+		convertAndSendToUser(user, destination, payload, headers, null);
 	}
 
 	@Override
 	public void convertAndSendToUser(String user, String destination, Object payload,
 			MessagePostProcessor postProcessor) throws MessagingException {
 
-		this.convertAndSendToUser(user, destination, payload, null, postProcessor);
+		convertAndSendToUser(user, destination, payload, null, postProcessor);
 	}
 
 	@Override
@@ -235,11 +227,9 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	 * {@link org.springframework.messaging.support.NativeMessageHeaderAccessor#NATIVE_HEADERS NATIVE_HEADERS NATIVE_HEADERS NATIVE_HEADERS}.
 	 * effectively treats the input header map as headers to be sent out to the
 	 * destination.
-	 *
 	 * <p>However if the given headers already contain the key
 	 * {@code NATIVE_HEADERS NATIVE_HEADERS} then the same headers instance is
 	 * returned without changes.
-	 *
 	 * <p>Also if the given headers were prepared and obtained with
 	 * {@link SimpMessageHeaderAccessor#getMessageHeaders()} then the same headers
 	 * instance is also returned without changes.

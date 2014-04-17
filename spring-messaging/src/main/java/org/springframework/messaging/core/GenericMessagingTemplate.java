@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,6 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 
 	/**
 	 * Configure the timeout value to use for send operations.
-	 *
 	 * @param sendTimeout the send timeout in milliseconds
 	 */
 	public void setSendTimeout(long sendTimeout) {
@@ -70,7 +69,6 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 
 	/**
 	 * Configure the timeout value to use for receive operations.
-	 *
 	 * @param receiveTimeout the receive timeout in milliseconds
 	 */
 	public void setReceiveTimeout(long receiveTimeout) {
@@ -89,11 +87,9 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 	 * receiving thread isn't going to receive the reply either because it timed out,
 	 * or because it already received a reply, or because it got an exception while
 	 * sending the request message.
-	 * <p>
-	 * The default value is {@code false} in which case only a WARN message is logged.
+	 * <p>The default value is {@code false} in which case only a WARN message is logged.
 	 * If set to {@code true} a {@link MessageDeliveryException} is raised in addition
 	 * to the log message.
-	 *
 	 * @param throwExceptionOnLateReply whether to throw an exception or not
 	 */
 	public void setThrowExceptionOnLateReply(boolean throwExceptionOnLateReply) {
@@ -108,8 +104,7 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 
 	@Override
 	protected final void doSend(MessageChannel channel, Message<?> message) {
-
-		Assert.notNull(channel, "channel must not be null");
+		Assert.notNull(channel, "'channel' is required");
 
 		MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
 		if (accessor != null && accessor.isMutable()) {
@@ -117,7 +112,7 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 		}
 
 		long timeout = this.sendTimeout;
-		boolean sent = (timeout >= 0) ? channel.send(message, timeout) : channel.send(message);
+		boolean sent = (timeout >= 0 ? channel.send(message, timeout) : channel.send(message));
 
 		if (!sent) {
 			throw new MessageDeliveryException(message,
@@ -127,15 +122,14 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 
 	@Override
 	protected final Message<?> doReceive(MessageChannel channel) {
-
 		Assert.notNull(channel, "'channel' is required");
-		Assert.state(channel instanceof PollableChannel, "A PollableChannel is required to receive messages.");
+		Assert.state(channel instanceof PollableChannel, "A PollableChannel is required to receive messages");
 
 		long timeout = this.receiveTimeout;
-		Message<?> message = (timeout >= 0) ?
-				((PollableChannel) channel).receive(timeout) : ((PollableChannel) channel).receive();
+		Message<?> message = (timeout >= 0 ?
+				((PollableChannel) channel).receive(timeout) : ((PollableChannel) channel).receive());
 
-		if ((message == null) && this.logger.isTraceEnabled()) {
+		if (message == null && this.logger.isTraceEnabled()) {
 			this.logger.trace("Failed to receive message from channel '" + channel + "' within timeout: " + timeout);
 		}
 
@@ -144,20 +138,16 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 
 	@Override
 	protected final Message<?> doSendAndReceive(MessageChannel channel, Message<?> requestMessage) {
-
 		Assert.notNull(channel, "'channel' is required");
-
 		Object originalReplyChannelHeader = requestMessage.getHeaders().getReplyChannel();
 		Object originalErrorChannelHeader = requestMessage.getHeaders().getErrorChannel();
 
 		TemporaryReplyChannel tempReplyChannel = new TemporaryReplyChannel();
-
-		requestMessage = MessageBuilder.fromMessage(requestMessage)
-				.setReplyChannel(tempReplyChannel)
-				.setErrorChannel(tempReplyChannel).build();
+		requestMessage = MessageBuilder.fromMessage(requestMessage).setReplyChannel(tempReplyChannel).
+				setErrorChannel(tempReplyChannel).build();
 
 		try {
-			this.doSend(channel, requestMessage);
+			doSend(channel, requestMessage);
 		}
 		catch (RuntimeException e) {
 			tempReplyChannel.setSendFailed(true);
@@ -183,9 +173,9 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 
 		private final Log logger = LogFactory.getLog(TemporaryReplyChannel.class);
 
-		private volatile Message<?> replyMessage;
-
 		private final CountDownLatch replyLatch = new CountDownLatch(1);
+
+		private volatile Message<?> replyMessage;
 
 		private volatile boolean hasReceived;
 
@@ -197,7 +187,6 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 		public void setSendFailed(boolean hasSendError) {
 			this.hasSendFailed = hasSendError;
 		}
-
 
 		@Override
 		public Message<?> receive() {
@@ -233,7 +222,6 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 
 		@Override
 		public boolean send(Message<?> message, long timeout) {
-
 			this.replyMessage = message;
 			boolean alreadyReceivedReply = this.hasReceived;
 			this.replyLatch.countDown();
