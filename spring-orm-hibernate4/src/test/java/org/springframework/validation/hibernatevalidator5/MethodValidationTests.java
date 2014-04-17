@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.validation.beanvalidation;
+package org.springframework.validation.hibernatevalidator5;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -27,14 +27,17 @@ import org.junit.Test;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.beanvalidation.MethodValidationInterceptor;
+import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 import static org.junit.Assert.*;
 
 /**
- * Tested against Hibernate Validator 4.3, as of Spring 4.0.
+ * Copy of {@link org.springframework.validation.beanvalidation.MethodValidationTests},
+ * here to be tested against Hibernate Validator 5.
  *
  * @author Juergen Hoeller
- * @since 3.1
+ * @since 4.1
  */
 public class MethodValidationTests {
 

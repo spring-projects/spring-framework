@@ -14,26 +14,29 @@
  * limitations under the License.
  */
 
-package org.springframework.validation.beanvalidation;
+package org.springframework.validation.hibernatevalidator5;
 
 import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.CommonAnnotationBeanPostProcessor;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.validation.beanvalidation.BeanValidationPostProcessor;
+
+import static org.junit.Assert.*;
 
 /**
- * Tested against Hibernate Validator 4.3, as of Spring 4.0.
+ * Copy of {@link org.springframework.validation.beanvalidation.BeanValidationPostProcessor},
+ * here to be tested against Hibernate Validator 5.
  *
  * @author Juergen Hoeller
- * @since 3.0
+ * @since 4.1
  */
 public class BeanValidationPostProcessorTests {
 

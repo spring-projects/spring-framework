@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.validation.beanvalidation;
+package org.springframework.validation.hibernatevalidator5;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -41,15 +41,17 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Tested against Hibernate Validator 4.3, as of Spring 4.0.
+ * Copy of {@link org.springframework.validation.beanvalidation.ValidatorFactoryTests},
+ * here to be tested against Hibernate Validator 5.
  *
  * @author Juergen Hoeller
- * @since 3.0
+ * @since 4.1
  */
 public class ValidatorFactoryTests {
 
