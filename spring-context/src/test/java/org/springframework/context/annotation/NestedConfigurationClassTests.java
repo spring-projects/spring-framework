@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,6 +123,7 @@ public class NestedConfigurationClassTests {
 
 	@Configuration
 	static class L0Config {
+
 		@Bean
 		public TestBean l0Bean() {
 			return new TestBean("l0");
@@ -135,6 +136,7 @@ public class NestedConfigurationClassTests {
 
 		@Configuration
 		static class L1Config {
+
 			@Bean
 			public TestBean l1Bean() {
 				return new TestBean("l1");
@@ -147,6 +149,7 @@ public class NestedConfigurationClassTests {
 
 			@Configuration
 			protected static class L2Config {
+
 				@Bean
 				public TestBean l2Bean() {
 					return new TestBean("l2");
@@ -163,6 +166,7 @@ public class NestedConfigurationClassTests {
 
 	@Component
 	static class L0ConfigLight {
+
 		@Bean
 		public TestBean l0Bean() {
 			return new TestBean("l0");
@@ -175,6 +179,7 @@ public class NestedConfigurationClassTests {
 
 		@Component
 		static class L1ConfigLight {
+
 			@Bean
 			public TestBean l1Bean() {
 				return new TestBean("l1");
@@ -187,6 +192,7 @@ public class NestedConfigurationClassTests {
 
 			@Component
 			protected static class L2ConfigLight {
+
 				@Bean
 				public TestBean l2Bean() {
 					return new TestBean("l2");
@@ -216,6 +222,7 @@ public class NestedConfigurationClassTests {
 
 	@Configuration
 	static class S1Config extends L0Config {
+
 		@Override
 		@Bean
 		public TestBean overrideBean() {
