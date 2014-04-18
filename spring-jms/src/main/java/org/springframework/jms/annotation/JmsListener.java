@@ -66,7 +66,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
  * @see EnableJms
  * @see JmsListenerAnnotationBeanPostProcessor
  */
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @MessageMapping
 @Documented
