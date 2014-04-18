@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -51,7 +50,7 @@ import org.springframework.jdbc.support.JdbcUtils;
  * is rolled back, the unused values will never be served. The maximum hole size in
  * numbering is consequently the value of cacheSize.
  *
- * <b>HINT:</b>  Since Derby supports the JDBC 3.0 {@code getGeneratedKeys} method,
+ * <b>HINT:</b> Since Derby supports the JDBC 3.0 {@code getGeneratedKeys} method,
  * it is recommended to use IDENTITY columns directly in the tables and then utilizing
  * a {@link org.springframework.jdbc.support.KeyHolder} when calling the with the
  * {@code update(PreparedStatementCreator psc, KeyHolder generatedKeyHolder)}

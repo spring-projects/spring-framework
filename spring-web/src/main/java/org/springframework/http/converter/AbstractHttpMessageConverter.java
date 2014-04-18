@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -163,11 +163,12 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 
 		HttpHeaders headers = outputMessage.getHeaders();
 		if (headers.getContentType() == null) {
+			MediaType contentTypeToUse = contentType;
 			if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {
-				contentType = getDefaultContentType(t);
+				contentTypeToUse = getDefaultContentType(t);
 			}
-			if (contentType != null) {
-				headers.setContentType(contentType);
+			if (contentTypeToUse != null) {
+				headers.setContentType(contentTypeToUse);
 			}
 		}
 		if (headers.getContentLength() == -1) {
@@ -227,7 +228,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	/**
 	 * Abstract template method that writes the actual body. Invoked from {@link #write}.
 	 * @param t the object to write to the output message
-	 * @param outputMessage the message to write to
+	 * @param outputMessage the HTTP output message to write to
 	 * @throws IOException in case of I/O errors
 	 * @throws HttpMessageNotWritableException in case of conversion errors
 	 */
