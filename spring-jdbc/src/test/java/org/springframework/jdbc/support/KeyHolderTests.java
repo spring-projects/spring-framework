@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,13 @@ package org.springframework.jdbc.support;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+
+import junit.framework.TestCase;
 
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-
-import junit.framework.TestCase;
 
 /**
  * Tests for the KeyHolder and GeneratedKeyHolder
@@ -41,17 +42,17 @@ public class KeyHolderTests extends TestCase {
 	}
 
 	public void testSingleKey(){
-		LinkedList l = new LinkedList();
-		HashMap m = new HashMap(1);
-		m.put("key", new Integer(1));
+		List<Map<String, Object>> l = new LinkedList<Map<String, Object>>();
+		Map<String, Object> m = new HashMap<String, Object>(1);
+		m.put("key", 1);
 		l.add(m);
 		kh.getKeyList().addAll(l);
 		assertEquals("single key should be returned", 1, kh.getKey().intValue());
 	}
 
 	public void testSingleKeyNonNumeric(){
-		LinkedList l = new LinkedList();
-		HashMap m = new HashMap(1);
+		List<Map<String, Object>> l = new LinkedList<Map<String, Object>>();
+		Map<String, Object> m = new HashMap<String, Object>(1);
 		m.put("key", "1");
 		l.add(m);
 		kh.getKeyList().addAll(l);
@@ -64,8 +65,8 @@ public class KeyHolderTests extends TestCase {
 	}
 
 	public void testNoKeyReturnedInMap(){
-		LinkedList l = new LinkedList();
-		HashMap m = new HashMap();
+		List<Map<String, Object>> l = new LinkedList<Map<String, Object>>();
+		Map<String, Object> m = new HashMap<String, Object>();
 		l.add(m);
 		kh.getKeyList().addAll(l);
 		try {
@@ -77,13 +78,13 @@ public class KeyHolderTests extends TestCase {
 	}
 
 	public void testMultipleKeys(){
-		LinkedList l = new LinkedList();
-		HashMap m = new HashMap(1);
-		m.put("key", new Integer(1));
-		m.put("seq", new Integer(2));
+		List<Map<String, Object>> l = new LinkedList<Map<String, Object>>();
+		Map<String, Object> m = new HashMap<String, Object>(2);
+		m.put("key", 1);
+		m.put("seq", 2);
 		l.add(m);
 		kh.getKeyList().addAll(l);
-		Map keyMap = kh.getKeys();
+		Map<String, Object> keyMap = kh.getKeys();
 		assertEquals("two keys should be in the map", 2, keyMap.size());
 		try {
 			kh.getKey();
@@ -94,10 +95,10 @@ public class KeyHolderTests extends TestCase {
 	}
 
 	public void testMultipleKeyRows(){
-		LinkedList l = new LinkedList();
-		HashMap m = new HashMap(1);
-		m.put("key", new Integer(1));
-		m.put("seq", new Integer(2));
+		List<Map<String, Object>> l = new LinkedList<Map<String, Object>>();
+		Map<String, Object> m = new HashMap<String, Object>(2);
+		m.put("key", 1);
+		m.put("seq", 2);
 		l.add(m);
 		l.add(m);
 		kh.getKeyList().addAll(l);
