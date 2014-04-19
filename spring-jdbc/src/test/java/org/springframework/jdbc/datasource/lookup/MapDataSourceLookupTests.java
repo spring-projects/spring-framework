@@ -37,7 +37,7 @@ public final class MapDataSourceLookupTests {
 	@SuppressWarnings("unchecked")
 	@Test(expected=UnsupportedOperationException.class)
 	public void testGetDataSourcesReturnsUnmodifiableMap() throws Exception {
-		MapDataSourceLookup lookup = new MapDataSourceLookup(new HashMap());
+		MapDataSourceLookup lookup = new MapDataSourceLookup(new HashMap<String, DataSource>());
 		Map dataSources = lookup.getDataSources();
 		dataSources.put("", "");
 	}
@@ -84,7 +84,7 @@ public final class MapDataSourceLookupTests {
 	@SuppressWarnings("unchecked")
 	@Test(expected=ClassCastException.class)
 	public void testGetDataSourceWhereSuppliedMapHasNonDataSourceTypeUnderSpecifiedKey() throws Exception {
-		Map dataSources = new HashMap();
+		Map dataSources = new HashMap<String, DataSource>();
 		dataSources.put(DATA_SOURCE_NAME, new Object());
 		MapDataSourceLookup lookup = new MapDataSourceLookup();
 		lookup.setDataSources(dataSources);

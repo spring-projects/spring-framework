@@ -100,8 +100,8 @@ public class BatchSqlUpdateTests {
 		update.reset();
 		assertEquals(0, update.getRowsAffected().length);
 
-		verify(preparedStatement).setObject(1, new Integer(ids[0]), Types.INTEGER);
-		verify(preparedStatement).setObject(1, new Integer(ids[1]), Types.INTEGER);
+		verify(preparedStatement).setObject(1, ids[0], Types.INTEGER);
+		verify(preparedStatement).setObject(1, ids[1], Types.INTEGER);
 		verify(preparedStatement, times(2)).addBatch();
 		verify(preparedStatement).close();
 	}

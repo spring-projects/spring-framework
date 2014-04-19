@@ -106,7 +106,7 @@ public class SqlQueryTests  {
 
 		SqlQuery<Integer> query = new MappingSqlQueryWithParameters<Integer>() {
 			@Override
-			protected Integer mapRow(ResultSet rs, int rownum, Object[] params, Map context) throws SQLException {
+			protected Integer mapRow(ResultSet rs, int rownum, Object[] params, Map<? ,?> context) throws SQLException {
 				assertTrue("params were null", params == null);
 				assertTrue("context was null", context == null);
 				return rs.getInt(1);
@@ -728,7 +728,7 @@ public class SqlQueryTests  {
 			}
 
 			@Override
-			protected Customer updateRow(ResultSet rs, int rownum, Map context)
+			protected Customer updateRow(ResultSet rs, int rownum, Map<? ,?> context)
 					throws SQLException {
 				rs.updateString(2, "" + context.get(rs.getInt(COLUMN_NAMES[0])));
 				return null;
