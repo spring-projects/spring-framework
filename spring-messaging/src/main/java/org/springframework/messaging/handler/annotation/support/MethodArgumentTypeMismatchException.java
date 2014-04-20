@@ -18,7 +18,6 @@ package org.springframework.messaging.handler.annotation.support;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessagingException;
 
 /**
  * Exception that indicates that a method argument has not the
