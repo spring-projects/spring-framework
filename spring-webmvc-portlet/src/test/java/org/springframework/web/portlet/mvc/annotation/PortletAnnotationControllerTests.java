@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 		doTestAdaptedHandleMethods(MyAdaptedController3.class);
 	}
 
-	public void doTestAdaptedHandleMethods(final Class controllerClass) throws Exception {
+	public void doTestAdaptedHandleMethods(final Class<?> controllerClass) throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
 			@Override
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
@@ -796,7 +796,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 
 	private static class TestView {
 
-		public void render(String viewName, Map model, PortletRequest request, MimeResponse response) throws Exception {
+		public void render(String viewName, Map<String, Object> model, PortletRequest request, MimeResponse response) throws Exception {
 			TestBean tb = (TestBean) model.get("testBean");
 			if (tb == null) {
 				tb = (TestBean) model.get("myCommand");
@@ -811,9 +811,9 @@ public class PortletAnnotationControllerTests extends TestCase {
 			if (errors.hasFieldErrors("date")) {
 				throw new IllegalStateException();
 			}
-			List<TestBean> testBeans = (List<TestBean>) model.get("testBeanList");
+			List<?> testBeans = (List<?>) model.get("testBeanList");
 			response.getWriter().write(viewName + "-" + tb.getName() + "-" + errors.getFieldError("age").getCode() +
-					"-" + testBeans.get(0).getName() + "-" + model.get("myKey"));
+					"-" + ((TestBean) testBeans.get(0)).getName() + "-" + model.get("myKey"));
 		}
 	}
 
@@ -830,7 +830,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 
 		@Override
 		public org.springframework.web.servlet.ModelAndView resolveModelAndView(Method handlerMethod,
-				Class handlerType,
+				Class<?> handlerType,
 				Object returnValue,
 				ExtendedModelMap implicitModel,
 				NativeWebRequest webRequest) {

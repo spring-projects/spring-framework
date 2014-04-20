@@ -1,18 +1,18 @@
 /*
-* Copyright 2002-2013 the original author or authors.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2002-2014 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package org.springframework.web.portlet;
 
@@ -125,7 +125,7 @@ public class DispatcherPortletTests extends TestCase {
 		request.setPortletMode(PortletMode.HELP);
 		request.setParameter("action", "help3");
 		complexDispatcherPortlet.doDispatch(request, response);
-		Map model = (Map) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
+		Map<?, ?> model = (Map<?, ?>) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
 		assertTrue(model.get("exception").getClass().equals(NoHandlerFoundException.class));
 		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertEquals("failed-unavailable", view.getBeanName());
@@ -164,7 +164,7 @@ public class DispatcherPortletTests extends TestCase {
 		request.setParameter("action", "not mapped");
 		request.setParameter("myParam", "not mapped");
 		complexDispatcherPortlet.doDispatch(request, response);
-		Map model = (Map) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
+		Map<?, ?> model = (Map<?, ?>) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
 		assertEquals("view was here", model.get("result"));
 		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertEquals("someViewName", view.getBeanName());
@@ -178,7 +178,7 @@ public class DispatcherPortletTests extends TestCase {
 		request.setParameter("action", "not mapped");
 		request.setParameter("myParam", "not mapped");
 		complexDispatcherPortlet.doDispatch(request, response);
-		Map model = (Map) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
+		Map<?, ?> model = (Map<?, ?>) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
 		Exception exception = (Exception) model.get("exception");
 		assertNotNull(exception);
 		assertTrue(exception.getClass().equals(PortletSecurityException.class));
@@ -222,7 +222,7 @@ public class DispatcherPortletTests extends TestCase {
 		MockRenderResponse response = new MockRenderResponse();
 		request.setParameter("myParam", "unknown");
 		complexDispatcherPortlet.doDispatch(request, response);
-		Map model = (Map) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
+		Map<?, ?> model = (Map<?, ?>) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
 		Exception exception = (Exception)model.get("exception");
 		assertTrue(exception.getClass().equals(PortletException.class));
 		assertTrue(exception.getMessage().indexOf("No adapter for handler") != -1);
@@ -255,7 +255,7 @@ public class DispatcherPortletTests extends TestCase {
 		MockRenderResponse response = new MockRenderResponse();
 		request.setParameter("myParam", "test1");
 		complexDispatcherPortlet.doDispatch(request, response);
-		Map model = (Map) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
+		Map<?, ?> model = (Map<?, ?>) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
 		Exception exception = (Exception) model.get("exception");
 		assertTrue(exception.getClass().equals(NoHandlerFoundException.class));
 		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
@@ -333,7 +333,7 @@ public class DispatcherPortletTests extends TestCase {
 		request.setParameter("myParam", "requestLocaleChecker");
 		request.addPreferredLocale(Locale.ENGLISH);
 		complexDispatcherPortlet.doDispatch(request, response);
-		Map model = (Map) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
+		Map<?, ?> model = (Map<?, ?>) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
 		Exception exception = (Exception) model.get("exception");
 		assertTrue(exception.getClass().equals(PortletException.class));
 		assertEquals("Incorrect Locale in RenderRequest", exception.getMessage());
@@ -356,7 +356,7 @@ public class DispatcherPortletTests extends TestCase {
 		request.setParameter("myParam", "contextLocaleChecker");
 		request.addPreferredLocale(Locale.ENGLISH);
 		complexDispatcherPortlet.doDispatch(request, response);
-		Map model = (Map) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
+		Map<?, ?> model = (Map<?, ?>) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
 		Exception exception = (Exception) model.get("exception");
 		assertTrue(exception.getClass().equals(PortletException.class));
 		assertEquals("Incorrect Locale in LocaleContextHolder", exception.getMessage());
@@ -401,7 +401,7 @@ public class DispatcherPortletTests extends TestCase {
 		request.addUserRole("role1");
 		request.addParameter("noView", "false");
 		complexDispatcherPortlet.doDispatch(request, response);
-		Map model = (Map) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
+		Map<?, ?> model = (Map<?, ?>) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
 		assertEquals("view was here", model.get("result"));
 		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertEquals("someViewName", view.getBeanName());
@@ -414,7 +414,7 @@ public class DispatcherPortletTests extends TestCase {
 		request.addUserRole("role1");
 		request.addParameter("noView", "true");
 		complexDispatcherPortlet.doDispatch(request, response);
-		Map model = (Map) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
+		Map<?, ?> model = (Map<?, ?>) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
 		assertNull(model);
 		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertNull(view);
