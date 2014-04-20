@@ -107,9 +107,9 @@ public class CciLocalTransactionTests {
 		TransactionTemplate tt = new TransactionTemplate(tm);
 
 		try {
-			tt.execute(new TransactionCallback() {
+			tt.execute(new TransactionCallback<Void>() {
 				@Override
-				public Object doInTransaction(TransactionStatus status) {
+				public Void doInTransaction(TransactionStatus status) {
 					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(connectionFactory));
 					CciTemplate ct = new CciTemplate(connectionFactory);
 					ct.execute(interactionSpec, record, record);

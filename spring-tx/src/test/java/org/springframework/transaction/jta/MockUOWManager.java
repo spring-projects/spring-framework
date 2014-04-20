@@ -43,9 +43,9 @@ public class MockUOWManager implements UOWManager {
 
 	private int status = UOW_STATUS_NONE;
 
-	private final Map resources = new HashMap();
+	private final Map<Object, Object> resources = new HashMap<Object, Object>();
 
-	private final List synchronizations = new LinkedList();
+	private final List<Synchronization> synchronizations = new LinkedList<Synchronization>();
 
 
 	@Override

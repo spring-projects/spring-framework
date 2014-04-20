@@ -75,7 +75,7 @@ public class RollbackRuleTests extends TestCase {
 
 	public void testCtorArgMustBeAThrowableClassWithNullThrowableType() {
 		try {
-			new RollbackRuleAttribute((Class) null);
+			new RollbackRuleAttribute((Class<?>) null);
 			fail("Cannot construct a RollbackRuleAttribute with a null-Throwable type");
 		}
 		catch (IllegalArgumentException expected) {

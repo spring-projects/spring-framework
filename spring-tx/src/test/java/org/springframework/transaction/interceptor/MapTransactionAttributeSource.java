@@ -35,7 +35,7 @@ public class MapTransactionAttributeSource extends AbstractFallbackTransactionAt
 		this.attributeMap.put(method, txAtt);
 	}
 
-	public void register(Class clazz, TransactionAttribute txAtt) {
+	public void register(Class<?> clazz, TransactionAttribute txAtt) {
 		this.attributeMap.put(clazz, txAtt);
 	}
 
@@ -46,7 +46,7 @@ public class MapTransactionAttributeSource extends AbstractFallbackTransactionAt
 	}
 
 	@Override
-	protected TransactionAttribute findTransactionAttribute(Class clazz) {
+	protected TransactionAttribute findTransactionAttribute(Class<?> clazz) {
 		return this.attributeMap.get(clazz);
 	}
 

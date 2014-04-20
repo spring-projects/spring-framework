@@ -159,7 +159,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 	}
 
 	public void testGetBeansOfTypeWithAbstract() {
-		Map beansOfType = factory.getBeansOfType(ITestBean.class, true, true);
+		Map<String, ITestBean> beansOfType = factory.getBeansOfType(ITestBean.class, true, true);
 		assertNotNull(beansOfType);
 	}
 
@@ -211,7 +211,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 		int counter = 0;
 
 		@Override
-		public boolean matches(Method method, Class clazz) {
+		public boolean matches(Method method, Class<?> clazz) {
 			counter++;
 			return true;
 		}

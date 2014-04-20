@@ -31,7 +31,7 @@ public class MockCallbackPreferringTransactionManager implements CallbackPreferr
 
 
 	@Override
-	public Object execute(TransactionDefinition definition, TransactionCallback callback) throws TransactionException {
+	public <T> T execute(TransactionDefinition definition, TransactionCallback<T> callback) throws TransactionException {
 		this.definition = definition;
 		this.status = new SimpleTransactionStatus();
 		return callback.doInTransaction(this.status);
