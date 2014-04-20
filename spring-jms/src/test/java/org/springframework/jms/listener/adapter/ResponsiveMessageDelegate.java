@@ -33,7 +33,7 @@ public interface ResponsiveMessageDelegate {
 
 	String handleMessage(TextMessage message);
 
-	Map handleMessage(MapMessage message);
+	Map<String, Object> handleMessage(MapMessage message);
 
 	byte[] handleMessage(BytesMessage message);
 

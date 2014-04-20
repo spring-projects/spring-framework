@@ -35,7 +35,7 @@ public class JmsGatewaySupportTests {
 	@Test
 	public void testJmsGatewaySupportWithConnectionFactory() throws Exception {
 		ConnectionFactory mockConnectionFactory = mock(ConnectionFactory.class);
-		final List test = new ArrayList();
+		final List<String> test = new ArrayList<String>(1);
 		JmsGatewaySupport gateway = new JmsGatewaySupport() {
 			@Override
 			protected void initGateway() {
@@ -52,7 +52,7 @@ public class JmsGatewaySupportTests {
 	@Test
 	public void testJmsGatewaySupportWithJmsTemplate() throws Exception {
 		JmsTemplate template = new JmsTemplate();
-		final List test = new ArrayList();
+		final List<String> test = new ArrayList<String>(1);
 		JmsGatewaySupport gateway = new JmsGatewaySupport() {
 			@Override
 			protected void initGateway() {
