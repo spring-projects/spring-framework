@@ -56,13 +56,13 @@ public class PortletWebRequestTests {
 		assertEquals("value2", request.getParameterValues("param2")[0]);
 		assertEquals("value2a", request.getParameterValues("param2")[1]);
 
-		Map paramMap = request.getParameterMap();
+		Map<String, String[]> paramMap = request.getParameterMap();
 		assertEquals(2, paramMap.size());
-		assertEquals(1, ((String[]) paramMap.get("param1")).length);
-		assertEquals("value1", ((String[]) paramMap.get("param1"))[0]);
-		assertEquals(2, ((String[]) paramMap.get("param2")).length);
-		assertEquals("value2", ((String[]) paramMap.get("param2"))[0]);
-		assertEquals("value2a", ((String[]) paramMap.get("param2"))[1]);
+		assertEquals(1, paramMap.get("param1").length);
+		assertEquals("value1", paramMap.get("param1")[0]);
+		assertEquals(2, paramMap.get("param2").length);
+		assertEquals("value2", paramMap.get("param2")[0]);
+		assertEquals("value2a", paramMap.get("param2")[1]);
 	}
 
 	@Test

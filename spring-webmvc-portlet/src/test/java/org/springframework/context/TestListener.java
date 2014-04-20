@@ -9,7 +9,7 @@ import org.springframework.context.ApplicationListener;
  * @author Rod Johnson
  * @since January 21, 2001
  */
-public class TestListener implements ApplicationListener {
+public class TestListener implements ApplicationListener<ApplicationEvent> {
 
 	private int eventCount;
 

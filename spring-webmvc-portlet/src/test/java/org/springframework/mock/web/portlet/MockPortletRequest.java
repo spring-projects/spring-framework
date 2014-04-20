@@ -271,8 +271,8 @@ public class MockPortletRequest implements PortletRequest {
 	@Override
 	public String getProperty(String key) {
 		Assert.notNull(key, "Property key must not be null");
-		List list = this.properties.get(key);
-		return (list != null && list.size() > 0 ? (String) list.get(0) : null);
+		List<String> list = this.properties.get(key);
+		return (list != null && list.size() > 0 ? list.get(0) : null);
 	}
 
 	@Override
