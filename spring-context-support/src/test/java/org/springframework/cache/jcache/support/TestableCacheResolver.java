@@ -17,7 +17,6 @@
 package org.springframework.cache.jcache.support;
 
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.mock;
 
 import java.lang.annotation.Annotation;
 

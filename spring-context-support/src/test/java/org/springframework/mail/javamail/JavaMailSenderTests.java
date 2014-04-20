@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,19 +75,19 @@ public class JavaMailSenderTests extends TestCase {
 
 		assertEquals(1, sender.transport.getSentMessages().size());
 		MimeMessage sentMessage = sender.transport.getSentMessage(0);
-		List froms = Arrays.asList(sentMessage.getFrom());
+		List<Address> froms = Arrays.asList(sentMessage.getFrom());
 		assertEquals(1, froms.size());
 		assertEquals("me@mail.org", ((InternetAddress) froms.get(0)).getAddress());
-		List replyTos = Arrays.asList(sentMessage.getReplyTo());
+		List<Address> replyTos = Arrays.asList(sentMessage.getReplyTo());
 		assertEquals("reply@mail.org", ((InternetAddress) replyTos.get(0)).getAddress());
-		List tos = Arrays.asList(sentMessage.getRecipients(Message.RecipientType.TO));
+		List<Address> tos = Arrays.asList(sentMessage.getRecipients(Message.RecipientType.TO));
 		assertEquals(1, tos.size());
 		assertEquals("you@mail.org", ((InternetAddress) tos.get(0)).getAddress());
-		List ccs = Arrays.asList(sentMessage.getRecipients(Message.RecipientType.CC));
+		List<Address> ccs = Arrays.asList(sentMessage.getRecipients(Message.RecipientType.CC));
 		assertEquals(2, ccs.size());
 		assertEquals("he@mail.org", ((InternetAddress) ccs.get(0)).getAddress());
 		assertEquals("she@mail.org", ((InternetAddress) ccs.get(1)).getAddress());
-		List bccs = Arrays.asList(sentMessage.getRecipients(Message.RecipientType.BCC));
+		List<Address> bccs = Arrays.asList(sentMessage.getRecipients(Message.RecipientType.BCC));
 		assertEquals(2, bccs.size());
 		assertEquals("us@mail.org", ((InternetAddress) bccs.get(0)).getAddress());
 		assertEquals("them@mail.org", ((InternetAddress) bccs.get(1)).getAddress());
@@ -115,11 +115,11 @@ public class JavaMailSenderTests extends TestCase {
 
 		assertEquals(2, sender.transport.getSentMessages().size());
 		MimeMessage sentMessage1 = sender.transport.getSentMessage(0);
-		List tos1 = Arrays.asList(sentMessage1.getRecipients(Message.RecipientType.TO));
+		List<Address> tos1 = Arrays.asList(sentMessage1.getRecipients(Message.RecipientType.TO));
 		assertEquals(1, tos1.size());
 		assertEquals("he@mail.org", ((InternetAddress) tos1.get(0)).getAddress());
 		MimeMessage sentMessage2 = sender.transport.getSentMessage(1);
-		List tos2 = Arrays.asList(sentMessage2.getRecipients(Message.RecipientType.TO));
+		List<Address> tos2 = Arrays.asList(sentMessage2.getRecipients(Message.RecipientType.TO));
 		assertEquals(1, tos2.size());
 		assertEquals("she@mail.org", ((InternetAddress) tos2.get(0)).getAddress());
 	}
@@ -520,7 +520,7 @@ public class JavaMailSenderTests extends TestCase {
 			return closeCalled;
 		}
 
-		public List getSentMessages() {
+		public List<Message> getSentMessages() {
 			return sentMessages;
 		}
 
@@ -552,8 +552,8 @@ public class JavaMailSenderTests extends TestCase {
 			if ("fail".equals(message.getSubject())) {
 				throw new MessagingException("failed");
 			}
-			List addr1 = Arrays.asList(message.getAllRecipients());
-			List addr2 = Arrays.asList(addresses);
+			List<Address> addr1 = Arrays.asList(message.getAllRecipients());
+			List<Address> addr2 = Arrays.asList(addresses);
 			if (!addr1.equals(addr2)) {
 				throw new MessagingException("addresses not correct");
 			}
