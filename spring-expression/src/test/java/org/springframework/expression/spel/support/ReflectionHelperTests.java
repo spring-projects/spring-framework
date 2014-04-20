@@ -481,7 +481,7 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 	/**
 	 * Used to validate the match returned from a compareArguments call.
 	 */
-	private void checkMatch(Class[] inputTypes, Class[] expectedTypes, StandardTypeConverter typeConverter, ArgumentsMatchKind expectedMatchKind) {
+	private void checkMatch(Class<?>[] inputTypes, Class<?>[] expectedTypes, StandardTypeConverter typeConverter, ArgumentsMatchKind expectedMatchKind) {
 		ReflectionHelper.ArgumentsMatchInfo matchInfo = ReflectionHelper.compareArguments(getTypeDescriptors(expectedTypes), getTypeDescriptors(inputTypes), typeConverter);
 		if (expectedMatchKind == null) {
 			assertNull("Did not expect them to match in any way", matchInfo);
@@ -504,7 +504,7 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 	/**
 	 * Used to validate the match returned from a compareArguments call.
 	 */
-	private void checkMatch2(Class[] inputTypes, Class[] expectedTypes, StandardTypeConverter typeConverter, ArgumentsMatchKind expectedMatchKind) {
+	private void checkMatch2(Class<?>[] inputTypes, Class<?>[] expectedTypes, StandardTypeConverter typeConverter, ArgumentsMatchKind expectedMatchKind) {
 		ReflectionHelper.ArgumentsMatchInfo matchInfo = ReflectionHelper.compareArgumentsVarargs(getTypeDescriptors(expectedTypes), getTypeDescriptors(inputTypes), typeConverter);
 		if (expectedMatchKind == null) {
 			assertNull("Did not expect them to match in any way: " + matchInfo, matchInfo);
@@ -535,9 +535,9 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 		assertEquals(expected,actual);
 	}
 
-	private List<TypeDescriptor> getTypeDescriptors(Class... types) {
+	private List<TypeDescriptor> getTypeDescriptors(Class<?>... types) {
 		List<TypeDescriptor> typeDescriptors = new ArrayList<TypeDescriptor>(types.length);
-		for (Class type : types) {
+		for (Class<?> type : types) {
 			typeDescriptors.add(TypeDescriptor.valueOf(type));
 		}
 		return typeDescriptors;

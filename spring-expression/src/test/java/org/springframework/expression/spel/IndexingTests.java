@@ -64,12 +64,12 @@ public class IndexingTests {
 
 		@Override
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
-			return (((Map) target).containsKey(name));
+			return (((Map<?, ?>) target).containsKey(name));
 		}
 
 		@Override
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-			return new TypedValue(((Map) target).get(name));
+			return new TypedValue(((Map<?, ?>) target).get(name));
 		}
 
 		@Override
@@ -298,7 +298,7 @@ public class IndexingTests {
 
 	@Test
 	public void resolveCollectionElementType() {
-		listNotGeneric = new ArrayList();
+		listNotGeneric = new ArrayList(2);
 		listNotGeneric.add(5);
 		listNotGeneric.add(6);
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -338,7 +338,7 @@ public class IndexingTests {
 
 	@Test
 	public void testListOfScalar() {
-		listOfScalarNotGeneric = new ArrayList();
+		listOfScalarNotGeneric = new ArrayList(1);
 		listOfScalarNotGeneric.add("5");
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("listOfScalarNotGeneric[0]");

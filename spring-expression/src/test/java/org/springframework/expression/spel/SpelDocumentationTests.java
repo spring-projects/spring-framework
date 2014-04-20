@@ -383,8 +383,8 @@ public class SpelDocumentationTests extends AbstractExpressionTests {
 
 	@Test
 	public void testTypes() throws Exception {
-		Class dateClass = parser.parseExpression("T(java.util.Date)").getValue(Class.class);
-		assertEquals(Date.class,dateClass);
+		Class<?> dateClass = parser.parseExpression("T(java.util.Date)").getValue(Class.class);
+		assertEquals(Date.class, dateClass);
 		boolean trueValue = parser.parseExpression("T(java.math.RoundingMode).CEILING < T(java.math.RoundingMode).FLOOR").getValue(Boolean.class);
 		assertTrue(trueValue);
 	}
