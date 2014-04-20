@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2014 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.expression.spel;
 
 import static org.junit.Assert.assertEquals;
@@ -64,12 +80,12 @@ public class IndexingTests {
 
 		@Override
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
-			return (((Map) target).containsKey(name));
+			return (((Map<?, ?>) target).containsKey(name));
 		}
 
 		@Override
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-			return new TypedValue(((Map) target).get(name));
+			return new TypedValue(((Map<?, ?>) target).get(name));
 		}
 
 		@Override
@@ -298,7 +314,7 @@ public class IndexingTests {
 
 	@Test
 	public void resolveCollectionElementType() {
-		listNotGeneric = new ArrayList();
+		listNotGeneric = new ArrayList(2);
 		listNotGeneric.add(5);
 		listNotGeneric.add(6);
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -338,7 +354,7 @@ public class IndexingTests {
 
 	@Test
 	public void testListOfScalar() {
-		listOfScalarNotGeneric = new ArrayList();
+		listOfScalarNotGeneric = new ArrayList(1);
 		listOfScalarNotGeneric.add("5");
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("listOfScalarNotGeneric[0]");

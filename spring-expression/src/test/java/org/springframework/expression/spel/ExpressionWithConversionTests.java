@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,14 +75,14 @@ public class ExpressionWithConversionTests extends AbstractExpressionTests {
 		// ArrayList containing List<Integer> to List<String>
 		Class<?> clazz = typeDescriptorForListOfString.getElementTypeDescriptor().getType();
 		assertEquals(String.class,clazz);
-		List l = (List) tcs.convertValue(listOfInteger, TypeDescriptor.forObject(listOfInteger), typeDescriptorForListOfString);
+		List<?> l = (List<?>) tcs.convertValue(listOfInteger, TypeDescriptor.forObject(listOfInteger), typeDescriptorForListOfString);
 		assertNotNull(l);
 
 		// ArrayList containing List<String> to List<Integer>
 		clazz = typeDescriptorForListOfInteger.getElementTypeDescriptor().getType();
 		assertEquals(Integer.class,clazz);
 
-		l = (List) tcs.convertValue(listOfString, TypeDescriptor.forObject(listOfString), typeDescriptorForListOfString);
+		l = (List<?>) tcs.convertValue(listOfString, TypeDescriptor.forObject(listOfString), typeDescriptorForListOfString);
 		assertNotNull(l);
 	}
 
@@ -95,7 +95,7 @@ public class ExpressionWithConversionTests extends AbstractExpressionTests {
 		// Assign a List<String> to the List<Integer> field - the component elements should be converted
 		parser.parseExpression("listOfInteger").setValue(context,listOfString);
 		assertEquals(3,e.getValue(context,Integer.class).intValue()); // size now 3
-		Class clazz = parser.parseExpression("listOfInteger[1].getClass()").getValue(context,Class.class); // element type correctly Integer
+		Class<?> clazz = parser.parseExpression("listOfInteger[1].getClass()").getValue(context, Class.class); // element type correctly Integer
 		assertEquals(Integer.class,clazz);
 	}
 
