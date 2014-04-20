@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public class AtomFeedHttpMessageConverterTests {
 		Feed result = converter.read(Feed.class, inputMessage);
 		assertEquals("title", result.getTitle());
 		assertEquals("subtitle", result.getSubtitle().getValue());
-		List entries = result.getEntries();
+		List<?> entries = result.getEntries();
 		assertEquals(2, entries.size());
 
 		Entry entry1 = (Entry) entries.get(0);
@@ -95,7 +95,7 @@ public class AtomFeedHttpMessageConverterTests {
 		entry2.setId("id2");
 		entry2.setTitle("title2");
 
-		List entries = new ArrayList(2);
+		List<Entry> entries = new ArrayList<Entry>(2);
 		entries.add(entry1);
 		entries.add(entry2);
 		feed.setEntries(entries);

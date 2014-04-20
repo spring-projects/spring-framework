@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,16 +117,16 @@ public class CommonsMultipartResolverTests {
 
 	private void doTestParameters(MultipartHttpServletRequest request) {
 		Set<String> parameterNames = new HashSet<String>();
-		Enumeration parameterEnum = request.getParameterNames();
+		Enumeration<String> parameterEnum = request.getParameterNames();
 		while (parameterEnum.hasMoreElements()) {
-			parameterNames.add((String) parameterEnum.nextElement());
+			parameterNames.add(parameterEnum.nextElement());
 		}
 		assertEquals(3, parameterNames.size());
 		assertTrue(parameterNames.contains("field3"));
 		assertTrue(parameterNames.contains("field4"));
 		assertTrue(parameterNames.contains("getField"));
 		assertEquals("value3", request.getParameter("field3"));
-		List parameterValues = Arrays.asList(request.getParameterValues("field3"));
+		List<String> parameterValues = Arrays.asList(request.getParameterValues("field3"));
 		assertEquals(1, parameterValues.size());
 		assertTrue(parameterValues.contains("value3"));
 		assertEquals("value4", request.getParameter("field4"));
@@ -166,9 +166,9 @@ public class CommonsMultipartResolverTests {
 
 	private void doTestFiles(MultipartHttpServletRequest request) throws IOException {
 		Set<String> fileNames = new HashSet<String>();
-		Iterator fileIter = request.getFileNames();
+		Iterator<String> fileIter = request.getFileNames();
 		while (fileIter.hasNext()) {
-			fileNames.add((String) fileIter.next());
+			fileNames.add(fileIter.next());
 		}
 		assertEquals(3, fileNames.size());
 		assertTrue(fileNames.contains("field1"));
@@ -373,7 +373,7 @@ public class CommonsMultipartResolverTests {
 		protected FileUpload newFileUpload(FileItemFactory fileItemFactory) {
 			return new ServletFileUpload() {
 				@Override
-				public List parseRequest(HttpServletRequest request) {
+				public List<FileItem> parseRequest(HttpServletRequest request) {
 					if (request instanceof MultipartHttpServletRequest) {
 						throw new IllegalStateException("Already a multipart request");
 					}
