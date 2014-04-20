@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,9 +143,9 @@ public class JmsTemplateTests {
 		given(session.createProducer(null)).willReturn(messageProducer);
 		given(messageProducer.getPriority()).willReturn(4);
 
-		template.execute(new ProducerCallback() {
+		template.execute(new ProducerCallback<Void>() {
 			@Override
-			public Object doInJms(Session session, MessageProducer producer) throws JMSException {
+			public Void doInJms(Session session, MessageProducer producer) throws JMSException {
 				session.getTransacted();
 				producer.getPriority();
 				return null;
@@ -168,9 +168,9 @@ public class JmsTemplateTests {
 		given(session.createProducer(null)).willReturn(messageProducer);
 		given(messageProducer.getPriority()).willReturn(4);
 
-		template.execute(new ProducerCallback() {
+		template.execute(new ProducerCallback<Void>() {
 			@Override
-			public Object doInJms(Session session, MessageProducer producer) throws JMSException {
+			public Void doInJms(Session session, MessageProducer producer) throws JMSException {
 				session.getTransacted();
 				producer.getPriority();
 				return null;
@@ -192,9 +192,9 @@ public class JmsTemplateTests {
 		JmsTemplate template = createTemplate();
 		template.setConnectionFactory(connectionFactory);
 
-		template.execute(new SessionCallback() {
+		template.execute(new SessionCallback<Void>() {
 			@Override
-			public Object doInJms(Session session) throws JMSException {
+			public Void doInJms(Session session) throws JMSException {
 				session.getTransacted();
 				return null;
 			}
@@ -212,16 +212,16 @@ public class JmsTemplateTests {
 
 		TransactionSynchronizationManager.initSynchronization();
 		try {
-			template.execute(new SessionCallback() {
+			template.execute(new SessionCallback<Void>() {
 				@Override
-				public Object doInJms(Session session) throws JMSException {
+				public Void doInJms(Session session) throws JMSException {
 					session.getTransacted();
 					return null;
 				}
 			});
-			template.execute(new SessionCallback() {
+			template.execute(new SessionCallback<Void>() {
 				@Override
-				public Object doInJms(Session session) throws JMSException {
+				public Void doInJms(Session session) throws JMSException {
 					session.getTransacted();
 					return null;
 				}
@@ -237,9 +237,9 @@ public class JmsTemplateTests {
 			tas.close();
 			tac.close();
 
-			List synchs = TransactionSynchronizationManager.getSynchronizations();
+			List<TransactionSynchronization> synchs = TransactionSynchronizationManager.getSynchronizations();
 			assertEquals(1, synchs.size());
-			TransactionSynchronization synch = (TransactionSynchronization) synchs.get(0);
+			TransactionSynchronization synch = synchs.get(0);
 			synch.beforeCommit(false);
 			synch.beforeCompletion();
 			synch.afterCommit();
@@ -695,7 +695,7 @@ public class JmsTemplateTests {
 		doTestJmsException(new javax.jms.JMSException(""), UncategorizedJmsException.class);
 	}
 
-	protected void doTestJmsException(JMSException original, Class thrownExceptionClass) throws Exception {
+	protected void doTestJmsException(JMSException original, Class<? extends JmsException> thrownExceptionClass) throws Exception {
 		JmsTemplate template = createTemplate();
 		template.setConnectionFactory(connectionFactory);
 		template.setMessageConverter(new SimpleMessageConverter());

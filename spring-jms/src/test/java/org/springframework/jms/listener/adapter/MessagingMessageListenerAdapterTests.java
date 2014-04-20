@@ -18,8 +18,6 @@ package org.springframework.jms.listener.adapter;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 import java.lang.reflect.Method;
 
