@@ -39,10 +39,10 @@ public class HtmlCharacterEntityReferencesTests {
 	@Test
 	public void testSupportsAllCharacterEntityReferencesDefinedByHtml() {
 		HtmlCharacterEntityReferences entityReferences = new HtmlCharacterEntityReferences();
-		Map referenceCharactersMap = getReferenceCharacterMap();
+		Map<Integer, String> referenceCharactersMap = getReferenceCharacterMap();
 
 		for (int character = 0; character < 10000; character++) {
-			String referenceName = (String) referenceCharactersMap.get(new Integer(character));
+			String referenceName = referenceCharactersMap.get(character);
 			if (referenceName != null) {
 				String fullReference =
 						HtmlCharacterEntityReferences.REFERENCE_START +
@@ -76,7 +76,7 @@ public class HtmlCharacterEntityReferencesTests {
 				(char) -1, entityReferences.convertToCharacter("invalid"));
 	}
 
-	private Map getReferenceCharacterMap() {
+	private Map<Integer, String> getReferenceCharacterMap() {
 		CharacterEntityResourceIterator entityIterator = new CharacterEntityResourceIterator();
 		Map<Integer, String> referencedCharactersMap = new HashMap<Integer, String>();
 		while (entityIterator.hasNext()) {

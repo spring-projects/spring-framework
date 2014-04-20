@@ -77,7 +77,7 @@ public class HttpMessageConverterTests {
 		}
 
 		@Override
-		protected T readInternal(Class clazz, HttpInputMessage inputMessage)
+		protected T readInternal(Class<? extends T> clazz, HttpInputMessage inputMessage)
 				throws IOException, HttpMessageNotReadableException {
 			fail("Not expected");
 			return null;

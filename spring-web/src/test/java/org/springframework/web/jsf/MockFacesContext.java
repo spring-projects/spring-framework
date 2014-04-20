@@ -54,7 +54,7 @@ public class MockFacesContext extends FacesContext {
 	}
 
 	@Override
-	public Iterator getClientIdsWithMessages() {
+	public Iterator<String> getClientIdsWithMessages() {
 		return null;
 	}
 
@@ -73,12 +73,12 @@ public class MockFacesContext extends FacesContext {
 	}
 
 	@Override
-	public Iterator getMessages() {
+	public Iterator<FacesMessage> getMessages() {
 		return null;
 	}
 
 	@Override
-	public Iterator getMessages(String arg0) {
+	public Iterator<FacesMessage> getMessages(String clientId) {
 		return null;
 	}
 

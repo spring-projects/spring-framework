@@ -27,7 +27,7 @@ import org.apache.log4j.spi.LoggingEvent;
  */
 public class MockLog4jAppender extends AppenderSkeleton {
 
-	public static final List loggingStrings = new ArrayList();
+	public static final List<Object> loggingStrings = new ArrayList<Object>();
 
 	public static boolean closeCalled = false;
 

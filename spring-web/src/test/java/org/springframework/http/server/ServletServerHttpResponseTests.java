@@ -64,7 +64,7 @@ public class ServletServerHttpResponseTests {
 
 		response.close();
 		assertTrue("Header not set", mockResponse.getHeaderNames().contains(headerName));
-		List headerValues = mockResponse.getHeaders(headerName);
+		List<String> headerValues = mockResponse.getHeaders(headerName);
 		assertTrue("Header not set", headerValues.contains(headerValue1));
 		assertTrue("Header not set", headerValues.contains(headerValue2));
 		assertEquals("Invalid Content-Type", "text/plain;charset=UTF-8", mockResponse.getHeader("Content-Type"));
