@@ -30,7 +30,6 @@ import javax.websocket.Extension;
 import javax.websocket.Session;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.util.StringUtils;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.PingMessage;

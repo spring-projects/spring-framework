@@ -16,7 +16,6 @@
 
 package org.springframework.web.socket.messaging;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
