@@ -25,6 +25,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.junit.Ignore;
+
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.After;
@@ -37,9 +39,7 @@ import org.aspectj.lang.annotation.DeclareParents;
 import org.aspectj.lang.annotation.DeclarePrecedence;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-
 import org.junit.Test;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.annotation.ReflectiveAspectJAdvisorFactory.SyntheticInstantiationAdvisor;
 import org.springframework.aop.framework.Advised;
@@ -58,7 +58,6 @@ import test.aop.DefaultLockable;
 import test.aop.Lockable;
 import test.aop.PerTargetAspect;
 import test.aop.TwoAdviceAspect;
-
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
@@ -402,8 +401,8 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 
 	@Test
 	public void testIntroductionOnTargetExcludedByTypePattern() {
-		LinkedList target = new LinkedList();
-		List proxy = (List) createProxy(target,
+		LinkedList<Object> target = new LinkedList<Object>();
+		List<?> proxy = (List<?>) createProxy(target,
 				AopUtils.findAdvisorsThatCanApply(
 						getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable(), "someBean")),
 						List.class
@@ -431,7 +430,9 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 
 	// TODO: Why does this test fail? It hasn't been run before, so it maybe never actually passed...
 
-	public void XtestIntroductionWithArgumentBinding() {
+	@Test
+	@Ignore
+	public void testIntroductionWithArgumentBinding() {
 		TestBean target = new TestBean();
 
 		List<Advisor> advisors = getFixture().getAdvisors(
