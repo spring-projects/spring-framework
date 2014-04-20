@@ -35,7 +35,6 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link StompHeaderAccessor}.

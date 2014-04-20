@@ -16,7 +16,6 @@
 
 package org.springframework.messaging.simp;
 
-import org.apache.activemq.transport.stomp.Stomp;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.messaging.Message;

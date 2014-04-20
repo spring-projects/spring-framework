@@ -22,7 +22,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
-import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.MultiValueMap;
 
 /**

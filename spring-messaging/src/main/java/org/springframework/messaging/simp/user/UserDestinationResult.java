@@ -18,7 +18,6 @@ package org.springframework.messaging.simp.user;
 
 import org.springframework.util.Assert;
 
-import java.util.Collections;
 import java.util.Set;
 
 /**

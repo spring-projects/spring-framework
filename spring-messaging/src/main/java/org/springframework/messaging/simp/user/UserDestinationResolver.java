@@ -18,8 +18,6 @@ package org.springframework.messaging.simp.user;
 
 import org.springframework.messaging.Message;
 
-import java.util.Set;
-
 /**
  * A strategy for resolving a "user" destination and translating it to one or more
  * actual destinations unique to the user's active session(s).

@@ -30,7 +30,6 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.IdGenerator;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Test fixture for {@link MessageHeaderAccessor}.
