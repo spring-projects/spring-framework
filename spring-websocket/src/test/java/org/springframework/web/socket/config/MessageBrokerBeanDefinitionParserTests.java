@@ -64,7 +64,6 @@ import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsServ
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Test fixture for MessageBrokerBeanDefinitionParser.

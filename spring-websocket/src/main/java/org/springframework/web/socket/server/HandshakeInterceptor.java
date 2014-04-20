@@ -21,7 +21,6 @@ import java.util.Map;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.WebSocketSession;
 
 /**
  * Interceptor for WebSocket handshake requests. Can be used to inspect the
