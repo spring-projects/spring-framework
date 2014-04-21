@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,17 @@ package org.springframework.expression.spel.ast;
 import java.math.BigDecimal;
 
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Common supertype for operators that operate on either one or two operands. In the case
- * of multiply or divide there would be two operands, but for unary plus or minus, there
- * is only one.
+ * Common supertype for operators that operate on either one or two operands.
+ * In the case of multiply or divide there would be two operands, but for
+ * unary plus or minus, there is only one.
  *
  * @author Andy Clement
+ * @author Juergen Hoeller
  * @author Giovanni Dall'Oglio Risso
  * @since 3.0
  */
@@ -70,6 +72,7 @@ public abstract class Operator extends SpelNodeImpl {
 		return sb.toString();
 	}
 
+
 	protected boolean equalityCheck(ExpressionState state, Object left, Object right) {
 		if (left instanceof Number && right instanceof Number) {
 			Number leftNumber = (Number) left;
@@ -96,11 +99,22 @@ public abstract class Operator extends SpelNodeImpl {
 			return (leftNumber.intValue() == rightNumber.intValue());
 		}
 
-		if (left != null && (left instanceof Comparable)) {
-			return (state.getTypeComparator().compare(left, right) == 0);
+		if (left instanceof CharSequence && right instanceof CharSequence) {
+			return left.toString().equals(right.toString());
 		}
 
-		return ObjectUtils.nullSafeEquals(left, right);
+		if (ObjectUtils.nullSafeEquals(left, right)) {
+			return true;
+		}
+
+		if (left instanceof Comparable && right instanceof Comparable) {
+			Class<?> ancestor = ClassUtils.determineCommonAncestor(left.getClass(), right.getClass());
+			if (ancestor != null && Comparable.class.isAssignableFrom(ancestor)) {
+				return (state.getTypeComparator().compare(left, right) == 0);
+			}
+		}
+
+		return false;
 	}
 
 }
