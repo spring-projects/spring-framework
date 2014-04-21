@@ -13,7 +13,7 @@ configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
 
-	ext.aspectjVersion       = "1.7.4"
+	ext.aspectjVersion       = "1.8.0"
 	ext.groovyVersion        = "1.8.9"
 	ext.hibernate3Version    = "3.6.10.Final"
 	ext.hibernate4Version    = "4.3.5.Final"
@@ -78,7 +78,6 @@ configure(allprojects) { project ->
 
 	repositories {
 		maven { url "http://repo.spring.io/libs-release" }
-		maven { url "http://repo.spring.io/milestone" }  // for AspectJ 1.8.0.RC3
 		maven { url "http://repo.spring.io/snapshot" }  // temporarily until Reactor 1.1.0.M4
 	}
 
@@ -893,8 +892,8 @@ project("spring-aspects") {
 
 	dependencies {
 		aspects(project(":spring-orm"))
-		ajc("org.aspectj:aspectjtools:1.8.0.RC3") // needed for ajc on JDK 8 only
-		rt("org.aspectj:aspectjrt:1.8.0.RC3") // needed for ajc on JDK 8 only
+		ajc("org.aspectj:aspectjtools:${aspectjVersion}")
+		rt("org.aspectj:aspectjrt:${aspectjVersion}")
 		compile("org.aspectj:aspectjweaver:${aspectjVersion}") // exposing regular AspectJ version to users
 		provided("org.eclipse.persistence:javax.persistence:2.0.0")
 		optional(project(":spring-aop")) // for @Async support
