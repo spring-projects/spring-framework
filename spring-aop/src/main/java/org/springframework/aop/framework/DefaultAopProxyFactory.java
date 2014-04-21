@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,21 +21,18 @@ import java.io.Serializable;
 import org.springframework.aop.SpringProxy;
 
 /**
- * Default {@link AopProxyFactory} implementation,
- * creating either a CGLIB proxy or a JDK dynamic proxy.
+ * Default {@link AopProxyFactory} implementation, creating either a CGLIB proxy
+ * or a JDK dynamic proxy.
  *
- * <p>Creates a CGLIB proxy if one the following is true
- * for a given {@link AdvisedSupport} instance:
+ * <p>Creates a CGLIB proxy if one the following is true for a given
+ * {@link AdvisedSupport} instance:
  * <ul>
- * <li>the "optimize" flag is set
- * <li>the "proxyTargetClass" flag is set
+ * <li>the {@code optimize} flag is set
+ * <li>the {@code proxyTargetClass} flag is set
  * <li>no proxy interfaces have been specified
  * </ul>
  *
- * <p>Note that the CGLIB library classes have to be present on
- * the class path if an actual CGLIB proxy needs to be created.
- *
- * <p>In general, specify "proxyTargetClass" to enforce a CGLIB proxy,
+ * <p>In general, specify {@code proxyTargetClass} to enforce a CGLIB proxy,
  * or specify one or more interfaces to use a JDK dynamic proxy.
  *
  * @author Rod Johnson
