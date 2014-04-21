@@ -27,7 +27,7 @@ import org.springframework.asm.Type;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.util.LinkedMultiValueMap;
 
-import static org.springframework.core.annotation.AnnotationUtils.VALUE;
+import org.springframework.core.annotation.AnnotationUtils;
 
 /**
  * Internal utility class used when reading annotations.
@@ -119,18 +119,23 @@ abstract class AnnotationReadingVisitorUtils {
 			return null;
 		}
 
-		// To start with, we populate the results with all attribute values from the
-		// target annotation.
-		AnnotationAttributes results = attributesList.get(0);
+		// To start with, we populate the results with a copy of all attribute
+		// values from the target annotation. A copy is necessary so that we do
+		// not inadvertently mutate the state of the metadata passed to this
+		// method.
+		AnnotationAttributes results = new AnnotationAttributes(attributesList.get(0));
 
 		Set<String> overridableAttributeNames = new HashSet<String>(results.keySet());
-		overridableAttributeNames.remove(VALUE);
+		overridableAttributeNames.remove(AnnotationUtils.VALUE);
 
 		// Since the map is a LinkedMultiValueMap, we depend on the ordering of
 		// elements in the map and reverse the order of the keys in order to traverse
 		// "down" the annotation hierarchy.
 		List<String> annotationTypes = new ArrayList<String>(attributesMap.keySet());
 		Collections.reverse(annotationTypes);
+
+		// No need to revisit the target annotation type:
+		annotationTypes.remove(annotationType);
 
 		for (String currentAnnotationType : annotationTypes) {
 			List<AnnotationAttributes> currentAttributesList = attributesMap.get(currentAnnotationType);

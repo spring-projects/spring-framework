@@ -33,6 +33,7 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.MultiValueMap;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -111,7 +112,23 @@ public class AnnotationMetadataTests {
 		assertMetaAnnotationOverrides(metadata);
 	}
 
+	/**
+	 * @param metadata the metadata for {@link ComposedConfigurationWithAttributeOverridesClass}
+	 */
 	private void assertMetaAnnotationOverrides(AnnotationMetadata metadata) {
+		assertAllAttributesForMetaAnnotationOverrides(metadata);
+		assertAttributesForMetaAnnotationOverrides(metadata);
+
+		// SPR-11710: Invoke a 2nd time after invoking getAnnotationAttributes() in order
+		// to ensure that getMergedAnnotationAttributes() in AnnotationReadingVisitorUtils
+		// does not mutate the state of the metadata.
+		assertAllAttributesForMetaAnnotationOverrides(metadata);
+	}
+
+	/**
+	 * @param metadata the metadata for {@link ComposedConfigurationWithAttributeOverridesClass}
+	 */
+	private void assertAttributesForMetaAnnotationOverrides(AnnotationMetadata metadata) {
 		AnnotationAttributes attributes = (AnnotationAttributes) metadata.getAnnotationAttributes(
 			TestComponentScan.class.getName(), false);
 		String[] basePackages = attributes.getStringArray("basePackages");
@@ -121,6 +138,30 @@ public class AnnotationMetadataTests {
 		assertThat("length of value[]", value.length, is(0));
 		Class<?>[] basePackageClasses = attributes.getClassArray("basePackageClasses");
 		assertThat("length of basePackageClasses[]", basePackageClasses.length, is(0));
+	}
+
+	/**
+	 * @param metadata the metadata for {@link ComposedConfigurationWithAttributeOverridesClass}
+	 */
+	private void assertAllAttributesForMetaAnnotationOverrides(AnnotationMetadata metadata) {
+		MultiValueMap<String, Object> map = metadata.getAllAnnotationAttributes(TestComponentScan.class.getName());
+		List<Object> basePackages = map.get("basePackages");
+		assertThat("length of basePackages list", basePackages.size(), is(1));
+
+		// Ideally, the expected base package should be "org.example.componentscan", but
+		// since Spring's annotation processing currently does not support meta-annotation
+		// attribute overrides when searching for "all attributes", the actual value found
+		// is "bogus".
+		String expectedBasePackage = "bogus";
+		assertThat("basePackages[0]", ((String[]) basePackages.get(0))[0], is(expectedBasePackage));
+
+		List<Object> value = map.get("value");
+		assertThat("length of value list", value.size(), is(1));
+		assertThat("length of 0th value array", ((String[]) value.get(0)).length, is(0));
+
+		List<Object> basePackageClasses = map.get("basePackageClasses");
+		assertThat("length of basePackageClasses list", basePackageClasses.size(), is(1));
+		assertThat("length of 0th basePackageClasses array", ((Class<?>[]) basePackageClasses.get(0)).length, is(0));
 	}
 
 	private void doTestAnnotationInfo(AnnotationMetadata metadata) {
@@ -318,8 +359,10 @@ public class AnnotationMetadataTests {
 	// SPR-10914
 	public static enum SubclassEnum {
 		FOO {
+		/* Do not delete! This subclassing is intentional. */
 		},
 		BAR {
+		/* Do not delete! This subclassing is intentional. */
 		};
 	}
 
