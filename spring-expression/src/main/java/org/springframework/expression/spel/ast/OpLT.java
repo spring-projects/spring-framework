@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,20 +27,18 @@ import org.springframework.util.NumberUtils;
  * Implements the less-than operator.
  *
  * @author Andy Clement
+ * @author Juergen Hoeller
  * @author Giovanni Dall'Oglio Risso
  * @since 3.0
  */
 public class OpLT extends Operator {
 
-
 	public OpLT(int pos, SpelNodeImpl... operands) {
 		super("<", pos, operands);
 	}
 
-
 	@Override
-	public BooleanTypedValue getValueInternal(ExpressionState state)
-			throws EvaluationException {
+	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		Object left = getLeftOperand().getValueInternal(state).getValue();
 		Object right = getRightOperand().getValueInternal(state).getValue();
 
@@ -68,6 +66,12 @@ public class OpLT extends Operator {
 
 			return BooleanTypedValue.forValue(leftNumber.intValue() < rightNumber.intValue());
 		}
+
+		if (left instanceof CharSequence && right instanceof CharSequence) {
+			left = left.toString();
+			right = right.toString();
+		}
+
 		return BooleanTypedValue.forValue(state.getTypeComparator().compare(left, right) < 0);
 	}
 
