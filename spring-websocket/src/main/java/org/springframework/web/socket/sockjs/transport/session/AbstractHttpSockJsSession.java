@@ -351,11 +351,11 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	@Override
 	protected void writeFrameInternal(SockJsFrame frame) throws IOException {
 		if (isActive()) {
-			frame = this.frameFormat.format(frame);
+			String formattedFrame = this.frameFormat.format(frame);
 			if (logger.isTraceEnabled()) {
-				logger.trace("Writing " + frame);
+				logger.trace("Writing " + formattedFrame);
 			}
-			getResponse().getBody().write(frame.getContentBytes());
+			getResponse().getBody().write(formattedFrame.getBytes(SockJsFrame.CHARSET));
 		}
 	}
 

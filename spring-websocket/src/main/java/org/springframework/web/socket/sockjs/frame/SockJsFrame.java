@@ -18,18 +18,17 @@ package org.springframework.web.socket.sockjs.frame;
 
 import java.nio.charset.Charset;
 
-import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
- * Represents a SockJS frame. Provides factory methods to create SockJS frames on
- * the server side.
+ * Represents a SockJS frame. Provides factory methods to create SockJS frames.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public class SockJsFrame {
 
-	private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
+	public static final Charset CHARSET = Charset.forName("UTF-8");
 
 	private static final SockJsFrame OPEN_FRAME = new SockJsFrame("o");
 
@@ -40,12 +39,40 @@ public class SockJsFrame {
 	private static final SockJsFrame CLOSE_ANOTHER_CONNECTION_OPEN_FRAME = closeFrame(2010, "Another connection still open");
 
 
+	private final SockJsFrameType type;
+
 	private final String content;
 
 
+	/**
+	 * Create a new instance frame with the given frame content.
+	 * @param content the content, must be a non-empty and represent a valid SockJS frame
+	 */
 	public SockJsFrame(String content) {
-		Assert.notNull("Content must not be null");
-		this.content = content;
+		StringUtils.hasText(content);
+		if ("o".equals(content)) {
+			this.type = SockJsFrameType.OPEN;
+			this.content = content;
+		}
+		else if ("h".equals(content)) {
+			this.type = SockJsFrameType.HEARTBEAT;
+			this.content = content;
+		}
+		else if (content.charAt(0) == 'a') {
+			this.type = SockJsFrameType.MESSAGE;
+			this.content = (content.length() > 1 ? content : "a[]");
+		}
+		else if (content.charAt(0) == 'm') {
+			this.type = SockJsFrameType.MESSAGE;
+			this.content = (content.length() > 1 ? content : "null");
+		}
+		else if (content.charAt(0) == 'c') {
+			this.type = SockJsFrameType.CLOSE;
+			this.content = (content.length() > 1 ? content : "c[]");
+		}
+		else {
+			throw new IllegalArgumentException("Unexpected SockJS frame type in content=\"" + content + "\"");
+		}
 	}
 
 	public static SockJsFrame openFrame() {
@@ -74,12 +101,39 @@ public class SockJsFrame {
 	}
 
 
+	/**
+	 * Return the SockJS frame type.
+	 */
+	public SockJsFrameType getType() {
+		return this.type;
+	}
+
+	/**
+	 * Return the SockJS frame content, never {@code null}.
+	 */
 	public String getContent() {
 		return this.content;
 	}
 
+	/**
+	 * Return the SockJS frame content as a byte array.
+	 */
 	public byte[] getContentBytes() {
-		return this.content.getBytes(UTF8_CHARSET);
+		return this.content.getBytes(CHARSET);
+	}
+
+	/**
+	 * Return data contained in a SockJS "message" and "close" frames. Otherwise
+	 * for SockJS "open" and "close" frames, which do not contain data, return
+	 * {@code null}.
+	 */
+	public String getFrameData() {
+		if (SockJsFrameType.OPEN == getType() || SockJsFrameType.HEARTBEAT == getType()) {
+			return null;
+		}
+		else {
+			return getContent().substring(1);
+		}
 	}
 
 
