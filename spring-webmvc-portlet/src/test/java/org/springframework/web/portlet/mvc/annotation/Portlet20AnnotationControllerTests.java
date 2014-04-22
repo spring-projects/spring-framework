@@ -40,7 +40,6 @@ import javax.portlet.WindowState;
 import javax.servlet.http.Cookie;
 
 import org.junit.Test;
-
 import org.springframework.beans.BeansException;
 import org.springframework.tests.sample.beans.DerivedTestBean;
 import org.springframework.tests.sample.beans.ITestBean;
