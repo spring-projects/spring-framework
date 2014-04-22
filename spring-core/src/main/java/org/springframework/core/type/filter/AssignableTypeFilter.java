@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,12 +59,12 @@ public class AssignableTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 			return true;
 		}
 		else if (Object.class.getName().equals(typeName)) {
-			return Boolean.FALSE;
+			return false;
 		}
 		else if (typeName.startsWith("java.")) {
 			try {
 				Class<?> clazz = getClass().getClassLoader().loadClass(typeName);
-				return Boolean.valueOf(this.targetType.isAssignableFrom(clazz));
+				return this.targetType.isAssignableFrom(clazz);
 			}
 			catch (ClassNotFoundException ex) {
 				// Class not found - can't determine a match that way.

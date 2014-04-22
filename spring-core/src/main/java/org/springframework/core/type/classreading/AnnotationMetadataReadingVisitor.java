@@ -119,8 +119,8 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 
 	@Override
 	public AnnotationAttributes getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
-		AnnotationAttributes raw = AnnotationReadingVisitorUtils.getMergedAnnotationAttributes(this.attributesMap,
-			annotationType);
+		AnnotationAttributes raw = AnnotationReadingVisitorUtils.getMergedAnnotationAttributes(
+				this.attributesMap, annotationType);
 		return AnnotationReadingVisitorUtils.convertClassValues(this.classLoader, raw, classValuesAsString);
 	}
 
