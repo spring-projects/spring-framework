@@ -43,7 +43,6 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.MimeType;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 /**

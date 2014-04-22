@@ -28,7 +28,6 @@ import java.util.Map;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;

@@ -23,7 +23,6 @@ import java.util.Map;
 import groovy.lang.DelegatingMetaClass;
 import groovy.lang.GroovyObject;
 
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.aop.support.AopUtils;
@@ -45,8 +44,6 @@ import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.scripting.support.ScriptFactoryPostProcessor;
 import org.springframework.stereotype.Component;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ObjectUtils;
 

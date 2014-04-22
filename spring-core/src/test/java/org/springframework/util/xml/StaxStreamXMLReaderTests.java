@@ -31,7 +31,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.Locator;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
 import static org.mockito.BDDMockito.*;
 
 public class StaxStreamXMLReaderTests extends AbstractStaxXMLReaderTestCase {

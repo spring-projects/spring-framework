@@ -41,7 +41,6 @@ import org.springframework.core.type.AnnotationMetadata;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 /**

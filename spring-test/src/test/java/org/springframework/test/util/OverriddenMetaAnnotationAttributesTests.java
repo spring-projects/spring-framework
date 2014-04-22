@@ -23,7 +23,6 @@ import org.junit.Test;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.util.MetaAnnotationUtils;
-import org.springframework.test.util.MetaAnnotationUtils.AnnotationDescriptor;
 
 import static org.springframework.test.util.MetaAnnotationUtils.*;
 

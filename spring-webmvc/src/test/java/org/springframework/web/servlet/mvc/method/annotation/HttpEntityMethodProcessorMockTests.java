@@ -40,8 +40,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import static org.mockito.Mockito.*;
-
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.web.servlet.HandlerMapping.*;

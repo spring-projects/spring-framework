@@ -40,7 +40,6 @@ import org.xml.sax.ContentHandler;
 
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 /**

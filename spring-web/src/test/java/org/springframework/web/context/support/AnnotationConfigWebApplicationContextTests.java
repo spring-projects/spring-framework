@@ -16,8 +16,6 @@
 
 package org.springframework.web.context.support;
 
-import static org.junit.Assert.assertNotNull;
-
 import org.junit.Test;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;

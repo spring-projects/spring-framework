@@ -30,8 +30,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.SmartContextLoader;
-import org.springframework.test.util.MetaAnnotationUtils.AnnotationDescriptor;
-import org.springframework.test.util.MetaAnnotationUtils.UntypedAnnotationDescriptor;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 

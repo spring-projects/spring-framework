@@ -16,7 +16,6 @@
 
 package org.springframework.util.xml;
 
-import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.sax.SAXResult;

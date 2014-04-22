@@ -32,7 +32,6 @@ import org.springframework.web.socket.sockjs.frame.SockJsFrame;
 import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 /**

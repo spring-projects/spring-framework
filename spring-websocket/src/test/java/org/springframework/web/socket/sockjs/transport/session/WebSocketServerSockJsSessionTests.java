@@ -33,7 +33,6 @@ import org.springframework.web.socket.sockjs.transport.session.WebSocketServerSo
 import org.springframework.web.socket.handler.TestWebSocketSession;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 /**
