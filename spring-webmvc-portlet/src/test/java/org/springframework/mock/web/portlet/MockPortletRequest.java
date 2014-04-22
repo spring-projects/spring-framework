@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -271,8 +271,8 @@ public class MockPortletRequest implements PortletRequest {
 	@Override
 	public String getProperty(String key) {
 		Assert.notNull(key, "Property key must not be null");
-		List list = this.properties.get(key);
-		return (list != null && list.size() > 0 ? (String) list.get(0) : null);
+		List<String> list = this.properties.get(key);
+		return (list != null && list.size() > 0 ? list.get(0) : null);
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -166,7 +166,7 @@ public class PortletRequestDataBinderTests extends TestCase {
 
 	public void testBindingSet() {
 		TestBean bean = new TestBean();
-		Set set = new LinkedHashSet<>(2);
+		Set<TestBean> set = new LinkedHashSet<TestBean>(2);
 		set.add(new TestBean("test1"));
 		set.add(new TestBean("test2"));
 		bean.setSomeSet(set);
@@ -181,7 +181,7 @@ public class PortletRequestDataBinderTests extends TestCase {
 		assertNotNull(bean.getSomeSet());
 		assertEquals(2, bean.getSomeSet().size());
 
-		Iterator iter = bean.getSomeSet().iterator();
+		Iterator<?> iter = bean.getSomeSet().iterator();
 
 		TestBean bean1 = (TestBean) iter.next();
 		assertEquals("test1", bean1.getName());
