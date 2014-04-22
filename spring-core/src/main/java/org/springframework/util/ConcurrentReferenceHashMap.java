@@ -387,7 +387,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	protected static int calculateShift(int minimumValue, int maximumValue) {
 		int shift = 0;
 		int value = 1;
-		while (value < minimumValue && value < minimumValue) {
+		while (value < minimumValue && value < maximumValue) {
 			value <<= 1;
 			shift++;
 		}
