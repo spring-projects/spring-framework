@@ -149,10 +149,10 @@ public class AbstractJettyServerTestCase {
 
 		private void echo(HttpServletRequest request, HttpServletResponse response) throws IOException {
 			response.setStatus(HttpServletResponse.SC_OK);
-			for (Enumeration e1 = request.getHeaderNames(); e1.hasMoreElements();) {
-				String headerName = (String) e1.nextElement();
-				for (Enumeration e2 = request.getHeaders(headerName); e2.hasMoreElements();) {
-					String headerValue = (String) e2.nextElement();
+			for (Enumeration<String> e1 = request.getHeaderNames(); e1.hasMoreElements();) {
+				String headerName = e1.nextElement();
+				for (Enumeration<String> e2 = request.getHeaders(headerName); e2.hasMoreElements();) {
+					String headerValue = e2.nextElement();
 					response.addHeader(headerName, headerValue);
 				}
 			}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.web.context.request;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -69,13 +70,13 @@ public class ServletWebRequestTests {
 		assertEquals("value2", request.getParameterValues("param2")[0]);
 		assertEquals("value2a", request.getParameterValues("param2")[1]);
 
-		Map paramMap = request.getParameterMap();
+		Map<String, String[]> paramMap = request.getParameterMap();
 		assertEquals(2, paramMap.size());
-		assertEquals(1, ((String[]) paramMap.get("param1")).length);
-		assertEquals("value1", ((String[]) paramMap.get("param1"))[0]);
-		assertEquals(2, ((String[]) paramMap.get("param2")).length);
-		assertEquals("value2", ((String[]) paramMap.get("param2"))[0]);
-		assertEquals("value2a", ((String[]) paramMap.get("param2"))[1]);
+		assertEquals(1, paramMap.get("param1").length);
+		assertEquals("value1", paramMap.get("param1")[0]);
+		assertEquals(2, paramMap.get("param2").length);
+		assertEquals("value2", paramMap.get("param2")[0]);
+		assertEquals("value2a", paramMap.get("param2")[1]);
 	}
 
 	@Test

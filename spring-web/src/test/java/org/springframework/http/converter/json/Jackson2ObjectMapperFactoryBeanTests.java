@@ -211,8 +211,8 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 
 		factory.setObjectMapper(objectMapper);
 
-		JsonSerializer serializer1 = new ClassSerializer();
-		JsonSerializer serializer2 = new NumberSerializer();
+		JsonSerializer<Class<?>> serializer1 = new ClassSerializer();
+		JsonSerializer<Number> serializer2 = new NumberSerializer();
 
 		factory.setSerializers(serializer1);
 		factory.setSerializersByType(Collections.<Class<?>, JsonSerializer<?>> singletonMap(Boolean.class, serializer2));

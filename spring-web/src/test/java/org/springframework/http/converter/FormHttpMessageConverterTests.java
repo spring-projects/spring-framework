@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,31 +131,31 @@ public class FormHttpMessageConverterTests {
 		// see if Commons FileUpload can read what we wrote
 		FileItemFactory fileItemFactory = new DiskFileItemFactory();
 		FileUpload fileUpload = new FileUpload(fileItemFactory);
-		List items = fileUpload.parseRequest(new MockHttpOutputMessageRequestContext(outputMessage));
+		List<FileItem> items = fileUpload.parseRequest(new MockHttpOutputMessageRequestContext(outputMessage));
 		assertEquals(5, items.size());
-		FileItem item = (FileItem) items.get(0);
+		FileItem item = items.get(0);
 		assertTrue(item.isFormField());
 		assertEquals("name 1", item.getFieldName());
 		assertEquals("value 1", item.getString());
 
-		item = (FileItem) items.get(1);
+		item = items.get(1);
 		assertTrue(item.isFormField());
 		assertEquals("name 2", item.getFieldName());
 		assertEquals("value 2+1", item.getString());
 
-		item = (FileItem) items.get(2);
+		item = items.get(2);
 		assertTrue(item.isFormField());
 		assertEquals("name 2", item.getFieldName());
 		assertEquals("value 2+2", item.getString());
 
-		item = (FileItem) items.get(3);
+		item = items.get(3);
 		assertFalse(item.isFormField());
 		assertEquals("logo", item.getFieldName());
 		assertEquals("logo.jpg", item.getName());
 		assertEquals("image/jpeg", item.getContentType());
 		assertEquals(logo.getFile().length(), item.getSize());
 
-		item = (FileItem) items.get(4);
+		item = items.get(4);
 		assertEquals("xml", item.getFieldName());
 		assertEquals("text/xml", item.getContentType());
 		verify(outputMessage.getBody(), never()).close();
@@ -182,6 +182,7 @@ public class FormHttpMessageConverterTests {
 		}
 
 		@Override
+		@Deprecated
 		public int getContentLength() {
 			return outputMessage.getBodyAsBytes().length;
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public class RssChannelHttpMessageConverterTests {
 		assertEquals("http://example.com", result.getLink());
 		assertEquals("description", result.getDescription());
 
-		List items = result.getItems();
+		List<?> items = result.getItems();
 		assertEquals(2, items.size());
 
 		Item item1 = (Item) items.get(0);
@@ -95,7 +95,7 @@ public class RssChannelHttpMessageConverterTests {
 		Item item2 = new Item();
 		item2.setTitle("title2");
 
-		List items = new ArrayList(2);
+		List<Item> items = new ArrayList<Item>(2);
 		items.add(item1);
 		items.add(item2);
 		channel.setItems(items);
