@@ -17,10 +17,7 @@ argfile*
 pom.xml
 activemq-data/
 
-/build
-buildSrc/build
-/spring-*/build
-/src/asciidoc/build
+build/
 target/
 
 # Eclipse artifacts, including WTP generated manifests
