@@ -17,7 +17,6 @@
 package org.springframework.cache.jcache;
 
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.mock;
 
 import javax.cache.Cache;
 import javax.cache.CacheManager;
