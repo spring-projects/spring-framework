@@ -22,45 +22,46 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.Resource;
 
-
 /**
- * A strategy for matching a request to a server-side resource. Provides a mechanism
- * for resolving an incoming request to an actual
- * {@link org.springframework.core.io.Resource} and also for obtaining the public
- * URL path clients should use when requesting the resource.
+ * A strategy for resolving a request to a server-side resource.
+ *
+ * <p>Provides mechanisms for resolving an incoming request to an actual
+ * {@link org.springframework.core.io.Resource} and for obtaining the public
+ * URL path that clients should use when requesting the resource.
  *
  * @author Jeremy Grelle
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.1
- *
  * @see org.springframework.web.servlet.resource.ResourceResolverChain
  */
 public interface ResourceResolver {
 
 	/**
-	 * Resolve the input request and request path to a {@link Resource} that
+	 * Resolve the supplied request and request path to a {@link Resource} that
 	 * exists under one of the given resource locations.
 	 *
 	 * @param request the current request
 	 * @param requestPath the portion of the request path to use
-	 * @param locations locations where to look for resources
-	 * @param chain a chain with other resolvers to delegate to
-	 *
+	 * @param locations the locations to search in when looking up resources
+	 * @param chain the chain of resolvers to delegate to
 	 * @return the resolved resource or {@code null} if unresolved
 	 */
-	Resource resolveResource(HttpServletRequest request, String requestPath,
-			List<Resource> locations, ResourceResolverChain chain);
+	Resource resolveResource(HttpServletRequest request, String requestPath, List<? extends Resource> locations,
+			ResourceResolverChain chain);
 
 	/**
-	 * Get the externally facing public URL path for clients to use to access the
-	 * resource located at the resource URL path.
+	 * Resolve the externally facing <em>public</em> URL path for clients to use
+	 * to access the resource that is located at the given <em>internal</em>
+	 * resource path.
 	 *
-	 * @param resourceUrlPath the candidate resource URL path
-	 * @param locations the configured locations where to look up resources
-	 * @param chain the chain with remaining resolvers to delegate to
+	 * <p>This is useful when rendering URL links to clients.
 	 *
-	 * @return the resolved URL path or {@code null} if unresolved
+	 * @param resourcePath the internal resource path
+	 * @param locations the locations to search in when looking up resources
+	 * @param chain the chain of resolvers to delegate to
+	 * @return the resolved public URL path or {@code null} if unresolved
 	 */
-	String getPublicUrlPath(String resourceUrlPath, List<Resource> locations, ResourceResolverChain chain);
+	String resolvePublicUrlPath(String resourcePath, List<? extends Resource> locations, ResourceResolverChain chain);
 
 }

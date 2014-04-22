@@ -26,16 +26,18 @@ import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.web.filter.OncePerRequestFilter;
 
+import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
  * A filter that wraps the {@link HttpServletResponse} and overrides its
  * {@link HttpServletResponse#encodeURL(String) encodeURL} method in order to
- * translate resource request URLs.
+ * translate internal resource request URLs into public URL paths for external
+ * use.
  *
  * @author Jeremy Grelle
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.1
  */
 public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
@@ -44,15 +46,17 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 
 
 	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-			FilterChain filterChain) throws ServletException, IOException {
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
 
 		filterChain.doFilter(request, new ResourceUrlEncodingResponseWrapper(request, response));
 	}
 
-	private class ResourceUrlEncodingResponseWrapper extends HttpServletResponseWrapper {
+
+	private static class ResourceUrlEncodingResponseWrapper extends HttpServletResponseWrapper {
 
 		private HttpServletRequest request;
+
 
 		private ResourceUrlEncodingResponseWrapper(HttpServletRequest request, HttpServletResponse wrapped) {
 			super(wrapped);
@@ -62,15 +66,15 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 		@Override
 		public String encodeURL(String url) {
 			String name = PublicResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR;
-			PublicResourceUrlProvider translator = (PublicResourceUrlProvider) this.request.getAttribute(name);
-			if (translator != null) {
-				String translatedUrl = translator.getForRequestUrl(this.request, url);
+			PublicResourceUrlProvider urlProvider = (PublicResourceUrlProvider) this.request.getAttribute(name);
+			if (urlProvider != null) {
+				String translatedUrl = urlProvider.getForRequestUrl(this.request, url);
 				if (translatedUrl != null) {
 					return super.encodeURL(translatedUrl);
 				}
 			}
 			else {
-				logger.debug("Request attribute exposing ResourceUrlPathProvider not found");
+				logger.debug("Request attribute exposing PublicResourceUrlProvider not found under name: " + name);
 			}
 			return super.encodeURL(url);
 		}

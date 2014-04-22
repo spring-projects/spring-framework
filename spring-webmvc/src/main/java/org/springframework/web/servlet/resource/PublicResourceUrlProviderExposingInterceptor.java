@@ -23,9 +23,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * An interceptor that exposes the
- * {@link PublicResourceUrlProvider ResourceUrlPathTranslator}
- * instance it is configured with as a request attribute.
+ * An interceptor that exposes the {@link PublicResourceUrlProvider} instance it
+ * is configured with as a request attribute.
  *
  * @author Rossen Stoyanchev
  * @since 4.1
@@ -33,8 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 public class PublicResourceUrlProviderExposingInterceptor extends HandlerInterceptorAdapter {
 
 	/**
-	 * Name of request attribute that holds
-	 * {@link PublicResourceUrlProvider ResourceUrlPathTranslator}.
+	 * Name of the request attribute that holds the {@link PublicResourceUrlProvider}.
 	 */
 	public static final String RESOURCE_URL_PROVIDER_ATTR = PublicResourceUrlProvider.class.getName().toString();
 

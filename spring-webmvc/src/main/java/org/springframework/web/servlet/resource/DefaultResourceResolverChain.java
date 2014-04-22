@@ -28,30 +28,32 @@ import org.springframework.util.Assert;
 
 
 /**
- * A default implementation of
- * {@link org.springframework.web.servlet.resource.ResourceResolverChain ResourceResolverChain}
- * for invoking a list of {@link ResourceResolver}s.
+ * A default implementation of {@link ResourceResolverChain} for invoking a list
+ * of {@link ResourceResolver}s.
  *
  * @author Jeremy Grelle
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.1
  */
 class DefaultResourceResolverChain implements ResourceResolverChain {
 
-	private static Log logger = LogFactory.getLog(DefaultResourceResolverChain.class);
+	private static final Log logger = LogFactory.getLog(DefaultResourceResolverChain.class);
 
 	private final List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
 
 	private int index = -1;
 
 
-	public DefaultResourceResolverChain(List<ResourceResolver> resolvers) {
-		this.resolvers.addAll((resolvers != null) ? resolvers : new ArrayList<ResourceResolver>());
+	public DefaultResourceResolverChain(List<? extends ResourceResolver> resolvers) {
+		if (resolvers != null) {
+			this.resolvers.addAll(resolvers);
+		}
 	}
 
 
 	@Override
-	public Resource resolveResource(HttpServletRequest request, String requestPath, List<Resource> locations) {
+	public Resource resolveResource(HttpServletRequest request, String requestPath, List<? extends Resource> locations) {
 		ResourceResolver resolver = getNextResolver();
 		if (resolver == null) {
 			return null;
@@ -68,14 +70,14 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 	}
 
 	@Override
-	public String resolveUrlPath(String resourcePath, List<Resource> locations) {
+	public String resolvePublicUrlPath(String resourcePath, List<? extends Resource> locations) {
 		ResourceResolver resolver = getNextResolver();
 		if (resolver == null) {
 			return null;
 		}
 		try {
 			logBefore(resolver);
-			String urlPath = resolver.getPublicUrlPath(resourcePath, locations, this);
+			String urlPath = resolver.resolvePublicUrlPath(resourcePath, locations, this);
 			logAfter(resolver, urlPath);
 			return urlPath;
 		}

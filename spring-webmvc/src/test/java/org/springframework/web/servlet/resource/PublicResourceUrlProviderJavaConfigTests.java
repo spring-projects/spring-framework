@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,25 +44,25 @@ import static org.junit.Assert.*;
  */
 public class PublicResourceUrlProviderJavaConfigTests {
 
-	private MockFilterChain filterChain;
+	private final TestServlet servlet = new TestServlet();
 
-	private TestServlet servlet;
+	private MockFilterChain filterChain;
 
 	private MockHttpServletRequest request;
 
 
 	@Before
+	@SuppressWarnings("resource")
 	public void setup() throws Exception {
 
-		this.servlet = new TestServlet();
 		this.filterChain = new MockFilterChain(this.servlet, new ResourceUrlEncodingFilter());
 
-		AnnotationConfigWebApplicationContext cxt = new AnnotationConfigWebApplicationContext();
-		cxt.setServletContext(new MockServletContext());
-		cxt.register(WebConfig.class);
-		cxt.refresh();
+		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
+		ctx.setServletContext(new MockServletContext());
+		ctx.register(WebConfig.class);
+		ctx.refresh();
 
-		PublicResourceUrlProvider urlProvider = cxt.getBean(PublicResourceUrlProvider.class);
+		PublicResourceUrlProvider urlProvider = ctx.getBean(PublicResourceUrlProvider.class);
 
 		this.request = new MockHttpServletRequest("GET", "/");
 		request.setAttribute(PublicResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, urlProvider);

@@ -30,7 +30,6 @@ import org.springframework.util.DigestUtils;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 
-
 /**
  * A {@code ResourceResolver} that resolves request paths containing an additional
  * MD5 hash in the file name.
@@ -48,18 +47,19 @@ import org.springframework.util.StringUtils;
  *
  * @author Jeremy Grelle
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.1
  */
 public class FingerprintResourceResolver implements ResourceResolver {
 
 	private static final Log logger = LogFactory.getLog(FingerprintResourceResolver.class);
 
-	private final Pattern pattern = Pattern.compile("-(\\S*)\\.");
+	private static final Pattern pattern = Pattern.compile("-(\\S*)\\.");
 
 
 	@Override
-	public Resource resolveResource(HttpServletRequest request, String requestPath,
-			List<Resource> locations, ResourceResolverChain chain) {
+	public Resource resolveResource(HttpServletRequest request, String requestPath, List<? extends Resource> locations,
+			ResourceResolverChain chain) {
 
 		Resource resolved = chain.resolveResource(request, requestPath, locations);
 		if (resolved != null) {
@@ -82,13 +82,13 @@ public class FingerprintResourceResolver implements ResourceResolver {
 			return baseResource;
 		}
 		else {
-			logger.debug("Potential resource found for ["+requestPath+"], but fingerprint doesn't match.");
+			logger.debug("Potential resource found for [" + requestPath + "], but fingerprint doesn't match.");
 			return null;
 		}
 	}
 
 	private String extractHash(String path) {
-		Matcher matcher = this.pattern.matcher(path);
+		Matcher matcher = pattern.matcher(path);
 		if (matcher.find()) {
 			String match = matcher.group(1);
 			return match.contains("-") ? match.substring(match.lastIndexOf("-") + 1) : match;
@@ -104,19 +104,20 @@ public class FingerprintResourceResolver implements ResourceResolver {
 			return DigestUtils.md5DigestAsHex(content);
 		}
 		catch (IOException e) {
-			logger.error("Failed to calculate hash on resource [" + resource.toString()+"]");
+			logger.error("Failed to calculate hash for resource [" + resource + "]");
 			return "";
 		}
 	}
 
 	@Override
-	public String getPublicUrlPath(String resourceUrlPath, List<Resource> locations, ResourceResolverChain chain) {
-		String baseUrl = chain.resolveUrlPath(resourceUrlPath, locations);
+	public String resolvePublicUrlPath(String resourceUrlPath, List<? extends Resource> locations,
+			ResourceResolverChain chain) {
+		String baseUrl = chain.resolvePublicUrlPath(resourceUrlPath, locations);
 		if (StringUtils.hasText(baseUrl)) {
 			Resource original = chain.resolveResource(null, resourceUrlPath, locations);
 			String hash = calculateHash(original);
-			return StringUtils.stripFilenameExtension(baseUrl)
-					+ "-" + hash + "." + StringUtils.getFilenameExtension(baseUrl);
+			return StringUtils.stripFilenameExtension(baseUrl) + "-" + hash + "."
+					+ StringUtils.getFilenameExtension(baseUrl);
 		}
 		return baseUrl;
 	}

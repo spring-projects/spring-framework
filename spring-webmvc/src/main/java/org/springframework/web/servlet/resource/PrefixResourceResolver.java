@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.resource;
 
 import org.springframework.core.io.Resource;
@@ -35,22 +36,24 @@ import java.util.List;
  * it causes only actually modified resources to be reloaded.
  *
  * @author Brian Clozel
+ * @author Sam Brannen
  * @since 4.1
  */
 public class PrefixResourceResolver implements ResourceResolver {
 
 	private final String prefix;
 
+
 	public PrefixResourceResolver(String prefix) {
-		Assert.hasText(prefix, "resource path prefix should not be null");
+		Assert.hasText(prefix, "prefix must not be null or empty");
 		this.prefix = prefix.startsWith("/") ? prefix : "/" + prefix;
 	}
 
 	@Override
-	public Resource resolveResource(HttpServletRequest request,
-            String requestPath, List<Resource> locations, ResourceResolverChain chain) {
+	public Resource resolveResource(HttpServletRequest request, String requestPath, List<? extends Resource> locations,
+			ResourceResolverChain chain) {
 
-		if(requestPath.startsWith(this.prefix)) {
+		if (requestPath.startsWith(this.prefix)) {
 			requestPath = requestPath.substring(this.prefix.length());
 		}
 
@@ -58,8 +61,10 @@ public class PrefixResourceResolver implements ResourceResolver {
 	}
 
 	@Override
-	public String getPublicUrlPath(String resourceUrlPath, List<Resource> locations, ResourceResolverChain chain) {
-		String baseUrl = chain.resolveUrlPath(resourceUrlPath, locations);
+	public String resolvePublicUrlPath(String resourceUrlPath, List<? extends Resource> locations,
+			ResourceResolverChain chain) {
+		String baseUrl = chain.resolvePublicUrlPath(resourceUrlPath, locations);
 		return this.prefix + (baseUrl.startsWith("/") ? baseUrl : "/" + baseUrl);
 	}
+
 }

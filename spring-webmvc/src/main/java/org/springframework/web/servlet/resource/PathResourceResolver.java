@@ -25,7 +25,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
 
-
 /**
  * A simple {@code ResourceResolver} that tries to find a resource under the given
  * locations matching to the request path.
@@ -35,6 +34,7 @@ import org.springframework.core.io.Resource;
  *
  * @author Jeremy Grelle
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.1
  */
 public class PathResourceResolver implements ResourceResolver {
@@ -43,18 +43,18 @@ public class PathResourceResolver implements ResourceResolver {
 
 
 	@Override
-	public Resource resolveResource(HttpServletRequest request,
-			String requestPath, List<Resource> locations, ResourceResolverChain chain) {
-
+	public Resource resolveResource(HttpServletRequest request, String requestPath, List<? extends Resource> locations,
+			ResourceResolverChain chain) {
 		return getResource(requestPath, locations);
 	}
 
 	@Override
-	public String getPublicUrlPath(String resourceUrlPath, List<Resource> locations, ResourceResolverChain chain) {
+	public String resolvePublicUrlPath(String resourceUrlPath, List<? extends Resource> locations,
+			ResourceResolverChain chain) {
 		return (getResource(resourceUrlPath, locations) != null) ? resourceUrlPath : null;
 	}
 
-	private Resource getResource(String path, List<Resource> locations) {
+	private Resource getResource(String path, List<? extends Resource> locations) {
 		for (Resource location : locations) {
 			try {
 				if (logger.isDebugEnabled()) {

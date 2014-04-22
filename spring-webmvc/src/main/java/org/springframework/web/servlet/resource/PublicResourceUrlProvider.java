@@ -34,9 +34,9 @@ import java.util.Map;
 
 
 /**
- * A central component aware of Spring MVC handler mappings for serving static
- * resources that provides methods to determine the public URL path clients
- * should to access static resource.
+ * A central component for serving static resources that is aware of Spring MVC
+ * handler mappings and provides methods to determine the public URL path that
+ * a client should use to access a static resource.
  *
  * @author Rossen Stoyanchev
  * @since 4.1
@@ -44,7 +44,6 @@ import java.util.Map;
 public class PublicResourceUrlProvider implements ApplicationListener<ContextRefreshedEvent> {
 
 	protected final Log logger = LogFactory.getLog(getClass());
-
 
 	private UrlPathHelper pathHelper = new UrlPathHelper();
 
@@ -154,8 +153,8 @@ public class PublicResourceUrlProvider implements ApplicationListener<ContextRef
 	 * URL path to expose for public use.
 	 *
 	 * @param request the current request
-	 * @param requestUrl the request URL path to translate
-	 * @return the translated resource URL path or {@code null}
+	 * @param requestUrl the request URL path to resolve
+	 * @return the resolved public URL path or {@code null} if unresolved
 	 */
 	public final String getForRequestUrl(HttpServletRequest request, String requestUrl) {
 		if (logger.isDebugEnabled()) {
@@ -181,19 +180,18 @@ public class PublicResourceUrlProvider implements ApplicationListener<ContextRef
 	/**
 	 * Compare the given path against configured resource handler mappings and
 	 * if a match is found use the {@code ResourceResolver} chain of the matched
-	 * {@code ResourceHttpRequestHandler} to determine the URL path to expose for
+	 * {@code ResourceHttpRequestHandler} to resolve the URL path to expose for
 	 * public use.
 	 *
 	 * <p>It is expected the given path is what Spring MVC would use for request
 	 * mapping purposes, i.e. excluding context and servlet path portions.
 	 *
-	 * @param lookupPath the look path to check
-	 *
-	 * @return the resolved URL path or {@code null} if unresolved
+	 * @param lookupPath the lookup path to check
+	 * @return the resolved public URL path or {@code null} if unresolved
 	 */
 	public final String getForLookupPath(String lookupPath) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Checking lookup path=" + lookupPath);
+			logger.debug("Checking lookup path: " + lookupPath);
 		}
 		for (String pattern : this.handlerMap.keySet()) {
 			if (!getPathMatcher().match(pattern, lookupPath)) {
@@ -207,7 +205,7 @@ public class PublicResourceUrlProvider implements ApplicationListener<ContextRef
 			}
 			ResourceHttpRequestHandler handler = this.handlerMap.get(pattern);
 			ResourceResolverChain chain = handler.createResourceResolverChain();
-			String resolved = chain.resolveUrlPath(pathWithinMapping, handler.getLocations());
+			String resolved = chain.resolvePublicUrlPath(pathWithinMapping, handler.getLocations());
 			if (resolved == null) {
 				throw new IllegalStateException("Failed to get public resource URL path for " + pathWithinMapping);
 			}

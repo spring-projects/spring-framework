@@ -22,40 +22,40 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.Resource;
 
-
 /**
  * A contract for invoking a chain of {@link ResourceResolver}s where each resolver
  * is given a reference to the chain allowing it to delegate when necessary.
  *
  * @author Jeremy Grelle
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.1
+ * @see ResourceResolver
  */
 public interface ResourceResolverChain {
 
 	/**
-	 * Resolve the URL path of an incoming request to an actual {@link Resource}
-	 * to serve in the response.
+	 * Resolve the supplied request and request path to a {@link Resource} that
+	 * exists under one of the given resource locations.
 	 *
 	 * @param request the current request
 	 * @param requestPath the portion of the request path to use
-	 * @param locations the configured locations where to look up resources
-	 *
-	 * @return the resolved {@link Resource} or {@code null} if this resolver
-	 * could not resolve the resource
+	 * @param locations the locations to search in when looking up resources
+	 * @return the resolved resource or {@code null} if unresolved
 	 */
-	Resource resolveResource(HttpServletRequest request, String requestPath, List<Resource> locations);
+	Resource resolveResource(HttpServletRequest request, String requestPath, List<? extends Resource> locations);
 
 	/**
-	 * Resolve the given resource path to a URL path. This is useful when rendering
-	 * URL links to clients to determine the actual URL to use.
+	 * Resolve the externally facing <em>public</em> URL path for clients to use
+	 * to access the resource that is located at the given <em>internal</em>
+	 * resource path.
 	 *
-	 * @param resourcePath the resource path
-	 * @param locations the configured locations where to look up resources
+	 * <p>This is useful when rendering URL links to clients.
 	 *
-	 * @return the resolved URL path or {@code null} if this resolver could not
-	 * resolve the given resource path
+	 * @param resourcePath the internal resource path
+	 * @param locations the locations to search in when looking up resources
+	 * @return the resolved public URL path or {@code null} if unresolved
 	 */
-	String resolveUrlPath(String resourcePath, List<Resource> locations);
+	String resolvePublicUrlPath(String resourcePath, List<? extends Resource> locations);
 
 }
