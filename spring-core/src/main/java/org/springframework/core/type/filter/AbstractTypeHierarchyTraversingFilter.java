@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.core.type.filter;
 import java.io.IOException;
 
 import org.springframework.core.type.ClassMetadata;
-import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
 
 /**
  * Type filter that is aware of traversing over hierarchy.
@@ -61,40 +61,38 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 			return true;
 		}
 
-		if (!this.considerInherited) {
-			return false;
-		}
-		if (metadata.hasSuperClass()) {
-			// Optimization to avoid creating ClassReader for super class.
-			Boolean superClassMatch = matchSuperClass(metadata.getSuperClassName());
-			if (superClassMatch != null) {
-				if (superClassMatch.booleanValue()) {
-					return true;
+		if (this.considerInherited) {
+			if (metadata.hasSuperClass()) {
+				// Optimization to avoid creating ClassReader for super class.
+				Boolean superClassMatch = matchSuperClass(metadata.getSuperClassName());
+				if (superClassMatch != null) {
+					if (superClassMatch.booleanValue()) {
+						return true;
+					}
 				}
-			}
-			else {
-				// Need to read super class to determine a match...
-				if (match(metadata.getSuperClassName(), metadataReaderFactory)) {
-					return true;
+				else {
+					// Need to read super class to determine a match...
+					if (match(metadata.getSuperClassName(), metadataReaderFactory)) {
+						return true;
+					}
 				}
 			}
 		}
 
-		if (!this.considerInterfaces) {
-			return false;
-		}
-		for (String ifc : metadata.getInterfaceNames()) {
-			// Optimization to avoid creating ClassReader for super class
-			Boolean interfaceMatch = matchInterface(ifc);
-			if (interfaceMatch != null) {
-				if (interfaceMatch.booleanValue()) {
-					return true;
+		if (this.considerInterfaces) {
+			for (String ifc : metadata.getInterfaceNames()) {
+				// Optimization to avoid creating ClassReader for super class
+				Boolean interfaceMatch = matchInterface(ifc);
+				if (interfaceMatch != null) {
+					if (interfaceMatch.booleanValue()) {
+						return true;
+					}
 				}
-			}
-			else {
-				// Need to read interface to determine a match...
-				if (match(ifc, metadataReaderFactory)) {
-					return true;
+				else {
+					// Need to read interface to determine a match...
+					if (match(ifc, metadataReaderFactory)) {
+						return true;
+					}
 				}
 			}
 		}
@@ -132,7 +130,7 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 	/**
 	 * Override this to match on interface type name.
 	 */
-	protected Boolean matchInterface(String interfaceNames) {
+	protected Boolean matchInterface(String interfaceName) {
 		return null;
 	}
 
