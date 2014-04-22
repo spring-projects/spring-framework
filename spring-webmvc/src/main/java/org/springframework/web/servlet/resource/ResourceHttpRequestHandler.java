@@ -64,9 +64,9 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  * is used in the URL  mapping pattern that selects this handler. Such patterns can be easily parameterized
  * using Spring EL. See the reference manual for further examples of this approach.
  *
- * <p>For various front-end needs, such as ensuring that users with a primed browser cache get the latest changes,
- * or serving variations of resources (minified versions for example- -
- * {@link org.springframework.web.servlet.resource.ResourceResolver}s can be configured.</p>
+ * <p>For various front-end needs &mdash; such as ensuring that users with a primed browser cache get the
+ * latest changes, or serving variations of resources (e.g., minified versions) &mdash;
+ * {@link org.springframework.web.servlet.resource.ResourceResolver}s can be configured.
  *
  * <p>This handler can be configured through use of a
  * {@link org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry} or the {@code <mvc:resources/>}
