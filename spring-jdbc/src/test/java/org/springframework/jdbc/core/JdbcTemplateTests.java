@@ -1289,7 +1289,7 @@ public class JdbcTemplateTests {
 		List<SqlParameter> params = new ArrayList<SqlParameter>();
 		params.add(new SqlOutParameter("a", 12));
 
-		Map out = this.template.call(new CallableStatementCreator() {
+		Map<String, Object> out = this.template.call(new CallableStatementCreator() {
 			@Override
 			public CallableStatement createCallableStatement(Connection conn)
 					throws SQLException {

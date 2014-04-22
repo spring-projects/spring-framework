@@ -83,7 +83,7 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 		assertEquals(sex, bsgex2.getSQLException());
 	}
 
-	private void checkTranslation(SQLExceptionTranslator sext, int errorCode, Class exClass) {
+	private void checkTranslation(SQLExceptionTranslator sext, int errorCode, Class<?> exClass) {
 		SQLException sex = new SQLException("", "", errorCode);
 		DataAccessException ex = sext.translate("", "", sex);
 		assertTrue(exClass.isInstance(ex));
