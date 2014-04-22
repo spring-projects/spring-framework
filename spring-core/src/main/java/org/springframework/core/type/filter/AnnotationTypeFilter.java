@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.core.type.filter;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
 
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 
@@ -49,7 +50,7 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 	 * @param annotationType the annotation type to match
 	 */
 	public AnnotationTypeFilter(Class<? extends Annotation> annotationType) {
-		this(annotationType, true);
+		this(annotationType, true, false);
 	}
 
 	/**
@@ -84,13 +85,23 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 
 	@Override
 	protected Boolean matchSuperClass(String superClassName) {
-		if (Object.class.getName().equals(superClassName)) {
-			return Boolean.FALSE;
+		return hasAnnotation(superClassName);
+	}
+
+	@Override
+	protected Boolean matchInterface(String interfaceName) {
+		return hasAnnotation(interfaceName);
+	}
+
+	protected Boolean hasAnnotation(String typeName) {
+		if (Object.class.getName().equals(typeName)) {
+			return false;
 		}
-		else if (superClassName.startsWith("java.")) {
+		else if (typeName.startsWith("java.")) {
 			try {
-				Class<?> clazz = getClass().getClassLoader().loadClass(superClassName);
-				return (clazz.getAnnotation(this.annotationType) != null);
+				Class<?> clazz = getClass().getClassLoader().loadClass(typeName);
+				return ((this.considerMetaAnnotations ? AnnotationUtils.getAnnotation(clazz, this.annotationType) :
+						clazz.getAnnotation(this.annotationType)) != null);
 			}
 			catch (ClassNotFoundException ex) {
 				// Class not found - can't determine a match that way.
