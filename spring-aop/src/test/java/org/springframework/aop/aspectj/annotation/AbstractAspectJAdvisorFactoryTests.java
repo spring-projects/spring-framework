@@ -38,6 +38,7 @@ import org.aspectj.lang.annotation.DeclarePrecedence;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.aop.Advisor;
@@ -402,8 +403,8 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 
 	@Test
 	public void testIntroductionOnTargetExcludedByTypePattern() {
-		LinkedList target = new LinkedList();
-		List proxy = (List) createProxy(target,
+		LinkedList<Object> target = new LinkedList<Object>();
+		List<?> proxy = (List<?>) createProxy(target,
 				AopUtils.findAdvisorsThatCanApply(
 						getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable(), "someBean")),
 						List.class
@@ -431,7 +432,9 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 
 	// TODO: Why does this test fail? It hasn't been run before, so it maybe never actually passed...
 
-	public void XtestIntroductionWithArgumentBinding() {
+	@Test
+	@Ignore
+	public void testIntroductionWithArgumentBinding() {
 		TestBean target = new TestBean();
 
 		List<Advisor> advisors = getFixture().getAdvisors(
