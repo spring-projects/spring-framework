@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.dao.TypeMismatchDataAccessException;
 public class DataAccessUtilsTests extends TestCase {
 
 	public void testWithEmptyCollection() {
-		Collection col = new HashSet();
+		Collection<String> col = new HashSet<String>();
 
 		assertNull(DataAccessUtils.uniqueResult(col));
 
@@ -83,7 +83,7 @@ public class DataAccessUtilsTests extends TestCase {
 	}
 
 	public void testWithTooLargeCollection() {
-		Collection col = new HashSet();
+		Collection<String> col = new HashSet<String>(2);
 		col.add("test1");
 		col.add("test2");
 
@@ -139,33 +139,33 @@ public class DataAccessUtilsTests extends TestCase {
 	}
 
 	public void testWithInteger() {
-		Collection col = new HashSet();
-		col.add(new Integer(5));
+		Collection<Integer> col = new HashSet<Integer>(1);
+		col.add(5);
 
-		assertEquals(new Integer(5), DataAccessUtils.uniqueResult(col));
-		assertEquals(new Integer(5), DataAccessUtils.requiredUniqueResult(col));
-		assertEquals(new Integer(5), DataAccessUtils.objectResult(col, Integer.class));
+		assertEquals(Integer.valueOf(5), DataAccessUtils.uniqueResult(col));
+		assertEquals(Integer.valueOf(5), DataAccessUtils.requiredUniqueResult(col));
+		assertEquals(Integer.valueOf(5), DataAccessUtils.objectResult(col, Integer.class));
 		assertEquals("5", DataAccessUtils.objectResult(col, String.class));
 		assertEquals(5, DataAccessUtils.intResult(col));
 		assertEquals(5, DataAccessUtils.longResult(col));
 	}
 
 	public void testWithSameIntegerInstanceTwice() {
-		Integer i = new Integer(5);
-		Collection col = new ArrayList();
+		Integer i = 5;
+		Collection<Integer> col = new ArrayList<Integer>(1);
 		col.add(i);
 		col.add(i);
 
-		assertEquals(new Integer(5), DataAccessUtils.uniqueResult(col));
-		assertEquals(new Integer(5), DataAccessUtils.requiredUniqueResult(col));
-		assertEquals(new Integer(5), DataAccessUtils.objectResult(col, Integer.class));
+		assertEquals(Integer.valueOf(5), DataAccessUtils.uniqueResult(col));
+		assertEquals(Integer.valueOf(5), DataAccessUtils.requiredUniqueResult(col));
+		assertEquals(Integer.valueOf(5), DataAccessUtils.objectResult(col, Integer.class));
 		assertEquals("5", DataAccessUtils.objectResult(col, String.class));
 		assertEquals(5, DataAccessUtils.intResult(col));
 		assertEquals(5, DataAccessUtils.longResult(col));
 	}
 
 	public void testWithEquivalentIntegerInstanceTwice() {
-		Collection col = new ArrayList();
+		Collection<Integer> col = new ArrayList<Integer>(2);
 		col.add(new Integer(5));
 		col.add(new Integer(5));
 
@@ -181,19 +181,19 @@ public class DataAccessUtilsTests extends TestCase {
 	}
 
 	public void testWithLong() {
-		Collection col = new HashSet();
-		col.add(new Long(5));
+		Collection<Long> col = new HashSet<Long>(1);
+		col.add(5L);
 
-		assertEquals(new Long(5), DataAccessUtils.uniqueResult(col));
-		assertEquals(new Long(5), DataAccessUtils.requiredUniqueResult(col));
-		assertEquals(new Long(5), DataAccessUtils.objectResult(col, Long.class));
+		assertEquals(Long.valueOf(5L), DataAccessUtils.uniqueResult(col));
+		assertEquals(Long.valueOf(5L), DataAccessUtils.requiredUniqueResult(col));
+		assertEquals(Long.valueOf(5L), DataAccessUtils.objectResult(col, Long.class));
 		assertEquals("5", DataAccessUtils.objectResult(col, String.class));
 		assertEquals(5, DataAccessUtils.intResult(col));
 		assertEquals(5, DataAccessUtils.longResult(col));
 	}
 
 	public void testWithString() {
-		Collection col = new HashSet();
+		Collection<String> col = new HashSet<String>(1);
 		col.add("test1");
 
 		assertEquals("test1", DataAccessUtils.uniqueResult(col));
@@ -219,7 +219,7 @@ public class DataAccessUtilsTests extends TestCase {
 
 	public void testWithDate() {
 		Date date = new Date();
-		Collection col = new HashSet();
+		Collection<Date> col = new HashSet<Date>(1);
 		col.add(date);
 
 		assertEquals(date, DataAccessUtils.uniqueResult(col));
@@ -262,9 +262,9 @@ public class DataAccessUtilsTests extends TestCase {
 	public static class MapPersistenceExceptionTranslator implements PersistenceExceptionTranslator {
 
 		/**
-		 * Map<RuntimeException,RuntimeException>: in to out
+		 * in to out
 		 */
-		private Map translations = new HashMap();
+		private Map<RuntimeException,RuntimeException> translations = new HashMap<RuntimeException,RuntimeException>();
 
 		public void addTranslation(RuntimeException in, RuntimeException out) {
 			this.translations.put(in, out);
