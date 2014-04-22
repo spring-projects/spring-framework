@@ -82,7 +82,7 @@ public class AnnotationDrivenNamespaceTests extends AbstractJmsAnnotationDrivenT
 
 		private MessageListener messageListener;
 
-		private JmsListenerContainerFactory containerFactory;
+		private JmsListenerContainerFactory<?> containerFactory;
 
 		@Override
 		public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
@@ -97,7 +97,7 @@ public class AnnotationDrivenNamespaceTests extends AbstractJmsAnnotationDrivenT
 			this.messageListener = messageListener;
 		}
 
-		public void setContainerFactory(JmsListenerContainerFactory containerFactory) {
+		public void setContainerFactory(JmsListenerContainerFactory<?> containerFactory) {
 			this.containerFactory = containerFactory;
 		}
 	}

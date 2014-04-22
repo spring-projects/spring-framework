@@ -146,7 +146,7 @@ public class JmsListenerContainerFactoryTests {
 		factory.createMessageListenerContainer(endpoint);
 	}
 
-	private void setDefaultJmsConfig(AbstractJmsListenerContainerFactory factory) {
+	private void setDefaultJmsConfig(AbstractJmsListenerContainerFactory<?> factory) {
 		factory.setConnectionFactory(connectionFactory);
 		factory.setDestinationResolver(destinationResolver);
 		factory.setMessageConverter(messageConverter);

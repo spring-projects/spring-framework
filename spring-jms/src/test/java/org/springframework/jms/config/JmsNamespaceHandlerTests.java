@@ -78,7 +78,7 @@ public class JmsNamespaceHandlerTests {
 
 	@Test
 	public void testBeansCreated() {
-		Map containers = context.getBeansOfType(DefaultMessageListenerContainer.class);
+		Map<String, ?> containers = context.getBeansOfType(DefaultMessageListenerContainer.class);
 		assertEquals("Context should contain 3 JMS listener containers", 3, containers.size());
 
 		containers = context.getBeansOfType(GenericMessageEndpointManager.class);
@@ -272,9 +272,9 @@ public class JmsNamespaceHandlerTests {
 
 	@Test
 	public void testSourceExtraction() {
-		Iterator iterator = context.getRegisteredComponents();
+		Iterator<ComponentDefinition> iterator = context.getRegisteredComponents();
 		while (iterator.hasNext()) {
-			ComponentDefinition compDef = (ComponentDefinition) iterator.next();
+			ComponentDefinition compDef = iterator.next();
 			assertNotNull("CompositeComponentDefinition '" + compDef.getName() + "' has no source attachment", compDef.getSource());
 			validateComponentDefinition(compDef);
 		}
@@ -339,7 +339,7 @@ public class JmsNamespaceHandlerTests {
 
 		private Set<ComponentDefinition> registeredComponents;
 
-		public ToolingTestApplicationContext(String path, Class clazz) {
+		public ToolingTestApplicationContext(String path, Class<?> clazz) {
 			super(path, clazz);
 		}
 
