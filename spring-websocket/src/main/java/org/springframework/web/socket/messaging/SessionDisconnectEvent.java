@@ -18,7 +18,6 @@ package org.springframework.web.socket.messaging;
 
 
 import org.springframework.context.ApplicationEvent;
-import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
 

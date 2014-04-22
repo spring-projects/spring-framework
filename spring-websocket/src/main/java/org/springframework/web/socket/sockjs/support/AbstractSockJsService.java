@@ -44,7 +44,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsService;
-import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * An abstract base class for {@link SockJsService} implementations that provides SockJS

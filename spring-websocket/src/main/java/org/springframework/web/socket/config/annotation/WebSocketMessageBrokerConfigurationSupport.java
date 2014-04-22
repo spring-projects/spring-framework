@@ -18,7 +18,6 @@ package org.springframework.web.socket.config.annotation;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.simp.config.AbstractMessageBrokerConfiguration;
-import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.servlet.HandlerMapping;

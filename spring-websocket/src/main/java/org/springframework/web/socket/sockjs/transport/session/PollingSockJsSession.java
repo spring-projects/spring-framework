@@ -18,7 +18,6 @@ package org.springframework.web.socket.sockjs.transport.session;
 
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
 
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
