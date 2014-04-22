@@ -182,12 +182,12 @@ public class MapAccessTests extends AbstractExpressionTests {
 
 		@Override
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
-			return (((Map) target).containsKey(name));
+			return (((Map<?, ?>) target).containsKey(name));
 		}
 
 		@Override
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-			return new TypedValue(((Map) target).get(name));
+			return new TypedValue(((Map<? ,?>) target).get(name));
 		}
 
 		@Override
