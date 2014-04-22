@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1289,7 +1289,7 @@ public class JdbcTemplateTests {
 		List<SqlParameter> params = new ArrayList<SqlParameter>();
 		params.add(new SqlOutParameter("a", 12));
 
-		Map out = this.template.call(new CallableStatementCreator() {
+		Map<String, Object> out = this.template.call(new CallableStatementCreator() {
 			@Override
 			public CallableStatement createCallableStatement(Connection conn)
 					throws SQLException {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package org.springframework.jdbc.object;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
 
 import javax.sql.DataSource;
 
@@ -96,7 +94,7 @@ public class RdbmsOperationTests extends TestCase {
 		operation.setSql("select * from mytable");
 		operation.setTypes(new int[] { Types.INTEGER });
 		try {
-			operation.validateNamedParameters((Map) null);
+			operation.validateNamedParameters((Map<String, String>) null);
 			fail("Shouldn't validate without enough parameters");
 		}
 		catch (InvalidDataAccessApiUsageException idaauex) {
@@ -122,7 +120,7 @@ public class RdbmsOperationTests extends TestCase {
 		TestRdbmsOperation operation = new TestRdbmsOperation();
 		operation.setSql("select * from mytable");
 		try {
-			operation.validateParameters(new Object[] {new Integer(1), new Integer(2)});
+			operation.validateParameters(new Object[] {1, 2});
 			fail("Shouldn't validate with too many parameters");
 		}
 		catch (InvalidDataAccessApiUsageException idaauex) {
@@ -134,7 +132,7 @@ public class RdbmsOperationTests extends TestCase {
 		TestRdbmsOperation operation = new TestRdbmsOperation();
 		operation.setSql("select * from mytable");
 		try {
-			Map params = new HashMap();
+			Map<String, String> params = new HashMap<String, String>();
 			params.put("col1", "value");
 			operation.validateNamedParameters(params);
 			fail("Shouldn't validate with unspecified parameters");
@@ -193,15 +191,12 @@ public class RdbmsOperationTests extends TestCase {
 		DataSource ds = new DriverManagerDataSource();
 		operation.setDataSource(ds);
 		operation.setSql("select * from mytable where one = ? and two = ?");
-		List l = new ArrayList();
-		l.add(new SqlParameter("one", Types.NUMERIC));
-		l.add(new SqlParameter("two", Types.VARCHAR));
 		operation.setParameters(new SqlParameter[] {
 				new SqlParameter("one", Types.NUMERIC),
 				new SqlParameter("two", Types.NUMERIC)});
 		operation.afterPropertiesSet();
 		try {
-			operation.validateParameters(new Object[] {new Integer(1), new String("2")});
+			operation.validateParameters(new Object[] {1, "2"});
 			assertEquals(2, operation.getDeclaredParameters().size());
 			// OK
 		}

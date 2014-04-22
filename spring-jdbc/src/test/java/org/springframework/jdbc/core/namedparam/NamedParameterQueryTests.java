@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,9 +91,9 @@ public class NamedParameterQueryTests {
 
 		assertEquals("All rows returned", 2, li.size());
 		assertEquals("First row is Integer", 11,
-				((Integer) ((Map) li.get(0)).get("age")).intValue());
+				((Integer) li.get(0).get("age")).intValue());
 		assertEquals("Second row is Integer", 12,
-				((Integer) ((Map) li.get(1)).get("age")).intValue());
+				((Integer) li.get(1).get("age")).intValue());
 
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID < ?");
 		verify(preparedStatement).setObject(1, 3);
@@ -126,7 +126,7 @@ public class NamedParameterQueryTests {
 
 		assertEquals("All rows returned", 1, li.size());
 		assertEquals("First row is Integer", 11,
-				((Integer) ((Map) li.get(0)).get("age")).intValue());
+				((Integer) li.get(0).get("age")).intValue());
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID < ?");
 		verify(preparedStatement).setObject(1, 3);
 	}
@@ -157,7 +157,7 @@ public class NamedParameterQueryTests {
 
 		MapSqlParameterSource parms = new MapSqlParameterSource();
 		parms.addValue("id", 3);
-		Map map = template.queryForMap("SELECT AGE FROM CUSTMR WHERE ID < :id", parms);
+		Map<String, Object> map = template.queryForMap("SELECT AGE FROM CUSTMR WHERE ID < :id", parms);
 
 		assertEquals("Row is Integer", 11, ((Integer) map.get("age")).intValue());
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID < ?");
