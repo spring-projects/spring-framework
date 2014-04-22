@@ -137,14 +137,14 @@ public abstract class AnnotationUtils {
 	 * @param containerAnnotationType the class of the container that holds the annotations
 	 * @param annotationType the annotation class to look for
 	 * @return the annotations found
-	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod(Method)
 	 * @since 4.0
+	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod(Method)
 	 */
 	public static <A extends Annotation> Set<A> getRepeatableAnnotation(Method method,
 			Class<? extends Annotation> containerAnnotationType, Class<A> annotationType) {
+
 		Method resolvedMethod = BridgeMethodResolver.findBridgedMethod(method);
-		return getRepeatableAnnotation((AnnotatedElement) resolvedMethod,
-				containerAnnotationType, annotationType);
+		return getRepeatableAnnotation((AnnotatedElement) resolvedMethod, containerAnnotationType, annotationType);
 	}
 
 	/**
@@ -156,11 +156,12 @@ public abstract class AnnotationUtils {
 	 * @param containerAnnotationType the class of the container that holds the annotations
 	 * @param annotationType the annotation class to look for
 	 * @return the annotations found
-	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod(Method)
 	 * @since 4.0
+	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod(Method)
 	 */
 	public static <A extends Annotation> Set<A> getRepeatableAnnotation(AnnotatedElement annotatedElement,
 			Class<? extends Annotation> containerAnnotationType, Class<A> annotationType) {
+
 		if (annotatedElement.getAnnotations().length == 0) {
 			return Collections.emptySet();
 		}
@@ -507,14 +508,14 @@ public abstract class AnnotationUtils {
 					}
 					if (nestedAnnotationsAsMap && value instanceof Annotation) {
 						attrs.put(method.getName(),
-							getAnnotationAttributes((Annotation) value, classValuesAsString, nestedAnnotationsAsMap));
+							getAnnotationAttributes((Annotation) value, classValuesAsString, true));
 					}
 					else if (nestedAnnotationsAsMap && value instanceof Annotation[]) {
 						Annotation[] realAnnotations = (Annotation[]) value;
 						AnnotationAttributes[] mappedAnnotations = new AnnotationAttributes[realAnnotations.length];
 						for (int i = 0; i < realAnnotations.length; i++) {
 							mappedAnnotations[i] = getAnnotationAttributes(
-									realAnnotations[i], classValuesAsString, nestedAnnotationsAsMap);
+									realAnnotations[i], classValuesAsString, true);
 						}
 						attrs.put(method.getName(), mappedAnnotations);
 					}
@@ -550,7 +551,7 @@ public abstract class AnnotationUtils {
 	 */
 	public static Object getValue(Annotation annotation, String attributeName) {
 		try {
-			Method method = annotation.annotationType().getDeclaredMethod(attributeName, new Class<?>[0]);
+			Method method = annotation.annotationType().getDeclaredMethod(attributeName);
 			ReflectionUtils.makeAccessible(method);
 			return method.invoke(annotation);
 		}
@@ -601,8 +602,7 @@ public abstract class AnnotationUtils {
 	 */
 	public static Object getDefaultValue(Class<? extends Annotation> annotationType, String attributeName) {
 		try {
-			Method method = annotationType.getDeclaredMethod(attributeName, new Class<?>[0]);
-			return method.getDefaultValue();
+			return annotationType.getDeclaredMethod(attributeName).getDefaultValue();
 		}
 		catch (Exception ex) {
 			return null;
@@ -620,13 +620,10 @@ public abstract class AnnotationUtils {
 
 		private final Set<A> result = new LinkedHashSet<A>();
 
-
-		public AnnotationCollector(Class<? extends Annotation> containerAnnotationType,
-				Class<A> annotationType) {
+		public AnnotationCollector(Class<? extends Annotation> containerAnnotationType, Class<A> annotationType) {
 			this.containerAnnotationType = containerAnnotationType;
 			this.annotationType = annotationType;
 		}
-
 
 		public Set<A> getResult(AnnotatedElement element) {
 			process(element);
@@ -662,6 +659,6 @@ public abstract class AnnotationUtils {
 						+ this.containerAnnotationType.getName(), ex);
 			}
 		}
-
 	}
+
 }

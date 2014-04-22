@@ -58,7 +58,6 @@ public class AnnotatedElementUtils {
 
 	public static boolean hasMetaAnnotationTypes(AnnotatedElement element, String annotationType) {
 		return Boolean.TRUE.equals(process(element, annotationType, false, new Processor<Boolean>() {
-
 			@Override
 			public Boolean process(Annotation annotation, int metaDepth) {
 				if (metaDepth > 0) {
@@ -66,7 +65,6 @@ public class AnnotatedElementUtils {
 				}
 				return null;
 			}
-
 			@Override
 			public void postProcess(Annotation annotation, Boolean result) {
 			}
@@ -75,12 +73,10 @@ public class AnnotatedElementUtils {
 
 	public static boolean isAnnotated(AnnotatedElement element, String annotationType) {
 		return Boolean.TRUE.equals(process(element, annotationType, false, new Processor<Boolean>() {
-
 			@Override
 			public Boolean process(Annotation annotation, int metaDepth) {
 				return Boolean.TRUE;
 			}
-
 			@Override
 			public void postProcess(Annotation annotation, Boolean result) {
 			}
@@ -95,12 +91,10 @@ public class AnnotatedElementUtils {
 			final boolean classValuesAsString, final boolean nestedAnnotationsAsMap) {
 
 		return process(element, annotationType, false, new Processor<AnnotationAttributes>() {
-
 			@Override
 			public AnnotationAttributes process(Annotation annotation, int metaDepth) {
 				return AnnotationUtils.getAnnotationAttributes(annotation, classValuesAsString, nestedAnnotationsAsMap);
 			}
-
 			@Override
 			public void postProcess(Annotation annotation, AnnotationAttributes result) {
 				for (String key : result.keySet()) {
@@ -125,7 +119,6 @@ public class AnnotatedElementUtils {
 
 		final MultiValueMap<String, Object> attributes = new LinkedMultiValueMap<String, Object>();
 		process(element, annotationType, false, new Processor<Void>() {
-
 			@Override
 			public Void process(Annotation annotation, int metaDepth) {
 				if (annotation.annotationType().getName().equals(annotationType)) {
@@ -136,7 +129,6 @@ public class AnnotatedElementUtils {
 				}
 				return null;
 			}
-
 			@Override
 			public void postProcess(Annotation annotation, Void result) {
 				for (String key : attributes.keySet()) {
@@ -199,8 +191,8 @@ public class AnnotatedElementUtils {
 			Processor<T> processor, Set<AnnotatedElement> visited, int metaDepth) {
 
 		if (visited.add(element)) {
-			Annotation[] annotations = (traverseClassHierarchy ? element.getDeclaredAnnotations()
-					: element.getAnnotations());
+			Annotation[] annotations =
+					(traverseClassHierarchy ? element.getDeclaredAnnotations() : element.getAnnotations());
 			for (Annotation annotation : annotations) {
 				if (annotation.annotationType().getName().equals(annotationType) || metaDepth > 0) {
 					T result = processor.process(annotation, metaDepth);
@@ -228,7 +220,7 @@ public class AnnotatedElementUtils {
 			if (traverseClassHierarchy && element instanceof Class) {
 				Class<?> superclass = ((Class<?>) element).getSuperclass();
 				if (superclass != null && !superclass.equals(Object.class)) {
-					T result = doProcess(superclass, annotationType, traverseClassHierarchy, processor, visited,
+					T result = doProcess(superclass, annotationType, true, processor, visited,
 						metaDepth);
 					if (result != null) {
 						return result;

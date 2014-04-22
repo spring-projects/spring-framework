@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -287,7 +287,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * method is <b>not</b> symmetric.
 	 * @param other the reference media type with which to compare
 	 * @return {@code true} if this media type includes the given media type;
-	 *         {@code false} otherwise
+	 * {@code false} otherwise
 	 */
 	public boolean includes(MimeType other) {
 		if (other == null) {
@@ -424,7 +424,8 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 			return false;
 		}
 		MimeType otherType = (MimeType) other;
-		return (this.type.equalsIgnoreCase(otherType.type) && this.subtype.equalsIgnoreCase(otherType.subtype) &&
+		return (this.type.equalsIgnoreCase(otherType.type) &&
+				this.subtype.equalsIgnoreCase(otherType.subtype) &&
 				this.parameters.equals(otherType.parameters));
 	}
 
