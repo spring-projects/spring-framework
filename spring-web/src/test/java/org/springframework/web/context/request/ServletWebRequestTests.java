@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -69,13 +69,13 @@ public class ServletWebRequestTests {
 		assertEquals("value2", request.getParameterValues("param2")[0]);
 		assertEquals("value2a", request.getParameterValues("param2")[1]);
 
-		Map paramMap = request.getParameterMap();
+		Map<String, String[]> paramMap = request.getParameterMap();
 		assertEquals(2, paramMap.size());
-		assertEquals(1, ((String[]) paramMap.get("param1")).length);
-		assertEquals("value1", ((String[]) paramMap.get("param1"))[0]);
-		assertEquals(2, ((String[]) paramMap.get("param2")).length);
-		assertEquals("value2", ((String[]) paramMap.get("param2"))[0]);
-		assertEquals("value2a", ((String[]) paramMap.get("param2"))[1]);
+		assertEquals(1, paramMap.get("param1").length);
+		assertEquals("value1", paramMap.get("param1")[0]);
+		assertEquals(2, paramMap.get("param2").length);
+		assertEquals("value2", paramMap.get("param2")[0]);
+		assertEquals("value2a", paramMap.get("param2")[1]);
 	}
 
 	@Test
@@ -117,27 +117,68 @@ public class ServletWebRequestTests {
 	}
 
 	@Test
-	public void checkNotModifiedTimeStampForGET() {
+	public void checkNotModifiedTimestampForGET() {
 		long currentTime = new Date().getTime();
 		servletRequest.setMethod("GET");
 		servletRequest.addHeader("If-Modified-Since", currentTime);
 
-		request.checkNotModified(currentTime);
-
+		assertTrue(request.checkNotModified(currentTime));
 		assertEquals(304, servletResponse.getStatus());
 	}
 
 	@Test
-	public void checkModifiedTimeStampForGET() {
+	public void checkModifiedTimestampForGET() {
 		long currentTime = new Date().getTime();
 		long oneMinuteAgo  = currentTime - (1000 * 60);
 		servletRequest.setMethod("GET");
 		servletRequest.addHeader("If-Modified-Since", oneMinuteAgo);
 
-		request.checkNotModified(currentTime);
+		assertFalse(request.checkNotModified(currentTime));
+		assertEquals(200, servletResponse.getStatus());
+		assertEquals("" + currentTime, servletResponse.getHeader("Last-Modified"));
+	}
 
+	@Test
+	public void checkNotModifiedTimestampForHEAD() {
+		long currentTime = new Date().getTime();
+		servletRequest.setMethod("HEAD");
+		servletRequest.addHeader("If-Modified-Since", currentTime);
+
+		assertTrue(request.checkNotModified(currentTime));
+		assertEquals(304, servletResponse.getStatus());
+	}
+
+	@Test
+	public void checkModifiedTimestampForHEAD() {
+		long currentTime = new Date().getTime();
+		long oneMinuteAgo  = currentTime - (1000 * 60);
+		servletRequest.setMethod("HEAD");
+		servletRequest.addHeader("If-Modified-Since", oneMinuteAgo);
+
+		assertFalse(request.checkNotModified(currentTime));
 		assertEquals(200, servletResponse.getStatus());
 		assertEquals(""+currentTime, servletResponse.getHeader("Last-Modified"));
+	}
+
+	@Test
+	public void checkNotModifiedTimestampWithLengthPart() {
+		long currentTime = Date.parse("Wed, 09 Apr 2014 09:57:42 GMT");
+		servletRequest.setMethod("GET");
+		servletRequest.addHeader("If-Modified-Since", "Wed, 09 Apr 2014 09:57:42 GMT; length=13774");
+
+		assertTrue(request.checkNotModified(currentTime));
+		assertEquals(304, servletResponse.getStatus());
+	}
+
+	@Test
+	public void checkModifiedTimestampWithLengthPart() {
+		long currentTime = Date.parse("Wed, 09 Apr 2014 09:57:42 GMT");
+		servletRequest.setMethod("GET");
+		servletRequest.addHeader("If-Modified-Since", "Wed, 08 Apr 2014 09:57:42 GMT; length=13774");
+
+		assertFalse(request.checkNotModified(currentTime));
+		assertEquals(200, servletResponse.getStatus());
+		assertEquals("" + currentTime, servletResponse.getHeader("Last-Modified"));
 	}
 
 	@Test
@@ -146,8 +187,7 @@ public class ServletWebRequestTests {
 		servletRequest.setMethod("GET");
 		servletRequest.addHeader("If-None-Match", eTag );
 
-		request.checkNotModified(eTag);
-
+		assertTrue(request.checkNotModified(eTag));
 		assertEquals(304, servletResponse.getStatus());
 	}
 
@@ -158,34 +198,9 @@ public class ServletWebRequestTests {
 		servletRequest.setMethod("GET");
 		servletRequest.addHeader("If-None-Match", oldEtag);
 
-		request.checkNotModified(currentETag);
-
+		assertFalse(request.checkNotModified(currentETag));
 		assertEquals(200, servletResponse.getStatus());
 		assertEquals(currentETag, servletResponse.getHeader("ETag"));
-	}
-
-	@Test
-	public void checkNotModifiedTimeStampForHEAD() {
-		long currentTime = new Date().getTime();
-		servletRequest.setMethod("HEAD");
-		servletRequest.addHeader("If-Modified-Since", currentTime);
-
-		request.checkNotModified(currentTime);
-
-		assertEquals(304, servletResponse.getStatus());
-	}
-
-	@Test
-	public void checkModifiedTimeStampForHEAD() {
-		long currentTime = new Date().getTime();
-		long oneMinuteAgo  = currentTime - (1000 * 60);
-		servletRequest.setMethod("HEAD");
-		servletRequest.addHeader("If-Modified-Since", oneMinuteAgo);
-
-		request.checkNotModified(currentTime);
-
-		assertEquals(200, servletResponse.getStatus());
-		assertEquals(""+currentTime, servletResponse.getHeader("Last-Modified"));
 	}
 
 	@Test
@@ -194,8 +209,7 @@ public class ServletWebRequestTests {
 		servletRequest.setMethod("HEAD");
 		servletRequest.addHeader("If-None-Match", eTag );
 
-		request.checkNotModified(eTag);
-
+		assertTrue(request.checkNotModified(eTag));
 		assertEquals(304, servletResponse.getStatus());
 	}
 
@@ -206,8 +220,7 @@ public class ServletWebRequestTests {
 		servletRequest.setMethod("HEAD");
 		servletRequest.addHeader("If-None-Match", oldEtag);
 
-		request.checkNotModified(currentETag);
-
+		assertFalse(request.checkNotModified(currentETag));
 		assertEquals(200, servletResponse.getStatus());
 		assertEquals(currentETag, servletResponse.getHeader("ETag"));
 	}
