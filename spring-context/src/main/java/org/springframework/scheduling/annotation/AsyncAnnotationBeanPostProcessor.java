@@ -62,6 +62,7 @@ public class AsyncAnnotationBeanPostProcessor extends AbstractAdvisingBeanPostPr
 	private Class<? extends Annotation> asyncAnnotationType;
 
 	private Executor executor;
+
 	private AsyncUncaughtExceptionHandler exceptionHandler;
 
 
@@ -93,6 +94,7 @@ public class AsyncAnnotationBeanPostProcessor extends AbstractAdvisingBeanPostPr
 	/**
 	 * Set the {@link AsyncUncaughtExceptionHandler} to use to handle uncaught
 	 * exceptions thrown by asynchronous method executions.
+	 * @since 4.1
 	 */
 	public void setExceptionHandler(AsyncUncaughtExceptionHandler exceptionHandler) {
 		this.exceptionHandler = exceptionHandler;

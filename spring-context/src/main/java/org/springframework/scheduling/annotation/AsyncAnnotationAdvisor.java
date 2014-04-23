@@ -91,7 +91,8 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 		}
 		if (exceptionHandler != null) {
 			this.exceptionHandler = exceptionHandler;
-		} else {
+		}
+		else {
 			this.exceptionHandler = new SimpleAsyncUncaughtExceptionHandler();
 		}
 		this.advice = buildAdvice(executor, this.exceptionHandler);
