@@ -139,9 +139,9 @@ public class PublicResourceUrlProvider implements ApplicationListener<ContextRef
 				if (handler instanceof ResourceHttpRequestHandler) {
 					ResourceHttpRequestHandler resourceHandler = (ResourceHttpRequestHandler) handler;
 					if (logger.isDebugEnabled()) {
-						logger.debug("Found pattern=\"" + pattern + "\" mapped to locations " +
-								resourceHandler.getLocations() + " with resolvers: " +
-								resourceHandler.getResourceResolvers());
+						logger.debug("Found resource handler mapping: URL pattern=\"" + pattern + "\", " +
+								"locations=" + resourceHandler.getLocations() + ", " +
+								"resolvers=" + resourceHandler.getResourceResolvers());
 					}
 					this.handlerMap.put(pattern, resourceHandler);
 				}
@@ -160,13 +160,13 @@ public class PublicResourceUrlProvider implements ApplicationListener<ContextRef
 	 * @return the resolved public URL path or {@code null} if unresolved
 	 */
 	public final String getForRequestUrl(HttpServletRequest request, String requestUrl) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Checking requestURL=" + requestUrl);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Getting resource URL for requestURL=" + requestUrl);
 		}
 
 		String pathWithinMapping = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
 		if (pathWithinMapping == null) {
-			logger.debug("Request attribute with lookup path not found, calculating instead.");
+			logger.trace("Request attribute with lookup path not found, calculating instead.");
 			pathWithinMapping = getPathHelper().getLookupPathForRequest(request);
 		}
 
@@ -193,8 +193,8 @@ public class PublicResourceUrlProvider implements ApplicationListener<ContextRef
 	 * @return the resolved public URL path or {@code null} if unresolved
 	 */
 	public final String getForLookupPath(String lookupPath) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Checking lookup path: " + lookupPath);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Getting resource URL for lookupPath=" + lookupPath);
 		}
 		for (String pattern : this.handlerMap.keySet()) {
 			if (!getPathMatcher().match(pattern, lookupPath)) {
@@ -202,9 +202,8 @@ public class PublicResourceUrlProvider implements ApplicationListener<ContextRef
 			}
 			String pathWithinMapping = getPathMatcher().extractPathWithinPattern(pattern, lookupPath);
 			String pathMapping = lookupPath.substring(0, lookupPath.indexOf(pathWithinMapping));
-			if (logger.isDebugEnabled()) {
-				logger.debug("Found matching resource mapping=\"" + pattern + "\", " +
-						"resource URL path=\"" + pathWithinMapping + "\"");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Invoking ResourceResolverChain for URL pattern=\"" + pattern + "\"");
 			}
 			ResourceHttpRequestHandler handler = this.handlerMap.get(pattern);
 			ResourceResolverChain chain = handler.createResourceResolverChain();
@@ -212,8 +211,8 @@ public class PublicResourceUrlProvider implements ApplicationListener<ContextRef
 			if (resolved == null) {
 				throw new IllegalStateException("Failed to get public resource URL path for " + pathWithinMapping);
 			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("Returning public resource URL path=\"" + resolved + "\"");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Resolved public resource URL path=\"" + resolved + "\"");
 			}
 			return pathMapping + resolved;
 		}

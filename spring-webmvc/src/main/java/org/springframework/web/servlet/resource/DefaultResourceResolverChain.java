@@ -38,8 +38,6 @@ import org.springframework.util.Assert;
  */
 class DefaultResourceResolverChain implements ResourceResolverChain {
 
-	private static final Log logger = LogFactory.getLog(DefaultResourceResolverChain.class);
-
 	private final List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
 
 	private int index = -1;
@@ -59,10 +57,7 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 			return null;
 		}
 		try {
-			logBefore(resolver);
-			Resource resource = resolver.resolveResource(request, requestPath, locations, this);
-			logAfter(resolver, resource);
-			return resource;
+			return resolver.resolveResource(request, requestPath, locations, this);
 		}
 		finally {
 			this.index--;
@@ -76,10 +71,7 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 			return null;
 		}
 		try {
-			logBefore(resolver);
-			String urlPath = resolver.resolvePublicUrlPath(resourcePath, locations, this);
-			logAfter(resolver, urlPath);
-			return urlPath;
+			return resolver.resolvePublicUrlPath(resourcePath, locations, this);
 		}
 		finally {
 			this.index--;
@@ -92,26 +84,11 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 				"Current index exceeds the number of configured ResourceResolver's");
 
 		if (this.index == (this.resolvers.size() - 1)) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("No more ResourceResolver's to delegate to, returning null");
-			}
 			return null;
 		}
 
 		this.index++;
 		return this.resolvers.get(this.index);
-	}
-
-	private void logBefore(ResourceResolver resolver) {
-		if (logger.isTraceEnabled()) {
-			logger.trace("Calling " + resolver.getClass().getSimpleName() + " index=" + this.index);
-		}
-	}
-
-	private void logAfter(ResourceResolver resolver, Object result) {
-		if (logger.isTraceEnabled()) {
-			logger.trace(resolver.getClass().getSimpleName() + " returned " + result);
-		}
 	}
 
 }

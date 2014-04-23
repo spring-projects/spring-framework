@@ -37,42 +37,42 @@ import org.springframework.core.io.Resource;
  * @author Sam Brannen
  * @since 4.1
  */
-public class PathResourceResolver implements ResourceResolver {
-
-	private static final Log logger = LogFactory.getLog(PathResourceResolver.class);
+public class PathResourceResolver extends AbstractResourceResolver {
 
 
 	@Override
-	public Resource resolveResource(HttpServletRequest request, String requestPath, List<? extends Resource> locations,
-			ResourceResolverChain chain) {
+	protected Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
+			List<? extends Resource> locations, ResourceResolverChain chain) {
+
 		return getResource(requestPath, locations);
 	}
 
 	@Override
-	public String resolvePublicUrlPath(String resourceUrlPath, List<? extends Resource> locations,
+	protected String resolvePublicUrlPathInternal(String resourceUrlPath, List<? extends Resource> locations,
 			ResourceResolverChain chain) {
-		return (getResource(resourceUrlPath, locations) != null) ? resourceUrlPath : null;
+
+		return (getResource(resourceUrlPath, locations) != null ? resourceUrlPath : null);
 	}
 
 	private Resource getResource(String path, List<? extends Resource> locations) {
 		for (Resource location : locations) {
 			try {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Looking for \"" + path + "\" under " + location);
+				if (logger.isTraceEnabled()) {
+					logger.trace("Checking location=[" + location + "]");
 				}
 				Resource resource = location.createRelative(path);
 				if (resource.exists() && resource.isReadable()) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Resource exists and is readable");
+					if (logger.isTraceEnabled()) {
+						logger.trace("Found match");
 					}
 					return resource;
 				}
 				else if (logger.isTraceEnabled()) {
-					logger.trace("Relative resource doesn't exist or isn't readable: " + resource);
+					logger.trace("No match");
 				}
 			}
 			catch (IOException ex) {
-				logger.debug("Failed to create relative resource - trying next resource location", ex);
+				logger.trace("Failure checking for relative resource. Trying next location.", ex);
 			}
 		}
 		return null;

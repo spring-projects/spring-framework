@@ -43,14 +43,12 @@ import org.springframework.core.io.Resource;
  * @author Sam Brannen
  * @since 4.1
  */
-public class GzipResourceResolver implements ResourceResolver {
-
-	private static final Log logger = LogFactory.getLog(GzipResourceResolver.class);
+public class GzipResourceResolver extends AbstractResourceResolver {
 
 
 	@Override
-	public Resource resolveResource(HttpServletRequest request, String requestPath, List<? extends Resource> locations,
-			ResourceResolverChain chain) {
+	protected Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
+			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		Resource resource = chain.resolveResource(request, requestPath, locations);
 		if ((resource == null) || !isGzipAccepted(request)) {
@@ -76,8 +74,9 @@ public class GzipResourceResolver implements ResourceResolver {
 	}
 
 	@Override
-	public String resolvePublicUrlPath(String resourceUrlPath, List<? extends Resource> locations,
+	protected String resolvePublicUrlPathInternal(String resourceUrlPath, List<? extends Resource> locations,
 			ResourceResolverChain chain) {
+
 		return chain.resolvePublicUrlPath(resourceUrlPath, locations);
 	}
 

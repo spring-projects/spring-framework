@@ -16,6 +16,8 @@
 
 package org.springframework.web.servlet.resource;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
@@ -39,7 +41,9 @@ import java.util.List;
  * @author Sam Brannen
  * @since 4.1
  */
-public class PrefixResourceResolver implements ResourceResolver {
+public class PrefixResourceResolver extends AbstractResourceResolver {
+
+	private static final Log logger = LogFactory.getLog(PathResourceResolver.class);
 
 	private final String prefix;
 
@@ -50,9 +54,12 @@ public class PrefixResourceResolver implements ResourceResolver {
 	}
 
 	@Override
-	public Resource resolveResource(HttpServletRequest request, String requestPath, List<? extends Resource> locations,
-			ResourceResolverChain chain) {
+	protected Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
+			List<? extends Resource> locations, ResourceResolverChain chain) {
 
+		if (logger.isTraceEnabled()) {
+			logger.trace("Resolving resource: requestPath=\"" + requestPath + "\"");
+		}
 		if (requestPath.startsWith(this.prefix)) {
 			requestPath = requestPath.substring(this.prefix.length());
 		}
@@ -61,8 +68,9 @@ public class PrefixResourceResolver implements ResourceResolver {
 	}
 
 	@Override
-	public String resolvePublicUrlPath(String resourceUrlPath, List<? extends Resource> locations,
+	protected String resolvePublicUrlPathInternal(String resourceUrlPath, List<? extends Resource> locations,
 			ResourceResolverChain chain) {
+
 		String baseUrl = chain.resolvePublicUrlPath(resourceUrlPath, locations);
 		return this.prefix + (baseUrl.startsWith("/") ? baseUrl : "/" + baseUrl);
 	}

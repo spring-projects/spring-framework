@@ -50,16 +50,14 @@ import org.springframework.util.StringUtils;
  * @author Sam Brannen
  * @since 4.1
  */
-public class FingerprintResourceResolver implements ResourceResolver {
-
-	private static final Log logger = LogFactory.getLog(FingerprintResourceResolver.class);
+public class FingerprintResourceResolver extends AbstractResourceResolver {
 
 	private static final Pattern pattern = Pattern.compile("-(\\S*)\\.");
 
 
 	@Override
-	public Resource resolveResource(HttpServletRequest request, String requestPath, List<? extends Resource> locations,
-			ResourceResolverChain chain) {
+	protected Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
+			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		Resource resolved = chain.resolveResource(request, requestPath, locations);
 		if (resolved != null) {
@@ -68,10 +66,18 @@ public class FingerprintResourceResolver implements ResourceResolver {
 
 		String hash = extractHash(requestPath);
 		if (StringUtils.isEmpty(hash)) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("No hash found");
+			}
 			return null;
 		}
 
 		String simplePath = StringUtils.delete(requestPath, "-" + hash);
+
+		if (logger.isTraceEnabled()) {
+			logger.trace("Extracted hash from path, re-resolving without hash, path=\"" + simplePath + "\"");
+		}
+
 		Resource baseResource = chain.resolveResource(request, simplePath, locations);
 		if (baseResource == null) {
 			return null;
@@ -79,13 +85,38 @@ public class FingerprintResourceResolver implements ResourceResolver {
 
 		String candidateHash = calculateHash(baseResource);
 		if (candidateHash.equals(hash)) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Calculated hash matches extracted hash");
+			}
 			return baseResource;
 		}
 		else {
-			logger.debug("Potential resource found for [" + requestPath + "], but fingerprint doesn't match.");
+			logger.trace("Potential resource found for [" + requestPath + "], but fingerprint doesn't match.");
 			return null;
 		}
 	}
+
+	@Override
+	protected String resolvePublicUrlPathInternal(String resourceUrlPath, List<? extends Resource> locations,
+			ResourceResolverChain chain) {
+
+		String baseUrl = chain.resolvePublicUrlPath(resourceUrlPath, locations);
+		if (StringUtils.hasText(baseUrl)) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Getting the original resource to calculate hash");
+			}
+			Resource original = chain.resolveResource(null, resourceUrlPath, locations);
+			String hash = calculateHash(original);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Calculated hash=" + hash);
+			}
+			String baseFilename = StringUtils.stripFilenameExtension(baseUrl);
+			String extension = StringUtils.getFilenameExtension(baseUrl);
+			return baseFilename + "-" + hash + "." + extension;
+		}
+		return baseUrl;
+	}
+
 
 	private String extractHash(String path) {
 		Matcher matcher = pattern.matcher(path);
@@ -107,19 +138,6 @@ public class FingerprintResourceResolver implements ResourceResolver {
 			logger.error("Failed to calculate hash for resource [" + resource + "]");
 			return "";
 		}
-	}
-
-	@Override
-	public String resolvePublicUrlPath(String resourceUrlPath, List<? extends Resource> locations,
-			ResourceResolverChain chain) {
-		String baseUrl = chain.resolvePublicUrlPath(resourceUrlPath, locations);
-		if (StringUtils.hasText(baseUrl)) {
-			Resource original = chain.resolveResource(null, resourceUrlPath, locations);
-			String hash = calculateHash(original);
-			return StringUtils.stripFilenameExtension(baseUrl) + "-" + hash + "."
-					+ StringUtils.getFilenameExtension(baseUrl);
-		}
-		return baseUrl;
 	}
 
 }

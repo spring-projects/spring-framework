@@ -156,7 +156,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		// check whether a matching resource exists
 		Resource resource = getResource(request);
 		if (resource == null) {
-			logger.debug("No matching resource found - returning 404");
+			logger.trace("No matching resource found - returning 404");
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
@@ -164,19 +164,19 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		// check the resource's media type
 		MediaType mediaType = getMediaType(resource);
 		if (mediaType != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Determined media type '" + mediaType + "' for " + resource);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Determined media type '" + mediaType + "' for " + resource);
 			}
 		}
 		else {
-			if (logger.isDebugEnabled()) {
-				logger.debug("No media type found for " + resource + " - not sending a content-type header");
+			if (logger.isTraceEnabled()) {
+				logger.trace("No media type found for " + resource + " - not sending a content-type header");
 			}
 		}
 
 		// header phase
 		if (new ServletWebRequest(request, response).checkNotModified(resource.lastModified())) {
-			logger.debug("Resource not modified - returning 304");
+			logger.trace("Resource not modified - returning 304");
 			return;
 		}
 		setHeaders(response, resource, mediaType);
@@ -196,8 +196,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 					HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE + "' is not set");
 		}
 		if (!StringUtils.hasText(path) || isInvalidPath(path)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Ignoring invalid resource path [" + path + "]");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Ignoring invalid resource path [" + path + "]");
 			}
 			return null;
 		}
@@ -284,6 +284,11 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		}
 	}
 
+	@Override
+	public String toString() {
+		return "ResourceHttpRequestHandler [locations=" +
+				getLocations() + ", resolvers=" + getResourceResolvers() + "]";
+	}
 
 	/**
 	 * Inner class to avoid hard-coded JAF dependency.
