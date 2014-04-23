@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,9 +50,9 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 
 
 	/**
-	 * Create a new ClassPathResource for ClassLoader usage.
-	 * A leading slash will be removed, as the ClassLoader
-	 * resource access methods will not accept it.
+	 * Create a new {@code ClassPathResource} for {@code ClassLoader} usage.
+	 * A leading slash will be removed, as the ClassLoader resource access
+	 * methods will not accept it.
 	 * <p>The thread context class loader will be used for
 	 * loading the resource.
 	 * @param path the absolute path within the class path
@@ -64,9 +64,9 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	}
 
 	/**
-	 * Create a new ClassPathResource for ClassLoader usage.
-	 * A leading slash will be removed, as the ClassLoader
-	 * resource access methods will not accept it.
+	 * Create a new {@code ClassPathResource} for {@code ClassLoader} usage.
+	 * A leading slash will be removed, as the ClassLoader resource access
+	 * methods will not accept it.
 	 * @param path the absolute path within the classpath
 	 * @param classLoader the class loader to load the resource with,
 	 * or {@code null} for the thread context class loader
@@ -83,9 +83,9 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	}
 
 	/**
-	 * Create a new ClassPathResource for Class usage.
-	 * The path can be relative to the given class,
-	 * or absolute within the classpath via a leading slash.
+	 * Create a new {@code ClassPathResource} for {@code Class} usage.
+	 * The path can be relative to the given class, or absolute within
+	 * the classpath via a leading slash.
 	 * @param path relative or absolute path within the class path
 	 * @param clazz the class to load resources with
 	 * @see java.lang.Class#getResourceAsStream
@@ -97,8 +97,8 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	}
 
 	/**
-	 * Create a new ClassPathResource with optional ClassLoader and Class.
-	 * Only for internal usage.
+	 * Create a new {@code ClassPathResource} with optional {@code ClassLoader}
+	 * and {@code Class}. Only for internal usage.
 	 * @param path relative or absolute path within the classpath
 	 * @param classLoader the class loader to load the resource with, if any
 	 * @param clazz the class to load resources with, if any
@@ -108,6 +108,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 		this.classLoader = classLoader;
 		this.clazz = clazz;
 	}
+
 
 	/**
 	 * Return the path for this resource (as resource path within the class path).
@@ -120,8 +121,9 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 * Return the ClassLoader that this resource will be obtained from.
 	 */
 	public final ClassLoader getClassLoader() {
-		return (this.classLoader != null ? this.classLoader : this.clazz.getClassLoader());
+		return (this.clazz != null ? this.clazz.getClassLoader() : this.classLoader);
 	}
+
 
 	/**
 	 * This implementation checks for the resolution of a resource URL.
@@ -130,14 +132,23 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 */
 	@Override
 	public boolean exists() {
-		URL url;
+		return (resolveURL() != null);
+	}
+
+	/**
+	 * Resolves a URL for the underlying class path resource.
+	 * @return the resolved URL, or {@code null} if not resolvable
+	 */
+	protected URL resolveURL() {
 		if (this.clazz != null) {
-			url = this.clazz.getResource(this.path);
+			return this.clazz.getResource(this.path);
+		}
+		else if (this.classLoader != null) {
+			return this.classLoader.getResource(this.path);
 		}
 		else {
-			url = this.classLoader.getResource(this.path);
+			return ClassLoader.getSystemResource(this.path);
 		}
-		return (url != null);
 	}
 
 	/**
@@ -151,8 +162,11 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 		if (this.clazz != null) {
 			is = this.clazz.getResourceAsStream(this.path);
 		}
-		else {
+		else if (this.classLoader != null) {
 			is = this.classLoader.getResourceAsStream(this.path);
+		}
+		else {
+			is = ClassLoader.getSystemResourceAsStream(this.path);
 		}
 		if (is == null) {
 			throw new FileNotFoundException(getDescription() + " cannot be opened because it does not exist");
@@ -161,19 +175,14 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	}
 
 	/**
-	 * This implementation returns a URL for the underlying class path resource.
+	 * This implementation returns a URL for the underlying class path resource,
+	 * if available.
 	 * @see java.lang.ClassLoader#getResource(String)
 	 * @see java.lang.Class#getResource(String)
 	 */
 	@Override
 	public URL getURL() throws IOException {
-		URL url;
-		if (this.clazz != null) {
-			url = this.clazz.getResource(this.path);
-		}
-		else {
-			url = this.classLoader.getResource(this.path);
-		}
+		URL url = resolveURL();
 		if (url == null) {
 			throw new FileNotFoundException(getDescription() + " cannot be resolved to URL because it does not exist");
 		}
