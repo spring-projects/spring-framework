@@ -116,7 +116,8 @@ public abstract class ResourceUtils {
 		Assert.notNull(resourceLocation, "Resource location must not be null");
 		if (resourceLocation.startsWith(CLASSPATH_URL_PREFIX)) {
 			String path = resourceLocation.substring(CLASSPATH_URL_PREFIX.length());
-			URL url = ClassUtils.getDefaultClassLoader().getResource(path);
+			ClassLoader cl = ClassUtils.getDefaultClassLoader();
+			URL url = (cl != null ? cl.getResource(path) : ClassLoader.getSystemResource(path));
 			if (url == null) {
 				String description = "class path resource [" + path + "]";
 				throw new FileNotFoundException(
@@ -156,7 +157,8 @@ public abstract class ResourceUtils {
 		if (resourceLocation.startsWith(CLASSPATH_URL_PREFIX)) {
 			String path = resourceLocation.substring(CLASSPATH_URL_PREFIX.length());
 			String description = "class path resource [" + path + "]";
-			URL url = ClassUtils.getDefaultClassLoader().getResource(path);
+			ClassLoader cl = ClassUtils.getDefaultClassLoader();
+			URL url = (cl != null ? cl.getResource(path) : ClassLoader.getSystemResource(path));
 			if (url == null) {
 				throw new FileNotFoundException(
 						description + " cannot be resolved to absolute file path " +
