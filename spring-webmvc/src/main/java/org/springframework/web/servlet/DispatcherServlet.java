@@ -904,7 +904,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 			try {
 				processedRequest = checkMultipart(request);
-				multipartRequestParsed = processedRequest != request;
+				multipartRequestParsed = (processedRequest != request);
 
 				// Determine handler for the current request.
 				mappedHandler = getHandler(processedRequest);
@@ -1058,6 +1058,10 @@ public class DispatcherServlet extends FrameworkServlet {
 			if (request instanceof MultipartHttpServletRequest) {
 				logger.debug("Request is already a MultipartHttpServletRequest - if not in a forward, " +
 						"this typically results from an additional MultipartFilter in web.xml");
+			}
+			else if (request.getAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE) instanceof MultipartException) {
+				logger.debug("Multipart resolution failed for current request before - " +
+						"skipping re-resolution for undisturbed error rendering");
 			}
 			else {
 				return this.multipartResolver.resolveMultipart(request);
