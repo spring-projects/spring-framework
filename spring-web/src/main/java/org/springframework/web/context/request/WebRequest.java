@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,8 +142,11 @@ public interface WebRequest extends RequestAttributes {
 	 *   return "myViewName";
 	 * }</pre>
 	 * <p><strong>Note:</strong> that you typically want to use either
-	 * this {@link #checkNotModified(long)} method; or
+	 * this {@code #checkNotModified(long)} method; or
 	 * {@link #checkNotModified(String)}, but not both.
+	 * <p>If the "If-Modified-Since" header is set but cannot be parsed
+	 * to a date value, this method will ignore the header and proceed
+	 * with setting the last-modified timestamp on the response.
 	 * @param lastModifiedTimestamp the last-modified timestamp that
 	 * the application determined for the underlying resource
 	 * @return whether the request qualifies as not modified,
@@ -170,16 +173,16 @@ public interface WebRequest extends RequestAttributes {
 	 *   return "myViewName";
 	 * }</pre>
 	 * <p><strong>Note:</strong> that you typically want to use either
-	 * this {@link #checkNotModified(String)} method; or
+	 * this {@code #checkNotModified(String)} method; or
 	 * {@link #checkNotModified(long)}, but not both.
-	 * @param eTag the entity tag that the application determined
+	 * @param etag the entity tag that the application determined
 	 * for the underlying resource. This parameter will be padded
 	 * with quotes (") if necessary.
 	 * @return whether the request qualifies as not modified,
 	 * allowing to abort request processing and relying on the response
 	 * telling the client that the content has not been modified
 	 */
-	boolean checkNotModified(String eTag);
+	boolean checkNotModified(String etag);
 
 	/**
 	 * Get a short description of this request,
