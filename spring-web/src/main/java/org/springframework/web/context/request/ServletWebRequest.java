@@ -17,6 +17,7 @@
 package org.springframework.web.context.request;
 
 import java.security.Principal;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -103,6 +104,14 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 
+	/**
+	 * Return the HTTP method of the request.
+	 * @since 4.0.2
+	 */
+	public HttpMethod getHttpMethod() {
+		return HttpMethod.valueOf(getRequest().getMethod().trim().toUpperCase());
+	}
+
 	@Override
 	public String getHeader(String headerName) {
 		return getRequest().getHeader(headerName);
@@ -170,10 +179,28 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public boolean checkNotModified(long lastModifiedTimestamp) {
 		if (lastModifiedTimestamp >= 0 && !this.notModified &&
 				(this.response == null || !this.response.containsHeader(HEADER_LAST_MODIFIED))) {
-			long ifModifiedSince = getRequest().getDateHeader(HEADER_IF_MODIFIED_SINCE);
+			long ifModifiedSince = -1;
+			try {
+				ifModifiedSince = getRequest().getDateHeader(HEADER_IF_MODIFIED_SINCE);
+			}
+			catch (IllegalArgumentException ex) {
+				String headerValue = getRequest().getHeader(HEADER_IF_MODIFIED_SINCE);
+				// Possibly an IE 10 style value: "Wed, 09 Apr 2014 09:57:42 GMT; length=13774"
+				int separatorIndex = headerValue.indexOf(';');
+				if (separatorIndex != -1) {
+					String datePart = headerValue.substring(0, separatorIndex);
+					try {
+						ifModifiedSince = Date.parse(datePart);
+					}
+					catch (IllegalArgumentException ex2) {
+						// Giving up
+					}
+				}
+			}
 			this.notModified = (ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000));
 			if (this.response != null) {
 				if (this.notModified && supportsNotModifiedStatus()) {
@@ -188,17 +215,17 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 	@Override
-	public boolean checkNotModified(String eTag) {
-		if (StringUtils.hasLength(eTag) && !this.notModified &&
+	public boolean checkNotModified(String etag) {
+		if (StringUtils.hasLength(etag) && !this.notModified &&
 				(this.response == null || !this.response.containsHeader(HEADER_ETAG))) {
 			String ifNoneMatch = getRequest().getHeader(HEADER_IF_NONE_MATCH);
-			this.notModified = eTag.equals(ifNoneMatch);
+			this.notModified = etag.equals(ifNoneMatch);
 			if (this.response != null) {
 				if (this.notModified && supportsNotModifiedStatus()) {
 					this.response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 				}
 				else {
-					this.response.setHeader(HEADER_ETAG, eTag);
+					this.response.setHeader(HEADER_ETAG, etag);
 				}
 			}
 		}
@@ -234,14 +261,6 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 			}
 		}
 		return sb.toString();
-	}
-
-	/**
-	 * Return the HTTP method of the request.
-	 * @since 4.0.2
-	 */
-	public HttpMethod getHttpMethod() {
-		return HttpMethod.valueOf(getRequest().getMethod().trim().toUpperCase());
 	}
 
 

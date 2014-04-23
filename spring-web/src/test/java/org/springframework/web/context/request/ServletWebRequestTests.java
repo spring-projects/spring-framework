@@ -117,27 +117,68 @@ public class ServletWebRequestTests {
 	}
 
 	@Test
-	public void checkNotModifiedTimeStampForGET() {
+	public void checkNotModifiedTimestampForGET() {
 		long currentTime = new Date().getTime();
 		servletRequest.setMethod("GET");
 		servletRequest.addHeader("If-Modified-Since", currentTime);
 
-		request.checkNotModified(currentTime);
-
+		assertTrue(request.checkNotModified(currentTime));
 		assertEquals(304, servletResponse.getStatus());
 	}
 
 	@Test
-	public void checkModifiedTimeStampForGET() {
+	public void checkModifiedTimestampForGET() {
 		long currentTime = new Date().getTime();
 		long oneMinuteAgo  = currentTime - (1000 * 60);
 		servletRequest.setMethod("GET");
 		servletRequest.addHeader("If-Modified-Since", oneMinuteAgo);
 
-		request.checkNotModified(currentTime);
+		assertFalse(request.checkNotModified(currentTime));
+		assertEquals(200, servletResponse.getStatus());
+		assertEquals("" + currentTime, servletResponse.getHeader("Last-Modified"));
+	}
 
+	@Test
+	public void checkNotModifiedTimestampForHEAD() {
+		long currentTime = new Date().getTime();
+		servletRequest.setMethod("HEAD");
+		servletRequest.addHeader("If-Modified-Since", currentTime);
+
+		assertTrue(request.checkNotModified(currentTime));
+		assertEquals(304, servletResponse.getStatus());
+	}
+
+	@Test
+	public void checkModifiedTimestampForHEAD() {
+		long currentTime = new Date().getTime();
+		long oneMinuteAgo  = currentTime - (1000 * 60);
+		servletRequest.setMethod("HEAD");
+		servletRequest.addHeader("If-Modified-Since", oneMinuteAgo);
+
+		assertFalse(request.checkNotModified(currentTime));
 		assertEquals(200, servletResponse.getStatus());
 		assertEquals(""+currentTime, servletResponse.getHeader("Last-Modified"));
+	}
+
+	@Test
+	public void checkNotModifiedTimestampWithLengthPart() {
+		long currentTime = Date.parse("Wed, 09 Apr 2014 09:57:42 GMT");
+		servletRequest.setMethod("GET");
+		servletRequest.addHeader("If-Modified-Since", "Wed, 09 Apr 2014 09:57:42 GMT; length=13774");
+
+		assertTrue(request.checkNotModified(currentTime));
+		assertEquals(304, servletResponse.getStatus());
+	}
+
+	@Test
+	public void checkModifiedTimestampWithLengthPart() {
+		long currentTime = Date.parse("Wed, 09 Apr 2014 09:57:42 GMT");
+		servletRequest.setMethod("GET");
+		servletRequest.addHeader("If-Modified-Since", "Wed, 08 Apr 2014 09:57:42 GMT; length=13774");
+
+		assertFalse(request.checkNotModified(currentTime));
+		assertEquals(200, servletResponse.getStatus());
+		assertEquals("" + currentTime, servletResponse.getHeader("Last-Modified"));
 	}
 
 	@Test
@@ -146,8 +187,7 @@ public class ServletWebRequestTests {
 		servletRequest.setMethod("GET");
 		servletRequest.addHeader("If-None-Match", eTag );
 
-		request.checkNotModified(eTag);
-
+		assertTrue(request.checkNotModified(eTag));
 		assertEquals(304, servletResponse.getStatus());
 	}
 
@@ -158,34 +198,9 @@ public class ServletWebRequestTests {
 		servletRequest.setMethod("GET");
 		servletRequest.addHeader("If-None-Match", oldEtag);
 
-		request.checkNotModified(currentETag);
-
+		assertFalse(request.checkNotModified(currentETag));
 		assertEquals(200, servletResponse.getStatus());
 		assertEquals(currentETag, servletResponse.getHeader("ETag"));
-	}
-
-	@Test
-	public void checkNotModifiedTimeStampForHEAD() {
-		long currentTime = new Date().getTime();
-		servletRequest.setMethod("HEAD");
-		servletRequest.addHeader("If-Modified-Since", currentTime);
-
-		request.checkNotModified(currentTime);
-
-		assertEquals(304, servletResponse.getStatus());
-	}
-
-	@Test
-	public void checkModifiedTimeStampForHEAD() {
-		long currentTime = new Date().getTime();
-		long oneMinuteAgo  = currentTime - (1000 * 60);
-		servletRequest.setMethod("HEAD");
-		servletRequest.addHeader("If-Modified-Since", oneMinuteAgo);
-
-		request.checkNotModified(currentTime);
-
-		assertEquals(200, servletResponse.getStatus());
-		assertEquals(""+currentTime, servletResponse.getHeader("Last-Modified"));
 	}
 
 	@Test
@@ -194,8 +209,7 @@ public class ServletWebRequestTests {
 		servletRequest.setMethod("HEAD");
 		servletRequest.addHeader("If-None-Match", eTag );
 
-		request.checkNotModified(eTag);
-
+		assertTrue(request.checkNotModified(eTag));
 		assertEquals(304, servletResponse.getStatus());
 	}
 
@@ -206,8 +220,7 @@ public class ServletWebRequestTests {
 		servletRequest.setMethod("HEAD");
 		servletRequest.addHeader("If-None-Match", oldEtag);
 
-		request.checkNotModified(currentETag);
-
+		assertFalse(request.checkNotModified(currentETag));
 		assertEquals(200, servletResponse.getStatus());
 		assertEquals(currentETag, servletResponse.getHeader("ETag"));
 	}
