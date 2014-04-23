@@ -55,7 +55,8 @@ public abstract class SpringProperties {
 	static {
 		try {
 			ClassLoader cl = SpringProperties.class.getClassLoader();
-			URL url = cl.getResource(PROPERTIES_RESOURCE_LOCATION);
+			URL url = (cl != null ? cl.getResource(PROPERTIES_RESOURCE_LOCATION) :
+					ClassLoader.getSystemResource(PROPERTIES_RESOURCE_LOCATION));
 			if (url != null) {
 				logger.info("Found 'spring.properties' file in local classpath");
 				InputStream is = url.openStream();
