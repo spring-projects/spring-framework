@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.filter;
 
 import java.io.IOException;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -35,8 +34,8 @@ import org.springframework.web.util.WebUtils;
  * method with HttpServletRequest and HttpServletResponse arguments.
  *
  * <p>As of Servlet 3.0, a filter may be invoked as part of a
- * {@link javax.servlet.DispatcherType.REQUEST REQUEST} or
- * {@link javax.servlet.DispatcherType.ASYNC ASYNC} dispatches that occur in
+ * {@link javax.servlet.DispatcherType#REQUEST REQUEST} or
+ * {@link javax.servlet.DispatcherType#ASYNC ASYNC} dispatches that occur in
  * separate threads. A filter can be configured in {@code web.xml} whether it
  * should be involved in async dispatches. However, in some cases servlet
  * containers assume different default configuration. Therefore sub-classes can
@@ -53,7 +52,7 @@ import org.springframework.web.util.WebUtils;
  * won't be the last one.
  *
  * <p>Yet another dispatch type that also occurs in its own thread is
- * {@link javax.servlet.DispatcherType.ERROR ERROR}. Sub-classes can override
+ * {@link javax.servlet.DispatcherType#ERROR ERROR}. Sub-classes can override
  * {@link #shouldNotFilterErrorDispatch()} if they wish to declare statically
  * if they should be invoked <em>once</em> during error dispatches.
  *
@@ -129,7 +128,6 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	 * in Servlet 3.0 means a filter can be invoked in more than one thread over
 	 * the course of a single request. This method returns {@code true} if the
 	 * filter is currently executing within an asynchronous dispatch.
-	 *
 	 * @param request the current request
 	 * @see WebAsyncManager#hasConcurrentResult()
 	 */
@@ -140,7 +138,6 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	/**
 	 * Whether request processing is in asynchronous mode meaning that the
 	 * response will not be committed after the current thread is exited.
-	 *
 	 * @param request the current request
 	 * @see WebAsyncManager#isConcurrentHandlingStarted()
 	 */
@@ -151,7 +148,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	/**
 	 * Return the name of the request attribute that identifies that a request
 	 * is already filtered.
-	 * <p>Default implementation takes the configured name of the concrete filter
+	 * <p>The default implementation takes the configured name of the concrete filter
 	 * instance and appends ".FILTERED". If the filter is not fully initialized,
 	 * it falls back to its class name.
 	 * @see #getFilterName
@@ -188,7 +185,6 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	 * types via {@code web.xml} or in Java through the {@code ServletContext},
 	 * servlet containers may enforce different defaults with regards to
 	 * dispatcher types. This flag enforces the design intent of the filter.
-	 *
 	 * <p>The default return value is "true", which means the filter will not be
 	 * invoked during subsequent async dispatches. If "false", the filter will
 	 * be invoked during async dispatches with the same guarantees of being
