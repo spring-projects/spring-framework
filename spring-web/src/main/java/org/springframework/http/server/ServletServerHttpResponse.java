@@ -40,7 +40,7 @@ import org.springframework.util.CollectionUtils;
 public class ServletServerHttpResponse implements ServerHttpResponse {
 
 	private static final boolean servlet3Present =
-			ClassUtils.isPresent("javax.servlet.AsyncContext", ServletServerHttpResponse.class.getClassLoader());
+			ClassUtils.hasMethod(HttpServletResponse.class, "getHeader", String.class);
 
 
 	private final HttpServletResponse servletResponse;
