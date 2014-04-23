@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.util.ClassUtils;
 
 /**
  * A Spring {@link FactoryBean} for creating a Quartz {@link org.quartz.JobDetail}
@@ -56,7 +57,7 @@ public class JobDetailFactoryBean
 
 	private String group;
 
-	private Class jobClass;
+	private Class<?> jobClass;
 
 	private JobDataMap jobDataMap = new JobDataMap();
 
@@ -92,7 +93,7 @@ public class JobDetailFactoryBean
 	/**
 	 * Specify the job's implementation class.
 	 */
-	public void setJobClass(Class jobClass) {
+	public void setJobClass(Class<?> jobClass) {
 		this.jobClass = jobClass;
 	}
 
@@ -207,7 +208,7 @@ public class JobDetailFactoryBean
 
 		Class<?> jobDetailClass;
 		try {
-			jobDetailClass = getClass().getClassLoader().loadClass("org.quartz.impl.JobDetailImpl");
+			jobDetailClass = ClassUtils.forName("org.quartz.impl.JobDetailImpl", getClass().getClassLoader());
 		}
 		catch (ClassNotFoundException ex) {
 			jobDetailClass = JobDetail.class;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,16 +67,17 @@ public abstract class SpringFactoriesLoader {
 	 */
 	public static <T> List<T> loadFactories(Class<T> factoryClass, ClassLoader classLoader) {
 		Assert.notNull(factoryClass, "'factoryClass' must not be null");
-		if (classLoader == null) {
-			classLoader = SpringFactoriesLoader.class.getClassLoader();
+		ClassLoader classLoaderToUse = classLoader;
+		if (classLoaderToUse == null) {
+			classLoaderToUse = SpringFactoriesLoader.class.getClassLoader();
 		}
-		List<String> factoryNames = loadFactoryNames(factoryClass, classLoader);
+		List<String> factoryNames = loadFactoryNames(factoryClass, classLoaderToUse);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Loaded [" + factoryClass.getName() + "] names: " + factoryNames);
 		}
 		List<T> result = new ArrayList<T>(factoryNames.size());
 		for (String factoryName : factoryNames) {
-			result.add(instantiateFactory(factoryName, factoryClass, classLoader));
+			result.add(instantiateFactory(factoryName, factoryClass, classLoaderToUse));
 		}
 		OrderComparator.sort(result);
 		return result;
@@ -85,8 +86,9 @@ public abstract class SpringFactoriesLoader {
 	public static List<String> loadFactoryNames(Class<?> factoryClass, ClassLoader classLoader) {
 		String factoryClassName = factoryClass.getName();
 		try {
+			Enumeration<URL> urls = (classLoader != null ? classLoader.getResources(FACTORIES_RESOURCE_LOCATION) :
+					ClassLoader.getSystemResources(FACTORIES_RESOURCE_LOCATION));
 			List<String> result = new ArrayList<String>();
-			Enumeration<URL> urls = classLoader.getResources(FACTORIES_RESOURCE_LOCATION);
 			while (urls.hasMoreElements()) {
 				URL url = urls.nextElement();
 				Properties properties = PropertiesLoaderUtils.loadProperties(new UrlResource(url));

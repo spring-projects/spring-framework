@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,9 +135,9 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	public AutowiredAnnotationBeanPostProcessor() {
 		this.autowiredAnnotationTypes.add(Autowired.class);
 		this.autowiredAnnotationTypes.add(Value.class);
-		ClassLoader cl = AutowiredAnnotationBeanPostProcessor.class.getClassLoader();
 		try {
-			this.autowiredAnnotationTypes.add((Class<? extends Annotation>) cl.loadClass("javax.inject.Inject"));
+			this.autowiredAnnotationTypes.add((Class<? extends Annotation>)
+					ClassUtils.forName("javax.inject.Inject", AutowiredAnnotationBeanPostProcessor.class.getClassLoader()));
 			logger.info("JSR-330 'javax.inject.Inject' annotation found and supported for autowiring");
 		}
 		catch (ClassNotFoundException ex) {

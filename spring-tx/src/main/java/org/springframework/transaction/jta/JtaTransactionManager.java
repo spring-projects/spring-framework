@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import org.springframework.transaction.support.AbstractPlatformTransactionManage
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -154,9 +155,9 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	private static Class<?> transactionSynchronizationRegistryClass;
 
 	static {
-		ClassLoader cl = JtaTransactionManager.class.getClassLoader();
 		try {
-			transactionSynchronizationRegistryClass = cl.loadClass(TRANSACTION_SYNCHRONIZATION_REGISTRY_CLASS_NAME);
+			transactionSynchronizationRegistryClass = ClassUtils.forName(
+					TRANSACTION_SYNCHRONIZATION_REGISTRY_CLASS_NAME, JtaTransactionManager.class.getClassLoader());
 		}
 		catch (ClassNotFoundException ex) {
 			// JTA 1.1 API not available... simply proceed the JTA 1.0 way.

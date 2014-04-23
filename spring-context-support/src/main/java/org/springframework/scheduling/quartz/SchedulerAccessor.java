@@ -42,6 +42,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -66,8 +67,8 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	static {
 		// Quartz 2.0 job/trigger key available?
 		try {
-			jobKeyClass = Class.forName("org.quartz.JobKey");
-			triggerKeyClass = Class.forName("org.quartz.TriggerKey");
+			jobKeyClass = ClassUtils.forName("org.quartz.JobKey", SchedulerAccessor.class.getClassLoader());
+			triggerKeyClass = ClassUtils.forName("org.quartz.TriggerKey", SchedulerAccessor.class.getClassLoader());
 		}
 		catch (ClassNotFoundException ex) {
 			jobKeyClass = null;
@@ -254,7 +255,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 				clh.initialize();
 				try {
 					// Quartz 1.8 or higher?
-					Class<?> dataProcessorClass = getClass().getClassLoader().loadClass("org.quartz.xml.XMLSchedulingDataProcessor");
+					Class<?> dataProcessorClass = ClassUtils.forName("org.quartz.xml.XMLSchedulingDataProcessor", getClass().getClassLoader());
 					logger.debug("Using Quartz 1.8 XMLSchedulingDataProcessor");
 					Object dataProcessor = dataProcessorClass.getConstructor(ClassLoadHelper.class).newInstance(clh);
 					Method processFileAndScheduleJobs = dataProcessorClass.getMethod("processFileAndScheduleJobs", String.class, Scheduler.class);
@@ -264,7 +265,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 				}
 				catch (ClassNotFoundException ex) {
 					// Quartz 1.6
-					Class<?> dataProcessorClass = getClass().getClassLoader().loadClass("org.quartz.xml.JobSchedulingDataProcessor");
+					Class<?> dataProcessorClass = ClassUtils.forName("org.quartz.xml.JobSchedulingDataProcessor", getClass().getClassLoader());
 					logger.debug("Using Quartz 1.6 JobSchedulingDataProcessor");
 					Object dataProcessor = dataProcessorClass.getConstructor(ClassLoadHelper.class, boolean.class, boolean.class).newInstance(clh, true, true);
 					Method processFileAndScheduleJobs = dataProcessorClass.getMethod("processFileAndScheduleJobs", String.class, Scheduler.class, boolean.class);

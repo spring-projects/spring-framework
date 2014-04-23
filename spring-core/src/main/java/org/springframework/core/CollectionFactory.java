@@ -34,6 +34,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -73,8 +74,8 @@ public abstract class CollectionFactory {
 		// New Java 6 collection interfaces
 		ClassLoader cl = CollectionFactory.class.getClassLoader();
 		try {
-			navigableSetClass = cl.loadClass("java.util.NavigableSet");
-			navigableMapClass = cl.loadClass("java.util.NavigableMap");
+			navigableSetClass = ClassUtils.forName("java.util.NavigableSet", cl);
+			navigableMapClass = ClassUtils.forName("java.util.NavigableMap", cl);
 			approximableCollectionTypes.add(navigableSetClass);
 			approximableMapTypes.add(navigableMapClass);
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.core.io.VfsResource;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ResourceUtils;
@@ -72,7 +73,7 @@ import org.springframework.util.StringUtils;
  * <p><b>Ant-style Patterns:</b>
  *
  * <p>When the path location contains an Ant-style pattern, e.g.:
- * <pre>
+ * <pre class="code">
  * /WEB-INF/*-context.xml
  * com/mycompany/**&#47;applicationContext.xml
  * file:C:/some/path/*-context.xml
@@ -143,11 +144,15 @@ import org.springframework.util.StringUtils;
  *
  * <p><b>WARNING:</b> Ant-style patterns with "classpath:" resources are not
  * guaranteed to find matching resources if the root package to search is available
- * in multiple class path locations. This is because a resource such as<pre>
+ * in multiple class path locations. This is because a resource such as
+ * <pre class="code">
  *     com/mycompany/package1/service-context.xml
- * </pre>may be in only one location, but when a path such as<pre>
+ * </pre>
+ * may be in only one location, but when a path such as
+ * <pre class="code">
  *     classpath:com/mycompany/**&#47;service-context.xml
- * </pre>is used to try to resolve it, the resolver will work off the (first) URL
+ * </pre>
+ * is used to try to resolve it, the resolver will work off the (first) URL
  * returned by {@code getResource("com/mycompany");}. If this base package
  * node exists in multiple classloader locations, the actual end resource may
  * not be underneath. Therefore, preferably, use "{@code classpath*:}" with the same
@@ -171,10 +176,10 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	private static Method equinoxResolveMethod;
 
 	static {
-		// Detect Equinox OSGi (e.g. on WebSphere 6.1)
 		try {
-			Class<?> fileLocatorClass = PathMatchingResourcePatternResolver.class.getClassLoader().loadClass(
-					"org.eclipse.core.runtime.FileLocator");
+			// Detect Equinox OSGi (e.g. on WebSphere 6.1)
+			Class<?> fileLocatorClass = ClassUtils.forName("org.eclipse.core.runtime.FileLocator",
+					PathMatchingResourcePatternResolver.class.getClassLoader());
 			equinoxResolveMethod = fileLocatorClass.getMethod("resolve", URL.class);
 			logger.debug("Found Equinox FileLocator for OSGi bundle URL resolution");
 		}
@@ -199,17 +204,6 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	}
 
 	/**
-	 * Create a new PathMatchingResourcePatternResolver with a DefaultResourceLoader.
-	 * @param classLoader the ClassLoader to load classpath resources with,
-	 * or {@code null} for using the thread context class loader
-	 * at the time of actual resource access
-	 * @see org.springframework.core.io.DefaultResourceLoader
-	 */
-	public PathMatchingResourcePatternResolver(ClassLoader classLoader) {
-		this.resourceLoader = new DefaultResourceLoader(classLoader);
-	}
-
-	/**
 	 * Create a new PathMatchingResourcePatternResolver.
 	 * <p>ClassLoader access will happen via the thread context class loader.
 	 * @param resourceLoader the ResourceLoader to load root directories and
@@ -221,16 +215,24 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	}
 
 	/**
+	 * Create a new PathMatchingResourcePatternResolver with a DefaultResourceLoader.
+	 * @param classLoader the ClassLoader to load classpath resources with,
+	 * or {@code null} for using the thread context class loader
+	 * at the time of actual resource access
+	 * @see org.springframework.core.io.DefaultResourceLoader
+	 */
+	public PathMatchingResourcePatternResolver(ClassLoader classLoader) {
+		this.resourceLoader = new DefaultResourceLoader(classLoader);
+	}
+
+
+	/**
 	 * Return the ResourceLoader that this pattern resolver works with.
 	 */
 	public ResourceLoader getResourceLoader() {
 		return this.resourceLoader;
 	}
 
-	/**
-	 * Return the ClassLoader that this pattern resolver works with
-	 * (never {@code null}).
-	 */
 	public ClassLoader getClassLoader() {
 		return getResourceLoader().getClassLoader();
 	}
@@ -298,7 +300,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}
-		Enumeration<URL> resourceUrls = getClassLoader().getResources(path);
+		ClassLoader cl = getClassLoader();
+		Enumeration<URL> resourceUrls = (cl != null ? cl.getResources(path) : ClassLoader.getSystemResources(path));
 		Set<Resource> result = new LinkedHashSet<Resource>(16);
 		while (resourceUrls.hasMoreElements()) {
 			URL url = resourceUrls.nextElement();
