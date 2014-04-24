@@ -50,7 +50,7 @@ public class PrefixResourceResolver extends AbstractResourceResolver {
 
 	public PrefixResourceResolver(String prefix) {
 		Assert.hasText(prefix, "prefix must not be null or empty");
-		this.prefix = prefix.startsWith("/") ? prefix : "/" + prefix;
+		this.prefix = prefix.startsWith("/") ? prefix.substring(1) : prefix;
 	}
 
 	@Override

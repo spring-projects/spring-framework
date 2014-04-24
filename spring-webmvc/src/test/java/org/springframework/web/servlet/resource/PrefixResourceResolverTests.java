@@ -54,14 +54,14 @@ public class PrefixResourceResolverTests {
 	public void resolveResource() {
 		String resourceId = "foo.css";
 		Resource expected = new ClassPathResource("test/foo.css", getClass());
-		Resource actual = this.chain.resolveResource(null, "/" + this.shaPrefix + "/" + resourceId, this.locations);
+		Resource actual = this.chain.resolveResource(null, this.shaPrefix + "/" + resourceId, this.locations);
 		assertEquals(expected, actual);
 	}
 
 	@Test
 	public void resolvePublicUrlPath() {
 		String resourceId = "/foo.css";
-		String url = "/" + this.shaPrefix + resourceId;
+		String url = this.shaPrefix + resourceId;
 		assertEquals(url, chain.resolvePublicUrlPath(resourceId, locations));
 	}
 
