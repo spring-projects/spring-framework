@@ -33,12 +33,12 @@ import reactor.net.NetChannel;
  *
  * @author Rossen Stoyanchev
  */
-public class ReactorTcpConnection<P> implements TcpConnection<P> {
+public class Reactor11TcpConnection<P> implements TcpConnection<P> {
 
 	private final NetChannel<Message<P>, Message<P>> channel;
 
 
-	public ReactorTcpConnection(NetChannel<Message<P>, Message<P>> connection) {
+	public Reactor11TcpConnection(NetChannel<Message<P>, Message<P>> connection) {
 		this.channel = connection;
 	}
 

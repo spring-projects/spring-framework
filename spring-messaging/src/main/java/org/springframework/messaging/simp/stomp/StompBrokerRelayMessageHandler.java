@@ -35,7 +35,7 @@ import org.springframework.messaging.tcp.FixedIntervalReconnectStrategy;
 import org.springframework.messaging.tcp.TcpConnection;
 import org.springframework.messaging.tcp.TcpConnectionHandler;
 import org.springframework.messaging.tcp.TcpOperations;
-import org.springframework.messaging.tcp.reactor.ReactorTcpClient;
+import org.springframework.messaging.tcp.reactor.Reactor11TcpClient;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
@@ -311,7 +311,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	/**
 	 * Configure a TCP client for managing TCP connections to the STOMP broker.
-	 * By default {@link org.springframework.messaging.tcp.reactor.ReactorTcpClient} is used.
+	 * By default {@link org.springframework.messaging.tcp.reactor.Reactor11TcpClient} is used.
 	 */
 	public void setTcpClient(TcpOperations<byte[]> tcpClient) {
 		this.tcpClient = tcpClient;
@@ -354,7 +354,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		if (this.tcpClient == null) {
 			StompDecoder decoder = new StompDecoder();
 			decoder.setHeaderInitializer(getHeaderInitializer());
-			StompCodec codec = new StompCodec(new StompEncoder(), decoder);
+			Reactor11StompCodec codec = new Reactor11StompCodec(new StompEncoder(), decoder);
 			this.tcpClient = new StompTcpClientFactory().create(this.relayHost, this.relayPort, codec);
 		}
 
@@ -838,8 +838,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	private static class StompTcpClientFactory {
 
-		public TcpOperations<byte[]> create(String relayHost, int relayPort, StompCodec codec) {
-			return new ReactorTcpClient<byte[]>(relayHost, relayPort, codec);
+		public TcpOperations<byte[]> create(String relayHost, int relayPort, Reactor11StompCodec codec) {
+			return new Reactor11TcpClient<byte[]>(relayHost, relayPort, codec);
 		}
 	}
 

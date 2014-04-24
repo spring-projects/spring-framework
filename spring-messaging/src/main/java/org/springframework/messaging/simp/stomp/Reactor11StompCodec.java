@@ -33,7 +33,7 @@ import java.nio.ByteBuffer;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class StompCodec implements Codec<Buffer, Message<byte[]>, Message<byte[]>> {
+public class Reactor11StompCodec implements Codec<Buffer, Message<byte[]>, Message<byte[]>> {
 
 	private final StompDecoder stompDecoder;
 
@@ -42,11 +42,11 @@ public class StompCodec implements Codec<Buffer, Message<byte[]>, Message<byte[]
 	private final Function<Message<byte[]>, Buffer> encodingFunction;
 
 
-	public StompCodec() {
+	public Reactor11StompCodec() {
 		this(new StompEncoder(), new StompDecoder());
 	}
 
-	public StompCodec(StompEncoder encoder, StompDecoder decoder) {
+	public Reactor11StompCodec(StompEncoder encoder, StompDecoder decoder) {
 		Assert.notNull(encoder, "'encoder' is required");
 		Assert.notNull(decoder, "'decoder' is required");
 		this.stompEncoder = encoder;

@@ -55,7 +55,7 @@ import reactor.tuple.Tuple2;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class ReactorTcpClient<P> implements TcpOperations<P> {
+public class Reactor11TcpClient<P> implements TcpOperations<P> {
 
 	public static final Class<NettyTcpClient> REACTOR_TCP_CLIENT_TYPE = NettyTcpClient.class;
 
@@ -77,7 +77,7 @@ public class ReactorTcpClient<P> implements TcpOperations<P> {
 	 * @param port the port to connect to
 	 * @param codec the codec to use for encoding and decoding the TCP stream
 	 */
-	public ReactorTcpClient(String host, int port, Codec<Buffer, Message<P>, Message<P>> codec) {
+	public Reactor11TcpClient(String host, int port, Codec<Buffer, Message<P>, Message<P>> codec) {
 
 		// Revisit in 1.1: is Environment still required w/ sync dispatcher?
 		this.environment = new Environment(new SynchronousDispatcherConfigReader());
@@ -98,7 +98,7 @@ public class ReactorTcpClient<P> implements TcpOperations<P> {
 	 *
 	 * @param tcpClient the TcpClient to use
 	 */
-	public ReactorTcpClient(TcpClient<Message<P>, Message<P>> tcpClient) {
+	public Reactor11TcpClient(TcpClient<Message<P>, Message<P>> tcpClient) {
 		Assert.notNull(tcpClient, "'tcpClient' must not be null");
 		this.tcpClient = tcpClient;
 		this.environment = null;
@@ -178,7 +178,7 @@ public class ReactorTcpClient<P> implements TcpOperations<P> {
 										connectionHandler.afterConnectionClosed();
 									}
 								});
-						connectionHandler.afterConnected(new ReactorTcpConnection<P>(connection));
+						connectionHandler.afterConnected(new Reactor11TcpConnection<P>(connection));
 					}
 				});
 	}
