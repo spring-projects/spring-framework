@@ -77,7 +77,6 @@ configure(allprojects) { project ->
 
 	repositories {
 		maven { url "http://repo.spring.io/libs-release" }
-		maven { url "http://repo.spring.io/milestone" }  // for AspectJ 1.8.0.RC2
 		maven { url "http://repo.spring.io/snapshot" }   // temporarily until Reactor 1.1.0.RC1
 	}
 
@@ -865,6 +864,7 @@ project("spring-test") {
 
 	task testNG(type: Test) {
 		useTestNG()
+		scanForTestClasses = false
 		include(["**/testng/**/*Tests.class", "**/testng/**/*Test.class"])
 		// Show STD_OUT & STD_ERR of the test JVM(s) on the console:
 		// testLogging.showStandardStreams = true
@@ -891,8 +891,8 @@ project("spring-aspects") {
 
 	dependencies {
 		aspects(project(":spring-orm"))
-		ajc("org.aspectj:aspectjtools:1.8.0.RC2") // needed for ajc on JDK 8 only
-		rt("org.aspectj:aspectjrt:1.8.0.RC2") // needed for ajc on JDK 8 only
+		ajc("org.aspectj:aspectjtools:1.8.0") // needed for ajc on JDK 8 only
+		rt("org.aspectj:aspectjrt:1.8.0") // needed for ajc on JDK 8 only
 		compile("org.aspectj:aspectjweaver:${aspectjVersion}") // exposing regular AspectJ version to users
 		provided("org.eclipse.persistence:javax.persistence:2.0.0")
 		optional(project(":spring-aop")) // for @Async support
