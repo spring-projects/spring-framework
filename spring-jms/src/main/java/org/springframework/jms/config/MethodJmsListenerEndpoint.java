@@ -17,12 +17,16 @@
 package org.springframework.jms.config;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.jms.listener.adapter.MessagingMessageListenerAdapter;
 import org.springframework.jms.support.converter.MessageConverter;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * A {@link JmsListenerEndpoint} providing the method to invoke to process
@@ -36,8 +40,6 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 	private Object bean;
 
 	private Method method;
-
-	private String responseDestination;
 
 	private JmsHandlerMethodFactory jmsHandlerMethodFactory;
 
@@ -65,20 +67,6 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 	}
 
 	/**
-	 * Set the name of the default response destination to send response messages to.
-	 */
-	public void setResponseDestination(String responseDestination) {
-		this.responseDestination = responseDestination;
-	}
-
-	/**
-	 * Return the name of the default response destination to send response messages to.
-	 */
-	public String getResponseDestination() {
-		return responseDestination;
-	}
-
-	/**
 	 * Set the {@link DefaultJmsHandlerMethodFactory} to use to build the
 	 * {@link InvocableHandlerMethod} responsible to manage the invocation
 	 * of this endpoint.
@@ -91,12 +79,12 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 	protected MessagingMessageListenerAdapter createMessageListener(MessageListenerContainer container) {
 		Assert.state(jmsHandlerMethodFactory != null,
 				"Could not create message listener, message listener factory not set.");
-		MessagingMessageListenerAdapter messageListener = new MessagingMessageListenerAdapter();
+		MessagingMessageListenerAdapter messageListener = createMessageListenerInstance();
 		InvocableHandlerMethod invocableHandlerMethod =
 				jmsHandlerMethodFactory.createInvocableHandlerMethod(getBean(), getMethod());
 		messageListener.setHandlerMethod(invocableHandlerMethod);
-		String responseDestination = getResponseDestination();
-		if (responseDestination != null) {
+		String responseDestination = getDefaultResponseDestination();
+		if (StringUtils.hasText(responseDestination)) {
 			if (isQueue()) {
 				messageListener.setDefaultResponseQueueName(responseDestination);
 			}
@@ -109,6 +97,26 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 			messageListener.setMessageConverter(messageConverter);
 		}
 		return messageListener;
+	}
+
+	/**
+	 * Create an empty {@link MessagingMessageListenerAdapter} instance.
+	 */
+	protected MessagingMessageListenerAdapter createMessageListenerInstance() {
+		return new MessagingMessageListenerAdapter();
+	}
+
+	private String getDefaultResponseDestination() {
+		SendTo ann = AnnotationUtils.getAnnotation(getMethod(), SendTo.class);
+		if (ann != null) {
+			Object[] destinations = ann.value();
+			if (destinations.length != 1) {
+				throw new IllegalStateException("Invalid @" + SendTo.class.getSimpleName() + " annotation on '"
+						+ getMethod() + "' one destination must be set (got " + Arrays.toString(destinations) + ")");
+			}
+			return (String) destinations[0];
+		}
+		return null;
 	}
 
 	@Override

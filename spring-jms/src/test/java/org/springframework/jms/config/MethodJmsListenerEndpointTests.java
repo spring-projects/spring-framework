@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.jms.Destination;
+import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
 import javax.jms.ObjectMessage;
 import javax.jms.QueueSender;
@@ -48,12 +49,14 @@ import org.springframework.jms.listener.adapter.ListenerExecutionFailedException
 import org.springframework.jms.listener.adapter.MessagingMessageListenerAdapter;
 import org.springframework.jms.support.JmsMessageHeaderAccessor;
 import org.springframework.jms.support.converter.JmsHeaders;
+import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.handler.annotation.support.MethodArgumentTypeMismatchException;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.Errors;
@@ -99,7 +102,6 @@ public class MethodJmsListenerEndpointTests {
 		endpoint.setBean(this);
 		endpoint.setMethod(getTestMethod());
 		endpoint.setJmsHandlerMethodFactory(factory);
-		endpoint.setResponseDestination("myResponseQueue");
 
 		assertNotNull(endpoint.createMessageListener(container));
 	}
@@ -215,6 +217,56 @@ public class MethodJmsListenerEndpointTests {
 		verify(reply).setJMSCorrelationID(correlationId);
 		verify(queueSender).send(reply);
 		verify(queueSender).close();
+	}
+
+	@Test
+	public void processAndReplyWithSendTo() throws JMSException {
+		MessagingMessageListenerAdapter listener = createDefaultInstance(String.class);
+		String body = "echo text";
+		String correlationId = "link-1234";
+		Destination replyDestination = new Destination() {};
+
+		DestinationResolver destinationResolver = mock(DestinationResolver.class);
+		TextMessage reply = mock(TextMessage.class);
+		QueueSender queueSender = mock(QueueSender.class);
+		Session session = mock(Session.class);
+
+		given(destinationResolver.resolveDestinationName(session, "replyDestination", false))
+				.willReturn(replyDestination);
+		given(session.createTextMessage(body)).willReturn(reply);
+		given(session.createProducer(replyDestination)).willReturn(queueSender);
+
+		listener.setDestinationResolver(destinationResolver);
+		StubTextMessage inputMessage = createSimpleJmsTextMessage(body);
+		inputMessage.setJMSCorrelationID(correlationId);
+		listener.onMessage(inputMessage, session);
+		assertDefaultListenerMethodInvocation();
+
+		verify(destinationResolver).resolveDestinationName(session, "replyDestination", false);
+		verify(reply).setJMSCorrelationID(correlationId);
+		verify(queueSender).send(reply);
+		verify(queueSender).close();
+	}
+
+	@Test
+	public void emptySendTo() throws JMSException {
+		MessagingMessageListenerAdapter listener = createDefaultInstance(String.class);
+
+		TextMessage reply = mock(TextMessage.class);
+		Session session = mock(Session.class);
+		given(session.createTextMessage("content")).willReturn(reply);
+
+		thrown.expect(ListenerExecutionFailedException.class);
+		thrown.expectCause(Matchers.isA(InvalidDestinationException.class));
+		listener.onMessage(createSimpleJmsTextMessage("content"), session);
+	}
+
+	@Test
+	public void invalidSendTo() {
+		thrown.expect(IllegalStateException.class);
+		thrown.expectMessage("firstDestination");
+		thrown.expectMessage("secondDestination");
+		createDefaultInstance(String.class);
 	}
 
 	@Test
@@ -391,6 +443,24 @@ public class MethodJmsListenerEndpointTests {
 
 		public String processAndReply(@Payload String content) {
 			invocations.put("processAndReply", true);
+			return content;
+		}
+
+		@SendTo("replyDestination")
+		public String processAndReplyWithSendTo(String content) {
+			invocations.put("processAndReplyWithSendTo", true);
+			return content;
+		}
+
+		@SendTo("")
+		public String emptySendTo(String content) {
+			invocations.put("emptySendTo", true);
+			return content;
+		}
+
+		@SendTo({"firstDestination", "secondDestination"})
+		public String invalidSendTo(String content) {
+			invocations.put("invalidSendTo", true);
 			return content;
 		}
 

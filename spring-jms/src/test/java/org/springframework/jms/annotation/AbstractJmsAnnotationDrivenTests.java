@@ -114,7 +114,7 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 	static class FullBean {
 
 		@JmsListener(id = "listener1", containerFactory = "simpleFactory", destination = "queueIn",
-				responseDestination = "queueOut", selector = "mySelector", subscription = "mySubscription")
+				selector = "mySelector", subscription = "mySubscription")
 		public String fullHandle(String msg) {
 			return "reply";
 		}

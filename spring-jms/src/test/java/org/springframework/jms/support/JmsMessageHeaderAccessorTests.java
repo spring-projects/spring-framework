@@ -65,9 +65,12 @@ public class JmsMessageHeaderAccessorTests {
 		assertEquals("abcd-1234", headerAccessor.getMessageId());
 		assertEquals(Integer.valueOf(9), headerAccessor.getPriority());
 		assertEquals(replyTo, headerAccessor.getReplyTo());
-		assertEquals(replyTo, headerAccessor.getReplyChannel());
 		assertEquals(true, headerAccessor.getRedelivered());
 		assertEquals("type", headerAccessor.getType());
 		assertEquals(4567L, headerAccessor.getTimestamp(), 0.0);
+
+		// Making sure replyChannel is not mixed with replyTo
+		assertNull(headerAccessor.getReplyChannel());
+
 	}
 }

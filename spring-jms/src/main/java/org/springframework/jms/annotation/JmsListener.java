@@ -61,7 +61,9 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
  *
  * <p>Annotated method may have a non {@code void} return type. When they do, the result of the
  * method invocation is sent as a JMS reply to the destination defined by either the
- * {@code JMSReplyTO} header of the incoming message or the value of {@link #responseDestination()}.
+ * {@code JMSReplyTO} header of the incoming message. When this value is not set, a default
+ * destination can be provided by adding @{@link org.springframework.messaging.handler.annotation.SendTo
+ * SendTo} to the method declaration.
  *
  * @author Stephane Nicoll
  * @since 4.1
@@ -110,15 +112,5 @@ public @interface JmsListener {
 	 * <p>See the JMS specification for a detailed definition of selector expressions.
 	 */
 	String selector() default "";
-
-	/**
-	 * The name of the default response destination to send response messages to.
-	 * <p>This will be applied in case of a request message that does not carry
-	 * a "JMSReplyTo" field. The type of this destination will be determined
-	 * by the listener-container's "destination-type" attribute.
-	 * <p>Note: This only applies to a listener method with a return value,
-	 * for which each result object will be converted into a response message.
-	 */
-	String responseDestination() default "";
 
 }

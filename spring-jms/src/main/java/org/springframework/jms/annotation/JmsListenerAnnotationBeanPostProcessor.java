@@ -182,9 +182,6 @@ public class JmsListenerAnnotationBeanPostProcessor implements BeanPostProcessor
 		if (StringUtils.hasText(jmsListener.subscription())) {
 			endpoint.setSubscription(jmsListener.subscription());
 		}
-		if (StringUtils.hasText(jmsListener.responseDestination())) {
-			endpoint.setResponseDestination(jmsListener.responseDestination());
-		}
 
 		JmsListenerContainerFactory<?> factory = null;
 		String containerFactoryBeanName = jmsListener.containerFactory();

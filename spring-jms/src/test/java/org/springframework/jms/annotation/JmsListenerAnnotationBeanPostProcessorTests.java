@@ -58,7 +58,6 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 		MethodJmsListenerEndpoint methodEndpoint = (MethodJmsListenerEndpoint) endpoint;
 		assertNotNull(methodEndpoint.getBean());
 		assertNotNull(methodEndpoint.getMethod());
-		assertNull(methodEndpoint.getResponseDestination());
 		assertTrue(methodEndpoint.isQueue());
 		assertTrue("Should have been started " + container, container.isStarted());
 

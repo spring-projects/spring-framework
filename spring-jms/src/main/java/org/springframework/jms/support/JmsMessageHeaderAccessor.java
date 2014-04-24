@@ -51,47 +51,82 @@ public class JmsMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	}
 
 
-	@Override
-	public Object getReplyChannel() {
-		return getReplyTo();
-	}
-
+	/**
+	 * Return the {@link JmsHeaders#CORRELATION_ID correlationId}.
+	 * @see JmsHeaders#CORRELATION_ID
+	 */
 	public String getCorrelationId() {
 		return (String) getHeader(JmsHeaders.CORRELATION_ID);
 	}
 
+	/**
+	 * Return the {@link JmsHeaders#DESTINATION destination}.
+	 * @see JmsHeaders#DESTINATION
+	 */
 	public Destination getDestination() {
 		return (Destination) getHeader(JmsHeaders.DESTINATION);
 	}
 
+	/**
+	 * Return the {@link JmsHeaders#DELIVERY_MODE delivery mode}.
+	 * @see JmsHeaders#DELIVERY_MODE
+	 */
 	public Integer getDeliveryMode() {
 		return (Integer) getHeader(JmsHeaders.DELIVERY_MODE);
 	}
 
+	/**
+	 * Return the message {@link JmsHeaders#EXPIRATION expiration}.
+	 * @see JmsHeaders#EXPIRATION
+	 */
 	public Long getExpiration() {
 		return (Long) getHeader(JmsHeaders.EXPIRATION);
 	}
 
+	/**
+	 * Return the {@link JmsHeaders#MESSAGE_ID message id}.
+	 * @see JmsHeaders#MESSAGE_ID
+	 */
 	public String getMessageId() {
 		return (String) getHeader(JmsHeaders.MESSAGE_ID);
 	}
 
+	/**
+	 * Return the {@link JmsHeaders#PRIORITY}.
+	 * @see JmsHeaders#PRIORITY
+	 */
 	public Integer getPriority() {
 		return (Integer) getHeader(JmsHeaders.PRIORITY);
 	}
 
+	/**
+	 * Return the {@link JmsHeaders#REPLY_TO reply to}.
+	 * @see JmsHeaders#REPLY_TO
+	 */
 	public Destination getReplyTo() {
 		return (Destination) getHeader(JmsHeaders.REPLY_TO);
 	}
 
+	/**
+	 * Return the {@link JmsHeaders#REDELIVERED redelivered} flag.
+	 * @see JmsHeaders#REDELIVERED
+	 */
 	public Boolean getRedelivered() {
 		return (Boolean) getHeader(JmsHeaders.REDELIVERED);
 	}
 
+	/**
+	 * Return the {@link JmsHeaders#TYPE type}.
+	 * @see JmsHeaders#TYPE
+	 */
 	public String getType() {
 		return (String) getHeader(JmsHeaders.TYPE);
 	}
 
+	/**
+	 * Return the {@link JmsHeaders#TIMESTAMP timestamp}.
+	 * @see JmsHeaders#TIMESTAMP
+	 */
 	public Long getTimestamp() {
 		return (Long) getHeader(JmsHeaders.TIMESTAMP);
 	}
