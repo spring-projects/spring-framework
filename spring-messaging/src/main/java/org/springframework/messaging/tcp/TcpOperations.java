@@ -50,6 +50,6 @@ public interface TcpOperations<P> {
 	 * @return a ListenableFuture that can be used to determine when and if the
 	 * connection is successfully closed
 	 */
-	ListenableFuture<Void> shutdown();
+	ListenableFuture<Boolean> shutdown();
 
 }

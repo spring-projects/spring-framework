@@ -48,6 +48,12 @@ public interface TcpConnectionHandler<P> {
 	void handleMessage(Message<P> message);
 
 	/**
+	 * Handle a failure on the connection.
+	 * @param ex the exception
+	 */
+	void handleFailure(Throwable ex);
+
+	/**
 	 * Invoked after the connection is closed.
 	 */
 	void afterConnectionClosed();

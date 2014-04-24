@@ -16,7 +16,6 @@
 
 package org.springframework.messaging.simp.stomp;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -34,8 +33,8 @@ import org.springframework.messaging.tcp.FixedIntervalReconnectStrategy;
 import org.springframework.messaging.tcp.TcpConnection;
 import org.springframework.messaging.tcp.TcpConnectionHandler;
 import org.springframework.messaging.tcp.TcpOperations;
-import org.springframework.messaging.tcp.reactor.ReactorTcpClient;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.util.concurrent.ListenableFutureTask;
@@ -68,6 +67,12 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * @since 4.0
  */
 public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler {
+
+	private static final boolean reactor10Present =
+			ClassUtils.isPresent("reactor.tcp.TcpClient", StompBrokerRelayMessageHandler.class.getClassLoader());
+
+	private static final boolean reactor11Present =
+			ClassUtils.isPresent("reactor.net.tcp.TcpClient", StompBrokerRelayMessageHandler.class.getClassLoader());
 
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
@@ -331,7 +336,15 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		this.brokerChannel.subscribe(this);
 
 		if (this.tcpClient == null) {
-			this.tcpClient = new StompTcpClientFactory().create(this.relayHost, this.relayPort);
+			if (reactor11Present) {
+				this.tcpClient = new Reactor11TcpClientFactory().create(this.relayHost, this.relayPort);
+			}
+			else if (reactor10Present) {
+				this.tcpClient = new Reactor10TcpClientFactory().create(this.relayHost, this.relayPort);
+			}
+			else {
+				throw new IllegalStateException("Please add the \"org.projectreactor:reactor-net\" dependency");
+			}
 		}
 
 		if (logger.isDebugEnabled()) {
@@ -607,6 +620,14 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 
 		@Override
+		public void handleFailure(Throwable ex) {
+			if (this.tcpConnection == null) {
+				return;
+			}
+			handleTcpConnectionFailure("Closing connection after TCP failure", ex);
+		}
+
+		@Override
 		public void afterConnectionClosed() {
 			if (this.tcpConnection == null) {
 				return;
@@ -753,10 +774,19 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 	}
 
-	private static class StompTcpClientFactory {
+	private static class Reactor11TcpClientFactory {
 
-		public TcpOperations<byte[]> create(String relayHost, int relayPort) {
-			return new ReactorTcpClient<byte[]>(relayHost, relayPort, new StompCodec());
+		public TcpOperations<byte[]> create(String host, int port) {
+			return new org.springframework.messaging.tcp.reactor.Reactor11TcpClient<byte[]>(
+					host, port, new Reactor11StompCodec());
+		}
+	}
+
+	private static class Reactor10TcpClientFactory {
+
+		public TcpOperations<byte[]> create(String host, int port) {
+			return new org.springframework.messaging.tcp.reactor.ReactorTcpClient<byte[]>(
+					host, port, new StompCodec());
 		}
 	}
 

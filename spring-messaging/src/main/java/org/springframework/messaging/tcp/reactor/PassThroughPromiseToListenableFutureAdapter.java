@@ -25,7 +25,7 @@ import reactor.core.composable.Promise;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-class PassThroughPromiseToListenableFutureAdapter<T> extends AbstractPromiseToListenableFutureAdapter<T, T> {
+public class PassThroughPromiseToListenableFutureAdapter<T> extends AbstractPromiseToListenableFutureAdapter<T, T> {
 
 
 	public PassThroughPromiseToListenableFutureAdapter(Promise<T> promise) {

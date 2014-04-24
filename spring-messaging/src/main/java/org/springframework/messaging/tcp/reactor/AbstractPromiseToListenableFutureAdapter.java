@@ -38,7 +38,7 @@ import reactor.function.Consumer;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-abstract class AbstractPromiseToListenableFutureAdapter<S, T> implements ListenableFuture<T> {
+public abstract class AbstractPromiseToListenableFutureAdapter<S, T> implements ListenableFuture<T> {
 
 	private final Promise<S> promise;
 
