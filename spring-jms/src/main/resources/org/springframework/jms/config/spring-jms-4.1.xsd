@@ -43,13 +43,15 @@
 					</xsd:appinfo>
 				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="default-container-factory" type="xsd:string" use="optional">
+			<xsd:attribute name="container-factory" type="xsd:string" use="optional">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	Specifies the default org.springframework.jms.config.JmsListenerContainerFactory instance to
+	Specifies the org.springframework.jms.config.JmsListenerContainerFactory instance to
 	use to create the container for a jms listener endpoint that does not define a specific
 	factory. This permits in practice to omit the "containerFactory" attribute of the JmsListener
-	annotation. If not provided, each endpoint must define the container factory to use.
+	annotation. This attribute is not required as each endpoint may define the factory to use and,
+	as a convenience, the JmsListenerContainerFactory with name 'jmsListenerContainerFactory' is
+	looked up by default.
 					]]></xsd:documentation>
 					<xsd:appinfo>
 						<tool:annotation kind="ref">

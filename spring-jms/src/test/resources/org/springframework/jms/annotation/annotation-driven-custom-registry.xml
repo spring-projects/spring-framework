@@ -13,14 +13,13 @@
 
 	<bean id="customRegistry" class="org.springframework.jms.config.JmsListenerEndpointRegistry"/>
 
-	<bean id="defaultFactory" class="org.springframework.jms.config.JmsListenerContainerTestFactory"/>
+	<bean id="jmsListenerContainerFactory" class="org.springframework.jms.config.JmsListenerContainerTestFactory"/>
 	<bean id="customFactory" class="org.springframework.jms.config.JmsListenerContainerTestFactory"/>
 
 	<bean id="simpleMessageListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter"/>
 
 	<bean class="org.springframework.jms.annotation.AnnotationDrivenNamespaceTests$CustomJmsListenerConfigurer">
 		<property name="messageListener" ref="simpleMessageListener"/>
-		<property name="containerFactory" ref="defaultFactory"/>
 	</bean>
 
 

@@ -23,6 +23,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import org.springframework.context.support.StaticApplicationContext;
+
 /**
  *
  * @author Stephane Nicoll
@@ -41,6 +43,7 @@ public class JmsListenerEndpointRegistrarTests {
 	@Before
 	public void setup() {
 		registrar.setEndpointRegistry(registry);
+		registrar.setApplicationContext(new StaticApplicationContext());
 	}
 
 	@Test
@@ -59,7 +62,7 @@ public class JmsListenerEndpointRegistrarTests {
 	public void registerNullContainerFactoryIsAllowed() throws Exception {
 		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
 		endpoint.setId("some id");
-		registrar.setDefaultContainerFactory(containerFactory);
+		registrar.setContainerFactory(containerFactory);
 		registrar.registerEndpoint(endpoint, null);
 		registrar.afterPropertiesSet();
 		assertNotNull("Container not created", registry.getContainer("some id"));
@@ -81,7 +84,7 @@ public class JmsListenerEndpointRegistrarTests {
 	public void registerContainerWithoutFactory() throws Exception {
 		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
 		endpoint.setId("myEndpoint");
-		registrar.setDefaultContainerFactory(containerFactory);
+		registrar.setContainerFactory(containerFactory);
 		registrar.registerEndpoint(endpoint);
 		registrar.afterPropertiesSet();
 		assertNotNull("Container not created", registry.getContainer("myEndpoint"));

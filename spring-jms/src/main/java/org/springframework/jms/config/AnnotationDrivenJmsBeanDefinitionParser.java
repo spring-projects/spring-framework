@@ -64,10 +64,12 @@ final class AnnotationDrivenJmsBeanDefinitionParser implements BeanDefinitionPar
 			else {
 				registerDefaultEndpointRegistry(source, parserContext);
 			}
-			String defaultContainerFactory = element.getAttribute("default-container-factory");
-			if (StringUtils.hasText(defaultContainerFactory)) {
-				builder.addPropertyReference("defaultContainerFactory", defaultContainerFactory);
+
+			String containerFactory = element.getAttribute("container-factory");
+			if (StringUtils.hasText(containerFactory)) {
+				builder.addPropertyValue("containerFactoryBeanName", containerFactory);
 			}
+
 			String handlerMethodFactory = element.getAttribute("handler-method-factory");
 			if (StringUtils.hasText(handlerMethodFactory)) {
 				builder.addPropertyReference("jmsHandlerMethodFactory", handlerMethodFactory);

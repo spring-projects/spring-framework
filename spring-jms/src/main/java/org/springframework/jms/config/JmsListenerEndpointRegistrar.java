@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.Assert;
 
 /**
@@ -30,13 +32,17 @@ import org.springframework.util.Assert;
  * @since 4.1
  * @see org.springframework.jms.annotation.JmsListenerConfigurer
  */
-public class JmsListenerEndpointRegistrar implements InitializingBean {
+public class JmsListenerEndpointRegistrar implements ApplicationContextAware, InitializingBean {
 
 	private JmsListenerEndpointRegistry endpointRegistry;
 
-	private JmsListenerContainerFactory<?> defaultContainerFactory;
+	private String containerFactoryBeanName;
+
+	private JmsListenerContainerFactory<?> containerFactory;
 
 	private JmsHandlerMethodFactory jmsHandlerMethodFactory;
+
+	private ApplicationContext applicationContext;
 
 	private final List<JmsListenerEndpointDescriptor> endpointDescriptors
 			= new ArrayList<JmsListenerEndpointDescriptor>();
@@ -57,20 +63,24 @@ public class JmsListenerEndpointRegistrar implements InitializingBean {
 	}
 
 	/**
-	 * Set the default {@link JmsListenerContainerFactory} to use in case a
-	 * {@link JmsListenerEndpoint} is registered with a {@code null} container
-	 * factory.
+	 * Set the bean name of the {@link JmsListenerContainerFactory} to use in
+	 * case a {@link JmsListenerEndpoint} is registered with a {@code null}
+	 * container factory. Alternatively, the container factory instance can
+	 * be registered directly, see {@link #setContainerFactory(JmsListenerContainerFactory)}
 	 */
-	public void setDefaultContainerFactory(JmsListenerContainerFactory<?> defaultContainerFactory) {
-		this.defaultContainerFactory = defaultContainerFactory;
+	public void setContainerFactoryBeanName(String containerFactoryBeanName) {
+		this.containerFactoryBeanName = containerFactoryBeanName;
 	}
 
 	/**
-	 * Return the {@link JmsListenerContainerFactory} to use if none has been
-	 * defined for a particular endpoint or {@code null} if no default is set.
+	 * Set the {@link JmsListenerContainerFactory} to use in case a
+	 * {@link JmsListenerEndpoint} is registered with a {@code null} container
+	 * factory.
+	 * <p>Alternatively, the bean name of the {@link JmsListenerContainerFactory}
+	 * to use can be specified for a lazy lookup, see {@see #setContainerFactoryBeanName}
 	 */
-	public JmsListenerContainerFactory<?> getDefaultContainerFactory() {
-		return defaultContainerFactory;
+	public void setContainerFactory(JmsListenerContainerFactory<?> containerFactory) {
+		this.containerFactory = containerFactory;
 	}
 
 	/**
@@ -92,6 +102,11 @@ public class JmsListenerEndpointRegistrar implements InitializingBean {
 		return jmsHandlerMethodFactory;
 	}
 
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
+
 	/**
 	 * Register a new {@link JmsListenerEndpoint} alongside the {@link JmsListenerContainerFactory}
 	 * to use to create the underlying container.
@@ -109,7 +124,7 @@ public class JmsListenerEndpointRegistrar implements InitializingBean {
 	 * Register a new {@link JmsListenerEndpoint} using the default {@link JmsListenerContainerFactory}
 	 * to create the underlying container.
 	 *
-	 * @see #setDefaultContainerFactory(JmsListenerContainerFactory)
+	 * @see #setContainerFactory(JmsListenerContainerFactory)
 	 * @see #registerEndpoint(JmsListenerEndpoint, JmsListenerContainerFactory)
 	 */
 	public void registerEndpoint(JmsListenerEndpoint endpoint) {
@@ -118,6 +133,7 @@ public class JmsListenerEndpointRegistrar implements InitializingBean {
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
+	 	Assert.notNull(applicationContext, "ApplicationContext must not be null");
 		startAllEndpoints();
 	}
 
@@ -132,8 +148,13 @@ public class JmsListenerEndpointRegistrar implements InitializingBean {
 		if (descriptor.containerFactory != null) {
 			return descriptor.containerFactory;
 		}
-		else if (defaultContainerFactory != null) {
-			return defaultContainerFactory;
+		else if (this.containerFactory != null) {
+			return this.containerFactory;
+		}
+		else if (this.containerFactoryBeanName != null) {
+			this.containerFactory =  applicationContext.getBean(
+					this.containerFactoryBeanName, JmsListenerContainerFactory.class);
+			return this.containerFactory; // Consider changing this if live change of the factory is required
 		}
 		else {
 			throw new IllegalStateException("Could not resolve the "

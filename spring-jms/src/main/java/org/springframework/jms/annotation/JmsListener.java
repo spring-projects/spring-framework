@@ -28,8 +28,10 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
  * Annotation that marks a method to be the target of a JMS message
  * listener on the specified {@link #destination()}. The {@link #containerFactory()}
  * identifies the {@link org.springframework.jms.config.JmsListenerContainerFactory
- * JmsListenerContainerFactory} to use to build the jms listener container. It may
- * be omitted as long as a <em>default</em> container factory has been defined.
+ * JmsListenerContainerFactory} to use to build the jms listener container. If not
+ * set, a <em>default</em> container factory is assumed to be available with a bean
+ * name of {@code jmsListenerContainerFactory} unless an explicit default has been
+ * provided through configuration.
  *
  * <p>Processing of {@code @JmsListener} annotations is performed by
  * registering a {@link JmsListenerAnnotationBeanPostProcessor}. This can be

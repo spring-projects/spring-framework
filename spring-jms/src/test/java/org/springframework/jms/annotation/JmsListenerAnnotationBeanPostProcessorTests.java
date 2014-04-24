@@ -113,7 +113,7 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 		public JmsListenerAnnotationBeanPostProcessor postProcessor() {
 			JmsListenerAnnotationBeanPostProcessor postProcessor = new JmsListenerAnnotationBeanPostProcessor();
 			postProcessor.setEndpointRegistry(jmsListenerEndpointRegistry());
-			postProcessor.setDefaultContainerFactory(testFactory());
+			postProcessor.setContainerFactoryBeanName("testFactory");
 			return postProcessor;
 		}
 

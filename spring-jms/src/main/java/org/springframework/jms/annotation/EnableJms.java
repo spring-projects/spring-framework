@@ -66,7 +66,9 @@ import org.springframework.context.annotation.Import;
  * }</pre>
  *
  * The container factory to use is identified by the {@link JmsListener#containerFactory() containerFactory}
- * attribute defining the name of the {@code JmsListenerContainerFactory} bean to use.
+ * attribute defining the name of the {@code JmsListenerContainerFactory} bean to use.  When none
+ * is set a {@code JmsListenerContainerFactory} bean with name {@code jmsListenerContainerFactory} is
+ * assumed to be present.
  *
  * <p>the following configuration would ensure that every time a {@link javax.jms.Message}
  * is received on the {@link javax.jms.Destination} named "myQueue", {@code MyService.process()}
@@ -118,9 +120,8 @@ import org.springframework.context.annotation.Import;
  * <p>When more control is desired, a {@code @Configuration} class may implement
  * {@link JmsListenerConfigurer}. This allows access to the underlying
  * {@link org.springframework.jms.config.JmsListenerEndpointRegistrar JmsListenerEndpointRegistrar}
- * instance. The following example demonstrates how to specify a default
- * {@code JmsListenerContainerFactory} so that {@link JmsListener#containerFactory()} may be
- * omitted for endpoints willing to use the <em>default</em> container factory.
+ * instance. The following example demonstrates how to specify an explicit default
+ * {@code JmsListenerContainerFactory}
  *
  * <pre class="code">
  * &#064;Configuration
@@ -128,7 +129,7 @@ import org.springframework.context.annotation.Import;
  * public class AppConfig implements JmsListenerConfigurer {
  *     &#064;Override
  *     public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
- *         registrar.setDefaultContainerFactory(myJmsListenerContainerFactory());
+ *         registrar.setContainerFactory(myJmsListenerContainerFactory());
  *     }
  *
  *     &#064;Bean
@@ -146,7 +147,7 @@ import org.springframework.context.annotation.Import;
  * configuration:
  * <pre class="code">
  * {@code <beans>
- *     <jms:annotation-driven default-container-factory="myJmsListenerContainerFactory"/>
+ *     <jms:annotation-driven container-factory="myJmsListenerContainerFactory"/>
  *
  *     <bean id="myJmsListenerContainerFactory"
  *           class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">

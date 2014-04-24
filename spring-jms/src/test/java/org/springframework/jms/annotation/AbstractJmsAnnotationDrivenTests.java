@@ -59,17 +59,21 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 	public abstract void customConfiguration();
 
 	@Test
-	public abstract void defaultContainerFactoryConfiguration();
+	public abstract void explicitContainerFactory();
+
+	@Test
+	public abstract void defaultContainerFactory();
 
 	@Test
 	public abstract void jmsHandlerMethodFactoryConfiguration() throws JMSException;
 
 	/**
-	 * Test for {@link SampleBean} discovery.
+	 * Test for {@link SampleBean} discovery. If a factory with the default name
+	 * is set, an endpoint will use it automatically
 	 */
 	public void testSampleConfiguration(ApplicationContext context) {
 		JmsListenerContainerTestFactory defaultFactory =
-				context.getBean("defaultFactory", JmsListenerContainerTestFactory.class);
+				context.getBean("jmsListenerContainerFactory", JmsListenerContainerTestFactory.class);
 		JmsListenerContainerTestFactory simpleFactory =
 				context.getBean("simpleFactory", JmsListenerContainerTestFactory.class);
 		assertEquals(1, defaultFactory.getContainers().size());
@@ -79,7 +83,7 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 	@Component
 	static class SampleBean {
 
-		@JmsListener(containerFactory = "defaultFactory", destination = "myQueue")
+		@JmsListener(destination = "myQueue")
 		public void defaultHandle(String msg) {
 		}
 
@@ -89,7 +93,9 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 	}
 
 	/**
-	 * Test for {@link FullBean} discovery.
+	 * Test for {@link FullBean} discovery. In this case, no default is set because
+	 * all endpoints provide a default registry. This shows that the default factory
+	 * is only retrieved if it needs to be.
 	 */
 	public void testFullConfiguration(ApplicationContext context) {
 		JmsListenerContainerTestFactory simpleFactory =
@@ -116,11 +122,12 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 
 	/**
 	 * Test for {@link CustomBean} and an manually endpoint registered
-	 * with "myCustomEndpointId".
+	 * with "myCustomEndpointId". The custom endpoint does not provide
+	 * any factory so it's registered with the default one
 	 */
 	public void testCustomConfiguration(ApplicationContext context) {
 		JmsListenerContainerTestFactory defaultFactory =
-				context.getBean("defaultFactory", JmsListenerContainerTestFactory.class);
+				context.getBean("jmsListenerContainerFactory", JmsListenerContainerTestFactory.class);
 		JmsListenerContainerTestFactory customFactory =
 				context.getBean("customFactory", JmsListenerContainerTestFactory.class);
 		assertEquals(1, defaultFactory.getContainers().size());
@@ -150,11 +157,22 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 
 	/**
 	 * Test for {@link DefaultBean} that does not define the container
-	 * factory to use as a default is registered.
+	 * factory to use as a default is registered with an explicit
+	 * default.
+	 */
+	public void testExplicitContainerFactoryConfiguration(ApplicationContext context) {
+		JmsListenerContainerTestFactory defaultFactory =
+				context.getBean("simpleFactory", JmsListenerContainerTestFactory.class);
+		assertEquals(1, defaultFactory.getContainers().size());
+	}
+
+	/**
+	 * Test for {@link DefaultBean} that does not define the container
+	 * factory to use as a default is registered with the default name.
 	 */
 	public void testDefaultContainerFactoryConfiguration(ApplicationContext context) {
 		JmsListenerContainerTestFactory defaultFactory =
-				context.getBean("defaultFactory", JmsListenerContainerTestFactory.class);
+				context.getBean("jmsListenerContainerFactory", JmsListenerContainerTestFactory.class);
 		assertEquals(1, defaultFactory.getContainers().size());
 	}
 

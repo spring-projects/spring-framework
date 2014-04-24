@@ -24,7 +24,6 @@ import org.junit.Test;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerEndpointRegistrar;
 import org.springframework.jms.config.SimpleJmsListenerEndpoint;
 import org.springframework.jms.listener.adapter.ListenerExecutionFailedException;
@@ -62,9 +61,16 @@ public class AnnotationDrivenNamespaceTests extends AbstractJmsAnnotationDrivenT
 
 	@Override
 	@Test
-	public void defaultContainerFactoryConfiguration() {
+	public void explicitContainerFactory() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"annotation-driven-custom-container-factory.xml", getClass());
+		testExplicitContainerFactoryConfiguration(context);
+	}
+
+	@Override
+	public void defaultContainerFactory() {
+		ApplicationContext context = new ClassPathXmlApplicationContext(
+				"annotation-driven-default-container-factory.xml", getClass());
 		testDefaultContainerFactoryConfiguration(context);
 	}
 
@@ -82,23 +88,18 @@ public class AnnotationDrivenNamespaceTests extends AbstractJmsAnnotationDrivenT
 
 		private MessageListener messageListener;
 
-		private JmsListenerContainerFactory<?> containerFactory;
-
 		@Override
 		public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
 			SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
 			endpoint.setId("myCustomEndpointId");
 			endpoint.setDestination("myQueue");
 			endpoint.setMessageListener(messageListener);
-			registrar.registerEndpoint(endpoint, containerFactory);
+			registrar.registerEndpoint(endpoint);
 		}
 
 		public void setMessageListener(MessageListener messageListener) {
 			this.messageListener = messageListener;
 		}
 
-		public void setContainerFactory(JmsListenerContainerFactory<?> containerFactory) {
-			this.containerFactory = containerFactory;
-		}
 	}
 }

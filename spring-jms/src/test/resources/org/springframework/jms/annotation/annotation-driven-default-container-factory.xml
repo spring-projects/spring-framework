@@ -9,10 +9,10 @@
 
 	<jms:annotation-driven/>
 
-	<bean class="org.springframework.jms.annotation.AbstractJmsAnnotationDrivenTests$SampleBean"/>
+	<bean class="org.springframework.jms.annotation.AbstractJmsAnnotationDrivenTests$DefaultBean"/>
 
-	<bean id="jmsListenerContainerFactory" class="org.springframework.jms.config.JmsListenerContainerTestFactory"/>
-	<bean id="simpleFactory" class="org.springframework.jms.config.JmsListenerContainerTestFactory"/>
+	<bean id="jmsListenerContainerFactory"
+		  class="org.springframework.jms.config.JmsListenerContainerTestFactory"/>
 
 
 </beans>

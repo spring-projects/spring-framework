@@ -73,13 +73,18 @@ import org.springframework.util.StringUtils;
 public class JmsListenerAnnotationBeanPostProcessor implements BeanPostProcessor, Ordered,
 		ApplicationContextAware, ApplicationListener<ContextRefreshedEvent> {
 
+	/**
+	 * The bean name of the default {@link JmsListenerContainerFactory}
+	 */
+	static final String DEFAULT_JMS_LISTENER_CONTAINER_FACTORY_BEAN_NAME = "jmsListenerContainerFactory";
+
 	private final AtomicInteger counter = new AtomicInteger();
 
 	private ApplicationContext applicationContext;
 
 	private JmsListenerEndpointRegistry endpointRegistry;
 
-	private JmsListenerContainerFactory<?> defaultContainerFactory;
+	private String containerFactoryBeanName = DEFAULT_JMS_LISTENER_CONTAINER_FACTORY_BEAN_NAME;
 
 	private final JmsHandlerMethodFactoryAdapter jmsHandlerMethodFactory = new JmsHandlerMethodFactoryAdapter();
 
@@ -99,12 +104,12 @@ public class JmsListenerAnnotationBeanPostProcessor implements BeanPostProcessor
 	}
 
 	/**
-	 * Set the default {@link JmsListenerContainerFactory} to use in case a
-	 * {@link JmsListener} does not define any.
-	 * {@linkplain JmsListener#containerFactory() containerFactory}
+	 * Set the name of the {@link JmsListenerContainerFactory} to use by default.
+	 * <p/>If none is specified, {@value #DEFAULT_JMS_LISTENER_CONTAINER_FACTORY_BEAN_NAME}
+	 * is assumed to be defined.
 	 */
-	public void setDefaultContainerFactory(JmsListenerContainerFactory<?> defaultContainerFactory) {
-		this.defaultContainerFactory = defaultContainerFactory;
+	public void setContainerFactoryBeanName(String containerFactoryBeanName) {
+		this.containerFactoryBeanName = containerFactoryBeanName;
 	}
 
 	/**
@@ -209,6 +214,9 @@ public class JmsListenerAnnotationBeanPostProcessor implements BeanPostProcessor
 		for (JmsListenerConfigurer configurer : instances.values()) {
 			configurer.configureJmsListeners(registrar);
 		}
+
+		registrar.setApplicationContext(this.applicationContext);
+
 		if (registrar.getEndpointRegistry() == null) {
 			if (endpointRegistry == null) {
 				endpointRegistry = applicationContext
@@ -217,10 +225,13 @@ public class JmsListenerAnnotationBeanPostProcessor implements BeanPostProcessor
 			}
 			registrar.setEndpointRegistry(endpointRegistry);
 		}
-		if (registrar.getDefaultContainerFactory() == null && defaultContainerFactory != null) {
-			registrar.setDefaultContainerFactory(defaultContainerFactory);
+
+		if (this.containerFactoryBeanName != null) {
+			registrar.setContainerFactoryBeanName(this.containerFactoryBeanName);
 		}
 
+
+		// Set the custom handler method factory once resolved by the configurer
 		JmsHandlerMethodFactory handlerMethodFactory = registrar.getJmsHandlerMethodFactory();
 		if (handlerMethodFactory != null) {
 			this.jmsHandlerMethodFactory.setJmsHandlerMethodFactory(handlerMethodFactory);
@@ -234,7 +245,6 @@ public class JmsListenerAnnotationBeanPostProcessor implements BeanPostProcessor
 			throw new BeanInitializationException(e.getMessage(), e);
 		}
 	}
-
 
 	private String getEndpointId(JmsListener jmsListener) {
 		if (StringUtils.hasText(jmsListener.id())) {
@@ -267,7 +277,7 @@ public class JmsListenerAnnotationBeanPostProcessor implements BeanPostProcessor
 
 		private JmsHandlerMethodFactory getJmsHandlerMethodFactory() {
 			if (jmsHandlerMethodFactory == null) {
-				jmsHandlerMethodFactory= createDefaultJmsHandlerMethodFactory();
+				jmsHandlerMethodFactory = createDefaultJmsHandlerMethodFactory();
 			}
 			return jmsHandlerMethodFactory;
 		}
