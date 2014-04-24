@@ -156,6 +156,15 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 		return null;
 	}
 
+	@Override
+	public boolean isPubSubDomain() {
+		JmsActivationSpecConfig config = getActivationSpecConfig();
+		if (config != null) {
+			return config.isPubSubDomain();
+		}
+		throw new IllegalStateException("could not determine pubSubDomain, no activation spec config is set");
+	}
+
 	/**
 	 * Set the name of this message endpoint. Populated with the bean name
 	 * automatically when defined within Spring's bean factory.

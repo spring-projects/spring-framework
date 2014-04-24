@@ -44,6 +44,7 @@ import org.junit.rules.TestName;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.jms.StubTextMessage;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
+import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.jms.listener.SimpleMessageListenerContainer;
 import org.springframework.jms.listener.adapter.ListenerExecutionFailedException;
 import org.springframework.jms.listener.adapter.MessagingMessageListenerAdapter;
@@ -220,8 +221,27 @@ public class MethodJmsListenerEndpointTests {
 	}
 
 	@Test
-	public void processAndReplyWithSendTo() throws JMSException {
-		MessagingMessageListenerAdapter listener = createDefaultInstance(String.class);
+	public void processAndReplyWithSendToQueue() throws JMSException {
+		String methodName = "processAndReplyWithSendTo";
+		SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+		MessagingMessageListenerAdapter listener = createInstance(this.factory,
+				getListenerMethod(methodName, String.class), container);
+		processAndReplyWithSendTo(listener, false);
+		assertListenerMethodInvocation(sample, methodName);
+	}
+
+	@Test
+	public void processAndReplyWithSendToTopic() throws JMSException {
+		String methodName = "processAndReplyWithSendTo";
+		SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+		container.setPubSubDomain(true);
+		MessagingMessageListenerAdapter listener = createInstance(this.factory,
+				getListenerMethod(methodName, String.class), container);
+		processAndReplyWithSendTo(listener, true);
+		assertListenerMethodInvocation(sample, methodName);
+	}
+
+	private void processAndReplyWithSendTo(MessagingMessageListenerAdapter listener, boolean pubSubDomain) throws JMSException {
 		String body = "echo text";
 		String correlationId = "link-1234";
 		Destination replyDestination = new Destination() {};
@@ -231,7 +251,7 @@ public class MethodJmsListenerEndpointTests {
 		QueueSender queueSender = mock(QueueSender.class);
 		Session session = mock(Session.class);
 
-		given(destinationResolver.resolveDestinationName(session, "replyDestination", false))
+		given(destinationResolver.resolveDestinationName(session, "replyDestination", pubSubDomain))
 				.willReturn(replyDestination);
 		given(session.createTextMessage(body)).willReturn(reply);
 		given(session.createProducer(replyDestination)).willReturn(queueSender);
@@ -240,9 +260,8 @@ public class MethodJmsListenerEndpointTests {
 		StubTextMessage inputMessage = createSimpleJmsTextMessage(body);
 		inputMessage.setJMSCorrelationID(correlationId);
 		listener.onMessage(inputMessage, session);
-		assertDefaultListenerMethodInvocation();
 
-		verify(destinationResolver).resolveDestinationName(session, "replyDestination", false);
+		verify(destinationResolver).resolveDestinationName(session, "replyDestination", pubSubDomain);
 		verify(reply).setJMSCorrelationID(correlationId);
 		verify(queueSender).send(reply);
 		verify(queueSender).close();
@@ -322,12 +341,17 @@ public class MethodJmsListenerEndpointTests {
 	}
 
 	private MessagingMessageListenerAdapter createInstance(
-			DefaultJmsHandlerMethodFactory factory, Method method) {
+			DefaultJmsHandlerMethodFactory factory, Method method, MessageListenerContainer container) {
 		MethodJmsListenerEndpoint endpoint = new MethodJmsListenerEndpoint();
 		endpoint.setBean(sample);
 		endpoint.setMethod(method);
 		endpoint.setJmsHandlerMethodFactory(factory);
-		return endpoint.createMessageListener(new SimpleMessageListenerContainer());
+		return endpoint.createMessageListener(container);
+	}
+
+	private MessagingMessageListenerAdapter createInstance(
+			DefaultJmsHandlerMethodFactory factory, Method method) {
+		return createInstance(factory, method, new SimpleMessageListenerContainer());
 	}
 
 	private MessagingMessageListenerAdapter createDefaultInstance(Class<?>... parameterTypes) {

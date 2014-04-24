@@ -87,6 +87,11 @@ public class MessageListenerTestContainer
 	}
 
 	@Override
+	public boolean isPubSubDomain() {
+		return true;
+	}
+
+	@Override
 	public void afterPropertiesSet() {
 		if (!startInvoked) {
 			throw new IllegalStateException("Start should have been invoked before " +

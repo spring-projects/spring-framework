@@ -46,14 +46,12 @@ public class JmsListenerEndpointTests {
 		MessageListener messageListener = new MessageListenerAdapter();
 		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
 		endpoint.setDestination("myQueue");
-		endpoint.setQueue(true);
 		endpoint.setSelector("foo = 'bar'");
 		endpoint.setSubscription("mySubscription");
 		endpoint.setMessageListener(messageListener);
 
 		endpoint.setupMessageContainer(container);
 		assertEquals("myQueue", container.getDestinationName());
-		assertFalse(container.isPubSubDomain());
 		assertEquals("foo = 'bar'", container.getMessageSelector());
 		assertEquals("mySubscription", container.getDurableSubscriptionName());
 		assertEquals(messageListener, container.getMessageListener());
@@ -65,7 +63,6 @@ public class JmsListenerEndpointTests {
 		MessageListener messageListener = new MessageListenerAdapter();
 		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
 		endpoint.setDestination("myQueue");
-		endpoint.setQueue(true);
 		endpoint.setSelector("foo = 'bar'");
 		endpoint.setSubscription("mySubscription");
 		endpoint.setMessageListener(messageListener);
@@ -73,7 +70,6 @@ public class JmsListenerEndpointTests {
 		endpoint.setupMessageContainer(container);
 		JmsActivationSpecConfig config = container.getActivationSpecConfig();
 		assertEquals("myQueue", config.getDestinationName());
-		assertFalse(config.isPubSubDomain());
 		assertEquals("foo = 'bar'", config.getMessageSelector());
 		assertEquals("mySubscription", config.getDurableSubscriptionName());
 		assertEquals(messageListener, container.getMessageListener());

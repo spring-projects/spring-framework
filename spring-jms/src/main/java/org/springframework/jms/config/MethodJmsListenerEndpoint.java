@@ -85,11 +85,11 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 		messageListener.setHandlerMethod(invocableHandlerMethod);
 		String responseDestination = getDefaultResponseDestination();
 		if (StringUtils.hasText(responseDestination)) {
-			if (isQueue()) {
-				messageListener.setDefaultResponseQueueName(responseDestination);
+			if (container.isPubSubDomain()) {
+				messageListener.setDefaultResponseTopicName(responseDestination);
 			}
 			else {
-				messageListener.setDefaultResponseTopicName(responseDestination);
+				messageListener.setDefaultResponseQueueName(responseDestination);
 			}
 		}
 		MessageConverter messageConverter = container.getMessageConverter();

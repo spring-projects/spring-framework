@@ -67,7 +67,6 @@ public class JmsListenerContainerFactoryTests {
 		MessageListener messageListener = new MessageListenerAdapter();
 		endpoint.setMessageListener(messageListener);
 		endpoint.setDestination("myQueue");
-		endpoint.setQueue(false); // See #setDefaultJmsConfig
 
 		SimpleMessageListenerContainer container = factory.createMessageListenerContainer(endpoint);
 
@@ -89,7 +88,6 @@ public class JmsListenerContainerFactoryTests {
 		MessageListener messageListener = new MessageListenerAdapter();
 		endpoint.setMessageListener(messageListener);
 		endpoint.setDestination("myQueue");
-		endpoint.setQueue(false); // See #setDefaultJmsConfig
 		DefaultMessageListenerContainer container = factory.createMessageListenerContainer(endpoint);
 
 		assertDefaultJmsConfig(container);
@@ -112,26 +110,12 @@ public class JmsListenerContainerFactoryTests {
 		MessageListener messageListener = new MessageListenerAdapter();
 		endpoint.setMessageListener(messageListener);
 		endpoint.setDestination("myQueue");
-		endpoint.setQueue(false); // See #setDefaultJmsConfig
 		JmsMessageEndpointManager container = factory.createMessageListenerContainer(endpoint);
 
 		assertDefaultJcaConfig(container);
 		assertEquals(10, container.getActivationSpecConfig().getMaxConcurrency());
 		assertEquals(messageListener, container.getMessageListener());
 		assertEquals("myQueue", container.getActivationSpecConfig().getDestinationName());
-	}
-
-	@Test
-	public void endpointCanOverrideConfig() {
-		DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-		factory.setPubSubDomain(true); // topic
-
-		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
-		endpoint.setMessageListener(new MessageListenerAdapter());
-		endpoint.setQueue(true); // queue
-
-		DefaultMessageListenerContainer container = factory.createMessageListenerContainer(endpoint);
-		assertEquals(false, container.isPubSubDomain()); // overridden by the endpoint config
 	}
 
 	@Test

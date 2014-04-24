@@ -105,7 +105,6 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 				simpleFactory.getContainers().get(0).getEndpoint();
 		assertEquals("listener1", endpoint.getId());
 		assertEquals("queueIn", endpoint.getDestination());
-		assertTrue(endpoint.isQueue());
 		assertEquals("mySelector", endpoint.getSelector());
 		assertEquals("mySubscription", endpoint.getSubscription());
 	}

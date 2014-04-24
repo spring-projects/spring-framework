@@ -38,8 +38,6 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 
 	private String destination;
 
-	private boolean queue = true;
-
 	private String subscription;
 
 	private String selector;
@@ -66,20 +64,6 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 	 */
 	public void setDestination(String destination) {
 		this.destination = destination;
-	}
-
-	/**
-	 * Return {@code true} if the destination is a queue.
-	 */
-	public boolean isQueue() {
-		return queue;
-	}
-
-	/**
-	 * Specify if the destination is a queue.
-	 */
-	public void setQueue(boolean queue) {
-		this.queue = queue;
 	}
 
 	/**
@@ -136,7 +120,6 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 		if (getSelector() != null) {
 			container.setMessageSelector(getSelector());
 		}
-		container.setPubSubDomain(!isQueue());
 		setupMessageListener(container);
 	}
 
@@ -156,7 +139,6 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 		if (getSelector() != null) {
 			activationSpecConfig.setMessageSelector(getSelector());
 		}
-		activationSpecConfig.setPubSubDomain(!isQueue());
 		setupMessageListener(container);
 	}
 
@@ -183,8 +165,6 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 				.append(this.id)
 				.append("] destination=")
 				.append(this.destination)
-				.append(" | queue='")
-				.append(this.queue)
 				.append("' | subscription='")
 				.append(this.subscription)
 				.append(" | selector='")

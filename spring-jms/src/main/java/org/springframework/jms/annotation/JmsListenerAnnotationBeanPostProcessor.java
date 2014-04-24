@@ -175,7 +175,6 @@ public class JmsListenerAnnotationBeanPostProcessor implements BeanPostProcessor
 		endpoint.setJmsHandlerMethodFactory(jmsHandlerMethodFactory);
 		endpoint.setId(getEndpointId(jmsListener));
 		endpoint.setDestination(jmsListener.destination());
-		endpoint.setQueue(jmsListener.queue());
 		if (StringUtils.hasText(jmsListener.selector())) {
 			endpoint.setSelector(jmsListener.selector());
 		}

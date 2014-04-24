@@ -41,4 +41,10 @@ public interface MessageListenerContainer extends Lifecycle {
 	 */
 	MessageConverter getMessageConverter();
 
+	/**
+	 * Return whether the Publish/Subscribe domain ({@link javax.jms.Topic Topics}) is used.
+	 * Otherwise, the Point-to-Point domain ({@link javax.jms.Queue Queues}) is used.
+	 */
+	boolean isPubSubDomain();
+
 }
