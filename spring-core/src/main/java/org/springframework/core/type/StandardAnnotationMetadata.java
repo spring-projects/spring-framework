@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,14 +160,16 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	public boolean hasAnnotatedMethods(String annotationType) {
 		Method[] methods = getIntrospectedClass().getDeclaredMethods();
 		for (Method method : methods) {
-			for (Annotation ann : method.getAnnotations()) {
-				if (ann.annotationType().getName().equals(annotationType)) {
-					return true;
-				}
-				else {
-					for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
-						if (metaAnn.annotationType().getName().equals(annotationType)) {
-							return true;
+			if (!method.isBridge()) {
+				for (Annotation ann : method.getAnnotations()) {
+					if (ann.annotationType().getName().equals(annotationType)) {
+						return true;
+					}
+					else {
+						for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
+							if (metaAnn.annotationType().getName().equals(annotationType)) {
+								return true;
+							}
 						}
 					}
 				}
@@ -177,19 +179,21 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	}
 
 	public Set<MethodMetadata> getAnnotatedMethods(String annotationType) {
-		Method[] methods = getIntrospectedClass().getDeclaredMethods();
 		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>();
+		Method[] methods = getIntrospectedClass().getDeclaredMethods();
 		for (Method method : methods) {
-			for (Annotation ann : method.getAnnotations()) {
-				if (ann.annotationType().getName().equals(annotationType)) {
-					annotatedMethods.add(new StandardMethodMetadata(method, this.nestedAnnotationsAsMap));
-					break;
-				}
-				else {
-					for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
-						if (metaAnn.annotationType().getName().equals(annotationType)) {
-							annotatedMethods.add(new StandardMethodMetadata(method, this.nestedAnnotationsAsMap));
-							break;
+			if (!method.isBridge()) {
+				for (Annotation ann : method.getAnnotations()) {
+					if (ann.annotationType().getName().equals(annotationType)) {
+						annotatedMethods.add(new StandardMethodMetadata(method, this.nestedAnnotationsAsMap));
+						break;
+					}
+					else {
+						for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
+							if (metaAnn.annotationType().getName().equals(annotationType)) {
+								annotatedMethods.add(new StandardMethodMetadata(method, this.nestedAnnotationsAsMap));
+								break;
+							}
 						}
 					}
 				}
