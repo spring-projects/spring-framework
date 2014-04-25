@@ -29,7 +29,7 @@ import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.SimpleCacheResolver;
-import org.springframework.cache.interceptor.SimpleKeyGenerator;
+import org.springframework.cache.interceptor.SimpleSignatureKeyGenerator;
 import org.springframework.cache.jcache.interceptor.SimpleExceptionCacheResolver;
 import org.springframework.cache.support.SimpleCacheManager;
 
@@ -50,7 +50,7 @@ public abstract class AbstractJCacheTests {
 
 	protected final CacheResolver defaultExceptionCacheResolver = new SimpleExceptionCacheResolver(cacheManager);
 
-	protected final KeyGenerator defaultKeyGenerator = new SimpleKeyGenerator();
+	protected final KeyGenerator defaultKeyGenerator = new SimpleSignatureKeyGenerator();
 
 	protected static CacheManager createSimpleCacheManager(String... cacheNames) {
 		SimpleCacheManager result = new SimpleCacheManager();

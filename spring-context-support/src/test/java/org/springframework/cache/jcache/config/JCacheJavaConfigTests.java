@@ -31,7 +31,7 @@ import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.NamedCacheResolver;
 import org.springframework.cache.interceptor.SimpleCacheResolver;
-import org.springframework.cache.interceptor.SimpleKeyGenerator;
+import org.springframework.cache.interceptor.SimpleSignatureKeyGenerator;
 import org.springframework.cache.jcache.interceptor.AnnotatedJCacheableService;
 import org.springframework.cache.jcache.interceptor.DefaultJCacheOperationSource;
 import org.springframework.cache.jcache.interceptor.SimpleExceptionCacheResolver;
@@ -135,7 +135,7 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 		@Override
 		@Bean
 		public KeyGenerator keyGenerator() {
-			return new SimpleKeyGenerator();
+			return new SimpleSignatureKeyGenerator();
 		}
 
 		@Override
