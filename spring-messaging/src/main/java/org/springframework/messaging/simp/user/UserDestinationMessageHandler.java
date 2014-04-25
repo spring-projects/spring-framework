@@ -156,7 +156,7 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 		}
 		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.wrap(message);
 		if (SimpMessageType.MESSAGE.equals(headerAccessor.getMessageType())) {
-			headerAccessor.setHeader(SUBSCRIBE_DESTINATION, result.getSubscribeDestination());
+			headerAccessor.setNativeHeader(SUBSCRIBE_DESTINATION, result.getSubscribeDestination());
 			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headerAccessor).build();
 		}
 		for (String targetDestination : destinations) {

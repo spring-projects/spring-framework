@@ -251,9 +251,10 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 				logger.error("Ignoring message, no subscriptionId header: " + message);
 				return;
 			}
-			String header = UserDestinationMessageHandler.SUBSCRIBE_DESTINATION;
-			if (message.getHeaders().containsKey(header)) {
-				headers.setDestination((String) message.getHeaders().get(header));
+			String name = UserDestinationMessageHandler.SUBSCRIBE_DESTINATION;
+			String origDestination = headers.getFirstNativeHeader(name);
+			if (origDestination != null) {
+				headers.setDestination(origDestination);
 			}
 		}
 

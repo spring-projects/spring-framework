@@ -29,6 +29,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.support.MessageBuilder;
+import sun.security.provider.SHA;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
@@ -93,10 +94,10 @@ public class UserDestinationMessageHandlerTests {
 		ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
 		Mockito.verify(this.brokerChannel).send(captor.capture());
 
-		assertEquals("/queue/foo-user123",
-				captor.getValue().getHeaders().get(SimpMessageHeaderAccessor.DESTINATION_HEADER));
-		assertEquals("/user/queue/foo",
-				captor.getValue().getHeaders().get(UserDestinationMessageHandler.SUBSCRIBE_DESTINATION));
+		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.wrap(captor.getValue());
+
+		assertEquals("/queue/foo-user123", accessor.getDestination());
+		assertEquals("/user/queue/foo", accessor.getFirstNativeHeader(UserDestinationMessageHandler.SUBSCRIBE_DESTINATION));
 	}
 
 

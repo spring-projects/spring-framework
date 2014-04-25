@@ -209,6 +209,7 @@ public class StompSubProtocolHandlerTests {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
 		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 		TextMessage textMessage = new TextMessage(new StompEncoder().encode(message));
+		this.protocolHandler.afterSessionStarted(this.session, this.channel);
 		this.protocolHandler.handleMessageFromClient(this.session, textMessage, this.channel);
 
 		verify(this.channel).send(this.messageCaptor.capture());
@@ -240,8 +241,9 @@ public class StompSubProtocolHandlerTests {
 		headers.setMessageId("mess0");
 		headers.setSubscriptionId("sub0");
 		headers.setDestination("/queue/foo-user123");
-		headers.setHeader(UserDestinationMessageHandler.SUBSCRIBE_DESTINATION, "/user/queue/foo");
+		headers.setNativeHeader(UserDestinationMessageHandler.SUBSCRIBE_DESTINATION, "/user/queue/foo");
 		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		this.protocolHandler.afterSessionStarted(this.session, this.channel);
 		this.protocolHandler.handleMessageToClient(this.session, message);
 
 		assertEquals(1, this.session.getSentMessages().size());
@@ -278,8 +280,9 @@ public class StompSubProtocolHandlerTests {
 	@Test
 	public void handleMessageFromClientInvalidStompCommand() {
 
-		TextMessage textMessage = new TextMessage("FOO");
+		TextMessage textMessage = new TextMessage("FOO\n\n\0");
 
+		this.protocolHandler.afterSessionStarted(this.session, this.channel);
 		this.protocolHandler.handleMessageFromClient(this.session, textMessage, this.channel);
 
 		verifyZeroInteractions(this.channel);
