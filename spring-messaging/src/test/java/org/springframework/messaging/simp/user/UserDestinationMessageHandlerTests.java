@@ -91,8 +91,9 @@ public class UserDestinationMessageHandlerTests {
 		ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
 		Mockito.verify(this.brokerChannel).send(captor.capture());
 
-		assertEquals("/queue/foo-user123", SimpMessageHeaderAccessor.getDestination(captor.getValue().getHeaders()));
-		assertEquals("/user/queue/foo", captor.getValue().getHeaders().get(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION));
+		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.wrap(captor.getValue());
+		assertEquals("/queue/foo-user123", accessor.getDestination());
+		assertEquals("/user/queue/foo", accessor.getFirstNativeHeader(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION));
 	}
 
 

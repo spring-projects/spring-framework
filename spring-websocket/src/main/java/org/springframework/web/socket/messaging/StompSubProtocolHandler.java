@@ -298,10 +298,10 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 				logger.error("Ignoring message, no subscriptionId header: " + message);
 				return;
 			}
-			String header = SimpMessageHeaderAccessor.ORIGINAL_DESTINATION;
-			if (message.getHeaders().containsKey(header)) {
+			String origDestination = stompAccessor.getFirstNativeHeader(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION);
+			if (origDestination != null) {
 				stompAccessor = toMutableAccessor(stompAccessor, message);
-				stompAccessor.setDestination((String) message.getHeaders().get(header));
+				stompAccessor.setDestination(origDestination);
 			}
 		}
 		else if (StompCommand.CONNECTED.equals(command)) {

@@ -239,7 +239,7 @@ public class StompSubProtocolHandlerTests {
 		headers.setMessageId("mess0");
 		headers.setSubscriptionId("sub0");
 		headers.setDestination("/queue/foo-user123");
-		headers.setHeader(StompHeaderAccessor.ORIGINAL_DESTINATION, "/user/queue/foo");
+		headers.setNativeHeader(StompHeaderAccessor.ORIGINAL_DESTINATION, "/user/queue/foo");
 		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(this.session, message);
 
