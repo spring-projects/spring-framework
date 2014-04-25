@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -224,22 +224,12 @@ class ConfigurationClassParser {
 		// process superclass, if any
 		if (metadata.hasSuperClass()) {
 			String superclass = metadata.getSuperClassName();
-			if (!this.knownSuperclasses.containsKey(superclass)) {
+			if (!superclass.startsWith("java") && !this.knownSuperclasses.containsKey(superclass)) {
 				this.knownSuperclasses.put(superclass, configClass);
 				// superclass found, return its annotation metadata and recurse
 				if (metadata instanceof StandardAnnotationMetadata) {
 					Class<?> clazz = ((StandardAnnotationMetadata) metadata).getIntrospectedClass();
 					return new StandardAnnotationMetadata(clazz.getSuperclass(), true);
-				}
-				else if (superclass.startsWith("java")) {
-					// never load core JDK classes via ASM, in particular not java.lang.Object!
-					try {
-						return new StandardAnnotationMetadata(
-								this.resourceLoader.getClassLoader().loadClass(superclass), true);
-					}
-					catch (ClassNotFoundException ex) {
-						throw new IllegalStateException(ex);
-					}
 				}
 				else {
 					MetadataReader reader = this.metadataReaderFactory.getMetadataReader(superclass);
