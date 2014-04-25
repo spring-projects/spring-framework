@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.config.annotation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.core.io.Resource;
@@ -82,8 +83,8 @@ public class ResourceHandlerRegistration {
 	 * is recommended to add {@link PathResourceResolver} as the last resolver.
 	 * @since 4.1
 	 */
-	public void setResourceResolvers(List<ResourceResolver> resourceResolvers) {
-		this.resourceResolvers = resourceResolvers;
+	public void setResourceResolvers(ResourceResolver... resourceResolvers) {
+		this.resourceResolvers = Arrays.asList(resourceResolvers);
 	}
 
 	/**

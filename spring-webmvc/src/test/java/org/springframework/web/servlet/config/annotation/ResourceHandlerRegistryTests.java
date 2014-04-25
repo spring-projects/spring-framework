@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.config.annotation;
 
 import java.util.Arrays;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -97,13 +96,12 @@ public class ResourceHandlerRegistryTests {
 	@Test
 	public void resourceResolversAndTransformers() {
 		ResourceResolver resolver = Mockito.mock(ResourceResolver.class);
-		List<ResourceResolver> resolvers = Arrays.<ResourceResolver>asList(resolver);
-		registry.setResourceResolvers(resolvers);
+		registry.setResourceResolvers(resolver);
 
 		SimpleUrlHandlerMapping hm = (SimpleUrlHandlerMapping) registry.getHandlerMapping();
 		ResourceHttpRequestHandler handler = (ResourceHttpRequestHandler) hm.getUrlMap().values().iterator().next();
 
-		assertEquals(resolvers, handler.getResourceResolvers());
+		assertEquals(Arrays.asList(resolver), handler.getResourceResolvers());
 	}
 
 	private ResourceHttpRequestHandler getHandler(String pathPattern) {

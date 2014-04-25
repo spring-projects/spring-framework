@@ -107,8 +107,8 @@ public class ResourceHandlerRegistry {
 	 * Configure the {@link ResourceResolver}s to use by default in resource handlers that
 	 * don't have them set.
 	 */
-	public void setResourceResolvers(List<ResourceResolver> resourceResolvers) {
-		this.resourceResolvers = resourceResolvers;
+	public void setResourceResolvers(ResourceResolver... resourceResolvers) {
+		this.resourceResolvers = Arrays.asList(resourceResolvers);
 	}
 
 	/**
@@ -120,11 +120,11 @@ public class ResourceHandlerRegistry {
 		}
 
 		Map<String, HttpRequestHandler> urlMap = new LinkedHashMap<String, HttpRequestHandler>();
-		for (ResourceHandlerRegistration registration : registrations) {
+		for (ResourceHandlerRegistration registration : this.registrations) {
 			for (String pathPattern : registration.getPathPatterns()) {
 				ResourceHttpRequestHandler handler = registration.getRequestHandler();
-				handler.setServletContext(servletContext);
-				handler.setApplicationContext(applicationContext);
+				handler.setServletContext(this.servletContext);
+				handler.setApplicationContext(this.applicationContext);
 				if ((this.resourceResolvers != null) && (registration.getResourceResolvers() == null)) {
 					handler.setResourceResolvers(this.resourceResolvers);
 				}

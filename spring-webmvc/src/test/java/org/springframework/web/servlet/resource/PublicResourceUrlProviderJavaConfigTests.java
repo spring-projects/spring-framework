@@ -16,9 +16,6 @@
 
 package org.springframework.web.servlet.resource;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -114,14 +111,9 @@ public class PublicResourceUrlProviderJavaConfigTests {
 
 		@Override
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
-
-			List<ResourceResolver> resourceResolvers = new ArrayList<>();
-			resourceResolvers.add(new FingerprintResourceResolver());
-			resourceResolvers.add(new PathResourceResolver());
-
 			registry.addResourceHandler("/resources/**")
 				.addResourceLocations("classpath:org/springframework/web/servlet/resource/test/")
-				.setResourceResolvers(resourceResolvers);
+				.setResourceResolvers(new FingerprintResourceResolver(), new PathResourceResolver());
 		}
 	}
 
