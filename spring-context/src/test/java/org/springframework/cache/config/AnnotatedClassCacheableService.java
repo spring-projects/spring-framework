@@ -31,12 +31,18 @@ import org.springframework.cache.annotation.Caching;
 public class AnnotatedClassCacheableService implements CacheableService<Object> {
 
 	private final AtomicLong counter = new AtomicLong();
+	private final AtomicLong counter2 = new AtomicLong(100000);
 
 	public static final AtomicLong nullInvocations = new AtomicLong();
 
 	@Override
 	public Object cache(Object arg1) {
 		return counter.getAndIncrement();
+	}
+
+	@Override
+	public Object cacheAnother(Object arg1) {
+		return counter2.getAndIncrement();
 	}
 
 	@Override

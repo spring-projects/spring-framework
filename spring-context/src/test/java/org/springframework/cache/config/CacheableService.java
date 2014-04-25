@@ -25,6 +25,8 @@ package org.springframework.cache.config;
 public interface CacheableService<T> {
 
 	T cache(Object arg1);
+	
+	T cacheAnother(Object arg1);
 
 	void invalidate(Object arg1);
 
