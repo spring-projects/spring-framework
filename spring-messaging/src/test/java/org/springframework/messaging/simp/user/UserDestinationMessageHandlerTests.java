@@ -29,7 +29,6 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.support.MessageBuilder;
-import sun.security.provider.SHA;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
