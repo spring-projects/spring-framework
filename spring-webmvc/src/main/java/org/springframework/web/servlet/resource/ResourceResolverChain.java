@@ -56,6 +56,6 @@ public interface ResourceResolverChain {
 	 * @param locations the locations to search in when looking up resources
 	 * @return the resolved public URL path or {@code null} if unresolved
 	 */
-	String resolvePublicUrlPath(String resourcePath, List<? extends Resource> locations);
+	String resolveUrlPath(String resourcePath, List<? extends Resource> locations);
 
 }

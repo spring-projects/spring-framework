@@ -25,8 +25,6 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
 
@@ -74,10 +72,10 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 	}
 
 	@Override
-	protected String resolvePublicUrlPathInternal(String resourceUrlPath, List<? extends Resource> locations,
+	protected String resolveUrlPathInternal(String resourceUrlPath, List<? extends Resource> locations,
 			ResourceResolverChain chain) {
 
-		return chain.resolvePublicUrlPath(resourceUrlPath, locations);
+		return chain.resolveUrlPath(resourceUrlPath, locations);
 	}
 
 

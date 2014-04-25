@@ -62,6 +62,6 @@ public interface ResourceResolver {
 	 * @param chain the chain of resolvers to delegate to
 	 * @return the resolved public URL path or {@code null} if unresolved
 	 */
-	String resolvePublicUrlPath(String resourcePath, List<? extends Resource> locations, ResourceResolverChain chain);
+	String resolveUrlPath(String resourcePath, List<? extends Resource> locations, ResourceResolverChain chain);
 
 }

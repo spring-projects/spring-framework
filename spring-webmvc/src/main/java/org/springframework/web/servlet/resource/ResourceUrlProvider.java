@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.core.OrderComparator;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
@@ -29,7 +30,10 @@ import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -44,7 +48,7 @@ import java.util.Map;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public class PublicResourceUrlProvider implements ApplicationListener<ContextRefreshedEvent> {
+public class ResourceUrlProvider implements ApplicationListener<ContextRefreshedEvent> {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -130,10 +134,15 @@ public class PublicResourceUrlProvider implements ApplicationListener<ContextRef
 		}
 	}
 
-	protected void detectResourceHandlers(ApplicationContext applicationContext) {
+	protected void detectResourceHandlers(ApplicationContext appContext) {
+
 		logger.debug("Looking for resource handler mappings");
-		Map<String, SimpleUrlHandlerMapping> beans = applicationContext.getBeansOfType(SimpleUrlHandlerMapping.class);
-		for (SimpleUrlHandlerMapping hm : beans.values()) {
+
+		Map<String, SimpleUrlHandlerMapping> map = appContext.getBeansOfType(SimpleUrlHandlerMapping.class);
+		List<SimpleUrlHandlerMapping> handlerMappings = new ArrayList<SimpleUrlHandlerMapping>(map.values());
+		Collections.sort(handlerMappings, new OrderComparator());
+
+		for (SimpleUrlHandlerMapping hm : handlerMappings) {
 			for (String pattern : hm.getUrlMap().keySet()) {
 				Object handler = hm.getUrlMap().get(pattern);
 				if (handler instanceof ResourceHttpRequestHandler) {
@@ -207,7 +216,7 @@ public class PublicResourceUrlProvider implements ApplicationListener<ContextRef
 			}
 			ResourceHttpRequestHandler handler = this.handlerMap.get(pattern);
 			ResourceResolverChain chain = handler.createResourceResolverChain();
-			String resolved = chain.resolvePublicUrlPath(pathWithinMapping, handler.getLocations());
+			String resolved = chain.resolveUrlPath(pathWithinMapping, handler.getLocations());
 			if (resolved == null) {
 				throw new IllegalStateException("Failed to get public resource URL path for " + pathWithinMapping);
 			}

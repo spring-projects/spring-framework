@@ -35,11 +35,11 @@ import static org.junit.Assert.*;
 
 /**
  * Integration tests using {@link ResourceUrlEncodingFilter} and
- * {@link PublicResourceUrlProvider} with the latter configured in Spring MVC Java config.
+ * {@link ResourceUrlProvider} with the latter configured in Spring MVC Java config.
  *
  * @author Rossen Stoyanchev
  */
-public class PublicResourceUrlProviderJavaConfigTests {
+public class ResourceUrlProviderJavaConfigTests {
 
 	private final TestServlet servlet = new TestServlet();
 
@@ -59,10 +59,10 @@ public class PublicResourceUrlProviderJavaConfigTests {
 		ctx.register(WebConfig.class);
 		ctx.refresh();
 
-		PublicResourceUrlProvider urlProvider = ctx.getBean(PublicResourceUrlProvider.class);
+		ResourceUrlProvider urlProvider = ctx.getBean(ResourceUrlProvider.class);
 
 		this.request = new MockHttpServletRequest("GET", "/");
-		request.setAttribute(PublicResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, urlProvider);
+		request.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, urlProvider);
 	}
 
 

@@ -30,14 +30,14 @@ import static org.junit.Assert.*;
 
 
 /**
- * Unit tests for {@link org.springframework.web.servlet.resource.PublicResourceUrlProvider}.
+ * Unit tests for {@link ResourceUrlProvider}.
  *
  * @author Jeremy Grelle
  * @author Rossen Stoyanchev
  */
-public class PublicResourceUrlProviderTests {
+public class ResourceUrlProviderTests {
 
-	private PublicResourceUrlProvider translator;
+	private ResourceUrlProvider translator;
 
 	private ResourceHttpRequestHandler handler;
 
@@ -78,7 +78,7 @@ public class PublicResourceUrlProviderTests {
 	}
 
 	private void initTranslator() {
-		this.translator = new PublicResourceUrlProvider();
+		this.translator = new ResourceUrlProvider();
 		this.translator.setHandlerMap(this.handlerMap);
 	}
 

@@ -77,8 +77,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExc
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
-import org.springframework.web.servlet.resource.PublicResourceUrlProvider;
-import org.springframework.web.servlet.resource.PublicResourceUrlProviderExposingInterceptor;
+import org.springframework.web.servlet.resource.ResourceUrlProvider;
+import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -244,7 +244,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			InterceptorRegistry registry = new InterceptorRegistry();
 			addInterceptors(registry);
 			registry.addInterceptor(new ConversionServiceExposingInterceptor(mvcConversionService()));
-			registry.addInterceptor(new PublicResourceUrlProviderExposingInterceptor(resourceUrlPathTranslator()));
+			registry.addInterceptor(new ResourceUrlProviderExposingInterceptor(resourceUrlPathTranslator()));
 			this.interceptors = registry.getInterceptors();
 		}
 		return this.interceptors.toArray();
@@ -358,8 +358,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	@Bean
-	public PublicResourceUrlProvider resourceUrlPathTranslator() {
-		PublicResourceUrlProvider translator = new PublicResourceUrlProvider();
+	public ResourceUrlProvider resourceUrlPathTranslator() {
+		ResourceUrlProvider translator = new ResourceUrlProvider();
 		UrlPathHelper pathHelper = getPathMatchConfigurer().getUrlPathHelper();
 		if (pathHelper != null) {
 			translator.setUrlPathHelper(pathHelper);

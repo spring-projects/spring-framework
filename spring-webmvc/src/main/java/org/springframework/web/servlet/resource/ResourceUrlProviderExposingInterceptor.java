@@ -23,24 +23,24 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * An interceptor that exposes the {@link PublicResourceUrlProvider} instance it
+ * An interceptor that exposes the {@link ResourceUrlProvider} instance it
  * is configured with as a request attribute.
  *
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public class PublicResourceUrlProviderExposingInterceptor extends HandlerInterceptorAdapter {
+public class ResourceUrlProviderExposingInterceptor extends HandlerInterceptorAdapter {
 
 	/**
-	 * Name of the request attribute that holds the {@link PublicResourceUrlProvider}.
+	 * Name of the request attribute that holds the {@link ResourceUrlProvider}.
 	 */
-	public static final String RESOURCE_URL_PROVIDER_ATTR = PublicResourceUrlProvider.class.getName().toString();
+	public static final String RESOURCE_URL_PROVIDER_ATTR = ResourceUrlProvider.class.getName().toString();
 
 
-	private final PublicResourceUrlProvider resourceUrlProvider;
+	private final ResourceUrlProvider resourceUrlProvider;
 
 
-	public PublicResourceUrlProviderExposingInterceptor(PublicResourceUrlProvider resourceUrlProvider) {
+	public ResourceUrlProviderExposingInterceptor(ResourceUrlProvider resourceUrlProvider) {
 		Assert.notNull(resourceUrlProvider, "'resourceUrlProvider' is required");
 		this.resourceUrlProvider = resourceUrlProvider;
 	}

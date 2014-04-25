@@ -48,7 +48,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	}
 
 	@Override
-	protected String resolvePublicUrlPathInternal(String resourceUrlPath, List<? extends Resource> locations,
+	protected String resolveUrlPathInternal(String resourceUrlPath, List<? extends Resource> locations,
 			ResourceResolverChain chain) {
 
 		return (getResource(resourceUrlPath, locations) != null ? resourceUrlPath : null);

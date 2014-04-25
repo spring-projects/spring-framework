@@ -23,8 +23,6 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.FileCopyUtils;
@@ -97,10 +95,10 @@ public class FingerprintResourceResolver extends AbstractResourceResolver {
 	}
 
 	@Override
-	protected String resolvePublicUrlPathInternal(String resourceUrlPath, List<? extends Resource> locations,
+	protected String resolveUrlPathInternal(String resourceUrlPath, List<? extends Resource> locations,
 			ResourceResolverChain chain) {
 
-		String baseUrl = chain.resolvePublicUrlPath(resourceUrlPath, locations);
+		String baseUrl = chain.resolveUrlPath(resourceUrlPath, locations);
 		if (StringUtils.hasText(baseUrl)) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Getting the original resource to calculate hash");

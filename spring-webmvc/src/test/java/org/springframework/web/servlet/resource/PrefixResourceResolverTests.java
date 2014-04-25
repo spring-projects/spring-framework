@@ -59,10 +59,10 @@ public class PrefixResourceResolverTests {
 	}
 
 	@Test
-	public void resolvePublicUrlPath() {
+	public void resolveUrlPath() {
 		String resourceId = "/foo.css";
 		String url = this.shaPrefix + resourceId;
-		assertEquals(url, chain.resolvePublicUrlPath(resourceId, locations));
+		assertEquals(url, chain.resolveUrlPath(resourceId, locations));
 	}
 
 	@Test(expected = IllegalArgumentException.class)

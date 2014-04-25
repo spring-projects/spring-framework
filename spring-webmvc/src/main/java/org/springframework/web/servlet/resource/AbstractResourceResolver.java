@@ -49,17 +49,17 @@ public abstract class AbstractResourceResolver implements ResourceResolver {
 			List<? extends Resource> locations, ResourceResolverChain chain);
 
 	@Override
-	public String resolvePublicUrlPath(String resourceUrlPath, List<? extends Resource> locations,
+	public String resolveUrlPath(String resourceUrlPath, List<? extends Resource> locations,
 			ResourceResolverChain chain) {
 
 		if (logger.isTraceEnabled()) {
 			logger.trace("Resolving public URL for path=\"" + resourceUrlPath + "\"");
 		}
 
-		return resolvePublicUrlPathInternal(resourceUrlPath, locations, chain);
+		return resolveUrlPathInternal(resourceUrlPath, locations, chain);
 	}
 
-	protected abstract String resolvePublicUrlPathInternal(String resourceUrlPath,
+	protected abstract String resolveUrlPathInternal(String resourceUrlPath,
 			List<? extends Resource> locations, ResourceResolverChain chain);
 
 }

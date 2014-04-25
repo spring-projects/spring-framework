@@ -21,8 +21,6 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
@@ -65,13 +63,13 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 	}
 
 	@Override
-	public String resolvePublicUrlPath(String resourcePath, List<? extends Resource> locations) {
+	public String resolveUrlPath(String resourcePath, List<? extends Resource> locations) {
 		ResourceResolver resolver = getNextResolver();
 		if (resolver == null) {
 			return null;
 		}
 		try {
-			return resolver.resolvePublicUrlPath(resourcePath, locations, this);
+			return resolver.resolveUrlPath(resourcePath, locations, this);
 		}
 		finally {
 			this.index--;

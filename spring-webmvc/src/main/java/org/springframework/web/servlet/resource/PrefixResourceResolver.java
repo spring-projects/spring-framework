@@ -16,8 +16,6 @@
 
 package org.springframework.web.servlet.resource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -63,10 +61,10 @@ public class PrefixResourceResolver extends AbstractResourceResolver {
 	}
 
 	@Override
-	protected String resolvePublicUrlPathInternal(String resourceUrlPath, List<? extends Resource> locations,
+	protected String resolveUrlPathInternal(String resourceUrlPath, List<? extends Resource> locations,
 			ResourceResolverChain chain) {
 
-		String baseUrl = chain.resolvePublicUrlPath(resourceUrlPath, locations);
+		String baseUrl = chain.resolveUrlPath(resourceUrlPath, locations);
 		if (StringUtils.hasText(baseUrl)) {
 			return this.prefix + (baseUrl.startsWith("/") ? baseUrl : "/" + baseUrl);
 		}
