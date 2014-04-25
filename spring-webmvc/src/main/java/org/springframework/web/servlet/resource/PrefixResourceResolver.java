@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -43,10 +44,7 @@ import java.util.List;
  */
 public class PrefixResourceResolver extends AbstractResourceResolver {
 
-	private static final Log logger = LogFactory.getLog(PathResourceResolver.class);
-
 	private final String prefix;
-
 
 	public PrefixResourceResolver(String prefix) {
 		Assert.hasText(prefix, "prefix must not be null or empty");
@@ -57,9 +55,6 @@ public class PrefixResourceResolver extends AbstractResourceResolver {
 	protected Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
-		if (logger.isTraceEnabled()) {
-			logger.trace("Resolving resource: requestPath=\"" + requestPath + "\"");
-		}
 		if (requestPath.startsWith(this.prefix)) {
 			requestPath = requestPath.substring(this.prefix.length());
 		}
@@ -72,7 +67,10 @@ public class PrefixResourceResolver extends AbstractResourceResolver {
 			ResourceResolverChain chain) {
 
 		String baseUrl = chain.resolvePublicUrlPath(resourceUrlPath, locations);
-		return this.prefix + (baseUrl.startsWith("/") ? baseUrl : "/" + baseUrl);
+		if (StringUtils.hasText(baseUrl)) {
+			return this.prefix + (baseUrl.startsWith("/") ? baseUrl : "/" + baseUrl);
+		}
+		return baseUrl;
 	}
 
 }
