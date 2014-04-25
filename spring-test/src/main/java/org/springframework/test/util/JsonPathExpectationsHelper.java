@@ -101,7 +101,7 @@ public class JsonPathExpectationsHelper {
 			assertEquals("For JSON path " + this.expression + " type of value",
 					expectedValue.getClass(), actualValue.getClass());
 		}
-		assertEquals("JSON path" + this.expression, expectedValue, actualValue);
+		assertEquals("JSON path " + this.expression, expectedValue, actualValue);
 	}
 
 	/**
