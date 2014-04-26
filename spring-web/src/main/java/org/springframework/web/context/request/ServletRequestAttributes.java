@@ -16,8 +16,11 @@
 
 package org.springframework.web.context.request;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -45,11 +48,18 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	public static final String DESTRUCTION_CALLBACK_NAME_PREFIX =
 			ServletRequestAttributes.class.getName() + ".DESTRUCTION_CALLBACK.";
 
+	static final List<Class<?>> IMMUTABLE_CLASSES = Arrays.asList(new Class<?>[] {
+		String.class, Boolean.class, Integer.class, Long.class, Short.class,
+		Double.class, Float.class, Character.class, Byte.class });
 
 	private final HttpServletRequest request;
 
 	private volatile HttpSession session;
 
+	/**
+	 * The session attributes who need explicit update to announce that their internal
+	 * state may have potentially changed. Useful for session management.
+	 */
 	private final Map<String, Object> sessionAttributesToUpdate = new ConcurrentHashMap<String, Object>(1);
 
 
@@ -229,7 +239,9 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 					Object newValue = entry.getValue();
 					Object oldValue = this.session.getAttribute(name);
 					if (oldValue == newValue) {
-						this.session.setAttribute(name, newValue);
+						if (!IMMUTABLE_CLASSES.contains(value.getClass())) {
+							this.session.setAttribute(name, newValue);
+						}
 					}
 				}
 			}
