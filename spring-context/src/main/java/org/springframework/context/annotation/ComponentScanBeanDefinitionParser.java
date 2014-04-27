@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -258,7 +258,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 
 	@SuppressWarnings("unchecked")
 	private Object instantiateUserDefinedStrategy(String className, Class<?> strategyType, ClassLoader classLoader) {
-		Object result = null;
+		Object result;
 		try {
 			result = classLoader.loadClass(className).newInstance();
 		}
@@ -268,7 +268,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 		}
 		catch (Exception ex) {
 			throw new IllegalArgumentException("Unable to instantiate class [" + className + "] for strategy [" +
-					strategyType.getName() + "]. A zero-argument constructor is required", ex);
+					strategyType.getName() + "]: a zero-argument constructor is required", ex);
 		}
 
 		if (!strategyType.isAssignableFrom(result.getClass())) {
