@@ -107,9 +107,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private static Class<?> javaxInjectProviderClass = null;
 
 	static {
-		ClassLoader cl = DefaultListableBeanFactory.class.getClassLoader();
 		try {
-			javaxInjectProviderClass = cl.loadClass("javax.inject.Provider");
+			javaxInjectProviderClass =
+					ClassUtils.forName("javax.inject.Provider", DefaultListableBeanFactory.class.getClassLoader());
 		}
 		catch (ClassNotFoundException ex) {
 			// JSR-330 API not available - Provider interface simply not supported then.

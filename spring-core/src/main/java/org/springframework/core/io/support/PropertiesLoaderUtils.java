@@ -174,9 +174,9 @@ public abstract class PropertiesLoaderUtils {
 		if (classLoaderToUse == null) {
 			classLoaderToUse = ClassUtils.getDefaultClassLoader();
 		}
-		Properties props = new Properties();
 		Enumeration<URL> urls = (classLoaderToUse != null ? classLoaderToUse.getResources(resourceName) :
 				ClassLoader.getSystemResources(resourceName));
+		Properties props = new Properties();
 		while (urls.hasMoreElements()) {
 			URL url = urls.nextElement();
 			URLConnection con = url.openConnection();

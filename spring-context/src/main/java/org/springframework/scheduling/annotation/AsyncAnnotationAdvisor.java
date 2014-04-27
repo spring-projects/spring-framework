@@ -34,6 +34,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Advisor that activates asynchronous method execution through the {@link Async}
@@ -79,9 +80,9 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 	public AsyncAnnotationAdvisor(Executor executor, AsyncUncaughtExceptionHandler exceptionHandler) {
 		Set<Class<? extends Annotation>> asyncAnnotationTypes = new LinkedHashSet<Class<? extends Annotation>>(2);
 		asyncAnnotationTypes.add(Async.class);
-		ClassLoader cl = AsyncAnnotationAdvisor.class.getClassLoader();
 		try {
-			asyncAnnotationTypes.add((Class<? extends Annotation>) cl.loadClass("javax.ejb.Asynchronous"));
+			asyncAnnotationTypes.add((Class<? extends Annotation>)
+					ClassUtils.forName("javax.ejb.Asynchronous", AsyncAnnotationAdvisor.class.getClassLoader()));
 		}
 		catch (ClassNotFoundException ex) {
 			// If EJB 3.1 API not present, simply ignore.
