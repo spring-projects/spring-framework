@@ -45,14 +45,14 @@ import org.springframework.web.util.WebUtils;
  * and so on. This mechanism complements and does not replace the need to
  * configure a filter in {@code web.xml} with dispatcher types.
  *
- * <p>Sub-classes may use {@link #isAsyncDispatch(HttpServletRequest)} to
- * determine when a filter is invoked as part of an async dispatch, and
- * use {@link #isAsyncStarted(HttpServletRequest)} to determine when the
- * request has been placed in async mode and therefore the current dispatch
- * won't be the last one.
+ * <p>Subclasses may use {@link #isAsyncDispatch(HttpServletRequest)} to
+ * determine when a filter is invoked as part of an async dispatch, and use
+ * {@link #isAsyncStarted(HttpServletRequest)} to determine when the request
+ * has been placed in async mode and therefore the current dispatch won't be
+ * the last one for the given request.
  *
  * <p>Yet another dispatch type that also occurs in its own thread is
- * {@link javax.servlet.DispatcherType#ERROR ERROR}. Sub-classes can override
+ * {@link javax.servlet.DispatcherType#ERROR ERROR}. Subclasses can override
  * {@link #shouldNotFilterErrorDispatch()} if they wish to declare statically
  * if they should be invoked <em>once</em> during error dispatches.
  *
