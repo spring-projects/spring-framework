@@ -58,8 +58,8 @@ import org.springframework.util.xml.StaxUtils;
 
 /**
  * Abstract implementation of the {@code Marshaller} and {@code Unmarshaller} interface.
- * This implementation inspects the given {@code Source} or {@code Result}, and defers
- * further handling to overridable template methods.
+ * This implementation inspects the given {@code Source} or {@code Result}, and
+ * delegates further handling to overridable template methods.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
@@ -162,6 +162,7 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	/**
 	 * Determine the default encoding to use for marshalling or unmarshalling from
 	 * a byte stream, or {@code null} if none.
+	 * <p>The default implementation returns {@code null}.
 	 */
 	protected String getDefaultEncoding() {
 		return null;
@@ -315,7 +316,7 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 			return unmarshalSaxSource((SAXSource) source);
 		}
 		else if (source instanceof StreamSource) {
-			return unmarshalStreamSourceNoExternalEntitities((StreamSource) source);
+			return unmarshalStreamSource((StreamSource) source);
 		}
 		else {
 			throw new IllegalArgumentException("Unknown Source type: " + source.getClass());
@@ -389,40 +390,8 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	}
 
 	/**
-	 * Template method for handling {@code StreamSource}s with protection against
-	 * the XML External Entity (XXE) processing vulnerability taking into account
-	 * the value of the {@link #setProcessExternalEntities(boolean)} property.
-	 * <p>The default implementation wraps the StreamSource as a SAXSource and delegates
-	 * to {@link #unmarshalSaxSource(javax.xml.transform.sax.SAXSource)}.
-	 * @param streamSource the {@code StreamSource}
-	 * @return the object graph
-	 * @throws IOException if an I/O exception occurs
-	 * @throws XmlMappingException if the given source cannot be mapped to an object
-	 * @see <a href="https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Processing">XML_External_Entity_(XXE)_Processing</a>
-	 */
-	protected Object unmarshalStreamSourceNoExternalEntitities(StreamSource streamSource)
-			throws XmlMappingException, IOException {
-
-		InputSource inputSource;
-		if (streamSource.getInputStream() != null) {
-			inputSource = new InputSource(streamSource.getInputStream());
-			inputSource.setEncoding(getDefaultEncoding());
-		}
-		else if (streamSource.getReader() != null) {
-			inputSource = new InputSource(streamSource.getReader());
-		}
-		else {
-			inputSource = new InputSource(streamSource.getSystemId());
-		}
-		return unmarshalSaxSource(new SAXSource(inputSource));
-	}
-
-	/**
 	 * Template method for handling {@code StreamSource}s.
-	 * <p>This implementation defers to {@code unmarshalInputStream} or {@code unmarshalReader}.
-	 * <p>As of Spring 3.2.8, this method is no longer invoked from
-	 * {@link #unmarshal(javax.xml.transform.Source)}. The method invoked instead is
-	 * {@link #unmarshalStreamSourceNoExternalEntitities(javax.xml.transform.stream.StreamSource)}.
+	 * <p>This implementation delegates to {@code unmarshalInputStream} or {@code unmarshalReader}.
 	 * @param streamSource the {@code StreamSource}
 	 * @return the object graph
 	 * @throws IOException if an I/O exception occurs
@@ -430,13 +399,25 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	 */
 	protected Object unmarshalStreamSource(StreamSource streamSource) throws XmlMappingException, IOException {
 		if (streamSource.getInputStream() != null) {
-			return unmarshalInputStream(streamSource.getInputStream());
+			if (isProcessExternalEntities()) {
+				return unmarshalInputStream(streamSource.getInputStream());
+			}
+			else {
+				InputSource inputSource = new InputSource(streamSource.getInputStream());
+				inputSource.setEncoding(getDefaultEncoding());
+				return unmarshalSaxSource(new SAXSource(inputSource));
+			}
 		}
 		else if (streamSource.getReader() != null) {
-			return unmarshalReader(streamSource.getReader());
+			if (isProcessExternalEntities()) {
+				return unmarshalReader(streamSource.getReader());
+			}
+			else {
+				return unmarshalSaxSource(new SAXSource(new InputSource(streamSource.getReader())));
+			}
 		}
 		else {
-			throw new IllegalArgumentException("StreamSource contains neither InputStream nor Reader");
+			return unmarshalSaxSource(new SAXSource(new InputSource(streamSource.getSystemId())));
 		}
 	}
 
