@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Constants;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -252,7 +253,7 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 		Class<?> simpleTriggerClass;
 		Method jobKeyMethod;
 		try {
-			simpleTriggerClass = getClass().getClassLoader().loadClass("org.quartz.impl.triggers.SimpleTriggerImpl");
+			simpleTriggerClass = ClassUtils.forName("org.quartz.impl.triggers.SimpleTriggerImpl", getClass().getClassLoader());
 			jobKeyMethod = JobDetail.class.getMethod("getKey");
 		}
 		catch (ClassNotFoundException ex) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Constants;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -261,7 +262,7 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 		Class<?> cronTriggerClass;
 		Method jobKeyMethod;
 		try {
-			cronTriggerClass = getClass().getClassLoader().loadClass("org.quartz.impl.triggers.CronTriggerImpl");
+			cronTriggerClass = ClassUtils.forName("org.quartz.impl.triggers.CronTriggerImpl", getClass().getClassLoader());
 			jobKeyMethod = JobDetail.class.getMethod("getKey");
 		}
 		catch (ClassNotFoundException ex) {

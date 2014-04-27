@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -50,7 +51,6 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Rossen Stoyanchev
  * @since 4.0
- *
  * @see ServerEndpointRegistration
  * @see SpringConfigurator
  * @see ServletServerContainerFactoryBean
@@ -97,9 +97,9 @@ public class ServerEndpointExporter implements InitializingBean, BeanPostProcess
 	protected ServerContainer getServerContainer() {
 		Class<?> servletContextClass;
 		try {
-			servletContextClass = Class.forName("javax.servlet.ServletContext");
+			servletContextClass = ClassUtils.forName("javax.servlet.ServletContext", getClass().getClassLoader());
 		}
-		catch (Throwable e) {
+		catch (Throwable ex) {
 			return null;
 		}
 
@@ -139,8 +139,8 @@ public class ServerEndpointExporter implements InitializingBean, BeanPostProcess
 			ServerEndpointConfig sec = (ServerEndpointConfig) bean;
 			try {
 				if (logger.isInfoEnabled()) {
-					logger.info("Registering bean '" + beanName
-							+ "' as javax.websocket.Endpoint under path " + sec.getPath());
+					logger.info("Registering bean '" + beanName +
+							"' as javax.websocket.Endpoint under path " + sec.getPath());
 				}
 				getServerContainer().addEndpoint(sec);
 			}

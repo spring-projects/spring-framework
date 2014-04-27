@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -289,15 +289,15 @@ class TypeConverterDelegate {
 			if (index > - 1) {
 				String enumType = trimmedValue.substring(0, index);
 				String fieldName = trimmedValue.substring(index + 1);
-				ClassLoader loader = this.targetObject.getClass().getClassLoader();
+				ClassLoader cl = this.targetObject.getClass().getClassLoader();
 				try {
-					Class<?> enumValueType = loader.loadClass(enumType);
+					Class<?> enumValueType = ClassUtils.forName(enumType, cl);
 					Field enumField = enumValueType.getField(fieldName);
 					convertedValue = enumField.get(null);
 				}
 				catch (ClassNotFoundException ex) {
 					if(logger.isTraceEnabled()) {
-						logger.trace("Enum class [" + enumType + "] cannot be loaded from [" + loader + "]", ex);
+						logger.trace("Enum class [" + enumType + "] cannot be loaded", ex);
 					}
 				}
 				catch (Throwable ex) {

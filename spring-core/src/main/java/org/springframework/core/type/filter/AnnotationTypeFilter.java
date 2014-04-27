@@ -22,6 +22,7 @@ import java.lang.annotation.Inherited;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.util.ClassUtils;
 
 /**
  * A simple filter which matches classes with a given annotation,
@@ -97,14 +98,14 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 		if (Object.class.getName().equals(typeName)) {
 			return false;
 		}
-		else if (typeName.startsWith("java.")) {
+		else if (typeName.startsWith("java")) {
 			try {
-				Class<?> clazz = getClass().getClassLoader().loadClass(typeName);
+				Class<?> clazz = ClassUtils.forName(typeName, getClass().getClassLoader());
 				return ((this.considerMetaAnnotations ? AnnotationUtils.getAnnotation(clazz, this.annotationType) :
 						clazz.getAnnotation(this.annotationType)) != null);
 			}
-			catch (ClassNotFoundException ex) {
-				// Class not found - can't determine a match that way.
+			catch (Throwable ex) {
+				// Class not regularly loadable - can't determine a match that way.
 			}
 		}
 		return null;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.quartz.SchedulerException;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -77,7 +78,7 @@ public abstract class QuartzJobBean implements Job {
 	static {
 		try {
 			Class<?> jobExecutionContextClass =
-					QuartzJobBean.class.getClassLoader().loadClass("org.quartz.JobExecutionContext");
+					ClassUtils.forName("org.quartz.JobExecutionContext", QuartzJobBean.class.getClassLoader());
 			getSchedulerMethod = jobExecutionContextClass.getMethod("getScheduler");
 			getMergedJobDataMapMethod = jobExecutionContextClass.getMethod("getMergedJobDataMap");
 		}

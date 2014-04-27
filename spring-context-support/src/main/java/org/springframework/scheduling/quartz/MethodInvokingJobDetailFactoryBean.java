@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,14 +87,15 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 
 	static {
 		try {
-			jobDetailImplClass = Class.forName("org.quartz.impl.JobDetailImpl");
+			jobDetailImplClass = ClassUtils.forName("org.quartz.impl.JobDetailImpl",
+					MethodInvokingJobDetailFactoryBean.class.getClassLoader());
 		}
 		catch (ClassNotFoundException ex) {
 			jobDetailImplClass = null;
 		}
 		try {
-			Class<?> jobExecutionContextClass =
-					QuartzJobBean.class.getClassLoader().loadClass("org.quartz.JobExecutionContext");
+			Class<?> jobExecutionContextClass = ClassUtils.forName("org.quartz.JobExecutionContext",
+					MethodInvokingJobDetailFactoryBean.class.getClassLoader());
 			setResultMethod = jobExecutionContextClass.getMethod("setResult", Object.class);
 		}
 		catch (Exception ex) {

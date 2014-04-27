@@ -43,6 +43,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -68,8 +69,8 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	static {
 		// Quartz 2.0 job/trigger key available?
 		try {
-			jobKeyClass = Class.forName("org.quartz.JobKey");
-			triggerKeyClass = Class.forName("org.quartz.TriggerKey");
+			jobKeyClass = ClassUtils.forName("org.quartz.JobKey", SchedulerAccessor.class.getClassLoader());
+			triggerKeyClass = ClassUtils.forName("org.quartz.TriggerKey", SchedulerAccessor.class.getClassLoader());
 		}
 		catch (ClassNotFoundException ex) {
 			jobKeyClass = null;
