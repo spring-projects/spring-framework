@@ -267,7 +267,7 @@ class ConfigurationClassParser {
 		// process superclass, if any
 		if (sourceClass.getMetadata().hasSuperClass()) {
 			String superclass = sourceClass.getMetadata().getSuperClassName();
-			if (!this.knownSuperclasses.containsKey(superclass)) {
+			if (!superclass.startsWith("java") && !this.knownSuperclasses.containsKey(superclass)) {
 				this.knownSuperclasses.put(superclass, configClass);
 				// superclass found, return its annotation metadata and recurse
 				try {
