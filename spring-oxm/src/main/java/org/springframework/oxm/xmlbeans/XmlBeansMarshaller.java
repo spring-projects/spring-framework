@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
 import java.lang.ref.WeakReference;
 import java.nio.CharBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamReader;
@@ -113,10 +113,6 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 		return this.validating;
 	}
 
-	@Override
-	protected String getDefaultEncoding() {
-		return null;
-	}
 
 	/**
 	 * This implementation returns true if the given class is an implementation of {@link XmlObject}.
@@ -127,7 +123,7 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 
 	@Override
 	protected final void marshalDomNode(Object graph, Node node) throws XmlMappingException {
-		Document document = node.getNodeType() == Node.DOCUMENT_NODE ? (Document) node : node.getOwnerDocument();
+		Document document = (node.getNodeType() == Node.DOCUMENT_NODE ? (Document) node : node.getOwnerDocument());
 		Node xmlBeansNode = ((XmlObject) graph).newDomNode(getXmlOptions());
 		NodeList xmlBeansChildNodes = xmlBeansNode.getChildNodes();
 		for (int i = 0; i < xmlBeansChildNodes.getLength(); i++) {
@@ -135,29 +131,6 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 			Node importedNode = document.importNode(xmlBeansChildNode, true);
 			node.appendChild(importedNode);
 		}
-	}
-
-	@Override
-	protected final void marshalOutputStream(Object graph, OutputStream outputStream)
-			throws XmlMappingException, IOException {
-
-		((XmlObject) graph).save(outputStream, getXmlOptions());
-	}
-
-	@Override
-	protected final void marshalSaxHandlers(Object graph, ContentHandler contentHandler, LexicalHandler lexicalHandler)
-			throws XmlMappingException {
-		try {
-			((XmlObject) graph).save(contentHandler, lexicalHandler, getXmlOptions());
-		}
-		catch (SAXException ex) {
-			throw convertXmlBeansException(ex, true);
-		}
-	}
-
-	@Override
-	protected final void marshalWriter(Object graph, Writer writer) throws XmlMappingException, IOException {
-		((XmlObject) graph).save(writer, getXmlOptions());
 	}
 
 	@Override
@@ -173,11 +146,87 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 	}
 
 	@Override
+	protected final void marshalSaxHandlers(Object graph, ContentHandler contentHandler, LexicalHandler lexicalHandler)
+			throws XmlMappingException {
+		try {
+			((XmlObject) graph).save(contentHandler, lexicalHandler, getXmlOptions());
+		}
+		catch (SAXException ex) {
+			throw convertXmlBeansException(ex, true);
+		}
+	}
+
+	@Override
+	protected final void marshalOutputStream(Object graph, OutputStream outputStream)
+			throws XmlMappingException, IOException {
+
+		((XmlObject) graph).save(outputStream, getXmlOptions());
+	}
+
+	@Override
+	protected final void marshalWriter(Object graph, Writer writer) throws XmlMappingException, IOException {
+		((XmlObject) graph).save(writer, getXmlOptions());
+	}
+
+
+	@Override
 	protected final Object unmarshalDomNode(Node node) throws XmlMappingException {
 		try {
 			XmlObject object = XmlObject.Factory.parse(node, getXmlOptions());
 			validate(object);
 			return object;
+		}
+		catch (XmlException ex) {
+			throw convertXmlBeansException(ex, false);
+		}
+	}
+
+	@Override
+	protected final Object unmarshalXmlEventReader(XMLEventReader eventReader) throws XmlMappingException {
+		XMLReader reader = StaxUtils.createXMLReader(eventReader);
+		try {
+			return unmarshalSaxReader(reader, new InputSource());
+		}
+		catch (IOException ex) {
+			throw convertXmlBeansException(ex, false);
+		}
+	}
+
+	@Override
+	protected final Object unmarshalXmlStreamReader(XMLStreamReader streamReader) throws XmlMappingException {
+		try {
+			XmlObject object = XmlObject.Factory.parse(streamReader, getXmlOptions());
+			validate(object);
+			return object;
+		}
+		catch (XmlException ex) {
+			throw convertXmlBeansException(ex, false);
+		}
+	}
+
+	@Override
+	protected final Object unmarshalSaxReader(XMLReader xmlReader, InputSource inputSource)
+			throws XmlMappingException, IOException {
+
+		XmlSaxHandler saxHandler = XmlObject.Factory.newXmlSaxHandler(getXmlOptions());
+		xmlReader.setContentHandler(saxHandler.getContentHandler());
+		try {
+			xmlReader.setProperty("http://xml.org/sax/properties/lexical-handler", saxHandler.getLexicalHandler());
+		}
+		catch (SAXNotRecognizedException ex) {
+			// ignore
+		}
+		catch (SAXNotSupportedException ex) {
+			// ignore
+		}
+		try {
+			xmlReader.parse(inputSource);
+			XmlObject object = saxHandler.getObject();
+			validate(object);
+			return object;
+		}
+		catch (SAXException ex) {
+			throw convertXmlBeansException(ex, false);
 		}
 		catch (XmlException ex) {
 			throw convertXmlBeansException(ex, false);
@@ -210,57 +259,6 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 		}
 	}
 
-	@Override
-	protected final Object unmarshalSaxReader(XMLReader xmlReader, InputSource inputSource)
-			throws XmlMappingException, IOException {
-		XmlSaxHandler saxHandler = XmlObject.Factory.newXmlSaxHandler(getXmlOptions());
-		xmlReader.setContentHandler(saxHandler.getContentHandler());
-		try {
-			xmlReader.setProperty("http://xml.org/sax/properties/lexical-handler", saxHandler.getLexicalHandler());
-		}
-		catch (SAXNotRecognizedException e) {
-			// ignore
-		}
-		catch (SAXNotSupportedException e) {
-			// ignore
-		}
-		try {
-			xmlReader.parse(inputSource);
-			XmlObject object = saxHandler.getObject();
-			validate(object);
-			return object;
-		}
-		catch (SAXException ex) {
-			throw convertXmlBeansException(ex, false);
-		}
-		catch (XmlException ex) {
-			throw convertXmlBeansException(ex, false);
-		}
-	}
-
-	@Override
-	protected final Object unmarshalXmlEventReader(XMLEventReader eventReader) throws XmlMappingException {
-		XMLReader reader = StaxUtils.createXMLReader(eventReader);
-		try {
-			return unmarshalSaxReader(reader, new InputSource());
-		}
-		catch (IOException ex) {
-			throw convertXmlBeansException(ex, false);
-		}
-	}
-
-	@Override
-	protected final Object unmarshalXmlStreamReader(XMLStreamReader streamReader) throws XmlMappingException {
-		try {
-			XmlObject object = XmlObject.Factory.parse(streamReader, getXmlOptions());
-			validate(object);
-			return object;
-		}
-		catch (XmlException ex) {
-			throw convertXmlBeansException(ex, false);
-		}
-	}
-
 
 	/**
 	 * Validate the given {@code XmlObject}.
@@ -269,20 +267,27 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 	 */
 	protected void validate(XmlObject object) throws ValidationFailureException {
 		if (isValidating() && object != null) {
-			// create a temporary xmlOptions just for validation
-			XmlOptions validateOptions = getXmlOptions() != null ? getXmlOptions() : new XmlOptions();
-			List errorsList = new ArrayList();
+			XmlOptions validateOptions = getXmlOptions();
+			if (validateOptions == null) {
+				// Create temporary XmlOptions just for validation
+				validateOptions = new XmlOptions();
+			}
+			List<XmlError> errorsList = new ArrayList<XmlError>();
 			validateOptions.setErrorListener(errorsList);
 			if (!object.validate(validateOptions)) {
-				StringBuilder builder = new StringBuilder("Could not validate XmlObject :");
-				for (Object anErrorsList : errorsList) {
-					XmlError xmlError = (XmlError) anErrorsList;
-					if (xmlError instanceof XmlValidationError) {
-						builder.append(xmlError.toString());
+				StringBuilder sb = new StringBuilder("Failed to validate XmlObject: ");
+				boolean first = true;
+				for (XmlError error : errorsList) {
+					if (error instanceof XmlValidationError) {
+						if (!first) {
+							sb.append("; ");
+						}
+						sb.append(error.toString());
+						first = false;
 					}
 				}
 				throw new ValidationFailureException("XMLBeans validation failure",
-						new XmlException(builder.toString(), null, errorsList));
+						new XmlException(sb.toString(), null, errorsList));
 			}
 		}
 	}
@@ -299,7 +304,7 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 	 */
 	protected XmlMappingException convertXmlBeansException(Exception ex, boolean marshalling) {
 		if (ex instanceof XMLStreamValidationException) {
-			return new ValidationFailureException("XmlBeans validation exception", ex);
+			return new ValidationFailureException("XMLBeans validation exception", ex);
 		}
 		else if (ex instanceof XmlException || ex instanceof SAXException) {
 			if (marshalling) {
@@ -315,14 +320,12 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 		}
 	}
 
-	/**
-	 * See SPR-7034
-	 */
+
 	private static class NonClosingInputStream extends InputStream {
 
 		private final WeakReference<InputStream> in;
 
-		private NonClosingInputStream(InputStream in) {
+		public NonClosingInputStream(InputStream in) {
 			this.in = new WeakReference<InputStream>(in);
 		}
 
@@ -333,31 +336,31 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 		@Override
 		public int read() throws IOException {
 			InputStream in = getInputStream();
-			return in != null ? in.read() : -1;
+			return (in != null ? in.read() : -1);
 		}
 
 		@Override
 		public int read(byte[] b) throws IOException {
 			InputStream in = getInputStream();
-			return in != null ? in.read(b) : -1;
+			return (in != null ? in.read(b) : -1);
 		}
 
 		@Override
 		public int read(byte[] b, int off, int len) throws IOException {
 			InputStream in = getInputStream();
-			return in != null ? in.read(b, off, len) : -1;
+			return (in != null ? in.read(b, off, len) : -1);
 		}
 
 		@Override
 		public long skip(long n) throws IOException {
 			InputStream in = getInputStream();
-			return in != null ? in.skip(n) : 0;
+			return (in != null ? in.skip(n) : 0);
 		}
 
 		@Override
 		public boolean markSupported() {
 			InputStream in = getInputStream();
-			return in != null && in.markSupported();
+			return (in != null && in.markSupported());
 		}
 
 		@Override
@@ -379,23 +382,24 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 		@Override
 		public int available() throws IOException {
 			InputStream in = getInputStream();
-			return in != null ? in.available() : 0;
+			return (in != null ? in.available() : 0);
 		}
 
 		@Override
 		public void close() throws IOException {
 			InputStream in = getInputStream();
-			if(in != null) {
-			  this.in.clear();
+			if (in != null) {
+				this.in.clear();
 			}
 		}
 	}
+
 
 	private static class NonClosingReader extends Reader {
 
 		private final WeakReference<Reader> reader;
 
-		private NonClosingReader(Reader reader) {
+		public NonClosingReader(Reader reader) {
 			this.reader = new WeakReference<Reader>(reader);
 		}
 
@@ -406,43 +410,43 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 		@Override
 		public int read(CharBuffer target) throws IOException {
 			Reader rdr = getReader();
-			return rdr != null ? rdr.read(target) : -1;
+			return (rdr != null ? rdr.read(target) : -1);
 		}
 
 		@Override
 		public int read() throws IOException {
 			Reader rdr = getReader();
-			return rdr != null ? rdr.read() : -1;
+			return (rdr != null ? rdr.read() : -1);
 		}
 
 		@Override
 		public int read(char[] cbuf) throws IOException {
 			Reader rdr = getReader();
-			return rdr != null ? rdr.read(cbuf) : -1;
+			return (rdr != null ? rdr.read(cbuf) : -1);
 		}
 
 		@Override
 		public int read(char[] cbuf, int off, int len) throws IOException {
 			Reader rdr = getReader();
-			return rdr != null ? rdr.read(cbuf, off, len) : -1;
+			return (rdr != null ? rdr.read(cbuf, off, len) : -1);
 		}
 
 		@Override
 		public long skip(long n) throws IOException {
 			Reader rdr = getReader();
-			return rdr != null ? rdr.skip(n) : 0;
+			return (rdr != null ? rdr.skip(n) : 0);
 		}
 
 		@Override
 		public boolean ready() throws IOException {
 			Reader rdr = getReader();
-			return rdr != null && rdr.ready();
+			return (rdr != null && rdr.ready());
 		}
 
 		@Override
 		public boolean markSupported() {
 			Reader rdr = getReader();
-			return rdr != null && rdr.markSupported();
+			return (rdr != null && rdr.markSupported());
 		}
 
 		@Override
@@ -468,7 +472,6 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 				this.reader.clear();
 			}
 		}
-
 	}
 
 }

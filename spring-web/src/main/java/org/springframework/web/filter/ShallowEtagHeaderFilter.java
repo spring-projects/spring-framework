@@ -67,14 +67,15 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
+		HttpServletResponse responseToUse = response;
 		if (!isAsyncDispatch(request)) {
-			response = new ShallowEtagResponseWrapper(response);
+			responseToUse = new ShallowEtagResponseWrapper(response);
 		}
 
-		filterChain.doFilter(request, response);
+		filterChain.doFilter(request, responseToUse);
 
 		if (!isAsyncStarted(request)) {
-			updateResponse(request, response);
+			updateResponse(request, responseToUse);
 		}
 	}
 
@@ -83,34 +84,33 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 				WebUtils.getNativeResponse(response, ShallowEtagResponseWrapper.class);
 		Assert.notNull(responseWrapper, "ShallowEtagResponseWrapper not found");
 
-		response = (HttpServletResponse) responseWrapper.getResponse();
-		byte[] body = responseWrapper.toByteArray();
+		HttpServletResponse rawResponse = (HttpServletResponse) responseWrapper.getResponse();
 		int statusCode = responseWrapper.getStatusCode();
+		byte[] body = responseWrapper.toByteArray();
 
 		if (isEligibleForEtag(request, responseWrapper, statusCode, body)) {
 			String responseETag = generateETagHeaderValue(body);
-			response.setHeader(HEADER_ETAG, responseETag);
-
+			rawResponse.setHeader(HEADER_ETAG, responseETag);
 			String requestETag = request.getHeader(HEADER_IF_NONE_MATCH);
 			if (responseETag.equals(requestETag)) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("ETag [" + responseETag + "] equal to If-None-Match, sending 304");
 				}
-				response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+				rawResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 			}
 			else {
 				if (logger.isTraceEnabled()) {
 					logger.trace("ETag [" + responseETag + "] not equal to If-None-Match [" + requestETag +
 							"], sending normal response");
 				}
-				copyBodyToResponse(body, response);
+				copyBodyToResponse(body, rawResponse);
 			}
 		}
 		else {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Response with status code [" + statusCode + "] not eligible for ETag");
 			}
-			copyBodyToResponse(body, response);
+			copyBodyToResponse(body, rawResponse);
 		}
 	}
 

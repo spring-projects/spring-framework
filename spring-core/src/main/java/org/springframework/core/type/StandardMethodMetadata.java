@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,9 +49,14 @@ public class StandardMethodMetadata implements MethodMetadata {
 	}
 
 	/**
-	 * Create a new StandardMethodMetadata wrapper for the given Method.
+	 * Create a new StandardMethodMetadata wrapper for the given Method,
+	 * providing the option to return any nested annotations or annotation arrays in the
+	 * form of {@link org.springframework.core.annotation.AnnotationAttributes} instead
+	 * of actual {@link java.lang.annotation.Annotation} instances.
 	 * @param introspectedMethod the Method to introspect
-	 * @param nestedAnnotationsAsMap
+	 * @param nestedAnnotationsAsMap return nested annotations and annotation arrays as
+	 * {@link org.springframework.core.annotation.AnnotationAttributes} for compatibility
+	 * with ASM-based {@link AnnotationMetadata} implementations
 	 * @since 3.1.1
 	 */
 	public StandardMethodMetadata(Method introspectedMethod, boolean nestedAnnotationsAsMap) {
