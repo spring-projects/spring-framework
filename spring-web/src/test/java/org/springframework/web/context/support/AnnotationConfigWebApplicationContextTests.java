@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.context.support;
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.AnnotationBeanNameGenerator;
@@ -26,18 +27,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import static org.hamcrest.CoreMatchers.*;
-
 import static org.junit.Assert.*;
 
 /**
  * @author Chris Beams
+ * @author Juergen Hoeller
  */
 public class AnnotationConfigWebApplicationContextTests {
 
 	@Test
 	public void registerSingleClass() {
-		AnnotationConfigWebApplicationContext ctx =
-			new AnnotationConfigWebApplicationContext();
+		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
 		ctx.register(Config.class);
 		ctx.refresh();
 
@@ -47,8 +47,7 @@ public class AnnotationConfigWebApplicationContextTests {
 
 	@Test
 	public void configLocationWithSingleClass() {
-		AnnotationConfigWebApplicationContext ctx =
-			new AnnotationConfigWebApplicationContext();
+		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
 		ctx.setConfigLocation(Config.class.getName());
 		ctx.refresh();
 
@@ -57,9 +56,18 @@ public class AnnotationConfigWebApplicationContextTests {
 	}
 
 	@Test
+	public void configLocationWithBasePackage() {
+		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
+		ctx.setConfigLocation("org.springframework.web.context.support");
+		ctx.refresh();
+
+		TestBean bean = ctx.getBean(TestBean.class);
+		assertNotNull(bean);
+	}
+
+	@Test
 	public void withBeanNameGenerator() {
-		AnnotationConfigWebApplicationContext ctx =
-			new AnnotationConfigWebApplicationContext();
+		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
 		ctx.setBeanNameGenerator(new AnnotationBeanNameGenerator() {
 			@Override
 			public String generateBeanName(BeanDefinition definition,
@@ -75,14 +83,15 @@ public class AnnotationConfigWebApplicationContextTests {
 
 	@Configuration("myConfig")
 	static class Config {
+
 		@Bean
 		public TestBean myTestBean() {
 			return new TestBean();
 		}
 	}
 
-	static class NotConfigurationAnnotated { }
 
-	static class TestBean { }
+	static class TestBean {
+	}
 
 }
