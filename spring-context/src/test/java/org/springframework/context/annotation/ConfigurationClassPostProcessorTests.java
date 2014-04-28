@@ -23,6 +23,7 @@ import java.lang.annotation.Target;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.FactoryBean;
@@ -86,8 +87,7 @@ public class ConfigurationClassPostProcessorTests {
 	 */
 	@Test
 	public void alreadyLoadedConfigurationClasses() {
-		beanFactory.registerBeanDefinition("unloadedConfig", new RootBeanDefinition(UnloadedConfig.class.getName(),
-			null, null));
+		beanFactory.registerBeanDefinition("unloadedConfig", new RootBeanDefinition(UnloadedConfig.class.getName()));
 		beanFactory.registerBeanDefinition("loadedConfig", new RootBeanDefinition(LoadedConfig.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
@@ -126,56 +126,56 @@ public class ConfigurationClassPostProcessorTests {
 	@Test
 	public void postProcessorWorksWithComposedConfigurationWithAttributeOverridesUsingReflection() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
-			ComposedConfigurationWithAttributeOverridesClass.class);
+				ComposedConfigurationWithAttributeOverridesClass.class);
 		assertSupportForComposedAnnotation(beanDefinition);
 	}
 
 	@Test
 	public void postProcessorWorksWithComposedConfigurationWithAttributeOverridesUsingAsm() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
-			ComposedConfigurationWithAttributeOverridesClass.class.getName());
+				ComposedConfigurationWithAttributeOverridesClass.class.getName());
 		assertSupportForComposedAnnotation(beanDefinition);
 	}
 
 	@Test
 	public void postProcessorWorksWithComposedComposedConfigurationWithAttributeOverridesUsingReflection() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
-			ComposedComposedConfigurationWithAttributeOverridesClass.class);
+				ComposedComposedConfigurationWithAttributeOverridesClass.class);
 		assertSupportForComposedAnnotation(beanDefinition);
 	}
 
 	@Test
 	public void postProcessorWorksWithComposedComposedConfigurationWithAttributeOverridesUsingAsm() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
-			ComposedComposedConfigurationWithAttributeOverridesClass.class.getName());
+				ComposedComposedConfigurationWithAttributeOverridesClass.class.getName());
 		assertSupportForComposedAnnotation(beanDefinition);
 	}
 
 	@Test
 	public void postProcessorWorksWithMetaComponentScanConfigurationWithAttributeOverridesUsingReflection() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
-			MetaComponentScanConfigurationWithAttributeOverridesClass.class);
+				MetaComponentScanConfigurationWithAttributeOverridesClass.class);
 		assertSupportForComposedAnnotation(beanDefinition);
 	}
 
 	@Test
 	public void postProcessorWorksWithMetaComponentScanConfigurationWithAttributeOverridesUsingAsm() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
-			MetaComponentScanConfigurationWithAttributeOverridesClass.class.getName());
+				MetaComponentScanConfigurationWithAttributeOverridesClass.class.getName());
 		assertSupportForComposedAnnotation(beanDefinition);
 	}
 
 	@Test
 	public void postProcessorWorksWithMetaComponentScanConfigurationWithAttributeOverridesSubclassUsingReflection() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
-			SubMetaComponentScanConfigurationWithAttributeOverridesClass.class);
+				SubMetaComponentScanConfigurationWithAttributeOverridesClass.class);
 		assertSupportForComposedAnnotation(beanDefinition);
 	}
 
 	@Test
 	public void postProcessorWorksWithMetaComponentScanConfigurationWithAttributeOverridesSubclassUsingAsm() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
-			SubMetaComponentScanConfigurationWithAttributeOverridesClass.class.getName());
+				SubMetaComponentScanConfigurationWithAttributeOverridesClass.class.getName());
 		assertSupportForComposedAnnotation(beanDefinition);
 	}
 
@@ -208,8 +208,8 @@ public class ConfigurationClassPostProcessorTests {
 	public void postProcessorDoesNotOverrideRegularBeanDefinitionsEvenWithScopedProxy() {
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
 		rbd.setResource(new DescriptiveResource("XML or something"));
-		BeanDefinitionHolder proxied = ScopedProxyUtils.createScopedProxy(new BeanDefinitionHolder(rbd, "bar"),
-			beanFactory, true);
+		BeanDefinitionHolder proxied = ScopedProxyUtils.createScopedProxy(
+				new BeanDefinitionHolder(rbd, "bar"), beanFactory, true);
 		beanFactory.registerBeanDefinition("bar", proxied.getBeanDefinition());
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(SingletonBeanConfig.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
@@ -296,8 +296,7 @@ public class ConfigurationClassPostProcessorTests {
 		RootBeanDefinition bd = new RootBeanDefinition(RepositoryInjectionBean.class);
 		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		beanFactory.registerBeanDefinition("annotatedBean", bd);
-		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(
-			ScopedProxyRepositoryConfiguration.class));
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(ScopedProxyRepositoryConfiguration.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
 		beanFactory.freezeConfiguration();
@@ -332,8 +331,7 @@ public class ConfigurationClassPostProcessorTests {
 		RootBeanDefinition bd = new RootBeanDefinition(RepositoryFactoryBeanInjectionBean.class);
 		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		beanFactory.registerBeanDefinition("annotatedBean", bd);
-		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(
-			RepositoryFactoryBeanConfiguration.class));
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RepositoryFactoryBeanConfiguration.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
 		beanFactory.preInstantiateSingletons();
@@ -374,8 +372,7 @@ public class ConfigurationClassPostProcessorTests {
 
 	@Test
 	public void genericsBasedInjectionWithWildcardWithGenericExtendsMatch() {
-		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(
-			WildcardWithGenericExtendsConfiguration.class));
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(WildcardWithGenericExtendsConfiguration.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
 
@@ -574,7 +571,6 @@ public class ConfigurationClassPostProcessorTests {
 		@Scope(value = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
 		public Repository<String> stringRepo() {
 			return new Repository<String>() {
-
 				@Override
 				public String toString() {
 					return "Repository<String>";
@@ -586,7 +582,6 @@ public class ConfigurationClassPostProcessorTests {
 		@Scope(value = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
 		public Repository<Integer> integerRepo() {
 			return new Repository<Integer>() {
-
 				@Override
 				public String toString() {
 					return "Repository<Integer>";

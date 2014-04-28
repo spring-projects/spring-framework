@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -317,7 +317,7 @@ public abstract class CollectionUtils {
 	 * Enumeration elements must be assignable to the type of the given array. The array
 	 * returned will be a different instance than the array given.
 	 */
-	public static <A,E extends A> A[] toArray(Enumeration<E> enumeration, A[] array) {
+	public static <A, E extends A> A[] toArray(Enumeration<E> enumeration, A[] array) {
 		ArrayList<A> elements = new ArrayList<A>();
 		while (enumeration.hasMoreElements()) {
 			elements.add(enumeration.nextElement());
