@@ -370,7 +370,7 @@ public @interface RequestMapping {
 	 * all requests with a {@code Accept} other than "text/plain".
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings override
-	 * this consumes restriction.
+	 * this produces restriction.
 	 * @see org.springframework.http.MediaType
 	 */
 	String[] produces() default {};
