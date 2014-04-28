@@ -116,7 +116,8 @@ class ConfigurationClassParser {
 
 	private final Map<String, ConfigurationClass> knownSuperclasses = new HashMap<String, ConfigurationClass>();
 
-	private final MultiValueMap<String, PropertySource<?>> propertySources = new LinkedMultiValueMap<String, PropertySource<?>>();
+	private final MultiValueMap<String, ResourcePropertySource> propertySources =
+			new LinkedMultiValueMap<String, ResourcePropertySource>();
 
 	private final ImportStack importStack = new ImportStack();
 
@@ -310,16 +311,10 @@ class ConfigurationClassParser {
 		}
 		for (String location : locations) {
 			try {
-				Resource resource = this.resourceLoader.getResource(
-						this.environment.resolveRequiredPlaceholders(location));
-				if (!StringUtils.hasText(name) || this.propertySources.containsKey(name)) {
-					// We need to ensure unique names when the property source will ultimately end up in a composite
-					ResourcePropertySource ps = new ResourcePropertySource(resource);
-					this.propertySources.add((StringUtils.hasText(name) ? name : ps.getName()), ps);
-				}
-				else {
-					this.propertySources.add(name, new ResourcePropertySource(name, resource));
-				}
+				String resolvedLocation = this.environment.resolveRequiredPlaceholders(location);
+				Resource resource = this.resourceLoader.getResource(resolvedLocation);
+				ResourcePropertySource ps = new ResourcePropertySource(resource);
+				this.propertySources.add((StringUtils.hasText(name) ? name : ps.getName()), ps);
 			}
 			catch (IllegalArgumentException ex) {
 				// from resolveRequiredPlaceholders
@@ -482,15 +477,15 @@ class ConfigurationClassParser {
 
 	public List<PropertySource<?>> getPropertySources() {
 		List<PropertySource<?>> propertySources = new LinkedList<PropertySource<?>>();
-		for (Map.Entry<String, List<PropertySource<?>>> entry : this.propertySources.entrySet()) {
+		for (Map.Entry<String, List<ResourcePropertySource>> entry : this.propertySources.entrySet()) {
 			propertySources.add(0, collatePropertySources(entry.getKey(), entry.getValue()));
 		}
 		return propertySources;
 	}
 
-	private PropertySource<?> collatePropertySources(String name, List<PropertySource<?>> propertySources) {
+	private PropertySource<?> collatePropertySources(String name, List<ResourcePropertySource> propertySources) {
 		if (propertySources.size() == 1) {
-			return propertySources.get(0);
+			return propertySources.get(0).withName(name);
 		}
 		CompositePropertySource result = new CompositePropertySource(name);
 		for (int i = propertySources.size() - 1; i >= 0; i--) {
