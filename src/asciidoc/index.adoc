@@ -28200,6 +28200,37 @@ With the above Servlet configuration in place, you will need to have a file call
 Spring Web MVC-specific components (beans). You can change the exact location of this
 configuration file through a Servlet initialization parameter (see below for details).
 
+It is also possible to have just one root context for single DispatcherServlet scenarios
+by setting an empty contextConfigLocation servlet init parameter, as shown below:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<web-app>
+		<context-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>/WEB-INF/root-context.xml</param-value>
+		</context-param>
+		<servlet>
+			<servlet-name>dispatcher</servlet-name>
+			<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+			<init-param>
+				<param-name>contextConfigLocation</param-name>
+				<param-value></param-value>
+			</init-param>
+			<load-on-startup>1</load-on-startup>
+		</servlet>
+		<servlet-mapping>
+			<servlet-name>dispatcher</servlet-name>
+			<url-pattern>/*</url-pattern>
+		</servlet-mapping>
+		<listener>
+			<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+		</listener>
+	</web-app>
+----
+
+
 The `WebApplicationContext` is an extension of the plain `ApplicationContext` that has
 some extra features necessary for web applications. It differs from a normal
 `ApplicationContext` in that it is capable of resolving themes (see
@@ -31888,7 +31919,9 @@ To enable MVC Java config add the annotation `@EnableWebMvc` to one of your
 	}
 ----
 
-To achieve the same in XML use the `mvc:annotation-driven` element:
+To achieve the same in XML use the `mvc:annotation-driven` element in your
+DispatcherServlet context (or in your root context if you have no DispatcherServlet
+context defined):
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
