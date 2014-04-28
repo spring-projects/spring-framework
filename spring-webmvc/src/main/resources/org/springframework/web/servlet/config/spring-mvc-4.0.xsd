@@ -15,7 +15,7 @@
 		<xsd:annotation>
 			<xsd:documentation source="java:org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"><![CDATA[
 	Configures the annotation-driven Spring MVC Controller programming model.
-	Note that, with Spring 3.0, this tag works in Servlet MVC only!
+	Note that this tag works in Web MVC only, not in Portlet MVC!
 
 	See org.springframework.web.servlet.config.annotation.EnableWebMvc Javadoc for
 	information on code-based alternatives to enabling annotation-driven Spring MVC
