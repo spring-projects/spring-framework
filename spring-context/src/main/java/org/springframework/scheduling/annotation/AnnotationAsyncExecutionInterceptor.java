@@ -40,19 +40,6 @@ import org.springframework.core.annotation.AnnotationUtils;
 public class AnnotationAsyncExecutionInterceptor extends AsyncExecutionInterceptor {
 
 	/**
-	 * Create a new {@code AnnotationAsyncExecutionInterceptor} with the given executor.
-	 * @param defaultExecutor the executor to be used by default if no more specific
-	 * executor has been qualified at the method level using {@link Async#value()}
-	 * @param exceptionHandler the {@link AsyncUncaughtExceptionHandler} to use to
-	 * handle exceptions thrown by asynchronous method executions with {@code void}
-	 * return type
-	 */
-	public AnnotationAsyncExecutionInterceptor(Executor defaultExecutor,
-											   AsyncUncaughtExceptionHandler exceptionHandler) {
-		super(defaultExecutor, exceptionHandler);
-	}
-
-	/**
 	 * Create a new {@code AnnotationAsyncExecutionInterceptor} with the given executor
 	 * and a simple {@link AsyncUncaughtExceptionHandler}.
 	 * @param defaultExecutor the executor to be used by default if no more specific
@@ -61,6 +48,19 @@ public class AnnotationAsyncExecutionInterceptor extends AsyncExecutionIntercept
 	public AnnotationAsyncExecutionInterceptor(Executor defaultExecutor) {
 		this(defaultExecutor, new SimpleAsyncUncaughtExceptionHandler());
 	}
+
+	/**
+	 * Create a new {@code AnnotationAsyncExecutionInterceptor} with the given executor.
+	 * @param defaultExecutor the executor to be used by default if no more specific
+	 * executor has been qualified at the method level using {@link Async#value()}
+	 * @param exceptionHandler the {@link AsyncUncaughtExceptionHandler} to use to
+	 * handle exceptions thrown by asynchronous method executions with {@code void}
+	 * return type
+	 */
+	public AnnotationAsyncExecutionInterceptor(Executor defaultExecutor, AsyncUncaughtExceptionHandler exceptionHandler) {
+		super(defaultExecutor, exceptionHandler);
+	}
+
 
 	/**
 	 * Return the qualifier or bean name of the executor to be used when executing the
