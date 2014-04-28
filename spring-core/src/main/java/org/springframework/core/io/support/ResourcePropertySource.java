@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.core.io.support;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Properties;
 
 import org.springframework.core.env.PropertiesPropertySource;
@@ -36,6 +37,8 @@ import org.springframework.util.StringUtils;
  * @author Chris Beams
  * @author Juergen Hoeller
  * @since 3.1
+ * @see org.springframework.core.io.Resource
+ * @see org.springframework.core.io.support.EncodedResource
  */
 public class ResourcePropertySource extends PropertiesPropertySource {
 
@@ -112,10 +115,27 @@ public class ResourcePropertySource extends PropertiesPropertySource {
 		this(new DefaultResourceLoader().getResource(location));
 	}
 
+	private ResourcePropertySource(String name, Map<String, Object> source) {
+		super(name, source);
+	}
+
 
 	/**
-	 * Return the description string for the resource, and if empty returns
-	 * the class name of the resource plus its identity hash code.
+	 * Return a potentially adapted variant of this {@link ResourcePropertySource},
+	 * overriding the previously given (or derived) name with the specified name.
+	 */
+	public ResourcePropertySource withName(String name) {
+		if (this.name.equals(name)) {
+			return this;
+		}
+		return new ResourcePropertySource(name, this.source);
+	}
+
+
+	/**
+	 * Return the description String for the given Resource; it the description is
+	 * empty, return the class name of the resource plus its identity hash code.
+	 * @see org.springframework.core.io.Resource#getDescription()
 	 */
 	private static String getNameForResource(Resource resource) {
 		String name = resource.getDescription();

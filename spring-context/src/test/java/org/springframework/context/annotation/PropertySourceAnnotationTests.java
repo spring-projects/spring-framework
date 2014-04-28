@@ -124,9 +124,14 @@ public class PropertySourceAnnotationTests {
 		System.clearProperty("path.to.properties");
 	}
 
-	/**
-	 * SPR-10820
-	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void withEmptyResourceLocations() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ConfigWithEmptyResourceLocations.class);
+		ctx.refresh();
+	}
+
+	// SPR-10820
 	@Test
 	public void orderingWithAndWithoutNameAndMultipleResourceLocations() {
 		// p2 should 'win' as it was registered last
@@ -134,13 +139,6 @@ public class PropertySourceAnnotationTests {
 		AnnotationConfigApplicationContext ctxWithoutName = new AnnotationConfigApplicationContext(ConfigWithMultipleResourceLocations.class);
 		assertThat(ctxWithoutName.getEnvironment().getProperty("testbean.name"), equalTo("p2TestBean"));
 		assertThat(ctxWithName.getEnvironment().getProperty("testbean.name"), equalTo("p2TestBean"));
-	}
-
-	@Test(expected=IllegalArgumentException.class)
-	public void withEmptyResourceLocations() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(ConfigWithEmptyResourceLocations.class);
-		ctx.refresh();
 	}
 
 	@Test
@@ -164,6 +162,15 @@ public class PropertySourceAnnotationTests {
 	@Test
 	public void withPropertySources() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithPropertySources.class);
+		assertThat(ctx.getEnvironment().containsProperty("from.p1"), is(true));
+		assertThat(ctx.getEnvironment().containsProperty("from.p2"), is(true));
+		// p2 should 'win' as it was registered last
+		assertThat(ctx.getEnvironment().getProperty("testbean.name"), equalTo("p2TestBean"));
+	}
+
+	@Test
+	public void withNamedPropertySources() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithNamedPropertySources.class);
 		assertThat(ctx.getEnvironment().containsProperty("from.p1"), is(true));
 		assertThat(ctx.getEnvironment().containsProperty("from.p2"), is(true));
 		// p2 should 'win' as it was registered last
@@ -269,8 +276,8 @@ public class PropertySourceAnnotationTests {
 
 	@Configuration
 	@PropertySources({
-		@PropertySource(name = "psName", value="classpath:org/springframework/context/annotation/p1.properties"),
-		@PropertySource(name = "psName", value="classpath:org/springframework/context/annotation/p2.properties")
+		@PropertySource("classpath:org/springframework/context/annotation/p1.properties"),
+		@PropertySource("classpath:org/springframework/context/annotation/p2.properties"),
 	})
 	static class ConfigWithPropertySources {
 	}
@@ -278,9 +285,18 @@ public class PropertySourceAnnotationTests {
 
 	@Configuration
 	@PropertySources({
-		@PropertySource(name = "psName", value="classpath:org/springframework/context/annotation/p1.properties"),
-		@PropertySource(name = "psName", value="classpath:org/springframework/context/annotation/missing.properties"),
-		@PropertySource(name = "psName", value="classpath:org/springframework/context/annotation/p2.properties")
+			@PropertySource(name = "psName", value = "classpath:org/springframework/context/annotation/p1.properties"),
+			@PropertySource(name = "psName", value = "classpath:org/springframework/context/annotation/p2.properties"),
+	})
+	static class ConfigWithNamedPropertySources {
+	}
+
+
+	@Configuration
+	@PropertySources({
+		@PropertySource(name = "psName", value = "classpath:org/springframework/context/annotation/p1.properties"),
+		@PropertySource(name = "psName", value = "classpath:org/springframework/context/annotation/missing.properties"),
+		@PropertySource(name = "psName", value = "classpath:org/springframework/context/annotation/p2.properties")
 	})
 	static class ConfigWithMissingPropertySource {
 	}
@@ -288,10 +304,10 @@ public class PropertySourceAnnotationTests {
 
 	@Configuration
 	@PropertySources({
-		@PropertySource(name = "psName", value="classpath:org/springframework/context/annotation/p1.properties"),
-		@PropertySource(name = "psName", value="classpath:org/springframework/context/annotation/missing.properties", ignoreResourceNotFound=true),
-		@PropertySource(name = "psName", value="classpath:${myPath}/missing.properties", ignoreResourceNotFound=true),
-		@PropertySource(name = "psName", value="classpath:org/springframework/context/annotation/p2.properties")
+		@PropertySource(name = "psName", value = "classpath:org/springframework/context/annotation/p1.properties"),
+		@PropertySource(name = "psName", value = "classpath:org/springframework/context/annotation/missing.properties", ignoreResourceNotFound=true),
+		@PropertySource(name = "psName", value = "classpath:${myPath}/missing.properties", ignoreResourceNotFound=true),
+		@PropertySource(name = "psName", value = "classpath:org/springframework/context/annotation/p2.properties")
 	})
 	static class ConfigWithIgnoredPropertySource {
 	}
