@@ -220,8 +220,8 @@ class TypeConverterDelegate {
 				else if (convertedValue instanceof String && !requiredType.isInstance(convertedValue)) {
 					if (firstAttemptEx == null && !requiredType.isInterface() && !requiredType.isEnum()) {
 						try {
-							Constructor strCtor = requiredType.getConstructor(String.class);
-							return (T) BeanUtils.instantiateClass(strCtor, convertedValue);
+							Constructor<T> strCtor = requiredType.getConstructor(String.class);
+							return BeanUtils.instantiateClass(strCtor, convertedValue);
 						}
 						catch (NoSuchMethodException ex) {
 							// proceed with field lookup
@@ -331,7 +331,7 @@ class TypeConverterDelegate {
 	 * @param requiredType the type to find an editor for
 	 * @return the corresponding editor, or {@code null} if none
 	 */
-	private PropertyEditor findDefaultEditor(Class requiredType) {
+	private PropertyEditor findDefaultEditor(Class<?> requiredType) {
 		PropertyEditor editor = null;
 		if (requiredType != null) {
 			// No custom editor -> check BeanWrapperImpl's default editors.
@@ -496,7 +496,7 @@ class TypeConverterDelegate {
 
 	@SuppressWarnings("unchecked")
 	private Collection convertToTypedCollection(
-			Collection original, String propertyName, Class requiredType, TypeDescriptor typeDescriptor) {
+			Collection original, String propertyName, Class<?> requiredType, TypeDescriptor typeDescriptor) {
 
 		if (!Collection.class.isAssignableFrom(requiredType)) {
 			return original;
@@ -578,7 +578,7 @@ class TypeConverterDelegate {
 
 	@SuppressWarnings("unchecked")
 	private Map convertToTypedMap(
-			Map original, String propertyName, Class requiredType, TypeDescriptor typeDescriptor) {
+			Map original, String propertyName, Class<?> requiredType, TypeDescriptor typeDescriptor) {
 
 		if (!Map.class.isAssignableFrom(requiredType)) {
 			return original;
@@ -674,7 +674,7 @@ class TypeConverterDelegate {
 				null);
 	}
 
-	private boolean canCreateCopy(Class requiredType) {
+	private boolean canCreateCopy(Class<?> requiredType) {
 		return (!requiredType.isInterface() && !Modifier.isAbstract(requiredType.getModifiers()) &&
 				Modifier.isPublic(requiredType.getModifiers()) && ClassUtils.hasConstructor(requiredType));
 	}

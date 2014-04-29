@@ -28,27 +28,24 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * <p>
- * {@code TestContextManager} is the main entry point into the
- * <em>Spring TestContext Framework</em>, which provides support for loading and
- * accessing {@link ApplicationContext application contexts}, dependency
- * injection of test instances,
- * {@link org.springframework.transaction.annotation.Transactional
- * transactional} execution of test methods, etc.
- * </p>
- * <p>
- * Specifically, a {@code TestContextManager} is responsible for managing a
+ * {@code TestContextManager} is the main entry point into the <em>Spring
+ * TestContext Framework</em>, which provides support for loading and accessing
+ * {@link org.springframework.context.ApplicationContext application contexts},
+ * dependency injection of test instances,
+ * {@link org.springframework.transaction.annotation.Transactional transactional}
+ * execution of test methods, etc.
+ *
+ * <p>Specifically, a {@code TestContextManager} is responsible for managing a
  * single {@link TestContext} and signaling events to all registered
  * {@link TestExecutionListener TestExecutionListeners} at well defined test
  * execution points:
- * </p>
+ *
  * <ul>
  * <li>{@link #beforeTestClass() before test class execution}: prior to any
  * <em>before class methods</em> of a particular testing framework (e.g., JUnit
@@ -85,9 +82,10 @@ public class TestContextManager {
 	private static final Log logger = LogFactory.getLog(TestContextManager.class);
 
 	/**
-	 * Cache of Spring application contexts. This needs to be static, as tests
-	 * may be destroyed and recreated between running individual test methods,
-	 * for example with JUnit.
+	 * Cache of Spring application contexts.
+	 * <p>This needs to be static, since test instances may be destroyed and
+	 * recreated between invocations of individual test methods, as is the case
+	 * with JUnit.
 	 */
 	static final ContextCache contextCache = new ContextCache();
 
@@ -97,7 +95,11 @@ public class TestContextManager {
 
 
 	/**
-	 * Delegates to {@link #TestContextManager(Class, String)} with a value of
+	 * Construct a new {@code TestContextManager} for the specified {@linkplain Class test class}
+	 * and automatically {@link #registerTestExecutionListeners register} the
+	 * {@link TestExecutionListener TestExecutionListeners} configured for the test class
+	 * via the {@link TestExecutionListeners &#064;TestExecutionListeners} annotation.
+	 * <p>Delegates to {@link #TestContextManager(Class, String)} with a value of
 	 * {@code null} for the default {@code ContextLoader} class name.
 	 */
 	public TestContextManager(Class<?> testClass) {
@@ -105,23 +107,23 @@ public class TestContextManager {
 	}
 
 	/**
-	 * Constructs a new {@code TestContextManager} for the specified {@linkplain Class
-	 * test class} and automatically {@link #registerTestExecutionListeners registers} the
+	 * Construct a new {@code TestContextManager} for the specified {@linkplain Class test class}
+	 * and automatically {@link #registerTestExecutionListeners register} the
 	 * {@link TestExecutionListener TestExecutionListeners} configured for the test class
 	 * via the {@link TestExecutionListeners &#064;TestExecutionListeners} annotation.
 	 * @param testClass the test class to be managed
-	 * @param defaultContextLoaderClassName the name of the default {@code ContextLoader}
-	 * class to use (may be {@code null})
-	 * @see #registerTestExecutionListeners(TestExecutionListener...)
+	 * @param defaultContextLoaderClassName the name of the default {@code ContextLoader} class
+	 * to use (may be {@code null})
+	 * @see #registerTestExecutionListeners
 	 */
 	public TestContextManager(Class<?> testClass, String defaultContextLoaderClassName) {
 		this.testContext = new TestContext(testClass, contextCache, defaultContextLoaderClassName);
 		registerTestExecutionListeners(retrieveTestExecutionListeners(testClass));
 	}
 
+
 	/**
-	 * Returns the {@link TestContext} managed by this
-	 * {@code TestContextManager}.
+	 * Get the {@link TestContext} managed by this {@code TestContextManager}.
 	 */
 	protected final TestContext getTestContext() {
 		return this.testContext;
@@ -183,7 +185,8 @@ public class TestContextManager {
 				logger.debug("@TestExecutionListeners is not present for class [" + clazz + "]: using defaults.");
 			}
 			classesList.addAll(getDefaultTestExecutionListenerClasses());
-		} else {
+		}
+		else {
 			// Traverse the class hierarchy...
 			while (declaringClass != null) {
 				TestExecutionListeners testExecutionListeners = declaringClass.getAnnotation(annotationType);
@@ -201,7 +204,8 @@ public class TestContextManager {
 							ObjectUtils.nullSafeToString(listenerClasses));
 					logger.error(msg);
 					throw new IllegalStateException(msg);
-				} else if (!ObjectUtils.isEmpty(valueListenerClasses)) {
+				}
+				else if (!ObjectUtils.isEmpty(valueListenerClasses)) {
 					listenerClasses = valueListenerClasses;
 				}
 
@@ -264,7 +268,7 @@ public class TestContextManager {
 	 * @see #getTestExecutionListeners()
 	 */
 	public void beforeTestClass() throws Exception {
-		final Class<?> testClass = getTestContext().getTestClass();
+		Class<?> testClass = getTestContext().getTestClass();
 		if (logger.isTraceEnabled()) {
 			logger.trace("beforeTestClass(): class [" + testClass + "]");
 		}
@@ -421,7 +425,7 @@ public class TestContextManager {
 	 * @see #getTestExecutionListeners()
 	 */
 	public void afterTestClass() throws Exception {
-		final Class<?> testClass = getTestContext().getTestClass();
+		Class<?> testClass = getTestContext().getTestClass();
 		if (logger.isTraceEnabled()) {
 			logger.trace("afterTestClass(): class [" + testClass + "]");
 		}

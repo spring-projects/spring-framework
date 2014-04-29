@@ -65,7 +65,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 
 	private static final Log logger = LogFactory.getLog(DisposableBeanAdapter.class);
 
-	private static Class closeableInterface;
+	private static Class<?> closeableInterface;
 
 	static {
 		try {
@@ -86,13 +86,13 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 
 	private final boolean nonPublicAccessAllowed;
 
+	private final AccessControlContext acc;
+
 	private String destroyMethodName;
 
 	private transient Method destroyMethod;
 
 	private List<DestructionAwareBeanPostProcessor> beanPostProcessors;
-
-	private final AccessControlContext acc;
 
 
 	/**
@@ -150,9 +150,9 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		this.beanName = beanName;
 		this.invokeDisposableBean = invokeDisposableBean;
 		this.nonPublicAccessAllowed = nonPublicAccessAllowed;
+		this.acc = null;
 		this.destroyMethodName = destroyMethodName;
 		this.beanPostProcessors = postProcessors;
-		this.acc = null;
 	}
 
 
