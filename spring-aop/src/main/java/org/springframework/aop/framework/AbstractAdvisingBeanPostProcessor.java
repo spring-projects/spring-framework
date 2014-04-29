@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,9 +91,11 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyConfig
 			// Ignore AOP infrastructure such as scoped proxies.
 			return bean;
 		}
-		if (isEligible(bean, beanName)) {
-			if (bean instanceof Advised) {
-				Advised advised = (Advised) bean;
+
+		if (bean instanceof Advised) {
+			Advised advised = (Advised) bean;
+			if (!advised.isFrozen() && isEligible(AopUtils.getTargetClass(bean))) {
+				// Add our local Advisor to the existing proxy's Advisor chain...
 				if (this.beforeExistingAdvisors) {
 					advised.addAdvisor(0, this.advisor);
 				}
@@ -102,32 +104,47 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyConfig
 				}
 				return bean;
 			}
-			else {
-				ProxyFactory proxyFactory = new ProxyFactory(bean);
-				// Copy our properties (proxyTargetClass etc) inherited from ProxyConfig.
-				proxyFactory.copyFrom(this);
-				proxyFactory.addAdvisor(this.advisor);
-				return proxyFactory.getProxy(this.beanClassLoader);
-			}
 		}
-		else {
-			// No async proxy needed.
-			return bean;
+
+		if (isEligible(bean, beanName)) {
+			ProxyFactory proxyFactory = new ProxyFactory(bean);
+			// Copy our properties (proxyTargetClass etc) inherited from ProxyConfig.
+			proxyFactory.copyFrom(this);
+			proxyFactory.addAdvisor(this.advisor);
+			return proxyFactory.getProxy(this.beanClassLoader);
 		}
+
+		// No async proxy needed.
+		return bean;
 	}
 
 	/**
 	 * Check whether the given bean is eligible for advising with this
 	 * post-processor's {@link Advisor}.
-	 * <p>Implements caching of {@code canApply} results per bean target class.
+	 * <p>Delegates to {@link #isEligible(Class)} for target class checking.
 	 * Can be overridden e.g. to specifically exclude certain beans by name.
+	 * <p>Note: Only called for regular bean instances but not for existing
+	 * proxy instances which implement {@link Advised} and allow for adding
+	 * the local {@link Advisor} to the existing proxy's {@link Advisor} chain.
+	 * For the latter, {@link #isEligible(Class)} is being called directly,
+	 * with the actual target class behind the existing proxy (as determined
+	 * by {@link AopUtils#getTargetClass(Object)}).
 	 * @param bean the bean instance
 	 * @param beanName the name of the bean
-	 * @see AopUtils#getTargetClass(Object)
-	 * @see AopUtils#canApply(Advisor, Class)
+	 * @see #isEligible(Class)
 	 */
 	protected boolean isEligible(Object bean, String beanName) {
-		Class<?> targetClass = AopUtils.getTargetClass(bean);
+		return isEligible(bean.getClass());
+	}
+
+	/**
+	 * Check whether the given class is eligible for advising with this
+	 * post-processor's {@link Advisor}.
+	 * <p>Implements caching of {@code canApply} results per bean target class.
+	 * @param targetClass the class to check against
+	 * @see AopUtils#canApply(Advisor, Class)
+	 */
+	protected boolean isEligible(Class<?> targetClass) {
 		Boolean eligible = this.eligibleBeans.get(targetClass);
 		if (eligible != null) {
 			return eligible;
