@@ -42,6 +42,7 @@ import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.NestedIOException;
 import org.springframework.core.annotation.AnnotationAttributes;
@@ -411,11 +412,14 @@ class ConfigurationClassParser {
 	}
 
 	/**
-	 * Invoke {@link ResourceLoaderAware}, {@link BeanClassLoaderAware} and
-	 * {@link BeanFactoryAware} contracts if implemented by the given {@code registrar}.
+	 * Invoke {@link EnvironmentAware}, {@link ResourceLoaderAware}, {@link BeanClassLoaderAware}
+	 * and {@link BeanFactoryAware} contracts if implemented by the given {@code registrar}.
 	 */
 	private void invokeAwareMethods(ImportBeanDefinitionRegistrar registrar) {
 		if (registrar instanceof Aware) {
+			if (registrar instanceof EnvironmentAware) {
+				((EnvironmentAware) registrar).setEnvironment(this.environment);
+			}
 			if (registrar instanceof ResourceLoaderAware) {
 				((ResourceLoaderAware) registrar).setResourceLoader(this.resourceLoader);
 			}
