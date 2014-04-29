@@ -29,8 +29,8 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Oracle-specific implementation of the {@link org.springframework.jdbc.core.metadata.TableMetaDataProvider}.
- * Supports a feature for including synonyms in the metadata lookup. Also supports lookup of current schema using
- * the sys_context.
+ * Supports a feature for including synonyms in the metadata lookup. Also supports lookup of current schema
+ * using the sys_context.
  *
  * <p>Thanks to Mike Youngstrom and Bruce Campbell for submitting the original suggestion for the Oracle
  * current schema lookup implementation.
@@ -128,7 +128,6 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 
 	/*
 	 * Oracle-based implementation for detecting the current schema.
-	 * @param databaseMetaData
 	 */
 	private void lookupDefaultSchema(DatabaseMetaData databaseMetaData) {
 		try {
