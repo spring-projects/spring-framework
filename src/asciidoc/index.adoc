@@ -37749,61 +37749,51 @@ sections <<websocket-stomp-handle-broker-relay-configure>> and
 [[websocket-stomp-message-flow]]
 ==== Flow of Messages
 
-When a STOMP endpoint is configured, the Spring application becomes the broker to
-connected clients. It handles incoming messages and broadcasts messages back.
-This section provides the big picture of how messages are handled and how
-they flow inside the application.
+When a STOMP endpoint is configured, the Spring application acts as the STOMP broker
+to connected clients. It handles incoming messages and sends messages back.
+This section provides a big picture overview of how messages flow inside the application.
 
-The `spring-messaging` module contains a number of abstractions for use in
-messaging applications which originated in the
-https://spring.io/spring-integration[Spring Integration] project and
-have been in use for a long time but are now part of the Spring Framework.
-Listed below are some of the main building blocks:
+The `spring-messaging` module contains a number of abstractions that originated in the
+https://spring.io/spring-integration[Spring Integration] project and are intended
+for use as building blocks in messaging applications:
 
-* {javadoc-baseurl}/org/springframework/messaging/Message.html[Message]
+* {javadoc-baseurl}/org/springframework/messaging/Message.html[Message] --
 represents a message with headers and a payload.
-* {javadoc-baseurl}/org/springframework/messaging/MessageHandler.html[MessageHandler]
-a simple contract components that handle a message.
-* {javadoc-baseurl}/org/springframework/messaging/MessageChannel.html[MessageChannel]
-a simple contract for sending a message that enables loose coupling between
-senders and receivers.
-* {javadoc-baseurl}/org/springframework/messaging/SubscribableChannel.html[SubscribableChannel]
+* {javadoc-baseurl}/org/springframework/messaging/MessageHandler.html[MessageHandler] --
+a contract for handling a message.
+* {javadoc-baseurl}/org/springframework/messaging/MessageChannel.html[MessageChannel] --
+a contract for sending a message enabling loose coupling between senders and receivers.
+* {javadoc-baseurl}/org/springframework/messaging/SubscribableChannel.html[SubscribableChannel] --
 extends `MessageChannel` and sends messages to registered `MessageHandler` subscribers.
-* {javadoc-baseurl}/org/springframework/messaging/support/ExecutorSubscribableChannel.html[ExecutorSubscribableChannel]
+* {javadoc-baseurl}/org/springframework/messaging/support/ExecutorSubscribableChannel.html[ExecutorSubscribableChannel] --
 a concrete implementation of `SubscribableChannel` that can deliver messages
-asynchronously using threads from a thread pool.
+asynchronously through a thread pool.
 
-The above building blocks can be used to construct a message flow.
+The provided STOMP over WebSocket config, both Java and XML, uses the above to
+assemble a concrete message flow including the following 3 channels:
 
-The provided configuration for STOMP over WebSocket, both Java config and XML namespace,
-assemble just such a concrete message flow that consists of the following 3
-subscribable channels:
+* `"clientInboundChannel"` -- for messages from WebSocket clients. Every incoming
+WebSocket message carrying a STOMP frame is sent through this channel.
+* `"clientOutboundChannel"` -- for messages to WebSocket clients. Every outgoing
+STOMP message from the broker is sent through this channel before getting sent
+to a client's WebSocket session.
+* `"brokerChannel"` -- for messages to the broker from within the application.
+Every message sent from the application to the broker passes through this channel.
 
-* `"clientInboundChannel"` for messages from WebSocket clients; every incoming
-WebSocket message that is decoded and turned into a Spring Message representing
-a STOMP frame is passed through this channel.
-* `"clientOutboundChannel"` for messages to WebSocket clients; every outgoing
-Spring Message representing a STOMP frame that is encoded and sent as a
-WebSocket message is passed through this channel.
-* `"brokerChannel"` for messages to the broker from within the application and
-ultimately intended to reach connected clients; every message that the application
-wants to send to clients passes through this channel.
-
-Messages through `"clientInboundChannel"` can flow to annotated
+Messages on the `"clientInboundChannel"` can flow to annotated
 methods for application handling (e.g. a stock trade execution request) or can
 be forwarded to the broker (e.g. client subscribing for stock quotes).
 The STOMP destination is used for simple prefix-based routing. For example
-the "/app" prefix routes messages annotated methods while the "/topic" or
-"/queue" prefix route messages to the broker.
+the "/app" prefix could route messages to annotated methods while the "/topic"
+and "/queue" prefixes could route messages to the broker.
 
 When a message-handling annotated method has a return type, its return
 value is sent as the payload of a Spring Message to the `"brokerChannel"`.
-The broker in turn broadcasts the message to clients. Sending an object as
-the payload of a Message to a specific destination can also easily be done
-from anywhere in the application with the help of a messaging template.
-For example a an HTTP POST handling method can broadcast a message to
-connected clients or a service component may periodically broadcast
-stock quotes.
+The broker in turn broadcasts the message to clients. Sending a message
+to a destination can also be done from anywhere in the application with
+the help of a messaging template. For example a an HTTP POST handling method
+can broadcast a message to connected clients or a service component may
+periodically broadcast stock quotes.
 
 Below is a simple example to illustrate the flow of messages:
 
@@ -37839,7 +37829,7 @@ Below is a simple example to illustrate the flow of messages:
 
 ----
 
-The following explains how messages flow given the above:
+The following explains the message flow for the above exmaple:
 
 * WebSocket clients connect to the WebSocket endpoint at "/portfolio".
 * Subscriptions to "/topic/greeting" pass through the "clientInboundChannel"
