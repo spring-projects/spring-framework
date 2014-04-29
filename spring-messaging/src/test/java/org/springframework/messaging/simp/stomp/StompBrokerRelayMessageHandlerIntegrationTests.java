@@ -168,6 +168,8 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		logger.debug("Starting test messageDeliveryExceptionIfSystemSessionForwardFails()");
 
 		stopActiveMqBrokerAndAwait();
+		this.eventPublisher.expectBrokerAvailabilityEvent(false);
+
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
 		this.relay.handleMessage(MessageBuilder.createMessage("test".getBytes(), headers.getMessageHeaders()));
 	}
@@ -184,6 +186,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		MessageExchange error = MessageExchangeBuilder.error(sess1).build();
 		stopActiveMqBrokerAndAwait();
+		this.eventPublisher.expectBrokerAvailabilityEvent(false);
 		this.responseHandler.expectMessages(error);
 	}
 
