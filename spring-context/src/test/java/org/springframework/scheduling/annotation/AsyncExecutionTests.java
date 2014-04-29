@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling.annotation;
 
+import java.io.Serializable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
@@ -28,6 +29,7 @@ import org.junit.Test;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationEvent;
@@ -397,7 +399,7 @@ public class AsyncExecutionTests {
 
 
 	@Async
-	public static class AsyncClassBean {
+	public static class AsyncClassBean implements Serializable, DisposableBean {
 
 		public void doSomething(int i) {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
@@ -406,6 +408,10 @@ public class AsyncExecutionTests {
 		public Future<String> returnSomething(int i) {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
 			return new AsyncResult<String>(Integer.toString(i));
+		}
+
+		@Override
+		public void destroy() {
 		}
 	}
 

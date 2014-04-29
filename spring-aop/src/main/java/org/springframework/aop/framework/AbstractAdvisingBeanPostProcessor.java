@@ -21,10 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.core.Ordered;
-import org.springframework.util.ClassUtils;
 
 /**
  * Base class for {@link BeanPostProcessor} implementations that apply a
@@ -34,20 +31,11 @@ import org.springframework.util.ClassUtils;
  * @since 3.2
  */
 @SuppressWarnings("serial")
-public abstract class AbstractAdvisingBeanPostProcessor extends ProxyConfig
-		implements BeanPostProcessor, BeanClassLoaderAware, Ordered {
+public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSupport implements BeanPostProcessor {
 
 	protected Advisor advisor;
 
 	protected boolean beforeExistingAdvisors = false;
-
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
-
-	/**
-	 * This should run after all other post-processors, so that it can just add
-	 * an advisor to existing proxies rather than double-proxy.
-	 */
-	private int order = Ordered.LOWEST_PRECEDENCE;
 
 	private final Map<Class<?>, Boolean> eligibleBeans = new ConcurrentHashMap<Class<?>, Boolean>(64);
 
@@ -63,20 +51,6 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyConfig
 	 */
 	public void setBeforeExistingAdvisors(boolean beforeExistingAdvisors) {
 		this.beforeExistingAdvisors = beforeExistingAdvisors;
-	}
-
-	@Override
-	public void setBeanClassLoader(ClassLoader beanClassLoader) {
-		this.beanClassLoader = beanClassLoader;
-	}
-
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
-	@Override
-	public int getOrder() {
-		return this.order;
 	}
 
 
@@ -107,11 +81,14 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyConfig
 		}
 
 		if (isEligible(bean, beanName)) {
-			ProxyFactory proxyFactory = new ProxyFactory(bean);
-			// Copy our properties (proxyTargetClass etc) inherited from ProxyConfig.
+			ProxyFactory proxyFactory = new ProxyFactory();
 			proxyFactory.copyFrom(this);
+			proxyFactory.setTarget(bean);
+			if (!proxyFactory.isProxyTargetClass()) {
+				evaluateProxyInterfaces(bean.getClass(), proxyFactory);
+			}
 			proxyFactory.addAdvisor(this.advisor);
-			return proxyFactory.getProxy(this.beanClassLoader);
+			return proxyFactory.getProxy(getProxyClassLoader());
 		}
 
 		// No async proxy needed.
