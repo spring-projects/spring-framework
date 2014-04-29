@@ -422,9 +422,9 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * Determine if the supplied {@link Annotation} is defined in the
+	 * Determine if the supplied {@link Annotation} is defined in the core JDK
 	 * {@code java.lang.annotation} package.
-	 * @param annotation the annotation to check; never {@code null}
+	 * @param annotation the annotation to check (never {@code null})
 	 * @return {@code true} if the annotation is in the {@code java.lang.annotation} package
 	 */
 	public static boolean isInJavaLangAnnotationPackage(Annotation annotation) {
@@ -433,11 +433,10 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * Retrieve the given annotation's attributes as a Map, preserving all attribute types
-	 * as-is.
-	 * <p>Note: As of Spring 3.1.1, the returned map is actually an
-	 * {@link AnnotationAttributes} instance, however the Map signature of this method has
-	 * been preserved for binary compatibility.
+	 * Retrieve the given annotation's attributes as a {@link Map}, preserving all
+	 * attribute types as-is.
+	 * <p>Note: This method actually returns an {@link AnnotationAttributes} instance.
+	 * However, the {@code Map} signature has been preserved for binary compatibility.
 	 * @param annotation the annotation to retrieve the attributes for
 	 * @return the Map of annotation attributes, with attribute names as keys and
 	 * corresponding attribute values as values
@@ -447,16 +446,15 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * Retrieve the given annotation's attributes as a Map. Equivalent to calling
-	 * {@link #getAnnotationAttributes(Annotation, boolean, boolean)} with
+	 * Retrieve the given annotation's attributes as a {@link Map}. Equivalent to
+	 * calling {@link #getAnnotationAttributes(Annotation, boolean, boolean)} with
 	 * the {@code nestedAnnotationsAsMap} parameter set to {@code false}.
-	 * <p>Note: As of Spring 3.1.1, the returned map is actually an
-	 * {@link AnnotationAttributes} instance, however the Map signature of this method has
-	 * been preserved for binary compatibility.
+	 * <p>Note: This method actually returns an {@link AnnotationAttributes} instance.
+	 * However, the {@code Map} signature has been preserved for binary compatibility.
 	 * @param annotation the annotation to retrieve the attributes for
 	 * @param classValuesAsString whether to turn Class references into Strings (for
-	 * compatibility with {@link org.springframework.core.type.AnnotationMetadata} or to
-	 * preserve them as Class references
+	 * compatibility with {@link org.springframework.core.type.AnnotationMetadata}
+	 * or to preserve them as Class references
 	 * @return the Map of annotation attributes, with attribute names as keys and
 	 * corresponding attribute values as values
 	 */
@@ -466,13 +464,13 @@ public abstract class AnnotationUtils {
 
 	/**
 	 * Retrieve the given annotation's attributes as an {@link AnnotationAttributes}
-	 * map structure. Implemented in Spring 3.1.1 to provide fully recursive annotation
-	 * reading capabilities on par with that of the reflection-based
-	 * {@link org.springframework.core.type.StandardAnnotationMetadata}.
+	 * map structure.
+	 * <p>This method provides fully recursive annotation reading capabilities on par with
+	 * the reflection-based {@link org.springframework.core.type.StandardAnnotationMetadata}.
 	 * @param annotation the annotation to retrieve the attributes for
 	 * @param classValuesAsString whether to turn Class references into Strings (for
-	 * compatibility with {@link org.springframework.core.type.AnnotationMetadata} or to
-	 * preserve them as Class references
+	 * compatibility with {@link org.springframework.core.type.AnnotationMetadata}
+	 * or to preserve them as Class references
 	 * @param nestedAnnotationsAsMap whether to turn nested Annotation instances into
 	 * {@link AnnotationAttributes} maps (for compatibility with
 	 * {@link org.springframework.core.type.AnnotationMetadata} or to preserve them as
@@ -540,7 +538,7 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * Retrieve the <em>value</em> of a named Annotation attribute, given an annotation instance.
+	 * Retrieve the <em>value</em> of a named attribute, given an annotation instance.
 	 * @param annotation the annotation instance from which to retrieve the value
 	 * @param attributeName the name of the attribute value to retrieve
 	 * @return the attribute value, or {@code null} if not found
@@ -569,7 +567,7 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * Retrieve the <em>default value</em> of a named Annotation attribute, given an annotation instance.
+	 * Retrieve the <em>default value</em> of a named attribute, given an annotation instance.
 	 * @param annotation the annotation instance from which to retrieve the default value
 	 * @param attributeName the name of the attribute value to retrieve
 	 * @return the default value of the named attribute, or {@code null} if not found
@@ -591,7 +589,8 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * Retrieve the <em>default value</em> of a named Annotation attribute, given the {@link Class annotation type}.
+	 * Retrieve the <em>default value</em> of a named attribute, given the
+	 * {@link Class annotation type}.
 	 * @param annotationType the <em>annotation type</em> for which the default value should be retrieved
 	 * @param attributeName the name of the attribute value to retrieve.
 	 * @return the default value of the named attribute, or {@code null} if not found
