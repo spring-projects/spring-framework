@@ -41,14 +41,15 @@ public class Spr10744Tests {
 	@Test
 	public void testSpr10744() throws Exception {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		MyTestScope scope = new MyTestScope();
-		context.getBeanFactory().registerScope("myTestScope", scope);
+		context.getBeanFactory().registerScope("myTestScope", new MyTestScope());
 		context.register(MyTestConfiguration.class);
 		context.refresh();
+
 		Foo bean1 = context.getBean("foo", Foo.class);
 		Foo bean2 = context.getBean("foo", Foo.class);
 		assertThat(bean1, sameInstance(bean2));
-		// Should have created a single instance for the proxy
+
+		// Should not have invoked constructor for the proxy instance
 		assertThat(createCount, equalTo(0));
 		assertThat(scopeCount, equalTo(0));
 
@@ -118,9 +119,9 @@ public class Spr10744Tests {
 	@Configuration
 	static class MyTestConfiguration extends MyConfiguration {
 
-		@Override
-		@Scope(value = "myTestScope",  proxyMode = ScopedProxyMode.TARGET_CLASS)
 		@Bean
+		@Scope(value = "myTestScope",  proxyMode = ScopedProxyMode.TARGET_CLASS)
+		@Override
 		public Foo foo() {
 			return new Foo();
 		}

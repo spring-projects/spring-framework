@@ -89,20 +89,21 @@ public class TestContextManager {
 
 
 	/**
-	 * Construct a new {@code TestContextManager} for the specified {@linkplain Class
-	 * test class} and automatically {@link #registerTestExecutionListeners register} the
+	 * Construct a new {@code TestContextManager} for the specified {@linkplain Class test class}
+	 * and automatically {@link #registerTestExecutionListeners register} the
 	 * {@link TestExecutionListener TestExecutionListeners} configured for the test class
 	 * via the {@link TestExecutionListeners @TestExecutionListeners} annotation.
 	 * @param testClass the test class to be managed
-	 * @see #registerTestExecutionListeners(List)
+	 * @see #registerTestExecutionListeners
 	 */
 	public TestContextManager(Class<?> testClass) {
 		CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate = new DefaultCacheAwareContextLoaderDelegate(contextCache);
 		BootstrapContext bootstrapContext = new DefaultBootstrapContext(testClass, cacheAwareContextLoaderDelegate);
 		this.testContextBootstrapper = BootstrapUtils.resolveTestContextBootstrapper(bootstrapContext);
-		this.testContext = new DefaultTestContext(testContextBootstrapper);
-		registerTestExecutionListeners(testContextBootstrapper.getTestExecutionListeners());
+		this.testContext = new DefaultTestContext(this.testContextBootstrapper);
+		registerTestExecutionListeners(this.testContextBootstrapper.getTestExecutionListeners());
 	}
+
 
 	/**
 	 * Get the {@link TestContext} managed by this {@code TestContextManager}.
