@@ -77,9 +77,8 @@ public abstract class PropertySource<T> {
 	/**
 	 * Create a new {@code PropertySource} with the given name and with a new {@code Object}
 	 * instance as the underlying source.
-	 * <p>Often useful in testing scenarios when creating
-	 * anonymous implementations that never query an actual source, but rather return
-	 * hard-coded values.
+	 * <p>Often useful in testing scenarios when creating anonymous implementations that
+	 * never query an actual source but rather return hard-coded values.
 	 */
 	@SuppressWarnings("unchecked")
 	public PropertySource(String name) {
@@ -103,9 +102,9 @@ public abstract class PropertySource<T> {
 
 	/**
 	 * Return whether this {@code PropertySource} contains the given name.
-	 * <p>This implementation simply checks for a null return value
-	 * from {@link #getProperty(String)}. Subclasses may wish to
-	 * implement a more efficient algorithm if possible.
+	 * <p>This implementation simply checks for a {@code null} return value
+	 * from {@link #getProperty(String)}. Subclasses may wish to implement
+	 * a more efficient algorithm if possible.
 	 * @param name the property name to find
 	 */
 	public boolean containsProperty(String name) {
@@ -146,7 +145,7 @@ public abstract class PropertySource<T> {
 
 	/**
 	 * Produce concise output (type and name) if the current log level does not include
-	 * debug. If debug is enabled, produce verbose output including hash code of the
+	 * debug. If debug is enabled, produce verbose output including the hash code of the
 	 * PropertySource instance and every name/value property pair.
 	 * <p>This variable verbosity is useful as a property source such as system properties
 	 * or environment variables may contain an arbitrary number of property pairs,
@@ -221,8 +220,7 @@ public abstract class PropertySource<T> {
 	static class ComparisonPropertySource extends StubPropertySource {
 
 		private static final String USAGE_ERROR =
-			"ComparisonPropertySource instances are for collection comparison " +
-			"use only";
+				"ComparisonPropertySource instances are for use with collection comparison only";
 
 		public ComparisonPropertySource(String name) {
 			super(name);

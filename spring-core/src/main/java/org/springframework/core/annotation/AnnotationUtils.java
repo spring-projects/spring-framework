@@ -275,10 +275,8 @@ public abstract class AnnotationUtils {
 	 * @param visited the set of annotations that have already been visited
 	 * @return the annotation if found, or {@code null} if not found
 	 */
-	private static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType,
-			Set<Annotation> visited) {
+	private static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType, Set<Annotation> visited) {
 		Assert.notNull(clazz, "Class must not be null");
-
 		if (isAnnotationDeclaredLocally(annotationType, clazz)) {
 			return clazz.getAnnotation(annotationType);
 		}
@@ -426,7 +424,6 @@ public abstract class AnnotationUtils {
 	/**
 	 * Determine if the supplied {@link Annotation} is defined in the
 	 * {@code java.lang.annotation} package.
-	 *
 	 * @param annotation the annotation to check; never {@code null}
 	 * @return {@code true} if the annotation is in the {@code java.lang.annotation} package
 	 */
