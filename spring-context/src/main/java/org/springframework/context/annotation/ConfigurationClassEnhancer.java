@@ -360,7 +360,7 @@ class ConfigurationClassEnhancer {
 			};
 			enhancer.setCallbackTypes(CALLBACK_TYPES);
 			Class<?> fbSubclass = enhancer.createClass();
-			Enhancer.registerCallbacks(fbSubclass, callbackInstances);
+			Enhancer.registerStaticCallbacks(fbSubclass, callbackInstances);
 			return fbSubclass.newInstance();
 		}
 	}
