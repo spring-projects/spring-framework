@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,9 @@
 
 package org.springframework.messaging.simp.broker;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.springframework.messaging.Message;
 import org.springframework.util.AntPathMatcher;
@@ -34,6 +30,7 @@ import org.springframework.util.MultiValueMap;
  * A default, simple in-memory implementation of {@link SubscriptionRegistry}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 4.0
  */
 public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
@@ -59,18 +56,16 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 	@Override
 	protected void addSubscriptionInternal(String sessionId, String subsId, String destination, Message<?> message) {
 		SessionSubscriptionInfo info = this.subscriptionRegistry.addSubscription(sessionId, subsId, destination);
-		if (!this.pathMatcher.isPattern(destination)) {
-			this.destinationCache.mapToDestination(destination, info);
-		}
+		this.destinationCache.mapToDestination(destination, sessionId, subsId);
 	}
 
 	@Override
-	protected void removeSubscriptionInternal(String sessionId, String subscriptionId, Message<?> message) {
+	protected void removeSubscriptionInternal(String sessionId, String subsId, Message<?> message) {
 		SessionSubscriptionInfo info = this.subscriptionRegistry.getSubscriptions(sessionId);
 		if (info != null) {
-			String destination = info.removeSubscription(subscriptionId);
+			String destination = info.removeSubscription(subsId);
 			if (info.getSubscriptions(destination) == null) {
-				this.destinationCache.unmapFromDestination(destination, info);
+				this.destinationCache.unmapFromDestination(destination, sessionId, subsId);
 			}
 		}
 	}
@@ -88,8 +83,11 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 	@Override
 	protected MultiValueMap<String, String> findSubscriptionsInternal(String destination, Message<?> message) {
-		MultiValueMap<String,String> result = this.destinationCache.getSubscriptions(destination);
-		if (result.isEmpty()) {
+		MultiValueMap<String,String> result;
+		if (this.destinationCache.isCachedDestination(destination)) {
+			result = this.destinationCache.getSubscriptions(destination);
+		}
+		else {
 			result = new LinkedMultiValueMap<String, String>();
 			for (SessionSubscriptionInfo info : this.subscriptionRegistry.getAllSubscriptions()) {
 				for (String destinationPattern : info.getDestinations()) {
@@ -99,6 +97,9 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 						}
 					}
 				}
+			}
+			if(!result.isEmpty()) {
+				this.destinationCache.addSubscriptions(destination, result);
 			}
 		}
 		return result;
@@ -114,60 +115,77 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 
 	/**
-	 * Provide direct lookup of session subscriptions by destination (for non-pattern destinations).
+	 * Provide direct lookup of session subscriptions by destination
 	 */
 	private static class DestinationCache {
 
+		private AntPathMatcher pathMatcher = new AntPathMatcher();
+
 		// destination -> ..
-		private final Map<String, Set<SessionSubscriptionInfo>> subscriptionsByDestination =
-				new ConcurrentHashMap<String, Set<SessionSubscriptionInfo>>();
+		private final Map<String, MultiValueMap<String, String>> subscriptionsByDestination =
+				new ConcurrentHashMap<String, MultiValueMap<String, String>>();
 
 		private final Object monitor = new Object();
 
 
-		public void mapToDestination(String destination, SessionSubscriptionInfo info) {
+		public void addSubscriptions(String destination, MultiValueMap<String, String> subscriptions) {
+			this.subscriptionsByDestination.put(destination, subscriptions);
+		}
+
+		public void mapToDestination(String destination, String sessionId, String subsId) {
 			synchronized(this.monitor) {
-				Set<SessionSubscriptionInfo> registrations = this.subscriptionsByDestination.get(destination);
-				if (registrations == null) {
-					registrations = new CopyOnWriteArraySet<SessionSubscriptionInfo>();
-					this.subscriptionsByDestination.put(destination, registrations);
+				for (String cachedDestination : this.subscriptionsByDestination.keySet()) {
+					if (this.pathMatcher.match(destination, cachedDestination)) {
+						MultiValueMap<String, String> registrations = this.subscriptionsByDestination.get(cachedDestination);
+						if (registrations == null) {
+							registrations = new LinkedMultiValueMap<String, String>();
+						}
+						registrations.add(sessionId, subsId);
+					}
 				}
-				registrations.add(info);
 			}
 		}
 
-		public void unmapFromDestination(String destination, SessionSubscriptionInfo info) {
+		public void unmapFromDestination(String destination, String sessionId, String subsId) {
 			synchronized(this.monitor) {
-				Set<SessionSubscriptionInfo> infos = this.subscriptionsByDestination.get(destination);
-				if (infos != null) {
-					infos.remove(info);
-					if (infos.isEmpty()) {
-						this.subscriptionsByDestination.remove(destination);
+				for (String cachedDestination : this.subscriptionsByDestination.keySet()) {
+					if (this.pathMatcher.match(destination, cachedDestination)) {
+						MultiValueMap<String, String> registrations = this.subscriptionsByDestination.get(cachedDestination);
+						List<String> subscriptions = registrations.get(sessionId);
+						while(subscriptions.remove(subsId));
+						if (subscriptions.isEmpty()) {
+							registrations.remove(sessionId);
+						}
+						if (registrations.isEmpty()) {
+							this.subscriptionsByDestination.remove(cachedDestination);
+						}
 					}
 				}
 			}
 		}
 
 		public void removeSessionSubscriptions(SessionSubscriptionInfo info) {
-			for (String destination : info.getDestinations()) {
-				unmapFromDestination(destination, info);
-			}
-		}
-
-		public MultiValueMap<String, String> getSubscriptions(String destination) {
-			MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>();
-			Set<SessionSubscriptionInfo> infos = this.subscriptionsByDestination.get(destination);
-			if (infos != null) {
-				for (SessionSubscriptionInfo info : infos) {
-					Set<String> subscriptions = info.getSubscriptions(destination);
-					if (subscriptions != null) {
-						for (String subscription : subscriptions) {
-							result.add(info.getSessionId(), subscription);
+			synchronized(this.monitor) {
+				for (String destination : info.getDestinations()) {
+					for (String cachedDestination : this.subscriptionsByDestination.keySet()) {
+						if (this.pathMatcher.match(destination, cachedDestination)) {
+							MultiValueMap<String, String> map = this.subscriptionsByDestination.get(cachedDestination);
+							map.remove(info.getSessionId());
+							if (map.isEmpty()) {
+								this.subscriptionsByDestination.remove(cachedDestination);
+							}
 						}
 					}
 				}
 			}
-			return result;
+		}
+
+		public MultiValueMap<String, String> getSubscriptions(String destination) {
+			return this.subscriptionsByDestination.get(destination);
+		}
+
+		public boolean isCachedDestination(String destination) {
+			return subscriptionsByDestination.containsKey(destination);
 		}
 
 		@Override
