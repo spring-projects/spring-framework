@@ -73,10 +73,7 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 			WebSocketHttpHeaders headers, URI uri) {
 
 		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
-		Assert.notNull(uri, "uri must not be null");
-
-		String scheme = uri.getScheme();
-		Assert.isTrue(((scheme != null) && ("ws".equals(scheme) || "wss".equals(scheme))), "Invalid scheme: " + scheme);
+		assertUri(uri);
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Connecting to " + uri);
@@ -99,6 +96,12 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 
 		return doHandshakeInternal(webSocketHandler, headersToUse, uri, subProtocols, extensions,
 				Collections.<String, Object>emptyMap());
+	}
+
+	protected void assertUri(URI uri) {
+		Assert.notNull(uri, "uri must not be null");
+		String scheme = uri.getScheme();
+		Assert.isTrue(scheme != null && ("ws".equals(scheme) || "wss".equals(scheme)), "Invalid scheme: " + scheme);
 	}
 
 	/**

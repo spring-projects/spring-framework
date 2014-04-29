@@ -78,6 +78,7 @@ public class JettyWebSocketTestServer implements WebSocketTestServer {
 	@Override
 	public void stop() throws Exception {
 		if (this.jettyServer.isRunning()) {
+			this.jettyServer.setStopTimeout(0);
 			this.jettyServer.stop();
 		}
 	}

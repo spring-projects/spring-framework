@@ -145,7 +145,7 @@ public class SockJsFrame {
 		if (!(other instanceof SockJsFrame)) {
 			return false;
 		}
-		return this.content.equals(((SockJsFrame) other).content);
+		return (this.type.equals(((SockJsFrame) other).type) && this.content.equals(((SockJsFrame) other).content));
 	}
 
 	@Override

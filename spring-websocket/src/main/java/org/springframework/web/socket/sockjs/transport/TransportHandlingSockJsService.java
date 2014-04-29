@@ -238,7 +238,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 				}
 				else {
 					response.setStatusCode(HttpStatus.NOT_FOUND);
-					logger.warn("Session not found");
+					logger.warn("Session not found, sessionId=" + sessionId);
 					return;
 				}
 			}
