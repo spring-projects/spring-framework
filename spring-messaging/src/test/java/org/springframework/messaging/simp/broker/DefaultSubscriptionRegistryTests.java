@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.junit.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
-import org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.MultiValueMap;
 
@@ -35,6 +34,7 @@ import static org.junit.Assert.*;
  * Test fixture for {@link org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public class DefaultSubscriptionRegistryTests {
 
@@ -129,6 +129,64 @@ public class DefaultSubscriptionRegistryTests {
 
 		assertEquals("Expected one element " + actual, 1, actual.size());
 		assertEquals(Arrays.asList(subsId), actual.get(sessId));
+	}
+
+	// SPR-11657
+
+	@Test
+	public void registerMultipleSubscriptionsWithOneUsingDestinationPattern() {
+
+		String sessId1 = "sess01";
+		String sessId2 = "sess02";
+
+		String destPatternIbm = "/topic/PRICE.STOCK.*.IBM";
+		String destNasdaqIbm = "/topic/PRICE.STOCK.NASDAQ.IBM";
+		String destNyseIdm = "/topic/PRICE.STOCK.NYSE.IBM";
+		String destNasdaqGoogle = "/topic/PRICE.STOCK.NASDAQ.GOOG";
+
+		String sessId1ToDestPatternIbm = "subs01";
+		String sessId1ToDestNasdaqIbm = "subs02";
+		String sessId2TodestNasdaqIbm = "subs03";
+		String sessId2ToDestNyseIdm = "subs04";
+		String sessId2ToDestNasdaqGoogle = "subs05";
+
+		this.registry.registerSubscription(subscribeMessage(sessId1, sessId1ToDestNasdaqIbm, destNasdaqIbm));
+		this.registry.registerSubscription(subscribeMessage(sessId1, sessId1ToDestPatternIbm, destPatternIbm));
+		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message(destNasdaqIbm));
+		assertEquals("Expected 1 elements " + actual, 1, actual.size());
+		assertEquals(Arrays.asList(sessId1ToDestNasdaqIbm, sessId1ToDestPatternIbm), actual.get(sessId1));
+
+		this.registry.registerSubscription(subscribeMessage(sessId2, sessId2TodestNasdaqIbm, destNasdaqIbm));
+		this.registry.registerSubscription(subscribeMessage(sessId2, sessId2ToDestNyseIdm, destNyseIdm));
+		this.registry.registerSubscription(subscribeMessage(sessId2, sessId2ToDestNasdaqGoogle, destNasdaqGoogle));
+		actual = this.registry.findSubscriptions(message(destNasdaqIbm));
+		assertEquals("Expected 2 elements " + actual, 2, actual.size());
+		assertEquals(Arrays.asList(sessId1ToDestNasdaqIbm, sessId1ToDestPatternIbm), actual.get(sessId1));
+		assertEquals(Arrays.asList(sessId2TodestNasdaqIbm), actual.get(sessId2));
+
+		this.registry.unregisterAllSubscriptions(sessId1);
+		actual = this.registry.findSubscriptions(message(destNasdaqIbm));
+		assertEquals("Expected 1 elements " + actual, 1, actual.size());
+		assertEquals(Arrays.asList(sessId2TodestNasdaqIbm), actual.get(sessId2));
+
+		this.registry.registerSubscription(subscribeMessage(sessId1, sessId1ToDestPatternIbm, destPatternIbm));
+		this.registry.registerSubscription(subscribeMessage(sessId1, sessId1ToDestNasdaqIbm, destNasdaqIbm));
+		actual = this.registry.findSubscriptions(message(destNasdaqIbm));
+		assertEquals("Expected 2 elements " + actual, 2, actual.size());
+		assertEquals(Arrays.asList(sessId1ToDestPatternIbm, sessId1ToDestNasdaqIbm), actual.get(sessId1));
+		assertEquals(Arrays.asList(sessId2TodestNasdaqIbm), actual.get(sessId2));
+
+		this.registry.unregisterSubscription(unsubscribeMessage(sessId1, sessId1ToDestNasdaqIbm));
+		actual = this.registry.findSubscriptions(message(destNasdaqIbm));
+		assertEquals("Expected 2 elements " + actual, 2, actual.size());
+		assertEquals(Arrays.asList(sessId1ToDestPatternIbm), actual.get(sessId1));
+		assertEquals(Arrays.asList(sessId2TodestNasdaqIbm), actual.get(sessId2));
+		this.registry.unregisterSubscription(unsubscribeMessage(sessId1, sessId1ToDestPatternIbm));
+		assertEquals("Expected 1 elements " + actual, 1, actual.size());
+		assertEquals(Arrays.asList(sessId2TodestNasdaqIbm), actual.get(sessId2));
+
+		this.registry.unregisterSubscription(unsubscribeMessage(sessId2, sessId2TodestNasdaqIbm));
+		assertEquals("Expected 0 element " + actual, 0, actual.size());
 	}
 
 	@Test
