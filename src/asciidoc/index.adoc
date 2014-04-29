@@ -46280,9 +46280,13 @@ Since caches are essentially key-value stores, each invocation of a cached metho
 to be translated into a suitable key for cache access. Out of the box, the caching
 abstraction uses a simple `KeyGenerator` based on the following algorithm:
 
-* If no params are given, return `SimpleKey.EMPTY`.
-* If only one param is given, return that instance.
-* If more the one param is given, return a `SimpleKey` containing all parameters.
+* The target object's class name
+* The name of the method invoked
+* The target object's hash code
+* The parameter given using the following algorithm:
+** If no params are given, return `SimpleKey.EMPTY`.
+** If only one param is given, return that instance.
+** If more the one param is given, return a `SimpleKey` containing all parameters.
 
 This approach works well for most use-cases; As long as parameters have __natural keys__
 and implement valid `hashCode()` and `equals()` methods. If that is not the case then the
@@ -46294,6 +46298,11 @@ To provide a different __default__ key generator, one needs to implement the
 
 [NOTE]
 ====
+The default key generation strategy changed with the release of Spring 4.1. Earlier
+versions of Spring did not include the target and method signature which could cause
+unexpected key collisions (see https://jira.spring.io/browse/SPR-11736[SPR-11736]).
+The new 'SimpleSignatureKeyGenerator' address this problem.
+
 The default key generation strategy changed with the release of Spring 4.0. Earlier
 versions of Spring used a key generation strategy that, for multiple key parameters,
 only considered the `hashCode()` of parameters and not `equals()`; this could cause

@@ -83,7 +83,7 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 
 	private CacheOperationSource cacheOperationSource;
 
-	private KeyGenerator keyGenerator = new SimpleKeyGenerator();
+	private KeyGenerator keyGenerator = new SimpleSignatureKeyGenerator();
 
 	private CacheResolver cacheResolver;
 
@@ -114,7 +114,7 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 	/**
 	 * Set the default {@link KeyGenerator} that this cache aspect should delegate to
 	 * if no specific key generator has been set for the operation.
-	 * <p>The default is a {@link SimpleKeyGenerator}
+	 * <p>The default is a {@link SimpleSignatureKeyGenerator}
 	 */
 	public void setKeyGenerator(KeyGenerator keyGenerator) {
 		this.keyGenerator = keyGenerator;

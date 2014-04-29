@@ -33,6 +33,7 @@ import org.springframework.cache.annotation.Caching;
 public class DefaultCacheableService implements CacheableService<Long> {
 
 	private final AtomicLong counter = new AtomicLong();
+	private final AtomicLong counter2 = new AtomicLong(100000);
 	private final AtomicLong nullInvocations = new AtomicLong();
 
 	@Override
@@ -41,6 +42,12 @@ public class DefaultCacheableService implements CacheableService<Long> {
 		return counter.getAndIncrement();
 	}
 
+	@Override
+	@Cacheable("default")
+	public Long cacheAnother(Object arg1) {
+		return counter2.getAndIncrement();
+	}
+	
 	@Override
 	@CacheEvict("default")
 	public void invalidate(Object arg1) {

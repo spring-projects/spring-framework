@@ -27,10 +27,10 @@ import java.util.Arrays;
  * {@code null} parameters given.
  *
  * <p>NOTE: As this implementation returns only a hash of the parameters
- * it is possible for key collisions to occur. Since Spring 4.0 the
- * {@link SimpleKeyGenerator} is used when no explicit key generator
+ * it is possible for key collisions to occur. Since Spring 4.1 the
+ * {@link SimpleSignatureKeyGenerator} is used when no explicit key generator
  * has been defined. This class remains for applications that do not
- * wish to migrate to the {@link SimpleKeyGenerator}.
+ * wish to migrate to the {@link SimpleKeyGenerator} or {@link SimpleSignatureKeyGenerator}.
  *
  * @author Costin Leau
  * @author Chris Beams
