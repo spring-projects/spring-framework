@@ -647,8 +647,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Specify whether to allow access to non-public constructors and methods,
-	 * for the case of externalized metadata pointing to those.
-	 * The default is {@code true}; switch this to {@false} for public access only.
+	 * for the case of externalized metadata pointing to those. The default is
+	 * {@code true}; switch this to {@code false} for public access only.
 	 * <p>This applies to constructor resolution, factory method resolution,
 	 * and also init/destroy methods. Bean property accessors have to be public
 	 * in any case and are not affected by this setting.
