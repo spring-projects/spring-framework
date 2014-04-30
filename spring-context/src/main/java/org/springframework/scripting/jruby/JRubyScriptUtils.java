@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ public abstract class JRubyScriptUtils {
 		Ruby ruby = initializeRuntime();
 
 		Node scriptRootNode = ruby.parseEval(scriptSource, "", null, 0);
-		// keep using the deprecated runNormally variant for JRuby 1.1/1.2 compatibility...
+		// Keep using the deprecated runNormally variant for JRuby 1.1/1.2 compatibility...
         IRubyObject rubyObject = ruby.runNormally(scriptRootNode, false);
 
 		if (rubyObject instanceof RubyNil) {
@@ -118,10 +118,12 @@ public abstract class JRubyScriptUtils {
 
 	/**
 	 * Find the first {@link ClassNode} under the supplied {@link Node}.
-	 * @return the found {@code ClassNode}, or {@code null}
-	 * if no {@link ClassNode} is found
+	 * @return the corresponding {@code ClassNode}, or {@code null} if none found
 	 */
 	private static ClassNode findClassNode(Node node) {
+		if (node == null) {
+			return null;
+		}
 		if (node instanceof ClassNode) {
 			return (ClassNode) node;
 		}
@@ -230,8 +232,8 @@ public abstract class JRubyScriptUtils {
 	/**
 	 * Exception thrown in response to a JRuby {@link RaiseException}
 	 * being thrown from a JRuby method invocation.
-	 * <p>Introduced because the {@code RaiseException} class does not
-	 * have useful {@link Object#toString()}, {@link Throwable#getMessage()},
+	 * <p>Introduced because early versions of the {@code RaiseException} class did
+	 * not have useful {@link Object#toString()}, {@link Throwable#getMessage()},
 	 * and {@link Throwable#printStackTrace} implementations.
 	 */
 	@SuppressWarnings("serial")
@@ -248,7 +250,7 @@ public abstract class JRubyScriptUtils {
 
 		private static String buildMessage(RaiseException ex) {
 			RubyException rubyEx = ex.getException();
-			return (rubyEx != null && rubyEx.message != null) ? rubyEx.message.toString() : "Unexpected JRuby error";
+			return (rubyEx != null && rubyEx.message != null ? rubyEx.message.toString() : "Unexpected JRuby error");
 		}
 	}
 
