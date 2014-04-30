@@ -19,17 +19,18 @@ package org.springframework.core;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicate that the annotated element uses Java7 specific constructs
- * and therefore requires a Java7 environment.
+ * Indicates that the annotated element uses Java 7 specific API constructs,
+ * without implying that it strictly requires Java 7.
  *
  * @author Stephane Nicoll
+ * @since 4.1
  */
-@Retention(java.lang.annotation.RetentionPolicy.CLASS)
-@Documented
+@Retention(RetentionPolicy.CLASS)
 @Target({ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.TYPE})
+@Documented
 public @interface UsesJava7 {
-
 }
