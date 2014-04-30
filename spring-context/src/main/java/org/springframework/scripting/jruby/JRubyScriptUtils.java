@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.List;
 
 import org.jruby.Ruby;
 import org.jruby.RubyArray;
-import org.jruby.RubyException;
 import org.jruby.RubyNil;
 import org.jruby.ast.ClassNode;
 import org.jruby.ast.Colon2Node;
@@ -116,10 +115,12 @@ public abstract class JRubyScriptUtils {
 
 	/**
 	 * Find the first {@link ClassNode} under the supplied {@link Node}.
-	 * @return the found {@code ClassNode}, or {@code null}
-	 * if no {@link ClassNode} is found
+	 * @return the corresponding {@code ClassNode}, or {@code null} if none found
 	 */
 	private static ClassNode findClassNode(Node node) {
+		if (node == null) {
+			return null;
+		}
 		if (node instanceof ClassNode) {
 			return (ClassNode) node;
 		}
@@ -229,9 +230,6 @@ public abstract class JRubyScriptUtils {
 	/**
 	 * Exception thrown in response to a JRuby {@link RaiseException}
 	 * being thrown from a JRuby method invocation.
-	 * <p>Introduced because the {@code RaiseException} class does not
-	 * have useful {@link Object#toString()}, {@link Throwable#getMessage()},
-	 * and {@link Throwable#printStackTrace} implementations.
 	 */
 	@SuppressWarnings("serial")
 	public static class JRubyExecutionException extends NestedRuntimeException {
@@ -242,12 +240,7 @@ public abstract class JRubyScriptUtils {
 		 * @param ex the cause (must not be {@code null})
 		 */
 		public JRubyExecutionException(RaiseException ex) {
-			super(buildMessage(ex), ex);
-		}
-
-		private static String buildMessage(RaiseException ex) {
-			RubyException rubyEx = ex.getException();
-			return (rubyEx != null && rubyEx.message != null) ? rubyEx.message.toString() : "Unexpected JRuby error";
+			super(ex.getMessage(), ex);
 		}
 	}
 
