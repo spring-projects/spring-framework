@@ -3,7 +3,7 @@ buildscript {
 		maven { url "http://repo.springsource.org/plugins-release" }
 	}
 	dependencies {
-		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.5")
+		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.6")
 		classpath("org.springframework.build.gradle:docbook-reference-plugin:0.2.8")
 	}
 }
@@ -11,11 +11,6 @@ buildscript {
 configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
-
-	// The following is a work-around for allowing to build on JDK 8 until the
-	// Gradle build uses Ant 1.9.x by default. This is necessary to avoid the
-	// "Class not found: javac1.8" issue with Ant versions prior to 1.9.x
-	ant.properties["build.compiler"] = "javac1.7"
 
 	ext.aspectjVersion  = "1.7.4"
 	ext.hsqldbVersion   = "1.8.0.10"
@@ -94,6 +89,7 @@ configure(allprojects) { project ->
 		"http://commons.apache.org/proper/commons-codec/apidocs/",
 		"http://commons.apache.org/proper/commons-dbcp/apidocs/",
 		"http://portals.apache.org/pluto/portlet-2.0-apidocs/",
+		"http://tiles.apache.org/tiles-request/apidocs/",
 		"http://tiles.apache.org/framework/apidocs/",
 		"http://aopalliance.sourceforge.net/doc/",
 		"http://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
@@ -842,6 +838,7 @@ configure(rootProject) {
 
 	apply plugin: "docbook-reference"
 	apply plugin: "groovy"
+
 	// apply plugin: "detect-split-packages"
 	apply from: "${gradleScriptDir}/jdiff.gradle"
 
@@ -921,7 +918,7 @@ configure(rootProject) {
 		}
 	}
 
-	task docsZip(type: Zip) {
+	task docsZip(type: Zip, dependsOn: 'reference') {
 		group = "Distribution"
 		baseName = "spring-framework"
 		classifier = "docs"
