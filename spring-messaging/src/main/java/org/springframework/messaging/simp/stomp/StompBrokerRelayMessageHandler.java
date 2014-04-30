@@ -550,18 +550,22 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		public void handleMessage(Message<byte[]> message) {
 
 			StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
+			headers.setSessionId(this.sessionId);
+
 			if (SimpMessageType.HEARTBEAT.equals(headers.getMessageType())) {
 				logger.trace("Received broker heartbeat");
 			}
 			else if (logger.isDebugEnabled()) {
 				logger.debug("Received message from broker in session '" + this.sessionId + "'");
 			}
+			else if (logger.isErrorEnabled() && StompCommand.ERROR == headers.getCommand()) {
+				logger.error("Received STOMP ERROR: " + message);
+			}
 
 			if (StompCommand.CONNECTED == headers.getCommand()) {
 				afterStompConnected(headers);
 			}
 
-			headers.setSessionId(this.sessionId);
 			message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
 			sendMessageToClient(message);
 		}
