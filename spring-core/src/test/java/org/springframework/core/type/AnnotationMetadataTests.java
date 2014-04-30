@@ -28,12 +28,12 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.Test;
+
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.util.MultiValueMap;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -112,23 +112,7 @@ public class AnnotationMetadataTests {
 		assertMetaAnnotationOverrides(metadata);
 	}
 
-	/**
-	 * @param metadata the metadata for {@link ComposedConfigurationWithAttributeOverridesClass}
-	 */
 	private void assertMetaAnnotationOverrides(AnnotationMetadata metadata) {
-		assertAllAttributesForMetaAnnotationOverrides(metadata);
-		assertAttributesForMetaAnnotationOverrides(metadata);
-
-		// SPR-11710: Invoke a 2nd time after invoking getAnnotationAttributes() in order
-		// to ensure that getMergedAnnotationAttributes() in AnnotationReadingVisitorUtils
-		// does not mutate the state of the metadata.
-		assertAllAttributesForMetaAnnotationOverrides(metadata);
-	}
-
-	/**
-	 * @param metadata the metadata for {@link ComposedConfigurationWithAttributeOverridesClass}
-	 */
-	private void assertAttributesForMetaAnnotationOverrides(AnnotationMetadata metadata) {
 		AnnotationAttributes attributes = (AnnotationAttributes) metadata.getAnnotationAttributes(
 			TestComponentScan.class.getName(), false);
 		String[] basePackages = attributes.getStringArray("basePackages");
@@ -141,27 +125,60 @@ public class AnnotationMetadataTests {
 	}
 
 	/**
-	 * @param metadata the metadata for {@link ComposedConfigurationWithAttributeOverridesClass}
+	 * https://jira.spring.io/browse/SPR-11649
 	 */
-	private void assertAllAttributesForMetaAnnotationOverrides(AnnotationMetadata metadata) {
-		MultiValueMap<String, Object> map = metadata.getAllAnnotationAttributes(TestComponentScan.class.getName());
-		List<Object> basePackages = map.get("basePackages");
-		assertThat("length of basePackages list", basePackages.size(), is(1));
+	@Test
+	public void multipleAnnotationsWithIdenticalAttributeNamesUsingStandardAnnotationMetadata() {
+		AnnotationMetadata metadata = new StandardAnnotationMetadata(NamedAnnotationsClass.class);
+		assertMultipleAnnotationsWithIdenticalAttributeNames(metadata);
+	}
 
-		// Ideally, the expected base package should be "org.example.componentscan", but
-		// since Spring's annotation processing currently does not support meta-annotation
-		// attribute overrides when searching for "all attributes", the actual value found
-		// is "bogus".
-		String expectedBasePackage = "bogus";
-		assertThat("basePackages[0]", ((String[]) basePackages.get(0))[0], is(expectedBasePackage));
+	/**
+	 * https://jira.spring.io/browse/SPR-11649
+	 */
+	@Test
+	public void multipleAnnotationsWithIdenticalAttributeNamesUsingAnnotationMetadataReadingVisitor() throws Exception {
+		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
+		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(NamedAnnotationsClass.class.getName());
+		AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
+		assertMultipleAnnotationsWithIdenticalAttributeNames(metadata);
+	}
 
-		List<Object> value = map.get("value");
-		assertThat("length of value list", value.size(), is(1));
-		assertThat("length of 0th value array", ((String[]) value.get(0)).length, is(0));
+	/**
+	 * https://jira.spring.io/browse/SPR-11649
+	 */
+	@Test
+	public void composedAnnotationWithMetaAnnotationsWithIdenticalAttributeNamesUsingStandardAnnotationMetadata() {
+		AnnotationMetadata metadata = new StandardAnnotationMetadata(NamedComposedAnnotationClass.class);
+		assertMultipleAnnotationsWithIdenticalAttributeNames(metadata);
+	}
 
-		List<Object> basePackageClasses = map.get("basePackageClasses");
-		assertThat("length of basePackageClasses list", basePackageClasses.size(), is(1));
-		assertThat("length of 0th basePackageClasses array", ((Class<?>[]) basePackageClasses.get(0)).length, is(0));
+	/**
+	 * https://jira.spring.io/browse/SPR-11649
+	 */
+	@Test
+	public void composedAnnotationWithMetaAnnotationsWithIdenticalAttributeNamesUsingAnnotationMetadataReadingVisitor() throws Exception {
+		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
+		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(NamedComposedAnnotationClass.class.getName());
+		AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
+		assertMultipleAnnotationsWithIdenticalAttributeNames(metadata);
+	}
+
+	private void assertMultipleAnnotationsWithIdenticalAttributeNames(AnnotationMetadata metadata) {
+		AnnotationAttributes attributes1 = (AnnotationAttributes) metadata.getAnnotationAttributes(
+				NamedAnnotation1.class.getName(), false);
+		String name1 = attributes1.getString("name");
+		assertThat("name of NamedAnnotation1", name1, is("name 1"));
+
+		AnnotationAttributes attributes2 = (AnnotationAttributes) metadata.getAnnotationAttributes(
+				NamedAnnotation2.class.getName(), false);
+		String name2 = attributes2.getString("name");
+		assertThat("name of NamedAnnotation2", name2, is("name 2"));
+
+		AnnotationAttributes attributes3 = (AnnotationAttributes) metadata.getAnnotationAttributes(
+				NamedAnnotation3.class.getName(), false);
+		String name3 = attributes3.getString("name");
+		assertThat("name of NamedAnnotation3", name3, is("name 3"));
 	}
 
 	private void doTestAnnotationInfo(AnnotationMetadata metadata) {
@@ -424,6 +441,42 @@ public class AnnotationMetadataTests {
 
 	@ComposedConfigurationWithAttributeOverrides(basePackages = "org.example.componentscan")
 	public static class ComposedConfigurationWithAttributeOverridesClass {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	public static @interface NamedAnnotation1 {
+		String name() default "";
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	public static @interface NamedAnnotation2 {
+		String name() default "";
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	public static @interface NamedAnnotation3 {
+		String name() default "";
+	}
+
+	@NamedAnnotation1(name = "name 1")
+	@NamedAnnotation2(name = "name 2")
+	@NamedAnnotation3(name = "name 3")
+	public static class NamedAnnotationsClass {
+	}
+
+	@NamedAnnotation1(name = "name 1")
+	@NamedAnnotation2(name = "name 2")
+	@NamedAnnotation3(name = "name 3")
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	public static @interface NamedComposedAnnotation {
+	}
+
+	@NamedComposedAnnotation
+	public static class NamedComposedAnnotationClass {
 	}
 
 }
