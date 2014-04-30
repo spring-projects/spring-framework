@@ -390,8 +390,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			if (sessionId == null || sessionId == SystemStompConnectionHandler.SESSION_ID) {
 				throw new MessageDeliveryException("Message broker is not active.");
 			}
-			if (logger.isTraceEnabled()) {
-				logger.trace("Message broker is not active. Ignoring message id=" + message.getHeaders().getId());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Message broker is not active. Ignoring message id=" + message.getHeaders().getId());
 			}
 			return;
 		}
@@ -680,8 +680,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 			if (!this.isStompConnected) {
 				if (this.isRemoteClientSession) {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Ignoring client message received " + message +
+					if (logger.isDebugEnabled()) {
+						logger.debug("Ignoring client message received " + message +
 								(conn != null ? "before CONNECTED frame" : "after TCP connection closed"));
 					}
 					return EMPTY_TASK;
