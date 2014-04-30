@@ -176,10 +176,12 @@ public class DefaultSubscriptionRegistryTests {
 		assertEquals(Arrays.asList(subs1), actual.get(sess2));
 
 		this.registry.unregisterSubscription(unsubscribeMessage(sess1, subs1));
+		actual = this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NASDAQ.IBM"));
 		assertEquals(1, actual.size());
 		assertEquals(Arrays.asList(subs1), actual.get(sess2));
 
 		this.registry.unregisterSubscription(unsubscribeMessage(sess2, subs1));
+		actual = this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NASDAQ.IBM"));
 		assertEquals(0, actual.size());
 	}
 
