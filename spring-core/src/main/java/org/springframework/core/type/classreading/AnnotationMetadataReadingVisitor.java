@@ -56,7 +56,7 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	/**
 	 * Declared as a {@link LinkedMultiValueMap} instead of a {@link MultiValueMap}
 	 * to ensure that the hierarchical ordering of the entries is preserved.
-	 * @see AnnotationReadingVisitorUtils#getMergedAnnotationAttributes(LinkedMultiValueMap, String)
+	 * @see AnnotationReadingVisitorUtils#getMergedAnnotationAttributes
 	 */
 	protected final LinkedMultiValueMap<String, AnnotationAttributes> attributesMap = new LinkedMultiValueMap<String, AnnotationAttributes>(4);
 
@@ -125,7 +125,7 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	@Override
 	public AnnotationAttributes getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
 		AnnotationAttributes raw = AnnotationReadingVisitorUtils.getMergedAnnotationAttributes(
-				this.attributesMap, annotationType);
+				this.attributesMap, this.metaAnnotationMap, annotationType);
 		return AnnotationReadingVisitorUtils.convertClassValues(this.classLoader, raw, classValuesAsString);
 	}
 
