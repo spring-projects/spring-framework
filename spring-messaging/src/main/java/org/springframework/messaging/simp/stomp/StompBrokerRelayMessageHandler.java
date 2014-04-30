@@ -400,7 +400,11 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			if (sessionId == null || SystemStompConnectionHandler.SESSION_ID.equals(sessionId)) {
 				throw new MessageDeliveryException("Message broker is not active.");
 			}
-			if (logger.isDebugEnabled()) {
+			SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
+			if (messageType.equals(SimpMessageType.CONNECT) && logger.isErrorEnabled()) {
+				logger.error("Message broker is not active. Ignoring: " + message);
+			}
+			else if (logger.isDebugEnabled()) {
 				logger.debug("Message broker is not active. Ignoring: " + message);
 			}
 			return;
