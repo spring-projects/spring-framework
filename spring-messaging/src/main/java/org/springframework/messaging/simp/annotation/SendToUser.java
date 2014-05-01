@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,17 +26,16 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 
 /**
- * Annotation that can be used on methods processing an input message to indicate that the
- * method's return value should be converted to a {@link Message} and sent to the
- * specified destination with the prefix <code>"/user/{username}"</code> automatically
- * prepended with the user information expected to be the input message header
- * {@link SimpMessageHeaderAccessor#USER_HEADER}. Such user destinations may need to be
- * further resolved to actual destinations.
+ * Annotation that indicates the return value of a message-handling method should
+ * be sent as a {@link org.springframework.messaging.Message} to the specified
+ * destination(s) prepended with {@code "/user/{username}"} where the user
+ * name is extracted from the headers of the input message being handled.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
- * @see org.springframework.messaging.handler.annotation.SendTo
+ * @see org.springframework.messaging.simp.annotation.support.SendToMethodReturnValueHandler
  * @see org.springframework.messaging.simp.user.UserDestinationMessageHandler
+ * @see org.springframework.messaging.simp.SimpMessageHeaderAccessor#getUser()
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
@@ -44,15 +43,20 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 public @interface SendToUser {
 
 	/**
-	 * The destination for a message based on the return value of a method.
+	 * One or more destinations to send a message to. If left unspecified, a
+	 * default destination is selected based on the destination of the input
+	 * message being handled.
+	 * @see org.springframework.messaging.simp.annotation.support.SendToMethodReturnValueHandler
 	 */
 	String[] value() default {};
 
 	/**
-     * A flag indicating whether the message is to be sent to a particular user session.
-     *
+	 * Whether messages should be sent to all sessions associated with the user
+	 * or only to the session of the input message being handled.
+	 *
+	 * <p>By default this is set to {@code true} in which case messages are
+	 * broadcast to all sessions.
      */
-    boolean singleSession() default false;
-
+    boolean broadcast() default true;
 
 }

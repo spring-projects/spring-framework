@@ -102,14 +102,14 @@ public class SendToMethodReturnValueHandlerTests {
 
 		method = this.getClass().getDeclaredMethod("handleAndSendToUser");
 		this.sendToUserReturnType = new MethodParameter(method, -1);
-		
+
 		method = this.getClass().getDeclaredMethod("handleAndSendToUserSingleSession");
 		this.sendToUserSingleSessionReturnType = new MethodParameter(method, -1);
 
 		method = this.getClass().getDeclaredMethod("handleAndSendToUserDefaultDestination");
 		this.sendToUserDefaultDestReturnType = new MethodParameter(method, -1);
-		
-		method = this.getClass().getDeclaredMethod("handleAndSendToUserSingleSessionDefaultDestination");
+
+		method = this.getClass().getDeclaredMethod("handleAndSendToUserDefaultDestinationSingleSession");
 		this.sendToUserSingleSessionDefaultDestReturnType = new MethodParameter(method, -1);
 	}
 
@@ -231,7 +231,7 @@ public class SendToMethodReturnValueHandlerTests {
 		assertNull(headers.getSubscriptionId());
 		assertEquals("/user/" + user.getName() + "/dest2", headers.getDestination());
 	}
-	
+
 	@Test
 	public void sendToUserSingleSession() throws Exception {
 
@@ -239,8 +239,8 @@ public class SendToMethodReturnValueHandlerTests {
 
 		String sessionId = "sess1";
 		TestUser user = new TestUser();
-		Message<?> inputMessage = createInputMessage(sessionId, "sub1", null, user);
-		this.handler.handleReturnValue(payloadContent, this.sendToUserSingleSessionReturnType, inputMessage);
+		Message<?> inputMessage = createInputMessage(sessionId, "sub1", null, null, user);
+		this.handler.handleReturnValue(PAYLOAD, this.sendToUserSingleSessionReturnType, inputMessage);
 
 		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
 
@@ -296,7 +296,7 @@ public class SendToMethodReturnValueHandlerTests {
 		assertNull(headers.getSubscriptionId());
 		assertEquals("/user/" + user.getName() + "/queue/dest", headers.getDestination());
 	}
-	
+
 	@Test
 	public void sendToUserDefaultDestinationSingleSession() throws Exception {
 
@@ -304,8 +304,8 @@ public class SendToMethodReturnValueHandlerTests {
 
 		String sessionId = "sess1";
 		TestUser user = new TestUser();
-		Message<?> inputMessage = createInputMessage(sessionId, "sub1", "/dest", user);
-		this.handler.handleReturnValue(payloadContent, this.sendToUserSingleSessionDefaultDestReturnType, inputMessage);
+		Message<?> inputMessage = createInputMessage(sessionId, "sub1", "/app", "/dest", user);
+		this.handler.handleReturnValue(PAYLOAD, this.sendToUserSingleSessionDefaultDestReturnType, inputMessage);
 
 		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
 
@@ -328,16 +328,8 @@ public class SendToMethodReturnValueHandlerTests {
 
 		handler.handleReturnValue(PAYLOAD, this.sendToUserDefaultDestReturnType, inputMessage);
 
-		ArgumentCaptor<MessageHeaders> captor = ArgumentCaptor.forClass(MessageHeaders.class);
-		verify(messagingTemplate).convertAndSendToUser(eq("joe"), eq("/queue/dest"), eq(PAYLOAD), captor.capture());
-
-		SimpMessageHeaderAccessor headerAccessor =
-				MessageHeaderAccessor.getAccessor(captor.getValue(), SimpMessageHeaderAccessor.class);
-
-		assertNotNull(headerAccessor);
-		assertTrue(headerAccessor.isMutable());
-		assertEquals("sess1", headerAccessor.getSessionId());
-		assertNull("Subscription id should not be copied", headerAccessor.getSubscriptionId());
+		verify(messagingTemplate).convertAndSendToUser(eq("joe"), eq("/queue/dest"), eq(PAYLOAD));
+		verifyNoMoreInteractions(messagingTemplate);
 	}
 
 
@@ -376,38 +368,45 @@ public class SendToMethodReturnValueHandlerTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	public String handleNoAnnotations() {
 		return PAYLOAD;
 	}
 
+	@SuppressWarnings("unused")
 	@SendTo
 	public String handleAndSendToDefaultDestination() {
 		return PAYLOAD;
 	}
 
+	@SuppressWarnings("unused")
 	@SendTo({"/dest1", "/dest2"})
 	public String handleAndSendTo() {
 		return PAYLOAD;
 	}
 
+	@SuppressWarnings("unused")
 	@SendToUser
 	public String handleAndSendToUserDefaultDestination() {
 		return PAYLOAD;
 	}
-	
-	@SendToUser(singleSession=true)
-	public String handleAndSendToUserSingleSessionDefaultDestination() {
-		return payloadContent;
+
+	@SuppressWarnings("unused")
+	@SendToUser(broadcast=false)
+	public String handleAndSendToUserDefaultDestinationSingleSession() {
+		return PAYLOAD;
 	}
 
+	@SuppressWarnings("unused")
 	@SendToUser({"/dest1", "/dest2"})
 	public String handleAndSendToUser() {
 		return PAYLOAD;
 	}
-	
-	@SendToUser(value={"/dest1", "/dest2"}, singleSession=true)
+
+	@SuppressWarnings("unused")
+	@SendToUser(value={"/dest1", "/dest2"}, broadcast=false)
 	public String handleAndSendToUserSingleSession() {
-		return payloadContent;
+		return PAYLOAD;
 	}
 
 }
