@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,8 @@ public class ContentNegotiationManagerFactoryBean
 	private boolean ignoreAcceptHeader = false;
 
 	private Map<String, MediaType> mediaTypes = new HashMap<String, MediaType>();
+
+	private boolean ignoreUnknownPathExtensions = true;
 
 	private Boolean useJaf;
 
@@ -114,6 +116,17 @@ public class ContentNegotiationManagerFactoryBean
 		if (mediaTypes != null) {
 			this.mediaTypes.putAll(mediaTypes);
 		}
+	}
+
+	/**
+	 * Whether to ignore requests that have a file extension that does not match
+	 * any mapped media types. Setting this to {@code false} will result in a
+	 * {@code HttpMediaTypeNotAcceptableException} when there is no match.
+	 *
+	 * <p>By default this is set to {@code true}.
+	 */
+	public void setIgnoreUnknownPathExtensions(boolean ignoreUnknownPathExtensions) {
+		this.ignoreUnknownPathExtensions = ignoreUnknownPathExtensions;
 	}
 
 	/**
@@ -191,6 +204,7 @@ public class ContentNegotiationManagerFactoryBean
 			} else {
 				strategy = new PathExtensionContentNegotiationStrategy(this.mediaTypes);
 			}
+			strategy.setIgnoreUnknownExtensions(this.ignoreUnknownPathExtensions);
 			if (this.useJaf != null) {
 				strategy.setUseJaf(this.useJaf);
 			}

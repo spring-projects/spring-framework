@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import javax.servlet.ServletContext;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
@@ -64,7 +65,9 @@ public class ServletPathExtensionContentNegotiationStrategy extends PathExtensio
 	 * and if that doesn't help, delegate to the parent implementation.
 	 */
 	@Override
-	protected MediaType handleNoMatch(NativeWebRequest webRequest, String extension) {
+	protected MediaType handleNoMatch(NativeWebRequest webRequest, String extension)
+			throws HttpMediaTypeNotAcceptableException {
+
 		MediaType mediaType = null;
 		if (this.servletContext != null) {
 			String mimeType = this.servletContext.getMimeType("file." + extension);

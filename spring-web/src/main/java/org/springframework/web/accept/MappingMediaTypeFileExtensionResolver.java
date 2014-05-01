@@ -16,6 +16,7 @@
 
 package org.springframework.web.accept;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,6 +60,7 @@ public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExten
 		}
 	}
 
+
 	/**
 	 * Find the file extensions mapped to the given MediaType.
 	 * @return 0 or more extensions, never {@code null}
@@ -72,6 +74,10 @@ public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExten
 	@Override
 	public List<String> getAllFileExtensions() {
 		return Collections.unmodifiableList(this.allFileExtensions);
+	}
+
+	protected List<MediaType> getAllMediaTypes() {
+		return new ArrayList<MediaType>(this.mediaTypes.values());
 	}
 
 	/**
