@@ -59,41 +59,41 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	private static final long serialVersionUID = -8578554704772377436L;
 
-	private static final String ACCEPT = "Accept";
+	public static final String ACCEPT = "Accept";
 
-	private static final String ACCEPT_CHARSET = "Accept-Charset";
+	public static final String ACCEPT_CHARSET = "Accept-Charset";
 
-	private static final String ALLOW = "Allow";
+	public static final String ALLOW = "Allow";
 
-	private static final String CACHE_CONTROL = "Cache-Control";
+	public static final String CACHE_CONTROL = "Cache-Control";
 
-	private static final String CONNECTION = "Connection";
+	public static final String CONNECTION = "Connection";
 
-	private static final String CONTENT_DISPOSITION = "Content-Disposition";
+	public static final String CONTENT_DISPOSITION = "Content-Disposition";
 
-	private static final String CONTENT_LENGTH = "Content-Length";
+	public static final String CONTENT_LENGTH = "Content-Length";
 
-	private static final String CONTENT_TYPE = "Content-Type";
+	public static final String CONTENT_TYPE = "Content-Type";
 
-	private static final String DATE = "Date";
+	public static final String DATE = "Date";
 
-	private static final String ETAG = "ETag";
+	public static final String ETAG = "ETag";
 
-	private static final String EXPIRES = "Expires";
+	public static final String EXPIRES = "Expires";
 
-	private static final String IF_MODIFIED_SINCE = "If-Modified-Since";
+	public static final String IF_MODIFIED_SINCE = "If-Modified-Since";
 
-	private static final String IF_NONE_MATCH = "If-None-Match";
+	public static final String IF_NONE_MATCH = "If-None-Match";
 
-	private static final String LAST_MODIFIED = "Last-Modified";
+	public static final String LAST_MODIFIED = "Last-Modified";
 
-	private static final String LOCATION = "Location";
+	public static final String LOCATION = "Location";
 
-	private static final String ORIGIN = "Origin";
+	public static final String ORIGIN = "Origin";
 
-	private static final String PRAGMA = "Pragma";
+	public static final String PRAGMA = "Pragma";
 
-	private static final String UPGRADE = "Upgrade";
+	public static final String UPGRADE = "Upgrade";
 
 
 	private static final String[] DATE_FORMATS = new String[] {
