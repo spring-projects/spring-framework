@@ -50,7 +50,7 @@ public class ListenableFutureReturnValueHandler implements HandlerMethodReturnVa
 			return;
 		}
 
-		DeferredResult<Object> deferredResult = new DeferredResult<Object>();
+		final DeferredResult<Object> deferredResult = new DeferredResult<Object>();
 		WebAsyncUtils.getAsyncManager(webRequest).startDeferredResultProcessing(deferredResult, mavContainer);
 
 		ListenableFuture<?> future = (ListenableFuture<?>) returnValue;
