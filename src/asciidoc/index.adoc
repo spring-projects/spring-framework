@@ -29143,6 +29143,8 @@ The following are the supported return types:
   asynchronously in a thread managed by Spring MVC.
 * A `DeferredResult<?>` can be returned when the application wants to produce the return
   value from a thread of its own choosing.
+* A `ListenableFuture<?>` can be returned when the application wants to produce the return
+  value from a thread of its own choosing.
 * Any other return type is considered to be a single model attribute to be exposed to
   the view, using the attribute name specified through `@ModelAttribute` at the method
   level (or the default attribute name based on the return type class name). The model

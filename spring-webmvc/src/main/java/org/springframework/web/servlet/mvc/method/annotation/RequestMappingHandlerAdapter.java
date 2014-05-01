@@ -588,6 +588,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		handlers.add(new CallableMethodReturnValueHandler());
 		handlers.add(new DeferredResultMethodReturnValueHandler());
 		handlers.add(new AsyncTaskMethodReturnValueHandler(this.beanFactory));
+		handlers.add(new ListenableFutureReturnValueHandler());
 
 		// Annotation-based return value types
 		handlers.add(new ModelAttributeMethodProcessor(false));

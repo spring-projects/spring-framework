@@ -204,6 +204,9 @@ import java.util.concurrent.Callable;
  * <li>A {@link org.springframework.web.context.request.async.DeferredResult}
  * which the application uses to produce a return value in a separate
  * thread of its own choosing, as an alternative to returning a Callable.
+ * <li>A {@link org.springframework.util.concurrent.ListenableFuture}
+ * which the application uses to produce a return value in a separate
+ * thread of its own choosing, as an alternative to returning a Callable.
  * <li>{@code void} if the method handles the response itself (by
  * writing the response content directly, declaring an argument of type
  * {@link javax.servlet.ServletResponse} / {@link javax.servlet.http.HttpServletResponse}
