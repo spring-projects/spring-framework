@@ -16,9 +16,6 @@
 
 package org.springframework.messaging.simp.annotation.support;
 
-import java.lang.annotation.Annotation;
-import java.security.Principal;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.messaging.Message;
@@ -35,6 +32,9 @@ import org.springframework.messaging.simp.user.DestinationUserNameProvider;
 import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+
+import java.lang.annotation.Annotation;
+import java.security.Principal;
 
 /**
  * A {@link HandlerMethodReturnValueHandler} for sending to destinations specified in a
@@ -148,7 +148,12 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 			String user = getUserName(message, headers);
 			String[] destinations = getTargetDestinations(sendToUser, message, this.defaultUserDestinationPrefix);
 			for (String destination : destinations) {
-				this.messagingTemplate.convertAndSendToUser(user, destination, returnValue, createHeaders(sessionId));
+				if (sendToUser.broadcast()) {
+					this.messagingTemplate.convertAndSendToUser(user, destination, returnValue);
+				}
+				else {
+					this.messagingTemplate.convertAndSendToUser(user, destination, returnValue, createHeaders(sessionId));
+				}
 			}
 			return;
 		}

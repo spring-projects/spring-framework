@@ -123,6 +123,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(headers);
 		String destination = SimpMessageHeaderAccessor.getDestination(headers);
 		Principal principal = SimpMessageHeaderAccessor.getUser(headers);
+		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 
 		String destinationWithoutPrefix;
 		String subscribeDestination;
@@ -137,7 +138,6 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 				logger.error("Ignoring message, no principal info available");
 				return null;
 			}
-			String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 			if (sessionId == null) {
 				logger.error("Ignoring message, no session id available");
 				return null;
@@ -158,7 +158,8 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 			subscribeDestination = this.destinationPrefix.substring(0, startIndex-1) + destinationWithoutPrefix;
 			user = destination.substring(startIndex, endIndex);
 			user = StringUtils.replace(user, "%2F", "/");
-			sessionIds = this.userSessionRegistry.getSessionIds(user);
+			sessionIds = (sessionId != null ?
+					Collections.singleton(sessionId) : this.userSessionRegistry.getSessionIds(user));
 		}
 		else {
 			if (logger.isTraceEnabled()) {
