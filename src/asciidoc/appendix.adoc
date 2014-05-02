@@ -3579,7 +3579,7 @@ custom element, as we can see in the next step
 
 
 [[extensible-xml-parser]]
-=== nDefinitionParser
+=== BeanDefinitionParser
 
 A `BeanDefinitionParser` will be used if the `NamespaceHandler` encounters an XML
 element of the type that has been mapped to the specific bean definition parser (which
