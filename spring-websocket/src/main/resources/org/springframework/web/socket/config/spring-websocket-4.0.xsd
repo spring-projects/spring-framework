@@ -148,7 +148,7 @@
                 ]]></xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
-        <xsd:attribute name="stream-bytes-limit" type="xsd:long">
+        <xsd:attribute name="stream-bytes-limit" type="xsd:string">
             <xsd:annotation>
                 <xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
 	Minimum number of bytes that can be send over a single HTTP streaming request before it will be closed.
@@ -165,7 +165,7 @@
                 ]]></xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
-        <xsd:attribute name="heartbeat-time" type="xsd:long">
+        <xsd:attribute name="heartbeat-time" type="xsd:string">
             <xsd:annotation>
                 <xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
 	The amount of time in milliseconds when the server has not sent any messages and after which the server
@@ -174,7 +174,7 @@
                 ]]></xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
-        <xsd:attribute name="disconnect-delay" type="xsd:long">
+        <xsd:attribute name="disconnect-delay" type="xsd:string">
             <xsd:annotation>
                 <xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
 	The amount of time in milliseconds before a client is considered disconnected after not having
@@ -183,7 +183,7 @@
                 ]]></xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
-        <xsd:attribute name="message-cache-size" type="xsd:long">
+        <xsd:attribute name="message-cache-size" type="xsd:string">
             <xsd:annotation>
                 <xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
 	The number of server-to-client messages that a session can cache while waiting for
@@ -192,7 +192,7 @@
                 ]]></xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
-        <xsd:attribute name="websocket-enabled" type="xsd:boolean">
+        <xsd:attribute name="websocket-enabled" type="xsd:string">
             <xsd:annotation>
                 <xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
 	Some load balancers don't support websockets. Set this option to "false" to disable the WebSocket transport on the server side.
@@ -279,14 +279,14 @@
                 ]]></xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
-        <xsd:attribute name="heartbeat-send-interval" type="xsd:long">
+        <xsd:attribute name="heartbeat-send-interval" type="xsd:string">
             <xsd:annotation>
                 <xsd:documentation source="java:org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler"><![CDATA[
 	The interval, in milliseconds, at which the "system" connection will send heartbeats to the STOMP broker.
                 ]]></xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
-        <xsd:attribute name="heartbeat-receive-interval" type="xsd:long">
+        <xsd:attribute name="heartbeat-receive-interval" type="xsd:string">
             <xsd:annotation>
                 <xsd:documentation source="java:org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler"><![CDATA[
 	The interval, in milliseconds, at which the "system" connection expects to receive heartbeats from the STOMP broker.
@@ -343,7 +343,7 @@
 	Configuration for the ThreadPoolTaskExecutor that sends messages for the message channel.
                 ]]></xsd:documentation>
         </xsd:annotation>
-        <xsd:attribute name="core-pool-size" type="xsd:int" use="optional">
+        <xsd:attribute name="core-pool-size" type="xsd:string" use="optional">
             <xsd:annotation>
                 <xsd:documentation source="java:org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"><![CDATA[
 	Set the core pool size of the ThreadPoolExecutor.
@@ -356,7 +356,7 @@
                 ]]></xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
-        <xsd:attribute name="max-pool-size" type="xsd:int" use="optional">
+        <xsd:attribute name="max-pool-size" type="xsd:string" use="optional">
             <xsd:annotation>
                 <xsd:documentation source="java:org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"><![CDATA[
 	 Set the max pool size of the ThreadPoolExecutor.
@@ -366,7 +366,7 @@
                 ]]></xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
-        <xsd:attribute name="keep-alive-seconds" type="xsd:int" use="optional">
+        <xsd:attribute name="keep-alive-seconds" type="xsd:string" use="optional">
             <xsd:annotation>
                 <xsd:documentation source="java:org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"><![CDATA[
 	 Set the time limit for which threads may remain idle before being terminated.
@@ -376,7 +376,7 @@
                 ]]></xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
-        <xsd:attribute name="queue-capacity" type="xsd:int" use="optional">
+        <xsd:attribute name="queue-capacity" type="xsd:string" use="optional">
             <xsd:annotation>
                 <xsd:documentation source="java:org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"><![CDATA[
 	 Set the queue capacity for the ThreadPoolExecutor.
