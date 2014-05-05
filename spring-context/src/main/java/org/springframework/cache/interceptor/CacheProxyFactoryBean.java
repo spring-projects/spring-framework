@@ -35,6 +35,7 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
  * of the Spring reference documentation for more information.
  *
  * @author Costin Leau
+ * @since 3.1
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see CacheInterceptor
  */

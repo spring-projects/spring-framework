@@ -28,6 +28,7 @@ import org.springframework.cache.CacheManager;
  * collection of name(s) against a given {@link CacheManager}.
  *
  * @author Stephane Nicoll
+ * @since 4.1
  */
 public class NamedCacheResolver extends BaseCacheResolver {
 

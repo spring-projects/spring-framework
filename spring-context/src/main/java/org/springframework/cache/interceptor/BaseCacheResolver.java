@@ -31,6 +31,7 @@ import org.springframework.util.Assert;
  * invocation context.
  *
  * @author Stephane Nicoll
+ * @since 4.1
  */
 public abstract class BaseCacheResolver implements CacheResolver, InitializingBean {
 
