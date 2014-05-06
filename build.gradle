@@ -578,7 +578,11 @@ project("spring-context-support") {
 		optional("org.apache.velocity:velocity:1.7")
 		optional("org.freemarker:freemarker:2.3.20")
 		optional("com.lowagie:itext:2.1.7")
-		optional("net.sf.jasperreports:jasperreports:$jasperReportsVersion")
+		optional("net.sf.jasperreports:jasperreports:$jasperReportsVersion") {
+			exclude group: "com.fasterxml.jackson.core", module: "jackson-annotations"
+			exclude group: "com.fasterxml.jackson.core", module: "jackson-core"
+			exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
+		}
 		testCompile("org.apache.poi:poi:3.10-FINAL")
 		testCompile("commons-beanutils:commons-beanutils:1.8.0") // for Velocity/JasperReports
 		testCompile("commons-digester:commons-digester:1.8.1") // for Velocity/JasperReports
@@ -756,6 +760,9 @@ project("spring-webmvc") {
 		optional("com.lowagie:itext:2.1.7")
 		optional("net.sf.jasperreports:jasperreports:$jasperReportsVersion") {
 			exclude group: "xml-apis", module: "xml-apis"
+			exclude group: "com.fasterxml.jackson.core", module: "jackson-annotations"
+			exclude group: "com.fasterxml.jackson.core", module: "jackson-core"
+			exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
 		}
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("rome:rome:1.0")
