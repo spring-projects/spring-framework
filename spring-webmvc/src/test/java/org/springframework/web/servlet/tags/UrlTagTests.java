@@ -431,6 +431,42 @@ public class UrlTagTests extends AbstractTagTests {
 		assertTrue(usedParams.contains("name"));
 	}
 
+	// SPR-11401
+
+	public void testReplaceUriTemplateParamsTemplateWithPathSegment()
+			throws JspException {
+		List<Param> params = new LinkedList<Param>();
+		Set<String> usedParams = new HashSet<String>();
+
+		Param param = new Param();
+		param.setName("name");
+		param.setValue("my/Id");
+		params.add(param);
+
+		String uri = tag.replaceUriTemplateParams("url/{/name}", params, usedParams);
+
+		assertEquals("url/my%2FId", uri);
+		assertEquals(1, usedParams.size());
+		assertTrue(usedParams.contains("name"));
+	}
+
+	public void testReplaceUriTemplateParamsTemplateWithPath()
+			throws JspException {
+		List<Param> params = new LinkedList<Param>();
+		Set<String> usedParams = new HashSet<String>();
+
+		Param param = new Param();
+		param.setName("name");
+		param.setValue("my/Id");
+		params.add(param);
+
+		String uri = tag.replaceUriTemplateParams("url/{name}", params, usedParams);
+
+		assertEquals("url/my/Id", uri);
+		assertEquals(1, usedParams.size());
+		assertTrue(usedParams.contains("name"));
+	}
+
 	public void testCreateUrlRemoteServer() throws JspException {
 		tag.setValue("http://www.springframework.org/");
 
