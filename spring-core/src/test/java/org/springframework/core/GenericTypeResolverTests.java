@@ -16,6 +16,7 @@
 
 package org.springframework.core;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -166,10 +167,20 @@ public class GenericTypeResolverTests {
 	public void getGenericsOnArrayFromReturnCannotBeResolved() throws Exception {
 		// SPR-11044
 		Class<?> resolved = GenericTypeResolver.resolveReturnType(
-				WithArrayBase.class.getDeclaredMethod("array", Object[].class),
-				WithArray.class);
+				WithArrayBase.class.getDeclaredMethod("array", Object[].class), WithArray.class);
 		assertThat(resolved, equalTo((Class) Object[].class));
 	}
+
+	@Test
+	public void resolveIncompleteTypeVariables() {
+		// SPR-11763
+		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(IdFixingRepository.class, Repository.class);
+		assertNotNull(resolved);
+		assertEquals(2, resolved.length);
+		assertEquals(Object.class, resolved[0]);
+		assertEquals(Long.class, resolved[1]);
+	}
+
 
 	public interface MyInterfaceType<T> {
 	}
@@ -312,6 +323,12 @@ public class GenericTypeResolverTests {
 	}
 
 	static abstract class WithArray<T> extends WithArrayBase<T> {
+	}
+
+	interface Repository<T, ID extends Serializable> {
+	}
+
+	interface IdFixingRepository<T> extends Repository<T, Long> {
 	}
 
 }

@@ -416,7 +416,24 @@ public final class ResolvableType implements Serializable {
 	}
 
 	/**
-	 * Determine whether the underlying type has unresolvable generics:
+	 * Return {@code true} if this type contains unresolvable generics only,
+	 * that is, no substitute for any of its declared type variables.
+	 */
+	boolean isEntirelyUnresolvable() {
+		if (this == NONE) {
+			return false;
+		}
+		ResolvableType[] generics = getGenerics();
+		for (ResolvableType generic : generics) {
+			if (!generic.isUnresolvableTypeVariable() && !generic.isWildcardWithoutBounds()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Determine whether the underlying type has any unresolvable generics:
 	 * either through an unresolvable type variable on the type itself
 	 * or through implementing a generic interface in a raw fashion,
 	 * i.e. without substituting that interface's type variables.
@@ -634,8 +651,8 @@ public final class ResolvableType implements Serializable {
 	/**
 	 * Convenience method that will {@link #getGeneric(int...) get} and
 	 * {@link #resolve() resolve} a specific generic parameters.
-	 * @param indexes the indexes that refer to the generic parameter (may be omitted to
-	 * return the first generic)
+	 * @param indexes the indexes that refer to the generic parameter
+	 * (may be omitted to return the first generic)
 	 * @return a resolved {@link Class} or {@code null}
 	 * @see #getGeneric(int...)
 	 * @see #resolve()
@@ -645,11 +662,11 @@ public final class ResolvableType implements Serializable {
 	}
 
 	/**
-	 * Resolve this type to a {@link java.lang.Class}, returning {@code null} if the type
-	 * cannot be resolved. This method will consider bounds of {@link TypeVariable}s and
-	 * {@link WildcardType}s if direct resolution fails; however, bounds of
-	 * {@code Object.class} will be ignored.
-	 * @return the resolved {@link Class} or {@code null}
+	 * Resolve this type to a {@link java.lang.Class}, returning {@code null}
+	 * if the type cannot be resolved. This method will consider bounds of
+	 * {@link TypeVariable}s and {@link WildcardType}s if direct resolution fails;
+	 * however, bounds of {@code Object.class} will be ignored.
+	 * @return the resolved {@link Class}, or {@code null} if not resolvable
 	 * @see #resolve(Class)
 	 * @see #resolveGeneric(int...)
 	 * @see #resolveGenerics()
