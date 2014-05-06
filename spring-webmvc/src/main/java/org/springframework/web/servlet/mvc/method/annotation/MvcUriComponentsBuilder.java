@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
@@ -29,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.cglib.core.SpringNamingPolicy;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.Enhancer;
@@ -50,9 +52,11 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.RequestParamMethodArgumentResolver;
 import org.springframework.web.method.support.CompositeUriComponentsContributor;
 import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -196,6 +200,43 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	}
 
 	/**
+	 * Create a {@link UriComponentsBuilder} from a request mapping identified
+	 * by name. The configured
+	 * {@link org.springframework.web.servlet.handler.HandlerMethodMappingNamingStrategy
+	 * HandlerMethodMappingNamingStrategy} assigns a default name to every
+	 * {@code @RequestMapping} method but an explicit name may also be assigned
+	 * through the {@code @RequestMapping} name attribute.
+	 *
+	 * <p>This is intended for use in EL expressions, typically in JSPs or other
+	 * view templates, which can use the convenience method:
+	 * {@link org.springframework.web.servlet.support.RequestContext#getMvcUrl(String, Object...)
+	 * RequestContext.getMvcUrl(String, Object...)}).
+	 *
+	 * <p>The default naming convention for mappings is based on the capital
+	 * letters of the class name, followed by "#" as a separator, and the method
+	 * name. For example "TC#getFoo" for a class named TestController with method
+	 * getFoo. Use explicit names where the naming convention does not produce
+	 * unique results.
+	 *
+	 * @param name the mapping name
+	 * @param argumentValues argument values for the controller method; those values
+	 * 	are important for {@code @RequestParam} and {@code @PathVariable} arguments
+	 * 	but may be passed as {@code null} otherwise.
+	 *
+	 * @return the UriComponentsBuilder
+	 *
+	 * @throws java.lang.IllegalStateException if the mapping name is not found
+	 * 	or there is no unique match
+	 */
+	public static UriComponentsBuilder fromMappingName(String name, Object... argumentValues) {
+		RequestMappingInfoHandlerMapping hm = getRequestMappingInfoHandlerMapping();
+		List<HandlerMethod> handlerMethods = hm.getHandlerMethodsForMappingName(name);
+		Assert.state(handlerMethods != null, "Mapping name not found: " + name);
+		Assert.state(handlerMethods.size() == 1, "No unique match for mapping name " + name + ": " + handlerMethods);
+		return fromMethod(handlerMethods.get(0).getMethod(), argumentValues);
+	}
+
+	/**
 	 * Create a {@link UriComponentsBuilder} from the mapping of a controller method
 	 * and an array of method argument values. The array of values  must match the
 	 * signature of the controller method. Values for {@code @RequestParam} and
@@ -263,6 +304,37 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	}
 
 	protected static CompositeUriComponentsContributor getConfiguredUriComponentsContributor() {
+		WebApplicationContext wac = getWebApplicationContext();
+		if (wac == null) {
+			return null;
+		}
+		try {
+			return wac.getBean(MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME, CompositeUriComponentsContributor.class);
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("No CompositeUriComponentsContributor bean with name '" +
+						MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME + "'");
+			}
+			return null;
+		}
+	}
+
+	protected static RequestMappingInfoHandlerMapping getRequestMappingInfoHandlerMapping() {
+		WebApplicationContext wac = getWebApplicationContext();
+		Assert.notNull(wac, "Cannot lookup handler method mappings without WebApplicationContext");
+		try {
+			return wac.getBean(RequestMappingInfoHandlerMapping.class);
+		}
+		catch (NoUniqueBeanDefinitionException ex) {
+			throw new IllegalStateException("More than one RequestMappingInfoHandlerMapping beans found", ex);
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			throw new IllegalStateException("No RequestMappingInfoHandlerMapping bean", ex);
+		}
+	}
+
+	private static WebApplicationContext getWebApplicationContext() {
 		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
 		if (requestAttributes == null) {
 			logger.debug("No request bound to the current thread: is DispatcherSerlvet used?");
@@ -281,17 +353,7 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 			logger.debug("No WebApplicationContext found: not in a DispatcherServlet request?");
 			return null;
 		}
-
-		try {
-			return wac.getBean(MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME, CompositeUriComponentsContributor.class);
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("No CompositeUriComponentsContributor bean with name '" +
-						MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME + "'");
-			}
-			return null;
-		}
+		return wac;
 	}
 
 	/**

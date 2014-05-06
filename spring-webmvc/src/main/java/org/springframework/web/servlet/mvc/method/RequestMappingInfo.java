@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.method;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.mvc.condition.ConsumesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition;
 import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
@@ -45,6 +46,8 @@ import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondit
  */
 public final class RequestMappingInfo implements RequestCondition<RequestMappingInfo> {
 
+	private final String name;
+
 	private final PatternsRequestCondition patternsCondition;
 
 	private final RequestMethodsRequestCondition methodsCondition;
@@ -60,13 +63,11 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	private final RequestConditionHolder customConditionHolder;
 
 
-	/**
-	 * Creates a new instance with the given request conditions.
-	 */
-	public RequestMappingInfo(PatternsRequestCondition patterns, RequestMethodsRequestCondition methods,
+	public RequestMappingInfo(String name, PatternsRequestCondition patterns, RequestMethodsRequestCondition methods,
 			ParamsRequestCondition params, HeadersRequestCondition headers, ConsumesRequestCondition consumes,
 			ProducesRequestCondition produces, RequestCondition<?> custom) {
 
+		this.name = (StringUtils.hasText(name) ? name : null);
 		this.patternsCondition = (patterns != null ? patterns : new PatternsRequestCondition());
 		this.methodsCondition = (methods != null ? methods : new RequestMethodsRequestCondition());
 		this.paramsCondition = (params != null ? params : new ParamsRequestCondition());
@@ -77,13 +78,30 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	}
 
 	/**
+	 * Creates a new instance with the given request conditions.
+	 */
+	public RequestMappingInfo(PatternsRequestCondition patterns, RequestMethodsRequestCondition methods,
+			ParamsRequestCondition params, HeadersRequestCondition headers, ConsumesRequestCondition consumes,
+			ProducesRequestCondition produces, RequestCondition<?> custom) {
+
+		this(null, patterns, methods, params, headers, consumes, produces, custom);
+	}
+
+	/**
 	 * Re-create a RequestMappingInfo with the given custom request condition.
 	 */
 	public RequestMappingInfo(RequestMappingInfo info, RequestCondition<?> customRequestCondition) {
-		this(info.patternsCondition, info.methodsCondition, info.paramsCondition, info.headersCondition,
+		this(info.name, info.patternsCondition, info.methodsCondition, info.paramsCondition, info.headersCondition,
 				info.consumesCondition, info.producesCondition, customRequestCondition);
 	}
 
+
+	/**
+	 * Return the name for this mapping, or {@code null}.
+	 */
+	public String getName() {
+		return this.name;
+	}
 
 	/**
 	 * Returns the URL patterns of this {@link RequestMappingInfo};
@@ -148,6 +166,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 */
 	@Override
 	public RequestMappingInfo combine(RequestMappingInfo other) {
+		String name = combineNames(other);
 		PatternsRequestCondition patterns = this.patternsCondition.combine(other.patternsCondition);
 		RequestMethodsRequestCondition methods = this.methodsCondition.combine(other.methodsCondition);
 		ParamsRequestCondition params = this.paramsCondition.combine(other.paramsCondition);
@@ -156,7 +175,21 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		ProducesRequestCondition produces = this.producesCondition.combine(other.producesCondition);
 		RequestConditionHolder custom = this.customConditionHolder.combine(other.customConditionHolder);
 
-		return new RequestMappingInfo(patterns, methods, params, headers, consumes, produces, custom.getCondition());
+		return new RequestMappingInfo(name, patterns,
+				methods, params, headers, consumes, produces, custom.getCondition());
+	}
+
+	private String combineNames(RequestMappingInfo other) {
+		if (this.name != null && other.name != null) {
+			String separator = RequestMappingInfoHandlerMethodMappingNamingStrategy.SEPARATOR;
+			return this.name + separator + other.name;
+		}
+		else if (this.name != null) {
+			return this.name;
+		}
+		else {
+			return (other.name != null ? other.name : null);
+		}
 	}
 
 	/**
@@ -188,7 +221,8 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 			return null;
 		}
 
-		return new RequestMappingInfo(patterns, methods, params, headers, consumes, produces, custom.getCondition());
+		return new RequestMappingInfo(this.name, patterns,
+				methods, params, headers, consumes, produces, custom.getCondition());
 	}
 
 

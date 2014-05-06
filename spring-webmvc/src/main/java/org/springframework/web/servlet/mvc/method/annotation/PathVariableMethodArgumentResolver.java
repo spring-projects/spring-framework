@@ -123,21 +123,32 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	}
 
 	@Override
-	public void contributeMethodArgument(MethodParameter parameter, Object value,
-			UriComponentsBuilder builder, Map<String, Object> uriVariables, ConversionService conversionService) {
+	public void contributeMethodArgument(MethodParameter param, Object value,
+			UriComponentsBuilder builder, Map<String, Object> uriVariables, ConversionService cs) {
 
-		if (Map.class.isAssignableFrom(parameter.getParameterType())) {
+		if (Map.class.isAssignableFrom(param.getParameterType())) {
 			return;
 		}
 
-		PathVariable annot = parameter.getParameterAnnotation(PathVariable.class);
-		String name = StringUtils.isEmpty(annot.value()) ? parameter.getParameterName() : annot.value();
-
-		if (conversionService != null) {
-			value = conversionService.convert(value, new TypeDescriptor(parameter), STRING_TYPE_DESCRIPTOR);
-		}
-
+		PathVariable annot = param.getParameterAnnotation(PathVariable.class);
+		String name = (StringUtils.isEmpty(annot.value()) ? param.getParameterName() : annot.value());
+		value = formatUriValue(cs, new TypeDescriptor(param), value);
 		uriVariables.put(name, value);
+	}
+
+	protected String formatUriValue(ConversionService cs, TypeDescriptor sourceType, Object value) {
+		if (value == null) {
+			return null;
+		}
+		else if (value instanceof String) {
+			return (String) value;
+		}
+		else if (cs != null) {
+			return (String) cs.convert(value, sourceType, STRING_TYPE_DESCRIPTOR);
+		}
+		else {
+			return value.toString();
+		}
 	}
 
 

@@ -234,6 +234,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	protected RequestMappingInfo createRequestMappingInfo(RequestMapping annotation, RequestCondition<?> customCondition) {
 		String[] patterns = resolveEmbeddedValuesInPatterns(annotation.value());
 		return new RequestMappingInfo(
+				annotation.name(),
 				new PatternsRequestCondition(patterns, getUrlPathHelper(), getPathMatcher(),
 						this.useSuffixPatternMatch, this.useTrailingSlashMatch, this.fileExtensions),
 				new RequestMethodsRequestCondition(annotation.method()),

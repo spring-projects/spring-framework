@@ -266,6 +266,18 @@ import java.util.concurrent.Callable;
 @Mapping
 public @interface RequestMapping {
 
+
+	/**
+	 * Assign a name to this mapping.
+	 * <p><b>Supported at the method and also at type level!</b>
+	 * When used on both levels, a combined name is derived by
+	 * concatenation with "#" as separator.
+	 *
+	 * @see org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder
+	 * @see org.springframework.web.servlet.handler.HandlerMethodMappingNamingStrategy
+	 */
+	String name() default "";
+
 	/**
 	 * The primary mapping expressed by this annotation.
 	 * <p>In a Servlet environment: the path mapping URIs (e.g. "/myPath.do").

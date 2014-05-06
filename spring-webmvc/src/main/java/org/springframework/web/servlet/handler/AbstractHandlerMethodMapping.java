@@ -71,9 +71,14 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 	private boolean detectHandlerMethodsInAncestorContexts = false;
 
+	private HandlerMethodMappingNamingStrategy<T> namingStrategy;
+
+
 	private final Map<T, HandlerMethod> handlerMethods = new LinkedHashMap<T, HandlerMethod>();
 
 	private final MultiValueMap<String, T> urlMap = new LinkedMultiValueMap<String, T>();
+
+	private final MultiValueMap<String, HandlerMethod> nameMap = new LinkedMultiValueMap<String, HandlerMethod>();
 
 
 	/**
@@ -89,10 +94,28 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	}
 
 	/**
+	 * Configure the naming strategy to use for assigning a default name to every
+	 * mapped handler method.
+	 *
+	 * @param namingStrategy strategy to use.
+	 */
+	public void setHandlerMethodMappingNamingStrategy(HandlerMethodMappingNamingStrategy<T> namingStrategy) {
+		this.namingStrategy = namingStrategy;
+	}
+
+	/**
 	 * Return a map with all handler methods and their mappings.
 	 */
 	public Map<T, HandlerMethod> getHandlerMethods() {
 		return Collections.unmodifiableMap(this.handlerMethods);
+	}
+
+	/**
+	 * Return the handler methods mapped to the mapping with the given name.
+	 * @param mappingName the mapping name
+	 */
+	public List<HandlerMethod> getHandlerMethodsForMappingName(String mappingName) {
+		return this.nameMap.get(mappingName);
 	}
 
 	/**
@@ -201,6 +224,34 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		for (String pattern : patterns) {
 			if (!getPathMatcher().isPattern(pattern)) {
 				this.urlMap.add(pattern, mapping);
+			}
+		}
+
+		if (this.namingStrategy != null) {
+			String name = this.namingStrategy.getName(newHandlerMethod, mapping);
+			updateNameMap(name, newHandlerMethod);
+		}
+	}
+
+	private void updateNameMap(String name, HandlerMethod newHandlerMethod) {
+
+		List<HandlerMethod> handlerMethods = this.nameMap.get(name);
+		if (handlerMethods != null) {
+			for (HandlerMethod handlerMethod : handlerMethods) {
+				if (handlerMethod.getMethod().equals(newHandlerMethod.getMethod())) {
+					logger.trace("Mapping name already registered. Multiple controller instances perhaps?");
+					return;
+				}
+			}
+		}
+
+		logger.trace("Mapping name=" + name);
+		this.nameMap.add(name, newHandlerMethod);
+
+		if (this.nameMap.get(name).size() > 1) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Mapping name clash for handlerMethods=" + this.nameMap.get(name) +
+						". Consider assigning explicit names.");
 			}
 		}
 	}
