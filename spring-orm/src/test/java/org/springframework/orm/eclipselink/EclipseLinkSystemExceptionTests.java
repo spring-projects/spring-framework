@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,27 @@
 
 package org.springframework.orm.eclipselink;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
 import org.eclipse.persistence.exceptions.DatabaseException;
 import org.hibernate.HibernateException;
+import org.junit.Test;
 
 /**
  * @author Jan Stamer
- * @since 3.2
  */
-public class EclipseLinkSytemExceptionTests extends TestCase {
+@SuppressWarnings("serial")
+public class EclipseLinkSystemExceptionTests {
 
-	public void testWithNull() {
+	@Test
+	public void withNull() {
 		EclipseLinkSystemException exception = new EclipseLinkSystemException(null);
 		assertNull(exception.getCause());
 		assertNull(exception.getMessage());
 	}
 
-	public void testCreateWithCause() {
+	@Test
+	public void createWithCause() {
 		DatabaseException dbExceptionWithCause = new DatabaseException("my custom exception cause") {
 		};
 		EclipseLinkSystemException elSystemException = new EclipseLinkSystemException(dbExceptionWithCause);
@@ -41,7 +44,8 @@ public class EclipseLinkSytemExceptionTests extends TestCase {
 		assertTrue(elSystemException.getMessage().contains("my custom exception cause"));
 	}
 
-	public void testCreateWithNullCause() throws HibernateException {
+	@Test
+	public void createWithNullCause() throws HibernateException {
 		DatabaseException dbExceptionWithCause = new DatabaseException((String) null) {
 		};
 		EclipseLinkSystemException elSystemException = new EclipseLinkSystemException(dbExceptionWithCause);

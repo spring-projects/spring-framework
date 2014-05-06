@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,29 @@
 
 package org.springframework.orm.eclipselink;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
 import org.eclipse.persistence.exceptions.DatabaseException;
-import org.springframework.dao.DataAccessException;
+import org.junit.Test;
 
 /**
  * @author Jan Stamer
- * @since 3.2
  */
-public class EclipseLinkExceptionTranslatorTests extends TestCase {
+public class EclipseLinkExceptionTranslatorTests {
 
-	public void testWithWrongException() {
+	@Test
+	public void wrongException() {
 		EclipseLinkExceptionTranslator exceptionTranslator = new EclipseLinkExceptionTranslator();
 		assertNull(exceptionTranslator.translateExceptionIfPossible(new IllegalArgumentException()));
 	}
 
-	public void testWithEclipseLinkException() {
+	@SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+	@Test
+	public void eclipseLinkException() {
 		EclipseLinkExceptionTranslator exceptionTranslator = new EclipseLinkExceptionTranslator();
 		assertNotNull(exceptionTranslator.translateExceptionIfPossible(DatabaseException.databaseAccessorNotConnected()));
-		assertTrue(exceptionTranslator.translateExceptionIfPossible(DatabaseException.databaseAccessorNotConnected()) instanceof DataAccessException);
+		assertNotNull(exceptionTranslator.translateExceptionIfPossible(
+				DatabaseException.databaseAccessorNotConnected()));
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
  * instances to Spring's {@link DataAccessException} hierarchy.
  *
  * @author Jan Stamer
- * @since 3.2
+ * @since 4.1
  * @see org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor
  */
 public class EclipseLinkExceptionTranslator implements PersistenceExceptionTranslator {
@@ -42,7 +42,7 @@ public class EclipseLinkExceptionTranslator implements PersistenceExceptionTrans
 	 * the {@code org.springframework.dao} hierarchy.
 	 * @param ex EclipseLinkException that occurred
 	 * @return a corresponding DataAccessException
-	 * @see SessionFactoryUtils#convertEclipseLinkAccessException
+	 * @see EclipseLinkUtils#convertEclipseLinkAccessException
 	 */
 	protected DataAccessException convertEclipseLinkAccessException(EclipseLinkException ex) {
 		return EclipseLinkUtils.convertEclipseLinkAccessException(ex);

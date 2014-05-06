@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,25 @@
 
 package org.springframework.orm.eclipselink;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
 import org.eclipse.persistence.exceptions.DatabaseException;
-import org.springframework.dao.DataAccessException;
+import org.junit.Test;
 
 /**
  * @author Jan Stamer
- * @since 3.2
  */
-public class EclipseLinkUtilsTests extends TestCase {
+public class EclipseLinkUtilsTests {
 
-	public void testWithNull() {
-		assertTrue(EclipseLinkUtils.convertEclipseLinkAccessException(null) instanceof DataAccessException);
+	@Test
+	public void withNull() {
+		assertNotNull(EclipseLinkUtils.convertEclipseLinkAccessException(null));
 	}
 
+	@Test
 	public void testWithEclipseLinkException() {
-		assertTrue(EclipseLinkUtils.convertEclipseLinkAccessException(DatabaseException.databaseAccessorNotConnected()) instanceof DataAccessException);
+		assertNotNull(EclipseLinkUtils.convertEclipseLinkAccessException(
+				DatabaseException.databaseAccessorNotConnected()));
 	}
 
 }
