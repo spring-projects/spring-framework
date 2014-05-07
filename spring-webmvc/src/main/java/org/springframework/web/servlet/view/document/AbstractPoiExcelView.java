@@ -104,7 +104,19 @@ public abstract class AbstractPoiExcelView<T extends Workbook> extends AbstractV
             Map<String, Object> model, T workbook, HttpServletRequest request, HttpServletResponse response)
             throws Exception;
 
+    /**
+     * Create new an Excel Workbook document
+     *
+     * @return workbook
+     */
     protected abstract T createWorkbook();
 
+    /**
+     * Create new an Excel Workbook document from template document
+     *
+     * @param resource template document resource
+     *
+     * @return workbook
+     */
     protected abstract T createWorkbookFromTemplate(Resource resource) throws IOException;
 }

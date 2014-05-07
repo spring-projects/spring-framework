@@ -95,7 +95,7 @@ public abstract class AbstractExcelView extends AbstractPoiExcelView<HSSFWorkboo
 
 	/**
 	 * Default Constructor.
-	 * Sets the content type of the view to "application/vnd.ms-excel".
+	 * Sets the content type of the view to "application/vnd.ms-excel" and extension to ".xls".
 	 */
 	public AbstractExcelView() {
 		setContentType(CONTENT_TYPE);
