@@ -24,6 +24,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 
 /**
@@ -460,6 +461,46 @@ public interface RestOperations {
 	 */
 	<T> ResponseEntity<T> exchange(URI url, HttpMethod method, HttpEntity<?> requestEntity,
 			ParameterizedTypeReference<T> responseType) throws RestClientException;
+
+	/**
+	 * Execute the HTTP method and URL of the {@link RequestEntity}, writing it to the
+	 * request, and returns the response as {@link ResponseEntity}. Typically used in
+	 * combination with the static builder methods on {@code RequestEntity}, for instance:
+	 *
+	 * <pre class="code">
+	 * MyRequest body = ...
+	 * RequestEntity request = RequestEntity.post(&quot;http://example.com/{foo}&quot;, &quot;bar&quot;).accept(MediaType.APPLICATION_JSON).body(body);
+	 * ResponseEntity&lt;MyResponse&gt; response = template.exchange(request, MyResponse.class);
+	 * </pre>
+	 *
+	 * @param requestEntity the entity to write to the request
+	 * @param responseType the type of the return value
+	 * @return the response as entity
+	 * @since 4.1
+	 */
+	<T> ResponseEntity<T> exchange(RequestEntity<?> requestEntity,
+			Class<T> responseType) throws RestClientException;
+
+	/**
+	 * Execute the HTTP method and URL of the {@link RequestEntity}, writing it to the
+	 * request, and returns the response as {@link ResponseEntity}.
+	 * The given {@link ParameterizedTypeReference} is used to pass generic type information:
+	 *
+	 * <pre class="code">
+	 * MyRequest body = ...
+	 * RequestEntity request = RequestEntity.post(&quot;http://example.com/{foo}&quot;, &quot;bar&quot;).accept(MediaType.APPLICATION_JSON).body(body);
+	 * ParameterizedTypeReference&lt;List&lt;MyResponse&gt;&gt; myBean = new ParameterizedTypeReference&lt;List&lt;MyResponse&gt;&gt;() {};
+	 * ResponseEntity&lt;List&lt;MyResponse&gt;&gt; response = template.exchange(request, myBean);
+	 * </pre>
+	 *
+	 * @param requestEntity the entity to write to the request
+	 * @param responseType the type of the return value
+	 * @return the response as entity
+	 * @since 4.1
+	 */
+	<T> ResponseEntity<T> exchange(RequestEntity<?> requestEntity,
+			ParameterizedTypeReference<T> responseType) throws RestClientException;
+
 
 	// general execution
 

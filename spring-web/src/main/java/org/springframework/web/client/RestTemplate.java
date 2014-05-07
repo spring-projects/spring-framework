@@ -31,6 +31,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -492,6 +493,28 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(type);
 		return execute(url, method, requestCallback, responseExtractor);
 	}
+
+	@Override
+	public <T> ResponseEntity<T> exchange(RequestEntity<?> requestEntity,
+			Class<T> responseType) throws RestClientException {
+		Assert.notNull(requestEntity, "'requestEntity' must not be null");
+
+		RequestCallback requestCallback = httpEntityCallback(requestEntity, responseType);
+		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
+		return execute(requestEntity.getUrl(), requestEntity.getMethod(), requestCallback, responseExtractor);
+	}
+
+	@Override
+	public <T> ResponseEntity<T> exchange(RequestEntity<?> requestEntity,
+			ParameterizedTypeReference<T> responseType) throws RestClientException {
+		Assert.notNull(requestEntity, "'requestEntity' must not be null");
+
+		Type type = responseType.getType();
+		RequestCallback requestCallback = httpEntityCallback(requestEntity, type);
+		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(type);
+		return execute(requestEntity.getUrl(), requestEntity.getMethod(), requestCallback, responseExtractor);
+	}
+
 
 	// general execution
 

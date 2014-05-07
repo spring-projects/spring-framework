@@ -25,6 +25,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -68,12 +69,14 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 		@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return HttpEntity.class.equals(parameter.getParameterType());
+		return HttpEntity.class.equals(parameter.getParameterType()) ||
+				RequestEntity.class.equals(parameter.getParameterType());
 	}
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		return HttpEntity.class.isAssignableFrom(returnType.getParameterType());
+		return HttpEntity.class.equals(returnType.getParameterType()) ||
+				ResponseEntity.class.equals(returnType.getParameterType());
 	}
 
 	@Override
@@ -81,11 +84,18 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
 			throws IOException, HttpMediaTypeNotSupportedException {
 
-		HttpInputMessage inputMessage = createInputMessage(webRequest);
+		ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
 		Type paramType = getHttpEntityType(parameter);
 
 		Object body = readWithMessageConverters(webRequest, parameter, paramType);
-		return new HttpEntity<Object>(body, inputMessage.getHeaders());
+		if (RequestEntity.class.equals(parameter.getParameterType())) {
+			return new RequestEntity<Object>(body, inputMessage.getHeaders(),
+					inputMessage.getMethod(), inputMessage.getURI());
+		}
+		else {
+			return new HttpEntity<Object>(body, inputMessage.getHeaders());
+
+		}
 	}
 
 	private Type getHttpEntityType(MethodParameter parameter) {
