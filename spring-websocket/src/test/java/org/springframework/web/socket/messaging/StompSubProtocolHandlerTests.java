@@ -246,6 +246,7 @@ public class StompSubProtocolHandlerTests {
 		assertEquals(1, this.session.getSentMessages().size());
 		WebSocketMessage<?> textMessage = this.session.getSentMessages().get(0);
 		assertTrue(((String) textMessage.getPayload()).contains("destination:/user/queue/foo\n"));
+		assertFalse(((String) textMessage.getPayload()).contains(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION));
 	}
 
 	@Test

@@ -108,10 +108,6 @@ public class UserDestinationMessageHandlerTests {
 		this.messageHandler.handleMessage(createMessage(SimpMessageType.MESSAGE, "joe", "123", "/queue/foo"));
 		Mockito.verifyZeroInteractions(this.brokerChannel);
 
-		// subscribe + no user
-		this.messageHandler.handleMessage(createMessage(SimpMessageType.SUBSCRIBE, null, "123", "/user/queue/foo"));
-		Mockito.verifyZeroInteractions(this.brokerChannel);
-
 		// subscribe + not a user destination
 		this.messageHandler.handleMessage(createMessage(SimpMessageType.SUBSCRIBE, "joe", "123", "/queue/foo"));
 		Mockito.verifyZeroInteractions(this.brokerChannel);

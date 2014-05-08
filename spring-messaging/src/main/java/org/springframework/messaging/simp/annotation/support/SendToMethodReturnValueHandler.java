@@ -145,10 +145,18 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 
 		SendToUser sendToUser = returnType.getMethodAnnotation(SendToUser.class);
 		if (sendToUser != null) {
+			boolean broadcast = sendToUser.broadcast();
 			String user = getUserName(message, headers);
+			if (user == null) {
+				if (sessionId == null) {
+					throw new MissingSessionUserException(message);
+				}
+				user = sessionId;
+				broadcast = false;
+			}
 			String[] destinations = getTargetDestinations(sendToUser, message, this.defaultUserDestinationPrefix);
 			for (String destination : destinations) {
-				if (sendToUser.broadcast()) {
+				if (broadcast) {
 					this.messagingTemplate.convertAndSendToUser(user, destination, returnValue);
 				}
 				else {
@@ -168,13 +176,11 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 
 	protected String getUserName(Message<?> message, MessageHeaders headers) {
 		Principal principal = SimpMessageHeaderAccessor.getUser(headers);
-		if (principal == null) {
-			throw new MissingSessionUserException(message);
+		if (principal != null) {
+			return (principal instanceof DestinationUserNameProvider ?
+					((DestinationUserNameProvider) principal).getDestinationUserName() : principal.getName());
 		}
-		if (principal instanceof DestinationUserNameProvider) {
-			return ((DestinationUserNameProvider) principal).getDestinationUserName();
-		}
-		return principal.getName();
+		return null;
 	}
 
 	protected String[] getTargetDestinations(Annotation annotation, Message<?> message, String defaultPrefix) {

@@ -29,7 +29,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 /**
- * Unit tests for {@link org.springframework.messaging.simp.user.DefaultUserDestinationResolver}.
+ * Unit tests for
+ * {@link org.springframework.messaging.simp.user.DefaultUserDestinationResolver}.
  *
  * @author Rossen Stoyanchev
  */
@@ -82,6 +83,19 @@ public class DefaultUserDestinationResolverTests {
 	}
 
 	@Test
+	public void handleSubscribeNoUser() {
+		String sourceDestination = "/user/queue/foo";
+		Message<?> message = createMessage(SimpMessageType.SUBSCRIBE, null, SESSION_ID, sourceDestination);
+		UserDestinationResult actual = this.resolver.resolveDestination(message);
+
+		assertEquals(sourceDestination, actual.getSourceDestination());
+		assertEquals(1, actual.getTargetDestinations().size());
+		assertEquals("/queue/foo-user" + SESSION_ID, actual.getTargetDestinations().iterator().next());
+		assertEquals(sourceDestination, actual.getSubscribeDestination());
+		assertNull(actual.getUser());
+	}
+
+	@Test
 	public void handleUnsubscribe() {
 		Message<?> message = createMessage(SimpMessageType.UNSUBSCRIBE, this.user, SESSION_ID, "/user/queue/foo");
 		UserDestinationResult actual = this.resolver.resolveDestination(message);
@@ -117,6 +131,19 @@ public class DefaultUserDestinationResolverTests {
 	}
 
 	@Test
+	public void handleMessageWithNoUser() {
+		String sourceDestination = "/user/" + SESSION_ID + "/queue/foo";
+		Message<?> message = createMessage(SimpMessageType.MESSAGE, null, SESSION_ID, sourceDestination);
+		UserDestinationResult actual = this.resolver.resolveDestination(message);
+
+		assertEquals(sourceDestination, actual.getSourceDestination());
+		assertEquals(1, actual.getTargetDestinations().size());
+		assertEquals("/queue/foo-user123", actual.getTargetDestinations().iterator().next());
+		assertEquals("/user/queue/foo", actual.getSubscribeDestination());
+		assertNull(actual.getUser());
+	}
+
+	@Test
 	public void ignoreMessage() {
 
 		// no destination
@@ -126,11 +153,6 @@ public class DefaultUserDestinationResolverTests {
 
 		// not a user destination
 		message = createMessage(SimpMessageType.MESSAGE, this.user, SESSION_ID, "/queue/foo");
-		actual = this.resolver.resolveDestination(message);
-		assertNull(actual);
-
-		// subscribe + no user
-		message = createMessage(SimpMessageType.SUBSCRIBE, null, SESSION_ID, "/user/queue/foo");
 		actual = this.resolver.resolveDestination(message);
 		assertNull(actual);
 

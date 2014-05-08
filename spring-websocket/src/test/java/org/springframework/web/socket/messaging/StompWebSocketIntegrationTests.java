@@ -36,6 +36,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -118,10 +119,10 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 	@Test
 	public void sendMessageToBrokerAndReceiveReplyViaTopic() throws Exception {
 
-		TextMessage message1 = create(StompCommand.SUBSCRIBE).headers("id:subs1", "destination:/topic/foo").build();
-		TextMessage message2 = create(StompCommand.SEND).headers("destination:/topic/foo").body("5").build();
+		TextMessage m1 = create(StompCommand.SUBSCRIBE).headers("id:subs1", "destination:/topic/foo").build();
+		TextMessage m2 = create(StompCommand.SEND).headers("destination:/topic/foo").body("5").build();
 
-		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(1, message1, message2);
+		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(1, m1, m2);
 		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
 
 		try {
@@ -140,8 +141,8 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 	@Test
 	public void sendSubscribeToControllerAndReceiveReply() throws Exception {
 
-		TextMessage message = create(StompCommand.SUBSCRIBE).headers(
-				"id:subs1", "destination:/app/number").build();
+		String destHeader = "destination:/app/number";
+		TextMessage message = create(StompCommand.SUBSCRIBE).headers("id:subs1", destHeader).build();
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(1, message);
 		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
@@ -149,8 +150,31 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 		try {
 			assertTrue(clientHandler.latch.await(2, TimeUnit.SECONDS));
 			String payload = clientHandler.actual.get(0).getPayload();
-			assertTrue("Expected STOMP destination=/app/number, got " + payload, payload.contains("destination:/app/number"));
+			assertTrue("Expected STOMP destination=/app/number, got " + payload, payload.contains(destHeader));
 			assertTrue("Expected STOMP Payload=42, got " + payload, payload.contains("42"));
+		}
+		finally {
+			session.close();
+		}
+	}
+
+	@Test
+	public void handleExceptionAndSendToUser() throws Exception {
+
+		String destHeader = "destination:/user/queue/error";
+		TextMessage m1 = create(StompCommand.SUBSCRIBE).headers("id:subs1", destHeader).build();
+		TextMessage m2 = create(StompCommand.SEND).headers("destination:/app/exception").build();
+
+		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(1, m1, m2);
+		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
+
+		try {
+			assertTrue(clientHandler.latch.await(2, TimeUnit.SECONDS));
+
+			String payload = clientHandler.actual.get(0).getPayload();
+			assertTrue(payload.startsWith("MESSAGE\n"));
+			assertTrue(payload.contains("destination:/user/queue/error\n"));
+			assertTrue(payload.endsWith("\"Got error: Bad input\"\0"));
 		}
 		finally {
 			session.close();
@@ -174,10 +198,10 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 		}
 
 		@MessageExceptionHandler
-		public void handleException(IllegalArgumentException ex) {
-
+		@SendToUser("/queue/error")
+		public String handleException(IllegalArgumentException ex) {
+			return "Got error: " + ex.getMessage();
 		}
-
 	}
 
 	@IntegrationTestController

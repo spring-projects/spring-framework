@@ -107,14 +107,15 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 			return null;
 		}
 
-		Set<String> targetDestinations = new HashSet<String>();
+		Set<String> resolved = new HashSet<String>();
 		for (String sessionId : info.getSessionIds()) {
-			targetDestinations.add(getTargetDestination(destination,
-					info.getDestinationWithoutPrefix(), sessionId, info.getUser()));
+			String d = getTargetDestination(destination, info.getDestinationWithoutPrefix(), sessionId, info.getUser());
+			if (d != null) {
+				resolved.add(d);
+			}
 		}
 
-		return new UserDestinationResult(destination,
-				targetDestinations, info.getSubscribeDestination(), info.getUser());
+		return new UserDestinationResult(destination, resolved, info.getSubscribeDestination(), info.getUser());
 	}
 
 	private DestinationInfo parseUserDestination(Message<?> message) {
@@ -134,17 +135,13 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 			if (!checkDestination(destination, this.destinationPrefix)) {
 				return null;
 			}
-			if (principal == null) {
-				logger.error("Ignoring message, no principal info available");
-				return null;
-			}
 			if (sessionId == null) {
 				logger.error("Ignoring message, no session id available");
 				return null;
 			}
 			destinationWithoutPrefix = destination.substring(this.destinationPrefix.length()-1);
 			subscribeDestination = destination;
-			user = principal.getName();
+			user = (principal != null ? principal.getName() : null);
 			sessionIds = Collections.singleton(sessionId);
 		}
 		else if (SimpMessageType.MESSAGE.equals(messageType)) {
@@ -153,11 +150,12 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 			}
 			int startIndex = this.destinationPrefix.length();
 			int endIndex = destination.indexOf('/', startIndex);
-			Assert.isTrue(endIndex > 0, "Expected destination pattern \"/principal/{userId}/**\"");
+			Assert.isTrue(endIndex > 0, "Expected destination pattern \"/user/{userId}/**\"");
 			destinationWithoutPrefix = destination.substring(endIndex);
 			subscribeDestination = this.destinationPrefix.substring(0, startIndex-1) + destinationWithoutPrefix;
 			user = destination.substring(startIndex, endIndex);
 			user = StringUtils.replace(user, "%2F", "/");
+			user = user.equals(sessionId) ? null : user;
 			sessionIds = (sessionId != null ?
 					Collections.singleton(sessionId) : this.userSessionRegistry.getSessionIds(user));
 		}
@@ -186,14 +184,16 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 	}
 
 	/**
-	 * Return the target destination to use. Provided as input are the original source
-	 * destination, as well as the same destination with the target prefix removed.
+	 * This methods determines the translated destination to use based on the source
+	 * destination, the source destination with the user prefix removed, a session
+	 * id, and the user for the session (if known).
 	 *
-	 * @param sourceDestination the source destination from the input message
-	 * @param sourceDestinationWithoutPrefix the source destination with the target prefix removed
-	 * @param sessionId an active user session id
-	 * @param user the user
-	 * @return the target destination
+	 * @param sourceDestination the source destination of the input message
+	 * @param sourceDestinationWithoutPrefix the source destination without the user prefix
+	 * @param sessionId the id of the session for the target message
+	 * @param user the user associated with the session, or {@code null}
+	 *
+	 * @return a target destination, or {@code null}
 	 */
 	protected String getTargetDestination(String sourceDestination,
 			String sourceDestinationWithoutPrefix, String sessionId, String user) {

@@ -301,6 +301,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			String origDestination = stompAccessor.getFirstNativeHeader(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION);
 			if (origDestination != null) {
 				stompAccessor = toMutableAccessor(stompAccessor, message);
+				stompAccessor.removeNativeHeader(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION);
 				stompAccessor.setDestination(origDestination);
 			}
 		}

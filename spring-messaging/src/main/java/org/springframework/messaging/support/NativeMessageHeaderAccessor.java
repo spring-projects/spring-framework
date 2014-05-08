@@ -186,4 +186,13 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		setModified(true);
 	}
 
+	public List<String> removeNativeHeader(String name) {
+		Assert.state(isMutable(), "Already immutable");
+		Map<String, List<String>> nativeHeaders = getNativeHeaders();
+		if (nativeHeaders == null) {
+			return null;
+		}
+		return nativeHeaders.remove(name);
+	}
+
 }

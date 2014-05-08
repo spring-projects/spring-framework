@@ -332,6 +332,26 @@ public class SendToMethodReturnValueHandlerTests {
 		verifyNoMoreInteractions(messagingTemplate);
 	}
 
+	@Test
+	public void sendToUserSessionWithoutUserName() throws Exception {
+
+		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
+
+		String sessionId = "sess1";
+		Message<?> inputMessage = createInputMessage(sessionId, "sub1", null, null, null);
+		this.handler.handleReturnValue(PAYLOAD, this.sendToUserReturnType, inputMessage);
+
+		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
+
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(this.messageCaptor.getAllValues().get(0));
+		assertEquals("/user/sess1/dest1", headers.getDestination());
+		assertEquals("sess1", headers.getSessionId());
+
+		headers = SimpMessageHeaderAccessor.wrap(this.messageCaptor.getAllValues().get(1));
+		assertEquals("/user/sess1/dest2", headers.getDestination());
+		assertEquals("sess1", headers.getSessionId());
+	}
+
 
 	private Message<?> createInputMessage(String sessId, String subsId, String destinationPrefix,
             String destination, Principal principal) {
