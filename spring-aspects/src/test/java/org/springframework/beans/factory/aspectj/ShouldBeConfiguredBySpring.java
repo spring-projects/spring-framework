@@ -16,22 +16,22 @@
 
 package org.springframework.beans.factory.aspectj;
 
-import org.junit.Assert;
-import org.junit.Test;
+import java.io.Serializable;
 
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.beans.factory.annotation.Configurable;
 
-/**
- * @author Chris Beams
- */
-public class XmlBeanConfigurerTests {
+@Configurable("configuredBean")
+@SuppressWarnings("serial")
+public class ShouldBeConfiguredBySpring implements Serializable {
 
-	@Test
-	public void testInjection() {
-		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
-				"org/springframework/beans/factory/aspectj/beanConfigurerTests.xml");
-		ShouldBeConfiguredBySpring myObject = new ShouldBeConfiguredBySpring();
-		Assert.assertEquals("Rod", myObject.getName());
+	private String name;
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getName() {
+		return this.name;
 	}
 
 }
