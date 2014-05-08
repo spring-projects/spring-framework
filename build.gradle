@@ -26,6 +26,7 @@ configure(allprojects) { project ->
 	ext.jodaVersion          = "2.3"
 	ext.junitVersion         = "4.11"
 	ext.slf4jVersion         = "1.7.7"
+	ext.snakeYamlVersion     = "1.13"
 	ext.tiles2Version        = "2.2.2"
 	ext.tiles3Version        = "3.0.3"
 	ext.tomcatVersion        = "8.0.5"
@@ -321,6 +322,7 @@ project("spring-beans") {
 		compile(files(project(":spring-core").cglibRepackJar))
 		optional("javax.inject:javax.inject:1")
 		optional("javax.el:javax.el-api:2.2.4")
+		optional("org.yaml:snakeyaml:${snakeYamlVersion}")
 		testCompile("log4j:log4j:1.2.17")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
     }
