@@ -39,6 +39,10 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -211,6 +215,69 @@ public class ExcelViewTests {
 		HSSFCell cell = row.getCell(0);
 		assertEquals("Test Template auf Deutsch", cell.getStringCellValue());
 	}
+
+
+    @Test
+    public void testExcelX() throws Exception {
+        AbstractExcelXView excelView = new AbstractExcelXView() {
+            @Override
+            protected void buildExcelDocument(Map<String, Object> model, XSSFWorkbook wb,
+                                              HttpServletRequest request, HttpServletResponse response) throws Exception {
+                XSSFSheet sheet = wb.createSheet("Test Sheet");
+                // test all possible permutation of row or column not existing
+                XSSFCell cell = getCell(sheet, 2, 4);
+                cell.setCellValue("Test Value");
+                cell = getCell(sheet, 2, 3);
+                setText(cell, "Test Value");
+                cell = getCell(sheet, 3, 4);
+                setText(cell, "Test Value");
+                cell = getCell(sheet, 2, 4);
+                setText(cell, "Test Value");
+            }
+        };
+
+        excelView.render(new HashMap<String, Object>(), request, response);
+
+        XSSFWorkbook wb = new XSSFWorkbook(new ByteArrayInputStream(response.getContentAsByteArray()));
+        assertEquals("Test Sheet", wb.getSheetName(0));
+        XSSFSheet sheet = wb.getSheet("Test Sheet");
+        XSSFRow row = sheet.getRow(2);
+        XSSFCell cell = row.getCell(4);
+        assertEquals("Test Value", cell.getStringCellValue());
+    }
+
+    @Test
+    public void testExcelXWithTemplateNoLoc() throws Exception {
+        request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE,
+                newDummyLocaleResolver("nl", "nl"));
+
+        AbstractExcelXView excelView = new AbstractExcelXView() {
+            @Override
+            protected void buildExcelDocument(Map<String, Object> model, XSSFWorkbook wb,
+                                              HttpServletRequest request, HttpServletResponse response) throws Exception {
+                XSSFSheet sheet = wb.getSheet("Sheet1");
+                // test all possible permutation of row or column not existing
+                XSSFCell cell = getCell(sheet, 2, 4);
+                cell.setCellValue("Test Value");
+                cell = getCell(sheet, 2, 3);
+                setText(cell, "Test Value");
+                cell = getCell(sheet, 3, 4);
+                setText(cell, "Test Value");
+                cell = getCell(sheet, 2, 4);
+                setText(cell, "Test Value");
+            }
+        };
+
+        excelView.setApplicationContext(webAppCtx);
+        excelView.setUrl("template");
+        excelView.render(new HashMap<String, Object>(), request, response);
+
+        XSSFWorkbook wb = new XSSFWorkbook(new ByteArrayInputStream(response.getContentAsByteArray()));
+        XSSFSheet sheet = wb.getSheet("Sheet1");
+        XSSFRow row = sheet.getRow(0);
+        XSSFCell cell = row.getCell(0);
+        assertEquals("Test Template", cell.getStringCellValue());
+    }
 
 	@Test
 	public void testJExcel() throws Exception {
