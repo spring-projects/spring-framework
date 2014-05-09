@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.context.annotation;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,7 +48,17 @@ abstract class ConfigurationClassUtils {
 	private static final String CONFIGURATION_CLASS_ATTRIBUTE =
 			Conventions.getQualifiedAttributeName(ConfigurationClassPostProcessor.class, "configurationClass");
 
+
 	private static final Log logger = LogFactory.getLog(ConfigurationClassUtils.class);
+
+	private static final Set<String> candidateIndicators = new HashSet<String>(4);
+
+	static {
+		candidateIndicators.add(Component.class.getName());
+		candidateIndicators.add(ComponentScan.class.getName());
+		candidateIndicators.add(Import.class.getName());
+		candidateIndicators.add(ImportResource.class.getName());
+	}
 
 
 	/**
@@ -119,7 +131,7 @@ abstract class ConfigurationClassUtils {
 
 	/**
 	 * Check the given metadata for a lite configuration class candidate
-	 * (i.e. a class annotated with {@code @Component} or just having
+	 * (e.g. a class annotated with {@code @Component} or just having
 	 * {@code @Import} declarations or {@code @Bean methods}).
 	 * @param metadata the metadata of the annotated class
 	 * @return {@code true} if the given class is to be processed as a lite
@@ -127,8 +139,15 @@ abstract class ConfigurationClassUtils {
 	 */
 	public static boolean isLiteConfigurationCandidate(AnnotationMetadata metadata) {
 		// Do not consider an interface or an annotation...
-		return (!metadata.isInterface() && (metadata.isAnnotated(Component.class.getName()) ||
-				metadata.isAnnotated(Import.class.getName()) || metadata.hasAnnotatedMethods(Bean.class.getName())));
+		if (metadata.isInterface()) {
+			return false;
+		}
+		for (String indicator : candidateIndicators) {
+			if (metadata.isAnnotated(indicator)) {
+				return true;
+			}
+		}
+		return metadata.hasAnnotatedMethods(Bean.class.getName());
 	}
 
 	/**
