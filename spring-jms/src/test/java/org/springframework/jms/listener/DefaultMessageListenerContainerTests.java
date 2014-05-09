@@ -29,6 +29,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import org.springframework.util.BackOff;
+import org.springframework.util.BackOffExecution;
 
 /**
  *
@@ -39,7 +40,9 @@ public class DefaultMessageListenerContainerTests {
 	@Test
 	public void applyBackOff() {
 		BackOff mock = mock(BackOff.class);
-		given(mock.nextBackOff()).willReturn(BackOff.STOP);
+		BackOffExecution execution = mock(BackOffExecution.class);
+		given(execution.nextBackOff()).willReturn(BackOffExecution.STOP);
+		given(mock.start()).willReturn(execution);
 
 		DefaultMessageListenerContainer container = createContainer(mock, createFailingContainerFactory());
 		container.start();
@@ -48,34 +51,40 @@ public class DefaultMessageListenerContainerTests {
 		container.refreshConnectionUntilSuccessful();
 
 		assertEquals(false, container.isRunning());
-		verify(mock).nextBackOff();
+		verify(mock).start();
+		verify(execution).nextBackOff();
 	}
 
 	@Test
 	public void applyBackOffRetry() {
 		BackOff mock = mock(BackOff.class);
-		given(mock.nextBackOff()).willReturn(50L, BackOff.STOP);
+		BackOffExecution execution = mock(BackOffExecution.class);
+		given(execution.nextBackOff()).willReturn(50L, BackOffExecution.STOP);
+		given(mock.start()).willReturn(execution);
 
 		DefaultMessageListenerContainer container = createContainer(mock, createFailingContainerFactory());
 		container.start();
 		container.refreshConnectionUntilSuccessful();
 
 		assertEquals(false, container.isRunning());
-		verify(mock, times(2)).nextBackOff();
+		verify(mock).start();
+		verify(execution, times(2)).nextBackOff();
 	}
 
 	@Test
 	public void recoverResetBackOff() {
 		BackOff mock = mock(BackOff.class);
-		given(mock.nextBackOff()).willReturn(50L, 50L, 50L); // 3 attempts max
+		BackOffExecution execution = mock(BackOffExecution.class);
+		given(execution.nextBackOff()).willReturn(50L, 50L, 50L); // 3 attempts max
+		given(mock.start()).willReturn(execution);
 
 		DefaultMessageListenerContainer container = createContainer(mock, createRecoverableContainerFactory(1));
 		container.start();
 		container.refreshConnectionUntilSuccessful();
 
 		assertEquals(true, container.isRunning());
-		verify(mock, times(1)).nextBackOff(); // only on attempt as the second one lead to a recovery
-		verify(mock, times(1)).reset(); // reset should have been called
+		verify(mock).start();
+		verify(execution, times(1)).nextBackOff(); // only on attempt as the second one lead to a recovery
 	}
 
 	@SuppressWarnings("unchecked")

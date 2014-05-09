@@ -35,6 +35,7 @@ import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
 import org.springframework.util.BackOff;
+import org.springframework.util.BackOffExecution;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.FixedBackOff;
 
@@ -221,8 +222,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	/**
 	 * Specify the {@link BackOff} instance to use to compute the interval
-	 * between recovery attempts. If the {@link BackOff} implementation
-	 * returns {@link BackOff#STOP}, this listener container will not further
+	 * between recovery attempts. If the {@link BackOffExecution} implementation
+	 * returns {@link BackOffExecution#STOP}, this listener container will not further
 	 * attempt to recover.
 	 * <p>The {@link #setRecoveryInterval(long) recovery interval} is ignored
 	 * when this property is set.
@@ -897,6 +898,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #stop()
 	 */
 	protected void refreshConnectionUntilSuccessful() {
+		BackOffExecution execution = backOff.start();
 		while (isRunning()) {
 			try {
 				if (sharedConnectionEnabled()) {
@@ -907,7 +909,6 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 					JmsUtils.closeConnection(con);
 				}
 				logger.info("Successfully refreshed JMS Connection");
-				backOff.reset();
 				break;
 			}
 			catch (Exception ex) {
@@ -917,7 +918,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				StringBuilder msg = new StringBuilder();
 				msg.append("Could not refresh JMS Connection for destination '");
 				msg.append(getDestinationDescription()).append("' - retrying using ");
-				msg.append(this.backOff).append(". Cause: ");
+				msg.append(execution).append(". Cause: ");
 				msg.append(ex instanceof JMSException ? JmsUtils.buildExceptionMessage((JMSException) ex) : ex.getMessage());
 				if (logger.isDebugEnabled()) {
 					logger.error(msg, ex);
@@ -926,7 +927,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 					logger.error(msg);
 				}
 			}
-			if (!applyBackOffTime()) {
+			if (!applyBackOffTime(execution)) {
 				stop();
 			}
 		}
@@ -952,13 +953,14 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	}
 
 	/**
-	 * Apply the next back off time. Return {@code true} if the back off period has
-	 * been applied and a new attempt to recover should be made, {@code false} if no
-	 * further attempt should be made.
+	 * Apply the next back off time using the specified {@link BackOffExecution}.
+	 * <p>Return {@code true} if the back off period has been applied and a new
+	 * attempt to recover should be made, {@code false} if no further attempt
+	 * should be made.
 	 */
-	protected boolean applyBackOffTime() {
-		long interval = backOff.nextBackOff();
-		if (interval == BackOff.STOP) {
+	protected boolean applyBackOffTime(BackOffExecution execution) {
+		long interval = execution.nextBackOff();
+		if (interval == BackOffExecution.STOP) {
 			return false;
 		}
 		else {

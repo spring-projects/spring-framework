@@ -28,57 +28,62 @@ public class FixedBackOffTests {
 	@Test
 	public void defaultInstance() {
 		FixedBackOff backOff = new FixedBackOff();
+		BackOffExecution execution = backOff.start();
 		for (int i = 0; i < 100; i++) {
-			assertEquals(FixedBackOff.DEFAULT_INTERVAL, backOff.nextBackOff());
+			assertEquals(FixedBackOff.DEFAULT_INTERVAL, execution.nextBackOff());
 		}
 	}
 
 	@Test
 	public void noAttemptAtAll() {
 		FixedBackOff backOff = new FixedBackOff(100L, 0L);
-		assertEquals(BackOff.STOP, backOff.nextBackOff());
+		BackOffExecution execution = backOff.start();
+		assertEquals(BackOffExecution.STOP, execution.nextBackOff());
 	}
 
 	@Test
 	public void maxAttemptsReached() {
 		FixedBackOff backOff = new FixedBackOff(200L, 2);
-		assertEquals(200l, backOff.nextBackOff());
-		assertEquals(200l, backOff.nextBackOff());
-		assertEquals(BackOff.STOP, backOff.nextBackOff());
+		BackOffExecution execution = backOff.start();
+		assertEquals(200l, execution.nextBackOff());
+		assertEquals(200l, execution.nextBackOff());
+		assertEquals(BackOffExecution.STOP, execution.nextBackOff());
 	}
 
 	@Test
-	public void resetOnInstance() {
+	public void startReturnDifferentInstances() {
 		FixedBackOff backOff = new FixedBackOff(100L, 1);
-		assertEquals(100l, backOff.nextBackOff());
-		assertEquals(BackOff.STOP, backOff.nextBackOff());
+		BackOffExecution execution = backOff.start();
+		BackOffExecution execution2 = backOff.start();
 
-		backOff.reset();
-
-		assertEquals(100l, backOff.nextBackOff());
-		assertEquals(BackOff.STOP, backOff.nextBackOff());
+		assertEquals(100l, execution.nextBackOff());
+		assertEquals(100l, execution2.nextBackOff());
+		assertEquals(BackOffExecution.STOP, execution.nextBackOff());
+		assertEquals(BackOffExecution.STOP, execution2.nextBackOff());
 	}
 
 	@Test
 	public void liveUpdate() {
 		FixedBackOff backOff = new FixedBackOff(100L, 1);
-		assertEquals(100l, backOff.nextBackOff());
+		BackOffExecution execution = backOff.start();
+		assertEquals(100l, execution.nextBackOff());
 
 		backOff.setInterval(200l);
 		backOff.setMaxAttempts(2);
 
-		assertEquals(200l, backOff.nextBackOff());
-		assertEquals(BackOff.STOP, backOff.nextBackOff());
+		assertEquals(200l, execution.nextBackOff());
+		assertEquals(BackOffExecution.STOP, execution.nextBackOff());
 	}
 
 	@Test
 	public void toStringContent() {
 		FixedBackOff backOff = new FixedBackOff(200L, 10);
-		assertEquals("FixedBackOff{interval=200, currentAttempts=0, maxAttempts=10}", backOff.toString());
-		backOff.nextBackOff();
-		assertEquals("FixedBackOff{interval=200, currentAttempts=1, maxAttempts=10}", backOff.toString());
-		backOff.nextBackOff();
-		assertEquals("FixedBackOff{interval=200, currentAttempts=2, maxAttempts=10}", backOff.toString());
+		BackOffExecution execution = backOff.start();
+		assertEquals("FixedBackOff{interval=200, currentAttempts=0, maxAttempts=10}", execution.toString());
+		execution.nextBackOff();
+		assertEquals("FixedBackOff{interval=200, currentAttempts=1, maxAttempts=10}", execution.toString());
+		execution.nextBackOff();
+		assertEquals("FixedBackOff{interval=200, currentAttempts=2, maxAttempts=10}", execution.toString());
 	}
 
 }

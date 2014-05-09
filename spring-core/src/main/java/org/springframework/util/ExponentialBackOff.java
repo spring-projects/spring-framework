@@ -44,7 +44,8 @@ package org.springframework.util;
  *
  * Note that the default max elapsed time is {@link Long#MAX_VALUE}. Use
  * {@link #setMaxElapsedTime(long)} to limit the maximum number of time
- * that an instance should accumulate before returning {@link BackOff#STOP}.
+ * that an instance should accumulate before returning
+ * {@link BackOffExecution#STOP}.
  *
  * @author Stephane Nicoll
  * @since 4.1
@@ -80,9 +81,6 @@ public class ExponentialBackOff implements BackOff {
 
 	private long maxElapsedTime = DEFAULT_MAX_ELAPSED_TIME;
 
-	private long currentInterval = -1;
-
-	private long currentElapsedTime = 0;
 
 	/**
 	 * Create an instance with the default settings.
@@ -113,11 +111,25 @@ public class ExponentialBackOff implements BackOff {
 	}
 
 	/**
+	 * Return the initial interval in milliseconds.
+	 */
+	public long getInitialInterval() {
+		return initialInterval;
+	}
+
+	/**
 	 * The value to multiply the current interval with for each retry attempt.
 	 */
 	public void setMultiplier(double multiplier) {
 		checkMultiplier(multiplier);
 		this.multiplier = multiplier;
+	}
+
+	/**
+	 * Return the value to multiply the current interval with for each retry attempt.
+	 */
+	public double getMultiplier() {
+		return multiplier;
 	}
 
 	/**
@@ -128,49 +140,31 @@ public class ExponentialBackOff implements BackOff {
 	}
 
 	/**
+	 * Return the maximum back off time.
+	 */
+	public long getMaxInterval() {
+		return maxInterval;
+	}
+
+	/**
 	 * The maximum elapsed time in milliseconds after which a call to
-	 * {@link #nextBackOff()} returns {@link BackOff#STOP}.
+	 * {@link BackOffExecution#nextBackOff()} returns {@link BackOffExecution#STOP}.
 	 */
 	public void setMaxElapsedTime(long maxElapsedTime) {
 		this.maxElapsedTime = maxElapsedTime;
 	}
 
-	@Override
-	public long nextBackOff() {
-		if (currentElapsedTime >= maxElapsedTime) {
-			return BackOff.STOP;
-		}
-
-		long nextInterval = computeNextInterval();
-		currentElapsedTime += nextInterval;
-		return nextInterval;
-
+	/**
+	 * Return the maximum elapsed time in milliseconds after which a call to
+	 * {@link BackOffExecution#nextBackOff()} returns {@link BackOffExecution#STOP}.
+	 */
+	public long getMaxElapsedTime() {
+		return maxElapsedTime;
 	}
 
 	@Override
-	public void reset() {
-		this.currentInterval = -1;
-		this.currentElapsedTime = 0;
-	}
-
-	private long computeNextInterval() {
-		if (this.currentInterval >= this.maxInterval) {
-			return this.maxInterval;
-		}
-		else if (this.currentInterval < 0) {
-			this.currentInterval = (this.initialInterval < this.maxInterval
-					? this.initialInterval : this.maxInterval);
-		}
-		else {
-			this.currentInterval = multiplyInterval();
-		}
-		return currentInterval;
-	}
-
-	private long multiplyInterval() {
-		long i = this.currentInterval;
-		i *= this.multiplier;
-		return (i > this.maxInterval ? this.maxInterval :i);
+	public BackOffExecution start() {
+		return new ExponentialBackOffExecution();
 	}
 
 	private void checkMultiplier(double multiplier) {
@@ -180,14 +174,56 @@ public class ExponentialBackOff implements BackOff {
 		}
 	}
 
-	@Override
-	public String toString() {
-		String i = (this.currentInterval < 0 ? "n/a" : this.currentInterval + "ms");
-		final StringBuilder sb = new StringBuilder("ExponentialBackOff{");
-		sb.append("currentInterval=").append(i);
-		sb.append(", multiplier=").append(this.multiplier);
-		sb.append('}');
-		return sb.toString();
+
+	private class ExponentialBackOffExecution implements BackOffExecution {
+
+		private long currentInterval = -1;
+
+		private long currentElapsedTime = 0;
+
+		@Override
+		public long nextBackOff() {
+			if (currentElapsedTime >= maxElapsedTime) {
+				return BackOffExecution.STOP;
+			}
+
+			long nextInterval = computeNextInterval();
+			currentElapsedTime += nextInterval;
+			return nextInterval;
+		}
+
+		private long computeNextInterval() {
+			long maxInterval = getMaxInterval();
+			if (this.currentInterval >= maxInterval) {
+				return maxInterval;
+			}
+			else if (this.currentInterval < 0) {
+			 	long initialInterval = getInitialInterval();
+				this.currentInterval = (initialInterval < maxInterval
+						? initialInterval : maxInterval);
+			}
+			else {
+				this.currentInterval = multiplyInterval(maxInterval);
+			}
+			return currentInterval;
+		}
+
+		private long multiplyInterval(long maxInterval) {
+			long i = this.currentInterval;
+			i *= getMultiplier();
+			return (i > maxInterval ? maxInterval : i);
+		}
+
+
+		@Override
+		public String toString() {
+			String i = (this.currentInterval < 0 ? "n/a" : this.currentInterval + "ms");
+			final StringBuilder sb = new StringBuilder("ExponentialBackOff{");
+			sb.append("currentInterval=").append(i);
+			sb.append(", multiplier=").append(getMultiplier());
+			sb.append('}');
+			return sb.toString();
+		}
 	}
 
 }

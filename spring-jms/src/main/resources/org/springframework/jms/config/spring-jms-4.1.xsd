@@ -322,7 +322,7 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	 Specify the BackOff instance to use to compute the interval between recovery
-	 attempts. If the BackOff implementation returns "BackOff#STOP", the listener
+	 attempts. If the BackOff implementation returns "BackOffExecution#STOP", the listener
 	 container will not further attempt to recover. The recovery-interval value is
 	 ignored when this property is set. The default is a FixedBackOff with an
 	 interval of 5000 ms, that is 5 seconds.

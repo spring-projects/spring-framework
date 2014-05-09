@@ -39,7 +39,6 @@ public class FixedBackOff implements BackOff {
 
 	private long maxAttempts = UNLIMITED_ATTEMPTS;
 
-	private long currentAttempts = 0;
 
 	/**
 	 * Create an instance with an interval of {@value #DEFAULT_INTERVAL}
@@ -87,31 +86,38 @@ public class FixedBackOff implements BackOff {
 	}
 
 	@Override
-	public long nextBackOff() {
-		this.currentAttempts++;
-		if (this.currentAttempts <= this.maxAttempts) {
-			return this.interval;
-		}
-		else {
-			return BackOff.STOP;
-		}
+	public BackOffExecution start() {
+		return new FixedBackOffExecution();
 	}
 
-	@Override
-	public void reset() {
-		this.currentAttempts = 0;
-	}
 
-	@Override
-	public String toString() {
-		final StringBuilder sb = new StringBuilder("FixedBackOff{");
-		sb.append("interval=").append(this.interval);
-		String attemptValue = (this.maxAttempts == Long.MAX_VALUE ? "unlimited"
-				: String.valueOf(this.maxAttempts));
-		sb.append(", currentAttempts=").append(this.currentAttempts);
-		sb.append(", maxAttempts=").append(attemptValue);
-		sb.append('}');
-		return sb.toString();
+	private class FixedBackOffExecution implements BackOffExecution {
+
+		private long currentAttempts = 0;
+
+		@Override
+		public long nextBackOff() {
+			this.currentAttempts++;
+			if (this.currentAttempts <= getMaxAttempts()) {
+				return getInterval();
+			}
+			else {
+				return BackOffExecution.STOP;
+			}
+		}
+
+		@Override
+		public String toString() {
+			final StringBuilder sb = new StringBuilder("FixedBackOff{");
+			sb.append("interval=").append(FixedBackOff.this.interval);
+			String attemptValue = (FixedBackOff.this.maxAttempts == Long.MAX_VALUE ? "unlimited"
+					: String.valueOf(FixedBackOff.this.maxAttempts));
+			sb.append(", currentAttempts=").append(this.currentAttempts);
+			sb.append(", maxAttempts=").append(attemptValue);
+			sb.append('}');
+			return sb.toString();
+		}
+
 	}
 
 }

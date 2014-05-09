@@ -17,16 +17,19 @@
 package org.springframework.util;
 
 /**
- * Indicate the rate at which an operation should be retried.
+ * Provide a {@link BackOffExecution} that indicates the rate at which
+ * an operation should be retried.
  *
  * <p>Users of this interface are expected to use it like this:
  *
  * <pre class="code">
  * {@code
  *
- *  long waitInterval = backOff.nextBackOffMillis();
- *  if (waitInterval == BackOff.STOP) {
- *    backOff.reset();
+ *  BackOffExecution exec = backOff.start();
+ *
+ *  // In the operation recovery/retry loop:
+ *  long waitInterval = exec.nextBackOffMillis();
+ *  if (waitInterval == BackOffExecution.STOP) {
  *    // do not retry operation
  *  }
  *  else {
@@ -35,31 +38,19 @@ package org.springframework.util;
  *  }
  * }</pre>
  *
- * Once the underlying operation has completed successfully, the instance
- * <b>must</b> be {@link #reset()} before further use. Due to how back off
- * should be used, implementations do not need to be thread-safe.
+ * Once the underlying operation has completed successfully, the execution
+ * instance can be simply discarded.
  *
  * @author Stephane Nicoll
  * @since 4.1
+ * @see BackOffExecution
  */
 public interface BackOff {
 
 	/**
-	 * Return value of {@link #nextBackOff()} that indicates that the operation
-	 * should not be retried.
+	 * Start a new back off execution.
+	 * @return a fresh {@link BackOffExecution} ready to be used
 	 */
-	long STOP = -1;
-
-	/**
-	 * Return the number of milliseconds to wait before retrying the operation
-	 * or {@link #STOP} ({@value #STOP}) to indicate that no further attempt
-	 * should be made for the operation.
-	 */
-	long nextBackOff();
-
-	/**
-	 * Reset this instance to its original state.
-	 */
-	void reset();
+	BackOffExecution start();
 
 }
