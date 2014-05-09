@@ -318,11 +318,29 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="back-off" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	 Specify the BackOff instance to use to compute the interval between recovery
+	 attempts. If the BackOff implementation returns "BackOff#STOP", the listener
+	 container will not further attempt to recover. The recovery-interval value is
+	 ignored when this property is set. The default is a FixedBackOff with an
+	 interval of 5000 ms, that is 5 seconds.
+					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="org.springframework.util.BackOff"/>
+						</tool:annotation>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="recovery-interval" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	Specify the interval between recovery attempts, in milliseconds.
-	The default is 5000 ms, that is, 5 seconds.
+	Specify the interval between recovery attempts, in milliseconds. Convenience
+	way to create a FixedBackOff with the specified interval. For more recovery
+	options, consider specifying a BackOff instance instead. The default is
+	5000 ms, that is 5 seconds.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>

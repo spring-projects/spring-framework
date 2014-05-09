@@ -54,6 +54,8 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 
 	private static final String RECOVERY_INTERVAL_ATTRIBUTE = "recovery-interval";
 
+	private static final String BACK_OFF_ATTRIBUTE = "back-off";
+
 
 	protected PropertyValues parseProperties(Element containerEle, ParserContext parserContext) {
 		final MutablePropertyValues properties = new MutablePropertyValues();
@@ -223,10 +225,18 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 			}
 		}
 
-		String recoveryInterval = containerEle.getAttribute(RECOVERY_INTERVAL_ATTRIBUTE);
-		if (StringUtils.hasText(recoveryInterval)) {
+		String backOffBeanName = containerEle.getAttribute(BACK_OFF_ATTRIBUTE);
+		if (StringUtils.hasText(backOffBeanName)) {
 			if (!isSimpleContainer) {
-				propertyValues.add("recoveryInterval", recoveryInterval);
+				propertyValues.add("backOff", new RuntimeBeanReference(backOffBeanName));
+			}
+		}
+		else { // No need to consider this if back-off is set
+			String recoveryInterval = containerEle.getAttribute(RECOVERY_INTERVAL_ATTRIBUTE);
+			if (StringUtils.hasText(recoveryInterval)) {
+				if (!isSimpleContainer) {
+					propertyValues.add("recoveryInterval", recoveryInterval);
+				}
 			}
 		}
 

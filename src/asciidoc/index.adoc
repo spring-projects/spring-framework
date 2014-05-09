@@ -40424,6 +40424,10 @@ This listener container strikes a good balance between low requirements on the J
 provider, advanced functionality such as transaction participation, and compatibility
 with Java EE environments.
 
+This container also has recoverable capabilities when the broker goes down. By default,
+a simple `BackOff` implementation retries every 5 seconds. It is possible to specify
+a custom `BackOff` implementation for more fine-grained recovery options, see
+`ExponentialBackOff` for an example.
 
 
 [[jms-tx]]
@@ -41427,9 +41431,18 @@ choices and message redelivery scenarios.
 | The timeout to use for receive calls (in milliseconds). The default is `1000` ms (1
   sec); `-1` indicates no timeout at all.
 
+| back-off
+| Specify the `BackOff` instance to use to compute the interval between recovery
+  attempts. If the `BackOff` implementation returns `BackOff#STOP`, the listener
+  container will not further attempt to recover. The `recovery-interval value is
+  is ignored when this property is set. The default is a `FixedBackOff` with an
+  interval of 5000 ms, that is 5 seconds.
+
 | recovery-interval
-| Specify the interval between recovery attempts, in milliseconds. The default is `5000`
-  ms, that is, 5 seconds.
+| Specify the interval between recovery attempts, in milliseconds. Convenience
+  way to create a `FixedBackOff` with the specified interval. For more recovery
+  options, consider specifying a BackOff instance instead. The default is 5000 ms,
+  that is 5 seconds.
 
 | phase
 | The lifecycle phase within which this container should start and stop. The lower the

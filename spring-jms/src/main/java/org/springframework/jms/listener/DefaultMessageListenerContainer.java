@@ -224,6 +224,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * between recovery attempts. If the {@link BackOff} implementation
 	 * returns {@link BackOff#STOP}, this listener container will not further
 	 * attempt to recover.
+	 * <p>The {@link #setRecoveryInterval(long) recovery interval} is ignored
+	 * when this property is set.
 	 */
 	public void setBackOff(BackOff backOff) {
 		this.backOff = backOff;
@@ -231,9 +233,10 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	/**
 	 * Specify the interval between recovery attempts, in <b>milliseconds</b>.
-	 * The default is 5000 ms, that is, 5 seconds.
-	 * <p>This is a convenience method to create a {@link FixedBackOff} with
-	 * the specified interval.
+	 * The default is 5000 ms, that is, 5 seconds. This is a convenience method
+	 * to create a {@link FixedBackOff} with the specified interval.
+	 * <p>For more recovery options, consider specifying a {@link BackOff}
+	 * instance instead.
 	 * @see #setBackOff(BackOff)
 	 * @see #handleListenerSetupFailure
 	 */

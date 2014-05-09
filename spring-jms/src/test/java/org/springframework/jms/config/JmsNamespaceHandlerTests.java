@@ -161,6 +161,7 @@ public class JmsNamespaceHandlerTests {
 		assertEquals("wrong concurrency", 3, container.getConcurrentConsumers());
 		assertEquals("wrong concurrency", 5, container.getMaxConcurrentConsumers());
 		assertEquals("wrong prefetch", 50, container.getMaxMessagesPerTask());
+		assertSame(context.getBean("testBackOff"),new DirectFieldAccessor(container).getPropertyValue("backOff"));
 
 		assertEquals("phase cannot be customized by the factory", Integer.MAX_VALUE, container.getPhase());
 	}
@@ -216,12 +217,13 @@ public class JmsNamespaceHandlerTests {
 
 	@Test
 	public void testRecoveryInterval() {
-		long recoveryInterval1 = getRecoveryInterval("listener1");
-		long recoveryInterval2 = getRecoveryInterval("listener2");
+		Object testBackOff = context.getBean("testBackOff");
+		BackOff backOff1 = getBackOff("listener1");
+		BackOff backOff2 = getBackOff("listener2");
 		long recoveryInterval3 = getRecoveryInterval(DefaultMessageListenerContainer.class.getName() + "#0");
 
-		assertEquals(1000L, recoveryInterval1);
-		assertEquals(1000L, recoveryInterval2);
+		assertSame(testBackOff, backOff1);
+		assertSame(testBackOff, backOff2);
 		assertEquals(DefaultMessageListenerContainer.DEFAULT_RECOVERY_INTERVAL, recoveryInterval3);
 	}
 
@@ -300,9 +302,13 @@ public class JmsNamespaceHandlerTests {
 		return (ErrorHandler) new DirectFieldAccessor(container).getPropertyValue("errorHandler");
 	}
 
-	private long getRecoveryInterval(String containerBeanName) {
+	private BackOff getBackOff(String containerBeanName) {
 		DefaultMessageListenerContainer container = this.context.getBean(containerBeanName, DefaultMessageListenerContainer.class);
-		BackOff backOff = (BackOff) new DirectFieldAccessor(container).getPropertyValue("backOff");
+		return (BackOff) new DirectFieldAccessor(container).getPropertyValue("backOff");
+	}
+
+	private long getRecoveryInterval(String containerBeanName) {
+		BackOff backOff = getBackOff(containerBeanName);
 		assertEquals(FixedBackOff.class, backOff.getClass());
 		return ((FixedBackOff)backOff).getInterval();
 	}

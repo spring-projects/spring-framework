@@ -9,7 +9,7 @@
 			connection-factory="testConnectionFactory" task-executor="testTaskExecutor"
 			destination-resolver="testDestinationResolver" message-converter="testMessageConverter"
 			transaction-manager="testTransactionManager" error-handler="testErrorHandler"
-			cache="connection" concurrency="3-5" prefetch="50" receive-timeout="100" recovery-interval="1000" phase="99">
+			cache="connection" concurrency="3-5" prefetch="50" receive-timeout="100" back-off="testBackOff" phase="99">
 		<jms:listener id="listener1" destination="testDestination" ref="testBean1" method="setName"/>
 		<jms:listener id="listener2" destination="testDestination" ref="testBean2" method="setName" response-destination="responseDestination"/>
 	</jms:listener-container>
@@ -43,7 +43,8 @@
 							connection-factory="testConnectionFactory" task-executor="testTaskExecutor"
 							destination-resolver="testDestinationResolver" message-converter="testMessageConverter"
 							transaction-manager="testTransactionManager" error-handler="testErrorHandler"
-							concurrency="3-5" prefetch="50" receive-timeout="100" recovery-interval="1000"/>
+							concurrency="3-5" prefetch="50" receive-timeout="100"
+							recovery-interval="1000" back-off="testBackOff"/>
 
 	<!-- the default ConnectionFactory -->
 	<bean id="connectionFactory" class="org.springframework.jms.StubConnectionFactory"/>
@@ -66,6 +67,10 @@
 	<bean id="testTransactionManager" class="org.springframework.tests.transaction.CallCountingTransactionManager"/>
 
 	<bean id="testErrorHandler" class="org.springframework.jms.config.JmsNamespaceHandlerTests$TestErrorHandler"/>
+
+	<bean id="testBackOff" class="org.springframework.util.FixedBackOff">
+		<property name="interval" value="1000"/>
+	</bean>
 
 	<bean id="testBean1" class="org.springframework.tests.sample.beans.TestBean"/>
 
