@@ -34,7 +34,9 @@ import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
+import org.springframework.util.BackOff;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.FixedBackOff;
 
 /**
  * Message listener container variant that uses plain JMS client APIs, specifically
@@ -170,7 +172,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	private Executor taskExecutor;
 
-	private long recoveryInterval = DEFAULT_RECOVERY_INTERVAL;
+	private BackOff backOff = createDefaultBackOff(DEFAULT_RECOVERY_INTERVAL);
 
 	private int cacheLevel = CACHE_AUTO;
 
@@ -218,12 +220,25 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	}
 
 	/**
+	 * Specify the {@link BackOff} instance to use to compute the interval
+	 * between recovery attempts. If the {@link BackOff} implementation
+	 * returns {@link BackOff#STOP}, this listener container will not further
+	 * attempt to recover.
+	 */
+	public void setBackOff(BackOff backOff) {
+		this.backOff = backOff;
+	}
+
+	/**
 	 * Specify the interval between recovery attempts, in <b>milliseconds</b>.
 	 * The default is 5000 ms, that is, 5 seconds.
+	 * <p>This is a convenience method to create a {@link FixedBackOff} with
+	 * the specified interval.
+	 * @see #setBackOff(BackOff)
 	 * @see #handleListenerSetupFailure
 	 */
 	public void setRecoveryInterval(long recoveryInterval) {
-		this.recoveryInterval = recoveryInterval;
+		this.backOff = createDefaultBackOff(recoveryInterval);
 	}
 
 	/**
@@ -889,6 +904,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 					JmsUtils.closeConnection(con);
 				}
 				logger.info("Successfully refreshed JMS Connection");
+				backOff.reset();
 				break;
 			}
 			catch (Exception ex) {
@@ -897,8 +913,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				}
 				StringBuilder msg = new StringBuilder();
 				msg.append("Could not refresh JMS Connection for destination '");
-				msg.append(getDestinationDescription()).append("' - retrying in ");
-				msg.append(this.recoveryInterval).append(" ms. Cause: ");
+				msg.append(getDestinationDescription()).append("' - retrying using ");
+				msg.append(this.backOff).append(". Cause: ");
 				msg.append(ex instanceof JMSException ? JmsUtils.buildExceptionMessage((JMSException) ex) : ex.getMessage());
 				if (logger.isDebugEnabled()) {
 					logger.error(msg, ex);
@@ -907,7 +923,9 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 					logger.error(msg);
 				}
 			}
-			sleepInbetweenRecoveryAttempts();
+			if (!applyBackOffTime()) {
+				stop();
+			}
 		}
 	}
 
@@ -931,19 +949,29 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	}
 
 	/**
-	 * Sleep according to the specified recovery interval.
-	 * Called between recovery attempts.
+	 * Apply the next back off time. Return {@code true} if the back off period has
+	 * been applied and a new attempt to recover should be made, {@code false} if no
+	 * further attempt should be made.
 	 */
-	protected void sleepInbetweenRecoveryAttempts() {
-		if (this.recoveryInterval > 0) {
+	protected boolean applyBackOffTime() {
+		long interval = backOff.nextBackOff();
+		if (interval == BackOff.STOP) {
+			return false;
+		}
+		else {
 			try {
-				Thread.sleep(this.recoveryInterval);
+				Thread.sleep(interval);
 			}
 			catch (InterruptedException interEx) {
 				// Re-interrupt current thread, to allow other threads to react.
 				Thread.currentThread().interrupt();
 			}
 		}
+		return true;
+	}
+
+	private FixedBackOff createDefaultBackOff(long interval) {
+		return new FixedBackOff(interval, Long.MAX_VALUE);
 	}
 
 	/**
@@ -1000,11 +1028,6 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			}
 			catch (Throwable ex) {
 				clearResources();
-				if (!this.lastMessageSucceeded) {
-					// We failed more than once in a row - sleep for recovery interval
-					// even before first recovery attempt.
-					sleepInbetweenRecoveryAttempts();
-				}
 				this.lastMessageSucceeded = false;
 				boolean alreadyRecovered = false;
 				synchronized (recoveryMonitor) {

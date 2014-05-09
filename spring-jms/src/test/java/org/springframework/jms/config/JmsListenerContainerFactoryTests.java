@@ -28,6 +28,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.jms.StubConnectionFactory;
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
@@ -40,6 +41,8 @@ import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.jms.support.destination.DynamicDestinationResolver;
+import org.springframework.util.BackOff;
+import org.springframework.util.FixedBackOff;
 
 /**
  *
@@ -128,6 +131,22 @@ public class JmsListenerContainerFactoryTests {
 		endpoint.setMessageListener(new MessageListenerAdapter());
 		thrown.expect(IllegalStateException.class);
 		factory.createMessageListenerContainer(endpoint);
+	}
+
+	@Test
+	public void backOffOverridesRecoveryInterval() {
+		DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+		BackOff backOff = new FixedBackOff();
+		factory.setBackOff(backOff);
+		factory.setRecoveryInterval(2000L);
+
+		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
+		MessageListener messageListener = new MessageListenerAdapter();
+		endpoint.setMessageListener(messageListener);
+		endpoint.setDestination("myQueue");
+		DefaultMessageListenerContainer container = factory.createMessageListenerContainer(endpoint);
+
+		assertSame(backOff, new DirectFieldAccessor(container).getPropertyValue("backOff"));
 	}
 
 	private void setDefaultJmsConfig(AbstractJmsListenerContainerFactory<?> factory) {

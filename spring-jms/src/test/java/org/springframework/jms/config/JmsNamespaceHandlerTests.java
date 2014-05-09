@@ -48,7 +48,9 @@ import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.listener.adapter.MessageListenerAdapter;
 import org.springframework.jms.listener.endpoint.JmsMessageEndpointManager;
 import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.util.BackOff;
 import org.springframework.util.ErrorHandler;
+import org.springframework.util.FixedBackOff;
 
 /**
  * @author Mark Fisher
@@ -300,8 +302,9 @@ public class JmsNamespaceHandlerTests {
 
 	private long getRecoveryInterval(String containerBeanName) {
 		DefaultMessageListenerContainer container = this.context.getBean(containerBeanName, DefaultMessageListenerContainer.class);
-		Long recoveryInterval = (Long) new DirectFieldAccessor(container).getPropertyValue("recoveryInterval");
-		return recoveryInterval.longValue();
+		BackOff backOff = (BackOff) new DirectFieldAccessor(container).getPropertyValue("backOff");
+		assertEquals(FixedBackOff.class, backOff.getClass());
+		return ((FixedBackOff)backOff).getInterval();
 	}
 
 	private int getPhase(String containerBeanName) {

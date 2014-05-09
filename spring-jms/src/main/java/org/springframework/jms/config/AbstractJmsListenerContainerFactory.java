@@ -19,6 +19,9 @@ package org.springframework.jms.config;
 
 import javax.jms.ConnectionFactory;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
@@ -33,6 +36,8 @@ import org.springframework.util.ErrorHandler;
  */
 public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMessageListenerContainer>
 		implements JmsListenerContainerFactory<C> {
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private ConnectionFactory connectionFactory;
 
