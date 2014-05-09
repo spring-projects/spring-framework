@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
 import org.apache.commons.logging.Log;
@@ -94,7 +95,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 	private final WebSocketHandler handler;
 
-	private final Map<String, Object> attributes;
+	private final Map<String, Object> attributes = new ConcurrentHashMap<String, Object>();
 
 
 	private volatile State state = State.NEW;
@@ -129,7 +130,10 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 		this.id = id;
 		this.config = config;
 		this.handler = handler;
-		this.attributes = attributes;
+
+		if (attributes != null) {
+			this.attributes.putAll(attributes);
+		}
 	}
 
 
