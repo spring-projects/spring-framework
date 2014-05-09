@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -141,6 +142,7 @@ public class MessageBrokerConfigurationTests {
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
 		headers.setSessionId("sess1");
+		headers.setSessionAttributes(new ConcurrentHashMap<>());
 		headers.setSubscriptionId("subs1");
 		headers.setDestination("/foo");
 		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
@@ -230,6 +232,8 @@ public class MessageBrokerConfigurationTests {
 				this.simpleBrokerContext.getBean(SimpAnnotationMethodMessageHandler.class);
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
+		headers.setSessionId("sess1");
+		headers.setSessionAttributes(new ConcurrentHashMap<>());
 		headers.setDestination("/foo");
 		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 

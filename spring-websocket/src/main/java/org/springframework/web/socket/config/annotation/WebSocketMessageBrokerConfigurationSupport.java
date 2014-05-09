@@ -16,13 +16,17 @@
 
 package org.springframework.web.socket.config.annotation;
 
+import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.messaging.simp.SimpSessionScope;
 import org.springframework.messaging.simp.config.AbstractMessageBrokerConfiguration;
 import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
+
+import java.util.Collections;
 
 /**
  * Extends {@link AbstractMessageBrokerConfiguration} and adds configuration for
@@ -75,6 +79,8 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	protected void configureWebSocketTransport(WebSocketTransportRegistration registry) {
 	}
 
+	protected abstract void registerStompEndpoints(StompEndpointRegistry registry);
+
 	/**
 	 * The default TaskScheduler to use if none is configured via
 	 * {@link SockJsServiceRegistration#setTaskScheduler(org.springframework.scheduling.TaskScheduler)}, i.e.
@@ -100,6 +106,11 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 		return scheduler;
 	}
 
-	protected abstract void registerStompEndpoints(StompEndpointRegistry registry);
+	@Bean
+	public static CustomScopeConfigurer webSocketScopeConfigurer() {
+		CustomScopeConfigurer configurer = new CustomScopeConfigurer();
+		configurer.setScopes(Collections.<String, Object>singletonMap("websocket", new SimpSessionScope()));
+		return configurer;
+	}
 
 }

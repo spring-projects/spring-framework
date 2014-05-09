@@ -26,6 +26,7 @@ import org.junit.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.messaging.MessageHandler;
@@ -175,6 +176,8 @@ public class MessageBrokerBeanDefinitionParserTests {
 		catch (NoSuchBeanDefinitionException ex) {
 			// expected
 		}
+
+		assertNotNull(this.appContext.getBean("webSocketScopeConfigurer", CustomScopeConfigurer.class));
 	}
 
 	@Test

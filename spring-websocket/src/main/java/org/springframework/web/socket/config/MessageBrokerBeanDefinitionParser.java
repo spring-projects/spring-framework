@@ -17,8 +17,12 @@
 package org.springframework.web.socket.config;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.beans.factory.config.CustomScopeConfigurer;
+import org.springframework.messaging.simp.SimpSessionScope;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.MutablePropertyValues;
@@ -166,6 +170,11 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 
 		registerUserDestinationMessageHandler(clientInChannel, clientOutChannel, brokerChannel,
 				userDestinationResolver, parserCxt, source);
+
+		Map<String, Object> scopeMap = Collections.<String, Object>singletonMap("websocket", new SimpSessionScope());
+		RootBeanDefinition scopeConfigurerDef = new RootBeanDefinition(CustomScopeConfigurer.class);
+		scopeConfigurerDef.getPropertyValues().add("scopes", scopeMap);
+		registerBeanDefByName("webSocketScopeConfigurer", scopeConfigurerDef, parserCxt, source);
 
 		parserCxt.popAndRegisterContainingComponent();
 

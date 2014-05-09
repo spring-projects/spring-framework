@@ -33,6 +33,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.simp.SimpAttributes;
+import org.springframework.messaging.simp.SimpAttributesContextHolder;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.stomp.BufferingStompDecoder;
@@ -221,7 +223,13 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 					publishEvent(new SessionConnectEvent(this, message));
 				}
 
-				outputChannel.send(message);
+				try {
+					SimpAttributesContextHolder.setAttributesFromMessage(message);
+					outputChannel.send(message);
+				}
+				finally {
+					SimpAttributesContextHolder.resetAttributes();
+				}
 			}
 			catch (Throwable ex) {
 				logger.error("Terminating STOMP session due to failure to send message", ex);
@@ -420,22 +428,33 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			this.userSessionRegistry.unregisterSessionId(userName, session.getId());
 		}
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("WebSocket session ended, sending DISCONNECT message to broker");
+		if (this.eventPublisher != null) {
+			publishEvent(new SessionDisconnectEvent(this, session.getId(), closeStatus));
 		}
 
+		Message<?> message = createDisconnectMessage(session);
+		SimpAttributes simpAttributes = SimpAttributes.fromMessage(message);
+		try {
+			if (logger.isDebugEnabled()) {
+				logger.debug("WebSocket session ended, sending DISCONNECT message to broker");
+			}
+			SimpAttributesContextHolder.setAttributes(simpAttributes);
+			outputChannel.send(message);
+		}
+		finally {
+			SimpAttributesContextHolder.resetAttributes();
+			simpAttributes.sessionCompleted();
+		}
+	}
+
+	private Message<?> createDisconnectMessage(WebSocketSession session) {
 		StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		if (getHeaderInitializer() != null) {
 			getHeaderInitializer().initHeaders(headerAccessor);
 		}
 		headerAccessor.setSessionId(session.getId());
-		Message<?> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headerAccessor.getMessageHeaders());
-
-		if (this.eventPublisher != null) {
-			publishEvent(new SessionDisconnectEvent(this, session.getId(), closeStatus));
-		}
-
-		outputChannel.send(message);
+		headerAccessor.setSessionAttributes(session.getAttributes());
+		return MessageBuilder.createMessage(EMPTY_PAYLOAD, headerAccessor.getMessageHeaders());
 	}
 
 }

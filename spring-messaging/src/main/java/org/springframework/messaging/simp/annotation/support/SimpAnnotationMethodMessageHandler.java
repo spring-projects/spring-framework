@@ -52,6 +52,8 @@ import org.springframework.messaging.handler.invocation.AbstractExceptionHandler
 import org.springframework.messaging.handler.invocation.AbstractMethodMessageHandler;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
+import org.springframework.messaging.simp.SimpAttributes;
+import org.springframework.messaging.simp.SimpAttributesContextHolder;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageMappingInfo;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -390,7 +392,13 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 			accessor.setHeader(DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER, vars);
 		}
 
-		super.handleMatch(mapping, handlerMethod, lookupDestination, message);
+		try {
+			SimpAttributesContextHolder.setAttributesFromMessage(message);
+			super.handleMatch(mapping, handlerMethod, lookupDestination, message);
+		}
+		finally {
+			SimpAttributesContextHolder.resetAttributes();
+		}
 	}
 
 	@Override

@@ -38140,7 +38140,7 @@ the message being handled through the `@SendToUser` annotation:
 [subs="verbatim,quotes"]
 ----
 @Controller
-public class MyController {
+public class PortfolioController {
 
     @MessageMapping("/trade")
     @SendToUser("/queue/position-updates")
@@ -38267,6 +38267,77 @@ will typically notice the broker is not responding within 10 seconds. Clients ne
 implement their own reconnect logic.
 ====
 
+
+
+
+[[websocket-stomp-websocket-scope]]
+==== WebSocket Scope
+
+Each WebSocket session has a map of attributes. The map is attached as a header to
+inbound client messages and may be accessed from a controller method, for example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Controller
+public class MyController {
+
+    @MessageMapping("/action")
+    public void handle(SimpMessageHeaderAccessor headerAccessor) {
+        Map<String, Object> attrs = headerAccessor.getSessionAttributes();
+        // ...
+    }
+}
+----
+
+It is also possible to declare a Spring-managed bean in the `"websocket"` scope.
+WebSocket-scoped beans can be injected into controllers and any channel interceptors
+registered on the "clientInboundChannel". Those are typically singletons and live
+longer than any individual WebSocket session. Therefore you will need to use a
+scope proxy mode for WebSocket-scoped beans:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Component
+@Scope(value="websocket", proxyMode = ScopedProxyMode.TARGET_CLASS)
+public class MyBean {
+
+    @PostConstruct
+    public void init() {
+        // Invoked after dependencies injected
+    }
+
+    // ...
+
+    @PreDestroy
+    public void destroy() {
+        // Invoked when the WebSocket session ends
+    }
+}
+
+@Controller
+public class MyController {
+
+    private final MyBean myBean;
+
+    @Autowired
+    public MyController(MyBean myBean) {
+        this.myBean = myBean;
+    }
+
+    @MessageMapping("/action")
+    public void handle() {
+        // this.myBean from the current WebSocket session
+    }
+}
+----
+
+As with any custom scope, Spring initializes a new MyBean instance the first
+time it is accessed from the controller and stores the instance in the WebSocket
+session attributes. The same instance is returned subsequently until the session
+ends. WebSocket-scoped beans will have all Spring lifecycle methods invoked as
+shown in the examples above.
 
 
 

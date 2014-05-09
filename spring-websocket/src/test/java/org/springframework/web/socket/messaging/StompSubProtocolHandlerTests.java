@@ -31,6 +31,8 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.simp.SimpAttributes;
+import org.springframework.messaging.simp.SimpAttributesContextHolder;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.TestPrincipal;
@@ -48,6 +50,7 @@ import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.handler.TestWebSocketSession;
 import org.springframework.web.socket.sockjs.transport.SockJsSession;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -287,6 +290,41 @@ public class StompSubProtocolHandlerTests {
 		assertEquals(1, this.session.getSentMessages().size());
 		TextMessage actual = (TextMessage) this.session.getSentMessages().get(0);
 		assertTrue(actual.getPayload().startsWith("ERROR"));
+	}
+
+	@Test
+	public void webSocketScope() {
+
+		Runnable runnable = Mockito.mock(Runnable.class);
+		SimpAttributes simpAttributes = new SimpAttributes(this.session.getId(), this.session.getAttributes());
+		simpAttributes.setAttribute("name", "value");
+		simpAttributes.registerDestructionCallback("name", runnable);
+
+		MessageChannel testChannel = new MessageChannel() {
+			@Override
+			public boolean send(Message<?> message) {
+				SimpAttributes simpAttributes = SimpAttributesContextHolder.currentAttributes();
+				assertThat(simpAttributes.getAttribute("name"), is("value"));
+				return true;
+			}
+			@Override
+			public boolean send(Message<?> message, long timeout) {
+				return false;
+			}
+		};
+
+		this.protocolHandler.afterSessionStarted(this.session, this.channel);
+
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
+		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
+		TextMessage textMessage = new TextMessage(new StompEncoder().encode(message));
+
+		this.protocolHandler.handleMessageFromClient(this.session, textMessage, testChannel);
+		assertEquals(Collections.emptyList(), session.getSentMessages());
+
+		this.protocolHandler.afterSessionEnded(this.session, CloseStatus.BAD_DATA, testChannel);
+		assertEquals(Collections.emptyList(), session.getSentMessages());
+		verify(runnable, times(1)).run();
 	}
 
 

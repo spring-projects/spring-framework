@@ -34,6 +34,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.annotation.SendToUser;
@@ -97,11 +99,11 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 	@Test
 	public void sendMessageToControllerAndReceiveReplyViaTopic() throws Exception {
 
-		TextMessage message1 = create(StompCommand.SUBSCRIBE).headers(
-				"id:subs1", "destination:/topic/increment").build();
+		TextMessage message1 = create(StompCommand.SUBSCRIBE)
+				.headers("id:subs1", "destination:/topic/increment").build();
 
-		TextMessage message2 = create(StompCommand.SEND).headers(
-				"destination:/app/increment").body("5").build();
+		TextMessage message2 = create(StompCommand.SEND)
+				.headers("destination:/app/increment").body("5").build();
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(1, message1, message2);
 		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
@@ -181,6 +183,37 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 		}
 	}
 
+	@Test
+	public void webSocketScope() throws Exception {
+
+		TextMessage message1 = create(StompCommand.SUBSCRIBE)
+				.headers("id:subs1", "destination:/topic/scopedBeanValue").build();
+
+		TextMessage message2 = create(StompCommand.SEND)
+				.headers("destination:/app/scopedBeanValue").build();
+
+		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(1, message1, message2);
+		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
+
+		try {
+			assertTrue(clientHandler.latch.await(2, TimeUnit.SECONDS));
+
+			String payload = clientHandler.actual.get(0).getPayload();
+			assertTrue(payload.startsWith("MESSAGE\n"));
+			assertTrue(payload.contains("destination:/topic/scopedBeanValue\n"));
+			assertTrue(payload.endsWith("\"55\"\0"));
+		}
+		finally {
+			session.close();
+		}
+	}
+
+
+	@Target({ElementType.TYPE})
+	@Retention(RetentionPolicy.RUNTIME)
+	@Controller
+	private @interface IntegrationTestController {
+	}
 
 	@IntegrationTestController
 	static class SimpleController {
@@ -218,6 +251,42 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 		}
 	}
 
+	@IntegrationTestController
+	static class ScopedBeanController {
+
+		private final ScopedBean scopedBean;
+
+		@Autowired
+		public ScopedBeanController(ScopedBean scopedBean) {
+			this.scopedBean = scopedBean;
+		}
+
+		@MessageMapping(value="/scopedBeanValue")
+		public String getValue() {
+			return this.scopedBean.getValue();
+		}
+	}
+
+
+	static interface ScopedBean {
+
+		String getValue();
+	}
+
+	static class ScopedBeanImpl implements ScopedBean {
+
+		private final String value;
+
+		public ScopedBeanImpl(String value) {
+			this.value = value;
+		}
+
+		@Override
+		public String getValue() {
+			return this.value;
+		}
+	}
+
 
 	private static class TestClientWebSocketHandler extends TextWebSocketHandler {
 
@@ -251,7 +320,8 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 	}
 
 	@Configuration
-	@ComponentScan(basePackageClasses=StompWebSocketIntegrationTests.class,
+	@ComponentScan(
+			basePackageClasses=StompWebSocketIntegrationTests.class,
 			useDefaultFilters=false,
 			includeFilters=@ComponentScan.Filter(IntegrationTestController.class))
 	static class TestMessageBrokerConfigurer extends AbstractWebSocketMessageBrokerConfigurer {
@@ -269,6 +339,12 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 			configurer.setApplicationDestinationPrefixes("/app");
 			configurer.enableSimpleBroker("/topic", "/queue");
 		}
+
+		@Bean
+		@Scope(value="websocket", proxyMode=ScopedProxyMode.INTERFACES)
+		public ScopedBean scopedBean() {
+			return new ScopedBeanImpl("55");
+		}
 	}
 
 	@Configuration
@@ -285,12 +361,6 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 		public AbstractSubscribableChannel clientOutboundChannel() {
 			return new ExecutorSubscribableChannel(); // synchronous
 		}
-	}
-
-	@Target({ElementType.TYPE})
-	@Retention(RetentionPolicy.RUNTIME)
-	@Controller
-	private @interface IntegrationTestController {
 	}
 
 }
