@@ -1,7 +1,4 @@
 package org.springframework.web.servlet.view.document;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -10,6 +7,53 @@ import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 
+/**
+ * Convenient superclass for Excel (Open XML Format) document views.
+ * Compatible with Apache POI 3.5 and higher, as of Spring 4.0.
+ *
+ * <p>For working with the workbook in the subclass, see
+ * <a href="http://jakarta.apache.org/poi/index.html">Jakarta's POI site</a>
+ *
+ * <p>As an example, you can try this snippet:
+ *
+ * <pre class="code">
+ * protected void buildExcelDocument(
+ *     Map&lt;String, Object&gt; model, XSSFWorkbook workbook,
+ *     HttpServletRequest request, HttpServletResponse response) {
+ *
+ *   // Go to the first sheet.
+ *   // getSheetAt: only if workbook is created from an existing document
+ * 	 // XSSFSheet sheet = workbook.getSheetAt(0);
+ * 	 XSSFSheet sheet = workbook.createSheet("Spring");
+ * 	 sheet.setDefaultColumnWidth(12);
+ *
+ *   // Write a text at A1.
+ *   XSSFCell cell = getCell(sheet, 0, 0);
+ *   setText(cell, "Spring POI test");
+ *
+ *   // Write the current date at A2.
+ *   XSSFCellStyle dateStyle = workbook.createCellStyle();
+ *   dateStyle.setDataFormat(XSSFDataFormat.getBuiltinFormat("m/d/yy"));
+ *   cell = getCell(sheet, 1, 0);
+ *   cell.setCellValue(new Date());
+ *   cell.setCellStyle(dateStyle);
+ *
+ *   // Write a number at A3
+ *   getCell(sheet, 2, 0).setCellValue(458);
+ *
+ *   // Write a range of numbers.
+ *   XSSFRow sheetRow = sheet.createRow(3);
+ *   for (short i = 0; i < 10; i++) {
+ *     sheetRow.createCell(i).setCellValue(i * 10);
+ *   }
+ * }</pre>
+ *
+ * This class is similar to the AbstractPdfView class in usage style.
+ *
+ * @author Jean-Pierre Pawlak
+ * @author Juergen Hoeller
+ * @see AbstractPdfView
+ */
 public abstract class AbstractExcelXView extends AbstractPoiExcelView<XSSFWorkbook> {
 
     /**

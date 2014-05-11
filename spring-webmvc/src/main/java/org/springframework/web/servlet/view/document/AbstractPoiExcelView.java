@@ -13,6 +13,29 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * Convenient superclass for Excel document views.
+ * Compatible with Apache POI 3.5 and higher, as of Spring 4.0.
+ * <p>
+ * <p>Properties:
+ * <ul>
+ * <li>url (optional): The url of an existing Excel document to pick as a starting point.
+ * It is done without localization part nor the ".xls" extension.
+ * <li>extension (optional): The template document extension (e.q. ".xls", ".xlsx").
+ * </ul>
+ * <p>
+ * <p>The file will be searched with locations in the following order:
+ * <ul>
+ * <li>[url]_[language]_[country][extension]
+ * <li>[url]_[language][extension]
+ * <li>[url][extension]
+ * </ul>
+ * <p>
+ * <p>For working with the workbook in the subclass, see
+ * <a href="http://jakarta.apache.org/poi/index.html">Jakarta's POI site</a>
+ * <p>
+ * <p>Recommend to use one of the following subclasses: {@link AbstractExcelView}, {@link AbstractExcelXView}.
+ */
 public abstract class AbstractPoiExcelView<T extends Workbook> extends AbstractView {
     private String url;
     private String extension;
@@ -115,7 +138,6 @@ public abstract class AbstractPoiExcelView<T extends Workbook> extends AbstractV
      * Create new an Excel Workbook document from template document
      *
      * @param resource template document resource
-     *
      * @return workbook
      */
     protected abstract T createWorkbookFromTemplate(Resource resource) throws IOException;

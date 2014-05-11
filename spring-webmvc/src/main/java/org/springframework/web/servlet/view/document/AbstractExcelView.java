@@ -29,19 +29,6 @@ import java.io.IOException;
  * Convenient superclass for Excel document views.
  * Compatible with Apache POI 3.5 and higher, as of Spring 4.0.
  *
- * <p>Properties:
- * <ul>
- * <li>url (optional): The url of an existing Excel document to pick as a starting point.
- * It is done without localization part nor the ".xls" extension.
- * </ul>
- *
- * <p>The file will be searched with locations in the following order:
- * <ul>
- * <li>[url]_[language]_[country].xls
- * <li>[url]_[language].xls
- * <li>[url].xls
- * </ul>
- *
  * <p>For working with the workbook in the subclass, see
  * <a href="http://jakarta.apache.org/poi/index.html">Jakarta's POI site</a>
  *
