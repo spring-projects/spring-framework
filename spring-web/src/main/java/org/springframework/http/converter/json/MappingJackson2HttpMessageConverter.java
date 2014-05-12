@@ -21,6 +21,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -29,6 +30,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -36,6 +38,7 @@ import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.http.converter.MethodParameterHttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -57,7 +60,7 @@ import org.springframework.util.ClassUtils;
  * @since 3.1.2
  */
 public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConverter<Object>
-		implements GenericHttpMessageConverter<Object> {
+		implements GenericHttpMessageConverter<Object>, MethodParameterHttpMessageConverter<Object> {
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
@@ -147,6 +150,10 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 		}
 	}
 
+	@Override
+	public boolean canRead(Class<?> clazz, MediaType mediaType, MethodParameter parameter) {
+		return canRead(clazz, mediaType);
+	}
 
 	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
@@ -199,6 +206,11 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 	}
 
 	@Override
+	public boolean canWrite(Class<?> clazz, MediaType mediaType, MethodParameter parameter) {
+		return canWrite(clazz, mediaType);
+	}
+
+	@Override
 	protected boolean supports(Class<?> clazz) {
 		// should not be called, since we override canRead/Write instead
 		throw new UnsupportedOperationException();
@@ -210,6 +222,11 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 
 		JavaType javaType = getJavaType(clazz, null);
 		return readJavaType(javaType, inputMessage);
+	}
+
+	@Override
+	public Object read(Class<?> clazz, HttpInputMessage inputMessage, MethodParameter parameter) throws IOException, HttpMessageNotReadableException {
+		return super.read(clazz, inputMessage);
 	}
 
 	@Override
@@ -250,10 +267,32 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 			if (this.jsonPrefix != null) {
 				jsonGenerator.writeRaw(this.jsonPrefix);
 			}
-			this.objectMapper.writeValue(jsonGenerator, object);
+			if (object instanceof MappingJacksonValueHolder) {
+				MappingJacksonValueHolder valueHolder = (MappingJacksonValueHolder) object;
+				object = valueHolder.getValue();
+				Class<?> serializationView = valueHolder.getSerializationView();
+				this.objectMapper.writerWithView(serializationView).writeValue(jsonGenerator, object);
+			}
+			else {
+				this.objectMapper.writeValue(jsonGenerator, object);
+			}
 		}
 		catch (JsonProcessingException ex) {
 			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(), ex);
+		}
+	}
+
+	@Override
+	public void write(Object object, MediaType contentType, HttpOutputMessage outputMessage, MethodParameter parameter)
+			throws IOException, HttpMessageNotWritableException {
+
+		JsonView annot = parameter.getMethodAnnotation(JsonView.class);
+		if (annot != null && annot.value().length != 0) {
+			MappingJacksonValueHolder serializationValue = new MappingJacksonValueHolder(object, annot.value()[0]);
+			super.write(serializationValue, contentType, outputMessage);
+		}
+		else {
+			super.write(object, contentType, outputMessage);
 		}
 	}
 
@@ -296,6 +335,22 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 			}
 		}
 		return JsonEncoding.UTF8;
+	}
+
+	@Override
+	protected MediaType getDefaultContentType(Object object) throws IOException {
+		if (object instanceof MappingJacksonValueHolder) {
+			object = ((MappingJacksonValueHolder) object).getValue();
+		}
+		return super.getDefaultContentType(object);
+	}
+
+	@Override
+	protected Long getContentLength(Object object, MediaType contentType) throws IOException {
+		if (object instanceof MappingJacksonValueHolder) {
+			object = ((MappingJacksonValueHolder) object).getValue();
+		}
+		return super.getContentLength(object, contentType);
 	}
 
 }

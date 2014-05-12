@@ -56,7 +56,8 @@ public class AbstractJettyServerTestCase {
 
 	protected static String baseUrl;
 
-	protected static MediaType contentType;
+	protected static MediaType textContentType;
+	protected static MediaType jsonContentType;
 
 	private static Server jettyServer;
 
@@ -67,14 +68,19 @@ public class AbstractJettyServerTestCase {
 		baseUrl = "http://localhost:" + port;
 		ServletContextHandler handler = new ServletContextHandler();
 		byte[] bytes = helloWorld.getBytes("UTF-8");
-		contentType = new MediaType("text", "plain", Collections
+		textContentType = new MediaType("text", "plain", Collections
 				.singletonMap("charset", "UTF-8"));
-		handler.addServlet(new ServletHolder(new GetServlet(bytes, contentType)), "/get");
-		handler.addServlet(new ServletHolder(new GetServlet(new byte[0], contentType)), "/get/nothing");
+		jsonContentType = new MediaType("application", "json", Collections
+				.singletonMap("charset", "UTF-8"));
+		handler.addServlet(new ServletHolder(new GetServlet(bytes, textContentType)), "/get");
+		handler.addServlet(new ServletHolder(new GetServlet(new byte[0], textContentType)), "/get/nothing");
 		handler.addServlet(new ServletHolder(new GetServlet(bytes, null)), "/get/nocontenttype");
 		handler.addServlet(
-				new ServletHolder(new PostServlet(helloWorld, baseUrl + "/post/1", bytes, contentType)),
+				new ServletHolder(new PostServlet(helloWorld, baseUrl + "/post/1", bytes, textContentType)),
 				"/post");
+		handler.addServlet(
+				new ServletHolder(new JsonPostServlet(baseUrl + "/jsonpost/1", jsonContentType)),
+				"/jsonpost");
 		handler.addServlet(new ServletHolder(new StatusCodeServlet(204)), "/status/nocontent");
 		handler.addServlet(new ServletHolder(new StatusCodeServlet(304)), "/status/notmodified");
 		handler.addServlet(new ServletHolder(new ErrorServlet(404)), "/status/notfound");
@@ -83,7 +89,7 @@ public class AbstractJettyServerTestCase {
 		handler.addServlet(new ServletHolder(new MultipartServlet()), "/multipart");
 		handler.addServlet(new ServletHolder(new DeleteServlet()), "/delete");
 		handler.addServlet(
-				new ServletHolder(new PutServlet(helloWorld, bytes, contentType)),
+				new ServletHolder(new PutServlet(helloWorld, bytes, textContentType)),
 				"/put");
 		jettyServer.setHandler(handler);
 		jettyServer.start();
@@ -182,6 +188,33 @@ public class AbstractJettyServerTestCase {
 			response.setContentLength(buf.length);
 			response.setContentType(contentType.toString());
 			FileCopyUtils.copy(buf, response.getOutputStream());
+		}
+	}
+
+	@SuppressWarnings("serial")
+	private static class JsonPostServlet extends HttpServlet {
+
+		private final String location;
+
+		private final MediaType contentType;
+
+		private JsonPostServlet(String location, MediaType contentType) {
+			this.location = location;
+			this.contentType = contentType;
+		}
+
+		@Override
+		protected void doPost(HttpServletRequest request, HttpServletResponse response)
+				throws ServletException, IOException {
+			assertTrue("Invalid request content-length", request.getContentLength() > 0);
+			assertNotNull("No content-type", request.getContentType());
+			String body = FileCopyUtils.copyToString(request.getReader());
+			response.setStatus(HttpServletResponse.SC_CREATED);
+			response.setHeader("Location", location);
+			response.setContentType(contentType.toString());
+			byte[] bytes = body.getBytes("UTF-8");
+			response.setContentLength(bytes.length);;
+			FileCopyUtils.copy(bytes, response.getOutputStream());
 		}
 	}
 

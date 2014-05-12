@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Before;
 import org.junit.Test;
 import org.mozilla.javascript.Context;
@@ -274,6 +275,24 @@ public class MappingJackson2JsonViewTests {
 		assertSame(bean2, ((Map) actual).get("foo2"));
 	}
 
+	@Test
+	public void renderSimpleBeanWithJsonView() throws Exception {
+		Object bean = new TestBeanSimple();
+		Map<String, Object> model = new HashMap<String, Object>();
+		model.put("bindingResult", mock(BindingResult.class, "binding_result"));
+		model.put("foo", bean);
+		model.put(JsonView.class.getName(), MyJacksonView1.class);
+
+		view.setUpdateContentLength(true);
+		view.render(model, request, response);
+
+		String content = response.getContentAsString();
+		assertTrue(content.length() > 0);
+		assertEquals(content.length(), response.getContentLength());
+		assertTrue(content.contains("foo"));
+		assertFalse(content.contains("42"));
+	}
+
 	private void validateResult() throws Exception {
 		Object jsResult =
 				jsContext.evaluateString(jsScope, "(" + response.getContentAsString() + ")", "JSON Stream", 1, null);
@@ -281,14 +300,18 @@ public class MappingJackson2JsonViewTests {
 		assertEquals("application/json", response.getContentType());
 	}
 
+	public interface MyJacksonView1 {};
+	public interface MyJacksonView2 {};
 
 	@SuppressWarnings("unused")
 	public static class TestBeanSimple {
 
+		@JsonView(MyJacksonView1.class)
 		private String value = "foo";
 
 		private boolean test = false;
 
+		@JsonView(MyJacksonView2.class)
 		private long number = 42;
 
 		private TestChildBean child = new TestChildBean();

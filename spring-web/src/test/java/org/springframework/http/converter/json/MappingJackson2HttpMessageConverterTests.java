@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
@@ -237,6 +238,22 @@ public class MappingJackson2HttpMessageConverterTests {
 		assertEquals(")]}',\"foo\"", outputMessage.getBodyAsString(Charset.forName("UTF-8")));
 	}
 
+	@Test
+	public void jsonView() throws Exception {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		JacksonViewBean bean = new JacksonViewBean();
+		bean.setWithView1("with");
+		bean.setWithView2("with");
+		bean.setWithoutView("without");
+		MappingJacksonValueHolder jsv = new MappingJacksonValueHolder(bean, MyJacksonView1.class);
+		this.converter.writeInternal(jsv, outputMessage);
+
+		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
+		assertTrue(result.contains("\"withView1\":\"with\""));
+		assertFalse(result.contains("\"withView2\":\"with\""));
+		assertTrue(result.contains("\"withoutView\":\"without\""));
+	}
+
 
 	public static class MyBean {
 
@@ -312,6 +329,44 @@ public class MappingJackson2HttpMessageConverterTests {
 
 		public void setName(String name) {
 			this.name = name;
+		}
+	}
+
+	private interface MyJacksonView1 {};
+	private interface MyJacksonView2 {};
+
+	private static class JacksonViewBean {
+
+		@JsonView(MyJacksonView1.class)
+		private String withView1;
+
+		@JsonView(MyJacksonView2.class)
+		private String withView2;
+
+		private String withoutView;
+
+		public String getWithView1() {
+			return withView1;
+		}
+
+		public void setWithView1(String withView1) {
+			this.withView1 = withView1;
+		}
+
+		public String getWithView2() {
+			return withView2;
+		}
+
+		public void setWithView2(String withView2) {
+			this.withView2 = withView2;
+		}
+
+		public String getWithoutView() {
+			return withoutView;
+		}
+
+		public void setWithoutView(String withoutView) {
+			this.withoutView = withoutView;
 		}
 	}
 

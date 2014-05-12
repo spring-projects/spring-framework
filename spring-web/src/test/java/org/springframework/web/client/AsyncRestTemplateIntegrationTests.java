@@ -63,7 +63,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 		ResponseEntity<String> entity = futureEntity.get();
 		assertEquals("Invalid content", helloWorld, entity.getBody());
 		assertFalse("No headers", entity.getHeaders().isEmpty());
-		assertEquals("Invalid content-type", contentType, entity.getHeaders().getContentType());
+		assertEquals("Invalid content-type", textContentType, entity.getHeaders().getContentType());
 		assertEquals("Invalid status code", HttpStatus.OK, entity.getStatusCode());
 	}
 
@@ -84,7 +84,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 			public void onSuccess(ResponseEntity<String> entity) {
 				assertEquals("Invalid content", helloWorld, entity.getBody());
 				assertFalse("No headers", entity.getHeaders().isEmpty());
-				assertEquals("Invalid content-type", contentType, entity.getHeaders().getContentType());
+				assertEquals("Invalid content-type", textContentType, entity.getHeaders().getContentType());
 				assertEquals("Invalid status code", HttpStatus.OK, entity.getStatusCode());
 			}
 

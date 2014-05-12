@@ -23,6 +23,7 @@ import java.nio.charset.Charset;
 import java.util.EnumSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,6 +36,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.converter.json.MappingJacksonValueHolder;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -63,7 +65,7 @@ public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 		ResponseEntity<String> entity = template.getForEntity(baseUrl + "/{method}", String.class, "get");
 		assertEquals("Invalid content", helloWorld, entity.getBody());
 		assertFalse("No headers", entity.getHeaders().isEmpty());
-		assertEquals("Invalid content-type", contentType, entity.getHeaders().getContentType());
+		assertEquals("Invalid content-type", textContentType, entity.getHeaders().getContentType());
 		assertEquals("Invalid status code", HttpStatus.OK, entity.getStatusCode());
 	}
 
@@ -196,6 +198,81 @@ public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 		HttpEntity<Void> result = template.exchange(baseUrl + "/{method}", HttpMethod.POST, requestEntity, Void.class, "post");
 		assertEquals("Invalid location", new URI(baseUrl + "/post/1"), result.getHeaders().getLocation());
 		assertFalse(result.hasBody());
+	}
+
+	@Test
+	public void jsonPostForObject() throws URISyntaxException {
+		HttpHeaders entityHeaders = new HttpHeaders();
+		entityHeaders.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+		MySampleBean bean = new MySampleBean();
+		bean.setWith1("with");
+		bean.setWith2("with");
+		bean.setWithout("without");
+		HttpEntity<MySampleBean> entity = new HttpEntity<MySampleBean>(bean, entityHeaders);
+		String s = template.postForObject(baseUrl + "/jsonpost", entity, String.class, "post");
+		assertTrue(s.contains("\"with1\":\"with\""));
+		assertTrue(s.contains("\"with2\":\"with\""));
+		assertTrue(s.contains("\"without\":\"without\""));
+	}
+
+	@Test
+	public void jsonPostForObjectWithJacksonView() throws URISyntaxException {
+		HttpHeaders entityHeaders = new HttpHeaders();
+		entityHeaders.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+		MySampleBean bean = new MySampleBean("with", "with", "without");
+		MappingJacksonValueHolder jsv = new MappingJacksonValueHolder(bean, MyJacksonView1.class);
+		HttpEntity<MappingJacksonValueHolder> entity = new HttpEntity<MappingJacksonValueHolder>(jsv);
+		String s = template.postForObject(baseUrl + "/jsonpost", entity, String.class, "post");
+		assertTrue(s.contains("\"with1\":\"with\""));
+		assertFalse(s.contains("\"with2\":\"with\""));
+		assertTrue(s.contains("\"without\":\"without\""));
+	}
+
+	public interface MyJacksonView1 {};
+	public interface MyJacksonView2 {};
+
+	public static class MySampleBean {
+
+		@JsonView(MyJacksonView1.class)
+		private String with1;
+
+		@JsonView(MyJacksonView2.class)
+		private String with2;
+
+		private String without;
+
+		private MySampleBean() {
+		}
+
+		private MySampleBean(String with1, String with2, String without) {
+			this.with1 = with1;
+			this.with2 = with2;
+			this.without = without;
+		}
+
+		public String getWith1() {
+			return with1;
+		}
+
+		public void setWith1(String with1) {
+			this.with1 = with1;
+		}
+
+		public String getWith2() {
+			return with2;
+		}
+
+		public void setWith2(String with2) {
+			this.with2 = with2;
+		}
+
+		public String getWithout() {
+			return without;
+		}
+
+		public void setWithout(String without) {
+			this.without = without;
+		}
 	}
 
 }

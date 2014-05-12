@@ -245,6 +245,13 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	}
 
 	/**
+	 * Shortcut for {@link MapperFeature#DEFAULT_VIEW_INCLUSION} option.
+	 */
+	public void setDefaultViewInclusion(boolean defaultViewInclusion) {
+		this.features.put(MapperFeature.DEFAULT_VIEW_INCLUSION, defaultViewInclusion);
+	}
+
+	/**
 	 * Shortcut for {@link SerializationFeature#FAIL_ON_EMPTY_BEANS} option.
 	 */
 	public void setFailOnEmptyBeans(boolean failOnEmptyBeans) {
