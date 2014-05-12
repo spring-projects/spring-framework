@@ -14,24 +14,24 @@ configure(allprojects) { project ->
 	version = qualifyVersionIfNecessary(version)
 
 	ext.aspectjVersion       = "1.8.0"
-	ext.groovyVersion        = "1.8.9"
+	ext.groovyVersion        = "2.3.0"
 	ext.hibernate3Version    = "3.6.10.Final"
 	ext.hibernate4Version    = "4.3.5.Final"
 	ext.hibVal4Version       = "4.3.1.Final"
 	ext.hibVal5Version       = "5.1.0.Final"
 	ext.hsqldbVersion        = "2.3.2"
 	ext.jackson2Version      = "2.3.3"
-	ext.jasperReportsVersion = "5.5.1"  // 5.5.2 has an unresolvable transitive dependency
-	ext.jettyVersion         = "9.1.4.v20140401"
+	ext.jasperReportsVersion = "5.5.2"
+	ext.jettyVersion         = "9.1.5.v20140505"
 	ext.jodaVersion          = "2.3"
 	ext.junitVersion         = "4.11"
 	ext.slf4jVersion         = "1.7.7"
 	ext.snakeYamlVersion     = "1.13"
+	ext.snifferVersion       = "1.11"
 	ext.tiles2Version        = "2.2.2"
-	ext.tiles3Version        = "3.0.3"
+	ext.tiles3Version        = "3.0.4"
 	ext.tomcatVersion        = "8.0.5"
 	ext.xstreamVersion       = "1.4.7"
-	ext.snifferVersion       = "1.11"
 
 	ext.gradleScriptDir   = "${rootProject.projectDir}/gradle"
 
@@ -584,6 +584,8 @@ project("spring-context-support") {
 			exclude group: "com.fasterxml.jackson.core", module: "jackson-annotations"
 			exclude group: "com.fasterxml.jackson.core", module: "jackson-core"
 			exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
+			exclude group: "org.olap4j", module: "olap4j"
+			exclude group: "xml-apis", module: "xml-apis"
 		}
 		testCompile("org.apache.poi:poi:3.10-FINAL")
 		testCompile("commons-beanutils:commons-beanutils:1.8.0") // for Velocity/JasperReports
@@ -761,10 +763,11 @@ project("spring-webmvc") {
 		optional("org.freemarker:freemarker:2.3.20")
 		optional("com.lowagie:itext:2.1.7")
 		optional("net.sf.jasperreports:jasperreports:$jasperReportsVersion") {
-			exclude group: "xml-apis", module: "xml-apis"
 			exclude group: "com.fasterxml.jackson.core", module: "jackson-annotations"
 			exclude group: "com.fasterxml.jackson.core", module: "jackson-core"
 			exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
+			exclude group: "org.olap4j", module: "olap4j"
+			exclude group: "xml-apis", module: "xml-apis"
 		}
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("rome:rome:1.0")
