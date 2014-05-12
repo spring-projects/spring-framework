@@ -156,7 +156,7 @@ configure(allprojects) { project ->
 		"http://aopalliance.sourceforge.net/doc/",
 		"http://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
 		"http://ehcache.org/apidocs/",
-		"http://quartz-scheduler.org/api/2.1.7/",
+		"http://quartz-scheduler.org/api/2.2.0/",
 		"http://fasterxml.github.com/jackson-core/javadoc/2.3.0/",
 		"http://fasterxml.github.com/jackson-databind/javadoc/2.3.0/",
 		"http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs"
@@ -571,11 +571,11 @@ project("spring-context-support") {
 		compile(project(":spring-context"))
 		optional(project(":spring-jdbc")) // for Quartz support
 		optional(project(":spring-tx")) // for Quartz support
-		optional("javax.mail:javax.mail-api:1.4.7")
+		optional("javax.mail:javax.mail-api:1.5.2")
 		optional("javax.cache:cache-api:1.0.0")
 		optional("com.google.guava:guava:17.0")
-		optional("net.sf.ehcache:ehcache-core:2.6.5")
-		optional("org.quartz-scheduler:quartz:2.1.7")
+		optional("net.sf.ehcache:ehcache-core:2.6.7")
+		optional("org.quartz-scheduler:quartz:2.2.1")
 		optional("org.codehaus.fabric3.api:commonj:1.1.0")
 		optional("org.apache.velocity:velocity:1.7")
 		optional("org.freemarker:freemarker:2.3.20")
@@ -592,7 +592,7 @@ project("spring-context-support") {
 		testCompile("commons-digester:commons-digester:1.8.1") // for Velocity/JasperReports
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
 		testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
-		testRuntime("com.sun.mail:javax.mail:1.4.7")
+		testRuntime("com.sun.mail:javax.mail:1.5.2")
 	}
 
 	// pick up **/*.types files in src/main
@@ -901,7 +901,7 @@ project("spring-test") {
 		testCompile(project(":spring-context-support"))
 		testCompile(project(":spring-oxm"))
 		testCompile(project(":spring-webmvc-tiles3"))
-		testCompile("javax.mail:javax.mail-api:1.4.7")
+		testCompile("javax.mail:javax.mail-api:1.5.2")
 		testCompile("javax.ejb:ejb-api:3.0")
 		testCompile("org.hibernate:hibernate-core:${hibernate3Version}") {
 			exclude group: 'org.hibernate.javax.persistence', module: 'hibernate-jpa-2.0-api'
@@ -964,7 +964,7 @@ project("spring-aspects") {
 		optional("javax.cache:cache-api:1.0.0")
 		testCompile(project(":spring-core")) // for CodeStyleAspect
 		testCompile(project(":spring-test"))
-		testCompile("javax.mail:javax.mail-api:1.4.7")
+		testCompile("javax.mail:javax.mail-api:1.5.2")
 	}
 
 	eclipse.project {
