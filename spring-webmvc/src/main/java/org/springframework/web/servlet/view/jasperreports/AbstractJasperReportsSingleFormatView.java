@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ import java.io.ByteArrayOutputStream;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.jasperreports.engine.JRExporter;
-import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperPrint;
 
 import org.springframework.ui.jasperreports.JasperReportsUtils;
@@ -36,12 +34,17 @@ import org.springframework.web.util.WebUtils;
  * to create a JasperReports exporter for a specific output format, and
  * {@code useWriter} to determine whether to write text or binary content.
  *
+ * <p><b>This class is compatible with classic JasperReports releases back until 2.x.</b>
+ * As a consequence, it keeps using the {@link net.sf.jasperreports.engine.JRExporter}
+ * API which got deprecated as of JasperReports 5.5.2 (early 2014).
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.1.5
  * @see #createExporter()
  * @see #useWriter()
  */
+@SuppressWarnings({"deprecation", "rawtypes"})
 public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasperReportsView {
 
 	@Override
@@ -54,12 +57,13 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 	 * for a pre-defined output format.
 	 */
 	@Override
+	@SuppressWarnings("unchecked")
 	protected void renderReport(JasperPrint populatedReport, Map<String, Object> model, HttpServletResponse response)
 			throws Exception {
 
-		JRExporter exporter = createExporter();
+		net.sf.jasperreports.engine.JRExporter exporter = createExporter();
 
-		Map<JRExporterParameter, Object> mergedExporterParameters = getConvertedExporterParameters();
+		Map<net.sf.jasperreports.engine.JRExporterParameter, Object> mergedExporterParameters = getConvertedExporterParameters();
 		if (!CollectionUtils.isEmpty(mergedExporterParameters)) {
 			exporter.setParameters(mergedExporterParameters);
 		}
@@ -79,12 +83,12 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 	 * @param response the HTTP response the report should be rendered to
 	 * @throws Exception if rendering failed
 	 */
-	protected void renderReportUsingWriter(
-			JRExporter exporter, JasperPrint populatedReport, HttpServletResponse response) throws Exception {
+	protected void renderReportUsingWriter(net.sf.jasperreports.engine.JRExporter exporter,
+			JasperPrint populatedReport, HttpServletResponse response) throws Exception {
 
 		// Copy the encoding configured for the report into the response.
 		String contentType = getContentType();
-		String encoding = (String) exporter.getParameter(JRExporterParameter.CHARACTER_ENCODING);
+		String encoding = (String) exporter.getParameter(net.sf.jasperreports.engine.JRExporterParameter.CHARACTER_ENCODING);
 		if (encoding != null) {
 			// Only apply encoding if content type is specified but does not contain charset clause already.
 			if (contentType != null && !contentType.toLowerCase().contains(WebUtils.CONTENT_TYPE_CHARSET_PREFIX)) {
@@ -104,8 +108,8 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 	 * @param response the HTTP response the report should be rendered to
 	 * @throws Exception if rendering failed
 	 */
-	protected void renderReportUsingOutputStream(
-			JRExporter exporter, JasperPrint populatedReport, HttpServletResponse response) throws Exception {
+	protected void renderReportUsingOutputStream(net.sf.jasperreports.engine.JRExporter exporter,
+			JasperPrint populatedReport, HttpServletResponse response) throws Exception {
 
 		// IE workaround: write into byte array first.
 		ByteArrayOutputStream baos = createTemporaryOutputStream();
@@ -121,7 +125,7 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 	 * output will be written as text or as binary content.
 	 * @see #useWriter()
 	 */
-	protected abstract JRExporter createExporter();
+	protected abstract net.sf.jasperreports.engine.JRExporter createExporter();
 
 	/**
 	 * Return whether to use a {@code java.io.Writer} to write text content

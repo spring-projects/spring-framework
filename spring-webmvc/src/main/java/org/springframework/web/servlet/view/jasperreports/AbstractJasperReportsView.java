@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import javax.sql.DataSource;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRDataSourceProvider;
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -101,6 +100,10 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * so that reports render correctly in Internet Explorer. However, you can override this
  * setting through the {@code headers} property.
  *
+ * <p><b>This class is compatible with classic JasperReports releases back until 2.x.</b>
+ * As a consequence, it keeps using the {@link net.sf.jasperreports.engine.JRExporter}
+ * API which got deprecated as of JasperReports 5.5.2 (early 2014).
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.1.3
@@ -112,6 +115,7 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * @see #setExporterParameters
  * @see #setJdbcDataSource
  */
+@SuppressWarnings({"deprecation", "rawtypes"})
 public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 
 	/**
@@ -157,7 +161,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	/**
 	 * Stores the converted exporter parameters - keyed by {@code JRExporterParameter}.
 	 */
-	private Map<JRExporterParameter, Object> convertedExporterParameters;
+	private Map<net.sf.jasperreports.engine.JRExporterParameter, Object> convertedExporterParameters;
 
 	/**
 	 * Stores the {@code DataSource}, if any, used as the report data source.
@@ -261,14 +265,14 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	/**
 	 * Allows subclasses to populate the converted exporter parameters.
 	 */
-	protected void setConvertedExporterParameters(Map<JRExporterParameter, Object> convertedExporterParameters) {
-		this.convertedExporterParameters = convertedExporterParameters;
+	protected void setConvertedExporterParameters(Map<net.sf.jasperreports.engine.JRExporterParameter, Object> parameters) {
+		this.convertedExporterParameters = parameters;
 	}
 
 	/**
 	 * Allows subclasses to retrieve the converted exporter parameters.
 	 */
-	protected Map<JRExporterParameter, Object> getConvertedExporterParameters() {
+	protected Map<net.sf.jasperreports.engine.JRExporterParameter, Object> getConvertedExporterParameters() {
 		return this.convertedExporterParameters;
 	}
 
@@ -353,9 +357,10 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 */
 	protected final void convertExporterParameters() {
 		if (!CollectionUtils.isEmpty(this.exporterParameters)) {
-			this.convertedExporterParameters = new HashMap<JRExporterParameter, Object>(this.exporterParameters.size());
+			this.convertedExporterParameters =
+					new HashMap<net.sf.jasperreports.engine.JRExporterParameter, Object>(this.exporterParameters.size());
 			for (Map.Entry<?, ?> entry : this.exporterParameters.entrySet()) {
-				JRExporterParameter exporterParameter = getExporterParameter(entry.getKey());
+				net.sf.jasperreports.engine.JRExporterParameter exporterParameter = getExporterParameter(entry.getKey());
 				this.convertedExporterParameters.put(
 						exporterParameter, convertParameterValue(exporterParameter, entry.getValue()));
 			}
@@ -364,7 +369,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 
 	/**
 	 * Convert the supplied parameter value into the actual type required by the
-	 * corresponding {@link JRExporterParameter}.
+	 * corresponding {@code JRExporterParameter}.
 	 * <p>The default implementation simply converts the String values "true" and
 	 * "false" into corresponding {@code Boolean} objects, and tries to convert
 	 * String values that start with a digit into {@code Integer} objects
@@ -373,7 +378,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * @param value the parameter value
 	 * @return the converted parameter value
 	 */
-	protected Object convertParameterValue(JRExporterParameter parameter, Object value) {
+	protected Object convertParameterValue(net.sf.jasperreports.engine.JRExporterParameter parameter, Object value) {
 		if (value instanceof String) {
 			String str = (String) value;
 			if ("true".equals(str)) {
@@ -403,9 +408,9 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * @return a JRExporterParameter for the given parameter object
 	 * @see #convertToExporterParameter(String)
 	 */
-	protected JRExporterParameter getExporterParameter(Object parameter) {
-		if (parameter instanceof JRExporterParameter) {
-			return (JRExporterParameter) parameter;
+	protected net.sf.jasperreports.engine.JRExporterParameter getExporterParameter(Object parameter) {
+		if (parameter instanceof net.sf.jasperreports.engine.JRExporterParameter) {
+			return (net.sf.jasperreports.engine.JRExporterParameter) parameter;
 		}
 		if (parameter instanceof String) {
 			return convertToExporterParameter((String) parameter);
@@ -422,7 +427,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * (e.g. "net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI")
 	 * @return the corresponding JRExporterParameter instance
 	 */
-	protected JRExporterParameter convertToExporterParameter(String fqFieldName) {
+	protected net.sf.jasperreports.engine.JRExporterParameter convertToExporterParameter(String fqFieldName) {
 		int index = fqFieldName.lastIndexOf('.');
 		if (index == -1 || index == fqFieldName.length()) {
 			throw new IllegalArgumentException(
@@ -437,9 +442,9 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 			Class<?> cls = ClassUtils.forName(className, getApplicationContext().getClassLoader());
 			Field field = cls.getField(fieldName);
 
-			if (JRExporterParameter.class.isAssignableFrom(field.getType())) {
+			if (net.sf.jasperreports.engine.JRExporterParameter.class.isAssignableFrom(field.getType())) {
 				try {
-					return (JRExporterParameter) field.get(null);
+					return (net.sf.jasperreports.engine.JRExporterParameter) field.get(null);
 				}
 				catch (IllegalAccessException ex) {
 					throw new IllegalArgumentException(
