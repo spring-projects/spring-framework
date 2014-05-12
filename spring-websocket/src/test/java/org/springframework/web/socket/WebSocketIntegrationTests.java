@@ -23,17 +23,18 @@ import java.util.Arrays;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.handler.TextWebSocketHandler;
-import org.springframework.web.socket.handler.AbstractWebSocketHandler;
-import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
-import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
+import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+import org.springframework.web.socket.handler.AbstractWebSocketHandler;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
+import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
 import static org.junit.Assert.*;
 
@@ -47,22 +48,21 @@ public class WebSocketIntegrationTests extends  AbstractWebSocketIntegrationTest
 
 	@Parameterized.Parameters
 	public static Iterable<Object[]> arguments() {
-		return Arrays.asList(new Object[][]{
+		return Arrays.asList(new Object[][] {
 				{new JettyWebSocketTestServer(), new JettyWebSocketClient()},
 				{new TomcatWebSocketTestServer(), new StandardWebSocketClient()},
 				{new UndertowTestServer(), new JettyWebSocketClient()}
 		});
-	};
+	}
 
 
 	@Override
 	protected Class<?>[] getAnnotatedConfigClasses() {
-		return new Class<?>[] { TestWebSocketConfigurer.class };
+		return new Class<?>[] {TestWebSocketConfigurer.class};
 	}
 
 	@Test
 	public void subProtocolNegotiation() throws Exception {
-
 		WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 		headers.setSecWebSocketProtocol("foo");
 
@@ -78,7 +78,7 @@ public class WebSocketIntegrationTests extends  AbstractWebSocketIntegrationTest
 	static class TestWebSocketConfigurer implements WebSocketConfigurer {
 
 		@Autowired
-		private DefaultHandshakeHandler handshakeHandler; // can't rely on classpath for server detection
+		private DefaultHandshakeHandler handshakeHandler;  // can't rely on classpath for server detection
 
 		@Override
 		public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
@@ -91,6 +91,7 @@ public class WebSocketIntegrationTests extends  AbstractWebSocketIntegrationTest
 			return new TestServerWebSocketHandler();
 		}
 	}
+
 
 	private static class TestServerWebSocketHandler extends TextWebSocketHandler {
 	}

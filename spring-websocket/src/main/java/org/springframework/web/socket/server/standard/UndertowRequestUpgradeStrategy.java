@@ -16,6 +16,16 @@
 
 package org.springframework.web.socket.server.standard;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.websocket.Decoder;
+import javax.websocket.Encoder;
+import javax.websocket.Endpoint;
+import javax.websocket.Extension;
+
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.HttpUpgradeListener;
 import io.undertow.servlet.api.InstanceFactory;
@@ -31,18 +41,11 @@ import io.undertow.websockets.jsr.EncodingFactory;
 import io.undertow.websockets.jsr.EndpointSessionHandler;
 import io.undertow.websockets.jsr.ServerWebSocketContainer;
 import io.undertow.websockets.jsr.handshake.HandshakeUtil;
+import org.xnio.StreamConnection;
+
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.server.HandshakeFailureException;
-import org.xnio.StreamConnection;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.websocket.Decoder;
-import javax.websocket.Encoder;
-import javax.websocket.Endpoint;
-import javax.websocket.Extension;
-import java.util.*;
 
 
 /**
@@ -60,13 +63,13 @@ public class UndertowRequestUpgradeStrategy extends AbstractStandardUpgradeStrat
 
 
 	public UndertowRequestUpgradeStrategy() {
-		this.handshakes = new Handshake[] { new Hybi13Handshake(), new Hybi08Handshake(), new Hybi07Handshake() };
+		this.handshakes = new Handshake[] {new Hybi13Handshake(), new Hybi08Handshake(), new Hybi07Handshake()};
 		this.supportedVersions = initSupportedVersions(this.handshakes);
 	}
 
 	private String[] initSupportedVersions(Handshake[] handshakes) {
 		String[] versions = new String[handshakes.length];
-		for (int i=0; i < versions.length; i++) {
+		for (int i = 0; i < versions.length; i++) {
 			versions[i] = handshakes[i].getVersion().toHttpHeaderValue();
 		}
 		return versions;
@@ -125,8 +128,7 @@ public class UndertowRequestUpgradeStrategy extends AbstractStandardUpgradeStrat
 		endpointRegistration.setSubprotocols(Arrays.asList(selectedProtocol));
 		endpointRegistration.setExtensions(selectedExtensions);
 
-		return new ConfiguredServerEndpoint(endpointRegistration,
-				new EndpointInstanceFactory(endpoint), null,
+		return new ConfiguredServerEndpoint(endpointRegistration, new EndpointInstanceFactory(endpoint), null,
 				new EncodingFactory(
 						Collections.<Class<?>, List<InstanceFactory<? extends Encoder>>>emptyMap(),
 						Collections.<Class<?>, List<InstanceFactory<? extends Decoder>>>emptyMap(),
@@ -145,7 +147,6 @@ public class UndertowRequestUpgradeStrategy extends AbstractStandardUpgradeStrat
 
 		@Override
 		public InstanceHandle<Endpoint> createInstance() throws InstantiationException {
-
 			return new InstanceHandle<Endpoint>() {
 				@Override
 				public Endpoint getInstance() {
