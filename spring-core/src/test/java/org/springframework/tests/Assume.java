@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.junit.internal.AssumptionViolatedException;
+
 import org.springframework.util.ClassUtils;
 
 import static org.junit.Assume.*;
@@ -78,7 +79,6 @@ import static org.junit.Assume.*;
  */
 public abstract class Assume {
 
-
 	private static final Set<TestGroup> GROUPS = TestGroup.parse(System.getProperty("testGroups"));
 
 
@@ -119,13 +119,15 @@ public abstract class Assume {
 	public static void canLoadNativeDirFonts() {
 		try {
 			GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
-			Class<?> parserClass = ClassUtils.forName("net.sf.jasperreports.engine.util.JRStyledTextParser", null);
+			Class<?> parserClass = ClassUtils.forName(
+					"net.sf.jasperreports.engine.util.JRStyledTextParser", Assume.class.getClassLoader());
 			Method method = parserClass.getMethod("getInstance");
 			method.setAccessible(true);
 			method.invoke(null);
-		} catch(Throwable ex) {
-			throw new AssumptionViolatedException(
-					"Requires GraphicsEnvironment that can load fonts.", ex);
+		}
+		catch (Throwable ex) {
+			throw new AssumptionViolatedException("Requires GraphicsEnvironment that can load fonts", ex);
 		}
 	}
+
 }
