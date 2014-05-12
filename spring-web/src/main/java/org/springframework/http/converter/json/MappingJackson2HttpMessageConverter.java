@@ -21,6 +21,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -29,6 +30,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -36,6 +38,7 @@ import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.http.converter.ReturnValueHttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -57,7 +60,7 @@ import org.springframework.util.ClassUtils;
  * @since 3.1.2
  */
 public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConverter<Object>
-		implements GenericHttpMessageConverter<Object> {
+		implements GenericHttpMessageConverter<Object>, ReturnValueHttpMessageConverter<Object> {
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
@@ -199,6 +202,11 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 	}
 
 	@Override
+	public boolean canWrite(Class<?> clazz, MediaType mediaType, MethodParameter parameter) {
+		return canWrite(clazz, mediaType);
+	}
+
+	@Override
 	protected boolean supports(Class<?> clazz) {
 		// should not be called, since we override canRead/Write instead
 		throw new UnsupportedOperationException();
@@ -250,10 +258,31 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 			if (this.jsonPrefix != null) {
 				jsonGenerator.writeRaw(this.jsonPrefix);
 			}
-			this.objectMapper.writeValue(jsonGenerator, object);
+			if (object instanceof JacksonSerializationValue) {
+				Class<?> serializationView = ((JacksonSerializationValue) object).getSerializationView();
+				Object value = ((JacksonSerializationValue) object).getValue();
+				this.objectMapper.writerWithView(serializationView).writeValue(jsonGenerator, value);
+			}
+			else {
+				this.objectMapper.writeValue(jsonGenerator, object);
+			}
 		}
 		catch (JsonProcessingException ex) {
 			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(), ex);
+		}
+	}
+
+	@Override
+	public void write(Object object, MediaType contentType, HttpOutputMessage outputMessage, MethodParameter parameter)
+			throws IOException, HttpMessageNotWritableException {
+
+		JsonView annot = parameter.getMethodAnnotation(JsonView.class);
+		if (annot != null) {
+			JacksonSerializationValue serializationValue = new JacksonSerializationValue(object, annot.value()[0]);
+			super.write(serializationValue, contentType, outputMessage);
+		}
+		else {
+			super.write(object, contentType, outputMessage);
 		}
 	}
 
@@ -296,6 +325,22 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 			}
 		}
 		return JsonEncoding.UTF8;
+	}
+
+	@Override
+	protected MediaType getDefaultContentType(Object object) throws IOException {
+		if (object instanceof JacksonSerializationValue) {
+			object = ((JacksonSerializationValue) object).getValue();
+		}
+		return super.getDefaultContentType(object);
+	}
+
+	@Override
+	protected Long getContentLength(Object object, MediaType contentType) throws IOException {
+		if (object instanceof JacksonSerializationValue) {
+			object = ((JacksonSerializationValue) object).getValue();
+		}
+		return super.getContentLength(object, contentType);
 	}
 
 }
