@@ -254,7 +254,7 @@ public class MappingJackson2JsonView extends AbstractView {
 
 		OutputStream stream = (this.updateContentLength ? createTemporaryOutputStream() : response.getOutputStream());
 		Object value = filterModel(model);
-		if (model.containsKey(JsonView.class)) {
+		if (model.containsKey(JsonView.class.getName())) {
 			writeContent(stream, value, this.jsonPrefix, model);
 		}
 		else {
@@ -314,7 +314,7 @@ public class MappingJackson2JsonView extends AbstractView {
 			generator.writeRaw(jsonPrefix);
 		}
 
-		Class<?> serializationView = (Class<?>) model.get(JsonView.class);
+		Class<?> serializationView = (Class<?>) model.get(JsonView.class.getName());
 		if (serializationView != null) {
 			this.objectMapper.writerWithView(serializationView).writeValue(generator, value);
 		}

@@ -38,7 +38,7 @@ import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.http.converter.ReturnValueHttpMessageConverter;
+import org.springframework.http.converter.MethodParameterHttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -60,7 +60,7 @@ import org.springframework.util.ClassUtils;
  * @since 3.1.2
  */
 public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConverter<Object>
-		implements GenericHttpMessageConverter<Object>, ReturnValueHttpMessageConverter<Object> {
+		implements GenericHttpMessageConverter<Object>, MethodParameterHttpMessageConverter<Object> {
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
@@ -150,6 +150,10 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 		}
 	}
 
+	@Override
+	public boolean canRead(Class<?> clazz, MediaType mediaType, MethodParameter parameter) {
+		return canRead(clazz, mediaType);
+	}
 
 	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
@@ -218,6 +222,11 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 
 		JavaType javaType = getJavaType(clazz, null);
 		return readJavaType(javaType, inputMessage);
+	}
+
+	@Override
+	public Object read(Class<?> clazz, HttpInputMessage inputMessage, MethodParameter parameter) throws IOException, HttpMessageNotReadableException {
+		return super.read(clazz, inputMessage);
 	}
 
 	@Override

@@ -17,6 +17,7 @@
 package org.springframework.http.converter.json;
 
 /**
+ * Wrapper used for serialization of an object filtered by a serialization view.
  *
  * @author Rossen Stoyanchev
  * @since 4.1

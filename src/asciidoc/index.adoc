@@ -29853,6 +29853,77 @@ Check out the
 {javadoc-baseurl}/org/springframework/web/bind/annotation/ControllerAdvice.html[`@ControllerAdvice`
 documentation] for more details.
 
+[[mvc-ann-jsonview]]
+===== Jackson JSON Views support
+
+It can sometimes be useful to filter contextually the object that will be serialized in the
+HTTP response body. In order to provide such capability, Spring MVC have builtin support for
+http://wiki.fasterxml.com/JacksonJsonViews[Jackson JSON Views].
+
+You can enable a specific JSON View by using the @JsonView annotation on a handler method.
+For example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@RestController
+	public class UserController {
+
+		@RequestMapping(value = "/user", method = RequestMethod.GET)
+		@JsonView(User.WithoutPasswordView.class)
+		public User getUser() {
+			return new User("eric", "7!jd#h23");
+		}
+	}
+
+	public class User {
+
+		public interface WithoutPasswordView {};
+		public interface WithPasswordView extends WithoutPasswordView {};
+
+		private String username;
+		private String password;
+
+		public User() {
+		}
+
+		public User(String username, String password) {
+			this.username = username;
+			this.password = password;
+		}
+
+		@JsonView(WithoutPasswordView.class)
+		public String getUsername() {
+			return this.username;
+		}
+
+		@JsonView(WithPasswordView.class)
+		public String getPassword() {
+			return this.password;
+		}
+	}
+----
+
+If you don't use annotated controllers, you can specify the JSON View to use
+by adding a model entry with the JsonView class name as entry name and your view as value:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public class UserController extends AbstractController {
+
+		public ModelAndView handleRequestInternal(HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+
+			ModelAndView mav = new ModelAndView(new MappingJackson2JsonView());
+			mav.addObject("user", new User("eric", "7!jd#h23"));
+			mav.addObject(JsonView.class.getName(), User.WithoutPasswordView.class);
+			return mav;
+		}
+	}
+
+----
+
 [[mvc-ann-async]]
 ==== Asynchronous Request Processing
 Spring MVC 3.2 introduced Servlet 3 based asynchronous request processing. Instead of
@@ -39812,6 +39883,20 @@ In the above example, we first prepare a request entity that contains the
 `MyRequestHeader` header. We then retrieve the response, and read the `MyResponseHeader`
 and body.
 
+[[rest-template-jsonview]]
+===== Jackson JSON Views support
+
+It is possible to specify a http://wiki.fasterxml.com/JacksonJsonViews[Jackson JSON View]
+to serialize only a subset of the object properties. For example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	JacksonSerializationValue jsv = new JacksonSerializationValue(new User("eric", "7!jd#h23"),
+		User.WithoutPasswordView.class);
+	HttpEntity<JacksonSerializationValue> entity = new HttpEntity<JacksonSerializationValue>(jsv);
+	String s = template.postForObject("http://example.com/user", entity, String.class);
+----
 
 
 [[rest-message-conversion]]
