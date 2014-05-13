@@ -928,6 +928,11 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				}
 			}
 			if (!applyBackOffTime(execution)) {
+				StringBuilder msg = new StringBuilder();
+				msg.append("Stopping container for destination '")
+						.append(getDestinationDescription())
+						.append("' - back off policy does not allow ").append("for further attempts.");
+				logger.error(msg.toString());
 				stop();
 			}
 		}
