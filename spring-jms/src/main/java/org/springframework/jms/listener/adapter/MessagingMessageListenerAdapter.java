@@ -60,18 +60,36 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 
 	@Override
 	public void onMessage(javax.jms.Message jmsMessage, Session session) throws JMSException {
+		Message<?> message = toMessagingMessage(jmsMessage);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Processing [" + message + "]");
+		}
+		Object result = invokeHandler(jmsMessage, session, message);
+		if (result != null) {
+			handleResult(result, jmsMessage, session);
+		}
+		else {
+			logger.trace("No result object given - no result to handle");
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	protected Message<?> toMessagingMessage(javax.jms.Message jmsMessage) {
+		Map<String, Object> mappedHeaders = getHeaderMapper().toHeaders(jmsMessage);
+		Object convertedObject = extractMessage(jmsMessage);
+		MessageBuilder<Object> builder = (convertedObject instanceof org.springframework.messaging.Message) ?
+				MessageBuilder.fromMessage((org.springframework.messaging.Message<Object>) convertedObject) :
+				MessageBuilder.withPayload(convertedObject);
+		return builder.copyHeadersIfAbsent(mappedHeaders).build();
+	}
+
+	/**
+	 * Invoke the handler, wrapping any exception to a {@link ListenerExecutionFailedException} with
+	 * a dedicated error message.
+	 */
+	private Object invokeHandler(javax.jms.Message jmsMessage, Session session, Message<?> message) {
 		try {
-			Message<?> message = toMessagingMessage(jmsMessage);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Processing [" + message + "]");
-			}
-			Object result = handlerMethod.invoke(message, jmsMessage, session);
-			if (result != null) {
-				handleResult(result, jmsMessage, session);
-			}
-			else {
-				logger.trace("No result object given - no result to handle");
-			}
+			return handlerMethod.invoke(message, jmsMessage, session);
 		}
 		catch (MessagingException e) {
 			throw new ListenerExecutionFailedException(createMessagingErrorMessage("Listener method could not " +
@@ -81,16 +99,6 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 			throw new ListenerExecutionFailedException("Listener method '"
 					+ handlerMethod.getMethod().toGenericString() + "' threw exception", e);
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	protected Message<?> toMessagingMessage(javax.jms.Message jmsMessage) throws JMSException {
-		Map<String, Object> mappedHeaders = getHeaderMapper().toHeaders(jmsMessage);
-		Object convertedObject = extractMessage(jmsMessage);
-		MessageBuilder<Object> builder = (convertedObject instanceof org.springframework.messaging.Message) ?
-				MessageBuilder.fromMessage((org.springframework.messaging.Message<Object>) convertedObject) :
-				MessageBuilder.withPayload(convertedObject);
-		return builder.copyHeadersIfAbsent(mappedHeaders).build();
 	}
 
 	private String createMessagingErrorMessage(String description) {

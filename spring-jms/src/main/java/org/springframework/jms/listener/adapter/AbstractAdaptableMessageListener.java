@@ -221,14 +221,19 @@ public abstract class AbstractAdaptableMessageListener
 	 * @param message the JMS {@code Message}
 	 * @return the content of the message, to be passed into the
 	 * listener method as argument
-	 * @throws JMSException if thrown by JMS API methods
+	 * @throws MessageConversionException if the message could not be unmarshaled
 	 */
-	protected Object extractMessage(Message message) throws JMSException {
-		MessageConverter converter = getMessageConverter();
-		if (converter != null) {
-			return converter.fromMessage(message);
+	protected Object extractMessage(Message message)  {
+		try {
+			MessageConverter converter = getMessageConverter();
+			if (converter != null) {
+				return converter.fromMessage(message);
+			}
+			return message;
 		}
-		return message;
+		catch (JMSException e) {
+			throw new MessageConversionException("Could not unmarshal message", e);
+		}
 	}
 
 	/**
@@ -237,22 +242,27 @@ public abstract class AbstractAdaptableMessageListener
 	 * @param result the result object to handle (never {@code null})
 	 * @param request the original request message
 	 * @param session the JMS Session to operate on (may be {@code null})
-	 * @throws JMSException if thrown by JMS API methods
+	 * @throws ReplyFailureException if the response message could not be sent
 	 * @see #buildMessage
 	 * @see #postProcessResponse
 	 * @see #getResponseDestination
 	 * @see #sendResponse
 	 */
-	protected void handleResult(Object result, Message request, Session session) throws JMSException {
+	protected void handleResult(Object result, Message request, Session session) {
 		if (session != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Listener method returned result [" + result +
 						"] - generating response message for it");
 			}
-			Message response = buildMessage(session, result);
-			postProcessResponse(request, response);
-			Destination destination = getResponseDestination(request, response, session);
-			sendResponse(session, destination, response);
+			try {
+				Message response = buildMessage(session, result);
+				postProcessResponse(request, response);
+				Destination destination = getResponseDestination(request, response, session);
+				sendResponse(session, destination, response);
+			}
+			catch (Exception e) {
+				throw new ReplyFailureException("Failed to send reply with payload '" + result + "'", e);
+			}
 		}
 		else {
 			if (logger.isWarnEnabled()) {

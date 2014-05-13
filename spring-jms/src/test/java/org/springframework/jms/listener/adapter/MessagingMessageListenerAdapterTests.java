@@ -34,6 +34,7 @@ import org.springframework.jms.StubTextMessage;
 import org.springframework.jms.config.DefaultJmsHandlerMethodFactory;
 import org.springframework.jms.support.converter.JmsHeaders;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.ReflectionUtils;
 
@@ -63,7 +64,8 @@ public class MessagingMessageListenerAdapterTests {
 
 		Session session = mock(Session.class);
 		given(session.createTextMessage("Response")).willReturn(new StubTextMessage("Response"));
-		javax.jms.Message replyMessage = getSimpleInstance().buildMessage(session, result);
+		MessagingMessageListenerAdapter listener = getSimpleInstance("echo", Message.class);
+		javax.jms.Message replyMessage = listener.buildMessage(session, result);
 
 		verify(session).createTextMessage("Response");
 		assertNotNull("reply should never be null", replyMessage);
@@ -73,8 +75,45 @@ public class MessagingMessageListenerAdapterTests {
 		assertEquals("replyTo header not copied", replyTo, replyMessage.getJMSReplyTo());
 	}
 
-	protected MessagingMessageListenerAdapter getSimpleInstance() {
-		Method m = ReflectionUtils.findMethod(SampleBean.class, "echo", Message.class);
+	@Test
+	public void exceptionInListener() {
+		javax.jms.Message message = new StubTextMessage("foo");
+		Session session = mock(Session.class);
+		MessagingMessageListenerAdapter listener = getSimpleInstance("fail", String.class);
+
+		try {
+			listener.onMessage(message, session);
+			fail("Should have thrown an exception");
+		}
+		catch (JMSException e) {
+			fail("Should not have thrown a JMS exception");
+		}
+		catch (ListenerExecutionFailedException e) {
+			assertEquals(IllegalArgumentException.class, e.getCause().getClass());
+			assertEquals("Expected test exception", e.getCause().getMessage());
+		}
+	}
+
+	@Test
+	public void exceptionInInvocation() {
+		javax.jms.Message message = new StubTextMessage("foo");
+		Session session = mock(Session.class);
+		MessagingMessageListenerAdapter listener = getSimpleInstance("wrongParam", Integer.class);
+
+		try {
+			listener.onMessage(message, session);
+			fail("Should have thrown an exception");
+		}
+		catch (JMSException e) {
+			fail("Should not have thrown a JMS exception");
+		}
+		catch (ListenerExecutionFailedException e) {
+			assertEquals(MessageConversionException.class, e.getCause().getClass());
+		}
+	}
+
+	protected MessagingMessageListenerAdapter getSimpleInstance(String methodName, Class... parameterTypes) {
+		Method m = ReflectionUtils.findMethod(SampleBean.class, methodName, parameterTypes);
 		return createInstance(m);
 	}
 
@@ -96,6 +135,14 @@ public class MessagingMessageListenerAdapterTests {
 			return MessageBuilder.withPayload(input.getPayload())
 					.setHeader(JmsHeaders.TYPE, "reply")
 					.build();
+		}
+
+		public void fail(String input) {
+			throw new IllegalArgumentException("Expected test exception");
+		}
+
+		public void wrongParam(Integer i) {
+			throw new IllegalArgumentException("Should not have been called");
 		}
 	}
 }

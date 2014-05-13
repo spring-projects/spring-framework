@@ -46,6 +46,7 @@ import org.springframework.jms.StubTextMessage;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.jms.listener.SimpleMessageListenerContainer;
+import org.springframework.jms.listener.adapter.ReplyFailureException;
 import org.springframework.jms.listener.adapter.ListenerExecutionFailedException;
 import org.springframework.jms.listener.adapter.MessagingMessageListenerAdapter;
 import org.springframework.jms.support.JmsMessageHeaderAccessor;
@@ -275,7 +276,7 @@ public class MethodJmsListenerEndpointTests {
 		Session session = mock(Session.class);
 		given(session.createTextMessage("content")).willReturn(reply);
 
-		thrown.expect(ListenerExecutionFailedException.class);
+		thrown.expect(ReplyFailureException.class);
 		thrown.expectCause(Matchers.isA(InvalidDestinationException.class));
 		listener.onMessage(createSimpleJmsTextMessage("content"), session);
 	}
