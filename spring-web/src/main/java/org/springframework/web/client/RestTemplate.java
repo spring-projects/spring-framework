@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.xml.transform.Source;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -42,6 +43,7 @@ import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
 import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
+import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
@@ -115,6 +117,7 @@ import org.springframework.web.util.UriTemplate;
  *
  * @author Arjen Poutsma
  * @author Brian Clozel
+ * @author Roy Clarkson
  * @since 3.0
  * @see HttpMessageConverter
  * @see RequestCallback
@@ -134,6 +137,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", RestTemplate.class.getClassLoader()) &&
 					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", RestTemplate.class.getClassLoader());
 
+	private static final boolean gsonPresent =
+			ClassUtils.isPresent("com.google.gson.Gson", RestTemplate.class.getClassLoader());
 
 	private final List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
 
@@ -162,6 +167,9 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		}
 		if (jackson2Present) {
 			this.messageConverters.add(new MappingJackson2HttpMessageConverter());
+		}
+		else if (gsonPresent) {
+			this.messageConverters.add(new GsonHttpMessageConverter());
 		}
 	}
 
