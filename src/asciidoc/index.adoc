@@ -39694,15 +39694,15 @@ the `RestTemplate` as follows:
 
 [TIP]
 ====
-Apache HttpClient supports gzip encoding via the `DecompressingHttpClient`. To use it,
+Apache HttpClient supports gzip encoding. To use it,
 construct a `HttpComponentsClientHttpRequestFactory` like so:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	HttpClient httpClient = new DecompressingHttpClient(new DefaultHttpClient());
-	ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
-	RestTemplate template = new RestTemplate(requestFactory);
+	HttpClient httpClient = HttpClientBuilder.create().build();
+    ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+    RestTemplate restTemplate = new RestTemplate(requestFactory);
 ----
 ====
 The general callback interface is `RequestCallback` and is called when the execute
