@@ -51,6 +51,7 @@ import java.util.Set;
  * @since 4.1
  * @see ResponseEntity
  */
+@SuppressWarnings("rawtypes")
 public class ResponseEntityBuilder {
 
 	private ResponseEntityBuilder() {
@@ -134,7 +135,7 @@ public class ResponseEntityBuilder {
 		/**
 		 * Add the given, single header value under the given name.
 		 * @param headerName  the header name
-		 * @param headerValue the header value(s)
+		 * @param headerValues the header value(s)
 		 * @return this builder
 		 * @see HttpHeaders#add(String, String)
 		 */
