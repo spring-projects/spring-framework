@@ -147,7 +147,7 @@ public enum SpelMessage {
 			"The value ''{0}'' cannot be parsed as a long"),
 
 	INVALID_FIRST_OPERAND_FOR_MATCHES_OPERATOR(Kind.ERROR, 1037,
-			"First operand to matches operator must be a string.  ''{0}'' is not"),
+			"First operand to matches operator must be a string. ''{0}'' is not"),
 
 	INVALID_SECOND_OPERAND_FOR_MATCHES_OPERATOR(Kind.ERROR, 1038,
 			"Second operand to matches operator must be a string. ''{0}'' is not"),
@@ -166,7 +166,7 @@ public enum SpelMessage {
 			"Problem parsing right operand"),
 
 	NOT_EXPECTED_TOKEN(Kind.ERROR, 1043,
-			"Unexpected token.  Expected ''{0}'' but was ''{1}''"),
+			"Unexpected token. Expected ''{0}'' but was ''{1}''"),
 
 	OOD(Kind.ERROR, 1044,
 			"Unexpectedly ran out of input"),
