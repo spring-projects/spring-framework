@@ -49,7 +49,7 @@ import org.springframework.util.ObjectUtils;
  *   return new ResponseEntity&lt;String&gt;("Hello World", responseHeaders, HttpStatus.CREATED);
  * }
  * </pre>
- * Or, by using the static convenience methods:
+ * Or, by using a builder accessible via static methods:
  * <pre class="code">
  * &#64;RequestMapping("/handle")
  * public ResponseEntity&lt;String&gt; handle() {
@@ -158,36 +158,35 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	// Static builder methods
 
 	/**
-	 * Creates a new response entity builder with the given status.
+	 * Creates a builder with the given status.
 	 * @param status the response status
-	 * @return the new response entity builder
+	 * @return the created builder
 	 */
 	public static BodyBuilder status(HttpStatus status) {
 		return new DefaultBuilder(status);
 	}
 
 	/**
-	 * Creates a new response entity builder with the given status.
+	 * Creates a builder with the given status.
 	 * @param status the response status
-	 * @return the new response entity builder
+	 * @return the created builder
 	 */
 	public static BodyBuilder status(int status) {
 		return status(HttpStatus.valueOf(status));
 	}
 
 	/**
-	 * Creates a new response entity builder with the status set to
-	 * {@linkplain HttpStatus#OK OK}.
-	 * @return the new response entity builder
+	 * Creates a builder with the status set to {@linkplain HttpStatus#OK OK}.
+	 * @return the created builder
 	 */
 	public static BodyBuilder ok() {
 		return status(HttpStatus.OK);
 	}
 
 	/**
-	 * Creates a new response entity with the given body and the status set to
-	 * {@linkplain HttpStatus#OK OK}.
-	 * @return the new response entity
+	 * A shortcut for creating a {@code ResponseEntity} with the given body and
+	 * status set to {@linkplain HttpStatus#OK OK}.
+	 * @return the created {@code ResponseEntity}
 	 */
 	public static <T> ResponseEntity<T> ok(T body) {
 		BodyBuilder builder = ok();
@@ -195,11 +194,10 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Creates a new response entity builder with a
-	 * {@linkplain HttpStatus#CREATED CREATED} status and a location header set to the
-	 * given URI.
+	 * Creates a new builder with a {@linkplain HttpStatus#CREATED CREATED}
+	 * status and a location header set to the given URI.
 	 * @param location the location URI
-	 * @return the new response entity builder
+	 * @return the created builder
 	 */
 	public static BodyBuilder created(URI location) {
 		BodyBuilder builder = status(HttpStatus.CREATED);
@@ -207,18 +205,16 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Creates a new response entity builder with an
-	 * {@link HttpStatus#ACCEPTED ACCEPTED} status.
-	 * @return the new response entity builder
+	 * Creates a builder with an {@link HttpStatus#ACCEPTED ACCEPTED} status.
+	 * @return the created builder
 	 */
 	public static BodyBuilder accepted() {
 		return status(HttpStatus.ACCEPTED);
 	}
 
 	/**
-	 * Creates a new response entity builder with an
-	 * {@link HttpStatus#NO_CONTENT NO_CONTENT} status.
-	 * @return the new response entity builder
+	 * Creates a builder with a {@link HttpStatus#NO_CONTENT NO_CONTENT} status.
+	 * @return the created builder
 	 */
 	public static HeadersBuilder<?> noContent() {
 		return status(HttpStatus.NO_CONTENT);
@@ -228,21 +224,22 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	/**
 	 * Defines a builder that adds headers to the response entity.
 	 * @param <B> the builder subclass
+	 * @since 4.1
 	 */
 	public interface HeadersBuilder<B extends HeadersBuilder<B>> {
 
 		/**
 		 * Add the given, single header value under the given name.
 		 * @param headerName  the header name
-		 * @param headerValue the header value(s)
+		 * @param headerValues the header value(s)
 		 * @return this builder
 		 * @see HttpHeaders#add(String, String)
 		 */
 		B header(String headerName, String... headerValues);
 
 		/**
-		 * Set the set of allowed {@link HttpMethod HTTP methods}, as specified by the
-		 * {@code Allow} header.
+		 * Set the set of allowed {@link HttpMethod HTTP methods}, as specified
+		 * by the {@code Allow} header.
 		 * @param allowedMethods the allowed methods
 		 * @return this builder
 		 * @see HttpHeaders#setAllow(Set)
@@ -260,8 +257,8 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		/**
 		 * Sets the time the resource was last changed, as specified by the
 		 * {@code Last-Modified} header.
-		 * <p>The date should be specified as the number of milliseconds since January 1,
-		 * 1970 GMT.
+		 * <p>The date should be specified as the number of milliseconds since
+		 * January 1, 1970 GMT.
 		 * @param lastModified the last modified date
 		 * @return this builder
 		 * @see HttpHeaders#setLastModified(long)
@@ -279,7 +276,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		/**
 		 * Builds the response entity with no body.
 		 * @return the response entity
-		 * @see ResponseBodyBuilder#body(Object)
+		 * @see BodyBuilder#body(Object)
 		 */
 		ResponseEntity<Void> build();
 
@@ -288,12 +285,13 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 	/**
 	 * Defines a builder that adds a body to the response entity.
+	 * @since 4.1
 	 */
 	public interface BodyBuilder extends HeadersBuilder<BodyBuilder> {
 
 		/**
-		 * Set the length of the body in bytes, as specified by the {@code Content-Length}
-		 * header.
+		 * Set the length of the body in bytes, as specified by the
+		 * {@code Content-Length} header.
 		 * @param contentLength the content length
 		 * @return this builder
 		 * @see HttpHeaders#setContentLength(long)
@@ -334,56 +332,56 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		@Override
 		public BodyBuilder header(String headerName, String... headerValues) {
 			for (String headerValue : headerValues) {
-				headers.add(headerName, headerValue);
+				this.headers.add(headerName, headerValue);
 			}
 			return this;
 		}
 
 		@Override
 		public BodyBuilder allow(HttpMethod... allowedMethods) {
-			headers.setAllow(new HashSet<HttpMethod>(Arrays.asList(allowedMethods)));
+			this.headers.setAllow(new HashSet<HttpMethod>(Arrays.asList(allowedMethods)));
 			return this;
 		}
 
 		@Override
 		public BodyBuilder contentLength(long contentLength) {
-			headers.setContentLength(contentLength);
+			this.headers.setContentLength(contentLength);
 			return this;
 		}
 
 		@Override
 		public BodyBuilder contentType(MediaType contentType) {
-			headers.setContentType(contentType);
+			this.headers.setContentType(contentType);
 			return this;
 		}
 
 		@Override
 		public BodyBuilder eTag(String eTag) {
-			headers.setETag(eTag);
+			this.headers.setETag(eTag);
 			return this;
 		}
 
 		@Override
 		public BodyBuilder lastModified(long date) {
-			headers.setLastModified(date);
+			this.headers.setLastModified(date);
 			return this;
 		}
 
 		@Override
 		public BodyBuilder location(URI location) {
-			headers.setLocation(location);
+			this.headers.setLocation(location);
 			return this;
 		}
 
 
 		@Override
 		public ResponseEntity<Void> build() {
-			return new ResponseEntity<Void>(null, headers, status);
+			return new ResponseEntity<Void>(null, this.headers, this.status);
 		}
 
 		@Override
 		public <T> ResponseEntity<T> body(T body) {
-			return new ResponseEntity<T>(body, headers, status);
+			return new ResponseEntity<T>(body, this.headers, this.status);
 		}
 
 	}
