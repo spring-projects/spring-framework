@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,11 +62,11 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 
 	/**
 	 * Create a new {@code AsyncExecutionInterceptor}.
-	 * @param executor the {@link Executor} (typically a Spring {@link AsyncTaskExecutor}
-	 * or {@link java.util.concurrent.ExecutorService}) to delegate to.
+	 * @param defaultExecutor the {@link Executor} (typically a Spring {@link AsyncTaskExecutor}
+	 * or {@link java.util.concurrent.ExecutorService}) to delegate to
 	 */
-	public AsyncExecutionInterceptor(Executor executor) {
-		super(executor);
+	public AsyncExecutionInterceptor(Executor defaultExecutor) {
+		super(defaultExecutor);
 	}
 
 
@@ -117,8 +117,8 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 	 * Subclasses may override to provide support for extracting qualifier information,
 	 * e.g. via an annotation on the given method.
 	 * @return always {@code null}
-	 * @see #determineAsyncExecutor(Method)
 	 * @since 3.1.2
+	 * @see #determineAsyncExecutor(Method)
 	 */
 	@Override
 	protected String getExecutorQualifier(Method method) {

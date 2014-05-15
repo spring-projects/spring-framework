@@ -25,8 +25,8 @@ import org.springframework.cglib.transform.MethodFilterTransformer;
 import org.springframework.cglib.transform.TransformingClassGenerator;
 
 /**
- * Memory-safe variant of {@link UndeclaredThrowableStrategy} ported from the latest
- * as yet unreleased CGLIB code.
+ * Memory-safe variant of {@link UndeclaredThrowableStrategy} ported from CGLIB 3.1,
+ * introduced for using it in Spring before it was officially released in CGLIB.
  *
  * @author Phillip Webb
  * @since 3.2.4
@@ -35,23 +35,23 @@ public class MemorySafeUndeclaredThrowableStrategy extends DefaultGeneratorStrat
 
 	private static final MethodFilter TRANSFORM_FILTER = new MethodFilter() {
 		public boolean accept(int access, String name, String desc, String signature, String[] exceptions) {
-			return !TypeUtils.isPrivate(access) && name.indexOf('$') < 0;
+			return (!TypeUtils.isPrivate(access) && name.indexOf('$') < 0);
 		}
 	};
 
 
-	private Class<?> wrapper;
+	private final Class<?> wrapper;
 
 
-	public MemorySafeUndeclaredThrowableStrategy(Class wrapper) {
+	public MemorySafeUndeclaredThrowableStrategy(Class<?> wrapper) {
 		this.wrapper = wrapper;
 	}
 
 
 	protected ClassGenerator transform(ClassGenerator cg) throws Exception {
-		ClassTransformer tr = new UndeclaredThrowableTransformer(wrapper);
-		tr = new MethodFilterTransformer(TRANSFORM_FILTER, tr);
-		return new TransformingClassGenerator(cg, tr);
+		ClassTransformer ct = new UndeclaredThrowableTransformer(this.wrapper);
+		ct = new MethodFilterTransformer(TRANSFORM_FILTER, ct);
+		return new TransformingClassGenerator(cg, ct);
 	}
 
 }
