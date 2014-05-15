@@ -72,6 +72,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 
 	private AsyncUncaughtExceptionHandler exceptionHandler;
 
+
 	/**
 	 * Create a new {@code AsyncExecutionInterceptor}.
 	 * @param defaultExecutor the {@link Executor} (typically a Spring {@link AsyncTaskExecutor}
@@ -90,6 +91,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 		this(defaultExecutor, new SimpleAsyncUncaughtExceptionHandler());
 	}
 
+
 	/**
 	 * Supply the {@link AsyncUncaughtExceptionHandler} to use to handle exceptions
 	 * thrown by invoking asynchronous methods with a {@code void} return type.
@@ -97,6 +99,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 	public void setExceptionHandler(AsyncUncaughtExceptionHandler exceptionHandler) {
 		this.exceptionHandler = exceptionHandler;
 	}
+
 
 	/**
 	 * Intercept the given method invocation, submit the actual calling of the method to
@@ -150,7 +153,6 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 	 * for all other cases, the exception will not be transmitted back to the client.
 	 * In that later case, the current {@link AsyncUncaughtExceptionHandler} will be
 	 * used to manage such exception.
-	 *
 	 * @param ex the exception to handle
 	 * @param method the method that was invoked
 	 * @param params the parameters used to invoke the method
@@ -159,13 +161,14 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 		if (method.getReturnType().isAssignableFrom(Future.class)) {
 			ReflectionUtils.rethrowException(ex);
 		}
-		else { // Could not transmit the exception to the caller with default executor
+		else {
+			// Could not transmit the exception to the caller with default executor
 			try {
-				exceptionHandler.handleUncaughtException(ex, method, params);
+				this.exceptionHandler.handleUncaughtException(ex, method, params);
 			}
-			catch (Exception e) {
-				logger.error("exception handler has thrown an unexpected " +
-						"exception while invoking '" + method.toGenericString() + "'", e);
+			catch (Throwable ex2) {
+				logger.error("Exception handler for async method '" + method.toGenericString() +
+						"' threw unexpected exception itself", ex2);
 			}
 		}
 	}
@@ -175,8 +178,8 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 	 * Subclasses may override to provide support for extracting qualifier information,
 	 * e.g. via an annotation on the given method.
 	 * @return always {@code null}
-	 * @see #determineAsyncExecutor(Method)
 	 * @since 3.1.2
+	 * @see #determineAsyncExecutor(Method)
 	 */
 	@Override
 	protected String getExecutorQualifier(Method method) {
