@@ -117,7 +117,7 @@ public class DefaultPersistenceUnitManager
 		try {
 			@SuppressWarnings("unchecked")
 			Class<? extends Annotation> converterAnnotation = (Class<? extends Annotation>)
-					DefaultPersistenceUnitManager.class.getClassLoader().loadClass("javax.persistence.Converter");
+					ClassUtils.forName("javax.persistence.Converter", DefaultPersistenceUnitManager.class.getClassLoader());
 			entityTypeFilters.add(new AnnotationTypeFilter(converterAnnotation, false));
 		}
 		catch (ClassNotFoundException ex) {

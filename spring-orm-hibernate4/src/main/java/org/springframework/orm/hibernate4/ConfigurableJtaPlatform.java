@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.hibernate.service.Service;
 
 import org.springframework.transaction.jta.UserTransactionAdapter;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Implementation of Hibernate 4's JtaPlatform SPI (which has a different package
@@ -51,14 +52,14 @@ class ConfigurableJtaPlatform implements InvocationHandler {
 		Class<?> jpClass;
 		try {
 			// Try Hibernate 4.0-4.2 JtaPlatform variant
-			jpClass = SpringSessionContext.class.getClassLoader().loadClass(
-					"org.hibernate.service.jta.platform.spi.JtaPlatform");
+			jpClass = ClassUtils.forName("org.hibernate.service.jta.platform.spi.JtaPlatform",
+					ConfigurableJtaPlatform.class.getClassLoader());
 		}
 		catch (ClassNotFoundException ex) {
 			try {
 				// Try Hibernate 4.3 JtaPlatform variant
-				jpClass = SpringSessionContext.class.getClassLoader().loadClass(
-						"org.hibernate.engine.transaction.jta.platform.spi.JtaPlatform");
+				jpClass = ClassUtils.forName("org.hibernate.engine.transaction.jta.platform.spi.JtaPlatform",
+						ConfigurableJtaPlatform.class.getClassLoader());
 			}
 			catch (ClassNotFoundException ex2) {
 				throw new IllegalStateException("Neither Hibernate 4.0-4.2 nor 4.3 variant of JtaPlatform found");
