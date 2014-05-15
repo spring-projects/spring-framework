@@ -63,7 +63,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 	/**
 	 * Create a new {@code AsyncExecutionInterceptor}.
 	 * @param defaultExecutor the {@link Executor} (typically a Spring {@link AsyncTaskExecutor}
-	 * or {@link java.util.concurrent.ExecutorService}) to delegate to.
+	 * or {@link java.util.concurrent.ExecutorService}) to delegate to
 	 */
 	public AsyncExecutionInterceptor(Executor defaultExecutor) {
 		super(defaultExecutor);

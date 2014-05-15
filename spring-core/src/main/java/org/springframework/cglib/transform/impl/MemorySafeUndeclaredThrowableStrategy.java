@@ -43,7 +43,7 @@ public class MemorySafeUndeclaredThrowableStrategy extends DefaultGeneratorStrat
 	};
 
 
-	private Class<?> wrapper;
+	private final Class<?> wrapper;
 
 
 	public MemorySafeUndeclaredThrowableStrategy(Class<?> wrapper) {
@@ -52,9 +52,9 @@ public class MemorySafeUndeclaredThrowableStrategy extends DefaultGeneratorStrat
 
 
 	protected ClassGenerator transform(ClassGenerator cg) throws Exception {
-		ClassTransformer tr = new UndeclaredThrowableTransformer(wrapper);
-		tr = new MethodFilterTransformer(TRANSFORM_FILTER, tr);
-		return new TransformingClassGenerator(cg, tr);
+		ClassTransformer ct = new UndeclaredThrowableTransformer(this.wrapper);
+		ct = new MethodFilterTransformer(TRANSFORM_FILTER, ct);
+		return new TransformingClassGenerator(cg, ct);
 	}
 
 }
