@@ -18,24 +18,22 @@ package org.springframework.http;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
-import static org.springframework.http.ResponseEntityBuilder.*;
 
-public class ResponseEntityBuilderTests {
+public class ResponseEntityTests {
 
 	@Test
 	public void normal() {
 		String headerName = "My-Custom-Header";
 		String headerValue1 = "HeaderValue1";
 		String headerValue2 = "HeaderValue2";
-		Object entity = new Object();
+		Integer entity = new Integer(42);
 
-		ResponseEntity<Object> responseEntity =
-				status(HttpStatus.OK).header(headerName, headerValue1, headerValue2).body(entity);
+		ResponseEntity<Integer> responseEntity =
+				ResponseEntity.status(HttpStatus.OK).header(headerName, headerValue1, headerValue2).body(entity);
 
 		assertNotNull(responseEntity);
 		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
@@ -49,7 +47,7 @@ public class ResponseEntityBuilderTests {
 
 	@Test
 	public void okNoBody() {
-		ResponseEntity<?> responseEntity = ok().build();
+		ResponseEntity<Void> responseEntity = ResponseEntity.ok().build();
 
 		assertNotNull(responseEntity);
 		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
@@ -58,8 +56,8 @@ public class ResponseEntityBuilderTests {
 
 	@Test
 	public void okEntity() {
-		Object entity = new Object();
-		ResponseEntity<Object> responseEntity = ok(entity).build();
+		Integer entity = new Integer(42);
+		ResponseEntity<Integer> responseEntity = ResponseEntity.ok(entity);
 
 		assertNotNull(responseEntity);
 		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
@@ -69,7 +67,7 @@ public class ResponseEntityBuilderTests {
 	@Test
 	public void createdLocation() throws URISyntaxException {
 		URI location = new URI("location");
-		ResponseEntity<?> responseEntity = created(location).build();
+		ResponseEntity<Void> responseEntity = ResponseEntity.created(location).build();
 
 		assertNotNull(responseEntity);
 		assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
@@ -77,11 +75,13 @@ public class ResponseEntityBuilderTests {
 		assertEquals(location.toString(),
 				responseEntity.getHeaders().getFirst("Location"));
 		assertNull(responseEntity.getBody());
+
+		ResponseEntity.created(location).header("MyResponseHeader", "MyValue").body("Hello World");
 	}
 
 	@Test
 	public void acceptedNoBody() throws URISyntaxException {
-		ResponseEntity<?> responseEntity = accepted().build();
+		ResponseEntity<Void> responseEntity = ResponseEntity.accepted().build();
 
 		assertNotNull(responseEntity);
 		assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
@@ -90,7 +90,7 @@ public class ResponseEntityBuilderTests {
 
 	@Test
 	public void noContent() throws URISyntaxException {
-		ResponseEntity<?> responseEntity = ResponseEntityBuilder.noContent().build();
+		ResponseEntity<Void> responseEntity = ResponseEntity.noContent().build();
 
 		assertNotNull(responseEntity);
 		assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
@@ -104,8 +104,8 @@ public class ResponseEntityBuilderTests {
 		long contentLength = 67890;
 		MediaType contentType = MediaType.TEXT_PLAIN;
 
-		ResponseEntity<?> responseEntity = ResponseEntityBuilder.ok().
-				allow(Collections.singleton(HttpMethod.GET)).
+		ResponseEntity<Void> responseEntity = ResponseEntity.ok().
+				allow(HttpMethod.GET).
 				eTag(eTag).
 				lastModified(12345L).
 				location(location).
