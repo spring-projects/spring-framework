@@ -76,7 +76,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 	/**
 	 * Create a new {@code AsyncExecutionInterceptor}.
 	 * @param defaultExecutor the {@link Executor} (typically a Spring {@link AsyncTaskExecutor}
-	 * or {@link java.util.concurrent.ExecutorService}) to delegate to.
+	 * or {@link java.util.concurrent.ExecutorService}) to delegate to
 	 * @param exceptionHandler the {@link AsyncUncaughtExceptionHandler} to use
 	 */
 	public AsyncExecutionInterceptor(Executor defaultExecutor, AsyncUncaughtExceptionHandler exceptionHandler) {
@@ -111,10 +111,10 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 	@Override
 	public Object invoke(final MethodInvocation invocation) throws Throwable {
 		Class<?> targetClass = (invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null);
-		Method tmp = ClassUtils.getMostSpecificMethod(invocation.getMethod(), targetClass);
-		final Method specificMethod = BridgeMethodResolver.findBridgedMethod(tmp);
+		Method specificMethod = ClassUtils.getMostSpecificMethod(invocation.getMethod(), targetClass);
+		final Method userDeclaredMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);
 
-		AsyncTaskExecutor executor = determineAsyncExecutor(specificMethod);
+		AsyncTaskExecutor executor = determineAsyncExecutor(userDeclaredMethod);
 		if (executor == null) {
 			throw new IllegalStateException(
 					"No executor specified and no default executor set on AsyncExecutionInterceptor either");
@@ -131,7 +131,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 							}
 						}
 						catch (Throwable ex) {
-							handleError(ex, specificMethod, invocation.getArguments());
+							handleError(ex, userDeclaredMethod, invocation.getArguments());
 						}
 						return null;
 					}
