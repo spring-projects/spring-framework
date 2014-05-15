@@ -299,6 +299,8 @@ public class StringUtilsTests extends TestCase {
 		assertEquals("../mypath/myfile", StringUtils.cleanPath("../mypath/../mypath/myfile"));
 		assertEquals("../mypath/myfile", StringUtils.cleanPath("mypath/../../mypath/myfile"));
 		assertEquals("/../mypath/myfile", StringUtils.cleanPath("/../mypath/myfile"));
+		assertEquals("/mypath/myfile", StringUtils.cleanPath("/a/:b/../../mypath/myfile"));
+		assertEquals("file:///c:/path/to/the%20file.txt", StringUtils.cleanPath("file:///c:/some/../path/to/the%20file.txt"));
 	}
 
 	public void testPathEquals() {
