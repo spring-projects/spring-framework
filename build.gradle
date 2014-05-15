@@ -14,17 +14,19 @@ configure(allprojects) { project ->
 	version = qualifyVersionIfNecessary(version)
 
 	ext.aspectjVersion       = "1.8.0"
+	ext.eclipseLinkVersion   = "2.4.2"
 	ext.groovyVersion        = "2.3.0"
 	ext.hibernate3Version    = "3.6.10.Final"
 	ext.hibernate4Version    = "4.3.5.Final"
 	ext.hibVal4Version       = "4.3.1.Final"
-	ext.hibVal5Version       = "5.1.0.Final"
+	ext.hibVal5Version       = "5.1.1.Final"
 	ext.hsqldbVersion        = "2.3.2"
 	ext.jackson2Version      = "2.3.3"
 	ext.jasperReportsVersion = "5.5.2"
 	ext.jettyVersion         = "9.1.5.v20140505"
 	ext.jodaVersion          = "2.3"
 	ext.junitVersion         = "4.11"
+	ext.openJpaVersion       = "2.2.2"
 	ext.slf4jVersion         = "1.7.7"
 	ext.snakeYamlVersion     = "1.13"
 	ext.snifferVersion       = "1.11"
@@ -33,7 +35,7 @@ configure(allprojects) { project ->
 	ext.tomcatVersion        = "8.0.5"
 	ext.xstreamVersion       = "1.4.7"
 
-	ext.gradleScriptDir   = "${rootProject.projectDir}/gradle"
+	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
 	apply plugin: "propdeps"
 	apply plugin: "java"
@@ -694,9 +696,9 @@ project("spring-orm") {
 		optional(project(":spring-context"))
 		optional(project(":spring-web"))
 		optional("aopalliance:aopalliance:1.0")
-		optional("org.eclipse.persistence:javax.persistence:2.0.0")
-		optional("org.eclipse.persistence:org.eclipse.persistence.core:2.4.0")
-		optional("org.eclipse.persistence:org.eclipse.persistence.jpa:2.4.0") {
+		optional("org.eclipse.persistence:javax.persistence:2.0.5")
+		optional("org.eclipse.persistence:org.eclipse.persistence.core:${eclipseLinkVersion}")
+		optional("org.eclipse.persistence:org.eclipse.persistence.jpa:${eclipseLinkVersion}") {
 			exclude group: 'org.eclipse.persistence', module: 'javax.persistence'
 		}
 		optional("org.hibernate:hibernate-core:${hibernate3Version}") {
@@ -706,13 +708,13 @@ project("spring-orm") {
 		optional("org.hibernate:hibernate-entitymanager:${hibernate3Version}") {
 			exclude group: 'org.hibernate.javax.persistence', module: 'hibernate-jpa-2.0-api'
 		}
-		optional("org.apache.openjpa:openjpa:2.2.1") {
+		optional("org.apache.openjpa:openjpa:${openJpaVersion}") {
 			exclude group: 'junit', module: 'junit'
 			exclude group: 'org.apache.geronimo.specs', module: 'geronimo-jpa_2.0_spec'
 			exclude group: 'org.apache.geronimo.specs', module: 'geronimo-jta_1.1_spec'
 			exclude group: 'org.apache.geronimo.specs', module: 'geronimo-jms_1.1_spec'
 		}
-		optional("javax.jdo:jdo-api:3.0") {
+		optional("javax.jdo:jdo-api:3.0.1") {
 			exclude group: 'javax.transaction', module: 'transaction-api'
 		}
 		optional("javax.servlet:javax.servlet-api:3.0.1")
