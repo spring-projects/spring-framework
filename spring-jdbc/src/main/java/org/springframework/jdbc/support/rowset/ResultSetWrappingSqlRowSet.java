@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,7 +99,12 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 				int columnCount = rsmd.getColumnCount();
 				this.columnLabelMap = new HashMap<String, Integer>(columnCount);
 				for (int i = 1; i <= columnCount; i++) {
-					this.columnLabelMap.put(rsmd.getColumnLabel(i), i);
+					String key = rsmd.getColumnLabel(i);
+					// Make sure to preserve first matching column for any given name,
+					// as defined in ResultSet's type-level javadoc (lines 81 to 83).
+					if (!this.columnLabelMap.containsKey(key)) {
+						this.columnLabelMap.put(key, i);
+					}
 				}
 			}
 			else {
