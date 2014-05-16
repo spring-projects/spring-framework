@@ -128,10 +128,13 @@ public abstract class AbstractBrokerMessageHandler
 	public final void start() {
 		synchronized (this.lifecycleMonitor) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Starting " + getClass().getSimpleName());
+				logger.debug("Starting");
 			}
 			startInternal();
 			this.running = true;
+			if (logger.isDebugEnabled()) {
+				logger.debug("Started");
+			}
 		}
 	}
 
@@ -142,10 +145,13 @@ public abstract class AbstractBrokerMessageHandler
 	public final void stop() {
 		synchronized (this.lifecycleMonitor) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Stopping " + getClass().getSimpleName());
+				logger.debug("Stopping");
 			}
 			stopInternal();
 			this.running = false;
+			if (logger.isDebugEnabled()) {
+				logger.debug("Stopped");
+			}
 		}
 	}
 
