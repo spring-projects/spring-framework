@@ -26,6 +26,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -253,7 +254,12 @@ public class MappingJackson2JsonView extends AbstractView {
 
 		OutputStream stream = (this.updateContentLength ? createTemporaryOutputStream() : response.getOutputStream());
 		Object value = filterModel(model);
-		writeContent(stream, value, this.jsonPrefix);
+		if (model.containsKey(JsonView.class.getName())) {
+			writeContent(stream, value, this.jsonPrefix, model);
+		}
+		else {
+			writeContent(stream, value, this.jsonPrefix);
+		}
 		if (this.updateContentLength) {
 			writeToResponse(response, (ByteArrayOutputStream) stream);
 		}
@@ -287,6 +293,12 @@ public class MappingJackson2JsonView extends AbstractView {
 	 * @throws IOException if writing failed
 	 */
 	protected void writeContent(OutputStream stream, Object value, String jsonPrefix) throws IOException {
+		writeContent(stream, value, jsonPrefix, Collections.<String, Object>emptyMap());
+	}
+
+	protected void writeContent(OutputStream stream, Object value, String jsonPrefix, Map<String, Object> model)
+			throws IOException {
+
 		// The following has been deprecated as late as Jackson 2.2 (April 2013);
 		// preserved for the time being, for Jackson 2.0/2.1 compatibility.
 		@SuppressWarnings("deprecation")
@@ -301,7 +313,14 @@ public class MappingJackson2JsonView extends AbstractView {
 		if (jsonPrefix != null) {
 			generator.writeRaw(jsonPrefix);
 		}
-		this.objectMapper.writeValue(generator, value);
+
+		Class<?> serializationView = (Class<?>) model.get(JsonView.class.getName());
+		if (serializationView != null) {
+			this.objectMapper.writerWithView(serializationView).writeValue(generator, value);
+		}
+		else {
+			this.objectMapper.writeValue(generator, value);
+		}
 	}
 
 }
