@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -384,7 +385,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		this.brokerChannel.unsubscribe(this);
 
 		try {
-			this.tcpClient.shutdown();
+			this.tcpClient.shutdown().get(5000, TimeUnit.MILLISECONDS);
 		}
 		catch (Throwable t) {
 			logger.error("Error while shutting down TCP client", t);
