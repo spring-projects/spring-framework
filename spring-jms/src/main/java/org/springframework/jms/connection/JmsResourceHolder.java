@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,10 +191,20 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 					try {
 						Method getDataSourceMethod = this.connectionFactory.getClass().getMethod("getDataSource");
 						Object ds = ReflectionUtils.invokeMethod(getDataSourceMethod, this.connectionFactory);
-						if (ds != null && TransactionSynchronizationManager.hasResource(ds)) {
-							// IllegalStateException from sharing the underlying JDBC Connection
-							// which typically gets committed first, e.g. with Oracle AQ --> ignore
-							return;
+						while (ds != null) {
+							if (TransactionSynchronizationManager.hasResource(ds)) {
+								// IllegalStateException from sharing the underlying JDBC Connection
+								// which typically gets committed first, e.g. with Oracle AQ --> ignore
+								return;
+							}
+							try {
+								// Check for decorated DataSource a la Spring's DelegatingDataSource
+								Method getTargetDataSourceMethod = ds.getClass().getMethod("getTargetDataSource");
+								ds = ReflectionUtils.invokeMethod(getTargetDataSourceMethod, ds);
+							}
+							catch (NoSuchMethodException nsme) {
+								ds = null;
+							}
 						}
 					}
 					catch (Throwable ex2) {
