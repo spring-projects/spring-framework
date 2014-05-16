@@ -94,7 +94,7 @@ configure(allprojects) { project ->
 		"http://aopalliance.sourceforge.net/doc/",
 		"http://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
 		"http://ehcache.org/apidocs/",
-		"http://quartz-scheduler.org/api/2.1.7/",
+		"http://quartz-scheduler.org/api/2.2.0/",
 		"http://jackson.codehaus.org/1.9.4/javadoc/",
 		"http://fasterxml.github.com/jackson-core/javadoc/2.3.0/",
 		"http://fasterxml.github.com/jackson-databind/javadoc/2.3.0/",
@@ -632,20 +632,20 @@ project("spring-webmvc-tiles3") {
 		optional("javax.servlet.jsp:jsp-api:2.1")
 		optional("javax.servlet:jstl:1.2")
 		optional("javax.el:el-api:1.0")
-		optional("org.apache.tiles:tiles-api:3.0.3")
-		optional("org.apache.tiles:tiles-core:3.0.3") {
+		optional("org.apache.tiles:tiles-api:3.0.4")
+		optional("org.apache.tiles:tiles-core:3.0.4") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		optional("org.apache.tiles:tiles-servlet:3.0.3") {
+		optional("org.apache.tiles:tiles-servlet:3.0.4") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		optional("org.apache.tiles:tiles-jsp:3.0.3") {
+		optional("org.apache.tiles:tiles-jsp:3.0.4") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		optional("org.apache.tiles:tiles-el:3.0.3") {
+		optional("org.apache.tiles:tiles-el:3.0.4") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		optional("org.apache.tiles:tiles-extras:3.0.3") {
+		optional("org.apache.tiles:tiles-extras:3.0.4") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 			exclude group: "org.springframework", module: "spring-web"
 		}
@@ -743,11 +743,11 @@ project("spring-test-mvc") {
 		testCompile("org.codehaus.jackson:jackson-mapper-asl:1.7.9")
 		testCompile("com.fasterxml.jackson.core:jackson-databind:2.0.6")
 		testCompile("rome:rome:1.0")
-		testCompile("org.apache.tiles:tiles-api:3.0.3")
-		testCompile("org.apache.tiles:tiles-core:3.0.3") {
+		testCompile("org.apache.tiles:tiles-api:3.0.4")
+		testCompile("org.apache.tiles:tiles-core:3.0.4") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		testCompile("org.apache.tiles:tiles-servlet:3.0.3") {
+		testCompile("org.apache.tiles:tiles-servlet:3.0.4") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
