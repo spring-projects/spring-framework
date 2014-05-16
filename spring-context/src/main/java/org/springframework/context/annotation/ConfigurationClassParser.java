@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -112,7 +113,8 @@ class ConfigurationClassParser {
 
 	private final ComponentScanAnnotationParser componentScanParser;
 
-	private final Set<ConfigurationClass> configurationClasses = new LinkedHashSet<ConfigurationClass>();
+	private final Map<ConfigurationClass, ConfigurationClass> configurationClasses =
+			new LinkedHashMap<ConfigurationClass, ConfigurationClass>();
 
 	private final Map<String, ConfigurationClass> knownSuperclasses = new HashMap<String, ConfigurationClass>();
 
@@ -189,13 +191,23 @@ class ConfigurationClassParser {
 			return;
 		}
 
-		if (this.configurationClasses.contains(configClass) && configClass.getBeanName() != null) {
-			// Explicit bean definition found, probably replacing an import.
-			// Let's remove the old one and go with the new one.
-			this.configurationClasses.remove(configClass);
-			for (Iterator<ConfigurationClass> it = this.knownSuperclasses.values().iterator(); it.hasNext();) {
-				if (configClass.equals(it.next())) {
-					it.remove();
+		ConfigurationClass existingClass = this.configurationClasses.get(configClass);
+		if (existingClass != null) {
+			if (configClass.isImported()) {
+				if (existingClass.isImported()) {
+					existingClass.mergeImportedBy(configClass);
+				}
+				// Otherwise ignore new imported config class; existing non-imported class overrides it.
+				return;
+			}
+			else {
+				// Explicit bean definition found, probably replacing an import.
+				// Let's remove the old one and go with the new one.
+				this.configurationClasses.remove(configClass);
+				for (Iterator<ConfigurationClass> it = this.knownSuperclasses.values().iterator(); it.hasNext(); ) {
+					if (configClass.equals(it.next())) {
+						it.remove();
+					}
 				}
 			}
 		}
@@ -207,7 +219,7 @@ class ConfigurationClassParser {
 		}
 		while (sourceClass != null);
 
-		this.configurationClasses.add(configClass);
+		this.configurationClasses.put(configClass, configClass);
 	}
 
 	/**
@@ -466,13 +478,13 @@ class ConfigurationClassParser {
 	 * @see ConfigurationClass#validate
 	 */
 	public void validate() {
-		for (ConfigurationClass configClass : this.configurationClasses) {
+		for (ConfigurationClass configClass : this.configurationClasses.keySet()) {
 			configClass.validate(this.problemReporter);
 		}
 	}
 
 	public Set<ConfigurationClass> getConfigurationClasses() {
-		return this.configurationClasses;
+		return this.configurationClasses.keySet();
 	}
 
 	public List<PropertySource<?>> getPropertySources() {

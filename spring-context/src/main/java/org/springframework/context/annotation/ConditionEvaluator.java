@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,13 +83,13 @@ class ConditionEvaluator {
 
 		for (String[] conditionClasses : getConditionClasses(metadata)) {
 			for (String conditionClass : conditionClasses) {
-				Condition condition = getCondition(conditionClass, context.getClassLoader());
+				Condition condition = getCondition(conditionClass, this.context.getClassLoader());
 				ConfigurationPhase requiredPhase = null;
 				if (condition instanceof ConfigurationCondition) {
 					requiredPhase = ((ConfigurationCondition) condition).getConfigurationPhase();
 				}
 				if (requiredPhase == null || requiredPhase == phase) {
-					if (!condition.matches(context, metadata)) {
+					if (!condition.matches(this.context, metadata)) {
 						return true;
 					}
 				}

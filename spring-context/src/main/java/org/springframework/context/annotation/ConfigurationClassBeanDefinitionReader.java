@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -391,14 +391,19 @@ class ConfigurationClassBeanDefinitionReader {
 			Boolean skip = this.skipped.get(configClass);
 			if (skip == null) {
 				if (configClass.isImported()) {
-					if (shouldSkip(configClass.getImportedBy())) {
-						// The config that imported this one was skipped, therefore we are skipped
+					boolean allSkipped = true;
+					for (ConfigurationClass importedBy : configClass.getImportedBy()) {
+						if (!shouldSkip(importedBy)) {
+							allSkipped = false;
+						}
+					}
+					if (allSkipped) {
+						// The config classes that imported this one were all skipped, therefore we are skipped...
 						skip = true;
 					}
 				}
 				if (skip == null) {
-					skip = conditionEvaluator.shouldSkip(configClass.getMetadata(),
-							ConfigurationPhase.REGISTER_BEAN);
+					skip = conditionEvaluator.shouldSkip(configClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN);
 				}
 				this.skipped.put(configClass, skip);
 			}
