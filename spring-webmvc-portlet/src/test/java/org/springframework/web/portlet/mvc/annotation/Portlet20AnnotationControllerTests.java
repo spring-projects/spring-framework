@@ -23,7 +23,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.EventResponse;
@@ -31,6 +30,7 @@ import javax.portlet.MimeResponse;
 import javax.portlet.PortletContext;
 import javax.portlet.PortletMode;
 import javax.portlet.PortletRequest;
+import javax.portlet.PortletResponse;
 import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
@@ -42,9 +42,6 @@ import javax.servlet.http.Cookie;
 import org.junit.Test;
 
 import org.springframework.beans.BeansException;
-import org.springframework.tests.sample.beans.DerivedTestBean;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -63,6 +60,9 @@ import org.springframework.mock.web.portlet.MockRenderResponse;
 import org.springframework.mock.web.portlet.MockResourceRequest;
 import org.springframework.mock.web.portlet.MockResourceResponse;
 import org.springframework.stereotype.Controller;
+import org.springframework.tests.sample.beans.DerivedTestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -1088,17 +1088,21 @@ public class Portlet20AnnotationControllerTests {
 		private PortletContext portletContext;
 
 		@Autowired
-		private PortletSession session;
+		private PortletRequest request;
 
 		@Autowired
-		private PortletRequest request;
+		private PortletResponse response;
+
+		@Autowired
+		private PortletSession session;
 
 		@Autowired
 		private WebRequest webRequest;
 
 		@RenderMapping
 		public void myHandle(RenderResponse response) throws IOException {
-			if (this.portletContext == null || this.session == null || this.request == null || this.webRequest == null) {
+			if (this.portletContext == null || this.request == null || this.response == null ||
+					this.session == null || this.webRequest == null) {
 				throw new IllegalStateException();
 			}
 			response.getWriter().write("myView");

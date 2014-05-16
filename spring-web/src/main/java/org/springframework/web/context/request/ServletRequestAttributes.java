@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.context.request;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.util.Assert;
@@ -48,6 +49,8 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 
 	private final HttpServletRequest request;
 
+	private HttpServletResponse response;
+
 	private volatile HttpSession session;
 
 	private final Map<String, Object> sessionAttributesToUpdate = new ConcurrentHashMap<String, Object>(1);
@@ -62,12 +65,29 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 		this.request = request;
 	}
 
+	/**
+	 * Create a new ServletRequestAttributes instance for the given request.
+	 * @param request current HTTP request
+	 * @param response current HTTP response (for optional exposure)
+	 */
+	public ServletRequestAttributes(HttpServletRequest request, HttpServletResponse response) {
+		this(request);
+		this.response = response;
+	}
+
 
 	/**
 	 * Exposes the native {@link HttpServletRequest} that we're wrapping.
 	 */
 	public final HttpServletRequest getRequest() {
 		return this.request;
+	}
+
+	/**
+	 * Exposes the native {@link HttpServletResponse} that we're wrapping (if any).
+	 */
+	public final HttpServletResponse getResponse() {
+		return this.response;
 	}
 
 	/**

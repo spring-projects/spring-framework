@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.portlet.context;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.portlet.PortletRequest;
+import javax.portlet.PortletResponse;
 import javax.portlet.PortletSession;
 
 import org.springframework.util.Assert;
@@ -57,6 +58,8 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 
 	private final PortletRequest request;
 
+	private PortletResponse response;
+
 	private volatile PortletSession session;
 
 	private final Map<String, Object> sessionAttributesToUpdate = new ConcurrentHashMap<String, Object>(1);
@@ -73,12 +76,29 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 		this.request = request;
 	}
 
+	/**
+	 * Create a new PortletRequestAttributes instance for the given request.
+	 * @param request current portlet request
+	 * @param response current portlet response (for optional exposure)
+	 */
+	public PortletRequestAttributes(PortletRequest request, PortletResponse response) {
+		this(request);
+		this.response = response;
+	}
+
 
 	/**
 	 * Exposes the native {@link PortletRequest} that we're wrapping.
 	 */
 	public final PortletRequest getRequest() {
 		return this.request;
+	}
+
+	/**
+	 * Exposes the native {@link PortletResponse} that we're wrapping (if any).
+	 */
+	public final PortletResponse getResponse() {
+		return this.response;
 	}
 
 	/**

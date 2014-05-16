@@ -16,16 +16,6 @@
 
 package org.springframework.web.servlet.mvc.annotation;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
 import java.io.Serializable;
@@ -53,7 +43,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -65,6 +54,7 @@ import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.junit.Test;
+
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
@@ -149,6 +139,9 @@ import org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMap
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.util.NestedServletException;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -2483,18 +2476,21 @@ public class ServletAnnotationControllerTests {
 		private transient ServletConfig servletConfig;
 
 		@Autowired
-		private HttpSession session;
+		private HttpServletRequest request;
 
 		@Autowired
-		private HttpServletRequest request;
+		private HttpServletResponse response;
+
+		@Autowired
+		private HttpSession session;
 
 		@Autowired
 		private WebRequest webRequest;
 
 		@RequestMapping
 		public void myHandle(HttpServletResponse response, HttpServletRequest request) throws IOException {
-			if (this.servletContext == null || this.servletConfig == null || this.session == null ||
-					this.request == null || this.webRequest == null) {
+			if (this.servletContext == null || this.servletConfig == null || this.request == null ||
+					this.response == null || this.session == null || this.webRequest == null) {
 				throw new IllegalStateException();
 			}
 			response.getWriter().write("myView");

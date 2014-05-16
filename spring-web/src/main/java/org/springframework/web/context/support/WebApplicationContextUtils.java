@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import javax.faces.context.FacesContext;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.ObjectFactory;
@@ -154,6 +155,7 @@ public abstract class WebApplicationContextUtils {
 		}
 
 		beanFactory.registerResolvableDependency(ServletRequest.class, new RequestObjectFactory());
+		beanFactory.registerResolvableDependency(ServletResponse.class, new ResponseObjectFactory());
 		beanFactory.registerResolvableDependency(HttpSession.class, new SessionObjectFactory());
 		beanFactory.registerResolvableDependency(WebRequest.class, new WebRequestObjectFactory());
 		if (jsfPresent) {
@@ -301,6 +303,29 @@ public abstract class WebApplicationContextUtils {
 
 
 	/**
+	 * Factory that exposes the current response object on demand.
+	 */
+	@SuppressWarnings("serial")
+	private static class ResponseObjectFactory implements ObjectFactory<ServletResponse>, Serializable {
+
+		@Override
+		public ServletResponse getObject() {
+			ServletResponse response = currentRequestAttributes().getResponse();
+			if (response == null) {
+				throw new IllegalStateException("Current servlet response not available - " +
+						"consider using RequestContextFilter instead of RequestContextListener");
+			}
+			return response;
+		}
+
+		@Override
+		public String toString() {
+			return "Current HttpServletResponse";
+		}
+	}
+
+
+	/**
 	 * Factory that exposes the current session object on demand.
 	 */
 	@SuppressWarnings("serial")
@@ -326,7 +351,8 @@ public abstract class WebApplicationContextUtils {
 
 		@Override
 		public WebRequest getObject() {
-			return new ServletWebRequest(currentRequestAttributes().getRequest());
+			ServletRequestAttributes requestAttr = currentRequestAttributes();
+			return new ServletWebRequest(requestAttr.getRequest(), requestAttr.getResponse());
 		}
 
 		@Override
