@@ -395,6 +395,7 @@ class ConfigurationClassBeanDefinitionReader {
 					for (ConfigurationClass importedBy : configClass.getImportedBy()) {
 						if (!shouldSkip(importedBy)) {
 							allSkipped = false;
+							break;
 						}
 					}
 					if (allSkipped) {
