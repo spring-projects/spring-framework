@@ -23,6 +23,7 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -51,6 +52,7 @@ import org.springframework.web.servlet.handler.ConversionServiceExposingIntercep
 import org.springframework.web.servlet.handler.HandlerExceptionResolverComposite;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyInterceptor;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -157,6 +159,11 @@ public class WebMvcConfigurationSupportTests {
 		Validator validator = initializer.getValidator();
 		assertNotNull(validator);
 		assertTrue(validator instanceof LocalValidatorFactoryBean);
+
+		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(adapter);
+		List<Object> interceptors = (List<Object>) fieldAccessor.getPropertyValue("responseBodyInterceptors");
+		assertEquals(1, interceptors.size());
+		assertEquals(JsonViewResponseBodyInterceptor.class, interceptors.get(0).getClass());
 	}
 
 	@Test
@@ -183,6 +190,11 @@ public class WebMvcConfigurationSupportTests {
 
 		ExceptionHandlerExceptionResolver eher = (ExceptionHandlerExceptionResolver) expectedResolvers.get(0);
 		assertNotNull(eher.getApplicationContext());
+
+		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(eher);
+		List<Object> interceptors = (List<Object>) fieldAccessor.getPropertyValue("responseBodyInterceptors");
+		assertEquals(1, interceptors.size());
+		assertEquals(JsonViewResponseBodyInterceptor.class, interceptors.get(0).getClass());
 	}
 
 

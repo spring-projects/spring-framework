@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -28,7 +29,9 @@ import org.junit.Test;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -287,36 +290,42 @@ public class RequestResponseBodyMethodProcessorTests {
 	}
 
 	@Test
-	public void handleResponseBodyJacksonView() throws Exception {
+	public void jacksonJsonViewWithResponseBody() throws Exception {
 		Method method = JacksonViewController.class.getMethod("handleResponseBody");
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonViewController(), method);
 		MethodParameter methodReturnType = handlerMethod.getReturnType();
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
 		converters.add(new MappingJackson2HttpMessageConverter());
-		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
-		processor.handleReturnValue(new JacksonViewController().handleResponseBody(), methodReturnType, mavContainer, webRequest);
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(
+				converters, null, Arrays.asList(new JsonViewResponseBodyInterceptor()));
 
-		String content = servletResponse.getContentAsString();
+		Object returnValue = new JacksonViewController().handleResponseBody();
+		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);
+
+		String content = this.servletResponse.getContentAsString();
 		assertFalse(content.contains("\"withView1\":\"with\""));
 		assertTrue(content.contains("\"withView2\":\"with\""));
 		assertTrue(content.contains("\"withoutView\":\"without\""));
 	}
 
 	@Test
-	public void handleResponseBodyJacksonViewAndModelAndView() throws Exception {
-		Method method = JacksonViewController.class.getMethod("handleResponseBodyWithModelAndView");
+	public void jacksonJsonViewWithResponseEntity() throws Exception {
+		Method method = JacksonViewController.class.getMethod("handleResponseEntity");
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonViewController(), method);
 		MethodParameter methodReturnType = handlerMethod.getReturnType();
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
 		converters.add(new MappingJackson2HttpMessageConverter());
-		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
-		processor.handleReturnValue(new JacksonViewController().handleResponseBody(), methodReturnType, mavContainer, webRequest);
+		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(
+				converters, null, Arrays.asList(new JsonViewResponseBodyInterceptor()));
 
-		String content = servletResponse.getContentAsString();
+		Object returnValue = new JacksonViewController().handleResponseEntity();
+		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);
+
+		String content = this.servletResponse.getContentAsString();
 		assertFalse(content.contains("\"withView1\":\"with\""));
 		assertTrue(content.contains("\"withView2\":\"with\""));
 		assertTrue(content.contains("\"withoutView\":\"without\""));
@@ -465,14 +474,14 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		@RequestMapping
 		@JsonView(MyJacksonView2.class)
-		public ModelAndView handleResponseBodyWithModelAndView() {
+		public ResponseEntity<JacksonViewBean> handleResponseEntity() {
 			JacksonViewBean bean = new JacksonViewBean();
 			bean.setWithView1("with");
 			bean.setWithView2("with");
 			bean.setWithoutView("without");
 			ModelAndView mav = new ModelAndView(new MappingJackson2JsonView());
 			mav.addObject("bean", bean);
-			return mav;
+			return new ResponseEntity<JacksonViewBean>(bean, HttpStatus.OK);
 		}
 
 	}

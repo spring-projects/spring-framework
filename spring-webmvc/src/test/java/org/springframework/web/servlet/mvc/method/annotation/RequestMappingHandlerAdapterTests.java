@@ -23,6 +23,14 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.ui.Model;
@@ -217,6 +225,21 @@ public class RequestMappingHandlerAdapterTests {
 		assertEquals(null,mav.getModel().get("attr3"));
 	}
 
+	// SPR-10859
+
+	@Test
+	public void responseBodyInterceptor() throws Exception {
+		this.webAppContext.registerSingleton("rba", ResponseCodeSuppressingAdvice.class);
+		this.webAppContext.refresh();
+
+		HandlerMethod handlerMethod = handlerMethod(new SimpleController(), "handleWithResponseEntity");
+		this.handlerAdapter.afterPropertiesSet();
+		this.handlerAdapter.handle(this.request, this.response, handlerMethod);
+
+		assertEquals(200, this.response.getStatus());
+		assertEquals("status=400, message=body", this.response.getContentAsString());
+	}
+
 
 	private HandlerMethod handlerMethod(Object handler, String methodName, Class<?>... paramTypes) throws Exception {
 		Method method = handler.getClass().getDeclaredMethod(methodName, paramTypes);
@@ -240,6 +263,10 @@ public class RequestMappingHandlerAdapterTests {
 
 		public String handle() {
 			return null;
+		}
+
+		public ResponseEntity<String> handleWithResponseEntity() {
+			return new ResponseEntity<String>("body", HttpStatus.BAD_REQUEST);
 		}
 	}
 
@@ -266,6 +293,7 @@ public class RequestMappingHandlerAdapterTests {
 	@ControllerAdvice
 	private static class ModelAttributeAdvice {
 
+		@SuppressWarnings("unused")
 		@ModelAttribute
 		public void addAttributes(Model model) {
 			model.addAttribute("attr1", "gAttr1");
@@ -274,9 +302,10 @@ public class RequestMappingHandlerAdapterTests {
 	}
 
 
-	@ControllerAdvice({"org.springframework.web.servlet.mvc.method.annotation","java.lang"})
+	@ControllerAdvice({"org.springframework.web.servlet.mvc.method.annotation", "java.lang"})
 	private static class ModelAttributePackageAdvice {
 
+		@SuppressWarnings("unused")
 		@ModelAttribute
 		public void addAttributes(Model model) {
 			model.addAttribute("attr2", "gAttr2");
@@ -287,9 +316,25 @@ public class RequestMappingHandlerAdapterTests {
 	@ControllerAdvice("java.lang")
 	private static class ModelAttributeNotUsedPackageAdvice {
 
+		@SuppressWarnings("unused")
 		@ModelAttribute
 		public void addAttributes(Model model) {
 			model.addAttribute("attr3", "gAttr3");
+		}
+	}
+
+	@ControllerAdvice
+	private static class ResponseCodeSuppressingAdvice implements ResponseBodyInterceptor {
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T> T beforeBodyWrite(T body, MediaType contentType,
+				Class<? extends HttpMessageConverter<T>> converterType,
+				MethodParameter returnType, ServerHttpRequest request, ServerHttpResponse response) {
+
+			int status = ((ServletServerHttpResponse) response).getServletResponse().getStatus();
+			response.setStatusCode(HttpStatus.OK);
+			return (T) ("status=" + status + ", message=" + body);
 		}
 	}
 

@@ -19,6 +19,7 @@ package org.springframework.web.servlet.config;
 import java.util.List;
 import java.util.Properties;
 
+import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyInterceptor;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.FactoryBean;
@@ -196,6 +197,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		handlerAdapterDef.getPropertyValues().add("contentNegotiationManager", contentNegotiationManager);
 		handlerAdapterDef.getPropertyValues().add("webBindingInitializer", bindingDef);
 		handlerAdapterDef.getPropertyValues().add("messageConverters", messageConverters);
+		addResponseBodyInterceptors(handlerAdapterDef);
 
 		if (element.hasAttribute("ignore-default-model-on-redirect")) {
 			Boolean ignoreDefaultModel = Boolean.valueOf(element.getAttribute("ignore-default-model-on-redirect"));
@@ -247,6 +249,8 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		exceptionHandlerExceptionResolver.getPropertyValues().add("contentNegotiationManager", contentNegotiationManager);
 		exceptionHandlerExceptionResolver.getPropertyValues().add("messageConverters", messageConverters);
 		exceptionHandlerExceptionResolver.getPropertyValues().add("order", 0);
+		addResponseBodyInterceptors(exceptionHandlerExceptionResolver);
+
 		String methodExceptionResolverName =
 				parserContext.getReaderContext().registerWithGeneratedName(exceptionHandlerExceptionResolver);
 
@@ -278,6 +282,13 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		parserContext.popAndRegisterContainingComponent();
 
 		return null;
+	}
+
+	protected void addResponseBodyInterceptors(RootBeanDefinition beanDef) {
+		if (jackson2Present) {
+			beanDef.getPropertyValues().add("responseBodyInterceptors",
+					new RootBeanDefinition(JsonViewResponseBodyInterceptor.class));
+		}
 	}
 
 	private RuntimeBeanReference getConversionService(Element element, Object source, ParserContext parserContext) {
@@ -492,6 +503,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		return beanDefinition;
 	}
+
 
 	private ManagedList<BeanDefinitionHolder> extractBeanSubElements(Element parentElement, ParserContext parserContext) {
 		ManagedList<BeanDefinitionHolder> list = new ManagedList<BeanDefinitionHolder>();

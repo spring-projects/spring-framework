@@ -46,7 +46,7 @@ public interface ResponseBodyInterceptor {
 	 *
 	 * @return the body that was passed in or a modified, possibly new instance
 	 */
-	<T> T beforeBodyWrite(T body, MediaType contentType, Class<HttpMessageConverter<T>> converterType,
+	<T> T beforeBodyWrite(T body, MediaType contentType, Class<? extends HttpMessageConverter<T>> converterType,
 			MethodParameter returnType, ServerHttpRequest request, ServerHttpResponse response);
 
 }

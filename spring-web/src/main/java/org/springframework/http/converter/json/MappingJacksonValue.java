@@ -25,7 +25,7 @@ package org.springframework.http.converter.json;
  *
  * @see com.fasterxml.jackson.annotation.JsonView
  */
-public class MappingJacksonValueHolder {
+public class MappingJacksonValue {
 
 	private final Object value;
 
@@ -37,7 +37,7 @@ public class MappingJacksonValueHolder {
 	 * @param value the Object to be serialized
 	 * @param serializationView the view to be applied
 	 */
-	public MappingJacksonValueHolder(Object value, Class<?> serializationView) {
+	public MappingJacksonValue(Object value, Class<?> serializationView) {
 		this.value = value;
 		this.serializationView = serializationView;
 	}

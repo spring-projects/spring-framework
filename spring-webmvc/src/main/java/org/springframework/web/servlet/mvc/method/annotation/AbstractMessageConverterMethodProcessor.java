@@ -29,7 +29,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.MethodParameterHttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.CollectionUtils;
@@ -148,17 +147,6 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		if (selectedMediaType != null) {
 			selectedMediaType = selectedMediaType.removeQualityValue();
 			for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
-				if (messageConverter instanceof MethodParameterHttpMessageConverter) {
-					MethodParameterHttpMessageConverter<T> c = (MethodParameterHttpMessageConverter<T>) messageConverter;
-					if (c.canWrite(returnValueClass, selectedMediaType, returnType)) {
-						c.write(returnValue, selectedMediaType, outputMessage, returnType);
-						if (logger.isDebugEnabled()) {
-							logger.debug("Written [" + returnValue + "] as \"" + selectedMediaType + "\" using [" +
-									messageConverter + "]");
-						}
-						return;
-					}
-				}
 				if (messageConverter.canWrite(returnValueClass, selectedMediaType)) {
 					returnValue = this.interceptorChain.invoke(returnValue, selectedMediaType,
 							(Class<HttpMessageConverter<T>>) messageConverter.getClass(),

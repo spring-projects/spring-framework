@@ -526,6 +526,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		List<ControllerAdviceBean> beans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
 		Collections.sort(beans, new OrderComparator());
 
+		List<Object> interceptorBeans = new ArrayList<Object>();
+
 		for (ControllerAdviceBean bean : beans) {
 			Set<Method> attrMethods = HandlerMethodSelector.selectMethods(bean.getBeanType(), MODEL_ATTRIBUTE_METHODS);
 			if (!attrMethods.isEmpty()) {
@@ -538,9 +540,13 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				logger.info("Detected @InitBinder methods in " + bean);
 			}
 			if (ResponseBodyInterceptor.class.isAssignableFrom(bean.getBeanType())) {
-				this.responseBodyInterceptors.add(bean);
+				interceptorBeans.add(bean);
 				logger.info("Detected ResponseBodyInterceptor implementation in " + bean);
 			}
+		}
+
+		if (!interceptorBeans.isEmpty()) {
+			this.responseBodyInterceptors.addAll(0, interceptorBeans);
 		}
 	}
 

@@ -36,7 +36,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.converter.json.MappingJacksonValueHolder;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -220,8 +220,8 @@ public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
 		MySampleBean bean = new MySampleBean("with", "with", "without");
-		MappingJacksonValueHolder jsv = new MappingJacksonValueHolder(bean, MyJacksonView1.class);
-		HttpEntity<MappingJacksonValueHolder> entity = new HttpEntity<MappingJacksonValueHolder>(jsv);
+		MappingJacksonValue jsv = new MappingJacksonValue(bean, MyJacksonView1.class);
+		HttpEntity<MappingJacksonValue> entity = new HttpEntity<MappingJacksonValue>(jsv);
 		String s = template.postForObject(baseUrl + "/jsonpost", entity, String.class, "post");
 		assertTrue(s.contains("\"with1\":\"with\""));
 		assertFalse(s.contains("\"with2\":\"with\""));

@@ -46,7 +46,7 @@ class ResponseBodyInterceptorChain {
 	}
 
 
-	public <T> T invoke(T body, MediaType contentType, Class<HttpMessageConverter<T>> converterType,
+	public <T> T invoke(T body, MediaType contentType, Class<? extends HttpMessageConverter<T>> converterType,
 			MethodParameter returnType, ServerHttpRequest request, ServerHttpResponse response) {
 
 		if (this.interceptors != null) {

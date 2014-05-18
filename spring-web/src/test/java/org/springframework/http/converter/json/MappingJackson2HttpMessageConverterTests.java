@@ -245,7 +245,7 @@ public class MappingJackson2HttpMessageConverterTests {
 		bean.setWithView1("with");
 		bean.setWithView2("with");
 		bean.setWithoutView("without");
-		MappingJacksonValueHolder jsv = new MappingJacksonValueHolder(bean, MyJacksonView1.class);
+		MappingJacksonValue jsv = new MappingJacksonValue(bean, MyJacksonView1.class);
 		this.converter.writeInternal(jsv, outputMessage);
 
 		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));

@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.config.annotation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,8 +75,10 @@ import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyInterceptor;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyInterceptor;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
@@ -417,6 +420,11 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		adapter.setCustomArgumentResolvers(argumentResolvers);
 		adapter.setCustomReturnValueHandlers(returnValueHandlers);
 
+		if (jackson2Present) {
+			ResponseBodyInterceptor interceptor = new JsonViewResponseBodyInterceptor();
+			adapter.setResponseBodyInterceptors(Arrays.asList(interceptor));
+		}
+
 		AsyncSupportConfigurer configurer = new AsyncSupportConfigurer();
 		configureAsyncSupport(configurer);
 
@@ -695,6 +703,10 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		exceptionHandlerExceptionResolver.setApplicationContext(this.applicationContext);
 		exceptionHandlerExceptionResolver.setContentNegotiationManager(mvcContentNegotiationManager());
 		exceptionHandlerExceptionResolver.setMessageConverters(getMessageConverters());
+		if (jackson2Present) {
+			ResponseBodyInterceptor interceptor = new JsonViewResponseBodyInterceptor();
+			exceptionHandlerExceptionResolver.setResponseBodyInterceptors(Arrays.asList(interceptor));
+		}
 		exceptionHandlerExceptionResolver.afterPropertiesSet();
 
 		exceptionResolvers.add(exceptionHandlerExceptionResolver);
