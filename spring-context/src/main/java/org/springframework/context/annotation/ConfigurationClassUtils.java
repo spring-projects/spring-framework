@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,14 +93,36 @@ abstract class ConfigurationClassUtils {
 		return false;
 	}
 
+	/**
+	 * Check the given metadata for a configuration class candidate
+	 * (or nested component class declared within a configuration/component class).
+	 * @param metadata the metadata of the annotated class
+	 * @return {@code true} if the given class is to be registered as a
+	 * reflection-detected bean definition; {@code false} otherwise
+	 */
 	public static boolean isConfigurationCandidate(AnnotationMetadata metadata) {
 		return (isFullConfigurationCandidate(metadata) || isLiteConfigurationCandidate(metadata));
 	}
 
+	/**
+	 * Check the given metadata for a full configuration class candidate
+	 * (i.e. a class annotated with {@code @Configuration}).
+	 * @param metadata the metadata of the annotated class
+	 * @return {@code true} if the given class is to be processed as a full
+	 * configuration class, including cross-method call interception
+	 */
 	public static boolean isFullConfigurationCandidate(AnnotationMetadata metadata) {
 		return metadata.isAnnotated(Configuration.class.getName());
 	}
 
+	/**
+	 * Check the given metadata for a lite configuration class candidate
+	 * (e.g. a class annotated with {@code @Component} or just having
+	 * {@code @Bean methods}).
+	 * @param metadata the metadata of the annotated class
+	 * @return {@code true} if the given class is to be processed as a lite
+	 * configuration class, just registering it and scanning it for {@code @Bean} methods
+	 */
 	public static boolean isLiteConfigurationCandidate(AnnotationMetadata metadata) {
 		// Do not consider an interface or an annotation...
 		return (!metadata.isInterface() && (
@@ -108,7 +130,8 @@ abstract class ConfigurationClassUtils {
 	}
 
 	/**
-	 * Determine whether the given bean definition indicates a full @Configuration class.
+	 * Determine whether the given bean definition indicates a full
+	 * {@code @Configuration} class.
 	 */
 	public static boolean isFullConfigurationClass(BeanDefinition beanDef) {
 		return CONFIGURATION_CLASS_FULL.equals(beanDef.getAttribute(CONFIGURATION_CLASS_ATTRIBUTE));
