@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
@@ -45,21 +49,46 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 
 	private static final String FILENAME_KEY = "filename=";
 
+	private Set<String> multipartParameterNames;
+
 
 	/**
-	 * Create a new StandardMultipartHttpServletRequest wrapper for the given request.
+	 * Create a new StandardMultipartHttpServletRequest wrapper for the given request,
+	 * immediately parsing the multipart content.
 	 * @param request the servlet request to wrap
 	 * @throws MultipartException if parsing failed
 	 */
 	public StandardMultipartHttpServletRequest(HttpServletRequest request) throws MultipartException {
+		this(request, false);
+	}
+
+	/**
+	 * Create a new StandardMultipartHttpServletRequest wrapper for the given request.
+	 * @param request the servlet request to wrap
+	 * @param lazyParsing whether multipart parsing should be triggered lazily on
+	 * first access of multipart files or parameters
+	 * @throws MultipartException if an immediate parsing attempt failed
+	 */
+	public StandardMultipartHttpServletRequest(HttpServletRequest request, boolean lazyParsing) throws MultipartException {
 		super(request);
+		if (!lazyParsing) {
+			parseRequest(request);
+		}
+	}
+
+
+	private void parseRequest(HttpServletRequest request) {
 		try {
 			Collection<Part> parts = request.getParts();
+			this.multipartParameterNames = new LinkedHashSet<String>(parts.size());
 			MultiValueMap<String, MultipartFile> files = new LinkedMultiValueMap<String, MultipartFile>(parts.size());
 			for (Part part : parts) {
 				String filename = extractFilename(part.getHeader(CONTENT_DISPOSITION));
 				if (filename != null) {
 					files.add(part.getName(), new StandardMultipartFile(part, filename));
+				}
+				else {
+					this.multipartParameterNames.add(part.getName());
 				}
 			}
 			setMultipartFiles(files);
@@ -94,6 +123,29 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 		return filename;
 	}
 
+
+	@Override
+	protected void initializeMultipart() {
+		parseRequest(getRequest());
+	}
+
+	@Override
+	public Enumeration<String> getParameterNames() {
+		if (this.multipartParameterNames == null) {
+			initializeMultipart();
+		}
+		if (this.multipartParameterNames.isEmpty()) {
+			return super.getParameterNames();
+		}
+
+		Set<String> paramNames = new LinkedHashSet<String>();
+		Enumeration<String> paramEnum = super.getParameterNames();
+		while (paramEnum.hasMoreElements()) {
+			paramNames.add(paramEnum.nextElement());
+		}
+		paramNames.addAll(this.multipartParameterNames);
+		return Collections.enumeration(paramNames);
+	}
 
 	@Override
 	public String getMultipartContentType(String paramOrFileName) {
