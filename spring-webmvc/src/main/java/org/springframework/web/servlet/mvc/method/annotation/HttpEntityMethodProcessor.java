@@ -57,12 +57,16 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 	public HttpEntityMethodProcessor(List<HttpMessageConverter<?>> messageConverters,
 			ContentNegotiationManager contentNegotiationManager) {
-
 		super(messageConverters, contentNegotiationManager);
 	}
 
+	public HttpEntityMethodProcessor(List<HttpMessageConverter<?>> messageConverters,
+			ContentNegotiationManager contentNegotiationManager, List<Object> responseBodyInterceptors) {
+		super(messageConverters, contentNegotiationManager, responseBodyInterceptors);
+	}
 
-	@Override
+
+		@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return HttpEntity.class.equals(parameter.getParameterType());
 	}

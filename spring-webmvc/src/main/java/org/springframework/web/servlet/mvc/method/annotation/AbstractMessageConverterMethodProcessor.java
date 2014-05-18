@@ -55,6 +55,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 	private final ContentNegotiationManager contentNegotiationManager;
 
+	private final ResponseBodyInterceptorChain interceptorChain;
+
 
 	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> messageConverters) {
 		this(messageConverters, null);
@@ -62,9 +64,15 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> messageConverters,
 			ContentNegotiationManager manager) {
+		this(messageConverters, manager, null);
+	}
+
+	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> messageConverters,
+			ContentNegotiationManager manager, List<Object> responseBodyInterceptors) {
 
 		super(messageConverters);
 		this.contentNegotiationManager = (manager != null ? manager : new ContentNegotiationManager());
+		this.interceptorChain = new ResponseBodyInterceptorChain(responseBodyInterceptors);
 	}
 
 
@@ -152,6 +160,9 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 					}
 				}
 				if (messageConverter.canWrite(returnValueClass, selectedMediaType)) {
+					returnValue = this.interceptorChain.invoke(returnValue, selectedMediaType,
+							(Class<HttpMessageConverter<T>>) messageConverter.getClass(),
+							returnType, inputMessage, outputMessage);
 					((HttpMessageConverter<T>) messageConverter).write(returnValue, selectedMediaType, outputMessage);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Written [" + returnValue + "] as \"" + selectedMediaType + "\" using [" +

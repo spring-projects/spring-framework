@@ -132,7 +132,10 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 	private List<HttpMessageConverter<?>> messageConverters;
 
+	private List<Object> responseBodyInterceptors = new ArrayList<Object>();
+
 	private WebBindingInitializer webBindingInitializer;
+
 
 	private AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("MvcAsync");
 
@@ -307,6 +310,14 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * Set the {@link ContentNegotiationManager} to use to determine requested media types.
+	 * If not set, the default constructor is used.
+	 */
+	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
+		this.contentNegotiationManager = contentNegotiationManager;
+	}
+
+	/**
 	 * Provide the converters to use in argument resolvers and return value
 	 * handlers that support reading and/or writing to the body of the
 	 * request and response.
@@ -316,18 +327,23 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
-	 * Set the {@link ContentNegotiationManager} to use to determine requested media types.
-	 * If not set, the default constructor is used.
-	 */
-	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
-		this.contentNegotiationManager = contentNegotiationManager;
-	}
-
-	/**
 	 * Return the configured message body converters.
 	 */
 	public List<HttpMessageConverter<?>> getMessageConverters() {
 		return messageConverters;
+	}
+
+	/**
+	 * Add one or more interceptors to be invoked after the execution of a controller
+	 * method annotated with {@code @ResponseBody} or returning {@code ResponseEntity}
+	 * but before the body is written to the response with the selected
+	 * {@code HttpMessageConverter}.
+	 */
+	public void setResponseBodyInterceptors(List<ResponseBodyInterceptor> responseBodyInterceptors) {
+		this.responseBodyInterceptors.clear();
+		if (responseBodyInterceptors != null) {
+			this.responseBodyInterceptors.addAll(responseBodyInterceptors);
+		}
 	}
 
 	/**
@@ -481,6 +497,10 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 	@Override
 	public void afterPropertiesSet() {
+
+		// Do this first, it may add ResponseBody interceptors
+		initControllerAdviceCache();
+
 		if (this.argumentResolvers == null) {
 			List<HandlerMethodArgumentResolver> resolvers = getDefaultArgumentResolvers();
 			this.argumentResolvers = new HandlerMethodArgumentResolverComposite().addResolvers(resolvers);
@@ -493,7 +513,35 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			List<HandlerMethodReturnValueHandler> handlers = getDefaultReturnValueHandlers();
 			this.returnValueHandlers = new HandlerMethodReturnValueHandlerComposite().addHandlers(handlers);
 		}
-		initControllerAdviceCache();
+	}
+
+	private void initControllerAdviceCache() {
+		if (getApplicationContext() == null) {
+			return;
+		}
+		if (logger.isInfoEnabled()) {
+			logger.info("Looking for @ControllerAdvice: " + getApplicationContext());
+		}
+
+		List<ControllerAdviceBean> beans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
+		Collections.sort(beans, new OrderComparator());
+
+		for (ControllerAdviceBean bean : beans) {
+			Set<Method> attrMethods = HandlerMethodSelector.selectMethods(bean.getBeanType(), MODEL_ATTRIBUTE_METHODS);
+			if (!attrMethods.isEmpty()) {
+				this.modelAttributeAdviceCache.put(bean, attrMethods);
+				logger.info("Detected @ModelAttribute methods in " + bean);
+			}
+			Set<Method> binderMethods = HandlerMethodSelector.selectMethods(bean.getBeanType(), INIT_BINDER_METHODS);
+			if (!binderMethods.isEmpty()) {
+				this.initBinderAdviceCache.put(bean, binderMethods);
+				logger.info("Detected @InitBinder methods in " + bean);
+			}
+			if (ResponseBodyInterceptor.class.isAssignableFrom(bean.getBeanType())) {
+				this.responseBodyInterceptors.add(bean);
+				logger.info("Detected ResponseBodyInterceptor implementation in " + bean);
+			}
+		}
 	}
 
 	/**
@@ -583,7 +631,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		handlers.add(new ModelAndViewMethodReturnValueHandler());
 		handlers.add(new ModelMethodProcessor());
 		handlers.add(new ViewMethodReturnValueHandler());
-		handlers.add(new HttpEntityMethodProcessor(getMessageConverters(), this.contentNegotiationManager));
+		handlers.add(new HttpEntityMethodProcessor(
+				getMessageConverters(), this.contentNegotiationManager, this.responseBodyInterceptors));
 		handlers.add(new HttpHeadersReturnValueHandler());
 		handlers.add(new CallableMethodReturnValueHandler());
 		handlers.add(new DeferredResultMethodReturnValueHandler());
@@ -592,7 +641,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 		// Annotation-based return value types
 		handlers.add(new ModelAttributeMethodProcessor(false));
-		handlers.add(new RequestResponseBodyMethodProcessor(getMessageConverters(), this.contentNegotiationManager));
+		handlers.add(new RequestResponseBodyMethodProcessor(
+				getMessageConverters(), this.contentNegotiationManager, this.responseBodyInterceptors));
 
 		// Multi-purpose return value types
 		handlers.add(new ViewNameMethodReturnValueHandler());
@@ -612,31 +662,6 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 
 		return handlers;
-	}
-
-	private void initControllerAdviceCache() {
-		if (getApplicationContext() == null) {
-			return;
-		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Looking for controller advice: " + getApplicationContext());
-		}
-
-		List<ControllerAdviceBean> beans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
-		Collections.sort(beans, new OrderComparator());
-
-		for (ControllerAdviceBean bean : beans) {
-			Set<Method> attrMethods = HandlerMethodSelector.selectMethods(bean.getBeanType(), MODEL_ATTRIBUTE_METHODS);
-			if (!attrMethods.isEmpty()) {
-				this.modelAttributeAdviceCache.put(bean, attrMethods);
-				logger.info("Detected @ModelAttribute methods in " + bean);
-			}
-			Set<Method> binderMethods = HandlerMethodSelector.selectMethods(bean.getBeanType(), INIT_BINDER_METHODS);
-			if (!binderMethods.isEmpty()) {
-				this.initBinderAdviceCache.put(bean, binderMethods);
-				logger.info("Detected @InitBinder methods in " + bean);
-			}
-		}
 	}
 
 	/**

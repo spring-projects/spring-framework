@@ -79,6 +79,9 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
+	private final List<Object> responseBodyInterceptors = new ArrayList<Object>();
+
+
 	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache =
 			new ConcurrentHashMap<Class<?>, ExceptionHandlerMethodResolver>(64);
 
@@ -104,6 +107,19 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		this.messageConverters.add(stringHttpMessageConverter);
 		this.messageConverters.add(new SourceHttpMessageConverter<Source>());
 		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
+	}
+
+	/**
+	 * Add one or more interceptors to be invoked after the execution of a controller
+	 * method annotated with {@code @ResponseBody} or returning {@code ResponseEntity}
+	 * but before the body is written to the response with the selected
+	 * {@code HttpMessageConverter}.
+	 */
+	public void setResponseBodyInterceptors(List<ResponseBodyInterceptor> responseBodyInterceptors) {
+		this.responseBodyInterceptors.clear();
+		if (responseBodyInterceptors != null) {
+			this.responseBodyInterceptors.addAll(responseBodyInterceptors);
+		}
 	}
 
 	/**
@@ -233,6 +249,10 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 
 	@Override
 	public void afterPropertiesSet() {
+
+		// Do this first, it may add ResponseBody interceptors
+		initExceptionHandlerAdviceCache();
+
 		if (this.argumentResolvers == null) {
 			List<HandlerMethodArgumentResolver> resolvers = getDefaultArgumentResolvers();
 			this.argumentResolvers = new HandlerMethodArgumentResolverComposite().addResolvers(resolvers);
@@ -241,7 +261,30 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			List<HandlerMethodReturnValueHandler> handlers = getDefaultReturnValueHandlers();
 			this.returnValueHandlers = new HandlerMethodReturnValueHandlerComposite().addHandlers(handlers);
 		}
-		initExceptionHandlerAdviceCache();
+	}
+
+	private void initExceptionHandlerAdviceCache() {
+		if (getApplicationContext() == null) {
+			return;
+		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("Looking for exception mappings: " + getApplicationContext());
+		}
+
+		List<ControllerAdviceBean> beans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
+		Collections.sort(beans, new OrderComparator());
+
+		for (ControllerAdviceBean bean : beans) {
+			ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(bean.getBeanType());
+			if (resolver.hasExceptionMappings()) {
+				this.exceptionHandlerAdviceCache.put(bean, resolver);
+				logger.info("Detected @ExceptionHandler methods in " + bean);
+			}
+			if (ResponseBodyInterceptor.class.isAssignableFrom(bean.getBeanType())) {
+				this.responseBodyInterceptors.add(bean);
+				logger.info("Detected ResponseBodyInterceptor implementation in " + bean);
+			}
+		}
 	}
 
 	/**
@@ -274,11 +317,13 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		handlers.add(new ModelAndViewMethodReturnValueHandler());
 		handlers.add(new ModelMethodProcessor());
 		handlers.add(new ViewMethodReturnValueHandler());
-		handlers.add(new HttpEntityMethodProcessor(getMessageConverters(), this.contentNegotiationManager));
+		handlers.add(new HttpEntityMethodProcessor(
+				getMessageConverters(), this.contentNegotiationManager, this.responseBodyInterceptors));
 
 		// Annotation-based return value types
 		handlers.add(new ModelAttributeMethodProcessor(false));
-		handlers.add(new RequestResponseBodyMethodProcessor(getMessageConverters(), this.contentNegotiationManager));
+		handlers.add(new RequestResponseBodyMethodProcessor(
+				getMessageConverters(), this.contentNegotiationManager, this.responseBodyInterceptors));
 
 		// Multi-purpose return value types
 		handlers.add(new ViewNameMethodReturnValueHandler());
@@ -293,26 +338,6 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		handlers.add(new ModelAttributeMethodProcessor(true));
 
 		return handlers;
-	}
-
-	private void initExceptionHandlerAdviceCache() {
-		if (getApplicationContext() == null) {
-			return;
-		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Looking for exception mappings: " + getApplicationContext());
-		}
-
-		List<ControllerAdviceBean> beans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
-		Collections.sort(beans, new OrderComparator());
-
-		for (ControllerAdviceBean bean : beans) {
-			ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(bean.getBeanType());
-			if (resolver.hasExceptionMappings()) {
-				this.exceptionHandlerAdviceCache.put(bean, resolver);
-				logger.info("Detected @ExceptionHandler methods in " + bean);
-			}
-		}
 	}
 
 	/**

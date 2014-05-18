@@ -69,9 +69,14 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 
 	public RequestResponseBodyMethodProcessor(List<HttpMessageConverter<?>> messageConverters,
 			ContentNegotiationManager contentNegotiationManager) {
-
 		super(messageConverters, contentNegotiationManager);
 	}
+
+	public RequestResponseBodyMethodProcessor(List<HttpMessageConverter<?>> messageConverters,
+			ContentNegotiationManager contentNegotiationManager, List<Object> responseBodyInterceptors) {
+		super(messageConverters, contentNegotiationManager, responseBodyInterceptors);
+	}
+
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
