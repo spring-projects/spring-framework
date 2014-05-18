@@ -77,7 +77,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 
 	/**
-	 * Exposes the native {@link HttpServletRequest} that we're wrapping (if any).
+	 * Exposes the native {@link HttpServletResponse} that we're wrapping (if any).
 	 */
 	public final HttpServletResponse getResponse() {
 		return this.response;
