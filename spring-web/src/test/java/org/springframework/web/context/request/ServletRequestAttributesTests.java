@@ -17,8 +17,8 @@
 package org.springframework.web.context.request;
 
 import java.io.Serializable;
-
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.junit.Test;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -162,4 +162,20 @@ public class ServletRequestAttributesTests {
 		verify(request).getSession(false);
 	}
 
+	/**
+	 * SPR-11738
+	 */
+	@Test
+	public void skipImmutableForSessionManagement() {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpSession session = mock(HttpSession.class);
+		when(request.getSession(anyBoolean())).thenReturn(session);
+
+		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
+
+		attrs.setAttribute(KEY, "SampleString", RequestAttributes.SCOPE_SESSION);
+		attrs.getAttribute(KEY, RequestAttributes.SCOPE_SESSION);
+		attrs.requestCompleted();
+		verify(session, times(1)).setAttribute(anyString(), anyObject());
+	}
 }
