@@ -1,4 +1,0 @@
-# Tooling related information for the oxm namespace
-http\://www.springframework.org/schema/oxm@name=oxm Namespace
-http\://www.springframework.org/schema/oxm@prefix=oxm
-http\://www.springframework.org/schema/oxm@icon=org/springframework/oxm/config/spring-oxm.gif

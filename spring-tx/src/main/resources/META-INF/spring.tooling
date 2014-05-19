@@ -1,4 +1,0 @@
-# Tooling related information for the tx namespace
-http\://www.springframework.org/schema/tx@name=tx Namespace
-http\://www.springframework.org/schema/tx@prefix=tx
-http\://www.springframework.org/schema/tx@icon=org/springframework/transaction/config/spring-tx.gif
