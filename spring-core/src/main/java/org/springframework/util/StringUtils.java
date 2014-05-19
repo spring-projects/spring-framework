@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,6 @@ import java.util.TreeSet;
  * @author Rick Evans
  * @author Arjen Poutsma
  * @since 16 April 2001
- * @see org.apache.commons.lang.StringUtils
  */
 public abstract class StringUtils {
 
@@ -87,7 +86,7 @@ public abstract class StringUtils {
 	/**
 	 * Check that the given CharSequence is neither {@code null} nor of length 0.
 	 * Note: Will return {@code true} for a CharSequence that purely consists of whitespace.
-	 * <p><pre>
+	 * <p><pre class="code">
 	 * StringUtils.hasLength(null) = false
 	 * StringUtils.hasLength("") = false
 	 * StringUtils.hasLength(" ") = true
@@ -116,7 +115,7 @@ public abstract class StringUtils {
 	 * Check whether the given CharSequence has actual text.
 	 * More specifically, returns {@code true} if the string not {@code null},
 	 * its length is greater than 0, and it contains at least one non-whitespace character.
-	 * <p><pre>
+	 * <p><pre class="code">
 	 * StringUtils.hasText(null) = false
 	 * StringUtils.hasText("") = false
 	 * StringUtils.hasText(" ") = false
@@ -207,7 +206,7 @@ public abstract class StringUtils {
 
 	/**
 	 * Trim <i>all</i> whitespace from the given String:
-	 * leading, trailing, and inbetween characters.
+	 * leading, trailing, and in between characters.
 	 * @param str the String to check
 	 * @return the trimmed String
 	 * @see java.lang.Character#isWhitespace
@@ -264,7 +263,7 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Trim all occurences of the supplied leading character from the given String.
+	 * Trim all occurrences of the supplied leading character from the given String.
 	 * @param str the String to check
 	 * @param leadingCharacter the leading character to be trimmed
 	 * @return the trimmed String
@@ -281,7 +280,7 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Trim all occurences of the supplied trailing character from the given String.
+	 * Trim all occurrences of the supplied trailing character from the given String.
 	 * @param str the String to check
 	 * @param trailingCharacter the trailing character to be trimmed
 	 * @return the trimmed String
@@ -380,7 +379,7 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Replace all occurences of a substring within a string with
+	 * Replace all occurrences of a substring within a string with
 	 * another string.
 	 * @param inString String to examine
 	 * @param oldPattern String to replace
@@ -679,10 +678,11 @@ public abstract class StringUtils {
 	/**
 	 * Parse the given {@code localeString} value into a {@link Locale}.
 	 * <p>This is the inverse operation of {@link Locale#toString Locale's toString}.
-	 * @param localeString the locale string, following {@code Locale's}
+	 * @param localeString the locale String, following {@code Locale's}
 	 * {@code toString()} format ("en", "en_UK", etc);
 	 * also accepts spaces as separators, as an alternative to underscores
 	 * @return a corresponding {@code Locale} instance
+	 * @throws IllegalArgumentException in case of an invalid locale specification
 	 */
 	public static Locale parseLocaleString(String localeString) {
 		String[] parts = tokenizeToStringArray(localeString, "_ ", false, false);
@@ -691,10 +691,10 @@ public abstract class StringUtils {
 		validateLocalePart(language);
 		validateLocalePart(country);
 		String variant = "";
-		if (parts.length >= 2) {
+		if (parts.length > 2) {
 			// There is definitely a variant, and it is everything after the country
 			// code sans the separator between the country code and the variant.
-			int endIndexOfCountryCode = localeString.lastIndexOf(country) + country.length();
+			int endIndexOfCountryCode = localeString.indexOf(country, language.length()) + country.length();
 			// Strip off any leading '_' and whitespace, what's left is the variant.
 			variant = trimLeadingWhitespace(localeString.substring(endIndexOfCountryCode));
 			if (variant.startsWith("_")) {
