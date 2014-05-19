@@ -170,7 +170,7 @@ public class TestContextManager {
 	public void beforeTestClass() throws Exception {
 		Class<?> testClass = getTestContext().getTestClass();
 		if (logger.isTraceEnabled()) {
-			logger.trace("beforeTestClass(): class [" + testClass + "]");
+			logger.trace("beforeTestClass(): class [" + testClass.getName() + "]");
 		}
 		getTestContext().updateState(null, null, null);
 
@@ -284,8 +284,8 @@ public class TestContextManager {
 	public void afterTestMethod(Object testInstance, Method testMethod, Throwable exception) throws Exception {
 		Assert.notNull(testInstance, "testInstance must not be null");
 		if (logger.isTraceEnabled()) {
-			logger.trace("afterTestMethod(): instance [" + testInstance + "], method [" + testMethod + "], exception ["
-					+ exception + "]");
+			logger.trace("afterTestMethod(): instance [" + testInstance + "], method [" + testMethod +
+					"], exception [" + exception + "]");
 		}
 		getTestContext().updateState(testInstance, testMethod, exception);
 
@@ -327,7 +327,7 @@ public class TestContextManager {
 	public void afterTestClass() throws Exception {
 		Class<?> testClass = getTestContext().getTestClass();
 		if (logger.isTraceEnabled()) {
-			logger.trace("afterTestClass(): class [" + testClass + "]");
+			logger.trace("afterTestClass(): class [" + testClass.getName() + "]");
 		}
 		getTestContext().updateState(null, null, null);
 
