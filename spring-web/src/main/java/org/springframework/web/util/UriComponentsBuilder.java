@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,15 +34,15 @@ import org.springframework.web.util.HierarchicalUriComponents.PathComponent;
 /**
  * Builder for {@link UriComponents}.
  *
- * <p></p>Typical usage involves:
+ * <p>Typical usage involves:
  * <ol>
- *     <li>Create a {@code UriComponentsBuilder} with one of the static factory methods (such as
- *     {@link #fromPath(String)} or {@link #fromUri(URI)})</li>
- *     <li>Set the various URI components through the respective methods ({@link #scheme(String)},
- *     {@link #userInfo(String)}, {@link #host(String)}, {@link #port(int)}, {@link #path(String)},
- *     {@link #pathSegment(String...)}, {@link #queryParam(String, Object...)}, and
- *     {@link #fragment(String)}.</li>
- *     <li>Build the {@link UriComponents} instance with the {@link #build()} method.</li>
+ * <li>Create a {@code UriComponentsBuilder} with one of the static factory methods
+ * (such as {@link #fromPath(String)} or {@link #fromUri(URI)})</li>
+ * <li>Set the various URI components through the respective methods ({@link #scheme(String)},
+ * {@link #userInfo(String)}, {@link #host(String)}, {@link #port(int)}, {@link #path(String)},
+ * {@link #pathSegment(String...)}, {@link #queryParam(String, Object...)}, and
+ * {@link #fragment(String)}.</li>
+ * <li>Build the {@link UriComponents} instance with the {@link #build()} method.</li>
  * </ol>
  *
  * @author Arjen Poutsma
@@ -150,7 +150,7 @@ public class UriComponentsBuilder {
 	 * contains {@code '='} or {@code '&'} characters, the query string cannot
 	 * be parsed unambiguously. Such values should be substituted for URI
 	 * variables to enable correct parsing:
-	 * <pre>
+	 * <pre class="code">
 	 * String uriString = &quot;/hotels/42?filter={value}&quot;;
 	 * UriComponentsBuilder.fromUriString(uriString).buildAndExpand(&quot;hot&amp;cold&quot;);
 	 * </pre>
@@ -210,7 +210,7 @@ public class UriComponentsBuilder {
 	 * contains {@code '='} or {@code '&'} characters, the query string cannot
 	 * be parsed unambiguously. Such values should be substituted for URI
 	 * variables to enable correct parsing:
-	 * <pre>
+	 * <pre class="code">
 	 * String uriString = &quot;/hotels/42?filter={value}&quot;;
 	 * UriComponentsBuilder.fromUriString(uriString).buildAndExpand(&quot;hot&amp;cold&quot;);
 	 * </pre>
@@ -245,7 +245,7 @@ public class UriComponentsBuilder {
 	// build methods
 
 	/**
-	 * Builds a {@code UriComponents} instance from the various components contained in this builder.
+	 * Build a {@code UriComponents} instance from the various components contained in this builder.
 	 * @return the URI components
 	 */
 	public UriComponents build() {
@@ -253,10 +253,10 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Builds a {@code UriComponents} instance from the various components
+	 * Build a {@code UriComponents} instance from the various components
 	 * contained in this builder.
 	 * @param encoded whether all the components set in this builder are
-	 * 	encoded ({@code true}) or not ({@code false}).
+	 * encoded ({@code true}) or not ({@code false}).
 	 * @return the URI components
 	 */
 	public UriComponents build(boolean encoded) {
@@ -270,8 +270,8 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Builds a {@code UriComponents} instance and replaces URI template variables
-	 * with the values from a map. This is a shortcut method, which combines
+	 * Build a {@code UriComponents} instance and replaces URI template variables
+	 * with the values from a map. This is a shortcut method which combines
 	 * calls to {@link #build()} and then {@link UriComponents#expand(Map)}.
 	 * @param uriVariables the map of URI variables
 	 * @return the URI components with expanded values
@@ -281,8 +281,8 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Builds a {@code UriComponents} instance and replaces URI template variables
-	 * with the values from an array. This is a shortcut method, which combines
+	 * Build a {@code UriComponents} instance and replaces URI template variables
+	 * with the values from an array. This is a shortcut method which combines
 	 * calls to {@link #build()} and then {@link UriComponents#expand(Object...)}.
 	 * @param uriVariableValues URI variable values
 	 * @return the URI components with expanded values
@@ -295,7 +295,7 @@ public class UriComponentsBuilder {
 	// URI components methods
 
 	/**
-	 * Initializes all components of this URI builder with the components of the given URI.
+	 * Initialize all components of this URI builder with the components of the given URI.
 	 * @param uri the URI
 	 * @return this UriComponentsBuilder
 	 */
@@ -344,7 +344,7 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Sets the URI scheme. The given scheme may contain URI template variables,
+	 * Set the URI scheme. The given scheme may contain URI template variables,
 	 * and may also be {@code null} to clear the scheme of this builder.
 	 * @param scheme the URI scheme
 	 * @return this UriComponentsBuilder
@@ -369,9 +369,8 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Sets the URI user info. The given user info may contain URI template
-	 * variables, and may also be {@code null} to clear the user info of this
-	 * builder.
+	 * Set the URI user info. The given user info may contain URI template variables,
+	 * and may also be {@code null} to clear the user info of this builder.
 	 * @param userInfo the URI user info
 	 * @return this UriComponentsBuilder
 	 */
@@ -382,8 +381,8 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Sets the URI host. The given host may contain URI template variables, and
-	 * may also be {@code null} to clear the host of this builder.
+	 * Set the URI host. The given host may contain URI template variables,
+	 * and may also be {@code null} to clear the host of this builder.
 	 * @param host the URI host
 	 * @return this UriComponentsBuilder
 	 */
@@ -394,7 +393,7 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Sets the URI port. Passing {@code -1} will clear the port of this builder.
+	 * Set the URI port. Passing {@code -1} will clear the port of this builder.
 	 * @param port the URI port
 	 * @return this UriComponentsBuilder
 	 */
@@ -406,8 +405,8 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Appends the given path to the existing path of this builder. The given
-	 * path may contain URI template variables.
+	 * Append the given path to the existing path of this builder.
+	 * The given path may contain URI template variables.
 	 * @param path the URI path
 	 * @return this UriComponentsBuilder
 	 */
@@ -418,7 +417,7 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Sets the path of this builder overriding all existing path and path segment values.
+	 * Set the path of this builder overriding all existing path and path segment values.
 	 * @param path the URI path; a {@code null} value results in an empty path.
 	 * @return this UriComponentsBuilder
 	 */
@@ -429,8 +428,8 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Appends the given path segments to the existing path of this builder. Each given
-	 * path segments may contain URI template variables.
+	 * Append the given path segments to the existing path of this builder.
+	 * Each given path segment may contain URI template variables.
 	 * @param pathSegments the URI path segments
 	 * @return this UriComponentsBuilder
 	 */
@@ -442,14 +441,14 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Appends the given query to the existing query of this builder.
+	 * Append the given query to the existing query of this builder.
 	 * The given query may contain URI template variables.
 	 * <p><strong>Note:</strong> The presence of reserved characters can prevent
 	 * correct parsing of the URI string. For example if a query parameter
 	 * contains {@code '='} or {@code '&'} characters, the query string cannot
 	 * be parsed unambiguously. Such values should be substituted for URI
 	 * variables to enable correct parsing:
-	 * <pre>
+	 * <pre class="code">
 	 * String uriString = &quot;/hotels/42?filter={value}&quot;;
 	 * UriComponentsBuilder.fromUriString(uriString).buildAndExpand(&quot;hot&amp;cold&quot;);
 	 * </pre>
@@ -475,7 +474,7 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Sets the query of this builder overriding all existing query parameters.
+	 * Set the query of this builder overriding all existing query parameters.
 	 * @param query the query string; a {@code null} value removes all query parameters.
 	 * @return this UriComponentsBuilder
 	 */
@@ -487,7 +486,7 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Appends the given query parameter to the existing query parameters. The
+	 * Append the given query parameter to the existing query parameters. The
 	 * given name or any of the values may contain URI template variables. If no
 	 * values are given, the resulting URI will contain the query parameter name
 	 * only (i.e. {@code ?foo} instead of {@code ?foo=bar}.
@@ -511,9 +510,8 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Sets the query parameter values overriding all existing query values for
-	 * the same parameter. If no values are given, the query parameter is
-	 * removed.
+	 * Set the query parameter values overriding all existing query values for
+	 * the same parameter. If no values are given, the query parameter is removed.
 	 * @param name the query parameter name
 	 * @param values the query parameter values
 	 * @return this UriComponentsBuilder
@@ -529,9 +527,8 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Sets the URI fragment. The given fragment may contain URI template
-	 * variables, and may also be {@code null} to clear the fragment of this
-	 * builder.
+	 * Set the URI fragment. The given fragment may contain URI template variables,
+	 * and may also be {@code null} to clear the fragment of this builder.
 	 * @param fragment the URI fragment
 	 * @return this UriComponentsBuilder
 	 */
