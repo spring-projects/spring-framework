@@ -1,2 +1,0 @@
-http\://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd=org/springframework/web/socket/config/spring-websocket-4.0.xsd
-http\://www.springframework.org/schema/websocket/spring-websocket.xsd=org/springframework/web/socket/config/spring-websocket-4.0.xsd

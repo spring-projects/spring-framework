@@ -1,6 +1,0 @@
-<products>
-	<product id="1" name="Whatsit" price="12.99"/>
-	<product id="2" name="Thingy" price="13.99"/>
-	<product id="3" name="Gizmo" price="14.99"/>
-	<product id="4" name="Cranktoggle" price="11.99"/>
-</products>
