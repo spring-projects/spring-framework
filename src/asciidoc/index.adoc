@@ -40428,6 +40428,10 @@ clear, the `JmsTemplate` is stateful, in that it maintains a reference to a
 `ConnectionFactory`, but this state is __not__ conversational state.
 ====
 
+As of Spring Framework 4.1, `JmsMessagingTemplate` is built on top of `JmsTemplate`
+and provides an integration with the messaging abstraction, i.e.
+`org.springframework.messaging.Message`. This allows you to create the message to
+send in generic manner.
 
 
 [[jms-connections]]

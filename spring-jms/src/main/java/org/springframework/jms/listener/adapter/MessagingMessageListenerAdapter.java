@@ -16,16 +16,14 @@
 
 package org.springframework.jms.listener.adapter;
 
-import java.util.Map;
-
 import javax.jms.JMSException;
 import javax.jms.Session;
 
 import org.springframework.jms.support.converter.JmsHeaderMapper;
+import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
-import org.springframework.messaging.support.MessageBuilder;
 
 /**
  * A {@link javax.jms.MessageListener} adapter that invokes a configurable
@@ -75,12 +73,12 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 
 	@SuppressWarnings("unchecked")
 	protected Message<?> toMessagingMessage(javax.jms.Message jmsMessage) {
-		Map<String, Object> mappedHeaders = getHeaderMapper().toHeaders(jmsMessage);
-		Object convertedObject = extractMessage(jmsMessage);
-		MessageBuilder<Object> builder = (convertedObject instanceof org.springframework.messaging.Message) ?
-				MessageBuilder.fromMessage((org.springframework.messaging.Message<Object>) convertedObject) :
-				MessageBuilder.withPayload(convertedObject);
-		return builder.copyHeadersIfAbsent(mappedHeaders).build();
+		try {
+			return (Message<?>) getMessagingMessageConverter().fromMessage(jmsMessage);
+		}
+		catch (JMSException e) {
+			throw new MessageConversionException("Could not unmarshal message", e);
+		}
 	}
 
 	/**

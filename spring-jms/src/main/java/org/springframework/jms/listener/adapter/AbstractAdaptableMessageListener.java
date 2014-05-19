@@ -32,6 +32,7 @@ import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.converter.JmsHeaderMapper;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.MessageConverter;
+import org.springframework.jms.support.converter.MessagingMessageConverter;
 import org.springframework.jms.support.converter.SimpleJmsHeaderMapper;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
@@ -60,7 +61,7 @@ public abstract class AbstractAdaptableMessageListener
 
 	private MessageConverter messageConverter;
 
-	private JmsHeaderMapper headerMapper = new SimpleJmsHeaderMapper();
+	private MessagingMessageConverterAdapter messagingMessageConverter = new MessagingMessageConverterAdapter();
 
 
 	/**
@@ -152,6 +153,10 @@ public abstract class AbstractAdaptableMessageListener
 		return this.messageConverter;
 	}
 
+	protected MessageConverter getMessagingMessageConverter() {
+		return this.messagingMessageConverter;
+	}
+
 	/**
 	 * Set the {@link JmsHeaderMapper} implementation to use to map the
 	 * standard JMS headers. By default {@link SimpleJmsHeaderMapper} is
@@ -160,15 +165,7 @@ public abstract class AbstractAdaptableMessageListener
 	 */
 	public void setHeaderMapper(JmsHeaderMapper headerMapper) {
 		Assert.notNull(headerMapper, "HeaderMapper must not be null");
-		this.headerMapper = headerMapper;
-	}
-
-	/**
-	 * Return the {@link JmsHeaderMapper} that converts headers from
-	 * and to the messaging abstraction.
-	 */
-	protected JmsHeaderMapper getHeaderMapper() {
-		return headerMapper;
+		this.messagingMessageConverter.setHeaderMapper(headerMapper);
 	}
 
 	/**
@@ -284,10 +281,7 @@ public abstract class AbstractAdaptableMessageListener
 		MessageConverter converter = getMessageConverter();
 		if (converter != null) {
 			if (result instanceof org.springframework.messaging.Message) {
-				org.springframework.messaging.Message<?> message = (org.springframework.messaging.Message<?>) result;
-				Message reply = converter.toMessage(message.getPayload(), session);
-				getHeaderMapper().fromHeaders(message.getHeaders(), reply);
-				return reply;
+				return messagingMessageConverter.toMessage(result, session);
 			}
 			else {
 				return converter.toMessage(result, session);
@@ -403,6 +397,18 @@ public abstract class AbstractAdaptableMessageListener
 	protected void postProcessProducer(MessageProducer producer, Message response) throws JMSException {
 	}
 
+
+	/**
+	 * Delegates payload extraction to {@link #extractMessage(javax.jms.Message)} to
+	 * enforce backward compatibility.
+	 */
+	private class MessagingMessageConverterAdapter extends MessagingMessageConverter {
+
+		@Override
+		protected Object extractPayload(Message message) throws JMSException {
+			return extractMessage(message);
+		}
+	}
 
 	/**
 	 * Internal class combining a destination name
