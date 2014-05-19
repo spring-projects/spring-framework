@@ -64,11 +64,12 @@ import org.springframework.util.StringUtils;
  * </ul>
  *
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 4.1
  */
 public abstract class AbstractTestContextBootstrapper implements TestContextBootstrapper {
 
-	private static final Log logger = LogFactory.getLog(AbstractTestContextBootstrapper.class);
+	private final Log logger = LogFactory.getLog(getClass());
 
 	private BootstrapContext bootstrapContext;
 
@@ -99,13 +100,13 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		Class<TestExecutionListeners> annotationType = TestExecutionListeners.class;
 		List<Class<? extends TestExecutionListener>> classesList = new ArrayList<Class<? extends TestExecutionListener>>();
 
-		AnnotationDescriptor<TestExecutionListeners> descriptor = MetaAnnotationUtils.findAnnotationDescriptor(clazz,
-			annotationType);
+		AnnotationDescriptor<TestExecutionListeners> descriptor =
+				MetaAnnotationUtils.findAnnotationDescriptor(clazz, annotationType);
 
 		// Use defaults?
 		if (descriptor == null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("@TestExecutionListeners is not present for class [" + clazz + "]: using defaults.");
+				logger.debug("@TestExecutionListeners is not present for class [" + clazz.getName() + "]: using defaults.");
 			}
 			classesList.addAll(getDefaultTestExecutionListenerClasses());
 		}
@@ -116,7 +117,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				AnnotationAttributes annAttrs = descriptor.getAnnotationAttributes();
 				if (logger.isTraceEnabled()) {
 					logger.trace(String.format("Retrieved @TestExecutionListeners attributes [%s] for declaring class [%s].",
-							annAttrs, declaringClass));
+							annAttrs, declaringClass.getName()));
 				}
 
 				Class<? extends TestExecutionListener>[] valueListenerClasses =
@@ -124,10 +125,9 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				Class<? extends TestExecutionListener>[] listenerClasses =
 						(Class<? extends TestExecutionListener>[]) annAttrs.getClassArray("listeners");
 				if (!ObjectUtils.isEmpty(valueListenerClasses) && !ObjectUtils.isEmpty(listenerClasses)) {
-					throw new IllegalStateException(
-							String.format("Class [%s] has been configured with @TestExecutionListeners' 'value' [%s]" +
-											" and 'listeners' [%s] attributes. Use one or the other, but not both.",
-							declaringClass, ObjectUtils.nullSafeToString(valueListenerClasses),
+					throw new IllegalStateException(String.format("Class [%s] configured with @TestExecutionListeners' " +
+							"'value' [%s] and 'listeners' [%s] attributes. Use one or the other, but not both.",
+							declaringClass.getName(), ObjectUtils.nullSafeToString(valueListenerClasses),
 							ObjectUtils.nullSafeToString(listenerClasses)));
 				}
 				else if (!ObjectUtils.isEmpty(valueListenerClasses)) {
@@ -160,7 +160,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				if (logger.isInfoEnabled()) {
 					logger.info(String.format("Could not instantiate TestExecutionListener [%s]. " +
 							"Specify custom listener classes or make the default listener classes " +
-							"(and their dependencies) available. Offending class: [%s]",
+							"(and their required dependencies) available. Offending class: [%s]",
 							listenerClass.getName(), ncdfe.getMessage()));
 				}
 			}
@@ -334,7 +334,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		}
 		if (logger.isTraceEnabled()) {
 			logger.trace(String.format("Using ContextLoader class [%s] for test class [%s]",
-				contextLoaderClass.getName(), testClass.getName()));
+					contextLoaderClass.getName(), testClass.getName()));
 		}
 		return BeanUtils.instantiateClass(contextLoaderClass, ContextLoader.class);
 	}
