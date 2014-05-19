@@ -323,7 +323,7 @@ project("spring-beans") {
 		compile(project(":spring-core"))
 		compile(files(project(":spring-core").cglibRepackJar))
 		optional("javax.inject:javax.inject:1")
-		optional("javax.el:javax.el-api:2.2.4")
+		optional("javax.el:javax.el-api:2.2.5")
 		optional("org.yaml:snakeyaml:${snakeYamlVersion}")
 		testCompile("log4j:log4j:1.2.17")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
@@ -613,7 +613,7 @@ project("spring-web") {
 		optional(project(":spring-oxm")) // for MarshallingHttpMessageConverter
 		optional("javax.servlet.jsp:javax.servlet.jsp-api:2.2.1")
 		optional("javax.portlet:portlet-api:2.0")
-		optional("javax.el:javax.el-api:2.2.4")
+		optional("javax.el:javax.el-api:2.2.5")
 		optional("javax.faces:javax.faces-api:2.2")
 		optional("aopalliance:aopalliance:1.0")
 		optional("com.caucho:hessian:4.0.38")
@@ -738,8 +738,8 @@ project("spring-orm-hibernate4") {
         optional("aopalliance:aopalliance:1.0")
 		testCompile("javax.validation:validation-api:1.1.0.GA")
 		testCompile("org.hibernate:hibernate-validator:${hibVal5Version}")
-		testCompile("javax.el:javax.el-api:2.2.4")
-		testCompile("org.glassfish.web:javax.el:2.2.4")
+		testCompile("javax.el:javax.el-api:2.2.5")
+		testCompile("org.glassfish.web:javax.el:2.2.6")
 	}
 }
 
@@ -831,7 +831,7 @@ project("spring-webmvc-tiles3") {
 		provided("javax.servlet:javax.servlet-api:3.0.1")
 		optional("javax.servlet.jsp:javax.servlet.jsp-api:2.2.1")
 		optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
-		optional("javax.el:javax.el-api:2.2.4")
+		optional("javax.el:javax.el-api:2.2.5")
 		optional("org.apache.tiles:tiles-api:${tiles3Version}")
 		optional("org.apache.tiles:tiles-core:${tiles3Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
@@ -894,7 +894,7 @@ project("spring-test") {
 			exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
 		}
 		optional("javax.portlet:portlet-api:2.0")
-		optional("javax.el:javax.el-api:2.2.4")
+		optional("javax.el:javax.el-api:2.2.5")
 		optional("org.eclipse.persistence:javax.persistence:2.0.0")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.hamcrest:hamcrest-core:1.3")
