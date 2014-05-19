@@ -27,6 +27,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.util.Assert;
@@ -74,10 +75,10 @@ import org.springframework.util.ObjectUtils;
 public class TestContextManager {
 
 	private static final String[] DEFAULT_TEST_EXECUTION_LISTENER_CLASS_NAMES = new String[] {
-		"org.springframework.test.context.web.ServletTestExecutionListener",
-		"org.springframework.test.context.support.DependencyInjectionTestExecutionListener",
-		"org.springframework.test.context.support.DirtiesContextTestExecutionListener",
-		"org.springframework.test.context.transaction.TransactionalTestExecutionListener" };
+			"org.springframework.test.context.web.ServletTestExecutionListener",
+			"org.springframework.test.context.support.DependencyInjectionTestExecutionListener",
+			"org.springframework.test.context.support.DirtiesContextTestExecutionListener",
+			"org.springframework.test.context.transaction.TransactionalTestExecutionListener" };
 
 	private static final Log logger = LogFactory.getLog(TestContextManager.class);
 
@@ -194,24 +195,21 @@ public class TestContextManager {
 			// Traverse the class hierarchy...
 			while (descriptor != null) {
 				Class<?> declaringClass = descriptor.getDeclaringClass();
-
 				AnnotationAttributes annAttrs = descriptor.getAnnotationAttributes();
 				if (logger.isTraceEnabled()) {
-					logger.trace(String.format(
-						"Retrieved @TestExecutionListeners attributes [%s] for declaring class [%s].", annAttrs,
-						declaringClass));
+					logger.trace(String.format("Retrieved @TestExecutionListeners attributes [%s] for declaring class [%s].",
+							annAttrs, declaringClass));
 				}
 
-				Class<? extends TestExecutionListener>[] valueListenerClasses = (Class<? extends TestExecutionListener>[]) annAttrs.getClassArray("value");
-				Class<? extends TestExecutionListener>[] listenerClasses = (Class<? extends TestExecutionListener>[]) annAttrs.getClassArray("listeners");
+				Class<? extends TestExecutionListener>[] valueListenerClasses =
+						(Class<? extends TestExecutionListener>[]) annAttrs.getClassArray("value");
+				Class<? extends TestExecutionListener>[] listenerClasses =
+						(Class<? extends TestExecutionListener>[]) annAttrs.getClassArray("listeners");
 				if (!ObjectUtils.isEmpty(valueListenerClasses) && !ObjectUtils.isEmpty(listenerClasses)) {
-					String msg = String.format(
-						"Class [%s] has been configured with @TestExecutionListeners' 'value' [%s] "
-								+ "and 'listeners' [%s] attributes. Use one or the other, but not both.",
-						declaringClass, ObjectUtils.nullSafeToString(valueListenerClasses),
-						ObjectUtils.nullSafeToString(listenerClasses));
-					logger.error(msg);
-					throw new IllegalStateException(msg);
+					throw new IllegalStateException(String.format("Class [%s] configured with @TestExecutionListeners' " +
+							"'value' [%s] and 'listeners' [%s] attributes. Use one or the other, but not both.",
+							declaringClass, ObjectUtils.nullSafeToString(valueListenerClasses),
+							ObjectUtils.nullSafeToString(listenerClasses)));
 				}
 				else if (!ObjectUtils.isEmpty(valueListenerClasses)) {
 					listenerClasses = valueListenerClasses;
@@ -220,7 +218,6 @@ public class TestContextManager {
 				if (listenerClasses != null) {
 					classesList.addAll(0, Arrays.<Class<? extends TestExecutionListener>> asList(listenerClasses));
 				}
-
 				descriptor = (annAttrs.getBoolean("inheritListeners") ? MetaAnnotationUtils.findAnnotationDescriptor(
 						descriptor.getRootDeclaringClass().getSuperclass(), annotationType) : null);
 			}
@@ -228,14 +225,24 @@ public class TestContextManager {
 
 		List<TestExecutionListener> listeners = new ArrayList<TestExecutionListener>(classesList.size());
 		for (Class<? extends TestExecutionListener> listenerClass : classesList) {
+			NoClassDefFoundError ncdfe = null;
 			try {
 				listeners.add(BeanUtils.instantiateClass(listenerClass));
 			}
 			catch (NoClassDefFoundError err) {
+				ncdfe = err;
+			}
+			catch (BeanInstantiationException ex) {
+				if (ex.getCause() instanceof NoClassDefFoundError) {
+					ncdfe = (NoClassDefFoundError) ex.getCause();
+				}
+			}
+			if (ncdfe != null) {
 				if (logger.isInfoEnabled()) {
-					logger.info(String.format("Could not instantiate TestExecutionListener class [%s]. " +
+					logger.info(String.format("Could not instantiate TestExecutionListener [%s]. " +
 							"Specify custom listener classes or make the default listener classes " +
-							"(and their dependencies) available.", listenerClass.getName()));
+							"(and their required dependencies) available. Offending class: [%s]",
+							listenerClass.getName(), ncdfe.getMessage()));
 				}
 			}
 		}
