@@ -248,7 +248,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 					String name = entry.getKey();
 					Object newValue = entry.getValue();
 					Object oldValue = this.session.getAttribute(name);
-					if (oldValue == newValue) {
+					if (oldValue == newValue && !isImmutableSessionAttribute(name, newValue)) {
 						this.session.setAttribute(name, newValue);
 					}
 				}
@@ -258,6 +258,23 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 			}
 		}
 		this.sessionAttributesToUpdate.clear();
+	}
+
+	/**
+	 * Determine whether the given value is to be considered as an immutable session
+	 * attribute, that is, doesn't have to be re-set via {@code session.setAttribute}
+	 * since its value cannot meaningfully change internally.
+	 * <p>The default implementation returns {@code true} for {@code String},
+	 * {@code Character}, {@code Boolean} and {@code Number} values.
+	 * @param name the name of the attribute
+	 * @param value the corresponding value to check
+	 * @return {@code true} if the value is to be considered as immutable for the
+	 * purposes of session attribute management; {@code false} otherwise
+	 * @see #updateAccessedSessionAttributes()
+	 */
+	protected boolean isImmutableSessionAttribute(String name, Object value) {
+		return (value instanceof String || value instanceof Character ||
+				value instanceof Boolean || value instanceof Number);
 	}
 
 	/**
