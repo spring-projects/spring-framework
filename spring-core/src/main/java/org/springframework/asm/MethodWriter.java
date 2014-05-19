@@ -1966,43 +1966,43 @@ class MethodWriter extends MethodVisitor {
                     stackMap.putByte(v);
                 }
             } else {
-                StringBuffer buf = new StringBuffer();
+                StringBuilder sb = new StringBuilder();
                 d >>= 28;
                 while (d-- > 0) {
-                    buf.append('[');
+                    sb.append('[');
                 }
                 if ((t & Frame.BASE_KIND) == Frame.OBJECT) {
-                    buf.append('L');
-                    buf.append(cw.typeTable[t & Frame.BASE_VALUE].strVal1);
-                    buf.append(';');
+                    sb.append('L');
+                    sb.append(cw.typeTable[t & Frame.BASE_VALUE].strVal1);
+                    sb.append(';');
                 } else {
                     switch (t & 0xF) {
                     case 1:
-                        buf.append('I');
+                        sb.append('I');
                         break;
                     case 2:
-                        buf.append('F');
+                        sb.append('F');
                         break;
                     case 3:
-                        buf.append('D');
+                        sb.append('D');
                         break;
                     case 9:
-                        buf.append('Z');
+                        sb.append('Z');
                         break;
                     case 10:
-                        buf.append('B');
+                        sb.append('B');
                         break;
                     case 11:
-                        buf.append('C');
+                        sb.append('C');
                         break;
                     case 12:
-                        buf.append('S');
+                        sb.append('S');
                         break;
                     default:
-                        buf.append('J');
+                        sb.append('J');
                     }
                 }
-                stackMap.putByte(7).putShort(cw.newClass(buf.toString()));
+                stackMap.putByte(7).putShort(cw.newClass(sb.toString()));
             }
         }
     }
