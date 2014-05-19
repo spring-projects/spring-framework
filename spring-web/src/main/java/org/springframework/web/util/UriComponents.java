@@ -30,10 +30,10 @@ import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Represents an immutable collection of URI components, mapping component type to String
- * values. Contains convenience getters for all components. Effectively similar to {@link
- * java.net.URI}, but with more powerful encoding options and support for URI template
- * variables.
+ * Represents an immutable collection of URI components, mapping component type to
+ * String values. Contains convenience getters for all components. Effectively similar
+ * to {@link java.net.URI}, but with more powerful encoding options and support for
+ * URI template variables.
  *
  * @author Arjen Poutsma
  * @since 3.1
@@ -135,17 +135,17 @@ public abstract class UriComponents implements Serializable {
 	 * Encode all URI components using their specific encoding rules, and
 	 * returns the result as a new {@code UriComponents} instance.
 	 * @param encoding the encoding of the values contained in this map
-	 * @return the encoded uri components
+	 * @return the encoded URI components
 	 * @throws UnsupportedEncodingException if the given encoding is not supported
 	 */
 	public abstract UriComponents encode(String encoding) throws UnsupportedEncodingException;
 
 	/**
-	 * Replace all URI template variables with the values from a given map. The map keys
-	 * represent variable names; the values variable values. The order of variables is not
-	 * significant.
+	 * Replace all URI template variables with the values from a given map.
+	 * <p>The given map keys represent variable names; the corresponding values
+	 * represent variable values. The order of variables is not significant.
 	 * @param uriVariables the map of URI variables
-	 * @return the expanded uri components
+	 * @return the expanded URI components
 	 */
 	public final UriComponents expand(Map<String, ?> uriVariables) {
 		Assert.notNull(uriVariables, "'uriVariables' must not be null");
@@ -153,10 +153,10 @@ public abstract class UriComponents implements Serializable {
 	}
 
 	/**
-	 * Replace all URI template variables with the values from a given array. The array
-	 * represent variable values. The order of variables is significant.
-	 * @param uriVariableValues URI variable values
-	 * @return the expanded uri components
+	 * Replace all URI template variables with the values from a given array.
+	 * <p>The given array represents variable values. The order of variables is significant.
+	 * @param uriVariableValues the URI variable values
+	 * @return the expanded URI components
 	 */
 	public final UriComponents expand(Object... uriVariableValues) {
 		Assert.notNull(uriVariableValues, "'uriVariableValues' must not be null");
@@ -164,14 +164,14 @@ public abstract class UriComponents implements Serializable {
 	}
 
 	/**
-	 * Replace all URI template variables with the values obtained through the
-	 * given {@link UriTemplateVariables} instance.
-	 * @param uriTemplateVars resolves URI template variable values
-	 * @return the expanded uri components
+	 * Replace all URI template variables with the values from the given
+	 * {@link UriTemplateVariables}.
+	 * @param uriVariables the URI template values
+	 * @return the expanded URI components
 	 */
-	public final UriComponents expand(UriTemplateVariables uriTemplateVars) {
-		Assert.notNull(uriTemplateVars, "'uriTemplateVars' must not be null");
-		return expandInternal(uriTemplateVars);
+	public final UriComponents expand(UriTemplateVariables uriVariables) {
+		Assert.notNull(uriVariables, "'uriVariables' must not be null");
+		return expandInternal(uriVariables);
 	}
 
 	/**
