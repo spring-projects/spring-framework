@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,11 @@
 package org.springframework.web.context.request;
 
 import java.io.Serializable;
-
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.junit.Test;
+
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpSession;
 
@@ -39,21 +40,10 @@ public class ServletRequestAttributesTests {
 	private static final Serializable VALUE = new Serializable() {
 	};
 
+
 	@Test(expected = IllegalArgumentException.class)
 	public void ctorRejectsNullArg() throws Exception {
 		new ServletRequestAttributes(null);
-	}
-
-	@Test
-	public void updateAccessedAttributes() throws Exception {
-		MockHttpSession session = new MockHttpSession();
-		session.setAttribute(KEY, VALUE);
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.setSession(session);
-		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
-		Object value = attrs.getAttribute(KEY, RequestAttributes.SCOPE_SESSION);
-		assertSame(VALUE, value);
-		attrs.requestCompleted();
 	}
 
 	@Test
@@ -160,6 +150,22 @@ public class ServletRequestAttributesTests {
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		attrs.removeAttribute(KEY, RequestAttributes.SCOPE_SESSION);
 		verify(request).getSession(false);
+	}
+
+	@Test
+	public void updateAccessedAttributes() throws Exception {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpSession session = mock(HttpSession.class);
+		when(request.getSession(anyBoolean())).thenReturn(session);
+		when(session.getAttribute(KEY)).thenReturn(VALUE);
+
+		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
+		assertSame(VALUE, attrs.getAttribute(KEY, RequestAttributes.SCOPE_SESSION));
+		attrs.requestCompleted();
+
+		verify(session, times(2)).getAttribute(KEY);
+		verify(session).setAttribute(KEY, VALUE);
+		verifyNoMoreInteractions(session);
 	}
 
 }
