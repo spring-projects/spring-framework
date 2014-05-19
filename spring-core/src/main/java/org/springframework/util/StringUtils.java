@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,6 @@ import java.util.TreeSet;
  * @author Rick Evans
  * @author Arjen Poutsma
  * @since 16 April 2001
- * @see org.apache.commons.lang.StringUtils
  */
 public abstract class StringUtils {
 
@@ -696,7 +695,7 @@ public abstract class StringUtils {
 		if (parts.length > 2) {
 			// There is definitely a variant, and it is everything after the country
 			// code sans the separator between the country code and the variant.
-			int endIndexOfCountryCode = localeString.lastIndexOf(country) + country.length();
+			int endIndexOfCountryCode = localeString.indexOf(country, language.length()) + country.length();
 			// Strip off any leading '_' and whitespace, what's left is the variant.
 			variant = trimLeadingWhitespace(localeString.substring(endIndexOfCountryCode));
 			if (variant.startsWith("_")) {
