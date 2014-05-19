@@ -27,6 +27,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
@@ -49,18 +50,18 @@ import org.springframework.util.ObjectUtils;
  * <ul>
  * <li>{@link #beforeTestClass() before test class execution}: prior to any
  * <em>before class methods</em> of a particular testing framework (e.g., JUnit
- * 4's {@link org.junit.BeforeClass &#064;BeforeClass})</li>
+ * 4's {@link org.junit.BeforeClass @BeforeClass})</li>
  * <li>{@link #prepareTestInstance(Object) test instance preparation}:
  * immediately following instantiation of the test instance</li>
  * <li>{@link #beforeTestMethod(Object, Method) before test method execution}:
  * prior to any <em>before methods</em> of a particular testing framework (e.g.,
- * JUnit 4's {@link org.junit.Before &#064;Before})</li>
+ * JUnit 4's {@link org.junit.Before @Before})</li>
  * <li>{@link #afterTestMethod(Object, Method, Throwable) after test method
  * execution}: after any <em>after methods</em> of a particular testing
- * framework (e.g., JUnit 4's {@link org.junit.After &#064;After})</li>
+ * framework (e.g., JUnit 4's {@link org.junit.After @After})</li>
  * <li>{@link #afterTestClass() after test class execution}: after any
  * <em>after class methods</em> of a particular testing framework (e.g., JUnit
- * 4's {@link org.junit.AfterClass &#064;AfterClass})</li>
+ * 4's {@link org.junit.AfterClass @AfterClass})</li>
  * </ul>
  *
  * @author Sam Brannen
@@ -74,10 +75,10 @@ import org.springframework.util.ObjectUtils;
 public class TestContextManager {
 
 	private static final String[] DEFAULT_TEST_EXECUTION_LISTENER_CLASS_NAMES = new String[] {
-		"org.springframework.test.context.web.ServletTestExecutionListener",
-		"org.springframework.test.context.support.DependencyInjectionTestExecutionListener",
-		"org.springframework.test.context.support.DirtiesContextTestExecutionListener",
-		"org.springframework.test.context.transaction.TransactionalTestExecutionListener" };
+			"org.springframework.test.context.web.ServletTestExecutionListener",
+			"org.springframework.test.context.support.DependencyInjectionTestExecutionListener",
+			"org.springframework.test.context.support.DirtiesContextTestExecutionListener",
+			"org.springframework.test.context.transaction.TransactionalTestExecutionListener" };
 
 	private static final Log logger = LogFactory.getLog(TestContextManager.class);
 
@@ -164,10 +165,10 @@ public class TestContextManager {
 
 	/**
 	 * Retrieve an array of newly instantiated {@link TestExecutionListener TestExecutionListeners}
-	 * for the specified {@link Class class}. If {@link TestExecutionListeners &#064;TestExecutionListeners}
+	 * for the specified {@link Class class}. If {@link TestExecutionListeners @TestExecutionListeners}
 	 * is not <em>present</em> on the supplied class, the default listeners will be returned.
 	 * <p>Note that the {@link TestExecutionListeners#inheritListeners() inheritListeners} flag of
-	 * {@link TestExecutionListeners &#064;TestExecutionListeners} will be taken into consideration.
+	 * {@link TestExecutionListeners @TestExecutionListeners} will be taken into consideration.
 	 * Specifically, if the {@code inheritListeners} flag is set to {@code true}, listeners
 	 * defined in the annotated class will be appended to the listeners defined in superclasses.
 	 * @param clazz the test class for which the listeners should be retrieved
@@ -198,12 +199,10 @@ public class TestContextManager {
 				Class<? extends TestExecutionListener>[] valueListenerClasses = testExecutionListeners.value();
 				Class<? extends TestExecutionListener>[] listenerClasses = testExecutionListeners.listeners();
 				if (!ObjectUtils.isEmpty(valueListenerClasses) && !ObjectUtils.isEmpty(listenerClasses)) {
-					String msg = String.format("Test class [%s] has been configured with @TestExecutionListeners' " +
-									"'value' [%s] and 'listeners' [%s] attributes. Use one or the other, but not both.",
+					throw new IllegalStateException(String.format("Class [%s] configured with @TestExecutionListeners' " +
+							"'value' [%s] and 'listeners' [%s] attributes. Use one or the other, but not both.",
 							declaringClass, ObjectUtils.nullSafeToString(valueListenerClasses),
-							ObjectUtils.nullSafeToString(listenerClasses));
-					logger.error(msg);
-					throw new IllegalStateException(msg);
+							ObjectUtils.nullSafeToString(listenerClasses)));
 				}
 				else if (!ObjectUtils.isEmpty(valueListenerClasses)) {
 					listenerClasses = valueListenerClasses;
@@ -213,20 +212,30 @@ public class TestContextManager {
 					classesList.addAll(0, Arrays.<Class<? extends TestExecutionListener>> asList(listenerClasses));
 				}
 				declaringClass = (testExecutionListeners.inheritListeners() ? AnnotationUtils.findAnnotationDeclaringClass(
-					annotationType, declaringClass.getSuperclass()) : null);
+						annotationType, declaringClass.getSuperclass()) : null);
 			}
 		}
 
 		List<TestExecutionListener> listeners = new ArrayList<TestExecutionListener>(classesList.size());
 		for (Class<? extends TestExecutionListener> listenerClass : classesList) {
+			NoClassDefFoundError ncdfe = null;
 			try {
 				listeners.add(BeanUtils.instantiateClass(listenerClass));
 			}
 			catch (NoClassDefFoundError err) {
+				ncdfe = err;
+			}
+			catch (BeanInstantiationException ex) {
+				if (ex.getCause() instanceof NoClassDefFoundError) {
+					ncdfe = (NoClassDefFoundError) ex.getCause();
+				}
+			}
+			if (ncdfe != null) {
 				if (logger.isInfoEnabled()) {
-					logger.info(String.format("Could not instantiate TestExecutionListener class [%s]. " +
+					logger.info(String.format("Could not instantiate TestExecutionListener [%s]. " +
 							"Specify custom listener classes or make the default listener classes " +
-							"(and their dependencies) available.", listenerClass.getName()));
+							"(and their required dependencies) available. Offending class: [%s]",
+							listenerClass.getName(), ncdfe.getMessage()));
 				}
 			}
 		}
@@ -258,7 +267,7 @@ public class TestContextManager {
 	 * Hook for pre-processing a test class <em>before</em> execution of any
 	 * tests within the class. Should be called prior to any framework-specific
 	 * <em>before class methods</em> (e.g., methods annotated with JUnit's
-	 * {@link org.junit.BeforeClass &#064;BeforeClass}).
+	 * {@link org.junit.BeforeClass @BeforeClass}).
 	 * <p>An attempt will be made to give each registered
 	 * {@link TestExecutionListener} a chance to pre-process the test class
 	 * execution. If a listener throws an exception, however, the remaining
@@ -324,7 +333,7 @@ public class TestContextManager {
 	 * {@link Method test method}, for example for setting up test fixtures,
 	 * starting a transaction, etc. Should be called prior to any
 	 * framework-specific <em>before methods</em> (e.g., methods annotated with
-	 * JUnit's {@link org.junit.Before &#064;Before}).
+	 * JUnit's {@link org.junit.Before @Before}).
 	 * <p>The managed {@link TestContext} will be updated with the supplied
 	 * {@code testInstance} and {@code testMethod}.
 	 * <p>An attempt will be made to give each registered
@@ -362,7 +371,7 @@ public class TestContextManager {
 	 * {@link Method test method}, for example for tearing down test fixtures,
 	 * ending a transaction, etc. Should be called after any framework-specific
 	 * <em>after methods</em> (e.g., methods annotated with JUnit's
-	 * {@link org.junit.After &#064;After}).
+	 * {@link org.junit.After @After}).
 	 * <p>The managed {@link TestContext} will be updated with the supplied
 	 * {@code testInstance}, {@code testMethod}, and
 	 * {@code exception}.
@@ -414,7 +423,7 @@ public class TestContextManager {
 	 * Hook for post-processing a test class <em>after</em> execution of all
 	 * tests within the class. Should be called after any framework-specific
 	 * <em>after class methods</em> (e.g., methods annotated with JUnit's
-	 * {@link org.junit.AfterClass &#064;AfterClass}).
+	 * {@link org.junit.AfterClass @AfterClass}).
 	 * <p>Each registered {@link TestExecutionListener} will be given a chance to
 	 * post-process the test class. If a listener throws an exception, the
 	 * remaining registered listeners will still be called, but the first
