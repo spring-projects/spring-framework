@@ -93,9 +93,8 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	 * Create a {@link UriComponentsBuilder} from the mapping of a controller class
 	 * and current request information including Servlet mapping. If the controller
 	 * contains multiple mappings, only the first one is used.
-	 *
 	 * @param controllerType the controller to build a URI for
-	 * @return a UriComponentsBuilder instance, never {@code null}
+	 * @return a UriComponentsBuilder instance (never {@code null})
 	 */
 	public static UriComponentsBuilder fromController(Class<?> controllerType) {
 		String mapping = getTypeRequestMapping(controllerType);
@@ -120,14 +119,11 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	 * Create a {@link UriComponentsBuilder} from the mapping of a controller method
 	 * and an array of method argument values. This method delegates to
 	 * {@link #fromMethod(java.lang.reflect.Method, Object...)}.
-	 *
 	 * @param controllerType the controller
 	 * @param methodName the method name
 	 * @param argumentValues the argument values
 	 * @return a UriComponentsBuilder instance, never {@code null}
-	 *
-	 * @throws java.lang.IllegalStateException if there is no matching or more than
-	 * 	one matching method.
+	 * @throws IllegalStateException if there is no matching or more than one matching method
 	 */
 	public static UriComponentsBuilder fromMethodName(Class<?> controllerType, String methodName, Object... argumentValues) {
 		Method method = getMethod(controllerType, methodName, argumentValues);
@@ -156,8 +152,7 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	 * Create a {@link UriComponentsBuilder} by invoking a "mock" controller method.
 	 * The controller method and the supplied argument values are then used to
 	 * delegate to {@link #fromMethod(java.lang.reflect.Method, Object...)}.
-	 * <p>
-	 * For example given this controller:
+	 * <p>For example, given this controller:
 	 * <pre class="code">
 	 * &#064;RequestMapping("/people/{id}/addresses")
 	 * class AddressController {
@@ -184,7 +179,6 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	 * controller.getAddressesForCountry("US")
 	 * builder = MvcUriComponentsBuilder.fromMethodCall(controller);
 	 * </pre>
-	 *
 	 * @param invocationInfo either the value returned from a "mock" controller
 	 * invocation or the "mock" controller itself after an invocation
 	 * @return a UriComponents instance
@@ -202,20 +196,17 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	 * {@code @PathVariable} are used for building the URI (via implementations of
 	 * {@link org.springframework.web.method.support.UriComponentsContributor})
 	 * while remaining argument values are ignored and can be {@code null}.
-	 *
 	 * @param method the controller method
 	 * @param argumentValues argument values for the controller method
 	 * @return a UriComponentsBuilder instance, never {@code null}
 	 */
 	public static UriComponentsBuilder fromMethod(Method method, Object... argumentValues) {
-
 		String typePath = getTypeRequestMapping(method.getDeclaringClass());
 		String methodPath = getMethodRequestMapping(method);
 		String path = pathMatcher.combine(typePath, methodPath);
 
 		UriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentServletMapping().path(path);
 		UriComponents uriComponents = applyContributors(builder, method, argumentValues);
-
 		return ServletUriComponentsBuilder.newInstance().uriComponents(uriComponents);
 	}
 
@@ -246,14 +237,13 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 				" does not match number of argument values " + argCount);
 
 		final Map<String, Object> uriVars = new HashMap<String, Object>();
-		for (int i=0; i < paramCount; i++) {
+		for (int i = 0; i < paramCount; i++) {
 			MethodParameter param = new MethodParameter(method, i);
 			param.initParameterNameDiscovery(parameterNameDiscoverer);
 			contributor.contributeMethodArgument(param, args[i], builder, uriVars);
 		}
 
 		// We may not have all URI var values, expand only what we have
-
 		return builder.build().expand(new UriComponents.UriTemplateVariables() {
 			@Override
 			public Object getValue(String name) {
