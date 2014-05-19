@@ -47,7 +47,6 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ThemeResolver;
-import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriTemplate;
 import org.springframework.web.util.UrlPathHelper;
@@ -595,18 +594,6 @@ public class RequestContext {
 	 */
 	public String getQueryString() {
 		return this.urlPathHelper.getOriginatingQueryString(this.request);
-	}
-
-	/**
-	 * Return a URL derived from a controller method's {@code @RequestMapping}.
-	 * This method internally uses
-	 * {@link org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder#fromMappingName(String, Object...)
-	 * MvcUriComponentsBuilder#fromMappingName(String, Object...)}. See its
-	 * Javadoc for more details.
-	 */
-	public String getMvcUrl(String mappingName, Object... handlerMethodArguments) {
-		return MvcUriComponentsBuilder.fromMappingName(
-				mappingName, handlerMethodArguments).build().encode().toUriString();
 	}
 
 	/**

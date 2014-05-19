@@ -253,7 +253,7 @@ public class UriComponentsBuilder {
 	// build methods
 
 	/**
-	 * Builds a {@code UriComponents} instance from the various components contained in this builder.
+	 * Build a {@code UriComponents} instance from the various components contained in this builder.
 	 * @return the URI components
 	 */
 	public UriComponents build() {
@@ -261,10 +261,10 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Builds a {@code UriComponents} instance from the various components
+	 * Build a {@code UriComponents} instance from the various components
 	 * contained in this builder.
 	 * @param encoded whether all the components set in this builder are
-	 * 	encoded ({@code true}) or not ({@code false}).
+	 * encoded ({@code true}) or not ({@code false}).
 	 * @return the URI components
 	 */
 	public UriComponents build(boolean encoded) {
@@ -278,8 +278,8 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Builds a {@code UriComponents} instance and replaces URI template variables
-	 * with the values from a map. This is a shortcut method, which combines
+	 * Build a {@code UriComponents} instance and replaces URI template variables
+	 * with the values from a map. This is a shortcut method which combines
 	 * calls to {@link #build()} and then {@link UriComponents#expand(Map)}.
 	 * @param uriVariables the map of URI variables
 	 * @return the URI components with expanded values
@@ -289,14 +289,24 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Builds a {@code UriComponents} instance and replaces URI template variables
-	 * with the values from an array. This is a shortcut method, which combines
+	 * Build a {@code UriComponents} instance and replaces URI template variables
+	 * with the values from an array. This is a shortcut method which combines
 	 * calls to {@link #build()} and then {@link UriComponents#expand(Object...)}.
 	 * @param uriVariableValues URI variable values
 	 * @return the URI components with expanded values
 	 */
 	public UriComponents buildAndExpand(Object... uriVariableValues) {
 		return build(false).expand(uriVariableValues);
+	}
+
+	/**
+	 * Build a URI String. This is a shortcut method which combines calls
+	 * to {@link #build()}, then {@link UriComponents#encode()} and finally
+	 * {@link UriComponents#toUriString()}.
+	 * @see UriComponents#toUriString()
+	 */
+	public String toUriString() {
+		return build(false).encode().toUriString();
 	}
 
 
