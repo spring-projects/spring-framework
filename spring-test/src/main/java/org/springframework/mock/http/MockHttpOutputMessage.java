@@ -79,7 +79,7 @@ public class MockHttpOutputMessage implements HttpOutputMessage {
 		}
 		catch (UnsupportedEncodingException ex) {
 			// should not occur
-			throw new InternalError(ex.getMessage());
+			throw new IllegalStateException(ex);
 		}
 	}
 

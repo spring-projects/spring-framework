@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.client;
 
 import java.io.UnsupportedEncodingException;
@@ -64,6 +65,7 @@ public class UnknownHttpStatusCodeException extends RestClientException {
 		this.responseCharset = responseCharset != null ? responseCharset.name() : DEFAULT_CHARSET;
 	}
 
+
 	/**
 	 * Return the raw HTTP status code value.
 	 */
@@ -89,7 +91,7 @@ public class UnknownHttpStatusCodeException extends RestClientException {
 	 * Return the response body as a byte array.
 	 */
 	public byte[] getResponseBodyAsByteArray() {
-		return responseBody;
+		return this.responseBody;
 	}
 
 	/**
@@ -97,11 +99,11 @@ public class UnknownHttpStatusCodeException extends RestClientException {
 	 */
 	public String getResponseBodyAsString() {
 		try {
-			return new String(responseBody, responseCharset);
+			return new String(this.responseBody, this.responseCharset);
 		}
 		catch (UnsupportedEncodingException ex) {
 			// should not occur
-			throw new InternalError(ex.getMessage());
+			throw new IllegalStateException(ex);
 		}
 	}
 
