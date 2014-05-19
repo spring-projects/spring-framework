@@ -104,38 +104,37 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	private static String getTypeRequestMapping(Class<?> controllerType) {
 		Assert.notNull(controllerType, "'controllerType' must not be null");
 		RequestMapping annot = AnnotationUtils.findAnnotation(controllerType, RequestMapping.class);
-		if ((annot == null) || ObjectUtils.isEmpty(annot.value()) || StringUtils.isEmpty(annot.value()[0])) {
+		if (annot == null || ObjectUtils.isEmpty(annot.value()) || StringUtils.isEmpty(annot.value()[0])) {
 			return "/";
 		}
-		if (annot.value().length > 1) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Multiple paths on controller " + controllerType.getName() + ", using first one");
-			}
+		if (annot.value().length > 1 && logger.isWarnEnabled()) {
+			logger.warn("Multiple paths on controller " + controllerType.getName() + ", using first one");
 		}
 		return annot.value()[0];
 	}
 
 	/**
-	 * Create a {@link UriComponentsBuilder} from the mapping of a controller method
-	 * and an array of method argument values. This method delegates to
-	 * {@link #fromMethod(java.lang.reflect.Method, Object...)}.
+	 * Create a {@link UriComponentsBuilder} from the mapping of a controller
+	 * method and an array of method argument values. This method delegates
+	 * to {@link #fromMethod(java.lang.reflect.Method, Object...)}.
 	 * @param controllerType the controller
 	 * @param methodName the method name
 	 * @param argumentValues the argument values
 	 * @return a UriComponentsBuilder instance, never {@code null}
-	 * @throws IllegalStateException if there is no matching or more than one matching method
+	 * @throws IllegalArgumentException if there is no matching or
+	 * if there is more than one matching method
 	 */
 	public static UriComponentsBuilder fromMethodName(Class<?> controllerType, String methodName, Object... argumentValues) {
 		Method method = getMethod(controllerType, methodName, argumentValues);
 		return fromMethod(method, argumentValues);
 	}
 
-	private static Method getMethod(Class<?> controllerType, String methodName, Object[] argumentValues) {
+	private static Method getMethod(Class<?> controllerType, String methodName, Object... argumentValues) {
 		Method match = null;
 		for (Method method : controllerType.getDeclaredMethods()) {
 			if (method.getName().equals(methodName) && method.getParameterTypes().length == argumentValues.length) {
 				if (match != null) {
-					throw new IllegalStateException("Found two methods named '" + methodName + "' having " +
+					throw new IllegalArgumentException("Found two methods named '" + methodName + "' having " +
 							Arrays.asList(argumentValues) + " arguments, controller " + controllerType.getName());
 				}
 				match = method;
@@ -212,19 +211,19 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 
 	private static String getMethodRequestMapping(Method method) {
 		RequestMapping annot = AnnotationUtils.findAnnotation(method, RequestMapping.class);
-		Assert.notNull(annot, "No @RequestMapping on: " + method.toGenericString());
+		if (annot == null) {
+			throw new IllegalArgumentException("No @RequestMapping on: " + method.toGenericString());
+		}
 		if (ObjectUtils.isEmpty(annot.value()) || StringUtils.isEmpty(annot.value()[0])) {
 			return "/";
 		}
-		if (annot.value().length > 1) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Multiple paths on method " + method.toGenericString() + ", using first one");
-			}
+		if (annot.value().length > 1 && logger.isWarnEnabled()) {
+			logger.warn("Multiple paths on method " + method.toGenericString() + ", using first one");
 		}
 		return annot.value()[0];
 	}
 
-	private static UriComponents applyContributors(UriComponentsBuilder builder, Method method, Object[] args) {
+	private static UriComponents applyContributors(UriComponentsBuilder builder, Method method, Object... args) {
 		CompositeUriComponentsContributor contributor = getConfiguredUriComponentsContributor();
 		if (contributor == null) {
 			logger.debug("Using default CompositeUriComponentsContributor");
@@ -233,8 +232,10 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 
 		int paramCount = method.getParameterTypes().length;
 		int argCount = args.length;
-		Assert.isTrue(paramCount == argCount,  "Number of method parameters " + paramCount +
-				" does not match number of argument values " + argCount);
+		if (paramCount != argCount) {
+			throw new IllegalArgumentException("Number of method parameters " + paramCount +
+					" does not match number of argument values " + argCount);
+		}
 
 		final Map<String, Object> uriVars = new HashMap<String, Object>();
 		for (int i = 0; i < paramCount; i++) {
