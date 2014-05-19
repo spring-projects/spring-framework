@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Represents an immutable collection of URI components, mapping component type to string
+ * Represents an immutable collection of URI components, mapping component type to String
  * values. Contains convenience getters for all components. Effectively similar to {@link
  * java.net.URI}, but with more powerful encoding options and support for URI template
  * variables.
@@ -119,14 +119,15 @@ public abstract class UriComponents implements Serializable {
 	/**
 	 * Encode all URI components using their specific encoding rules, and returns the
 	 * result as a new {@code UriComponents} instance. This method uses UTF-8 to encode.
-	 * @return the encoded uri components
+	 * @return the encoded URI components
 	 */
 	public final UriComponents encode() {
 		try {
 			return encode(DEFAULT_ENCODING);
 		}
-		catch (UnsupportedEncodingException e) {
-			throw new InternalError("\"" + DEFAULT_ENCODING + "\" not supported");
+		catch (UnsupportedEncodingException ex) {
+			// should not occur
+			throw new IllegalStateException(ex);
 		}
 	}
 
@@ -140,7 +141,7 @@ public abstract class UriComponents implements Serializable {
 	public abstract UriComponents encode(String encoding) throws UnsupportedEncodingException;
 
 	/**
-	 * Replaces all URI template variables with the values from a given map. The map keys
+	 * Replace all URI template variables with the values from a given map. The map keys
 	 * represent variable names; the values variable values. The order of variables is not
 	 * significant.
 	 * @param uriVariables the map of URI variables
@@ -152,7 +153,7 @@ public abstract class UriComponents implements Serializable {
 	}
 
 	/**
-	 * Replaces all URI template variables with the values from a given array. The array
+	 * Replace all URI template variables with the values from a given array. The array
 	 * represent variable values. The order of variables is significant.
 	 * @param uriVariableValues URI variable values
 	 * @return the expanded uri components
@@ -163,7 +164,7 @@ public abstract class UriComponents implements Serializable {
 	}
 
 	/**
-	 * Replaces all URI template variables with the values obtained through the
+	 * Replace all URI template variables with the values obtained through the
 	 * given {@link UriTemplateVariables} instance.
 	 * @param uriTemplateVars resolves URI template variable values
 	 * @return the expanded uri components
@@ -174,7 +175,7 @@ public abstract class UriComponents implements Serializable {
 	}
 
 	/**
-	 * Replaces all URI template variables with the values from the given {@link
+	 * Replace all URI template variables with the values from the given {@link
 	 * UriTemplateVariables}
 	 * @param uriVariables URI template values
 	 * @return the expanded uri components
@@ -188,12 +189,12 @@ public abstract class UriComponents implements Serializable {
 	public abstract UriComponents normalize();
 
 	/**
-	 * Returns a URI string from this {@code UriComponents} instance.
+	 * Return a URI string from this {@code UriComponents} instance.
 	 */
 	public abstract String toUriString();
 
 	/**
-	 * Returns a {@code URI} from this {@code UriComponents} instance.
+	 * Return a {@code URI} from this {@code UriComponents} instance.
 	 */
 	public abstract URI toUri();
 
