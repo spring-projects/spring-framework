@@ -657,20 +657,20 @@ public class Type {
      * Appends the descriptor corresponding to this Java type to the given
      * string builder.
      * 
-     * @param buf
+     * @param sb
      *            the string builder to which the descriptor must be appended.
      */
-    private void getDescriptor(final StringBuilder buf) {
+    private void getDescriptor(final StringBuilder sb) {
         if (this.buf == null) {
             // descriptor is in byte 3 of 'off' for primitive types (buf ==
             // null)
-            buf.append((char) ((off & 0xFF000000) >>> 24));
+            sb.append((char) ((off & 0xFF000000) >>> 24));
         } else if (sort == OBJECT) {
-            buf.append('L');
-            buf.append(this.buf, off, len);
-            buf.append(';');
+            sb.append('L');
+            sb.append(this.buf, off, len);
+            sb.append(';');
         } else { // sort == ARRAY || sort == METHOD
-            buf.append(this.buf, off, len);
+            sb.append(this.buf, off, len);
         }
     }
 

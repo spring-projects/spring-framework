@@ -51,7 +51,7 @@ public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanC
 	 * Set the ordering which will apply to this class's implementation
 	 * of Ordered, used when applying multiple processors.
 	 * <p>Default value is {@code Integer.MAX_VALUE}, meaning that it's non-ordered.
-	 * @param order ordering value
+	 * @param order the ordering value
 	 */
 	public void setOrder(int order) {
 		this.order = order;
@@ -64,9 +64,9 @@ public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanC
 
 	/**
 	 * Set the ClassLoader to generate the proxy class in.
-	 * <p>Default is the bean ClassLoader, i.e. the ClassLoader used by the
-	 * containing BeanFactory for loading all bean classes. This can be
-	 * overridden here for specific proxies.
+	 * <p>Default is the bean ClassLoader, i.e. the ClassLoader used by the containing
+	 * {@link org.springframework.beans.factory.BeanFactory} for loading all bean classes.
+	 * This can be overridden here for specific proxies.
 	 */
 	public void setProxyClassLoader(ClassLoader classLoader) {
 		this.proxyClassLoader = classLoader;
@@ -89,7 +89,7 @@ public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanC
 
 
 	/**
-	 * Check the interfaces on the given bean class and apply them to the ProxyFactory,
+	 * Check the interfaces on the given bean class and apply them to the {@link ProxyFactory},
 	 * if appropriate.
 	 * <p>Calls {@link #isConfigurationCallbackInterface} and {@link #isInternalLanguageInterface}
 	 * to filter for reasonable proxy interfaces, falling back to a target-class proxy otherwise.
