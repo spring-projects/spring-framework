@@ -21,6 +21,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
@@ -72,6 +73,7 @@ import javax.xml.validation.SchemaFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.ls.LSResourceResolver;
+import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -806,7 +808,11 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 			if (xmlReader == null) {
 				xmlReader = XMLReaderFactory.createXMLReader();
 			}
-			xmlReader.setFeature("http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
+			String name = "http://xml.org/sax/features/external-general-entities";
+			xmlReader.setFeature(name, isProcessExternalEntities());
+			if (!isProcessExternalEntities()) {
+				xmlReader.setEntityResolver(NO_OP_ENTITY_RESOLVER);
+			}
 			return new SAXSource(xmlReader, inputSource);
 		}
 		catch (SAXException ex) {
@@ -1018,5 +1024,12 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 			return "ByteArrayDataSource";
 		}
 	}
+
+	private static final EntityResolver NO_OP_ENTITY_RESOLVER = new EntityResolver() {
+		@Override
+		public InputSource resolveEntity(String publicId, String systemId) {
+			return new InputSource(new StringReader(""));
+		}
+	};
 
 }

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.Writer;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -43,6 +44,7 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.ContentHandler;
+import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -156,6 +158,9 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	protected XMLReader createXmlReader() throws SAXException {
 		XMLReader xmlReader = XMLReaderFactory.createXMLReader();
 		xmlReader.setFeature("http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
+		if (!isProcessExternalEntities()) {
+			xmlReader.setEntityResolver(NO_OP_ENTITY_RESOLVER);
+		}
 		return xmlReader;
 	}
 
@@ -544,5 +549,13 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	 */
 	protected abstract Object unmarshalReader(Reader reader)
 			throws XmlMappingException, IOException;
+
+
+	private static final EntityResolver NO_OP_ENTITY_RESOLVER = new EntityResolver() {
+		@Override
+		public InputSource resolveEntity(String publicId, String systemId) {
+			return new InputSource(new StringReader(""));
+		}
+	};
 
 }
