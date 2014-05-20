@@ -3,6 +3,47 @@ SPRING FRAMEWORK CHANGELOG
 http://www.spring.io
 
 
+Changes in version 3.2.9 (2014-05-20)
+-------------------------------------
+
+added basic Java 8 bytecode compatibility for Spring 3.2.x through ASM 5.0.2 (SPR-11656, SPR-11719)
+fixed potential excessive memory and CPU usage (SPR-11545, SPR-11520, SPR-11606, SPR-11720, SPR-9274)
+fixed cache key issues for methods with arguments of array types (SPR-11505)
+fixed FlashMap retrieval when target parameters are encoded (SPR-11504)
+fixed SpringBeanELResolver.setValue throws PropertyNotWritableException issue (SPR-11502)
+optimized handling of @Bean method override regression with return type narrowing on JDK 8 (SPR-11718)
+prevented double evaluation of method arguments in SpEL (SPR-11445)
+fixed reinjection of Servlet mocks into test instance between TestNG test methods (SPR-11626)
+fixed If-Modified-Since header is parsed as HTTP-date; but IE 10 sends length (SPR-11727)
+fixed unsafe fallback pointcut construction in AspectJExpressionPointcut (SPR-9335)
+updated UrlResource.exists() to properly detect JBoss vfszip resources (SPR-11676)
+fixed potential NPE with SpringProperties, ConstructorResolver and JRubyScriptUtils (SPR-11721, SPR-11517, SPR-11747)
+consider parent definitions with overriding bean definition message (SPR-9671(
+improved exception message for failed property access in SpEL (SPR-11535)
+fixed Spring MVC Test async result timing issue (SPR-11516)
+treat empty log config refresh interval as infinite interval in Log4jWebConfigurer (SPR-11507)
+improve CollectionToCollectionConverter.convert() for untyped collections (SPR-11479)
+fixed XmlValidationModeDetector length of a string is always greater than index of any of its characters (SPR-11477)
+improve memory consumption with MarshallingView (SPR-11646)
+fixed SpEL issues when working with Maps (SPR-11609, SPR-9861)
+add ResizableByteArrayOutputStream and ByteArrayOutputStream capacities (SPR-11594)
+logged Forging in DispatcherServlet via requestURI (SPR-11591)
+fixed BufferedImageHttpMessageConverter to no longer fail if JAI is installed (SPR-11581)
+updated AbstractMarshaller to avoid SAXSource workaround when processExternalEntities=true (SPR-11737)
+close Resource's input stream when using ResourceHttpRequestHandler (SPR-11644)
+consider proxy interfaces in AbstractAdvisingBeanPostProcessor.isEligible(...) (SPR-11725)
+protect against security exploits via system identifier in DTD declaration (SPR-11768)
+fixed Access Denied exception within Spring MVC application on WebSphere 8.x (SPR-11758)
+fixed servlet 3 multipart parameter binding on Weblogic12c (SPR-11074)
+updated ConfigurationClassParser.invokeAwareMethods(...) to consider EnvironmentAware (SPR-11744)
+fixed JDBC findColumn result in the case of duplicate column labels (SPR-11786)
+improved prefix detection in StringUtils.cleanPath (SPR-11793)
+fixed JMS problem with Oracle AQ when underlying DataSource is decorated (SPR-11791, SPR-10829)
+support lazy resolution with StandardServletMultipartResolver (SPR-11730)
+fixed StringUtils.parseLocaleString issue where locale variant cannot contain country code (SPR-11806)
+detected NoClassDefFoundError within BeanInstantiationException for getTestExecutionListeners (SPR-11804)
+
+
 Changes in version 3.2.8 (2014-02-18)
 -------------------------------------
 
