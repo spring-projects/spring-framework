@@ -43,6 +43,8 @@ public abstract class AbstractJCacheAnnotationTests {
 	@Rule
 	public final TestName name = new TestName();
 
+	protected ApplicationContext ctx;
+
 	private JCacheableService<?> service;
 
 	private CacheManager cacheManager;
@@ -51,9 +53,9 @@ public abstract class AbstractJCacheAnnotationTests {
 
 	@Before
 	public void setUp() {
-		ApplicationContext context = getApplicationContext();
-		service = context.getBean(JCacheableService.class);
-		cacheManager = context.getBean("cacheManager", CacheManager.class);
+		ctx = getApplicationContext();
+		service = ctx.getBean(JCacheableService.class);
+		cacheManager = ctx.getBean("cacheManager", CacheManager.class);
 	}
 
 	@Test

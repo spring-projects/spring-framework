@@ -68,6 +68,9 @@ public class ProxyCachingConfiguration extends AbstractCachingConfiguration<Cach
 		if (this.keyGenerator != null) {
 			interceptor.setKeyGenerator(this.keyGenerator);
 		}
+		if (this.errorHandler != null) {
+			interceptor.setErrorHandler(this.errorHandler);
+		}
 		return interceptor;
 	}
 

@@ -24,6 +24,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.cache.Cache;
+import org.springframework.cache.interceptor.AbstractCacheInvoker;
+import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
 import org.springframework.cache.jcache.model.BaseCacheOperation;
@@ -36,9 +38,13 @@ import org.springframework.cache.jcache.model.BaseCacheOperation;
  */
 @SuppressWarnings("serial")
 public abstract class AbstractCacheInterceptor<O extends BaseCacheOperation<A>, A extends Annotation>
-		implements Serializable {
+		extends AbstractCacheInvoker implements Serializable {
 
 	protected final Log logger = LogFactory.getLog(getClass());
+
+	protected AbstractCacheInterceptor(CacheErrorHandler errorHandler) {
+		super(errorHandler);
+	}
 
 	protected abstract Object invoke(CacheOperationInvocationContext<O> context,
 			CacheOperationInvoker invoker) throws Throwable;

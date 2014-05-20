@@ -17,6 +17,7 @@
 package org.springframework.cache.annotation;
 
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
 
@@ -103,5 +104,27 @@ public interface CachingConfigurer {
 	 * See @{@link EnableCaching} for more complete examples.
 	 */
 	KeyGenerator keyGenerator();
+
+	/**
+	 * Return the {@link CacheErrorHandler} to use to handle cache-related errors.
+	 * <p>By default,{@link org.springframework.cache.interceptor.SimpleCacheErrorHandler}
+	 * is used and simply throws the exception back at the client.
+	 * <p>Implementations must explicitly declare
+	 * {@link org.springframework.context.annotation.Bean @Bean}, e.g.
+	 * <pre class="code">
+	 * &#064;Configuration
+	 * &#064;EnableCaching
+	 * public class AppConfig extends CachingConfigurerSupport {
+	 *     &#064;Bean // important!
+	 *     &#064;Override
+	 *     public CacheErrorHandler errorHandler() {
+	 *         // configure and return CacheErrorHandler instance
+	 *     }
+	 *     // ...
+	 * }
+	 * </pre>
+	 * See @{@link EnableCaching} for more complete examples.
+	 */
+	CacheErrorHandler errorHandler();
 
 }

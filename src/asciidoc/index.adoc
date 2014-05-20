@@ -47196,6 +47196,17 @@ application through AOP. The configuration is intentionally similar with that of
 | Name of cache manager to use. Only required if the name of the cache manager is not
   `cacheManager`.
 
+| `key-generator`
+| N/A (See `CachingConfigurer` javadocs)
+| `SimpleKeyGenerator`
+| Name of the custom key generator to use.
+
+| `error-handler`
+| N/A (See `CachingConfigurer` javadocs)
+| `SimpleCacheErrorHandler`
+| Name of the custom cache error handler to use. By default, any exception throw during
+  a cache related operations are thrown back at the client.
+
 | `mode`
 | `mode`
 | proxy

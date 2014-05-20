@@ -69,7 +69,8 @@ import org.springframework.util.StringUtils;
  * @author Stephane Nicoll
  * @since 3.1
  */
-public abstract class CacheAspectSupport implements InitializingBean, ApplicationContextAware {
+public abstract class CacheAspectSupport extends AbstractCacheInvoker
+		implements InitializingBean, ApplicationContextAware {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -168,6 +169,7 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 				"to use or set the cache manager to create a default cache resolver based on it.");
 		Assert.state(this.cacheOperationSource != null, "The 'cacheOperationSources' property is required: " +
 				"If there are no cacheable methods, then don't use a cache aspect.");
+		Assert.state(this.getErrorHandler() != null, "The 'errorHandler' is required.");
 		Assert.state(this.applicationContext != null, "The application context was not injected as it should.");
 		this.initialized = true;
 	}
@@ -343,14 +345,14 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 		for (Cache cache : context.getCaches()) {
 			if (operation.isCacheWide()) {
 				logInvalidating(context, operation, null);
-				cache.clear();
+				doClear(cache);
 			}
 			else {
 				if (key == null) {
 					key = context.generateKey(result);
 				}
 				logInvalidating(context, operation, key);
-				cache.evict(key);
+				doEvict(cache, key);
 			}
 		}
 	}
@@ -402,7 +404,7 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 
 	private Cache.ValueWrapper findInCaches(CacheOperationContext context, Object key) {
 		for (Cache cache : context.getCaches()) {
-			Cache.ValueWrapper wrapper = cache.get(key);
+			Cache.ValueWrapper wrapper = doGet(cache, key);
 			if (wrapper != null) {
 				return wrapper;
 			}
@@ -571,7 +573,7 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 	}
 
 
-	private static class CachePutRequest {
+	private class CachePutRequest {
 
 		private final CacheOperationContext context;
 
@@ -585,7 +587,7 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 		public void apply(Object result) {
 			if (this.context.canPutToCache(result)) {
 				for (Cache cache : this.context.getCaches()) {
-					cache.put(this.key, result);
+					doPut(cache, this.key, result);
 				}
 			}
 		}

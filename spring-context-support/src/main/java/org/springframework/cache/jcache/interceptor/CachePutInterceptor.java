@@ -20,6 +20,7 @@ import javax.cache.annotation.CacheKeyInvocationContext;
 import javax.cache.annotation.CachePut;
 
 import org.springframework.cache.Cache;
+import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
 import org.springframework.cache.jcache.model.CachePutOperation;
@@ -32,6 +33,10 @@ import org.springframework.cache.jcache.model.CachePutOperation;
  */
 @SuppressWarnings("serial")
 public class CachePutInterceptor extends AbstractKeyCacheInterceptor<CachePutOperation, CachePut> {
+
+	public CachePutInterceptor(CacheErrorHandler errorHandler) {
+		super(errorHandler);
+	}
 
 	@Override
 	protected Object invoke(CacheOperationInvocationContext<CachePutOperation> context,
@@ -65,7 +70,7 @@ public class CachePutInterceptor extends AbstractKeyCacheInterceptor<CachePutOpe
 	protected void cacheValue(CacheOperationInvocationContext<CachePutOperation> context, Object value) {
 		Object key = generateKey(context);
 		Cache cache = resolveCache(context);
-		cache.put(key, value);
+		doPut(cache, key, value);
 	}
 
 }

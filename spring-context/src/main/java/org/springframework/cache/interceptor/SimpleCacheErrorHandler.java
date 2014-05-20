@@ -14,40 +14,36 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.annotation;
+package org.springframework.cache.interceptor;
 
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.interceptor.CacheErrorHandler;
-import org.springframework.cache.interceptor.CacheResolver;
-import org.springframework.cache.interceptor.KeyGenerator;
+import org.springframework.cache.Cache;
 
 /**
- * An implementation of {@link CachingConfigurer} with empty methods allowing
- * sub-classes to override only the methods they're interested in.
+ * A simple {@link CacheErrorHandler} that does not handle the
+ * exception at all, simply throwing it back at the client.
  *
  * @author Stephane Nicoll
  * @since 4.1
- * @see CachingConfigurer
  */
-public class CachingConfigurerSupport implements CachingConfigurer {
+public class SimpleCacheErrorHandler implements CacheErrorHandler {
 
 	@Override
-	public CacheManager cacheManager() {
-		return null;
+	public void handleCacheGetError(RuntimeException exception, Cache cache, Object key) {
+		throw exception;
 	}
 
 	@Override
-	public KeyGenerator keyGenerator() {
-		return null;
+	public void handleCachePutError(RuntimeException exception, Cache cache, Object key, Object value) {
+		throw exception;
 	}
 
 	@Override
-	public CacheResolver cacheResolver() {
-		return null;
+	public void handleCacheEvictError(RuntimeException exception, Cache cache, Object key) {
+		throw exception;
 	}
 
 	@Override
-	public CacheErrorHandler errorHandler() {
-		return null;
+	public void handleCacheClearError(RuntimeException exception, Cache cache) {
+		throw exception;
 	}
 }

@@ -22,6 +22,7 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Configuration;
@@ -50,6 +51,8 @@ public abstract class AbstractCachingConfiguration<C extends CachingConfigurer> 
 	protected CacheResolver cacheResolver;
 
 	protected KeyGenerator keyGenerator;
+
+	protected CacheErrorHandler errorHandler;
 
 	@Autowired(required=false)
 	private Collection<CacheManager> cacheManagerBeans;
@@ -115,6 +118,7 @@ public abstract class AbstractCachingConfiguration<C extends CachingConfigurer> 
 		this.cacheManager = config.cacheManager();
 		this.cacheResolver = config.cacheResolver();
 		this.keyGenerator = config.keyGenerator();
+		this.errorHandler = config.errorHandler();
 	}
 
 }

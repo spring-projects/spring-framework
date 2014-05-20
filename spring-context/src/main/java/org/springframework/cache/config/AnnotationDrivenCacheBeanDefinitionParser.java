@@ -32,6 +32,7 @@ import org.springframework.cache.annotation.AnnotationCacheOperationSource;
 import org.springframework.cache.interceptor.BeanFactoryCacheOperationSourceAdvisor;
 import org.springframework.cache.interceptor.CacheInterceptor;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser}
@@ -102,6 +103,13 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 				new RuntimeBeanReference(CacheNamespaceHandler.extractCacheManager(element)));
 	}
 
+	private static BeanDefinition parseErrorHandler(Element element, BeanDefinition def) {
+		String name = element.getAttribute("error-handler");
+		if (StringUtils.hasText(name)) {
+			def.getPropertyValues().add("errorHandler", new RuntimeBeanReference(name.trim()));
+		}
+		return def;
+	}
 
 	/**
 	 * Configure the necessary infrastructure to support the Spring's caching annotations.
@@ -123,6 +131,7 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 				interceptorDef.setSource(eleSource);
 				interceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 				parseCacheManagerProperty(element, interceptorDef);
+				parseErrorHandler(element, interceptorDef);
 				CacheNamespaceHandler.parseKeyGenerator(element, interceptorDef);
 				interceptorDef.getPropertyValues().add("cacheOperationSources", new RuntimeBeanReference(sourceName));
 				String interceptorName = parserContext.getReaderContext().registerWithGeneratedName(interceptorDef);
@@ -186,6 +195,7 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 				interceptorDef.setSource(eleSource);
 				interceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 				interceptorDef.getPropertyValues().add("cacheOperationSource", new RuntimeBeanReference(sourceName));
+				parseErrorHandler(element, interceptorDef);
 				String interceptorName = parserContext.getReaderContext().registerWithGeneratedName(interceptorDef);
 
 				// Create the CacheAdvisor definition.

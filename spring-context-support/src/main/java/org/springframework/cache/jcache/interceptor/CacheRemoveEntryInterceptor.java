@@ -19,6 +19,7 @@ package org.springframework.cache.jcache.interceptor;
 import javax.cache.annotation.CacheRemove;
 
 import org.springframework.cache.Cache;
+import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
 import org.springframework.cache.jcache.model.CacheRemoveOperation;
@@ -31,6 +32,10 @@ import org.springframework.cache.jcache.model.CacheRemoveOperation;
  */
 @SuppressWarnings("serial")
 public class CacheRemoveEntryInterceptor extends AbstractKeyCacheInterceptor<CacheRemoveOperation, CacheRemove> {
+
+	protected CacheRemoveEntryInterceptor(CacheErrorHandler errorHandler) {
+		super(errorHandler);
+	}
 
 	@Override
 	protected Object invoke(CacheOperationInvocationContext<CacheRemoveOperation> context,
@@ -66,7 +71,7 @@ public class CacheRemoveEntryInterceptor extends AbstractKeyCacheInterceptor<Cac
 			logger.trace("Invalidating key [" + key + "] on cache '" + cache.getName()
 					+ "' for operation " + context.getOperation());
 		}
-		cache.evict(key);
+		doEvict(cache, key);
 	}
 
 }

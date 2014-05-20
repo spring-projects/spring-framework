@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 
 import javax.cache.annotation.CacheKeyInvocationContext;
 
+import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.jcache.model.BaseKeyCacheOperation;
@@ -33,6 +34,10 @@ import org.springframework.cache.jcache.model.BaseKeyCacheOperation;
 @SuppressWarnings("serial")
 public abstract class AbstractKeyCacheInterceptor<O extends BaseKeyCacheOperation<A>, A extends Annotation>
 		extends AbstractCacheInterceptor<O, A> {
+
+	protected AbstractKeyCacheInterceptor(CacheErrorHandler errorHandler) {
+		super(errorHandler);
+	}
 
 	/**
 	 * Generate a key for the specified invocation.

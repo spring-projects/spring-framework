@@ -19,6 +19,7 @@ package org.springframework.cache.jcache.interceptor;
 import javax.cache.annotation.CacheResult;
 
 import org.springframework.cache.Cache;
+import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
 import org.springframework.cache.interceptor.CacheResolver;
@@ -35,6 +36,10 @@ import org.springframework.util.filter.ExceptionTypeFilter;
 @SuppressWarnings("serial")
 public class CacheResultInterceptor extends AbstractKeyCacheInterceptor<CacheResultOperation, CacheResult> {
 
+	public CacheResultInterceptor(CacheErrorHandler errorHandler) {
+		super(errorHandler);
+	}
+
 	@Override
 	protected Object invoke(CacheOperationInvocationContext<CacheResultOperation> context,
 			CacheOperationInvoker invoker) {
@@ -46,7 +51,7 @@ public class CacheResultInterceptor extends AbstractKeyCacheInterceptor<CacheRes
 		Cache exceptionCache = resolveExceptionCache(context);
 
 		if (!operation.isAlwaysInvoked()) {
-			Cache.ValueWrapper cachedValue = cache.get(cacheKey);
+			Cache.ValueWrapper cachedValue = doGet(cache, cacheKey);
 			if (cachedValue != null) {
 				return cachedValue.get();
 			}
@@ -74,7 +79,7 @@ public class CacheResultInterceptor extends AbstractKeyCacheInterceptor<CacheRes
 		if (exceptionCache == null) {
 			return;
 		}
-		Cache.ValueWrapper result = exceptionCache.get(cacheKey);
+		Cache.ValueWrapper result = doGet(exceptionCache, cacheKey);
 		if (result != null) {
 			throw rewriteCallStack((Throwable) result.get(), getClass().getName(), "invoke");
 		}
@@ -111,7 +116,6 @@ public class CacheResultInterceptor extends AbstractKeyCacheInterceptor<CacheRes
 	 * @param exception the exception to merge with the current call stack
 	 * @param className the class name of the common ancestor
 	 * @param methodName the method name of the common ancestor
-	 * @param <T> the type of the exception
 	 * @return a clone exception with a rewritten call stack composed of the current
 	 * call stack up to (included) the common ancestor specified by the {@code className} and
 	 * {@code methodName} arguments, followed by stack trace elements of the specified

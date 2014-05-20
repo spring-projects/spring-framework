@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2014 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cache.jcache.interceptor;
 
 import java.lang.annotation.Annotation;
@@ -8,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.cache.interceptor.AbstractCacheInvoker;
 import org.springframework.cache.interceptor.BasicCacheOperation;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
@@ -36,7 +53,7 @@ import org.springframework.util.Assert;
  * @see KeyGeneratorAdapter
  * @see CacheResolverAdapter
  */
-public class JCacheAspectSupport implements InitializingBean {
+public class JCacheAspectSupport extends AbstractCacheInvoker implements InitializingBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -44,13 +61,13 @@ public class JCacheAspectSupport implements InitializingBean {
 
 	private boolean initialized = false;
 
-	private final CacheResultInterceptor cacheResultInterceptor = new CacheResultInterceptor();
+	private CacheResultInterceptor cacheResultInterceptor;
 
-	private final CachePutInterceptor cachePutInterceptor = new CachePutInterceptor();
+	private CachePutInterceptor cachePutInterceptor;
 
-	private final CacheRemoveEntryInterceptor cacheRemoveEntryInterceptor = new CacheRemoveEntryInterceptor();
+	private CacheRemoveEntryInterceptor cacheRemoveEntryInterceptor;
 
-	private final CacheRemoveAllInterceptor cacheRemoveAllInterceptor = new CacheRemoveAllInterceptor();
+	private CacheRemoveAllInterceptor cacheRemoveAllInterceptor;
 
 	public void setCacheOperationSource(JCacheOperationSource cacheOperationSource) {
 		Assert.notNull(cacheOperationSource);
@@ -67,6 +84,13 @@ public class JCacheAspectSupport implements InitializingBean {
 	public void afterPropertiesSet() {
 		Assert.state(this.cacheOperationSource != null, "The 'cacheOperationSource' property is required: " +
 				"If there are no cacheable methods, then don't use a cache aspect.");
+		Assert.state(this.getErrorHandler() != null, "The 'errorHandler' is required.");
+
+		this.cacheResultInterceptor = new CacheResultInterceptor(getErrorHandler());
+		this.cachePutInterceptor = new CachePutInterceptor(getErrorHandler());
+		this.cacheRemoveEntryInterceptor = new CacheRemoveEntryInterceptor(getErrorHandler());
+		this.cacheRemoveAllInterceptor  = new CacheRemoveAllInterceptor(getErrorHandler());
+
 		this.initialized = true;
 	}
 

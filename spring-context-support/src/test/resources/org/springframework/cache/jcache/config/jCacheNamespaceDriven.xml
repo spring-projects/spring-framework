@@ -7,7 +7,7 @@
        		http://www.springframework.org/schema/cache
        		http://www.springframework.org/schema/cache/spring-cache.xsd">
 
-	<cache:annotation-driven proxy-target-class="false" order="0"/>
+	<cache:annotation-driven proxy-target-class="false" order="0" error-handler="errorHandler"/>
 
 	<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
 		<property name="caches">
@@ -25,6 +25,8 @@
 			</set>
 		</property>
 	</bean>
+
+	<bean id="errorHandler" class="org.springframework.cache.interceptor.SimpleCacheErrorHandler"/>
 
 	<bean id="defaultCache"
 		  class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean">

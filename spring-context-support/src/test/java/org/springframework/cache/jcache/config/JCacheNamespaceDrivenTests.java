@@ -16,6 +16,12 @@
 
 package org.springframework.cache.jcache.config;
 
+import static org.junit.Assert.assertSame;
+
+import org.junit.Test;
+
+import org.springframework.cache.interceptor.CacheErrorHandler;
+import org.springframework.cache.jcache.interceptor.JCacheInterceptor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 
@@ -28,6 +34,12 @@ public class JCacheNamespaceDrivenTests extends AbstractJCacheAnnotationTests {
 	protected ApplicationContext getApplicationContext() {
 		return new GenericXmlApplicationContext(
 				"/org/springframework/cache/jcache/config/jCacheNamespaceDriven.xml");
+	}
+
+	@Test
+	public void testCacheErrorHandler() {
+		JCacheInterceptor ci = ctx.getBean(JCacheInterceptor.class);
+		assertSame(ctx.getBean("errorHandler", CacheErrorHandler.class), ci.getErrorHandler());
 	}
 
 }

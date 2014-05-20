@@ -55,6 +55,9 @@ public class ProxyJCacheConfiguration extends AbstractJCacheConfiguration {
 	public JCacheInterceptor cacheInterceptor() {
 		JCacheInterceptor interceptor = new JCacheInterceptor();
 		interceptor.setCacheOperationSource(cacheOperationSource());
+		if (this.errorHandler != null) {
+			interceptor.setErrorHandler(this.errorHandler);
+		}
 		return interceptor;
 	}
 
