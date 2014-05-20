@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ import org.springframework.util.StreamUtils;
  * that can read and write {@link Source} objects.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 3.0
  */
 public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMessageConverter<T> {
@@ -94,11 +95,12 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 	}
 
 	/**
-	 * @return the configured value for whether XML external entities are allowed.
+	 * Returns the configured value for whether XML external entities are allowed.
 	 */
 	public boolean isProcessExternalEntities() {
 		return this.processExternalEntities;
 	}
+
 
 	@Override
 	public boolean supports(Class<?> clazz) {
@@ -150,8 +152,7 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 	private SAXSource readSAXSource(InputStream body) throws IOException {
 		try {
 			XMLReader reader = XMLReaderFactory.createXMLReader();
-			reader.setFeature(
-					"http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
+			reader.setFeature("http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
 			byte[] bytes = StreamUtils.copyToByteArray(body);
 			if (!isProcessExternalEntities()) {
 				reader.setEntityResolver(NO_OP_ENTITY_RESOLVER);

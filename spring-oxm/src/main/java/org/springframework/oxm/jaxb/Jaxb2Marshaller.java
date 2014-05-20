@@ -64,6 +64,7 @@ import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
@@ -82,7 +83,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.oxm.GenericMarshaller;
 import org.springframework.oxm.GenericUnmarshaller;
 import org.springframework.oxm.MarshallingFailureException;
@@ -102,7 +102,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.xml.StaxUtils;
 
 /**
- * Implementation of the {@code Marshaller} interface for JAXB 2.0.
+ * Implementation of the {@code GenericMarshaller} interface for JAXB 2.0+.
  *
  * <p>The typical usage will be to set either the "contextPath" or the "classesToBeBound"
  * property on this bean, possibly customize the marshaller and unmarshaller by setting
@@ -110,6 +110,7 @@ import org.springframework.util.xml.StaxUtils;
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  * @since 3.0
  * @see #setContextPath(String)
  * @see #setClassesToBeBound(Class[])
@@ -168,8 +169,6 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	private Class<?> mappedClass;
 
 	private ClassLoader beanClassLoader;
-
-	private ResourceLoader resourceLoader;
 
 	private final Object jaxbContextMonitor = new Object();
 
@@ -299,7 +298,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	 * Specify the {@code XmlAdapter}s to be registered with the JAXB {@code Marshaller}
 	 * and {@code Unmarshaller}
 	 */
-	public void setAdapters(XmlAdapter<?, ?>[] adapters) {
+	public void setAdapters(XmlAdapter<?, ?>... adapters) {
 		this.adapters = adapters;
 	}
 
@@ -313,7 +312,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	/**
 	 * Set the schema resources to use for validation.
 	 */
-	public void setSchemas(Resource[] schemaResources) {
+	public void setSchemas(Resource... schemaResources) {
 		this.schemaResources = schemaResources;
 	}
 
@@ -887,7 +886,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 
 		private final MimeContainer mimeContainer;
 
-		private Jaxb2AttachmentMarshaller(MimeContainer mimeContainer) {
+		public Jaxb2AttachmentMarshaller(MimeContainer mimeContainer) {
 			this.mimeContainer = mimeContainer;
 		}
 
@@ -941,7 +940,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 
 		private final MimeContainer mimeContainer;
 
-		private Jaxb2AttachmentUnmarshaller(MimeContainer mimeContainer) {
+		public Jaxb2AttachmentUnmarshaller(MimeContainer mimeContainer) {
 			this.mimeContainer = mimeContainer;
 		}
 
@@ -991,7 +990,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 
 		private final int length;
 
-		private ByteArrayDataSource(String contentType, byte[] data, int offset, int length) {
+		public ByteArrayDataSource(String contentType, byte[] data, int offset, int length) {
 			this.contentType = contentType;
 			this.data = data;
 			this.offset = offset;
