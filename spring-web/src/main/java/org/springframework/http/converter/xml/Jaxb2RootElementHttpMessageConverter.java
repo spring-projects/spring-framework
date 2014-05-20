@@ -17,6 +17,7 @@
 package org.springframework.http.converter.xml;
 
 import java.io.IOException;
+import java.io.StringReader;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.MarshalException;
@@ -38,6 +39,7 @@ import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.ClassUtils;
+import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -65,6 +67,10 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 	 */
 	public void setProcessExternalEntities(boolean processExternalEntities) {
 		this.processExternalEntities = processExternalEntities;
+	}
+
+	public boolean isProcessExternalEntities() {
+		return this.processExternalEntities;
 	}
 
 	@Override
@@ -113,7 +119,10 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 			try {
 				XMLReader xmlReader = XMLReaderFactory.createXMLReader();
 				String featureName = "http://xml.org/sax/features/external-general-entities";
-				xmlReader.setFeature(featureName, this.processExternalEntities);
+				xmlReader.setFeature(featureName, isProcessExternalEntities());
+				if (!isProcessExternalEntities()) {
+					xmlReader.setEntityResolver(NO_OP_ENTITY_RESOLVER);
+				}
 				return new SAXSource(xmlReader, inputSource);
 			}
 			catch (SAXException ex) {
@@ -147,5 +156,13 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 			marshaller.setProperty(Marshaller.JAXB_ENCODING, contentType.getCharSet().name());
 		}
 	}
+
+
+	private static final EntityResolver NO_OP_ENTITY_RESOLVER = new EntityResolver() {
+		@Override
+		public InputSource resolveEntity(String publicId, String systemId) {
+			return new InputSource(new StringReader(""));
+		}
+	};
 
 }

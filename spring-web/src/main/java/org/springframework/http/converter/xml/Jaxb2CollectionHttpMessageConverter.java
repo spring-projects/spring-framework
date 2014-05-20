@@ -16,6 +16,7 @@
 
 package org.springframework.http.converter.xml;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -32,6 +33,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLResolver;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Result;
@@ -230,7 +232,16 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 	protected XMLInputFactory createXmlInputFactory() {
 		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 		inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+		inputFactory.setXMLResolver(NO_OP_XML_RESOLVER);
 		return inputFactory;
 	}
+
+
+	private static final XMLResolver NO_OP_XML_RESOLVER = new XMLResolver() {
+		@Override
+		public Object resolveEntity(String publicID, String systemID, String base, String ns) {
+			return new ByteArrayInputStream(new byte[0]);
+		}
+	};
 
 }
