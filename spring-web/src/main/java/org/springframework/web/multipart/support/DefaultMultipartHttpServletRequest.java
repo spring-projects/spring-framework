@@ -18,7 +18,7 @@ package org.springframework.web.multipart.support;
 
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -76,22 +76,6 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 
 
 	@Override
-	public Enumeration<String> getParameterNames() {
-		Map<String, String[]> multipartParameters = getMultipartParameters();
-		if (multipartParameters.isEmpty()) {
-			return super.getParameterNames();
-		}
-
-		Set<String> paramNames = new LinkedHashSet<String>();
-		Enumeration<String> paramEnum = super.getParameterNames();
-		while (paramEnum.hasMoreElements()) {
-			paramNames.add(paramEnum.nextElement());
-		}
-		paramNames.addAll(multipartParameters.keySet());
-		return Collections.enumeration(paramNames);
-	}
-
-	@Override
 	public String getParameter(String name) {
 		String[] values = getMultipartParameters().get(name);
 		if (values != null) {
@@ -110,10 +94,31 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 	}
 
 	@Override
+	public Enumeration<String> getParameterNames() {
+		Map<String, String[]> multipartParameters = getMultipartParameters();
+		if (multipartParameters.isEmpty()) {
+			return super.getParameterNames();
+		}
+
+		Set<String> paramNames = new LinkedHashSet<String>();
+		Enumeration<String> paramEnum = super.getParameterNames();
+		while (paramEnum.hasMoreElements()) {
+			paramNames.add(paramEnum.nextElement());
+		}
+		paramNames.addAll(multipartParameters.keySet());
+		return Collections.enumeration(paramNames);
+	}
+
+	@Override
 	public Map<String, String[]> getParameterMap() {
-		Map<String, String[]> paramMap = new HashMap<String, String[]>();
+		Map<String, String[]> multipartParameters = getMultipartParameters();
+		if (multipartParameters.isEmpty()) {
+			return super.getParameterMap();
+		}
+
+		Map<String, String[]> paramMap = new LinkedHashMap<String, String[]>();
 		paramMap.putAll(super.getParameterMap());
-		paramMap.putAll(getMultipartParameters());
+		paramMap.putAll(multipartParameters);
 		return paramMap;
 	}
 
