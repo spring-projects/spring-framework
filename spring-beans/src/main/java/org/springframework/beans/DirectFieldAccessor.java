@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.beans;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.objenesis.ObjenesisStd;
+import org.springframework.objenesis.instantiator.ObjectInstantiator;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
@@ -31,13 +33,13 @@ import java.util.Map;
  * {@link PropertyAccessor} implementation that directly accesses instance fields.
  * Allows for direct binding to fields instead of going through JavaBean setters.
  *
- * <p>This implementation just supports fields in the actual target object.
- * It is not able to traverse nested fields.
+ * <p>Since 4.1 this implementation supports nested fields traversing.
  *
  * <p>A DirectFieldAccessor's default for the "extractOldValueForEditor" setting
  * is "true", since a field can always be read without side effects.
  *
  * @author Juergen Hoeller
+ * @author Maciej Walkowiak
  * @since 2.0
  * @see #setExtractOldValueForEditor
  * @see BeanWrapper
@@ -48,8 +50,7 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 
 	private final Object target;
 
-	private final Map<String, Field> fieldMap = new HashMap<String, Field>();
-
+	private final Map<String, FieldHolder> fieldMap = new HashMap<String, FieldHolder>();
 
 	/**
 	 * Create a new DirectFieldAccessor for the given target object.
@@ -58,101 +59,189 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 	public DirectFieldAccessor(final Object target) {
 		Assert.notNull(target, "Target object must not be null");
 		this.target = target;
-		ReflectionUtils.doWithFields(this.target.getClass(), new ReflectionUtils.FieldCallback() {
-			@Override
-			public void doWith(Field field) {
-				if (fieldMap.containsKey(field.getName())) {
-					// ignore superclass declarations of fields already found in a subclass
-				}
-				else {
-					fieldMap.put(field.getName(), field);
-				}
-			}
-		});
+
 		this.typeConverterDelegate = new TypeConverterDelegate(this, target);
 		registerDefaultEditors();
 		setExtractOldValueForEditor(true);
 	}
 
-
 	@Override
 	public boolean isReadableProperty(String propertyName) throws BeansException {
-		return this.fieldMap.containsKey(propertyName);
+		return doesPropertyExists(propertyName);
 	}
 
 	@Override
 	public boolean isWritableProperty(String propertyName) throws BeansException {
-		return this.fieldMap.containsKey(propertyName);
+		return doesPropertyExists(propertyName);
 	}
 
 	@Override
-	public Class<?> getPropertyType(String propertyName) throws BeansException {
-		Field field = this.fieldMap.get(propertyName);
-		if (field != null) {
-			return field.getType();
+	public Class<?> getPropertyType(String propertyPath) throws BeansException {
+		FieldHolder fieldHolder = getFieldHolder(propertyPath);
+		if (fieldHolder != null) {
+			return fieldHolder.getField().getType();
 		}
 		return null;
 	}
 
 	@Override
 	public TypeDescriptor getPropertyTypeDescriptor(String propertyName) throws BeansException {
-		Field field = this.fieldMap.get(propertyName);
-		if (field != null) {
-			return new TypeDescriptor(field);
+		try {
+			FieldHolder fieldHolder = getFieldHolder(propertyName);
+			return new TypeDescriptor(fieldHolder.getField());
+		} catch (InvalidPropertyException e) {
+			return null;
 		}
-		return null;
 	}
 
 	@Override
 	public Object getPropertyValue(String propertyName) throws BeansException {
-		Field field = this.fieldMap.get(propertyName);
-		if (field == null) {
-			throw new NotReadablePropertyException(
-					this.target.getClass(), propertyName, "Field '" + propertyName + "' does not exist");
-		}
+		FieldHolder fieldHolder;
+
 		try {
-			ReflectionUtils.makeAccessible(field);
-			return field.get(this.target);
+			fieldHolder = this.getFieldHolder(propertyName);
+		} catch (InvalidPropertyException ex) {
+			throw new NotReadablePropertyException(ex.getBeanClass(), ex.getPropertyName(), ex.getMessage());
 		}
-		catch (IllegalAccessException ex) {
-			throw new InvalidPropertyException(this.target.getClass(), propertyName, "Field is not accessible", ex);
-		}
+
+		return fieldHolder.getValue();
 	}
 
 	@Override
 	public void setPropertyValue(String propertyName, Object newValue) throws BeansException {
-		Field field = this.fieldMap.get(propertyName);
-		if (field == null) {
-			throw new NotWritablePropertyException(
-					this.target.getClass(), propertyName, "Field '" + propertyName + "' does not exist");
+		FieldHolder fieldHolder;
+
+		try {
+			fieldHolder = this.getFieldHolder(propertyName);
+		} catch (InvalidPropertyException ex) {
+			throw new NotWritablePropertyException(ex.getBeanClass(), ex.getPropertyName(), ex.getMessage());
 		}
+
 		Object oldValue = null;
 		try {
-			ReflectionUtils.makeAccessible(field);
-			oldValue = field.get(this.target);
+			oldValue = fieldHolder.getValue();
+
 			Object convertedValue = this.typeConverterDelegate.convertIfNecessary(
-					field.getName(), oldValue, newValue, field.getType(), new TypeDescriptor(field));
-			field.set(this.target, convertedValue);
+					fieldHolder.getField().getName(), fieldHolder.getValue(), newValue, fieldHolder.getField().getType(),
+					new TypeDescriptor(fieldHolder.getField()));
+
+			fieldHolder.setValue(convertedValue);
 		}
 		catch (ConverterNotFoundException ex) {
-			PropertyChangeEvent pce = new PropertyChangeEvent(this.target, propertyName, oldValue, newValue);
-			throw new ConversionNotSupportedException(pce, field.getType(), ex);
+			PropertyChangeEvent pce = new PropertyChangeEvent(fieldHolder.getTarget(), propertyName, oldValue, newValue);
+			throw new ConversionNotSupportedException(pce, fieldHolder.getField().getType(), ex);
 		}
 		catch (ConversionException ex) {
-			PropertyChangeEvent pce = new PropertyChangeEvent(this.target, propertyName, oldValue, newValue);
-			throw new TypeMismatchException(pce, field.getType(), ex);
+			PropertyChangeEvent pce = new PropertyChangeEvent(fieldHolder.getTarget(), propertyName, oldValue, newValue);
+			throw new TypeMismatchException(pce, fieldHolder.getField().getType(), ex);
 		}
 		catch (IllegalStateException ex) {
-			PropertyChangeEvent pce = new PropertyChangeEvent(this.target, propertyName, oldValue, newValue);
-			throw new ConversionNotSupportedException(pce, field.getType(), ex);
+			PropertyChangeEvent pce = new PropertyChangeEvent(fieldHolder.getTarget(), propertyName, oldValue, newValue);
+			throw new ConversionNotSupportedException(pce, fieldHolder.getField().getType(), ex);
 		}
 		catch (IllegalArgumentException ex) {
-			PropertyChangeEvent pce = new PropertyChangeEvent(this.target, propertyName, oldValue, newValue);
-			throw new TypeMismatchException(pce, field.getType(), ex);
-		}
-		catch (IllegalAccessException ex) {
-			throw new InvalidPropertyException(this.target.getClass(), propertyName, "Field is not accessible", ex);
+			PropertyChangeEvent pce = new PropertyChangeEvent(fieldHolder.getTarget(), propertyName, oldValue, newValue);
+			throw new TypeMismatchException(pce, fieldHolder.getField().getType(), ex);
 		}
 	}
 
+	private boolean doesPropertyExists(String propertyName) {
+		try {
+			FieldHolder fieldHolder = getFieldHolder(propertyName);
+			return fieldHolder != null;
+		} catch (InvalidPropertyException e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Gets FieldHolder for given property name.
+	 *
+	 * @param propertyName - property name, can be simple field name or path containing dots, for example "person.address.city"
+	 * @return FieldHolder when corresponding field found on target object
+	 * @throws org.springframework.beans.InvalidPropertyException when field not found
+	 */
+	private FieldHolder getFieldHolder(String propertyName) {
+		if (!fieldMap.containsKey(propertyName)) {
+			try {
+				fieldMap.put(propertyName, getField(propertyName, target));
+			} catch (IllegalAccessException e) {
+				throw new InvalidPropertyException(this.target.getClass(), propertyName, "Field is not accessible", e);
+			}
+		}
+
+		return fieldMap.get(propertyName);
+	}
+
+	private FieldHolder getField(String propertyName, Object target) throws IllegalAccessException {
+		final boolean hasNestedProperties = propertyName.contains(".");
+
+		String property = hasNestedProperties ? propertyName.substring(0, propertyName.indexOf(".")) : propertyName;
+
+		Field field = ReflectionUtils.findField(target.getClass(), property);
+
+		if (field == null) {
+			throw new InvalidPropertyException(target.getClass(), property, "Field does not exists");
+		}
+
+		ReflectionUtils.makeAccessible(field);
+
+		if (hasNestedProperties) {
+			Object newTarget = field.get(target);
+
+			if (newTarget == null) {
+				// nested object not created, creating new instance using default constructor
+				ObjenesisStd objenesis = new ObjenesisStd();
+				ObjectInstantiator<?> instantiator = objenesis.getInstantiatorOf(field.getType());
+
+				newTarget = instantiator.newInstance();
+				ReflectionUtils.setField(field, target, newTarget);
+			}
+
+			return getField(propertyName.substring(property.length() + 1), newTarget);
+		} else {
+			return new FieldHolder(target, field);
+		}
+
+	}
+
+	/**
+	 * Wraps field and corresponding target object together. Provides simple methods for getting and setting value
+	 * from field on target object.
+	 */
+	private class FieldHolder {
+		private final Object target;
+		private final Field field;
+
+		private FieldHolder(Object target, Field field) {
+			Assert.notNull(target);
+			Assert.notNull(field);
+			this.target = target;
+			this.field = field;
+		}
+
+		public Object getTarget() {
+			return target;
+		}
+
+		public Field getField() {
+			return field;
+		}
+
+		public Object getValue() {
+			try {
+				return this.field.get(this.target);
+			} catch (IllegalAccessException e) {
+				throw new InvalidPropertyException(this.target.getClass(), this.field.getName(), "Field is not accessible", e);
+			}
+		}
+
+		public void setValue(Object value) {
+			try {
+				this.field.set(this.target, value);
+			} catch (IllegalAccessException e) {
+				throw new InvalidPropertyException(this.target.getClass(), this.field.getName(), "Field is not accessible", e);
+			}
+		}
+	}
 }
