@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.UnmarshalException;
 import javax.xml.bind.Unmarshaller;
@@ -54,6 +53,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
  * does not support writing.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 3.2
  */
 @SuppressWarnings("rawtypes")
@@ -61,6 +61,7 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 		extends AbstractJaxb2HttpMessageConverter<T> implements GenericHttpMessageConverter<T> {
 
 	private final XMLInputFactory inputFactory = createXmlInputFactory();
+
 
 	/**
 	 * Always returns {@code false} since Jaxb2CollectionHttpMessageConverter
@@ -166,7 +167,6 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 	/**
 	 * Create a Collection of the given type, with the given initial capacity
 	 * (if supported by the Collection type).
-	 *
 	 * @param collectionClass the type of Collection to instantiate
 	 * @return the created Collection instance
 	 */
@@ -224,10 +224,8 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 	/**
 	 * Create a {@code XMLInputFactory} that this converter will use to create {@link
 	 * javax.xml.stream.XMLStreamReader} and {@link javax.xml.stream.XMLEventReader} objects.
-	 * <p/> Can be overridden in subclasses, adding further initialization of the factory.
+	 * <p>Can be overridden in subclasses, adding further initialization of the factory.
 	 * The resulting factory is cached, so this method will only be called once.
-	 *
-	 * @return the created factory
 	 */
 	protected XMLInputFactory createXmlInputFactory() {
 		XMLInputFactory inputFactory = XMLInputFactory.newInstance();

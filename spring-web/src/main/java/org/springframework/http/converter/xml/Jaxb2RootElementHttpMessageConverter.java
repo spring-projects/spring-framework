@@ -32,6 +32,12 @@ import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.XMLReaderFactory;
+
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -39,21 +45,17 @@ import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.ClassUtils;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
- * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter} that can read
- * and write XML using JAXB2.
+ * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter}
+ * that can read and write XML using JAXB2.
  *
- * <p>This converter can read classes annotated with {@link XmlRootElement} and {@link XmlType}, and write classes
- * annotated with with {@link XmlRootElement}, or subclasses thereof.
+ * <p>This converter can read classes annotated with {@link XmlRootElement} and {@link XmlType},
+ * and write classes annotated with with {@link XmlRootElement}, or subclasses thereof.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  * @since 3.0
  */
 public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessageConverter<Object> {
@@ -69,9 +71,13 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 		this.processExternalEntities = processExternalEntities;
 	}
 
+	/**
+	 * Returns the configured value for whether XML external entities are allowed.
+	 */
 	public boolean isProcessExternalEntities() {
 		return this.processExternalEntities;
 	}
+
 
 	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
@@ -81,7 +87,7 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 
 	@Override
 	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
-		return AnnotationUtils.findAnnotation(clazz, XmlRootElement.class) != null && canWrite(mediaType);
+		return (AnnotationUtils.findAnnotation(clazz, XmlRootElement.class) != null && canWrite(mediaType));
 	}
 
 	@Override
