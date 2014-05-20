@@ -23,7 +23,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
@@ -138,6 +140,8 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 			return super.getParameterNames();
 		}
 
+		// Servlet 3.0 getParameterNames() not guaranteed to include multipart form items
+		// (e.g. on WebLogic 12) -> need to merge them here to be on the safe side
 		Set<String> paramNames = new LinkedHashSet<String>();
 		Enumeration<String> paramEnum = super.getParameterNames();
 		while (paramEnum.hasMoreElements()) {
@@ -145,6 +149,27 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 		}
 		paramNames.addAll(this.multipartParameterNames);
 		return Collections.enumeration(paramNames);
+	}
+
+	@Override
+	public Map<String, String[]> getParameterMap() {
+		if (this.multipartParameterNames == null) {
+			initializeMultipart();
+		}
+		if (this.multipartParameterNames.isEmpty()) {
+			return super.getParameterMap();
+		}
+
+		// Servlet 3.0 getParameterMap() not guaranteed to include multipart form items
+		// (e.g. on WebLogic 12) -> need to merge them here to be on the safe side
+		Map<String, String[]> paramMap = new LinkedHashMap<String, String[]>();
+		paramMap.putAll(super.getParameterMap());
+		for (String paramName : this.multipartParameterNames) {
+			if (!paramMap.containsKey(paramName)) {
+				paramMap.put(paramName, getParameterValues(paramName));
+			}
+		}
+		return paramMap;
 	}
 
 	@Override
