@@ -22,6 +22,7 @@ configure(allprojects) { project ->
 	ext.hibVal5Version       = "5.1.1.Final"
 	ext.hsqldbVersion        = "2.3.2"
 	ext.jackson2Version      = "2.3.3"
+	ext.gsonVersion          = "2.2.4"
 	ext.jasperReportsVersion = "5.5.2"
 	ext.jettyVersion         = "9.1.5.v20140505"
 	ext.jodaVersion          = "2.3"
@@ -621,6 +622,8 @@ project("spring-web") {
 		optional("org.apache.httpcomponents:httpclient:4.3.3")
 		optional("org.apache.httpcomponents:httpasyncclient:4.0.1")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
+		optional("com.google.code.gson:gson:${gsonVersion}")
+		optional("commons-codec:commons-codec:1.9")
 		optional("rome:rome:1.0")
 		optional("org.eclipse.jetty:jetty-servlet:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
