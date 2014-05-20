@@ -19,42 +19,40 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.Assert;
 
 /**
- * A {@code ResponseBodyInterceptor} implementation that adds support for the
- * Jackson {@code @JsonView} annotation on a Spring MVC {@code @RequestMapping}
- * or {@code @ExceptionHandler} method.
+ * A {@code ResponseBodyInterceptor} implementation that adds support for
+ * Jackson's {@code @JsonView} annotation declared on a Spring MVC
+ * {@code @RequestMapping} or {@code @ExceptionHandler} method. The serialization
+ * view specified in the annotation will be passed in to the
+ * {@code MappingJackson2HttpMessageConverter} which will then use it to
+ * serialize the response body with.
  *
  * @author Rossen Stoyanchev
  * @since 4.1
+ *
+ * @see com.fasterxml.jackson.databind.ObjectMapper#writerWithView(Class)
  */
-public class JsonViewResponseBodyInterceptor implements ResponseBodyInterceptor {
+public class JsonViewResponseBodyInterceptor extends AbstractMappingJacksonResponseBodyInterceptor {
 
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public <T> T beforeBodyWrite(T body, MediaType contentType, Class<? extends HttpMessageConverter<T>> converterType,
+	protected void beforeBodyWriteInternal(MappingJacksonValue bodyContainer, MediaType contentType,
 			MethodParameter returnType, ServerHttpRequest request, ServerHttpResponse response) {
-
-		if (!MappingJackson2HttpMessageConverter.class.equals(converterType)) {
-			return body;
-		}
 
 		JsonView annotation = returnType.getMethodAnnotation(JsonView.class);
 		if (annotation == null) {
-			return body;
+			return;
 		}
 
 		Assert.isTrue(annotation.value().length != 0,
 				"Expected at least one serialization view class in JsonView annotation on " + returnType);
 
-		return (T) new MappingJacksonValue(body, annotation.value()[0]);
+		bodyContainer.setSerializationView(annotation.value()[0]);
 	}
 
 }

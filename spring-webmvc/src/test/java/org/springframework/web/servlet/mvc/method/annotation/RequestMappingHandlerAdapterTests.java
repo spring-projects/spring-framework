@@ -17,7 +17,12 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -28,6 +33,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpResponse;
@@ -229,15 +236,23 @@ public class RequestMappingHandlerAdapterTests {
 
 	@Test
 	public void responseBodyInterceptor() throws Exception {
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
+		converters.add(new MappingJackson2HttpMessageConverter());
+		this.handlerAdapter.setMessageConverters(converters);
+
 		this.webAppContext.registerSingleton("rba", ResponseCodeSuppressingAdvice.class);
+		this.webAppContext.registerSingleton("ja", JsonpAdvice.class);
 		this.webAppContext.refresh();
+
+		this.request.addHeader("Accept", MediaType.APPLICATION_JSON_VALUE);
+		this.request.setParameter("c", "callback");
 
 		HandlerMethod handlerMethod = handlerMethod(new SimpleController(), "handleWithResponseEntity");
 		this.handlerAdapter.afterPropertiesSet();
 		this.handlerAdapter.handle(this.request, this.response, handlerMethod);
 
 		assertEquals(200, this.response.getStatus());
-		assertEquals("status=400, message=body", this.response.getContentAsString());
+		assertEquals("callback({\"status\":400,\"message\":\"body\"});", this.response.getContentAsString());
 	}
 
 
@@ -324,17 +339,28 @@ public class RequestMappingHandlerAdapterTests {
 	}
 
 	@ControllerAdvice
-	private static class ResponseCodeSuppressingAdvice implements ResponseBodyInterceptor {
+	private static class ResponseCodeSuppressingAdvice extends AbstractMappingJacksonResponseBodyInterceptor {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public <T> T beforeBodyWrite(T body, MediaType contentType,
-				Class<? extends HttpMessageConverter<T>> converterType,
+		protected void beforeBodyWriteInternal(MappingJacksonValue bodyContainer, MediaType contentType,
 				MethodParameter returnType, ServerHttpRequest request, ServerHttpResponse response) {
 
 			int status = ((ServletServerHttpResponse) response).getServletResponse().getStatus();
 			response.setStatusCode(HttpStatus.OK);
-			return (T) ("status=" + status + ", message=" + body);
+
+			Map<String, Object> map = new LinkedHashMap<>();
+			map.put("status", status);
+			map.put("message", bodyContainer.getValue());
+			bodyContainer.setValue(map);
+		}
+	}
+
+	@ControllerAdvice
+	private static class JsonpAdvice extends AbstractJsonpResponseBodyInterceptor {
+
+		public JsonpAdvice() {
+			super(Arrays.asList("c"));
 		}
 	}
 

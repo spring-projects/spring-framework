@@ -220,8 +220,9 @@ public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
 		MySampleBean bean = new MySampleBean("with", "with", "without");
-		MappingJacksonValue jsv = new MappingJacksonValue(bean, MyJacksonView1.class);
-		HttpEntity<MappingJacksonValue> entity = new HttpEntity<MappingJacksonValue>(jsv);
+		MappingJacksonValue jacksonValue = new MappingJacksonValue(bean);
+		jacksonValue.setSerializationView(MyJacksonView1.class);
+		HttpEntity<MappingJacksonValue> entity = new HttpEntity<MappingJacksonValue>(jacksonValue);
 		String s = template.postForObject(baseUrl + "/jsonpost", entity, String.class, "post");
 		assertTrue(s.contains("\"with1\":\"with\""));
 		assertFalse(s.contains("\"with2\":\"with\""));

@@ -249,14 +249,26 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 			if (this.jsonPrefix != null) {
 				jsonGenerator.writeRaw(this.jsonPrefix);
 			}
+			Class<?> serializationView = null;
+			String jsonpFunction = null;
 			if (object instanceof MappingJacksonValue) {
-				MappingJacksonValue valueHolder = (MappingJacksonValue) object;
-				object = valueHolder.getValue();
-				Class<?> serializationView = valueHolder.getSerializationView();
+				MappingJacksonValue container = (MappingJacksonValue) object;
+				object = container.getValue();
+				serializationView = container.getSerializationView();
+				jsonpFunction = container.getJsonpFunction();
+			}
+			if (jsonpFunction != null) {
+				jsonGenerator.writeRaw(jsonpFunction + "(" );
+			}
+			if (serializationView != null) {
 				this.objectMapper.writerWithView(serializationView).writeValue(jsonGenerator, object);
 			}
 			else {
 				this.objectMapper.writeValue(jsonGenerator, object);
+			}
+			if (jsonpFunction != null) {
+				jsonGenerator.writeRaw(");");
+				jsonGenerator.flush();
 			}
 		}
 		catch (JsonProcessingException ex) {
