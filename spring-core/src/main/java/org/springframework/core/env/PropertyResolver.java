@@ -82,8 +82,7 @@ public interface PropertyResolver {
 	<T> Class<T> getPropertyAsClass(String key, Class<T> targetType);
 
 	/**
-	 * Return the property value associated with the given key, converted to the given
-	 * targetType (never {@code null}).
+	 * Return the property value associated with the given key (never {@code null}).
 	 * @throws IllegalStateException if the key cannot be resolved
 	 * @see #getRequiredProperty(String, Class)
 	 */
