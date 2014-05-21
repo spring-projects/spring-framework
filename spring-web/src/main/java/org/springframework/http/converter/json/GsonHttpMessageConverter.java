@@ -76,18 +76,19 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 	}
 
 	/**
-	 * Set the {@code Gson} for this view.
-	 * If not set, a default {@link Gson#Gson() Gson} is used.
+	 * Set the {@code Gson} instance to use.
+	 * If not set, a default {@link Gson#Gson() Gson} instance is used.
+	 *
 	 * <p>Setting a custom-configured {@code Gson} is one way to take further
 	 * control of the JSON serialization process.
 	 */
 	public void setGson(Gson gson) {
-		Assert.notNull(gson, "Gson must not be null");
+		Assert.notNull(gson, "'gson' is required");
 		this.gson = gson;
 	}
 
 	/**
-	 * Return the underlying {@code GsonBuilder} for this converter.
+	 * Return the configured {@code Gson} instance for this converter.
 	 */
 	public Gson getGson() {
 		return this.gson;
@@ -106,10 +107,11 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 	 * Indicate whether the JSON output by this view should be prefixed with "{} &&".
 	 * Default is {@code false}.
 	 *
-	 * <p>Prefixing the JSON string in this manner is used to help prevent JSON Hijacking.
-	 * The prefix renders the string syntactically invalid as a script so that it cannot
-	 * be hijacked. This prefix does not affect the evaluation of JSON, but if JSON
-	 * validation is performed on the string, the prefix would need to be ignored.
+	 * <p>Prefixing the JSON string in this manner is used to help prevent JSON
+	 * Hijacking. The prefix renders the string syntactically invalid as a script
+	 * so that it cannot be hijacked. This prefix does not affect the evaluation
+	 * of JSON, but if JSON validation is performed on the string, the prefix
+	 * would need to be ignored.
 	 *
 	 * @see #setJsonPrefix
 	 */
@@ -157,9 +159,10 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 
 	/**
 	 * Return the Gson {@link TypeToken} for the specified type.
-	 * <p>The default implementation returns {@code TypeToken.get(type)}, but this can be
-	 * overridden in subclasses to allow for custom generic collection handling.
-	 * For instance:
+	 *
+	 * <p>The default implementation returns {@code TypeToken.get(type)}, but
+	 * this can be overridden in subclasses to allow for custom generic
+	 * collection handling. For instance:
 	 * <pre class="code">
 	 * protected TypeToken<?> getTypeToken(Type type) {
 	 *   if (type instanceof Class && List.class.isAssignableFrom((Class<?>) type)) {
@@ -200,12 +203,11 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 
 		Charset charset = getCharset(outputMessage.getHeaders());
 		OutputStreamWriter writer = new OutputStreamWriter(outputMessage.getBody(), charset);
-
 		try {
 			if (this.jsonPrefix != null) {
 				writer.append(this.jsonPrefix);
 			}
-			gson.toJson(o, writer);
+			this.gson.toJson(o, writer);
 			writer.close();
 		}
 		catch(JsonIOException  ex) {

@@ -51,13 +51,12 @@ final class GsonBase64ByteArrayJsonTypeAdapter implements JsonSerializer<byte[]>
 
 	@Override
 	public JsonElement serialize(byte[] src, Type typeOfSrc, JsonSerializationContext context) {
-		return new JsonPrimitive(new String(this.base64.encode(src), DEFAULT_CHARSET));
+		String encoded = new String(this.base64.encode(src), DEFAULT_CHARSET);
+		return new JsonPrimitive(encoded);
 	}
 
 	@Override
-	public byte[] deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-			throws JsonParseException {
-
+	public byte[] deserialize(JsonElement json, Type type, JsonDeserializationContext cxt) throws JsonParseException {
 		return this.base64.decode(json.getAsString().getBytes(DEFAULT_CHARSET));
 	}
 

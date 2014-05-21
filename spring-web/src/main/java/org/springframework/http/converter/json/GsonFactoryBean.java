@@ -25,13 +25,12 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.ClassUtils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 
 /**
- * A {@link FactoryBean} for creating a Google Gson 2.x {@link Gson}
+ * A {@link FactoryBean} for creating a Google Gson 2.x {@link Gson} instance.
  *
  * @author Roy Clarkson
  * @since 4.1
@@ -42,6 +41,7 @@ public class GsonFactoryBean implements FactoryBean<Gson>, BeanClassLoaderAware,
 			"org.apache.commons.codec.binary.Base64", GsonFactoryBean.class.getClassLoader());
 
 	private final Log logger = LogFactory.getLog(getClass());
+
 
 	private Gson gson;
 
@@ -61,15 +61,15 @@ public class GsonFactoryBean implements FactoryBean<Gson>, BeanClassLoaderAware,
 
 
 	/**
-	 * Set the GsonBuilder instance to use. If not set, the GsonBuilder will be created
-	 * using its default constructor.
+	 * Set the GsonBuilder instance to use. If not set, the GsonBuilder will be
+	 * created using its default constructor.
 	 */
 	public void setGsonBuilder(GsonBuilder gsonBuilder) {
 		this.gsonBuilder = gsonBuilder;
 	}
 
 	/**
-	 * Return the GsonBuilder instance being used.
+	 * Return the configured GsonBuilder instance to use, if any.
 	 * @return the GsonBuilder instance
 	 */
 	public GsonBuilder getGsonBuilder() {
@@ -77,8 +77,8 @@ public class GsonFactoryBean implements FactoryBean<Gson>, BeanClassLoaderAware,
 	}
 
 	/**
-	 * Whether to use the {@link GsonBuilder#setPrettyPrinting()} when writing JSON. This
-	 * is a shortcut for setting up a {@code Gson} as follows:
+	 * Whether to use the {@link GsonBuilder#setPrettyPrinting()} when writing
+	 * JSON. This is a shortcut for setting up a {@code Gson} as follows:
 	 *
 	 * <pre class="code">
 	 * new GsonBuilder().setPrettyPrinting().create();
@@ -89,8 +89,9 @@ public class GsonFactoryBean implements FactoryBean<Gson>, BeanClassLoaderAware,
 	}
 
 	/**
-	 * Whether to use the {@link GsonBuilder#serializeNulls()} option when writing JSON.
-	 * This is a shortcut for setting up a {@code Gson} as follows:
+	 * Whether to use the {@link GsonBuilder#serializeNulls()} option when
+	 * writing JSON. This is a shortcut for setting up a {@code Gson} as
+	 * follows:
 	 *
 	 * <pre class="code">
 	 * new GsonBuilder().serializeNulls().create();
@@ -101,9 +102,9 @@ public class GsonFactoryBean implements FactoryBean<Gson>, BeanClassLoaderAware,
 	}
 
 	/**
-	 * Whether to use the {@link GsonBuilder#disableHtmlEscaping()} when writing JSON. Set
-	 * to {@code true} to disable HTML escaping in JSON. This is a shortcut for setting up
-	 * a {@code Gson} as follows:
+	 * Whether to use the {@link GsonBuilder#disableHtmlEscaping()} when writing
+	 * JSON. Set to {@code true} to disable HTML escaping in JSON. This is a
+	 * shortcut for setting up a {@code Gson} as follows:
 	 *
 	 * <pre class="code">
 	 * new GsonBuilder().disableHtmlEscaping().create();
@@ -146,7 +147,8 @@ public class GsonFactoryBean implements FactoryBean<Gson>, BeanClassLoaderAware,
 	 * writing JSON.
 	 *
 	 * <p>When set to {@code true} a custom {@link com.google.gson.TypeAdapter}
-	 * is registered via {@link GsonBuilder#registerTypeHierarchyAdapter(Class, Object)}
+	 * is registered via
+	 * {@link GsonBuilder#registerTypeHierarchyAdapter(Class, Object)}
 	 * that serializes a {@code byte[]} property to and from a Base64 encoded
 	 * string instead of a JSON array.
 	 *
@@ -167,7 +169,7 @@ public class GsonFactoryBean implements FactoryBean<Gson>, BeanClassLoaderAware,
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		if (gsonBuilder == null) {
+		if (this.gsonBuilder == null) {
 			this.gsonBuilder = new GsonBuilder();
 		}
 		if (this.prettyPrint != null && this.prettyPrint) {
@@ -188,14 +190,14 @@ public class GsonFactoryBean implements FactoryBean<Gson>, BeanClassLoaderAware,
 			}
 		}
 		else if (logger.isDebugEnabled()) {
-			logger.debug("org.apache.commons.codec.binary.Base64 is not available on the class path. Gson Base64 encoding is disabled.");
+			logger.debug("org.apache.commons.codec.binary.Base64 is not " +
+					"available on the class path. Gson Base64 encoding is disabled.");
 		}
 		this.gson = this.gsonBuilder.create();
 	}
 
-
 	/**
-	 * Return the singleton Gson.
+	 * Return the created Gson instance.
 	 */
 	@Override
 	public Gson getObject() throws Exception {

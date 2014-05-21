@@ -28,13 +28,11 @@ import com.google.gson.Gson;
 import static org.junit.Assert.*;
 
 /**
- * {@link GsonFactoryBean} tests
+ * {@link GsonFactoryBean} tests.
  *
  * @author Roy Clarkson
  */
 public class GsonFactoryBeanTests {
-
-	private static final String NEWLINE_SYSTEM_PROPERTY = System.getProperty("line.separator");
 
 	private static final String DATE_FORMAT = "yyyy-MM-dd";
 
@@ -54,7 +52,8 @@ public class GsonFactoryBeanTests {
 		StringBean bean = new StringBean();
 		bean.setName("Jason");
 		String result = gson.toJson(bean);
-		assertEquals("{" + NEWLINE_SYSTEM_PROPERTY + "  \"name\": \"Jason\"" + NEWLINE_SYSTEM_PROPERTY + "}", result);
+		String lineSeparator = System.getProperty("line.separator");
+		assertEquals("{" + lineSeparator + "  \"name\": \"Jason\"" + lineSeparator + "}", result);
 	}
 
 	@Test
@@ -233,7 +232,6 @@ public class GsonFactoryBeanTests {
 		public void setBytes(byte[] bytes) {
 			this.bytes = bytes;
 		}
-
 	}
 
 }
