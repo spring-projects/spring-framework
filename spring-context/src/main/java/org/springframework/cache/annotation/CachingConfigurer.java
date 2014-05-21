@@ -42,7 +42,7 @@ public interface CachingConfigurer {
 	/**
 	 * Return the cache manager bean to use for annotation-driven cache
 	 * management. A default {@link CacheResolver} will be initialized
-	 * behind the scene with this cache manager. For more fine-grained
+	 * behind the scenes with this cache manager. For more fine-grained
 	 * management of the cache resolution, consider setting the
 	 * {@link CacheResolver} directly.
 	 * <p>Implementations must explicitly declare
@@ -65,8 +65,10 @@ public interface CachingConfigurer {
 
 	/**
 	 * Return the {@link CacheResolver} bean to use to resolve regular caches for
-	 * annotation-driven cache management. This is an alternative option to set
-	 * the {@link CacheManager} to use.
+	 * annotation-driven cache management. This is an alternative and more powerful
+	 * option of specifying the {@link CacheManager} to use.
+	 * <p>If both a {@link #cacheManager()} and {@link #cacheResolver()} are set, the
+	 * cache manager is ignored.
 	 * <p>Implementations must explicitly declare
 	 * {@link org.springframework.context.annotation.Bean @Bean}, e.g.
 	 * <pre class="code">

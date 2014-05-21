@@ -98,9 +98,20 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 		}
 	}
 
-	private static void parseCacheManagerProperty(Element element, BeanDefinition def) {
-		def.getPropertyValues().add("cacheManager",
-				new RuntimeBeanReference(CacheNamespaceHandler.extractCacheManager(element)));
+	/**
+	 * Parse the cache resolution strategy to use. If a 'cache-resolver' attribute
+	 * is set, it is injected. Otherwise the 'cache-manager' is set. If {@code setBoth}
+	 * is {@code true}, both service are actually injected.
+	 */
+	private static void parseCacheResolution(Element element, BeanDefinition def, boolean setBoth) {
+		String name = element.getAttribute("cache-resolver");
+		if (StringUtils.hasText(name)) {
+			def.getPropertyValues().add("cacheResolver", new RuntimeBeanReference(name.trim()));
+		}
+		if (!StringUtils.hasText(name) || setBoth) {
+			def.getPropertyValues().add("cacheManager",
+					new RuntimeBeanReference(CacheNamespaceHandler.extractCacheManager(element)));
+		}
 	}
 
 	private static BeanDefinition parseErrorHandler(Element element, BeanDefinition def) {
@@ -130,7 +141,7 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 				RootBeanDefinition interceptorDef = new RootBeanDefinition(CacheInterceptor.class);
 				interceptorDef.setSource(eleSource);
 				interceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-				parseCacheManagerProperty(element, interceptorDef);
+				parseCacheResolution(element, interceptorDef, false);
 				parseErrorHandler(element, interceptorDef);
 				CacheNamespaceHandler.parseKeyGenerator(element, interceptorDef);
 				interceptorDef.getPropertyValues().add("cacheOperationSources", new RuntimeBeanReference(sourceName));
@@ -170,7 +181,7 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 				RootBeanDefinition def = new RootBeanDefinition();
 				def.setBeanClassName(CACHE_ASPECT_CLASS_NAME);
 				def.setFactoryMethodName("aspectOf");
-				parseCacheManagerProperty(element, def);
+				parseCacheResolution(element, def, false);
 				CacheNamespaceHandler.parseKeyGenerator(element, def);
 				parserContext.registerBeanComponent(new BeanComponentDefinition(def, CACHE_ASPECT_BEAN_NAME));
 			}
@@ -239,7 +250,9 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 			RootBeanDefinition sourceDef = new RootBeanDefinition(JCACHE_OPERATION_SOURCE_CLASS);
 			sourceDef.setSource(eleSource);
 			sourceDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-			parseCacheManagerProperty(element, sourceDef);
+			// JSR-107 support should create an exception cache resolver with the cache manager
+			// and there is no way to set that exception cache resolver from the namespace
+			parseCacheResolution(element, sourceDef, true);
 			CacheNamespaceHandler.parseKeyGenerator(element, sourceDef);
 			return sourceDef;
 		}

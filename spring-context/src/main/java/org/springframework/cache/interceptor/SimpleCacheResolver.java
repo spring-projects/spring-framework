@@ -32,6 +32,9 @@ import org.springframework.cache.CacheManager;
  */
 public class SimpleCacheResolver extends BaseCacheResolver {
 
+	public SimpleCacheResolver() {
+	}
+
 	public SimpleCacheResolver(CacheManager cacheManager) {
 		super(cacheManager);
 	}

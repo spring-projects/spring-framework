@@ -26,7 +26,10 @@
 	annotations on bean classes, and that proxies are automatically
 	to be created for the relevant annotated beans.
 
-	The default annotations supported are Spring's @Cacheable and @CacheEvict.
+	The default annotations supported are Spring's @Cacheable, @CachePut and @CacheEvict. If
+	spring-context-support and the JSR-107 API are on the classpath, additional proxies are
+	automatically created for JSR-107 annotated beans, that is @CacheResult, @CachePut,
+	@CacheRemove and @CacheRemoveAll.
 
 	See org.springframework.cache.annotation.EnableCaching Javadoc
 	for information on code-based alternatives to this XML element.
@@ -35,15 +38,34 @@
 			<xsd:attribute name="cache-manager" type="xsd:string" default="cacheManager">
 				<xsd:annotation>
 					<xsd:documentation source="java:org.springframework.cache.CacheManager"><![CDATA[
-	The bean name of the CacheManager that is to be used to retrieve the backing caches.
+	The bean name of the CacheManager that is to be used to retrieve the backing
+	caches. A default CacheResolver will be initialized behind the scenes with
+	this cache manager (or "cacheManager" if not set). For more fine-grained
+	management of the cache resolution, consider setting the 'cache-resolver'
+	attribute.
 
-	This attribute is not required, and only needs to be specified
-	explicitly if the bean name of the desired CacheManager
-	is not 'cacheManager'.
+	Note that this attribute is still mandatory if you are using JSR-107 as an
+	additional exception cache resolver should be created and requires a CacheManager
+	to do so.
 					]]></xsd:documentation>
 					<xsd:appinfo>
 						<tool:annotation kind="ref">
 							<tool:expected-type type="org.springframework.cache.CacheManager"/>
+						</tool:annotation>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="cache-resolver" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation source="java:org.springframework.cache.interceptor.CacheResolver"><![CDATA[
+	The bean name of the CacheResolver that is to be used to resolve the backing caches.
+
+	This attribute is not required, and only needs to be specified as an alternative to
+	the 'cache-manager' attribute. See the javadoc of CacheResolver for more details.
+					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="org.springframework.cache.interceptor.CacheResolver"/>
 						</tool:annotation>
 					</xsd:appinfo>
 				</xsd:annotation>

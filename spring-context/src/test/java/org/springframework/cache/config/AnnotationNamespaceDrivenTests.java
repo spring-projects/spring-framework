@@ -28,6 +28,7 @@ import org.springframework.context.support.GenericXmlApplicationContext;
 /**
  * @author Costin Leau
  * @author Chris Beams
+ * @author Stephane Nicoll
  */
 public class AnnotationNamespaceDrivenTests extends AbstractAnnotationTests {
 
@@ -42,6 +43,26 @@ public class AnnotationNamespaceDrivenTests extends AbstractAnnotationTests {
 		CacheInterceptor ci = ctx.getBean("org.springframework.cache.interceptor.CacheInterceptor#0",
 				CacheInterceptor.class);
 		assertSame(ctx.getBean("keyGenerator"), ci.getKeyGenerator());
+	}
+
+	@Test
+	public void cacheResolver() {
+		ConfigurableApplicationContext context = new GenericXmlApplicationContext(
+				"/org/springframework/cache/config/annotationDrivenCacheNamespace-resolver.xml");
+
+		CacheInterceptor ci = context.getBean(CacheInterceptor.class);
+		assertSame(context.getBean("cacheResolver"), ci.getCacheResolver());
+		context.close();
+	}
+
+	@Test
+	public void bothSetOnlyResolverIsUsed() {
+		ConfigurableApplicationContext context = new GenericXmlApplicationContext(
+				"/org/springframework/cache/config/annotationDrivenCacheNamespace-manager-resolver.xml");
+
+		CacheInterceptor ci = context.getBean(CacheInterceptor.class);
+		assertSame(context.getBean("cacheResolver"), ci.getCacheResolver());
+		context.close();
 	}
 
 	@Test

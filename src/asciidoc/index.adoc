@@ -47193,8 +47193,17 @@ application through AOP. The configuration is intentionally similar with that of
 | `cache-manager`
 | N/A (See `CachingConfigurer` javadocs)
 | cacheManager
-| Name of cache manager to use. Only required if the name of the cache manager is not
-  `cacheManager`.
+| Name of cache manager to use. A default `CacheResolver` will be initialized behind
+  the scenes with this cache manager (or `cacheManager`if not set). For more
+  fine-grained management of the cache resolution, consider setting the 'cache-resolver'
+  attribute.
+
+| `cache-resolver`
+| N/A (See `CachingConfigurer` javadocs)
+| A `SimpleCacheResolver` using the configured `cacheManager`.
+| The bean name of the CacheResolver that is to be used to resolve the backing caches.
+  This attribute is not required, and only needs to be specified as an alternative to
+  the 'cache-manager' attribute.
 
 | `key-generator`
 | N/A (See `CachingConfigurer` javadocs)
