@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyInterceptor;
+import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.FactoryBean;
@@ -143,6 +144,9 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	private static final boolean jackson2Present =
 			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", AnnotationDrivenBeanDefinitionParser.class.getClassLoader()) &&
 					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+
+	private static final boolean gsonPresent =
+			ClassUtils.isPresent("com.google.gson.Gson", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
 
 
 	@Override
@@ -379,7 +383,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		if (jaxb2Present) {
 			props.put("xml", MediaType.APPLICATION_XML_VALUE);
 		}
-		if (jackson2Present) {
+		if (jackson2Present || gsonPresent) {
 			props.put("json", MediaType.APPLICATION_JSON_VALUE);
 		}
 		return props;
@@ -492,6 +496,9 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			}
 			if (jackson2Present) {
 				messageConverters.add(createConverterDefinition(MappingJackson2HttpMessageConverter.class, source));
+			}
+			else if (gsonPresent) {
+				messageConverters.add(createConverterDefinition(GsonHttpMessageConverter.class, source));
 			}
 		}
 		return messageConverters;

@@ -44,6 +44,7 @@ import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
 import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
+import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
@@ -158,6 +159,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	private static final boolean jackson2Present =
 			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", WebMvcConfigurationSupport.class.getClassLoader()) &&
 					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", WebMvcConfigurationSupport.class.getClassLoader());
+
+	private static final boolean gsonPresent =
+			ClassUtils.isPresent("com.google.gson.Gson", WebMvcConfigurationSupport.class.getClassLoader());
 
 
 	private ServletContext servletContext;
@@ -290,7 +294,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		if (jaxb2Present) {
 			map.put("xml", MediaType.APPLICATION_XML);
 		}
-		if (jackson2Present) {
+		if (jackson2Present || gsonPresent) {
 			map.put("json", MediaType.APPLICATION_JSON);
 		}
 		return map;
@@ -604,6 +608,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		}
 		if (jackson2Present) {
 			messageConverters.add(new MappingJackson2HttpMessageConverter());
+		}
+		else if (gsonPresent) {
+			messageConverters.add(new GsonHttpMessageConverter());
 		}
 	}
 
