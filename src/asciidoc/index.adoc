@@ -7642,7 +7642,7 @@ You can find out more about
 http://spring.io/blog/2011/02/15/spring-3-1-m1-unified-property-management/[Unified
 Property Management], the
 {javadoc-baseurl}/org/springframework/core/env/PropertySource.html[`PropertySource` class]
-and the {javadoc-baseurl}org/springframework/context/annotation/PropertySource.html[`@PropertySource`
+and the {javadoc-baseurl}/org/springframework/context/annotation/PropertySource.html[`@PropertySource`
 annotation].
 
 
@@ -29299,7 +29299,7 @@ JSON, XML or custom MediaType content. For convenience, instead of annotating al
 `@RequestMapping` methods with `@ResponseBody`, you can annotate your Controller Class
 with `@RestController`.
 
-{javadoc-baseurl}org/springframework/web/bind/annotation/RestController.html[`@RestController`]
+{javadoc-baseurl}/org/springframework/web/bind/annotation/RestController.html[`@RestController`]
 is a stereotype annotation that combines `@ResponseBody` and `@Controller`. More than
 that, it gives more meaning to your Controller and also may carry additional semantics
 in future releases of the framework.
