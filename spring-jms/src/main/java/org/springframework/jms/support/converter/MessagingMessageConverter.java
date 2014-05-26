@@ -98,6 +98,9 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 	@SuppressWarnings("unchecked")
 	@Override
 	public Object fromMessage(javax.jms.Message message) throws JMSException, MessageConversionException {
+		if (message == null) {
+			return null;
+		}
 		Map<String, Object> mappedHeaders = this.headerMapper.toHeaders(message);
 		Object convertedObject = extractPayload(message);
 		MessageBuilder<Object> builder = (convertedObject instanceof org.springframework.messaging.Message) ?

@@ -17,9 +17,13 @@
 package org.springframework.jms.messaging;
 
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.eq;
 import static org.mockito.BDDMockito.*;
+import static org.mockito.BDDMockito.verify;
 import static org.mockito.Mockito.mock;
 
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +33,7 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -39,12 +44,14 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.jms.StubTextMessage;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.converter.GenericMessageConverter;
 import org.springframework.messaging.support.MessageBuilder;
 
 /**
@@ -216,11 +223,150 @@ public class JmsMessagingTemplateTests {
 		assertTextMessage(messageCreator.getValue()); // see createTextMessage
 	}
 
+	@Test
+	public void receive() {
+		Destination destination = new Destination() {};
+		javax.jms.Message jmsMessage = createJmsTextMessage();
+		given(jmsTemplate.receive(destination)).willReturn(jmsMessage);
+
+		Message<?> message = messagingTemplate.receive(destination);
+		verify(jmsTemplate).receive(destination);
+		assertTextMessage(message);
+	}
+
+	@Test
+	public void receiveName() {
+		javax.jms.Message jmsMessage = createJmsTextMessage();
+		given(jmsTemplate.receive("myQueue")).willReturn(jmsMessage);
+
+		Message<?> message = messagingTemplate.receive("myQueue");
+		verify(jmsTemplate).receive("myQueue");
+		assertTextMessage(message);
+	}
+
+	@Test
+	public void receiveDefaultDestination() {
+		Destination destination = new Destination() {};
+		messagingTemplate.setDefaultDestination(destination);
+		javax.jms.Message jmsMessage = createJmsTextMessage();
+		given(jmsTemplate.receive(destination)).willReturn(jmsMessage);
+
+		Message<?> message = messagingTemplate.receive();
+		verify(jmsTemplate).receive(destination);
+		assertTextMessage(message);
+	}
+
+	@Test
+	public void receiveDefaultDestinationName() {
+		messagingTemplate.setDefaultDestinationName("myQueue");
+		javax.jms.Message jmsMessage = createJmsTextMessage();
+		given(jmsTemplate.receive("myQueue")).willReturn(jmsMessage);
+
+		Message<?> message = messagingTemplate.receive();
+		verify(jmsTemplate).receive("myQueue");
+		assertTextMessage(message);
+	}
+
+	@Test
+	public void receiveNoDefaultSet() {
+		thrown.expect(IllegalStateException.class);
+		messagingTemplate.receive();
+	}
+
+	@Test
+	public void receiveAndConvert() {
+		Destination destination = new Destination() {};
+		javax.jms.Message jmsMessage = createJmsTextMessage("my Payload");
+		given(jmsTemplate.receive(destination)).willReturn(jmsMessage);
+
+		String payload = messagingTemplate.receiveAndConvert(destination, String.class);
+		assertEquals("my Payload", payload);
+		verify(jmsTemplate).receive(destination);
+	}
+
+	@Test
+	public void receiveAndConvertName() {
+		javax.jms.Message jmsMessage = createJmsTextMessage("my Payload");
+		given(jmsTemplate.receive("myQueue")).willReturn(jmsMessage);
+
+		String payload = messagingTemplate.receiveAndConvert("myQueue", String.class);
+		assertEquals("my Payload", payload);
+		verify(jmsTemplate).receive("myQueue");
+	}
+
+	@Test
+	public void receiveAndConvertDefaultDestination() {
+		Destination destination = new Destination() {};
+		messagingTemplate.setDefaultDestination(destination);
+		javax.jms.Message jmsMessage = createJmsTextMessage("my Payload");
+		given(jmsTemplate.receive(destination)).willReturn(jmsMessage);
+
+		String payload = messagingTemplate.receiveAndConvert(String.class);
+		assertEquals("my Payload", payload);
+		verify(jmsTemplate).receive(destination);
+	}
+
+	@Test
+	public void receiveAndConvertDefaultDestinationName() {
+		messagingTemplate.setDefaultDestinationName("myQueue");
+		javax.jms.Message jmsMessage = createJmsTextMessage("my Payload");
+		given(jmsTemplate.receive("myQueue")).willReturn(jmsMessage);
+
+		String payload = messagingTemplate.receiveAndConvert(String.class);
+		assertEquals("my Payload", payload);
+		verify(jmsTemplate).receive("myQueue");
+	}
+
+	@Test
+	public void receiveAndConvertWithConversion() {
+		javax.jms.Message jmsMessage = createJmsTextMessage("123");
+		given(jmsTemplate.receive("myQueue")).willReturn(jmsMessage);
+
+		messagingTemplate.setMessageConverter(new GenericMessageConverter(new DefaultConversionService()));
+
+		Integer payload = messagingTemplate.receiveAndConvert("myQueue", Integer.class);
+		assertEquals(Integer.valueOf(123), payload);
+		verify(jmsTemplate).receive("myQueue");
+	}
+
+	@Test
+	@Ignore("SPR-11817")
+	public void receiveAndConvertNoConverter() {
+		javax.jms.Message jmsMessage = createJmsTextMessage("Hello");
+		given(jmsTemplate.receive("myQueue")).willReturn(jmsMessage);
+
+		thrown.expect(MessageConversionException.class);
+		messagingTemplate.receiveAndConvert("myQueue", Writer.class);
+	}
+
+	@Test
+	public void receiveAndConvertNoInput() {
+		given(jmsTemplate.receive("myQueue")).willReturn(null);
+
+		assertNull(messagingTemplate.receiveAndConvert("myQueue", String.class));
+	}
+
 
 	private Message<String> createTextMessage() {
 		return MessageBuilder
 				.withPayload("Hello").setHeader("foo", "bar").build();
 	}
+
+	private javax.jms.Message createJmsTextMessage(String payload) {
+		try {
+			StubTextMessage jmsMessage = new StubTextMessage(payload);
+			jmsMessage.setStringProperty("foo", "bar");
+			return jmsMessage;
+		}
+		catch (JMSException e) {
+			throw new IllegalStateException("Should not happen", e);
+		}
+	}
+
+	private javax.jms.Message createJmsTextMessage() {
+		return createJmsTextMessage("Hello");
+	}
+
 
 	private void assertTextMessage(MessageCreator messageCreator) {
 		try {
@@ -231,6 +377,12 @@ public class JmsMessagingTemplateTests {
 		catch (JMSException e) {
 			throw new IllegalStateException("Wrong text message", e);
 		}
+	}
+
+	private void assertTextMessage(Message<?> message) {
+		assertNotNull("message should not be null", message);
+		assertEquals("Wrong payload", "Hello", message.getPayload());
+		assertEquals("Invalid foo property", "bar", message.getHeaders().get("foo"));
 	}
 
 

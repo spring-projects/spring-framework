@@ -23,47 +23,15 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.MessageConversionException;
 
 /**
- * An extension of {@link AbstractMessageSendingTemplate} that adds support for
- * receive as well as request-reply style operations as defined by
- * {@link MessageReceivingOperations} and {@link MessageRequestReplyOperations}.
+ * An extension of {@link AbstractMessageReceivingTemplate} that adds support for
+ * request-reply style operations as defined by {@link MessageRequestReplyOperations}.
  *
  * @author Mark Fisher
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractMessagingTemplate<D> extends AbstractMessageSendingTemplate<D>
-		implements MessageRequestReplyOperations<D>, MessageReceivingOperations<D> {
-
-
-	@Override
-	public Message<?> receive() {
-		return receive(getRequiredDefaultDestination());
-	}
-
-	@Override
-	public Message<?> receive(D destination) {
-		return doReceive(destination);
-	}
-
-	protected abstract Message<?> doReceive(D destination);
-
-
-	@Override
-	public <T> T receiveAndConvert(Class<T> targetClass) {
-		return receiveAndConvert(getRequiredDefaultDestination(), targetClass);
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T> T receiveAndConvert(D destination, Class<T> targetClass) {
-		Message<?> message = doReceive(destination);
-		if (message != null) {
-			return (T) getMessageConverter().fromMessage(message, targetClass);
-		}
-		else {
-			return null;
-		}
-	}
+public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceivingTemplate<D>
+		implements MessageRequestReplyOperations<D> {
 
 	@Override
 	public Message<?> sendAndReceive(Message<?> requestMessage) {

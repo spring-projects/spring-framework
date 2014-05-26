@@ -65,6 +65,11 @@ public class MessagingMessageConverterTests {
 	}
 
 	@Test
+	public void fromNull() throws JMSException {
+		assertNull(converter.fromMessage(null));
+	}
+
+	@Test
 	public void customPayloadConverter() throws JMSException {
 		TextMessage jmsMsg = new StubTextMessage("1224");
 

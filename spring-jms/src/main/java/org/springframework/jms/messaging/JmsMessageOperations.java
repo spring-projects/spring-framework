@@ -23,18 +23,20 @@ import javax.jms.Destination;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.core.MessagePostProcessor;
+import org.springframework.messaging.core.MessageReceivingOperations;
 import org.springframework.messaging.core.MessageSendingOperations;
 
 /**
- * A specialization of {@link MessageSendingOperations} for JMS related
- * operations that allows to specify a destination name rather than the
+ * A specialization of {@link MessageSendingOperations} and {@link MessageSendingOperations}
+ * for JMS related operations that allows to specify a destination name rather than the
  * actual {@link javax.jms.Destination}
  *
  * @author Stephane Nicoll
  * @since 4.1
  * @see org.springframework.jms.core.JmsTemplate
  */
-public interface JmsMessageSendingOperations extends MessageSendingOperations<Destination> {
+public interface JmsMessageOperations
+		extends MessageSendingOperations<Destination>, MessageReceivingOperations<Destination> {
 
 	/**
 	 * Send a message to the given destination.
@@ -88,5 +90,23 @@ public interface JmsMessageSendingOperations extends MessageSendingOperations<De
 	 */
 	void convertAndSend(String destinationName, Object payload, Map<String,
 			Object> headers, MessagePostProcessor postProcessor) throws MessagingException;
+
+	/**
+	 * Receive a message from the given destination.
+	 * @param destinationName the name of the target destination
+	 * @return the received message, possibly {@code null} if the message could not
+	 * be received, for example due to a timeout
+	 */
+	Message<?> receive(String destinationName) throws MessagingException;
+
+	/**
+	 * Receive a message from the given destination and convert its payload to the
+	 * specified target class.
+	 * @param destinationName the name of the target destination
+	 * @param targetClass the target class to convert the payload to
+	 * @return the converted payload of the reply message, possibly {@code null} if
+	 * the message could not be received, for example due to a timeout
+	 */
+	<T> T receiveAndConvert(String destinationName, Class<T> targetClass) throws MessagingException;
 
 }
