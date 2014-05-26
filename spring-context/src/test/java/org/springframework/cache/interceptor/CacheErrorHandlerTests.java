@@ -34,11 +34,11 @@ import org.junit.rules.ExpectedException;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.AnnotationCacheOperationSource;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.cache.support.SimpleValueWrapper;
@@ -172,26 +172,12 @@ public class CacheErrorHandlerTests {
 
 	@Configuration
 	@EnableCaching
-	static class Config {
+	static class Config extends CachingConfigurerSupport {
 
 		@Bean
-		public CacheInterceptor cacheInterceptor() {
-			CacheInterceptor cacheInterceptor = new CacheInterceptor();
-			cacheInterceptor.setCacheManager(cacheManager());
-			cacheInterceptor.setCacheOperationSources(cacheOperationSource());
-			cacheInterceptor.setErrorHandler(errorHandler());
-			return cacheInterceptor;
-		}
-
-		@Bean
+		@Override
 		public CacheErrorHandler errorHandler() {
 			return mock(CacheErrorHandler.class);
-		}
-
-		@Bean
-		public CacheOperationSource cacheOperationSource() {
-			return new AnnotationCacheOperationSource();
-
 		}
 
 		@Bean

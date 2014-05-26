@@ -36,16 +36,15 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.CacheErrorHandler;
+import org.springframework.cache.jcache.config.JCacheConfigurerSupport;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Role;
 
 /**
  *
@@ -112,40 +111,25 @@ public class JCacheErrorHandlerTests {
 
 	@Configuration
 	@EnableCaching
-	static class Config {
+	static class Config extends JCacheConfigurerSupport {
 
-		@Bean(name = "jCacheInterceptor")
-		@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-		public JCacheInterceptor cacheInterceptor() {
-			JCacheInterceptor interceptor = new JCacheInterceptor();
-			interceptor.setCacheOperationSource(cacheOperationSource());
-			interceptor.setErrorHandler(errorHandler());
-			return interceptor;
+		@Bean
+		@Override
+		public CacheManager cacheManager() {
+			SimpleCacheManager cacheManager = new SimpleCacheManager();
+			cacheManager.setCaches(Arrays.asList(mockCache()));
+			return cacheManager;
 		}
 
 		@Bean
+		@Override
 		public CacheErrorHandler errorHandler() {
 			return mock(CacheErrorHandler.class);
-		}
-
-		@Bean(name = "jCacheOperationSource")
-		@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-		public JCacheOperationSource cacheOperationSource() {
-			DefaultJCacheOperationSource source = new DefaultJCacheOperationSource();
-			source.setCacheManager(cacheManager());
-			return source;
 		}
 
 		@Bean
 		public SimpleService simpleService() {
 			return new SimpleService();
-		}
-
-		@Bean
-		public CacheManager cacheManager() {
-			SimpleCacheManager cacheManager = new SimpleCacheManager();
-			cacheManager.setCaches(Arrays.asList(mockCache()));
-			return cacheManager;
 		}
 
 		@Bean
