@@ -89,7 +89,7 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 		this.cacheResultInterceptor = new CacheResultInterceptor(getErrorHandler());
 		this.cachePutInterceptor = new CachePutInterceptor(getErrorHandler());
 		this.cacheRemoveEntryInterceptor = new CacheRemoveEntryInterceptor(getErrorHandler());
-		this.cacheRemoveAllInterceptor  = new CacheRemoveAllInterceptor(getErrorHandler());
+		this.cacheRemoveAllInterceptor = new CacheRemoveAllInterceptor(getErrorHandler());
 
 		this.initialized = true;
 	}
@@ -130,25 +130,54 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 	@SuppressWarnings("unchecked")
 	private Object execute(CacheOperationInvocationContext<?> context,
 			CacheOperationInvoker invoker) {
+
+		CacheOperationInvoker adapter = new CacheOperationInvokerAdapter(invoker);
+
 		BasicCacheOperation operation = context.getOperation();
 		if (operation instanceof CacheResultOperation) {
 			return cacheResultInterceptor.invoke(
-					(CacheOperationInvocationContext<CacheResultOperation>) context, invoker);
+					(CacheOperationInvocationContext<CacheResultOperation>) context, adapter);
 		}
 		else if (operation instanceof CachePutOperation) {
 			return cachePutInterceptor.invoke(
-					(CacheOperationInvocationContext<CachePutOperation>) context, invoker);
+					(CacheOperationInvocationContext<CachePutOperation>) context, adapter);
 		}
 		else if (operation instanceof CacheRemoveOperation) {
 			return cacheRemoveEntryInterceptor.invoke(
-					(CacheOperationInvocationContext<CacheRemoveOperation>) context, invoker);
+					(CacheOperationInvocationContext<CacheRemoveOperation>) context, adapter);
 		}
 		else if (operation instanceof CacheRemoveAllOperation) {
 			return cacheRemoveAllInterceptor.invoke(
-					(CacheOperationInvocationContext<CacheRemoveAllOperation>) context, invoker);
+					(CacheOperationInvocationContext<CacheRemoveAllOperation>) context, adapter);
 		}
 		else {
 			throw new IllegalArgumentException("Could not handle " + operation);
+		}
+	}
+
+	/**
+	 * Execute the underlying operation (typically in case of cache miss) and return
+	 * the result of the invocation. If an exception occurs it will be wrapped in
+	 * a {@link CacheOperationInvoker.ThrowableWrapper}: the exception can be handled
+	 * or modified but it <em>must</em> be wrapped in a
+	 * {@link CacheOperationInvoker.ThrowableWrapper} as well.
+	 * @param invoker the invoker handling the operation being cached
+	 * @return the result of the invocation
+	 * @see CacheOperationInvoker#invoke()
+	 */
+	protected Object invokeOperation(CacheOperationInvoker invoker) {
+		return invoker.invoke();
+	}
+
+	private class CacheOperationInvokerAdapter implements CacheOperationInvoker {
+
+		private final CacheOperationInvoker delegate;
+
+		private CacheOperationInvokerAdapter(CacheOperationInvoker delegate) {this.delegate = delegate;}
+
+		@Override
+		public Object invoke() throws ThrowableWrapper {
+			return invokeOperation(delegate);
 		}
 	}
 

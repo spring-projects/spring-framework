@@ -19,9 +19,10 @@ package org.springframework.cache.interceptor;
 /**
  * Abstract the invocation of a cache operation.
  *
- * <p>Provide a special exception that can be used to indicate that the
- * underlying invocation has thrown a checked exception, allowing the
- * callers to threat these in a different manner if necessary.
+ * <p>Does not provide a way to transmit checked exceptions but
+ * provide a special exception that should be used to wrap any
+ * exception that was thrown by the underlying invocation. Callers
+ * are expected to handle this issue type specifically.
  *
  * @author Stephane Nicoll
  * @since 4.1
@@ -29,11 +30,11 @@ package org.springframework.cache.interceptor;
 public interface CacheOperationInvoker {
 
 	/**
-	 * Invoke the cache operation defined by this instance. Can throw a
-	 * {@link ThrowableWrapper} if that operation wants to explicitly
-	 * indicate that a checked exception has occurred.
+	 * Invoke the cache operation defined by this instance. Wraps any
+	 * exception that is thrown during the invocation in a
+	 * {@link ThrowableWrapper}.
 	 * @return the result of the operation
-	 * @throws ThrowableWrapper if a checked exception has been thrown
+	 * @throws ThrowableWrapper if an error occurred while invoking the operation
 	 */
 	Object invoke() throws ThrowableWrapper;
 

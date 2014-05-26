@@ -284,6 +284,20 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		return invoker.invoke();
 	}
 
+	/**
+	 * Execute the underlying operation (typically in case of cache miss) and return
+	 * the result of the invocation. If an exception occurs it will be wrapped in
+	 * a {@link CacheOperationInvoker.ThrowableWrapper}: the exception can be handled
+	 * or modified but it <em>must</em> be wrapped in a
+	 * {@link CacheOperationInvoker.ThrowableWrapper} as well.
+	 * @param invoker the invoker handling the operation being cached
+	 * @return the result of the invocation
+	 * @see CacheOperationInvoker#invoke()
+	 */
+	protected Object invokeOperation(CacheOperationInvoker invoker) {
+		return invoker.invoke();
+	}
+
 	private Class<?> getTargetClass(Object target) {
 		Class<?> targetClass = AopProxyUtils.ultimateTargetClass(target);
 		if (targetClass == null && target != null) {
@@ -314,7 +328,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		// Invoke the method if don't have a cache hit
 		if (result == null) {
-			result = new SimpleValueWrapper(invoker.invoke());
+			result = new SimpleValueWrapper(invokeOperation(invoker));
 		}
 
 		// Collect any explicit @CachePuts
