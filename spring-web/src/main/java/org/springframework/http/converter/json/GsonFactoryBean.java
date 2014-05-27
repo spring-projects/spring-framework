@@ -18,81 +18,54 @@ package org.springframework.http.converter.json;
 
 import java.text.SimpleDateFormat;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.BeanClassLoaderAware;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.ClassUtils;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 
 /**
  * A {@link FactoryBean} for creating a Google Gson 2.x {@link Gson} instance.
  *
  * @author Roy Clarkson
+ * @author Juergen Hoeller
  * @since 4.1
  */
-public class GsonFactoryBean implements FactoryBean<Gson>, BeanClassLoaderAware, InitializingBean {
+public class GsonFactoryBean implements FactoryBean<Gson>, InitializingBean {
 
-	private static final boolean base64Present = ClassUtils.isPresent(
+	/** Apache Commons Codec present on the classpath, for Base64 encoding? */
+	private static final boolean commonsCodecPresent = ClassUtils.isPresent(
 			"org.apache.commons.codec.binary.Base64", GsonFactoryBean.class.getClassLoader());
 
-	private final Log logger = LogFactory.getLog(getClass());
-
-
-	private Gson gson;
 
 	private GsonBuilder gsonBuilder;
 
-	private Boolean prettyPrint;
+	private boolean serializeNulls;
 
-	private Boolean serializeNulls;
+	private boolean prettyPrinting;
 
-	private Boolean disableHtmlEscaping;
+	private boolean disableHtmlEscaping;
 
-	private SimpleDateFormat dateFormat;
+	private String dateFormatPattern;
 
-	private Boolean base64EncodeByteArrays;
+	private boolean base64EncodeByteArrays;
 
-	private ClassLoader beanClassLoader;
+	private Gson gson;
 
 
 	/**
-	 * Set the GsonBuilder instance to use. If not set, the GsonBuilder will be
-	 * created using its default constructor.
+	 * Set the GsonBuilder instance to use.
+	 * If not set, the GsonBuilder will be created using its default constructor.
 	 */
 	public void setGsonBuilder(GsonBuilder gsonBuilder) {
 		this.gsonBuilder = gsonBuilder;
 	}
 
 	/**
-	 * Return the configured GsonBuilder instance to use, if any.
-	 * @return the GsonBuilder instance
-	 */
-	public GsonBuilder getGsonBuilder() {
-		return this.gsonBuilder;
-	}
-
-	/**
-	 * Whether to use the {@link GsonBuilder#setPrettyPrinting()} when writing
+	 * Whether to use the {@link GsonBuilder#serializeNulls()} option when writing
 	 * JSON. This is a shortcut for setting up a {@code Gson} as follows:
-	 *
-	 * <pre class="code">
-	 * new GsonBuilder().setPrettyPrinting().create();
-	 * </pre>
-	 */
-	public void setPrettyPrint(boolean prettyPrint) {
-		this.prettyPrint = prettyPrint;
-	}
-
-	/**
-	 * Whether to use the {@link GsonBuilder#serializeNulls()} option when
-	 * writing JSON. This is a shortcut for setting up a {@code Gson} as
-	 * follows:
-	 *
 	 * <pre class="code">
 	 * new GsonBuilder().serializeNulls().create();
 	 * </pre>
@@ -102,10 +75,20 @@ public class GsonFactoryBean implements FactoryBean<Gson>, BeanClassLoaderAware,
 	}
 
 	/**
+	 * Whether to use the {@link GsonBuilder#setPrettyPrinting()} when writing
+	 * JSON. This is a shortcut for setting up a {@code Gson} as follows:
+	 * <pre class="code">
+	 * new GsonBuilder().setPrettyPrinting().create();
+	 * </pre>
+	 */
+	public void setPrettyPrinting(boolean prettyPrinting) {
+		this.prettyPrinting = prettyPrinting;
+	}
+
+	/**
 	 * Whether to use the {@link GsonBuilder#disableHtmlEscaping()} when writing
 	 * JSON. Set to {@code true} to disable HTML escaping in JSON. This is a
 	 * shortcut for setting up a {@code Gson} as follows:
-	 *
 	 * <pre class="code">
 	 * new GsonBuilder().disableHtmlEscaping().create();
 	 * </pre>
@@ -115,92 +98,67 @@ public class GsonFactoryBean implements FactoryBean<Gson>, BeanClassLoaderAware,
 	}
 
 	/**
-	 * Define the format for date/time with the given {@link SimpleDateFormat}.
+	 * Define the date/time format with a {@link SimpleDateFormat}-style pattern.
 	 * This is a shortcut for setting up a {@code Gson} as follows:
-	 *
 	 * <pre class="code">
 	 * new GsonBuilder().setDateFormat(dateFormatPattern).create();
 	 * </pre>
-	 *
-	 * @see #setSimpleDateFormat(String)
 	 */
-	public void setSimpleDateFormat(SimpleDateFormat dateFormat) {
-		this.dateFormat = dateFormat;
+	public void setDateFormatPattern(String dateFormatPattern) {
+		this.dateFormatPattern = dateFormatPattern;
 	}
 
 	/**
-	 * Define the date/time format with a {@link SimpleDateFormat}.
-	 * This is a shortcut for setting up a {@code Gson} as follows:
-	 *
-	 * <pre class="code">
-	 * new GsonBuilder().setDateFormat(dateFormatPattern).create();
-	 * </pre>
-	 *
-	 * @see #setSimpleDateFormat(SimpleDateFormat)
-	 */
-	public void setSimpleDateFormat(String format) {
-		this.dateFormat = new SimpleDateFormat(format);
-	}
-
-	/**
-	 * Whether to Base64 encode {@code byte[]} properties when reading and
+	 * Whether to Base64-encode {@code byte[]} properties when reading and
 	 * writing JSON.
-	 *
-	 * <p>When set to {@code true} a custom {@link com.google.gson.TypeAdapter}
-	 * is registered via
-	 * {@link GsonBuilder#registerTypeHierarchyAdapter(Class, Object)}
-	 * that serializes a {@code byte[]} property to and from a Base64 encoded
-	 * string instead of a JSON array.
-	 *
-	 * <p><strong>NOTE:</strong> Use of this option requires the presence of
-	 * Apache commons-codec on the classpath. Otherwise it is ignored.
-	 *
-	 * @see org.springframework.http.converter.json.GsonBase64ByteArrayJsonTypeAdapter
+	 * <p>When set to {@code true} a custom {@link com.google.gson.TypeAdapter} is
+	 * registered via {@link GsonBuilder#registerTypeHierarchyAdapter(Class, Object)}
+	 * that serializes a {@code byte[]} property to and from a Base64-encoded String
+	 * instead of a JSON array.
+	 * <p><strong>NOTE:</strong> Use of this option requires the presence of the
+	 * Apache Commons Codec library on the classpath.
+	 * @see GsonBase64ByteArrayJsonTypeAdapter
 	 */
 	public void setBase64EncodeByteArrays(boolean base64EncodeByteArrays) {
 		this.base64EncodeByteArrays = base64EncodeByteArrays;
 	}
 
-	@Override
-	public void setBeanClassLoader(ClassLoader beanClassLoader) {
-		this.beanClassLoader = beanClassLoader;
-	}
-
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
 		if (this.gsonBuilder == null) {
 			this.gsonBuilder = new GsonBuilder();
 		}
-		if (this.prettyPrint != null && this.prettyPrint) {
-			this.gsonBuilder = this.gsonBuilder.setPrettyPrinting();
+		if (this.serializeNulls) {
+			this.gsonBuilder.serializeNulls();
 		}
-		if (this.serializeNulls != null && this.serializeNulls) {
-			this.gsonBuilder = this.gsonBuilder.serializeNulls();
+		if (this.prettyPrinting) {
+			this.gsonBuilder.setPrettyPrinting();
 		}
-		if (this.disableHtmlEscaping != null && this.disableHtmlEscaping) {
-			this.gsonBuilder = this.gsonBuilder.disableHtmlEscaping();
+		if (this.disableHtmlEscaping) {
+			this.gsonBuilder.disableHtmlEscaping();
 		}
-		if (this.dateFormat != null) {
-			this.gsonBuilder.setDateFormat(this.dateFormat.toPattern());
+		if (this.dateFormatPattern != null) {
+			this.gsonBuilder.setDateFormat(this.dateFormatPattern);
 		}
-		if (base64Present) {
-			if (this.base64EncodeByteArrays != null && this.base64EncodeByteArrays) {
+		if (this.base64EncodeByteArrays) {
+			if (commonsCodecPresent) {
 				this.gsonBuilder.registerTypeHierarchyAdapter(byte[].class, new GsonBase64ByteArrayJsonTypeAdapter());
 			}
-		}
-		else if (logger.isDebugEnabled()) {
-			logger.debug("org.apache.commons.codec.binary.Base64 is not " +
-					"available on the class path. Gson Base64 encoding is disabled.");
+			else {
+				throw new IllegalStateException(
+						"Apache Commons Codec is not available on the classpath - cannot enable Gson Base64 encoding");
+			}
 		}
 		this.gson = this.gsonBuilder.create();
 	}
+
 
 	/**
 	 * Return the created Gson instance.
 	 */
 	@Override
-	public Gson getObject() throws Exception {
+	public Gson getObject() {
 		return this.gson;
 	}
 
