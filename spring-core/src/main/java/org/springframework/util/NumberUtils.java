@@ -21,6 +21,9 @@ import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Miscellaneous utility methods for number conversion and parsing.
@@ -36,6 +39,25 @@ public abstract class NumberUtils {
 	private static final BigInteger LONG_MIN = BigInteger.valueOf(Long.MIN_VALUE);
 
 	private static final BigInteger LONG_MAX = BigInteger.valueOf(Long.MAX_VALUE);
+
+	/**
+	 * Standard number types (all immutable):
+	 * Byte, Short, Integer, Long, BigInteger, Float, Double, BigDecimal.
+	 */
+	public static final Set<Class<?>> STANDARD_NUMBER_TYPES;
+
+	static {
+		Set<Class<?>> numberTypes = new HashSet<Class<?>>(8);
+		numberTypes.add(Byte.class);
+		numberTypes.add(Short.class);
+		numberTypes.add(Integer.class);
+		numberTypes.add(Long.class);
+		numberTypes.add(BigInteger.class);
+		numberTypes.add(Float.class);
+		numberTypes.add(Double.class);
+		numberTypes.add(BigDecimal.class);
+		STANDARD_NUMBER_TYPES = Collections.unmodifiableSet(numberTypes);
+	}
 
 
 	/**

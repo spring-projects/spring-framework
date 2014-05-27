@@ -16,13 +16,16 @@
 
 package org.springframework.web.context.request;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.util.Assert;
+import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.WebUtils;
 
@@ -45,6 +48,15 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	 */
 	public static final String DESTRUCTION_CALLBACK_NAME_PREFIX =
 			ServletRequestAttributes.class.getName() + ".DESTRUCTION_CALLBACK.";
+
+	protected static final Set<Class<?>> immutableValueTypes = new HashSet<Class<?>>(16);
+
+	static {
+		immutableValueTypes.addAll(NumberUtils.STANDARD_NUMBER_TYPES);
+		immutableValueTypes.add(Boolean.class);
+		immutableValueTypes.add(Character.class);
+		immutableValueTypes.add(String.class);
+	}
 
 
 	private final HttpServletRequest request;
@@ -265,7 +277,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	 * attribute, that is, doesn't have to be re-set via {@code session.setAttribute}
 	 * since its value cannot meaningfully change internally.
 	 * <p>The default implementation returns {@code true} for {@code String},
-	 * {@code Character}, {@code Boolean} and {@code Number} values.
+	 * {@code Character}, {@code Boolean} and standard {@code Number} values.
 	 * @param name the name of the attribute
 	 * @param value the corresponding value to check
 	 * @return {@code true} if the value is to be considered as immutable for the
@@ -273,8 +285,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	 * @see #updateAccessedSessionAttributes()
 	 */
 	protected boolean isImmutableSessionAttribute(String name, Object value) {
-		return (value instanceof String || value instanceof Character ||
-				value instanceof Boolean || value instanceof Number);
+		return (value == null || immutableValueTypes.contains(value.getClass()));
 	}
 
 	/**
