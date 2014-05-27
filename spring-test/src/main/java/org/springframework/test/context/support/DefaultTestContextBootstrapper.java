@@ -38,6 +38,7 @@ import org.springframework.test.context.TestExecutionListener;
  * <li>{@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener}
  * <li>{@link org.springframework.test.context.support.DirtiesContextTestExecutionListener}
  * <li>{@link org.springframework.test.context.transaction.TransactionalTestExecutionListener}
+ * <li>{@link org.springframework.test.context.jdbc.DatabaseInitializerTestExecutionListener}
  * </ol>
  * <li>Uses {@link DelegatingSmartContextLoader} as the default {@link ContextLoader}.
  * <li>Builds a standard {@link MergedContextConfiguration}.
@@ -51,7 +52,8 @@ public class DefaultTestContextBootstrapper extends AbstractTestContextBootstrap
 	private static final List<String> DEFAULT_TEST_EXECUTION_LISTENER_CLASS_NAMES = Collections.unmodifiableList(Arrays.asList(
 		"org.springframework.test.context.support.DependencyInjectionTestExecutionListener",
 		"org.springframework.test.context.support.DirtiesContextTestExecutionListener",
-		"org.springframework.test.context.transaction.TransactionalTestExecutionListener"));
+		"org.springframework.test.context.transaction.TransactionalTestExecutionListener",
+		"org.springframework.test.context.jdbc.DatabaseInitializerTestExecutionListener"));
 
 
 	/**
@@ -61,6 +63,7 @@ public class DefaultTestContextBootstrapper extends AbstractTestContextBootstrap
 	 * <li>{@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener}
 	 * <li>{@link org.springframework.test.context.support.DirtiesContextTestExecutionListener}
 	 * <li>{@link org.springframework.test.context.transaction.TransactionalTestExecutionListener}
+	 * <li>{@link org.springframework.test.context.jdbc.DatabaseInitializerTestExecutionListener}
 	 * </ol>
 	 */
 	protected List<String> getDefaultTestExecutionListenerClassNames() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,17 +45,22 @@ public @interface TransactionConfiguration {
 	 * The bean name of the {@link org.springframework.transaction.PlatformTransactionManager
 	 * PlatformTransactionManager} that should be used to drive transactions.
 	 *
-	 * <p>This attribute is not required and only needs to be declared if there
-	 * are multiple beans of type {@code PlatformTransactionManager} in the test's
-	 * {@code ApplicationContext} <em>and</em> if one of the following is true.
-	 * <ul>
-	 * <li>the bean name of the desired {@code PlatformTransactionManager} is not
-	 * "transactionManager"</li>
+	 * <p>The name is only used if there is more than one bean of type
+	 * {@code PlatformTransactionManager} in the test's {@code ApplicationContext}.
+	 * If there is only one such bean, it is not necessary to specify a bean name.
+	 *
+	 * <p>Defaults to an empty string, requiring that one of the following is
+	 * true:
+	 * <ol>
+	 * <li>There is only one bean of type {@code PlatformTransactionManager} in
+	 * the test's {@code ApplicationContext}.</li>
 	 * <li>{@link org.springframework.transaction.annotation.TransactionManagementConfigurer
-	 * TransactionManagementConfigurer} was not implemented to specify which
+	 * TransactionManagementConfigurer} has been implemented to specify which
 	 * {@code PlatformTransactionManager} bean should be used for annotation-driven
-	 * transaction management
-	 * </ul>
+	 * transaction management.</li>
+	 * <li>The {@code PlatformTransactionManager} to use is named
+	 * {@code "transactionManager"}.</li>
+	 * </ol>
 	 *
 	 * <p><b>NOTE:</b> The XML {@code <tx:annotation-driven>} element also refers
 	 * to a bean named "transactionManager" by default. If you are using both
@@ -63,7 +68,7 @@ public @interface TransactionConfiguration {
 	 * bean - here in {@code @TransactionConfiguration} and also in
 	 * {@code <tx:annotation-driven transaction-manager="...">}.
 	 */
-	String transactionManager() default "transactionManager";
+	String transactionManager() default "";
 
 	/**
 	 * Should transactions be rolled back by default?

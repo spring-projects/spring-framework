@@ -192,13 +192,13 @@ public class TransactionalTestExecutionListenerTests {
 
 	@Test
 	public void retrieveConfigurationAttributesWithMissingTransactionConfiguration() throws Exception {
-		assertTransactionConfigurationAttributes(MissingTransactionConfigurationTestCase.class, "transactionManager",
+		assertTransactionConfigurationAttributes(MissingTransactionConfigurationTestCase.class, "",
 			true);
 	}
 
 	@Test
 	public void retrieveConfigurationAttributesWithEmptyTransactionConfiguration() throws Exception {
-		assertTransactionConfigurationAttributes(EmptyTransactionConfigurationTestCase.class, "transactionManager",
+		assertTransactionConfigurationAttributes(EmptyTransactionConfigurationTestCase.class, "",
 			true);
 	}
 

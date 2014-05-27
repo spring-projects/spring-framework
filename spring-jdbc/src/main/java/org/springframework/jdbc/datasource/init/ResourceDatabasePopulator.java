@@ -26,6 +26,7 @@ import javax.sql.DataSource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Populates, initializes, or cleans up a database using SQL scripts defined in
@@ -95,7 +96,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * @param ignoreFailedDrops flag to indicate that a failed SQL {@code DROP}
 	 * statement can be ignored
 	 * @param sqlScriptEncoding the encoding for the supplied SQL scripts, if
-	 * different from the platform encoding; may be {@code null}
+	 * different from the platform encoding; may be {@code null} or empty
 	 * @param scripts the scripts to execute to initialize or populate the database;
 	 * never {@code null}
 	 * @since 4.0.3
@@ -105,7 +106,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 		this(scripts);
 		this.continueOnError = continueOnError;
 		this.ignoreFailedDrops = ignoreFailedDrops;
-		this.sqlScriptEncoding = sqlScriptEncoding;
+		setSqlScriptEncoding(sqlScriptEncoding);
 	}
 
 	/**
@@ -143,7 +144,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * @see #addScript(Resource)
 	 */
 	public void setSqlScriptEncoding(String sqlScriptEncoding) {
-		this.sqlScriptEncoding = sqlScriptEncoding;
+		this.sqlScriptEncoding = StringUtils.hasText(sqlScriptEncoding) ? sqlScriptEncoding : null;
 	}
 
 	/**

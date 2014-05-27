@@ -44,7 +44,7 @@ public class ContextLoaderUtilsMergedConfigTests extends AbstractContextLoaderUt
 		assertMergedConfig(
 			mergedConfig,
 			testClass,
-			new String[] { "classpath:/org/springframework/test/context/support/AbstractContextLoaderUtilsTests$BareAnnotations-context.xml" },
+			new String[] { "classpath:org/springframework/test/context/support/AbstractContextLoaderUtilsTests$BareAnnotations-context.xml" },
 			EMPTY_CLASS_ARRAY, DelegatingSmartContextLoader.class);
 	}
 
