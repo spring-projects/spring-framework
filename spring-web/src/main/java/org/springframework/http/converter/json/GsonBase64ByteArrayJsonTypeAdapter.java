@@ -19,32 +19,30 @@ package org.springframework.http.converter.json;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 
-import org.apache.commons.codec.binary.Base64;
-
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.TypeAdapter;
+import org.apache.commons.codec.binary.Base64;
 
 /**
- * Custom Gson {@link TypeAdapter} for serialization or deserialization of
- * {@code byte[]}. By default Gson converts byte arrays to JSON arrays instead
- * of a Base64 encoded string. Use this type adapter with
- * {@link org.springframework.http.converter.json.GsonHttpMessageConverter
- * GsonHttpMessageConverter} to read and write Base64 encoded byte arrays.
+ * Custom Gson {@link TypeAdapter} for serialization and deserialization
+ * of {@code byte[]} values to/from Base64-encoded Strings.
+ *
+ * <p>By default, Gson converts byte arrays to JSON arrays. This type adapter
+ * needs to be specifically registered to read/write Base64-encoded byte arrays.
  *
  * @author Roy Clarkson
  * @since 4.1
  * @see GsonBuilder#registerTypeHierarchyAdapter(Class, Object)
  */
-final class GsonBase64ByteArrayJsonTypeAdapter implements JsonSerializer<byte[]>, JsonDeserializer<byte[]> {
+class GsonBase64ByteArrayJsonTypeAdapter implements JsonSerializer<byte[]>, JsonDeserializer<byte[]> {
 
-	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
 	private final Base64 base64 = new Base64();
 
@@ -56,7 +54,7 @@ final class GsonBase64ByteArrayJsonTypeAdapter implements JsonSerializer<byte[]>
 	}
 
 	@Override
-	public byte[] deserialize(JsonElement json, Type type, JsonDeserializationContext cxt) throws JsonParseException {
+	public byte[] deserialize(JsonElement json, Type type, JsonDeserializationContext cxt) {
 		return this.base64.decode(json.getAsString().getBytes(DEFAULT_CHARSET));
 	}
 

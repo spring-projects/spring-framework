@@ -23,6 +23,11 @@ import java.io.Reader;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonParseException;
+import com.google.gson.reflect.TypeToken;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -33,28 +38,21 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.Assert;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonParseException;
-import com.google.gson.reflect.TypeToken;
-
 /**
- * Implementation of {@link org.springframework.http.converter.HttpMessageConverter
- * HttpMessageConverter} that can read and write JSON using the <a
- * href="https://code.google.com/p/google-gson/">Google Gson</a> library's {@link Gson}
- * class.
+ * Implementation of {@link org.springframework.http.converter.HttpMessageConverter}
+ * that can read and write JSON using the
+ * <a href="https://code.google.com/p/google-gson/">Google Gson</a> library's
+ * {@link Gson} class.
  *
- * <p>This converter can be used to bind to typed beans or untyped
- * {@link java.util.HashMap HashMap} instances.
- *
- * <p>By default this converter supports {@code application/json} and
- * {@code application/*+json} but {@link #setSupportedMediaTypes
- * supportedMediaTypes} can be used to change that.
+ * <p>This converter can be used to bind to typed beans or untyped {@code HashMap}s.
+ * By default, it supports {@code application/json} and {@code application/*+json}.
  *
  * <p>Tested against Gson 2.2; compatible with Gson 2.0 and higher.
  *
  * @author Roy Clarkson
  * @since 4.1
+ * @see #setGson
+ * @see #setSupportedMediaTypes
  */
 public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Object>
 		implements GenericHttpMessageConverter<Object> {
@@ -75,10 +73,10 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 				new MediaType("application", "*+json", DEFAULT_CHARSET));
 	}
 
+
 	/**
 	 * Set the {@code Gson} instance to use.
 	 * If not set, a default {@link Gson#Gson() Gson} instance is used.
-	 *
 	 * <p>Setting a custom-configured {@code Gson} is one way to take further
 	 * control of the JSON serialization process.
 	 */
@@ -96,7 +94,6 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 
 	/**
 	 * Specify a custom prefix to use for JSON output. Default is none.
-	 *
 	 * @see #setPrefixJson
 	 */
 	public void setJsonPrefix(String jsonPrefix) {
@@ -106,13 +103,11 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 	/**
 	 * Indicate whether the JSON output by this view should be prefixed with "{} &&".
 	 * Default is {@code false}.
-	 *
 	 * <p>Prefixing the JSON string in this manner is used to help prevent JSON
 	 * Hijacking. The prefix renders the string syntactically invalid as a script
 	 * so that it cannot be hijacked. This prefix does not affect the evaluation
 	 * of JSON, but if JSON validation is performed on the string, the prefix
 	 * would need to be ignored.
-	 *
 	 * @see #setJsonPrefix
 	 */
 	public void setPrefixJson(boolean prefixJson) {
@@ -159,16 +154,15 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 
 	/**
 	 * Return the Gson {@link TypeToken} for the specified type.
-	 *
 	 * <p>The default implementation returns {@code TypeToken.get(type)}, but
 	 * this can be overridden in subclasses to allow for custom generic
 	 * collection handling. For instance:
 	 * <pre class="code">
 	 * protected TypeToken<?> getTypeToken(Type type) {
 	 *   if (type instanceof Class && List.class.isAssignableFrom((Class<?>) type)) {
-	 *     return new TypeToken<ArrayList<MyBean>>() {
-	 *     };
-	 *   } else {
+	 *     return new TypeToken<ArrayList<MyBean>>() {};
+	 *   }
+	 *   else {
 	 *     return super.getTypeToken(type);
 	 *   }
 	 * }
