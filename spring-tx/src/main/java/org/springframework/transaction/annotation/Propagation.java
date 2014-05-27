@@ -56,10 +56,10 @@ public enum Propagation {
 	MANDATORY(TransactionDefinition.PROPAGATION_MANDATORY),
 
 	/**
-	 * Create a new transaction, suspend the current transaction if one exists.
-	 * Analogous to EJB transaction attribute of the same name.
-	 * <p>Note: Actual transaction suspension will not work on out-of-the-box
-	 * on all transaction managers. This in particular applies to JtaTransactionManager,
+	 * Create a new transaction, and suspend the current transaction if one exists.
+	 * Analogous to the EJB transaction attribute of the same name.
+	 * <p>Note: Actual transaction suspension will not work out-of-the-box on
+	 * all transaction managers. This in particular applies to JtaTransactionManager,
 	 * which requires the {@code javax.transaction.TransactionManager} to be
 	 * made available it to it (which is server-specific in standard J2EE).
 	 * @see org.springframework.transaction.jta.JtaTransactionManager#setTransactionManager
