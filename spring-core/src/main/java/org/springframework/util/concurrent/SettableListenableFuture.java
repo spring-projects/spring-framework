@@ -85,6 +85,11 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 	}
 
 	@Override
+	public void addCallback(SuccessCallback<? super T> successCallback, FailureCallback failureCallback) {
+		this.listenableFuture.addCallback(successCallback, failureCallback);
+	}
+
+	@Override
 	public boolean cancel(boolean mayInterruptIfRunning) {
 		this.settableTask.setCancelled();
 		boolean cancelled = this.listenableFuture.cancel(mayInterruptIfRunning);

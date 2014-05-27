@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,16 @@ import org.springframework.util.Assert;
  * <p>Inspired by {@code com.google.common.util.concurrent.ExecutionList}.
  *
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  * @since 4.0
  */
 public class ListenableFutureCallbackRegistry<T> {
 
-	private final Queue<ListenableFutureCallback<? super T>> callbacks =
-			new LinkedList<ListenableFutureCallback<? super T>>();
+	private final Queue<SuccessCallback<? super T>> successCallbacks =
+			new LinkedList<SuccessCallback<? super T>>();
+
+	private final Queue<FailureCallback> failureCallbacks =
+			new LinkedList<FailureCallback>();
 
 	private State state = State.NEW;
 
@@ -52,10 +56,55 @@ public class ListenableFutureCallbackRegistry<T> {
 		synchronized (mutex) {
 			switch (state) {
 				case NEW:
-					callbacks.add(callback);
+					successCallbacks.add(callback);
+					failureCallbacks.add(callback);
 					break;
 				case SUCCESS:
 					callback.onSuccess((T)result);
+					break;
+				case FAILURE:
+					callback.onFailure((Throwable) result);
+					break;
+			}
+		}
+	}
+
+	/**
+	 * Adds the given success callback to this registry.
+	 * @param callback the success callback to add
+	 *
+	 * @since 4.1
+	 */
+	@SuppressWarnings("unchecked")
+	public void addSuccessCallback(SuccessCallback<? super T> callback) {
+		Assert.notNull(callback, "'callback' must not be null");
+
+		synchronized (mutex) {
+			switch (state) {
+				case NEW:
+					successCallbacks.add(callback);
+					break;
+				case SUCCESS:
+					callback.onSuccess((T)result);
+					break;
+			}
+		}
+	}
+
+	/**
+	 * Adds the given failure callback to this registry.
+	 * @param callback the failure callback to add
+	 *
+	 * @since 4.1
+	 */
+	@SuppressWarnings("unchecked")
+	public void addFailureCallback(FailureCallback callback) {
+		Assert.notNull(callback, "'callback' must not be null");
+
+		synchronized (mutex) {
+			switch (state) {
+				case NEW:
+					failureCallbacks.add(callback);
 					break;
 				case FAILURE:
 					callback.onFailure((Throwable) result);
@@ -74,8 +123,8 @@ public class ListenableFutureCallbackRegistry<T> {
 			state = State.SUCCESS;
 			this.result = result;
 
-			while (!callbacks.isEmpty()) {
-				callbacks.poll().onSuccess(result);
+			while (!successCallbacks.isEmpty()) {
+				successCallbacks.poll().onSuccess(result);
 			}
 		}
 	}
@@ -90,8 +139,8 @@ public class ListenableFutureCallbackRegistry<T> {
 			state = State.FAILURE;
 			this.result = t;
 
-			while (!callbacks.isEmpty()) {
-				callbacks.poll().onFailure(t);
+			while (!failureCallbacks.isEmpty()) {
+				failureCallbacks.poll().onFailure(t);
 			}
 		}
 	}

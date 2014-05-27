@@ -18,8 +18,10 @@ package org.springframework.scheduling.annotation;
 
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.util.concurrent.FailureCallback;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
+import org.springframework.util.concurrent.SuccessCallback;
 
 /**
  * A pass-through {@code Future} handle that can be used for method signatures
@@ -74,7 +76,15 @@ public class AsyncResult<V> implements ListenableFuture<V> {
 
 	@Override
 	public void addCallback(ListenableFutureCallback<? super V> callback) {
-		callback.onSuccess(this.value);
+		addCallback(callback, callback);
 	}
 
+	@Override
+	public void addCallback(SuccessCallback<? super V> successCallback, FailureCallback failureCallback) {
+		try {
+			successCallback.onSuccess(this.value);
+		} catch(Throwable t) {
+			failureCallback.onFailure(t);
+		}
+	}
 }
