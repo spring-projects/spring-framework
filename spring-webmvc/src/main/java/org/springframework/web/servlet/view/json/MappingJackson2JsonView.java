@@ -19,10 +19,7 @@ package org.springframework.web.servlet.view.json;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -32,6 +29,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
@@ -50,6 +48,7 @@ import org.springframework.web.servlet.view.AbstractView;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 3.1.2
  */
 public class MappingJackson2JsonView extends AbstractView {
@@ -59,6 +58,10 @@ public class MappingJackson2JsonView extends AbstractView {
 	 * Overridable through {@link #setContentType}.
 	 */
 	public static final String DEFAULT_CONTENT_TYPE = "application/json";
+
+	public static final String DEFAULT_JSONP_CONTENT_TYPE = "application/javascript";
+
+	public static final String[] DEFAULT_JSONP_PARAMETER_NAMES = {"jsonp", "callback"};
 
 
 	private ObjectMapper objectMapper = new ObjectMapper();
@@ -77,6 +80,8 @@ public class MappingJackson2JsonView extends AbstractView {
 
 	private boolean updateContentLength = false;
 
+	private String[] jsonpParameterNames;
+
 
 	/**
 	 * Construct a new {@code MappingJackson2JsonView}, setting the content type to {@code application/json}.
@@ -84,6 +89,7 @@ public class MappingJackson2JsonView extends AbstractView {
 	public MappingJackson2JsonView() {
 		setContentType(DEFAULT_CONTENT_TYPE);
 		setExposePathVariables(false);
+		this.jsonpParameterNames = DEFAULT_JSONP_PARAMETER_NAMES;
 	}
 
 
@@ -236,6 +242,20 @@ public class MappingJackson2JsonView extends AbstractView {
 		this.updateContentLength = updateContentLength;
 	}
 
+	/**
+	 * Set the names of the request parameters recognized as JSONP ones.
+	 * Each time a request has one of those parameters, the resulting JSON will
+	 * be wrapped into a function named as specified by the JSONP parameter value.
+	 *
+	 * Default JSONP parameter names are "jsonp" and "callback".
+	 *
+	 * @since 4.1
+	 * @see <a href="http://en.wikipedia.org/wiki/JSONP">JSONP Wikipedia article</a>
+	 */
+	public void setJsonpParameterNames(Collection<String> jsonpParameterNames) {
+		Assert.isTrue(!CollectionUtils.isEmpty(jsonpParameterNames), "At least one JSONP query parameter name is required");
+		this.jsonpParameterNames = jsonpParameterNames.toArray(new String[jsonpParameterNames.size()]);
+	}
 
 	@Override
 	protected void prepareResponse(HttpServletRequest request, HttpServletResponse response) {
@@ -249,20 +269,46 @@ public class MappingJackson2JsonView extends AbstractView {
 	}
 
 	@Override
+	protected void setResponseContentType(HttpServletRequest request, HttpServletResponse response) {
+		if (getJsonpParameterValue(request) != null) {
+			response.setContentType(DEFAULT_JSONP_CONTENT_TYPE);
+		}
+		else {
+			super.setResponseContentType(request, response);
+		}
+	}
+
+	@Override
 	protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 
 		OutputStream stream = (this.updateContentLength ? createTemporaryOutputStream() : response.getOutputStream());
+
+		Class<?> serializationView = (Class<?>)model.get(JsonView.class.getName());
+		String jsonpParameterValue = getJsonpParameterValue(request);
 		Object value = filterModel(model);
-		if (model.containsKey(JsonView.class.getName())) {
-			writeContent(stream, value, this.jsonPrefix, model);
+		if(serializationView != null || jsonpParameterValue != null) {
+			MappingJacksonValue container = new MappingJacksonValue(value);
+			container.setSerializationView(serializationView);
+			container.setJsonpFunction(jsonpParameterValue);
+			value = container;
 		}
-		else {
-			writeContent(stream, value, this.jsonPrefix);
-		}
+
+		writeContent(stream, value, this.jsonPrefix);
 		if (this.updateContentLength) {
 			writeToResponse(response, (ByteArrayOutputStream) stream);
 		}
+	}
+
+	private String getJsonpParameterValue(HttpServletRequest request) {
+		String jsonpParameterValue = null;
+		for(String jsonpParameterName : this.jsonpParameterNames) {
+			jsonpParameterValue = request.getParameter(jsonpParameterName);
+			if(jsonpParameterValue != null) {
+				break;
+			}
+		}
+		return jsonpParameterValue;
 	}
 
 	/**
@@ -277,7 +323,9 @@ public class MappingJackson2JsonView extends AbstractView {
 		Map<String, Object> result = new HashMap<String, Object>(model.size());
 		Set<String> renderedAttributes = (!CollectionUtils.isEmpty(this.modelKeys) ? this.modelKeys : model.keySet());
 		for (Map.Entry<String, Object> entry : model.entrySet()) {
-			if (!(entry.getValue() instanceof BindingResult) && renderedAttributes.contains(entry.getKey())) {
+			if (!(entry.getValue() instanceof BindingResult)
+					&& renderedAttributes.contains(entry.getKey())
+					&& !entry.getKey().equals(JsonView.class.getName())) {
 				result.put(entry.getKey(), entry.getValue());
 			}
 		}
@@ -292,11 +340,7 @@ public class MappingJackson2JsonView extends AbstractView {
 	 * (as indicated through {@link #setJsonPrefix}/{@link #setPrefixJson})
 	 * @throws IOException if writing failed
 	 */
-	protected void writeContent(OutputStream stream, Object value, String jsonPrefix) throws IOException {
-		writeContent(stream, value, jsonPrefix, Collections.<String, Object>emptyMap());
-	}
-
-	protected void writeContent(OutputStream stream, Object value, String jsonPrefix, Map<String, Object> model)
+	protected void writeContent(OutputStream stream, Object value, String jsonPrefix)
 			throws IOException {
 
 		// The following has been deprecated as late as Jackson 2.2 (April 2013);
@@ -313,13 +357,26 @@ public class MappingJackson2JsonView extends AbstractView {
 		if (jsonPrefix != null) {
 			generator.writeRaw(jsonPrefix);
 		}
-
-		Class<?> serializationView = (Class<?>) model.get(JsonView.class.getName());
+		Class<?> serializationView = null;
+		String jsonpFunction = null;
+		if (value instanceof MappingJacksonValue) {
+			MappingJacksonValue container = (MappingJacksonValue) value;
+			value = container.getValue();
+			serializationView = container.getSerializationView();
+			jsonpFunction = container.getJsonpFunction();
+		}
+		if (jsonpFunction != null) {
+			generator.writeRaw(jsonpFunction + "(" );
+		}
 		if (serializationView != null) {
 			this.objectMapper.writerWithView(serializationView).writeValue(generator, value);
 		}
 		else {
 			this.objectMapper.writeValue(generator, value);
+		}
+		if (jsonpFunction != null) {
+			generator.writeRaw(");");
+			generator.flush();
 		}
 	}
 
