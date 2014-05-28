@@ -215,7 +215,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 				logger.trace("Invoking ResourceResolverChain for URL pattern=\"" + pattern + "\"");
 			}
 			ResourceHttpRequestHandler handler = this.handlerMap.get(pattern);
-			ResourceResolverChain chain = handler.createResourceResolverChain();
+			ResourceResolverChain chain = new DefaultResourceResolverChain(handler.getResourceResolvers());
 			String resolved = chain.resolveUrlPath(pathWithinMapping, handler.getLocations());
 			if (resolved == null) {
 				throw new IllegalStateException("Failed to get public resource URL path for " + pathWithinMapping);

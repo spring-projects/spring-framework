@@ -27,6 +27,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.resource.ResourceResolver;
+import org.springframework.web.servlet.resource.ResourceTransformer;
 
 /**
  * Encapsulates information required to create a resource handlers.
@@ -47,6 +48,8 @@ public class ResourceHandlerRegistration {
 	private Integer cachePeriod;
 
 	private List<ResourceResolver> resourceResolvers;
+
+	private List<ResourceTransformer> resourceTransformers;
 
 
 	/**
@@ -78,13 +81,23 @@ public class ResourceHandlerRegistration {
 
 	/**
 	 * Configure the list of {@link ResourceResolver}s to use.
-	 * <p>
-	 * By default {@link PathResourceResolver} is configured. If using this property, it
+	 * <p>By default {@link PathResourceResolver} is configured. If using this property, it
 	 * is recommended to add {@link PathResourceResolver} as the last resolver.
 	 * @since 4.1
 	 */
-	public void setResourceResolvers(ResourceResolver... resourceResolvers) {
+	public ResourceHandlerRegistration setResourceResolvers(ResourceResolver... resourceResolvers) {
 		this.resourceResolvers = Arrays.asList(resourceResolvers);
+		return this;
+	}
+
+	/**
+	 * Configure the list of {@link ResourceTransformer}s to use.
+	 * <p>By default no transformers are configured.
+	 * @since 4.1
+	 */
+	public ResourceHandlerRegistration setResourceTransformers(ResourceTransformer... transformers) {
+		this.resourceTransformers = Arrays.asList(transformers);
+		return this;
 	}
 
 	/**
@@ -110,6 +123,10 @@ public class ResourceHandlerRegistration {
 		return this.resourceResolvers;
 	}
 
+	protected List<ResourceTransformer> getResourceTransformers() {
+		return this.resourceTransformers;
+	}
+
 	/**
 	 * Returns a {@link ResourceHttpRequestHandler} instance.
 	 */
@@ -118,6 +135,9 @@ public class ResourceHandlerRegistration {
 		ResourceHttpRequestHandler requestHandler = new ResourceHttpRequestHandler();
 		if (this.resourceResolvers != null) {
 			requestHandler.setResourceResolvers(this.resourceResolvers);
+		}
+		if (this.resourceTransformers != null) {
+			requestHandler.setResourceTransformers(this.resourceTransformers);
 		}
 		requestHandler.setLocations(this.locations);
 		if (this.cachePeriod != null) {

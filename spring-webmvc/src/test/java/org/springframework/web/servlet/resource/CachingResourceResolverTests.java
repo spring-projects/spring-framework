@@ -74,7 +74,7 @@ public class CachingResourceResolverTests {
 	public void resolveResourceInternalFromCache() {
 
 		Resource expected = Mockito.mock(Resource.class);
-		this.cache.put("requestPath:bar.css", expected);
+		this.cache.put(CachingResourceResolver.RESOLVED_RESOURCE_CACHE_KEY_PREFIX + "bar.css", expected);
 
 		String file = "bar.css";
 		Resource actual = this.chain.resolveResource(null, file, this.locations);
@@ -98,7 +98,7 @@ public class CachingResourceResolverTests {
 	@Test
 	public void resolverUrlPathFromCache() {
 		String expected = "cached-imaginary.css";
-		this.cache.put("resourceUrlPath:imaginary.css", expected);
+		this.cache.put(CachingResourceResolver.RESOLVED_URL_PATH_CACHE_KEY_PREFIX + "imaginary.css", expected);
 		String actual = this.chain.resolveUrlPath("imaginary.css", this.locations);
 
 		assertEquals(expected, actual);

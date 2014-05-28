@@ -33,6 +33,7 @@ import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.resource.ResourceResolver;
+import org.springframework.web.servlet.resource.ResourceTransformer;
 
 /**
  * Stores registrations of resource handlers for serving static resources such as images, css files and others
@@ -55,18 +56,20 @@ public class ResourceHandlerRegistry {
 
 	private final ServletContext servletContext;
 
-	private final ApplicationContext applicationContext;
+	private final ApplicationContext appContext;
 
 	private final List<ResourceHandlerRegistration> registrations = new ArrayList<ResourceHandlerRegistration>();
 
 	private List<ResourceResolver> resourceResolvers;
+
+	private List<ResourceTransformer> resourceTransformers;
 
 	private int order = Integer.MAX_VALUE -1;
 
 
 	public ResourceHandlerRegistry(ApplicationContext applicationContext, ServletContext servletContext) {
 		Assert.notNull(applicationContext, "ApplicationContext is required");
-		this.applicationContext = applicationContext;
+		this.appContext = applicationContext;
 		this.servletContext = servletContext;
 	}
 
@@ -77,8 +80,8 @@ public class ResourceHandlerRegistry {
 	 * @return A {@link ResourceHandlerRegistration} to use to further configure the registered resource handler.
 	 */
 	public ResourceHandlerRegistration addResourceHandler(String... pathPatterns) {
-		ResourceHandlerRegistration registration = new ResourceHandlerRegistration(applicationContext, pathPatterns);
-		registrations.add(registration);
+		ResourceHandlerRegistration registration = new ResourceHandlerRegistration(this.appContext, pathPatterns);
+		this.registrations.add(registration);
 		return registration;
 	}
 
@@ -86,7 +89,7 @@ public class ResourceHandlerRegistry {
 	 * Whether a resource handler has already been registered for the given pathPattern.
 	 */
 	public boolean hasMappingForPattern(String pathPattern) {
-		for (ResourceHandlerRegistration registration : registrations) {
+		for (ResourceHandlerRegistration registration : this.registrations) {
 			if (Arrays.asList(registration.getPathPatterns()).contains(pathPattern)) {
 				return true;
 			}
@@ -104,11 +107,21 @@ public class ResourceHandlerRegistry {
 	}
 
 	/**
-	 * Configure the {@link ResourceResolver}s to use by default in resource handlers that
-	 * don't have them set.
+	 * Configure the {@link ResourceResolver}s to use by default, that is in
+	 * resource handlers aren't already configured explicitly with resolvers.
 	 */
-	public void setResourceResolvers(ResourceResolver... resourceResolvers) {
-		this.resourceResolvers = Arrays.asList(resourceResolvers);
+	public ResourceHandlerRegistry setResourceResolvers(ResourceResolver... resolvers) {
+		this.resourceResolvers = Arrays.asList(resolvers);
+		return this;
+	}
+
+	/**
+	 * Configure the {@link ResourceTransformer}s to use by default, that is in
+	 * resource handlers aren't already configured explicitly with transformers.
+	 */
+	public ResourceHandlerRegistry setResourceTransformers(ResourceTransformer... transformers) {
+		this.resourceTransformers = Arrays.asList(transformers);
+		return this;
 	}
 
 	/**
@@ -124,9 +137,12 @@ public class ResourceHandlerRegistry {
 			for (String pathPattern : registration.getPathPatterns()) {
 				ResourceHttpRequestHandler handler = registration.getRequestHandler();
 				handler.setServletContext(this.servletContext);
-				handler.setApplicationContext(this.applicationContext);
+				handler.setApplicationContext(this.appContext);
 				if ((this.resourceResolvers != null) && (registration.getResourceResolvers() == null)) {
 					handler.setResourceResolvers(this.resourceResolvers);
+				}
+				if ((this.resourceResolvers != null) && (registration.getResourceTransformers() == null)) {
+					handler.setResourceTransformers(this.resourceTransformers);
 				}
 				try {
 					handler.afterPropertiesSet();

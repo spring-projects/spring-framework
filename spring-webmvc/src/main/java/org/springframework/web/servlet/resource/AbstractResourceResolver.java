@@ -25,7 +25,7 @@ import java.util.List;
 
 /**
  * Base class for {@link org.springframework.web.servlet.resource.ResourceResolver}
- * implementations.
+ * implementations. Provides consistent logging.
  *
  * @author Rossen Stoyanchev
  * @since 4.1

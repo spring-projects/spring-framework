@@ -48,10 +48,11 @@ public class FingerprintResourceResolverTests {
 		List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
 		resolvers.add(resolver);
 		resolvers.add(new PathResourceResolver());
-		chain = new DefaultResourceResolverChain(resolvers);
-		locations = new ArrayList<Resource>();
-		locations.add(new ClassPathResource("test/", getClass()));
-		locations.add(new ClassPathResource("testalternatepath/", getClass()));
+		this.chain = new DefaultResourceResolverChain(resolvers);
+
+		this.locations = new ArrayList<Resource>();
+		this.locations.add(new ClassPathResource("test/", getClass()));
+		this.locations.add(new ClassPathResource("testalternatepath/", getClass()));
 	}
 
 
@@ -73,7 +74,7 @@ public class FingerprintResourceResolverTests {
 	@Test
 	public void resolveStaticFingerprintedResource() throws Exception {
 		String file = "foo-e36d2e05253c6c7085a91522ce43a0b4.css";
-		Resource expected = new ClassPathResource("test/"+file, getClass());
+		Resource expected = new ClassPathResource("test/" + file, getClass());
 		Resource actual = chain.resolveResource(null, file, locations);
 
 		assertEquals(expected, actual);
