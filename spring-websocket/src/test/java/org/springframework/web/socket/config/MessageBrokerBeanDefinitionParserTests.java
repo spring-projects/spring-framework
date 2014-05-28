@@ -16,6 +16,8 @@
 
 package org.springframework.web.socket.config;
 
+import static org.junit.Assert.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -39,12 +41,12 @@ import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
-import org.springframework.messaging.simp.user.DefaultUserDestinationResolver;
 import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
+import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
+import org.springframework.messaging.simp.user.DefaultUserDestinationResolver;
 import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
 import org.springframework.messaging.simp.user.UserDestinationResolver;
 import org.springframework.messaging.simp.user.UserSessionRegistry;
-import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -64,13 +66,12 @@ import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
 
-import static org.junit.Assert.*;
-
 /**
  * Test fixture for MessageBrokerBeanDefinitionParser.
  * See test configuration files websocket-config-broker-*.xml.
  *
  * @author Brian Clozel
+ * @author Artem Bilan
  */
 public class MessageBrokerBeanDefinitionParserTests {
 
@@ -117,6 +118,8 @@ public class MessageBrokerBeanDefinitionParserTests {
 				(StompSubProtocolHandler) subProtocolWsHandler.getProtocolHandlerMap().get("v12.stomp");
 		assertNotNull(stompHandler);
 		assertEquals(128 * 1024, stompHandler.getMessageSizeLimit());
+
+		assertNotNull(new DirectFieldAccessor(stompHandler).getPropertyValue("eventPublisher"));
 
 		httpRequestHandler = (HttpRequestHandler) suhm.getUrlMap().get("/test/**");
 		assertNotNull(httpRequestHandler);

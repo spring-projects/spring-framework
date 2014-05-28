@@ -21,6 +21,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
@@ -38,9 +41,10 @@ import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
  * {@link SimpleUrlHandlerMapping} for use in Spring MVC.
  *
  * @author Rossen Stoyanchev
+ * @author Artem Bilan
  * @since 4.0
  */
-public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
+public class WebMvcStompEndpointRegistry implements StompEndpointRegistry, ApplicationContextAware {
 
 	private final WebSocketHandler webSocketHandler;
 
@@ -82,6 +86,11 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 		}
 
 		this.sockJsScheduler = defaultSockJsTaskScheduler;
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.stompHandler.setApplicationEventPublisher(applicationContext);
 	}
 
 	private static SubProtocolWebSocketHandler unwrapSubProtocolWebSocketHandler(WebSocketHandler wsHandler) {
