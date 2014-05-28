@@ -457,8 +457,8 @@ public class AntPathMatcherTests {
 		assertEquals(1, comparator.compare("/hotels/**", "/hotels/{hotel}/bookings/{booking}/cutomers/{customer}"));
 		assertEquals(1, comparator.compare("/hotels/foo/bar/**", "/hotels/{hotel}"));
 		assertEquals(-1, comparator.compare("/hotels/{hotel}", "/hotels/foo/bar/**"));
-		assertEquals(-12, comparator.compare("/hotels/**/bookings/**", "/hotels/**"));
-		assertEquals(12, comparator.compare("/hotels/**", "/hotels/**/bookings/**"));
+		assertEquals(2, comparator.compare("/hotels/**/bookings/**", "/hotels/**"));
+		assertEquals(-2, comparator.compare("/hotels/**", "/hotels/**/bookings/**"));
 
 		//SPR-8683
 		assertEquals(1, comparator.compare("/**", "/hotels/{hotel}"));
