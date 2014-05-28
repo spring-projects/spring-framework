@@ -235,7 +235,7 @@ public class CssLinkResourceTransformer implements ResourceTransformer {
 
 		@Override
 		public int compareTo(CssLinkInfo other) {
-			return Integer.compare(this.start, other.start);
+			return (this.start < other.start ? -1 : (this.start == other.start ? 0 : 1));
 		}
 
 		@Override
