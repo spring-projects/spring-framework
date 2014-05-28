@@ -16,13 +16,6 @@
 
 package org.springframework.jms.messaging;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.any;
-import static org.mockito.BDDMockito.eq;
-import static org.mockito.BDDMockito.*;
-import static org.mockito.BDDMockito.verify;
-import static org.mockito.Mockito.mock;
-
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,12 +31,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
+import org.mockito.BDDMockito;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.jms.StubTextMessage;
 import org.springframework.jms.core.JmsTemplate;
@@ -53,6 +46,9 @@ import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.GenericMessageConverter;
 import org.springframework.messaging.support.MessageBuilder;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  *
@@ -388,14 +384,15 @@ public class JmsMessagingTemplateTests {
 
 	protected TextMessage createTextMessage(MessageCreator creator) throws JMSException {
 		Session mock = mock(Session.class);
-		given(mock.createTextMessage(any())).willAnswer(new Answer<TextMessage>() {
+		given(mock.createTextMessage(BDDMockito.<String> any())).willAnswer(
+				new Answer<TextMessage>() {
 			@Override
 			public TextMessage answer(InvocationOnMock invocation) throws Throwable {
 				return new StubTextMessage((String) invocation.getArguments()[0]);
 			}
 		});
 		javax.jms.Message message = creator.createMessage(mock);
-		verify(mock).createTextMessage(any());
+		verify(mock).createTextMessage(BDDMockito.<String> any());
 		return TextMessage.class.cast(message);
 	}
 
