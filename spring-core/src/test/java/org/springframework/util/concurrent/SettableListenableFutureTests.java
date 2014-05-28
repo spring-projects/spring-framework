@@ -26,6 +26,8 @@ import java.util.concurrent.TimeoutException;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
 
 /**
  * @author Mattias Severson
@@ -290,36 +292,28 @@ public class SettableListenableFutureTests {
 
 	@Test
 	public void cancelDoesNotNotifyCallbacksOnSet() {
-		settableListenableFuture.addCallback(new ListenableFutureCallback<String>() {
-			@Override
-			public void onSuccess(String result) {
-				fail("onSuccess should not have been called");
-			}
-
-			@Override
-			public void onFailure(Throwable t) {
-				fail("onFailure should not have been called");
-			}
-		});
+		ListenableFutureCallback callback = mock(ListenableFutureCallback.class);
+		settableListenableFuture.addCallback(callback);
 		settableListenableFuture.cancel(true);
+
+		verify(callback).onFailure(any(CancellationException.class));
+		verifyNoMoreInteractions(callback);
+
 		settableListenableFuture.set("hello");
+		verifyNoMoreInteractions(callback);
 	}
 
 	@Test
 	public void cancelDoesNotNotifyCallbacksOnSetException() {
-		settableListenableFuture.addCallback(new ListenableFutureCallback<String>() {
-			@Override
-			public void onSuccess(String result) {
-				fail("onSuccess should not have been called");
-			}
-
-			@Override
-			public void onFailure(Throwable t) {
-				fail("onFailure should not have been called");
-			}
-		});
+		ListenableFutureCallback callback = mock(ListenableFutureCallback.class);
+		settableListenableFuture.addCallback(callback);
 		settableListenableFuture.cancel(true);
+
+		verify(callback).onFailure(any(CancellationException.class));
+		verifyNoMoreInteractions(callback);
+
 		settableListenableFuture.setException(new RuntimeException());
+		verifyNoMoreInteractions(callback);
 	}
 	
 	private static class InterruptableSettableListenableFuture extends SettableListenableFuture<String> {
