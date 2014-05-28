@@ -17,6 +17,8 @@
 package org.springframework.messaging.core;
 
 import org.springframework.messaging.Message;
+import org.springframework.messaging.converter.MessageConversionException;
+import org.springframework.messaging.converter.MessageConverter;
 
 /**
  * An extension of {@link AbstractMessageSendingTemplate} that adds support for
@@ -53,11 +55,23 @@ public abstract class AbstractMessageReceivingTemplate<D> extends AbstractMessag
 	public <T> T receiveAndConvert(D destination, Class<T> targetClass) {
 		Message<?> message = doReceive(destination);
 		if (message != null) {
-			return (T) getMessageConverter().fromMessage(message, targetClass);
+			return doConvert(message, targetClass);
 		}
 		else {
 			return null;
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	protected <T> T doConvert(Message<?> message, Class<T> targetClass) {
+		MessageConverter messageConverter = getMessageConverter();
+		T value = (T) messageConverter.fromMessage(message, targetClass);
+		if (value == null) {
+			throw new MessageConversionException("Unable to convert payload='"
+					+ message.getPayload() + "' to type='" + targetClass
+					+ "', converter=[" + messageConverter + "]");
+		}
+		return value;
 	}
 
 }

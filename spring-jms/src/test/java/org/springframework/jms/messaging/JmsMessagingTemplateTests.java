@@ -26,7 +26,6 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -326,12 +325,11 @@ public class JmsMessagingTemplateTests {
 	}
 
 	@Test
-	@Ignore("SPR-11817")
 	public void receiveAndConvertNoConverter() {
 		javax.jms.Message jmsMessage = createJmsTextMessage("Hello");
 		given(jmsTemplate.receive("myQueue")).willReturn(jmsMessage);
 
-		thrown.expect(MessageConversionException.class);
+		thrown.expect(org.springframework.messaging.converter.MessageConversionException.class);
 		messagingTemplate.receiveAndConvert("myQueue", Writer.class);
 	}
 

@@ -17,12 +17,22 @@
 package org.springframework.messaging.core;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
+import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.converter.GenericMessageConverter;
+import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.support.GenericMessage;
 
+import static org.hamcrest.CoreMatchers.isA;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+
+import java.io.Writer;
 
 /**
  * Unit tests for receiving operations in {@link AbstractMessagingTemplate}.
@@ -32,6 +42,9 @@ import static org.junit.Assert.assertSame;
  * @see MessageRequestReplyTemplateTests
  */
 public class MessageReceivingTemplateTests {
+
+	@Rule
+	public final ExpectedException thrown = ExpectedException.none();
 
 	private TestMessagingTemplate template;
 
@@ -86,6 +99,29 @@ public class MessageReceivingTemplateTests {
 
 		assertEquals("somewhere", this.template.destination);
 		assertSame("payload", payload);
+	}
+
+	@Test
+	public void receiveAndConvertFailed() {
+		Message<?> expected = new GenericMessage<Object>("not a number test");
+		this.template.setReceiveMessage(expected);
+		this.template.setMessageConverter(new GenericMessageConverter(new DefaultConversionService()));
+
+		thrown.expect(MessageConversionException.class);
+		thrown.expectCause(isA(ConversionFailedException.class));
+		this.template.receiveAndConvert("somewhere", Integer.class);
+	}
+
+	@Test
+	public void receiveAndConvertNoConverter() {
+		Message<?> expected = new GenericMessage<Object>("payload");
+		this.template.setDefaultDestination("home");
+		this.template.setReceiveMessage(expected);
+		this.template.setMessageConverter(new GenericMessageConverter(new DefaultConversionService()));
+
+		thrown.expect(MessageConversionException.class);
+		thrown.expectMessage("payload");
+		this.template.receiveAndConvert(Writer.class);
 	}
 
 
