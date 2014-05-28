@@ -28,8 +28,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -60,10 +58,11 @@ import org.springframework.web.socket.handler.SessionLimitExceededException;
  *
  * @author Rossen Stoyanchev
  * @author Andy Wilkinson
+ * @author Artem Bilan
  * @since 4.0
  */
 public class SubProtocolWebSocketHandler implements WebSocketHandler,
-		SubProtocolCapable, MessageHandler, SmartLifecycle, ApplicationEventPublisherAware {
+		SubProtocolCapable, MessageHandler, SmartLifecycle {
 
 	private final Log logger = LogFactory.getLog(SubProtocolWebSocketHandler.class);
 
@@ -82,11 +81,9 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 
 	private int sendBufferSizeLimit = 512 * 1024;
 
-	private Object lifecycleMonitor = new Object();
+	private final Object lifecycleMonitor = new Object();
 
 	private volatile boolean running = false;
-
-	private ApplicationEventPublisher eventPublisher;
 
 
 	public SubProtocolWebSocketHandler(MessageChannel clientInboundChannel, SubscribableChannel clientOutboundChannel) {
@@ -131,10 +128,6 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 				throw new IllegalStateException("Failed to map handler " + handler
 						+ " to protocol '" + protocol + "', it is already mapped to handler " + replaced);
 			}
-		}
-
-		if (handler instanceof ApplicationEventPublisherAware) {
-			((ApplicationEventPublisherAware) handler).setApplicationEventPublisher(this.eventPublisher);
 		}
 	}
 
@@ -186,11 +179,6 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 
 	public int getSendBufferSizeLimit() {
 		return sendBufferSizeLimit;
-	}
-
-	@Override
-	public void setApplicationEventPublisher(ApplicationEventPublisher eventPublisher) {
-		this.eventPublisher = eventPublisher;
 	}
 
 	@Override
