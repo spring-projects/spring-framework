@@ -1,22 +1,25 @@
-STS_TEST_VERSION='2.9.2.RELEASE'
-
 cd `dirname $0`
 clear
 cat <<EOM
 
------------------------------------------------------------------------
+------------------------------------------------------------------------
 Spring Framework Eclipse/STS project import guide
 
-This script will guide you through the process of importing the
-Spring Framework sources into Eclipse/STS. It is recommended that you
-have a recent version of the SpringSource Tool Suite (this script has
-been tested against STS $STS_TEST_VERSION), but at the minimum you will
-need Eclipse + AJDT.
+This script will guide you through the process of importing the Spring
+Framework projects into Eclipse or the Spring Tool Suite (STS). It is
+recommended that you have a recent version of Eclipse or STS with full
+support for Java 8 (this script has been tested against Eclipse Luna
+4.4 integration build I20140520-2000), but as a bare minimum you will
+need Eclipse with Java 8 support, AJDT, and the Groovy Compiler.
 
-If you need to download and install STS, please do that now by
-visiting http://spring.io/tools/sts/all 
+If you need to download and install Eclipse or STS, please do that now
+by visiting one of the following sites:
 
-Otherwise, press enter and we'll begin.
+Eclipse downloads: http://download.eclipse.org/eclipse/downloads/
+STS downloads: http://spring.io/tools/sts/all
+STS nightly builds: http://dist.springsource.com/snapshot/STS/nightly-distributions.html
+
+Otherwise, press enter, and we'll begin.
 EOM
 
 read
@@ -31,14 +34,14 @@ COMMAND="./gradlew cleanEclipse :spring-oxm:compileTestJava eclipse -x :eclipse"
 
 cat <<EOM
 
------------------------------------------------------------------------
+------------------------------------------------------------------------
 STEP 1: Generate subproject Eclipse metadata
 
-The first step will be to generate Eclipse project metadata for each
-of the spring-* subprojects. This happens via the built-in
-"Gradle wrapper" script (./gradlew in this directory). If this is your
-first time using the Gradle wrapper, this step may take a few minutes
-while a Gradle distribution is downloaded for you.
+The first step will be to generate Eclipse project metadata for each of
+the spring-* subprojects. This happens via the built-in "Gradle
+wrapper" script (./gradlew in this directory). If this is your first
+time using the Gradle wrapper, this step may take a few minutes while a
+Gradle distribution is downloaded for you.
 
 The command run will be:
 
@@ -53,7 +56,7 @@ $COMMAND || exit
 
 cat <<EOM
 
------------------------------------------------------------------------
+------------------------------------------------------------------------
 STEP 2: Import subprojects into Eclipse/STS
 
 Within Eclipse/STS, do the following:
@@ -73,13 +76,13 @@ COMMAND="./gradlew :eclipse"
 
 cat <<EOM
 
------------------------------------------------------------------------
+------------------------------------------------------------------------
 STEP 3: generate root project Eclipse metadata
 
 Unfortunately, Eclipse does not allow for importing project
-hierarchies, so we had to skip root project metadata generation in the
-during step 1. In this step we simply generate root project metadata
-so you can import it in the next step.
+hierarchies, so we had to skip root project metadata generation during
+step 1. In this step we simply generate root project metadata so you
+can import it in the next step.
 
 The command run will be:
 
@@ -93,7 +96,7 @@ read
 $COMMAND || exit
 
 cat <<EOM
------------------------------------------------------------------------
+------------------------------------------------------------------------
 STEP 4: Import root project into Eclipse/STS
 
 Follow the project import steps listed in step 2 above to import the
@@ -105,7 +108,7 @@ EOM
 read
 
 cat <<EOM
------------------------------------------------------------------------
+------------------------------------------------------------------------
 STEP 5: Enable Git support for all projects
 
 - In the Eclipse/STS Package Explorer, select all spring* projects.
