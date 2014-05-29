@@ -16,6 +16,8 @@
 
 package org.springframework.web.socket.config.annotation;
 
+import java.util.Collections;
+
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.simp.SimpSessionScope;
@@ -26,8 +28,6 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 
-import java.util.Collections;
-
 /**
  * Extends {@link AbstractMessageBrokerConfiguration} and adds configuration for
  * receiving and responding to STOMP messages from WebSocket clients.
@@ -37,6 +37,7 @@ import java.util.Collections;
  * also be extended directly.
  *
  * @author Rossen Stoyanchev
+ * @author Artem Bilan
  * @since 4.0
  */
 public abstract class WebSocketMessageBrokerConfigurationSupport extends AbstractMessageBrokerConfiguration {
@@ -57,6 +58,8 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 
 		WebMvcStompEndpointRegistry registry = new WebMvcStompEndpointRegistry(
 				webSocketHandler, transportRegistration, sessionRegistry, taskScheduler);
+
+		registry.setApplicationContext(getApplicationContext());
 
 		registerStompEndpoints(registry);
 
