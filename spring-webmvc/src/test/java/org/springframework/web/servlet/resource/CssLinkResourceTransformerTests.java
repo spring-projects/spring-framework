@@ -16,17 +16,18 @@
 
 package org.springframework.web.servlet.resource;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import org.junit.Before;
+import org.junit.Test;
+
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.util.StringUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for
@@ -79,7 +80,9 @@ public class CssLinkResourceTransformerTests {
 				"body { background: url(\"images/image-f448cd1d5dba82b774f3202c878230b3.png\") }\n\n" +
 				"li { list-style: url(http://www.example.com/redball.png) disc }\n";
 
-		assertEquals(expected, new String(transformedResource.getByteArray(), "UTF-8"));
+		String result = new String(transformedResource.getByteArray(), "UTF-8");
+		result = StringUtils.deleteAny(result, "\r");
+		assertEquals(expected, result);
 	}
 
 	@Test
