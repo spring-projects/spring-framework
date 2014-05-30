@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -41,17 +42,16 @@ public class JsonViewResponseBodyInterceptor extends AbstractMappingJacksonRespo
 
 
 	@Override
+	public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
+		return (super.supports(returnType, converterType) && returnType.getMethodAnnotation(JsonView.class) != null);
+	}
+
+	@Override
 	protected void beforeBodyWriteInternal(MappingJacksonValue bodyContainer, MediaType contentType,
 			MethodParameter returnType, ServerHttpRequest request, ServerHttpResponse response) {
 
 		JsonView annotation = returnType.getMethodAnnotation(JsonView.class);
-		if (annotation == null) {
-			return;
-		}
-
-		Assert.isTrue(annotation.value().length != 0,
-				"Expected at least one serialization view class in JsonView annotation on " + returnType);
-
+		Assert.isTrue(annotation.value().length != 0, "No view class in JsonView annotation on " + returnType);
 		bodyContainer.setSerializationView(annotation.value()[0]);
 	}
 

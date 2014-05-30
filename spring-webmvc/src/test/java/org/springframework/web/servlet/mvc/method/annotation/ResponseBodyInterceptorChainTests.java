@@ -53,7 +53,7 @@ public class ResponseBodyInterceptorChainTests {
 
 	private MediaType contentType;
 
-	private Class<? extends HttpMessageConverter<String>> converterType;
+	private Class<? extends HttpMessageConverter<?>> converterType;
 
 	private MethodParameter returnType;
 
@@ -75,16 +75,17 @@ public class ResponseBodyInterceptorChainTests {
 	@Test
 	public void responseBodyInterceptor() {
 
-		ResponseBodyInterceptor interceptor = Mockito.mock(ResponseBodyInterceptor.class);
+		@SuppressWarnings("unchecked")
+		ResponseBodyInterceptor<String> interceptor = Mockito.mock(ResponseBodyInterceptor.class);
 		ResponseBodyInterceptorChain chain = new ResponseBodyInterceptorChain(Arrays.asList(interceptor));
 
 		String expected = "body++";
-		when(interceptor.beforeBodyWrite(
-				eq(this.body), eq(this.contentType), eq(this.converterType), eq(this.returnType),
-				same(this.request), same(this.response))).thenReturn(expected);
+		when(interceptor.supports(this.returnType, this.converterType)).thenReturn(true);
+		when(interceptor.beforeBodyWrite(eq(this.body), eq(this.returnType), eq(this.contentType),
+				eq(this.converterType), same(this.request), same(this.response))).thenReturn(expected);
 
-		String actual = chain.invoke(this.body, this.contentType,
-				this.converterType, this.returnType, this.request, this.response);
+		String actual = chain.invoke(this.body, this.returnType,
+				this.contentType, this.converterType, this.request, this.response);
 
 		assertEquals(expected, actual);
 	}
@@ -95,8 +96,8 @@ public class ResponseBodyInterceptorChainTests {
 		Object interceptor = new ControllerAdviceBean(new MyControllerAdvice());
 		ResponseBodyInterceptorChain chain = new ResponseBodyInterceptorChain(Arrays.asList(interceptor));
 
-		String actual = chain.invoke(this.body, this.contentType,
-				this.converterType, this.returnType, this.request, this.response);
+		String actual = chain.invoke(this.body, this.returnType,
+				this.contentType, this.converterType, this.request, this.response);
 
 		assertEquals("body-MyControllerAdvice", actual);
 	}
@@ -107,36 +108,46 @@ public class ResponseBodyInterceptorChainTests {
 		Object interceptor = new ControllerAdviceBean(new TargetedControllerAdvice());
 		ResponseBodyInterceptorChain chain = new ResponseBodyInterceptorChain(Arrays.asList(interceptor));
 
-		String actual = chain.invoke(this.body, this.contentType,
-				this.converterType, this.returnType, this.request, this.response);
+		String actual = chain.invoke(this.body, this.returnType,
+				this.contentType, this.converterType, this.request, this.response);
 
 		assertEquals(this.body, actual);
 	}
 
 
 	@ControllerAdvice
-	private static class MyControllerAdvice implements ResponseBodyInterceptor {
+	private static class MyControllerAdvice implements ResponseBodyInterceptor<String> {
+
+		@Override
+		public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
+			return true;
+		}
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public <T> T beforeBodyWrite(T body, MediaType contentType,
-				Class<? extends HttpMessageConverter<T>> converterType,
-				MethodParameter returnType, ServerHttpRequest request, ServerHttpResponse response) {
+		public String beforeBodyWrite(String body, MethodParameter returnType,
+				MediaType contentType, Class<? extends HttpMessageConverter<?>> converterType,
+				ServerHttpRequest request, ServerHttpResponse response) {
 
-			return (T) (body + "-MyControllerAdvice");
+			return body + "-MyControllerAdvice";
 		}
 	}
 
 	@ControllerAdvice(annotations = Controller.class)
-	private static class TargetedControllerAdvice implements ResponseBodyInterceptor {
+	private static class TargetedControllerAdvice implements ResponseBodyInterceptor<String> {
+
+		@Override
+		public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
+			return true;
+		}
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public <T> T beforeBodyWrite(T body, MediaType contentType,
-				Class<? extends HttpMessageConverter<T>> converterType,
-				MethodParameter returnType, ServerHttpRequest request, ServerHttpResponse response) {
+		public String beforeBodyWrite(String body, MethodParameter returnType,
+				MediaType contentType, Class<? extends HttpMessageConverter<?>> converterType,
+				ServerHttpRequest request, ServerHttpResponse response) {
 
-			return (T) (body + "-TargetedControllerAdvice");
+			return body + "-TargetedControllerAdvice";
 		}
 	}
 

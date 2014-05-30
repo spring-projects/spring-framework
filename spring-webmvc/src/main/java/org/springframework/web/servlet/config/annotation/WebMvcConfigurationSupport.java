@@ -425,8 +425,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		adapter.setCustomReturnValueHandlers(returnValueHandlers);
 
 		if (jackson2Present) {
-			ResponseBodyInterceptor interceptor = new JsonViewResponseBodyInterceptor();
-			adapter.setResponseBodyInterceptors(Arrays.asList(interceptor));
+			List<ResponseBodyInterceptor<?>> interceptors = new ArrayList<ResponseBodyInterceptor<?>>();
+			interceptors.add(new JsonViewResponseBodyInterceptor());
+			adapter.setResponseBodyInterceptors(interceptors);
 		}
 
 		AsyncSupportConfigurer configurer = new AsyncSupportConfigurer();
@@ -711,8 +712,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		exceptionHandlerExceptionResolver.setContentNegotiationManager(mvcContentNegotiationManager());
 		exceptionHandlerExceptionResolver.setMessageConverters(getMessageConverters());
 		if (jackson2Present) {
-			ResponseBodyInterceptor interceptor = new JsonViewResponseBodyInterceptor();
-			exceptionHandlerExceptionResolver.setResponseBodyInterceptors(Arrays.asList(interceptor));
+			List<ResponseBodyInterceptor<?>> interceptors = new ArrayList<ResponseBodyInterceptor<?>>();
+			interceptors.add(new JsonViewResponseBodyInterceptor());
+			exceptionHandlerExceptionResolver.setResponseBodyInterceptors(interceptors);
 		}
 		exceptionHandlerExceptionResolver.afterPropertiesSet();
 

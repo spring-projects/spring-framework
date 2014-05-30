@@ -33,25 +33,27 @@ import org.springframework.http.server.ServerHttpResponse;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public abstract class AbstractMappingJacksonResponseBodyInterceptor implements ResponseBodyInterceptor {
+public abstract class AbstractMappingJacksonResponseBodyInterceptor
+		implements ResponseBodyInterceptor<Object> {
 
 
 	protected AbstractMappingJacksonResponseBodyInterceptor() {
 	}
 
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public final <T> T beforeBodyWrite(T body, MediaType contentType,
-			Class<? extends HttpMessageConverter<T>> converterType,
-			MethodParameter returnType, ServerHttpRequest request, ServerHttpResponse response) {
+	public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
+		return MappingJackson2HttpMessageConverter.class.equals(converterType);
+	}
 
-		if (!MappingJackson2HttpMessageConverter.class.equals(converterType)) {
-			return body;
-		}
+	@Override
+	public final Object beforeBodyWrite(Object body, MethodParameter returnType,
+			MediaType contentType, Class<? extends HttpMessageConverter<?>> converterType,
+			ServerHttpRequest request, ServerHttpResponse response) {
+
 		MappingJacksonValue container = getOrCreateContainer(body);
 		beforeBodyWriteInternal(container, contentType, returnType, request, response);
-		return (T) container;
+		return container;
 	}
 
 	/**

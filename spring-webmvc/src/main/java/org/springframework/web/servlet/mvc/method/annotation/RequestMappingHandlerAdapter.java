@@ -339,7 +339,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * but before the body is written to the response with the selected
 	 * {@code HttpMessageConverter}.
 	 */
-	public void setResponseBodyInterceptors(List<ResponseBodyInterceptor> responseBodyInterceptors) {
+	public void setResponseBodyInterceptors(List<ResponseBodyInterceptor<?>> responseBodyInterceptors) {
 		this.responseBodyInterceptors.clear();
 		if (responseBodyInterceptors != null) {
 			this.responseBodyInterceptors.addAll(responseBodyInterceptors);

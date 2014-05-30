@@ -23,7 +23,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.util.Assert;
 import org.springframework.web.method.ControllerAdviceBean;
 
 import java.util.List;
@@ -46,8 +45,10 @@ class ResponseBodyInterceptorChain {
 	}
 
 
-	public <T> T invoke(T body, MediaType contentType, Class<? extends HttpMessageConverter<T>> converterType,
-			MethodParameter returnType, ServerHttpRequest request, ServerHttpResponse response) {
+	@SuppressWarnings("unchecked")
+	public <T> T invoke(T body, MethodParameter returnType,
+			MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType,
+			ServerHttpRequest request, ServerHttpResponse response) {
 
 		if (this.interceptors != null) {
 			if (logger.isDebugEnabled()) {
@@ -61,9 +62,16 @@ class ResponseBodyInterceptorChain {
 					}
 					interceptor = adviceBean.resolveBean();
 				}
-				Assert.state(interceptor instanceof  ResponseBodyInterceptor);
-				body = ((ResponseBodyInterceptor) interceptor).beforeBodyWrite(
-						body, contentType, converterType, returnType, request, response);
+				if (interceptor instanceof ResponseBodyInterceptor) {
+					ResponseBodyInterceptor<T> typedInterceptor = (ResponseBodyInterceptor<T>) interceptor;
+					if (typedInterceptor.supports(returnType, selectedConverterType)) {
+						body = typedInterceptor.beforeBodyWrite(body, returnType,
+								selectedContentType, selectedConverterType, request, response);
+					}
+				}
+				else {
+					throw new IllegalStateException("Expected a ResponseBodyInterceptor: " + interceptor);
+				}
 			}
 			if (logger.isDebugEnabled()) {
 				logger.debug("After interceptor chain body=" + body);
