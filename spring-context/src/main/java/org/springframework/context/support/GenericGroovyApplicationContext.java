@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -210,7 +210,7 @@ public class GenericGroovyApplicationContext extends GenericApplicationContext i
 	}
 
 
-	// IMPLEMENTATION OF THE GROOVYOBJECT INTERFACE
+	// Implementation of the GroovyObject interface
 
 	public void setMetaClass(MetaClass metaClass) {
 		this.metaClass = metaClass;
@@ -244,4 +244,3 @@ public class GenericGroovyApplicationContext extends GenericApplicationContext i
 	}
 
 }
-
