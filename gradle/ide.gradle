@@ -47,9 +47,20 @@ eclipse.classpath.file.whenMerged { classpath ->
 	}
 }
 
+// Ensure project dependencies come after 3rd-party libs (SPR-11836)
+// https://jira.spring.io/browse/SPR-11836
+eclipse.classpath.file.whenMerged { classpath ->
+	def projectOutputDependencies = classpath.entries.findAll { entry -> entry instanceof ProjectDependency }
+	projectOutputDependencies.each { entry ->
+		// delete from original position
+		classpath.entries.remove(entry)
+		// append to end of classpath
+		classpath.entries.add(entry)
+	}
+}
+
 // Allow projects to be used as WPT modules
 eclipse.project.natures "org.eclipse.wst.common.project.facet.core.nature"
-
 
 // Include project specific settings
 task eclipseSettings(type: Copy) {
