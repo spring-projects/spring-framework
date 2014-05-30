@@ -299,7 +299,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		converters.add(new MappingJackson2HttpMessageConverter());
 
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(
-				converters, null, Arrays.asList(new JsonViewResponseBodyInterceptor()));
+				converters, null, Arrays.asList(new JsonViewResponseBodyAdvice()));
 
 		Object returnValue = new JacksonViewController().handleResponseBody();
 		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);
@@ -320,7 +320,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		converters.add(new MappingJackson2HttpMessageConverter());
 
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(
-				converters, null, Arrays.asList(new JsonViewResponseBodyInterceptor()));
+				converters, null, Arrays.asList(new JsonViewResponseBodyAdvice()));
 
 		Object returnValue = new JacksonViewController().handleResponseEntity();
 		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);

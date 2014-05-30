@@ -28,20 +28,20 @@ import org.springframework.web.method.ControllerAdviceBean;
 import java.util.List;
 
 /**
- * Invokes a a list of ResponseBodyInterceptor's.
+ * Invokes a a list of {@link ResponseBodyAdvice} beans.
  *
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-class ResponseBodyInterceptorChain {
+class ResponseBodyAdviceChain {
 
-	private static Log logger = LogFactory.getLog(ResponseBodyInterceptorChain.class);
+	private static Log logger = LogFactory.getLog(ResponseBodyAdviceChain.class);
 
-	private final List<Object> interceptors;
+	private final List<Object> advice;
 
 
-	public ResponseBodyInterceptorChain(List<Object> interceptors) {
-		this.interceptors = interceptors;
+	public ResponseBodyAdviceChain(List<Object> advice) {
+		this.advice = advice;
 	}
 
 
@@ -50,31 +50,31 @@ class ResponseBodyInterceptorChain {
 			MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType,
 			ServerHttpRequest request, ServerHttpResponse response) {
 
-		if (this.interceptors != null) {
+		if (this.advice != null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking ResponseBody interceptor chain for body=" + body);
+				logger.debug("Invoking ResponseBodyAdvice chain for body=" + body);
 			}
-			for (Object interceptor : this.interceptors) {
-				if (interceptor instanceof ControllerAdviceBean) {
-					ControllerAdviceBean adviceBean = (ControllerAdviceBean) interceptor;
+			for (Object advice : this.advice) {
+				if (advice instanceof ControllerAdviceBean) {
+					ControllerAdviceBean adviceBean = (ControllerAdviceBean) advice;
 					if (!adviceBean.isApplicableToBeanType(returnType.getContainingClass())) {
 						continue;
 					}
-					interceptor = adviceBean.resolveBean();
+					advice = adviceBean.resolveBean();
 				}
-				if (interceptor instanceof ResponseBodyInterceptor) {
-					ResponseBodyInterceptor<T> typedInterceptor = (ResponseBodyInterceptor<T>) interceptor;
-					if (typedInterceptor.supports(returnType, selectedConverterType)) {
-						body = typedInterceptor.beforeBodyWrite(body, returnType,
+				if (advice instanceof ResponseBodyAdvice) {
+					ResponseBodyAdvice<T> typedAdvice = (ResponseBodyAdvice<T>) advice;
+					if (typedAdvice.supports(returnType, selectedConverterType)) {
+						body = typedAdvice.beforeBodyWrite(body, returnType,
 								selectedContentType, selectedConverterType, request, response);
 					}
 				}
 				else {
-					throw new IllegalStateException("Expected a ResponseBodyInterceptor: " + interceptor);
+					throw new IllegalStateException("Expected ResponseBodyAdvice: " + advice);
 				}
 			}
 			if (logger.isDebugEnabled()) {
-				logger.debug("After interceptor chain body=" + body);
+				logger.debug("After ResponseBodyAdvice chain body=" + body);
 			}
 		}
 		return body;

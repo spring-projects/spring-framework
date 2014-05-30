@@ -19,7 +19,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -235,7 +234,7 @@ public class RequestMappingHandlerAdapterTests {
 	// SPR-10859
 
 	@Test
-	public void responseBodyInterceptor() throws Exception {
+	public void responseBodyAdvice() throws Exception {
 		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());
 		this.handlerAdapter.setMessageConverters(converters);
@@ -339,7 +338,7 @@ public class RequestMappingHandlerAdapterTests {
 	}
 
 	@ControllerAdvice
-	private static class ResponseCodeSuppressingAdvice extends AbstractMappingJacksonResponseBodyInterceptor {
+	private static class ResponseCodeSuppressingAdvice extends AbstractMappingJacksonResponseBodyAdvice {
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -357,7 +356,7 @@ public class RequestMappingHandlerAdapterTests {
 	}
 
 	@ControllerAdvice
-	private static class JsonpAdvice extends AbstractJsonpResponseBodyInterceptor {
+	private static class JsonpAdvice extends AbstractJsonpResponseBodyAdvice {
 
 		public JsonpAdvice() {
 			super(Arrays.asList("c"));

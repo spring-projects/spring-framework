@@ -31,7 +31,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.ContentNegotiationManager;
@@ -55,7 +54,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 	private final ContentNegotiationManager contentNegotiationManager;
 
-	private final ResponseBodyInterceptorChain interceptorChain;
+	private final ResponseBodyAdviceChain adviceChain;
 
 
 	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> messageConverters) {
@@ -68,11 +67,11 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	}
 
 	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> messageConverters,
-			ContentNegotiationManager manager, List<Object> responseBodyInterceptors) {
+			ContentNegotiationManager manager, List<Object> responseBodyAdvice) {
 
 		super(messageConverters);
 		this.contentNegotiationManager = (manager != null ? manager : new ContentNegotiationManager());
-		this.interceptorChain = new ResponseBodyInterceptorChain(responseBodyInterceptors);
+		this.adviceChain = new ResponseBodyAdviceChain(responseBodyAdvice);
 	}
 
 
@@ -149,7 +148,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			selectedMediaType = selectedMediaType.removeQualityValue();
 			for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
 				if (messageConverter.canWrite(returnValueClass, selectedMediaType)) {
-					returnValue = this.interceptorChain.invoke(returnValue, returnType, selectedMediaType,
+					returnValue = this.adviceChain.invoke(returnValue, returnType, selectedMediaType,
 							(Class<HttpMessageConverter<?>>) messageConverter.getClass(), inputMessage, outputMessage);
 					((HttpMessageConverter<T>) messageConverter).write(returnValue, selectedMediaType, outputMessage);
 					if (logger.isDebugEnabled()) {

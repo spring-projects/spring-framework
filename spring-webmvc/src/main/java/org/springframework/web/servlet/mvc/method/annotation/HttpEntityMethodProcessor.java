@@ -61,8 +61,8 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 	}
 
 	public HttpEntityMethodProcessor(List<HttpMessageConverter<?>> messageConverters,
-			ContentNegotiationManager contentNegotiationManager, List<Object> responseBodyInterceptors) {
-		super(messageConverters, contentNegotiationManager, responseBodyInterceptors);
+			ContentNegotiationManager contentNegotiationManager, List<Object> responseBodyAdvice) {
+		super(messageConverters, contentNegotiationManager, responseBodyAdvice);
 	}
 
 

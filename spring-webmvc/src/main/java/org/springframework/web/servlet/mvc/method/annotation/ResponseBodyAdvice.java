@@ -27,13 +27,18 @@ import org.springframework.http.server.ServerHttpResponse;
  * or an {@code ResponseEntity} controller method but before the body is written
  * with an {@code HttpMessageConverter}.
  *
+ * <p>Implementations may be may be registered directly with
+ * {@code RequestMappingHandlerAdapter} and {@code ExceptionHandlerExceptionResolver}
+ * or more likely annotated with {@code @ControllerAdvice} in which case they
+ * will be auto-detected by both.
+ *
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public interface ResponseBodyInterceptor<T> {
+public interface ResponseBodyAdvice<T> {
 
 	/**
-	 * Whether this interceptor supports the given controller method return type
+	 * Whether this component supports the given controller method return type
 	 * and the selected {@code HttpMessageConverter} type.
 	 *
 	 * @param returnType the return type

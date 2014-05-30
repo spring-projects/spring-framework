@@ -52,7 +52,7 @@ import org.springframework.web.servlet.handler.ConversionServiceExposingIntercep
 import org.springframework.web.servlet.handler.HandlerExceptionResolverComposite;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
-import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyInterceptor;
+import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -161,9 +161,9 @@ public class WebMvcConfigurationSupportTests {
 		assertTrue(validator instanceof LocalValidatorFactoryBean);
 
 		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(adapter);
-		List<Object> interceptors = (List<Object>) fieldAccessor.getPropertyValue("responseBodyInterceptors");
+		List<Object> interceptors = (List<Object>) fieldAccessor.getPropertyValue("responseBodyAdvice");
 		assertEquals(1, interceptors.size());
-		assertEquals(JsonViewResponseBodyInterceptor.class, interceptors.get(0).getClass());
+		assertEquals(JsonViewResponseBodyAdvice.class, interceptors.get(0).getClass());
 	}
 
 	@Test
@@ -192,9 +192,9 @@ public class WebMvcConfigurationSupportTests {
 		assertNotNull(eher.getApplicationContext());
 
 		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(eher);
-		List<Object> interceptors = (List<Object>) fieldAccessor.getPropertyValue("responseBodyInterceptors");
+		List<Object> interceptors = (List<Object>) fieldAccessor.getPropertyValue("responseBodyAdvice");
 		assertEquals(1, interceptors.size());
-		assertEquals(JsonViewResponseBodyInterceptor.class, interceptors.get(0).getClass());
+		assertEquals(JsonViewResponseBodyAdvice.class, interceptors.get(0).getClass());
 	}
 
 

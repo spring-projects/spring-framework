@@ -132,7 +132,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 	private List<HttpMessageConverter<?>> messageConverters;
 
-	private List<Object> responseBodyInterceptors = new ArrayList<Object>();
+	private List<Object> responseBodyAdvice = new ArrayList<Object>();
 
 	private WebBindingInitializer webBindingInitializer;
 
@@ -334,15 +334,15 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
-	 * Add one or more interceptors to be invoked after the execution of a controller
-	 * method annotated with {@code @ResponseBody} or returning {@code ResponseEntity}
-	 * but before the body is written to the response with the selected
-	 * {@code HttpMessageConverter}.
+	 * Add one or more components to modify the response after the execution of a
+	 * controller method annotated with {@code @ResponseBody}, or a method returning
+	 * {@code ResponseEntity} and before the body is written to the response with
+	 * the selected {@code HttpMessageConverter}.
 	 */
-	public void setResponseBodyInterceptors(List<ResponseBodyInterceptor<?>> responseBodyInterceptors) {
-		this.responseBodyInterceptors.clear();
-		if (responseBodyInterceptors != null) {
-			this.responseBodyInterceptors.addAll(responseBodyInterceptors);
+	public void setResponseBodyAdvice(List<ResponseBodyAdvice<?>> responseBodyAdvice) {
+		this.responseBodyAdvice.clear();
+		if (responseBodyAdvice != null) {
+			this.responseBodyAdvice.addAll(responseBodyAdvice);
 		}
 	}
 
@@ -498,7 +498,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	@Override
 	public void afterPropertiesSet() {
 
-		// Do this first, it may add ResponseBody interceptors
+		// Do this first, it may add ResponseBody advice beans
 		initControllerAdviceCache();
 
 		if (this.argumentResolvers == null) {
@@ -526,7 +526,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		List<ControllerAdviceBean> beans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
 		Collections.sort(beans, new OrderComparator());
 
-		List<Object> interceptorBeans = new ArrayList<Object>();
+		List<Object> responseBodyAdviceBeans = new ArrayList<Object>();
 
 		for (ControllerAdviceBean bean : beans) {
 			Set<Method> attrMethods = HandlerMethodSelector.selectMethods(bean.getBeanType(), MODEL_ATTRIBUTE_METHODS);
@@ -539,14 +539,14 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				this.initBinderAdviceCache.put(bean, binderMethods);
 				logger.info("Detected @InitBinder methods in " + bean);
 			}
-			if (ResponseBodyInterceptor.class.isAssignableFrom(bean.getBeanType())) {
-				interceptorBeans.add(bean);
-				logger.info("Detected ResponseBodyInterceptor implementation in " + bean);
+			if (ResponseBodyAdvice.class.isAssignableFrom(bean.getBeanType())) {
+				responseBodyAdviceBeans.add(bean);
+				logger.info("Detected ResponseBodyAdvice bean in " + bean);
 			}
 		}
 
-		if (!interceptorBeans.isEmpty()) {
-			this.responseBodyInterceptors.addAll(0, interceptorBeans);
+		if (!responseBodyAdviceBeans.isEmpty()) {
+			this.responseBodyAdvice.addAll(0, responseBodyAdviceBeans);
 		}
 	}
 
@@ -638,7 +638,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		handlers.add(new ModelMethodProcessor());
 		handlers.add(new ViewMethodReturnValueHandler());
 		handlers.add(new HttpEntityMethodProcessor(
-				getMessageConverters(), this.contentNegotiationManager, this.responseBodyInterceptors));
+				getMessageConverters(), this.contentNegotiationManager, this.responseBodyAdvice));
 		handlers.add(new HttpHeadersReturnValueHandler());
 		handlers.add(new CallableMethodReturnValueHandler());
 		handlers.add(new DeferredResultMethodReturnValueHandler());
@@ -648,7 +648,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		// Annotation-based return value types
 		handlers.add(new ModelAttributeMethodProcessor(false));
 		handlers.add(new RequestResponseBodyMethodProcessor(
-				getMessageConverters(), this.contentNegotiationManager, this.responseBodyInterceptors));
+				getMessageConverters(), this.contentNegotiationManager, this.responseBodyAdvice));
 
 		// Multi-purpose return value types
 		handlers.add(new ViewNameMethodReturnValueHandler());

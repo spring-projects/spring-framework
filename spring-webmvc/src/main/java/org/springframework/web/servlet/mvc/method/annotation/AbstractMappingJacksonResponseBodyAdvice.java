@@ -25,7 +25,7 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 
 /**
- * A convenient base class for {@code ResponseBodyInterceptor} implementations
+ * A convenient base class for {@code ResponseBodyAdvice} implementations
  * that customize the response before JSON serialization with
  * {@link org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
  * MappingJackson2HttpMessageConverter}.
@@ -33,11 +33,11 @@ import org.springframework.http.server.ServerHttpResponse;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public abstract class AbstractMappingJacksonResponseBodyInterceptor
-		implements ResponseBodyInterceptor<Object> {
+public abstract class AbstractMappingJacksonResponseBodyAdvice
+		implements ResponseBodyAdvice<Object> {
 
 
-	protected AbstractMappingJacksonResponseBodyInterceptor() {
+	protected AbstractMappingJacksonResponseBodyAdvice() {
 	}
 
 

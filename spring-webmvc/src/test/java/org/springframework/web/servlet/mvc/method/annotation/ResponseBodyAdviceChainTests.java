@@ -42,12 +42,12 @@ import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for
- * {@link org.springframework.web.servlet.mvc.method.annotation.ResponseBodyInterceptorChain}.
+ * {@link ResponseBodyAdviceChain}.
  *
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public class ResponseBodyInterceptorChainTests {
+public class ResponseBodyAdviceChainTests {
 
 	private String body;
 
@@ -73,15 +73,15 @@ public class ResponseBodyInterceptorChainTests {
 	}
 
 	@Test
-	public void responseBodyInterceptor() {
+	public void responseBodyAdvice() {
 
 		@SuppressWarnings("unchecked")
-		ResponseBodyInterceptor<String> interceptor = Mockito.mock(ResponseBodyInterceptor.class);
-		ResponseBodyInterceptorChain chain = new ResponseBodyInterceptorChain(Arrays.asList(interceptor));
+		ResponseBodyAdvice<String> advice = Mockito.mock(ResponseBodyAdvice.class);
+		ResponseBodyAdviceChain chain = new ResponseBodyAdviceChain(Arrays.asList(advice));
 
 		String expected = "body++";
-		when(interceptor.supports(this.returnType, this.converterType)).thenReturn(true);
-		when(interceptor.beforeBodyWrite(eq(this.body), eq(this.returnType), eq(this.contentType),
+		when(advice.supports(this.returnType, this.converterType)).thenReturn(true);
+		when(advice.beforeBodyWrite(eq(this.body), eq(this.returnType), eq(this.contentType),
 				eq(this.converterType), same(this.request), same(this.response))).thenReturn(expected);
 
 		String actual = chain.invoke(this.body, this.returnType,
@@ -93,8 +93,8 @@ public class ResponseBodyInterceptorChainTests {
 	@Test
 	public void controllerAdvice() {
 
-		Object interceptor = new ControllerAdviceBean(new MyControllerAdvice());
-		ResponseBodyInterceptorChain chain = new ResponseBodyInterceptorChain(Arrays.asList(interceptor));
+		Object adviceBean = new ControllerAdviceBean(new MyControllerAdvice());
+		ResponseBodyAdviceChain chain = new ResponseBodyAdviceChain(Arrays.asList(adviceBean));
 
 		String actual = chain.invoke(this.body, this.returnType,
 				this.contentType, this.converterType, this.request, this.response);
@@ -105,8 +105,8 @@ public class ResponseBodyInterceptorChainTests {
 	@Test
 	public void controllerAdviceNotApplicable() {
 
-		Object interceptor = new ControllerAdviceBean(new TargetedControllerAdvice());
-		ResponseBodyInterceptorChain chain = new ResponseBodyInterceptorChain(Arrays.asList(interceptor));
+		Object adviceBean = new ControllerAdviceBean(new TargetedControllerAdvice());
+		ResponseBodyAdviceChain chain = new ResponseBodyAdviceChain(Arrays.asList(adviceBean));
 
 		String actual = chain.invoke(this.body, this.returnType,
 				this.contentType, this.converterType, this.request, this.response);
@@ -116,7 +116,7 @@ public class ResponseBodyInterceptorChainTests {
 
 
 	@ControllerAdvice
-	private static class MyControllerAdvice implements ResponseBodyInterceptor<String> {
+	private static class MyControllerAdvice implements ResponseBodyAdvice<String> {
 
 		@Override
 		public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
@@ -134,7 +134,7 @@ public class ResponseBodyInterceptorChainTests {
 	}
 
 	@ControllerAdvice(annotations = Controller.class)
-	private static class TargetedControllerAdvice implements ResponseBodyInterceptor<String> {
+	private static class TargetedControllerAdvice implements ResponseBodyAdvice<String> {
 
 		@Override
 		public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {

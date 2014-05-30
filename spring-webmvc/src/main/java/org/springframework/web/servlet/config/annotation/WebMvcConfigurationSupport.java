@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.config.annotation;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,10 +75,10 @@ import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
-import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyInterceptor;
+import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyInterceptor;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
@@ -425,9 +424,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		adapter.setCustomReturnValueHandlers(returnValueHandlers);
 
 		if (jackson2Present) {
-			List<ResponseBodyInterceptor<?>> interceptors = new ArrayList<ResponseBodyInterceptor<?>>();
-			interceptors.add(new JsonViewResponseBodyInterceptor());
-			adapter.setResponseBodyInterceptors(interceptors);
+			List<ResponseBodyAdvice<?>> interceptors = new ArrayList<ResponseBodyAdvice<?>>();
+			interceptors.add(new JsonViewResponseBodyAdvice());
+			adapter.setResponseBodyAdvice(interceptors);
 		}
 
 		AsyncSupportConfigurer configurer = new AsyncSupportConfigurer();
@@ -712,9 +711,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		exceptionHandlerExceptionResolver.setContentNegotiationManager(mvcContentNegotiationManager());
 		exceptionHandlerExceptionResolver.setMessageConverters(getMessageConverters());
 		if (jackson2Present) {
-			List<ResponseBodyInterceptor<?>> interceptors = new ArrayList<ResponseBodyInterceptor<?>>();
-			interceptors.add(new JsonViewResponseBodyInterceptor());
-			exceptionHandlerExceptionResolver.setResponseBodyInterceptors(interceptors);
+			List<ResponseBodyAdvice<?>> interceptors = new ArrayList<ResponseBodyAdvice<?>>();
+			interceptors.add(new JsonViewResponseBodyAdvice());
+			exceptionHandlerExceptionResolver.setResponseBodyAdvice(interceptors);
 		}
 		exceptionHandlerExceptionResolver.afterPropertiesSet();
 

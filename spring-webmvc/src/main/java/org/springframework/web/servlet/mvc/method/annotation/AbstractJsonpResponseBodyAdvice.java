@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 
 /**
- * A convenient base class for a {@code ResponseBodyInterceptor} to instruct the
+ * A convenient base class for a {@code ResponseBodyAdvice} to instruct the
  * {@link org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
  * MappingJackson2HttpMessageConverter} to serialize with JSONP formatting.
  *
@@ -43,12 +43,12 @@ import java.util.Collection;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public abstract class AbstractJsonpResponseBodyInterceptor extends AbstractMappingJacksonResponseBodyInterceptor {
+public abstract class AbstractJsonpResponseBodyAdvice extends AbstractMappingJacksonResponseBodyAdvice {
 
 	private final String[] jsonpQueryParamNames;
 
 
-	protected AbstractJsonpResponseBodyInterceptor(Collection<String> queryParamNames) {
+	protected AbstractJsonpResponseBodyAdvice(Collection<String> queryParamNames) {
 		Assert.isTrue(!CollectionUtils.isEmpty(queryParamNames), "At least one query param name is required");
 		this.jsonpQueryParamNames = queryParamNames.toArray(new String[queryParamNames.size()]);
 	}

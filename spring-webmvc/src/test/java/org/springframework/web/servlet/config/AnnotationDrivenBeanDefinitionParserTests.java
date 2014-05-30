@@ -38,11 +38,11 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
-import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyInterceptor;
+import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyInterceptor;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ServletWebArgumentResolverAdapter;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -95,8 +95,8 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		loadBeanDefinitions("mvc-config-message-converters.xml");
 		verifyMessageConverters(appContext.getBean(RequestMappingHandlerAdapter.class), true);
 		verifyMessageConverters(appContext.getBean(ExceptionHandlerExceptionResolver.class), true);
-		verifyResponseBodyInterceptors(appContext.getBean(RequestMappingHandlerAdapter.class));
-		verifyResponseBodyInterceptors(appContext.getBean(ExceptionHandlerExceptionResolver.class));
+		verifyResponseBodyAdvice(appContext.getBean(RequestMappingHandlerAdapter.class));
+		verifyResponseBodyAdvice(appContext.getBean(ExceptionHandlerExceptionResolver.class));
 	}
 
 	@Test
@@ -167,13 +167,13 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void verifyResponseBodyInterceptors(Object bean) {
+	private void verifyResponseBodyAdvice(Object bean) {
 		assertNotNull(bean);
-		Object value = new DirectFieldAccessor(bean).getPropertyValue("responseBodyInterceptors");
+		Object value = new DirectFieldAccessor(bean).getPropertyValue("responseBodyAdvice");
 		assertNotNull(value);
 		assertTrue(value instanceof List);
-		List<ResponseBodyInterceptor> converters = (List<ResponseBodyInterceptor>) value;
-		assertTrue(converters.get(0) instanceof JsonViewResponseBodyInterceptor);
+		List<ResponseBodyAdvice> converters = (List<ResponseBodyAdvice>) value;
+		assertTrue(converters.get(0) instanceof JsonViewResponseBodyAdvice);
 	}
 
 }

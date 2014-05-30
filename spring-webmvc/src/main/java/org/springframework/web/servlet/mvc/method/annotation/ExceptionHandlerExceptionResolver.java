@@ -79,7 +79,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
-	private final List<Object> responseBodyInterceptors = new ArrayList<Object>();
+	private final List<Object> responseBodyAdvice = new ArrayList<Object>();
 
 
 	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache =
@@ -110,15 +110,15 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	}
 
 	/**
-	 * Add one or more interceptors to be invoked after the execution of a controller
+	 * Add one or more components to be invoked after the execution of a controller
 	 * method annotated with {@code @ResponseBody} or returning {@code ResponseEntity}
 	 * but before the body is written to the response with the selected
 	 * {@code HttpMessageConverter}.
 	 */
-	public void setResponseBodyInterceptors(List<ResponseBodyInterceptor<?>> responseBodyInterceptors) {
-		this.responseBodyInterceptors.clear();
-		if (responseBodyInterceptors != null) {
-			this.responseBodyInterceptors.addAll(responseBodyInterceptors);
+	public void setResponseBodyAdvice(List<ResponseBodyAdvice<?>> responseBodyAdvice) {
+		this.responseBodyAdvice.clear();
+		if (responseBodyAdvice != null) {
+			this.responseBodyAdvice.addAll(responseBodyAdvice);
 		}
 	}
 
@@ -250,7 +250,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	@Override
 	public void afterPropertiesSet() {
 
-		// Do this first, it may add ResponseBody interceptors
+		// Do this first, it may add ResponseBodyAdvice beans
 		initExceptionHandlerAdviceCache();
 
 		if (this.argumentResolvers == null) {
@@ -271,18 +271,18 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			logger.debug("Looking for exception mappings: " + getApplicationContext());
 		}
 
-		List<ControllerAdviceBean> beans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
-		Collections.sort(beans, new OrderComparator());
+		List<ControllerAdviceBean> adviceBeans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
+		Collections.sort(adviceBeans, new OrderComparator());
 
-		for (ControllerAdviceBean bean : beans) {
-			ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(bean.getBeanType());
+		for (ControllerAdviceBean adviceBean : adviceBeans) {
+			ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(adviceBean.getBeanType());
 			if (resolver.hasExceptionMappings()) {
-				this.exceptionHandlerAdviceCache.put(bean, resolver);
-				logger.info("Detected @ExceptionHandler methods in " + bean);
+				this.exceptionHandlerAdviceCache.put(adviceBean, resolver);
+				logger.info("Detected @ExceptionHandler methods in " + adviceBean);
 			}
-			if (ResponseBodyInterceptor.class.isAssignableFrom(bean.getBeanType())) {
-				this.responseBodyInterceptors.add(bean);
-				logger.info("Detected ResponseBodyInterceptor implementation in " + bean);
+			if (ResponseBodyAdvice.class.isAssignableFrom(adviceBean.getBeanType())) {
+				this.responseBodyAdvice.add(adviceBean);
+				logger.info("Detected ResponseBodyAdvice implementation in " + adviceBean);
 			}
 		}
 	}
@@ -318,12 +318,12 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		handlers.add(new ModelMethodProcessor());
 		handlers.add(new ViewMethodReturnValueHandler());
 		handlers.add(new HttpEntityMethodProcessor(
-				getMessageConverters(), this.contentNegotiationManager, this.responseBodyInterceptors));
+				getMessageConverters(), this.contentNegotiationManager, this.responseBodyAdvice));
 
 		// Annotation-based return value types
 		handlers.add(new ModelAttributeMethodProcessor(false));
 		handlers.add(new RequestResponseBodyMethodProcessor(
-				getMessageConverters(), this.contentNegotiationManager, this.responseBodyInterceptors));
+				getMessageConverters(), this.contentNegotiationManager, this.responseBodyAdvice));
 
 		// Multi-purpose return value types
 		handlers.add(new ViewNameMethodReturnValueHandler());

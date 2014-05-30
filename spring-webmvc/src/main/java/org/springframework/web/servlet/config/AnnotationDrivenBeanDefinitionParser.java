@@ -19,7 +19,7 @@ package org.springframework.web.servlet.config;
 import java.util.List;
 import java.util.Properties;
 
-import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyInterceptor;
+import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyAdvice;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.w3c.dom.Element;
 
@@ -201,7 +201,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		handlerAdapterDef.getPropertyValues().add("contentNegotiationManager", contentNegotiationManager);
 		handlerAdapterDef.getPropertyValues().add("webBindingInitializer", bindingDef);
 		handlerAdapterDef.getPropertyValues().add("messageConverters", messageConverters);
-		addResponseBodyInterceptors(handlerAdapterDef);
+		addResponseBodyAdvice(handlerAdapterDef);
 
 		if (element.hasAttribute("ignore-default-model-on-redirect")) {
 			Boolean ignoreDefaultModel = Boolean.valueOf(element.getAttribute("ignore-default-model-on-redirect"));
@@ -253,7 +253,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		exceptionHandlerExceptionResolver.getPropertyValues().add("contentNegotiationManager", contentNegotiationManager);
 		exceptionHandlerExceptionResolver.getPropertyValues().add("messageConverters", messageConverters);
 		exceptionHandlerExceptionResolver.getPropertyValues().add("order", 0);
-		addResponseBodyInterceptors(exceptionHandlerExceptionResolver);
+		addResponseBodyAdvice(exceptionHandlerExceptionResolver);
 
 		String methodExceptionResolverName =
 				parserContext.getReaderContext().registerWithGeneratedName(exceptionHandlerExceptionResolver);
@@ -288,10 +288,10 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return null;
 	}
 
-	protected void addResponseBodyInterceptors(RootBeanDefinition beanDef) {
+	protected void addResponseBodyAdvice(RootBeanDefinition beanDef) {
 		if (jackson2Present) {
-			beanDef.getPropertyValues().add("responseBodyInterceptors",
-					new RootBeanDefinition(JsonViewResponseBodyInterceptor.class));
+			beanDef.getPropertyValues().add("responseBodyAdvice",
+					new RootBeanDefinition(JsonViewResponseBodyAdvice.class));
 		}
 	}
 

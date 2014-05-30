@@ -26,7 +26,7 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.Assert;
 
 /**
- * A {@code ResponseBodyInterceptor} implementation that adds support for
+ * A {@code ResponseBodyAdvice} implementation that adds support for
  * Jackson's {@code @JsonView} annotation declared on a Spring MVC
  * {@code @RequestMapping} or {@code @ExceptionHandler} method. The serialization
  * view specified in the annotation will be passed in to the
@@ -38,7 +38,7 @@ import org.springframework.util.Assert;
  *
  * @see com.fasterxml.jackson.databind.ObjectMapper#writerWithView(Class)
  */
-public class JsonViewResponseBodyInterceptor extends AbstractMappingJacksonResponseBodyInterceptor {
+public class JsonViewResponseBodyAdvice extends AbstractMappingJacksonResponseBodyAdvice {
 
 
 	@Override
