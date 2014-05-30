@@ -42,7 +42,7 @@ public @interface MetaContextHierarchyConfig {
 }
 
 @Configuration
-@Profile("dev")
+@DevProfile
 class DevConfig {
 
 	@Bean
@@ -52,11 +52,21 @@ class DevConfig {
 }
 
 @Configuration
-@Profile("prod")
+@ProdProfile
 class ProductionConfig {
 
 	@Bean
 	public String foo() {
 		return "Production Foo";
 	}
+}
+
+@Profile("dev")
+@Retention(RetentionPolicy.RUNTIME)
+@interface DevProfile {
+}
+
+@Profile("prod")
+@Retention(RetentionPolicy.RUNTIME)
+@interface ProdProfile {
 }
