@@ -77,7 +77,7 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
 
 /**
  * A {@link BeanDefinitionParser} that provides the configuration for the
- * {@code <annotation-driven/>} MVC namespace  element.
+ * {@code <annotation-driven/>} MVC namespace element.
  *
  * <p>This class registers the following {@link HandlerMapping}s:</p>
  * <ul>
@@ -110,6 +110,16 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  * 	<li>{@link DefaultHandlerExceptionResolver} for resolving known Spring
  * 	exception types
  * </ul>
+ *
+ * <p>This class registers an {@link org.springframework.util.AntPathMatcher}
+ * and a {@link org.springframework.web.util.UrlPathHelper} to be used by:
+ * <ul>
+ *  <li>the {@link RequestMappingHandlerMapping},
+ *  <li>the {@link HandlerMapping} for ViewControllers
+ *  <li>and the {@link HandlerMapping} for serving resources
+ * </ul>
+ * Note that those beans can be configured by using the {@code path-matching} MVC namespace element.
+
  *
  * <p>Both the {@link RequestMappingHandlerAdapter} and the
  * {@link ExceptionHandlerExceptionResolver} are configured with instances of
@@ -174,7 +184,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			handlerMappingDef.getPropertyValues().add("removeSemicolonContent", !enableMatrixVariables);
 		}
 
-		configurePathMatchingProperties(handlerMappingDef, element);
+		configurePathMatchingProperties(handlerMappingDef, element, parserContext);
 
 		RuntimeBeanReference conversionService = getConversionService(element, source, parserContext);
 		RuntimeBeanReference validator = getValidator(element, source, parserContext);
@@ -348,9 +358,11 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return contentNegotiationManagerRef;
 	}
 
-	private void configurePathMatchingProperties(RootBeanDefinition handlerMappingDef, Element element) {
+	private void configurePathMatchingProperties(RootBeanDefinition handlerMappingDef,
+	                                             Element element, ParserContext parserContext) {
 		Element pathMatchingElement = DomUtils.getChildElementByTagName(element, "path-matching");
 		if(pathMatchingElement != null) {
+			Object source = parserContext.extractSource(element);
 			if (pathMatchingElement.hasAttribute("suffix-pattern")) {
 				Boolean useSuffixPatternMatch = Boolean.valueOf(pathMatchingElement.getAttribute("suffix-pattern"));
 				handlerMappingDef.getPropertyValues().add("useSuffixPatternMatch", useSuffixPatternMatch);
@@ -363,14 +375,19 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 				Boolean useRegisteredSuffixPatternMatch = Boolean.valueOf(pathMatchingElement.getAttribute("registered-suffixes-only"));
 				handlerMappingDef.getPropertyValues().add("useRegisteredSuffixPatternMatch", useRegisteredSuffixPatternMatch);
 			}
+			RuntimeBeanReference pathHelperRef = null;
 			if (pathMatchingElement.hasAttribute("path-helper")) {
-				RuntimeBeanReference pathHelperRef = new RuntimeBeanReference(pathMatchingElement.getAttribute("path-helper"));
-				handlerMappingDef.getPropertyValues().add("urlPathHelper", pathHelperRef);
+				pathHelperRef = new RuntimeBeanReference(pathMatchingElement.getAttribute("path-helper"));
 			}
+			pathHelperRef = MvcNamespaceUtils.registerUrlPathHelper(pathHelperRef, parserContext, source);
+			handlerMappingDef.getPropertyValues().add("urlPathHelper", pathHelperRef);
+
+			RuntimeBeanReference pathMatcherRef = null;
 			if (pathMatchingElement.hasAttribute("path-matcher")) {
-				RuntimeBeanReference pathMatcherRef = new RuntimeBeanReference(pathMatchingElement.getAttribute("path-matcher"));
-				handlerMappingDef.getPropertyValues().add("pathMatcher", pathMatcherRef);
+				pathMatcherRef = new RuntimeBeanReference(pathMatchingElement.getAttribute("path-matcher"));
 			}
+			pathMatcherRef = MvcNamespaceUtils.registerPathMatcher(pathMatcherRef, parserContext, source);
+			handlerMappingDef.getPropertyValues().add("pathMatcher", pathMatcherRef);
 		}
 	}
 

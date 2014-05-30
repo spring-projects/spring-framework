@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.DefaultMessageCodesResolver;
 import org.springframework.validation.Errors;
@@ -63,6 +64,7 @@ import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * A test fixture with a sub-class of {@link WebMvcConfigurationSupport} that
@@ -93,6 +95,8 @@ public class WebMvcConfigurationSupportExtensionTests {
 		RequestMappingHandlerMapping rmHandlerMapping = webConfig.requestMappingHandlerMapping();
 		rmHandlerMapping.setApplicationContext(webAppContext);
 		rmHandlerMapping.afterPropertiesSet();
+		assertEquals(TestPathHelper.class, rmHandlerMapping.getUrlPathHelper().getClass());
+		assertEquals(TestPathMatcher.class, rmHandlerMapping.getPathMatcher().getClass());
 		HandlerExecutionChain chain = rmHandlerMapping.getHandler(new MockHttpServletRequest("GET", "/"));
 		assertNotNull(chain.getInterceptors());
 		assertEquals(3, chain.getInterceptors().length);
@@ -104,6 +108,8 @@ public class WebMvcConfigurationSupportExtensionTests {
 		handlerMapping.setApplicationContext(webAppContext);
 		assertNotNull(handlerMapping);
 		assertEquals(1, handlerMapping.getOrder());
+		assertEquals(TestPathHelper.class, handlerMapping.getUrlPathHelper().getClass());
+		assertEquals(TestPathMatcher.class, handlerMapping.getPathMatcher().getClass());
 		HandlerExecutionChain handler = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/path"));
 		assertNotNull(handler.getHandler());
 
@@ -111,6 +117,8 @@ public class WebMvcConfigurationSupportExtensionTests {
 		handlerMapping.setApplicationContext(webAppContext);
 		assertNotNull(handlerMapping);
 		assertEquals(Integer.MAX_VALUE-1, handlerMapping.getOrder());
+		assertEquals(TestPathHelper.class, handlerMapping.getUrlPathHelper().getClass());
+		assertEquals(TestPathMatcher.class, handlerMapping.getPathMatcher().getClass());
 		handler = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/resources/foo.gif"));
 		assertNotNull(handler.getHandler());
 
@@ -278,6 +286,12 @@ public class WebMvcConfigurationSupportExtensionTests {
 		}
 
 		@Override
+		public void configurePathMatch(PathMatchConfigurer configurer) {
+			configurer.setPathMatcher(new TestPathMatcher());
+			configurer.setUrlPathHelper(new TestPathHelper());
+		}
+
+		@Override
 		public void addInterceptors(InterceptorRegistry registry) {
 			registry.addInterceptor(new LocaleChangeInterceptor());
 		}
@@ -310,4 +324,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 
 	}
 
+	private class TestPathHelper extends UrlPathHelper {}
+
+	private class TestPathMatcher extends AntPathMatcher {}
 }

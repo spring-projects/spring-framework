@@ -36,6 +36,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -58,6 +60,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
+import org.springframework.web.util.UrlPathHelper;
 
 import static org.junit.Assert.*;
 
@@ -195,6 +198,16 @@ public class WebMvcConfigurationSupportTests {
 		List<Object> interceptors = (List<Object>) fieldAccessor.getPropertyValue("responseBodyAdvice");
 		assertEquals(1, interceptors.size());
 		assertEquals(JsonViewResponseBodyAdvice.class, interceptors.get(0).getClass());
+	}
+
+	@Test
+	public void defaultPathMatchConfiguration() throws Exception {
+		UrlPathHelper urlPathHelper = this.wac.getBean(UrlPathHelper.class);
+		PathMatcher pathMatcher = this.wac.getBean(PathMatcher.class);
+
+		assertNotNull(urlPathHelper);
+		assertNotNull(pathMatcher);
+		assertEquals(AntPathMatcher.class, pathMatcher.getClass());
 	}
 
 

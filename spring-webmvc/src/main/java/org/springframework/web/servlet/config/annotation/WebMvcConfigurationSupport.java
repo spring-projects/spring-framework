@@ -48,6 +48,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.validation.Errors;
@@ -128,6 +129,15 @@ import org.springframework.web.util.UrlPathHelper;
  * 	exception types
  * </ul>
  *
+ * <p>Registers an {@link AntPathMatcher} and a {@link UrlPathHelper}
+ * to be used by:
+ * <ul>
+ *  <li>the {@link RequestMappingHandlerMapping},
+ *  <li>the {@link HandlerMapping} for ViewControllers
+ *  <li>and the {@link HandlerMapping} for serving resources
+ * </ul>
+ * Note that those beans can be configured with a {@link PathMatchConfigurer}.
+ *
  * <p>Both the {@link RequestMappingHandlerAdapter} and the
  * {@link ExceptionHandlerExceptionResolver} are configured with default
  * instances of the following by default:
@@ -145,6 +155,7 @@ import org.springframework.web.util.UrlPathHelper;
  * @see WebMvcConfigurerAdapter
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 3.1
  */
 public class WebMvcConfigurationSupport implements ApplicationContextAware, ServletContextAware {
@@ -318,6 +329,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
 		handlerMapping = handlerMapping != null ? handlerMapping : new EmptyHandlerMapping();
+		handlerMapping.setPathMatcher(mvcPathMatcher());
+		handlerMapping.setUrlPathHelper(mvcUrlPathHelper());
 		handlerMapping.setInterceptors(getInterceptors());
 		return handlerMapping;
 	}
@@ -353,6 +366,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		addResourceHandlers(registry);
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
 		handlerMapping = handlerMapping != null ? handlerMapping : new EmptyHandlerMapping();
+		handlerMapping.setPathMatcher(mvcPathMatcher());
+		handlerMapping.setUrlPathHelper(mvcUrlPathHelper());
 		return handlerMapping;
 	}
 
@@ -507,6 +522,40 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			}
 		}
 		return validator;
+	}
+
+	/**
+	 * Return a global {@link PathMatcher} instance for path matching
+	 * patterns in {@link HandlerMapping}s.
+	 * This instance can be configured using the {@link PathMatchConfigurer}
+	 * in {@link #configurePathMatch(PathMatchConfigurer)}.
+	 * @since 4.1
+	 */
+	@Bean
+	public PathMatcher mvcPathMatcher() {
+		if(getPathMatchConfigurer().getPathMatcher() != null) {
+			return getPathMatchConfigurer().getPathMatcher();
+		}
+		else {
+			return new AntPathMatcher();
+		}
+	}
+
+	/**
+	 * Return a global {@link UrlPathHelper} instance for path matching
+	 * patterns in {@link HandlerMapping}s.
+	 * This instance can be configured using the {@link PathMatchConfigurer}
+	 * in {@link #configurePathMatch(PathMatchConfigurer)}.
+	 * @since 4.1
+	 */
+	@Bean
+	public UrlPathHelper mvcUrlPathHelper() {
+		if(getPathMatchConfigurer().getUrlPathHelper() != null) {
+			return getPathMatchConfigurer().getUrlPathHelper();
+		}
+		else {
+			return new UrlPathHelper();
+		}
 	}
 
 	/**

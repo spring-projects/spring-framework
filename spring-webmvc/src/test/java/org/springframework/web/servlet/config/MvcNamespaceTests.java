@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,6 +76,7 @@ import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBui
 import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
+import org.springframework.web.util.UrlPathHelper;
 
 import static org.junit.Assert.*;
 
@@ -86,6 +87,8 @@ import static org.junit.Assert.*;
  */
 public class MvcNamespaceTests {
 
+	public static final String VIEWCONTROLLER_BEAN_NAME = "org.springframework.web.servlet.config.viewControllerHandlerMapping";
+	
 	private GenericWebApplicationContext appContext;
 
 	private TestController handler;
@@ -250,7 +253,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testResources() throws Exception {
-		loadBeanDefinitions("mvc-config-resources.xml", 5);
+		loadBeanDefinitions("mvc-config-resources.xml", 7);
 
 		HttpRequestHandlerAdapter adapter = appContext.getBean(HttpRequestHandlerAdapter.class);
 		assertNotNull(adapter);
@@ -283,7 +286,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testResourcesWithOptionalAttributes() throws Exception {
-		loadBeanDefinitions("mvc-config-resources-optional-attrs.xml", 5);
+		loadBeanDefinitions("mvc-config-resources-optional-attrs.xml", 7);
 
 		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(mapping);
@@ -365,7 +368,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testViewControllers() throws Exception {
-		loadBeanDefinitions("mvc-config-view-controllers.xml", 16);
+		loadBeanDefinitions("mvc-config-view-controllers.xml", 18);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
@@ -425,7 +428,7 @@ public class MvcNamespaceTests {
 	/** WebSphere gives trailing servlet path slashes by default!! */
 	@Test
 	public void testViewControllersOnWebSphere() throws Exception {
-		loadBeanDefinitions("mvc-config-view-controllers.xml", 16);
+		loadBeanDefinitions("mvc-config-view-controllers.xml", 18);
 
 		SimpleUrlHandlerMapping mapping2 = appContext.getBean(SimpleUrlHandlerMapping.class);
 		SimpleControllerHandlerAdapter adapter = appContext.getBean(SimpleControllerHandlerAdapter.class);
@@ -469,7 +472,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testViewControllersDefaultConfig() {
-		loadBeanDefinitions("mvc-config-view-controllers-minimal.xml", 4);
+		loadBeanDefinitions("mvc-config-view-controllers-minimal.xml", 6);
 
 		BeanNameUrlHandlerMapping beanNameMapping = appContext.getBean(BeanNameUrlHandlerMapping.class);
 		assertNotNull(beanNameMapping);
@@ -506,6 +509,28 @@ public class MvcNamespaceTests {
 		DeferredResultProcessingInterceptor[] deferredResultInterceptors =
 				(DeferredResultProcessingInterceptor[]) fieldAccessor.getPropertyValue("deferredResultInterceptors");
 		assertEquals(1, deferredResultInterceptors.length);
+	}
+
+	@Test
+	public void testPathMatchingHandlerMappings() throws Exception {
+		loadBeanDefinitions("mvc-config-path-matching-mappings.xml", 20);
+
+		RequestMappingHandlerMapping requestMapping = appContext.getBean(RequestMappingHandlerMapping.class);
+		assertNotNull(requestMapping);
+		assertEquals(TestPathHelper.class, requestMapping.getUrlPathHelper().getClass());
+		assertEquals(TestPathMatcher.class, requestMapping.getPathMatcher().getClass());
+
+		SimpleUrlHandlerMapping viewController = appContext.getBean(VIEWCONTROLLER_BEAN_NAME, SimpleUrlHandlerMapping.class);
+		assertNotNull(viewController);
+		assertEquals(TestPathHelper.class, viewController.getUrlPathHelper().getClass());
+		assertEquals(TestPathMatcher.class, viewController.getPathMatcher().getClass());
+
+		for(SimpleUrlHandlerMapping handlerMapping : appContext.getBeansOfType(SimpleUrlHandlerMapping.class).values()) {
+			assertNotNull(handlerMapping);
+			assertEquals(TestPathHelper.class, handlerMapping.getUrlPathHelper().getClass());
+			assertEquals(TestPathMatcher.class, handlerMapping.getPathMatcher().getClass());
+		}
+
 	}
 
 
@@ -617,5 +642,8 @@ public class MvcNamespaceTests {
 			return null;
 		}
 	}
+
+	public static class TestPathHelper extends UrlPathHelper { }
+
 
 }

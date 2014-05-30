@@ -80,7 +80,14 @@ public interface WebMvcConfigurer {
 	void configureAsyncSupport(AsyncSupportConfigurer configurer);
 
 	/**
-	 * Configure path matching options.
+	 * Helps with configuring HandlerMappings path matching options such as trailing slash match,
+	 * suffix registration, path matcher and path helper.
+	 * Configured path matcher and path helper instances are shared for:
+	 * <ul>
+	 *     <li>RequestMappings</li>
+	 *     <li>ViewControllerMappings</li>
+	 *     <li>ResourcesMappings</li>
+	 * </ul>
 	 * @since 4.0.3
 	 */
 	void configurePathMatch(PathMatchConfigurer configurer);
