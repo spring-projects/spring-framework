@@ -21,9 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
@@ -44,7 +42,7 @@ import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
  * @author Artem Bilan
  * @since 4.0
  */
-public class WebMvcStompEndpointRegistry implements StompEndpointRegistry, ApplicationContextAware {
+public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 
 	private final WebSocketHandler webSocketHandler;
 
@@ -88,17 +86,15 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry, Appli
 		this.sockJsScheduler = defaultSockJsTaskScheduler;
 	}
 
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		this.stompHandler.setApplicationEventPublisher(applicationContext);
-	}
-
 	private static SubProtocolWebSocketHandler unwrapSubProtocolWebSocketHandler(WebSocketHandler wsHandler) {
 		WebSocketHandler actual = WebSocketHandlerDecorator.unwrap(wsHandler);
 		Assert.isInstanceOf(SubProtocolWebSocketHandler.class, actual, "No SubProtocolWebSocketHandler in " + wsHandler);
 		return (SubProtocolWebSocketHandler) actual;
 	}
 
+	protected void setApplicationContext(ApplicationContext applicationContext) {
+		this.stompHandler.setApplicationEventPublisher(applicationContext);
+	}
 
 	@Override
 	public StompWebSocketEndpointRegistration addEndpoint(String... paths) {
