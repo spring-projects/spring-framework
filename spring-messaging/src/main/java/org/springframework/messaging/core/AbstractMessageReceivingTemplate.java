@@ -67,9 +67,9 @@ public abstract class AbstractMessageReceivingTemplate<D> extends AbstractMessag
 		MessageConverter messageConverter = getMessageConverter();
 		T value = (T) messageConverter.fromMessage(message, targetClass);
 		if (value == null) {
-			throw new MessageConversionException("Unable to convert payload='"
+			throw new MessageConversionException(message, "Unable to convert payload='"
 					+ message.getPayload() + "' to type='" + targetClass
-					+ "', converter=[" + messageConverter + "]");
+					+ "', converter=[" + messageConverter + "]", null);
 		}
 		return value;
 	}

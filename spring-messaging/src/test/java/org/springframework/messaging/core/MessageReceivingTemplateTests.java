@@ -29,8 +29,7 @@ import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.support.GenericMessage;
 
 import static org.hamcrest.CoreMatchers.isA;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 import java.io.Writer;
 
@@ -118,10 +117,13 @@ public class MessageReceivingTemplateTests {
 		this.template.setDefaultDestination("home");
 		this.template.setReceiveMessage(expected);
 		this.template.setMessageConverter(new GenericMessageConverter(new DefaultConversionService()));
-
-		thrown.expect(MessageConversionException.class);
-		thrown.expectMessage("payload");
-		this.template.receiveAndConvert(Writer.class);
+		try {
+			this.template.receiveAndConvert(Writer.class);
+		}
+		catch (MessageConversionException e) {
+			assertTrue("Invalid exception message '"+e.getMessage()+"'", e.getMessage().contains("payload"));
+			assertSame(expected, e.getFailedMessage());
+		}
 	}
 
 
