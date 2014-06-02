@@ -104,15 +104,13 @@ import org.springframework.util.ErrorHandler;
  * runtime processing overhead.
  * </ul>
  *
- * <p>Note that it is also possible to specify a
- * {@link org.springframework.jms.connection.JmsTransactionManager} as external
- * "transactionManager", providing fully synchronized Spring transactions based
- * on local JMS transactions. The effect is similar to "sessionTransacted" set
- * to "true", the difference being that this external transaction management
- * will also affect independent JMS access code within the service layer
- * (e.g. based on {@link org.springframework.jms.core.JmsTemplate} or
- * {@link org.springframework.jms.connection.TransactionAwareConnectionFactoryProxy}),
- * not just direct JMS Session usage in a {@link SessionAwareMessageListener}.
+ * <p>Note that even if
+ * {@link org.springframework.jms.connection.JmsTransactionManager} used to
+ * only provide fully synchronized Spring transactions based
+ * on local JMS transactions, "sessionTransacted" offers now the same feature and
+ * is the recommended option when transactions are not managed externally. In
+ * other words, set the transaction manager only if you are using JTA , or
+ * synchronizing transactions.
  *
  * @author Juergen Hoeller
  * @author Stephane Nicoll

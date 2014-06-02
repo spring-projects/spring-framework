@@ -132,11 +132,13 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * Simply switch the {@link #setSessionTransacted "sessionTransacted"} flag
 	 * to "true" in order to use a locally transacted JMS Session for the entire
 	 * receive processing, including any Session operations performed by a
-	 * {@link SessionAwareMessageListener} (e.g. sending a response message).
-	 * Alternatively, a {@link org.springframework.jms.connection.JmsTransactionManager}
-	 * may be used for fully synchronized Spring transactions based on local JMS
-	 * transactions. Check {@link AbstractMessageListenerContainer}'s javadoc for
+	 * {@link SessionAwareMessageListener} (e.g. sending a response message). This
+	 * allows for fully synchronized Spring transactions based on local JMS
+	 * transactions, similar to what
+	 * {@link org.springframework.jms.connection.JmsTransactionManager} provides. Check
+	 * {@link AbstractMessageListenerContainer}'s javadoc for
 	 * a discussion of transaction choices and message redelivery scenarios.
+	 * @see #setSessionTransacted(boolean)
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 * @see org.springframework.jms.connection.JmsTransactionManager
 	 */

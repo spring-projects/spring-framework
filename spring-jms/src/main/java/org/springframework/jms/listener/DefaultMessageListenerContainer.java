@@ -262,12 +262,13 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * <p>Default is {@link #CACHE_NONE} if an external transaction manager has been specified
 	 * (to reobtain all resources freshly within the scope of the external transaction),
 	 * and {@link #CACHE_CONSUMER} otherwise (operating with local JMS resources).
-	 * <p>Some J2EE servers only register their JMS resources with an ongoing XA
+	 * <p>Some JavaEE servers only register their JMS resources with an ongoing XA
 	 * transaction in case of a freshly obtained JMS {@code Connection} and {@code Session},
 	 * which is why this listener container by default does not cache any of those.
-	 * However, if you want to optimize for a specific server, consider switching
-	 * this setting to at least {@link #CACHE_CONNECTION} or {@link #CACHE_SESSION}
-	 * even in conjunction with an external transaction manager.
+	 * However, depending on how smart your JavaEE server is with respect to the caching
+	 * of transactional resource, consider switching this setting to at least
+	 * {@link #CACHE_CONNECTION} or {@link #CACHE_SESSION} even in conjunction with an
+	 * external transaction manager.
 	 * @see #CACHE_NONE
 	 * @see #CACHE_CONNECTION
 	 * @see #CACHE_SESSION
