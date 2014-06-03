@@ -768,6 +768,7 @@ project("spring-webmvc") {
 		optional("org.apache.velocity:velocity:1.7")
 		optional("velocity-tools:velocity-tools-view:1.4")
 		optional("org.freemarker:freemarker:2.3.20")
+		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("com.lowagie:itext:2.1.7")
 		optional("net.sf.jasperreports:jasperreports:$jasperReportsVersion") {
 			exclude group: "com.fasterxml.jackson.core", module: "jackson-annotations"
