@@ -101,7 +101,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * by other means than bean definitions.
 	 * <p>This version of {@code getBeanNamesForType} matches all kinds of beans,
 	 * be it singletons, prototypes, or FactoryBeans. In most implementations, the
-	 * result will be the same as for {@code getBeanNamesOfType(type, true, true)}.
+	 * result will be the same as for {@code getBeanNamesForType(type, true, true)}.
 	 * <p>Bean names returned by this method should always return bean names <i>in the
 	 * order of definition</i> in the backend configuration, as far as possible.
 	 * @param type the class or interface to match, or {@code null} for all bean names
