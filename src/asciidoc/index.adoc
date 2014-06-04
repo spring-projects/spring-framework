@@ -2046,12 +2046,12 @@ part of a Spring XML configuration file specifies some bean definitions:
 [subs="verbatim,quotes"]
 ----
 	<bean id="exampleBean" class="examples.ExampleBean">
-		<!-- setter injection using the nested <ref/> element -->
+		<!-- setter injection using the nested ref element -->
 		<property name="beanOne">
 			<ref bean="anotherExampleBean"/>
 		</property>
 
-		<!-- setter injection using the neater 'ref' attribute -->
+		<!-- setter injection using the neater ref attribute -->
 		<property name="beanTwo" ref="yetAnotherBean"/>
 		<property name="integerProperty" value="1"/>
 	</bean>
@@ -2091,12 +2091,12 @@ in the XML file. The following example uses constructor-based DI:
 [subs="verbatim,quotes"]
 ----
 	<bean id="exampleBean" class="examples.ExampleBean">
-		<!-- constructor injection using the nested <ref/> element -->
+		<!-- constructor injection using the nested ref element -->
 		<constructor-arg>
 			<ref bean="anotherExampleBean"/>
 		</constructor-arg>
 
-		<!-- constructor injection using the neater 'ref' attribute -->
+		<!-- constructor injection using the neater ref attribute -->
 		<constructor-arg ref="yetAnotherBean"/>
 
 		<constructor-arg type="int" value="1"/>
