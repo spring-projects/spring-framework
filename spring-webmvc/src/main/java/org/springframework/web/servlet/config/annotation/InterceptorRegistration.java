@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public class InterceptorRegistration {
 	 * {@link MappedInterceptor}; otherwise {@link HandlerInterceptor}.
 	 */
 	protected Object getInterceptor() {
-		if (this.includePatterns.isEmpty()) {
+		if (this.includePatterns.isEmpty() && this.excludePatterns.isEmpty()) {
 			return this.interceptor;
 		}
 		MappedInterceptor mappedInterceptor = new MappedInterceptor(

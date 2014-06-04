@@ -138,6 +138,20 @@ public class InterceptorRegistryTests {
 		verifyAdaptedInterceptor(interceptors.get(0), webRequestInterceptor2);
 	}
 
+	/**
+	 * Test for SPR-11130
+	 */
+	@Test
+	public void addInterceptorWithExcludePathPatternOnly() {
+		registry.addInterceptor(interceptor1).excludePathPatterns("/path1/secret");
+		registry.addInterceptor(interceptor2).addPathPatterns("/path2");
+
+		assertEquals(Arrays.asList(interceptor1), getInterceptorsForPath("/path1"));
+		assertEquals(Arrays.asList(interceptor1, interceptor2), getInterceptorsForPath("/path2"));
+		assertEquals(Collections.emptyList(), getInterceptorsForPath("/path1/secret"));
+	}
+
+
 	private List<HandlerInterceptor> getInterceptorsForPath(String lookupPath) {
 		PathMatcher pathMatcher = new AntPathMatcher();
 		List<HandlerInterceptor> result = new ArrayList<HandlerInterceptor>();
@@ -147,11 +161,9 @@ public class InterceptorRegistryTests {
 				if (mappedInterceptor.matches(lookupPath, pathMatcher)) {
 					result.add(mappedInterceptor.getInterceptor());
 				}
-			}
-			else if (i instanceof HandlerInterceptor){
+			} else if (i instanceof HandlerInterceptor) {
 				result.add((HandlerInterceptor) i);
-			}
-			else {
+			} else {
 				fail("Unexpected interceptor type: " + i.getClass().getName());
 			}
 		}
