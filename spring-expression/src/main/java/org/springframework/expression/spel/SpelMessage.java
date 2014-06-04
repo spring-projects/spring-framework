@@ -249,7 +249,10 @@ public enum SpelMessage {
 			"Problem parsing left operand"),
 
 	MISSING_SELECTION_EXPRESSION(Kind.ERROR, 1071,
-			"A required selection expression has not been specified");
+			"A required selection expression has not been specified"),
+	
+	EXCEPTION_RUNNING_COMPILED_EXPRESSION(Kind.ERROR,1072,
+			"An exception occurred whilst evaluating a compiled expression");
 
 
 	private final Kind kind;

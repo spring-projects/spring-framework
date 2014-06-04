@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,13 @@
 package org.springframework.expression.spel.ast;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.asm.MethodVisitor;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.ConstructorExecutor;
@@ -34,6 +37,8 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelNode;
+import org.springframework.expression.spel.standard.CodeFlow;
+import org.springframework.expression.spel.support.ReflectiveConstructorExecutor;
 
 /**
  * Represents the invocation of a constructor. Either a constructor on a regular type or
@@ -151,6 +156,10 @@ public class ConstructorReference extends SpelNodeImpl {
 		executorToUse = findExecutorForConstructor(typename, argumentTypes, state);
 		try {
 			this.cachedExecutor = executorToUse;
+			if (this.cachedExecutor instanceof ReflectiveConstructorExecutor) {
+				this.exitTypeDescriptor = CodeFlow.toDescriptor(((ReflectiveConstructorExecutor)this.cachedExecutor).getConstructor().getDeclaringClass());
+				
+			}
 			return executorToUse.execute(state.getEvaluationContext(), arguments);
 		}
 		catch (AccessException ae) {
@@ -402,6 +411,54 @@ public class ConstructorReference extends SpelNodeImpl {
 
 	private boolean hasInitializer() {
 		return getChildCount() > 1;
+	}
+	
+	@Override
+	public boolean isCompilable() {
+		if (!(this.cachedExecutor instanceof ReflectiveConstructorExecutor) || 
+			this.exitTypeDescriptor == null) {
+			return false;
+		}
+		if (getChildCount() > 1) {
+			for (int c = 1, max = getChildCount();c < max; c++) {
+				if (!children[c].isCompilable()) {
+					return false;
+				}
+			}
+		}
+		ReflectiveConstructorExecutor executor = (ReflectiveConstructorExecutor)this.cachedExecutor;
+		Constructor<?> constructor = executor.getConstructor();
+		if (!Modifier.isPublic(constructor.getModifiers()) || 
+			!Modifier.isPublic(constructor.getDeclaringClass().getModifiers())) {
+			return false;
+		}
+		if (constructor.isVarArgs()) {
+			return false;
+		}
+		return true;
+	}
+	
+	@Override
+	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
+		ReflectiveConstructorExecutor executor = ((ReflectiveConstructorExecutor) this.cachedExecutor);
+		Constructor<?> constructor = executor.getConstructor();
+		
+		String classSlashedDescriptor = constructor.getDeclaringClass().getName().replace('.','/');
+		String[] paramDescriptors = CodeFlow.toParamDescriptors(constructor);
+		mv.visitTypeInsn(NEW,classSlashedDescriptor);
+		mv.visitInsn(DUP);
+		for (int c = 1; c < children.length; c++) { // children[0] is the type of the constructor
+			SpelNodeImpl child = children[c];
+			codeflow.enterCompilationScope();
+			child.generateCode(mv, codeflow);
+			// Check if need to box it for the method reference?
+			if (CodeFlow.isPrimitive(codeflow.lastDescriptor()) && (paramDescriptors[c-1].charAt(0)=='L')) {
+				CodeFlow.insertBoxIfNecessary(mv, codeflow.lastDescriptor().charAt(0));
+			}
+			codeflow.exitCompilationScope();
+		}
+		mv.visitMethodInsn(INVOKESPECIAL,classSlashedDescriptor,"<init>",CodeFlow.createSignatureDescriptor(constructor),false);
+		codeflow.pushDescriptor(exitTypeDescriptor);
 	}
 
 }

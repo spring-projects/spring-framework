@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,15 @@
 
 package org.springframework.expression.spel.ast;
 
+import org.springframework.asm.MethodVisitor;
+
 import java.math.BigDecimal;
 
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.expression.spel.standard.CodeFlow;
 import org.springframework.util.NumberUtils;
 
 /**
@@ -81,17 +84,29 @@ public class OpMultiply extends Operator {
 			}
 
 			if (leftNumber instanceof Double || rightNumber instanceof Double) {
-				return new TypedValue(leftNumber.doubleValue() * rightNumber.doubleValue());
+				if (leftNumber instanceof Double && rightNumber instanceof Double) {
+					this.exitTypeDescriptor = "D";
+				}
+				return new TypedValue(leftNumber.doubleValue()
+						* rightNumber.doubleValue());
 			}
 
 			if (leftNumber instanceof Float || rightNumber instanceof Float) {
+				if (leftNumber instanceof Float && rightNumber instanceof Float) {
+					this.exitTypeDescriptor = "F";
+				}
 				return new TypedValue(leftNumber.floatValue() * rightNumber.floatValue());
 			}
 
 			if (leftNumber instanceof Long || rightNumber instanceof Long) {
+				if (leftNumber instanceof Long && rightNumber instanceof Long) {
+					this.exitTypeDescriptor = "J";
+				}
 				return new TypedValue(leftNumber.longValue() * rightNumber.longValue());
 			}
-
+			if (leftNumber instanceof Integer && rightNumber instanceof Integer) {
+				this.exitTypeDescriptor = "I";
+			}
 			return new TypedValue(leftNumber.intValue() * rightNumber.intValue());
 		}
 		else if (leftOperand instanceof String && rightOperand instanceof Integer) {
@@ -104,6 +119,52 @@ public class OpMultiply extends Operator {
 		}
 
 		return state.operate(Operation.MULTIPLY, leftOperand, rightOperand);
+	}
+	
+	@Override
+	public boolean isCompilable() {
+		if (!getLeftOperand().isCompilable()) {
+			return false;
+		}
+		if (this.children.length>1) {
+			 if (!getRightOperand().isCompilable()) {
+				 return false;
+			 }
+		}
+		return this.exitTypeDescriptor!=null;
+	}
+	
+	@Override
+	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
+		getLeftOperand().generateCode(mv, codeflow);
+		String leftdesc = getLeftOperand().getExitDescriptor();
+		if (!CodeFlow.isPrimitive(leftdesc)) {
+			CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), false);
+		}
+		if (this.children.length>1) {
+			getRightOperand().generateCode(mv, codeflow);
+			String rightdesc = getRightOperand().getExitDescriptor();
+			if (!CodeFlow.isPrimitive(rightdesc)) {
+				CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), false);
+			}
+			switch (this.exitTypeDescriptor.charAt(0)) {
+				case 'I':
+					mv.visitInsn(IMUL);
+					break;
+				case 'J':
+					mv.visitInsn(LMUL);
+					break;
+				case 'F': 
+					mv.visitInsn(FMUL);
+					break;
+				case 'D':
+					mv.visitInsn(DMUL);
+					break;				
+				default:
+					throw new IllegalStateException("Unrecognized exit descriptor: '"+this.exitTypeDescriptor+"'");			
+			}
+		}
+		codeflow.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 }

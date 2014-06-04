@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,11 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.common.ExpressionUtils;
+import org.springframework.expression.spel.CompiledExpression;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.expression.spel.SpelCompilerMode;
+import org.springframework.expression.spel.SpelEvaluationException;
+import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.ast.SpelNodeImpl;
@@ -42,12 +46,23 @@ public class SpelExpression implements Expression {
 
 	private final String expression;
 
-	private final SpelNodeImpl ast;
+	// Holds the compiled form of the expression (if it has been compiled)
+	private CompiledExpression compiledAst;
+
+	private SpelNodeImpl ast;
 
 	private final SpelParserConfiguration configuration;
 
 	// the default context is used if no override is supplied by the user
 	private EvaluationContext defaultContext;
+
+	// Count of many times as the expression been interpreted - can trigger compilation
+	// when certain limit reached
+	private int interpretedCount = 0;
+	
+	// The number of times compilation was attempted and failed - enables us to eventually
+	// give up trying to compile it when it just doesn't seem to be possible.
+	private int failedAttempts = 0;
 
 
 	/**
@@ -64,51 +79,214 @@ public class SpelExpression implements Expression {
 
 	@Override
 	public Object getValue() throws EvaluationException {
+		Object result = null;
+		if (compiledAst != null) {
+			try {
+				return this.compiledAst.getValue(null,null);
+			} catch (Throwable t) {
+				// If running in mixed mode, revert to interpreted
+				if (this.configuration.getCompilerMode() == SpelCompilerMode.mixed) {
+					interpretedCount = 0;
+					compiledAst = null;
+				}
+				else {
+					// Running in SpelCompilerMode.immediate mode - propagate exception to caller
+					throw new SpelEvaluationException(t,SpelMessage.EXCEPTION_RUNNING_COMPILED_EXPRESSION);
+				}
+			}
+		}
 		ExpressionState expressionState = new ExpressionState(getEvaluationContext(), this.configuration);
-		return this.ast.getValue(expressionState);
+		result = this.ast.getValue(expressionState);
+		checkCompile(expressionState);
+		return result;
 	}
 
 	@Override
 	public Object getValue(Object rootObject) throws EvaluationException {
+		Object result = null;
+		if (compiledAst!=null) {
+			try {
+				return this.compiledAst.getValue(rootObject,null);
+			} catch (Throwable t) {
+				// If running in mixed mode, revert to interpreted
+				if (this.configuration.getCompilerMode() == SpelCompilerMode.mixed) {
+					interpretedCount = 0;
+					compiledAst = null;
+				}
+				else {
+					// Running in SpelCompilerMode.immediate mode - propagate exception to caller
+					throw new SpelEvaluationException(t,SpelMessage.EXCEPTION_RUNNING_COMPILED_EXPRESSION);
+				}
+			}
+		}
 		ExpressionState expressionState = new ExpressionState(getEvaluationContext(), toTypedValue(rootObject), this.configuration);
-		return this.ast.getValue(expressionState);
+		result = this.ast.getValue(expressionState);
+		checkCompile(expressionState);
+		return result;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getValue(Class<T> expectedResultType) throws EvaluationException {
+		if (compiledAst!=null) {
+			try {
+				Object result = this.compiledAst.getValue(null,null);
+				if (expectedResultType == null) {
+					return (T)result;
+				} else {
+					return ExpressionUtils.convertTypedValue(getEvaluationContext(), new TypedValue(result), expectedResultType);
+				}
+			} catch (Throwable t) {
+				// If running in mixed mode, revert to interpreted
+				if (this.configuration.getCompilerMode() == SpelCompilerMode.mixed) {
+					interpretedCount = 0;
+					compiledAst = null;
+				}
+				else {
+					// Running in SpelCompilerMode.immediate mode - propagate exception to caller
+					throw new SpelEvaluationException(t,SpelMessage.EXCEPTION_RUNNING_COMPILED_EXPRESSION);
+				}
+			}
+		}
 		ExpressionState expressionState = new ExpressionState(getEvaluationContext(), this.configuration);
 		TypedValue typedResultValue = this.ast.getTypedValue(expressionState);
+		checkCompile(expressionState);
 		return ExpressionUtils.convertTypedValue(expressionState.getEvaluationContext(), typedResultValue, expectedResultType);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getValue(Object rootObject, Class<T> expectedResultType) throws EvaluationException {
+		if (compiledAst!=null) {
+			try {
+				Object result = this.compiledAst.getValue(rootObject,null);
+				if (expectedResultType == null) {
+					return (T)result;
+				} else {
+					return ExpressionUtils.convertTypedValue(getEvaluationContext(), new TypedValue(result), expectedResultType);
+				}
+			} catch (Throwable t) {
+				// If running in mixed mode, revert to interpreted
+				if (this.configuration.getCompilerMode() == SpelCompilerMode.mixed) {
+					interpretedCount = 0;
+					compiledAst = null;
+				}
+				else {
+					// Running in SpelCompilerMode.immediate mode - propagate exception to caller
+					throw new SpelEvaluationException(t,SpelMessage.EXCEPTION_RUNNING_COMPILED_EXPRESSION);
+				}
+			}
+		}
 		ExpressionState expressionState = new ExpressionState(getEvaluationContext(), toTypedValue(rootObject), this.configuration);
 		TypedValue typedResultValue = this.ast.getTypedValue(expressionState);
+		checkCompile(expressionState);
 		return ExpressionUtils.convertTypedValue(expressionState.getEvaluationContext(), typedResultValue, expectedResultType);
 	}
 
 	@Override
 	public Object getValue(EvaluationContext context) throws EvaluationException {
 		Assert.notNull(context, "The EvaluationContext is required");
-		return this.ast.getValue(new ExpressionState(context, this.configuration));
+		if (compiledAst!= null) {
+			try {
+				Object result = this.compiledAst.getValue(null,context);
+				return result;
+			} catch (Throwable t) {
+				// If running in mixed mode, revert to interpreted
+				if (this.configuration.getCompilerMode() == SpelCompilerMode.mixed) {
+					interpretedCount = 0;
+					compiledAst = null;
+				}
+				else {
+					// Running in SpelCompilerMode.immediate mode - propagate exception to caller
+					throw new SpelEvaluationException(t,SpelMessage.EXCEPTION_RUNNING_COMPILED_EXPRESSION);
+				}
+			}
+		}
+		ExpressionState expressionState = new ExpressionState(context, this.configuration);
+		Object result = this.ast.getValue(expressionState);
+		checkCompile(expressionState);
+		return result;
 	}
 
 	@Override
 	public Object getValue(EvaluationContext context, Object rootObject) throws EvaluationException {
 		Assert.notNull(context, "The EvaluationContext is required");
-		return this.ast.getValue(new ExpressionState(context, toTypedValue(rootObject), this.configuration));
+		if (compiledAst!=null) {
+			try {
+				return this.compiledAst.getValue(rootObject,context);
+			} catch (Throwable t) {
+				// If running in mixed mode, revert to interpreted
+				if (this.configuration.getCompilerMode() == SpelCompilerMode.mixed) {
+					interpretedCount = 0;
+					compiledAst = null;
+				}
+				else {
+					// Running in SpelCompilerMode.immediate mode - propagate exception to caller
+					throw new SpelEvaluationException(t,SpelMessage.EXCEPTION_RUNNING_COMPILED_EXPRESSION);
+				}
+			}
+		}
+		ExpressionState expressionState = new ExpressionState(context, toTypedValue(rootObject), this.configuration);
+		Object result = this.ast.getValue(expressionState);
+		checkCompile(expressionState);
+		return result;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getValue(EvaluationContext context, Class<T> expectedResultType) throws EvaluationException {
-		TypedValue typedResultValue = this.ast.getTypedValue(new ExpressionState(context, this.configuration));
+		if (compiledAst!=null) {
+			try {
+				Object result = this.compiledAst.getValue(null,context);
+				if (expectedResultType!=null) {
+					return (T) result;
+				} else {
+					return ExpressionUtils.convertTypedValue(context, new TypedValue(result), expectedResultType);
+				}
+			} catch (Throwable t) {
+				// If running in mixed mode, revert to interpreted
+				if (this.configuration.getCompilerMode() == SpelCompilerMode.mixed) {
+					interpretedCount = 0;
+					compiledAst = null;
+				}
+				else {
+					// Running in SpelCompilerMode.immediate mode - propagate exception to caller
+					throw new SpelEvaluationException(t,SpelMessage.EXCEPTION_RUNNING_COMPILED_EXPRESSION);
+				}
+			}
+		}
+		ExpressionState expressionState = new ExpressionState(context, this.configuration);
+		TypedValue typedResultValue = this.ast.getTypedValue(expressionState);
+		checkCompile(expressionState);
 		return ExpressionUtils.convertTypedValue(context, typedResultValue, expectedResultType);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getValue(EvaluationContext context, Object rootObject, Class<T> expectedResultType) throws EvaluationException {
-		TypedValue typedResultValue = this.ast.getTypedValue(new ExpressionState(context, toTypedValue(rootObject), this.configuration));
+		if (compiledAst!=null) {
+			try {
+				Object result = this.compiledAst.getValue(rootObject,context);
+				if (expectedResultType!=null) {
+					return (T) result;
+				} else {
+					return ExpressionUtils.convertTypedValue(context, new TypedValue(result), expectedResultType);
+				}
+			} catch (Throwable t) {
+				// If running in mixed mode, revert to interpreted
+				if (this.configuration.getCompilerMode() == SpelCompilerMode.mixed) {
+					interpretedCount = 0;
+					compiledAst = null;
+				}
+				else {
+					// Running in SpelCompilerMode.immediate mode - propagate exception to caller
+					throw new SpelEvaluationException(t,SpelMessage.EXCEPTION_RUNNING_COMPILED_EXPRESSION);
+				}
+			}
+		}
+		ExpressionState expressionState = new ExpressionState(context, toTypedValue(rootObject), this.configuration);
+		TypedValue typedResultValue = this.ast.getTypedValue(expressionState);
+		checkCompile(expressionState);
 		return ExpressionUtils.convertTypedValue(context, typedResultValue, expectedResultType);
 	}
 
@@ -202,6 +380,66 @@ public class SpelExpression implements Expression {
 	}
 
 	// impl only
+
+	/**
+	 * Compile the expression if it has been evaluated more than the threshold number of times to trigger compilation.
+	 * @param expressionState the expression state used to determine compilation mode
+	 */
+	private void checkCompile(ExpressionState expressionState) {
+		interpretedCount++;
+		SpelCompilerMode compilerMode = expressionState.getConfiguration().getCompilerMode();
+		if (compilerMode != SpelCompilerMode.off) {
+			if (compilerMode == SpelCompilerMode.immediate) {
+				if (interpretedCount > 1) {
+					compileExpression();
+				}
+			}
+			else {
+				// compilerMode = SpelCompilerMode.mixed
+				if (interpretedCount > SpelCompiler.interpretedCountThreshold) {
+					compileExpression();
+				}
+			}
+		}
+	}
+
+
+	/**
+	 * Perform expression compilation. This will only succeed once exit descriptors for all nodes have 
+	 * been determined. If the compilation fails and has failed more than 100 times the expression is 
+	 * no longer considered suitable for compilation.
+	 */
+	public boolean compileExpression() {
+		if (failedAttempts > 100) {
+			// Don't try again
+			return false;
+		}
+		if (this.compiledAst == null) {
+			synchronized (expression) {
+				// Possibly compiled by another thread before this thread got into the
+				// sync block
+				if (this.compiledAst != null) {
+					return true;
+				}
+				this.compiledAst = SpelCompiler.getCompiler().compile(this.ast);
+				if (this.compiledAst == null) {
+					failedAttempts++;
+				}
+			}
+		}
+		return (this.compiledAst != null);
+	}
+
+	/**
+	 * Cause an expression to revert to being interpreted if it has been using a compiled
+	 * form. It also resets the compilation attempt failure count (an expression is normally no
+	 * longer considered compilable if it cannot be compiled after 100 attempts).
+	 */
+	public void revertToInterpreted() {
+		this.compiledAst = null;
+		this.interpretedCount = 0;
+		this.failedAttempts = 0;
+	}
 
 	/**
 	 * @return return the Abstract Syntax Tree for the expression

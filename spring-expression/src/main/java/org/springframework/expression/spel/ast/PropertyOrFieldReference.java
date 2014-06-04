@@ -21,8 +21,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.asm.MethodVisitor;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
+import org.springframework.expression.CompilablePropertyAccessor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.PropertyAccessor;
@@ -30,6 +32,7 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
+import org.springframework.expression.spel.standard.CodeFlow;
 import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
 
 /**
@@ -75,8 +78,17 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
-		return getValueInternal(state.getActiveContextObject(), state.getEvaluationContext(),
-				state.getConfiguration().isAutoGrowNullReferences());
+		TypedValue tv = getValueInternal(state.getActiveContextObject(), state.getEvaluationContext(), state.getConfiguration().isAutoGrowNullReferences());
+		if (cachedReadAccessor instanceof CompilablePropertyAccessor) {
+			CompilablePropertyAccessor accessor = (CompilablePropertyAccessor)cachedReadAccessor;
+			exitTypeDescriptor = CodeFlow.toDescriptor(accessor.getPropertyType());
+		}
+		return tv;
+	}
+
+	@Override
+	public String getExitDescriptor() {
+		return exitTypeDescriptor;
 	}
 
 	private TypedValue getValueInternal(TypedValue contextObject, EvaluationContext eContext,
@@ -316,6 +328,23 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		resolvers.addAll(generalAccessors);
 		return resolvers;
 	}
+	
+	@Override
+	public boolean isCompilable() {
+		if (this.cachedReadAccessor == null) {
+			return false;
+		}
+		if (this.cachedReadAccessor instanceof CompilablePropertyAccessor) {
+			return ((CompilablePropertyAccessor)this.cachedReadAccessor).isCompilable();
+		}
+		return false;
+	}
+	
+	@Override
+	public void generateCode(MethodVisitor mv,CodeFlow codeflow) {
+		((CompilablePropertyAccessor)this.cachedReadAccessor).generateCode(this, mv, codeflow);
+		codeflow.pushDescriptor(exitTypeDescriptor);
+	}
 
 
 	private static class AccessorLValue implements ValueRef {
@@ -338,7 +367,12 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 		@Override
 		public TypedValue getValue() {
-			return this.ref.getValueInternal(this.contextObject, this.eContext, this.autoGrowNullReferences);
+			TypedValue value = this.ref.getValueInternal(this.contextObject, this.eContext, this.autoGrowNullReferences);
+			if (ref.cachedReadAccessor instanceof CompilablePropertyAccessor) {
+				CompilablePropertyAccessor accessor = (CompilablePropertyAccessor)this.ref.cachedReadAccessor;
+				this.ref.exitTypeDescriptor = CodeFlow.toDescriptor(accessor.getPropertyType());
+			}
+			return value;
 		}
 
 		@Override

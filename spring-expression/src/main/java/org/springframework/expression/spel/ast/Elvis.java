@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,12 @@
 
 package org.springframework.expression.spel.ast;
 
+import org.springframework.asm.Label;
+import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.expression.spel.standard.CodeFlow;
 
 /**
  * Represents the elvis operator ?:. For an expression "a?:b" if a is not null, the value
@@ -49,7 +52,18 @@ public class Elvis extends SpelNodeImpl {
 			return value;
 		}
 		else {
-			return this.children[1].getValueInternal(state);
+			TypedValue result = this.children[1].getValueInternal(state);
+			if (exitTypeDescriptor == null) {
+				String testDescriptor = this.children[0].exitTypeDescriptor;
+				String ifNullDescriptor = this.children[1].exitTypeDescriptor;
+				if (testDescriptor.equals(ifNullDescriptor)) {
+					this.exitTypeDescriptor = testDescriptor;
+				}
+				else {
+					this.exitTypeDescriptor = "Ljava/lang/Object";
+				}
+			}
+			return result;
 		}
 	}
 
@@ -57,6 +71,61 @@ public class Elvis extends SpelNodeImpl {
 	public String toStringAST() {
 		return new StringBuilder().append(getChild(0).toStringAST()).append(" ?: ").append(
 				getChild(1).toStringAST()).toString();
+	}
+
+	private void computeExitTypeDescriptor() {
+		if (exitTypeDescriptor == null &&
+				this.children[0].getExitDescriptor()!=null &&
+				this.children[1].getExitDescriptor()!=null) {
+			String conditionDescriptor = this.children[0].exitTypeDescriptor;
+			String ifNullValueDescriptor = this.children[1].exitTypeDescriptor;
+			if (conditionDescriptor.equals(ifNullValueDescriptor)) {
+				this.exitTypeDescriptor = conditionDescriptor;
+			}
+			else if (conditionDescriptor.equals("Ljava/lang/Object") && !CodeFlow.isPrimitive(ifNullValueDescriptor)) {
+				this.exitTypeDescriptor = ifNullValueDescriptor;
+			}
+			else if (ifNullValueDescriptor.equals("Ljava/lang/Object") && !CodeFlow.isPrimitive(conditionDescriptor)) {
+				this.exitTypeDescriptor = conditionDescriptor;
+			}
+			else {
+				// Use the easiest to compute common super type
+				this.exitTypeDescriptor = "Ljava/lang/Object";
+			}
+		}
+	}
+
+	@Override
+	public boolean isCompilable() {
+		SpelNodeImpl condition = this.children[0];
+		SpelNodeImpl ifNullValue = this.children[1];
+		if (!(condition.isCompilable() && ifNullValue.isCompilable())) {
+			return false;
+		}
+		return
+			condition.getExitDescriptor()!=null &&
+			ifNullValue.getExitDescriptor()!=null;
+	}
+
+
+	@Override
+	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
+		// exit type descriptor can be null if both components are literal expressions
+		computeExitTypeDescriptor();
+		this.children[0].generateCode(mv, codeflow);
+		Label elseTarget = new Label();
+		Label endOfIf = new Label();
+		mv.visitInsn(DUP);
+		mv.visitJumpInsn(IFNULL, elseTarget);
+		mv.visitJumpInsn(GOTO, endOfIf);
+		mv.visitLabel(elseTarget);
+		mv.visitInsn(POP);
+		this.children[1].generateCode(mv, codeflow);
+		if (!CodeFlow.isPrimitive(getExitDescriptor())) {
+			CodeFlow.insertBoxIfNecessary(mv, codeflow.lastDescriptor().charAt(0));
+		}
+		mv.visitLabel(endOfIf);
+		codeflow.pushDescriptor(getExitDescriptor());
 	}
 
 }
