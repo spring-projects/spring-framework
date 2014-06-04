@@ -1241,7 +1241,7 @@ The following example shows the data access objects `daos.xml` file:
 			<!-- additional collaborators and configuration for this bean go here -->
 		</bean>
 
-		<bean id="itemDao" class="org.springframework.samples.jpetstore.dao.jpa.JapItemDao">
+		<bean id="itemDao" class="org.springframework.samples.jpetstore.dao.jpa.JpaItemDao">
 			<!-- additional collaborators and configuration for this bean go here -->
 		</bean>
 
