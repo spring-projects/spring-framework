@@ -45,7 +45,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 		Assert.hasText(name, "'name' must not be empty");
 		Assert.hasText(alias, "'alias' must not be empty");
 		if (alias.equals(name)) {
-			this.aliasMap.remove(alias);
+			this.aliasMap.remove(alias);//if alias equals bean name, then remove the alias. because user can get the bean by the bean name when they get the bean with the alias.
 		}
 		else {
 			if (!allowAliasOverriding()) {

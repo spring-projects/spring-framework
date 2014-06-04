@@ -29,6 +29,7 @@ import test.beans.TestBean;
 /**
  * @author Costin Leau
  */
+@SuppressWarnings("deprecation")
 public class SimpleConstructorNamespaceHandlerTests {
 
 	@Test

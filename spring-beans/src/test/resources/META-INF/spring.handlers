@@ -1,1 +1,2 @@
 http\://www.foo.com/schema/component=com.foo.ComponentNamespaceHandler
+http\://www.example.org/user=source.source.spring.ch4.UserNamespacesHandlers
