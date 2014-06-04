@@ -38,11 +38,11 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AutowireCandidateQualifier;
+import org.springframework.beans.factory.support.DefaultDependencyComparator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.Ordered;
-import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.IndexedTestBean;
@@ -51,12 +51,15 @@ import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
 
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @author Sam Brannen
  * @author Chris Beams
+ * @author Stephane Nicoll
  */
 public class AutowiredAnnotationBeanPostProcessorTests {
 
@@ -351,7 +354,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	@Test
 	public void testOrderedResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
+		bf.setDependencyComparator(DefaultDependencyComparator.INSTANCE);
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
@@ -383,9 +386,37 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	public void testOrderedResourceInjectionDetectsFactoryAwareComparator() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		DefaultDependencyComparator comparator = mock(DefaultDependencyComparator.class);
+		bf.setDependencyComparator(comparator);
+
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(OptionalResourceInjectionBean.class));
+		TestBean tb = new TestBean();
+		bf.registerSingleton("testBean", tb);
+		IndexedTestBean itb = new IndexedTestBean();
+		bf.registerSingleton("indexedTestBean", itb);
+		final OrderedNestedTestBean ntb1 = new OrderedNestedTestBean();
+		ntb1.setOrder(2);
+		bf.registerSingleton("nestedTestBean1", ntb1);
+		final OrderedNestedTestBean ntb2 = new OrderedNestedTestBean();
+		ntb2.setOrder(1);
+		bf.registerSingleton("nestedTestBean2", ntb2);
+
+		OptionalResourceInjectionBean bean = (OptionalResourceInjectionBean) bf.getBean("annotatedBean");
+		verify(comparator, never()).compare(any(), any());
+		verify(comparator, never()).sortList(any(),any());
+		verify(comparator, times(2)).sortArray(any(),any());
+		bf.destroySingletons();
+	}
+
+	@Test
 	public void testAnnotationOrderedResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
+		bf.setDependencyComparator(DefaultDependencyComparator.INSTANCE);
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
@@ -417,7 +448,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	@Test
 	public void testOrderedCollectionResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
+		bf.setDependencyComparator(DefaultDependencyComparator.INSTANCE);
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
@@ -458,7 +489,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	@Test
 	public void testAnnotationOrderedCollectionResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
+		bf.setDependencyComparator(DefaultDependencyComparator.INSTANCE);
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
@@ -576,7 +607,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	@Test
 	public void testConstructorResourceInjectionWithMultipleOrderedCandidates() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
+		bf.setDependencyComparator(DefaultDependencyComparator.INSTANCE);
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
@@ -600,7 +631,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	@Test
 	public void testConstructorResourceInjectionWithMultipleCandidatesAsOrderedCollection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
+		bf.setDependencyComparator(DefaultDependencyComparator.INSTANCE);
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);

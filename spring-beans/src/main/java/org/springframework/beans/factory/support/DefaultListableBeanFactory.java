@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.OrderProviderComparator;
 import org.springframework.core.annotation.OrderUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -895,7 +897,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
 			Object result = converter.convertIfNecessary(matchingBeans.values(), type);
 			if (this.dependencyComparator != null && result instanceof Object[]) {
-				Arrays.sort((Object[]) result, this.dependencyComparator);
+				sortArray((Object[]) result, matchingBeans);
 			}
 			return result;
 		}
@@ -922,7 +924,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
 			Object result = converter.convertIfNecessary(matchingBeans.values(), type);
 			if (this.dependencyComparator != null && result instanceof List) {
-				Collections.sort((List<?>) result, this.dependencyComparator);
+				sortList((List<?>) result, matchingBeans);
 			}
 			return result;
 		}
@@ -981,6 +983,32 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			return entry.getValue();
 		}
+	}
+
+	private void sortArray(Object[] items, Map<String, Object> matchingBeans) {
+		if (this.dependencyComparator instanceof OrderProviderComparator) {
+			((OrderProviderComparator) this.dependencyComparator)
+					.sortArray(items, createFactoryAwareOrderProvider(matchingBeans));
+		} else {
+			Arrays.sort(items, this.dependencyComparator);
+		}
+	}
+
+	private void sortList(List<?> items, Map<String, Object> matchingBeans) {
+		if (this.dependencyComparator instanceof OrderProviderComparator) {
+			((OrderProviderComparator) this.dependencyComparator)
+					.sortList(items, createFactoryAwareOrderProvider(matchingBeans));
+		} else {
+			Collections.sort(items, this.dependencyComparator);
+		}
+	}
+
+	private FactoryAwareOrderProvider createFactoryAwareOrderProvider(Map<String, Object> beans) {
+		IdentityHashMap<Object, String> instancesToBeanNames = new IdentityHashMap<Object, String>();
+		for (Map.Entry<String, Object> entry : beans.entrySet()) {
+			instancesToBeanNames.put(entry.getValue(), entry.getKey());
+		}
+		return new FactoryAwareOrderProvider(instancesToBeanNames, this);
 	}
 
 	/**
