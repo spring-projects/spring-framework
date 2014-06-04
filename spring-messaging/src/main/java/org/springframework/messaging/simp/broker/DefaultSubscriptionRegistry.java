@@ -312,6 +312,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		}
 
 		public Set<String> getSubscriptions(String destination) {
+			if(destination == null) return new HashSet<String>();
 			return this.subscriptions.get(destination);
 		}
 
