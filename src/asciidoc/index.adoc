@@ -1282,7 +1282,7 @@ to load bean definitions from another file or files. For example:
 	</beans>
 ----
 
-In the preceding example, external bean definitions are loaded from three files,
+In the preceding example, external bean definitions are loaded from three files:
 `services.xml`, `messageSource.xml`, and `themeSource.xml`. All location paths are
 relative to the definition file doing the importing, so `services.xml` must be in the
 same directory or classpath location as the file doing the importing, while
