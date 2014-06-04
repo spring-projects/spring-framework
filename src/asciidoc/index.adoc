@@ -1511,7 +1511,7 @@ You use the `Class` property in one of two ways:
   equivalent to Java code using the `new` operator.
 * To specify the actual class containing the `static` factory method that will be
   invoked to create the object, in the less common case where the container invokes a
-  `static`, __factory__ method on a class to create the bean. The object type returned
+  `static` __factory__ method on a class to create the bean. The object type returned
   from the invocation of the `static` factory method may be the same class or another
   class entirely.
 
