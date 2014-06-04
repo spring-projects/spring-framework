@@ -19,6 +19,8 @@ package org.springframework.util;
 import java.nio.charset.Charset;
 import java.util.Base64;
 
+import org.springframework.lang.UsesJava8;
+
 /**
  * A simple utility class for Base64 encoding and decoding.
  *
@@ -131,6 +133,7 @@ public abstract class Base64Utils {
 	}
 
 
+	@UsesJava8
 	private static class JdkBase64Delegate implements Base64Delegate {
 
 		public byte[] encode(byte[] src) {

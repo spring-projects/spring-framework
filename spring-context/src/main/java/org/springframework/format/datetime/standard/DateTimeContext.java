@@ -24,7 +24,7 @@ import java.util.TimeZone;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
-import org.springframework.core.UsesJava8;
+import org.springframework.lang.UsesJava8;
 
 /**
  * A context that holds user-specific <code>java.time</code> (JSR-310) settings

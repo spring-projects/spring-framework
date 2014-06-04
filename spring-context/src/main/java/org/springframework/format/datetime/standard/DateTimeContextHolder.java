@@ -19,8 +19,8 @@ package org.springframework.format.datetime.standard;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-import org.springframework.core.UsesJava8;
 import org.springframework.core.NamedThreadLocal;
+import org.springframework.lang.UsesJava8;
 
 /**
  * A holder for a thread-local user {@link DateTimeContext}.

@@ -28,10 +28,10 @@ import java.time.format.FormatStyle;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.core.UsesJava8;
 import org.springframework.format.FormatterRegistrar;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
+import org.springframework.lang.UsesJava8;
 
 /**
  * Configures the JSR-310 <code>java.time</code> formatting system for use with Spring.

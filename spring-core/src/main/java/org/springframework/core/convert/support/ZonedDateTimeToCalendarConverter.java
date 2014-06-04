@@ -20,8 +20,8 @@ import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-import org.springframework.core.UsesJava8;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.lang.UsesJava8;
 
 /**
  * Simple converter from Java 8's {@link java.time.ZonedDateTime} to {@link java.util.Calendar}.

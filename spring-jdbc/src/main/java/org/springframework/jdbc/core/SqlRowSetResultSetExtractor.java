@@ -22,10 +22,10 @@ import javax.sql.rowset.CachedRowSet;
 import javax.sql.rowset.RowSetFactory;
 import javax.sql.rowset.RowSetProvider;
 
-import org.springframework.core.UsesJava7;
 import org.springframework.core.JdkVersion;
 import org.springframework.jdbc.support.rowset.ResultSetWrappingSqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.lang.UsesJava7;
 import org.springframework.util.ClassUtils;
 
 /**

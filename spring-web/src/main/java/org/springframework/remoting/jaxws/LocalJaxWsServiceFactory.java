@@ -24,8 +24,8 @@ import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.handler.HandlerResolver;
 
-import org.springframework.core.UsesJava7;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.UsesJava7;
 import org.springframework.util.Assert;
 
 /**
@@ -147,7 +147,7 @@ public class LocalJaxWsServiceFactory {
 	 * @see #setServiceName
 	 * @see #setWsdlDocumentUrl
 	 */
-	@UsesJava7 // Service#create with WebServiceFeature[]
+	@UsesJava7  // optional use of Service#create with WebServiceFeature[]
 	public Service createJaxWsService() {
 		Assert.notNull(this.serviceName, "No service name specified");
 		Service service;

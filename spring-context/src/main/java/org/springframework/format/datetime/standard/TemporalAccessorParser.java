@@ -27,8 +27,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.Locale;
 
-import org.springframework.core.UsesJava8;
 import org.springframework.format.Parser;
+import org.springframework.lang.UsesJava8;
 
 /**
  * {@link Parser} implementation for a JSR-310 {@link java.time.temporal.TemporalAccessor},

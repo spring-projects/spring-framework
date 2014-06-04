@@ -22,7 +22,7 @@ import java.io.IOException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-import org.springframework.core.UsesSunHttpServer;
+import org.springframework.lang.UsesSunHttpServer;
 import org.springframework.util.FileCopyUtils;
 
 /**

@@ -135,9 +135,9 @@ configure(allprojects) { project ->
 					signature: "$buildDir/javaApiSignature/javaApi.signature",
 					classpath: sourceSets.main.compileClasspath.asPath) {
 				path(path: sourceSets.main.output.classesDir)
-				annotation(className: "org.springframework.core.UsesJava7")
-				annotation(className: "org.springframework.core.UsesJava8")
-				annotation(className: "org.springframework.core.UsesSunHttpServer")
+				annotation(className: "org.springframework.lang.UsesJava7")
+				annotation(className: "org.springframework.lang.UsesJava8")
+				annotation(className: "org.springframework.lang.UsesSunHttpServer")
 			}
 		}
 	}

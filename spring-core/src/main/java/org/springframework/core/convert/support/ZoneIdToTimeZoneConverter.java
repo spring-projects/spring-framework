@@ -19,8 +19,8 @@ package org.springframework.core.convert.support;
 import java.time.ZoneId;
 import java.util.TimeZone;
 
-import org.springframework.core.UsesJava8;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.lang.UsesJava8;
 
 /**
  * Simple converter from Java 8's {@link java.time.ZoneId} to {@link java.util.TimeZone}.

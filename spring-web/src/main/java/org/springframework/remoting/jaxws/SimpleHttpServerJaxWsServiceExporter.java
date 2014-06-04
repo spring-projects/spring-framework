@@ -28,7 +28,8 @@ import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpServer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.core.UsesSunHttpServer;
+
+import org.springframework.lang.UsesSunHttpServer;
 
 /**
  * Simple exporter for JAX-WS services, autodetecting annotated service beans

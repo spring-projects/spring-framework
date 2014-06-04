@@ -20,8 +20,8 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.util.Locale;
 
-import org.springframework.core.UsesJava8;
 import org.springframework.format.Formatter;
+import org.springframework.lang.UsesJava8;
 
 /**
  * {@link Formatter} implementation for a JSR-310 {@link java.time.Instant},

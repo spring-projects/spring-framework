@@ -26,10 +26,10 @@ import java.time.chrono.ChronoZonedDateTime;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-import org.springframework.core.UsesJava8;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.format.datetime.DateFormatterRegistrar;
+import org.springframework.lang.UsesJava8;
 
 /**
  * Installs lower-level type converters required to integrate

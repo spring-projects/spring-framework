@@ -19,7 +19,7 @@ package org.springframework.beans.propertyeditors;
 import java.beans.PropertyEditorSupport;
 import java.time.ZoneId;
 
-import org.springframework.core.UsesJava8;
+import org.springframework.lang.UsesJava8;
 
 /**
  * Editor for {@code java.time.ZoneId}, translating zone ID Strings into {@code ZoneId}

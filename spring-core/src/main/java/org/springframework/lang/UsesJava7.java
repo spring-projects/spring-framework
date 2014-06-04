@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core;
+package org.springframework.lang;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
