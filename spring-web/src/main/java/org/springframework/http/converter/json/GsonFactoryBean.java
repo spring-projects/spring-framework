@@ -23,7 +23,6 @@ import com.google.gson.GsonBuilder;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.util.ClassUtils;
 
 
 /**
@@ -35,32 +34,33 @@ import org.springframework.util.ClassUtils;
  */
 public class GsonFactoryBean implements FactoryBean<Gson>, InitializingBean {
 
-	/** Apache Commons Codec present on the classpath, for Base64 encoding? */
-	private static final boolean commonsCodecPresent = ClassUtils.isPresent(
-			"org.apache.commons.codec.binary.Base64", GsonFactoryBean.class.getClassLoader());
+	private boolean base64EncodeByteArrays = false;
 
+	private boolean serializeNulls = false;
 
-	private GsonBuilder gsonBuilder;
+	private boolean prettyPrinting = false;
 
-	private boolean serializeNulls;
-
-	private boolean prettyPrinting;
-
-	private boolean disableHtmlEscaping;
+	private boolean disableHtmlEscaping = false;
 
 	private String dateFormatPattern;
-
-	private boolean base64EncodeByteArrays;
 
 	private Gson gson;
 
 
 	/**
-	 * Set the GsonBuilder instance to use.
-	 * If not set, the GsonBuilder will be created using its default constructor.
+	 * Whether to Base64-encode {@code byte[]} properties when reading and
+	 * writing JSON.
+	 * <p>When set to {@code true}, a custom {@link com.google.gson.TypeAdapter} will be
+	 * registered via {@link GsonBuilder#registerTypeHierarchyAdapter(Class, Object)}
+	 * which serializes a {@code byte[]} property to and from a Base64-encoded String
+	 * instead of a JSON array.
+	 * <p><strong>NOTE:</strong> Use of this option requires the presence of the
+	 * Apache Commons Codec library on the classpath when running on Java 6 or 7.
+	 * On Java 8, the standard {@link java.util.Base64} facility is used instead.
+	 * @see GsonBuilderUtils#gsonBuilderWithBase64EncodedByteArrays()
 	 */
-	public void setGsonBuilder(GsonBuilder gsonBuilder) {
-		this.gsonBuilder = gsonBuilder;
+	public void setBase64EncodeByteArrays(boolean base64EncodeByteArrays) {
+		this.base64EncodeByteArrays = base64EncodeByteArrays;
 	}
 
 	/**
@@ -108,49 +108,24 @@ public class GsonFactoryBean implements FactoryBean<Gson>, InitializingBean {
 		this.dateFormatPattern = dateFormatPattern;
 	}
 
-	/**
-	 * Whether to Base64-encode {@code byte[]} properties when reading and
-	 * writing JSON.
-	 * <p>When set to {@code true} a custom {@link com.google.gson.TypeAdapter} is
-	 * registered via {@link GsonBuilder#registerTypeHierarchyAdapter(Class, Object)}
-	 * that serializes a {@code byte[]} property to and from a Base64-encoded String
-	 * instead of a JSON array.
-	 * <p><strong>NOTE:</strong> Use of this option requires the presence of the
-	 * Apache Commons Codec library on the classpath.
-	 * @see GsonBase64ByteArrayJsonTypeAdapter
-	 */
-	public void setBase64EncodeByteArrays(boolean base64EncodeByteArrays) {
-		this.base64EncodeByteArrays = base64EncodeByteArrays;
-	}
-
 
 	@Override
 	public void afterPropertiesSet() {
-		if (this.gsonBuilder == null) {
-			this.gsonBuilder = new GsonBuilder();
-		}
+		GsonBuilder builder = (this.base64EncodeByteArrays ?
+				GsonBuilderUtils.gsonBuilderWithBase64EncodedByteArrays() : new GsonBuilder());
 		if (this.serializeNulls) {
-			this.gsonBuilder.serializeNulls();
+			builder.serializeNulls();
 		}
 		if (this.prettyPrinting) {
-			this.gsonBuilder.setPrettyPrinting();
+			builder.setPrettyPrinting();
 		}
 		if (this.disableHtmlEscaping) {
-			this.gsonBuilder.disableHtmlEscaping();
+			builder.disableHtmlEscaping();
 		}
 		if (this.dateFormatPattern != null) {
-			this.gsonBuilder.setDateFormat(this.dateFormatPattern);
+			builder.setDateFormat(this.dateFormatPattern);
 		}
-		if (this.base64EncodeByteArrays) {
-			if (commonsCodecPresent) {
-				this.gsonBuilder.registerTypeHierarchyAdapter(byte[].class, new GsonBase64ByteArrayJsonTypeAdapter());
-			}
-			else {
-				throw new IllegalStateException(
-						"Apache Commons Codec is not available on the classpath - cannot enable Gson Base64 encoding");
-			}
-		}
-		this.gson = this.gsonBuilder.create();
+		this.gson = builder.create();
 	}
 
 
