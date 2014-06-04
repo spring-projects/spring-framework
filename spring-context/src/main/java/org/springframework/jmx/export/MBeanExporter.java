@@ -16,41 +16,13 @@
 
 package org.springframework.jmx.export;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.management.DynamicMBean;
-import javax.management.JMException;
-import javax.management.MBeanException;
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.NotificationListener;
-import javax.management.ObjectName;
-import javax.management.StandardMBean;
-import javax.management.modelmbean.ModelMBean;
-import javax.management.modelmbean.ModelMBeanInfo;
-import javax.management.modelmbean.RequiredModelMBean;
-
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.LazyInitTargetSource;
-import org.springframework.beans.factory.BeanClassLoaderAware;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.CannotLoadBeanClassException;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.*;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.core.Constants;
 import org.springframework.jmx.export.assembler.AutodetectCapableMBeanInfoAssembler;
 import org.springframework.jmx.export.assembler.MBeanInfoAssembler;
@@ -66,6 +38,12 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+
+import javax.management.*;
+import javax.management.modelmbean.ModelMBean;
+import javax.management.modelmbean.ModelMBeanInfo;
+import javax.management.modelmbean.RequiredModelMBean;
+import java.util.*;
 
 /**
  * JMX exporter that allows for exposing any <i>Spring-managed bean</i> to a
@@ -98,7 +76,7 @@ import org.springframework.util.ObjectUtils;
  * @see MBeanExporterListener
  */
 public class MBeanExporter extends MBeanRegistrationSupport
-		implements MBeanExportOperations, BeanClassLoaderAware, BeanFactoryAware, InitializingBean, DisposableBean {
+		implements MBeanExportOperations, BeanClassLoaderAware, BeanFactoryAware, InitializingBean, DisposableBean, SmartLifecycle {
 
 	/**
 	 * Autodetection mode indicating that no autodetection should be used.
@@ -178,8 +156,16 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	/** Stores the BeanFactory for use in autodetection process */
 	private ListableBeanFactory beanFactory;
 
+    private boolean autoStartup = true;
 
-	/**
+    private volatile boolean running = false;
+
+    private int phase = Integer.MAX_VALUE;
+
+    private final Object lifecycleMonitor = new Object();
+
+
+    /**
 	 * Supply a {@code Map} of beans to be registered with the JMX
 	 * {@code MBeanServer}.
 	 * <p>The String keys are the basis for the creation of JMX object names.
@@ -411,17 +397,6 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		// such as JDK 1.5, Tomcat or JBoss where there is already an MBeanServer loaded.
 		if (this.server == null) {
 			this.server = JmxUtils.locateMBeanServer();
-		}
-		try {
-			logger.info("Registering beans for JMX exposure on startup");
-			registerBeans();
-			registerNotificationListeners();
-		}
-		catch (RuntimeException ex) {
-			// Unregister beans already registered by this exporter.
-			unregisterNotificationListeners();
-			unregisterBeans();
-			throw ex;
 		}
 	}
 
@@ -1054,8 +1029,80 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		}
 	}
 
+    /**
+     * Set whether to automatically start the container after initialization.
+     * <p>Default is "true"; set this to "false" to allow for manual startup
+     * through the {@link #start()} method.
+     */
+    public void setAutoStartup(boolean autoStartup) {
+        this.autoStartup = autoStartup;
+    }
 
-	//---------------------------------------------------------------------
+    @Override
+    public boolean isAutoStartup() {
+        return this.autoStartup;
+    }
+
+    @Override
+    public void stop(Runnable callback) {
+        synchronized (this.lifecycleMonitor) {
+            stop();
+            callback.run();
+        }
+    }
+
+    @Override
+    public void start() {
+        logger.info("Registering beans for JMX exposure");
+        synchronized (this.lifecycleMonitor) {
+            try {
+                registerBeans();
+                registerNotificationListeners();
+            } catch (RuntimeException ex) {
+                // Unregister beans already registered by this exporter.
+                unregisterNotificationListeners();
+                unregisterBeans();
+                throw ex;
+            }
+        }
+        running = true;
+    }
+
+    @Override
+    public void stop() {
+        logger.info("Unregistering JMX-exposed beans on stop");
+        synchronized (this.lifecycleMonitor) {
+            unregisterNotificationListeners();
+            unregisterBeans();
+            running = false;
+        }
+    }
+
+    @Override
+    public boolean isRunning() {
+        synchronized (this.lifecycleMonitor) {
+            return this.running;
+        }
+    }
+
+    /**
+     * Specify the phase in which this container should be started and
+     * stopped. The startup order proceeds from lowest to highest, and
+     * the shutdown order is the reverse of that. By default this value
+     * is Integer.MAX_VALUE meaning that this container starts as late
+     * as possible and stops as soon as possible.
+     */
+    public void setPhase(int phase) {
+        this.phase = phase;
+    }
+
+    @Override
+    public int getPhase() {
+        return this.phase;
+    }
+
+
+    //---------------------------------------------------------------------
 	// Inner classes for internal use
 	//---------------------------------------------------------------------
 

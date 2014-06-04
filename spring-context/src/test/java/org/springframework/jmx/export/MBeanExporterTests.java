@@ -16,28 +16,12 @@
 
 package org.springframework.jmx.export;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.management.Attribute;
-import javax.management.InstanceNotFoundException;
-import javax.management.JMException;
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.Notification;
-import javax.management.NotificationListener;
-import javax.management.ObjectInstance;
-import javax.management.ObjectName;
-import javax.management.modelmbean.ModelMBeanInfo;
-
 import org.junit.Test;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.IJmxTestBean;
@@ -50,6 +34,10 @@ import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.jmx.support.RegistrationPolicy;
 import org.springframework.tests.aop.interceptor.NopInterceptor;
 import org.springframework.tests.sample.beans.TestBean;
+
+import javax.management.*;
+import javax.management.modelmbean.ModelMBeanInfo;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -116,6 +104,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		exporter.setNotificationListenerMappings(listeners);
 		try {
 			exporter.afterPropertiesSet();
+            exporter.start();
 			fail("Must have thrown an MBeanExportException when registering a NotificationListener on a non-existent MBean.");
 		}
 		catch (MBeanExportException expected) {
@@ -129,6 +118,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		exporter.setBeans(getBeanMap());
 		exporter.setServer(server);
 		exporter.afterPropertiesSet();
+        exporter.start();
 		assertIsRegistered("The bean was not registered with the MBeanServer",
 				ObjectNameManager.getInstance(OBJECT_NAME));
 	}
@@ -156,6 +146,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		exporter.setBeans(map);
 		exporter.setAssembler(asm);
 		exporter.afterPropertiesSet();
+        exporter.start();
 
 		Object name = server.getAttribute(ObjectNameManager.getInstance("spring:name=dynBean"), "Name");
 		assertEquals("The name attribute is incorrect", "Rob Harrop", name);
@@ -164,11 +155,12 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 
 	@Test
 	public void testAutodetectMBeans() throws Exception {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource("autodetectMBeans.xml", getClass()));
+        GenericApplicationContext ctx = new GenericApplicationContext();
+		new XmlBeanDefinitionReader(ctx).loadBeanDefinitions(new ClassPathResource("autodetectMBeans.xml", getClass()));
+        ctx.refresh();
 		try {
-			bf.getBean("exporter");
-			MBeanServer server = (MBeanServer) bf.getBean("server");
+            ctx.getBean("exporter");
+			MBeanServer server = (MBeanServer) ctx.getBean("server");
 			ObjectInstance instance = server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean=true"));
 			assertNotNull(instance);
 			instance = server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean2=true"));
@@ -176,17 +168,18 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 			instance = server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean3=true"));
 			assertNotNull(instance);
 		} finally {
-			bf.destroySingletons();
+            ctx.destroy();
 		}
 	}
 
 	@Test
 	public void testAutodetectWithExclude() throws Exception {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource("autodetectMBeans.xml", getClass()));
+        GenericApplicationContext ctx = new GenericApplicationContext();
+		new XmlBeanDefinitionReader(ctx).loadBeanDefinitions(new ClassPathResource("autodetectMBeans.xml", getClass()));
+        ctx.refresh();
 		try {
-			bf.getBean("exporter");
-			MBeanServer server = (MBeanServer) bf.getBean("server");
+			ctx.getBean("exporter");
+			MBeanServer server = (MBeanServer) ctx.getBean("server");
 			ObjectInstance instance = server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean=true"));
 			assertNotNull(instance);
 
@@ -196,17 +189,18 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 			} catch (InstanceNotFoundException expected) {
 			}
 		} finally {
-			bf.destroySingletons();
+            ctx.destroy();
 		}
 	}
 
 	@Test
 	public void testAutodetectLazyMBeans() throws Exception {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource("autodetectLazyMBeans.xml", getClass()));
+		GenericApplicationContext ctx = new GenericApplicationContext();
+		new XmlBeanDefinitionReader(ctx).loadBeanDefinitions(new ClassPathResource("autodetectLazyMBeans.xml", getClass()));
+        ctx.refresh();
 		try {
-			bf.getBean("exporter");
-			MBeanServer server = (MBeanServer) bf.getBean("server");
+            ctx.getBean("exporter");
+			MBeanServer server = (MBeanServer) ctx.getBean("server");
 
 			ObjectName oname = ObjectNameManager.getInstance("spring:mbean=true");
 			assertNotNull(server.getObjectInstance(oname));
@@ -218,18 +212,19 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 			name = (String) server.getAttribute(oname, "Name");
 			assertEquals("Invalid name returned", "Juergen Hoeller", name);
 		} finally {
-			bf.destroySingletons();
+            ctx.destroy();
 		}
 	}
 
 	@Test
 	public void testAutodetectNoMBeans() throws Exception {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource("autodetectNoMBeans.xml", getClass()));
+		GenericApplicationContext ctx = new GenericApplicationContext();
+		new XmlBeanDefinitionReader(ctx).loadBeanDefinitions(new ClassPathResource("autodetectNoMBeans.xml", getClass()));
+        ctx.refresh();
 		try {
-			bf.getBean("exporter");
+            ctx.getBean("exporter");
 		} finally {
-			bf.destroySingletons();
+            ctx.destroy();
 		}
 	}
 
@@ -243,6 +238,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		exporter.setServer(server);
 		exporter.setListeners(new MBeanExporterListener[] { listener1, listener2 });
 		exporter.afterPropertiesSet();
+        exporter.start();
 		exporter.destroy();
 
 		assertListener(listener1);
@@ -288,7 +284,8 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		exporter.setServer(server);
 		exporter.setBeans(beans);
 
-		exporter.afterPropertiesSet();
+        exporter.afterPropertiesSet();
+        exporter.start();
 
 		ObjectInstance instance = server.getObjectInstance(objectName);
 		assertNotNull(instance);
@@ -318,6 +315,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		exporter.setRegistrationBehavior(MBeanExporter.REGISTRATION_IGNORE_EXISTING);
 
 		exporter.afterPropertiesSet();
+        exporter.start();
 
 		ObjectInstance instance = server.getObjectInstance(objectName);
 		assertNotNull(instance);
@@ -349,6 +347,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		exporter.setRegistrationPolicy(RegistrationPolicy.REPLACE_EXISTING);
 
 		exporter.afterPropertiesSet();
+        exporter.start();
 
 		ObjectInstance instance = server.getObjectInstance(objectName);
 		assertNotNull(instance);
@@ -374,6 +373,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		exporter.setBeans(beans);
 		exporter.setExposeManagedResourceClassLoader(true);
 		exporter.afterPropertiesSet();
+        exporter.start();
 
 		assertIsRegistered("Bean instance not registered", objectName);
 
@@ -404,7 +404,9 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_NONE);
 		// MBean has a bad ObjectName, so if said MBean is autodetected, an exception will be thrown...
 		exporter.afterPropertiesSet();
-	}
+        exporter.start();
+
+    }
 
 	@Test
 	public void testOnlyBonaFideMBeanIsExportedWhenAutodetectIsMBeanOnly() throws Exception {
@@ -420,7 +422,9 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		exporter.setBeanFactory(factory);
 		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_MBEAN);
 		exporter.afterPropertiesSet();
-		assertIsRegistered("Bona fide MBean not autodetected in AUTODETECT_MBEAN mode",
+        exporter.start();
+
+        assertIsRegistered("Bona fide MBean not autodetected in AUTODETECT_MBEAN mode",
 				ObjectNameManager.getInstance(OBJECT_NAME));
 		assertIsNotRegistered("Bean autodetected and (only) AUTODETECT_MBEAN mode is on",
 				ObjectNameManager.getInstance(exportedBeanName));
@@ -442,6 +446,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		exporter.setBeanFactory(factory);
 		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_ALL);
 		exporter.afterPropertiesSet();
+        exporter.start();
 		assertIsRegistered("Bona fide MBean not autodetected in (AUTODETECT_ALL) mode",
 				ObjectNameManager.getInstance(OBJECT_NAME));
 		assertIsRegistered("Bean not autodetected in (AUTODETECT_ALL) mode",
@@ -464,6 +469,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		exporter.setBeanFactory(factory);
 		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_ASSEMBLER);
 		exporter.afterPropertiesSet();
+        exporter.start();
 		assertIsNotRegistered("Bona fide MBean was autodetected in AUTODETECT_ASSEMBLER mode - must not have been",
 				ObjectNameManager.getInstance(OBJECT_NAME));
 		assertIsRegistered("Bean not autodetected in AUTODETECT_ASSEMBLER mode",
@@ -488,6 +494,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		exporter.setBeanFactory(factory);
 		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_ASSEMBLER);
 		exporter.afterPropertiesSet();
+        exporter.start();
 		assertIsRegistered("Explicitly exported bona fide MBean obviously not exported.",
 				ObjectNameManager.getInstance(OBJECT_NAME));
 	}
@@ -566,6 +573,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 			beans.put(OBJECT_NAME, "beanName");
 			exporter.setBeans(beans);
 			exporter.afterPropertiesSet();
+            exporter.start();
 			fail("Expecting exception because MBeanExporter is not running in a BeanFactory and was passed bean name to (lookup and then) export");
 		}
 		catch (MBeanExportException expected) {
@@ -578,6 +586,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 			MBeanExporter exporter = new MBeanExporter();
 			exporter.setAutodetectMode(MBeanExporter.AUTODETECT_ALL);
 			exporter.afterPropertiesSet();
+            exporter.start();
 			fail("Expecting exception because MBeanExporter is not running in a BeanFactory and was configured to autodetect beans");
 		}
 		catch (MBeanExportException expected) {
@@ -595,6 +604,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		MockMBeanExporterListener listener = new MockMBeanExporterListener();
 		exporter.setListeners(new MBeanExporterListener[] { listener });
 		exporter.afterPropertiesSet();
+        exporter.start();
 		assertIsRegistered("The bean was not registered with the MBeanServer",
 				ObjectNameManager.getInstance(OBJECT_NAME));
 
@@ -677,6 +687,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 
 		try {
 			exporter.afterPropertiesSet();
+            exporter.start();
 			fail("Must have failed during creation of RuntimeExceptionThrowingConstructorBean");
 		}
 		catch (RuntimeException expected) {
