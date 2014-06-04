@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,13 @@
 package org.springframework.expression.spel.ast;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.asm.MethodVisitor;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
@@ -32,6 +35,8 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
+import org.springframework.expression.spel.standard.CodeFlow;
+import org.springframework.expression.spel.support.ReflectiveMethodExecutor;
 import org.springframework.expression.spel.support.ReflectiveMethodResolver;
 
 /**
@@ -77,7 +82,18 @@ public class MethodReference extends SpelNodeImpl {
 		Object value = state.getActiveContextObject().getValue();
 		TypeDescriptor targetType = state.getActiveContextObject().getTypeDescriptor();
 		Object[] arguments = getArguments(state);
-		return getValueInternal(evaluationContext, value, targetType, arguments);
+		TypedValue result = getValueInternal(evaluationContext, value, targetType, arguments);
+		if (cachedExecutor.get() instanceof ReflectiveMethodExecutor) {
+			ReflectiveMethodExecutor executor = (ReflectiveMethodExecutor) cachedExecutor.get();
+			Method method = executor.getMethod();
+			exitTypeDescriptor = CodeFlow.toDescriptor(method.getReturnType());
+		}
+		return result;
+	}
+
+	@Override
+	public String getExitDescriptor() {
+		return exitTypeDescriptor;
 	}
 
 	private TypedValue getValueInternal(EvaluationContext evaluationContext,
@@ -161,9 +177,7 @@ public class MethodReference extends SpelNodeImpl {
 		return Collections.unmodifiableList(descriptors);
 	}
 
-	private MethodExecutor getCachedExecutor(EvaluationContext evaluationContext, Object value,
-			TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
-
+	private MethodExecutor getCachedExecutor(EvaluationContext evaluationContext, Object value, TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
 		List<MethodResolver> methodResolvers = evaluationContext.getMethodResolvers();
 		if (methodResolvers == null || methodResolvers.size() != 1 ||
 				!(methodResolvers.get(0) instanceof ReflectiveMethodResolver)) {
@@ -255,7 +269,13 @@ public class MethodReference extends SpelNodeImpl {
 
 		@Override
 		public TypedValue getValue() {
-			return getValueInternal(this.evaluationContext, this.value, this.targetType, this.arguments);
+			TypedValue result = MethodReference.this.getValueInternal(this.evaluationContext, this.value, this.targetType, this.arguments);
+			if (MethodReference.this.cachedExecutor.get() instanceof ReflectiveMethodExecutor) {
+				ReflectiveMethodExecutor executor = (ReflectiveMethodExecutor) MethodReference.this.cachedExecutor.get();
+				Method method = executor.getMethod();
+				MethodReference.this.exitTypeDescriptor = CodeFlow.toDescriptor(method.getReturnType());
+			}
+			return result;
 		}
 
 		@Override
@@ -296,6 +316,71 @@ public class MethodReference extends SpelNodeImpl {
 		public MethodExecutor get() {
 			return this.methodExecutor;
 		}
+	}
+
+	/**
+	 * A method reference is compilable if it has been resolved to a reflectively accessible method
+	 * and the child nodes (arguments to the method) are also compilable.
+	 */
+	@Override
+	public boolean isCompilable() {
+		if (this.cachedExecutor == null || !(this.cachedExecutor.get() instanceof ReflectiveMethodExecutor)) {
+			return false;
+		}
+		for (SpelNodeImpl child: children) {
+			if (!child.isCompilable()) {
+				return false;
+			}
+		}
+		ReflectiveMethodExecutor executor = (ReflectiveMethodExecutor) this.cachedExecutor.get();
+		Method method = executor.getMethod();
+		if (!Modifier.isPublic(method.getModifiers()) || !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
+			return false;
+		}
+		if (method.isVarArgs()) {
+			return false;
+		}
+		if (executor.didArgumentConversionOccur()) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public void generateCode(MethodVisitor mv,CodeFlow codeflow) {
+		ReflectiveMethodExecutor executor = (ReflectiveMethodExecutor) this.cachedExecutor.get();
+		Method method = executor.getMethod();
+		boolean isStaticMethod = Modifier.isStatic(method.getModifiers());
+		String descriptor = codeflow.lastDescriptor();
+
+		if (descriptor == null && !isStaticMethod) {
+			codeflow.loadTarget(mv);
+		}
+
+		boolean itf = method.getDeclaringClass().isInterface();
+		String methodDeclaringClassSlashedDescriptor = method.getDeclaringClass().getName().replace('.','/');
+		if (!isStaticMethod) {
+			if (descriptor == null || !descriptor.equals(method.getDeclaringClass())) {
+				mv.visitTypeInsn(CHECKCAST, method.getDeclaringClass().getName().replace('.','/'));
+			}
+		}
+		String[] paramDescriptors = CodeFlow.toParamDescriptors(method);
+		for (int c=0;c<children.length;c++) {
+			SpelNodeImpl child = children[c];
+			codeflow.enterCompilationScope();
+			child.generateCode(mv, codeflow);
+			// Check if need to box it for the method reference?
+			if (CodeFlow.isPrimitive(codeflow.lastDescriptor()) && (paramDescriptors[c].charAt(0)=='L')) {
+				CodeFlow.insertBoxIfNecessary(mv, codeflow.lastDescriptor().charAt(0));
+			}
+			else if (!codeflow.lastDescriptor().equals(paramDescriptors[c])) {
+				// This would be unnecessary in the case of subtyping (e.g. method takes a Number but passed in is an Integer)
+				CodeFlow.insertCheckCast(mv, paramDescriptors[c]);
+			}
+			codeflow.exitCompilationScope();
+		}
+		mv.visitMethodInsn(isStaticMethod?INVOKESTATIC:INVOKEVIRTUAL,methodDeclaringClassSlashedDescriptor,method.getName(),CodeFlow.createSignatureDescriptor(method), itf);
+		codeflow.pushDescriptor(exitTypeDescriptor);
 	}
 
 }

@@ -16,10 +16,15 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.asm.MethodVisitor;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
@@ -30,6 +35,7 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
+import org.springframework.expression.spel.standard.CodeFlow;
 import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
 
 /**
@@ -65,6 +71,10 @@ public class Indexer extends SpelNodeImpl {
 	private Class<?> cachedWriteTargetType;
 
 	private PropertyAccessor cachedWriteAccessor;
+
+	private static enum IndexedType { map, array, list, string, object; }
+	
+	private IndexedType indexedType;
 
 
 	public Indexer(int pos, SpelNodeImpl expr) {
@@ -122,6 +132,7 @@ public class Indexer extends SpelNodeImpl {
 			if (targetObjectTypeDescriptor.getMapKeyTypeDescriptor() != null) {
 				key = state.convertValue(key, targetObjectTypeDescriptor.getMapKeyTypeDescriptor());
 			}
+			this.indexedType = IndexedType.map;
 			return new MapIndexingValueRef(state.getTypeConverter(), (Map<?, ?>) targetObject, key,
 					targetObjectTypeDescriptor);
 		}
@@ -135,14 +146,19 @@ public class Indexer extends SpelNodeImpl {
 		if (targetObject.getClass().isArray() || targetObject instanceof Collection || targetObject instanceof String) {
 			int idx = (Integer) state.convertValue(index, TypeDescriptor.valueOf(Integer.class));
 			if (targetObject.getClass().isArray()) {
+				this.indexedType = IndexedType.array;
 				return new ArrayIndexingValueRef(state.getTypeConverter(), targetObject, idx, targetObjectTypeDescriptor);
 			}
 			else if (targetObject instanceof Collection) {
+				if (targetObject instanceof List) {
+					this.indexedType = IndexedType.list;
+				}
 				return new CollectionIndexingValueRef((Collection<?>) targetObject, idx, targetObjectTypeDescriptor,
 						state.getTypeConverter(), state.getConfiguration().isAutoGrowCollections(),
 						state.getConfiguration().getMaximumAutoGrowSize());
 			}
 			else if (targetObject instanceof String) {
+				this.indexedType = IndexedType.string;
 				return new StringIndexingLValue((String) targetObject, idx, targetObjectTypeDescriptor);
 			}
 		}
@@ -150,12 +166,128 @@ public class Indexer extends SpelNodeImpl {
 		// Try and treat the index value as a property of the context object
 		// TODO could call the conversion service to convert the value to a String
 		if (indexValue.getTypeDescriptor().getType() == String.class) {
+			this.indexedType = IndexedType.object;
 			return new PropertyIndexingValueRef(targetObject, (String) indexValue.getValue(),
 					state.getEvaluationContext(), targetObjectTypeDescriptor);
 		}
 
 		throw new SpelEvaluationException(getStartPosition(), SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,
 				targetObjectTypeDescriptor.toString());
+	}
+	
+	@Override
+	public boolean isCompilable() {
+		if (this.indexedType == IndexedType.array) {
+			return exitTypeDescriptor != null;
+		}
+		else if (this.indexedType == IndexedType.list || this.indexedType == IndexedType.map) {
+			return true;
+		}
+		else if (this.indexedType == IndexedType.object) {
+			// If the string name is changing the accessor is clearly going to change (so compilation is not possible)
+			if (this.cachedReadAccessor != null && 
+					(this.cachedReadAccessor instanceof ReflectivePropertyAccessor.OptimalPropertyAccessor) &&
+					(getChild(0) instanceof StringLiteral)) {
+				return true;
+			};
+		}
+		return false;
+	}
+	
+	@Override
+	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
+		String s = codeflow.lastDescriptor();
+		
+		if (s == null) {
+			// stack is empty, should use context object
+			codeflow.loadTarget(mv);
+		}
+		
+		if (this.indexedType == IndexedType.array) {
+			if (exitTypeDescriptor == "I") {
+				mv.visitTypeInsn(CHECKCAST,"[I");
+				SpelNodeImpl index = this.children[0];
+				index.generateCode(mv, codeflow);
+				mv.visitInsn(IALOAD);
+			} 
+			else if (exitTypeDescriptor == "D") {
+				mv.visitTypeInsn(CHECKCAST,"[D");
+				SpelNodeImpl index = this.children[0];
+				index.generateCode(mv, codeflow);
+				mv.visitInsn(DALOAD);
+			}
+			else if (exitTypeDescriptor == "J") {
+				mv.visitTypeInsn(CHECKCAST,"[J");
+				SpelNodeImpl index = this.children[0];
+				index.generateCode(mv, codeflow);
+				mv.visitInsn(LALOAD);
+			}
+			else if (exitTypeDescriptor == "F") {
+				mv.visitTypeInsn(CHECKCAST,"[F");
+				SpelNodeImpl index = this.children[0];
+				index.generateCode(mv, codeflow);
+				mv.visitInsn(FALOAD);
+			}
+			else if (exitTypeDescriptor == "S") {
+				mv.visitTypeInsn(CHECKCAST,"[S");
+				SpelNodeImpl index = this.children[0];
+				index.generateCode(mv, codeflow);
+				mv.visitInsn(SALOAD);
+			}
+			else if (exitTypeDescriptor == "B") {
+				mv.visitTypeInsn(CHECKCAST,"[B");
+				SpelNodeImpl index = this.children[0];
+				index.generateCode(mv, codeflow);
+				mv.visitInsn(BALOAD);
+			}
+			else if (exitTypeDescriptor == "C") {
+				mv.visitTypeInsn(CHECKCAST,"[C");
+				SpelNodeImpl index = this.children[0];
+				index.generateCode(mv, codeflow);
+				mv.visitInsn(CALOAD);
+			}
+			else { 
+				mv.visitTypeInsn(CHECKCAST,"["+exitTypeDescriptor+(CodeFlow.isPrimitiveArray(exitTypeDescriptor)?"":";"));//depthPlusOne(exitTypeDescriptor)+"Ljava/lang/Object;");
+				SpelNodeImpl index = this.children[0];
+				index.generateCode(mv, codeflow);
+				mv.visitInsn(AALOAD);
+			}
+		}
+		else if (this.indexedType == IndexedType.list) {
+			mv.visitTypeInsn(CHECKCAST,"java/util/List");
+			this.children[0].generateCode(mv, codeflow);
+			mv.visitMethodInsn(INVOKEINTERFACE,"java/util/List","get","(I)Ljava/lang/Object;", true);
+			CodeFlow.insertCheckCast(mv,exitTypeDescriptor);
+		}
+		else if (this.indexedType == IndexedType.map) {
+			mv.visitTypeInsn(CHECKCAST,"java/util/Map");
+			this.children[0].generateCode(mv, codeflow);
+			mv.visitMethodInsn(INVOKEINTERFACE,"java/util/Map","get","(Ljava/lang/Object;)Ljava/lang/Object;", true);
+			CodeFlow.insertCheckCast(mv,exitTypeDescriptor);
+		} 
+		else if (this.indexedType == IndexedType.object) {
+			ReflectivePropertyAccessor.OptimalPropertyAccessor accessor =
+					(ReflectivePropertyAccessor.OptimalPropertyAccessor)this.cachedReadAccessor;
+			Member member = accessor.member;
+			boolean isStatic = Modifier.isStatic(member.getModifiers());
+
+			String descriptor = codeflow.lastDescriptor();
+			String memberDeclaringClassSlashedDescriptor = member.getDeclaringClass().getName().replace('.','/');
+			if (!isStatic) {
+				if (descriptor == null) {
+					codeflow.loadTarget(mv);
+				}
+				if (descriptor == null || !memberDeclaringClassSlashedDescriptor.equals(descriptor.substring(1))) {
+					mv.visitTypeInsn(CHECKCAST, memberDeclaringClassSlashedDescriptor);
+				}
+			}
+			if (member instanceof Field) {
+				mv.visitFieldInsn(isStatic?GETSTATIC:GETFIELD,memberDeclaringClassSlashedDescriptor,member.getName(),CodeFlow.toJVMDescriptor(((Field) member).getType()));
+			} else {
+				mv.visitMethodInsn(isStatic?INVOKESTATIC:INVOKEVIRTUAL, memberDeclaringClassSlashedDescriptor, member.getName(),CodeFlow.createSignatureDescriptor((Method)member),false);
+			}
+		} 
+		codeflow.pushDescriptor(exitTypeDescriptor);
 	}
 
 	@Override
@@ -236,47 +368,57 @@ public class Indexer extends SpelNodeImpl {
 		if (arrayComponentType == Integer.TYPE) {
 			int[] array = (int[]) ctx;
 			checkAccess(array.length, idx);
+			this.exitTypeDescriptor = "I";
 			return array[idx];
 		}
 		else if (arrayComponentType == Boolean.TYPE) {
 			boolean[] array = (boolean[]) ctx;
 			checkAccess(array.length, idx);
+			this.exitTypeDescriptor = "Z";
 			return array[idx];
 		}
 		else if (arrayComponentType == Character.TYPE) {
 			char[] array = (char[]) ctx;
 			checkAccess(array.length, idx);
+			this.exitTypeDescriptor = "C";
 			return array[idx];
 		}
 		else if (arrayComponentType == Long.TYPE) {
 			long[] array = (long[]) ctx;
 			checkAccess(array.length, idx);
+			this.exitTypeDescriptor = "J";
 			return array[idx];
 		}
 		else if (arrayComponentType == Short.TYPE) {
 			short[] array = (short[]) ctx;
 			checkAccess(array.length, idx);
+			this.exitTypeDescriptor = "S";
 			return array[idx];
 		}
 		else if (arrayComponentType == Double.TYPE) {
 			double[] array = (double[]) ctx;
 			checkAccess(array.length, idx);
+			this.exitTypeDescriptor = "D";
 			return array[idx];
 		}
 		else if (arrayComponentType == Float.TYPE) {
 			float[] array = (float[]) ctx;
 			checkAccess(array.length, idx);
+			this.exitTypeDescriptor = "F";
 			return array[idx];
 		}
 		else if (arrayComponentType == Byte.TYPE) {
 			byte[] array = (byte[]) ctx;
 			checkAccess(array.length, idx);
+			this.exitTypeDescriptor = "B";
 			return array[idx];
 		}
 		else {
 			Object[] array = (Object[]) ctx;
 			checkAccess(array.length, idx);
-			return array[idx];
+			Object retValue = array[idx];
+			this.exitTypeDescriptor = CodeFlow.toDescriptor(arrayComponentType);
+			return retValue;
 		}
 	}
 
@@ -327,7 +469,7 @@ public class Indexer extends SpelNodeImpl {
 
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	private static class MapIndexingValueRef implements ValueRef {
+	private class MapIndexingValueRef implements ValueRef {
 
 		private final TypeConverter typeConverter;
 
@@ -347,6 +489,7 @@ public class Indexer extends SpelNodeImpl {
 		@Override
 		public TypedValue getValue() {
 			Object value = this.map.get(this.key);
+			exitTypeDescriptor = CodeFlow.toDescriptorFromObject(value);
 			return new TypedValue(value,
 					this.mapEntryTypeDescriptor.getMapValueTypeDescriptor(value));
 		}
@@ -408,7 +551,17 @@ public class Indexer extends SpelNodeImpl {
 							Indexer.this.cachedReadAccessor = accessor;
 							Indexer.this.cachedReadName = this.name;
 							Indexer.this.cachedReadTargetType = targetObjectRuntimeClass;
-							return accessor.read(this.evaluationContext, this.targetObject, this.name);
+							if (accessor instanceof ReflectivePropertyAccessor.OptimalPropertyAccessor) {
+								ReflectivePropertyAccessor.OptimalPropertyAccessor optimalAccessor = (ReflectivePropertyAccessor.OptimalPropertyAccessor)accessor;
+								Member member = optimalAccessor.member;
+								if (member instanceof Field) {
+									Indexer.this.exitTypeDescriptor = CodeFlow.toDescriptor(((Field)member).getType());
+								} else {
+									Indexer.this.exitTypeDescriptor = CodeFlow.toDescriptor(((Method)member).getReturnType());
+								}
+							}
+							TypedValue value = accessor.read(this.evaluationContext, this.targetObject, this.name);
+							return value;
 						}
 					}
 				}
@@ -490,6 +643,7 @@ public class Indexer extends SpelNodeImpl {
 			growCollectionIfNecessary();
 			if (this.collection instanceof List) {
 				Object o = ((List) this.collection).get(this.index);
+				exitTypeDescriptor = CodeFlow.toDescriptorFromObject(o);
 				return new TypedValue(o, this.collectionEntryDescriptor.elementTypeDescriptor(o));
 			}
 			int pos = 0;

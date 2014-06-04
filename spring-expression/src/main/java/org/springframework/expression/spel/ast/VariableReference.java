@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@
 
 package org.springframework.expression.spel.ast;
 
+import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
+import org.springframework.expression.spel.standard.CodeFlow;
 
 /**
  * Represents a variable reference, eg. #someVar. Note this is different to a *local*
@@ -64,9 +66,12 @@ public class VariableReference extends SpelNodeImpl {
 			return state.getActiveContextObject();
 		}
 		if (this.name.equals(ROOT)) {
-			return state.getRootContextObject();
+			TypedValue result = state.getRootContextObject();
+			this.exitTypeDescriptor = CodeFlow.toDescriptorFromObject(result.getValue());
+			return result;
 		}
 		TypedValue result = state.lookupVariable(this.name);
+		this.exitTypeDescriptor = CodeFlow.toDescriptorFromObject(result.getValue());
 		// a null value will mean either the value was null or the variable was not found
 		return result;
 	}
@@ -118,6 +123,24 @@ public class VariableReference extends SpelNodeImpl {
 		public boolean isWritable() {
 			return true;
 		}
+	}
+
+	@Override
+	public boolean isCompilable() {
+		return getExitDescriptor()!=null;
+	}
+	
+	@Override
+	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
+		if (this.name.equals(ROOT)) {
+			mv.visitVarInsn(ALOAD,1);
+		} else {
+			mv.visitVarInsn(ALOAD, 2);
+			mv.visitLdcInsn(name);
+			mv.visitMethodInsn(INVOKEINTERFACE, "org/springframework/expression/EvaluationContext", "lookupVariable", "(Ljava/lang/String;)Ljava/lang/Object;",true);
+		}
+		CodeFlow.insertCheckCast(mv,getExitDescriptor());
+		codeflow.pushDescriptor(getExitDescriptor());
 	}
 
 

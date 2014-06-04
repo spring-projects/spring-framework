@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,13 @@
 
 package org.springframework.expression.spel.ast;
 
+import org.springframework.asm.Label;
+import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
+import org.springframework.expression.spel.standard.CodeFlow;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
@@ -34,6 +37,7 @@ public class OperatorNot extends SpelNodeImpl { // Not is a unary operator so do
 
 	public OperatorNot(int pos, SpelNodeImpl operand) {
 		super(pos, operand);
+		this.exitTypeDescriptor = "Z";
 	}
 
 
@@ -57,6 +61,27 @@ public class OperatorNot extends SpelNodeImpl { // Not is a unary operator so do
 		StringBuilder sb = new StringBuilder();
 		sb.append("!").append(getChild(0).toStringAST());
 		return sb.toString();
+	}
+	
+	@Override
+	public boolean isCompilable() {
+		SpelNodeImpl child = this.children[0];
+		return child.isCompilable() && CodeFlow.isBooleanCompatible(child.getExitDescriptor());
+	}
+	
+	@Override
+	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
+		this.children[0].generateCode(mv, codeflow);
+		codeflow.unboxBooleanIfNecessary(mv);
+		Label elseTarget = new Label();
+		Label endOfIf = new Label();
+		mv.visitJumpInsn(IFNE,elseTarget);		
+		mv.visitInsn(ICONST_1); // TRUE
+		mv.visitJumpInsn(GOTO,endOfIf);
+		mv.visitLabel(elseTarget);
+		mv.visitInsn(ICONST_0); // FALSE
+		mv.visitLabel(endOfIf);
+		codeflow.pushDescriptor(getExitDescriptor());
 	}
 
 }
