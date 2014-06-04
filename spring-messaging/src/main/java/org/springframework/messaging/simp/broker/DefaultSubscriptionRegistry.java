@@ -48,11 +48,11 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 	/** The maximum number of entries in the cache */
 	private volatile int cacheLimit = DEFAULT_CACHE_LIMIT;
 
+	private PathMatcher pathMatcher = new AntPathMatcher();
+
 	private final DestinationCache destinationCache = new DestinationCache();
 
 	private final SessionSubscriptionRegistry subscriptionRegistry = new SessionSubscriptionRegistry();
-
-	private PathMatcher pathMatcher = new AntPathMatcher();
 
 
 	/**
@@ -71,18 +71,19 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 	}
 
 	/**
-	 * The PathMatcher to use.
+	 * Specify the {@link PathMatcher} to use.
 	 */
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;
 	}
 
 	/**
-	 * The configured PathMatcher.
+	 * Return the configured {@link PathMatcher}.
 	 */
 	public PathMatcher getPathMatcher() {
 		return this.pathMatcher;
 	}
+
 
 	@Override
 	protected void addSubscriptionInternal(String sessionId, String subsId, String destination, Message<?> message) {
@@ -95,7 +96,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		SessionSubscriptionInfo info = this.subscriptionRegistry.getSubscriptions(sessionId);
 		if (info != null) {
 			String destination = info.removeSubscription(subsId);
-			if (info.getSubscriptions(destination) == null) {
+			if (destination != null && info.getSubscriptions(destination) == null) {
 				this.destinationCache.updateAfterRemovedSubscription(destination, sessionId, subsId);
 			}
 		}
@@ -206,9 +207,9 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 						}
 					}
 				}
-				for (String d : destinationsToRemove) {
-					this.updateCache.remove(d);
-					this.accessCache.remove(d);
+				for (String destinationToRemove : destinationsToRemove) {
+					this.updateCache.remove(destinationToRemove);
+					this.accessCache.remove(destinationToRemove);
 				}
 			}
 		}
