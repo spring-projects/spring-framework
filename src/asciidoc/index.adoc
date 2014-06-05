@@ -2306,7 +2306,7 @@ validate the bean id earlier, at XML document parse time.
 ----
 	<property name="targetName">
 		<!-- a bean with id theTargetBean must exist; otherwise an exception will be thrown -->
-		<idref bean="theTargetBean"/>
+		<idref local="theTargetBean"/>
 	</property>
 ----
 
