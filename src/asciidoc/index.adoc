@@ -4080,7 +4080,7 @@ lifecycle requirements (e.g. starts and stops some background process):
 ----
 
 Any Spring-managed object may implement that interface. Then, when the
-ApplicationContext itself starts and stops, it will cascade those calls to all Lifecycle
+`ApplicationContext` itself starts and stops, it will cascade those calls to all `Lifecycle`
 implementations defined within that context. It does this by delegating to a
 `LifecycleProcessor`:
 
