@@ -7,17 +7,21 @@ Spring Framework Eclipse/STS project import guide
 
 This script will guide you through the process of importing the Spring
 Framework projects into Eclipse or the Spring Tool Suite (STS). It is
-recommended that you have a recent version of Eclipse or STS with full
-support for Java 8 (this script has been tested against Eclipse Luna
-4.4 integration build I20140520-2000), but as a bare minimum you will
-need Eclipse with Java 8 support, AJDT, and the Groovy Compiler.
+recommended that you have a recent version of Eclipse or STS. As a bare
+minimum you will need Eclipse with full Java 8 support, AJDT, and the
+Groovy Compiler.
+
+This script has been tested against:
+
+- Eclipse: integration build I20140528-2000 (Luna 4.4)
+- STS: nightly build 3.6.0.CI-B1874144 (Luna 4.4)
 
 If you need to download and install Eclipse or STS, please do that now
 by visiting one of the following sites:
 
-Eclipse downloads: http://download.eclipse.org/eclipse/downloads/
-STS downloads: http://spring.io/tools/sts/all
-STS nightly builds: http://dist.springsource.com/snapshot/STS/nightly-distributions.html
+- Eclipse downloads: http://download.eclipse.org/eclipse/downloads/
+- STS downloads: http://spring.io/tools/sts/all
+- STS nightly builds: http://dist.springsource.com/snapshot/STS/nightly-distributions.html
 
 Otherwise, press enter, and we'll begin.
 EOM
