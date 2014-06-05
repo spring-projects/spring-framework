@@ -2580,7 +2580,14 @@ following XML-based configuration metadata snippet sets the email property to th
 ----
 
 The preceding example is equivalent to the following Java code:
-`exampleBean.setEmail("")`. The `<null/>` element handles `null` values. For example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+        exampleBean.setEmail("")
+----
+
+The `<null/>` element handles `null` values. For example:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -2593,7 +2600,12 @@ The preceding example is equivalent to the following Java code:
 ----
 
 The above configuration is equivalent to the following Java code:
-`exampleBean.setEmail(null)`.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	exampleBean.setEmail(null)
+----
 
 
 [[beans-p-namespace]]
