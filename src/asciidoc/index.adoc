@@ -2297,18 +2297,12 @@ likely fatal results) when the `client` bean is actually instantiated. If the `c
 bean is a <<beans-factory-scopes,prototype>> bean, this typo and the resulting exception
 may only be discovered long after the container is deployed.
 
-Additionally, if the referenced bean is in the same XML unit, and the bean name is the
-bean __id__, you can use the `local` attribute, which allows the XML parser itself to
-validate the bean id earlier, at XML document parse time.
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<property name="targetName">
-		<!-- a bean with id theTargetBean must exist; otherwise an exception will be thrown -->
-		<idref local="theTargetBean"/>
-	</property>
-----
+[NOTE]
+====
+The `local` attribute on the `idref` element is no longer supported in the 4.0 beans xsd
+since it does not provide value over a regular `bean` reference anymore. Simply change
+your existing `idref local` references to `idref bean` when upgrading to the 4.0 schema.
+====
 
 A common place (at least in versions earlier than Spring 2.0) where the `<idref/>` element
 brings value is in the configuration of <<aop-pfb-1,AOP interceptors>> in a
