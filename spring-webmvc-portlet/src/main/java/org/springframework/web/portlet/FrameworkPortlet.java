@@ -41,12 +41,14 @@ import org.springframework.context.event.SourceFilteringListener;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.i18n.SimpleLocaleContext;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.portlet.context.ConfigurablePortletApplicationContext;
 import org.springframework.web.portlet.context.PortletApplicationContextUtils;
 import org.springframework.web.portlet.context.PortletRequestAttributes;
 import org.springframework.web.portlet.context.PortletRequestHandledEvent;
+import org.springframework.web.portlet.context.StandardPortletEnvironment;
 import org.springframework.web.portlet.context.XmlPortletApplicationContext;
 
 /**
@@ -352,6 +354,14 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 		pac.setNamespace(getNamespace());
 		pac.setConfigLocation(getContextConfigLocation());
 		pac.addApplicationListener(new SourceFilteringListener(pac, this));
+
+		// The wac environment's #initPropertySources will be called in any case when the context
+		// is refreshed; do it eagerly here to ensure portlet property sources are in place for
+		// use in any post-processing or initialization that occurs below prior to #refresh
+		ConfigurableEnvironment env = pac.getEnvironment();
+		if (env instanceof StandardPortletEnvironment) {
+			((StandardPortletEnvironment) env).initPropertySources(pac.getServletContext(), getPortletContext(), getPortletConfig());
+		}
 
 		postProcessPortletApplicationContext(pac);
 		pac.refresh();
