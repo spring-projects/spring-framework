@@ -79,7 +79,7 @@ public abstract class TestContextTransactionUtils {
 	 * should be retrieved; never {@code null}
 	 * @param name the name of the {@code DataSource} to retrieve; may be {@code null}
 	 * or <em>empty</em>
-	 * @return the {@code DataSource} to use, or {@code null} if not found
+	 * @return the {@code DataSource} to use
 	 * @throws BeansException if an error occurs while retrieving the {@code DataSource}
 	 */
 	public static DataSource retrieveDataSource(TestContext testContext, String name) {
@@ -133,7 +133,7 @@ public abstract class TestContextTransactionUtils {
 	 * should be retrieved; never {@code null}
 	 * @param name the name of the transaction manager to retrieve; may be
 	 * {@code null} or <em>empty</em>
-	 * @return the transaction manager to use, or {@code null} if not found
+	 * @return the transaction manager to use
 	 * @throws BeansException if an error occurs while retrieving the transaction manager
 	 */
 	public static PlatformTransactionManager retrieveTransactionManager(TestContext testContext, String name) {
@@ -182,7 +182,7 @@ public abstract class TestContextTransactionUtils {
 	/**
 	 * Create a delegating {@link TransactionAttribute} for the supplied target
 	 * {@link TransactionAttribute} and {@link TestContext}, using the names of
-	 * the test class and test method as the name of the transaction.
+	 * the test class and test method to build the name of the transaction.
 	 *
 	 * @param testContext the {@code TestContext} upon which to base the name; never {@code null}
 	 * @param targetAttribute the {@code TransactionAttribute} to delegate to; never {@code null}
