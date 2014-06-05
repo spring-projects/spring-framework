@@ -4243,8 +4243,8 @@ additional functionality. One use would be the programmatic retrieval of other b
 Sometimes this capability is useful; however, in general you should avoid it, because it
 couples the code to Spring and does not follow the Inversion of Control style, where
 collaborators are provided to beans as properties. Other methods of the
-ApplicationContext provide access to file resources, publishing application events, and
-accessing a MessageSource. These additional features are described in
+`ApplicationContext` provide access to file resources, publishing application events, and
+accessing a `MessageSource`. These additional features are described in
 <<context-introduction>>
 
 As of Spring 2.5, autowiring is another alternative to obtain reference to the
@@ -4258,7 +4258,7 @@ parameter that is expecting the `ApplicationContext` type if the field, construc
 method in question carries the `@Autowired` annotation. For more information, see
 <<beans-autowired-annotation>>.
 
-When an ApplicationContext creates a class that implements the
+When an `ApplicationContext` creates a class that implements the
 `org.springframework.beans.factory.BeanNameAware` interface, the class is provided with
 a reference to the name defined in its associated object definition.
 
