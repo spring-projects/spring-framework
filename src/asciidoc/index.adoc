@@ -3785,7 +3785,7 @@ of the scope. You can also do the `Scope` registration declaratively, using the
 
 [NOTE]
 ====
-When you place <aop:scoped-proxy/> in a `FactoryBean` implementation, it is the factory
+When you place `<aop:scoped-proxy/>` in a `FactoryBean` implementation, it is the factory
 bean itself that is scoped, not the object returned from `getObject()`.
 ====
 
