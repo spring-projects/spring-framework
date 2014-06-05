@@ -4142,7 +4142,7 @@ negative phase value would indicate that an object should start before those sta
 components (and stop after them), and vice versa for any positive phase value.
 
 As you can see the stop method defined by `SmartLifecycle` accepts a callback. Any
-implementation __must__ invoke that callback's run() method after that implementation's
+implementation __must__ invoke that callback's `run()` method after that implementation's
 shutdown process is complete. That enables asynchronous shutdown where necessary since
 the default implementation of the `LifecycleProcessor` interface,
 `DefaultLifecycleProcessor`, will wait up to its timeout value for the group of objects
@@ -4162,14 +4162,14 @@ defining the following would be sufficient:
 
 As mentioned, the `LifecycleProcessor` interface defines callback methods for the
 refreshing and closing of the context as well. The latter will simply drive the shutdown
-process as if stop() had been called explicitly, but it will happen when the context is
+process as if `stop()` had been called explicitly, but it will happen when the context is
 closing. The 'refresh' callback on the other hand enables another feature of
 `SmartLifecycle` beans. When the context is refreshed (after all objects have been
 instantiated and initialized), that callback will be invoked, and at that point the
 default lifecycle processor will check the boolean value returned by each
 `SmartLifecycle` object's `isAutoStartup()` method. If "true", then that object will be
 started at that point rather than waiting for an explicit invocation of the context's or
-its own start() method (unlike the context refresh, the context start does not happen
+its own `start()` method (unlike the context refresh, the context start does not happen
 automatically for a standard context implementation). The "phase" value as well as any
 "depends-on" relationships will determine the startup order in the same way as described
 above.
