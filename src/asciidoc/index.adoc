@@ -4132,7 +4132,7 @@ another option, namely the `getPhase()` method as defined on its super-interface
 
 When starting, the objects with the lowest phase start first, and when stopping, the
 reverse order is followed. Therefore, an object that implements `SmartLifecycle` and
-whose getPhase() method returns `Integer.MIN_VALUE` would be among the first to start
+whose `getPhase()` method returns `Integer.MIN_VALUE` would be among the first to start
 and the last to stop. At the other end of the spectrum, a phase value of
 `Integer.MAX_VALUE` would indicate that the object should be started last and stopped
 first (likely because it depends on other processes to be running). When considering the
