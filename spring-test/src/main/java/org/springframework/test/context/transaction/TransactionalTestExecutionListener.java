@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryUtils;
-import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -44,7 +42,6 @@ import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
 import org.springframework.transaction.annotation.TransactionManagementConfigurer;
-import org.springframework.transaction.interceptor.DelegatingTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
 import org.springframework.util.Assert;
@@ -126,10 +123,10 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * @see org.springframework.transaction.annotation.Transactional
 	 * @see #getTransactionManager(TestContext, String)
 	 */
-	@SuppressWarnings("serial")
 	@Override
-	public void beforeTestMethod(TestContext testContext) throws Exception {
+	public void beforeTestMethod(final TestContext testContext) throws Exception {
 		final Method testMethod = testContext.getTestMethod();
+		final Class<?> testClass = testContext.getTestClass();
 		Assert.notNull(testMethod, "The test method of the supplied TestContext must not be null");
 
 		if (this.transactionContextCache.remove(testMethod) != null) {
@@ -138,17 +135,11 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 		}
 
 		PlatformTransactionManager tm = null;
-		TransactionAttribute transactionAttribute = this.attributeSource.getTransactionAttribute(testMethod,
-			testContext.getTestClass());
+		TransactionAttribute transactionAttribute = this.attributeSource.getTransactionAttribute(testMethod, testClass);
 
 		if (transactionAttribute != null) {
-			transactionAttribute = new DelegatingTransactionAttribute(transactionAttribute) {
-
-				@Override
-				public String getName() {
-					return testMethod.getName();
-				}
-			};
+			transactionAttribute = TestContextTransactionUtils.createDelegatingTransactionAttribute(testContext,
+				transactionAttribute);
 
 			if (logger.isDebugEnabled()) {
 				logger.debug("Explicit transaction definition [" + transactionAttribute + "] found for test context "
@@ -302,7 +293,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 	/**
 	 * Get the {@link PlatformTransactionManager transaction manager} to use
-	 * for the supplied {@link TestContext test context} and {@code qualifier}.
+	 * for the supplied {@linkplain TestContext test context} and {@code qualifier}.
 	 * <p>Delegates to {@link #getTransactionManager(TestContext)} if the
 	 * supplied {@code qualifier} is {@code null} or empty.
 	 * @param testContext the test context for which the transaction manager
@@ -340,6 +331,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	/**
 	 * Get the {@link PlatformTransactionManager transaction manager} to use
 	 * for the supplied {@link TestContext test context}.
+	 * <p>The default implementation simply delegates to 
+	 * {@link TestContextTransactionUtils#retrieveTransactionManager}.
 	 * @param testContext the test context for which the transaction manager
 	 * should be retrieved
 	 * @return the transaction manager to use, or {@code null} if not found
@@ -347,47 +340,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * @see #getTransactionManager(TestContext, String)
 	 */
 	protected PlatformTransactionManager getTransactionManager(TestContext testContext) {
-		BeanFactory bf = testContext.getApplicationContext().getAutowireCapableBeanFactory();
 		String tmName = retrieveConfigurationAttributes(testContext).getTransactionManagerName();
-
-		try {
-			// look up by type and explicit name from @TransactionConfiguration
-			if (StringUtils.hasText(tmName) && !DEFAULT_TRANSACTION_MANAGER_NAME.equals(tmName)) {
-				return bf.getBean(tmName, PlatformTransactionManager.class);
-			}
-
-			if (bf instanceof ListableBeanFactory) {
-				ListableBeanFactory lbf = (ListableBeanFactory) bf;
-
-				// look up single bean by type
-				Map<String, PlatformTransactionManager> txMgrs = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf,
-					PlatformTransactionManager.class);
-				if (txMgrs.size() == 1) {
-					return txMgrs.values().iterator().next();
-				}
-
-				// look up single TransactionManagementConfigurer
-				Map<String, TransactionManagementConfigurer> configurers = BeanFactoryUtils.beansOfTypeIncludingAncestors(
-					lbf, TransactionManagementConfigurer.class);
-				if (configurers.size() > 1) {
-					throw new IllegalStateException(
-						"Only one TransactionManagementConfigurer may exist in the ApplicationContext");
-				}
-				if (configurers.size() == 1) {
-					return configurers.values().iterator().next().annotationDrivenTransactionManager();
-				}
-			}
-
-			// look up by type and default name from @TransactionConfiguration
-			return bf.getBean(DEFAULT_TRANSACTION_MANAGER_NAME, PlatformTransactionManager.class);
-
-		}
-		catch (BeansException ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Caught exception while retrieving transaction manager for test context " + testContext, ex);
-			}
-			throw ex;
-		}
+		return TestContextTransactionUtils.retrieveTransactionManager(testContext, tmName);
 	}
 
 	/**

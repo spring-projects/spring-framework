@@ -45,7 +45,7 @@ public class TestExecutionListenersTests {
 	@Test
 	public void verifyNumDefaultListenersRegistered() throws Exception {
 		TestContextManager testContextManager = new TestContextManager(DefaultListenersExampleTestCase.class);
-		assertEquals("Num registered TELs for DefaultListenersExampleTestCase.", 3,
+		assertEquals("Num registered TELs for DefaultListenersExampleTestCase.", 4,
 			testContextManager.getTestExecutionListeners().size());
 	}
 
