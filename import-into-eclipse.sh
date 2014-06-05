@@ -42,10 +42,10 @@ cat <<EOM
 STEP 1: Generate subproject Eclipse metadata
 
 The first step will be to generate Eclipse project metadata for each of
-the spring-* subprojects. This happens via the built-in "Gradle
-wrapper" script (./gradlew in this directory). If this is your first
-time using the Gradle wrapper, this step may take a few minutes while a
-Gradle distribution is downloaded for you.
+the spring-* subprojects. This happens via the built-in "Gradle wrapper"
+script (./gradlew in this directory). If this is your first time using
+the Gradle wrapper, this step may take a few minutes while a Gradle
+distribution is downloaded for you.
 
 The command run will be:
 
@@ -65,11 +65,11 @@ STEP 2: Import subprojects into Eclipse/STS
 
 Within Eclipse/STS, do the following:
 
-File > Import... > Existing Projects into Workspace
-   > When prompted for the 'root directory', provide $PWD
-   > Press enter. You will see the modules show up under "Projects"
-   > All projects should be selected/checked. Click Finish.
-   > When the project import is complete, you should have no errors.
+- File > Import... > Existing Projects into Workspace
+- When prompted for the 'root directory', provide $PWD.
+- Press enter. You will see the modules show up under "Projects".
+- All projects should be selected/checked. Click Finish.
+- When the project import is complete, you should have no errors.
 
 When the above is complete, return here and press the enter key.
 EOM
@@ -81,12 +81,12 @@ COMMAND="./gradlew :eclipse"
 cat <<EOM
 
 ------------------------------------------------------------------------
-STEP 3: generate root project Eclipse metadata
+STEP 3: Generate root project Eclipse metadata
 
-Unfortunately, Eclipse does not allow for importing project
-hierarchies, so we had to skip root project metadata generation during
-step 1. In this step we simply generate root project metadata so you
-can import it in the next step.
+Unfortunately, Eclipse does not support importing project hierarchies,
+so we had to skip root project metadata generation during step 1. In
+this step we simply generate root project metadata so that you can
+import it in the next step.
 
 The command run will be:
 
@@ -117,9 +117,9 @@ STEP 5: Enable Git support for all projects
 
 - In the Eclipse/STS Package Explorer, select all spring* projects.
 - Right-click to open the context menu and select Team > Share Project...
-- In the Share Project dialog that appears, select Git and press Next
-- Check "Use or create repository in parent folder of project"
-- Click Finish
+- In the Share Project dialog that appears, select Git and press Next.
+- Check "Use or create repository in parent folder of project".
+- Click Finish.
 
 When complete, you'll have Git support enabled for all projects.
 
