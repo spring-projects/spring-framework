@@ -4222,8 +4222,8 @@ declared on the `AbstractApplicationContext` class:
 [[beans-factory-aware]]
 ==== ApplicationContextAware and BeanNameAware
 
-When an `ApplicationContext` creates a class that implements the
-`org.springframework.context.ApplicationContextAware` interface, the class is provided
+When an `ApplicationContext` creates an object instance that implements the
+`org.springframework.context.ApplicationContextAware` interface, the instance is provided
 with a reference to that `ApplicationContext`.
 
 [source,java,indent=0]
