@@ -1241,7 +1241,7 @@ The following example shows the data access objects `daos.xml` file:
 			<!-- additional collaborators and configuration for this bean go here -->
 		</bean>
 
-		<bean id="itemDao" class="org.springframework.samples.jpetstore.dao.jpa.JapItemDao">
+		<bean id="itemDao" class="org.springframework.samples.jpetstore.dao.jpa.JpaItemDao">
 			<!-- additional collaborators and configuration for this bean go here -->
 		</bean>
 
@@ -1282,7 +1282,7 @@ to load bean definitions from another file or files. For example:
 	</beans>
 ----
 
-In the preceding example, external bean definitions are loaded from three files,
+In the preceding example, external bean definitions are loaded from three files:
 `services.xml`, `messageSource.xml`, and `themeSource.xml`. All location paths are
 relative to the definition file doing the importing, so `services.xml` must be in the
 same directory or classpath location as the file doing the importing, while
@@ -1511,7 +1511,7 @@ You use the `Class` property in one of two ways:
   equivalent to Java code using the `new` operator.
 * To specify the actual class containing the `static` factory method that will be
   invoked to create the object, in the less common case where the container invokes a
-  `static`, __factory__ method on a class to create the bean. The object type returned
+  `static` __factory__ method on a class to create the bean. The object type returned
   from the invocation of the `static` factory method may be the same class or another
   class entirely.
 
@@ -2046,12 +2046,12 @@ part of a Spring XML configuration file specifies some bean definitions:
 [subs="verbatim,quotes"]
 ----
 	<bean id="exampleBean" class="examples.ExampleBean">
-		<!-- setter injection using the nested <ref/> element -->
+		<!-- setter injection using the nested ref element -->
 		<property name="beanOne">
 			<ref bean="anotherExampleBean"/>
 		</property>
 
-		<!-- setter injection using the neater 'ref' attribute -->
+		<!-- setter injection using the neater ref attribute -->
 		<property name="beanTwo" ref="yetAnotherBean"/>
 		<property name="integerProperty" value="1"/>
 	</bean>
@@ -2091,12 +2091,12 @@ in the XML file. The following example uses constructor-based DI:
 [subs="verbatim,quotes"]
 ----
 	<bean id="exampleBean" class="examples.ExampleBean">
-		<!-- constructor injection using the nested <ref/> element -->
+		<!-- constructor injection using the nested ref element -->
 		<constructor-arg>
 			<ref bean="anotherExampleBean"/>
 		</constructor-arg>
 
-		<!-- constructor injection using the neater 'ref' attribute -->
+		<!-- constructor injection using the neater ref attribute -->
 		<constructor-arg ref="yetAnotherBean"/>
 
 		<constructor-arg type="int" value="1"/>
@@ -2297,18 +2297,12 @@ likely fatal results) when the `client` bean is actually instantiated. If the `c
 bean is a <<beans-factory-scopes,prototype>> bean, this typo and the resulting exception
 may only be discovered long after the container is deployed.
 
-Additionally, if the referenced bean is in the same XML unit, and the bean name is the
-bean __id__, you can use the `local` attribute, which allows the XML parser itself to
-validate the bean id earlier, at XML document parse time.
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<property name="targetName">
-		<!-- a bean with id theTargetBean must exist; otherwise an exception will be thrown -->
-		<idref bean="theTargetBean"/>
-	</property>
-----
+[NOTE]
+====
+The `local` attribute on the `idref` element is no longer supported in the 4.0 beans xsd
+since it does not provide value over a regular `bean` reference anymore. Simply change
+your existing `idref local` references to `idref bean` when upgrading to the 4.0 schema.
+====
 
 A common place (at least in versions earlier than Spring 2.0) where the `<idref/>` element
 brings value is in the configuration of <<aop-pfb-1,AOP interceptors>> in a
@@ -2360,7 +2354,7 @@ container with a proxy that will have the same name as the parent bean.
 [subs="verbatim,quotes"]
 ----
 	<!-- in the child (descendant) context -->
-	<bean id="accountService" <-- bean name is the same as the parent bean -->
+	<bean id="accountService" <!-- bean name is the same as the parent bean -->
 		class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="target">
 			<ref parent="accountService"/> <!-- notice how we refer to the parent bean -->
@@ -2586,7 +2580,14 @@ following XML-based configuration metadata snippet sets the email property to th
 ----
 
 The preceding example is equivalent to the following Java code:
-`exampleBean.setEmail("")`. The `<null/>` element handles `null` values. For example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+        exampleBean.setEmail("")
+----
+
+The `<null/>` element handles `null` values. For example:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -2599,7 +2600,12 @@ The preceding example is equivalent to the following Java code:
 ----
 
 The above configuration is equivalent to the following Java code:
-`exampleBean.setEmail(null)`.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	exampleBean.setEmail(null)
+----
 
 
 [[beans-p-namespace]]
@@ -3779,7 +3785,7 @@ of the scope. You can also do the `Scope` registration declaratively, using the
 
 [NOTE]
 ====
-When you place <aop:scoped-proxy/> in a `FactoryBean` implementation, it is the factory
+When you place `<aop:scoped-proxy/>` in a `FactoryBean` implementation, it is the factory
 bean itself that is scoped, not the object returned from `getObject()`.
 ====
 
@@ -4074,7 +4080,7 @@ lifecycle requirements (e.g. starts and stops some background process):
 ----
 
 Any Spring-managed object may implement that interface. Then, when the
-ApplicationContext itself starts and stops, it will cascade those calls to all Lifecycle
+`ApplicationContext` itself starts and stops, it will cascade those calls to all `Lifecycle`
 implementations defined within that context. It does this by delegating to a
 `LifecycleProcessor`:
 
@@ -4126,7 +4132,7 @@ another option, namely the `getPhase()` method as defined on its super-interface
 
 When starting, the objects with the lowest phase start first, and when stopping, the
 reverse order is followed. Therefore, an object that implements `SmartLifecycle` and
-whose getPhase() method returns `Integer.MIN_VALUE` would be among the first to start
+whose `getPhase()` method returns `Integer.MIN_VALUE` would be among the first to start
 and the last to stop. At the other end of the spectrum, a phase value of
 `Integer.MAX_VALUE` would indicate that the object should be started last and stopped
 first (likely because it depends on other processes to be running). When considering the
@@ -4136,7 +4142,7 @@ negative phase value would indicate that an object should start before those sta
 components (and stop after them), and vice versa for any positive phase value.
 
 As you can see the stop method defined by `SmartLifecycle` accepts a callback. Any
-implementation __must__ invoke that callback's run() method after that implementation's
+implementation __must__ invoke that callback's `run()` method after that implementation's
 shutdown process is complete. That enables asynchronous shutdown where necessary since
 the default implementation of the `LifecycleProcessor` interface,
 `DefaultLifecycleProcessor`, will wait up to its timeout value for the group of objects
@@ -4156,14 +4162,14 @@ defining the following would be sufficient:
 
 As mentioned, the `LifecycleProcessor` interface defines callback methods for the
 refreshing and closing of the context as well. The latter will simply drive the shutdown
-process as if stop() had been called explicitly, but it will happen when the context is
+process as if `stop()` had been called explicitly, but it will happen when the context is
 closing. The 'refresh' callback on the other hand enables another feature of
 `SmartLifecycle` beans. When the context is refreshed (after all objects have been
 instantiated and initialized), that callback will be invoked, and at that point the
 default lifecycle processor will check the boolean value returned by each
 `SmartLifecycle` object's `isAutoStartup()` method. If "true", then that object will be
 started at that point rather than waiting for an explicit invocation of the context's or
-its own start() method (unlike the context refresh, the context start does not happen
+its own `start()` method (unlike the context refresh, the context start does not happen
 automatically for a standard context implementation). The "phase" value as well as any
 "depends-on" relationships will determine the startup order in the same way as described
 above.
@@ -4216,8 +4222,8 @@ declared on the `AbstractApplicationContext` class:
 [[beans-factory-aware]]
 ==== ApplicationContextAware and BeanNameAware
 
-When an `ApplicationContext` creates a class that implements the
-`org.springframework.context.ApplicationContextAware` interface, the class is provided
+When an `ApplicationContext` creates an object instance that implements the
+`org.springframework.context.ApplicationContextAware` interface, the instance is provided
 with a reference to that `ApplicationContext`.
 
 [source,java,indent=0]
@@ -4237,8 +4243,8 @@ additional functionality. One use would be the programmatic retrieval of other b
 Sometimes this capability is useful; however, in general you should avoid it, because it
 couples the code to Spring and does not follow the Inversion of Control style, where
 collaborators are provided to beans as properties. Other methods of the
-ApplicationContext provide access to file resources, publishing application events, and
-accessing a MessageSource. These additional features are described in
+`ApplicationContext` provide access to file resources, publishing application events, and
+accessing a `MessageSource`. These additional features are described in
 <<context-introduction>>
 
 As of Spring 2.5, autowiring is another alternative to obtain reference to the
@@ -4252,7 +4258,7 @@ parameter that is expecting the `ApplicationContext` type if the field, construc
 method in question carries the `@Autowired` annotation. For more information, see
 <<beans-autowired-annotation>>.
 
-When an ApplicationContext creates a class that implements the
+When an `ApplicationContext` creates a class that implements the
 `org.springframework.beans.factory.BeanNameAware` interface, the class is provided with
 a reference to the name defined in its associated object definition.
 
