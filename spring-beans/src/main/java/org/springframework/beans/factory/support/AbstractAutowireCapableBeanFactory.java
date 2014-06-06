@@ -759,7 +759,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 									}
 								}
 							});
-					if (objectType.value != null) {
+					if (objectType.value != null && !Object.class.equals(objectType.value)) {
 						return objectType.value;
 					}
 				}
