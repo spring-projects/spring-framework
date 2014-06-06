@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,39 +153,43 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 		final HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
 		HttpInputMessage inputMessage = new ServletServerHttpRequest(servletRequest);
 
-		RequestBody annot = methodParam.getParameterAnnotation(RequestBody.class);
-		if (!annot.required()) {
-			InputStream inputStream = inputMessage.getBody();
-			if (inputStream == null) {
-				return null;
+		InputStream inputStream = inputMessage.getBody();
+		if (inputStream == null) {
+			return handleEmptyBody(methodParam);
+		}
+		else if (inputStream.markSupported()) {
+			inputStream.mark(1);
+			if (inputStream.read() == -1) {
+				return handleEmptyBody(methodParam);
 			}
-			else if (inputStream.markSupported()) {
-				inputStream.mark(1);
-				if (inputStream.read() == -1) {
-					return null;
-				}
-				inputStream.reset();
+			inputStream.reset();
+		}
+		else {
+			final PushbackInputStream pushbackInputStream = new PushbackInputStream(inputStream);
+			int b = pushbackInputStream.read();
+			if (b == -1) {
+				return handleEmptyBody(methodParam);
 			}
 			else {
-				final PushbackInputStream pushbackInputStream = new PushbackInputStream(inputStream);
-				int b = pushbackInputStream.read();
-				if (b == -1) {
-					return null;
-				}
-				else {
-					pushbackInputStream.unread(b);
-				}
-				inputMessage = new ServletServerHttpRequest(servletRequest) {
-					@Override
-					public InputStream getBody() throws IOException {
-						// Form POST should not get here
-						return pushbackInputStream;
-					}
-				};
+				pushbackInputStream.unread(b);
 			}
+			inputMessage = new ServletServerHttpRequest(servletRequest) {
+				@Override
+				public InputStream getBody() throws IOException {
+					// Form POST should not get here
+					return pushbackInputStream;
+				}
+			};
 		}
 
 		return super.readWithMessageConverters(inputMessage, methodParam, paramType);
+	}
+
+	private Object handleEmptyBody(MethodParameter param) {
+		if (param.getParameterAnnotation(RequestBody.class).required()) {
+			throw new HttpMessageNotReadableException("Required request body content is missing: " + param);
+		}
+		return null;
 	}
 
 	@Override

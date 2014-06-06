@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
@@ -172,6 +173,18 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		assertNotNull(result);
 		assertEquals("foobarbaz", result);
+	}
+
+	// SPR-9942
+
+	@Test(expected = HttpMessageNotReadableException.class)
+	public void resolveArgumentRequiredNoContent() throws Exception {
+		this.servletRequest.setContent(new byte[0]);
+		this.servletRequest.setContentType("text/plain");
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		converters.add(new StringHttpMessageConverter());
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
+		processor.resolveArgument(paramString, mavContainer, webRequest, binderFactory);
 	}
 
 	// SPR-9964
