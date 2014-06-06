@@ -46,7 +46,6 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.CannotLoadBeanClassException;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -67,7 +66,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-
 
 /**
  * JMX exporter that allows for exposing any <i>Spring-managed bean</i> to a
@@ -91,6 +89,8 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @author Rick Evans
  * @author Mark Fisher
+ * @author Marten Deinum
+ * @author Stephane Nicoll
  * @since 1.2
  * @see #setBeans
  * @see #setAutodetect
@@ -100,7 +100,7 @@ import org.springframework.util.ObjectUtils;
  * @see MBeanExporterListener
  */
 public class MBeanExporter extends MBeanRegistrationSupport
-		implements MBeanExportOperations, BeanClassLoaderAware, BeanFactoryAware, InitializingBean, DisposableBean, SmartLifecycle {
+		implements MBeanExportOperations, BeanClassLoaderAware, BeanFactoryAware, InitializingBean, SmartLifecycle {
 
 	/**
 	 * Autodetection mode indicating that no autodetection should be used.
@@ -405,16 +405,31 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		}
 	}
 
+	/**
+	 * Specify the phase in which the MBeans should be exported to the
+	 * JMX domain. The startup order proceeds from lowest to highest, and
+	 * the shutdown order is the reverse of that. By default this value
+	 * is {@code Integer.MAX_VALUE} meaning that MBeans are exported
+	 * as late as possible and removed from the domain as soon as possible.
+	 */
+	public void setPhase(int phase) {
+		this.phase = phase;
+	}
+
+	/**
+	 * Set whether to automatically export MBeans after initialization.
+	 * <p>Default is "true"; set this to "false" to allow for manual startup
+	 * through the {@link #start()} method.
+	 */
+	public void setAutoStartup(boolean autoStartup) {
+		this.autoStartup = autoStartup;
+	}
+
 
 	//---------------------------------------------------------------------
 	// Lifecycle in bean factory: automatically register/unregister beans
 	//---------------------------------------------------------------------
 
-	/**
-	 * Start bean registration automatically when deployed in an
-	 * {@code ApplicationContext}.
-	 * @see #registerBeans()
-	 */
 	@Override
 	public void afterPropertiesSet() {
 		// If no server was provided then try to find one. This is useful in an environment
@@ -424,15 +439,56 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		}
 	}
 
-	/**
-	 * Unregisters all beans that this exported has exposed via JMX
-	 * when the enclosing {@code ApplicationContext} is destroyed.
-	 */
 	@Override
-	public void destroy() {
-		logger.info("Unregistering JMX-exposed beans on shutdown");
-		unregisterNotificationListeners();
-		unregisterBeans();
+	public void start() {
+		logger.info("Registering beans for JMX exposure");
+		synchronized (this.lifecycleMonitor) {
+			try {
+				registerBeans();
+				registerNotificationListeners();
+			} catch (RuntimeException ex) {
+				// Unregister beans already registered by this exporter.
+				unregisterNotificationListeners();
+				unregisterBeans();
+				throw ex;
+			}
+		}
+		running = true;
+	}
+
+	@Override
+	public void stop() {
+		logger.info("Unregistering JMX-exposed beans on stop");
+		synchronized (this.lifecycleMonitor) {
+			unregisterNotificationListeners();
+			unregisterBeans();
+			running = false;
+		}
+	}
+
+	@Override
+	public void stop(Runnable callback) {
+		synchronized (this.lifecycleMonitor) {
+			stop();
+			callback.run();
+		}
+	}
+
+	@Override
+	public boolean isRunning() {
+		synchronized (this.lifecycleMonitor) {
+			return this.running;
+		}
+	}
+
+	@Override
+	public boolean isAutoStartup() {
+		return this.autoStartup;
+	}
+
+	@Override
+	public int getPhase() {
+		return this.phase;
 	}
 
 
@@ -1052,79 +1108,6 @@ public class MBeanExporter extends MBeanRegistrationSupport
 			}
 		}
 	}
-
-	/**
-	 * Set whether to automatically start the container after initialization.
-	 * <p>Default is "true"; set this to "false" to allow for manual startup
-	 * through the {@link #start()} method.
-	 */
-	public void setAutoStartup(boolean autoStartup) {
-		this.autoStartup = autoStartup;
-	}
-
-	@Override
-	public boolean isAutoStartup() {
-		return this.autoStartup;
-	}
-
-	@Override
-	public void stop(Runnable callback) {
-		synchronized (this.lifecycleMonitor) {
-			stop();
-			callback.run();
-		}
-	}
-
-	@Override
-	public void start() {
-		logger.info("Registering beans for JMX exposure");
-		synchronized (this.lifecycleMonitor) {
-			try {
-				registerBeans();
-				registerNotificationListeners();
-			} catch (RuntimeException ex) {
-				// Unregister beans already registered by this exporter.
-				unregisterNotificationListeners();
-				unregisterBeans();
-				throw ex;
-			}
-		}
-		running = true;
-	}
-
-	@Override
-	public void stop() {
-		logger.info("Unregistering JMX-exposed beans on stop");
-		synchronized (this.lifecycleMonitor) {
-			unregisterNotificationListeners();
-			unregisterBeans();
-			running = false;
-		}
-	}
-
-	@Override
-	public boolean isRunning() {
-		synchronized (this.lifecycleMonitor) {
-			return this.running;
-		}
-	}
-
-	/**
-	 * Specify the phase in which this container should be started and
-	 * stopped. The startup order proceeds from lowest to highest, and
-	 * the shutdown order is the reverse of that. By default this value
-	 * is Integer.MAX_VALUE meaning that this container starts as late
-	 * as possible and stops as soon as possible.
-	 */
-	public void setPhase(int phase) {
-		this.phase = phase;
-	}
-
-	@Override
-	public int getPhase() {
-		return this.phase;
-	}
-
 
 	//---------------------------------------------------------------------
 	// Inner classes for internal use

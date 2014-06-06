@@ -41809,6 +41809,13 @@ With this configuration the `testBean` bean is exposed as an MBean under the
 are exposed as attributes and all __public__ methods (bar those inherited from the
 `Object` class) are exposed as operations.
 
+[NOTE]
+====
+`MBeanExporter` is a `Lifecycle` bean (see <<beans-factory-lifecycle-processor>>)
+and MBeans are exported as late as possible during the application lifecycle by default. It
+is possible to configure the `phase` at which the export happens or disable automatic
+registration by setting the `autoStartup` flag.
+====
 
 
 [[jmx-exporting-mbeanserver]]

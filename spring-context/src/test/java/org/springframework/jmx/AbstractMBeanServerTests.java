@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.tests.TestGroup;
 import org.springframework.util.MBeanTestUtils;
 
@@ -89,6 +90,17 @@ public abstract class AbstractMBeanServerTests {
 
 	public MBeanServer getServer() {
 		return this.server;
+	}
+
+	/**
+	 * Start the specified {@link MBeanExporter}.
+	 *
+	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
+	 * @see org.springframework.context.Lifecycle#start()
+	 */
+	protected void start(MBeanExporter exporter) {
+		exporter.afterPropertiesSet();
+		exporter.start();
 	}
 
 	protected void assertIsRegistered(String message, ObjectName objectName) {

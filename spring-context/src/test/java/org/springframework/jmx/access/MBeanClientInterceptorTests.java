@@ -67,7 +67,7 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		adapter.setServer(getServer());
 		adapter.setBeans(beans);
 		adapter.setAssembler(new ProxyTestAssembler());
-		adapter.afterPropertiesSet();
+		start(adapter);
 	}
 
 	protected MBeanServerConnection getServerConnection() throws Exception {
