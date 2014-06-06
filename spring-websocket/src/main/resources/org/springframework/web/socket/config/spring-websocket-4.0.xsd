@@ -144,7 +144,22 @@
         <xsd:attribute name="client-library-url" type="xsd:string">
             <xsd:annotation>
                 <xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
-	URL of the JavaScript client library. Defaults to "https://d1fxtkz8shb9d2.cloudfront.net/sockjs-0.3.4.min.js".
+	Transports with no native cross-domain communication (e.g. "eventsource",
+	"htmlfile") must get a simple page from the "foreign" domain in an invisible
+	iframe so that code in the iframe can run from  a domain local to the SockJS
+	server. Since the iframe needs to load the SockJS javascript client library,
+	this property allows specifying where to load it from.
+
+	By default this is set to point to
+	"https://d1fxtkz8shb9d2.cloudfront.net/sockjs-0.3.4.min.js". However it can
+	also be set to point to a URL served by the application.
+
+	Note that it's possible to specify a relative URL in which case the URL
+	must be relative to the iframe URL. For example assuming a SockJS endpoint
+	mapped to "/sockjs", and resulting iframe URL "/sockjs/iframe.html", then the
+	The relative URL must start with "../../" to traverse up to the location
+	above the SockJS mapping. In case of a prefix-based Servlet mapping one more
+	traversal may be needed.
                 ]]></xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
