@@ -18,12 +18,15 @@ package org.springframework.remoting.httpinvoker;
 
 import org.junit.Test;
 
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import static org.junit.Assert.*;
@@ -35,9 +38,18 @@ import static org.junit.Assert.*;
 public class HttpInvokerFactoryBeanIntegrationTests {
 
 	@Test
-	public void foo() {
+	public void testLoadedConfigClass() {
 		ApplicationContext context = new AnnotationConfigApplicationContext(InvokerAutowiringConfig.class);
-		MyBean myBean = context.getBean(MyBean.class);
+		MyBean myBean = context.getBean("myBean", MyBean.class);
+		assertSame(context.getBean("myService"), myBean.myService);
+	}
+
+	@Test
+	public void testNonLoadedConfigClass() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.registerBeanDefinition("config", new RootBeanDefinition(InvokerAutowiringConfig.class.getName()));
+		context.refresh();
+		MyBean myBean = context.getBean("myBean", MyBean.class);
 		assertSame(context.getBean("myService"), myBean.myService);
 	}
 
@@ -46,7 +58,7 @@ public class HttpInvokerFactoryBeanIntegrationTests {
 	}
 
 
-	@Component
+	@Component("myBean")
 	public static class MyBean {
 
 		@Autowired
@@ -56,6 +68,7 @@ public class HttpInvokerFactoryBeanIntegrationTests {
 
 	@Configuration
 	@ComponentScan
+	@Lazy
 	public static class InvokerAutowiringConfig {
 
 		@Bean
@@ -64,6 +77,11 @@ public class HttpInvokerFactoryBeanIntegrationTests {
 			factory.setServiceUrl("/svc/dummy");
 			factory.setServiceInterface(MyService.class);
 			return factory;
+		}
+
+		@Bean
+		public FactoryBean<String> myOtherService() {
+			throw new IllegalStateException("Don't ever call me");
 		}
 	}
 
