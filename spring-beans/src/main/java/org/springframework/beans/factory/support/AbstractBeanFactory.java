@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,7 +124,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	/** Resolution strategy for expressions in bean definition values */
 	private BeanExpressionResolver beanExpressionResolver;
 
-	/** Spring 3.0 ConversionService to use instead of PropertyEditors */
+	/** Spring ConversionService to use instead of PropertyEditors */
 	private ConversionService conversionService;
 
 	/** Custom PropertyEditorRegistrars to apply to the beans of this factory */
@@ -160,9 +160,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private final Map<String, RootBeanDefinition> mergedBeanDefinitions =
 			new ConcurrentHashMap<String, RootBeanDefinition>(64);
 
-	/**
-	 * Names of beans that have already been created at least once
-	 */
+	/** Names of beans that have already been created at least once */
 	private final Set<String> alreadyCreated = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(64));
 
 	/** Names of beans that are currently in creation */
