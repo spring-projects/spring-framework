@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.mock.web;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,6 +28,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.junit.Test;
+import org.springframework.util.StreamUtils;
 
 import static org.junit.Assert.*;
 
@@ -41,6 +44,22 @@ public class MockHttpServletRequestTests {
 
 	private MockHttpServletRequest request = new MockHttpServletRequest();
 
+
+	@Test
+	public void content() throws IOException {
+		byte[] bytes = "body".getBytes(Charset.defaultCharset());
+		request.setContent(bytes);
+		assertEquals(bytes.length, request.getContentLength());
+		assertNotNull(request.getInputStream());
+		assertEquals("body", StreamUtils.copyToString(request.getInputStream(), Charset.defaultCharset()));
+	}
+
+	@Test
+	public void noContent() throws IOException {
+		assertEquals(-1, request.getContentLength());
+		assertNotNull(request.getInputStream());
+		assertEquals(-1, request.getInputStream().read());
+	}
 
 	@Test
 	public void setContentType() {

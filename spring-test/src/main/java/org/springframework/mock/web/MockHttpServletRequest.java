@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,6 +103,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private static final String CONTENT_TYPE_HEADER = "Content-Type";
 
 	private static final String CHARSET_PREFIX = "charset=";
+
+	private static final ServletInputStream EMPTY_SERVLET_INPUT_STREAM =
+			new DelegatingServletInputStream(new ByteArrayInputStream(new byte[0]));
 
 
 	private boolean active = true;
@@ -375,7 +378,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			return new DelegatingServletInputStream(new ByteArrayInputStream(this.content));
 		}
 		else {
-			return null;
+			return EMPTY_SERVLET_INPUT_STREAM;
 		}
 	}
 
