@@ -630,6 +630,62 @@ public class InjectAnnotationBeanPostProcessorTests {
 		bf.destroySingletons();
 	}
 
+	@Test
+	public void testProviderOfOptionalFieldInjectionWithBeanAvailable() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ProviderOfOptionalFieldInjectionBean.class));
+		bf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class));
+
+		ProviderOfOptionalFieldInjectionBean bean = (ProviderOfOptionalFieldInjectionBean) bf.getBean("annotatedBean");
+		assertTrue(bean.getTestBean().isPresent());
+		assertSame(bf.getBean("testBean"), bean.getTestBean().get());
+		bf.destroySingletons();
+	}
+
+	@Test
+	public void testProviderOfOptionalFieldInjectionWithBeanNotAvailable() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ProviderOfOptionalFieldInjectionBean.class));
+
+		ProviderOfOptionalFieldInjectionBean bean = (ProviderOfOptionalFieldInjectionBean) bf.getBean("annotatedBean");
+		assertFalse(bean.getTestBean().isPresent());
+		bf.destroySingletons();
+	}
+
+	@Test
+	public void testProviderOfOptionalMethodInjectionWithBeanAvailable() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ProviderOfOptionalMethodInjectionBean.class));
+		bf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class));
+
+		ProviderOfOptionalMethodInjectionBean bean = (ProviderOfOptionalMethodInjectionBean) bf.getBean("annotatedBean");
+		assertTrue(bean.getTestBean().isPresent());
+		assertSame(bf.getBean("testBean"), bean.getTestBean().get());
+		bf.destroySingletons();
+	}
+
+	@Test
+	public void testProviderOfOptionalMethodInjectionWithBeanNotAvailable() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ProviderOfOptionalMethodInjectionBean.class));
+
+		ProviderOfOptionalMethodInjectionBean bean = (ProviderOfOptionalMethodInjectionBean) bf.getBean("annotatedBean");
+		assertFalse(bean.getTestBean().isPresent());
+		bf.destroySingletons();
+	}
+
 
 	public static class ResourceInjectionBean {
 
@@ -1179,6 +1235,32 @@ public class InjectAnnotationBeanPostProcessorTests {
 
 		public Optional<TestBean> getTestBean() {
 			return this.testBean;
+		}
+	}
+
+
+	public static class ProviderOfOptionalFieldInjectionBean {
+
+		@Inject
+		private Provider<Optional<TestBean>> testBean;
+
+		public Optional<TestBean> getTestBean() {
+			return this.testBean.get();
+		}
+	}
+
+
+	public static class ProviderOfOptionalMethodInjectionBean {
+
+		private Provider<Optional<TestBean>> testBean;
+
+		@Inject
+		public void setTestBean(Provider<Optional<TestBean>> testBeanFactory) {
+			this.testBean = testBeanFactory;
+		}
+
+		public Optional<TestBean> getTestBean() {
+			return this.testBean.get();
 		}
 	}
 

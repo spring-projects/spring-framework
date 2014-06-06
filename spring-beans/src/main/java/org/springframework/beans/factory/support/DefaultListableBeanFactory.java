@@ -64,6 +64,7 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.OrderProviderComparator;
 import org.springframework.core.annotation.OrderUtils;
+import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -107,24 +108,24 @@ import org.springframework.util.StringUtils;
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
 		implements ConfigurableListableBeanFactory, BeanDefinitionRegistry, Serializable {
 
-	private static Class<?> javaxInjectProviderClass = null;
-
 	private static Class<?> javaUtilOptionalClass = null;
 
+	private static Class<?> javaxInjectProviderClass = null;
+
 	static {
-		try {
-			javaxInjectProviderClass =
-					ClassUtils.forName("javax.inject.Provider", DefaultListableBeanFactory.class.getClassLoader());
-		}
-		catch (ClassNotFoundException ex) {
-			// JSR-330 API not available - Provider interface simply not supported then.
-		}
 		try {
 			javaUtilOptionalClass =
 					ClassUtils.forName("java.util.Optional", DefaultListableBeanFactory.class.getClassLoader());
 		}
 		catch (ClassNotFoundException ex) {
 			// Java 8 not available - Optional references simply not supported then.
+		}
+		try {
+			javaxInjectProviderClass =
+					ClassUtils.forName("javax.inject.Provider", DefaultListableBeanFactory.class.getClassLoader());
+		}
+		catch (ClassNotFoundException ex) {
+			// JSR-330 API not available - Provider interface simply not supported then.
 		}
 	}
 
@@ -858,14 +859,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException {
 
 		descriptor.initParameterNameDiscovery(getParameterNameDiscoverer());
-		if (descriptor.getDependencyType().equals(ObjectFactory.class)) {
+		if (descriptor.getDependencyType().equals(javaUtilOptionalClass)) {
+			return new OptionalDependencyFactory().createOptionalDependency(descriptor, beanName);
+		}
+		else if (descriptor.getDependencyType().equals(ObjectFactory.class)) {
 			return new DependencyObjectFactory(descriptor, beanName);
 		}
 		else if (descriptor.getDependencyType().equals(javaxInjectProviderClass)) {
 			return new DependencyProviderFactory().createDependencyProvider(descriptor, beanName);
-		}
-		else if (descriptor.getDependencyType().equals(javaUtilOptionalClass)) {
-			return new OptionalDependencyFactory().createOptionalDependency(descriptor, beanName);
 		}
 		else {
 			Object result = getAutowireCandidateResolver().getLazyResolutionProxyIfNecessary(descriptor, beanName);
@@ -1285,23 +1286,50 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 
 	/**
+	 * Separate inner class for avoiding a hard dependency on the {@code javax.inject} API.
+	 */
+	@UsesJava8
+	private class OptionalDependencyFactory {
+
+		public Object createOptionalDependency(DependencyDescriptor descriptor, String beanName) {
+			DependencyDescriptor descriptorToUse = new DependencyDescriptor(descriptor) {
+				@Override
+				public boolean isRequired() {
+					return false;
+				}
+			};
+			descriptorToUse.increaseNestingLevel();
+			return Optional.ofNullable(doResolveDependency(descriptorToUse, beanName, null, null));
+		}
+	}
+
+
+	/**
 	 * Serializable ObjectFactory for lazy resolution of a dependency.
 	 */
 	private class DependencyObjectFactory implements ObjectFactory<Object>, Serializable {
 
 		private final DependencyDescriptor descriptor;
 
+		private final boolean optional;
+
 		private final String beanName;
 
 		public DependencyObjectFactory(DependencyDescriptor descriptor, String beanName) {
 			this.descriptor = new DependencyDescriptor(descriptor);
 			this.descriptor.increaseNestingLevel();
+			this.optional = this.descriptor.getDependencyType().equals(javaUtilOptionalClass);
 			this.beanName = beanName;
 		}
 
 		@Override
 		public Object getObject() throws BeansException {
-			return doResolveDependency(this.descriptor, this.beanName, null, null);
+			if (this.optional) {
+				return new OptionalDependencyFactory().createOptionalDependency(this.descriptor, this.beanName);
+			}
+			else {
+				return doResolveDependency(this.descriptor, this.beanName, null, null);
+			}
 		}
 	}
 
@@ -1329,24 +1357,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		public Object createDependencyProvider(DependencyDescriptor descriptor, String beanName) {
 			return new DependencyProvider(descriptor, beanName);
-		}
-	}
-
-
-	/**
-	 * Separate inner class for avoiding a hard dependency on the {@code javax.inject} API.
-	 */
-	private class OptionalDependencyFactory {
-
-		public Object createOptionalDependency(DependencyDescriptor descriptor, String beanName) {
-			DependencyDescriptor descriptorToUse = new DependencyDescriptor(descriptor) {
-				@Override
-				public boolean isRequired() {
-					return false;
-				}
-			};
-			descriptorToUse.increaseNestingLevel();
-			return Optional.ofNullable(doResolveDependency(descriptorToUse, beanName, null, null));
 		}
 	}
 

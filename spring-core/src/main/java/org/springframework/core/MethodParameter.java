@@ -260,18 +260,20 @@ public class MethodParameter {
 	public Class<?> getNestedParameterType() {
 		if (this.nestingLevel > 1) {
 			Type type = getGenericParameterType();
-			if (type instanceof ParameterizedType) {
-				Integer index = getTypeIndexForCurrentLevel();
-				Type[] args = ((ParameterizedType) type).getActualTypeArguments();
-				Type arg = args[index != null ? index : args.length - 1];
+			for (int i = 2; i <= this.nestingLevel; i++) {
+				if (type instanceof ParameterizedType) {
+					Type[] args = ((ParameterizedType) type).getActualTypeArguments();
+					Integer index = getTypeIndexForLevel(i);
+					type = args[index != null ? index : args.length - 1];
+				}
+			}
+			if (type instanceof Class) {
+				return (Class<?>) type;
+			}
+			else if (type instanceof ParameterizedType) {
+				Type arg = ((ParameterizedType) type).getRawType();
 				if (arg instanceof Class) {
 					return (Class<?>) arg;
-				}
-				else if (arg instanceof ParameterizedType) {
-					arg = ((ParameterizedType) arg).getRawType();
-					if (arg instanceof Class) {
-						return (Class<?>) arg;
-					}
 				}
 			}
 			return Object.class;
