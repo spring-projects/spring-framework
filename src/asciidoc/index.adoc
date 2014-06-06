@@ -7703,7 +7703,7 @@ interfaces to provide additional functionality in a more __application
 framework-oriented style__. Many people use the `ApplicationContext` in a completely
 declarative fashion, not even creating it programmatically, but instead relying on
 support classes such as `ContextLoader` to automatically instantiate an
-`ApplicationContext` as part of the normal startup process of a J2EE web application.
+`ApplicationContext` as part of the normal startup process of a Java EE web application.
 
 To enhance `BeanFactory` functionality in a more framework-oriented style the context
 package also provides the following functionality:
@@ -8186,14 +8186,14 @@ the `contextConfigLocation` parameter just as the listener does.
 
 
 [[context-deploy-rar]]
-==== Deploying a Spring ApplicationContext as a J2EE RAR file
+==== Deploying a Spring ApplicationContext as a Java EE RAR file
 It is possible to deploy a Spring ApplicationContext as a RAR file, encapsulating the
-context and all of its required bean classes and library JARs in a J2EE RAR deployment
+context and all of its required bean classes and library JARs in a Java EE RAR deployment
 unit. This is the equivalent of bootstrapping a standalone ApplicationContext, just hosted
-in J2EE environment, being able to access the J2EE servers facilities. RAR deployment is a
-more natural alternative to scenario of deploying a headless WAR file, in effect, a WAR
+in Java EE environment, being able to access the Java EE servers facilities. RAR deployment
+is  more natural alternative to scenario of deploying a headless WAR file, in effect, a WAR
 file without any HTTP entry points that is used only for bootstrapping a Spring
-ApplicationContext in a J2EE environment.
+ApplicationContext in a Java EE environment.
 
 RAR deployment is ideal for application contexts that do not need HTTP entry points but
 rather consist only of message endpoints and scheduled jobs. Beans in such a context can
@@ -8207,7 +8207,7 @@ Check out the JavaDoc of the
 {javadoc-baseurl}/org/springframework/jca/context/SpringContextResourceAdapter.html[`SpringContextResourceAdapter`]
 class for the configuration details involved in RAR deployment.
 
-__For a simple deployment of a Spring ApplicationContext as a J2EE RAR file:__ package
+__For a simple deployment of a Spring ApplicationContext as a Java EE RAR file:__ package
 all application classes into a RAR file, which is a standard JAR file with a different
 file extension. Add all required library JARs into the root of the RAR archive. Add a
 "META-INF/ra.xml" deployment descriptor (as shown in ++SpringContextResourceAdapter++'s
@@ -12368,7 +12368,7 @@ style.
 
 [[aop-introduction-proxies]]
 ==== AOP Proxies
-Spring AOP defaults to using standard J2SE __dynamic proxies__ for AOP proxies. This
+Spring AOP defaults to using standard JDK __dynamic proxies__ for AOP proxies. This
 enables any interface (or set of interfaces) to be proxied.
 
 Spring AOP can also use CGLIB proxies. This is necessary to proxy classes, rather than
@@ -20975,7 +20975,7 @@ applications. Many high-end applications use a single, highly scalable database 
 Oracle RAC) instead. Standalone transaction managers such as
 http://www.atomikos.com/[Atomikos Transactions] and http://jotm.objectweb.org/[JOTM]
 are other options. Of course, you may need other application server capabilities such as
-Java Message Service (JMS) and J2EE Connector Architecture (JCA).
+Java Message Service (JMS) and Java EE Connector Architecture (JCA).
 
 The Spring Framework __gives you the choice of when to scale your application to a fully
 loaded application server__. Gone are the days when the only alternative to using EJB
@@ -39021,11 +39021,11 @@ and return types are complex types that cannot be serialized using the serializa
 mechanisms Hessian and Burlap use (refer to the next section for more considerations
 when choosing a remoting technology).
 
-Under the hood, Spring uses either the standard facilities provided by J2SE to perform
-HTTP calls or Commons `HttpClient`. Use the latter if you need more advanced and
-easy-to-use functionality. Refer to
-http://jakarta.apache.org/commons/httpclient[jakarta.apache.org/commons/httpclient] for
-more info.
+Under the hood, Spring uses either the standard facilities provided by the JDK or
+Apache `HttpComponents` to perform HTTP calls. Use the latter if you need more
+advanced and easier-to-use functionality. Refer to
+http://hc.apache.org/httpcomponents-client-ga/[hc.apache.org/httpcomponents-client-ga/]
+for more information.
 
 
 
@@ -39124,14 +39124,14 @@ to HTTP POST requests to the URL pointing to the exported service.
 ----
 
 As mentioned before, you can choose what HTTP client you want to use. By default, the
-`HttpInvokerProxy` uses the J2SE HTTP functionality, but you can also use the Commons
-`HttpClient` by setting the `httpInvokerRequestExecutor` property:
+`HttpInvokerProxy` uses the JDK's HTTP functionality, but you can also use the Apache
+`HttpComponents` client by setting the `httpInvokerRequestExecutor` property:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<property name="httpInvokerRequestExecutor">
-		<bean class="org.springframework.remoting.httpinvoker.CommonsHttpInvokerRequestExecutor"/>
+		<bean class="org.springframework.remoting.httpinvoker.HttpComponentsHttpInvokerRequestExecutor"/>
 	</property>
 ----
 
@@ -42649,7 +42649,7 @@ By default `ConnectorServerFactoryBean` creates a `JMXConnectorServer` bound to
 `"service:jmx:jmxmp://localhost:9875"`. The `serverConnector` bean thus exposes the
 local `MBeanServer` to clients through the JMXMP protocol on localhost, port 9875. Note
 that the JMXMP protocol is marked as optional by the JSR 160 specification: currently,
-the main open-source JMX implementation, MX4J, and the one provided with J2SE 5.0
+the main open-source JMX implementation, MX4J, and the one provided with JDK 5.0
 do __not__ support JMXMP.
 
 To specify another URL and register the `JMXConnectorServer` itself with the
@@ -43132,8 +43132,8 @@ homepage] at Oracle
 [[cci-introduction]]
 === Introduction
 Java EE provides a specification to standardize access to enterprise information systems
-(EIS): the JCA (J2EE Connector Architecture). This specification is divided into several
-different parts:
+(EIS): the JCA (Java EE Connector Architecture). This specification is divided into
+several different parts:
 
 * SPI (Service provider interfaces) that the connector provider must implement. These
   interfaces constitute a resource adapter which can be deployed on a Java EE
