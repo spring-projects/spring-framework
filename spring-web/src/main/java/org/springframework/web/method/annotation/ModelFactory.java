@@ -19,9 +19,13 @@ package org.springframework.web.method.annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.Conventions;
 import org.springframework.core.GenericTypeResolver;
@@ -54,7 +58,9 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public final class ModelFactory {
 
-	private final List<InvocableHandlerMethod> handlerMethods;
+	private static final Log logger = LogFactory.getLog(ModelFactory.class);
+
+	private final List<ModelMethod> modelMethods = new ArrayList<ModelMethod>();
 
 	private final WebDataBinderFactory dataBinderFactory;
 
@@ -63,14 +69,18 @@ public final class ModelFactory {
 
 	/**
 	 * Create a new instance with the given {@code @ModelAttribute} methods.
-	 * @param handlerMethods the {@code @ModelAttribute} methods to invoke
+	 * @param invocableMethods the {@code @ModelAttribute} methods to invoke
 	 * @param dataBinderFactory for preparation of {@link BindingResult} attributes
 	 * @param sessionAttributesHandler for access to session attributes
 	 */
-	public ModelFactory(List<InvocableHandlerMethod> handlerMethods, WebDataBinderFactory dataBinderFactory,
+	public ModelFactory(List<InvocableHandlerMethod> invocableMethods, WebDataBinderFactory dataBinderFactory,
 			SessionAttributesHandler sessionAttributesHandler) {
 
-		this.handlerMethods = (handlerMethods != null) ? handlerMethods : new ArrayList<InvocableHandlerMethod>();
+		if (invocableMethods != null) {
+			for (InvocableHandlerMethod method : invocableMethods) {
+				this.modelMethods.add(new ModelMethod(method));
+			}
+		}
 		this.dataBinderFactory = dataBinderFactory;
 		this.sessionAttributesHandler = sessionAttributesHandler;
 	}
@@ -115,7 +125,8 @@ public final class ModelFactory {
 	private void invokeModelAttributeMethods(NativeWebRequest request, ModelAndViewContainer mavContainer)
 			throws Exception {
 
-		for (InvocableHandlerMethod attrMethod : this.handlerMethods) {
+		while (!this.modelMethods.isEmpty()) {
+			InvocableHandlerMethod attrMethod = getNextModelMethod(mavContainer).getHandlerMethod();
 			String modelName = attrMethod.getMethodAnnotation(ModelAttribute.class).value();
 			if (mavContainer.containsAttribute(modelName)) {
 				continue;
@@ -130,6 +141,25 @@ public final class ModelFactory {
 				}
 			}
 		}
+	}
+
+	private ModelMethod getNextModelMethod(ModelAndViewContainer mavContainer) {
+		for (ModelMethod modelMethod : this.modelMethods) {
+			if (modelMethod.checkDependencies(mavContainer)) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Selected @ModelAttribute method " + modelMethod);
+				}
+				this.modelMethods.remove(modelMethod);
+				return modelMethod;
+			}
+		}
+		ModelMethod modelMethod = this.modelMethods.get(0);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Selected @ModelAttribute method (not present: " +
+					modelMethod.getUnresolvedDependencies(mavContainer)+ ") " + modelMethod);
+		}
+		this.modelMethods.remove(modelMethod);
+		return modelMethod;
 	}
 
 	/**
@@ -238,6 +268,52 @@ public final class ModelFactory {
 
 		return (value != null && !value.getClass().isArray() && !(value instanceof Collection) &&
 				!(value instanceof Map) && !BeanUtils.isSimpleValueType(value.getClass()));
+	}
+
+
+	private static class ModelMethod {
+
+		private final InvocableHandlerMethod handlerMethod;
+
+		private final Set<String> dependencies = new HashSet<String>();
+
+
+		private ModelMethod(InvocableHandlerMethod handlerMethod) {
+			this.handlerMethod = handlerMethod;
+			for (MethodParameter parameter : handlerMethod.getMethodParameters()) {
+				if (parameter.hasParameterAnnotation(ModelAttribute.class)) {
+					this.dependencies.add(getNameForParameter(parameter));
+				}
+			}
+		}
+
+		public InvocableHandlerMethod getHandlerMethod() {
+			return this.handlerMethod;
+		}
+
+		public boolean checkDependencies(ModelAndViewContainer mavContainer) {
+			for (String name : this.dependencies) {
+				if (!mavContainer.containsAttribute(name)) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		public List<String> getUnresolvedDependencies(ModelAndViewContainer mavContainer) {
+			List<String> result = new ArrayList<String>(this.dependencies.size());
+			for (String name : this.dependencies) {
+				if (!mavContainer.containsAttribute(name)) {
+					result.add(name);
+				}
+			}
+			return result;
+		}
+
+		@Override
+		public String toString() {
+			return this.handlerMethod.getMethod().toGenericString();
+		}
 	}
 
 }
