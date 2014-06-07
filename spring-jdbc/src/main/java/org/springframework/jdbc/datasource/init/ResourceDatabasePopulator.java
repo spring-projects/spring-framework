@@ -81,7 +81,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	/**
 	 * Construct a new {@code ResourceDatabasePopulator} with default settings
 	 * for the supplied scripts.
-	 * @param scripts the scripts to execute to initialize or populate the database
+	 * @param scripts the scripts to execute to initialize or clean up the database;
+	 * never {@code null}
 	 * @since 4.0.3
 	 */
 	public ResourceDatabasePopulator(Resource... scripts) {
@@ -95,9 +96,9 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * logged but not cause a failure
 	 * @param ignoreFailedDrops flag to indicate that a failed SQL {@code DROP}
 	 * statement can be ignored
-	 * @param sqlScriptEncoding the encoding for the supplied SQL scripts, if
-	 * different from the platform encoding; may be {@code null} or empty
-	 * @param scripts the scripts to execute to initialize or populate the database;
+	 * @param sqlScriptEncoding the encoding for the supplied SQL scripts; may
+	 * be {@code null} or <em>empty</em> to indicate platform encoding
+	 * @param scripts the scripts to execute to initialize or clean up the database;
 	 * never {@code null}
 	 * @since 4.0.3
 	 */
@@ -110,16 +111,16 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 	/**
-	 * Add a script to execute to initialize or populate the database.
+	 * Add a script to execute to initialize or clean up the database.
 	 * @param script the path to an SQL script; never {@code null}
 	 */
 	public void addScript(Resource script) {
-		Assert.notNull(script, "script must not be null");
+		Assert.notNull(script, "Script must not be null");
 		getScripts().add(script);
 	}
 
 	/**
-	 * Add multiple scripts to execute to initialize or populate the database.
+	 * Add multiple scripts to execute to initialize or clean up the database.
 	 * @param scripts the scripts to execute; never {@code null}
 	 */
 	public void addScripts(Resource... scripts) {
@@ -128,7 +129,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 	/**
-	 * Set the scripts to execute to initialize or populate the database,
+	 * Set the scripts to execute to initialize or clean up the database,
 	 * replacing any previously added scripts.
 	 * @param scripts the scripts to execute; never {@code null}
 	 */
@@ -139,8 +140,10 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 	/**
-	 * Specify the encoding for SQL scripts, if different from the platform encoding.
-	 * @param sqlScriptEncoding the encoding used in scripts
+	 * Specify the encoding for the configured SQL scripts, if different from the
+	 * platform encoding.
+	 * @param sqlScriptEncoding the encoding used in scripts; may be {@code null}
+	 * or empty to indicate platform encoding
 	 * @see #addScript(Resource)
 	 */
 	public void setSqlScriptEncoding(String sqlScriptEncoding) {
@@ -177,7 +180,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * @see #setBlockCommentEndDelimiter
 	 */
 	public void setBlockCommentStartDelimiter(String blockCommentStartDelimiter) {
-		Assert.hasText(blockCommentStartDelimiter, "blockCommentStartDelimiter must not be null or empty");
+		Assert.hasText(blockCommentStartDelimiter, "BlockCommentStartDelimiter must not be null or empty");
 		this.blockCommentStartDelimiter = blockCommentStartDelimiter;
 	}
 
@@ -191,7 +194,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * @see #setBlockCommentStartDelimiter
 	 */
 	public void setBlockCommentEndDelimiter(String blockCommentEndDelimiter) {
-		Assert.hasText(blockCommentEndDelimiter, "blockCommentEndDelimiter must not be null or empty");
+		Assert.hasText(blockCommentEndDelimiter, "BlockCommentEndDelimiter must not be null or empty");
 		this.blockCommentEndDelimiter = blockCommentEndDelimiter;
 	}
 
@@ -255,13 +258,13 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * @param script the script to wrap; never {@code null}
 	 */
 	private EncodedResource encodeScript(Resource script) {
-		Assert.notNull(script, "script must not be null");
+		Assert.notNull(script, "Script must not be null");
 		return new EncodedResource(script, this.sqlScriptEncoding);
 	}
 
 	private void assertContentsOfScriptArray(Resource... scripts) {
-		Assert.notNull(scripts, "scripts must not be null");
-		Assert.noNullElements(scripts, "scripts array must not contain null elements");
+		Assert.notNull(scripts, "Scripts must not be null");
+		Assert.noNullElements(scripts, "Scripts array must not contain null elements");
 	}
 
 }
