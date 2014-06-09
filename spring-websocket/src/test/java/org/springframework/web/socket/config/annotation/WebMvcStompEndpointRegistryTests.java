@@ -30,6 +30,7 @@ import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.socket.messaging.StompSubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
+import org.springframework.web.util.UrlPathHelper;
 
 import static org.junit.Assert.*;
 
@@ -82,6 +83,8 @@ public class WebMvcStompEndpointRegistryTests {
 		SimpleUrlHandlerMapping hm = (SimpleUrlHandlerMapping) this.registry.getHandlerMapping();
 		assertEquals(0, hm.getUrlMap().size());
 
+		UrlPathHelper pathHelper = new UrlPathHelper();
+		this.registry.setUrlPathHelper(pathHelper);
 		this.registry.addEndpoint("/stompOverWebSocket");
 		this.registry.addEndpoint("/stompOverSockJS").withSockJS();
 
@@ -89,6 +92,7 @@ public class WebMvcStompEndpointRegistryTests {
 		assertEquals(2, hm.getUrlMap().size());
 		assertNotNull(hm.getUrlMap().get("/stompOverWebSocket"));
 		assertNotNull(hm.getUrlMap().get("/stompOverSockJS/**"));
+		assertSame(pathHelper, hm.getUrlPathHelper());
 	}
 
 }

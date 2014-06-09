@@ -34,7 +34,6 @@ public class WebSocketConfigurationSupport {
 		ServletWebSocketHandlerRegistry registry = new ServletWebSocketHandlerRegistry(defaultSockJsTaskScheduler());
 		registerWebSocketHandlers(registry);
 		AbstractHandlerMapping hm = registry.getHandlerMapping();
-		hm.setOrder(1);
 		return hm;
 	}
 
