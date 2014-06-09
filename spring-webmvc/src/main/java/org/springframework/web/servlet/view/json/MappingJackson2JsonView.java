@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.AbstractView;
@@ -61,8 +62,6 @@ public class MappingJackson2JsonView extends AbstractView {
 
 	public static final String DEFAULT_JSONP_CONTENT_TYPE = "application/javascript";
 
-	public static final String[] DEFAULT_JSONP_PARAMETER_NAMES = {"jsonp", "callback"};
-
 
 	private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -72,6 +71,8 @@ public class MappingJackson2JsonView extends AbstractView {
 
 	private Boolean prettyPrint;
 
+	private final List<String> jsonpParameterNames = new ArrayList<String>(Arrays.asList("jsonp", "callback"));
+
 	private Set<String> modelKeys;
 
 	private boolean extractValueFromSingleKeyModel = false;
@@ -80,8 +81,6 @@ public class MappingJackson2JsonView extends AbstractView {
 
 	private boolean updateContentLength = false;
 
-	private String[] jsonpParameterNames;
-
 
 	/**
 	 * Construct a new {@code MappingJackson2JsonView}, setting the content type to {@code application/json}.
@@ -89,7 +88,6 @@ public class MappingJackson2JsonView extends AbstractView {
 	public MappingJackson2JsonView() {
 		setContentType(DEFAULT_CONTENT_TYPE);
 		setExposePathVariables(false);
-		this.jsonpParameterNames = DEFAULT_JSONP_PARAMETER_NAMES;
 	}
 
 
@@ -172,6 +170,23 @@ public class MappingJackson2JsonView extends AbstractView {
 	}
 
 	/**
+	 * Set JSONP request parameter names. Each time a request has one of those
+	 * parameters, the resulting JSON will be wrapped into a function named as
+	 * specified by the JSONP request parameter value.
+	 *
+	 * <p>The parameter names configured by default are "jsonp" and "callback".
+	 *
+	 * @since 4.1
+	 * @see <a href="http://en.wikipedia.org/wiki/JSONP">JSONP Wikipedia article</a>
+	 */
+	public void setJsonpParameterNames(Collection<String> jsonpParameters) {
+		this.jsonpParameterNames.clear();
+		if (jsonpParameters != null) {
+			this.jsonpParameterNames.addAll(jsonpParameters);
+		}
+	}
+
+	/**
 	 * Set the attribute in the model that should be rendered by this view.
 	 * When set, all other model attributes will be ignored.
 	 */
@@ -242,21 +257,6 @@ public class MappingJackson2JsonView extends AbstractView {
 		this.updateContentLength = updateContentLength;
 	}
 
-	/**
-	 * Set the names of the request parameters recognized as JSONP ones.
-	 * Each time a request has one of those parameters, the resulting JSON will
-	 * be wrapped into a function named as specified by the JSONP parameter value.
-	 *
-	 * Default JSONP parameter names are "jsonp" and "callback".
-	 *
-	 * @since 4.1
-	 * @see <a href="http://en.wikipedia.org/wiki/JSONP">JSONP Wikipedia article</a>
-	 */
-	public void setJsonpParameterNames(Collection<String> jsonpParameterNames) {
-		Assert.isTrue(!CollectionUtils.isEmpty(jsonpParameterNames), "At least one JSONP query parameter name is required");
-		this.jsonpParameterNames = jsonpParameterNames.toArray(new String[jsonpParameterNames.size()]);
-	}
-
 	@Override
 	protected void prepareResponse(HttpServletRequest request, HttpServletResponse response) {
 		setResponseContentType(request, response);
@@ -269,22 +269,12 @@ public class MappingJackson2JsonView extends AbstractView {
 	}
 
 	@Override
-	protected void setResponseContentType(HttpServletRequest request, HttpServletResponse response) {
-		if (getJsonpParameterValue(request) != null) {
-			response.setContentType(DEFAULT_JSONP_CONTENT_TYPE);
-		}
-		else {
-			super.setResponseContentType(request, response);
-		}
-	}
-
-	@Override
 	protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 
 		OutputStream stream = (this.updateContentLength ? createTemporaryOutputStream() : response.getOutputStream());
 
-		Class<?> serializationView = (Class<?>)model.get(JsonView.class.getName());
+		Class<?> serializationView = (Class<?>) model.get(JsonView.class.getName());
 		String jsonpParameterValue = getJsonpParameterValue(request);
 		Object value = filterModel(model);
 		if(serializationView != null || jsonpParameterValue != null) {
@@ -301,14 +291,13 @@ public class MappingJackson2JsonView extends AbstractView {
 	}
 
 	private String getJsonpParameterValue(HttpServletRequest request) {
-		String jsonpParameterValue = null;
-		for(String jsonpParameterName : this.jsonpParameterNames) {
-			jsonpParameterValue = request.getParameter(jsonpParameterName);
-			if(jsonpParameterValue != null) {
-				break;
+		for(String name : this.jsonpParameterNames) {
+			String value = request.getParameter(name);
+			if (!StringUtils.isEmpty(value)) {
+				return value;
 			}
 		}
-		return jsonpParameterValue;
+		return null;
 	}
 
 	/**
@@ -377,6 +366,16 @@ public class MappingJackson2JsonView extends AbstractView {
 		if (jsonpFunction != null) {
 			generator.writeRaw(");");
 			generator.flush();
+		}
+	}
+
+	@Override
+	protected void setResponseContentType(HttpServletRequest request, HttpServletResponse response) {
+		if (getJsonpParameterValue(request) != null) {
+			response.setContentType(DEFAULT_JSONP_CONTENT_TYPE);
+		}
+		else {
+			super.setResponseContentType(request, response);
 		}
 	}
 
