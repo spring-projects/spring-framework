@@ -22204,12 +22204,12 @@ application context.
 ----
 	<tx:annotation-driven/>
 
-		<bean id="transactionManager1" class="org.springframework.jdbc.DataSourceTransactionManager">
+		<bean id="transactionManager1" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 			...
 			<qualifier value="order"/>
 		</bean>
 
-		<bean id="transactionManager2" class="org.springframework.jdbc.DataSourceTransactionManager">
+		<bean id="transactionManager2" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 			...
 			<qualifier value="account"/>
 		</bean>
