@@ -25235,23 +25235,21 @@ dependency injection.
 	final InputStreamReader clobReader = new InputStreamReader(clobIs);
 	jdbcTemplate.execute(
 		"INSERT INTO lob_table (id, a_clob, a_blob) VALUES (?, ?, ?)",
-		new AbstractLobCreatingPreparedStatementCallback(lobHandler) { <<1>>
-	protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException { ps.setLong(1, 1L); lobCreator.setClobAsCharacterStream(ps, 2, clobReader, (int)clobIn.length()); <<2>>
-	lobCreator.setBlobAsBinaryStream(ps, 3, blobIs, (int)blobIn.length()); <<3>>
-	} }
+		new AbstractLobCreatingPreparedStatementCallback(lobHandler) { # <1>
+			protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
+				ps.setLong(1, 1L);
+				lobCreator.setClobAsCharacterStream(ps, 2, clobReader, (int)clobIn.length()); # <2>
+				lobCreator.setBlobAsBinaryStream(ps, 3, blobIs, (int)blobIn.length()); # <3>
+			}
+		}
 	);
 	blobIs.close();
 	clobReader.close();
 ----
 
-<<1>>
-Pass in the lobHandler that in this example is a plain `DefaultLobHandler`
-
-<<2>>
-Using the method `setClobAsCharacterStream`, pass in the contents of the CLOB.
-
-<<3>>
-Using the method `setBlobAsBinaryStream`, pass in the contents of the BLOB.
+<1> Pass in the lobHandler that in this example is a plain `DefaultLobHandler`
+<2> Using the method `setClobAsCharacterStream`, pass in the contents of the CLOB.
+<3> Using the method `setBlobAsBinaryStream`, pass in the contents of the BLOB.
 
 Now it's time to read the LOB data from the database. Again, you use a `JdbcTemplate`
 with the same instance variable `l` `obHandler` and a reference to a `DefaultLobHandler`.
@@ -25263,16 +25261,13 @@ with the same instance variable `l` `obHandler` and a reference to a `DefaultLob
 		new RowMapper<Map<String, Object>>() {
 			public Map<String, Object> mapRow(ResultSet rs, int i) throws SQLException {
 				Map<String, Object> results = new HashMap<String, Object>();
-				String clobText = lobHandler.getClobAsString(rs, "a_clob"); <<1>>
-	results.put("CLOB", clobText); byte[] blobBytes = lobHandler.getBlobAsBytes(rs, "a_blob"); <<2>>
+				String clobText = lobHandler.getClobAsString(rs, "a_clob"); # <1>
+	results.put("CLOB", clobText); byte[] blobBytes = lobHandler.getBlobAsBytes(rs, "a_blob"); # <2>
 	results.put("BLOB", blobBytes); return results; } });
 ----
 
-<<1>>
-Using the method `getClobAsString`, retrieve the contents of the CLOB.
-
-<<2>>
-Using the method `getBlobAsBytes`, retrieve the contents of the BLOB.
+<1> Using the method `getClobAsString`, retrieve the contents of the CLOB.
+<2> Using the method `getBlobAsBytes`, retrieve the contents of the BLOB.
 
 
 
