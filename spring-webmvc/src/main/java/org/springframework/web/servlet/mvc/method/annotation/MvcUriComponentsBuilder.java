@@ -193,38 +193,62 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	}
 
 	/**
-	 * Create a {@link UriComponentsBuilder} from a request mapping identified
-	 * by name. The configured
+	 * Create a URL from the name of a Spring MVC controller method's request mapping.
+	 *
+	 * <p>The configured
 	 * {@link org.springframework.web.servlet.handler.HandlerMethodMappingNamingStrategy
-	 * HandlerMethodMappingNamingStrategy} assigns a default name to every
-	 * {@code @RequestMapping} method but an explicit name may also be assigned
-	 * through the {@code @RequestMapping} name attribute.
-	 * <p>This is intended for use in EL expressions, typically in JSPs or other
-	 * view templates, which can use the convenience method {@link #toUriString()}.
-	 * <p>The default naming convention for mappings is based on the capital
-	 * letters of the class name, followed by "#" as a separator, and the method
-	 * name. For example "TC#getFoo" for a class named TestController with method
-	 * getFoo. Use explicit names where the naming convention does not produce
-	 * unique results.
-	 * @param name the mapping name
-	 * @param argumentValues argument values for the controller method; those values
-	 * are important for {@code @RequestParam} and {@code @PathVariable} arguments
-	 * but may be passed as {@code null} otherwise.
-	 * @return the UriComponentsBuilder
+	 * HandlerMethodMappingNamingStrategy} determines the names of controller
+	 * method request mappings at startup. By default all mappings are assigned
+	 * a name based on the capital letters of the class name, followed by "#" as
+	 * separator, and then the method name. For example "PC#getPerson"
+	 * for a class named PersonController with method getPerson. In case the
+	 * naming convention does not produce unique results, an explicit name may
+	 * be assigned through the name attribute of the {@code @RequestMapping}
+	 * annotation.
+	 *
+	 * <p>This is aimed primarily for use in view rendering technologies and EL
+	 * expressions. The Spring URL tag library registers this method as a function
+	 * called "mvcUrl".
+	 *
+	 * <p>For example, given this controller:
+	 * <pre class="code">
+	 * &#064;RequestMapping("/people")
+	 * class PersonController {
+	 *
+	 *   &#064;RequestMapping("/{id}")
+	 *   public HttpEntity<Void> getPerson(&#064;PathVariable String id) { ... }
+	 *
+	 * }
+	 * </pre>
+	 *
+	 * A JSP can prepare a URL to the controller method as follows:
+	 *
+	 * <pre class="code">
+	 * <%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
+	 *
+	 * &lt;a href="${s:mvcUrl('PC#getPerson').arg(0,"123").build()}"&gt;Get Person&lt;/a&gt;
+	 * </pre>
+	 *
+	 * <p>Note that it's not necessary to specify all arguments. Only the ones
+	 * required to prepare the URL, mainly {@code @RequestParam} and {@code @PathVariable}).
+	 *
+	 * @param mappingName the mapping name
+	 * @return a builder to to prepare the URI String
 	 * @throws IllegalArgumentException if the mapping name is not found or
 	 * if there is no unique match
 	 * @since 4.1
 	 */
-	public static UriComponentsBuilder fromMappingName(String name, Object... argumentValues) {
-		RequestMappingInfoHandlerMapping hm = getRequestMappingInfoHandlerMapping();
-		List<HandlerMethod> handlerMethods = hm.getHandlerMethodsForMappingName(name);
+	public static MethodArgumentBuilder fromMappingName(String mappingName) {
+		RequestMappingInfoHandlerMapping handlerMapping = getRequestMappingInfoHandlerMapping();
+		List<HandlerMethod> handlerMethods = handlerMapping.getHandlerMethodsForMappingName(mappingName);
 		if (handlerMethods == null) {
-			throw new IllegalArgumentException("Mapping name not found: " + name);
+			throw new IllegalArgumentException("Mapping mappingName not found: " + mappingName);
 		}
 		if (handlerMethods.size() != 1) {
-			throw new IllegalArgumentException("No unique match for mapping name " + name + ": " + handlerMethods);
+			throw new IllegalArgumentException(
+					"No unique match for mapping mappingName " + mappingName + ": " + handlerMethods);
 		}
-		return fromMethod(handlerMethods.get(0).getMethod(), argumentValues);
+		return new MethodArgumentBuilder(handlerMethods.get(0).getMethod());
 	}
 
 	/**
@@ -453,6 +477,39 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 		Method getControllerMethod();
 
 		Object[] getArgumentValues();
+	}
+
+
+	public static class MethodArgumentBuilder {
+
+		private final Method method;
+
+		private final Object[] argumentValues;
+
+
+		public MethodArgumentBuilder(Method method) {
+			Assert.notNull(method, "'method' is required");
+			this.method = method;
+			this.argumentValues = new Object[method.getParameterTypes().length];
+			for (int i = 0; i < this.argumentValues.length; i++) {
+				this.argumentValues[i] = null;
+			}
+		}
+
+		public MethodArgumentBuilder arg(int index, Object value) {
+			this.argumentValues[index] = value;
+			return this;
+		}
+
+		public String build() {
+			return MvcUriComponentsBuilder.fromMethod(this.method, this.argumentValues)
+					.build(false).encode().toUriString();
+		}
+
+		public String buildAndExpand(Object... uriVariables) {
+			return MvcUriComponentsBuilder.fromMethod(this.method, this.argumentValues)
+					.build(false).expand(uriVariables).encode().toString();
+		}
 	}
 
 }

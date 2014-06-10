@@ -472,4 +472,11 @@
 		</attribute>
 	</tag>
 
+    <function>
+        <description>Helps to prepare a URL to a Spring MVC controller method.</description>
+        <name>mvcUrl</name>
+        <function-class>org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder</function-class>
+        <function-signature>org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.MethodArgumentBuilder fromMappingName(java.lang.String)</function-signature>
+    </function>
+
 </taglib>
