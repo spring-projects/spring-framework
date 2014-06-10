@@ -175,7 +175,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 		Map<String, Object> beans = new HashMap<String, Object>();
 		beans.put(objectName, proxy);
 		exporter.setBeans(beans);
-		exporter.afterPropertiesSet();
+		start(exporter);
 
 		MBeanInfo inf = getServer().getMBeanInfo(ObjectNameManager.getInstance(objectName));
 		assertEquals("Incorrect number of operations", getExpectedOperationCount(), inf.getOperations().length);

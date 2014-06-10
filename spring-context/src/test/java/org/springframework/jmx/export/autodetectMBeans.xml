@@ -17,12 +17,6 @@
 
 	<bean name="spring:mbean3=true" class="org.springframework.jmx.export.TestDynamicMBean"/>
 
-	<bean id="connector" class="org.springframework.jmx.support.ConnectorServerFactoryBean">
-		<property name="server">
-			<ref local="server"/>
-		</property>
-	</bean>
-
 	<bean id="toBeIgnored" class="javax.management.DynamicMBean" abstract="true"/>
 
 	<bean id="toBeIgnoredToo" class="javax.management.DynamicMBean" abstract="true" lazy-init="true"/>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,11 +46,11 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.CannotLoadBeanClassException;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.core.Constants;
 import org.springframework.jmx.export.assembler.AutodetectCapableMBeanInfoAssembler;
 import org.springframework.jmx.export.assembler.MBeanInfoAssembler;
@@ -89,6 +89,8 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @author Rick Evans
  * @author Mark Fisher
+ * @author Marten Deinum
+ * @author Stephane Nicoll
  * @since 1.2
  * @see #setBeans
  * @see #setAutodetect
@@ -98,7 +100,7 @@ import org.springframework.util.ObjectUtils;
  * @see MBeanExporterListener
  */
 public class MBeanExporter extends MBeanRegistrationSupport
-		implements MBeanExportOperations, BeanClassLoaderAware, BeanFactoryAware, InitializingBean, DisposableBean {
+		implements MBeanExportOperations, BeanClassLoaderAware, BeanFactoryAware, InitializingBean, SmartLifecycle {
 
 	/**
 	 * Autodetection mode indicating that no autodetection should be used.
@@ -177,6 +179,14 @@ public class MBeanExporter extends MBeanRegistrationSupport
 
 	/** Stores the BeanFactory for use in autodetection process */
 	private ListableBeanFactory beanFactory;
+
+	private boolean autoStartup = true;
+
+	private volatile boolean running = false;
+
+	private int phase = Integer.MAX_VALUE;
+
+	private final Object lifecycleMonitor = new Object();
 
 
 	/**
@@ -395,16 +405,31 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		}
 	}
 
+	/**
+	 * Specify the phase in which the MBeans should be exported to the
+	 * JMX domain. The startup order proceeds from lowest to highest, and
+	 * the shutdown order is the reverse of that. By default this value
+	 * is {@code Integer.MAX_VALUE} meaning that MBeans are exported
+	 * as late as possible and removed from the domain as soon as possible.
+	 */
+	public void setPhase(int phase) {
+		this.phase = phase;
+	}
+
+	/**
+	 * Set whether to automatically export MBeans after initialization.
+	 * <p>Default is "true"; set this to "false" to allow for manual startup
+	 * through the {@link #start()} method.
+	 */
+	public void setAutoStartup(boolean autoStartup) {
+		this.autoStartup = autoStartup;
+	}
+
 
 	//---------------------------------------------------------------------
 	// Lifecycle in bean factory: automatically register/unregister beans
 	//---------------------------------------------------------------------
 
-	/**
-	 * Start bean registration automatically when deployed in an
-	 * {@code ApplicationContext}.
-	 * @see #registerBeans()
-	 */
 	@Override
 	public void afterPropertiesSet() {
 		// If no server was provided then try to find one. This is useful in an environment
@@ -412,28 +437,58 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		if (this.server == null) {
 			this.server = JmxUtils.locateMBeanServer();
 		}
-		try {
-			logger.info("Registering beans for JMX exposure on startup");
-			registerBeans();
-			registerNotificationListeners();
+	}
+
+	@Override
+	public void start() {
+		logger.info("Registering beans for JMX exposure");
+		synchronized (this.lifecycleMonitor) {
+			try {
+				registerBeans();
+				registerNotificationListeners();
+			} catch (RuntimeException ex) {
+				// Unregister beans already registered by this exporter.
+				unregisterNotificationListeners();
+				unregisterBeans();
+				throw ex;
+			}
 		}
-		catch (RuntimeException ex) {
-			// Unregister beans already registered by this exporter.
+		running = true;
+	}
+
+	@Override
+	public void stop() {
+		logger.info("Unregistering JMX-exposed beans on stop");
+		synchronized (this.lifecycleMonitor) {
 			unregisterNotificationListeners();
 			unregisterBeans();
-			throw ex;
+			running = false;
 		}
 	}
 
-	/**
-	 * Unregisters all beans that this exported has exposed via JMX
-	 * when the enclosing {@code ApplicationContext} is destroyed.
-	 */
 	@Override
-	public void destroy() {
-		logger.info("Unregistering JMX-exposed beans on shutdown");
-		unregisterNotificationListeners();
-		unregisterBeans();
+	public void stop(Runnable callback) {
+		synchronized (this.lifecycleMonitor) {
+			stop();
+			callback.run();
+		}
+	}
+
+	@Override
+	public boolean isRunning() {
+		synchronized (this.lifecycleMonitor) {
+			return this.running;
+		}
+	}
+
+	@Override
+	public boolean isAutoStartup() {
+		return this.autoStartup;
+	}
+
+	@Override
+	public int getPhase() {
+		return this.phase;
 	}
 
 
@@ -1053,7 +1108,6 @@ public class MBeanExporter extends MBeanRegistrationSupport
 			}
 		}
 	}
-
 
 	//---------------------------------------------------------------------
 	// Inner classes for internal use
