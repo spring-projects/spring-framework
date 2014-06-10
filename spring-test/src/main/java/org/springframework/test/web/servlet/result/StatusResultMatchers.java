@@ -317,9 +317,9 @@ public class StatusResultMatchers {
 	}
 
 	/**
-	 * Assert the response status code is {@code HttpStatus.RESUME_INCOMPLETE} (308).
+	 * Assert the response status code is {@code HttpStatus.PERMANENT_REDIRECT} (308).
 	 */
-	public ResultMatcher isResumeIncomplete() {
+	public ResultMatcher isPermanentRedirect() {
 		return matcher(HttpStatus.valueOf(308));
 	}
 

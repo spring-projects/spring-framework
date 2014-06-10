@@ -150,11 +150,10 @@ public enum HttpStatus {
 	 */
 	TEMPORARY_REDIRECT(307, "Temporary Redirect"),
 	/**
-	 * {@code 308 Resume Incomplete}.
-	 * @see <a href="http://code.google.com/p/gears/wiki/ResumableHttpRequestsProposal">A proposal for supporting
-	 * resumable POST/PUT HTTP requests in HTTP/1.0</a>
+	 * {@code 308 Permanent Redirect}.
+	 * @see <a href="http://tools.ietf.org/html/rfc7238">RFC 7238</a>
 	 */
-	RESUME_INCOMPLETE(308, "Resume Incomplete"),
+	PERMANENT_REDIRECT(308, "Permanent Redirect"),
 
 	// --- 4xx Client Error ---
 

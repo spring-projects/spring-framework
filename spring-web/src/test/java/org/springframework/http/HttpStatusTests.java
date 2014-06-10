@@ -54,7 +54,7 @@ public class HttpStatusTests {
 		statusCodes.put(304, "NOT_MODIFIED");
 		statusCodes.put(305, "USE_PROXY");
 		statusCodes.put(307, "TEMPORARY_REDIRECT");
-		statusCodes.put(308, "RESUME_INCOMPLETE");
+		statusCodes.put(308, "PERMANENT_REDIRECT");
 
 		statusCodes.put(400, "BAD_REQUEST");
 		statusCodes.put(401, "UNAUTHORIZED");
