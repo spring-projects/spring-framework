@@ -33,5 +33,6 @@ public interface GroovyMarkupConfig {
 	 * May be unique to one servlet, or shared in the root context.
 	 * @return the Groovy Template engine
 	 */
-	public MarkupTemplateEngine getTemplateEngine();
+	MarkupTemplateEngine getTemplateEngine();
+
 }

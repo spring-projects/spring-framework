@@ -155,7 +155,7 @@ public class GroovyMarkupConfigurer extends TemplateConfiguration
 	protected MarkupTemplateEngine createTemplateEngine() throws IOException {
 		if (this.templateEngine == null) {
 			ClassLoader templateClassLoader = createTemplateClassLoader();
-			this.templateEngine = new MarkupTemplateEngine(templateClassLoader, this, createTemplateResolver());
+			this.templateEngine = new MarkupTemplateEngine(templateClassLoader, this, new LocaleTemplateResolver());
 		}
 		return this.templateEngine;
 	}
@@ -182,30 +182,44 @@ public class GroovyMarkupConfigurer extends TemplateConfiguration
 	}
 
 	/**
-	 * Return a {@link TemplateResolver} to be used by the
-	 * {@link MarkupTemplateEngine} to resolve template files.
+	 * Resolve a template from the given template path.
 	 *
-	 * <p>The default implementation returns a resolver that uses the Locale
-	 * associated with the current request to resolve the relevant template file.
-	 * Effectively the locale configured at the engine level is ignored.
+	 * <p>The default implementation uses the Locale associated with the current
+	 * request, as obtained through
+	 * {@link org.springframework.context.i18n.LocaleContextHolder LocaleContextHolder},
+	 * to find the template file. Effectively the locale configured at the engine
+	 * level is ignored.
 	 *
 	 * @see LocaleContextHolder
 	 * @see #setLocale(java.util.Locale)
+	 *
+	 * @param classLoader
+	 * @param templatePath
+	 * @return
+	 * @throws IOException
 	 */
-	protected TemplateResolver createTemplateResolver() {
-		return new MarkupTemplateResolver();
+	protected URL resolveTemplate(ClassLoader classLoader, String templatePath) throws IOException {
+		MarkupTemplateEngine.TemplateResource resource = MarkupTemplateEngine.TemplateResource.parse(templatePath);
+		Locale locale = LocaleContextHolder.getLocale();
+		URL url = classLoader.getResource(resource.withLocale(locale.toString().replace("-", "_")).toString());
+		if (url == null) {
+			url = classLoader.getResource(resource.withLocale(locale.getLanguage()).toString());
+		}
+		if (url == null) {
+			url = classLoader.getResource(resource.withLocale(null).toString());
+		}
+		if (url == null) {
+			throw new IOException("Unable to load template:" + templatePath);
+		}
+		return url;
 	}
 
 
 	/**
-	 * A custom {@link TemplateResolver template resolver} that resolves
-	 * templates using the locale found with LocaleContextHolder.
-	 *
-	 * @author Cedric Champeau
-	 * @author Brian Clozel
-	 * @see LocaleContextHolder
+	 * Custom {@link TemplateResolver template resolver} that simply delegates to
+	 * {@link #resolveTemplate(ClassLoader, String)}..
 	 */
-	private static class MarkupTemplateResolver implements TemplateResolver {
+	private class LocaleTemplateResolver implements TemplateResolver {
 
 		private ClassLoader classLoader;
 
@@ -215,20 +229,8 @@ public class GroovyMarkupConfigurer extends TemplateConfiguration
 		}
 
 		@Override
-		public URL resolveTemplate(final String templatePath) throws IOException {
-			MarkupTemplateEngine.TemplateResource resource = MarkupTemplateEngine.TemplateResource.parse(templatePath);
-			Locale locale = LocaleContextHolder.getLocale();
-			URL url = this.classLoader.getResource(resource.withLocale(locale.toString().replace("-", "_")).toString());
-			if (url == null) {
-				url = this.classLoader.getResource(resource.withLocale(locale.getLanguage()).toString());
-			}
-			if (url == null) {
-				url = this.classLoader.getResource(resource.withLocale(null).toString());
-			}
-			if (url == null) {
-				throw new IOException("Unable to load template:" + templatePath);
-			}
-			return url;
+		public URL resolveTemplate(String templatePath) throws IOException {
+			return GroovyMarkupConfigurer.this.resolveTemplate(this.classLoader, templatePath);
 		}
 	}
 }
