@@ -26,7 +26,6 @@ import java.util.Locale;
 import groovy.text.TemplateEngine;
 import groovy.text.markup.MarkupTemplateEngine;
 import groovy.text.markup.TemplateConfiguration;
-import groovy.text.markup.TemplateResolver;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -51,15 +50,12 @@ public class GroovyMarkupConfigurerTests {
 
 	private GroovyMarkupConfigurer configurer;
 
-	private TemplateResolver resolver;
 
 	@Before
 	public void setup() throws Exception {
 		this.applicationContext = new StaticApplicationContext();
 		this.configurer = new GroovyMarkupConfigurer();
 		this.configurer.setResourceLoaderPath(RESOURCE_LOADER_PATH);
-		this.resolver = this.configurer.createTemplateResolver();
-		this.resolver.configure(this.getClass().getClassLoader(), null);
 	}
 
 	@Test
@@ -136,14 +132,14 @@ public class GroovyMarkupConfigurerTests {
 
 	@Test
 	public void resolveSampleTemplate() throws Exception {
-		URL url = this.resolver.resolveTemplate(TEMPLATE_PREFIX + "test.tpl");
+		URL url = this.configurer.resolveTemplate(getClass().getClassLoader(), TEMPLATE_PREFIX + "test.tpl");
 		Assert.assertNotNull(url);
 	}
 
 	@Test
 	public void resolveI18nFullLocale() throws Exception {
 		LocaleContextHolder.setLocale(Locale.GERMANY);
-		URL url = this.resolver.resolveTemplate(TEMPLATE_PREFIX + "i18n.tpl");
+		URL url = this.configurer.resolveTemplate(getClass().getClassLoader(), TEMPLATE_PREFIX + "i18n.tpl");
 		Assert.assertNotNull(url);
 		Assert.assertThat(url.getPath(), Matchers.containsString("i18n_de_DE.tpl"));
 	}
@@ -151,7 +147,7 @@ public class GroovyMarkupConfigurerTests {
 	@Test
 	public void resolveI18nPartialLocale() throws Exception {
 		LocaleContextHolder.setLocale(Locale.FRANCE);
-		URL url = this.resolver.resolveTemplate(TEMPLATE_PREFIX + "i18n.tpl");
+		URL url = this.configurer.resolveTemplate(getClass().getClassLoader(), TEMPLATE_PREFIX + "i18n.tpl");
 		Assert.assertNotNull(url);
 		Assert.assertThat(url.getPath(), Matchers.containsString("i18n_fr.tpl"));
 	}
@@ -159,7 +155,7 @@ public class GroovyMarkupConfigurerTests {
 	@Test
 	public void resolveI18nDefaultLocale() throws Exception {
 		LocaleContextHolder.setLocale(Locale.US);
-		URL url = this.resolver.resolveTemplate(TEMPLATE_PREFIX + "i18n.tpl");
+		URL url = this.configurer.resolveTemplate(getClass().getClassLoader(), TEMPLATE_PREFIX + "i18n.tpl");
 		Assert.assertNotNull(url);
 		Assert.assertThat(url.getPath(), Matchers.containsString("i18n.tpl"));
 	}
@@ -167,7 +163,7 @@ public class GroovyMarkupConfigurerTests {
 	@Test(expected = IOException.class)
 	public void failMissingTemplate() throws Exception {
 		LocaleContextHolder.setLocale(Locale.US);
-		this.resolver.resolveTemplate(TEMPLATE_PREFIX + "missing.tpl");
+		this.configurer.resolveTemplate(getClass().getClassLoader(), TEMPLATE_PREFIX + "missing.tpl");
 		Assert.fail();
 	}
 }
