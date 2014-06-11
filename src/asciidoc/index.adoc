@@ -5946,10 +5946,28 @@ are eligible for such autodetection:
 	}
 ----
 
-To autodetect these classes and register the corresponding beans, you need to include
-the following element in XML, where the base-package element is a common parent package
-for the two classes. (Alternatively, you can specify a comma-separated list that
-includes the parent package of each class.)
+To autodetect these classes and register the corresponding beans, you need to add
+`@ComponentScan` to your `@Configuration` class, where the `basePackages` attribute
+is a common parent package for the two classes. (Alternatively, you can specify a
+comma-separated list that includes the parent package of each class.)
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@ComponentScan(basePackages = "org.example")
+	public class AppConfig  {
+    	...
+	}
+----
+
+[NOTE]
+====
+for concision, the above may have used the `value` attribute of the
+annotation, i.e. `ComponentScan("org.example")`
+====
+
+The following is an alternative using XML
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -6005,8 +6023,9 @@ with a value of false.
 By default, classes annotated with `@Component`, `@Repository`, `@Service`,
 `@Controller`, or a custom annotation that itself is annotated with `@Component` are the
 only detected candidate components. However, you can modify and extend this behavior
-simply by applying custom filters. Add them as __include-filter__ or __exclude-filter__
-sub-elements of the `component-scan` element. Each filter element requires the `type`
+simply by applying custom filters. Add them as __includeFilters__ or __excludeFilters__
+parameters of the `@ComponentScan` annotation (or as __include-filter__ or __exclude-filter__
+sub-elements of the `component-scan` element). Each filter element requires the `type`
 and `expression` attributes. The following table describes the filtering options.
 
 [[beans-scanning-filters-tbl]]
@@ -6014,7 +6033,7 @@ and `expression` attributes. The following table describes the filtering options
 |===
 | Filter Type| Example Expression| Description
 
-| annotation
+| annotation (default)
 | `org.example.SomeAnnotation`
 | An annotation to be present at the type level in target components.
 
@@ -6035,8 +6054,23 @@ and `expression` attributes. The following table describes the filtering options
 | A custom implementation of the `org.springframework.core.type .TypeFilter` interface.
 |===
 
-The following example shows the XML configuration ignoring all `@Repository` annotations
+The following example shows the configuration ignoring all `@Repository` annotations
 and using "stub" repositories instead.
+
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+    @ComponentScan(basePackages = "org.example",
+    		includeFilters = @Filter(type = FilterType.REGEX, pattern = ".*Stub.*Repository"),
+    		excludeFilters = @Filter(Repository.class))
+    public class AppConfig {
+    	...
+    }
+----
+
+and the equivalent using XML
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -6053,10 +6087,10 @@ and using "stub" repositories instead.
 
 [NOTE]
 ====
-You can also disable the default filters by providing __use-default-filters="false"__ as
-an attribute of the <component-scan/> element. This will in effect disable automatic
-detection of classes annotated with `@Component`, `@Repository`, `@Service`, or
-`@Controller`.
+You can also disable the default filters by setting `useDefaultFilters=false` on the annotation or
+providing `use-default-filters="false"` as an attribute of the <component-scan/> element. This
+will in effect disable automatic detection of classes annotated with `@Component`, `@Repository`,
+`@Service`, or `@Controller`.
 ====
 
 
@@ -6201,6 +6235,16 @@ interface, and be sure to include a default no-arg constructor. Then, provide th
 fully-qualified class name when configuring the scanner:
 ====
 
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+    @ComponentScan(basePackages = "org.example", nameGenerator = MyNameGenerator.class)
+    public class AppConfig {
+    	...
+    }
+----
+
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6242,6 +6286,16 @@ interface, and be sure to include a default no-arg constructor. Then, provide th
 fully-qualified class name when configuring the scanner:
 ====
 
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@ComponentScan(basePackages = "org.example", scopeResolver = MyScopeResolver.class)
+	public class AppConfig {
+    	...
+    }
+----
+
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6256,6 +6310,16 @@ scoped objects. The reasoning is described in <<beans-factory-scopes-other-injec
 For this purpose, a __scoped-proxy__ attribute is available on the component-scan
 element. The three possible values are: no, interfaces, and targetClass. For example,
 the following configuration will result in standard JDK dynamic proxies:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@ComponentScan(basePackages = "org.example", scopedProxy = ScopedProxyMode.INTERFACES)
+	public class AppConfig {
+    	...
+    }
+----
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -6452,12 +6516,14 @@ can be used in a similar fashion:
 When using `@Named`, it is possible to use
 component-scanning in the exact same way as when using Spring annotations:
 
-[source,xml,indent=0]
+[source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<beans>
-		<context:component-scan base-package="org.example"/>
-	</beans>
+	@Configuration
+	@ComponentScan(basePackages = "org.example")
+	public class AppConfig  {
+    	...
+	}
 ----
 
 
@@ -6654,8 +6720,23 @@ when programmatically building an `AnnotationConfigApplicationContext`.
 [[beans-java-instantiating-container-scan]]
 ===== Enabling component scanning with scan(String...)
 
-Experienced Spring users will be familiar with the following commonly-used XML
-declaration from Spring's `context:` namespace
+To enable component scanning, just annotate your `@Configuration` class as follows:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@ComponentScan(basePackages = "com.acme")
+	public class AppConfig  {
+    	...
+	}
+----
+
+[TIP]
+====
+
+Experienced Spring users will be familiar with the XML declaration equivalent from
+Spring's `context:` namespace
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -6664,6 +6745,8 @@ declaration from Spring's `context:` namespace
 		<context:component-scan base-package="com.acme"/>
 	</beans>
 ----
+====
+
 
 In the example above, the `com.acme` package will be scanned, looking for any
 `@Component`-annotated classes, and those classes will be registered as Spring bean
