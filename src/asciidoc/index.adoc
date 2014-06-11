@@ -6774,6 +6774,9 @@ its `@Bean` methods will be processed and registered as bean definitions within 
 container.
 ====
 
+When we are in a web based application we don't have a `main` method, so, to obtain
+the same result, we need to annotate the `AppConfig` class with `@ComponentScan`. Or any other class
+with the annotation `@Configuration`.
 
 [[beans-java-instantiating-container-web]]
 ===== Support for web applications with AnnotationConfigWebApplicationContext
