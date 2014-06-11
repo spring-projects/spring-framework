@@ -696,11 +696,15 @@ public class AntPathMatcher implements PathMatcher {
 							this.doubleWildcards++;
 							pos += 2;
 						}
-						else {
+						else if(!this.pattern.substring(pos - 1).equals(".*")) {
 							this.singleWildcards++;
 							pos++;
 						}
-					} else {
+						else {
+							pos++;
+						}
+					}
+					else {
 						pos++;
 					}
 				}
