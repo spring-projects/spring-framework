@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,12 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.util.UriComponents;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
+ * Unit tests for
+ * {@link org.springframework.web.servlet.support.ServletUriComponentsBuilder}.
+ *
  * @author Rossen Stoyanchev
  */
 public class ServletUriComponentsBuilderTests {
@@ -85,7 +89,7 @@ public class ServletUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromRequestWithForwardedHostHeader() {
+	public void fromRequestWithForwardedHost() {
 		request.addHeader("X-Forwarded-Host", "anotherHost");
 		request.setRequestURI("/mvc-showcase/data/param");
 		request.setQueryString("foo=123");
@@ -97,7 +101,7 @@ public class ServletUriComponentsBuilderTests {
 	// SPR-10701
 
 	@Test
-	public void fromRequestWithForwardedHostAndPortHeader() {
+	public void fromRequestWithForwardedHostIncludingPort() {
 		request.addHeader("X-Forwarded-Host", "webtest.foo.bar.com:443");
 		request.setRequestURI("/mvc-showcase/data/param");
 		request.setQueryString("foo=123");
@@ -114,6 +118,19 @@ public class ServletUriComponentsBuilderTests {
 		this.request.addHeader("X-Forwarded-Host", "a.example.org, b.example.org, c.example.org");
 
 		assertEquals("a.example.org", ServletUriComponentsBuilder.fromRequest(this.request).build().getHost());
+	}
+
+	// SPR-11855
+
+	@Test
+	public void fromRequestWithForwardedHostAndPort() {
+		this.request.addHeader("X-Forwarded-Host", "foobarhost");
+		this.request.addHeader("X-Forwarded-Port", "9090");
+		this.request.setServerPort(8080);
+		UriComponents uriComponents = ServletUriComponentsBuilder.fromRequest(this.request).build();
+
+		assertEquals("foobarhost", uriComponents.getHost());
+		assertEquals(9090, uriComponents.getPort());
 	}
 
 	@Test
