@@ -15,7 +15,7 @@ configure(allprojects) { project ->
 
 	ext.aspectjVersion       = "1.8.0"
 	ext.eclipseLinkVersion   = "2.4.2"
-	ext.groovyVersion        = "2.3.2"
+	ext.groovyVersion        = "2.3.3"
 	ext.hibernate3Version    = "3.6.10.Final"
 	ext.hibernate4Version    = "4.3.5.Final"
 	ext.hibVal4Version       = "4.3.1.Final"
