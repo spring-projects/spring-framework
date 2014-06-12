@@ -17,10 +17,12 @@
 package org.springframework.web.servlet.resource;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -77,8 +79,7 @@ public class CssLinkResourceTransformerTests {
 				"@import url(bar-11e16cf79faee7ac698c805cf28248d2.css);\n\n" +
 				"@import \"foo-e36d2e05253c6c7085a91522ce43a0b4.css\";\n" +
 				"@import 'foo-e36d2e05253c6c7085a91522ce43a0b4.css';\n\n" +
-				"body { background: url(\"images/image-f448cd1d5dba82b774f3202c878230b3.png\") }\n\n" +
-				"li { list-style: url(http://www.example.com/redball.png) disc }\n";
+				"body { background: url(\"images/image-f448cd1d5dba82b774f3202c878230b3.png\") }\n";
 
 		String result = new String(transformedResource.getByteArray(), "UTF-8");
 		result = StringUtils.deleteAny(result, "\r");
@@ -90,6 +91,28 @@ public class CssLinkResourceTransformerTests {
 		Resource expected = new ClassPathResource("test/foo.css", getClass());
 		Resource actual = this.transformerChain.transform(this.request, expected);
 		assertSame(expected, actual);
+	}
+
+	@Test
+	public void transformExtLinksNotAllowed() throws Exception {
+		ResourceResolverChain resolverChain = Mockito.mock(DefaultResourceResolverChain.class);
+		ResourceTransformerChain transformerChain = new DefaultResourceTransformerChain(resolverChain,
+				Arrays.asList(new CssLinkResourceTransformer()));
+
+		Resource externalCss = new ClassPathResource("test/external.css", getClass());
+		Resource resource = transformerChain.transform(this.request, externalCss);
+		TransformedResource transformedResource = (TransformedResource) resource;
+
+		String expected = "@import url(\"http://example.org/fonts/css\");\n" +
+				"body { background: url(\"file:///home/spring/image.png\") }";
+		String result = new String(transformedResource.getByteArray(), "UTF-8");
+		result = StringUtils.deleteAny(result, "\r");
+		assertEquals(expected, result);
+
+		Mockito.verify(resolverChain, Mockito.never())
+				.resolveUrlPath("http://example.org/fonts/css", Arrays.asList(externalCss));
+		Mockito.verify(resolverChain, Mockito.never())
+				.resolveUrlPath("file:///home/spring/image.png", Arrays.asList(externalCss));
 	}
 
 }

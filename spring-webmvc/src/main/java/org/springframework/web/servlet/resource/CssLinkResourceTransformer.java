@@ -101,7 +101,10 @@ public class CssLinkResourceTransformer implements ResourceTransformer {
 		for (CssLinkInfo info : sortedInfos) {
 			writer.write(content.substring(index, info.getStart()));
 			String link = content.substring(info.getStart(), info.getEnd());
-			String newLink = transformerChain.getResolverChain().resolveUrlPath(link, Arrays.asList(resource));
+			String newLink = null;
+			if(!hasScheme(link)) {
+				newLink = transformerChain.getResolverChain().resolveUrlPath(link, Arrays.asList(resource));
+			}
 			if (logger.isTraceEnabled()) {
 				if (newLink != null && !link.equals(newLink)) {
 					logger.trace("Link modified: " + newLink + " (original: " + link + ")");
@@ -116,6 +119,11 @@ public class CssLinkResourceTransformer implements ResourceTransformer {
 		writer.write(content.substring(index));
 
 		return new TransformedResource(resource, writer.toString().getBytes(DEFAULT_CHARSET));
+	}
+
+	private boolean hasScheme(String link) {
+		int schemeIndex = link.indexOf(":");
+		return schemeIndex > 0 && !link.substring(0, schemeIndex).contains("/");
 	}
 
 
