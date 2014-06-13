@@ -213,20 +213,21 @@ public abstract class StringUtils {
 	 * @see java.lang.Character#isWhitespace
 	 */
 	public static String trimAllWhitespace(String str) {
-		if (!hasLength(str)) {
-			return str;
-		}
-		StringBuilder sb = new StringBuilder(str);
-		int index = 0;
-		while (sb.length() > index) {
-			if (Character.isWhitespace(sb.charAt(index))) {
-				sb.deleteCharAt(index);
-			}
-			else {
+		int len = str.length();
+		if((str != null && len > 0)) {
+			StringBuffer sb = new StringBuffer(str.length());
+			int index = 0;
+			while(index < len) {
+				char c = str.charAt(index);
+				if (!Character.isWhitespace(c)) {
+					sb.append(c);
+				}
 				index++;
 			}
+			return sb.toString();
+		}else {
+			return str;
 		}
-		return sb.toString();
 	}
 
 	/**
