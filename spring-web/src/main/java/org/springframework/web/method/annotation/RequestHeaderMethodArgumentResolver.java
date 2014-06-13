@@ -77,9 +77,12 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
 
 	@Override
 	protected void handleMissingValue(String headerName, MethodParameter param) throws ServletRequestBindingException {
-		String paramType = param.getParameterType().getName();
-		throw new ServletRequestBindingException(
-				"Missing header '" + headerName + "' for method parameter type [" + paramType + "]");
+		Class<?> paramType = param.getParameterType();
+		if (!paramType.getName().equals("java.util.Optional")) {
+			throw new ServletRequestBindingException(
+					"Missing header '" + headerName + "' for method parameter type [" + paramType.getName() + "]");
+
+		}
 	}
 
 	private static class RequestHeaderNamedValueInfo extends NamedValueInfo {

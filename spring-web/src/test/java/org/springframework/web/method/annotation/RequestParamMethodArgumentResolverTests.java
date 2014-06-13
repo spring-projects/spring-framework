@@ -20,8 +20,10 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.servlet.http.Part;
+import javax.swing.text.html.Option;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -29,6 +31,7 @@ import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockMultipartFile;
@@ -38,6 +41,8 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
+import org.springframework.web.bind.support.DefaultDataBinderFactory;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.bind.support.WebRequestDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -76,6 +81,7 @@ public class RequestParamMethodArgumentResolverTests {
 	private MethodParameter paramRequestPartAnnot;
 	private MethodParameter paramRequired;
 	private MethodParameter paramNotRequired;
+	private MethodParameter paramOptional;
 
 	private NativeWebRequest webRequest;
 
@@ -91,7 +97,7 @@ public class RequestParamMethodArgumentResolverTests {
 				Map.class, MultipartFile.class, List.class, MultipartFile[].class,
 				Part.class, List.class, Part[].class, Map.class,
 				String.class, MultipartFile.class, List.class, Part.class,
-				MultipartFile.class, String.class, String.class);
+				MultipartFile.class, String.class, String.class, Optional.class);
 
 		paramNamedDefaultValueString = new MethodParameter(method, 0);
 		paramNamedStringArray = new MethodParameter(method, 1);
@@ -114,6 +120,7 @@ public class RequestParamMethodArgumentResolverTests {
 		paramRequestPartAnnot = new MethodParameter(method, 14);
 		paramRequired = new MethodParameter(method, 15);
 		paramNotRequired = new MethodParameter(method, 16);
+		paramOptional = new MethodParameter(method, 17);
 
 		request = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
@@ -420,6 +427,22 @@ public class RequestParamMethodArgumentResolverTests {
 		assertEquals("", result);
 	}
 
+	@Test
+	public void resolveOptional() throws Exception {
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setConversionService(new DefaultConversionService());
+		WebDataBinderFactory binderFactory = new DefaultDataBinderFactory(initializer);
+
+		Object result = resolver.resolveArgument(paramOptional, null, webRequest, binderFactory);
+		assertEquals(Optional.class, result.getClass());
+		assertEquals(Optional.empty(), result);
+
+		this.request.addParameter("name", "123");
+		result = resolver.resolveArgument(paramOptional, null, webRequest, binderFactory);
+		assertEquals(Optional.class, result.getClass());
+		assertEquals(123, ((Optional) result).get());
+	}
+
 
 	public void params(@RequestParam(value = "name", defaultValue = "bar") String param1,
 			@RequestParam("name") String[] param2,
@@ -437,7 +460,8 @@ public class RequestParamMethodArgumentResolverTests {
 			Part part,
 			@RequestPart MultipartFile requestPartAnnot,
 			@RequestParam(value = "name") String paramRequired,
-			@RequestParam(value = "name", required=false) String paramNotRequired) {
+			@RequestParam(value = "name", required=false) String paramNotRequired,
+			@RequestParam(value = "name") Optional<Integer> paramOptional) {
 	}
 
 }

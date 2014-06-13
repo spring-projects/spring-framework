@@ -17,6 +17,7 @@
 package org.springframework.core.convert.support;
 
 import java.awt.Color;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.ZoneId;
@@ -32,6 +33,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
@@ -43,6 +45,7 @@ import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterRegistry;
+import org.springframework.util.ClassUtils;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -787,6 +790,23 @@ public class DefaultConversionTests {
 		assertArrayEquals(grid, convertedBack);
 	}
 
+	@Test
+	@SuppressWarnings("unchecked")
+	public void convertObjectToOptional() {
+		Method method = ClassUtils.getMethod(TestEntity.class, "handleOptionalValue", Optional.class);
+		MethodParameter parameter = new MethodParameter(method, 0);
+		TypeDescriptor descriptor = new TypeDescriptor(parameter);
+		Object actual = conversionService.convert("1,2,3", TypeDescriptor.valueOf(String.class), descriptor);
+		assertEquals(Optional.class, actual.getClass());
+		assertEquals(Arrays.asList(1,2,3), ((Optional<List<Integer>>) actual).get());
+	}
+
+	@Test
+	public void convertObjectToOptionalNull() {
+		assertSame(Optional.empty(), conversionService.convert(null, TypeDescriptor.valueOf(Object.class), TypeDescriptor.valueOf(Optional.class)));
+		assertSame(Optional.empty(), conversionService.convert(null, Optional.class));
+	}
+
 
 	public static class TestEntity {
 
@@ -802,6 +822,9 @@ public class DefaultConversionTests {
 
 		public static TestEntity findTestEntity(Long id) {
 			return new TestEntity(id);
+		}
+
+		public void handleOptionalValue(Optional<List<Integer>> value) {
 		}
 	}
 

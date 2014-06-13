@@ -252,7 +252,9 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 
 	@Override
 	protected void handleMissingValue(String paramName, MethodParameter parameter) throws ServletException {
-		throw new MissingServletRequestParameterException(paramName, parameter.getParameterType().getSimpleName());
+		if (!parameter.getParameterType().getName().equals("java.util.Optional")) {
+			throw new MissingServletRequestParameterException(paramName, parameter.getParameterType().getSimpleName());
+		}
 	}
 
 	@Override
