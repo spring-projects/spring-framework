@@ -218,9 +218,9 @@ public abstract class StringUtils {
 			StringBuffer sb = new StringBuffer(str.length());
 			int index = 0;
 			while(index < len) {
-				char charAt = str.charAt(index);
-				if (!Character.isWhitespace(charAt)) {
-					sb.append(charAt);
+				char c = str.charAt(index);
+				if (!Character.isWhitespace(c)) {
+					sb.append(c);
 				}
 				index++;
 			}
