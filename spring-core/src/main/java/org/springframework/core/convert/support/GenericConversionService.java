@@ -59,6 +59,9 @@ import org.springframework.util.StringUtils;
  */
 public class GenericConversionService implements ConfigurableConversionService {
 
+	/** Java 8's java.util.Optional.empty() */
+	private static Object javaUtilOptionalEmpty = null;
+
 	/**
 	 * General NO-OP converter used when conversion is not required.
 	 */
@@ -69,6 +72,15 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 * returned.
 	 */
 	private static final GenericConverter NO_MATCH = new NoOpConverter("NO_MATCH");
+
+	static {
+		try {
+			Class<?> clazz = ClassUtils.forName("java.util.Optional", GenericConversionService.class.getClassLoader());
+			javaUtilOptionalEmpty = ClassUtils.getMethod(clazz, "empty").invoke(null);
+		} catch (Exception ex) {
+			// Java 8 not available - conversion to Optional not supported then.
+		}
+	}
 
 
 	private final Converters converters = new Converters();
@@ -204,13 +216,18 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 	/**
 	 * Template method to convert a null source.
-	 * <p>Default implementation returns {@code null}.
+	 * <p>Default implementation returns {@code null} or the Java 8
+	 * {@link java.util.Optional#empty()} instance if the target type is
+	 * {@code java.uti.Optional}.
 	 * Subclasses may override to return custom null objects for specific target types.
 	 * @param sourceType the sourceType to convert from
 	 * @param targetType the targetType to convert to
 	 * @return the converted null object
 	 */
 	protected Object convertNullSource(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		if (targetType.getObjectType().equals(javaUtilOptionalEmpty.getClass())) {
+			return javaUtilOptionalEmpty;
+		}
 		return null;
 	}
 

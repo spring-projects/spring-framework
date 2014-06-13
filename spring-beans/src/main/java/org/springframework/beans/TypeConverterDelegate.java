@@ -53,6 +53,19 @@ class TypeConverterDelegate {
 
 	private static final Log logger = LogFactory.getLog(TypeConverterDelegate.class);
 
+	/** Java 8's java.util.Optional.empty() instance */
+	private static Object javaUtilOptionalEmpty = null;
+
+	static {
+		try {
+			Class<?> clazz = ClassUtils.forName("java.util.Optional", TypeConverterDelegate.class.getClassLoader());
+			javaUtilOptionalEmpty = ClassUtils.getMethod(clazz, "empty").invoke(null);
+		} catch (Exception ex) {
+			// Java 8 not available - conversion to Optional not supported then.
+		}
+	}
+
+
 	private final PropertyEditorRegistrySupport propertyEditorRegistry;
 
 	private final Object targetObject;
@@ -243,6 +256,9 @@ class TypeConverterDelegate {
 					convertedValue = attemptToConvertStringToEnum(requiredType, trimmedValue, convertedValue);
 					standardConversion = true;
 				}
+			}
+			else if (requiredType.equals(javaUtilOptionalEmpty.getClass())) {
+				convertedValue = javaUtilOptionalEmpty;
 			}
 
 			if (!ClassUtils.isAssignableValue(requiredType, convertedValue)) {
