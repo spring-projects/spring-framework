@@ -216,14 +216,12 @@ public abstract class StringUtils {
 		if (!hasLength(str)) {
 			return str;
 		}
-		StringBuilder sb = new StringBuilder(str);
-		int index = 0;
-		while (sb.length() > index) {
-			if (Character.isWhitespace(sb.charAt(index))) {
-				sb.deleteCharAt(index);
-			}
-			else {
-				index++;
+		int len = str.length();
+		StringBuilder sb = new StringBuilder(str.length());
+		for (int i = 0; i < len; i++) {
+			char c = str.charAt(i);
+			if (!Character.isWhitespace(c)) {
+				sb.append(c);
 			}
 		}
 		return sb.toString();
