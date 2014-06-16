@@ -71,7 +71,7 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 	 */
 	public boolean setException(Throwable exception) {
 		Assert.notNull(exception, "'exception' must not be null");
-		boolean success = this.settableTask.setValue(exception);
+		boolean success = this.settableTask.setException(exception);
 		if (success) {
 			this.listenableFuture.run();
 		}
@@ -151,17 +151,25 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 		private volatile boolean cancelled = false;
 
 
-		public boolean setValue(Object value) {
+		public boolean setValue(T value) {
 			if (this.cancelled) {
 				return false;
 			}
 			return this.value.compareAndSet(NO_VALUE, value);
 		}
 
+		public boolean setException(Throwable exception) {
+			if (this.cancelled) {
+				return false;
+			}
+			return this.value.compareAndSet(NO_VALUE, exception);
+		}
+
 		public void setCancelled() {
 			this.cancelled = true;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public T call() throws Exception {
 			if (value.get() instanceof Exception) {
