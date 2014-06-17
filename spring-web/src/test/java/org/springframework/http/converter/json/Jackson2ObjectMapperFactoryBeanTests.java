@@ -23,11 +23,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import org.springframework.beans.FatalBeanException;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -48,8 +43,12 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.BasicSerializerFactory;
 import com.fasterxml.jackson.databind.ser.Serializers;
 import com.fasterxml.jackson.databind.ser.std.ClassSerializer;
-import com.fasterxml.jackson.databind.ser.std.NumberSerializers.NumberSerializer;
+import com.fasterxml.jackson.databind.ser.std.NumberSerializer;
 import com.fasterxml.jackson.databind.type.SimpleType;
+import org.junit.Before;
+import org.junit.Test;
+
+import org.springframework.beans.FatalBeanException;
 
 import static org.junit.Assert.*;
 
@@ -161,16 +160,16 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 
 	@Test
 	public void testSetModules() {
-		JsonSerializer serializer1 = new NumberSerializer();
+		NumberSerializer serializer1 = new NumberSerializer();
 		SimpleModule module = new SimpleModule();
-		module.addSerializer(Boolean.class,serializer1);
+		module.addSerializer(Integer.class, serializer1);
 
-		this.factory.setModules(Arrays.asList(new Module[]{module}));
+		this.factory.setModules(Arrays.asList(new Module[] {module}));
 		this.factory.afterPropertiesSet();
 		ObjectMapper objectMapper = this.factory.getObject();
 
 		Serializers serializers = getSerializerFactoryConfig(objectMapper).serializers().iterator().next();
-		assertTrue(serializers.findSerializer(null, SimpleType.construct(Boolean.class), null) == serializer1);
+		assertTrue(serializers.findSerializer(null, SimpleType.construct(Integer.class), null) == serializer1);
 	}
 
 	@Test
