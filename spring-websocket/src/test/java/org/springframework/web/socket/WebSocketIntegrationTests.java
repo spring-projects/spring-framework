@@ -58,24 +58,22 @@ public class WebSocketIntegrationTests extends  AbstractWebSocketIntegrationTest
 
 	@Override
 	protected Class<?>[] getAnnotatedConfigClasses() {
-		return new Class<?>[] {TestWebSocketConfigurer.class};
+		return new Class<?>[] { TestConfig.class };
 	}
 
 	@Test
 	public void subProtocolNegotiation() throws Exception {
 		WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 		headers.setSecWebSocketProtocol("foo");
-
-		WebSocketSession session = this.webSocketClient.doHandshake(
-				new AbstractWebSocketHandler() {}, headers, new URI(getWsBaseUrl() + "/ws")).get();
-
+		URI url = new URI(getWsBaseUrl() + "/ws");
+		WebSocketSession session = this.webSocketClient.doHandshake(new TextWebSocketHandler(), headers, url).get();
 		assertEquals("foo", session.getAcceptedProtocol());
 	}
 
 
 	@Configuration
 	@EnableWebSocket
-	static class TestWebSocketConfigurer implements WebSocketConfigurer {
+	static class TestConfig implements WebSocketConfigurer {
 
 		@Autowired
 		private DefaultHandshakeHandler handshakeHandler;  // can't rely on classpath for server detection
@@ -83,17 +81,13 @@ public class WebSocketIntegrationTests extends  AbstractWebSocketIntegrationTest
 		@Override
 		public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
 			this.handshakeHandler.setSupportedProtocols("foo", "bar", "baz");
-			registry.addHandler(serverHandler(), "/ws").setHandshakeHandler(this.handshakeHandler);
+			registry.addHandler(handler(), "/ws").setHandshakeHandler(this.handshakeHandler);
 		}
 
 		@Bean
-		public TestServerWebSocketHandler serverHandler() {
-			return new TestServerWebSocketHandler();
+		public TextWebSocketHandler handler() {
+			return new TextWebSocketHandler();
 		}
-	}
-
-
-	private static class TestServerWebSocketHandler extends TextWebSocketHandler {
 	}
 
 }

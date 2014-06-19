@@ -57,7 +57,7 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 
 	@Override
 	protected Class<?>[] getAnnotatedConfigClasses() {
-		return new Class<?>[] {TestWebSocketConfigurer.class};
+		return new Class<?>[] { TestConfig.class };
 	}
 
 	@Test
@@ -65,7 +65,7 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 		WebSocketSession session = this.webSocketClient.doHandshake(
 				new AbstractWebSocketHandler() {}, getWsBaseUrl() + "/ws").get();
 
-		TestWebSocketHandler serverHandler = this.wac.getBean(TestWebSocketHandler.class);
+		TestHandler serverHandler = this.wac.getBean(TestHandler.class);
 		assertTrue(serverHandler.connectLatch.await(2, TimeUnit.SECONDS));
 
 		session.close();
@@ -76,7 +76,7 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 		WebSocketSession session = this.webSocketClient.doHandshake(
 				new AbstractWebSocketHandler() {}, getWsBaseUrl() + "/sockjs/websocket").get();
 
-		TestWebSocketHandler serverHandler = this.wac.getBean(TestWebSocketHandler.class);
+		TestHandler serverHandler = this.wac.getBean(TestHandler.class);
 		assertTrue(serverHandler.connectLatch.await(2, TimeUnit.SECONDS));
 
 		session.close();
@@ -85,7 +85,7 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 
 	@Configuration
 	@EnableWebSocket
-	static class TestWebSocketConfigurer implements WebSocketConfigurer {
+	static class TestConfig implements WebSocketConfigurer {
 
 		@Autowired
 		private HandshakeHandler handshakeHandler; // can't rely on classpath for server detection
@@ -99,12 +99,12 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 		}
 
 		@Bean
-		public TestWebSocketHandler serverHandler() {
-			return new TestWebSocketHandler();
+		public TestHandler serverHandler() {
+			return new TestHandler();
 		}
 	}
 
-	private static class TestWebSocketHandler extends AbstractWebSocketHandler {
+	private static class TestHandler extends AbstractWebSocketHandler {
 
 		private CountDownLatch connectLatch = new CountDownLatch(1);
 

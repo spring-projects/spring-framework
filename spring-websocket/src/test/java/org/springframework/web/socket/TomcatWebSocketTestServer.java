@@ -18,16 +18,22 @@ package org.springframework.web.socket;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.EnumSet;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.tomcat.util.descriptor.web.ApplicationListener;
+import org.apache.tomcat.util.descriptor.web.FilterDef;
+import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.websocket.server.WsContextListener;
 import org.springframework.util.SocketUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+
+import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
 
 /**
  * Tomcat based {@link WebSocketTestServer}.
@@ -82,11 +88,27 @@ public class TomcatWebSocketTestServer implements WebSocketTestServer {
 	}
 
 	@Override
-	public void deployConfig(WebApplicationContext wac) {
+	public void deployConfig(WebApplicationContext wac, Filter... filters) {
         this.context = this.tomcatServer.addContext("", System.getProperty("java.io.tmpdir"));
         this.context.addApplicationListener(WS_APPLICATION_LISTENER);
-		Tomcat.addServlet(context, "dispatcherServlet", new DispatcherServlet(wac));
+		Tomcat.addServlet(this.context, "dispatcherServlet", new DispatcherServlet(wac)).setAsyncSupported(true);
 		this.context.addServletMapping("/", "dispatcherServlet");
+		for (Filter filter : filters) {
+			FilterDef filterDef = new FilterDef();
+			filterDef.setFilterName(filter.getClass().getName());
+			filterDef.setFilter(filter);
+			filterDef.setAsyncSupported("true");
+			this.context.addFilterDef(filterDef);
+			FilterMap filterMap = new FilterMap();
+			filterMap.setFilterName(filter.getClass().getName());
+			filterMap.addURLPattern("/*");
+			filterMap.setDispatcher("REQUEST,FORWARD,INCLUDE,ASYNC");
+			this.context.addFilterMap(filterMap);
+		}
+	}
+
+	private EnumSet<DispatcherType> getDispatcherTypes() {
+		return EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.INCLUDE, DispatcherType.ASYNC);
 	}
 
 	@Override
