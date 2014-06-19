@@ -26,8 +26,10 @@ will exist. However, it should be easy to isolate these dependencies from the re
 your code base.
 
 This document is a reference guide to Spring Framework features. If you have any
-requests, comments, or questions on this document, please post them on the user mailing
-list or on the support forums at http://forum.spring.io/[].
+requests, comments, or questions on this document, please post them on the
+https://groups.google.com/forum/#!forum/spring-framework-contrib[user mailing
+list]. Questions on the Framework itself should be asked on StackOverflow
+(see http://spring.io/questions[]).
 --
 
 
