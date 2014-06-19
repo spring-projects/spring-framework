@@ -60,7 +60,8 @@ class TypeConverterDelegate {
 		try {
 			Class<?> clazz = ClassUtils.forName("java.util.Optional", TypeConverterDelegate.class.getClassLoader());
 			javaUtilOptionalEmpty = ClassUtils.getMethod(clazz, "empty").invoke(null);
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			// Java 8 not available - conversion to Optional not supported then.
 		}
 	}
@@ -257,8 +258,11 @@ class TypeConverterDelegate {
 					standardConversion = true;
 				}
 			}
-			else if (requiredType.equals(javaUtilOptionalEmpty.getClass())) {
-				convertedValue = javaUtilOptionalEmpty;
+			else {
+				// convertedValue == null
+				if (javaUtilOptionalEmpty != null && requiredType.equals(javaUtilOptionalEmpty.getClass())) {
+					convertedValue = javaUtilOptionalEmpty;
+				}
 			}
 
 			if (!ClassUtils.isAssignableValue(requiredType, convertedValue)) {
