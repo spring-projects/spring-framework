@@ -59,9 +59,6 @@ import org.springframework.util.StringUtils;
  */
 public class GenericConversionService implements ConfigurableConversionService {
 
-	/** Java 8's java.util.Optional.empty() */
-	private static Object javaUtilOptionalEmpty = null;
-
 	/**
 	 * General NO-OP converter used when conversion is not required.
 	 */
@@ -73,11 +70,16 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 */
 	private static final GenericConverter NO_MATCH = new NoOpConverter("NO_MATCH");
 
+
+	/** Java 8's java.util.Optional.empty() */
+	private static Object javaUtilOptionalEmpty = null;
+
 	static {
 		try {
 			Class<?> clazz = ClassUtils.forName("java.util.Optional", GenericConversionService.class.getClassLoader());
 			javaUtilOptionalEmpty = ClassUtils.getMethod(clazz, "empty").invoke(null);
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			// Java 8 not available - conversion to Optional not supported then.
 		}
 	}
@@ -225,7 +227,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 * @return the converted null object
 	 */
 	protected Object convertNullSource(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (targetType.getObjectType().equals(javaUtilOptionalEmpty.getClass())) {
+		if (javaUtilOptionalEmpty != null && targetType.getObjectType().equals(javaUtilOptionalEmpty.getClass())) {
 			return javaUtilOptionalEmpty;
 		}
 		return null;
