@@ -781,22 +781,22 @@ project("spring-webmvc") {
 		}
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("com.rometools:rome:1.5.0")
-		optional("org.apache.tiles:tiles-api:${tiles2Version}")
-		optional("org.apache.tiles:tiles-core:${tiles2Version}") {
+		optional("javax.el:javax.el-api:2.2.5")
+		optional("org.apache.tiles:tiles-api:${tiles3Version}")
+		optional("org.apache.tiles:tiles-core:${tiles3Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		optional("org.apache.tiles:tiles-servlet:${tiles2Version}") {
+		optional("org.apache.tiles:tiles-servlet:${tiles3Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		optional("org.apache.tiles:tiles-jsp:${tiles2Version}") {
+		optional("org.apache.tiles:tiles-jsp:${tiles3Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		optional("org.apache.tiles:tiles-el:${tiles2Version}") {
+		optional("org.apache.tiles:tiles-el:${tiles3Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		optional("org.apache.tiles:tiles-extras:${tiles2Version}") {
+		optional("org.apache.tiles:tiles-extras:${tiles3Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
-			exclude group: "org.apache.velocity", module: "velocity-tools"
 			exclude group: "org.springframework", module: "spring-web"
 		}
 		testCompile(project(":spring-aop"))
@@ -829,8 +829,8 @@ project("spring-webmvc") {
 	sourceSets.main.resources.srcDirs += "src/main/java"
 }
 
-project("spring-webmvc-tiles3") {
-	description = "Spring Framework Tiles3 Integration"
+project("spring-webmvc-tiles2") {
+	description = "Spring Framework Tiles2 Integration"
 	merge.into = project(":spring-webmvc")
 
 	dependencies {
@@ -839,22 +839,22 @@ project("spring-webmvc-tiles3") {
 		provided("javax.servlet:javax.servlet-api:3.0.1")
 		optional("javax.servlet.jsp:javax.servlet.jsp-api:2.2.1")
 		optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
-		optional("javax.el:javax.el-api:2.2.5")
-		optional("org.apache.tiles:tiles-api:${tiles3Version}")
-		optional("org.apache.tiles:tiles-core:${tiles3Version}") {
+		optional("org.apache.tiles:tiles-api:${tiles2Version}")
+		optional("org.apache.tiles:tiles-core:${tiles2Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		optional("org.apache.tiles:tiles-servlet:${tiles3Version}") {
+		optional("org.apache.tiles:tiles-servlet:${tiles2Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		optional("org.apache.tiles:tiles-jsp:${tiles3Version}") {
+		optional("org.apache.tiles:tiles-jsp:${tiles2Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		optional("org.apache.tiles:tiles-el:${tiles3Version}") {
+		optional("org.apache.tiles:tiles-el:${tiles2Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		optional("org.apache.tiles:tiles-extras:${tiles3Version}") {
+		optional("org.apache.tiles:tiles-extras:${tiles2Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
+			exclude group: "org.apache.velocity", module: "velocity-tools"
 			exclude group: "org.springframework", module: "spring-web"
 		}
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
@@ -910,7 +910,7 @@ project("spring-test") {
 		optional("xmlunit:xmlunit:1.5")
 		testCompile(project(":spring-context-support"))
 		testCompile(project(":spring-oxm"))
-		testCompile(project(":spring-webmvc-tiles3"))
+		testCompile(project(":spring-webmvc-tiles2"))
 		testCompile("javax.mail:javax.mail-api:1.5.2")
 		testCompile("javax.ejb:ejb-api:3.0")
 		testCompile("org.hibernate:hibernate-core:${hibernate4Version}")

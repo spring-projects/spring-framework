@@ -22,7 +22,6 @@ import org.apache.tiles.preparer.factory.PreparerFactory;
 import org.apache.tiles.request.Request;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
-import org.springframework.web.servlet.view.tiles2.SpringBeanPreparerFactory;
 
 /**
  * Abstract implementation of the Tiles3 {@link org.apache.tiles.preparer.PreparerFactory}

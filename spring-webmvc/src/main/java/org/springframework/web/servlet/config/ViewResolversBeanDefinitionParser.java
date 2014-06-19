@@ -16,9 +16,9 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
-import org.springframework.web.servlet.view.tiles2.TilesConfigurer;
-import org.springframework.web.servlet.view.tiles2.TilesView;
-import org.springframework.web.servlet.view.tiles2.TilesViewResolver;
+import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
+import org.springframework.web.servlet.view.tiles3.TilesView;
+import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
 import org.w3c.dom.Element;
 
 
@@ -26,10 +26,10 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 	
 	private static final String INTERNAL_VIEW_RESOLVER_BEAN_NAME =
 			"org.springframework.web.servlet.view.InternalResourceViewResolver";
-	private static final String TILES2_VIEW_RESOLVER_BEAN_NAME =
-			"org.springframework.web.servlet.view.tiles2.TilesViewResolver";
-	private static final String TILES2_CONFIGURER_BEAN_NAME =
-			"org.springframework.web.servlet.view.tiles2.TilesConfigurer";
+	private static final String TILES3_VIEW_RESOLVER_BEAN_NAME =
+			"org.springframework.web.servlet.view.tiles3.TilesViewResolver";
+	private static final String TILES3_CONFIGURER_BEAN_NAME =
+			"org.springframework.web.servlet.view.tiles3.TilesConfigurer";
 	private static final String BEANNAME_VIEW_RESOLVER_BEAN_NAME =
 			"org.springframework.web.servlet.view.BeanNameViewResolver";
 	private static final String FREEMARKER_CONFIGURER_BEAN_NAME =
@@ -81,7 +81,7 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 
 	}
 	
-	private void registerBean(String beanName,Map<String,Object> propertyMap,Class beanClass ){
+	private void registerBean(String beanName,Map<String,Object> propertyMap,Class<?> beanClass ){
 		RootBeanDefinition beanDef = new RootBeanDefinition(beanClass);
 		beanDef.setSource(source);
 		beanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
@@ -125,20 +125,20 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	private void registerTilesConfigurerBean(ParserContext parserContext,Element viewResolverElement) {
-		if (!parserContext.getRegistry().containsBeanDefinition(TILES2_CONFIGURER_BEAN_NAME)) {			
+		if (!parserContext.getRegistry().containsBeanDefinition(TILES3_CONFIGURER_BEAN_NAME)) {
 			Map<String, Object> propertyMap= new HashMap<String, Object>();			
 			propertyMap.put("definitions", viewResolverElement.getAttribute("definitions"));
-			registerBean(TILES2_CONFIGURER_BEAN_NAME, propertyMap, TilesConfigurer.class);		
+			registerBean(TILES3_CONFIGURER_BEAN_NAME, propertyMap, TilesConfigurer.class);
 		}	
 	}
 	
 	private void registerTilesViewResolverBean(ParserContext parserContext, Element viewResolverElement) {
 		
-		if (!parserContext.getRegistry().containsBeanDefinition(TILES2_VIEW_RESOLVER_BEAN_NAME)) {
+		if (!parserContext.getRegistry().containsBeanDefinition(TILES3_VIEW_RESOLVER_BEAN_NAME)) {
 			Map<String, Object> propertyMap= new HashMap<String, Object>();			
 			propertyMap.put("viewClass", TilesView.class);
 			propertyMap.put("order", 1);
-			registerBean(TILES2_VIEW_RESOLVER_BEAN_NAME, propertyMap, TilesViewResolver.class);			
+			registerBean(TILES3_VIEW_RESOLVER_BEAN_NAME, propertyMap, TilesViewResolver.class);
 		}		
 	}
 	private void registerInternalResourceViewResolverBean(ParserContext parserContext, Element viewResolverElement) {
