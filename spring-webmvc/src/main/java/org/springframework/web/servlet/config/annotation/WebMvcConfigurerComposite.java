@@ -114,6 +114,13 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 	}
 
 	@Override
+	public void configureViewResolution(ViewResolutionRegistry registry) {
+		for (WebMvcConfigurer delegate : this.delegates) {
+			delegate.configureViewResolution(registry);
+		}
+	}
+
+	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
 		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.addResourceHandlers(registry);

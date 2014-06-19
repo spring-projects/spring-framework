@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,14 +34,7 @@ import org.springframework.test.web.servlet.samples.context.JavaConfigTests.Root
 import org.springframework.test.web.servlet.samples.context.JavaConfigTests.WebConfig;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-import org.springframework.web.servlet.view.UrlBasedViewResolver;
-import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
-import org.springframework.web.servlet.view.tiles3.TilesView;
+import org.springframework.web.servlet.config.annotation.*;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 
@@ -54,6 +47,7 @@ import static org.mockito.Mockito.*;
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Sebastien Deleuze
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration("src/test/resources/META-INF/web-resources")
@@ -130,19 +124,11 @@ public class JavaConfigTests {
 			configurer.enable();
 		}
 
-		@Bean
-		public UrlBasedViewResolver urlBasedViewResolver() {
-			UrlBasedViewResolver resolver = new UrlBasedViewResolver();
-			resolver.setViewClass(TilesView.class);
-			return resolver;
+		@Override
+		public void configureViewResolution(ViewResolutionRegistry registry) {
+			registry.tiles().definition("/WEB-INF/**/tiles.xml");
 		}
 
-		@Bean
-		public TilesConfigurer tilesConfigurer() {
-			TilesConfigurer configurer = new TilesConfigurer();
-			configurer.setDefinitions(new String[] {"/WEB-INF/**/tiles.xml"});
-			return configurer;
-		}
 	}
 
 }
