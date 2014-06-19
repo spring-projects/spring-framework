@@ -22,11 +22,11 @@ import javax.servlet.http.HttpServletRequest;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.core.Ordered;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -48,6 +48,8 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.method.support.CompositeUriComponentsContributor;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerExecutionChain;
+import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.ViewResolverComposite;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
@@ -69,6 +71,7 @@ import static org.junit.Assert.*;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  */
 public class WebMvcConfigurationSupportTests {
 
@@ -198,6 +201,14 @@ public class WebMvcConfigurationSupportTests {
 		List<Object> interceptors = (List<Object>) fieldAccessor.getPropertyValue("responseBodyAdvice");
 		assertEquals(1, interceptors.size());
 		assertEquals(JsonViewResponseBodyAdvice.class, interceptors.get(0).getClass());
+	}
+	
+	@Test
+	public void viewResolvers() throws Exception {
+		ViewResolverComposite compositeResolver = this.wac.getBean(ViewResolverComposite.class);
+		assertEquals(Ordered.LOWEST_PRECEDENCE, compositeResolver.getOrder());
+		List<ViewResolver> viewResolvers = compositeResolver.getViewResolvers();
+		assertEquals(0, viewResolvers.size());
 	}
 
 	@Test
