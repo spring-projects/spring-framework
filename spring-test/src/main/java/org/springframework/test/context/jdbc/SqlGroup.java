@@ -25,28 +25,26 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 
 /**
- * Container annotation that aggregates several {@link DatabaseInitializer}
- * annotations.
+ * Container annotation that aggregates several {@link Sql @Sql} annotations.
  *
- * <p>Can be used natively, declaring several nested {@link DatabaseInitializer}
- * annotations. Can also be used in conjunction with Java 8's support for
- * repeatable annotations, where {@code @DatabaseInitializer} can simply be
- * declared several times on the same class or method, implicitly generating
- * this container annotation.
+ * <p>Can be used natively, declaring several nested {@code @Sql} annotations.
+ * Can also be used in conjunction with Java 8's support for repeatable
+ * annotations, where {@code @Sql} can simply be declared several times on the
+ * same class or method, implicitly generating this container annotation.
  *
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
  * <em>composed annotations</em>.
  *
  * @author Sam Brannen
  * @since 4.1
- * @see DatabaseInitializer
+ * @see Sql
  */
 @Documented
 @Inherited
 @Retention(RUNTIME)
 @Target({ TYPE, METHOD })
-public @interface DatabaseInitializers {
+public @interface SqlGroup {
 
-	DatabaseInitializer[] value();
+	Sql[] value();
 
 }

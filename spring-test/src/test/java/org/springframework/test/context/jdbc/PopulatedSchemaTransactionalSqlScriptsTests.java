@@ -16,39 +16,36 @@
 
 package org.springframework.test.context.jdbc;
 
-import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.junit.runners.MethodSorters;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
+import org.springframework.test.context.transaction.AfterTransaction;
+import org.springframework.test.context.transaction.BeforeTransaction;
 
 import static org.junit.Assert.*;
 
 /**
- * Transactional integration tests for {@link DatabaseInitializer @DatabaseInitializer}
- * support.
+ * Transactional integration tests that verify rollback semantics for
+ * {@link Sql @Sql} support.
  *
  * @author Sam Brannen
  * @since 4.1
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@ContextConfiguration(classes = EmptyDatabaseConfig.class)
-@DatabaseInitializers(@DatabaseInitializer({ "schema.sql", "data.sql" }))
+@ContextConfiguration(classes = PopulatedSchemaDatabaseConfig.class)
 @DirtiesContext
-public class TransactionalDatabaseInitializerTests extends AbstractTransactionalJUnit4SpringContextTests {
+public class PopulatedSchemaTransactionalSqlScriptsTests extends AbstractTransactionalJUnit4SpringContextTests {
 
-	@Test
-	// test##_ prefix is required for @FixMethodOrder.
-	public void test01_classLevelScripts() {
-		assertNumUsers(1);
+	@BeforeTransaction
+	@AfterTransaction
+	public void verifyPreAndPostTransactionDatabaseState() {
+		assertNumUsers(0);
 	}
 
 	@Test
-	@DatabaseInitializers(@DatabaseInitializer({ "drop-schema.sql", "schema.sql", "data.sql", "data-add-dogbert.sql" }))
-	// test##_ prefix is required for @FixMethodOrder.
-	public void test02_methodLevelScripts() {
-		assertNumUsers(2);
+	@SqlGroup(@Sql("data-add-dogbert.sql"))
+	public void methodLevelScripts() {
+		assertNumUsers(1);
 	}
 
 	protected void assertNumUsers(int expected) {

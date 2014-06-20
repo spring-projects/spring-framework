@@ -20,36 +20,29 @@ import org.junit.Test;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
-import org.springframework.test.context.transaction.AfterTransaction;
-import org.springframework.test.context.transaction.BeforeTransaction;
 
 import static org.junit.Assert.*;
 
 /**
- * Transactional integration tests that verify commit semantics for
- * {@link DatabaseInitializer#requireNewTransaction}.
+ * Integration tests that verify support for default SQL script detection.
  *
  * @author Sam Brannen
  * @since 4.1
  */
-@ContextConfiguration(classes = PopulatedSchemaDatabaseConfig.class)
+@ContextConfiguration(classes = EmptyDatabaseConfig.class)
+@Sql
 @DirtiesContext
-public class RequiresNewTransactionDatabaseInitializerTests extends AbstractTransactionalJUnit4SpringContextTests {
+public class DefaultScriptDetectionSqlScriptsTests extends AbstractTransactionalJUnit4SpringContextTests {
 
-	@BeforeTransaction
-	public void beforeTransaction() {
-		assertNumUsers(0);
+	@Test
+	public void classLevel() {
+		assertNumUsers(2);
 	}
 
 	@Test
-	@DatabaseInitializers(@DatabaseInitializer(scripts = "data-add-dogbert.sql", requireNewTransaction = true))
-	public void methodLevelScripts() {
-		assertNumUsers(1);
-	}
-
-	@AfterTransaction
-	public void afterTransaction() {
-		assertNumUsers(1);
+	@Sql
+	public void methodLevel() {
+		assertNumUsers(3);
 	}
 
 	protected void assertNumUsers(int expected) {

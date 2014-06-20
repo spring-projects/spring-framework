@@ -28,7 +28,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.test.context.TestContext;
-import org.springframework.test.context.jdbc.DatabaseInitializer.ExecutionPhase;
+import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.context.transaction.TestContextTransactionUtils;
 import org.springframework.test.context.util.TestContextResourceUtils;
@@ -45,17 +45,20 @@ import org.springframework.util.ResourceUtils;
 
 /**
  * {@code TestExecutionListener} that provides support for executing SQL scripts
- * configured via the {@link DatabaseInitializer @DatabaseInitializer} annotation.
+ * configured via the {@link Sql @Sql} annotation.
  *
- * <p>SQL scripts will be executed {@linkplain #beforeTestMethod(TestContext) before}
+ * <p>Scripts will be executed {@linkplain #beforeTestMethod(TestContext) before}
  * or {@linkplain #afterTestMethod(TestContext) after} execution of the corresponding
  * {@linkplain java.lang.reflect.Method test method}, depending on the configured
- * value of the {@link DatabaseInitializer#requireNewTransaction requireNewTransaction}
- * flag.
+ * value of the {@link Sql#executionPhase executionPhase} flag.
+ *
+ * <p>Scripts will be executed either within an existing Spring-managed transaction
+ * or within a new, isolated transaction, depending on the configured value of the
+ * {@link Sql#requireNewTransaction requireNewTransaction} flag.
  *
  * <h3>Script Resources</h3>
  * <p>For details on default script detection and how explicit script locations
- * are interpreted, see {@link DatabaseInitializer#scripts}.
+ * are interpreted, see {@link Sql#scripts}.
  *
  * <h3>Required Spring Beans</h3>
  * <p>A {@link DataSource} and {@link PlatformTransactionManager} must be defined
@@ -66,106 +69,105 @@ import org.springframework.util.ResourceUtils;
  *
  * @author Sam Brannen
  * @since 4.1
- * @see DatabaseInitializer
- * @see DatabaseInitializers
+ * @see Sql
+ * @see SqlGroup
+ * @see org.springframework.test.context.transaction.TestContextTransactionUtils
  * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener
  * @see org.springframework.jdbc.datasource.init.ResourceDatabasePopulator
  * @see org.springframework.jdbc.datasource.init.ScriptUtils
  */
-public class DatabaseInitializerTestExecutionListener extends AbstractTestExecutionListener {
+public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListener {
 
-	private static final Log logger = LogFactory.getLog(DatabaseInitializerTestExecutionListener.class);
+	private static final Log logger = LogFactory.getLog(SqlScriptsTestExecutionListener.class);
 
 
 	/**
-	 * Execute SQL scripts configured via {@link DatabaseInitializer @DatabaseInitializer}
-	 * for the supplied {@link TestContext} <em>before</em> the current test method.
+	 * Execute SQL scripts configured via {@link Sql @Sql} for the supplied
+	 * {@link TestContext} <em>before</em> the current test method.
 	 */
 	@Override
 	public void beforeTestMethod(TestContext testContext) throws Exception {
-		executeDatabaseInitializers(testContext, ExecutionPhase.BEFORE_TEST_METHOD);
+		executeSqlScripts(testContext, ExecutionPhase.BEFORE_TEST_METHOD);
 	}
 
 	/**
-	 * Execute SQL scripts configured via {@link DatabaseInitializer @DatabaseInitializer}
-	 * for the supplied {@link TestContext} <em>after</em> the current test method.
+	 * Execute SQL scripts configured via {@link Sql @Sql} for the supplied
+	 * {@link TestContext} <em>after</em> the current test method.
 	 */
 	@Override
 	public void afterTestMethod(TestContext testContext) throws Exception {
-		executeDatabaseInitializers(testContext, ExecutionPhase.AFTER_TEST_METHOD);
+		executeSqlScripts(testContext, ExecutionPhase.AFTER_TEST_METHOD);
 	}
 
 	/**
-	 * Execute SQL scripts configured via {@link DatabaseInitializer @DatabaseInitializer}
-	 * for the supplied {@link TestContext} and {@link ExecutionPhase}.
+	 * Execute SQL scripts configured via {@link Sql @Sql} for the supplied
+	 * {@link TestContext} and {@link ExecutionPhase}.
 	 */
-	private void executeDatabaseInitializers(TestContext testContext, ExecutionPhase executionPhase) throws Exception {
+	private void executeSqlScripts(TestContext testContext, ExecutionPhase executionPhase) throws Exception {
 		boolean classLevel = false;
 
-		Set<DatabaseInitializer> databaseInitializers = AnnotationUtils.getRepeatableAnnotation(
-			testContext.getTestMethod(), DatabaseInitializers.class, DatabaseInitializer.class);
-		if (databaseInitializers.isEmpty()) {
-			databaseInitializers = AnnotationUtils.getRepeatableAnnotation(testContext.getTestClass(),
-				DatabaseInitializers.class, DatabaseInitializer.class);
-			if (!databaseInitializers.isEmpty()) {
+		Set<Sql> sqlAnnotations = AnnotationUtils.getRepeatableAnnotation(testContext.getTestMethod(), SqlGroup.class,
+			Sql.class);
+		if (sqlAnnotations.isEmpty()) {
+			sqlAnnotations = AnnotationUtils.getRepeatableAnnotation(testContext.getTestClass(), SqlGroup.class,
+				Sql.class);
+			if (!sqlAnnotations.isEmpty()) {
 				classLevel = true;
 			}
 		}
 
-		for (DatabaseInitializer databaseInitializer : databaseInitializers) {
-			executeDatabaseInitializer(databaseInitializer, executionPhase, testContext, classLevel);
+		for (Sql sql : sqlAnnotations) {
+			executeSqlScripts(sql, executionPhase, testContext, classLevel);
 		}
 	}
 
 	/**
-	 * Execute the SQL scripts configured via the supplied
-	 * {@link DatabaseInitializer @DatabaseInitializer} for the given
-	 * {@link ExecutionPhase} and {@link TestContext}.
+	 * Execute the SQL scripts configured via the supplied {@link Sql @Sql} 
+	 * annotation for the given {@link ExecutionPhase} and {@link TestContext}.
 	 *
 	 * <p>Special care must be taken in order to properly support the
-	 * {@link DatabaseInitializer#requireNewTransaction requireNewTransaction}
+	 * {@link Sql#requireNewTransaction requireNewTransaction}
 	 * flag.
 	 *
-	 * @param databaseInitializer the {@code @DatabaseInitializer} to parse
+	 * @param sql the {@code @Sql} annotation to parse
 	 * @param executionPhase the current execution phase
 	 * @param testContext the current {@code TestContext}
-	 * @param classLevel {@code true} if {@link DatabaseInitializer @DatabaseInitializer}
-	 * was declared at the class level
+	 * @param classLevel {@code true} if {@link Sql @Sql} was declared at the
+	 * class level
 	 */
 	@SuppressWarnings("serial")
-	private void executeDatabaseInitializer(DatabaseInitializer databaseInitializer, ExecutionPhase executionPhase,
-			TestContext testContext, boolean classLevel) throws Exception {
+	private void executeSqlScripts(Sql sql, ExecutionPhase executionPhase, TestContext testContext, boolean classLevel)
+			throws Exception {
 		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Processing %s for execution phase [%s] and test context %s.",
-				databaseInitializer, executionPhase, testContext));
+			logger.debug(String.format("Processing %s for execution phase [%s] and test context %s.", sql,
+				executionPhase, testContext));
 		}
 
-		if (executionPhase != databaseInitializer.executionPhase()) {
+		if (executionPhase != sql.executionPhase()) {
 			return;
 		}
 
 		final ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
-		populator.setSqlScriptEncoding(databaseInitializer.encoding());
-		populator.setSeparator(databaseInitializer.separator());
-		populator.setCommentPrefix(databaseInitializer.commentPrefix());
-		populator.setBlockCommentStartDelimiter(databaseInitializer.blockCommentStartDelimiter());
-		populator.setBlockCommentEndDelimiter(databaseInitializer.blockCommentEndDelimiter());
-		populator.setContinueOnError(databaseInitializer.continueOnError());
-		populator.setIgnoreFailedDrops(databaseInitializer.ignoreFailedDrops());
+		populator.setSqlScriptEncoding(sql.encoding());
+		populator.setSeparator(sql.separator());
+		populator.setCommentPrefix(sql.commentPrefix());
+		populator.setBlockCommentStartDelimiter(sql.blockCommentStartDelimiter());
+		populator.setBlockCommentEndDelimiter(sql.blockCommentEndDelimiter());
+		populator.setContinueOnError(sql.continueOnError());
+		populator.setIgnoreFailedDrops(sql.ignoreFailedDrops());
 
-		String[] scripts = getScripts(databaseInitializer, testContext, classLevel);
+		String[] scripts = getScripts(sql, testContext, classLevel);
 		scripts = TestContextResourceUtils.convertToClasspathResourcePaths(testContext.getTestClass(), scripts);
 		populator.setScripts(TestContextResourceUtils.convertToResources(testContext.getApplicationContext(), scripts));
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL scripts: " + ObjectUtils.nullSafeToString(scripts));
 		}
 
-		final DataSource dataSource = TestContextTransactionUtils.retrieveDataSource(testContext,
-			databaseInitializer.dataSource());
+		final DataSource dataSource = TestContextTransactionUtils.retrieveDataSource(testContext, sql.dataSource());
 		final PlatformTransactionManager transactionManager = TestContextTransactionUtils.retrieveTransactionManager(
-			testContext, databaseInitializer.transactionManager());
+			testContext, sql.transactionManager());
 
-		int propagation = databaseInitializer.requireNewTransaction() ? TransactionDefinition.PROPAGATION_REQUIRES_NEW
+		int propagation = sql.requireNewTransaction() ? TransactionDefinition.PROPAGATION_REQUIRES_NEW
 				: TransactionDefinition.PROPAGATION_REQUIRED;
 
 		TransactionAttribute transactionAttribute = TestContextTransactionUtils.createDelegatingTransactionAttribute(
@@ -180,9 +182,9 @@ public class DatabaseInitializerTestExecutionListener extends AbstractTestExecut
 		});
 	}
 
-	private String[] getScripts(DatabaseInitializer databaseInitializer, TestContext testContext, boolean classLevel) {
-		String[] scripts = databaseInitializer.scripts();
-		String[] value = databaseInitializer.value();
+	private String[] getScripts(Sql sql, TestContext testContext, boolean classLevel) {
+		String[] scripts = sql.scripts();
+		String[] value = sql.value();
 		boolean scriptsDeclared = !ObjectUtils.isEmpty(scripts);
 		boolean valueDeclared = !ObjectUtils.isEmpty(value);
 
@@ -190,9 +192,9 @@ public class DatabaseInitializerTestExecutionListener extends AbstractTestExecut
 			String elementType = (classLevel ? "class" : "method");
 			String elementName = (classLevel ? testContext.getTestClass().getName()
 					: testContext.getTestMethod().toString());
-			String msg = String.format("Test %s [%s] has been configured with @DatabaseInitializer's 'value' [%s] "
+			String msg = String.format("Test %s [%s] has been configured with @Sql's 'value' [%s] "
 					+ "and 'scripts' [%s] attributes. Only one declaration of SQL script "
-					+ "paths is permitted per @DatabaseInitializer annotation.", elementType, elementName,
+					+ "paths is permitted per @Sql annotation.", elementType, elementName,
 				ObjectUtils.nullSafeToString(value), ObjectUtils.nullSafeToString(scripts));
 			logger.error(msg);
 			throw new IllegalStateException(msg);
@@ -208,7 +210,7 @@ public class DatabaseInitializerTestExecutionListener extends AbstractTestExecut
 
 	/**
 	 * Detect a default SQL script by implementing the algorithm defined in
-	 * {@link DatabaseInitializer#scripts}.
+	 * {@link Sql#scripts}.
 	 */
 	private String detectDefaultScript(TestContext testContext, boolean classLevel) {
 		Class<?> clazz = testContext.getTestClass();
@@ -234,7 +236,7 @@ public class DatabaseInitializerTestExecutionListener extends AbstractTestExecut
 		}
 		else {
 			String msg = String.format("Could not detect default SQL script for test %s [%s]: "
-					+ "%s does not exist. Either declare scripts via @DatabaseInitializer or make the "
+					+ "%s does not exist. Either declare scripts via @Sql or make the "
 					+ "default SQL script available.", elementType, elementName, classPathResource);
 			logger.error(msg);
 			throw new IllegalStateException(msg);

@@ -26,25 +26,29 @@ import org.springframework.test.context.transaction.BeforeTransaction;
 import static org.junit.Assert.*;
 
 /**
- * Transactional integration tests that verify rollback semantics for
- * {@link DatabaseInitializer @DatabaseInitializer} support.
+ * Transactional integration tests that verify commit semantics for
+ * {@link Sql#requireNewTransaction}.
  *
  * @author Sam Brannen
  * @since 4.1
  */
 @ContextConfiguration(classes = PopulatedSchemaDatabaseConfig.class)
 @DirtiesContext
-public class PopulatedSchemaTransactionalDatabaseInitializerTests extends AbstractTransactionalJUnit4SpringContextTests {
+public class RequiresNewTransactionSqlScriptsTests extends AbstractTransactionalJUnit4SpringContextTests {
 
 	@BeforeTransaction
-	@AfterTransaction
-	public void verifyPreAndPostTransactionDatabaseState() {
+	public void beforeTransaction() {
 		assertNumUsers(0);
 	}
 
 	@Test
-	@DatabaseInitializers(@DatabaseInitializer("data-add-dogbert.sql"))
+	@SqlGroup(@Sql(scripts = "data-add-dogbert.sql", requireNewTransaction = true))
 	public void methodLevelScripts() {
+		assertNumUsers(1);
+	}
+
+	@AfterTransaction
+	public void afterTransaction() {
 		assertNumUsers(1);
 	}
 

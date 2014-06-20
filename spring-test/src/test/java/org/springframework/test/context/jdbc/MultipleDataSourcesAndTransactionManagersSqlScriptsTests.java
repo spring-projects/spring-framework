@@ -30,21 +30,21 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.Assert.*;
 
 /**
- * Exact copy of {@link MultipleDataSourcesAndTransactionManagersDatabaseInitializerTests},
- * except that the test methods are transactional.
+ * Integration tests for {@link Sql @Sql} that verify support for multiple
+ * {@link DataSource}s and {@link PlatformTransactionManager}s.
  *
  * @author Sam Brannen
  * @since 4.1
+ * @see MultipleDataSourcesAndTransactionManagersTransactionalSqlScriptsTests
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @DirtiesContext
-public class MultipleDataSourcesAndTransactionManagersTransactionalDatabaseInitializerTests {
+public class MultipleDataSourcesAndTransactionManagersSqlScriptsTests {
 
 	@Autowired
 	private DataSource dataSource1;
@@ -54,15 +54,13 @@ public class MultipleDataSourcesAndTransactionManagersTransactionalDatabaseIniti
 
 
 	@Test
-	@Transactional("txMgr1")
-	@DatabaseInitializer(scripts = "data-add-dogbert.sql", dataSource = "dataSource1", transactionManager = "txMgr1")
+	@Sql(scripts = "data-add-dogbert.sql", dataSource = "dataSource1", transactionManager = "txMgr1")
 	public void database1() {
 		assertUsersExist(new JdbcTemplate(dataSource1), "Dilbert", "Dogbert");
 	}
 
 	@Test
-	@Transactional("txMgr2")
-	@DatabaseInitializer(scripts = "data-add-catbert.sql", dataSource = "dataSource2", transactionManager = "txMgr2")
+	@Sql(scripts = "data-add-catbert.sql", dataSource = "dataSource2", transactionManager = "txMgr2")
 	public void database2() {
 		assertUsersExist(new JdbcTemplate(dataSource2), "Dilbert", "Catbert");
 	}

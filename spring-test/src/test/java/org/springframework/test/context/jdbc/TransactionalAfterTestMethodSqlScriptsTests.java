@@ -24,15 +24,16 @@ import org.junit.runners.MethodSorters;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.jdbc.DatabaseInitializer.ExecutionPhase;
+import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 import org.springframework.test.context.transaction.AfterTransaction;
 
 import static org.junit.Assert.*;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.*;
 
 /**
- * Transactional integration tests for {@link DatabaseInitializer @DatabaseInitializer}
- * that verify proper support for {@link ExecutionPhase#AFTER_TEST_METHOD}.
+ * Transactional integration tests for {@link Sql @Sql} that verify proper
+ * support for {@link ExecutionPhase#AFTER_TEST_METHOD}.
  *
  * @author Sam Brannen
  * @since 4.1
@@ -40,7 +41,7 @@ import static org.junit.Assert.*;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @ContextConfiguration(classes = EmptyDatabaseConfig.class)
 @DirtiesContext
-public class TransactionalAfterTestMethodDatabaseInitializerTests extends AbstractTransactionalJUnit4SpringContextTests {
+public class TransactionalAfterTestMethodSqlScriptsTests extends AbstractTransactionalJUnit4SpringContextTests {
 
 	@Rule
 	public TestName testName = new TestName();
@@ -60,9 +61,9 @@ public class TransactionalAfterTestMethodDatabaseInitializerTests extends Abstra
 	}
 
 	@Test
-	@DatabaseInitializers({//
-	@DatabaseInitializer({ "schema.sql", "data.sql" }),//
-		@DatabaseInitializer(scripts = "drop-schema.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD) //
+	@SqlGroup({//
+		@Sql({ "schema.sql", "data.sql" }),//
+		@Sql(scripts = "drop-schema.sql", executionPhase = AFTER_TEST_METHOD) //
 	})
 	// test## is required for @FixMethodOrder.
 	public void test01() {
@@ -70,7 +71,7 @@ public class TransactionalAfterTestMethodDatabaseInitializerTests extends Abstra
 	}
 
 	@Test
-	@DatabaseInitializers(@DatabaseInitializer({ "schema.sql", "data.sql", "data-add-dogbert.sql" }))
+	@Sql({ "schema.sql", "data.sql", "data-add-dogbert.sql" })
 	// test## is required for @FixMethodOrder.
 	public void test02() {
 		assertNumUsers(2);

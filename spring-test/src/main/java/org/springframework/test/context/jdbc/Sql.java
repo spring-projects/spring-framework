@@ -29,23 +29,24 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 
 /**
- * {@code @DatabaseInitializer} is used to annotate a test class or test method
- * to configure SQL scripts to be executed against a given database during
- * integration tests.
+ * {@code @Sql} is used to annotate a test class or test method to configure SQL
+ * scripts to be executed against a given database during integration tests.
  *
  * <p>Method-level declarations override class-level declarations.
  *
- * <p>Script execution is performed by the {@link DatabaseInitializerTestExecutionListener},
+ * <p>Script execution is performed by the {@link SqlScriptsTestExecutionListener},
  * which is enabled by default.
  *
- * <p>The configuration options provided by this annotation are a superset of
- * those provided by the {@code <jdbc:initialize-database />} XML namespace
- * element. Consult the Javadoc of individual attributes for details.
+ * <p>The configuration options provided by this annotation are equivalent to
+ * those supported by {@link ScriptUtils} and {@link org.springframework.jdbc.datasource.init.ResourceDatabasePopulator
+ * ResourceDatabasePopulator} but are a superset of those provided by the
+ * {@code <jdbc:initialize-database />} XML namespace element. Consult the
+ * Javadoc of individual attributes in this annotation for details.
  *
- * <p>Beginning with Java 8, {@code @DatabaseInitializer} can be used as a
+ * <p>Beginning with Java 8, {@code @Sql} can be used as a
  * <em>{@linkplain Repeatable repeatable}</em> annotation. Otherwise,
- * {@link DatabaseInitializers @DatabaseInitializers} can be used as an explicit
- * container for declaring multiple instances of {@code @DatabaseInitializer}.
+ * {@link SqlGroup @SqlGroup} can be used as an explicit container for declaring
+ * multiple instances of {@code @Sql}.
  *
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
  * <em>composed annotations</em>; however, attribute overrides are not currently
@@ -55,8 +56,8 @@ import static java.lang.annotation.RetentionPolicy.*;
  * @author Sam Brannen
  * @author Tadaya Tsuyukubo
  * @since 4.1
- * @see DatabaseInitializers
- * @see DatabaseInitializerTestExecutionListener
+ * @see SqlGroup
+ * @see SqlScriptsTestExecutionListener
  * @see org.springframework.transaction.annotation.Transactional
  * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener
  * @see org.springframework.jdbc.datasource.init.ResourceDatabasePopulator
@@ -66,8 +67,8 @@ import static java.lang.annotation.RetentionPolicy.*;
 @Inherited
 @Retention(RUNTIME)
 @Target({ TYPE, METHOD })
-@Repeatable(DatabaseInitializers.class)
-public @interface DatabaseInitializer {
+@Repeatable(SqlGroup.class)
+public @interface Sql {
 
 	/**
 	 * Enumeration of <em>phases</em> that dictate when SQL scripts are executed.

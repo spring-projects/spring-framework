@@ -25,7 +25,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.jdbc.DatabaseInitializerTestExecutionListener;
+import org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -55,7 +55,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.test.context.ContextConfiguration
  * @see org.springframework.test.context.TestExecutionListeners
  * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener
- * @see org.springframework.test.context.jdbc.DatabaseInitializerTestExecutionListener
+ * @see org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener
  * @see org.springframework.test.context.transaction.TransactionConfiguration
  * @see org.springframework.transaction.annotation.Transactional
  * @see org.springframework.test.annotation.Rollback
@@ -64,7 +64,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.test.jdbc.JdbcTestUtils
  * @see org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests
  */
-@TestExecutionListeners({ TransactionalTestExecutionListener.class, DatabaseInitializerTestExecutionListener.class })
+@TestExecutionListeners({ TransactionalTestExecutionListener.class, SqlScriptsTestExecutionListener.class })
 @Transactional
 public abstract class AbstractTransactionalTestNGSpringContextTests extends AbstractTestNGSpringContextTests {
 

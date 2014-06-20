@@ -16,7 +16,9 @@
 
 package org.springframework.test.context.jdbc;
 
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
@@ -24,25 +26,28 @@ import org.springframework.test.context.junit4.AbstractTransactionalJUnit4Spring
 import static org.junit.Assert.*;
 
 /**
- * Integration tests that verify support for default SQL script detection.
+ * Transactional integration tests for {@link Sql @Sql} support.
  *
  * @author Sam Brannen
  * @since 4.1
  */
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @ContextConfiguration(classes = EmptyDatabaseConfig.class)
-@DatabaseInitializer
+@Sql({ "schema.sql", "data.sql" })
 @DirtiesContext
-public class DefaultScriptDetectionDatabaseInitializerTests extends AbstractTransactionalJUnit4SpringContextTests {
+public class TransactionalSqlScriptsTests extends AbstractTransactionalJUnit4SpringContextTests {
 
 	@Test
-	public void classLevel() {
-		assertNumUsers(2);
+	// test##_ prefix is required for @FixMethodOrder.
+	public void test01_classLevelScripts() {
+		assertNumUsers(1);
 	}
 
 	@Test
-	@DatabaseInitializer
-	public void methodLevel() {
-		assertNumUsers(3);
+	@Sql({ "drop-schema.sql", "schema.sql", "data.sql", "data-add-dogbert.sql" })
+	// test##_ prefix is required for @FixMethodOrder.
+	public void test02_methodLevelScripts() {
+		assertNumUsers(2);
 	}
 
 	protected void assertNumUsers(int expected) {

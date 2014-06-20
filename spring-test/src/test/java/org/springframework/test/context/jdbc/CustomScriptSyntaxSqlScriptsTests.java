@@ -16,61 +16,41 @@
 
 package org.springframework.test.context.jdbc;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
 import org.junit.Test;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
 import static org.junit.Assert.*;
 
 /**
- * Integration tests that verify support for using
- * {@link DatabaseInitializer @DatabaseInitializer} and
- * {@link DatabaseInitializers @DatabaseInitializers} as a meta-annotations.
+ * Integration tests that verify support for custom SQL script syntax
+ * configured via {@link Sql @Sql}.
  *
  * @author Sam Brannen
  * @since 4.1
  */
 @ContextConfiguration(classes = EmptyDatabaseConfig.class)
 @DirtiesContext
-public class MetaAnnotationDatabaseInitializerTests extends AbstractTransactionalJUnit4SpringContextTests {
+public class CustomScriptSyntaxSqlScriptsTests extends AbstractTransactionalJUnit4SpringContextTests {
 
 	@Test
-	@MetaDbInitializer
-	public void metaDatabaseInitializer() {
-		assertNumUsers(1);
-	}
-
-	@Test
-	@MetaDbInitializers
-	public void metaDatabaseInitializers() {
-		assertNumUsers(1);
+	@SqlGroup({//
+	@Sql("schema.sql"),//
+		@Sql(//
+		scripts = "data-add-users-with-custom-script-syntax.sql",//
+		commentPrefix = "`",//
+		blockCommentStartDelimiter = "#$",//
+		blockCommentEndDelimiter = "$#",//
+		separator = "@@"//
+		) //
+	})
+	public void methodLevelScripts() {
+		assertNumUsers(3);
 	}
 
 	protected void assertNumUsers(int expected) {
 		assertEquals("Number of rows in the 'user' table.", expected, countRowsInTable("user"));
-	}
-
-
-	@DatabaseInitializer({ "drop-schema.sql", "schema.sql", "data.sql" })
-	@Retention(RUNTIME)
-	@Target(METHOD)
-	static @interface MetaDbInitializer {
-	}
-
-	@DatabaseInitializers({//
-	@DatabaseInitializer("drop-schema.sql"),//
-		@DatabaseInitializer("schema.sql"),//
-		@DatabaseInitializer("data.sql") //
-	})
-	@Retention(RUNTIME)
-	@Target(METHOD)
-	static @interface MetaDbInitializers {
 	}
 
 }

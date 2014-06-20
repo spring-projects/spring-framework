@@ -24,14 +24,14 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Unit tests for {@link DatabaseInitializerTestExecutionListener}.
+ * Unit tests for {@link SqlScriptsTestExecutionListener}.
  *
  * @author Sam Brannen
  * @since 4.1
  */
-public class DatabaseInitializerTestExecutionListenerTests {
+public class SqlScriptsTestExecutionListenerTests {
 
-	private final DatabaseInitializerTestExecutionListener listener = new DatabaseInitializerTestExecutionListener();
+	private final SqlScriptsTestExecutionListener listener = new SqlScriptsTestExecutionListener();
 
 	private final TestContext testContext = mock(TestContext.class);
 
@@ -76,7 +76,7 @@ public class DatabaseInitializerTestExecutionListenerTests {
 
 	// -------------------------------------------------------------------------
 
-	@DatabaseInitializer
+	@Sql
 	static class MissingValueAndScriptsAtClassLevel {
 
 		public void foo() {
@@ -85,14 +85,14 @@ public class DatabaseInitializerTestExecutionListenerTests {
 
 	static class MissingValueAndScriptsAtMethodLevel {
 
-		@DatabaseInitializer
+		@Sql
 		public void foo() {
 		}
 	}
 
 	static class ValueAndScriptsDeclared {
 
-		@DatabaseInitializer(value = "foo", scripts = "bar")
+		@Sql(value = "foo", scripts = "bar")
 		public void valueAndScriptsDeclared() {
 		}
 	}

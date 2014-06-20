@@ -32,9 +32,8 @@ import org.springframework.test.jdbc.JdbcTestUtils;
 import static org.junit.Assert.*;
 
 /**
- * Integration tests which verify that scripts executed via
- * {@link DatabaseInitializer @DatabaseInitializer} will persist between
- * non-transactional test methods.
+ * Integration tests which verify that scripts executed via {@link Sql @Sql}
+ * will persist between non-transactional test methods.
  *
  * @author Sam Brannen
  * @since 4.1
@@ -42,9 +41,9 @@ import static org.junit.Assert.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @ContextConfiguration(classes = EmptyDatabaseConfig.class)
-@DatabaseInitializer({ "schema.sql", "data.sql" })
+@Sql({ "schema.sql", "data.sql" })
 @DirtiesContext
-public class NonTransactionalDatabaseInitializerTests {
+public class NonTransactionalSqlScriptsTests {
 
 	protected JdbcTemplate jdbcTemplate;
 
@@ -61,7 +60,7 @@ public class NonTransactionalDatabaseInitializerTests {
 	}
 
 	@Test
-	@DatabaseInitializers(@DatabaseInitializer("data-add-dogbert.sql"))
+	@Sql("data-add-dogbert.sql")
 	// test##_ prefix is required for @FixMethodOrder.
 	public void test02_methodLevelScripts() {
 		assertNumUsers(2);
