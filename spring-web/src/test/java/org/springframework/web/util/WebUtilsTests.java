@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,24 @@
 
 package org.springframework.web.util;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import org.junit.Test;
+import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.MultiValueMap;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public class WebUtilsTests {
 
@@ -95,6 +100,27 @@ public class WebUtilsTests {
 		variables = WebUtils.parseMatrixVariables("colors=red;colors=blue;colors=green");
 		assertEquals(1, variables.size());
 		assertEquals(Arrays.asList("red", "blue", "green"), variables.get("colors"));
+	}
+
+	@Test
+	public void sendError() throws IOException {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		HttpMessageNotWritableException ex = new HttpMessageNotWritableException("test message");
+		WebUtils.sendError(request, response, 500, ex);
+		assertNotNull(request.getAttribute(WebUtils.EXCEPTION_ATTRIBUTE));
+		assertEquals(HttpMessageNotWritableException.class, request.getAttribute(WebUtils.EXCEPTION_ATTRIBUTE).getClass());
+	}
+
+	@Test
+	public void sendErrorWithMessage() throws IOException {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		HttpMessageNotWritableException ex = new HttpMessageNotWritableException("test message");
+		WebUtils.sendError(request, response, 500, ex, "test message");
+		assertNotNull(request.getAttribute(WebUtils.EXCEPTION_ATTRIBUTE));
+		assertEquals(HttpMessageNotWritableException.class, request.getAttribute(WebUtils.EXCEPTION_ATTRIBUTE).getClass());
+		assertTrue(response.getErrorMessage().contains("test message"));
 	}
 
 }

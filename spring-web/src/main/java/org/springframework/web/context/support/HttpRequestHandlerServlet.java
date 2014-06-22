@@ -28,6 +28,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Simple HttpServlet that delegates to an {@link HttpRequestHandler} bean defined
@@ -72,7 +73,7 @@ public class HttpRequestHandlerServlet extends HttpServlet {
 			if (supportedMethods != null) {
 				response.setHeader("Allow", StringUtils.arrayToDelimitedString(supportedMethods, ", "));
 			}
-			response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, ex.getMessage());
+			WebUtils.sendError(request, response, HttpServletResponse.SC_METHOD_NOT_ALLOWED, ex, ex.getMessage());
 		}
 		finally {
 			LocaleContextHolder.resetLocaleContext();

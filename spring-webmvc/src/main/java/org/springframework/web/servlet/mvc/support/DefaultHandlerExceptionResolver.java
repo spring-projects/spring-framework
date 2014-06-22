@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Default implementation of the {@link org.springframework.web.servlet.HandlerExceptionResolver
@@ -59,6 +60,7 @@ import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMeth
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 3.0
  *
  * @see org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
@@ -175,7 +177,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
 
 		pageNotFoundLogger.warn(ex.getMessage());
-		response.sendError(HttpServletResponse.SC_NOT_FOUND);
+		WebUtils.sendError(request, response, HttpServletResponse.SC_NOT_FOUND, ex);
 		return new ModelAndView();
 	}
 
@@ -200,7 +202,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 		if (supportedMethods != null) {
 			response.setHeader("Allow", StringUtils.arrayToDelimitedString(supportedMethods, ", "));
 		}
-		response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, ex.getMessage());
+		WebUtils.sendError(request, response, HttpServletResponse.SC_METHOD_NOT_ALLOWED, ex, ex.getMessage());
 		return new ModelAndView();
 	}
 
@@ -219,7 +221,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	protected ModelAndView handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex,
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
 
-		response.sendError(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
+		WebUtils.sendError(request, response, HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE, ex);
 		List<MediaType> mediaTypes = ex.getSupportedMediaTypes();
 		if (!CollectionUtils.isEmpty(mediaTypes)) {
 			response.setHeader("Accept", MediaType.toString(mediaTypes));
@@ -243,7 +245,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	protected ModelAndView handleHttpMediaTypeNotAcceptable(HttpMediaTypeNotAcceptableException ex,
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
 
-		response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE);
+		WebUtils.sendError(request, response, HttpServletResponse.SC_NOT_ACCEPTABLE, ex);
 		return new ModelAndView();
 	}
 
@@ -262,7 +264,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	protected ModelAndView handleMissingServletRequestParameter(MissingServletRequestParameterException ex,
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
 
-		response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
+		WebUtils.sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, ex, ex.getMessage());
 		return new ModelAndView();
 	}
 
@@ -280,7 +282,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	protected ModelAndView handleServletRequestBindingException(ServletRequestBindingException ex,
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
 
-		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+		WebUtils.sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, ex);
 		return new ModelAndView();
 	}
 
@@ -310,7 +312,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 		request.setAttribute("javax.servlet.error.exception", ex);
-		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		WebUtils.sendError(request, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex);
 	}
 
 	/**
@@ -327,7 +329,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	protected ModelAndView handleTypeMismatch(TypeMismatchException ex,
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
 
-		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+		WebUtils.sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, ex);
 		return new ModelAndView();
 	}
 
@@ -347,7 +349,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	protected ModelAndView handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
 
-		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+		WebUtils.sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, ex);
 		return new ModelAndView();
 	}
 
@@ -383,7 +385,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 */
 	protected ModelAndView handleMethodArgumentNotValidException(MethodArgumentNotValidException ex,
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
- 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+
+		WebUtils.sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, ex);
 		return new ModelAndView();
 	}
 
@@ -399,7 +402,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 */
 	protected ModelAndView handleMissingServletRequestPartException(MissingServletRequestPartException ex,
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
-		response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
+
+		WebUtils.sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, ex, ex.getMessage());
 		return new ModelAndView();
 	}
 
@@ -416,7 +420,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 */
 	protected ModelAndView handleBindException(BindException ex, HttpServletRequest request,
 			HttpServletResponse response, Object handler) throws IOException {
-		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+		WebUtils.sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, ex);
 		return new ModelAndView();
 	}
 
@@ -436,7 +440,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 */
 	protected ModelAndView handleNoHandlerFoundException(NoHandlerFoundException ex, HttpServletRequest request,
 	                                           HttpServletResponse response, Object handler) throws IOException {
-		response.sendError(HttpServletResponse.SC_NOT_FOUND);
+
+		WebUtils.sendError(request, response, HttpServletResponse.SC_NOT_FOUND, ex);
 		return new ModelAndView();
 	}
 
