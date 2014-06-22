@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package org.springframework.test.context.junit4;
 
-import static org.junit.Assert.assertEquals;
-import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
-
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 
@@ -27,13 +24,16 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.transaction.annotation.Transactional;
+
+import static org.junit.Assert.*;
+import static org.springframework.test.transaction.TransactionTestUtils.*;
 
 /**
  * JUnit 4 based integration test which verifies
@@ -43,13 +43,12 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Sam Brannen
  * @since 2.5
  */
-@SuppressWarnings("deprecation")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
-@TestExecutionListeners({ TransactionalTestExecutionListener.class })
+@TestExecutionListeners(TransactionalTestExecutionListener.class)
 public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactionalSpringRunnerTests {
 
-	protected static SimpleJdbcTemplate simpleJdbcTemplate;
+	protected static JdbcTemplate jdbcTemplate;
 
 	protected static int numBeforeTransactionCalls = 0;
 	protected static int numAfterTransactionCalls = 0;
@@ -66,7 +65,7 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 	@AfterClass
 	public static void afterClass() {
 		assertEquals("Verifying the final number of rows in the person table after all tests.", 3,
-			countRowsInPersonTable(simpleJdbcTemplate));
+			countRowsInPersonTable(jdbcTemplate));
 		assertEquals("Verifying the total number of calls to beforeTransaction().", 2,
 			BeforeAndAfterTransactionAnnotationTests.numBeforeTransactionCalls);
 		assertEquals("Verifying the total number of calls to afterTransaction().", 2,
@@ -78,8 +77,8 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 		assertInTransaction(false);
 		this.inTransaction = true;
 		BeforeAndAfterTransactionAnnotationTests.numBeforeTransactionCalls++;
-		clearPersonTable(simpleJdbcTemplate);
-		assertEquals("Adding yoda", 1, addPerson(simpleJdbcTemplate, YODA));
+		clearPersonTable(jdbcTemplate);
+		assertEquals("Adding yoda", 1, addPerson(jdbcTemplate, YODA));
 	}
 
 	@AfterTransaction
@@ -87,44 +86,44 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 		assertInTransaction(false);
 		this.inTransaction = false;
 		BeforeAndAfterTransactionAnnotationTests.numAfterTransactionCalls++;
-		assertEquals("Deleting yoda", 1, deletePerson(simpleJdbcTemplate, YODA));
+		assertEquals("Deleting yoda", 1, deletePerson(jdbcTemplate, YODA));
 		assertEquals("Verifying the number of rows in the person table after a transactional test method.", 0,
-			countRowsInPersonTable(simpleJdbcTemplate));
+			countRowsInPersonTable(jdbcTemplate));
 	}
 
 	@Before
 	public void before() {
 		assertEquals("Verifying the number of rows in the person table before a test method.", (this.inTransaction ? 1
-				: 0), countRowsInPersonTable(simpleJdbcTemplate));
+				: 0), countRowsInPersonTable(jdbcTemplate));
 	}
 
 	@Test
 	@Transactional
 	public void transactionalMethod1() {
 		assertInTransaction(true);
-		assertEquals("Adding jane", 1, addPerson(simpleJdbcTemplate, JANE));
+		assertEquals("Adding jane", 1, addPerson(jdbcTemplate, JANE));
 		assertEquals("Verifying the number of rows in the person table within transactionalMethod1().", 2,
-			countRowsInPersonTable(simpleJdbcTemplate));
+			countRowsInPersonTable(jdbcTemplate));
 	}
 
 	@Test
 	@Transactional
 	public void transactionalMethod2() {
 		assertInTransaction(true);
-		assertEquals("Adding jane", 1, addPerson(simpleJdbcTemplate, JANE));
-		assertEquals("Adding sue", 1, addPerson(simpleJdbcTemplate, SUE));
+		assertEquals("Adding jane", 1, addPerson(jdbcTemplate, JANE));
+		assertEquals("Adding sue", 1, addPerson(jdbcTemplate, SUE));
 		assertEquals("Verifying the number of rows in the person table within transactionalMethod2().", 3,
-			countRowsInPersonTable(simpleJdbcTemplate));
+			countRowsInPersonTable(jdbcTemplate));
 	}
 
 	@Test
 	public void nonTransactionalMethod() {
 		assertInTransaction(false);
-		assertEquals("Adding luke", 1, addPerson(simpleJdbcTemplate, LUKE));
-		assertEquals("Adding leia", 1, addPerson(simpleJdbcTemplate, LEIA));
-		assertEquals("Adding yoda", 1, addPerson(simpleJdbcTemplate, YODA));
+		assertEquals("Adding luke", 1, addPerson(jdbcTemplate, LUKE));
+		assertEquals("Adding leia", 1, addPerson(jdbcTemplate, LEIA));
+		assertEquals("Adding yoda", 1, addPerson(jdbcTemplate, YODA));
 		assertEquals("Verifying the number of rows in the person table without a transaction.", 3,
-			countRowsInPersonTable(simpleJdbcTemplate));
+			countRowsInPersonTable(jdbcTemplate));
 	}
 
 
@@ -132,8 +131,8 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 
 		@Resource
 		void setDataSource(DataSource dataSource) {
-			simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
-			createPersonTable(simpleJdbcTemplate);
+			jdbcTemplate = new JdbcTemplate(dataSource);
+			createPersonTable(jdbcTemplate);
 		}
 	}
 

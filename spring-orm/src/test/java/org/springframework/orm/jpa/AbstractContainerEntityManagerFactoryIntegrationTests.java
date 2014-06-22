@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.orm.jpa;
 
 import java.lang.reflect.Proxy;
 import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.FlushModeType;
@@ -144,7 +145,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 
 	protected final void insertPerson(String firstName) {
 		String INSERT_PERSON = "INSERT INTO PERSON (ID, FIRST_NAME, LAST_NAME) VALUES (?, ?, ?)";
-		simpleJdbcTemplate.update(INSERT_PERSON, 1, firstName, "Blair");
+		jdbcTemplate.update(INSERT_PERSON, 1, firstName, "Blair");
 	}
 
 	public void testEntityManagerProxyRejectsProgrammaticTxManagement() {

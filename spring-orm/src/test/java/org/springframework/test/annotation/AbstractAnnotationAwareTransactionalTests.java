@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Map;
 
-import javax.sql.DataSource;
-
 import junit.framework.AssertionFailedError;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.AbstractTransactionalDataSourceSpringContextTests;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
@@ -35,8 +32,8 @@ import org.springframework.util.Assert;
 /**
  * <p>
  * Java 5 specific subclass of
- * {@link AbstractTransactionalDataSourceSpringContextTests}, exposing a
- * {@link SimpleJdbcTemplate} and obeying annotations for transaction control.
+ * {@link AbstractTransactionalDataSourceSpringContextTests}, obeying annotations
+ * for transaction control.
  * </p>
  * <p>
  * For example, test methods can be annotated with the regular Spring
@@ -74,8 +71,6 @@ import org.springframework.util.Assert;
 public abstract class AbstractAnnotationAwareTransactionalTests extends
 		AbstractTransactionalDataSourceSpringContextTests {
 
-	protected SimpleJdbcTemplate simpleJdbcTemplate;
-
 	private final TransactionAttributeSource transactionAttributeSource = new AnnotationTransactionAttributeSource();
 
 	/**
@@ -108,13 +103,6 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 		this.profileValueSource = ProfileValueUtils.retrieveProfileValueSource(getClass());
 	}
 
-
-	@Override
-	public void setDataSource(DataSource dataSource) {
-		super.setDataSource(dataSource);
-		// JdbcTemplate will be identically configured
-		this.simpleJdbcTemplate = new SimpleJdbcTemplate(this.jdbcTemplate);
-	}
 
 	/**
 	 * Search for a unique {@link ProfileValueSource} in the supplied

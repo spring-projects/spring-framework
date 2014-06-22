@@ -26,6 +26,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
+@SuppressWarnings("deprecation")
 public abstract class AbstractEntityManagerFactoryIntegrationTests extends AbstractJpaTests {
 
 	public static final String[] ECLIPSELINK_CONFIG_LOCATIONS = new String[] {

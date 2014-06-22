@@ -35,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Rod Johnson
  * @since 2.0
  */
+@SuppressWarnings("deprecation")
 public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEntityManagerFactoryIntegrationTests {
 
 	@NotTransactional
