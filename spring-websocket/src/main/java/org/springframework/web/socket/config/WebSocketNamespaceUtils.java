@@ -31,6 +31,11 @@ import org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsSe
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+
 /**
  * Provides utility methods for parsing common WebSocket XML namespace elements.
  *
@@ -135,7 +140,7 @@ class WebSocketNamespaceUtils {
 			ParserContext parserContext, Object source) {
 
 		if (!parserContext.getRegistry().containsBeanDefinition(schedulerName)) {
-			RootBeanDefinition taskSchedulerDef = new RootBeanDefinition(ThreadPoolTaskScheduler.class);
+			RootBeanDefinition taskSchedulerDef = new RootBeanDefinition(SockJsThreadPoolTaskScheduler.class);
 			taskSchedulerDef.setSource(source);
 			taskSchedulerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			taskSchedulerDef.getPropertyValues().add("poolSize", Runtime.getRuntime().availableProcessors());
@@ -159,6 +164,18 @@ class WebSocketNamespaceUtils {
 		}
 
 		return beans;
+	}
+
+
+	@SuppressWarnings("serial")
+	private static class SockJsThreadPoolTaskScheduler extends ThreadPoolTaskScheduler {
+
+		@Override
+		protected ExecutorService initializeExecutor(ThreadFactory factory, RejectedExecutionHandler handler) {
+			ExecutorService service = super.initializeExecutor(factory, handler);
+			((ScheduledThreadPoolExecutor) service).setRemoveOnCancelPolicy(true);
+			return service;
+		}
 	}
 
 }

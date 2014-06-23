@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -128,8 +129,9 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		ThreadPoolTaskScheduler taskScheduler =
 				this.config.getBean("messageBrokerSockJsTaskScheduler", ThreadPoolTaskScheduler.class);
 
-		assertEquals(Runtime.getRuntime().availableProcessors(),
-				taskScheduler.getScheduledThreadPoolExecutor().getCorePoolSize());
+		ScheduledThreadPoolExecutor executor = taskScheduler.getScheduledThreadPoolExecutor();
+		assertEquals(Runtime.getRuntime().availableProcessors(), executor.getCorePoolSize());
+		assertTrue(executor.getRemoveOnCancelPolicy());
 	}
 
 
