@@ -28,6 +28,8 @@ import org.junit.Test;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.session.WebSocketServerSockJsSessionTests.TestWebSocketServerSockJsSession;
 import org.springframework.web.socket.handler.TestWebSocketSession;
@@ -72,15 +74,25 @@ public class WebSocketServerSockJsSessionTests extends AbstractSockJsSessionTest
 
 	@Test
 	public void afterSessionInitialized() throws Exception {
-
 		this.session.initializeDelegateSession(this.webSocketSession);
-
-		assertEquals("Open frame not sent",
-				Collections.singletonList(new TextMessage("o")), this.webSocketSession.getSentMessages());
-
+		assertEquals(Collections.singletonList(new TextMessage("o")), this.webSocketSession.getSentMessages());
 		assertEquals(Arrays.asList("schedule"), this.session.heartbeatSchedulingEvents);
 		verify(this.webSocketHandler).afterConnectionEstablished(this.session);
 		verifyNoMoreInteractions(this.taskScheduler, this.webSocketHandler);
+	}
+
+	@Test
+	public void afterSessionInitializedOpenFrameFirst() throws Exception {
+		TextWebSocketHandler handler = new TextWebSocketHandler() {
+			@Override
+			public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+				session.sendMessage(new TextMessage("go go"));
+			}
+		};
+		TestWebSocketServerSockJsSession session = new TestWebSocketServerSockJsSession(this.sockJsConfig, handler, null);
+		session.initializeDelegateSession(this.webSocketSession);
+		List<TextMessage> expected = Arrays.asList(new TextMessage("o"), new TextMessage("a[\"go go\"]"));
+		assertEquals(expected, this.webSocketSession.getSentMessages());
 	}
 
 	@Test

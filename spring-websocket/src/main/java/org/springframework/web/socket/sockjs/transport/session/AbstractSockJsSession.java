@@ -39,6 +39,7 @@ import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.sockjs.SockJsMessageDeliveryException;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
+import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.SockJsSession;
 
@@ -136,6 +137,10 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	@Override
 	public String getId() {
 		return this.id;
+	}
+
+	protected SockJsMessageCodec getMessageCodec() {
+		return this.config.getMessageCodec();
 	}
 
 	public SockJsServiceConfig getSockJsServiceConfig() {
@@ -416,7 +421,9 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 	@Override
 	public String toString() {
-		return "SockJS session id=" + this.id;
+		long currentTime = System.currentTimeMillis();
+		return "SockJsSession[id=" + this.id + ", state=" + this.state + ", sinceCreated=" +
+				(currentTime - this.timeCreated) + ", sinceLastActive=" + (currentTime - this.timeLastActive) + "]";
 	}
 
 

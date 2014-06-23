@@ -16,6 +16,8 @@
 
 package org.springframework.web.socket.sockjs.transport.session;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
@@ -34,6 +36,7 @@ import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
  */
 public class PollingSockJsSession extends AbstractHttpSockJsSession {
 
+
 	public PollingSockJsSession(String sessionId, SockJsServiceConfig config,
 			WebSocketHandler wsHandler, Map<String, Object> attributes) {
 
@@ -42,21 +45,19 @@ public class PollingSockJsSession extends AbstractHttpSockJsSession {
 
 
 	@Override
-	protected void flushCache() throws SockJsTransportFailureException {
-		cancelHeartbeat();
-		Queue<String> messageCache = getMessageCache();
-		String[] messages = messageCache.toArray(new String[messageCache.size()]);
-		messageCache.clear();
-
-		SockJsMessageCodec messageCodec = getSockJsServiceConfig().getMessageCodec();
-		SockJsFrame frame = SockJsFrame.messageFrame(messageCodec, messages);
-		writeFrame(frame);
+	protected boolean isStreaming() {
+		return false;
 	}
 
 	@Override
-	protected void writeFrame(SockJsFrame frame) throws SockJsTransportFailureException {
-		super.writeFrame(frame);
-		resetRequest();
+	protected void flushCache() throws SockJsTransportFailureException {
+		String[] messages = new String[getMessageCache().size()];
+		for (int i = 0; i < messages.length; i++) {
+			messages[i] = getMessageCache().poll();
+		}
+		SockJsMessageCodec messageCodec = getSockJsServiceConfig().getMessageCodec();
+		SockJsFrame frame = SockJsFrame.messageFrame(messageCodec, messages);
+		writeFrame(frame);
 	}
 
 }
