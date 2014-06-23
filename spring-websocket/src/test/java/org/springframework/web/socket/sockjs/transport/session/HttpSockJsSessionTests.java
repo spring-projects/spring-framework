@@ -94,10 +94,8 @@ public class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstr
 		this.session.handleSuccessiveRequest(this.request, this.response, this.frameFormat);
 
 		assertTrue(this.servletRequest.isAsyncStarted());
-
 		assertTrue(this.session.wasHeartbeatScheduled());
 		assertTrue(this.session.wasCacheFlushed());
-
 		assertEquals("hhh\n", this.servletResponse.getContentAsString());
 
 		verifyNoMoreInteractions(this.webSocketHandler);
@@ -120,6 +118,11 @@ public class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstr
 		}
 
 		@Override
+		protected boolean isStreaming() {
+			return false;
+		}
+
+		@Override
 		protected void writePrelude(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
 			response.getBody().write("hhh\n".getBytes());
 		}
@@ -139,6 +142,7 @@ public class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstr
 		@Override
 		protected void flushCache() {
 			this.cacheFlushed = true;
+			scheduleHeartbeat();
 		}
 
 		@Override

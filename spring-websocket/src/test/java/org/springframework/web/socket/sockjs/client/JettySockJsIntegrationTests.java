@@ -27,9 +27,6 @@ import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * SockJS integration tests using Jetty for client and server.
  *
