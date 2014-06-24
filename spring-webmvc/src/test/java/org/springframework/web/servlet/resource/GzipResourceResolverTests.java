@@ -19,7 +19,9 @@ package org.springframework.web.servlet.resource;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
 import org.junit.Before;
@@ -68,9 +70,14 @@ public class GzipResourceResolverTests {
 
 	@Before
 	public void setUp() {
+		Map<String, VersionStrategy> versionStrategyMap = new HashMap<>();
+		versionStrategyMap.put("/**", new ContentBasedVersionStrategy());
+		VersionResourceResolver versionResolver = new VersionResourceResolver();
+		versionResolver.setVersionStrategyMap(versionStrategyMap);
+
 		List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
 		resolvers.add(new GzipResourceResolver());
-		resolvers.add(new FingerprintResourceResolver());
+		resolvers.add(versionResolver);
 		resolvers.add(new PathResourceResolver());
 		resolver = new DefaultResourceResolverChain(resolvers);
 		locations = new ArrayList<Resource>();

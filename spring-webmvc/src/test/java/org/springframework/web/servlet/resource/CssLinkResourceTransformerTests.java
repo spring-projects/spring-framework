@@ -18,7 +18,9 @@ package org.springframework.web.servlet.resource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,8 +49,13 @@ public class CssLinkResourceTransformerTests {
 
 	@Before
 	public void setUp() {
+		Map<String, VersionStrategy> versionStrategyMap = new HashMap<>();
+		versionStrategyMap.put("/**", new ContentBasedVersionStrategy());
+		VersionResourceResolver versionResolver = new VersionResourceResolver();
+		versionResolver.setVersionStrategyMap(versionStrategyMap);
+
 		List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
-		resolvers.add(new FingerprintResourceResolver());
+		resolvers.add(versionResolver);
 		resolvers.add(new PathResourceResolver());
 		ResourceResolverChain resolverChain = new DefaultResourceResolverChain(resolvers);
 
