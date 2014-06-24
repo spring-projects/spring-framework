@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,18 +25,16 @@ import org.junit.runners.model.Statement;
 import org.springframework.test.context.TestContextManager;
 
 /**
- * {@code RunAfterTestMethodCallbacks} is a custom JUnit 4.5+
- * {@link Statement} which allows the <em>Spring TestContext Framework</em> to
- * be plugged into the JUnit execution chain by calling
- * {@link TestContextManager#afterTestMethod(Object, Method, Throwable) afterTestMethod()}
- * on the supplied {@link TestContextManager}.
+ * {@code RunAfterTestMethodCallbacks} is a custom JUnit {@link Statement} which allows
+ * the <em>Spring TestContext Framework</em> to be plugged into the JUnit execution chain
+ * by calling {@link TestContextManager#afterTestMethod(Object, Method, Throwable)
+ * afterTestMethod()} on the supplied {@link TestContextManager}.
  *
  * @see #evaluate()
  * @see RunBeforeTestMethodCallbacks
  * @author Sam Brannen
  * @since 3.0
  */
-@SuppressWarnings("deprecation")
 public class RunAfterTestMethodCallbacks extends Statement {
 
 	private final Statement next;
@@ -67,13 +65,13 @@ public class RunAfterTestMethodCallbacks extends Statement {
 	}
 
 	/**
-	 * Invokes the next {@link Statement} in the execution chain (typically an
-	 * instance of {@link org.junit.internal.runners.statements.RunAfters
-	 * RunAfters}), catching any exceptions thrown, and then calls
-	 * {@link TestContextManager#afterTestMethod(Object, Method, Throwable)} with the first
-	 * caught exception (if any). If the call to {@code afterTestMethod()}
-	 * throws an exception, it will also be tracked. Multiple exceptions will be
-	 * combined into a {@link MultipleFailureException}.
+	 * Invokes the next {@link Statement} in the execution chain (typically an instance of
+	 * {@link org.junit.internal.runners.statements.RunAfters RunAfters}), catching any
+	 * exceptions thrown, and then calls
+	 * {@link TestContextManager#afterTestMethod(Object, Method, Throwable)} with the
+	 * first caught exception (if any). If the call to {@code afterTestMethod()} throws an
+	 * exception, it will also be tracked. Multiple exceptions will be combined into a
+	 * {@link MultipleFailureException}.
 	 */
 	@Override
 	public void evaluate() throws Throwable {
@@ -100,6 +98,7 @@ public class RunAfterTestMethodCallbacks extends Statement {
 		if (errors.size() == 1) {
 			throw errors.get(0);
 		}
-		throw new org.junit.internal.runners.model.MultipleFailureException(errors);
+		throw new MultipleFailureException(errors);
 	}
+
 }

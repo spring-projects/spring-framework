@@ -2,7 +2,7 @@
  * <p>This package contains the <em>Spring TestContext Framework</em> which
  * provides annotation-driven unit and integration testing support that is
  * agnostic of the actual testing framework in use. The same techniques and
- * annotation-based configuration used in, for example, a JUnit 4.5+ environment
+ * annotation-based configuration used in, for example, a JUnit environment
  * can also be applied to tests written with TestNG, etc.
  *
  * <p>In addition to providing generic and extensible testing infrastructure,

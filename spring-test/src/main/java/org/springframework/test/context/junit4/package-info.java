@@ -1,6 +1,6 @@
 /**
- * <p>Support classes for ApplicationContext-based and transactional
- * tests run with JUnit 4.5+ and the <em>Spring TestContext Framework</em>.</p>
+ * <p>Support classes for integrating the <em>Spring TestContext Framework</em>
+ * with JUnit.</p>
  */
 
 package org.springframework.test.context.junit4;

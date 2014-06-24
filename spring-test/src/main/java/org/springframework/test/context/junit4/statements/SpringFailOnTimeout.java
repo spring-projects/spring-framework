@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,10 @@ import org.junit.runners.model.Statement;
 import org.springframework.test.annotation.Timed;
 
 /**
- * {@code SpringFailOnTimeout} is a custom JUnit 4.5+ {@link Statement}
- * which adds support for Spring's {@link Timed @Timed} annotation by throwing
- * an exception if the next statement in the execution chain takes more than the
- * specified number of milliseconds.
+ * {@code SpringFailOnTimeout} is a custom JUnit {@link Statement} which adds
+ * support for Spring's {@link Timed @Timed} annotation by throwing an exception
+ * if the next statement in the execution chain takes more than the specified
+ * number of milliseconds.
  *
  * @see #evaluate()
  * @author Sam Brannen
@@ -55,9 +55,8 @@ public class SpringFailOnTimeout extends Statement {
 	 * (typically an instance of
 	 * {@link org.junit.internal.runners.statements.InvokeMethod InvokeMethod}
 	 * or {@link org.junit.internal.runners.statements.ExpectException
-	 * ExpectException}) and throws an exception if the next
-	 * {@code statement} takes more than the specified {@code timeout}
-	 * .
+	 * ExpectException}) and throws an exception if the next {@code statement}
+	 * takes more than the specified {@code timeout}.
 	 */
 	@Override
 	public void evaluate() throws Throwable {

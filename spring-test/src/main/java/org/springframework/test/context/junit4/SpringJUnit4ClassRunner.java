@@ -22,8 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.internal.AssumptionViolatedException;
-import org.junit.internal.runners.model.EachTestNotifier;
 import org.junit.internal.runners.model.ReflectiveCallable;
 import org.junit.internal.runners.statements.ExpectException;
 import org.junit.internal.runners.statements.Fail;
@@ -50,18 +48,17 @@ import org.springframework.test.context.junit4.statements.SpringRepeat;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * <p>{@code SpringJUnit4ClassRunner} is a custom extension of JUnit's
+ * {@code SpringJUnit4ClassRunner} is a custom extension of JUnit's
  * {@link BlockJUnit4ClassRunner} which provides functionality of the
- * <em>Spring TestContext Framework</em> to standard JUnit 4.5+ tests by means
- * of the {@link TestContextManager} and associated support classes and
- * annotations.
+ * <em>Spring TestContext Framework</em> to standard JUnit tests by means of the
+ * {@link TestContextManager} and associated support classes and annotations.
  *
  * <p>The following list constitutes all annotations currently supported directly
- * or indirectly by {@code SpringJUnit4ClassRunner}.
- * <em>(Note that additional annotations may be supported by various {@link
- * org.springframework.test.context.TestExecutionListener TestExecutionListeners}
- * or {@link org.springframework.test.context.TestContextBootstrapper
- * TestContextBootstrapper} implementations.)</em>
+ * or indirectly by {@code SpringJUnit4ClassRunner}. <em>(Note that additional
+ * annotations may be supported by various
+ * {@link org.springframework.test.context.TestExecutionListener TestExecutionListener}
+ * or {@link org.springframework.test.context.TestContextBootstrapper TestContextBootstrapper}
+ * implementations.)</em>
  *
  * <ul>
  * <li>{@link Test#expected() @Test(expected=...)}</li>
@@ -73,8 +70,8 @@ import org.springframework.util.ReflectionUtils;
  * <li>{@link org.springframework.test.annotation.IfProfileValue @IfProfileValue}</li>
  * </ul>
  *
- * <p><strong>NOTE:</strong> As of Spring 3.0, {@code SpringJUnit4ClassRunner}
- * requires JUnit 4.5 or higher.
+ * <p><strong>NOTE:</strong> As of Spring 4.1, {@code SpringJUnit4ClassRunner}
+ * requires JUnit 4.9 or higher.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
@@ -85,6 +82,18 @@ import org.springframework.util.ReflectionUtils;
 public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 
 	private static final Log logger = LogFactory.getLog(SpringJUnit4ClassRunner.class);
+
+	private static final Method withRulesMethod;
+
+	static {
+		withRulesMethod = ReflectionUtils.findMethod(SpringJUnit4ClassRunner.class, "withRules", FrameworkMethod.class,
+			Object.class, Statement.class);
+		if (withRulesMethod == null) {
+			throw new IllegalStateException(
+				"Failed to find withRules() method: SpringJUnit4ClassRunner requires JUnit 4.9 or higher.");
+		}
+		ReflectionUtils.makeAccessible(withRulesMethod);
+	}
 
 	private final TestContextManager testContextManager;
 
@@ -198,38 +207,13 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 */
 	@Override
 	protected void runChild(FrameworkMethod frameworkMethod, RunNotifier notifier) {
-		EachTestNotifier eachNotifier = springMakeNotifier(frameworkMethod, notifier);
+		Description description = describeChild(frameworkMethod);
 		if (isTestMethodIgnored(frameworkMethod)) {
-			eachNotifier.fireTestIgnored();
-			return;
+			notifier.fireTestIgnored(description);
 		}
-
-		eachNotifier.fireTestStarted();
-		try {
-			methodBlock(frameworkMethod).evaluate();
+		else {
+			runLeaf(methodBlock(frameworkMethod), description, notifier);
 		}
-		catch (AssumptionViolatedException e) {
-			eachNotifier.addFailedAssumption(e);
-		}
-		catch (Throwable e) {
-			eachNotifier.addFailure(e);
-		}
-		finally {
-			eachNotifier.fireTestFinished();
-		}
-	}
-
-	/**
-	 * {@code springMakeNotifier()} is an exact copy of
-	 * {@link BlockJUnit4ClassRunner BlockJUnit4ClassRunner's}
-	 * {@code makeNotifier()} method, but we have decided to prefix it with
-	 * "spring" and keep it {@code private} in order to avoid the
-	 * compatibility clashes that were introduced in JUnit between versions 4.5,
-	 * 4.6, and 4.7.
-	 */
-	private EachTestNotifier springMakeNotifier(FrameworkMethod method, RunNotifier notifier) {
-		Description description = describeChild(method);
-		return new EachTestNotifier(notifier, description);
 	}
 
 	/**
@@ -252,8 +236,8 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * @see #possiblyExpectingExceptions(FrameworkMethod, Object, Statement)
 	 * @see #withBefores(FrameworkMethod, Object, Statement)
 	 * @see #withAfters(FrameworkMethod, Object, Statement)
-	 * @see #withPotentialTimeout(FrameworkMethod, Object, Statement)
 	 * @see #withPotentialRepeat(FrameworkMethod, Object, Statement)
+	 * @see #withPotentialTimeout(FrameworkMethod, Object, Statement)
 	 */
 	@Override
 	protected Statement methodBlock(FrameworkMethod frameworkMethod) {
@@ -283,21 +267,10 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	}
 
 	/**
-	 * Invokes JUnit 4.7's private {@code withRules()} method using reflection.
-	 * <p>This is necessary for backwards compatibility with the JUnit 4.5 and
-	 * 4.6 implementations of {@link BlockJUnit4ClassRunner}.
+	 * Invoke JUnit's private {@code withRules()} method using reflection.
 	 */
 	private Statement withRulesReflectively(FrameworkMethod frameworkMethod, Object testInstance, Statement statement) {
-		Method withRulesMethod = ReflectionUtils.findMethod(getClass(), "withRules", FrameworkMethod.class,
-			Object.class, Statement.class);
-		if (withRulesMethod != null) {
-			// Original JUnit 4.7 code:
-			// statement = withRules(frameworkMethod, testInstance, statement);
-			ReflectionUtils.makeAccessible(withRulesMethod);
-			statement = (Statement) ReflectionUtils.invokeMethod(withRulesMethod, this, frameworkMethod, testInstance,
-				statement);
-		}
-		return statement;
+		return (Statement) ReflectionUtils.invokeMethod(withRulesMethod, this, frameworkMethod, testInstance, statement);
 	}
 
 	/**

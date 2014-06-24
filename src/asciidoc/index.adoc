@@ -20213,12 +20213,12 @@ work__.
 
 [[testcontext-support-classes-junit4]]
 ====== JUnit support classes
-The `org.springframework.test.context.junit4` package provides support classes for JUnit
-4.5+ based test cases.
+The `org.springframework.test.context.junit4` package provides support classes for
+JUnit-based test cases.
 
 * `AbstractJUnit4SpringContextTests`: Abstract base test class that integrates the
   __Spring TestContext Framework__ with explicit `ApplicationContext` testing support in
-  a JUnit 4.5+ environment.
+  a JUnit 4.9+ environment.
   When you extend `AbstractJUnit4SpringContextTests`, you can access the following
   `protected` instance variable:
 ** `applicationContext`: Use this variable to perform explicit bean lookups or to test
@@ -20250,8 +20250,8 @@ using `@RunWith(SpringJUnit4ClassRunner.class)`, `@ContextConfiguration`,
 
 [[testcontext-junit4-runner]]
 ====== Spring JUnit Runner
-The __Spring TestContext Framework__ offers full integration with JUnit 4.5+ through a
-custom runner (tested on JUnit 4.5 -- 4.11). By annotating test classes with
+The __Spring TestContext Framework__ offers full integration with JUnit 4.9+ through a
+custom runner (tested on JUnit 4.9 -- 4.11). By annotating test classes with
 `@RunWith(SpringJUnit4ClassRunner.class)`, developers can implement standard JUnit-based
 unit and integration tests and simultaneously reap the benefits of the TestContext
 framework such as support for loading application contexts, dependency injection of test
@@ -20792,7 +20792,7 @@ tests] of client-side REST tests.
 ==== PetClinic Example
 The PetClinic application, available on
 https://github.com/spring-projects/spring-petclinic[Github], illustrates several features
-of the __Spring TestContext Framework__ in a JUnit 4.5+ environment. Most test
+of the __Spring TestContext Framework__ in a JUnit environment. Most test
 functionality is included in the `AbstractClinicTests`, for which a partial listing
 is shown below:
 
