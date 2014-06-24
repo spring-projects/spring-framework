@@ -16,17 +16,19 @@
 
 package org.springframework.web.servlet.support;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
@@ -35,6 +37,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.WebUtils;
 
 /**
  * A base class for {@link FlashMapManager} implementations.
@@ -175,13 +178,30 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 		MultiValueMap<String, String> targetParams = flashMap.getTargetRequestParams();
 		for (String expectedName : targetParams.keySet()) {
 			for (String expectedValue : targetParams.get(expectedName)) {
-				if (!ObjectUtils.containsElement(request.getParameterValues(expectedName), expectedValue)) {
+				//if (!ObjectUtils.containsElement(request.getParameterValues(expectedName), expectedValue)) {
+				if (!ObjectUtils.containsElement(request.getParameterValues(expectedName), decodeString(request, expectedValue))) {
 					return false;
 				}
 			}
 		}
 		return true;
 	}
+	
+    @SuppressWarnings("deprecation")
+	private String decodeString(HttpServletRequest request, String targetValue) {
+        String enc = request.getCharacterEncoding();        
+        if (enc == null) {
+            enc = WebUtils.DEFAULT_CHARACTER_ENCODING;
+        }
+        
+        String result;
+        try {
+            result = URLDecoder.decode(targetValue, enc);
+        } catch (UnsupportedEncodingException e) {
+            result = URLDecoder.decode(targetValue);
+        }
+        return result;
+    }
 
 	@Override
 	public final void saveOutputFlashMap(FlashMap flashMap, HttpServletRequest request, HttpServletResponse response) {
