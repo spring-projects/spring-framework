@@ -45,10 +45,16 @@ import java.util.regex.Pattern;
 public abstract class ReflectionUtils {
 
 	/**
+	 * Naming prefix for CGLIB-renamed methods.
+	 * @see #isCglibRenamedMethod
+	 */
+	private static final String CGLIB_RENAMED_METHOD_PREFIX = "CGLIB$";
+
+	/**
 	 * Pattern for detecting CGLIB-renamed methods.
 	 * @see #isCglibRenamedMethod
 	 */
-	private static final Pattern CGLIB_RENAMED_METHOD_PATTERN = Pattern.compile("CGLIB\\$(.+)\\$\\d+");
+	private static final Pattern CGLIB_RENAMED_METHOD_PATTERN = Pattern.compile("(.+)\\$\\d+");
 
 
 	/**
@@ -397,7 +403,9 @@ public abstract class ReflectionUtils {
 	 * @see org.springframework.cglib.proxy.Enhancer#rename
 	 */
 	public static boolean isCglibRenamedMethod(Method renamedMethod) {
-		return CGLIB_RENAMED_METHOD_PATTERN.matcher(renamedMethod.getName()).matches();
+		String name = renamedMethod.getName();
+		return (name.startsWith(CGLIB_RENAMED_METHOD_PREFIX) &&
+				CGLIB_RENAMED_METHOD_PATTERN.matcher(name.substring(CGLIB_RENAMED_METHOD_PREFIX.length())).matches());
 	}
 
 	/**
@@ -424,8 +432,8 @@ public abstract class ReflectionUtils {
 	 * @see java.lang.reflect.Method#setAccessible
 	 */
 	public static void makeAccessible(Method method) {
-		if ((!Modifier.isPublic(method.getModifiers()) || !Modifier.isPublic(method.getDeclaringClass().getModifiers()))
-				&& !method.isAccessible()) {
+		if ((!Modifier.isPublic(method.getModifiers()) || !Modifier.isPublic(method.getDeclaringClass().getModifiers())) &&
+				!method.isAccessible()) {
 			method.setAccessible(true);
 		}
 	}
@@ -439,8 +447,8 @@ public abstract class ReflectionUtils {
 	 * @see java.lang.reflect.Constructor#setAccessible
 	 */
 	public static void makeAccessible(Constructor<?> ctor) {
-		if ((!Modifier.isPublic(ctor.getModifiers()) || !Modifier.isPublic(ctor.getDeclaringClass().getModifiers()))
-				&& !ctor.isAccessible()) {
+		if ((!Modifier.isPublic(ctor.getModifiers()) || !Modifier.isPublic(ctor.getDeclaringClass().getModifiers())) &&
+				!ctor.isAccessible()) {
 			ctor.setAccessible(true);
 		}
 	}
