@@ -79,7 +79,14 @@ public abstract class AnnotationUtils {
 		if (annotationType.isInstance(ann)) {
 			return (T) ann;
 		}
-		return ann.annotationType().getAnnotation(annotationType);
+		try {
+			return ann.annotationType().getAnnotation(annotationType);
+		}
+		catch (Exception ex) {
+			// Assuming nested Class values not resolvable within annotation attributes...
+			// We're probably hitting a non-present optional arrangement - let's back out.
+			return null;
+		}
 	}
 
 	/**
@@ -92,16 +99,23 @@ public abstract class AnnotationUtils {
 	 * @since 3.1
 	 */
 	public static <T extends Annotation> T getAnnotation(AnnotatedElement ae, Class<T> annotationType) {
-		T ann = ae.getAnnotation(annotationType);
-		if (ann == null) {
-			for (Annotation metaAnn : ae.getAnnotations()) {
-				ann = metaAnn.annotationType().getAnnotation(annotationType);
-				if (ann != null) {
-					break;
+		try {
+			T ann = ae.getAnnotation(annotationType);
+			if (ann == null) {
+				for (Annotation metaAnn : ae.getAnnotations()) {
+					ann = metaAnn.annotationType().getAnnotation(annotationType);
+					if (ann != null) {
+						break;
+					}
 				}
 			}
+			return ann;
 		}
-		return ann;
+		catch (Exception ex) {
+			// Assuming nested Class values not resolvable within annotation attributes...
+			// We're probably hitting a non-present optional arrangement - let's back out.
+			return null;
+		}
 	}
 
 	/**
@@ -112,7 +126,14 @@ public abstract class AnnotationUtils {
 	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod(Method)
 	 */
 	public static Annotation[] getAnnotations(Method method) {
-		return BridgeMethodResolver.findBridgedMethod(method).getAnnotations();
+		try {
+			return BridgeMethodResolver.findBridgedMethod(method).getAnnotations();
+		}
+		catch (Exception ex) {
+			// Assuming nested Class values not resolvable within annotation attributes...
+			// We're probably hitting a non-present optional arrangement - let's back out.
+			return null;
+		}
 	}
 
 	/**
@@ -162,10 +183,16 @@ public abstract class AnnotationUtils {
 	public static <A extends Annotation> Set<A> getRepeatableAnnotation(AnnotatedElement annotatedElement,
 			Class<? extends Annotation> containerAnnotationType, Class<A> annotationType) {
 
-		if (annotatedElement.getAnnotations().length == 0) {
-			return Collections.emptySet();
+		try {
+			if (annotatedElement.getAnnotations().length > 0) {
+				return new AnnotationCollector<A>(containerAnnotationType, annotationType).getResult(annotatedElement);
+			}
 		}
-		return new AnnotationCollector<A>(containerAnnotationType, annotationType).getResult(annotatedElement);
+		catch (Exception ex) {
+			// Assuming nested Class values not resolvable within annotation attributes...
+			// We're probably hitting a non-present optional arrangement - let's back out.
+		}
+		return Collections.emptySet();
 	}
 
 	/**
@@ -230,9 +257,15 @@ public abstract class AnnotationUtils {
 			}
 			boolean found = false;
 			for (Method ifcMethod : iface.getMethods()) {
-				if (ifcMethod.getAnnotations().length > 0) {
-					found = true;
-					break;
+				try {
+					if (ifcMethod.getAnnotations().length > 0) {
+						found = true;
+						break;
+					}
+				}
+				catch (Exception ex) {
+					// Assuming nested Class values not resolvable within annotation attributes...
+					// We're probably hitting a non-present optional arrangement - let's back out.
 				}
 			}
 			annotatedInterfaceCache.put(iface, found);
@@ -278,7 +311,14 @@ public abstract class AnnotationUtils {
 	private static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType, Set<Annotation> visited) {
 		Assert.notNull(clazz, "Class must not be null");
 		if (isAnnotationDeclaredLocally(annotationType, clazz)) {
-			return clazz.getAnnotation(annotationType);
+			try {
+				return clazz.getAnnotation(annotationType);
+			}
+			catch (Exception ex) {
+				// Assuming nested Class values not resolvable within annotation attributes...
+				// We're probably hitting a non-present optional arrangement - let's back out.
+				return null;
+			}
 		}
 		for (Class<?> ifc : clazz.getInterfaces()) {
 			A annotation = findAnnotation(ifc, annotationType, visited);
@@ -390,11 +430,17 @@ public abstract class AnnotationUtils {
 		Assert.notNull(annotationType, "Annotation type must not be null");
 		Assert.notNull(clazz, "Class must not be null");
 		boolean declaredLocally = false;
-		for (Annotation annotation : clazz.getDeclaredAnnotations()) {
-			if (annotation.annotationType().equals(annotationType)) {
-				declaredLocally = true;
-				break;
+		try {
+			for (Annotation annotation : clazz.getDeclaredAnnotations()) {
+				if (annotation.annotationType().equals(annotationType)) {
+					declaredLocally = true;
+					break;
+				}
 			}
+		}
+		catch (Exception ex) {
+			// Assuming nested Class values not resolvable within annotation attributes...
+			// We're probably hitting a non-present optional arrangement - let's back out.
 		}
 		return declaredLocally;
 	}
@@ -632,7 +678,7 @@ public abstract class AnnotationUtils {
 						this.result.add((A) annotation);
 					}
 					else if (ObjectUtils.nullSafeEquals(this.containerAnnotationType, annotation.annotationType())) {
-						this.result.addAll(Arrays.asList(getValue(annotation)));
+						this.result.addAll(getValue(annotation));
 					}
 					else if (!isInJavaLangAnnotationPackage(annotation)) {
 						process(annotation.annotationType());
@@ -642,15 +688,15 @@ public abstract class AnnotationUtils {
 		}
 
 		@SuppressWarnings("unchecked")
-		private A[] getValue(Annotation annotation) {
+		private List<A> getValue(Annotation annotation) {
 			try {
 				Method method = annotation.annotationType().getDeclaredMethod("value");
 				ReflectionUtils.makeAccessible(method);
-				return (A[]) method.invoke(annotation);
+				return Arrays.asList((A[]) method.invoke(annotation));
 			}
 			catch (Exception ex) {
-				throw new IllegalStateException("Unable to read value from repeating annotation container " +
-						this.containerAnnotationType.getName(), ex);
+				// Unable to read value from repeating annotation container -> ignore it.
+				return Collections.emptyList();
 			}
 		}
 	}
