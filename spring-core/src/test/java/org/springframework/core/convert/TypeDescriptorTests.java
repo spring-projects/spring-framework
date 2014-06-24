@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.Test;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -68,6 +69,7 @@ public class TypeDescriptorTests {
 	public Map<String, Integer> mapField = new HashMap<String, Integer>();
 
 	public Map<String, List<Integer>> nestedMapField = new HashMap<String, List<Integer>>();
+
 
 	@Test
 	public void parameterPrimitive() throws Exception {
@@ -555,15 +557,16 @@ public class TypeDescriptorTests {
 		TypeDescriptor.nested(new MethodParameter(getClass().getMethod("test4", List.class), 0, 2), 2);
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test
 	public void nestedTooManyLevels() throws Exception {
 		TypeDescriptor t1 = TypeDescriptor.nested(new MethodParameter(getClass().getMethod("test4", List.class), 0), 3);
-		assertEquals(String.class, t1.getType());
+		assertNull(t1);
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test
 	public void nestedMethodParameterTypeNotNestable() throws Exception {
-		TypeDescriptor.nested(new MethodParameter(getClass().getMethod("test5", String.class), 0), 2);
+		TypeDescriptor t1 = TypeDescriptor.nested(new MethodParameter(getClass().getMethod("test5", String.class), 0), 2);
+		assertNull(t1);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
@@ -941,4 +944,5 @@ public class TypeDescriptorTests {
 		assertThat(new TypeDescriptor(methodParameter).getSource(), equalTo((Object) methodParameter));
 		assertThat(TypeDescriptor.valueOf(Integer.class).getSource(), equalTo((Object) Integer.class));
 	}
+
 }
