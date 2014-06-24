@@ -57,7 +57,7 @@ import org.springframework.util.ReflectionUtils;
  */
 public class ServerEndpointExporter implements InitializingBean, BeanPostProcessor, ApplicationContextAware {
 
-	private static Log logger = LogFactory.getLog(ServerEndpointExporter.class);
+	private static final Log logger = LogFactory.getLog(ServerEndpointExporter.class);
 
 
 	private final List<Class<?>> annotatedEndpointClasses = new ArrayList<Class<?>>();

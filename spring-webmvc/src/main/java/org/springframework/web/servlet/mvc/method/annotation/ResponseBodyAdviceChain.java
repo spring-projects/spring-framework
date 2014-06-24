@@ -35,7 +35,7 @@ import java.util.List;
  */
 class ResponseBodyAdviceChain {
 
-	private static Log logger = LogFactory.getLog(ResponseBodyAdviceChain.class);
+	private static final Log logger = LogFactory.getLog(ResponseBodyAdviceChain.class);
 
 	private final List<Object> advice;
 

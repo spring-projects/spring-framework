@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import java.util.concurrent.Callable;
 public class AsyncRequestInterceptor extends CallableProcessingInterceptorAdapter
 		implements DeferredResultProcessingInterceptor {
 
-	private static Log logger = LogFactory.getLog(AsyncRequestInterceptor.class);
+	private static final Log logger = LogFactory.getLog(AsyncRequestInterceptor.class);
 
 	private final SessionFactory sessionFactory;
 
@@ -52,10 +52,12 @@ public class AsyncRequestInterceptor extends CallableProcessingInterceptorAdapte
 
 	private volatile boolean timeoutInProgress;
 
+
 	public AsyncRequestInterceptor(SessionFactory sessionFactory, SessionHolder sessionHolder) {
 		this.sessionFactory = sessionFactory;
 		this.sessionHolder = sessionHolder;
 	}
+
 
 	@Override
 	public <T> void preProcess(NativeWebRequest request, Callable<T> task) {
@@ -90,11 +92,17 @@ public class AsyncRequestInterceptor extends CallableProcessingInterceptorAdapte
 		}
 	}
 
+
 	// Implementation of DeferredResultProcessingInterceptor methods
 
-	public <T> void beforeConcurrentHandling(NativeWebRequest request, DeferredResult<T> deferredResult) { }
-	public <T> void preProcess(NativeWebRequest request, DeferredResult<T> deferredResult) { }
-	public <T> void postProcess(NativeWebRequest request, DeferredResult<T> deferredResult, Object result) { }
+	public <T> void beforeConcurrentHandling(NativeWebRequest request, DeferredResult<T> deferredResult) {
+	}
+
+	public <T> void preProcess(NativeWebRequest request, DeferredResult<T> deferredResult) {
+	}
+
+	public <T> void postProcess(NativeWebRequest request, DeferredResult<T> deferredResult, Object result) {
+	}
 
 	@Override
 	public <T> boolean handleTimeout(NativeWebRequest request, DeferredResult<T> deferredResult) {
@@ -106,4 +114,5 @@ public class AsyncRequestInterceptor extends CallableProcessingInterceptorAdapte
 	public <T> void afterCompletion(NativeWebRequest request, DeferredResult<T> deferredResult) {
 		closeAfterTimeout();
 	}
+
 }

@@ -42,7 +42,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  */
 public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 
-	private static Log logger = LogFactory.getLog(ResourceUrlEncodingFilter.class);
+	private static final Log logger = LogFactory.getLog(ResourceUrlEncodingFilter.class);
 
 
 	@Override
