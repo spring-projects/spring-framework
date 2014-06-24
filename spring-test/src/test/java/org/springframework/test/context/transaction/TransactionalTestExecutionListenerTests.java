@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.test.context.transaction;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import org.junit.After;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.test.annotation.Rollback;
@@ -70,6 +71,7 @@ public class TransactionalTestExecutionListenerTests {
 		when(testContext.getTestMethod()).thenReturn(clazz.getDeclaredMethod("transactionalTest"));
 
 		assertFalse(instance.invoked);
+		TransactionContextHolder.removeCurrentTransactionContext();
 		listener.beforeTestMethod(testContext);
 		assertEquals(invokedInTx, instance.invoked);
 	}
@@ -82,6 +84,7 @@ public class TransactionalTestExecutionListenerTests {
 		when(testContext.getTestMethod()).thenReturn(clazz.getDeclaredMethod("nonTransactionalTest"));
 
 		assertFalse(instance.invoked);
+		TransactionContextHolder.removeCurrentTransactionContext();
 		listener.beforeTestMethod(testContext);
 		assertFalse(instance.invoked);
 	}
@@ -100,6 +103,7 @@ public class TransactionalTestExecutionListenerTests {
 		when(tm.getTransaction(Mockito.any(TransactionDefinition.class))).thenReturn(new SimpleTransactionStatus());
 
 		assertFalse(instance.invoked);
+		TransactionContextHolder.removeCurrentTransactionContext();
 		listener.beforeTestMethod(testContext);
 		listener.afterTestMethod(testContext);
 		assertTrue(instance.invoked);
@@ -112,6 +116,7 @@ public class TransactionalTestExecutionListenerTests {
 		when(testContext.getTestMethod()).thenReturn(clazz.getDeclaredMethod("nonTransactionalTest"));
 
 		assertFalse(instance.invoked);
+		TransactionContextHolder.removeCurrentTransactionContext();
 		listener.beforeTestMethod(testContext);
 		listener.afterTestMethod(testContext);
 		assertFalse(instance.invoked);
@@ -131,6 +136,11 @@ public class TransactionalTestExecutionListenerTests {
 		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(clazz);
 		when(testContext.getTestMethod()).thenReturn(clazz.getDeclaredMethod("test"));
 		assertEquals(rollback, listener.isRollback(testContext));
+	}
+
+	@After
+	public void cleanUpThreadLocalStateForSubsequentTestClassesInSuite() {
+		TransactionContextHolder.removeCurrentTransactionContext();
 	}
 
 	@Test
@@ -192,14 +202,12 @@ public class TransactionalTestExecutionListenerTests {
 
 	@Test
 	public void retrieveConfigurationAttributesWithMissingTransactionConfiguration() throws Exception {
-		assertTransactionConfigurationAttributes(MissingTransactionConfigurationTestCase.class, "",
-			true);
+		assertTransactionConfigurationAttributes(MissingTransactionConfigurationTestCase.class, "", true);
 	}
 
 	@Test
 	public void retrieveConfigurationAttributesWithEmptyTransactionConfiguration() throws Exception {
-		assertTransactionConfigurationAttributes(EmptyTransactionConfigurationTestCase.class, "",
-			true);
+		assertTransactionConfigurationAttributes(EmptyTransactionConfigurationTestCase.class, "", true);
 	}
 
 	@Test

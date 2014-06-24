@@ -40,7 +40,9 @@ public class EmptyDatabaseConfig {
 
 	@Bean
 	public DataSource dataSource() {
-		return new EmbeddedDatabaseBuilder().build();
+		return new EmbeddedDatabaseBuilder()//
+		.setName("empty-sql-scripts-test-db")//
+		.build();
 	}
 
 }
