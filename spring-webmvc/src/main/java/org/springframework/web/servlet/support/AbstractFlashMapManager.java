@@ -201,7 +201,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
         }
         return result;
     }
-
+    
 	@Override
 	public final void saveOutputFlashMap(FlashMap flashMap, HttpServletRequest request, HttpServletResponse response) {
 		if (CollectionUtils.isEmpty(flashMap)) {

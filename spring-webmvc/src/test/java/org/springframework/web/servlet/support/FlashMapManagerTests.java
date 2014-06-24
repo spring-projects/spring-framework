@@ -333,4 +333,5 @@ public class FlashMapManagerTests {
 		assertNotNull(inputFlashMap);
 		assertEquals("value", inputFlashMap.get("key"));
 	}
+	
 }
