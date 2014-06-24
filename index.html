@@ -58,7 +58,7 @@ deployment environments.
 
 {% include download_widget.md %}
 
-Spring Framework includes a number of different modules, here we are showing `spring-context` which provides core functionality. Refer to the getting started guides on the right for other options.
+Spring Framework includes a number of different modules. Here we are showing `spring-context` which provides core functionality. Refer to the getting started guides on the right for other options.
 
 Once you've set up your build with the `spring-context` dependency, you'll be able to do the following:
 
@@ -84,8 +84,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class MessagePrinter {
 
+    final private MessageService service;
+
     @Autowired
-    private MessageService service;
+    public MessagePrinter(MessageService service) {
+        this.service = service;
+    }
 
     public void printMessage() {
         System.out.println(this.service.getMessage());
@@ -124,9 +128,8 @@ public class Application {
 }
 ```
 
-The example above shows the basic concept of dependency injection, the `MessagePrinter` is
-decoupled from the `MessageService` implementation, with Spring Framework wiring everything
-together.
+The example above shows the basic concept of [dependency injection](http://stackoverflow.com/questions/24337486/how-to-properly-do-dependency-injection-in-spring/24363707#24363707), 
+the `MessagePrinter` is decoupled from the `MessageService` implementation, with Spring Framework wiring everything together.
 
 
 
