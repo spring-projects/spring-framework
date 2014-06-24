@@ -44,6 +44,7 @@ import org.springframework.context.i18n.SimpleLocaleContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.portlet.context.ConfigurablePortletApplicationContext;
 import org.springframework.web.portlet.context.PortletApplicationContextUtils;
 import org.springframework.web.portlet.context.PortletRequestAttributes;
@@ -516,7 +517,8 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 		// Expose current RequestAttributes to current thread.
 		RequestAttributes previousRequestAttributes = RequestContextHolder.getRequestAttributes();
 		PortletRequestAttributes requestAttributes = null;
-		if (previousRequestAttributes == null || previousRequestAttributes.getClass().equals(PortletRequestAttributes.class)) {
+		if (previousRequestAttributes == null || previousRequestAttributes.getClass().equals(PortletRequestAttributes.class) ||
+				previousRequestAttributes.getClass().equals(ServletRequestAttributes.class)) {
 			requestAttributes = new PortletRequestAttributes(request, response);
 			RequestContextHolder.setRequestAttributes(requestAttributes, this.threadContextInheritable);
 		}
