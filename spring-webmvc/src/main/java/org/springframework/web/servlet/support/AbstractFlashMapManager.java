@@ -178,7 +178,6 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 		MultiValueMap<String, String> targetParams = flashMap.getTargetRequestParams();
 		for (String expectedName : targetParams.keySet()) {
 			for (String expectedValue : targetParams.get(expectedName)) {
-				//if (!ObjectUtils.containsElement(request.getParameterValues(expectedName), expectedValue)) {
 				if (!ObjectUtils.containsElement(request.getParameterValues(expectedName), decodeString(request, expectedValue))) {
 					return false;
 				}
