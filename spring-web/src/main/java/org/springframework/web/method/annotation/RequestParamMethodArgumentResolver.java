@@ -204,7 +204,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 			if (arg == null) {
 				String[] paramValues = webRequest.getParameterValues(name);
 				if (paramValues != null) {
-					arg = paramValues.length == 1 ? paramValues[0] : paramValues;
+					arg = (paramValues.length == 1 && !List.class.isAssignableFrom(parameter.getParameterType())) ? paramValues[0] : paramValues;
 				}
 			}
 		}

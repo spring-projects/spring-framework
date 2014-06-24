@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.servlet.http.Part;
-import javax.swing.text.html.Option;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -82,10 +81,13 @@ public class RequestParamMethodArgumentResolverTests {
 	private MethodParameter paramRequired;
 	private MethodParameter paramNotRequired;
 	private MethodParameter paramOptional;
+	private MethodParameter paramStringList;	
 
 	private NativeWebRequest webRequest;
 
 	private MockHttpServletRequest request;
+	
+	private WebDataBinderFactory binderFactory;
 
 	@Before
 	public void setUp() throws Exception {
@@ -97,7 +99,8 @@ public class RequestParamMethodArgumentResolverTests {
 				Map.class, MultipartFile.class, List.class, MultipartFile[].class,
 				Part.class, List.class, Part[].class, Map.class,
 				String.class, MultipartFile.class, List.class, Part.class,
-				MultipartFile.class, String.class, String.class, Optional.class);
+				MultipartFile.class, String.class, String.class, Optional.class,
+				List.class);
 
 		paramNamedDefaultValueString = new MethodParameter(method, 0);
 		paramNamedStringArray = new MethodParameter(method, 1);
@@ -121,9 +124,14 @@ public class RequestParamMethodArgumentResolverTests {
 		paramRequired = new MethodParameter(method, 15);
 		paramNotRequired = new MethodParameter(method, 16);
 		paramOptional = new MethodParameter(method, 17);
+		paramStringList = new MethodParameter(method, 18);
 
 		request = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
+		
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setConversionService(new DefaultConversionService());
+		binderFactory = new InitBinderDataBinderFactory(null, initializer);		
 	}
 
 	@Test
@@ -142,7 +150,8 @@ public class RequestParamMethodArgumentResolverTests {
 		assertTrue("Simple type params supported w/o annotations", resolver.supportsParameter(paramStringNotAnnot));
 		assertTrue("MultipartFile parameter not supported", resolver.supportsParameter(paramMultipartFileNotAnnot));
 		assertTrue("Part parameter not supported", resolver.supportsParameter(paramPartNotAnnot));
-
+		assertTrue("List<String> parameter not supported", resolver.supportsParameter(paramStringList));
+		
 		resolver = new RequestParamMethodArgumentResolver(null, false);
 		assertFalse(resolver.supportsParameter(paramStringNotAnnot));
 		assertFalse(resolver.supportsParameter(paramRequestPartAnnot));
@@ -443,7 +452,39 @@ public class RequestParamMethodArgumentResolverTests {
 		assertEquals(123, ((Optional) result).get());
 	}
 
-
+	@SuppressWarnings("unchecked")
+	@Test
+	public void resolveStringList() throws Exception {
+		String[] expected = new String[]{"foo", "bar"};
+		request.addParameter("name", expected);
+		Object result = resolver.resolveArgument(paramStringList, null, webRequest, binderFactory);
+		assertTrue(result instanceof List<?>);
+		assertArrayEquals("Invalid result", expected, ((List<String>)result).toArray(new String[expected.length]));
+	}
+	
+	// SPR-11126
+	@SuppressWarnings("unchecked")
+	@Test
+	public void resolveStringListWithEmptyStringParam() throws Exception {
+		String[] expected = new String[]{""};
+		request.addParameter("name", expected);
+		Object result = resolver.resolveArgument(paramStringList, null, webRequest, binderFactory);
+		assertTrue(result instanceof List<?>);
+		assertEquals(expected.length, ((List<String>)result).size());
+		assertArrayEquals("Invalid result", expected, ((List<String>)result).toArray(new String[expected.length]));
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void resolveStringListEmptyStringParams() throws Exception {
+		String[] expected = new String[]{"", ""};
+		request.addParameter("name", expected);
+		Object result = resolver.resolveArgument(paramStringList, null, webRequest, binderFactory);
+		assertTrue(result instanceof List<?>);
+		assertEquals(expected.length, ((List<String>)result).size());
+		assertArrayEquals("Invalid result", expected, ((List<String>)result).toArray(new String[expected.length]));
+	}
+	
 	public void params(@RequestParam(value = "name", defaultValue = "bar") String param1,
 			@RequestParam("name") String[] param2,
 			@RequestParam("name") Map<?, ?> param3,
@@ -461,7 +502,8 @@ public class RequestParamMethodArgumentResolverTests {
 			@RequestPart MultipartFile requestPartAnnot,
 			@RequestParam(value = "name") String paramRequired,
 			@RequestParam(value = "name", required=false) String paramNotRequired,
-			@RequestParam(value = "name") Optional<Integer> paramOptional) {
+			@RequestParam(value = "name") Optional<Integer> paramOptional,
+			@RequestParam(value = "name") List<String> paramStringList) {
 	}
 
 }
