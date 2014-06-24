@@ -28,6 +28,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -63,6 +66,8 @@ public abstract class AnnotationUtils {
 	/** The attribute name for annotations with a single element */
 	public static final String VALUE = "value";
 
+	private static final Log logger = LogFactory.getLog(AnnotationUtils.class);
+
 	private static final Map<Class<?>, Boolean> annotatedInterfaceCache = new WeakHashMap<Class<?>, Boolean>();
 
 
@@ -85,6 +90,9 @@ public abstract class AnnotationUtils {
 		catch (Exception ex) {
 			// Assuming nested Class values not resolvable within annotation attributes...
 			// We're probably hitting a non-present optional arrangement - let's back out.
+			if (logger.isInfoEnabled()) {
+				logger.info("Failed to introspect annotations on [" + ann.annotationType() + "]: " + ex);
+			}
 			return null;
 		}
 	}
@@ -93,16 +101,16 @@ public abstract class AnnotationUtils {
 	 * Get a single {@link Annotation} of {@code annotationType} from the supplied
 	 * Method, Constructor or Field. Meta-annotations will be searched if the annotation
 	 * is not declared locally on the supplied element.
-	 * @param ae the Method, Constructor or Field from which to get the annotation
+	 * @param annotatedElement the Method, Constructor or Field from which to get the annotation
 	 * @param annotationType the annotation type to look for, both locally and as a meta-annotation
 	 * @return the matching annotation, or {@code null} if none found
 	 * @since 3.1
 	 */
-	public static <T extends Annotation> T getAnnotation(AnnotatedElement ae, Class<T> annotationType) {
+	public static <T extends Annotation> T getAnnotation(AnnotatedElement annotatedElement, Class<T> annotationType) {
 		try {
-			T ann = ae.getAnnotation(annotationType);
+			T ann = annotatedElement.getAnnotation(annotationType);
 			if (ann == null) {
-				for (Annotation metaAnn : ae.getAnnotations()) {
+				for (Annotation metaAnn : annotatedElement.getAnnotations()) {
 					ann = metaAnn.annotationType().getAnnotation(annotationType);
 					if (ann != null) {
 						break;
@@ -114,6 +122,9 @@ public abstract class AnnotationUtils {
 		catch (Exception ex) {
 			// Assuming nested Class values not resolvable within annotation attributes...
 			// We're probably hitting a non-present optional arrangement - let's back out.
+			if (logger.isInfoEnabled()) {
+				logger.info("Failed to introspect annotations on [" + annotatedElement + "]: " + ex);
+			}
 			return null;
 		}
 	}
@@ -132,6 +143,9 @@ public abstract class AnnotationUtils {
 		catch (Exception ex) {
 			// Assuming nested Class values not resolvable within annotation attributes...
 			// We're probably hitting a non-present optional arrangement - let's back out.
+			if (logger.isInfoEnabled()) {
+				logger.info("Failed to introspect annotations on [" + method + "]: " + ex);
+			}
 			return null;
 		}
 	}
@@ -191,6 +205,9 @@ public abstract class AnnotationUtils {
 		catch (Exception ex) {
 			// Assuming nested Class values not resolvable within annotation attributes...
 			// We're probably hitting a non-present optional arrangement - let's back out.
+			if (logger.isInfoEnabled()) {
+				logger.info("Failed to introspect annotations on [" + annotatedElement + "]: " + ex);
+			}
 		}
 		return Collections.emptySet();
 	}
@@ -266,6 +283,9 @@ public abstract class AnnotationUtils {
 				catch (Exception ex) {
 					// Assuming nested Class values not resolvable within annotation attributes...
 					// We're probably hitting a non-present optional arrangement - let's back out.
+					if (logger.isInfoEnabled()) {
+						logger.info("Failed to introspect annotations on [" + ifcMethod + "]: " + ex);
+					}
 				}
 			}
 			annotatedInterfaceCache.put(iface, found);
@@ -317,6 +337,9 @@ public abstract class AnnotationUtils {
 			catch (Exception ex) {
 				// Assuming nested Class values not resolvable within annotation attributes...
 				// We're probably hitting a non-present optional arrangement - let's back out.
+				if (logger.isInfoEnabled()) {
+					logger.info("Failed to introspect annotations on [" + clazz + "]: " + ex);
+				}
 				return null;
 			}
 		}
@@ -441,6 +464,9 @@ public abstract class AnnotationUtils {
 		catch (Exception ex) {
 			// Assuming nested Class values not resolvable within annotation attributes...
 			// We're probably hitting a non-present optional arrangement - let's back out.
+			if (logger.isInfoEnabled()) {
+				logger.info("Failed to introspect annotations on [" + clazz + "]: " + ex);
+			}
 		}
 		return declaredLocally;
 	}
