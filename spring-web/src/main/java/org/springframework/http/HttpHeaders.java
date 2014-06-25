@@ -224,7 +224,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public Set<HttpMethod> getAllow() {
 		String value = getFirst(ALLOW);
-		if (value != null) {
+		if (!StringUtils.isEmpty(value)) {
 			List<HttpMethod> allowedMethod = new ArrayList<HttpMethod>(5);
 			String[] tokens = value.split(",\\s*");
 			for (String token : tokens) {
