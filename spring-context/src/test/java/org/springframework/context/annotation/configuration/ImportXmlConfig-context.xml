@@ -15,4 +15,7 @@
 		</property>
 	</bean>
 
+	<!-- should not cause infinite loop (SPR-11858) but rather simply be ignored -->
+	<bean class="org.springframework.context.annotation.ConfigurationClassPostProcessor"/>
+
 </beans>

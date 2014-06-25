@@ -158,4 +158,12 @@ abstract class ConfigurationClassUtils {
 		return CONFIGURATION_CLASS_FULL.equals(beanDef.getAttribute(CONFIGURATION_CLASS_ATTRIBUTE));
 	}
 
+	/**
+	 * Determine whether the given bean definition indicates a lite {@code @Configuration}
+	 * class, through checking {@link #checkConfigurationClassCandidate}'s metadata marker.
+	 */
+	public static boolean isLiteConfigurationClass(BeanDefinition beanDef) {
+		return CONFIGURATION_CLASS_LITE.equals(beanDef.getAttribute(CONFIGURATION_CLASS_ATTRIBUTE));
+	}
+
 }
