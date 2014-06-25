@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Superclass for JUnit 3.8 based tests that allows conditional test execution
+ * This class is only used within tests in the spring-orm module.
+ *
+ * <p>Superclass for JUnit 3.8 based tests that allows conditional test execution
  * at the individual test method level. The
  * {@link #isDisabledInThisEnvironment(String) isDisabledInThisEnvironment()}
  * method is invoked before the execution of each test method. Subclasses can

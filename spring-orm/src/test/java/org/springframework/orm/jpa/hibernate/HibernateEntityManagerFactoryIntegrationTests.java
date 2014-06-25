@@ -25,7 +25,6 @@ import org.hibernate.ejb.HibernateEntityManagerFactory;
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.domain.Person;
-import org.springframework.test.annotation.IfProfileValue;
 
 /**
  * Hibernate-specific JPA tests.
@@ -33,14 +32,23 @@ import org.springframework.test.annotation.IfProfileValue;
  * @author Juergen Hoeller
  * @author Rod Johnson
  */
-// Essentially @Ignore-d since AnnotationBeanConfigurerAspect cannot be found
-@IfProfileValue(name="test-group", value="broken")
+// TODO Decide what to do with broken HibernateEntityManagerFactoryIntegrationTests.
+// See isDisabledInThisEnvironment() for details.
 @SuppressWarnings("deprecation")
 public class HibernateEntityManagerFactoryIntegrationTests extends
 		AbstractContainerEntityManagerFactoryIntegrationTests {
 
 	private SessionFactory sessionFactory;
 
+
+	/**
+	 * Always returns {@code true}, thereby disabling this entire test class
+	 * since AnnotationBeanConfigurerAspect cannot be found.
+	 */
+	@Override
+	protected boolean isDisabledInThisEnvironment(String testMethodName) {
+		return true;
+	}
 
 	public void setSessionFactory(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
@@ -50,7 +58,6 @@ public class HibernateEntityManagerFactoryIntegrationTests extends
 	protected String[] getConfigLocations() {
 		return HIBERNATE_CONFIG_LOCATIONS;
 	}
-
 
 	public void testCanCastNativeEntityManagerFactoryToHibernateEntityManagerFactoryImpl() {
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) entityManagerFactory;
@@ -78,7 +85,7 @@ public class HibernateEntityManagerFactoryIntegrationTests extends
 	public void testConfigurablePerson() {
 		Query q = this.sessionFactory.getCurrentSession().createQuery("select p from ContextualPerson as p");
 		assertEquals(0, q.list().size());
-		//assertNotNull(new ContextualPerson().entityManager);  TODO
+		// assertNotNull(new ContextualPerson().entityManager); TODO
 	}
 
 }
