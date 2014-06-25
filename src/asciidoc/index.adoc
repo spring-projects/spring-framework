@@ -4510,6 +4510,14 @@ configuration metadata which implement the `BeanPostProcessor` interface. The
 later upon bean creation. Bean post-processors can be deployed in the container just
 like any other beans.
 
+Note that when declaring a ++BeanPostProcessor++ using an `@Bean` factory method on a
+configuration class, the return type of the factory method should be the implementation
+class itself or at least the `org.springframework.beans.factory.config.BeanPostProcessor`
+interface, clearly indicating the post-processor nature of that bean. Otherwise, the
+`ApplicationContext` won't be able to autodetect it by type before fully creating it.
+Since a ++BeanPostProcessor++ needs to be instantiated early in order to apply to the
+initialization of other beans in the context, this early type detection is critical.
+
 [NOTE]
 ====
 
