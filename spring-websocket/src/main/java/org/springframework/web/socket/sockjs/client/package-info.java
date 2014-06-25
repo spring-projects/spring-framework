@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket;
-
-import org.springframework.web.context.WebApplicationContext;
-
-import javax.servlet.Filter;
-
 /**
- * Contract for a test server to use for WebSocket integration tests.
- *
- * @author Rossen Stoyanchev
+ * SockJS client implementation of
+ * {@link org.springframework.web.socket.client.WebSocketClient}.
  */
-public interface WebSocketTestServer {
+package org.springframework.web.socket.sockjs.client;
 
-	int getPort();
-
-	void deployConfig(WebApplicationContext cxt, Filter... filters);
-
-	void undeployConfig();
-
-	void start() throws Exception;
-
-	void stop() throws Exception;
-
-}

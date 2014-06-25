@@ -17,6 +17,10 @@
 package org.springframework.web.socket.config.annotation;
 
 import java.util.Collections;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.context.annotation.Bean;
@@ -96,7 +100,15 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	 */
 	@Bean
 	public ThreadPoolTaskScheduler messageBrokerSockJsTaskScheduler() {
-		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+		@SuppressWarnings("serial")
+		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler() {
+			@Override
+			protected ExecutorService initializeExecutor(ThreadFactory factory, RejectedExecutionHandler handler) {
+				ExecutorService service = super.initializeExecutor(factory, handler);
+				((ScheduledThreadPoolExecutor) service).setRemoveOnCancelPolicy(true);
+				return service;
+			}
+		};
 		scheduler.setPoolSize(Runtime.getRuntime().availableProcessors());
 		scheduler.setThreadNamePrefix("MessageBrokerSockJS-");
 		return scheduler;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.socket.sockjs.transport.session;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.springframework.http.server.ServerHttpRequest;
@@ -48,21 +47,12 @@ public class StreamingSockJsSession extends AbstractHttpSockJsSession {
 
 
 	@Override
-	public void handleInitialRequest(ServerHttpRequest request, ServerHttpResponse response,
-			SockJsFrameFormat frameFormat) throws SockJsException {
-
-		super.handleInitialRequest(request, response, frameFormat);
-
-		// the WebSocketHandler delegate may have closed the session
-		if (!isClosed()) {
-			super.startAsyncRequest();
-		}
+	protected boolean isStreaming() {
+		return true;
 	}
 
 	@Override
 	protected void flushCache() throws SockJsTransportFailureException {
-		cancelHeartbeat();
-
 		do {
 			String message = getMessageCache().poll();
 			SockJsMessageCodec messageCodec = getSockJsServiceConfig().getMessageCodec();
@@ -79,25 +69,11 @@ public class StreamingSockJsSession extends AbstractHttpSockJsSession {
 					logger.trace("Streamed bytes limit reached. Recycling current request");
 				}
 				resetRequest();
+				this.byteCount = 0;
 				break;
 			}
 		} while (!getMessageCache().isEmpty());
-
 		scheduleHeartbeat();
-	}
-
-	@Override
-	protected void resetRequest() {
-		super.resetRequest();
-		this.byteCount = 0;
-	}
-
-	@Override
-	protected void writeFrameInternal(SockJsFrame frame) throws IOException {
-		if (isActive()) {
-			super.writeFrameInternal(frame);
-			getResponse().flush();
-		}
 	}
 
 }

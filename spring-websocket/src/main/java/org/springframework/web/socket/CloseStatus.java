@@ -217,7 +217,7 @@ public final class CloseStatus {
 
 	@Override
 	public String toString() {
-		return "CloseStatus [code=" + this.code + ", reason=" + this.reason + "]";
+		return "CloseStatus[code=" + this.code + ", reason=" + this.reason + "]";
 	}
 
 }

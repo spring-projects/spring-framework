@@ -670,6 +670,7 @@ project("spring-websocket") {
 			exclude group: "javax.servlet", module: "javax.servlet"
 		}
 		optional("org.eclipse.jetty.websocket:websocket-client:${jettyVersion}")
+		optional("org.eclipse.jetty:jetty-client:${jettyVersion}")
 		optional("io.undertow:undertow-core:1.0.15.Final")
 		optional("io.undertow:undertow-servlet:1.0.15.Final") {
 			exclude group: "org.jboss.spec.javax.servlet", module: "jboss-servlet-api_3.1_spec"

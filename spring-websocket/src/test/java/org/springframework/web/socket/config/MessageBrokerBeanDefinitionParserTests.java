@@ -140,6 +140,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 
 		ThreadPoolTaskScheduler scheduler = (ThreadPoolTaskScheduler) defaultSockJsService.getTaskScheduler();
 		assertEquals(Runtime.getRuntime().availableProcessors(), scheduler.getScheduledThreadPoolExecutor().getCorePoolSize());
+		assertTrue(scheduler.getScheduledThreadPoolExecutor().getRemoveOnCancelPolicy());
 
 		UserSessionRegistry userSessionRegistry = this.appContext.getBean(UserSessionRegistry.class);
 		assertNotNull(userSessionRegistry);

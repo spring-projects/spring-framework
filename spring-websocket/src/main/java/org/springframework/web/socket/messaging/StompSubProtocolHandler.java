@@ -194,7 +194,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			}
 		}
 		catch (Throwable ex) {
-			logger.error("Failed to parse WebSocket message to STOMP frame(s)", ex);
+			logger.error("Failed to parse WebSocket message to STOMP." +
+					"Sending STOMP ERROR to client, sessionId=" + session.getId(), ex);
 			sendErrorMessage(session, ex);
 			return;
 		}
@@ -232,7 +233,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 				}
 			}
 			catch (Throwable ex) {
-				logger.error("Terminating STOMP session due to failure to send message", ex);
+				logger.error("Parsed STOMP message but could not send it to to message channel. " +
+						"Sending STOMP ERROR to client, sessionId=" + session.getId(), ex);
 				sendErrorMessage(session, ex);
 			}
 		}
@@ -248,7 +250,6 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	}
 
 	protected void sendErrorMessage(WebSocketSession session, Throwable error) {
-
 		StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.ERROR);
 		headerAccessor.setMessage(error.getMessage());
 		byte[] bytes = this.stompEncoder.encode(headerAccessor.getMessageHeaders(), EMPTY_PAYLOAD);
@@ -331,7 +332,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			throw ex;
 		}
 		catch (Throwable ex) {
-			sendErrorMessage(session, ex);
+			logger.error("Failed to send WebSocket message to client, sessionId=" + session.getId(), ex);
+			command = StompCommand.ERROR;
 		}
 		finally {
 			if (StompCommand.ERROR.equals(command)) {

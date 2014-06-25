@@ -16,12 +16,15 @@
 
 package org.springframework.web.socket;
 
+import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import io.undertow.Undertow;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
+import io.undertow.servlet.api.FilterInfo;
 import io.undertow.servlet.api.InstanceFactory;
 import io.undertow.servlet.api.InstanceHandle;
 import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
@@ -56,7 +59,7 @@ public class UndertowTestServer implements WebSocketTestServer {
 	}
 
 	@Override
-	public void deployConfig(WebApplicationContext cxt) {
+	public void deployConfig(WebApplicationContext cxt, Filter... filters) {
 		DispatcherServletInstanceFactory servletFactory = new DispatcherServletInstanceFactory(cxt);
 
 		DeploymentInfo servletBuilder = deployment()
@@ -66,6 +69,13 @@ public class UndertowTestServer implements WebSocketTestServer {
 				.addServlet(servlet("DispatcherServlet", DispatcherServlet.class, servletFactory).addMapping("/"))
 				.addServletContextAttribute(WebSocketDeploymentInfo.ATTRIBUTE_NAME, new WebSocketDeploymentInfo());
 
+		for (final Filter filter : filters) {
+			String filterName = filter.getClass().getName();
+			servletBuilder.addFilter(new FilterInfo(filterName, filter.getClass(), new FilterInstanceFactory(filter)));
+			for (DispatcherType type : DispatcherType.values()) {
+				servletBuilder.addFilterUrlMapping(filterName, "/*", type);
+			}
+		}
 		this.manager = defaultContainer().addDeployment(servletBuilder);
 		this.manager.deploy();
 
@@ -113,6 +123,27 @@ public class UndertowTestServer implements WebSocketTestServer {
 				@Override
 				public void release() {
 				}
+			};
+		}
+	}
+
+	private static class FilterInstanceFactory implements InstanceFactory<Filter> {
+
+		private final Filter filter;
+
+		private FilterInstanceFactory(Filter filter) {
+			this.filter = filter;
+		}
+
+		@Override
+		public InstanceHandle<Filter> createInstance() throws InstantiationException {
+			return new InstanceHandle<Filter>() {
+				@Override
+				public Filter getInstance() {
+					return filter;
+				}
+				@Override
+				public void release() {}
 			};
 		}
 	}

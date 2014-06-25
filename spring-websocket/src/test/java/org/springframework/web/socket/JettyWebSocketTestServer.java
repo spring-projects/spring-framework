@@ -17,11 +17,16 @@
 package org.springframework.web.socket;
 
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.springframework.util.SocketUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+
+import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
+import java.util.EnumSet;
 
 /**
  * Jetty based {@link WebSocketTestServer}.
@@ -46,11 +51,18 @@ public class JettyWebSocketTestServer implements WebSocketTestServer {
 	}
 
 	@Override
-	public void deployConfig(WebApplicationContext cxt) {
+	public void deployConfig(WebApplicationContext cxt, Filter... filters) {
 		ServletContextHandler contextHandler = new ServletContextHandler();
 		ServletHolder servletHolder = new ServletHolder(new DispatcherServlet(cxt));
 		contextHandler.addServlet(servletHolder, "/");
+		for (Filter filter : filters) {
+			contextHandler.addFilter(new FilterHolder(filter), "/*", getDispatcherTypes());
+		}
 		this.jettyServer.setHandler(contextHandler);
+	}
+
+	private EnumSet<DispatcherType> getDispatcherTypes() {
+		return EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.INCLUDE, DispatcherType.ASYNC);
 	}
 
 	@Override
@@ -66,6 +78,7 @@ public class JettyWebSocketTestServer implements WebSocketTestServer {
 	@Override
 	public void stop() throws Exception {
 		if (this.jettyServer.isRunning()) {
+			this.jettyServer.setStopTimeout(0);
 			this.jettyServer.stop();
 		}
 	}

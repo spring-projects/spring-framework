@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,27 +14,16 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket;
-
-import org.springframework.web.context.WebApplicationContext;
-
-import javax.servlet.Filter;
+package org.springframework.web.socket.sockjs.frame;
 
 /**
- * Contract for a test server to use for WebSocket integration tests.
+ * SockJS frame types.
  *
  * @author Rossen Stoyanchev
+ * @since 4.1
  */
-public interface WebSocketTestServer {
+public enum SockJsFrameType {
 
-	int getPort();
-
-	void deployConfig(WebApplicationContext cxt, Filter... filters);
-
-	void undeployConfig();
-
-	void start() throws Exception;
-
-	void stop() throws Exception;
+	OPEN, HEARTBEAT, MESSAGE, CLOSE
 
 }

@@ -82,12 +82,12 @@ public abstract class AbstractHttpSendingTransportHandler extends AbstractTransp
 		}
 		else {
 			logger.debug("another " + getTransportType() + " connection still open: " + sockJsSession);
-			SockJsFrame frame = getFrameFormat(request).format(SockJsFrame.closeFrameAnotherConnectionOpen());
+			String formattedFrame = getFrameFormat(request).format(SockJsFrame.closeFrameAnotherConnectionOpen());
 			try {
-				response.getBody().write(frame.getContentBytes());
+				response.getBody().write(formattedFrame.getBytes(SockJsFrame.CHARSET));
 			}
 			catch (IOException ex) {
-				throw new SockJsException("Failed to send " + frame, sockJsSession.getId(), ex);
+				throw new SockJsException("Failed to send " + formattedFrame, sockJsSession.getId(), ex);
 			}
 		}
 	}

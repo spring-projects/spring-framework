@@ -22,6 +22,10 @@ import java.net.URI;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
@@ -34,7 +38,6 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.NativeWebSocketSession;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
-import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 
 /**
@@ -46,6 +49,12 @@ import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 public class WebSocketServerSockJsSession extends AbstractSockJsSession implements NativeWebSocketSession {
 
 	private WebSocketSession webSocketSession;
+
+	private volatile boolean openFrameSent;
+
+	private final Queue<String> initSessionCache = new LinkedBlockingDeque<String>();
+
+	private final Lock initSessionLock = new ReentrantLock();
 
 
 	public WebSocketServerSockJsSession(String id, SockJsServiceConfig config,
@@ -143,15 +152,23 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 
 
 	public void initializeDelegateSession(WebSocketSession session) {
-		this.webSocketSession = session;
-		try {
-			TextMessage message = new TextMessage(SockJsFrame.openFrame().getContent());
-			this.webSocketSession.sendMessage(message);
-			scheduleHeartbeat();
-			delegateConnectionEstablished();
-		}
-		catch (Exception ex) {
-			tryCloseWithSockJsTransportError(ex, CloseStatus.SERVER_ERROR);
+		synchronized (this.initSessionLock) {
+			this.webSocketSession = session;
+			try {
+				// Let "our" handler know before sending the open frame to the remote handler
+				delegateConnectionEstablished();
+				this.webSocketSession.sendMessage(new TextMessage(SockJsFrame.openFrame().getContent()));
+
+				// Flush any messages cached in the mean time
+				while (!this.initSessionCache.isEmpty()) {
+					writeFrame(SockJsFrame.messageFrame(getMessageCodec(), this.initSessionCache.poll()));
+				}
+				scheduleHeartbeat();
+				this.openFrameSent = true;
+			}
+			catch (Exception ex) {
+				tryCloseWithSockJsTransportError(ex, CloseStatus.SERVER_ERROR);
+			}
 		}
 	}
 
@@ -180,10 +197,20 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 
 	@Override
 	public void sendMessageInternal(String message) throws SockJsTransportFailureException {
+
+		// Open frame not sent yet?
+		// If in the session initialization thread, then cache, otherwise wait.
+
+		if (!this.openFrameSent) {
+			synchronized (this.initSessionLock) {
+				if (!this.openFrameSent) {
+					this.initSessionCache.add(message);
+					return;
+				}
+			}
+		}
 		cancelHeartbeat();
-		SockJsMessageCodec messageCodec = getSockJsServiceConfig().getMessageCodec();
-		SockJsFrame frame = SockJsFrame.messageFrame(messageCodec, message);
-		writeFrame(frame);
+		writeFrame(SockJsFrame.messageFrame(getMessageCodec(), message));
 		scheduleHeartbeat();
 	}
 
