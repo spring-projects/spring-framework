@@ -17,20 +17,16 @@
 package org.springframework.web.socket.config.annotation;
 
 import java.util.Collections;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
 
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.simp.SimpSessionScope;
 import org.springframework.messaging.simp.config.AbstractMessageBrokerConfiguration;
-import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
+import org.springframework.web.socket.sockjs.transport.SockJsThreadPoolTaskScheduler;
 
 /**
  * Extends {@link AbstractMessageBrokerConfiguration} and adds configuration for
@@ -100,16 +96,7 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	 */
 	@Bean
 	public ThreadPoolTaskScheduler messageBrokerSockJsTaskScheduler() {
-		@SuppressWarnings("serial")
-		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler() {
-			@Override
-			protected ExecutorService initializeExecutor(ThreadFactory factory, RejectedExecutionHandler handler) {
-				ExecutorService service = super.initializeExecutor(factory, handler);
-				((ScheduledThreadPoolExecutor) service).setRemoveOnCancelPolicy(true);
-				return service;
-			}
-		};
-		scheduler.setPoolSize(Runtime.getRuntime().availableProcessors());
+		ThreadPoolTaskScheduler scheduler = new SockJsThreadPoolTaskScheduler();
 		scheduler.setThreadNamePrefix("MessageBrokerSockJS-");
 		return scheduler;
 	}

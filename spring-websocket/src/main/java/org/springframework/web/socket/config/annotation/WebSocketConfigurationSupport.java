@@ -20,11 +20,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
+import org.springframework.web.socket.sockjs.transport.SockJsThreadPoolTaskScheduler;
 
 /**
  * Configuration support for WebSocket request handling.
@@ -64,15 +60,7 @@ public class WebSocketConfigurationSupport {
 	 */
 	@Bean
 	public ThreadPoolTaskScheduler defaultSockJsTaskScheduler() {
-		@SuppressWarnings("serial")
-		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler() {
-			@Override
-			protected ExecutorService initializeExecutor(ThreadFactory factory, RejectedExecutionHandler handler) {
-				ExecutorService service = super.initializeExecutor(factory, handler);
-				((ScheduledThreadPoolExecutor) service).setRemoveOnCancelPolicy(true);
-				return service;
-			}
-		};
+		ThreadPoolTaskScheduler scheduler = new SockJsThreadPoolTaskScheduler();
 		scheduler.setThreadNamePrefix("SockJS-");
 		return scheduler;
 	}
