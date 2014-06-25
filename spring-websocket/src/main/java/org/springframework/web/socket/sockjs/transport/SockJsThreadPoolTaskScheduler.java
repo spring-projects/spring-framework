@@ -40,7 +40,7 @@ public class SockJsThreadPoolTaskScheduler extends ThreadPoolTaskScheduler {
 
 	// Check for setRemoveOnCancelPolicy method - available on JDK 7 and higher
 	private static boolean hasRemoveOnCancelPolicyMethod = ClassUtils.hasMethod(
-			ScheduledThreadPoolExecutor.class, "setRemoveOnCancelPolicy", Boolean.class);
+			ScheduledThreadPoolExecutor.class, "setRemoveOnCancelPolicy", boolean.class);
 
 
 	public SockJsThreadPoolTaskScheduler() {
