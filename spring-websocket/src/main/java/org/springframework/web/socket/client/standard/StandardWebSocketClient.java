@@ -34,6 +34,7 @@ import javax.websocket.HandshakeResponse;
 import javax.websocket.WebSocketContainer;
 
 import org.springframework.core.task.AsyncListenableTaskExecutor;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.UsesJava7;
@@ -59,7 +60,7 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 
 	private final WebSocketContainer webSocketContainer;
 
-	private AsyncListenableTaskExecutor taskExecutor;
+	private AsyncListenableTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
 
 
 	/**
@@ -86,9 +87,10 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 
 	/**
 	 * Set an {@link AsyncListenableTaskExecutor} to use when opening connections.
-	 *
-	 * <p>If this property is not configured, calls to  any of the
+	 * If this property is set to {@code null}, calls to  any of the
 	 * {@code doHandshake} methods will block until the connection is established.
+	 *
+	 * <p>By default an instance of {@code SimpleAsyncTaskExecutor} is used.
 	 */
 	public void setTaskExecutor(AsyncListenableTaskExecutor taskExecutor) {
 		this.taskExecutor = taskExecutor;
