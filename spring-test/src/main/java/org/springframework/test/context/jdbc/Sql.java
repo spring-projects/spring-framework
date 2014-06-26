@@ -38,10 +38,11 @@ import static java.lang.annotation.RetentionPolicy.*;
  * which is enabled by default.
  *
  * <p>The configuration options provided by this annotation are equivalent to
- * those supported by {@link ScriptUtils} and {@link org.springframework.jdbc.datasource.init.ResourceDatabasePopulator
- * ResourceDatabasePopulator} but are a superset of those provided by the
- * {@code <jdbc:initialize-database />} XML namespace element. Consult the
- * Javadoc of individual attributes in this annotation for details.
+ * those supported by {@link ScriptUtils} and
+ * {@link org.springframework.jdbc.datasource.init.ResourceDatabasePopulator}
+ * but are a superset of those provided by the {@code <jdbc:initialize-database/>}
+ * XML namespace element. Consult the javadocs of individual attributes in this
+ * annotation for details.
  *
  * <p>Beginning with Java 8, {@code @Sql} can be used as a
  * <em>{@linkplain Repeatable repeatable}</em> annotation. Otherwise,
@@ -66,7 +67,7 @@ import static java.lang.annotation.RetentionPolicy.*;
 @Documented
 @Inherited
 @Retention(RUNTIME)
-@Target({ TYPE, METHOD })
+@Target({TYPE, METHOD})
 @Repeatable(SqlGroup.class)
 public @interface Sql {
 
@@ -85,7 +86,7 @@ public @interface Sql {
 		 * The configured SQL scripts will be executed <em>after</em> the
 		 * corresponding test method.
 		 */
-		AFTER_TEST_METHOD;
+		AFTER_TEST_METHOD
 	}
 
 
@@ -98,10 +99,8 @@ public @interface Sql {
 
 	/**
 	 * The paths to the SQL scripts to execute.
-	 *
 	 * <p>This attribute may <strong>not</strong> be used in conjunction with
 	 * {@link #value}, but it may be used instead of {@link #value}.
-	 *
 	 * <h3>Path Resource Semantics</h3>
 	 * <p>Each path will be interpreted as a Spring
 	 * {@link org.springframework.core.io.Resource Resource}. A plain path
@@ -114,7 +113,6 @@ public @interface Sql {
 	 * {@link ResourceUtils#CLASSPATH_URL_PREFIX classpath:},
 	 * {@link ResourceUtils#FILE_URL_PREFIX file:}, {@code http:}, etc.) will be
 	 * loaded using the specified resource protocol.
-	 *
 	 * <h3>Default Script Detection</h3>
 	 * <p>If no SQL scripts are specified, an attempt will be made to detect a
 	 * <em>default</em> script depending on where this annotation is declared.

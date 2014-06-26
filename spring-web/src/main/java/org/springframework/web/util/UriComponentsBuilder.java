@@ -231,7 +231,7 @@ public class UriComponentsBuilder {
 			builder.scheme((scheme != null) ? scheme.toLowerCase() : scheme);
 			builder.userInfo(m.group(4));
 			String host = m.group(5);
-			if(StringUtils.hasLength(scheme) && !StringUtils.hasLength(host)) {
+			if (StringUtils.hasLength(scheme) && !StringUtils.hasLength(host)) {
 				throw new IllegalArgumentException("[" + httpUrl + "] is not a valid HTTP URL");
 			}
 			builder.host(host);
