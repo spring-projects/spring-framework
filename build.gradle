@@ -13,7 +13,7 @@ configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
 
-	ext.aspectjVersion       = "1.8.0"
+	ext.aspectjVersion       = "1.8.1"
 	ext.eclipseLinkVersion   = "2.4.2"
 	ext.groovyVersion        = "2.3.3"
 	ext.hibernate3Version    = "3.6.10.Final"
@@ -21,7 +21,7 @@ configure(allprojects) { project ->
 	ext.hibVal4Version       = "4.3.1.Final"
 	ext.hibVal5Version       = "5.1.1.Final"
 	ext.hsqldbVersion        = "2.3.2"
-	ext.jackson2Version      = "2.4.0"
+	ext.jackson2Version      = "2.4.1"
 	ext.gsonVersion          = "2.2.4"
 	ext.jasperReportsVersion = "5.6.0"
 	ext.jettyVersion         = "9.2.1.v20140609"
@@ -33,7 +33,7 @@ configure(allprojects) { project ->
 	ext.snifferVersion       = "1.11"
 	ext.tiles2Version        = "2.2.2"
 	ext.tiles3Version        = "3.0.4"
-	ext.tomcatVersion        = "8.0.8"
+	ext.tomcatVersion        = "8.0.9"
 	ext.xstreamVersion       = "1.4.7"
 
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
@@ -369,7 +369,7 @@ project("spring-aop") {
 		compile("aopalliance:aopalliance:1.0")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("commons-pool:commons-pool:1.6")
-		optional("com.jamonapi:jamon:2.4")
+		optional("com.jamonapi:jamon:2.76")
 	}
 }
 
@@ -683,8 +683,8 @@ project("spring-websocket") {
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}")
-		testCompile("org.projectreactor:reactor-core:1.1.0.RELEASE")
-		testCompile("org.projectreactor:reactor-net:1.1.0.RELEASE")
+		testCompile("org.projectreactor:reactor-core:1.1.2.RELEASE")
+		testCompile("org.projectreactor:reactor-net:1.1.2.RELEASE")
 		testCompile("log4j:log4j:1.2.17")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 	}
