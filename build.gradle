@@ -725,6 +725,7 @@ project("spring-orm") {
 		}
 		optional("javax.servlet:javax.servlet-api:3.0.1")
 		testCompile("commons-dbcp:commons-dbcp:1.4")
+		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 	}
