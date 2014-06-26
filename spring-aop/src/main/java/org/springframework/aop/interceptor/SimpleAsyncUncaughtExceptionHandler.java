@@ -38,4 +38,5 @@ public class SimpleAsyncUncaughtExceptionHandler implements AsyncUncaughtExcepti
 					"method '%s'.", method), ex);
 		}
 	}
+
 }

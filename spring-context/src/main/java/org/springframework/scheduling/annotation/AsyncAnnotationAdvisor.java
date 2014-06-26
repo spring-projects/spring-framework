@@ -105,7 +105,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 	 * Specify the default task executor to use for asynchronous methods.
 	 */
 	public void setTaskExecutor(Executor executor) {
-		this.advice = buildAdvice(executor, exceptionHandler);
+		this.advice = buildAdvice(executor, this.exceptionHandler);
 	}
 
 	/**
