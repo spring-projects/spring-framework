@@ -22,6 +22,7 @@ import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.ejb.HibernateEntityManagerFactory;
+import org.junit.Ignore;
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.domain.Person;
@@ -32,23 +33,20 @@ import org.springframework.orm.jpa.domain.Person;
  * @author Juergen Hoeller
  * @author Rod Johnson
  */
-// TODO Decide what to do with broken HibernateEntityManagerFactoryIntegrationTests.
-// See isDisabledInThisEnvironment() for details.
+// TODO [SPR-11922] Decide what to do with HibernateEntityManagerFactoryIntegrationTests.
+@Ignore("Disabled since AnnotationBeanConfigurerAspect cannot be found")
+// The reason AnnotationBeanConfigurerAspect cannot be found is that it resides
+// in the spring-aspects module which depends on this module (spring-orm). Thus,
+// in order to overcome the cyclical dependency, this test could be moved to the
+// root 'spring' module as a framework-level integration test, but the challenge
+// with doing so is that this class depends on a test class hierarchy which is
+// defined in this module.
 @SuppressWarnings("deprecation")
 public class HibernateEntityManagerFactoryIntegrationTests extends
 		AbstractContainerEntityManagerFactoryIntegrationTests {
 
 	private SessionFactory sessionFactory;
 
-
-	/**
-	 * Always returns {@code true}, thereby disabling this entire test class
-	 * since AnnotationBeanConfigurerAspect cannot be found.
-	 */
-	@Override
-	protected boolean isDisabledInThisEnvironment(String testMethodName) {
-		return true;
-	}
 
 	public void setSessionFactory(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
