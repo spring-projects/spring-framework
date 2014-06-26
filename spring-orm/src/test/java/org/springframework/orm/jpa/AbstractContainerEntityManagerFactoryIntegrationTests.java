@@ -167,7 +167,6 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests exte
 
 	// public void testAspectJInjectionOfConfigurableEntity() {
 	// Person p = new Person();
-	// System.err.println(p);
 	// assertNotNull("Was injected", p.getTestBean());
 	// assertEquals("Ramnivas", p.getTestBean().getName());
 	// }
@@ -246,10 +245,10 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests exte
 			fail("Should have thrown IllegalStateException");
 		}
 		catch (Exception ex) {
-			// IllegalStateException expected, but PersistenceException thrown by
-			// Hibernate
-			System.err.println(ex);
-			assertTrue(ex.getMessage().indexOf("closed") != -1);
+			// We would typically expect an IllegalStateException, but Hibernate throws a
+			// PersistenceException. So we assert the contents of the exception message
+			// instead.
+			assertTrue(ex.getMessage().contains("closed"));
 		}
 		q = em.createQuery("select p from Person as p");
 		q.setFlushMode(FlushModeType.AUTO);
