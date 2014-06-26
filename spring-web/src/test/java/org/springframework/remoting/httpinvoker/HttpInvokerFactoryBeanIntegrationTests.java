@@ -27,12 +27,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.remoting.support.RemoteInvocation;
+import org.springframework.remoting.support.RemoteInvocationResult;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor;
 import org.springframework.stereotype.Component;
 
 import static org.junit.Assert.*;
 
 /**
- *
  * @author Stephane Nicoll
  */
 public class HttpInvokerFactoryBeanIntegrationTests {
@@ -42,6 +45,8 @@ public class HttpInvokerFactoryBeanIntegrationTests {
 		ApplicationContext context = new AnnotationConfigApplicationContext(InvokerAutowiringConfig.class);
 		MyBean myBean = context.getBean("myBean", MyBean.class);
 		assertSame(context.getBean("myService"), myBean.myService);
+		myBean.myService.handle();
+		myBean.myService.handleAsync();
 	}
 
 	@Test
@@ -51,10 +56,17 @@ public class HttpInvokerFactoryBeanIntegrationTests {
 		context.refresh();
 		MyBean myBean = context.getBean("myBean", MyBean.class);
 		assertSame(context.getBean("myService"), myBean.myService);
+		myBean.myService.handle();
+		myBean.myService.handleAsync();
 	}
 
 
 	public interface MyService {
+
+		public void handle();
+
+		@Async
+		public void handleAsync();
 	}
 
 
@@ -62,7 +74,7 @@ public class HttpInvokerFactoryBeanIntegrationTests {
 	public static class MyBean {
 
 		@Autowired
-		private MyService myService;
+		public MyService myService;
 	}
 
 
@@ -72,10 +84,22 @@ public class HttpInvokerFactoryBeanIntegrationTests {
 	public static class InvokerAutowiringConfig {
 
 		@Bean
+		public AsyncAnnotationBeanPostProcessor aabpp() {
+			return new AsyncAnnotationBeanPostProcessor();
+		}
+
+		@Bean
 		public HttpInvokerProxyFactoryBean myService() {
 			HttpInvokerProxyFactoryBean factory = new HttpInvokerProxyFactoryBean();
 			factory.setServiceUrl("/svc/dummy");
 			factory.setServiceInterface(MyService.class);
+			Thread thread = Thread.currentThread();
+			factory.setHttpInvokerRequestExecutor(new HttpInvokerRequestExecutor() {
+				@Override
+				public RemoteInvocationResult executeRequest(HttpInvokerClientConfiguration config, RemoteInvocation invocation) {
+					return new RemoteInvocationResult(null);
+				}
+			});
 			return factory;
 		}
 
