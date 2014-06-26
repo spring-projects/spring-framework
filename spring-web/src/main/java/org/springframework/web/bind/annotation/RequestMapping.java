@@ -266,13 +266,11 @@ import java.util.concurrent.Callable;
 @Mapping
 public @interface RequestMapping {
 
-
 	/**
 	 * Assign a name to this mapping.
-	 * <p><b>Supported at the method and also at type level!</b>
-	 * When used on both levels, a combined name is derived by
-	 * concatenation with "#" as separator.
-	 *
+	 * <p><b>Supported at the type level as well as at the method level!</b>
+	 * When used on both levels, a combined name is derived by concatenation
+	 * with "#" as separator.
 	 * @see org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder
 	 * @see org.springframework.web.servlet.handler.HandlerMethodMappingNamingStrategy
 	 */

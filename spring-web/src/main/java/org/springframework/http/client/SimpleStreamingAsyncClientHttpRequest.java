@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,13 +33,12 @@ import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * {@link org.springframework.http.client.ClientHttpRequest} implementation that uses
- * standard J2SE facilities to execute streaming requests. Created via the {@link
+ * standard Java facilities to execute streaming requests. Created via the {@link
  * org.springframework.http.client.SimpleClientHttpRequestFactory}.
  *
  * @author Arjen Poutsma
- * @see org.springframework.http.client.SimpleClientHttpRequestFactory#createRequest(java.net.URI,
- *      org.springframework.http.HttpMethod)
  * @since 3.0
+ * @see org.springframework.http.client.SimpleClientHttpRequestFactory#createRequest
  */
 final class SimpleStreamingAsyncClientHttpRequest extends AbstractAsyncClientHttpRequest {
 
@@ -53,13 +52,16 @@ final class SimpleStreamingAsyncClientHttpRequest extends AbstractAsyncClientHtt
 
 	private final AsyncListenableTaskExecutor taskExecutor;
 
+
 	SimpleStreamingAsyncClientHttpRequest(HttpURLConnection connection, int chunkSize,
 			boolean outputStreaming, AsyncListenableTaskExecutor taskExecutor) {
+
 		this.connection = connection;
 		this.chunkSize = chunkSize;
 		this.outputStreaming = outputStreaming;
 		this.taskExecutor = taskExecutor;
 	}
+
 
 	@Override
 	public HttpMethod getMethod() {
@@ -106,8 +108,7 @@ final class SimpleStreamingAsyncClientHttpRequest extends AbstractAsyncClientHtt
 	}
 
 	@Override
-	protected ListenableFuture<ClientHttpResponse> executeInternal(final HttpHeaders headers)
-			throws IOException {
+	protected ListenableFuture<ClientHttpResponse> executeInternal(final HttpHeaders headers) throws IOException {
 		return taskExecutor.submitListenable(new Callable<ClientHttpResponse>() {
 			@Override
 			public ClientHttpResponse call() throws Exception {

@@ -47,6 +47,7 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 		this.listenableFuture = new ListenableFutureTask<T>(this.settableTask);
 	}
 
+
 	/**
 	 * Set the value of this future. This method will return {@code true} if
 	 * the value was set successfully, or {@code false} if the future has already
@@ -135,7 +136,6 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 	 * Subclasses can override this method to implement interruption of the future's
 	 * computation. The method is invoked automatically by a successful call to
 	 * {@link #cancel(boolean) cancel(true)}.
-	 *
 	 * <p>The default implementation does nothing.
 	 */
 	protected void interruptTask() {

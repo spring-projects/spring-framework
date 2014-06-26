@@ -116,16 +116,16 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 		final StandardWebSocketSession session = new StandardWebSocketSession(headers,
 				attributes, localAddress, remoteAddress);
 
-		final ClientEndpointConfig.Builder configBuidler = ClientEndpointConfig.Builder.create();
-		configBuidler.configurator(new StandardWebSocketClientConfigurator(headers));
-		configBuidler.preferredSubprotocols(protocols);
-		configBuidler.extensions(adaptExtensions(extensions));
+		final ClientEndpointConfig.Builder configBuilder = ClientEndpointConfig.Builder.create();
+		configBuilder.configurator(new StandardWebSocketClientConfigurator(headers));
+		configBuilder.preferredSubprotocols(protocols);
+		configBuilder.extensions(adaptExtensions(extensions));
 		final Endpoint endpoint = new StandardWebSocketHandlerAdapter(webSocketHandler, session);
 
 		Callable<WebSocketSession> connectTask = new Callable<WebSocketSession>() {
 			@Override
 			public WebSocketSession call() throws Exception {
-				webSocketContainer.connectToServer(endpoint, configBuidler.build(), uri);
+				webSocketContainer.connectToServer(endpoint, configBuilder.build(), uri);
 				return session;
 			}
 		};
@@ -142,8 +142,8 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 
 	private static List<Extension> adaptExtensions(List<WebSocketExtension> extensions) {
 		List<Extension> result = new ArrayList<Extension>();
-		for (WebSocketExtension e : extensions) {
-			result.add(new WebSocketToStandardExtensionAdapter(e));
+		for (WebSocketExtension extension : extensions) {
+			result.add(new WebSocketToStandardExtensionAdapter(extension));
 		}
 		return result;
 	}
