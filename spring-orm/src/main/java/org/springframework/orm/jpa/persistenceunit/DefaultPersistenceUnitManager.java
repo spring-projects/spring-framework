@@ -86,7 +86,9 @@ import org.springframework.util.ResourceUtils;
 public class DefaultPersistenceUnitManager
 		implements PersistenceUnitManager, ResourceLoaderAware, LoadTimeWeaverAware, InitializingBean {
 
-	private static final String ENTITY_CLASS_RESOURCE_PATTERN = "/**/*.class";
+	private static final String CLASS_RESOURCE_PATTERN = "/**/*.class";
+
+	private static final String PACKAGE_INFO_SUFFIX = ".package-info";
 
 	private static final String DEFAULT_ORM_XML_RESOURCE = "META-INF/orm.xml";
 
@@ -512,7 +514,7 @@ public class DefaultPersistenceUnitManager
 			for (String pkg : this.packagesToScan) {
 				try {
 					String pattern = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
-							ClassUtils.convertClassNameToResourcePath(pkg) + ENTITY_CLASS_RESOURCE_PATTERN;
+							ClassUtils.convertClassNameToResourcePath(pkg) + CLASS_RESOURCE_PATTERN;
 					Resource[] resources = this.resourcePatternResolver.getResources(pattern);
 					MetadataReaderFactory readerFactory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
 					for (Resource resource : resources) {
@@ -527,6 +529,10 @@ public class DefaultPersistenceUnitManager
 										scannedUnit.setPersistenceUnitRootUrl(ResourceUtils.extractJarFileURL(url));
 									}
 								}
+							}
+							else if (className.endsWith(PACKAGE_INFO_SUFFIX)) {
+								scannedUnit.addManagedPackage(
+										className.substring(0, className.length() - PACKAGE_INFO_SUFFIX.length()));
 							}
 						}
 					}

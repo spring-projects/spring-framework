@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,6 @@ import org.hibernate.dialect.MySQLDialect;
 import org.hibernate.dialect.Oracle9iDialect;
 import org.hibernate.dialect.PostgreSQLDialect;
 import org.hibernate.dialect.SQLServerDialect;
-import org.hibernate.ejb.HibernateEntityManager;
-import org.hibernate.ejb.HibernateEntityManagerFactory;
-import org.hibernate.ejb.HibernatePersistence;
 
 import org.springframework.orm.jpa.JpaDialect;
 
@@ -68,25 +65,28 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 
 	@SuppressWarnings({"deprecation", "unchecked"})
 	public HibernateJpaVendorAdapter() {
-		PersistenceProvider providerToUse;
+		ClassLoader cl = HibernateJpaVendorAdapter.class.getClassLoader();
 		Class<? extends EntityManagerFactory> emfIfcToUse;
 		Class<? extends EntityManager> emIfcToUse;
+		Class<?> providerClass;
+		PersistenceProvider providerToUse;
 		try {
-			// Try Hibernate 4.3's org.hibernate.jpa package in order to avoid deprecation warnings
-			ClassLoader cl = HibernateJpaVendorAdapter.class.getClassLoader();
-			Class<?> hibernatePersistenceProviderClass = cl.loadClass("org.hibernate.jpa.HibernatePersistenceProvider");
-			providerToUse = (PersistenceProvider) hibernatePersistenceProviderClass.newInstance();
-			emfIfcToUse = (Class<? extends EntityManagerFactory>) cl.loadClass("org.hibernate.jpa.HibernateEntityManagerFactory");
-			emIfcToUse = (Class<? extends EntityManager>) cl.loadClass("org.hibernate.jpa.HibernateEntityManager");
-		}
-		catch (ClassNotFoundException ex) {
-			// Fall back to Hibernate 3.6-4.2 org.hibernate.ejb package
-			providerToUse = new HibernatePersistence();
-			emfIfcToUse = HibernateEntityManagerFactory.class;
-			emIfcToUse = HibernateEntityManager.class;
+			try {
+				// Try Hibernate 4.3's org.hibernate.jpa package in order to avoid deprecation warnings
+				emfIfcToUse = (Class<? extends EntityManagerFactory>) cl.loadClass("org.hibernate.jpa.HibernateEntityManagerFactory");
+				emIfcToUse = (Class<? extends EntityManager>) cl.loadClass("org.hibernate.jpa.HibernateEntityManager");
+				providerClass = cl.loadClass("org.springframework.orm.jpa.vendor.SpringHibernateJpaPersistenceProvider");
+			}
+			catch (ClassNotFoundException ex) {
+				// Fall back to Hibernate 3.6-4.2 org.hibernate.ejb package
+				emfIfcToUse = (Class<? extends EntityManagerFactory>) cl.loadClass("org.hibernate.ejb.HibernateEntityManagerFactory");
+				emIfcToUse = (Class<? extends EntityManager>) cl.loadClass("org.hibernate.ejb.HibernateEntityManager");
+				providerClass = cl.loadClass("org.springframework.orm.jpa.vendor.SpringHibernateEjbPersistenceProvider");
+			}
+			providerToUse = (PersistenceProvider) providerClass.newInstance();
 		}
 		catch (Exception ex) {
-			throw new IllegalStateException("Found HibernatePersistenceProvider but could not instantiate it", ex);
+			throw new IllegalStateException("Failed to determine Hibernate PersistenceProvider", ex);
 		}
 		this.persistenceProvider = providerToUse;
 		this.entityManagerFactoryInterface = emfIfcToUse;
