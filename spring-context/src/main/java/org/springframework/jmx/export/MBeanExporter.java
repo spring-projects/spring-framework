@@ -25,7 +25,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.management.DynamicMBean;
 import javax.management.JMException;
 import javax.management.MBeanException;
@@ -46,6 +45,7 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.CannotLoadBeanClassException;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -82,8 +82,7 @@ import org.springframework.util.ObjectUtils;
  * via the {@link #setListeners(MBeanExporterListener[]) listeners} property, allowing
  * application code to be notified of MBean registration and unregistration events.
  *
- * <p>This exporter is compatible with JMX 1.2 on Java 5 and above.
- * As of Spring 2.5, it also autodetects and exports Java 6 MXBeans.
+ * <p>This exporter is compatible with MBeans and MXBeans on Java 6 and above.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -99,8 +98,8 @@ import org.springframework.util.ObjectUtils;
  * @see org.springframework.jmx.export.assembler.MBeanInfoAssembler
  * @see MBeanExporterListener
  */
-public class MBeanExporter extends MBeanRegistrationSupport
-		implements MBeanExportOperations, BeanClassLoaderAware, BeanFactoryAware, InitializingBean, SmartLifecycle {
+public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExportOperations,
+		BeanClassLoaderAware, BeanFactoryAware, InitializingBean, DisposableBean, SmartLifecycle {
 
 	/**
 	 * Autodetection mode indicating that no autodetection should be used.
@@ -149,11 +148,11 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	/** Whether to eagerly initialize candidate beans when autodetecting MBeans */
 	private boolean allowEagerInit = false;
 
-	/** Indicates whether Spring should modify generated ObjectNames */
-	private boolean ensureUniqueRuntimeObjectNames = true;
+	/** Stores the MBeanInfoAssembler to use for this exporter */
+	private MBeanInfoAssembler assembler = new SimpleReflectiveMBeanInfoAssembler();
 
-	/** Indicates whether Spring should expose the managed resource ClassLoader in the MBean */
-	private boolean exposeManagedResourceClassLoader = true;
+	/** The strategy to use for creating ObjectNames for an object */
+	private ObjectNamingStrategy namingStrategy = new KeyNamingStrategy();
 
 	/** A set of bean names that should be excluded from autodetection */
 	private Set<String> excludedBeans;
@@ -168,11 +167,17 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	private final Map<NotificationListenerBean, ObjectName[]> registeredNotificationListeners =
 			new LinkedHashMap<NotificationListenerBean, ObjectName[]>();
 
-	/** Stores the MBeanInfoAssembler to use for this exporter */
-	private MBeanInfoAssembler assembler = new SimpleReflectiveMBeanInfoAssembler();
+	/** Indicates whether Spring should modify generated ObjectNames */
+	private boolean ensureUniqueRuntimeObjectNames = true;
 
-	/** The strategy to use for creating ObjectNames for an object */
-	private ObjectNamingStrategy namingStrategy = new KeyNamingStrategy();
+	/** Indicates whether Spring should expose the managed resource ClassLoader in the MBean */
+	private boolean exposeManagedResourceClassLoader = true;
+
+	/** Indicate whether to auto-startup within the container-managed lifecycle */
+	private boolean autoStartup = true;
+
+	/** Indicate the phase to use within the container-managed lifecycle */
+	private int phase = Integer.MAX_VALUE;
 
 	/** Stores the ClassLoader to use for generating lazy-init proxies */
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
@@ -180,11 +185,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	/** Stores the BeanFactory for use in autodetection process */
 	private ListableBeanFactory beanFactory;
 
-	private boolean autoStartup = true;
-
-	private volatile boolean running = false;
-
-	private int phase = Integer.MAX_VALUE;
+	private boolean running = false;
 
 	private final Object lifecycleMonitor = new Object();
 
@@ -295,44 +296,19 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	}
 
 	/**
-	 * Set the {@code MBeanExporterListener}s that should be notified
-	 * of MBean registration and unregistration events.
-	 * @see MBeanExporterListener
-	 */
-	public void setListeners(MBeanExporterListener[] listeners) {
-		this.listeners = listeners;
-	}
-
-	/**
 	 * Set the list of names for beans that should be excluded from autodetection.
 	 */
-	public void setExcludedBeans(String[] excludedBeans) {
+	public void setExcludedBeans(String... excludedBeans) {
 		this.excludedBeans = (excludedBeans != null ? new HashSet<String>(Arrays.asList(excludedBeans)) : null);
 	}
 
 	/**
-	 * Indicates whether Spring should ensure that {@link ObjectName ObjectNames}
-	 * generated by the configured {@link ObjectNamingStrategy} for
-	 * runtime-registered MBeans ({@link #registerManagedResource}) should get
-	 * modified: to ensure uniqueness for every instance of a managed {@code Class}.
-	 * <p>The default value is {@code true}.
-	 * @see #registerManagedResource
-	 * @see JmxUtils#appendIdentityToObjectName(javax.management.ObjectName, Object)
+	 * Set the {@code MBeanExporterListener}s that should be notified
+	 * of MBean registration and unregistration events.
+	 * @see MBeanExporterListener
 	 */
-	public void setEnsureUniqueRuntimeObjectNames(boolean ensureUniqueRuntimeObjectNames) {
-		this.ensureUniqueRuntimeObjectNames = ensureUniqueRuntimeObjectNames;
-	}
-
-	/**
-	 * Indicates whether or not the managed resource should be exposed on the
-	 * {@link Thread#getContextClassLoader() thread context ClassLoader} before
-	 * allowing any invocations on the MBean to occur.
-	 * <p>The default value is {@code true}, exposing a {@link SpringModelMBean}
-	 * which performs thread context ClassLoader management. Switch this flag off to
-	 * expose a standard JMX {@link javax.management.modelmbean.RequiredModelMBean}.
-	 */
-	public void setExposeManagedResourceClassLoader(boolean exposeManagedResourceClassLoader) {
-		this.exposeManagedResourceClassLoader = exposeManagedResourceClassLoader;
+	public void setListeners(MBeanExporterListener... listeners) {
+		this.listeners = listeners;
 	}
 
 	/**
@@ -343,7 +319,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * @see #setNotificationListenerMappings(java.util.Map)
 	 * @see NotificationListenerBean
 	 */
-	public void setNotificationListeners(NotificationListenerBean[] notificationListeners) {
+	public void setNotificationListeners(NotificationListenerBean... notificationListeners) {
 		this.notificationListeners = notificationListeners;
 	}
 
@@ -382,6 +358,61 @@ public class MBeanExporter extends MBeanRegistrationSupport
 				notificationListeners.toArray(new NotificationListenerBean[notificationListeners.size()]);
 	}
 
+	/**
+	 * Indicates whether Spring should ensure that {@link ObjectName ObjectNames}
+	 * generated by the configured {@link ObjectNamingStrategy} for
+	 * runtime-registered MBeans ({@link #registerManagedResource}) should get
+	 * modified: to ensure uniqueness for every instance of a managed {@code Class}.
+	 * <p>The default value is {@code true}.
+	 * @see #registerManagedResource
+	 * @see JmxUtils#appendIdentityToObjectName(javax.management.ObjectName, Object)
+	 */
+	public void setEnsureUniqueRuntimeObjectNames(boolean ensureUniqueRuntimeObjectNames) {
+		this.ensureUniqueRuntimeObjectNames = ensureUniqueRuntimeObjectNames;
+	}
+
+	/**
+	 * Indicates whether or not the managed resource should be exposed on the
+	 * {@link Thread#getContextClassLoader() thread context ClassLoader} before
+	 * allowing any invocations on the MBean to occur.
+	 * <p>The default value is {@code true}, exposing a {@link SpringModelMBean}
+	 * which performs thread context ClassLoader management. Switch this flag off to
+	 * expose a standard JMX {@link javax.management.modelmbean.RequiredModelMBean}.
+	 */
+	public void setExposeManagedResourceClassLoader(boolean exposeManagedResourceClassLoader) {
+		this.exposeManagedResourceClassLoader = exposeManagedResourceClassLoader;
+	}
+
+	/**
+	 * Set whether to automatically export MBeans after initialization.
+	 * <p>Default is "true"; set this to "false" to allow for manual startup
+	 * through the {@link #start()} method.
+	 */
+	public void setAutoStartup(boolean autoStartup) {
+		this.autoStartup = autoStartup;
+	}
+
+	@Override
+	public boolean isAutoStartup() {
+		return this.autoStartup;
+	}
+
+	/**
+	 * Specify the phase in which the MBeans should be exported to the
+	 * JMX domain. The startup order proceeds from lowest to highest, and
+	 * the shutdown order is the reverse of that. By default this value
+	 * is {@code Integer.MAX_VALUE} meaning that MBeans are exported
+	 * as late as possible and removed from the domain as soon as possible.
+	 */
+	public void setPhase(int phase) {
+		this.phase = phase;
+	}
+
+	@Override
+	public int getPhase() {
+		return this.phase;
+	}
+
 	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
@@ -405,71 +436,47 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		}
 	}
 
-	/**
-	 * Specify the phase in which the MBeans should be exported to the
-	 * JMX domain. The startup order proceeds from lowest to highest, and
-	 * the shutdown order is the reverse of that. By default this value
-	 * is {@code Integer.MAX_VALUE} meaning that MBeans are exported
-	 * as late as possible and removed from the domain as soon as possible.
-	 */
-	public void setPhase(int phase) {
-		this.phase = phase;
-	}
-
-	/**
-	 * Set whether to automatically export MBeans after initialization.
-	 * <p>Default is "true"; set this to "false" to allow for manual startup
-	 * through the {@link #start()} method.
-	 */
-	public void setAutoStartup(boolean autoStartup) {
-		this.autoStartup = autoStartup;
-	}
-
-
-	//---------------------------------------------------------------------
-	// Lifecycle in bean factory: automatically register/unregister beans
-	//---------------------------------------------------------------------
-
 	@Override
 	public void afterPropertiesSet() {
 		// If no server was provided then try to find one. This is useful in an environment
-		// such as JDK 1.5, Tomcat or JBoss where there is already an MBeanServer loaded.
+		// where there is already an MBeanServer loaded.
 		if (this.server == null) {
 			this.server = JmxUtils.locateMBeanServer();
 		}
 	}
 
+
+	//---------------------------------------------------------------------
+	// Implementation of SmartLifecycle interface
+	//---------------------------------------------------------------------
+
 	@Override
 	public void start() {
-		logger.info("Registering beans for JMX exposure");
 		synchronized (this.lifecycleMonitor) {
 			try {
 				registerBeans();
 				registerNotificationListeners();
-			} catch (RuntimeException ex) {
+			}
+			catch (RuntimeException ex) {
 				// Unregister beans already registered by this exporter.
-				unregisterNotificationListeners();
-				unregisterBeans();
+				doStop();
 				throw ex;
 			}
+			this.running = true;
 		}
-		running = true;
 	}
 
 	@Override
 	public void stop() {
-		logger.info("Unregistering JMX-exposed beans on stop");
 		synchronized (this.lifecycleMonitor) {
-			unregisterNotificationListeners();
-			unregisterBeans();
-			running = false;
+			doStop();
 		}
 	}
 
 	@Override
 	public void stop(Runnable callback) {
 		synchronized (this.lifecycleMonitor) {
-			stop();
+			doStop();
 			callback.run();
 		}
 	}
@@ -482,13 +489,16 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	}
 
 	@Override
-	public boolean isAutoStartup() {
-		return this.autoStartup;
+	public void destroy() {
+		synchronized (this.lifecycleMonitor) {
+			doStop();
+		}
 	}
 
-	@Override
-	public int getPhase() {
-		return this.phase;
+	private void doStop() {
+		unregisterNotificationListeners();
+		unregisterBeans();
+		this.running = false;
 	}
 
 
@@ -558,6 +568,8 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * implementation of the {@code ObjectNamingStrategy} interface being used.
 	 */
 	protected void registerBeans() {
+		logger.info("Registering beans for JMX exposure");
+
 		// The beans property may be null, for example if we are relying solely on autodetection.
 		if (this.beans == null) {
 			this.beans = new HashMap<String, Object>();
@@ -575,7 +587,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 			}
 			if (mode == AUTODETECT_MBEAN || mode == AUTODETECT_ALL) {
 				// Autodetect any beans that are already MBeans.
-				this.logger.debug("Autodetecting user-defined JMX MBeans");
+				logger.info("Autodetecting user-defined JMX MBeans");
 				autodetectMBeans();
 			}
 			// Allow the assembler a chance to vote for bean inclusion.
@@ -1108,6 +1120,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 			}
 		}
 	}
+
 
 	//---------------------------------------------------------------------
 	// Inner classes for internal use
