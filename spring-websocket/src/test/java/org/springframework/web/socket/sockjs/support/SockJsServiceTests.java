@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.socket.AbstractHttpRequestTests;
@@ -30,6 +31,10 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsException;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Test fixture for {@link AbstractSockJsService}.
@@ -104,6 +109,21 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		handleRequest("GET", "/echo/info", HttpStatus.OK);
 
 		assertEquals("foobar:123", this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+	}
+
+	// SPR-11919
+
+	@Test
+	public void handleInfoGetWildflyNPE() throws Exception {
+		HttpServletResponse mockResponse = mock(HttpServletResponse.class);
+		ServletOutputStream ous = mock(ServletOutputStream.class);
+		when(mockResponse.getHeaders("Access-Control-Allow-Origin")).thenThrow(NullPointerException.class);
+		when(mockResponse.getOutputStream()).thenReturn(ous);
+		this.response = new ServletServerHttpResponse(mockResponse);
+
+		handleRequest("GET", "/echo/info", HttpStatus.OK);
+
+		verify(mockResponse.getOutputStream(), times(1));
 	}
 
 	@Test

@@ -367,10 +367,15 @@ public abstract class AbstractSockJsService implements SockJsService {
 		HttpHeaders requestHeaders = request.getHeaders();
 		HttpHeaders responseHeaders = response.getHeaders();
 
-		// Perhaps a CORS Filter has already added this?
-		if (!CollectionUtils.isEmpty(responseHeaders.get("Access-Control-Allow-Origin"))) {
-			logger.debug("Skip adding CORS headers, response already contains \"Access-Control-Allow-Origin\"");
-			return;
+		try {
+			// Perhaps a CORS Filter has already added this?
+			if (!CollectionUtils.isEmpty(responseHeaders.get("Access-Control-Allow-Origin"))) {
+				logger.debug("Skip adding CORS headers, response already contains \"Access-Control-Allow-Origin\"");
+				return;
+			}
+		}
+		catch (NullPointerException npe) {
+			// See SPR-11919 and https://issues.jboss.org/browse/WFLY-3474
 		}
 
 		String origin = requestHeaders.getFirst("origin");
