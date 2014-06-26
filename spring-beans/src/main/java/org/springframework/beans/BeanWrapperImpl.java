@@ -115,8 +115,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 */
 	private Map<String, BeanWrapperImpl> nestedBeanWrappers;
 
-	private boolean autoGrowNestedPaths = false;
-
 	private int autoGrowCollectionLimit = Integer.MAX_VALUE;
 
 
@@ -252,25 +250,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		return (this.rootObject != null ? this.rootObject.getClass() : null);
 	}
 
-	/**
-	 * Set whether this BeanWrapper should attempt to "auto-grow" a nested path that contains a null value.
-	 * <p>If "true", a null path location will be populated with a default object value and traversed
-	 * instead of resulting in a {@link NullValueInNestedPathException}. Turning this flag on also
-	 * enables auto-growth of collection elements when accessing an out-of-bounds index.
-	 * <p>Default is "false" on a plain BeanWrapper.
-	 */
-	@Override
-	public void setAutoGrowNestedPaths(boolean autoGrowNestedPaths) {
-		this.autoGrowNestedPaths = autoGrowNestedPaths;
-	}
 
-	/**
-	 * Return whether "auto-growing" of nested paths has been activated.
-	 */
-	@Override
-	public boolean isAutoGrowNestedPaths() {
-		return this.autoGrowNestedPaths;
-	}
 
 	/**
 	 * Specify a limit for array and collection auto-growing.
@@ -570,7 +550,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		String canonicalName = tokens.canonicalName;
 		Object propertyValue = getPropertyValue(tokens);
 		if (propertyValue == null) {
-			if (this.autoGrowNestedPaths) {
+			if (isAutoGrowNestedPaths()) {
 				propertyValue = setDefaultValue(tokens);
 			}
 			else {
@@ -761,7 +741,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 
 			if (tokens.keys != null) {
 				if (value == null) {
-					if (this.autoGrowNestedPaths) {
+					if (isAutoGrowNestedPaths()) {
 						value = setDefaultValue(tokens.actualName);
 					}
 					else {
@@ -851,7 +831,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	}
 
 	private Object growArrayIfNecessary(Object array, int index, String name) {
-		if (!this.autoGrowNestedPaths) {
+		if (!isAutoGrowNestedPaths()) {
 			return array;
 		}
 		int length = Array.getLength(array);
@@ -874,7 +854,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	private void growCollectionIfNecessary(Collection<Object> collection, int index, String name,
 			PropertyDescriptor pd, int nestingLevel) {
 
-		if (!this.autoGrowNestedPaths) {
+		if (!isAutoGrowNestedPaths()) {
 			return;
 		}
 		int size = collection.size();
@@ -951,7 +931,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			String key = tokens.keys[tokens.keys.length - 1];
 			if (propValue == null) {
 				// null map value case
-				if (this.autoGrowNestedPaths) {
+				if (isAutoGrowNestedPaths()) {
 					// TODO: cleanup, this is pretty hacky
 					int lastKeyIndex = tokens.canonicalName.lastIndexOf('[');
 					getterTokens.canonicalName = tokens.canonicalName.substring(0, lastKeyIndex);
