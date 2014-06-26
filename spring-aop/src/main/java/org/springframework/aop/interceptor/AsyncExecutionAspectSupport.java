@@ -24,6 +24,7 @@ import java.util.concurrent.Executor;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
+import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.support.TaskExecutorAdapter;
 import org.springframework.util.Assert;
@@ -40,6 +41,7 @@ import org.springframework.util.StringUtils;
  * bean to be used when executing it, e.g. through an annotation attribute.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1.2
  */
 public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
@@ -87,6 +89,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 
 	/**
 	 * Determine the specific executor to use when executing the given method.
+	 * Should preferably return an {@link AsyncListenableTaskExecutor} implementation.
 	 * @return the executor to use (or {@code null}, but just if no default executor has been set)
 	 */
 	protected AsyncTaskExecutor determineAsyncExecutor(Method method) {
@@ -103,8 +106,8 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 			else if (executorToUse == null) {
 				return null;
 			}
-			executor = (executorToUse instanceof AsyncTaskExecutor ?
-					(AsyncTaskExecutor) executorToUse : new TaskExecutorAdapter(executorToUse));
+			executor = (executorToUse instanceof AsyncListenableTaskExecutor ?
+					(AsyncListenableTaskExecutor) executorToUse : new TaskExecutorAdapter(executorToUse));
 			this.executors.put(method, executor);
 		}
 		return executor;

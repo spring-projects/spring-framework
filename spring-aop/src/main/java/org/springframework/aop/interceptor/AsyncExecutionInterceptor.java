@@ -29,9 +29,11 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.Ordered;
+import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * AOP Alliance {@code MethodInterceptor} that processes method invocations
@@ -120,27 +122,31 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 					"No executor specified and no default executor set on AsyncExecutionInterceptor either");
 		}
 
-		Future<?> result = executor.submit(
-				new Callable<Object>() {
-					@Override
-					public Object call() throws Exception {
-						try {
-							Object result = invocation.proceed();
-							if (result instanceof Future) {
-								return ((Future<?>) result).get();
-							}
-						}
-						catch (Throwable ex) {
-							handleError(ex, userDeclaredMethod, invocation.getArguments());
-						}
-						return null;
+		Callable<Object> task = new Callable<Object>() {
+			@Override
+			public Object call() throws Exception {
+				try {
+					Object result = invocation.proceed();
+					if (result instanceof Future) {
+						return ((Future<?>) result).get();
 					}
-				});
+				}
+				catch (Throwable ex) {
+					handleError(ex, userDeclaredMethod, invocation.getArguments());
+				}
+				return null;
+			}
+		};
 
-		if (Future.class.isAssignableFrom(invocation.getMethod().getReturnType())) {
-			return result;
+		Class<?> returnType = invocation.getMethod().getReturnType();
+		if (ListenableFuture.class.isAssignableFrom(returnType)) {
+			return ((AsyncListenableTaskExecutor) executor).submitListenable(task);
+		}
+		else if (Future.class.isAssignableFrom(returnType)) {
+			return executor.submit(task);
 		}
 		else {
+			executor.submit(task);
 			return null;
 		}
 	}

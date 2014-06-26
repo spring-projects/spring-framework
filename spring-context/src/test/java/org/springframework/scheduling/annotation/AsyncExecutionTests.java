@@ -36,6 +36,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.util.concurrent.ListenableFuture;
 
 import static org.junit.Assert.*;
 
@@ -65,6 +66,8 @@ public class AsyncExecutionTests {
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
 		assertEquals("20", future.get());
+		ListenableFuture<String> listenableFuture = asyncTest.returnSomethingListenable(20);
+		assertEquals("20", listenableFuture.get());
 	}
 
 	@Test
@@ -134,6 +137,8 @@ public class AsyncExecutionTests {
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
 		assertEquals("20", future.get());
+		ListenableFuture<String> listenableFuture = asyncTest.returnSomethingListenable(20);
+		assertEquals("20", listenableFuture.get());
 	}
 
 	@Test
@@ -348,6 +353,12 @@ public class AsyncExecutionTests {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
 			return new AsyncResult<String>(Integer.toString(i));
 		}
+
+		@Async
+		public ListenableFuture<String> returnSomethingListenable(int i) {
+			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			return new AsyncResult<String>(Integer.toString(i));
+		}
 	}
 
 
@@ -406,6 +417,11 @@ public class AsyncExecutionTests {
 		}
 
 		public Future<String> returnSomething(int i) {
+			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			return new AsyncResult<String>(Integer.toString(i));
+		}
+
+		public ListenableFuture<String> returnSomethingListenable(int i) {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
 			return new AsyncResult<String>(Integer.toString(i));
 		}

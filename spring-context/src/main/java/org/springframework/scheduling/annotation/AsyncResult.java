@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,24 @@
 
 package org.springframework.scheduling.annotation;
 
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 
 /**
  * A pass-through {@code Future} handle that can be used for method signatures
- * which are declared with a Future return type for asynchronous execution.
+ * which are declared with a {@code Future} return type for asynchronous execution.
+ *
+ * <p>As of Spring 4.1, this class implements {@link ListenableFuture}, not just
+ * plain {@link java.util.concurrent.Future}, along with the corresponding support
+ * in {@code @Async} processing.
  *
  * @author Juergen Hoeller
  * @since 3.0
  * @see Async
  */
-public class AsyncResult<V> implements Future<V> {
+public class AsyncResult<V> implements ListenableFuture<V> {
 
 	private final V value;
 
@@ -39,6 +45,7 @@ public class AsyncResult<V> implements Future<V> {
 	public AsyncResult(V value) {
 		this.value = value;
 	}
+
 
 	@Override
 	public boolean cancel(boolean mayInterruptIfRunning) {
@@ -63,6 +70,11 @@ public class AsyncResult<V> implements Future<V> {
 	@Override
 	public V get(long timeout, TimeUnit unit) {
 		return this.value;
+	}
+
+	@Override
+	public void addCallback(ListenableFutureCallback<? super V> callback) {
+		callback.onSuccess(this.value);
 	}
 
 }
