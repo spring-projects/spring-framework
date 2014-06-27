@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -55,6 +56,12 @@ public abstract class ReflectionUtils {
 	 * @see #isCglibRenamedMethod
 	 */
 	private static final Pattern CGLIB_RENAMED_METHOD_PATTERN = Pattern.compile("(.+)\\$\\d+");
+
+	/**
+	 * Cache for {@link Class#getDeclaredMethods()}, allowing for fast resolution.
+	 */
+	private static final Map<Class<?>, Method[]> declaredMethodsCache =
+			new ConcurrentReferenceHashMap<Class<?>, Method[]>(256);
 
 
 	/**
@@ -162,7 +169,7 @@ public abstract class ReflectionUtils {
 		Assert.notNull(name, "Method name must not be null");
 		Class<?> searchType = clazz;
 		while (searchType != null) {
-			Method[] methods = (searchType.isInterface() ? searchType.getMethods() : searchType.getDeclaredMethods());
+			Method[] methods = (searchType.isInterface() ? searchType.getMethods() : getDeclaredMethods(searchType));
 			for (Method method : methods) {
 				if (name.equals(method.getName()) &&
 						(paramTypes == null || Arrays.equals(paramTypes, method.getParameterTypes()))) {
@@ -479,7 +486,7 @@ public abstract class ReflectionUtils {
 			throws IllegalArgumentException {
 
 		// Keep backing up the inheritance hierarchy.
-		Method[] methods = clazz.getDeclaredMethods();
+		Method[] methods = getDeclaredMethods(clazz);
 		for (Method method : methods) {
 			if (mf != null && !mf.matches(method)) {
 				continue;
@@ -552,6 +559,19 @@ public abstract class ReflectionUtils {
 			}
 		});
 		return methods.toArray(new Method[methods.size()]);
+	}
+
+	/**
+	 * This method retrieves {@link Class#getDeclaredMethods()} from a local cache
+	 * in order to avoid the JVM's SecurityManager check and defensive array copying.
+	 */
+	private static Method[] getDeclaredMethods(Class<?> clazz) {
+		Method[] result = declaredMethodsCache.get(clazz);
+		if (result == null) {
+			result = clazz.getDeclaredMethods();
+			declaredMethodsCache.put(clazz, result);
+		}
+		return result;
 	}
 
 	/**
