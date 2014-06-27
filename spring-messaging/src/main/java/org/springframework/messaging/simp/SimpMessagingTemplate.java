@@ -77,8 +77,9 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	 * @see org.springframework.messaging.simp.user.UserDestinationMessageHandler
 	 */
 	public void setUserDestinationPrefix(String prefix) {
-		Assert.notNull(prefix, "UserDestinationPrefix must not be null");
-		this.userDestinationPrefix = prefix;
+		Assert.hasText(prefix, "'userDestinationPrefix' must not be empty");
+		this.userDestinationPrefix = prefix.endsWith("/") ? prefix : prefix + "/";
+
 	}
 
 	/**

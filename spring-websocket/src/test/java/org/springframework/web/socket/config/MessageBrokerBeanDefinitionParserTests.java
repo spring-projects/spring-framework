@@ -264,7 +264,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 
 		SimpMessagingTemplate simpMessagingTemplate = this.appContext.getBean(SimpMessagingTemplate.class);
 		assertNotNull(simpMessagingTemplate);
-		assertEquals("/personal", simpMessagingTemplate.getUserDestinationPrefix());
+		assertEquals("/personal/", simpMessagingTemplate.getUserDestinationPrefix());
 
 		List<MessageConverter> converters = compositeMessageConverter.getConverters();
 		assertThat(converters.size(), Matchers.is(3));
