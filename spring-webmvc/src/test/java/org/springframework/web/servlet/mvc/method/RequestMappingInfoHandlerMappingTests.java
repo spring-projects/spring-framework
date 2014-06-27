@@ -353,7 +353,8 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertEquals(Arrays.asList("red", "blue", "green"), matrixVariables.get("colors"));
 		assertEquals("2012", matrixVariables.getFirst("year"));
 		assertEquals("cars", uriVariables.get("cars"));
-		assertEquals(";colors=red,blue,green;year=2012", uriVariables.get("params"));
+		// SPR-11897
+		assertEquals("", uriVariables.get("params"));
 
 		request = new MockHttpServletRequest();
 		testHandleMatch(request, "/{cars:[^;]+}{params}", "/cars");
@@ -364,6 +365,18 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertNull(matrixVariables);
 		assertEquals("cars", uriVariables.get("cars"));
 		assertEquals("", uriVariables.get("params"));
+
+		// SPR-11897
+		request = new MockHttpServletRequest();
+		testHandleMatch(request, "/{cars}", "/cars=suv;colors=red,blue,green;year=2012");
+
+		matrixVariables = getMatrixVariables(request, "cars");
+		uriVariables = getUriTemplateVariables(request);
+
+		assertNotNull(matrixVariables);
+		assertEquals(Arrays.asList("red", "blue", "green"), matrixVariables.get("colors"));
+		assertEquals("2012", matrixVariables.getFirst("year"));
+		assertEquals("cars=suv", uriVariables.get("cars"));
 	}
 
 	@Test
