@@ -91,4 +91,10 @@ public class UserDestinationResult {
 	public String getUser() {
 		return this.user;
 	}
+
+	@Override
+	public String toString() {
+		return "UserDestinationResult[source=" + this.sourceDestination + ", target=" + this.targetDestinations +
+				", subscribeDestination=" + this.subscribeDestination + ", user=" + this.user + "]";
+	}
 }

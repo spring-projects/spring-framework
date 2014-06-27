@@ -100,18 +100,14 @@ public abstract class AbstractMessageChannel implements MessageChannel, BeanName
 
 	@Override
 	public final boolean send(Message<?> message, long timeout) {
-
 		Assert.notNull(message, "Message must not be null");
-
 		if (logger.isTraceEnabled()) {
-			logger.trace("[" + this.beanName + "] sending message=" + message);
+			logger.trace(this + " sending " + message);
 		}
-
 		message = this.interceptorChain.preSend(message, this);
 		if (message == null) {
 			return false;
 		}
-
 		try {
 			boolean sent = sendInternal(message, timeout);
 			this.interceptorChain.postSend(message, this, sent);
@@ -121,8 +117,7 @@ public abstract class AbstractMessageChannel implements MessageChannel, BeanName
 			if (e instanceof MessagingException) {
 				throw (MessagingException) e;
 			}
-			throw new MessageDeliveryException(message,
-					"Failed to send message to channel '" + this.getBeanName() + "'", e);
+			throw new MessageDeliveryException(message,"Failed to send message to " + this, e);
 		}
 	}
 
@@ -131,7 +126,7 @@ public abstract class AbstractMessageChannel implements MessageChannel, BeanName
 
 	@Override
 	public String toString() {
-		return "MessageChannel [name=" + this.beanName + "]";
+		return "MessageChannel[name=" + this.beanName + "]";
 	}
 
 }

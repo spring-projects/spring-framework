@@ -91,7 +91,7 @@ public final class StompEncoder  {
 			return baos.toByteArray();
 		}
 		catch (IOException e) {
-			throw new StompConversionException("Failed to encode STOMP frame",  e);
+			throw new StompConversionException("Failed to encode STOMP frame, headers=" + headers + ".",  e);
 		}
 	}
 
@@ -102,8 +102,8 @@ public final class StompEncoder  {
 		Map<String,List<String>> nativeHeaders =
 				(Map<String, List<String>>) headers.get(NativeMessageHeaderAccessor.NATIVE_HEADERS);
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Encoding STOMP " + command + ", headers=" + nativeHeaders);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Encoding STOMP " + command + ", headers=" + nativeHeaders + ".");
 		}
 
 		if (nativeHeaders == null) {

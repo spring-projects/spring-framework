@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
@@ -54,7 +52,9 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 
 	private final Queue<String> initSessionCache = new LinkedBlockingDeque<String>();
 
-	private final Lock initSessionLock = new ReentrantLock();
+	private final Object initSessionLock = new Object();
+
+	private volatile boolean disconnected;
 
 
 	public WebSocketServerSockJsSession(String id, SockJsServiceConfig config,
@@ -174,7 +174,7 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 
 	@Override
 	public boolean isActive() {
-		return ((this.webSocketSession != null) && this.webSocketSession.isOpen());
+		return (this.webSocketSession != null && this.webSocketSession.isOpen() && !this.disconnected);
 	}
 
 	public void handleMessage(TextMessage message, WebSocketSession wsSession) throws Exception {
@@ -225,8 +225,11 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 
 	@Override
 	protected void disconnect(CloseStatus status) throws IOException {
-		if (isActive()) {
-			this.webSocketSession.close(status);
+		synchronized (this) {
+			if (isActive()) {
+				this.disconnected = true;
+				this.webSocketSession.close(status);
+			}
 		}
 	}
 

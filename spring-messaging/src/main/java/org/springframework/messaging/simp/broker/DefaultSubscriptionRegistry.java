@@ -106,9 +106,6 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 	public void unregisterAllSubscriptions(String sessionId) {
 		SessionSubscriptionInfo info = this.subscriptionRegistry.removeSubscriptions(sessionId);
 		if (info != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Unregistering subscriptions for sessionId=" + sessionId);
-			}
 			this.destinationCache.updateAfterRemovedSession(info);
 		}
 	}
@@ -137,8 +134,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 	@Override
 	public String toString() {
-		return "[destinationCache=" + this.destinationCache + ", subscriptionRegistry="
-				+ this.subscriptionRegistry + "]";
+		return "DefaultSubscriptionRegistry[" + this.destinationCache + ", " + this.subscriptionRegistry + "]";
 	}
 
 
@@ -241,7 +237,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		@Override
 		public String toString() {
-			return "[cache=" + this.accessCache + "]";
+			return "cache[" + this.accessCache.size() + " destination(s)]";
 		}
 	}
 
@@ -282,7 +278,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		@Override
 		public String toString() {
-			return "[sessions=" + sessions + "]";
+			return "registry[" + sessions.size() + " session(s)]";
 		}
 	}
 

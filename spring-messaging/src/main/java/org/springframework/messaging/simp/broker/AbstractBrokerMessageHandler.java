@@ -43,11 +43,16 @@ public abstract class AbstractBrokerMessageHandler
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+
 	private final Collection<String> destinationPrefixes;
 
 	private ApplicationEventPublisher eventPublisher;
 
 	private AtomicBoolean brokerAvailable = new AtomicBoolean(false);
+
+	private final BrokerAvailabilityEvent availableEvent = new BrokerAvailabilityEvent(true, this);
+
+	private final BrokerAvailabilityEvent notAvailableEvent = new BrokerAvailabilityEvent(false, this);
 
 	private boolean autoStartup = true;
 
@@ -128,12 +133,12 @@ public abstract class AbstractBrokerMessageHandler
 	public final void start() {
 		synchronized (this.lifecycleMonitor) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Starting");
+				logger.debug("Starting...");
 			}
 			startInternal();
 			this.running = true;
 			if (logger.isDebugEnabled()) {
-				logger.debug("Started");
+				logger.debug("Started.");
 			}
 		}
 	}
@@ -145,12 +150,12 @@ public abstract class AbstractBrokerMessageHandler
 	public final void stop() {
 		synchronized (this.lifecycleMonitor) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Stopping");
+				logger.debug("Stopping...");
 			}
 			stopInternal();
 			this.running = false;
 			if (logger.isDebugEnabled()) {
-				logger.debug("Stopped");
+				logger.debug("Stopped.");
 			}
 		}
 	}
@@ -170,7 +175,7 @@ public abstract class AbstractBrokerMessageHandler
 	public final void handleMessage(Message<?> message) {
 		if (!this.running) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Message broker is not running. Ignoring message=" + message);
+				logger.trace(this + " not running yet. Ignoring " + message);
 			}
 			return;
 		}
@@ -194,20 +199,20 @@ public abstract class AbstractBrokerMessageHandler
 	protected void publishBrokerAvailableEvent() {
 		boolean shouldPublish = this.brokerAvailable.compareAndSet(false, true);
 		if (this.eventPublisher != null && shouldPublish) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Publishing BrokerAvailabilityEvent (available)");
+			if (logger.isInfoEnabled()) {
+				logger.info("Publishing " + this.availableEvent);
 			}
-			this.eventPublisher.publishEvent(new BrokerAvailabilityEvent(true, this));
+			this.eventPublisher.publishEvent(this.availableEvent);
 		}
 	}
 
 	protected void publishBrokerUnavailableEvent() {
 		boolean shouldPublish = this.brokerAvailable.compareAndSet(true, false);
 		if (this.eventPublisher != null && shouldPublish) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Publishing BrokerAvailabilityEvent (unavailable)");
+			if (logger.isInfoEnabled()) {
+				logger.info("Publishing " + this.notAvailableEvent);
 			}
-			this.eventPublisher.publishEvent(new BrokerAvailabilityEvent(false, this));
+			this.eventPublisher.publishEvent(this.notAvailableEvent);
 		}
 	}
 

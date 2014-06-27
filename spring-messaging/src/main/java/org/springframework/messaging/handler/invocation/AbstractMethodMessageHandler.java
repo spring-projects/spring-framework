@@ -325,20 +325,16 @@ public abstract class AbstractMethodMessageHandler<T>
 
 		String destination = getDestination(message);
 		if (destination == null) {
-			logger.trace("Ignoring message, no destination");
 			return;
 		}
 
 		String lookupDestination = getLookupDestination(destination);
 		if (lookupDestination == null) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Ignoring message to destination=" + destination);
-			}
 			return;
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Handling message, lookupDestination=" + lookupDestination);
+			logger.debug("Handling message to " + destination);
 		}
 
 		MessageHeaderAccessor headerAccessor = MessageHeaderAccessor.getMutableAccessor(message);
@@ -397,7 +393,8 @@ public abstract class AbstractMethodMessageHandler<T>
 		Collections.sort(matches, comparator);
 
 		if (logger.isTraceEnabled()) {
-			logger.trace("Found " + matches.size() + " matching mapping(s) for [" + lookupDestination + "] : " + matches);
+			logger.trace("Found " + matches.size() + " matching mapping(s) for [" +
+					lookupDestination + "] : " + matches);
 		}
 
 		Match bestMatch = matches.get(0);
@@ -507,7 +504,7 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	protected void handleNoMatch(Set<T> ts, String lookupDestination, Message<?> message) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("No matching method found");
+			logger.debug("No matching method found.");
 		}
 	}
 

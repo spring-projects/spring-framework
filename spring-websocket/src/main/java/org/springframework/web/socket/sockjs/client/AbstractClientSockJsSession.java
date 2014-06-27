@@ -241,8 +241,8 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 
 	private void handleMessageFrame(SockJsFrame frame) {
 		if (!isOpen()) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Ignoring received message due to state=" + this.state + " in " + this);
+			if (logger.isErrorEnabled()) {
+				logger.error("Ignoring received message due to state=" + this.state + " in " + this);
 			}
 			return;
 		}

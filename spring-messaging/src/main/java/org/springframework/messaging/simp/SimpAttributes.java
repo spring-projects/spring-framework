@@ -62,6 +62,22 @@ public class SimpAttributes {
 		this.attributes = attributes;
 	}
 
+	/**
+	 * Extract the SiMP session attributes from the given message, wrap them in
+	 * a {@link SimpAttributes} instance.
+	 * @param message the message to extract session attributes from
+	 */
+	public static SimpAttributes fromMessage(Message<?> message) {
+		Assert.notNull(message);
+		MessageHeaders headers = message.getHeaders();
+		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
+		Map<String, Object> sessionAttributes = SimpMessageHeaderAccessor.getSessionAttributes(headers);
+		if (sessionId == null || sessionAttributes == null) {
+			throw new IllegalStateException(
+					"Message does not contain SiMP session id or attributes: " + message);
+		}
+		return new SimpAttributes(sessionId, sessionAttributes);
+	}
 
 	/**
 	 * Return the value for the attribute of the given name, if any.
@@ -173,24 +189,6 @@ public class SimpAttributes {
 				}
 			}
 		}
-	}
-
-
-	/**
-	 * Extract the SiMP session attributes from the given message, wrap them in
-	 * a {@link SimpAttributes} instance.
-	 * @param message the message to extract session attributes from
-	 */
-	public static SimpAttributes fromMessage(Message<?> message) {
-		Assert.notNull(message);
-		MessageHeaders headers = message.getHeaders();
-		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
-		Map<String, Object> sessionAttributes = SimpMessageHeaderAccessor.getSessionAttributes(headers);
-		if (sessionId == null || sessionAttributes == null) {
-			throw new IllegalStateException(
-					"Message does not contain SiMP session id or attributes: " + message);
-		}
-		return new SimpAttributes(sessionId, sessionAttributes);
 	}
 
 }

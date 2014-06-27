@@ -133,9 +133,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message)
-			throws Exception {
-
+	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message) throws Exception {
 		if (returnValue == null) {
 			return;
 		}

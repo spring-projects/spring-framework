@@ -100,13 +100,11 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 
 	@Override
 	public UserDestinationResult resolveDestination(Message<?> message) {
-
 		String destination = SimpMessageHeaderAccessor.getDestination(message.getHeaders());
 		DestinationInfo info = parseUserDestination(message);
 		if (info == null) {
 			return null;
 		}
-
 		Set<String> resolved = new HashSet<String>();
 		for (String sessionId : info.getSessionIds()) {
 			String d = getTargetDestination(destination, info.getDestinationWithoutPrefix(), sessionId, info.getUser());
@@ -114,12 +112,10 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 				resolved.add(d);
 			}
 		}
-
 		return new UserDestinationResult(destination, resolved, info.getSubscribeDestination(), info.getUser());
 	}
 
 	private DestinationInfo parseUserDestination(Message<?> message) {
-
 		MessageHeaders headers = message.getHeaders();
 		SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(headers);
 		String destination = SimpMessageHeaderAccessor.getDestination(headers);
@@ -131,12 +127,13 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		String user;
 		Set<String> sessionIds;
 
+		if (destination == null || !checkDestination(destination, this.destinationPrefix)) {
+			return null;
+		}
+
 		if (SimpMessageType.SUBSCRIBE.equals(messageType) || SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
-			if (!checkDestination(destination, this.destinationPrefix)) {
-				return null;
-			}
 			if (sessionId == null) {
-				logger.error("Ignoring message, no session id available");
+				logger.error("No session id. Ignoring " + message);
 				return null;
 			}
 			destinationWithoutPrefix = destination.substring(this.destinationPrefix.length()-1);
@@ -145,9 +142,6 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 			sessionIds = Collections.singleton(sessionId);
 		}
 		else if (SimpMessageType.MESSAGE.equals(messageType)) {
-			if (!checkDestination(destination, this.destinationPrefix)) {
-				return null;
-			}
 			int startIndex = this.destinationPrefix.length();
 			int endIndex = destination.indexOf('/', startIndex);
 			Assert.isTrue(endIndex > 0, "Expected destination pattern \"/user/{userId}/**\"");
@@ -160,27 +154,13 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 					Collections.singleton(sessionId) : this.userSessionRegistry.getSessionIds(user));
 		}
 		else {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Ignoring " + messageType + " message");
-			}
 			return null;
 		}
-
 		return new DestinationInfo(destinationWithoutPrefix, subscribeDestination, user, sessionIds);
 	}
 
 	protected boolean checkDestination(String destination, String requiredPrefix) {
-		if (destination == null) {
-			logger.trace("Ignoring message, no destination");
-			return false;
-		}
-		if (!destination.startsWith(requiredPrefix)) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Ignoring message to " + destination + ", not a \"user\" destination");
-			}
-			return false;
-		}
-		return true;
+		return destination.startsWith(requiredPrefix);
 	}
 
 	/**
@@ -236,6 +216,12 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 
 		public Set<String> getSessionIds() {
 			return this.sessionIds;
+		}
+
+		@Override
+		public String toString() {
+			return "DestinationInfo[destination=" + this.destinationWithoutPrefix + ", subscribeDestination=" +
+					this.subscribeDestination + ", user=" + this.user + ", sessionIds=" + this.sessionIds + "]";
 		}
 	}
 

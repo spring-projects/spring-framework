@@ -73,6 +73,6 @@ public class SessionConnectEvent extends ApplicationEvent {
 
 	@Override
 	public String toString() {
-		return "SessionConnectEvent: message=" + message;
+		return "SessionConnectEvent" + this.message;
 	}
 }

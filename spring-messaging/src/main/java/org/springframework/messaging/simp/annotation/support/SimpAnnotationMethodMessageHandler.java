@@ -187,7 +187,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	 * The configured Validator instance
 	 */
 	public Validator getValidator() {
-		return validator;
+		return this.validator;
 	}
 
 	/**
@@ -315,25 +315,23 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	@Override
 	protected SimpMessageMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
-		MessageMapping typeAnnot = AnnotationUtils.findAnnotation(handlerType, MessageMapping.class);
+		MessageMapping typeAnnotation = AnnotationUtils.findAnnotation(handlerType, MessageMapping.class);
 		MessageMapping messageAnnot = AnnotationUtils.findAnnotation(method, MessageMapping.class);
 		if (messageAnnot != null) {
 			SimpMessageMappingInfo result = createMessageMappingCondition(messageAnnot);
-			if (typeAnnot != null) {
-				result = createMessageMappingCondition(typeAnnot).combine(result);
+			if (typeAnnotation != null) {
+				result = createMessageMappingCondition(typeAnnotation).combine(result);
 			}
 			return result;
 		}
-
-		SubscribeMapping subsribeAnnot = AnnotationUtils.findAnnotation(method, SubscribeMapping.class);
-		if (subsribeAnnot != null) {
-			SimpMessageMappingInfo result = createSubscribeCondition(subsribeAnnot);
-			if (typeAnnot != null) {
-				result = createMessageMappingCondition(typeAnnot).combine(result);
+		SubscribeMapping subsribeAnnotation = AnnotationUtils.findAnnotation(method, SubscribeMapping.class);
+		if (subsribeAnnotation != null) {
+			SimpMessageMappingInfo result = createSubscribeCondition(subsribeAnnotation);
+			if (typeAnnotation != null) {
+				result = createMessageMappingCondition(typeAnnotation).combine(result);
 			}
 			return result;
 		}
-
 		return null;
 	}
 

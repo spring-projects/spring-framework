@@ -156,7 +156,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 
 		TransportHandler transportHandler = this.handlers.get(TransportType.WEBSOCKET);
 		if (!(transportHandler instanceof HandshakeHandler)) {
-			logger.warn("No handler for raw WebSocket messages");
+			logger.error("No handler configured for raw WebSocket messages");
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
 		}
@@ -192,8 +192,8 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 
 		TransportType transportType = TransportType.fromValue(transport);
 		if (transportType == null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Unknown transport type: " + transportType);
+			if (logger.isErrorEnabled()) {
+				logger.error("Unknown transport type: " + transportType);
 			}
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
@@ -201,7 +201,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 
 		TransportHandler transportHandler = this.handlers.get(transportType);
 		if (transportHandler == null) {
-			logger.debug("Transport handler not found");
+			logger.error("Transport handler not found");
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
 		}
@@ -238,7 +238,9 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 				}
 				else {
 					response.setStatusCode(HttpStatus.NOT_FOUND);
-					logger.warn("Session not found, sessionId=" + sessionId);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Session not found, sessionId=" + sessionId);
+					}
 					return;
 				}
 			}
@@ -281,7 +283,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Creating new session with session id \"" + sessionId + "\"");
+			logger.debug("Creating new SockJS session, sessionId=" + sessionId);
 		}
 		session = sessionFactory.createSession(sessionId, handler, attributes);
 		this.sessions.put(sessionId, session);

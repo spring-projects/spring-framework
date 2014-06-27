@@ -156,13 +156,13 @@ public class StompDecoder {
 				headerAccessor.updateSimpMessageHeadersFromStompHeaders();
 				headerAccessor.setLeaveMutable(true);
 				decodedMessage = MessageBuilder.createMessage(payload, headerAccessor.getMessageHeaders());
-				if (logger.isDebugEnabled()) {
-					logger.debug("Decoded " + decodedMessage);
+				if (logger.isTraceEnabled()) {
+					logger.trace("Decoded " + decodedMessage);
 				}
 			}
 			else {
 				if (logger.isTraceEnabled()) {
-					logger.trace("Received incomplete frame. Resetting buffer.");
+					logger.trace("Incomplete frame, resetting input buffer.");
 				}
 				if (headers != null && headerAccessor != null) {
 					String name = NativeMessageHeaderAccessor.NATIVE_HEADERS;
@@ -177,7 +177,7 @@ public class StompDecoder {
 		}
 		else {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Decoded heartbeat");
+				logger.trace("Decoded heartbeat.");
 			}
 			StompHeaderAccessor headerAccessor = StompHeaderAccessor.createForHeartbeat();
 			initHeaders(headerAccessor);
@@ -224,8 +224,8 @@ public class StompDecoder {
 				int colonIndex = header.indexOf(':');
 				if ((colonIndex <= 0) || (colonIndex == header.length() - 1)) {
 					if (buffer.remaining() > 0) {
-						throw new StompConversionException(
-								"Illegal header: '" + header + "'. A header must be of the form <name>:<value>");
+						throw new StompConversionException("Illegal header: '" + header +
+								"'. A header must be of the form <name>:<value>.");
 					}
 				}
 				else {

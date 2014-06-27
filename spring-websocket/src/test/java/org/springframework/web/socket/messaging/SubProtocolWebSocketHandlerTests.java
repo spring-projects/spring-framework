@@ -116,7 +116,7 @@ public class SubProtocolWebSocketHandlerTests {
 	@Test
 	public void emptySubProtocol() throws Exception {
 		this.session.setAcceptedProtocol("");
-		this.webSocketHandler.setDefaultProtocolHandler(defaultHandler);
+		this.webSocketHandler.setDefaultProtocolHandler(this.defaultHandler);
 		this.webSocketHandler.afterConnectionEstablished(session);
 
 		verify(this.defaultHandler).afterSessionStarted(

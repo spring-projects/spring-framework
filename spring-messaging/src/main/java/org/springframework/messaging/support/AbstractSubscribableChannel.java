@@ -47,7 +47,7 @@ public abstract class AbstractSubscribableChannel extends AbstractMessageChannel
 		boolean result = this.handlers.add(handler);
 		if (result) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("[" + getBeanName() + "] subscribed " + handler);
+				logger.debug(this + " subscribed " + handler);
 			}
 		}
 		return result;
@@ -58,7 +58,7 @@ public abstract class AbstractSubscribableChannel extends AbstractMessageChannel
 		boolean result = this.handlers.remove(handler);
 		if (result) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("[" + getBeanName() + "] unsubscribed " + handler);
+				logger.debug(this + " unsubscribed " + handler);
 			}
 		}
 		return result;

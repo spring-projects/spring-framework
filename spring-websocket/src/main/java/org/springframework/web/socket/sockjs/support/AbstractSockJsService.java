@@ -266,23 +266,23 @@ public abstract class AbstractSockJsService implements SockJsService {
 			String sockJsPath, WebSocketHandler wsHandler) throws SockJsException {
 
 		if (sockJsPath == null) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("No SockJS path provided, URI=\"" + request.getURI());
+			if (logger.isErrorEnabled()) {
+				logger.error("Expected SockJS path. Failing request: " + request.getURI());
 			}
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
 		}
 
-		if (logger.isDebugEnabled()) {
-			logger.debug(request.getMethod() + " with SockJS path [" + sockJsPath + "]");
+		if (logger.isTraceEnabled()) {
+			logger.trace(request.getMethod() + " with SockJS path [" + sockJsPath + "]");
 		}
 
 		try {
 			request.getHeaders();
 		}
 		catch (InvalidMediaTypeException ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Invalid media type ignored: " + ex.getMediaType());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Invalid media type ignored: " + ex.getMediaType());
 			}
 		}
 
@@ -305,8 +305,8 @@ public abstract class AbstractSockJsService implements SockJsService {
 			else {
 				String[] pathSegments = StringUtils.tokenizeToStringArray(sockJsPath.substring(1), "/");
 				if (pathSegments.length != 3) {
-					if (logger.isWarnEnabled()) {
-						logger.warn("Expected \"/{server}/{session}/{transport}\" but got \"" + sockJsPath + "\"");
+					if (logger.isErrorEnabled()) {
+						logger.error("Expected \"/{server}/{session}/{transport}\" but got \"" + sockJsPath + "\"");
 					}
 					response.setStatusCode(HttpStatus.NOT_FOUND);
 					return;
@@ -330,18 +330,18 @@ public abstract class AbstractSockJsService implements SockJsService {
 
 	protected boolean validateRequest(String serverId, String sessionId, String transport) {
 		if (!StringUtils.hasText(serverId) || !StringUtils.hasText(sessionId) || !StringUtils.hasText(transport)) {
-			logger.warn("Empty server, session, or transport value");
+			logger.error("Empty server, session, or transport value");
 			return false;
 		}
 
 		// Server and session id's must not contain "."
 		if (serverId.contains(".") || sessionId.contains(".")) {
-			logger.warn("Server or session contain a \".\"");
+			logger.error("Server or session contain a \".\"");
 			return false;
 		}
 
 		if (!isWebSocketEnabled() && transport.equals("websocket")) {
-			logger.warn("Websocket transport is disabled");
+			logger.debug("Ignoring WebSocket request (transport disabled via SockJsService property).");
 			return false;
 		}
 
@@ -370,7 +370,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 		try {
 			// Perhaps a CORS Filter has already added this?
 			if (!CollectionUtils.isEmpty(responseHeaders.get("Access-Control-Allow-Origin"))) {
-				logger.debug("Skip adding CORS headers, response already contains \"Access-Control-Allow-Origin\"");
+				logger.trace("Skip adding CORS headers, response already contains \"Access-Control-Allow-Origin\"");
 				return;
 			}
 		}
@@ -407,7 +407,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 	}
 
 	protected void sendMethodNotAllowed(ServerHttpResponse response, HttpMethod... httpMethods) {
-		logger.debug("Sending Method Not Allowed (405)");
+		logger.error("Sending Method Not Allowed (405)");
 		response.setStatusCode(HttpStatus.METHOD_NOT_ALLOWED);
 		response.getHeaders().setAllow(new HashSet<HttpMethod>(Arrays.asList(httpMethods)));
 	}

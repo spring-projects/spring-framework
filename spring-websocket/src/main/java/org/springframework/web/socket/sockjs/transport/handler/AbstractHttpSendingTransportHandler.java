@@ -62,11 +62,13 @@ public abstract class AbstractHttpSendingTransportHandler extends AbstractTransp
 			AbstractHttpSockJsSession sockJsSession) throws SockJsException {
 
 		if (sockJsSession.isNew()) {
-			logger.debug("Opening " + getTransportType() + " connection");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Opening " + getTransportType() + " connection.");
+			}
 			sockJsSession.handleInitialRequest(request, response, getFrameFormat(request));
 		}
 		else if (sockJsSession.isClosed()) {
-			logger.debug("Connection already closed (but not removed yet)");
+			logger.debug("Connection already closed (but not removed yet).");
 			SockJsFrame frame = SockJsFrame.closeFrameGoAway();
 			try {
 				response.getBody().write(frame.getContentBytes());
@@ -77,11 +79,15 @@ public abstract class AbstractHttpSendingTransportHandler extends AbstractTransp
 			return;
 		}
 		else if (!sockJsSession.isActive()) {
-			logger.debug("starting " + getTransportType() + " async request");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Starting " + getTransportType() + " async request.");
+			}
 			sockJsSession.handleSuccessiveRequest(request, response, getFrameFormat(request));
 		}
 		else {
-			logger.debug("another " + getTransportType() + " connection still open: " + sockJsSession);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Another " + getTransportType() + " connection still open: " + sockJsSession);
+			}
 			String formattedFrame = getFrameFormat(request).format(SockJsFrame.closeFrameAnotherConnectionOpen());
 			try {
 				response.getBody().write(formattedFrame.getBytes(SockJsFrame.CHARSET));

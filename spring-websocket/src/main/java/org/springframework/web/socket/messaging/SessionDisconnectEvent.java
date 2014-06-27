@@ -68,6 +68,7 @@ public class SessionDisconnectEvent extends ApplicationEvent {
 
 	@Override
 	public String toString() {
-		return "SessionDisconnectEvent: sessionId=" + this.sessionId;
+		return "SessionDisconnectEvent[sessionId=" + this.sessionId +
+				(this.status != null ? this.status.toString() : "closeStatus=null") + "]";
 	}
 }

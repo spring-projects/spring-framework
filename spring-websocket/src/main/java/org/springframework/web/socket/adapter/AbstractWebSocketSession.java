@@ -133,8 +133,8 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 	@Override
 	public final void close(CloseStatus status) throws IOException {
 		checkNativeSessionInitialized();
-		if (logger.isDebugEnabled()) {
-			logger.debug("Closing " + this);
+		if (logger.isInfoEnabled()) {
+			logger.info("Closing " + this);
 		}
 		closeInternal(status);
 	}
@@ -144,7 +144,7 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 
 	@Override
 	public String toString() {
-		return "WebSocket session id=" + getId();
+		return this.getClass().getSimpleName() + "[id=" + getId() + "]";
 	}
 
 }

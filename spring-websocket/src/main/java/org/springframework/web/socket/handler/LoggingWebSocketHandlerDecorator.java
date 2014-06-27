@@ -50,7 +50,7 @@ public class LoggingWebSocketHandlerDecorator extends WebSocketHandlerDecorator 
 	@Override
 	public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
 		if (logger.isTraceEnabled()) {
-			logger.trace(message + ", " + session);
+			logger.trace("Handling " + message + " in " + session);
 		}
 		super.handleMessage(session, message);
 	}

@@ -322,7 +322,6 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 			if (control != null && !control.isCompleted()) {
 				if (control.isStarted()) {
 					try {
-						logger.debug("Completing asynchronous request");
 						control.complete();
 					}
 					catch (Throwable ex) {

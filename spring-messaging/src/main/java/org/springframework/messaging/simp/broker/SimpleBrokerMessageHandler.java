@@ -64,12 +64,9 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 			SubscribableChannel brokerChannel, Collection<String> destinationPrefixes) {
 
 		super(destinationPrefixes);
-
 		Assert.notNull(clientInboundChannel, "'clientInboundChannel' must not be null");
 		Assert.notNull(clientOutboundChannel, "'clientOutboundChannel' must not be null");
 		Assert.notNull(brokerChannel, "'brokerChannel' must not be null");
-
-
 		this.clientInboundChannel = clientInboundChannel;
 		this.clientOutboundChannel = clientOutboundChannel;
 		this.brokerChannel = brokerChannel;
@@ -139,7 +136,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 		if (!checkDestinationPrefix(destination)) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Ignoring message to destination=" + destination);
+				logger.trace("No match on destination in " + message);
 			}
 			return;
 		}
@@ -147,16 +144,10 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		if (SimpMessageType.MESSAGE.equals(messageType)) {
 			sendMessageToSubscribers(destination, message);
 		}
-		else if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
-			this.subscriptionRegistry.registerSubscription(message);
-		}
-		else if (SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
-			this.subscriptionRegistry.unregisterSubscription(message);
-		}
-		else if (SimpMessageType.DISCONNECT.equals(messageType)) {
-				this.subscriptionRegistry.unregisterAllSubscriptions(sessionId);
-		}
 		else if (SimpMessageType.CONNECT.equals(messageType)) {
+			if (logger.isInfoEnabled()) {
+				logger.info("Handling CONNECT: " + message);
+			}
 			SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
 			initHeaders(accessor);
 			accessor.setSessionId(sessionId);
@@ -164,9 +155,27 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 			Message<byte[]> connectAck = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
 			this.clientOutboundChannel.send(connectAck);
 		}
+		else if (SimpMessageType.DISCONNECT.equals(messageType)) {
+			if (logger.isInfoEnabled()) {
+				logger.info("Handling DISCONNECT: " + message);
+			}
+			this.subscriptionRegistry.unregisterAllSubscriptions(sessionId);
+		}
+		else if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Handling SUBSCRIBE: " + message);
+			}
+			this.subscriptionRegistry.registerSubscription(message);
+		}
+		else if (SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Handling UNSUBSCRIBE: " + message);
+			}
+			this.subscriptionRegistry.unregisterSubscription(message);
+		}
 		else {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Message type not supported. Ignoring: " + message);
+				logger.trace("Unsupported message type in " + message);
 			}
 		}
 	}
@@ -179,9 +188,8 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	protected void sendMessageToSubscribers(String destination, Message<?> message) {
 		MultiValueMap<String,String> subscriptions = this.subscriptionRegistry.findSubscriptions(message);
-		if ((subscriptions.size() > 0) && logger.isDebugEnabled()) {
-			logger.debug("Sending message with destination=" + destination
-					+ " to " + subscriptions.size() + " subscriber(s)");
+		if ((subscriptions.size() > 0) && logger.isTraceEnabled()) {
+			logger.trace("Sending to " + subscriptions.size() + " subscriber(s): " + message);
 		}
 		for (String sessionId : subscriptions.keySet()) {
 			for (String subscriptionId : subscriptions.get(sessionId)) {
@@ -196,10 +204,15 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 					this.clientOutboundChannel.send(reply);
 				}
 				catch (Throwable ex) {
-					logger.error("Failed to send message=" + message, ex);
+					logger.error("Failed to send " + message, ex);
 				}
 			}
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "SimpleBroker[" + this.subscriptionRegistry + "]";
 	}
 
 }
