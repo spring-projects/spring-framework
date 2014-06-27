@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 07.03.2006
  */
 public class DataBinderFieldAccessTests extends TestCase {
@@ -107,6 +108,22 @@ public class DataBinderFieldAccessTests extends TestCase {
 			assertEquals("32x", binder.getBindingResult().getFieldError("age").getRejectedValue());
 			assertEquals(0, tb.getAge());
 		}
+	}
+
+	public void testedNestedBindingWithDefaultConversionNoErrors() throws Exception {
+		FieldAccessBean rod = new FieldAccessBean();
+		DataBinder binder = new DataBinder(rod, "person");
+		assertTrue(binder.isIgnoreUnknownFields());
+		binder.initDirectFieldAccess();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue(new PropertyValue("spouse.name", "Kerry"));
+		pvs.addPropertyValue(new PropertyValue("spouse.jedi", "on"));
+
+		binder.bind(pvs);
+		binder.close();
+
+		assertEquals("Kerry", rod.getSpouse().getName());
+		assertTrue((rod.getSpouse()).isJedi());
 	}
 
 	public void testBindingWithErrorsAndCustomEditors() throws Exception {

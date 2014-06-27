@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,7 @@ import org.springframework.util.Assert;
  * supporting registration and evaluation of binding errors on value objects.
  * Performs direct field access instead of going through JavaBean getters.
  *
- * <p>This implementation just supports fields in the actual target object.
- * It is not able to traverse nested fields.
+ * <p>Since Spring 4.1 this implementation is able to traverse nested fields.
  *
  * @author Juergen Hoeller
  * @since 2.0
