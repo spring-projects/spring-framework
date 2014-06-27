@@ -38,6 +38,8 @@ public class DirectFieldBindingResult extends AbstractPropertyBindingResult {
 
 	private final Object target;
 
+	private final boolean autoGrowNestedPaths;
+
 	private transient ConfigurablePropertyAccessor directFieldAccessor;
 
 
@@ -47,8 +49,19 @@ public class DirectFieldBindingResult extends AbstractPropertyBindingResult {
 	 * @param objectName the name of the target object
 	 */
 	public DirectFieldBindingResult(Object target, String objectName) {
+		this(target, objectName, true);
+	}
+
+	/**
+	 * Create a new DirectFieldBindingResult instance.
+	 * @param target the target object to bind onto
+	 * @param objectName the name of the target object
+	 * @param autoGrowNestedPaths whether to "auto-grow" a nested path that contains a null value
+	 */
+	public DirectFieldBindingResult(Object target, String objectName, boolean autoGrowNestedPaths) {
 		super(objectName);
 		this.target = target;
+		this.autoGrowNestedPaths = autoGrowNestedPaths;
 	}
 
 
@@ -67,6 +80,7 @@ public class DirectFieldBindingResult extends AbstractPropertyBindingResult {
 		if (this.directFieldAccessor == null) {
 			this.directFieldAccessor = createDirectFieldAccessor();
 			this.directFieldAccessor.setExtractOldValueForEditor(true);
+			this.directFieldAccessor.setAutoGrowNestedPaths(this.autoGrowNestedPaths);
 		}
 		return this.directFieldAccessor;
 	}

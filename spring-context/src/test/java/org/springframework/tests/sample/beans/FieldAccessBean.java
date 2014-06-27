@@ -28,10 +28,6 @@ public class FieldAccessBean {
 
 	private TestBean spouse;
 
-	public FieldAccessBean() {
-		this.spouse = new TestBean();
-	}
-
 	public String getName() {
 		return name;
 	}
