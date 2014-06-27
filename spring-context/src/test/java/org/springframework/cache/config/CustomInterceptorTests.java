@@ -113,6 +113,7 @@ public class CustomInterceptorTests {
 	 * A test {@link CacheInterceptor} that handles special exception
 	 * types.
 	 */
+	@SuppressWarnings("serial")
 	static class TestCacheInterceptor extends CacheInterceptor {
 
 		@Override

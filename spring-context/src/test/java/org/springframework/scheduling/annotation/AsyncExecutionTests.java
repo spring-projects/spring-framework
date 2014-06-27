@@ -410,6 +410,7 @@ public class AsyncExecutionTests {
 
 
 	@Async
+	@SuppressWarnings("serial")
 	public static class AsyncClassBean implements Serializable, DisposableBean {
 
 		public void doSomething(int i) {
