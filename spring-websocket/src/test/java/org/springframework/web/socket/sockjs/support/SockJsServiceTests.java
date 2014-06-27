@@ -123,7 +123,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 
 		handleRequest("GET", "/echo/info", HttpStatus.OK);
 
-		verify(mockResponse.getOutputStream(), times(1));
+		verify(mockResponse, times(1)).getOutputStream();
 	}
 
 	@Test
