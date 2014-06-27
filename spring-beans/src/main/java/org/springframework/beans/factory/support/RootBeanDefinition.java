@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,6 @@ import org.springframework.util.Assert;
  */
 @SuppressWarnings("serial")
 public class RootBeanDefinition extends AbstractBeanDefinition {
-
-	boolean allowCaching = true;
 
 	private BeanDefinitionHolder decoratedDefinition;
 
@@ -171,7 +169,6 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 */
 	public RootBeanDefinition(RootBeanDefinition original) {
 		super(original);
-		this.allowCaching = original.allowCaching;
 		this.decoratedDefinition = original.decoratedDefinition;
 		this.targetType = original.targetType;
 		this.isFactoryMethodUnique = original.isFactoryMethodUnique;
