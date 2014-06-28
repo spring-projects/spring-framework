@@ -46,13 +46,17 @@ import org.springframework.web.socket.adapter.AbstractWebSocketSession;
  */
 public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
+	private String id;
+
+	private URI uri;
+
 	private HttpHeaders headers;
+
+	private String acceptedProtocol;
 
 	private List<WebSocketExtension> extensions;
 
 	private Principal user;
-
-	private String acceptedProtocol;
 
 
 	/**
@@ -81,33 +85,36 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 	@Override
 	public String getId() {
 		checkNativeSessionInitialized();
-		return ObjectUtils.getIdentityHexString(getNativeSession());
+		return this.id;
 	}
 
 	@Override
 	public URI getUri() {
 		checkNativeSessionInitialized();
-		return getNativeSession().getUpgradeRequest().getRequestURI();
+		return this.uri;
 	}
 
 	@Override
 	public HttpHeaders getHandshakeHeaders() {
 		checkNativeSessionInitialized();
-		if (this.headers == null) {
-			this.headers = new HttpHeaders();
-			this.headers.putAll(getNativeSession().getUpgradeRequest().getHeaders());
-			this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
-		}
 		return this.headers;
 	}
 
 	@Override
-	public Principal getPrincipal() {
-		if (this.user != null) {
-			return this.user;
-		}
+	public String getAcceptedProtocol() {
 		checkNativeSessionInitialized();
-		return (isOpen() ? getNativeSession().getUpgradeRequest().getUserPrincipal() : null);
+		return this.acceptedProtocol;
+	}
+
+	@Override
+	public List<WebSocketExtension> getExtensions() {
+		checkNativeSessionInitialized();
+		return this.extensions;
+	}
+
+	@Override
+	public Principal getPrincipal() {
+		return this.user;
 	}
 
 	@Override
@@ -120,12 +127,6 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 	public InetSocketAddress getRemoteAddress() {
 		checkNativeSessionInitialized();
 		return getNativeSession().getRemoteAddress();
-	}
-
-	@Override
-	public String getAcceptedProtocol() {
-		checkNativeSessionInitialized();
-		return this.acceptedProtocol;
 	}
 
 	@Override
@@ -153,19 +154,6 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 	}
 
 	@Override
-	public List<WebSocketExtension> getExtensions() {
-		checkNativeSessionInitialized();
-		if(this.extensions == null) {
-			List<ExtensionConfig> source = getNativeSession().getUpgradeResponse().getExtensions();
-			this.extensions = new ArrayList<WebSocketExtension>(source.size());
-			for(ExtensionConfig e : source) {
-				this.extensions.add(new WebSocketExtension(e.getName(), e.getParameters()));
-			}
-		}
-		return this.extensions;
-	}
-
-	@Override
 	public boolean isOpen() {
 		return ((getNativeSession() != null) && getNativeSession().isOpen());
 	}
@@ -173,10 +161,25 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 	@Override
 	public void initializeNativeSession(Session session) {
 		super.initializeNativeSession(session);
+
+		this.id = ObjectUtils.getIdentityHexString(getNativeSession());
+		this.uri = session.getUpgradeRequest().getRequestURI();
+
+		this.headers = new HttpHeaders();
+		this.headers.putAll(getNativeSession().getUpgradeRequest().getHeaders());
+		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
+
+		this.acceptedProtocol = session.getUpgradeResponse().getAcceptedSubProtocol();
+
+		List<ExtensionConfig> source = getNativeSession().getUpgradeResponse().getExtensions();
+		this.extensions = new ArrayList<WebSocketExtension>(source.size());
+		for(ExtensionConfig e : source) {
+			this.extensions.add(new WebSocketExtension(e.getName(), e.getParameters()));
+		}
+
 		if (this.user == null) {
 			this.user = session.getUpgradeRequest().getUserPrincipal();
 		}
-		this.acceptedProtocol = session.getUpgradeResponse().getAcceptedSubProtocol();
 	}
 
 	@Override

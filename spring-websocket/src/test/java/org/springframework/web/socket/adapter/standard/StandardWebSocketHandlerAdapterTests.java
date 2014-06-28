@@ -55,6 +55,7 @@ public class StandardWebSocketHandlerAdapterTests {
 
 	@Test
 	public void onOpen() throws Throwable {
+		when(this.session.getId()).thenReturn("123");
 		this.adapter.onOpen(this.session, null);
 
 		verify(this.webSocketHandler).afterConnectionEstablished(this.webSocketSession);

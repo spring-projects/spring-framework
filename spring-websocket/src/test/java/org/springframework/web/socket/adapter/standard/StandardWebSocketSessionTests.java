@@ -86,7 +86,6 @@ public class StandardWebSocketSessionTests {
 		reset(nativeSession);
 
 		assertNull(session.getPrincipal());
-		verify(nativeSession).isOpen();
 		verifyNoMoreInteractions(nativeSession);
 	}
 

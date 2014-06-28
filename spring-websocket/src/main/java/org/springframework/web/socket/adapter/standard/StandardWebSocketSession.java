@@ -47,17 +47,21 @@ import org.springframework.web.socket.adapter.AbstractWebSocketSession;
  */
 public class StandardWebSocketSession extends AbstractWebSocketSession<Session> {
 
+	private String id;
+
+	private URI uri;
+
 	private final HttpHeaders handshakeHeaders;
-
-	private final InetSocketAddress localAddress;
-
-	private final InetSocketAddress remoteAddress;
-
-	private Principal user;
 
 	private String acceptedProtocol;
 
 	private List<WebSocketExtension> extensions;
+
+	private Principal user;
+
+	private final InetSocketAddress localAddress;
+
+	private final InetSocketAddress remoteAddress;
 
 
 	/**
@@ -89,25 +93,24 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 			InetSocketAddress localAddress, InetSocketAddress remoteAddress, Principal user) {
 
 		super(attributes);
-
 		headers = (headers != null) ? headers : new HttpHeaders();
 		this.handshakeHeaders = HttpHeaders.readOnlyHttpHeaders(headers);
+		this.user = user;
 		this.localAddress = localAddress;
 		this.remoteAddress = remoteAddress;
-		this.user = user;
 	}
 
 
 	@Override
 	public String getId() {
 		checkNativeSessionInitialized();
-		return getNativeSession().getId();
+		return this.id;
 	}
 
 	@Override
 	public URI getUri() {
 		checkNativeSessionInitialized();
-		return getNativeSession().getRequestURI();
+		return this.uri;
 	}
 
 	@Override
@@ -116,12 +119,19 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	}
 
 	@Override
-	public Principal getPrincipal() {
-		if (this.user != null) {
-			return this.user;
-		}
+	public String getAcceptedProtocol() {
 		checkNativeSessionInitialized();
-		return (isOpen() ? getNativeSession().getUserPrincipal() : null);
+		return this.acceptedProtocol;
+	}
+
+	@Override
+	public List<WebSocketExtension> getExtensions() {
+		checkNativeSessionInitialized();
+		return this.extensions;
+	}
+
+	public Principal getPrincipal() {
+		return this.user;
 	}
 
 	@Override
@@ -132,12 +142,6 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	@Override
 	public InetSocketAddress getRemoteAddress() {
 		return this.remoteAddress;
-	}
-
-	@Override
-	public String getAcceptedProtocol() {
-		checkNativeSessionInitialized();
-		return this.acceptedProtocol;
 	}
 
 	@Override
@@ -165,19 +169,6 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	}
 
 	@Override
-	public List<WebSocketExtension> getExtensions() {
-		checkNativeSessionInitialized();
-		if(this.extensions == null) {
-			List<Extension> source = getNativeSession().getNegotiatedExtensions();
-			this.extensions = new ArrayList<WebSocketExtension>(source.size());
-			for(Extension e : source) {
-				this.extensions.add(new StandardToWebSocketExtensionAdapter(e));
-			}
-		}
-		return this.extensions;
-	}
-
-	@Override
 	public boolean isOpen() {
 		return (getNativeSession() != null && getNativeSession().isOpen());
 	}
@@ -185,10 +176,21 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	@Override
 	public void initializeNativeSession(Session session) {
 		super.initializeNativeSession(session);
+
+		this.id = session.getId();
+		this.uri = session.getRequestURI();
+
+		this.acceptedProtocol = session.getNegotiatedSubprotocol();
+
+		List<Extension> source = getNativeSession().getNegotiatedExtensions();
+		this.extensions = new ArrayList<WebSocketExtension>(source.size());
+		for(Extension e : source) {
+			this.extensions.add(new StandardToWebSocketExtensionAdapter(e));
+		}
+
 		if(this.user == null) {
 			this.user = session.getUserPrincipal();
 		}
-		this.acceptedProtocol = session.getNegotiatedSubprotocol();
 	}
 
 	@Override

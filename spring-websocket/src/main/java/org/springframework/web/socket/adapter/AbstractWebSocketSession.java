@@ -144,7 +144,12 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName() + "[id=" + getId() + "]";
+		if (this.nativeSession != null) {
+			return getClass().getSimpleName() + "[id=" + getId() + ", uri=" + getUri() + "]";
+		}
+		else {
+			return getClass().getSimpleName() + "[nativeSession=null]";
+		}
 	}
 
 }

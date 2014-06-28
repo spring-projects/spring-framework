@@ -168,4 +168,10 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 		super.close(status);
 	}
 
+
+	@Override
+	public String toString() {
+		return getDelegate().toString();
+	}
+
 }

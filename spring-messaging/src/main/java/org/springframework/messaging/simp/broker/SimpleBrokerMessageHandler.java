@@ -135,9 +135,6 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 
 		if (!checkDestinationPrefix(destination)) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("No match on destination in " + message);
-			}
 			return;
 		}
 
@@ -172,11 +169,6 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 				logger.debug("Handling UNSUBSCRIBE: " + message);
 			}
 			this.subscriptionRegistry.unregisterSubscription(message);
-		}
-		else {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Unsupported message type in " + message);
-			}
 		}
 	}
 

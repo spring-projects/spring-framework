@@ -424,12 +424,9 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 		}
 	}
 
-
 	@Override
 	public String toString() {
-		long currentTime = System.currentTimeMillis();
-		return getClass().getSimpleName() + "[id=" + this.id + ", state=" + this.state + ", sinceCreated=" +
-				(currentTime - this.timeCreated) + ", sinceLastActive=" + (currentTime - this.timeLastActive) + "]";
+		return getClass().getSimpleName() + "[id=" + getId() + ", uri=" + getUri() + "]";
 	}
 
 

@@ -454,9 +454,6 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 		String destination = stompAccessor.getDestination();
 		if ((command != null) && command.requiresDestination() && !checkDestinationPrefix(destination)) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("No match on destination. Ignoring " + message);
-			}
 			return;
 		}
 

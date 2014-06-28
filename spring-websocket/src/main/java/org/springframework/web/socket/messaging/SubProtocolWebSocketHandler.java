@@ -376,7 +376,8 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 					}
 					WebSocketSession session = holder.getSession();
 					if (logger.isErrorEnabled()) {
-						logger.error("No messages received after " + timeSinceCreated + " ms. Closing " + holder + ".");
+						logger.error("No messages received after " + timeSinceCreated + " ms. " +
+								"Closing " + holder.getSession() + ".");
 					}
 					try {
 						session.close(CloseStatus.PROTOCOL_ERROR);
@@ -446,12 +447,8 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 
 		@Override
 		public String toString() {
-			if (this.session instanceof ConcurrentWebSocketSessionDecorator) {
-				return ((ConcurrentWebSocketSessionDecorator) this.session).getLastSession().toString();
-			}
-			else {
-				return this.session.toString();
-			}
+			return "WebSocketSessionHolder[=session=" + this.session + ", createTime=" +
+					this.createTime + ", hasHandledMessages=" + this.handledMessages + "]";
 		}
 	}
 

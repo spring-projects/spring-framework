@@ -41,8 +41,8 @@ public class LoggingWebSocketHandlerDecorator extends WebSocketHandlerDecorator 
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Connection established, "	+ session + ", uri=" + session.getUri());
+		if (logger.isInfoEnabled()) {
+			logger.info("Connection established "	+ session);
 		}
 		super.afterConnectionEstablished(session);
 	}
@@ -58,15 +58,15 @@ public class LoggingWebSocketHandlerDecorator extends WebSocketHandlerDecorator 
 	@Override
 	public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
 		if (logger.isErrorEnabled()) {
-			logger.error("Transport error for " + session, exception);
+			logger.error("Transport error in " + session, exception);
 		}
 		super.handleTransportError(session, exception);
 	}
 
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Connection closed for " + session + ", " + closeStatus);
+		if (logger.isInfoEnabled()) {
+			logger.info("Connection closed with " + closeStatus + " in " + session + ", ");
 		}
 		super.afterConnectionClosed(session, closeStatus);
 	}

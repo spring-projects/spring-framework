@@ -233,4 +233,13 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 		}
 	}
 
+	@Override
+	public String toString() {
+		if (getNativeSession() != null) {
+			return super.toString();
+		}
+		else {
+			return "WebSocketServerSockJsSession[id=" + getId() + ", uri=null]";
+		}
+	}
 }

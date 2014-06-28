@@ -171,8 +171,8 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 		}
 		Set<String> destinations = result.getTargetDestinations();
 		if (destinations.isEmpty()) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Use destination not resolved (no active sessions?): " + message);
+			if (logger.isTraceEnabled()) {
+				logger.trace("No user destinations for " + message);
 			}
 			return;
 		}
@@ -185,7 +185,7 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 		}
 		for (String destination : destinations) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Sending message with resolved user destination: " + message);
+				logger.trace("Sending " + message);
 			}
 			this.brokerMessagingTemplate.send(destination, message);
 		}
