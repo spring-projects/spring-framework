@@ -135,11 +135,10 @@ public final class CloseStatus {
 
 
 	/**
-	 * Indicates that a session has become unreliable (e.g. timed out while sending
-	 * a message) and extra care should be exercised while closing the session in
-	 * order to avoid locking additional threads.
-	 *
-	 * <p><strong>NOTE:</strong> Spring Framework specific status code.
+	 * A status code for use within the framework the indicate a session has
+	 * become unreliable (e.g. timed out while sending a message) and extra
+	 * care should be exercised, e.g. avoid sending any further data to the
+	 * client that may be done during normal shutdown.
 	 */
 	public static final CloseStatus SESSION_NOT_RELIABLE = new CloseStatus(4500);
 

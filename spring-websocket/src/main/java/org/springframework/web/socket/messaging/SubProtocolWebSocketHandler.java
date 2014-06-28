@@ -356,8 +356,13 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 	}
 
 	/**
-	 * Periodically check sessions to ensure they have received at least one
-	 * message or otherwise close them.
+	 * When a session is connected through a higher-level protocol it has a chance
+	 * to use heartbeat management to shut down sessions that are too slow to send
+	 * or receive messages. However, after a WebSocketSession is established and
+	 * before the higher level protocol is fully connected there is a possibility
+	 * for sessions to hang. This method checks and closes any sessions that have
+	 * been connected for more than 60 seconds without having received a single
+	 * message.
 	 */
 	private void checkSessions() throws IOException {
 		long currentTime = System.currentTimeMillis();
@@ -380,7 +385,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 								"Closing " + holder.getSession() + ".");
 					}
 					try {
-						session.close(CloseStatus.PROTOCOL_ERROR);
+						session.close(CloseStatus.SESSION_NOT_RELIABLE);
 					}
 					catch (Throwable t) {
 						logger.error("Failure while closing " + session, t);
