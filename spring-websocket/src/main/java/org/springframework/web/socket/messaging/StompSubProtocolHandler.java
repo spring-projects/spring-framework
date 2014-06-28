@@ -219,8 +219,16 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 				headerAccessor.setUser(session.getPrincipal());
 				headerAccessor.setImmutable();
 
-				if (this.eventPublisher != null && StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
-					publishEvent(new SessionConnectEvent(this, message));
+				if (this.eventPublisher != null) {
+					if (StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
+						publishEvent(new SessionConnectEvent(this, message));
+					}
+					else if (StompCommand.SUBSCRIBE.equals(headerAccessor.getCommand())) {
+						publishEvent(new SessionSubscribeEvent(this, message));
+					}
+					else if (StompCommand.UNSUBSCRIBE.equals(headerAccessor.getCommand())) {
+						publishEvent(new SessionUnsubscribeEvent(this, message));
+					}
 				}
 
 				try {

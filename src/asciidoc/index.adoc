@@ -38417,6 +38417,8 @@ to this event can wrap the contained message using `SimpMessageHeaderAccessor` o
 * `SessionConnectedEvent` -- published shortly after a `SessionConnectEvent` when the
 broker has sent a STOMP CONNECTED frame in response to the CONNECT. At this point the
 STOMP session can be considered fully established.
+* `SessionSubscribeEvent` -- published when a new STOMP SUBSCRIBE is received.
+* `SessionUnsubscribeEvent` -- published when a new STOMP UNSUBSCRIBE is received.
 * `SessionDisconnectEvent` -- published when a STOMP session ends. The DISCONNECT may
 have been sent from the client or it may also be automatically generated when the
 WebSocket session is closed. In some cases this event may be published more than once

@@ -17,45 +17,22 @@
 package org.springframework.web.socket.messaging;
 
 
-import org.springframework.context.ApplicationEvent;
 import org.springframework.messaging.Message;
-import org.springframework.util.Assert;
 
 /**
  * A connected event represents the server response to a client's connect request.
- * See {@link org.springframework.web.socket.messaging.SessionConnectEvent}.
+ * See {@link org.springframework.web.socket.messaging.SessionConnectEvent
+ * SessionConnectEvent}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0.3
  */
 @SuppressWarnings("serial")
-public class SessionConnectedEvent extends ApplicationEvent {
-
-	private final Message<byte[]> message;
+public class SessionConnectedEvent extends AbstractSubProtocolEvent {
 
 
-	/**
-	 * Create a new event.
-	 *
-	 * @param source the component that published the event (never {@code null})
-	 * @param message the connected message
-	 */
 	public SessionConnectedEvent(Object source, Message<byte[]> message) {
-		super(source);
-		Assert.notNull(message, "'message' must not be null");
-		this.message = message;
+		super(source, message);
 	}
 
-	/**
-	 * Return the connected message.
-	 */
-	public Message<byte[]> getMessage() {
-		return this.message;
-	}
-
-
-	@Override
-	public String toString() {
-		return "SessionConnectedEvent" + this.message;
-	}
 }

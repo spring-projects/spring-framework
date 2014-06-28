@@ -21,20 +21,16 @@ import org.springframework.messaging.Message;
 
 /**
  * Event raised when a new WebSocket client using a Simple Messaging Protocol
- * (e.g. STOMP) as the WebSocket sub-protocol issues a connect request.
- *
- * <p>Note that this is not the same as the WebSocket session getting established
- * but rather the client's first attempt to connect within the the sub-protocol,
- * for example sending the STOMP CONNECT frame.
+ * (e.g. STOMP) sends a request to remove a subscription.
  *
  * @author Rossen Stoyanchev
  * @since 4.0.3
  */
 @SuppressWarnings("serial")
-public class SessionConnectEvent extends AbstractSubProtocolEvent {
+public class SessionUnsubscribeEvent extends AbstractSubProtocolEvent {
 
 
-	public SessionConnectEvent(Object source, Message<byte[]> message) {
+	public SessionUnsubscribeEvent(Object source, Message<byte[]> message) {
 		super(source, message);
 	}
 
