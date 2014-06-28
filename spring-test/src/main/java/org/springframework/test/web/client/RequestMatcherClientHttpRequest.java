@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.mock.http.client.MockAsyncClientHttpRequest;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.util.Assert;
 
@@ -33,7 +34,7 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-class RequestMatcherClientHttpRequest extends MockClientHttpRequest implements ResponseActions {
+class RequestMatcherClientHttpRequest extends MockAsyncClientHttpRequest implements ResponseActions {
 
 	private final List<RequestMatcher> requestMatchers = new LinkedList<RequestMatcher>();
 

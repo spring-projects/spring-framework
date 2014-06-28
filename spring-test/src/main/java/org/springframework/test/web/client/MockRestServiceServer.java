@@ -16,17 +16,25 @@
 package org.springframework.test.web.client;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URI;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.client.AsyncClientHttpRequest;
+import org.springframework.http.client.AsyncClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.test.web.client.response.MockRestResponseCreators;
 import org.springframework.util.Assert;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.SettableListenableFuture;
+import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.support.RestGatewaySupport;
 
@@ -80,11 +88,9 @@ import org.springframework.web.client.support.RestGatewaySupport;
  */
 public class MockRestServiceServer {
 
-	private final List<RequestMatcherClientHttpRequest> expectedRequests =
-			new LinkedList<RequestMatcherClientHttpRequest>();
+	private final List<RequestMatcherClientHttpRequest> expectedRequests = new LinkedList<RequestMatcherClientHttpRequest>();
 
-	private final List<RequestMatcherClientHttpRequest> actualRequests =
-			new LinkedList<RequestMatcherClientHttpRequest>();
+	private final List<RequestMatcherClientHttpRequest> actualRequests = new LinkedList<RequestMatcherClientHttpRequest>();
 
 
 	/**
@@ -104,12 +110,24 @@ public class MockRestServiceServer {
 	 */
 	public static MockRestServiceServer createServer(RestTemplate restTemplate) {
 		Assert.notNull(restTemplate, "'restTemplate' must not be null");
-
 		MockRestServiceServer mockServer = new MockRestServiceServer();
 		RequestMatcherClientHttpRequestFactory factory = mockServer.new RequestMatcherClientHttpRequestFactory();
-
 		restTemplate.setRequestFactory(factory);
+		return mockServer;
+	}
 
+	/**
+	 * Create a {@code MockRestServiceServer} and set up the given
+	 * {@code AsyRestTemplate} with a mock {@link AsyncClientHttpRequestFactory}.
+	 *
+	 * @param asyncRestTemplate the AsyncRestTemplate to set up for mock testing
+	 * @return the created mock server
+	 */
+	public static MockRestServiceServer createServer(AsyncRestTemplate asyncRestTemplate) {
+		Assert.notNull(asyncRestTemplate, "'asyncRestTemplate' must not be null");
+		MockRestServiceServer mockServer = new MockRestServiceServer();
+		RequestMatcherClientHttpRequestFactory factory = mockServer.new RequestMatcherClientHttpRequestFactory();
+		asyncRestTemplate.setAsyncRequestFactory(factory);
 		return mockServer;
 	}
 
@@ -171,7 +189,6 @@ public class MockRestServiceServer {
 				sb.append(request.toString()).append("\n");
 			}
 		}
-
 		return sb.toString();
 	}
 
@@ -180,12 +197,22 @@ public class MockRestServiceServer {
 	 * Mock ClientHttpRequestFactory that creates requests by iterating
 	 * over the list of expected {@link RequestMatcherClientHttpRequest}'s.
 	 */
-	private class RequestMatcherClientHttpRequestFactory implements ClientHttpRequestFactory {
+	private class RequestMatcherClientHttpRequestFactory
+			implements ClientHttpRequestFactory, AsyncClientHttpRequestFactory {
 
 		private Iterator<RequestMatcherClientHttpRequest> requestIterator;
 
 		@Override
 		public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
+			return createRequestInternal(uri, httpMethod);
+		}
+
+		@Override
+		public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod) throws IOException {
+			return createRequestInternal(uri, httpMethod);
+		}
+
+		private RequestMatcherClientHttpRequest createRequestInternal(URI uri, HttpMethod httpMethod) {
 			Assert.notNull(uri, "'uri' must not be null");
 			Assert.notNull(httpMethod, "'httpMethod' must not be null");
 
@@ -201,7 +228,6 @@ public class MockRestServiceServer {
 			request.setMethod(httpMethod);
 
 			MockRestServiceServer.this.actualRequests.add(request);
-
 			return request;
 		}
 	}
