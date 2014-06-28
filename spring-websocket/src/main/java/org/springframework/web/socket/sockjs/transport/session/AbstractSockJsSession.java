@@ -271,6 +271,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 			if (logger.isInfoEnabled()) {
 				logger.info("Closing SockJS session " + getId() + " with " + status);
 			}
+			this.state = State.CLOSED;
 			try {
 				if (isActive() && !CloseStatus.SESSION_NOT_RELIABLE.equals(status)) {
 					try {
@@ -285,7 +286,6 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 				disconnect(status);
 			}
 			finally {
-				this.state = State.CLOSED;
 				try {
 					this.handler.afterConnectionClosed(this, status);
 				}
