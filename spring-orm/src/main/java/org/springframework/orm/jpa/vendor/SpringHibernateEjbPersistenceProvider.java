@@ -33,7 +33,9 @@ import org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo;
  * <p>Compatible with Hibernate 3.6 as well as 4.0-4.2.
  *
  * @author Juergen Hoeller
+ * @author Joris Kuipers
  * @since 4.1
+ * @see Ejb3Configuration#addPackage
  */
 class SpringHibernateEjbPersistenceProvider extends HibernatePersistence {
 

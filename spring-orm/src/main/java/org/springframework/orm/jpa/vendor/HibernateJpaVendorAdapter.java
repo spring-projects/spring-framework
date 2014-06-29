@@ -40,7 +40,12 @@ import org.springframework.orm.jpa.JpaDialect;
  * Hibernate EntityManager. Developed and tested against Hibernate 3.6 and 4.2/4.3.
  *
  * <p>Exposes Hibernate's persistence provider and EntityManager extension interface,
- * and supports {@link AbstractJpaVendorAdapter}'s common configuration settings.
+ * and adapts {@link AbstractJpaVendorAdapter}'s common configuration settings.
+ * Also supports the detection of annotated packages (through
+ * {@link org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo#getManagedPackages()}),
+ * e.g. containing Hibernate {@link org.hibernate.annotations.FilterDef} annotations,
+ * along with Spring-driven entity scanning which requires no {@code persistence.xml}
+ * ({@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean#setPackagesToScan}).
  *
  * <p>Note that the package location of Hibernate's JPA support changed from 4.2 to 4.3:
  * from {@code org.hibernate.ejb.HibernateEntityManager(Factory)} to
@@ -51,6 +56,9 @@ import org.springframework.orm.jpa.JpaDialect;
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @since 2.0
+ * @see HibernateJpaDialect
+ * @see org.hibernate.ejb.HibernatePersistence
+ * @see org.hibernate.ejb.HibernateEntityManager
  */
 public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 

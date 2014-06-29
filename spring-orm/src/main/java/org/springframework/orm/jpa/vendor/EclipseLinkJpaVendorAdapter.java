@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,11 +33,15 @@ import org.springframework.orm.jpa.JpaDialect;
  * Persistence Services (EclipseLink). Developed and tested against EclipseLink 2.4.
  *
  * <p>Exposes EclipseLink's persistence provider and EntityManager extension interface,
- * and supports {@link AbstractJpaVendorAdapter}'s common configuration settings.
+ * and adapts {@link AbstractJpaVendorAdapter}'s common configuration settings.
+ * No support for the detection of annotated packages (through
+ * {@link org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo#getManagedPackages()})
+ * since EclipseLink doesn't use package-level metadata.
  *
  * @author Juergen Hoeller
  * @author Thomas Risberg
  * @since 2.5.2
+ * @see EclipseLinkJpaDialect
  * @see org.eclipse.persistence.jpa.PersistenceProvider
  * @see org.eclipse.persistence.jpa.JpaEntityManager
  */

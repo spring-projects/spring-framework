@@ -37,7 +37,9 @@ import org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo;
  * is an alternative for compatibility with earlier Hibernate versions (3.6-4.2).
  *
  * @author Juergen Hoeller
+ * @author Joris Kuipers
  * @since 4.1
+ * @see Configuration#addPackage
  */
 class SpringHibernateJpaPersistenceProvider extends HibernatePersistenceProvider {
 

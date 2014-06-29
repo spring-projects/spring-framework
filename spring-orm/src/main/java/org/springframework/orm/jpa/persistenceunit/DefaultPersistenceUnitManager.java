@@ -215,6 +215,11 @@ public class DefaultPersistenceUnitManager
 	 * may live next to regularly defined units originating from {@code persistence.xml}.
 	 * Its name is determined by {@link #setDefaultPersistenceUnitName}: by default,
 	 * it's simply "default".
+	 * <p><p>Note: There may be limitations in comparison to regular JPA scanning.</b>
+	 * In particular, JPA providers may pick up annotated packages for provider-specific
+	 * annotations only when driven by {@code persistence.xml}. As of 4.1, Spring's
+	 * scan can detect annotated packages as well if supported by the given
+	 * {@link org.springframework.orm.jpa.JpaVendorAdapter} (e.g. for Hibernate).
 	 * <p>If no explicit {@link #setMappingResources mapping resources} have been
 	 * specified in addition to these packages, this manager looks for a default
 	 * {@code META-INF/orm.xml} file in the classpath, registering it as a mapping

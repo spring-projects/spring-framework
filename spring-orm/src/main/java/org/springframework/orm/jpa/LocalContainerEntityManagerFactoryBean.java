@@ -149,6 +149,11 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * <p>Default is none. Specify packages to search for autodetection of your entity
 	 * classes in the classpath. This is analogous to Spring's component-scan feature
 	 * ({@link org.springframework.context.annotation.ClassPathBeanDefinitionScanner}).
+	 * <p><p>Note: There may be limitations in comparison to regular JPA scanning.</b>
+	 * In particular, JPA providers may pick up annotated packages for provider-specific
+	 * annotations only when driven by {@code persistence.xml}. As of 4.1, Spring's
+	 * scan can detect annotated packages as well if supported by the given
+	 * {@link JpaVendorAdapter} (e.g. for Hibernate).
 	 * <p>If no explicit {@link #setMappingResources mapping resources} have been
 	 * specified in addition to these packages, Spring's setup looks for a default
 	 * {@code META-INF/orm.xml} file in the classpath, registering it as a mapping
