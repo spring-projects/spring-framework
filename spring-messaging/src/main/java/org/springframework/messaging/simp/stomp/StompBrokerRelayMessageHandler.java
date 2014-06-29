@@ -648,6 +648,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			}
 			finally {
 				try {
+					// Prevent clearConnection() from trying to close
+					this.tcpConnection = null;
 					clearConnection();
 				}
 				catch (Throwable t) {
