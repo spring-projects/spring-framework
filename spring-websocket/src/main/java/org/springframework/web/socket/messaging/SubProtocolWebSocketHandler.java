@@ -70,7 +70,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 	 * connection isn't doing well (proxy issue, slow network?) and can be closed.
 	 * @see #checkSessions()
 	 */
-	private final int TIME_TO_FIRST_MESSAGE = 60 * 1000;
+	private static final int TIME_TO_FIRST_MESSAGE = 60 * 1000;
 
 
 	private final Log logger = LogFactory.getLog(SubProtocolWebSocketHandler.class);
@@ -298,10 +298,6 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 		if (holder != null) {
 			holder.setHasHandledMessages();
 		}
-		else {
-			// Should never happen
-			throw new IllegalStateException("Session not found: " + session);
-		}
 		checkSessions();
 	}
 
@@ -366,7 +362,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 	 */
 	private void checkSessions() throws IOException {
 		long currentTime = System.currentTimeMillis();
-		if (!isRunning() && currentTime - this.lastSessionCheckTime < TIME_TO_FIRST_MESSAGE) {
+		if (!isRunning() || (currentTime - this.lastSessionCheckTime < TIME_TO_FIRST_MESSAGE)) {
 			return;
 		}
 		if (this.sessionCheckLock.tryLock()) {
@@ -376,7 +372,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 						continue;
 					}
 					long timeSinceCreated = currentTime - holder.getCreateTime();
-					if (holder.hasHandledMessages() || timeSinceCreated < TIME_TO_FIRST_MESSAGE) {
+					if (timeSinceCreated < TIME_TO_FIRST_MESSAGE) {
 						continue;
 					}
 					WebSocketSession session = holder.getSession();
