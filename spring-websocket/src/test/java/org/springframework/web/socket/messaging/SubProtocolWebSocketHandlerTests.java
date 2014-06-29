@@ -170,7 +170,7 @@ public class SubProtocolWebSocketHandlerTests {
 		assertTrue(session1.isOpen());
 		assertFalse(session2.isOpen());
 		assertNull(session1.getCloseStatus());
-		assertEquals(CloseStatus.PROTOCOL_ERROR, session2.getCloseStatus());
+		assertEquals(CloseStatus.SESSION_NOT_RELIABLE, session2.getCloseStatus());
 	}
 
 

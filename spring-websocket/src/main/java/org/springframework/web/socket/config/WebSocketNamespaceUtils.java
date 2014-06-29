@@ -16,7 +16,7 @@
 
 package org.springframework.web.socket.config;
 
-import org.springframework.web.socket.sockjs.transport.SockJsThreadPoolTaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -135,11 +135,12 @@ class WebSocketNamespaceUtils {
 			ParserContext parserContext, Object source) {
 
 		if (!parserContext.getRegistry().containsBeanDefinition(schedulerName)) {
-			RootBeanDefinition taskSchedulerDef = new RootBeanDefinition(SockJsThreadPoolTaskScheduler.class);
+			RootBeanDefinition taskSchedulerDef = new RootBeanDefinition(ThreadPoolTaskScheduler.class);
 			taskSchedulerDef.setSource(source);
 			taskSchedulerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			taskSchedulerDef.getPropertyValues().add("poolSize", Runtime.getRuntime().availableProcessors());
 			taskSchedulerDef.getPropertyValues().add("threadNamePrefix", schedulerName + "-");
+			taskSchedulerDef.getPropertyValues().add("removeOnCancelPolicy", true);
 			parserContext.getRegistry().registerBeanDefinition(schedulerName, taskSchedulerDef);
 			parserContext.registerComponent(new BeanComponentDefinition(taskSchedulerDef, schedulerName));
 		}

@@ -26,7 +26,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
-import org.springframework.web.socket.sockjs.transport.SockJsThreadPoolTaskScheduler;
 
 /**
  * Extends {@link AbstractMessageBrokerConfiguration} and adds configuration for
@@ -96,8 +95,10 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	 */
 	@Bean
 	public ThreadPoolTaskScheduler messageBrokerSockJsTaskScheduler() {
-		ThreadPoolTaskScheduler scheduler = new SockJsThreadPoolTaskScheduler();
+		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
 		scheduler.setThreadNamePrefix("MessageBrokerSockJS-");
+		scheduler.setPoolSize(Runtime.getRuntime().availableProcessors());
+		scheduler.setRemoveOnCancelPolicy(true);
 		return scheduler;
 	}
 
