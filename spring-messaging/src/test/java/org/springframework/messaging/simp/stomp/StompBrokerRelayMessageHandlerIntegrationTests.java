@@ -223,11 +223,6 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		startActiveMqBroker();
 		this.eventPublisher.expectBrokerAvailabilityEvent(true);
-
-		// TODO The event publisher assertions show that the broker's back up and the system relay session
-		// has reconnected. We need to decide what we want the reconnect behaviour to be for client relay
-		// sessions and add further message sending and assertions as appropriate. At the moment any client
-		// sessions will be closed and an ERROR from will be sent.
 	}
 
 	@Test
@@ -247,6 +242,21 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		// Check that we have not received an ERROR as a result of the connection closing
 		assertTrue("Unexpected messages: " + this.responseHandler.queue, this.responseHandler.queue.isEmpty());
+	}
+
+	@Test
+	public void disconnectWithReceipt() throws Exception {
+
+		logger.debug("Starting test disconnectWithReceipt()");
+
+		MessageExchange connect = MessageExchangeBuilder.connect("sess1").build();
+		this.relay.handleMessage(connect.message);
+		this.responseHandler.expectMessages(connect);
+
+		MessageExchange disconnect = MessageExchangeBuilder.disconnectWithReceipt("sess1", "r123").build();
+		this.relay.handleMessage(disconnect.message);
+
+		this.responseHandler.expectMessages(disconnect);
 	}
 
 
@@ -401,6 +411,18 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 			headers.setDestination(destination);
 			Message<?> message = MessageBuilder.createMessage(payload.getBytes(UTF_8), headers.getMessageHeaders());
 			return new MessageExchangeBuilder(message);
+		}
+
+		public static MessageExchangeBuilder disconnectWithReceipt(String sessionId, String receiptId) {
+
+			StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
+			headers.setSessionId(sessionId);
+			headers.setReceipt(receiptId);
+			Message<?> message = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
+
+			MessageExchangeBuilder builder = new MessageExchangeBuilder(message);
+			builder.expected.add(new StompReceiptFrameMessageMatcher(sessionId, receiptId));
+			return builder;
 		}
 
 		public MessageExchangeBuilder andExpectMessage(String sessionId, String subscriptionId) {

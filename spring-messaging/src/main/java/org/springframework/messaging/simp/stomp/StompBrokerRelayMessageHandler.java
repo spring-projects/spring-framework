@@ -759,7 +759,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				@Override
 				public void onSuccess(Void result) {
 					if (accessor.getCommand() == StompCommand.DISCONNECT) {
-						clearConnection();
+						afterDisconnectSent(accessor);
 					}
 				}
 				@Override
@@ -773,6 +773,21 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				}
 			});
 			return future;
+		}
+
+		/**
+		 * After a DISCONNECT there should be no more client frames so we can
+		 * close the connection pro-actively. However, if the DISCONNECT has a
+		 * receipt header we leave the connection open and expect the server will
+		 * respond with a RECEIPT and then close the connection.
+		 *
+		 * @see <a href="http://stomp.github.io/stomp-specification-1.2.html#DISCONNECT">
+		 *     STOMP Specification 1.2 DISCONNECT</a>
+		 */
+		private void afterDisconnectSent(StompHeaderAccessor accessor) {
+			if (accessor.getReceipt() == null) {
+				clearConnection();
+			}
 		}
 
 		/**
