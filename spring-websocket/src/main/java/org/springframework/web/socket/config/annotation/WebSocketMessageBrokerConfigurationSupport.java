@@ -21,6 +21,7 @@ import org.springframework.messaging.simp.config.AbstractMessageBrokerConfigurat
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
@@ -37,6 +38,11 @@ import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
  * @since 4.0
  */
 public abstract class WebSocketMessageBrokerConfigurationSupport extends AbstractMessageBrokerConfiguration {
+
+	// Check for setRemoveOnCancelPolicy method - available on JDK 7 and higher
+	private static boolean hasRemoveOnCancelPolicyMethod = ClassUtils.hasMethod(
+			WebSocketConfigurationSupport.class, "setRemoveOnCancelPolicy", boolean.class);
+
 
 	private WebSocketTransportRegistration transportRegistration;
 
@@ -97,7 +103,9 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	public ThreadPoolTaskScheduler messageBrokerSockJsTaskScheduler() {
 		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
 		scheduler.setPoolSize(Runtime.getRuntime().availableProcessors());
-		scheduler.setRemoveOnCancelPolicy(true);
+		if (hasRemoveOnCancelPolicyMethod) {
+			scheduler.setRemoveOnCancelPolicy(true);
+		}
 		scheduler.setThreadNamePrefix("MessageBrokerSockJS-");
 		return scheduler;
 	}
