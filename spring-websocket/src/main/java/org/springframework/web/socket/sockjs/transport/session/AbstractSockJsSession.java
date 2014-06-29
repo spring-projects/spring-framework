@@ -274,6 +274,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Closing " + this + ", " + status);
 			}
+			this.state = State.CLOSED;
 			try {
 				if (isActive() && !CloseStatus.SESSION_NOT_RELIABLE.equals(status)) {
 					try {
@@ -289,7 +290,6 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 				disconnect(status);
 			}
 			finally {
-				this.state = State.CLOSED;
 				try {
 					this.handler.afterConnectionClosed(this, status);
 				}
@@ -339,11 +339,17 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 		catch (Throwable ex) {
 			logWriteFrameFailure(ex);
 			try {
+				// Force disconnect (so we won't try to send close frame)
 				disconnect(CloseStatus.SERVER_ERROR);
+			}
+			catch (Throwable disconnectFailure) {
+				logger.error("Failure while closing " + this, disconnectFailure);
+			}
+			try {
 				close(CloseStatus.SERVER_ERROR);
 			}
-			catch (Throwable ex2) {
-				// ignore
+			catch (Throwable t) {
+				// Nothing of consequence, already forced disconnect
 			}
 			throw new SockJsTransportFailureException("Failed to write " + frame, this.getId(), ex);
 		}
