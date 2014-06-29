@@ -20,15 +20,12 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
@@ -38,6 +35,7 @@ import org.springframework.core.SpringProperties;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
 
 /**
@@ -107,14 +105,22 @@ public class CachedIntrospectionResults {
 	 * Set of ClassLoaders that this CachedIntrospectionResults class will always
 	 * accept classes from, even if the classes do not qualify as cache-safe.
 	 */
-	static final Set<ClassLoader> acceptedClassLoaders = new HashSet<ClassLoader>();
+	static final Set<ClassLoader> acceptedClassLoaders =
+			Collections.newSetFromMap(new ConcurrentHashMap<ClassLoader, Boolean>(16));
 
 	/**
-	 * Map keyed by class containing CachedIntrospectionResults.
-	 * Needs to be a WeakHashMap with WeakReferences as values to allow
-	 * for proper garbage collection in case of multiple class loaders.
+	 * Map keyed by Class containing CachedIntrospectionResults, strongly held.
+	 * This variant is being used for cache-safe bean classes.
 	 */
-	static final Map<Class<?>, Object> classCache = new WeakHashMap<Class<?>, Object>();
+	static final Map<Class<?>, CachedIntrospectionResults> strongClassCache =
+			new ConcurrentHashMap<Class<?>, CachedIntrospectionResults>(64);
+
+	/**
+	 * Map keyed by Class containing CachedIntrospectionResults, softly held.
+	 * This variant is being used for non-cache-safe bean classes.
+	 */
+	static final Map<Class<?>, CachedIntrospectionResults> softClassCache =
+			new ConcurrentReferenceHashMap<Class<?>, CachedIntrospectionResults>(64);
 
 
 	/**
@@ -131,9 +137,7 @@ public class CachedIntrospectionResults {
 	 */
 	public static void acceptClassLoader(ClassLoader classLoader) {
 		if (classLoader != null) {
-			synchronized (acceptedClassLoaders) {
-				acceptedClassLoaders.add(classLoader);
-			}
+			acceptedClassLoaders.add(classLoader);
 		}
 	}
 
@@ -144,20 +148,22 @@ public class CachedIntrospectionResults {
 	 * @param classLoader the ClassLoader to clear the cache for
 	 */
 	public static void clearClassLoader(ClassLoader classLoader) {
-		synchronized (classCache) {
-			for (Iterator<Class<?>> it = classCache.keySet().iterator(); it.hasNext();) {
-				Class<?> beanClass = it.next();
-				if (isUnderneathClassLoader(beanClass.getClassLoader(), classLoader)) {
-					it.remove();
-				}
+		for (Iterator<ClassLoader> it = acceptedClassLoaders.iterator(); it.hasNext();) {
+			ClassLoader registeredLoader = it.next();
+			if (isUnderneathClassLoader(registeredLoader, classLoader)) {
+				it.remove();
 			}
 		}
-		synchronized (acceptedClassLoaders) {
-			for (Iterator<ClassLoader> it = acceptedClassLoaders.iterator(); it.hasNext();) {
-				ClassLoader registeredLoader = it.next();
-				if (isUnderneathClassLoader(registeredLoader, classLoader)) {
-					it.remove();
-				}
+		for (Iterator<Class<?>> it = strongClassCache.keySet().iterator(); it.hasNext();) {
+			Class<?> beanClass = it.next();
+			if (isUnderneathClassLoader(beanClass.getClassLoader(), classLoader)) {
+				it.remove();
+			}
+		}
+		for (Iterator<Class<?>> it = softClassCache.keySet().iterator(); it.hasNext();) {
+			Class<?> beanClass = it.next();
+			if (isUnderneathClassLoader(beanClass.getClassLoader(), classLoader)) {
+				it.remove();
 			}
 		}
 	}
@@ -170,35 +176,25 @@ public class CachedIntrospectionResults {
 	 */
 	@SuppressWarnings("unchecked")
 	static CachedIntrospectionResults forClass(Class<?> beanClass) throws BeansException {
-		CachedIntrospectionResults results;
-		Object value;
-		synchronized (classCache) {
-			value = classCache.get(beanClass);
+		CachedIntrospectionResults results = strongClassCache.get(beanClass);
+		if (results != null) {
+			return results;
 		}
-		if (value instanceof Reference) {
-			Reference<CachedIntrospectionResults> ref = (Reference<CachedIntrospectionResults>) value;
-			results = ref.get();
+		results = softClassCache.get(beanClass);
+		if (results != null) {
+			return results;
+		}
+
+		results = new CachedIntrospectionResults(beanClass);
+		if (ClassUtils.isCacheSafe(beanClass, CachedIntrospectionResults.class.getClassLoader()) ||
+				isClassLoaderAccepted(beanClass.getClassLoader())) {
+			strongClassCache.put(beanClass, results);
 		}
 		else {
-			results = (CachedIntrospectionResults) value;
-		}
-		if (results == null) {
-			if (ClassUtils.isCacheSafe(beanClass, CachedIntrospectionResults.class.getClassLoader()) ||
-					isClassLoaderAccepted(beanClass.getClassLoader())) {
-				results = new CachedIntrospectionResults(beanClass);
-				synchronized (classCache) {
-					classCache.put(beanClass, results);
-				}
+			if (logger.isDebugEnabled()) {
+				logger.debug("Not strongly caching class [" + beanClass.getName() + "] because it is not cache-safe");
 			}
-			else {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Not strongly caching class [" + beanClass.getName() + "] because it is not cache-safe");
-				}
-				results = new CachedIntrospectionResults(beanClass);
-				synchronized (classCache) {
-					classCache.put(beanClass, new WeakReference<CachedIntrospectionResults>(results));
-				}
-			}
+			softClassCache.put(beanClass, results);
 		}
 		return results;
 	}
@@ -211,13 +207,7 @@ public class CachedIntrospectionResults {
 	 * @see #acceptClassLoader
 	 */
 	private static boolean isClassLoaderAccepted(ClassLoader classLoader) {
-		// Iterate over array copy in order to avoid synchronization for the entire
-		// ClassLoader check (avoiding a synchronized acceptedClassLoaders Iterator).
-		ClassLoader[] acceptedLoaderArray;
-		synchronized (acceptedClassLoaders) {
-			acceptedLoaderArray = acceptedClassLoaders.toArray(new ClassLoader[acceptedClassLoaders.size()]);
-		}
-		for (ClassLoader acceptedLoader : acceptedLoaderArray) {
+		for (ClassLoader acceptedLoader : acceptedClassLoaders) {
 			if (isUnderneathClassLoader(classLoader, acceptedLoader)) {
 				return true;
 			}
