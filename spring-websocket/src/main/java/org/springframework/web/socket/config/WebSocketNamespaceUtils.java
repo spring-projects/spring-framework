@@ -139,6 +139,7 @@ class WebSocketNamespaceUtils {
 			taskSchedulerDef.setSource(source);
 			taskSchedulerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			taskSchedulerDef.getPropertyValues().add("poolSize", Runtime.getRuntime().availableProcessors());
+			taskSchedulerDef.getPropertyValues().add("removeOnCancelPolicy", true);
 			taskSchedulerDef.getPropertyValues().add("threadNamePrefix", schedulerName + "-");
 			parserContext.getRegistry().registerBeanDefinition(schedulerName, taskSchedulerDef);
 			parserContext.registerComponent(new BeanComponentDefinition(taskSchedulerDef, schedulerName));
