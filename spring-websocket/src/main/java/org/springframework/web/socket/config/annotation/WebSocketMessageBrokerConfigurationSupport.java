@@ -17,6 +17,7 @@
 package org.springframework.web.socket.config.annotation;
 
 import java.util.Collections;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.context.annotation.Bean;
@@ -44,7 +45,7 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 
 	// Check for setRemoveOnCancelPolicy method - available on JDK 7 and higher
 	private static boolean hasRemoveOnCancelPolicyMethod = ClassUtils.hasMethod(
-			WebSocketConfigurationSupport.class, "setRemoveOnCancelPolicy", boolean.class);
+			ScheduledThreadPoolExecutor.class, "setRemoveOnCancelPolicy", boolean.class);
 
 	private WebSocketTransportRegistration transportRegistration;
 

@@ -33,6 +33,8 @@ import org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsSe
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
 
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+
 /**
  * Provides utility methods for parsing common WebSocket XML namespace elements.
  *
@@ -44,7 +46,7 @@ class WebSocketNamespaceUtils {
 
 	// Check for setRemoveOnCancelPolicy method - available on JDK 7 and higher
 	private static boolean hasRemoveOnCancelPolicyMethod = ClassUtils.hasMethod(
-			WebSocketConfigurationSupport.class, "setRemoveOnCancelPolicy", boolean.class);
+			ScheduledThreadPoolExecutor.class, "setRemoveOnCancelPolicy", boolean.class);
 
 
 	public static RuntimeBeanReference registerHandshakeHandler(Element element, ParserContext parserContext, Object source) {
