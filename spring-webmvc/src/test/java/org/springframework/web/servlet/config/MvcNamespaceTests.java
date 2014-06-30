@@ -24,6 +24,7 @@ import java.util.*;
 import javax.servlet.RequestDispatcher;
 import javax.validation.constraints.NotNull;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.DirectFieldAccessor;
@@ -73,8 +74,14 @@ import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
+import org.springframework.web.servlet.resource.CachingResourceTransformer;
+import org.springframework.web.servlet.resource.CssLinkResourceTransformer;
 import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler;
+import org.springframework.web.servlet.resource.GzipResourceResolver;
+import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
+import org.springframework.web.servlet.resource.ResourceResolver;
+import org.springframework.web.servlet.resource.ResourceTransformer;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -84,6 +91,7 @@ import static org.junit.Assert.*;
  * @author Keith Donald
  * @author Arjen Poutsma
  * @author Jeremy Grelle
+ * @author Brian Clozel
  */
 public class MvcNamespaceTests {
 
@@ -291,6 +299,34 @@ public class MvcNamespaceTests {
 		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(mapping);
 		assertEquals(5, mapping.getOrder());
+		assertNotNull(mapping.getUrlMap().get("/resources/**"));
+
+		ResourceHttpRequestHandler handler = appContext.getBean((String)mapping.getUrlMap().get("/resources/**"),
+				ResourceHttpRequestHandler.class);
+		assertNotNull(handler);
+		assertEquals(3600, handler.getCacheSeconds());
+	}
+
+	@Test
+	public void testResourcesWithResolversTransformers() throws Exception {
+		loadBeanDefinitions("mvc-config-resources-resolvers-transformers.xml", 10);
+
+		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
+		assertNotNull(mapping);
+		assertNotNull(mapping.getUrlMap().get("/resources/**"));
+		ResourceHttpRequestHandler handler = appContext.getBean((String)mapping.getUrlMap().get("/resources/**"),
+				ResourceHttpRequestHandler.class);
+		assertNotNull(handler);
+
+		List<ResourceResolver> resolvers = handler.getResourceResolvers();
+		assertThat(resolvers, Matchers.hasSize(2));
+		assertThat(resolvers.get(0), Matchers.instanceOf(PathResourceResolver.class));
+		assertThat(resolvers.get(1), Matchers.instanceOf(GzipResourceResolver.class));
+
+		List<ResourceTransformer> transformers = handler.getResourceTransformers();
+		assertThat(transformers, Matchers.hasSize(2));
+		assertThat(transformers.get(0), Matchers.instanceOf(CachingResourceTransformer.class));
+		assertThat(transformers.get(1), Matchers.instanceOf(CssLinkResourceTransformer.class));
 	}
 
 	@Test

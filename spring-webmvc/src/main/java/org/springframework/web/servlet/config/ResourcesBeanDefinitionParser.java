@@ -31,6 +31,7 @@ import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.core.Ordered;
 import org.springframework.util.StringUtils;
+import org.springframework.util.xml.DomUtils;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
@@ -108,10 +109,46 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 			resourceHandlerDef.getPropertyValues().add("cacheSeconds", cacheSeconds);
 		}
 
+		ManagedList<? super Object> resourceResolvers = parseResourceResolvers(parserContext, element, source);
+		if(!resourceResolvers.isEmpty()) {
+			resourceHandlerDef.getPropertyValues().add("resourceResolvers", resourceResolvers);
+		}
+
+		ManagedList<? super Object> resourceTransformers = parseResourceTransformers(parserContext, element, source);
+		if(!resourceTransformers.isEmpty()) {
+			resourceHandlerDef.getPropertyValues().add("resourceTransformers", resourceTransformers);
+		}
+
 		String beanName = parserContext.getReaderContext().generateBeanName(resourceHandlerDef);
 		parserContext.getRegistry().registerBeanDefinition(beanName, resourceHandlerDef);
 		parserContext.registerComponent(new BeanComponentDefinition(resourceHandlerDef, beanName));
 		return beanName;
+	}
+
+	private ManagedList<? super Object> parseResourceResolvers(ParserContext parserContext, Element element, Object source) {
+		Element resolversElement = DomUtils.getChildElementByTagName(element, "resolvers");
+		ManagedList<? super Object> resourceResolvers = new ManagedList<Object>();
+		if (resolversElement != null) {
+			resourceResolvers.setSource(source);
+			for (Element beanElement : DomUtils.getChildElementsByTagName(resolversElement, "bean", "ref")) {
+				Object object = parserContext.getDelegate().parsePropertySubElement(beanElement, null);
+				resourceResolvers.add(object);
+			}
+		}
+		return resourceResolvers;
+	}
+
+	private ManagedList<? super Object> parseResourceTransformers(ParserContext parserContext, Element element, Object source) {
+		Element transformersElement = DomUtils.getChildElementByTagName(element, "transformers");
+		ManagedList<? super Object> resourceTransformers = new ManagedList<Object>();
+		if (transformersElement != null) {
+			resourceTransformers.setSource(source);
+			for (Element beanElement : DomUtils.getChildElementsByTagName(transformersElement, "bean", "ref")) {
+				Object object = parserContext.getDelegate().parsePropertySubElement(beanElement, null);
+				resourceTransformers.add(object);
+			}
+		}
+		return resourceTransformers;
 	}
 
 }
