@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
@@ -42,6 +43,7 @@ import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
@@ -287,28 +289,42 @@ class ConfigurationClassBeanDefinitionReader {
 			Map<String, Class<? extends BeanDefinitionReader>> importedResources) {
 
 		Map<Class<?>, BeanDefinitionReader> readerInstanceCache = new HashMap<Class<?>, BeanDefinitionReader>();
+
 		for (Map.Entry<String, Class<? extends BeanDefinitionReader>> entry : importedResources.entrySet()) {
 			String resource = entry.getKey();
 			Class<? extends BeanDefinitionReader> readerClass = entry.getValue();
-			if (!readerInstanceCache.containsKey(readerClass)) {
+
+			// Default reader selection necessary?
+			if (readerClass.equals(BeanDefinitionReader.class)) {
+				if (StringUtils.endsWithIgnoreCase(resource, ".groovy")) {
+					// When clearly asking for Groovy, that's what they'll get...
+					readerClass = GroovyBeanDefinitionReader.class;
+				}
+				else {
+					// Primarily ".xml" files but for any other extension as well
+					readerClass = XmlBeanDefinitionReader.class;
+				}
+			}
+
+			BeanDefinitionReader reader = readerInstanceCache.get(readerClass);
+			if (reader == null) {
 				try {
 					// Instantiate the specified BeanDefinitionReader
-					BeanDefinitionReader readerInstance =
-							readerClass.getConstructor(BeanDefinitionRegistry.class).newInstance(this.registry);
+					reader = readerClass.getConstructor(BeanDefinitionRegistry.class).newInstance(this.registry);
 					// Delegate the current ResourceLoader to it if possible
-					if (readerInstance instanceof AbstractBeanDefinitionReader) {
-						AbstractBeanDefinitionReader abdr = ((AbstractBeanDefinitionReader) readerInstance);
+					if (reader instanceof AbstractBeanDefinitionReader) {
+						AbstractBeanDefinitionReader abdr = ((AbstractBeanDefinitionReader) reader);
 						abdr.setResourceLoader(this.resourceLoader);
 						abdr.setEnvironment(this.environment);
 					}
-					readerInstanceCache.put(readerClass, readerInstance);
+					readerInstanceCache.put(readerClass, reader);
 				}
 				catch (Exception ex) {
 					throw new IllegalStateException(
 							"Could not instantiate BeanDefinitionReader class [" + readerClass.getName() + "]");
 				}
 			}
-			BeanDefinitionReader reader = readerInstanceCache.get(readerClass);
+
 			// TODO SPR-6310: qualify relative path locations as done in AbstractContextLoader.modifyLocations
 			reader.loadBeanDefinitions(resource);
 		}
