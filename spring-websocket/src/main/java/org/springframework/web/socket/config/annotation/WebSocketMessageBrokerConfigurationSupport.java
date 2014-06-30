@@ -26,6 +26,8 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+
 /**
  * Extends {@link AbstractMessageBrokerConfiguration} and adds configuration for
  * receiving and responding to STOMP messages from WebSocket clients.
@@ -41,7 +43,7 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 
 	// Check for setRemoveOnCancelPolicy method - available on JDK 7 and higher
 	private static boolean hasRemoveOnCancelPolicyMethod = ClassUtils.hasMethod(
-			WebSocketConfigurationSupport.class, "setRemoveOnCancelPolicy", boolean.class);
+			ScheduledThreadPoolExecutor.class, "setRemoveOnCancelPolicy", boolean.class);
 
 
 	private WebSocketTransportRegistration transportRegistration;
