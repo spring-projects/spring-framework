@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.TaskRejectedException;
+import org.springframework.lang.UsesJava7;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
@@ -83,6 +84,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	 * There is no default. If not set, the executor property is not set.
 	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
 	 */
+	@UsesJava7
 	public void setRemoveOnCancelPolicy(boolean removeOnCancelPolicy) {
 		this.removeOnCancelPolicy = removeOnCancelPolicy;
 		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor) {
@@ -98,6 +100,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		this.errorHandler = errorHandler;
 	}
 
+	@UsesJava7
 	@Override
 	protected ExecutorService initializeExecutor(
 			ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
@@ -169,6 +172,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	 * Return the current setting of removeOnCancelPolicy.
 	 * <p>Requires an underlying {@link ScheduledThreadPoolExecutor} and JDK 1.7+.
 	 */
+	@UsesJava7
 	public boolean isRemoveOnCancelPolicy() {
 		if (this.scheduledExecutor == null) {
 			// Not initialized yet: return false (the default of the executor)

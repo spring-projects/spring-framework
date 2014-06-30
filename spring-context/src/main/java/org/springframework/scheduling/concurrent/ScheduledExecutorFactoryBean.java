@@ -137,6 +137,7 @@ public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 
 
 	@Override
+	@UsesJava7
 	protected ExecutorService initializeExecutor(
 			ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
 
