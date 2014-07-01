@@ -26,8 +26,10 @@ will exist. However, it should be easy to isolate these dependencies from the re
 your code base.
 
 This document is a reference guide to Spring Framework features. If you have any
-requests, comments, or questions on this document, please post them on the user mailing
-list or on the support forums at http://forum.spring.io/[].
+requests, comments, or questions on this document, please post them on the
+https://groups.google.com/forum/#!forum/spring-framework-contrib[user mailing
+list]. Questions on the Framework itself should be asked on StackOverflow
+(see http://spring.io/questions[]).
 --
 
 
@@ -894,7 +896,7 @@ There have been several general improvements to the core container:
 * If you use Spring's meta-annotation support, you can now develop custom annotations that
   <<beans-meta-annotations,expose specific attributes from the source annotation>>.
 * Beans can now be __ordered__ when they are <<beans-autowired-annotation,autowired into
-  lists and arrays>>. Both the `@Ordered` annotation and `Ordered` interface are
+  lists and arrays>>. Both the `@Order` annotation and `Ordered` interface are
   supported.
 * The `@Lazy` annotation can now be used on injection points, as well as on `@Bean`
   definitions.
@@ -1241,7 +1243,7 @@ The following example shows the data access objects `daos.xml` file:
 			<!-- additional collaborators and configuration for this bean go here -->
 		</bean>
 
-		<bean id="itemDao" class="org.springframework.samples.jpetstore.dao.jpa.JapItemDao">
+		<bean id="itemDao" class="org.springframework.samples.jpetstore.dao.jpa.JpaItemDao">
 			<!-- additional collaborators and configuration for this bean go here -->
 		</bean>
 
@@ -1282,7 +1284,7 @@ to load bean definitions from another file or files. For example:
 	</beans>
 ----
 
-In the preceding example, external bean definitions are loaded from three files,
+In the preceding example, external bean definitions are loaded from three files:
 `services.xml`, `messageSource.xml`, and `themeSource.xml`. All location paths are
 relative to the definition file doing the importing, so `services.xml` must be in the
 same directory or classpath location as the file doing the importing, while
@@ -1511,7 +1513,7 @@ You use the `Class` property in one of two ways:
   equivalent to Java code using the `new` operator.
 * To specify the actual class containing the `static` factory method that will be
   invoked to create the object, in the less common case where the container invokes a
-  `static`, __factory__ method on a class to create the bean. The object type returned
+  `static` __factory__ method on a class to create the bean. The object type returned
   from the invocation of the `static` factory method may be the same class or another
   class entirely.
 
@@ -1867,7 +1869,7 @@ You can also use the constructor parameter name for value disambiguation:
 ----
 	<bean id="exampleBean" class="examples.ExampleBean">
 		<constructor-arg name="years" value="7500000"/>
-		<constructor-arg name="ultimateanswer" value="42"/>
+		<constructor-arg name="ultimateAnswer" value="42"/>
 	</bean>
 ----
 
@@ -2046,12 +2048,12 @@ part of a Spring XML configuration file specifies some bean definitions:
 [subs="verbatim,quotes"]
 ----
 	<bean id="exampleBean" class="examples.ExampleBean">
-		<!-- setter injection using the nested <ref/> element -->
+		<!-- setter injection using the nested ref element -->
 		<property name="beanOne">
 			<ref bean="anotherExampleBean"/>
 		</property>
 
-		<!-- setter injection using the neater 'ref' attribute -->
+		<!-- setter injection using the neater ref attribute -->
 		<property name="beanTwo" ref="yetAnotherBean"/>
 		<property name="integerProperty" value="1"/>
 	</bean>
@@ -2091,12 +2093,12 @@ in the XML file. The following example uses constructor-based DI:
 [subs="verbatim,quotes"]
 ----
 	<bean id="exampleBean" class="examples.ExampleBean">
-		<!-- constructor injection using the nested <ref/> element -->
+		<!-- constructor injection using the nested ref element -->
 		<constructor-arg>
 			<ref bean="anotherExampleBean"/>
 		</constructor-arg>
 
-		<!-- constructor injection using the neater 'ref' attribute -->
+		<!-- constructor injection using the neater ref attribute -->
 		<constructor-arg ref="yetAnotherBean"/>
 
 		<constructor-arg type="int" value="1"/>
@@ -2297,18 +2299,12 @@ likely fatal results) when the `client` bean is actually instantiated. If the `c
 bean is a <<beans-factory-scopes,prototype>> bean, this typo and the resulting exception
 may only be discovered long after the container is deployed.
 
-Additionally, if the referenced bean is in the same XML unit, and the bean name is the
-bean __id__, you can use the `local` attribute, which allows the XML parser itself to
-validate the bean id earlier, at XML document parse time.
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<property name="targetName">
-		<!-- a bean with id theTargetBean must exist; otherwise an exception will be thrown -->
-		<idref bean="theTargetBean"/>
-	</property>
-----
+[NOTE]
+====
+The `local` attribute on the `idref` element is no longer supported in the 4.0 beans xsd
+since it does not provide value over a regular `bean` reference anymore. Simply change
+your existing `idref local` references to `idref bean` when upgrading to the 4.0 schema.
+====
 
 A common place (at least in versions earlier than Spring 2.0) where the `<idref/>` element
 brings value is in the configuration of <<aop-pfb-1,AOP interceptors>> in a
@@ -2360,7 +2356,7 @@ container with a proxy that will have the same name as the parent bean.
 [subs="verbatim,quotes"]
 ----
 	<!-- in the child (descendant) context -->
-	<bean id="accountService" <-- bean name is the same as the parent bean -->
+	<bean id="accountService" <!-- bean name is the same as the parent bean -->
 		class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="target">
 			<ref parent="accountService"/> <!-- notice how we refer to the parent bean -->
@@ -2586,7 +2582,14 @@ following XML-based configuration metadata snippet sets the email property to th
 ----
 
 The preceding example is equivalent to the following Java code:
-`exampleBean.setEmail("")`. The `<null/>` element handles `null` values. For example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+        exampleBean.setEmail("")
+----
+
+The `<null/>` element handles `null` values. For example:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -2599,7 +2602,12 @@ The preceding example is equivalent to the following Java code:
 ----
 
 The above configuration is equivalent to the following Java code:
-`exampleBean.setEmail(null)`.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	exampleBean.setEmail(null)
+----
 
 
 [[beans-p-namespace]]
@@ -3779,7 +3787,7 @@ of the scope. You can also do the `Scope` registration declaratively, using the
 
 [NOTE]
 ====
-When you place <aop:scoped-proxy/> in a `FactoryBean` implementation, it is the factory
+When you place `<aop:scoped-proxy/>` in a `FactoryBean` implementation, it is the factory
 bean itself that is scoped, not the object returned from `getObject()`.
 ====
 
@@ -4074,7 +4082,7 @@ lifecycle requirements (e.g. starts and stops some background process):
 ----
 
 Any Spring-managed object may implement that interface. Then, when the
-ApplicationContext itself starts and stops, it will cascade those calls to all Lifecycle
+`ApplicationContext` itself starts and stops, it will cascade those calls to all `Lifecycle`
 implementations defined within that context. It does this by delegating to a
 `LifecycleProcessor`:
 
@@ -4126,7 +4134,7 @@ another option, namely the `getPhase()` method as defined on its super-interface
 
 When starting, the objects with the lowest phase start first, and when stopping, the
 reverse order is followed. Therefore, an object that implements `SmartLifecycle` and
-whose getPhase() method returns `Integer.MIN_VALUE` would be among the first to start
+whose `getPhase()` method returns `Integer.MIN_VALUE` would be among the first to start
 and the last to stop. At the other end of the spectrum, a phase value of
 `Integer.MAX_VALUE` would indicate that the object should be started last and stopped
 first (likely because it depends on other processes to be running). When considering the
@@ -4136,7 +4144,7 @@ negative phase value would indicate that an object should start before those sta
 components (and stop after them), and vice versa for any positive phase value.
 
 As you can see the stop method defined by `SmartLifecycle` accepts a callback. Any
-implementation __must__ invoke that callback's run() method after that implementation's
+implementation __must__ invoke that callback's `run()` method after that implementation's
 shutdown process is complete. That enables asynchronous shutdown where necessary since
 the default implementation of the `LifecycleProcessor` interface,
 `DefaultLifecycleProcessor`, will wait up to its timeout value for the group of objects
@@ -4156,14 +4164,14 @@ defining the following would be sufficient:
 
 As mentioned, the `LifecycleProcessor` interface defines callback methods for the
 refreshing and closing of the context as well. The latter will simply drive the shutdown
-process as if stop() had been called explicitly, but it will happen when the context is
+process as if `stop()` had been called explicitly, but it will happen when the context is
 closing. The 'refresh' callback on the other hand enables another feature of
 `SmartLifecycle` beans. When the context is refreshed (after all objects have been
 instantiated and initialized), that callback will be invoked, and at that point the
 default lifecycle processor will check the boolean value returned by each
 `SmartLifecycle` object's `isAutoStartup()` method. If "true", then that object will be
 started at that point rather than waiting for an explicit invocation of the context's or
-its own start() method (unlike the context refresh, the context start does not happen
+its own `start()` method (unlike the context refresh, the context start does not happen
 automatically for a standard context implementation). The "phase" value as well as any
 "depends-on" relationships will determine the startup order in the same way as described
 above.
@@ -4216,8 +4224,8 @@ declared on the `AbstractApplicationContext` class:
 [[beans-factory-aware]]
 ==== ApplicationContextAware and BeanNameAware
 
-When an `ApplicationContext` creates a class that implements the
-`org.springframework.context.ApplicationContextAware` interface, the class is provided
+When an `ApplicationContext` creates an object instance that implements the
+`org.springframework.context.ApplicationContextAware` interface, the instance is provided
 with a reference to that `ApplicationContext`.
 
 [source,java,indent=0]
@@ -4237,8 +4245,8 @@ additional functionality. One use would be the programmatic retrieval of other b
 Sometimes this capability is useful; however, in general you should avoid it, because it
 couples the code to Spring and does not follow the Inversion of Control style, where
 collaborators are provided to beans as properties. Other methods of the
-ApplicationContext provide access to file resources, publishing application events, and
-accessing a MessageSource. These additional features are described in
+`ApplicationContext` provide access to file resources, publishing application events, and
+accessing a `MessageSource`. These additional features are described in
 <<context-introduction>>
 
 As of Spring 2.5, autowiring is another alternative to obtain reference to the
@@ -4252,7 +4260,7 @@ parameter that is expecting the `ApplicationContext` type if the field, construc
 method in question carries the `@Autowired` annotation. For more information, see
 <<beans-autowired-annotation>>.
 
-When an ApplicationContext creates a class that implements the
+When an `ApplicationContext` creates a class that implements the
 `org.springframework.beans.factory.BeanNameAware` interface, the class is provided with
 a reference to the name defined in its associated object definition.
 
@@ -4501,6 +4509,14 @@ configuration metadata which implement the `BeanPostProcessor` interface. The
 `ApplicationContext` registers these beans as post-processors so that they can be called
 later upon bean creation. Bean post-processors can be deployed in the container just
 like any other beans.
+
+Note that when declaring a ++BeanPostProcessor++ using an `@Bean` factory method on a
+configuration class, the return type of the factory method should be the implementation
+class itself or at least the `org.springframework.beans.factory.config.BeanPostProcessor`
+interface, clearly indicating the post-processor nature of that bean. Otherwise, the
+`ApplicationContext` won't be able to autodetect it by type before fully creating it.
+Since a ++BeanPostProcessor++ needs to be instantiated early in order to apply to the
+initialization of other beans in the context, this early type detection is critical.
 
 [NOTE]
 ====
@@ -5148,7 +5164,7 @@ The same applies for typed collections:
 [TIP]
 ====
 Your beans can implement the `org.springframework.core.Ordered` interface or use the
-the `@Ordered` annotation if you want items in the array or list to be sorted into a
+the `@Order` annotation if you want items in the array or list to be sorted into a
 specific order.
 ====
 
@@ -6008,7 +6024,7 @@ and `expression` attributes. The following table describes the filtering options
 |===
 | Filter Type| Example Expression| Description
 
-| annotation
+| annotation (default)
 | `org.example.SomeAnnotation`
 | An annotation to be present at the type level in target components.
 
@@ -7697,7 +7713,7 @@ interfaces to provide additional functionality in a more __application
 framework-oriented style__. Many people use the `ApplicationContext` in a completely
 declarative fashion, not even creating it programmatically, but instead relying on
 support classes such as `ContextLoader` to automatically instantiate an
-`ApplicationContext` as part of the normal startup process of a J2EE web application.
+`ApplicationContext` as part of the normal startup process of a Java EE web application.
 
 To enhance `BeanFactory` functionality in a more framework-oriented style the context
 package also provides the following functionality:
@@ -8180,14 +8196,14 @@ the `contextConfigLocation` parameter just as the listener does.
 
 
 [[context-deploy-rar]]
-==== Deploying a Spring ApplicationContext as a J2EE RAR file
+==== Deploying a Spring ApplicationContext as a Java EE RAR file
 It is possible to deploy a Spring ApplicationContext as a RAR file, encapsulating the
-context and all of its required bean classes and library JARs in a J2EE RAR deployment
+context and all of its required bean classes and library JARs in a Java EE RAR deployment
 unit. This is the equivalent of bootstrapping a standalone ApplicationContext, just hosted
-in J2EE environment, being able to access the J2EE servers facilities. RAR deployment is a
-more natural alternative to scenario of deploying a headless WAR file, in effect, a WAR
+in Java EE environment, being able to access the Java EE servers facilities. RAR deployment
+is  more natural alternative to scenario of deploying a headless WAR file, in effect, a WAR
 file without any HTTP entry points that is used only for bootstrapping a Spring
-ApplicationContext in a J2EE environment.
+ApplicationContext in a Java EE environment.
 
 RAR deployment is ideal for application contexts that do not need HTTP entry points but
 rather consist only of message endpoints and scheduled jobs. Beans in such a context can
@@ -8201,7 +8217,7 @@ Check out the JavaDoc of the
 {javadoc-baseurl}/org/springframework/jca/context/SpringContextResourceAdapter.html[`SpringContextResourceAdapter`]
 class for the configuration details involved in RAR deployment.
 
-__For a simple deployment of a Spring ApplicationContext as a J2EE RAR file:__ package
+__For a simple deployment of a Spring ApplicationContext as a Java EE RAR file:__ package
 all application classes into a RAR file, which is a standard JAR file with a different
 file extension. Add all required library JARs into the root of the RAR archive. Add a
 "META-INF/ra.xml" deployment descriptor (as shown in ++SpringContextResourceAdapter++'s
@@ -12362,7 +12378,7 @@ style.
 
 [[aop-introduction-proxies]]
 ==== AOP Proxies
-Spring AOP defaults to using standard J2SE __dynamic proxies__ for AOP proxies. This
+Spring AOP defaults to using standard JDK __dynamic proxies__ for AOP proxies. This
 enables any interface (or set of interfaces) to be proxied.
 
 Spring AOP can also use CGLIB proxies. This is necessary to proxy classes, rather than
@@ -20969,7 +20985,7 @@ applications. Many high-end applications use a single, highly scalable database 
 Oracle RAC) instead. Standalone transaction managers such as
 http://www.atomikos.com/[Atomikos Transactions] and http://jotm.objectweb.org/[JOTM]
 are other options. Of course, you may need other application server capabilities such as
-Java Message Service (JMS) and J2EE Connector Architecture (JCA).
+Java Message Service (JMS) and Java EE Connector Architecture (JCA).
 
 The Spring Framework __gives you the choice of when to scale your application to a fully
 loaded application server__. Gone are the days when the only alternative to using EJB
@@ -38794,11 +38810,11 @@ and return types are complex types that cannot be serialized using the serializa
 mechanisms Hessian and Burlap use (refer to the next section for more considerations
 when choosing a remoting technology).
 
-Under the hood, Spring uses either the standard facilities provided by J2SE to perform
-HTTP calls or Commons `HttpClient`. Use the latter if you need more advanced and
-easy-to-use functionality. Refer to
-http://jakarta.apache.org/commons/httpclient[jakarta.apache.org/commons/httpclient] for
-more info.
+Under the hood, Spring uses either the standard facilities provided by the JDK or
+Apache `HttpComponents` to perform HTTP calls. Use the latter if you need more
+advanced and easier-to-use functionality. Refer to
+http://hc.apache.org/httpcomponents-client-ga/[hc.apache.org/httpcomponents-client-ga/]
+for more information.
 
 
 
@@ -38897,14 +38913,14 @@ to HTTP POST requests to the URL pointing to the exported service.
 ----
 
 As mentioned before, you can choose what HTTP client you want to use. By default, the
-`HttpInvokerProxy` uses the J2SE HTTP functionality, but you can also use the Commons
-`HttpClient` by setting the `httpInvokerRequestExecutor` property:
+`HttpInvokerProxy` uses the JDK's HTTP functionality, but you can also use the Apache
+`HttpComponents` client by setting the `httpInvokerRequestExecutor` property:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<property name="httpInvokerRequestExecutor">
-		<bean class="org.springframework.remoting.httpinvoker.CommonsHttpInvokerRequestExecutor"/>
+		<bean class="org.springframework.remoting.httpinvoker.HttpComponentsHttpInvokerRequestExecutor"/>
 	</property>
 ----
 
@@ -42127,7 +42143,7 @@ By default `ConnectorServerFactoryBean` creates a `JMXConnectorServer` bound to
 `"service:jmx:jmxmp://localhost:9875"`. The `serverConnector` bean thus exposes the
 local `MBeanServer` to clients through the JMXMP protocol on localhost, port 9875. Note
 that the JMXMP protocol is marked as optional by the JSR 160 specification: currently,
-the main open-source JMX implementation, MX4J, and the one provided with J2SE 5.0
+the main open-source JMX implementation, MX4J, and the one provided with JDK 5.0
 do __not__ support JMXMP.
 
 To specify another URL and register the `JMXConnectorServer` itself with the
@@ -42610,8 +42626,8 @@ homepage] at Oracle
 [[cci-introduction]]
 === Introduction
 Java EE provides a specification to standardize access to enterprise information systems
-(EIS): the JCA (J2EE Connector Architecture). This specification is divided into several
-different parts:
+(EIS): the JCA (Java EE Connector Architecture). This specification is divided into
+several different parts:
 
 * SPI (Service provider interfaces) that the connector provider must implement. These
   interfaces constitute a resource adapter which can be deployed on a Java EE
