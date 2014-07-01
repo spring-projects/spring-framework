@@ -1,5 +1,5 @@
 /*
-	 * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,10 @@
 package org.springframework.http;
 
 import java.io.Serializable;
-
 import java.net.URI;
-
 import java.nio.charset.Charset;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -153,12 +149,15 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public List<MediaType> getAccept() {
 		String value = getFirst(ACCEPT);
-		List<MediaType> result = (value != null) ? MediaType.parseMediaTypes(value) : Collections.<MediaType>emptyList();
+		List<MediaType> result = (value != null ? MediaType.parseMediaTypes(value) : Collections.<MediaType>emptyList());
 
 		// Some containers parse 'Accept' into multiple values
-		if ((result.size() == 1) && (headers.get(ACCEPT).size() > 1)) {
-			value = StringUtils.collectionToCommaDelimitedString(headers.get(ACCEPT));
-			result = MediaType.parseMediaTypes(value);
+		if (result.size() == 1) {
+			List<String> acceptHeader = get(ACCEPT);
+			if (acceptHeader.size() > 1) {
+				value = StringUtils.collectionToCommaDelimitedString(acceptHeader);
+				result = MediaType.parseMediaTypes(value);
+			}
 		}
 
 		return result;
@@ -222,7 +221,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public Set<HttpMethod> getAllow() {
 		String value = getFirst(ALLOW);
-		if (value != null) {
+		if (!StringUtils.isEmpty(value)) {
 			List<HttpMethod> allowedMethod = new ArrayList<HttpMethod>(5);
 			String[] tokens = value.split(",\\s*");
 			for (String token : tokens) {
@@ -429,7 +428,6 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public List<String> getIfNoneMatch() {
 		List<String> result = new ArrayList<String>();
-
 		String value = getFirst(IF_NONE_MATCH);
 		if (value != null) {
 			String[] tokens = value.split(",\\s*");
