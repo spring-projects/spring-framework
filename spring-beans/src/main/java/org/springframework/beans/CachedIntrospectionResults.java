@@ -21,7 +21,7 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
+import java.lang.ref.SoftReference;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -196,7 +196,7 @@ public class CachedIntrospectionResults {
 				}
 				results = new CachedIntrospectionResults(beanClass);
 				synchronized (classCache) {
-					classCache.put(beanClass, new WeakReference<CachedIntrospectionResults>(results));
+					classCache.put(beanClass, new SoftReference<CachedIntrospectionResults>(results));
 				}
 			}
 		}
