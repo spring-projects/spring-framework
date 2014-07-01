@@ -134,6 +134,7 @@ public class JCacheCustomInterceptorTests {
 	 * A test {@link org.springframework.cache.interceptor.CacheInterceptor} that handles special exception
 	 * types.
 	 */
+	@SuppressWarnings("serial")
 	static class TestCacheInterceptor extends JCacheInterceptor {
 
 		@Override
