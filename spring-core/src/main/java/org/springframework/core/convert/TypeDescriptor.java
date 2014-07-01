@@ -701,8 +701,7 @@ public class TypeDescriptor implements Serializable {
 			}
 		}
 		if (nested == ResolvableType.NONE) {
-			throw new IllegalStateException(
-					"Unable to obtain nested generic from " + typeDescriptor + " at level " + nestingLevel);
+			return null;
 		}
 		return getRelatedIfResolvable(typeDescriptor, nested);
 	}
