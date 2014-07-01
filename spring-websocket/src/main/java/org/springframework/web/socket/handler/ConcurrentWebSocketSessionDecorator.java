@@ -16,18 +16,19 @@
 
 package org.springframework.web.socket.handler;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.WebSocketMessage;
-import org.springframework.web.socket.WebSocketSession;
-
 import java.io.IOException;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.WebSocketMessage;
+import org.springframework.web.socket.WebSocketSession;
 
 
 /**
@@ -44,7 +45,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorator {
 
-	private static Log logger = LogFactory.getLog(ConcurrentWebSocketSessionDecorator.class);
+	private static final Log logger = LogFactory.getLog(ConcurrentWebSocketSessionDecorator.class);
 
 
 	private final Queue<WebSocketMessage<?>> buffer = new LinkedBlockingQueue<WebSocketMessage<?>>();
@@ -61,7 +62,7 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 
 	private volatile boolean limitExceeded;
 
-	private volatile boolean shutDownInProgress;
+	private volatile boolean shutdownInProgress;
 
 
 	private final Lock flushLock = new ReentrantLock();
@@ -87,7 +88,6 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 
 
 	public void sendMessage(WebSocketMessage<?> message) throws IOException {
-
 		if (isDisabled()) {
 			return;
 		}
@@ -110,7 +110,7 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 	}
 
 	private boolean isDisabled() {
-		return (this.limitExceeded || this.shutDownInProgress);
+		return (this.limitExceeded || this.shutdownInProgress);
 	}
 
 	private boolean tryFlushMessageBuffer() throws IOException {
@@ -140,17 +140,13 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 		if (!isDisabled() && this.closeLock.tryLock()) {
 			try {
 				if (getTimeSinceSendStarted() > this.sendTimeLimit) {
-
 					String errorMessage = "Message send time " + getTimeSinceSendStarted() +
 							" (ms) exceeded the allowed limit " + this.sendTimeLimit;
-
 					sessionLimitReached(errorMessage, CloseStatus.SESSION_NOT_RELIABLE);
 				}
 				else if (this.bufferSize.get() > this.bufferSizeLimit) {
-
 					String errorMessage = "The send buffer size " + this.bufferSize.get() + " bytes for " +
 							"session '" + getId() + " exceeded the allowed limit " + this.bufferSizeLimit;
-
 					sessionLimitReached(errorMessage,
 							(getTimeSinceSendStarted() >= 10000 ? CloseStatus.SESSION_NOT_RELIABLE : null));
 				}
@@ -168,7 +164,8 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 
 	@Override
 	public void close(CloseStatus status) throws IOException {
-		this.shutDownInProgress = true;
+		this.shutdownInProgress = true;
 		super.close(status);
 	}
+
 }

@@ -54,7 +54,7 @@ import org.springframework.util.ClassUtils;
  */
 public class LocalVariableTableParameterNameDiscoverer implements ParameterNameDiscoverer {
 
-	private static Log logger = LogFactory.getLog(LocalVariableTableParameterNameDiscoverer.class);
+	private static final Log logger = LogFactory.getLog(LocalVariableTableParameterNameDiscoverer.class);
 
 	// marker object for classes that do not have any debug info
 	private static final Map<Member, String[]> NO_DEBUG_INFO_MAP = Collections.emptyMap();

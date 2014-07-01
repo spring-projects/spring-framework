@@ -63,7 +63,7 @@ public class EmbeddedDatabaseFactory {
 	 */
 	public static final String DEFAULT_DATABASE_NAME = "testdb";
 
-	private static Log logger = LogFactory.getLog(EmbeddedDatabaseFactory.class);
+	private static final Log logger = LogFactory.getLog(EmbeddedDatabaseFactory.class);
 
 	private String databaseName = DEFAULT_DATABASE_NAME;
 
