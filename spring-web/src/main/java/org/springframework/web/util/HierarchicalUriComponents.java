@@ -649,7 +649,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		private final List<String> pathSegments;
 
 		public PathSegmentComponent(List<String> pathSegments) {
-			this.pathSegments = Collections.unmodifiableList(pathSegments);
+			this.pathSegments = Collections.unmodifiableList(new ArrayList<String>(pathSegments));
 		}
 
 		public String getPath() {
