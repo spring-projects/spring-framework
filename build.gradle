@@ -445,8 +445,8 @@ project("spring-messaging") {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
 		compile(project(":spring-context"))
-		optional("org.projectreactor:reactor-core:1.1.0.RELEASE")
-		optional("org.projectreactor:reactor-net:1.1.0.RELEASE")
+		optional("org.projectreactor:reactor-core:1.1.3.RELEASE")
+		optional("org.projectreactor:reactor-net:1.1.3.RELEASE")
 		optional("org.eclipse.jetty.websocket:websocket-server:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
 		}
@@ -683,8 +683,8 @@ project("spring-websocket") {
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}")
-		testCompile("org.projectreactor:reactor-core:1.1.2.RELEASE")
-		testCompile("org.projectreactor:reactor-net:1.1.2.RELEASE")
+		testCompile("org.projectreactor:reactor-core:1.1.3.RELEASE")
+		testCompile("org.projectreactor:reactor-net:1.1.3.RELEASE")
 		testCompile("log4j:log4j:1.2.17")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 	}
