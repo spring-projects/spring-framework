@@ -28,6 +28,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -63,6 +66,8 @@ public abstract class AnnotationUtils {
 	/** The attribute name for annotations with a single element */
 	public static final String VALUE = "value";
 
+	private static final Log logger = LogFactory.getLog(AnnotationUtils.class);
+
 	private static final Map<Class<?>, Boolean> annotatedInterfaceCache = new WeakHashMap<Class<?>, Boolean>();
 
 
@@ -79,29 +84,49 @@ public abstract class AnnotationUtils {
 		if (annotationType.isInstance(ann)) {
 			return (T) ann;
 		}
-		return ann.annotationType().getAnnotation(annotationType);
+		try {
+			return ann.annotationType().getAnnotation(annotationType);
+		}
+		catch (Exception ex) {
+			// Assuming nested Class values not resolvable within annotation attributes...
+			// We're probably hitting a non-present optional arrangement - let's back out.
+			if (logger.isInfoEnabled()) {
+				logger.info("Failed to introspect annotations on [" + ann.annotationType() + "]: " + ex);
+			}
+			return null;
+		}
 	}
 
 	/**
 	 * Get a single {@link Annotation} of {@code annotationType} from the supplied
 	 * Method, Constructor or Field. Meta-annotations will be searched if the annotation
 	 * is not declared locally on the supplied element.
-	 * @param ae the Method, Constructor or Field from which to get the annotation
+	 * @param annotatedElement the Method, Constructor or Field from which to get the annotation
 	 * @param annotationType the annotation type to look for, both locally and as a meta-annotation
 	 * @return the matching annotation, or {@code null} if none found
 	 * @since 3.1
 	 */
-	public static <T extends Annotation> T getAnnotation(AnnotatedElement ae, Class<T> annotationType) {
-		T ann = ae.getAnnotation(annotationType);
-		if (ann == null) {
-			for (Annotation metaAnn : ae.getAnnotations()) {
-				ann = metaAnn.annotationType().getAnnotation(annotationType);
-				if (ann != null) {
-					break;
+	public static <T extends Annotation> T getAnnotation(AnnotatedElement annotatedElement, Class<T> annotationType) {
+		try {
+			T ann = annotatedElement.getAnnotation(annotationType);
+			if (ann == null) {
+				for (Annotation metaAnn : annotatedElement.getAnnotations()) {
+					ann = metaAnn.annotationType().getAnnotation(annotationType);
+					if (ann != null) {
+						break;
+					}
 				}
 			}
+			return ann;
 		}
-		return ann;
+		catch (Exception ex) {
+			// Assuming nested Class values not resolvable within annotation attributes...
+			// We're probably hitting a non-present optional arrangement - let's back out.
+			if (logger.isInfoEnabled()) {
+				logger.info("Failed to introspect annotations on [" + annotatedElement + "]: " + ex);
+			}
+			return null;
+		}
 	}
 
 	/**
@@ -112,7 +137,17 @@ public abstract class AnnotationUtils {
 	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod(Method)
 	 */
 	public static Annotation[] getAnnotations(Method method) {
-		return BridgeMethodResolver.findBridgedMethod(method).getAnnotations();
+		try {
+			return BridgeMethodResolver.findBridgedMethod(method).getAnnotations();
+		}
+		catch (Exception ex) {
+			// Assuming nested Class values not resolvable within annotation attributes...
+			// We're probably hitting a non-present optional arrangement - let's back out.
+			if (logger.isInfoEnabled()) {
+				logger.info("Failed to introspect annotations on [" + method + "]: " + ex);
+			}
+			return null;
+		}
 	}
 
 	/**
@@ -162,10 +197,19 @@ public abstract class AnnotationUtils {
 	public static <A extends Annotation> Set<A> getRepeatableAnnotation(AnnotatedElement annotatedElement,
 			Class<? extends Annotation> containerAnnotationType, Class<A> annotationType) {
 
-		if (annotatedElement.getAnnotations().length == 0) {
-			return Collections.emptySet();
+		try {
+			if (annotatedElement.getAnnotations().length > 0) {
+				return new AnnotationCollector<A>(containerAnnotationType, annotationType).getResult(annotatedElement);
+			}
 		}
-		return new AnnotationCollector<A>(containerAnnotationType, annotationType).getResult(annotatedElement);
+		catch (Exception ex) {
+			// Assuming nested Class values not resolvable within annotation attributes...
+			// We're probably hitting a non-present optional arrangement - let's back out.
+			if (logger.isInfoEnabled()) {
+				logger.info("Failed to introspect annotations on [" + annotatedElement + "]: " + ex);
+			}
+		}
+		return Collections.emptySet();
 	}
 
 	/**
@@ -230,9 +274,18 @@ public abstract class AnnotationUtils {
 			}
 			boolean found = false;
 			for (Method ifcMethod : iface.getMethods()) {
-				if (ifcMethod.getAnnotations().length > 0) {
-					found = true;
-					break;
+				try {
+					if (ifcMethod.getAnnotations().length > 0) {
+						found = true;
+						break;
+					}
+				}
+				catch (Exception ex) {
+					// Assuming nested Class values not resolvable within annotation attributes...
+					// We're probably hitting a non-present optional arrangement - let's back out.
+					if (logger.isInfoEnabled()) {
+						logger.info("Failed to introspect annotations on [" + ifcMethod + "]: " + ex);
+					}
 				}
 			}
 			annotatedInterfaceCache.put(iface, found);
@@ -278,7 +331,17 @@ public abstract class AnnotationUtils {
 	private static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType, Set<Annotation> visited) {
 		Assert.notNull(clazz, "Class must not be null");
 		if (isAnnotationDeclaredLocally(annotationType, clazz)) {
-			return clazz.getAnnotation(annotationType);
+			try {
+				return clazz.getAnnotation(annotationType);
+			}
+			catch (Exception ex) {
+				// Assuming nested Class values not resolvable within annotation attributes...
+				// We're probably hitting a non-present optional arrangement - let's back out.
+				if (logger.isInfoEnabled()) {
+					logger.info("Failed to introspect annotations on [" + clazz + "]: " + ex);
+				}
+				return null;
+			}
 		}
 		for (Class<?> ifc : clazz.getInterfaces()) {
 			A annotation = findAnnotation(ifc, annotationType, visited);
@@ -390,10 +453,19 @@ public abstract class AnnotationUtils {
 		Assert.notNull(annotationType, "Annotation type must not be null");
 		Assert.notNull(clazz, "Class must not be null");
 		boolean declaredLocally = false;
-		for (Annotation annotation : clazz.getDeclaredAnnotations()) {
-			if (annotation.annotationType().equals(annotationType)) {
-				declaredLocally = true;
-				break;
+		try {
+			for (Annotation annotation : clazz.getDeclaredAnnotations()) {
+				if (annotation.annotationType().equals(annotationType)) {
+					declaredLocally = true;
+					break;
+				}
+			}
+		}
+		catch (Exception ex) {
+			// Assuming nested Class values not resolvable within annotation attributes...
+			// We're probably hitting a non-present optional arrangement - let's back out.
+			if (logger.isInfoEnabled()) {
+				logger.info("Failed to introspect annotations on [" + clazz + "]: " + ex);
 			}
 		}
 		return declaredLocally;
@@ -502,7 +574,7 @@ public abstract class AnnotationUtils {
 					}
 					if (nestedAnnotationsAsMap && value instanceof Annotation) {
 						attrs.put(method.getName(),
-							getAnnotationAttributes((Annotation) value, classValuesAsString, true));
+								getAnnotationAttributes((Annotation) value, classValuesAsString, true));
 					}
 					else if (nestedAnnotationsAsMap && value instanceof Annotation[]) {
 						Annotation[] realAnnotations = (Annotation[]) value;
@@ -632,7 +704,7 @@ public abstract class AnnotationUtils {
 						this.result.add((A) annotation);
 					}
 					else if (ObjectUtils.nullSafeEquals(this.containerAnnotationType, annotation.annotationType())) {
-						this.result.addAll(Arrays.asList(getValue(annotation)));
+						this.result.addAll(getValue(annotation));
 					}
 					else if (!isInJavaLangAnnotationPackage(annotation)) {
 						process(annotation.annotationType());
@@ -642,15 +714,15 @@ public abstract class AnnotationUtils {
 		}
 
 		@SuppressWarnings("unchecked")
-		private A[] getValue(Annotation annotation) {
+		private List<A> getValue(Annotation annotation) {
 			try {
 				Method method = annotation.annotationType().getDeclaredMethod("value");
 				ReflectionUtils.makeAccessible(method);
-				return (A[]) method.invoke(annotation);
+				return Arrays.asList((A[]) method.invoke(annotation));
 			}
 			catch (Exception ex) {
-				throw new IllegalStateException("Unable to read value from repeating annotation container " +
-						this.containerAnnotationType.getName(), ex);
+				// Unable to read value from repeating annotation container -> ignore it.
+				return Collections.emptyList();
 			}
 		}
 	}
