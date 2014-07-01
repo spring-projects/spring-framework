@@ -44,7 +44,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsService;
-import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * An abstract base class for {@link SockJsService} implementations that provides SockJS
@@ -102,16 +101,20 @@ public abstract class AbstractSockJsService implements SockJsService {
 	}
 
 	/**
-	 * Transports which don't support cross-domain communication natively (e.g.
-	 * "eventsource", "htmlfile") rely on serving a simple page (using the
-	 * "foreign" domain) from an invisible iframe. Code run from this iframe
-	 * doesn't need to worry about cross-domain issues since it is running from
-	 * a domain local to the SockJS server. The iframe does need to load the
-	 * SockJS javascript client library and this option allows configuring that url.
-	 * For more details see the reference documentation.
-	 *
+	 * Transports with no native cross-domain communication (e.g. "eventsource",
+	 * "htmlfile") must get a simple page from the "foreign" domain in an invisible
+	 * iframe so that code in the iframe can run from  a domain local to the SockJS
+	 * server. Since the iframe needs to load the SockJS javascript client library,
+	 * this property allows specifying where to load it from.
 	 * <p>By default this is set to point to
 	 * "https://d1fxtkz8shb9d2.cloudfront.net/sockjs-0.3.4.min.js".
+	 * However, it can also be set to point to a URL served by the application.
+	 * <p>Note that it's possible to specify a relative URL in which case the URL
+	 * must be relative to the iframe URL. For example assuming a SockJS endpoint
+	 * mapped to "/sockjs", and resulting iframe URL "/sockjs/iframe.html", then the
+	 * the relative URL must start with "../../" to traverse up to the location
+	 * above the SockJS mapping. In case of a prefix-based Servlet mapping one more
+	 * traversal may be needed.
 	 */
 	public void setSockJsClientLibraryUrl(String clientLibraryUrl) {
 		this.clientLibraryUrl = clientLibraryUrl;
@@ -148,16 +151,13 @@ public abstract class AbstractSockJsService implements SockJsService {
 	 * clients with a "cookie_needed" boolean property that indicates whether the use of a
 	 * JSESSIONID cookie is required for the application to function correctly, e.g. for
 	 * load balancing or in Java Servlet containers for the use of an HTTP session.
-	 *
 	 * <p>This is especially important for IE 8,9 that support XDomainRequest -- a modified
 	 * AJAX/XHR -- that can do requests across domains but does not send any cookies. In
 	 * those cases, the SockJS client prefers the "iframe-htmlfile" transport over
 	 * "xdr-streaming" in order to be able to send cookies.
-	 *
 	 * <p>The SockJS protocol also expects a SockJS service to echo back the JSESSIONID
 	 * cookie when this property is set to true. However, when running in a Servlet
 	 * container this is not necessary since the container takes care of it.
-	 *
 	 * <p>The default value is "true" to maximize the chance for applications to work
 	 * correctly in IE 8,9 with support for cookies (and the JSESSIONID cookie in
 	 * particular). However, an application can choose to set this to "false" if
@@ -358,14 +358,18 @@ public abstract class AbstractSockJsService implements SockJsService {
 
 
 	protected void addCorsHeaders(ServerHttpRequest request, ServerHttpResponse response, HttpMethod... httpMethods) {
-
 		HttpHeaders requestHeaders = request.getHeaders();
 		HttpHeaders responseHeaders = response.getHeaders();
 
-		// Perhaps a CORS Filter has already added this?
-		if (!CollectionUtils.isEmpty(responseHeaders.get("Access-Control-Allow-Origin"))) {
-			logger.debug("Skip adding CORS headers, response already contains \"Access-Control-Allow-Origin\"");
-			return;
+		try {
+			// Perhaps a CORS Filter has already added this?
+			if (!CollectionUtils.isEmpty(responseHeaders.get("Access-Control-Allow-Origin"))) {
+				logger.debug("Skip adding CORS headers, response already contains \"Access-Control-Allow-Origin\"");
+				return;
+			}
+		}
+		catch (NullPointerException npe) {
+			// See SPR-11919 and https://issues.jboss.org/browse/WFLY-3474
 		}
 
 		String origin = requestHeaders.getFirst("origin");
@@ -433,6 +437,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 			}
 		}
 	};
+
 
 	private final SockJsRequestHandler iframeHandler = new SockJsRequestHandler() {
 
