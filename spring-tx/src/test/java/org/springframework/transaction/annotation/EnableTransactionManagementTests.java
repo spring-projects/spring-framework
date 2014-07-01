@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.Map;
 import org.junit.Test;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -33,10 +35,13 @@ import org.springframework.transaction.annotation.AnnotationTransactionNamespace
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
+import javax.annotation.PostConstruct;
+
 /**
  * Tests demonstrating use of @EnableTransactionManagement @Configuration classes.
  *
  * @author Chris Beams
+ * @author Stephane Nicoll
  * @since 3.1
  */
 public class EnableTransactionManagementTests {
@@ -101,6 +106,21 @@ public class EnableTransactionManagementTests {
 		}
 	}
 
+	@Test
+	public void spr11915() {
+		AnnotationConfigApplicationContext ctx =
+				new AnnotationConfigApplicationContext(Spr11915Config.class);
+
+		TransactionalTestBean bean = ctx.getBean(TransactionalTestBean.class);
+		bean.saveQualifiedFoo();
+
+		CallCountingTransactionManager txManager = ctx
+				.getBean("qualifiedTransactionManager", CallCountingTransactionManager.class);
+		assertThat(txManager.begun, equalTo(1));
+		assertThat(txManager.commits, equalTo(1));
+		assertThat(txManager.rollbacks, equalTo(0));
+	}
+
 
 	@Configuration
 	@EnableTransactionManagement
@@ -116,6 +136,25 @@ public class EnableTransactionManagementTests {
 	@Configuration
 	@EnableTransactionManagement(mode=AdviceMode.ASPECTJ)
 	static class EnableAspectJTxConfig {
+	}
+
+	@Configuration
+	@EnableTransactionManagement
+	static class Spr11915Config {
+
+		@Autowired
+		private ConfigurableApplicationContext applicationContext;
+
+		@PostConstruct
+		public void initializeApp() {
+			applicationContext.getBeanFactory().registerSingleton(
+					"qualifiedTransactionManager", new CallCountingTransactionManager());
+		}
+
+		@Bean
+		public TransactionalTestBean testBean() {
+			return new TransactionalTestBean();
+		}
 	}
 
 

@@ -118,6 +118,10 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 		public void saveFoo() {
 		}
 
+		@Transactional("qualifiedTransactionManager")
+		public void saveQualifiedFoo() {
+		}
+
 		@Transactional
 		public void exceptional(Throwable t) throws Throwable {
 			throw t;
