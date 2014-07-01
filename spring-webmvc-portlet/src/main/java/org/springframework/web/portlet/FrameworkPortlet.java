@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,12 +41,15 @@ import org.springframework.context.event.SourceFilteringListener;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.i18n.SimpleLocaleContext;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.portlet.context.ConfigurablePortletApplicationContext;
 import org.springframework.web.portlet.context.PortletApplicationContextUtils;
 import org.springframework.web.portlet.context.PortletRequestAttributes;
 import org.springframework.web.portlet.context.PortletRequestHandledEvent;
+import org.springframework.web.portlet.context.StandardPortletEnvironment;
 import org.springframework.web.portlet.context.XmlPortletApplicationContext;
 
 /**
@@ -107,7 +110,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 	 * Default context class for FrameworkPortlet.
 	 * @see org.springframework.web.portlet.context.XmlPortletApplicationContext
 	 */
-	public static final Class DEFAULT_CONTEXT_CLASS = XmlPortletApplicationContext.class;
+	public static final Class<?> DEFAULT_CONTEXT_CLASS = XmlPortletApplicationContext.class;
 
 	/**
 	 * Suffix for Portlet ApplicationContext namespaces. If a portlet of this class is
@@ -130,7 +133,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 
 
 	/** Portlet ApplicationContext implementation class to use */
-	private Class contextClass = DEFAULT_CONTEXT_CLASS;
+	private Class<?> contextClass = DEFAULT_CONTEXT_CLASS;
 
 	/** Namespace for this portlet */
 	private String namespace;
@@ -163,14 +166,14 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 	 * must also implement ConfigurablePortletApplicationContext.
 	 * @see #createPortletApplicationContext
 	 */
-	public void setContextClass(Class contextClass) {
+	public void setContextClass(Class<?> contextClass) {
 		this.contextClass = contextClass;
 	}
 
 	/**
 	 * Return the custom context class.
 	 */
-	public Class getContextClass() {
+	public Class<?> getContextClass() {
 		return this.contextClass;
 	}
 
@@ -353,6 +356,14 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 		pac.setConfigLocation(getContextConfigLocation());
 		pac.addApplicationListener(new SourceFilteringListener(pac, this));
 
+		// The wac environment's #initPropertySources will be called in any case when the context
+		// is refreshed; do it eagerly here to ensure portlet property sources are in place for
+		// use in any post-processing or initialization that occurs below prior to #refresh
+		ConfigurableEnvironment env = pac.getEnvironment();
+		if (env instanceof StandardPortletEnvironment) {
+			((StandardPortletEnvironment) env).initPropertySources(pac.getServletContext(), getPortletContext(), getPortletConfig());
+		}
+
 		postProcessPortletApplicationContext(pac);
 		pac.refresh();
 
@@ -505,7 +516,8 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 		// Expose current RequestAttributes to current thread.
 		RequestAttributes previousRequestAttributes = RequestContextHolder.getRequestAttributes();
 		PortletRequestAttributes requestAttributes = null;
-		if (previousRequestAttributes == null || previousRequestAttributes.getClass().equals(PortletRequestAttributes.class)) {
+		if (previousRequestAttributes == null || previousRequestAttributes.getClass().equals(PortletRequestAttributes.class) ||
+				previousRequestAttributes.getClass().equals(ServletRequestAttributes.class)) {
 			requestAttributes = new PortletRequestAttributes(request);
 			RequestContextHolder.setRequestAttributes(requestAttributes, this.threadContextInheritable);
 		}
