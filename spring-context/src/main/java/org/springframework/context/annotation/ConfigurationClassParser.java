@@ -537,6 +537,7 @@ class ConfigurationClassParser {
 			return new SourceClass(classType);
 		}
 		catch (Throwable ex) {
+			// Enforce ASM via class name resolution
 			return asSourceClass(classType.getName());
 		}
 	}
@@ -693,27 +694,40 @@ class ConfigurationClassParser {
 		}
 
 		public Collection<SourceClass> getMemberClasses() throws IOException {
-			List<SourceClass> members = new ArrayList<SourceClass>();
-			if (this.source instanceof Class<?>) {
-				Class<?> sourceClass = (Class<?>) this.source;
-				for (Class<?> declaredClass : sourceClass.getDeclaredClasses()) {
-					try {
-						members.add(asSourceClass(declaredClass));
+			Object sourceToProcess = this.source;
+
+			if (sourceToProcess instanceof Class<?>) {
+				Class<?> sourceClass = (Class<?>) sourceToProcess;
+				try {
+					Class<?>[] declaredClasses = sourceClass.getDeclaredClasses();
+					List<SourceClass> members = new ArrayList<SourceClass>(declaredClasses.length);
+					for (Class<?> declaredClass : declaredClasses) {
+						try {
+							members.add(asSourceClass(declaredClass));
+						}
+						catch (ClassNotFoundException ex) {
+							// ignore
+						}
 					}
-					catch (ClassNotFoundException ex) {
-						// ignore
-					}
+					return members;
+				}
+				catch (NoClassDefFoundError err) {
+					// getDeclaredClasses() failed because of non-resolvable dependencies
+					// -> fall back to ASM below
+					sourceToProcess = metadataReaderFactory.getMetadataReader(sourceClass.getName());
 				}
 			}
-			else {
-				MetadataReader sourceReader = (MetadataReader) source;
-				for (String memberClassName : sourceReader.getClassMetadata().getMemberClassNames()) {
-					try {
-						members.add(asSourceClass(memberClassName));
-					}
-					catch (ClassNotFoundException ex) {
-						// ignore
-					}
+
+			// ASM-based resolution - safe for non-resolvable classes as well
+			MetadataReader sourceReader = (MetadataReader) sourceToProcess;
+			String[] memberClassNames = sourceReader.getClassMetadata().getMemberClassNames();
+			List<SourceClass> members = new ArrayList<SourceClass>(memberClassNames.length);
+			for (String memberClassName : memberClassNames) {
+				try {
+					members.add(asSourceClass(memberClassName));
+				}
+				catch (ClassNotFoundException ex) {
+					// ignore
 				}
 			}
 			return members;
