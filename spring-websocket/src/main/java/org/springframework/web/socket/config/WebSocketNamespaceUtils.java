@@ -16,7 +16,6 @@
 
 package org.springframework.web.socket.config;
 
-import org.springframework.util.ClassUtils;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -32,8 +31,6 @@ import org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsSe
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
 
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-
 /**
  * Provides utility methods for parsing common WebSocket XML namespace elements.
  *
@@ -42,10 +39,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
  * @since 4.0
  */
 class WebSocketNamespaceUtils {
-
-	// Check for setRemoveOnCancelPolicy method - available on JDK 7 and higher
-	private static boolean hasRemoveOnCancelPolicyMethod = ClassUtils.hasMethod(
-			ScheduledThreadPoolExecutor.class, "setRemoveOnCancelPolicy", boolean.class);
 
 
 	public static RuntimeBeanReference registerHandshakeHandler(Element element, ParserContext parserContext, Object source) {
@@ -147,9 +140,7 @@ class WebSocketNamespaceUtils {
 			taskSchedulerDef.setSource(source);
 			taskSchedulerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			taskSchedulerDef.getPropertyValues().add("poolSize", Runtime.getRuntime().availableProcessors());
-			if (hasRemoveOnCancelPolicyMethod) {
-				taskSchedulerDef.getPropertyValues().add("removeOnCancelPolicy", true);
-			}
+			taskSchedulerDef.getPropertyValues().add("removeOnCancelPolicy", true);
 			taskSchedulerDef.getPropertyValues().add("threadNamePrefix", schedulerName + "-");
 			parserContext.getRegistry().registerBeanDefinition(schedulerName, taskSchedulerDef);
 			parserContext.registerComponent(new BeanComponentDefinition(taskSchedulerDef, schedulerName));

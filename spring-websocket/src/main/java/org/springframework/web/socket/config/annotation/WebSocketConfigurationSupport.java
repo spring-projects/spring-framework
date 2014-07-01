@@ -18,11 +18,8 @@ package org.springframework.web.socket.config.annotation;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.util.ClassUtils;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
-
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
  * Configuration support for WebSocket request handling.
@@ -31,11 +28,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
  * @since 4.0
  */
 public class WebSocketConfigurationSupport {
-
-	// Check for setRemoveOnCancelPolicy method - available on JDK 7 and higher
-	private static boolean hasRemoveOnCancelPolicyMethod = ClassUtils.hasMethod(
-			ScheduledThreadPoolExecutor.class, "setRemoveOnCancelPolicy", boolean.class);
-
 
 	@Bean
 	public HandlerMapping webSocketHandlerMapping() {
@@ -71,9 +63,7 @@ public class WebSocketConfigurationSupport {
 		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
 		scheduler.setThreadNamePrefix("SockJS-");
 		scheduler.setPoolSize(Runtime.getRuntime().availableProcessors());
-		if (hasRemoveOnCancelPolicyMethod) {
-			scheduler.setRemoveOnCancelPolicy(true);
-		}
+		scheduler.setRemoveOnCancelPolicy(true);
 		return scheduler;
 	}
 
