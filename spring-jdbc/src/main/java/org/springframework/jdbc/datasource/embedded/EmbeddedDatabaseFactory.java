@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,26 +30,42 @@ import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
 import org.springframework.util.Assert;
 
 /**
- * Creates a {@link EmbeddedDatabase} instance. Callers are guaranteed that the returned database has been fully
- * initialized and populated.
+ * Factory for creating {@link EmbeddedDatabase} instances.
  *
- * <p>Can be configured:<br>
- * Call {@link #setDatabaseName(String)} to change the name of the database.<br>
- * Call {@link #setDatabaseType(EmbeddedDatabaseType)} to set the database type if you wish to use one of the supported types.<br>
- * Call {@link #setDatabaseConfigurer(EmbeddedDatabaseConfigurer)} to configure support for your own embedded database type.<br>
- * Call {@link #setDatabasePopulator(DatabasePopulator)} to change the algorithm used to populate the database.<br>
- * Call {@link #setDataSourceFactory(DataSourceFactory)} to change the type of DataSource used to connect to the database.<br>
- * Call {@link #getDatabase()} to get the {@link EmbeddedDatabase} instance.<br>
+ * <p>Callers are guaranteed that a returned database has been fully initialized
+ * and populated.
+ *
+ * <p>Can be configured:
+ * <ul>
+ * <li>Call {@link #setDatabaseName(String)} to change the name of the database.
+ * <li>Call {@link #setDatabaseType(EmbeddedDatabaseType)} to set the database
+ * type if you wish to use one of the supported types.
+ * <li>Call {@link #setDatabaseConfigurer(EmbeddedDatabaseConfigurer)} to
+ * configure support for your own embedded database type.
+ * <li>Call {@link #setDatabasePopulator(DatabasePopulator)} to change the
+ * algorithm used to populate the database.
+ * <li>Call {@link #setDataSourceFactory(DataSourceFactory)} to change the type
+ * of {@link DataSource} used to connect to the database.
+ * </ul>
+ *
+ * <p>Call {@link #getDatabase()} to get the {@link EmbeddedDatabase} instance.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  */
 public class EmbeddedDatabaseFactory {
 
-	private static Log logger = LogFactory.getLog(EmbeddedDatabaseFactory.class);
+	/**
+	 * Default name for an embedded database: &quot;testdb&quot;.
+	 */
+	public static final String DEFAULT_DATABASE_NAME = "testdb";
 
-	private String databaseName = "testdb";
+
+	private static final Log logger = LogFactory.getLog(EmbeddedDatabaseFactory.class);
+
+	private String databaseName = DEFAULT_DATABASE_NAME;
 
 	private DataSourceFactory dataSourceFactory = new SimpleDriverDataSourceFactory();
 
@@ -61,16 +77,18 @@ public class EmbeddedDatabaseFactory {
 
 
 	/**
-	 * Set the name of the database. Defaults to "testdb".
-	 * @param databaseName name of the test database
+	 * Set the name of the database.
+	 * <p>Defaults to {@value #DEFAULT_DATABASE_NAME}.
+	 * @param databaseName name of the embedded database
 	 */
 	public void setDatabaseName(String databaseName) {
-		Assert.notNull(databaseName, "Database name is required");
+		Assert.hasText(databaseName, "Database name is required");
 		this.databaseName = databaseName;
 	}
 
 	/**
-	 * Set the factory to use to create the DataSource instance that connects to the embedded database.
+	 * Set the factory to use to create the {@link DataSource} instance that
+	 * connects to the embedded database.
 	 * <p>Defaults to {@link SimpleDriverDataSourceFactory}.
 	 */
 	public void setDataSourceFactory(DataSourceFactory dataSourceFactory) {
@@ -79,9 +97,10 @@ public class EmbeddedDatabaseFactory {
 	}
 
 	/**
-	 * Set the type of embedded database to use. Call this when you wish to configure
-	 * one of the pre-supported types. Defaults to HSQL.
-	 * @param type the test database type
+	 * Set the type of embedded database to use.
+	 * <p>Call this when you wish to configure one of the pre-supported types.
+	 * <p>Defaults to HSQL.
+	 * @param type the database type
 	 */
 	public void setDatabaseType(EmbeddedDatabaseType type) {
 		this.databaseConfigurer = EmbeddedDatabaseConfigurerFactory.getConfigurer(type);
@@ -96,15 +115,17 @@ public class EmbeddedDatabaseFactory {
 	}
 
 	/**
-	 * Set the strategy that will be used to populate the embedded database. Defaults to null.
-	 * @see org.springframework.jdbc.datasource.init.DataSourceInitializer#setDatabasePopulator
+	 * Set the strategy that will be used to initialize or populate the embedded
+	 * database.
+	 * <p>Defaults to {@code null}.
 	 */
 	public void setDatabasePopulator(DatabasePopulator populator) {
 		this.databasePopulator = populator;
 	}
 
 	/**
-	 * Factory method that returns the embedded database instance.
+	 * Factory method that returns the {@link EmbeddedDatabase embedded database}
+	 * instance, which is also a {@link DataSource}.
 	 */
 	public EmbeddedDatabase getDatabase() {
 		if (this.dataSource == null) {
@@ -115,8 +136,10 @@ public class EmbeddedDatabaseFactory {
 
 
 	/**
-	 * Hook to initialize the embedded database. Subclasses may call to force initialization. After calling this method,
-	 * {@link #getDataSource()} returns the DataSource providing connectivity to the db.
+	 * Hook to initialize the embedded database. Subclasses may call this method
+	 * to force initialization.
+	 * <p>After calling this method, {@link #getDataSource()} returns the
+	 * {@link DataSource} providing connectivity to the database.
 	 */
 	protected void initDatabase() {
 		// Create the embedded database source first
@@ -144,8 +167,10 @@ public class EmbeddedDatabaseFactory {
 	}
 
 	/**
-	 * Hook to shutdown the embedded database. Subclasses may call to force shutdown.
-	 * After calling, {@link #getDataSource()} returns null. Does nothing if no embedded database has been initialized.
+	 * Hook to shutdown the embedded database. Subclasses may call this method
+	 * to force shutdown.
+	 * <p>After calling, {@link #getDataSource()} returns {@code null}.
+	 * <p>Does nothing if no embedded database has been initialized.
 	 */
 	protected void shutdownDatabase() {
 		if (this.dataSource != null) {
@@ -155,9 +180,11 @@ public class EmbeddedDatabaseFactory {
 	}
 
 	/**
-	 * Hook that gets the DataSource that provides the connectivity to the embedded database.
-	 * <p>Returns {@code null} if the DataSource has not been initialized or the database
-	 * has been shut down. Subclasses may call to access the DataSource instance directly.
+	 * Hook that gets the {@link DataSource} that provides the connectivity to the
+	 * embedded database.
+	 * <p>Returns {@code null} if the {@code DataSource} has not been initialized
+	 * or if the database has been shut down. Subclasses may call this method to
+	 * access the {@code DataSource} instance directly.
 	 */
 	protected final DataSource getDataSource() {
 		return this.dataSource;
