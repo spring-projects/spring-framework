@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.util.ObjectUtils;
  * Spring's {@link Qualifier @Qualifier} annotation.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1.2
  * @see BeanFactoryUtils
  */
@@ -90,9 +91,13 @@ public class BeanFactoryAnnotationUtils {
 		if (matchingBean != null) {
 			return matchingBean;
 		}
+		else if (bf.containsBean(qualifier)) {
+			// Fallback: target bean at least found by bean name - probably a manually registered singleton.
+			return bf.getBean(qualifier, beanType);
+		}
 		else {
 			throw new NoSuchBeanDefinitionException(qualifier, "No matching " + beanType.getSimpleName() +
-					" bean found for qualifier '" + qualifier + "' - neither qualifier " + "match nor bean name match!");
+					" bean found for qualifier '" + qualifier + "' - neither qualifier match nor bean name match!");
 		}
 	}
 
@@ -128,7 +133,7 @@ public class BeanFactoryAnnotationUtils {
 				}
 			}
 			catch (NoSuchBeanDefinitionException ex) {
-				// ignore - can't compare qualifiers for a manually registered singleton object
+				// Ignore - can't compare qualifiers for a manually registered singleton object
 			}
 		}
 		return false;

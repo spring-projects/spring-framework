@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 	public void testIsProxy() throws Exception {
 		TransactionalTestBean bean = getTestBean();
 		assertTrue("testBean is not a proxy", AopUtils.isAopProxy(bean));
-		Map services = this.context.getBeansWithAnnotation(Service.class);
+		Map<String, Object> services = this.context.getBeansWithAnnotation(Service.class);
 		assertTrue("Stereotype annotation not visible", services.containsKey("testBean"));
 	}
 
@@ -110,12 +110,16 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 	public static class TransactionalTestBean {
 
 		@Transactional(readOnly = true)
-		public Collection findAllFoos() {
+		public Collection<?> findAllFoos() {
 			return null;
 		}
 
 		@Transactional
 		public void saveFoo() {
+		}
+
+		@Transactional("qualifiedTransactionManager")
+		public void saveQualifiedFoo() {
 		}
 
 		@Transactional
