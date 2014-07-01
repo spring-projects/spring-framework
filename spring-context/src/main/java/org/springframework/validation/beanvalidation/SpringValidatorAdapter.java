@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,19 +94,18 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
 	public void validate(Object target, Errors errors, Object... validationHints) {
 		if (this.targetValidator != null) {
-			Set<Class> groups = new LinkedHashSet<Class>();
+			Set<Class<?>> groups = new LinkedHashSet<Class<?>>();
 			if (validationHints != null) {
 				for (Object hint : validationHints) {
 					if (hint instanceof Class) {
-						groups.add((Class) hint);
+						groups.add((Class<?>) hint);
 					}
 				}
 			}
 			processConstraintViolations(
-					this.targetValidator.validate(target, groups.toArray(new Class[groups.size()])), errors);
+					this.targetValidator.validate(target, groups.toArray(new Class<?>[groups.size()])), errors);
 		}
 	}
 

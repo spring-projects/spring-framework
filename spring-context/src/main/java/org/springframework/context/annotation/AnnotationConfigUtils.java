@@ -311,14 +311,15 @@ public class AnnotationConfigUtils {
 
 	static Set<AnnotationAttributes> attributesForRepeatable(AnnotationMetadata metadata,
 			Class<?> containerClass, Class<?> annotationClass) {
+
 		return attributesForRepeatable(metadata, containerClass.getName(), annotationClass.getName());
 	}
 
 	@SuppressWarnings("unchecked")
 	static Set<AnnotationAttributes> attributesForRepeatable(AnnotationMetadata metadata,
 			String containerClassName, String annotationClassName) {
-		Set<AnnotationAttributes> result = new LinkedHashSet<AnnotationAttributes>();
 
+		Set<AnnotationAttributes> result = new LinkedHashSet<AnnotationAttributes>();
 		addAttributesIfNotNull(result, metadata.getAnnotationAttributes(annotationClassName, false));
 
 		Map<String, Object> container = metadata.getAnnotationAttributes(containerClassName, false);
@@ -330,8 +331,7 @@ public class AnnotationConfigUtils {
 		return Collections.unmodifiableSet(result);
 	}
 
-	private static void addAttributesIfNotNull(Set<AnnotationAttributes> result,
-			Map<String, Object> attributes) {
+	private static void addAttributesIfNotNull(Set<AnnotationAttributes> result, Map<String, Object> attributes) {
 		if (attributes != null) {
 			result.add(AnnotationAttributes.fromMap(attributes));
 		}
