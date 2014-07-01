@@ -318,8 +318,9 @@ public abstract class StatementCreatorUtils {
 		else if (inValue instanceof SqlValue) {
 			((SqlValue) inValue).setValue(ps, paramIndex);
 		}
-		else if (sqlType == Types.VARCHAR || sqlType == Types.LONGVARCHAR ||
-				(sqlType == Types.CLOB && isStringValue(inValue.getClass()))) {
+		else if (sqlType == Types.VARCHAR || sqlType == Types.NVARCHAR ||
+				sqlType == Types.LONGVARCHAR || sqlType == Types.LONGNVARCHAR ||
+				((sqlType == Types.CLOB || sqlType == Types.NCLOB) && isStringValue(inValue.getClass()))) {
 			ps.setString(paramIndex, inValue.toString());
 		}
 		else if (sqlType == Types.DECIMAL || sqlType == Types.NUMERIC) {
