@@ -18,7 +18,6 @@ package org.springframework.web.socket.config.annotation;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.simp.config.AbstractMessageBrokerConfiguration;
-import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
@@ -46,16 +45,11 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	@Bean
 	public HandlerMapping stompWebSocketHandlerMapping() {
 
-		WebSocketHandler webSocketHandler = subProtocolWebSocketHandler();
-		UserSessionRegistry sessionRegistry = userSessionRegistry();
-		WebSocketTransportRegistration transportRegistration = getTransportRegistration();
-		ThreadPoolTaskScheduler taskScheduler = messageBrokerSockJsTaskScheduler();
+		WebMvcStompEndpointRegistry registry = new WebMvcStompEndpointRegistry(subProtocolWebSocketHandler(),
+				getTransportRegistration(), userSessionRegistry(), messageBrokerSockJsTaskScheduler());
 
-		WebMvcStompEndpointRegistry registry = new WebMvcStompEndpointRegistry(
-				webSocketHandler, transportRegistration, sessionRegistry, taskScheduler);
-
+		registry.setApplicationContext(getApplicationContext());
 		registerStompEndpoints(registry);
-
 		return registry.getHandlerMapping();
 	}
 

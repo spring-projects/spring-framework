@@ -65,7 +65,7 @@ import org.springframework.web.socket.handler.SessionLimitExceededException;
  * @since 4.0
  */
 public class SubProtocolWebSocketHandler implements WebSocketHandler,
-		SubProtocolCapable, MessageHandler, SmartLifecycle, ApplicationEventPublisherAware {
+		SubProtocolCapable, MessageHandler, SmartLifecycle {
 
 	/**
 	 * Sessions connected to this handler use a sub-protocol. Hence we expect to
@@ -97,11 +97,9 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 
 	private final ReentrantLock sessionCheckLock = new ReentrantLock();
 
-	private Object lifecycleMonitor = new Object();
+	private final Object lifecycleMonitor = new Object();
 
 	private volatile boolean running = false;
-
-	private ApplicationEventPublisher eventPublisher;
 
 
 	public SubProtocolWebSocketHandler(MessageChannel clientInboundChannel, SubscribableChannel clientOutboundChannel) {
@@ -146,10 +144,6 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 				throw new IllegalStateException("Failed to map handler " + handler
 						+ " to protocol '" + protocol + "', it is already mapped to handler " + replaced);
 			}
-		}
-
-		if (handler instanceof ApplicationEventPublisherAware) {
-			((ApplicationEventPublisherAware) handler).setApplicationEventPublisher(this.eventPublisher);
 		}
 	}
 
@@ -201,11 +195,6 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 
 	public int getSendBufferSizeLimit() {
 		return sendBufferSizeLimit;
-	}
-
-	@Override
-	public void setApplicationEventPublisher(ApplicationEventPublisher eventPublisher) {
-		this.eventPublisher = eventPublisher;
 	}
 
 	@Override

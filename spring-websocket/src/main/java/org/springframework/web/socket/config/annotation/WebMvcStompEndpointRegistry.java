@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
@@ -90,6 +91,9 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 		return (SubProtocolWebSocketHandler) actual;
 	}
 
+	protected void setApplicationContext(ApplicationContext applicationContext) {
+		this.stompHandler.setApplicationEventPublisher(applicationContext);
+	}
 
 	@Override
 	public StompWebSocketEndpointRegistration addEndpoint(String... paths) {
