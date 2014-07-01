@@ -123,7 +123,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	/** Resolution strategy for expressions in bean definition values */
 	private BeanExpressionResolver beanExpressionResolver;
 
-	/** Spring 3.0 ConversionService to use instead of PropertyEditors */
+	/** Spring ConversionService to use instead of PropertyEditors */
 	private ConversionService conversionService;
 
 	/** Custom PropertyEditorRegistrars to apply to the beans of this factory */
@@ -159,10 +159,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private final Map<String, RootBeanDefinition> mergedBeanDefinitions =
 			new ConcurrentHashMap<String, RootBeanDefinition>(64);
 
-	/**
-	 * Names of beans that have already been created at least once
-	 * (using a ConcurrentHashMap as a Set)
-	 */
+	/** Names of beans that have already been created at least once */
 	private final Map<String, Boolean> alreadyCreated = new ConcurrentHashMap<String, Boolean>(64);
 
 	/** Names of beans that are currently in creation */
@@ -503,8 +500,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			// Retrieve corresponding bean definition.
 			RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 
-			Class[] typesToMatch = (FactoryBean.class.equals(typeToMatch) ?
-					new Class[] {typeToMatch} : new Class[] {FactoryBean.class, typeToMatch});
+			Class<?>[] typesToMatch = (FactoryBean.class.equals(typeToMatch) ?
+					new Class<?>[] {typeToMatch} : new Class<?>[] {FactoryBean.class, typeToMatch});
 
 			// Check decorated bean definition, if any: We assume it'll be easier
 			// to determine the decorated bean's type than the proxy's type.

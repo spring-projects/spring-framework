@@ -214,7 +214,7 @@ public class AnnotationConfigDispatcherServletInitializerTests {
 
 		@Override
 		protected Class<?>[] getServletConfigClasses() {
-			return new Class[]{MyConfiguration.class};
+			return new Class<?>[] {MyConfiguration.class};
 		}
 
 		@Override
@@ -239,16 +239,12 @@ public class AnnotationConfigDispatcherServletInitializerTests {
 	}
 
 
-	private static class MyBean {
+	public static class MyBean {
 	}
 
 
 	@Configuration
-	@SuppressWarnings("unused")
-	private static class MyConfiguration {
-
-		public MyConfiguration() {
-		}
+	public static class MyConfiguration {
 
 		@Bean
 		public MyBean bean() {

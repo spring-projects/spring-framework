@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -321,7 +321,7 @@ public @interface RequestMapping {
 	 * specified header is <i>not</i> supposed to be present in the request.
 	 * <p>Also supports media type wildcards (*), for headers such as Accept
 	 * and Content-Type. For instance,
-	 * <pre>
+	 * <pre class="code">
 	 * &#064;RequestMapping(value = "/something", headers = "content-type=text/*")
 	 * </pre>
 	 * will match requests with a Content-Type of "text/html", "text/plain", etc.
@@ -340,7 +340,7 @@ public @interface RequestMapping {
 	 * <p>The format is a single media type or a sequence of media types,
 	 * with a request only mapped if the {@code Content-Type} matches one of these media types.
 	 * Examples:
-	 * <pre>
+	 * <pre class="code">
 	 * consumes = "text/plain"
 	 * consumes = {"text/plain", "application/*"}
 	 * </pre>
@@ -359,7 +359,7 @@ public @interface RequestMapping {
 	 * <p>The format is a single media type or a sequence of media types,
 	 * with a request only mapped if the {@code Accept} matches one of these media types.
 	 * Examples:
-	 * <pre>
+	 * <pre class="code">
 	 * produces = "text/plain"
 	 * produces = {"text/plain", "application/*"}
 	 * </pre>
@@ -367,7 +367,7 @@ public @interface RequestMapping {
 	 * all requests with a {@code Accept} other than "text/plain".
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings override
-	 * this consumes restriction.
+	 * this produces restriction.
 	 * @see org.springframework.http.MediaType
 	 */
 	String[] produces() default {};
