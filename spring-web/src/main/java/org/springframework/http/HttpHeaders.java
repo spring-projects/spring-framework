@@ -155,12 +155,15 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public List<MediaType> getAccept() {
 		String value = getFirst(ACCEPT);
-		List<MediaType> result = (value != null) ? MediaType.parseMediaTypes(value) : Collections.<MediaType>emptyList();
+		List<MediaType> result = (value != null ? MediaType.parseMediaTypes(value) : Collections.<MediaType>emptyList());
 
 		// Some containers parse 'Accept' into multiple values
-		if ((result.size() == 1) && (get(ACCEPT).size() > 1)) {
-			value = StringUtils.collectionToCommaDelimitedString(get(ACCEPT));
-			result = MediaType.parseMediaTypes(value);
+		if (result.size() == 1) {
+			List<String> acceptHeader = get(ACCEPT);
+			if (acceptHeader.size() > 1) {
+				value = StringUtils.collectionToCommaDelimitedString(acceptHeader);
+				result = MediaType.parseMediaTypes(value);
+			}
 		}
 
 		return result;
