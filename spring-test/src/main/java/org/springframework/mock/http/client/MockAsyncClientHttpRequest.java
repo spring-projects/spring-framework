@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,23 @@
 
 package org.springframework.mock.http.client;
 
-import org.springframework.core.task.AsyncListenableTaskExecutor;
+import java.io.IOException;
+import java.net.URI;
+
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.AsyncClientHttpRequest;
-import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.mock.http.MockHttpOutputMessage;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.SettableListenableFuture;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.concurrent.Callable;
-
 /**
  * An extension of {@link MockClientHttpRequest} that also implements
- * {@link AsyncClientHttpRequest} by wraps the response in a "settable" future.
+ * {@link AsyncClientHttpRequest} by wrapping the response in a
+ * {@link SettableListenableFuture}.
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
- * @since 3.2
+ * @since 4.1
  */
 public class MockAsyncClientHttpRequest extends MockClientHttpRequest implements AsyncClientHttpRequest {
 
