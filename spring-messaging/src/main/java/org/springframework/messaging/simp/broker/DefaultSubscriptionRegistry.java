@@ -96,7 +96,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		SessionSubscriptionInfo info = this.subscriptionRegistry.getSubscriptions(sessionId);
 		if (info != null) {
 			String destination = info.removeSubscription(subsId);
-			if (destination != null && info.getSubscriptions(destination) == null) {
+			if (destination != null) {
 				this.destinationCache.updateAfterRemovedSubscription(destination, sessionId, subsId);
 			}
 		}
