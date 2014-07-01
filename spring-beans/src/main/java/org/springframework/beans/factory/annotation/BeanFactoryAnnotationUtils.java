@@ -92,12 +92,12 @@ public class BeanFactoryAnnotationUtils {
 			return matchingBean;
 		}
 		else if (bf.containsBean(qualifier)) {
-			// Fallback: target bean at least found by bean name.
+			// Fallback: target bean at least found by bean name - probably a manually registered singleton.
 			return bf.getBean(qualifier, beanType);
 		}
 		else {
 			throw new NoSuchBeanDefinitionException(qualifier, "No matching " + beanType.getSimpleName() +
-					" bean found for qualifier '" + qualifier + "' - neither qualifier " + "match nor bean name match!");
+					" bean found for qualifier '" + qualifier + "' - neither qualifier match nor bean name match!");
 		}
 	}
 
@@ -133,7 +133,7 @@ public class BeanFactoryAnnotationUtils {
 				}
 			}
 			catch (NoSuchBeanDefinitionException ex) {
-				// ignore - can't compare qualifiers for a manually registered singleton object
+				// Ignore - can't compare qualifiers for a manually registered singleton object
 			}
 		}
 		return false;

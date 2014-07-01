@@ -81,8 +81,8 @@ public interface Cache {
 	void put(Object key, Object value);
 
 	/**
-	 * Atomically associate the specified value with the specified key in this cache if
-	 * it is not set already.
+	 * Atomically associate the specified value with the specified key in this cache
+	 * if it is not set already.
 	 * <p>This is equivalent to:
 	 * <pre><code>
 	 * Object existingValue = cache.get(key);
@@ -93,17 +93,18 @@ public interface Cache {
 	 *     return existingValue;
 	 * }
 	 * </code></pre>
-	 * except that the action is performed atomically. While all known providers are
-	 * able to perform the put atomically, the returned value may be retrieved after
-	 * the attempt to put (i.e. in a non atomic way). Check the documentation of
-	 * the native cache implementation that you are using for more details.
+	 * except that the action is performed atomically. While all out-of-the-box
+	 * {@link CacheManager} implementations are able to perform the put atomically,
+	 * the operation may also be implemented in two steps, e.g. with a check for
+	 * presence and a subsequent put, in a non-atomic way. Check the documentation
+	 * of the native cache implementation that you are using for more details.
 	 * @param key the key with which the specified value is to be associated
 	 * @param value the value to be associated with the specified key
-	 * @return the value to which this cache maps the specified key (which may
-	 * be {@code null} itself), or also {@code null} if  the cache did not contain
-	 * any mapping for that key prior to this call. Returning {@code null} is
-	 * therefore an indicator that the given {@code value} has been associated
-	 * with the key
+	 * @return the value to which this cache maps the specified key (which may be
+	 * {@code null} itself), or also {@code null} if the cache did not contain any
+	 * mapping for that key prior to this call. Returning {@code null} is therefore
+	 * an indicator that the given {@code value} has been associated with the key.
+	 * @since 4.1
 	 */
 	ValueWrapper putIfAbsent(Object key, Object value);
 

@@ -63,7 +63,8 @@ public class ConcurrentMapCache implements Cache {
 	/**
 	 * Create a new ConcurrentMapCache with the specified name.
 	 * @param name the name of the cache
-	 * @param allowNullValues whether to accept and convert null values for this cache
+	 * @param allowNullValues whether to accept and convert {@code null}
+	 * values for this cache
 	 */
 	public ConcurrentMapCache(String name, boolean allowNullValues) {
 		this(name, new ConcurrentHashMap<Object, Object>(256), allowNullValues);
@@ -71,7 +72,7 @@ public class ConcurrentMapCache implements Cache {
 
 	/**
 	 * Create a new ConcurrentMapCache with the specified name and the
-	 * given internal ConcurrentMap to use.
+	 * given internal {@link ConcurrentMap} to use.
 	 * @param name the name of the cache
 	 * @param store the ConcurrentMap to use as an internal store
 	 * @param allowNullValues whether to allow {@code null} values
