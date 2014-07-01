@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,18 +22,23 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.TimeZone;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-/** @author Arjen Poutsma */
+/**
+ * @author Arjen Poutsma
+ */
 public class HttpHeadersTests {
 
 	private HttpHeaders headers;
@@ -256,5 +261,13 @@ public class HttpHeadersTests {
 				headers.getFirst("Content-Disposition"));
 	}
 
+	// SPR-11917
+
+	@Test
+	public void getAllowEmptySet() {
+		headers.setAllow(Collections.<HttpMethod> emptySet());
+
+		assertThat(headers.getAllow(), Matchers.emptyCollectionOf(HttpMethod.class));
+	}
 
 }
