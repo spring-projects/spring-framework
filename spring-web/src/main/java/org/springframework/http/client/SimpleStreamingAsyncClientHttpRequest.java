@@ -109,7 +109,7 @@ final class SimpleStreamingAsyncClientHttpRequest extends AbstractAsyncClientHtt
 
 	@Override
 	protected ListenableFuture<ClientHttpResponse> executeInternal(final HttpHeaders headers) throws IOException {
-		return taskExecutor.submitListenable(new Callable<ClientHttpResponse>() {
+		return this.taskExecutor.submitListenable(new Callable<ClientHttpResponse>() {
 			@Override
 			public ClientHttpResponse call() throws Exception {
 				try {

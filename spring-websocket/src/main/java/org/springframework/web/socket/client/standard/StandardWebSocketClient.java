@@ -74,9 +74,8 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 
 	/**
 	 * Constructor accepting an existing {@link WebSocketContainer} instance.
-	 *
-	 * <p>For XML configuration see {@link WebSocketContainerFactoryBean}. For Java
-	 * configuration use {@code ContainerProvider.getWebSocketContainer()} to obtain
+	 * <p>For XML configuration, see {@link WebSocketContainerFactoryBean}. For Java
+	 * configuration, use {@code ContainerProvider.getWebSocketContainer()} to obtain
 	 * the {@code WebSocketContainer} instance.
 	 */
 	public StandardWebSocketClient(WebSocketContainer webSocketContainer) {
@@ -89,8 +88,7 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 	 * Set an {@link AsyncListenableTaskExecutor} to use when opening connections.
 	 * If this property is set to {@code null}, calls to  any of the
 	 * {@code doHandshake} methods will block until the connection is established.
-	 *
-	 * <p>By default an instance of {@code SimpleAsyncTaskExecutor} is used.
+	 * <p>By default, an instance of {@code SimpleAsyncTaskExecutor} is used.
 	 */
 	public void setTaskExecutor(AsyncListenableTaskExecutor taskExecutor) {
 		this.taskExecutor = taskExecutor;

@@ -593,7 +593,7 @@ public abstract class AnnotationUtils {
 					}
 					if (nestedAnnotationsAsMap && value instanceof Annotation) {
 						attrs.put(method.getName(),
-							getAnnotationAttributes((Annotation) value, classValuesAsString, true));
+								getAnnotationAttributes((Annotation) value, classValuesAsString, true));
 					}
 					else if (nestedAnnotationsAsMap && value instanceof Annotation[]) {
 						Annotation[] realAnnotations = (Annotation[]) value;
