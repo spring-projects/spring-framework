@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.util.UriTemplate;
@@ -28,7 +29,7 @@ import org.springframework.web.util.UriTemplate;
 /**
  * Extension of {@link HttpEntity} that adds a {@linkplain HttpMethod method} and
  * {@linkplain URI uri}.
- * Used in {@code RestTemplate} as well {@code @Controller} methods.
+ * Used in {@code RestTemplate} and {@code @Controller} methods.
  *
  * <p>In {@code RestTemplate}, this class is used as parameter in
  * {@link org.springframework.web.client.RestTemplate#exchange(RequestEntity, Class) exchange()}:
@@ -59,63 +60,58 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 	private final URI url;
 
+
 	/**
-	 * Create a new {@code RequestEntity} with the given method and URL, and no body nor headers.
+	 * Constructor with method and URL but without body nor headers.
 	 * @param method the method
 	 * @param url the URL
 	 */
 	public RequestEntity(HttpMethod method, URI url) {
-		super();
-		this.method = method;
-		this.url = url;
+		this(null, null, method, url);
 	}
 
 	/**
-	 * Create a new {@code RequestEntity} with the given method, URL, body, and no headers.
+	 * Constructor with method, URL and body but without headers.
 	 * @param body the body
 	 * @param method the method
 	 * @param url the URL
 	 */
 	public RequestEntity(T body, HttpMethod method, URI url) {
-		super(body);
-		this.method = method;
-		this.url = url;
+		this(body, null, method, url);
 	}
 
 	/**
-	 * Create a new {@code RequestEntity} with the given method, URL, body, headers and no
-	 * body
+	 * Constructor with method, URL and headers but without body.
 	 * @param headers the headers
 	 * @param method the method
 	 * @param url the URL
 	 */
 	public RequestEntity(MultiValueMap<String, String> headers, HttpMethod method, URI url) {
-		super(headers);
-		this.method = method;
-		this.url = url;
+		this(null, headers, method, url);
 	}
 
 	/**
-	 * Create a new {@code RequestEntity} with the given method, URL, body, headers and
-	 * body
+	 * Constructor with method, URL, headers and body.
 	 * @param body the body
 	 * @param headers the headers
 	 * @param method the method
 	 * @param url the URL
 	 */
-	public RequestEntity(T body, MultiValueMap<String, String> headers,
-			HttpMethod method, URI url) {
+	public RequestEntity(T body, MultiValueMap<String, String> headers, HttpMethod method, URI url) {
 		super(body, headers);
+		Assert.notNull(method, "'method' is required");
+		Assert.notNull(url, "'url' is required");
 		this.method = method;
 		this.url = url;
 	}
+
 
 	/**
 	 * Return the HTTP method of the request.
 	 * @return the HTTP method as an {@code HttpMethod} enum value
 	 */
 	public HttpMethod getMethod() {
-		return method;
+		return this.method;
 	}
 
 	/**
@@ -123,8 +119,9 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @return the URL as a {@code URI}
 	 */
 	public URI getUrl() {
-		return url;
+		return this.url;
 	}
+
 
 	@Override
 	public boolean equals(Object other) {
@@ -150,7 +147,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder("<");
-		builder.append(this.method.toString());
+		builder.append(this.method);
 		builder.append(' ');
 		builder.append(this.url);
 		builder.append(',');
@@ -172,35 +169,33 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	// Static builder methods
 
 	/**
-	 * Creates a builder with the given method, url, and uri variables.
+	 * Create a builder with the given method, url, and uri variables.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param url the URL
 	 * @param uriVariables the variables to expand in the template
 	 * @return the created builder
 	 */
-	public static BodyBuilder method(HttpMethod method, String url,
-			Object... uriVariables) {
+	public static BodyBuilder method(HttpMethod method, String url, Object... uriVariables) {
 		URI expanded = new UriTemplate(url).expand(uriVariables);
 		return new DefaultBodyBuilder(method, expanded);
 	}
 
 	/**
-	 * Creates a builder with the given method, url, and uri variables.
+	 * Create a builder with the given method, url, and uri variables.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param url the URL
 	 * @param uriVariables the variables to expand in the template
 	 * @return the created builder
 	 */
-	public static BodyBuilder method(HttpMethod method, String url,
-			Map<String, ?> uriVariables) {
+	public static BodyBuilder method(HttpMethod method, String url, Map<String, ?> uriVariables) {
 		URI expanded = new UriTemplate(url).expand(uriVariables);
 		return new DefaultBodyBuilder(method, expanded);
 	}
 
 	/**
-	 * Creates a builder with the given method, url, and uri variables.
+	 * Create a builder with the given method and url.
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param url the URL
 	 * @return the created builder
@@ -210,7 +205,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Creates a GET builder with the given url and uri variables.
+	 * Create a GET builder with the given url and uri variables.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param uriVariables the variables to expand in the template
@@ -221,7 +216,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Creates a GET builder with the given url and uri variables.
+	 * Create an HTTP GET builder with the given url and uri variables.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param uriVariables the variables to expand in the template
@@ -232,7 +227,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Creates a GET builder with the given url.
+	 * Create an HTTP GET builder with the given url.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @return the created builder
@@ -242,7 +237,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Creates a HEAD builder with the given url and uri variables.
+	 * Create an HTTP HEAD builder with the given url and uri variables.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param uriVariables the variables to expand in the template
@@ -253,7 +248,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Creates a HEAD builder with the given url and uri variables.
+	 * Create an HTTP HEAD builder with the given url and uri variables.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param uriVariables the variables to expand in the template
@@ -264,7 +259,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Creates a HEAD builder with the given url.
+	 * Create an HTTP HEAD builder with the given url.
 	 * @param url the URL
 	 * @return the created builder
 	 */
@@ -273,7 +268,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Creates a POST builder with the given url and uri variables.
+	 * Create an HTTP POST builder with the given url and uri variables.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param uriVariables the variables to expand in the template
@@ -284,7 +279,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Creates a POST builder with the given url and uri variables.
+	 * Create an HTTP POST builder with the given url and uri variables.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param uriVariables the variables to expand in the template
@@ -295,7 +290,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Creates a POST builder with the given url.
+	 * Create an HTTP POST builder with the given url.
 	 * @param url the URL
 	 * @return the created builder
 	 */
@@ -304,31 +299,29 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Creates a PUT builder with the given url and uri variables.
+	 * Create an HTTP PUT builder with the given url and uri variables.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param uriVariables the variables to expand in the template
 	 * @return the created builder
 	 */
-	public static BodyBuilder put(String url,
-					Object... uriVariables) {
+	public static BodyBuilder put(String url, Object... uriVariables) {
 		return method(HttpMethod.PUT, url, uriVariables);
 	}
 
 	/**
-	 * Creates a PUT builder with the given url and uri variables.
+	 * Create an HTTP PUT builder with the given url and uri variables.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param uriVariables the variables to expand in the template
 	 * @return the created builder
 	 */
-	public static BodyBuilder put(String url,
-					Map<String, ?> uriVariables) {
+	public static BodyBuilder put(String url, Map<String, ?> uriVariables) {
 		return method(HttpMethod.PUT, url, uriVariables);
 	}
 
 	/**
-	 * Creates a PUT builder with the given url.
+	 * Create an HTTP PUT builder with the given url.
 	 * @param url the URL
 	 * @return the created builder
 	 */
@@ -337,31 +330,29 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Creates a PATCH builder with the given url and uri variables.
+	 * Create an HTTP PATCH builder with the given url and uri variables.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param uriVariables the variables to expand in the template
 	 * @return the created builder
 	 */
-	public static BodyBuilder patch(String url,
-					Object... uriVariables) {
+	public static BodyBuilder patch(String url, Object... uriVariables) {
 		return method(HttpMethod.PATCH, url, uriVariables);
 	}
 
 	/**
-	 * Creates a PATCH builder with the given url and uri variables.
+	 * Create an HTTP PATCH builder with the given url and uri variables.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param uriVariables the variables to expand in the template
 	 * @return the created builder
 	 */
-	public static BodyBuilder patch(String url,
-					Map<String, ?> uriVariables) {
+	public static BodyBuilder patch(String url, Map<String, ?> uriVariables) {
 		return method(HttpMethod.PATCH, url, uriVariables);
 	}
 
 	/**
-	 * Creates a PATCH builder with the given url.
+	 * Create an HTTP PATCH builder with the given url.
 	 * @param url the URL
 	 * @return the created builder
 	 */
@@ -370,31 +361,29 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Creates a DELETE builder with the given url and uri variables.
+	 * Create an HTTP DELETE builder with the given url and uri variables.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param uriVariables the variables to expand in the template
 	 * @return the created builder
 	 */
-	public static HeadersBuilder<?> delete(String url,
-					Object... uriVariables) {
+	public static HeadersBuilder<?> delete(String url, Object... uriVariables) {
 		return method(HttpMethod.DELETE, url, uriVariables);
 	}
 
 	/**
-	 * Creates a DELETE builder with the given url and uri variables.
+	 * Create an HTTP DELETE builder with the given url and uri variables.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param uriVariables the variables to expand in the template
 	 * @return the created builder
 	 */
-	public static HeadersBuilder<?> delete(String url,
-					Map<String, ?> uriVariables) {
+	public static HeadersBuilder<?> delete(String url, Map<String, ?> uriVariables) {
 		return method(HttpMethod.DELETE, url, uriVariables);
 	}
 
 	/**
-	 * Creates a DELETE builder with the given url.
+	 * Create an HTTP DELETE builder with the given url.
 	 * @param url the URL
 	 * @return the created builder
 	 */
@@ -403,31 +392,29 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Creates an OPTIONS builder with the given url and uri variables.
+	 * Create an HTTP OPTIONS builder with the given url and uri variables.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param uriVariables the variables to expand in the template
 	 * @return the created builder
 	 */
-	public static HeadersBuilder<?> options(String url,
-					Object... uriVariables) {
+	public static HeadersBuilder<?> options(String url, Object... uriVariables) {
 		return method(HttpMethod.OPTIONS, url, uriVariables);
 	}
 
 	/**
-	 * Creates an OPTIONS builder with the given url and uri variables.
+	 * Creates an HTTP OPTIONS builder with the given url and uri variables.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param uriVariables the variables to expand in the template
 	 * @return the created builder
 	 */
-	public static HeadersBuilder<?> options(String url,
-					Map<String, ?> uriVariables) {
+	public static HeadersBuilder<?> options(String url, Map<String, ?> uriVariables) {
 		return method(HttpMethod.OPTIONS, url, uriVariables);
 	}
 
 	/**
-	 * Creates an OPTIONS builder with the given url.
+	 * Creates an HTTP OPTIONS builder with the given url.
 	 * @param url the URL
 	 * @return the created builder
 	 */
@@ -451,29 +438,29 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		B header(String headerName, String... headerValues);
 
 		/**
-		 * Set the list of acceptable {@linkplain MediaType media types}, as specified
-		 * by the {@code Accept} header.
+		 * Set the list of acceptable {@linkplain MediaType media types}, as
+		 * specified by the {@code Accept} header.
 		 * @param acceptableMediaTypes the acceptable media types
 		 */
 		B accept(MediaType... acceptableMediaTypes);
 
 		/**
-		 * Set the list of acceptable {@linkplain Charset charsets}, as specified by
-		 * the {@code Accept-Charset} header.
+		 * Set the list of acceptable {@linkplain Charset charsets}, as specified
+		 * by the {@code Accept-Charset} header.
 		 * @param acceptableCharsets the acceptable charsets
 		 */
 		B acceptCharset(Charset... acceptableCharsets);
 
 		/**
-		 * Sets the value of the {@code If-Modified-Since} header.
-		 * <p>The date should be specified as the number of milliseconds since January 1,
-		 * 1970 GMT.
+		 * Set the value of the {@code If-Modified-Since} header.
+		 * <p>The date should be specified as the number of milliseconds since
+		 * January 1, 1970 GMT.
 		 * @param ifModifiedSince the new value of the header
 		 */
 		B ifModifiedSince(long ifModifiedSince);
 
 		/**
-		 * Sets the values of the {@code If-None-Match} header.
+		 * Set the values of the {@code If-None-Match} header.
 		 * @param ifNoneMatches the new value of the header
 		 */
 		B ifNoneMatch(String... ifNoneMatches);
@@ -493,8 +480,8 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	public interface BodyBuilder extends HeadersBuilder<BodyBuilder> {
 
 		/**
-		 * Set the length of the body in bytes, as specified by the {@code Content-Length}
-		 * header.
+		 * Set the length of the body in bytes, as specified by the
+		 * {@code Content-Length} header.
 		 * @param contentLength the content length
 		 * @return this builder
 		 * @see HttpHeaders#setContentLength(long)
@@ -502,8 +489,8 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		BodyBuilder contentLength(long contentLength);
 
 		/**
-		 * Set the {@linkplain MediaType media type} of the body, as specified by the
-		 * {@code Content-Type} header.
+		 * Set the {@linkplain MediaType media type} of the body, as specified
+		 * by the {@code Content-Type} header.
 		 * @param contentType the content type
 		 * @return this builder
 		 * @see HttpHeaders#setContentType(MediaType)
@@ -511,7 +498,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		BodyBuilder contentType(MediaType contentType);
 
 		/**
-		 * Sets the body of the request entity and returns it.
+		 * Set the body of the request entity and build the RequestEntity.
 		 * @param body the body of the request entity
 		 * @param <T> the type of the body
 		 * @return the built request entity
@@ -580,7 +567,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 		@Override
 		public RequestEntity<Void> build() {
-			return new RequestEntity<Void>(null, this.headers, this.method, this.url);
+			return new RequestEntity<Void>(this.headers, this.method, this.url);
 		}
 
 		@Override
@@ -588,10 +575,5 @@ public class RequestEntity<T> extends HttpEntity<T> {
 			return new RequestEntity<T>(body, this.headers, this.method, this.url);
 		}
 	}
-
-
-
-
-
 
 }

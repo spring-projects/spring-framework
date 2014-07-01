@@ -463,9 +463,9 @@ public interface RestOperations {
 			ParameterizedTypeReference<T> responseType) throws RestClientException;
 
 	/**
-	 * Execute the HTTP method and URL of the {@link RequestEntity}, writing it to the
-	 * request, and returns the response as {@link ResponseEntity}. Typically used in
-	 * combination with the static builder methods on {@code RequestEntity}, for instance:
+	 * Execute the request specified in the given {@link RequestEntity} and return
+	 * the response as {@link ResponseEntity}. Typically used in combination
+	 * with the static builder methods on {@code RequestEntity}, for instance:
 	 *
 	 * <pre class="code">
 	 * MyRequest body = ...
@@ -482,9 +482,9 @@ public interface RestOperations {
 			Class<T> responseType) throws RestClientException;
 
 	/**
-	 * Execute the HTTP method and URL of the {@link RequestEntity}, writing it to the
-	 * request, and returns the response as {@link ResponseEntity}.
-	 * The given {@link ParameterizedTypeReference} is used to pass generic type information:
+	 * Execute the request specified in the given {@link RequestEntity} and return
+	 * the response as {@link ResponseEntity}. The given
+	 * {@link ParameterizedTypeReference} is used to pass generic type information:
 	 *
 	 * <pre class="code">
 	 * MyRequest body = ...

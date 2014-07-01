@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,10 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Resolves {@link HttpEntity} method argument values and also handles
- * both {@link HttpEntity} and {@link ResponseEntity} return values.
+ * Resolves {@link HttpEntity} and {@link RequestEntity} method argument values
+ * and also handles {@link HttpEntity} and {@link ResponseEntity} return values.
  *
- * <p>An {@link HttpEntity} return type has a set purpose. Therefore this
+ * <p>An {@link HttpEntity} return type has a specific purpose. Therefore this
  * handler should be configured ahead of handlers that support any return
  * value type annotated with {@code @ModelAttribute} or {@code @ResponseBody}
  * to ensure they don't take over.

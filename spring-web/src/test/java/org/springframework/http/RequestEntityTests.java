@@ -20,14 +20,19 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
+
+/**
+ * Unit tests for {@link org.springframework.http.RequestEntity}.
+ * @author Arjen Poutsma
+ */
 public class RequestEntityTests {
+
 
 	@Test
 	public void normal() throws URISyntaxException {
@@ -60,7 +65,7 @@ public class RequestEntityTests {
 		RequestEntity<?> entity = RequestEntity.method(HttpMethod.GET, url, host, path).build();
 		assertEquals(expected, entity.getUrl());
 
-		Map<String, String> uriVariables = new HashMap<String, String>(2);
+		Map<String, String> uriVariables = new HashMap<>(2);
 		uriVariables.put("host", host);
 		uriVariables.put("path", path);
 
@@ -105,8 +110,7 @@ public class RequestEntityTests {
 
 		assertEquals("text/plain", responseHeaders.getFirst("Accept"));
 		assertEquals("utf-8", responseHeaders.getFirst("Accept-Charset"));
-		assertEquals("Thu, 01 Jan 1970 00:00:12 GMT",
-				responseHeaders.getFirst("If-Modified-Since"));
+		assertEquals("Thu, 01 Jan 1970 00:00:12 GMT", responseHeaders.getFirst("If-Modified-Since"));
 		assertEquals(ifNoneMatch, responseHeaders.getFirst("If-None-Match"));
 		assertEquals(String.valueOf(contentLength), responseHeaders.getFirst("Content-Length"));
 		assertEquals(contentType.toString(), responseHeaders.getFirst("Content-Type"));
@@ -140,8 +144,5 @@ public class RequestEntityTests {
 		assertEquals(HttpMethod.DELETE, entity.getMethod());
 
 	}
-
-
-
 
 }
