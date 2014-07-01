@@ -97,7 +97,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		if (info != null) {
 			String destination = info.removeSubscription(subsId);
 			if (destination != null) {
-				this.destinationCache.updateAfterRemovedSubscription(destination, sessionId, subsId);
+				this.destinationCache.updateAfterRemovedSubscription(sessionId, subsId);
 			}
 		}
 	}
@@ -183,14 +183,14 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 			}
 		}
 
-		public void updateAfterRemovedSubscription(String destination, String sessionId, String subsId) {
+		public void updateAfterRemovedSubscription(String sessionId, String subsId) {
 			synchronized (this.updateCache) {
 				Set<String> destinationsToRemove = new HashSet<String>();
 				for (Map.Entry<String, MultiValueMap<String, String>> entry : this.updateCache.entrySet()) {
 					String cachedDestination = entry.getKey();
-					if (getPathMatcher().match(destination, cachedDestination)) {
-						MultiValueMap<String, String> subs = entry.getValue();
-						List<String> subsIds = subs.get(sessionId);
+					MultiValueMap<String, String> subs = entry.getValue();
+					List<String> subsIds = subs.get(sessionId);
+					if(subsIds != null) {
 						subsIds.remove(subsId);
 						if (subsIds.isEmpty()) {
 							subs.remove(sessionId);
@@ -212,25 +212,22 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		public void updateAfterRemovedSession(SessionSubscriptionInfo info) {
 			synchronized (this.updateCache) {
-				for (String destination : info.getDestinations()) {
-					Set<String> destinationsToRemove = new HashSet<String>();
-					for (Map.Entry<String, MultiValueMap<String, String>> entry : this.updateCache.entrySet()) {
-						String cachedDestination = entry.getKey();
-						if (getPathMatcher().match(destination, cachedDestination)) {
-							MultiValueMap<String, String> subs = entry.getValue();
-							subs.remove(info.getSessionId());
-							if (subs.isEmpty()) {
-								destinationsToRemove.add(cachedDestination);
-							}
-							else {
-								this.accessCache.put(cachedDestination,new LinkedMultiValueMap<String, String>(subs));
-							}
+				Set<String> destinationsToRemove = new HashSet<String>();
+				for (Map.Entry<String, MultiValueMap<String, String>> entry : this.updateCache.entrySet()) {
+					String cachedDestination = entry.getKey();
+					MultiValueMap<String, String> subs = entry.getValue();
+					if(subs.remove(info.getSessionId()) != null) {
+						if (subs.isEmpty()) {
+							destinationsToRemove.add(cachedDestination);
+						}
+						else {
+							this.accessCache.put(cachedDestination,new LinkedMultiValueMap<String, String>(subs));
 						}
 					}
-					for (String d : destinationsToRemove) {
-						this.updateCache.remove(d);
-						this.accessCache.remove(d);
-					}
+				}
+				for (String d : destinationsToRemove) {
+					this.updateCache.remove(d);
+					this.accessCache.remove(d);
 				}
 			}
 		}
