@@ -71,8 +71,8 @@ class MergePlugin implements Plugin<Project> {
 		Configuration runtimeMerge = project.configurations.create("runtimeMerge")
 
 		// Ensure the IDE can reference merged projects
-		project.eclipse.classpath.plusConfigurations += [runtimeMerge]
-		project.idea.module.scopes.PROVIDED.plus += runtimeMerge
+		project.eclipse.classpath.plusConfigurations += [ runtimeMerge ]
+		project.idea.module.scopes.PROVIDED.plus += [ runtimeMerge ]
 
 		// Hook to perform the actual merge logic
 		project.afterEvaluate{
