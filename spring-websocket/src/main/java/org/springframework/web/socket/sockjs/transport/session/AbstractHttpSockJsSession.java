@@ -201,18 +201,20 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		this.frameFormat = frameFormat;
 		this.asyncRequestControl = request.getAsyncRequestControl(response);
 
-		try {
-			// Let "our" handler know before sending the open frame to the remote handler
-			delegateConnectionEstablished();
-			writePrelude(request, response);
-			writeFrame(SockJsFrame.openFrame());
-			if (isStreaming() && !isClosed()) {
-				startAsyncRequest();
+		synchronized (this.responseLock) {
+			try {
+				// Let "our" handler know before sending the open frame to the remote handler
+				delegateConnectionEstablished();
+				writePrelude(request, response);
+				writeFrame(SockJsFrame.openFrame());
+				if (isStreaming() && !isClosed()) {
+					startAsyncRequest();
+				}
 			}
-		}
-		catch (Throwable ex) {
-			tryCloseWithSockJsTransportError(ex, CloseStatus.SERVER_ERROR);
-			throw new SockJsTransportFailureException("Failed to open session", getId(), ex);
+			catch (Throwable ex) {
+				tryCloseWithSockJsTransportError(ex, CloseStatus.SERVER_ERROR);
+				throw new SockJsTransportFailureException("Failed to open session", getId(), ex);
+			}
 		}
 	}
 
