@@ -16,16 +16,10 @@
 
 package org.springframework.orm.jpa.hibernate;
 
-import java.util.List;
-
-import org.hibernate.Query;
-import org.hibernate.SessionFactory;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.ejb.HibernateEntityManagerFactory;
-import org.junit.Ignore;
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
-import org.springframework.orm.jpa.domain.Person;
 
 /**
  * Hibernate-specific JPA tests.
@@ -33,24 +27,9 @@ import org.springframework.orm.jpa.domain.Person;
  * @author Juergen Hoeller
  * @author Rod Johnson
  */
-// TODO [SPR-11922] Decide what to do with HibernateEntityManagerFactoryIntegrationTests.
-@Ignore("Disabled since AnnotationBeanConfigurerAspect cannot be found")
-// The reason AnnotationBeanConfigurerAspect cannot be found is that it resides
-// in the spring-aspects module which depends on this module (spring-orm). Thus,
-// in order to overcome the cyclical dependency, this test could be moved to the
-// root 'spring' module as a framework-level integration test, but the challenge
-// with doing so is that this class depends on a test class hierarchy which is
-// defined in this module.
 @SuppressWarnings("deprecation")
 public class HibernateEntityManagerFactoryIntegrationTests extends
 		AbstractContainerEntityManagerFactoryIntegrationTests {
-
-	private SessionFactory sessionFactory;
-
-
-	public void setSessionFactory(SessionFactory sessionFactory) {
-		this.sessionFactory = sessionFactory;
-	}
 
 	@Override
 	protected String[] getConfigLocations() {
@@ -66,24 +45,6 @@ public class HibernateEntityManagerFactoryIntegrationTests extends
 		assertTrue(sharedEntityManager instanceof HibernateEntityManager);
 		HibernateEntityManager hibernateEntityManager = (HibernateEntityManager) sharedEntityManager;
 		assertNotNull(hibernateEntityManager.getSession());
-	}
-
-	public void testWithHibernateSessionFactory() {
-		// Add with JDBC
-		String firstName = "Tony";
-		insertPerson(firstName);
-
-		Query q = this.sessionFactory.getCurrentSession().createQuery("select p from Person as p");
-		List<Person> people = q.list();
-
-		assertEquals(1, people.size());
-		assertEquals(firstName, people.get(0).getFirstName());
-	}
-
-	public void testConfigurablePerson() {
-		Query q = this.sessionFactory.getCurrentSession().createQuery("select p from ContextualPerson as p");
-		assertEquals(0, q.list().size());
-		// assertNotNull(new ContextualPerson().entityManager); TODO
 	}
 
 }

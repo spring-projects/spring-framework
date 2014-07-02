@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 
 import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.beans.factory.annotation.Configurable;
 
 /**
  * Simple JavaBean domain object representing an person.
@@ -35,23 +34,22 @@ import org.springframework.beans.factory.annotation.Configurable;
  * @author Rod Johnson
  */
 @Entity
-@Configurable
 public class Person {
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer id;
 
 	private transient TestBean testBean;
 
 	// Lazy relationship to force use of instrumentation in JPA implementation.
-	@OneToOne(fetch=FetchType.LAZY, cascade=CascadeType.PERSIST)
-	@JoinColumn(name="DRIVERS_LICENSE_ID")
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+	@JoinColumn(name = "DRIVERS_LICENSE_ID")
 	private DriversLicense driversLicense;
 
 	private String first_name;
 
-	@Basic(fetch=FetchType.LAZY)
+	@Basic(fetch = FetchType.LAZY)
 	private String last_name;
 
 
@@ -91,11 +89,10 @@ public class Person {
 		return this.driversLicense;
 	}
 
-
 	@Override
 	public String toString() {
-		return getClass().getName() + ":(" + hashCode() + ") id=" + id +
-				"; firstName=" + first_name + "; lastName=" + last_name + "; testBean=" + testBean;
+		return getClass().getName() + ":(" + hashCode() + ") id=" + id + "; firstName=" + first_name + "; lastName="
+				+ last_name + "; testBean=" + testBean;
 	}
 
 }

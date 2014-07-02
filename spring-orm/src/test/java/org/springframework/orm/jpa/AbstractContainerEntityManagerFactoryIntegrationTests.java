@@ -165,12 +165,6 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests exte
 		}
 	}
 
-	// public void testAspectJInjectionOfConfigurableEntity() {
-	// Person p = new Person();
-	// assertNotNull("Was injected", p.getTestBean());
-	// assertEquals("Ramnivas", p.getTestBean().getName());
-	// }
-
 	public void testInstantiateAndSaveWithSharedEmProxy() {
 		testInstantiateAndSave(sharedEntityManager);
 	}
