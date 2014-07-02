@@ -22,8 +22,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,7 +36,6 @@ import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
 import org.springframework.transaction.annotation.TransactionManagementConfigurer;
@@ -53,7 +50,7 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
 /**
  * {@code TestExecutionListener} that provides support for executing tests
  * within transactions by honoring the
- * {@link org.springframework.transaction.annotation.Transactional &#064;Transactional}
+ * {@link org.springframework.transaction.annotation.Transactional @Transactional}
  * annotation. Expects a {@link PlatformTransactionManager} bean to be defined in the
  * Spring {@link ApplicationContext} for the test.
  *
@@ -91,6 +88,7 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  * @see org.springframework.test.annotation.Rollback
  * @see BeforeTransaction
  * @see AfterTransaction
+ * @see TestTransaction
  */
 public class TransactionalTestExecutionListener extends AbstractTestExecutionListener {
 
@@ -104,18 +102,13 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 	protected final TransactionAttributeSource attributeSource = new AnnotationTransactionAttributeSource();
 
-	private final Map<Method, TransactionContext> transactionContextCache = new ConcurrentHashMap<Method, TransactionContext>(
-		8);
-
 	private TransactionConfigurationAttributes configurationAttributes;
-
-	private volatile int transactionsStarted = 0;
 
 
 	/**
-	 * If the test method of the supplied {@link TestContext test context} is
-	 * configured to run within a transaction, this method will run
-	 * {@link BeforeTransaction &#064;BeforeTransaction methods} and start a new
+	 * If the test method of the supplied {@linkplain TestContext test context}
+	 * is configured to run within a transaction, this method will run
+	 * {@link BeforeTransaction @BeforeTransaction} methods and start a new
 	 * transaction.
 	 * <p>Note that if a {@code @BeforeTransaction} method fails, any remaining
 	 * {@code @BeforeTransaction} methods will not be invoked, and a transaction
@@ -129,9 +122,9 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 		final Class<?> testClass = testContext.getTestClass();
 		Assert.notNull(testMethod, "The test method of the supplied TestContext must not be null");
 
-		if (this.transactionContextCache.remove(testMethod) != null) {
-			throw new IllegalStateException("Cannot start new transaction without ending existing transaction: "
-					+ "Invoke endTransaction() before startNewTransaction().");
+		TransactionContext txContext = TransactionContextHolder.removeCurrentTransactionContext();
+		if (txContext != null) {
+			throw new IllegalStateException("Cannot start a new transaction without ending the existing transaction.");
 		}
 
 		PlatformTransactionManager tm = null;
@@ -154,30 +147,34 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 		}
 
 		if (tm != null) {
-			TransactionContext txContext = new TransactionContext(tm, transactionAttribute);
+			txContext = new TransactionContext(testContext, tm, transactionAttribute, isRollback(testContext));
 			runBeforeTransactionMethods(testContext);
-			startNewTransaction(testContext, txContext);
-			this.transactionContextCache.put(testMethod, txContext);
+			txContext.startTransaction();
+			TransactionContextHolder.setCurrentTransactionContext(txContext);
 		}
 	}
 
 	/**
-	 * If a transaction is currently active for the test method of the supplied
-	 * {@link TestContext test context}, this method will end the transaction
-	 * and run {@link AfterTransaction &#064;AfterTransaction methods}.
-	 * <p>{@code @AfterTransaction} methods are guaranteed to be
-	 * invoked even if an error occurs while ending the transaction.
+	 * If a transaction is currently active for the supplied
+	 * {@linkplain TestContext test context}, this method will end the transaction
+	 * and run {@link AfterTransaction @AfterTransaction} methods.
+	 * <p>{@code @AfterTransaction} methods are guaranteed to be invoked even if
+	 * an error occurs while ending the transaction.
 	 */
 	@Override
 	public void afterTestMethod(TestContext testContext) throws Exception {
 		Method testMethod = testContext.getTestMethod();
 		Assert.notNull(testMethod, "The test method of the supplied TestContext must not be null");
 
-		// If the transaction is still active...
-		TransactionContext txContext = this.transactionContextCache.remove(testMethod);
-		if (txContext != null && !txContext.transactionStatus.isCompleted()) {
+		TransactionContext txContext = TransactionContextHolder.removeCurrentTransactionContext();
+		// If there was (or perhaps still is) a transaction...
+		if (txContext != null) {
+			TransactionStatus transactionStatus = txContext.getTransactionStatus();
 			try {
-				endTransaction(testContext, txContext);
+				// If the transaction is still active...
+				if ((transactionStatus != null) && !transactionStatus.isCompleted()) {
+					txContext.endTransaction();
+				}
 			}
 			finally {
 				runAfterTransactionMethods(testContext);
@@ -186,7 +183,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	}
 
 	/**
-	 * Run all {@link BeforeTransaction &#064;BeforeTransaction methods} for the
+	 * Run all {@link BeforeTransaction @BeforeTransaction} methods for the
 	 * specified {@link TestContext test context}. If one of the methods fails,
 	 * however, the caught exception will be rethrown in a wrapped
 	 * {@link RuntimeException}, and the remaining methods will <strong>not</strong>
@@ -212,7 +209,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	}
 
 	/**
-	 * Run all {@link AfterTransaction &#064;AfterTransaction methods} for the
+	 * Run all {@link AfterTransaction @AfterTransaction} methods for the
 	 * specified {@link TestContext test context}. If one of the methods fails,
 	 * the caught exception will be logged as an error, and the remaining
 	 * methods will be given a chance to execute. After all methods have
@@ -249,45 +246,6 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 		if (afterTransactionException != null) {
 			ReflectionUtils.rethrowException(afterTransactionException);
-		}
-	}
-
-	/**
-	 * Start a new transaction for the supplied {@link TestContext test context}.
-	 * <p>Only call this method if {@link #endTransaction} has been called or if no
-	 * transaction has been previously started.
-	 * @param testContext the current test context
-	 * @throws TransactionException if starting the transaction fails
-	 * @throws Exception if an error occurs while retrieving the transaction manager
-	 */
-	private void startNewTransaction(TestContext testContext, TransactionContext txContext) throws Exception {
-		txContext.startTransaction();
-		++this.transactionsStarted;
-		if (logger.isInfoEnabled()) {
-			logger.info(String.format(
-				"Began transaction (%s) for test context %s; transaction manager [%s]; rollback [%s]",
-				this.transactionsStarted, testContext, txContext.transactionManager, isRollback(testContext)));
-		}
-	}
-
-	/**
-	 * Immediately force a <em>commit</em> or <em>rollback</em> of the
-	 * transaction for the supplied {@link TestContext test context}, according
-	 * to the commit and rollback flags.
-	 * @param testContext the current test context
-	 * @throws Exception if an error occurs while retrieving the transaction manager
-	 */
-	private void endTransaction(TestContext testContext, TransactionContext txContext) throws Exception {
-		boolean rollback = isRollback(testContext);
-		if (logger.isTraceEnabled()) {
-			logger.trace(String.format(
-				"Ending transaction for test context %s; transaction status [%s]; rollback [%s]", testContext,
-				txContext.transactionStatus, rollback));
-		}
-		txContext.endTransaction(rollback);
-		if (logger.isInfoEnabled()) {
-			logger.info((rollback ? "Rolled back" : "Committed")
-					+ " transaction after test execution for test context " + testContext);
 		}
 	}
 
@@ -478,7 +436,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	/**
 	 * Retrieves the {@link TransactionConfigurationAttributes} for the
 	 * specified {@link Class class} which may optionally declare or inherit
-	 * {@link TransactionConfiguration &#064;TransactionConfiguration}. If
+	 * {@link TransactionConfiguration @TransactionConfiguration}. If
 	 * {@code @TransactionConfiguration} is not present for the supplied
 	 * class, the <em>default values</em> for attributes defined in
 	 * {@code @TransactionConfiguration} will be used instead.
@@ -518,39 +476,6 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 			this.configurationAttributes = configAttributes;
 		}
 		return this.configurationAttributes;
-	}
-
-
-	/**
-	 * Internal context holder for a specific test method.
-	 */
-	private static class TransactionContext {
-
-		private final PlatformTransactionManager transactionManager;
-
-		private final TransactionDefinition transactionDefinition;
-
-		private TransactionStatus transactionStatus;
-
-
-		public TransactionContext(PlatformTransactionManager transactionManager,
-				TransactionDefinition transactionDefinition) {
-			this.transactionManager = transactionManager;
-			this.transactionDefinition = transactionDefinition;
-		}
-
-		public void startTransaction() {
-			this.transactionStatus = this.transactionManager.getTransaction(this.transactionDefinition);
-		}
-
-		public void endTransaction(boolean rollback) {
-			if (rollback) {
-				this.transactionManager.rollback(this.transactionStatus);
-			}
-			else {
-				this.transactionManager.commit(this.transactionStatus);
-			}
-		}
 	}
 
 }
