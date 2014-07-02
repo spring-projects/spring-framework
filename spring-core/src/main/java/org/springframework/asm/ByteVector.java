@@ -37,7 +37,6 @@ package org.springframework.asm;
  */
 public class ByteVector {
 
-    // just a tests of pull request - please ignore
     /**
      * The content of this vector.
      */
