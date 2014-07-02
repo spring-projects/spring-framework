@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Implementation of the {@link org.springframework.web.servlet.HandlerExceptionResolver HandlerExceptionResolver}
@@ -85,10 +86,10 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 			reason = this.messageSource.getMessage(reason, null, reason, LocaleContextHolder.getLocale());
 		}
 		if (!StringUtils.hasLength(reason)) {
-			response.sendError(statusCode);
+			WebUtils.sendError(request, response, statusCode, ex);
 		}
 		else {
-			response.sendError(statusCode, reason);
+			WebUtils.sendError(request, response, statusCode, ex, reason);
 		}
 		return new ModelAndView();
 	}

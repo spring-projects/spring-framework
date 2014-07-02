@@ -18,6 +18,7 @@ package org.springframework.web.util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -43,6 +44,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  */
 public abstract class WebUtils {
 
@@ -120,6 +122,14 @@ public abstract class WebUtils {
 
 	/** Key for the mutex session attribute */
 	public static final String SESSION_MUTEX_ATTRIBUTE = WebUtils.class.getName() + ".MUTEX";
+
+	/**
+	 * This request attribute is similar to the standard servlet
+	 * {@link WebUtils#ERROR_EXCEPTION_ATTRIBUTE} request attribute, but is more flexible
+	 * since the response won't be automatically handled by the servlet container as an
+	 * {@link org.springframework.http.HttpStatus#INTERNAL_SERVER_ERROR} error page.
+	 */
+	public static final String EXCEPTION_ATTRIBUTE = WebUtils.class.getName() + ".EXCEPTION";
 
 
 	/**
@@ -735,4 +745,46 @@ public abstract class WebUtils {
 		}
 		return result;
 	}
+
+	/**
+	 * Sends an error response to the client using the specified status, and stores the
+	 * exception encountered in the {@link WebUtils#EXCEPTION_ATTRIBUTE} request attribute
+	 * in order to make it available to the view.
+	 *
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param status the error status code
+	 * @param ex the exception encountered
+	 * @throws IOException if an input or output exception occurs
+	 * @throws IllegalStateException if the response was committed before this method call
+	 *
+	 * @since 4.1
+	 * @see HttpServletResponse#sendError(int)
+	 */
+	public static void sendError(HttpServletRequest request, HttpServletResponse response, int status, Throwable ex) throws IOException {
+		request.setAttribute(EXCEPTION_ATTRIBUTE, ex);
+		response.sendError(status);
+	}
+
+	/**
+	 * Sends an error response to the client using the specified status, stores the
+	 * exception encountered in the {@link WebUtils#EXCEPTION_ATTRIBUTE} request attribute
+	 * in order to make it available to the view, and set the response error message.
+	 *
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param status the error status code
+	 * @param ex the exception encountered
+	 * @param message the descriptive message of the error
+	 * @throws IOException if an input or output exception occurs
+	 * @throws IllegalStateException if the response was committed before this method call
+	 *
+	 * @since 4.1
+	 * @see HttpServletResponse#sendError(int, String)
+	 */
+	public static void sendError(HttpServletRequest request, HttpServletResponse response, int status, Throwable ex, String message) throws IOException {
+		request.setAttribute(EXCEPTION_ATTRIBUTE, ex);
+		response.sendError(status, message);
+	}
+
 }

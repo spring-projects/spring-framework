@@ -41,6 +41,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 import org.springframework.web.servlet.mvc.LastModified;
+import org.springframework.web.util.WebUtils;
 
 /**
  * {@link org.springframework.web.servlet.mvc.Controller Controller}
@@ -429,7 +430,7 @@ public class MultiActionController extends AbstractController implements LastMod
 			throws Exception {
 
 		pageNotFoundLogger.warn(ex.getMessage());
-		response.sendError(HttpServletResponse.SC_NOT_FOUND);
+		WebUtils.sendError(request, response, HttpServletResponse.SC_NOT_FOUND, ex);
 		return null;
 	}
 
