@@ -161,7 +161,7 @@ import org.springframework.web.util.UrlPathHelper;
 public class WebMvcConfigurationSupport implements ApplicationContextAware, ServletContextAware {
 
 	private static boolean romePresent =
-			ClassUtils.isPresent("com.sun.syndication.feed.WireFeed", WebMvcConfigurationSupport.class.getClassLoader());
+			ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", WebMvcConfigurationSupport.class.getClassLoader());
 
 	private static final boolean jaxb2Present =
 			ClassUtils.isPresent("javax.xml.bind.Binder", WebMvcConfigurationSupport.class.getClassLoader());

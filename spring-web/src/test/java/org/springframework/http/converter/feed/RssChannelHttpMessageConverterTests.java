@@ -22,12 +22,9 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sun.syndication.feed.rss.Channel;
-import com.sun.syndication.feed.rss.Item;
-import static org.custommonkey.xmlunit.XMLAssert.*;
+import com.rometools.rome.feed.rss.Channel;
+import com.rometools.rome.feed.rss.Item;
 import org.custommonkey.xmlunit.XMLUnit;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -36,7 +33,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 
-/** @author Arjen Poutsma */
+import static org.custommonkey.xmlunit.XMLAssert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+/**
+ * @author Arjen Poutsma
+ */
 public class RssChannelHttpMessageConverterTests {
 
 	private RssChannelHttpMessageConverter converter;
@@ -111,7 +114,6 @@ public class RssChannelHttpMessageConverterTests {
 				"<item><title>title2</title></item>" +
 				"</channel></rss>";
 		assertXMLEqual(expected, outputMessage.getBodyAsString(utf8));
-
 	}
 
 	@Test
@@ -133,6 +135,5 @@ public class RssChannelHttpMessageConverterTests {
 		assertEquals("Invalid content-type", new MediaType("application", "rss+xml", Charset.forName(encoding)),
 				outputMessage.getHeaders().getContentType());
 	}
-
 
 }

@@ -626,7 +626,7 @@ project("spring-web") {
 		optional("org.apache.httpcomponents:httpasyncclient:4.0.1")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("com.google.code.gson:gson:${gsonVersion}")
-		optional("rome:rome:1.0")
+		optional("com.rometools:rome:1.5.0")
 		optional("org.eclipse.jetty:jetty-servlet:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
 		}
@@ -780,7 +780,7 @@ project("spring-webmvc") {
 			exclude group: "xml-apis", module: "xml-apis"
 		}
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
-		optional("rome:rome:1.0")
+		optional("com.rometools:rome:1.5.0")
 		optional("org.apache.tiles:tiles-api:${tiles2Version}")
 		optional("org.apache.tiles:tiles-core:${tiles2Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
@@ -918,7 +918,7 @@ project("spring-test") {
 		testCompile("org.hibernate:hibernate-validator:${hibVal5Version}")
 		testCompile("com.thoughtworks.xstream:xstream:${xstreamVersion}")
 		testCompile("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
-		testCompile("rome:rome:1.0")
+		testCompile("com.rometools:rome:1.5.0")
 		testCompile("org.apache.tiles:tiles-api:${tiles3Version}")
 		testCompile("org.apache.tiles:tiles-core:${tiles3Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"

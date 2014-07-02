@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.xml.transform.Source;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -129,7 +128,7 @@ import org.springframework.web.util.UriTemplate;
 public class RestTemplate extends InterceptingHttpAccessor implements RestOperations {
 
 	private static boolean romePresent =
-			ClassUtils.isPresent("com.sun.syndication.feed.WireFeed", RestTemplate.class.getClassLoader());
+			ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", RestTemplate.class.getClassLoader());
 
 	private static final boolean jaxb2Present =
 			ClassUtils.isPresent("javax.xml.bind.Binder", RestTemplate.class.getClassLoader());

@@ -146,7 +146,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			"javax.validation.Validator", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
 
 	private static boolean romePresent =
-			ClassUtils.isPresent("com.sun.syndication.feed.WireFeed", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+			ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
 
 	private static final boolean jaxb2Present =
 			ClassUtils.isPresent("javax.xml.bind.Binder", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
