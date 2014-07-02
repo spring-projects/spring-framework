@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.sun.syndication.feed.WireFeed;
 import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
 
@@ -31,17 +30,15 @@ import com.sun.syndication.feed.atom.Feed;
  *
  * <p>Application-specific view classes will extend this class.
  * The view will be held in the subclass itself, not in a template.
- *
- * <p>Main entry points are the {@link #buildFeedMetadata(Map, WireFeed, HttpServletRequest)} and
- * {@link #buildFeedEntries(Map, HttpServletRequest, HttpServletResponse)}.
+ * Main entry points are the {@link #buildFeedMetadata} and {@link #buildFeedEntries}.
  *
  * <p>Thanks to Jettro Coenradie and Sergio Bossa for the original feed view prototype!
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 3.0
- * @see #buildFeedMetadata(Map, WireFeed, HttpServletRequest)
- * @see #buildFeedEntries(Map, HttpServletRequest, HttpServletResponse)
+ * @see #buildFeedMetadata
+ * @see #buildFeedEntries
  * @see <a href="http://www.atomenabled.org/developers/syndication/">Atom Syndication Format</a>
  */
 public abstract class AbstractAtomFeedView extends AbstractFeedView<Feed> {
@@ -56,7 +53,7 @@ public abstract class AbstractAtomFeedView extends AbstractFeedView<Feed> {
 	}
 
 	/**
-	 * Sets the Rome feed type to use.
+	 * Set the Rome feed type to use.
 	 * <p>Defaults to Atom 1.0.
 	 * @see Feed#setFeedType(String)
 	 * @see #DEFAULT_FEED_TYPE

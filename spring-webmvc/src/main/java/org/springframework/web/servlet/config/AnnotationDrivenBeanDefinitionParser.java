@@ -75,7 +75,7 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
 
 /**
  * A {@link BeanDefinitionParser} that provides the configuration for the
- * {@code <annotation-driven/>} MVC namespace  element.
+ * {@code <annotation-driven/>} MVC namespace element.
  *
  * <p>This class registers the following {@link HandlerMapping}s:</p>
  * <ul>

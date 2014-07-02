@@ -2593,7 +2593,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		@SuppressWarnings("unchecked")
 		public <T> T createMock(Class<T> toMock) {
-			return (T) Proxy.newProxyInstance(AutowiredAnnotationBeanPostProcessorTests.class.getClassLoader(), new Class<?>[]{toMock},
+			return (T) Proxy.newProxyInstance(AutowiredAnnotationBeanPostProcessorTests.class.getClassLoader(), new Class<?>[] {toMock},
 					new InvocationHandler() {
 						@Override
 						public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -2620,11 +2620,11 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 			return gi2.doSomethingMoreGeneric(o) + "_somethingGeneric_" + o;
 		}
 
-		public static GenericInterface1<String> create(){
+		public static GenericInterface1<String> create() {
 			return new StringGenericInterface1Impl();
 		}
 
-		public static GenericInterface1 createPlain(){
+		public static GenericInterface1 createPlain() {
 			return new GenericInterface1Impl();
 		}
 	}
@@ -2640,7 +2640,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
-	public static class GenericInterface2Impl implements GenericInterface2<String>{
+	public static class GenericInterface2Impl implements GenericInterface2<String> {
 
 		@Override
 		public String doSomethingMoreGeneric(String o) {
@@ -2658,7 +2658,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
-	public static class PlainGenericInterface2Impl implements GenericInterface2{
+	public static class PlainGenericInterface2Impl implements GenericInterface2 {
 
 		@Override
 		public String doSomethingMoreGeneric(Object o) {
