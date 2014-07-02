@@ -27,6 +27,7 @@ import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -1732,6 +1733,26 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	@Ignore  // SPR-11521
+	public void testGenericsBasedInjectionIntoTypeVariableSelectingBestMatchAgainstFactoryMethodSignature() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(GenericInterface1Impl.class);
+		bd.setFactoryMethodName("createErased");
+		bf.registerBeanDefinition("bean1", bd);
+		bf.registerBeanDefinition("bean2", new RootBeanDefinition(GenericInterface2Impl.class));
+		bf.registerBeanDefinition("bean2a", new RootBeanDefinition(ReallyGenericInterface2Impl.class));
+		bf.registerBeanDefinition("bean2b", new RootBeanDefinition(PlainGenericInterface2Impl.class));
+
+		GenericInterface1Impl bean1 = (GenericInterface1Impl) bf.getBean("bean1");
+		GenericInterface2Impl bean2 = (GenericInterface2Impl) bf.getBean("bean2");
+		assertSame(bean2, bean1.gi2);
+	}
+
+	@Test
 	public void testCircularTypeReference() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
@@ -2624,7 +2645,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		@SuppressWarnings("unchecked")
 		public <T> T createMock(Class<T> toMock) {
-			return (T) Proxy.newProxyInstance(AutowiredAnnotationBeanPostProcessorTests.class.getClassLoader(), new Class<?>[]{toMock},
+			return (T) Proxy.newProxyInstance(AutowiredAnnotationBeanPostProcessorTests.class.getClassLoader(), new Class<?>[] {toMock},
 					new InvocationHandler() {
 						@Override
 						public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -2651,11 +2672,15 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 			return gi2.doSomethingMoreGeneric(o) + "_somethingGeneric_" + o;
 		}
 
-		public static GenericInterface1<String> create(){
+		public static GenericInterface1<String> create() {
 			return new StringGenericInterface1Impl();
 		}
 
-		public static GenericInterface1 createPlain(){
+		public static GenericInterface1<String> createErased() {
+			return new GenericInterface1Impl<String>();
+		}
+
+		public static GenericInterface1 createPlain() {
 			return new GenericInterface1Impl();
 		}
 	}
@@ -2671,7 +2696,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
-	public static class GenericInterface2Impl implements GenericInterface2<String>{
+	public static class GenericInterface2Impl implements GenericInterface2<String> {
 
 		@Override
 		public String doSomethingMoreGeneric(String o) {
@@ -2689,7 +2714,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
-	public static class PlainGenericInterface2Impl implements GenericInterface2{
+	public static class PlainGenericInterface2Impl implements GenericInterface2 {
 
 		@Override
 		public String doSomethingMoreGeneric(Object o) {
