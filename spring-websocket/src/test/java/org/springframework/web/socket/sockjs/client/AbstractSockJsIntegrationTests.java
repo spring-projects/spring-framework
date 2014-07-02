@@ -21,7 +21,9 @@ import org.apache.commons.logging.LogFactory;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -75,6 +77,9 @@ import static org.junit.Assert.fail;
  */
 public abstract class AbstractSockJsIntegrationTests {
 
+	@Rule
+	public final TestName testName = new TestName();
+
 	protected Log logger = LogFactory.getLog(getClass());
 
 	private WebSocketTestServer server;
@@ -88,6 +93,7 @@ public abstract class AbstractSockJsIntegrationTests {
 
 	@Before
 	public void setup() throws Exception {
+		logger.debug("Setting up '" + this.testName.getMethodName() + "'");
 		this.errorFilter = new ErrorFilter();
 		this.wac = new AnnotationConfigWebApplicationContext();
 		this.wac.register(TestConfig.class, upgradeStrategyConfigClass());

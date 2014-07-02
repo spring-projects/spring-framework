@@ -30,8 +30,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
+import org.junit.rules.TestName;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.Message;
@@ -56,6 +58,9 @@ import static org.junit.Assert.*;
  */
 public class StompBrokerRelayMessageHandlerIntegrationTests {
 
+	@Rule
+	public final TestName testName = new TestName();
+
 	private static final Log logger = LogFactory.getLog(StompBrokerRelayMessageHandlerIntegrationTests.class);
 
 	private static final Charset UTF_8 = Charset.forName("UTF-8");
@@ -75,14 +80,12 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 	@Before
 	public void setUp() throws Exception {
-
+		logger.debug("Setting up '" + this.testName.getMethodName() + "'");
 		this.port = SocketUtils.findAvailableTcpPort(61613);
-
 		this.responseChannel = new ExecutorSubscribableChannel();
 		this.responseHandler = new TestMessageHandler();
 		this.responseChannel.subscribe(this.responseHandler);
 		this.eventPublisher = new TestEventPublisher();
-
 		startActiveMqBroker();
 		createAndStartRelay();
 	}

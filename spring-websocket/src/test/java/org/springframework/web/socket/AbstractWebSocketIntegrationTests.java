@@ -23,6 +23,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 import org.junit.runners.Parameterized.Parameter;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.annotation.Bean;
@@ -53,6 +55,9 @@ public abstract class AbstractWebSocketIntegrationTests {
 		upgradeStrategyConfigTypes.put(UndertowTestServer.class, UndertowUpgradeStrategyConfig.class);
 	}
 
+	@Rule
+	public final TestName testName = new TestName();
+
 	@Parameter(0)
 	public WebSocketTestServer server;
 
@@ -64,6 +69,10 @@ public abstract class AbstractWebSocketIntegrationTests {
 
 	@Before
 	public void setup() throws Exception {
+
+		logger.debug("Setting up '" + this.testName.getMethodName() + "', client=" +
+				this.webSocketClient.getClass().getSimpleName() + ", server=" +
+				this.server.getClass().getSimpleName());
 
 		this.wac = new AnnotationConfigWebApplicationContext();
 		this.wac.register(getAnnotatedConfigClasses());
