@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +21,16 @@ import com.sun.syndication.feed.atom.Feed;
 import org.springframework.http.MediaType;
 
 /**
- * Implementation of {@link org.springframework.http.converter.HttpMessageConverter} that can read and write Atom feeds.
- * Specifically, this converter can handle {@link Feed} objects, from the <a href="https://rome.dev.java.net/">ROME</a>
- * project.
+ * Implementation of {@link org.springframework.http.converter.HttpMessageConverter}
+ * that can read and write Atom feeds. Specifically, this converter can handle {@link Feed}
+ * objects from the <a href="https://rome.dev.java.net/">ROME</a> project.
  *
- * <p>By default, this converter reads and writes the media type ({@code application/atom+xml}). This can
- * be overridden by setting the {@link #setSupportedMediaTypes(java.util.List) supportedMediaTypes} property.
+ * <p>By default, this converter reads and writes the media type ({@code application/atom+xml}).
+ * This can be overridden through the {@link #setSupportedMediaTypes supportedMediaTypes} property.
  *
  * @author Arjen Poutsma
- * @see Feed
  * @since 3.0.2
+ * @see Feed
  */
 public class AtomFeedHttpMessageConverter extends AbstractWireFeedHttpMessageConverter<Feed> {
 
@@ -42,6 +42,5 @@ public class AtomFeedHttpMessageConverter extends AbstractWireFeedHttpMessageCon
 	protected boolean supports(Class<?> clazz) {
 		return Feed.class.isAssignableFrom(clazz);
 	}
-
 
 }

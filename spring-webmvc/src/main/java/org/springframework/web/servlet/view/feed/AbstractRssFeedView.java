@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.sun.syndication.feed.WireFeed;
 import com.sun.syndication.feed.rss.Channel;
 import com.sun.syndication.feed.rss.Item;
 
@@ -31,17 +30,15 @@ import com.sun.syndication.feed.rss.Item;
  *
  * <p>Application-specific view classes will extend this class.
  * The view will be held in the subclass itself, not in a template.
- *
- * <p>Main entry points are the {@link #buildFeedMetadata(Map, WireFeed , HttpServletRequest)}
- * and {@link #buildFeedItems(Map, HttpServletRequest, HttpServletResponse)}.
+ * Main entry points are the {@link #buildFeedMetadata} and {@link #buildFeedItems}.
  *
  * <p>Thanks to Jettro Coenradie and Sergio Bossa for the original feed view prototype!
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 3.0
- * @see #buildFeedMetadata(Map, WireFeed , HttpServletRequest)
- * @see #buildFeedItems(Map, HttpServletRequest, HttpServletResponse)
+ * @see #buildFeedMetadata
+ * @see #buildFeedItems
  */
 public abstract class AbstractRssFeedView extends AbstractFeedView<Channel> {
 
@@ -79,7 +76,7 @@ public abstract class AbstractRssFeedView extends AbstractFeedView<Channel> {
 	 * @param request  in case we need locale etc. Shouldn't look at attributes.
 	 * @param response in case we need to set cookies. Shouldn't write to it.
 	 * @return the feed items to be added to the feed
-	 * @throws Exception any exception that occured during document building
+	 * @throws Exception any exception that occurred during document building
 	 * @see Item
 	 */
 	protected abstract List<Item> buildFeedItems(

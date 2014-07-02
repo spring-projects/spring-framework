@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,7 @@ import java.util.List;
 
 import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
-import static org.custommonkey.xmlunit.XMLAssert.*;
 import org.custommonkey.xmlunit.XMLUnit;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -36,7 +33,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 
-/** @author Arjen Poutsma */
+import static org.custommonkey.xmlunit.XMLAssert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+/**
+ * @author Arjen Poutsma
+ */
 public class AtomFeedHttpMessageConverterTests {
 
 	private AtomFeedHttpMessageConverter converter;
@@ -70,7 +73,7 @@ public class AtomFeedHttpMessageConverterTests {
 		Feed result = converter.read(Feed.class, inputMessage);
 		assertEquals("title", result.getTitle());
 		assertEquals("subtitle", result.getSubtitle().getValue());
-		List entries = result.getEntries();
+		List<?> entries = result.getEntries();
 		assertEquals(2, entries.size());
 
 		Entry entry1 = (Entry) entries.get(0);
@@ -95,7 +98,7 @@ public class AtomFeedHttpMessageConverterTests {
 		entry2.setId("id2");
 		entry2.setTitle("title2");
 
-		List entries = new ArrayList(2);
+		List<Entry> entries = new ArrayList<Entry>(2);
 		entries.add(entry1);
 		entries.add(entry2);
 		feed.setEntries(entries);
@@ -109,7 +112,6 @@ public class AtomFeedHttpMessageConverterTests {
 				"<entry><id>id1</id><title>title1</title></entry>" +
 				"<entry><id>id2</id><title>title2</title></entry></feed>";
 		assertXMLEqual(expected, outputMessage.getBodyAsString(utf8));
-
 	}
 
 	@Test
@@ -125,6 +127,5 @@ public class AtomFeedHttpMessageConverterTests {
 		assertEquals("Invalid content-type", new MediaType("application", "atom+xml", Charset.forName(encoding)),
 				outputMessage.getHeaders().getContentType());
 	}
-
 
 }
