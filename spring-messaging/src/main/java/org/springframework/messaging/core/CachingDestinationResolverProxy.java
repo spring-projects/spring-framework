@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.core;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -34,9 +35,9 @@ import org.springframework.util.Assert;
  */
 public class CachingDestinationResolverProxy<D> implements DestinationResolver<D>, InitializingBean {
 
-    private final ConcurrentHashMap<String, D> resolvedDestinationCache = new ConcurrentHashMap<String, D>();
+	private final Map<String, D> resolvedDestinationCache = new ConcurrentHashMap<String, D>();
 
-    private DestinationResolver<D> targetDestinationResolver;
+	private DestinationResolver<D> targetDestinationResolver;
 
 
 	/**
@@ -47,14 +48,14 @@ public class CachingDestinationResolverProxy<D> implements DestinationResolver<D
 	}
 
 	/**
-     * Create a new CachingDestinationResolverProxy using the given target
+	 * Create a new CachingDestinationResolverProxy using the given target
 	 * DestinationResolver to actually resolve destinations.
-     * @param targetDestinationResolver the target DestinationResolver to delegate to
-     */
-    public CachingDestinationResolverProxy(DestinationResolver<D> targetDestinationResolver) {
-        Assert.notNull(targetDestinationResolver, "Target DestinationResolver must not be null");
-        this.targetDestinationResolver = targetDestinationResolver;
-    }
+	 * @param targetDestinationResolver the target DestinationResolver to delegate to
+	 */
+	public CachingDestinationResolverProxy(DestinationResolver<D> targetDestinationResolver) {
+		Assert.notNull(targetDestinationResolver, "Target DestinationResolver must not be null");
+		this.targetDestinationResolver = targetDestinationResolver;
+	}
 
 
 	/**
@@ -73,22 +74,21 @@ public class CachingDestinationResolverProxy<D> implements DestinationResolver<D
 
 
 	/**
-     *
-     * Resolves and caches destinations if successfully resolved by the target
-     * DestinationResolver implementation.
-     * @param name the destination name to be resolved
-     * @return the currently resolved destination or an already cached destination
-     * @throws DestinationResolutionException if the target DestinationResolver
-     * reports an error during destination resolution
-     */
-    @Override
-    public D resolveDestination(String name) throws DestinationResolutionException {
-        D destination = this.resolvedDestinationCache.get(name);
+	 * Resolves and caches destinations if successfully resolved by the target
+	 * DestinationResolver implementation.
+	 * @param name the destination name to be resolved
+	 * @return the currently resolved destination or an already cached destination
+	 * @throws DestinationResolutionException if the target DestinationResolver
+	 * reports an error during destination resolution
+	 */
+	@Override
+	public D resolveDestination(String name) throws DestinationResolutionException {
+		D destination = this.resolvedDestinationCache.get(name);
 		if (destination == null) {
-            destination = this.targetDestinationResolver.resolveDestination(name);
-			this.resolvedDestinationCache.putIfAbsent(name, destination);
-        }
-        return destination;
-    }
+			destination = this.targetDestinationResolver.resolveDestination(name);
+			this.resolvedDestinationCache.put(name, destination);
+		}
+		return destination;
+	}
 
 }

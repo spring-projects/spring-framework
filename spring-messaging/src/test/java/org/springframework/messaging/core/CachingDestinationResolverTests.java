@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.core;
 
 import org.junit.Test;
@@ -28,23 +29,23 @@ import static org.mockito.Mockito.*;
  */
 public class CachingDestinationResolverTests {
 
-    @Test
-    public void cachedDestination() {
-        @SuppressWarnings("unchecked")
-        DestinationResolver<String> destinationResolver = (DestinationResolver<String>) mock(DestinationResolver.class);
-        CachingDestinationResolverProxy<String> cachingDestinationResolver = new CachingDestinationResolverProxy<String>(destinationResolver);
+	@Test
+	public void cachedDestination() {
+		@SuppressWarnings("unchecked")
+		DestinationResolver<String> destinationResolver = (DestinationResolver<String>) mock(DestinationResolver.class);
+		CachingDestinationResolverProxy<String> cachingDestinationResolver = new CachingDestinationResolverProxy<String>(destinationResolver);
 
-        when(destinationResolver.resolveDestination("abcd")).thenReturn("dcba");
+		when(destinationResolver.resolveDestination("abcd")).thenReturn("dcba");
 		when(destinationResolver.resolveDestination("1234")).thenReturn("4321");
 
-        assertEquals("dcba", cachingDestinationResolver.resolveDestination("abcd"));
-        assertEquals("4321", cachingDestinationResolver.resolveDestination("1234"));
+		assertEquals("dcba", cachingDestinationResolver.resolveDestination("abcd"));
+		assertEquals("4321", cachingDestinationResolver.resolveDestination("1234"));
 		assertEquals("4321", cachingDestinationResolver.resolveDestination("1234"));
 		assertEquals("dcba", cachingDestinationResolver.resolveDestination("abcd"));
 
-        verify(destinationResolver, times(1)).resolveDestination("abcd");
+		verify(destinationResolver, times(1)).resolveDestination("abcd");
 		verify(destinationResolver, times(1)).resolveDestination("1234");
-    }
+	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void noTargetSet() {
@@ -52,9 +53,9 @@ public class CachingDestinationResolverTests {
 		cachingDestinationResolver.afterPropertiesSet();
 	}
 
-    @Test(expected = IllegalArgumentException.class)
-    public void nullTargetThroughConstructor() {
-        new CachingDestinationResolverProxy<String>(null);
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void nullTargetThroughConstructor() {
+		new CachingDestinationResolverProxy<String>(null);
+	}
 
 }
