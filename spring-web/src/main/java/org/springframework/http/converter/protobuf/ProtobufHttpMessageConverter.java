@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -90,6 +91,11 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
     @Override
     protected void writeInternal(Message message, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
         List<MediaType> contentTypes = outputMessage.getHeaders().getAccept();
+
+        if (contentTypes == null || contentTypes.isEmpty()) {
+            contentTypes = new LinkedList<MediaType>();
+            contentTypes.add(PROTOBUF);
+        }
 
         for(MediaType contentType : contentTypes) {
             Charset charset = contentType.getCharSet() != null ? contentType.getCharSet() : DEFAULT_CHARSET;
