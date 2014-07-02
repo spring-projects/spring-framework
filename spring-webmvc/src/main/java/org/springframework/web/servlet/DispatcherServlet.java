@@ -232,6 +232,13 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	public static final String FLASH_MAP_MANAGER_ATTRIBUTE = DispatcherServlet.class.getName() + ".FLASH_MAP_MANAGER";
 
+	/**
+	 * Name of request attribute that exposes an Exception resolved with an
+	 * {@link HandlerExceptionResolver} but where no view was rendered
+	 * (e.g. setting the status code).
+	 */
+	public static final String EXCEPTION_ATTRIBUTE = DispatcherServlet.class.getName() + ".EXCEPTION";
+
 	/** Log category to use when no mapped handler is found for a request. */
 	public static final String PAGE_NOT_FOUND_LOG_CATEGORY = "org.springframework.web.servlet.PageNotFound";
 
@@ -1165,6 +1172,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		if (exMv != null) {
 			if (exMv.isEmpty()) {
+				request.setAttribute(EXCEPTION_ATTRIBUTE, ex);
 				return null;
 			}
 			// We might still need view name translation for a plain error model...
