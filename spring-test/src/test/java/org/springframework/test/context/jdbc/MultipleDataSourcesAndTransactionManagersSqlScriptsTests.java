@@ -16,6 +16,10 @@
 
 package org.springframework.test.context.jdbc;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import javax.sql.DataSource;
 
 import org.junit.Test;
@@ -56,21 +60,21 @@ public class MultipleDataSourcesAndTransactionManagersSqlScriptsTests {
 	@Test
 	@Sql(scripts = "data-add-dogbert.sql", dataSource = "dataSource1", transactionManager = "txMgr1")
 	public void database1() {
-		assertUsersExist(new JdbcTemplate(dataSource1), "Dilbert", "Dogbert");
+		assertUsers(new JdbcTemplate(dataSource1), "Dilbert", "Dogbert");
 	}
 
 	@Test
 	@Sql(scripts = "data-add-catbert.sql", dataSource = "dataSource2", transactionManager = "txMgr2")
 	public void database2() {
-		assertUsersExist(new JdbcTemplate(dataSource2), "Dilbert", "Catbert");
+		assertUsers(new JdbcTemplate(dataSource2), "Dilbert", "Catbert");
 	}
 
-	private void assertUsersExist(JdbcTemplate jdbcTemplate, String... users) {
-		String query = "select count(name) from user where name =?";
-		for (String user : users) {
-			assertTrue("User [" + user + "] must exist.",
-				jdbcTemplate.queryForObject(query, Integer.class, user).intValue() == 1);
-		}
+	private void assertUsers(JdbcTemplate jdbcTemplate, String... users) {
+		List<String> expected = Arrays.asList(users);
+		Collections.sort(expected);
+		List<String> actual = jdbcTemplate.queryForList("select name from user", String.class);
+		Collections.sort(actual);
+		assertEquals("Users in database;", expected, actual);
 	}
 
 

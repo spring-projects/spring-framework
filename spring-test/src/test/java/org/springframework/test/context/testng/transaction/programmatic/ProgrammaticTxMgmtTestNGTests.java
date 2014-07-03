@@ -16,10 +16,9 @@
 
 package org.springframework.test.context.testng.transaction.programmatic;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -45,8 +44,8 @@ import static org.junit.Assert.*;
 import static org.springframework.test.transaction.TransactionTestUtils.*;
 
 /**
- * This class is a copy of {@link ProgrammaticTxMgmtTests} that has been modified
- * to run with TestNG.
+ * This class is a copy of the JUnit-based {@link ProgrammaticTxMgmtTests} class
+ * that has been modified to run with TestNG.
  *
  * @author Sam Brannen
  * @since 4.1
@@ -54,12 +53,12 @@ import static org.springframework.test.transaction.TransactionTestUtils.*;
 @ContextConfiguration
 public class ProgrammaticTxMgmtTestNGTests extends AbstractTransactionalTestNGSpringContextTests {
 
-	private String testName;
+	private String method;
 
 
 	@Override
 	public void run(IHookCallBack callBack, ITestResult testResult) {
-		this.testName = testResult.getMethod().getMethodName();
+		this.method = testResult.getMethod().getMethodName();
 		super.run(callBack, testResult);
 	}
 
@@ -71,20 +70,15 @@ public class ProgrammaticTxMgmtTestNGTests extends AbstractTransactionalTestNGSp
 
 	@AfterTransaction
 	public void afterTransaction() {
-		switch (testName) {
-			case "commitTxAndStartNewTx": {
-				assertUsers("Dogbert");
-				break;
-			}
+		switch (method) {
+			case "commitTxAndStartNewTx":
 			case "commitTxButDoNotStartNewTx": {
 				assertUsers("Dogbert");
 				break;
 			}
-			case "rollbackTxAndStartNewTx": {
-				assertUsers("Dilbert");
-				break;
-			}
-			case "rollbackTxButDoNotStartNewTx": {
+			case "rollbackTxAndStartNewTx":
+			case "rollbackTxButDoNotStartNewTx":
+			case "startTxWithExistingTransaction": {
 				assertUsers("Dilbert");
 				break;
 			}
@@ -92,12 +86,8 @@ public class ProgrammaticTxMgmtTestNGTests extends AbstractTransactionalTestNGSp
 				assertUsers("Dilbert", "Dogbert");
 				break;
 			}
-			case "startTxWithExistingTransaction": {
-				assertUsers("Dilbert");
-				break;
-			}
 			default: {
-				fail("missing 'after transaction' assertion for test method: " + testName);
+				fail("missing 'after transaction' assertion for test method: " + method);
 			}
 		}
 	}
@@ -258,12 +248,11 @@ public class ProgrammaticTxMgmtTestNGTests extends AbstractTransactionalTestNGSp
 	// -------------------------------------------------------------------------
 
 	private void assertUsers(String... users) {
-		List<Map<String, Object>> results = jdbcTemplate.queryForList("select name from user");
-		List<String> names = new ArrayList<String>();
-		for (Map<String, Object> map : results) {
-			names.add((String) map.get("name"));
-		}
-		assertEquals(Arrays.asList(users), names);
+		List<String> expected = Arrays.asList(users);
+		Collections.sort(expected);
+		List<String> actual = jdbcTemplate.queryForList("select name from user", String.class);
+		Collections.sort(actual);
+		assertEquals("Users in database;", expected, actual);
 	}
 
 

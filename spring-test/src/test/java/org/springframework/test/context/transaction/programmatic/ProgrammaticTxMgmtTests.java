@@ -16,10 +16,9 @@
 
 package org.springframework.test.context.transaction.programmatic;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -44,8 +43,8 @@ import static org.junit.Assert.*;
 import static org.springframework.test.transaction.TransactionTestUtils.*;
 
 /**
- * Integration tests that verify support for programmatic transaction management
- * within the <em>Spring TestContext Framework</em>.
+ * JUnit-based integration tests that verify support for programmatic transaction
+ * management within the <em>Spring TestContext Framework</em>.
  *
  * @author Sam Brannen
  * @since 4.1
@@ -67,28 +66,19 @@ public class ProgrammaticTxMgmtTests extends AbstractTransactionalJUnit4SpringCo
 	public void afterTransaction() {
 		String method = testName.getMethodName();
 		switch (method) {
-			case "commitTxAndStartNewTx": {
-				assertUsers("Dogbert");
-				break;
-			}
+			case "commitTxAndStartNewTx":
 			case "commitTxButDoNotStartNewTx": {
 				assertUsers("Dogbert");
 				break;
 			}
-			case "rollbackTxAndStartNewTx": {
-				assertUsers("Dilbert");
-				break;
-			}
-			case "rollbackTxButDoNotStartNewTx": {
+			case "rollbackTxAndStartNewTx":
+			case "rollbackTxButDoNotStartNewTx":
+			case "startTxWithExistingTransaction": {
 				assertUsers("Dilbert");
 				break;
 			}
 			case "rollbackTxAndStartNewTxWithDefaultCommitSemantics": {
 				assertUsers("Dilbert", "Dogbert");
-				break;
-			}
-			case "startTxWithExistingTransaction": {
-				assertUsers("Dilbert");
 				break;
 			}
 			default: {
@@ -253,12 +243,11 @@ public class ProgrammaticTxMgmtTests extends AbstractTransactionalJUnit4SpringCo
 	// -------------------------------------------------------------------------
 
 	private void assertUsers(String... users) {
-		List<Map<String, Object>> results = jdbcTemplate.queryForList("select name from user");
-		List<String> names = new ArrayList<String>();
-		for (Map<String, Object> map : results) {
-			names.add((String) map.get("name"));
-		}
-		assertEquals(Arrays.asList(users), names);
+		List<String> expected = Arrays.asList(users);
+		Collections.sort(expected);
+		List<String> actual = jdbcTemplate.queryForList("select name from user", String.class);
+		Collections.sort(actual);
+		assertEquals("Users in database;", expected, actual);
 	}
 
 
