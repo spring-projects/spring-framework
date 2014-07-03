@@ -23553,7 +23553,7 @@ parameters.
 
 		SqlParameterSource namedParameters = new MapSqlParameterSource("first_name", firstName);
 
-		return this.namedParameterJdbcTemplate.queryForObject(sql, Integer.class, namedParameters);
+		return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
 	}
 ----
 
@@ -23584,7 +23584,7 @@ The following example shows the use of the `Map`-based style.
 
 		Map<String, String> namedParameters = Collections.singletonMap("first_name", firstName);
 
-		return this.namedParameterJdbcTemplate.queryForObject(sql, Integer.class, namedParameters);
+		return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters,  Integer.class);
 	}
 ----
 
@@ -23645,7 +23645,7 @@ of named parameter values.
 
 		SqlParameterSource namedParameters = new BeanPropertySqlParameterSource(exampleActor);
 
-		return this.namedParameterJdbcTemplate.queryForObject(sql, Integer.class, namedParameters);
+		return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
 	}
 ----
 
