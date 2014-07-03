@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.orm.jpa;
 
 import java.io.Serializable;
 import java.sql.SQLException;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
@@ -64,9 +63,9 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 			throws PersistenceException, SQLException, TransactionException {
 
 		if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
-			throw new InvalidIsolationLevelException(
-					"Standard JPA does not support custom isolation levels - " +
-					"use a special JpaDialect for your JPA implementation");
+			throw new InvalidIsolationLevelException(getClass().getSimpleName() +
+					" does not support custom isolation levels due to limitations in standard JPA. " +
+					"Specific arrangements may be implemented in custom JpaDialect variants.");
 		}
 		entityManager.getTransaction().begin();
 		return null;
