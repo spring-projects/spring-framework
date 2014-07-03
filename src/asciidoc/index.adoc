@@ -3241,7 +3241,7 @@ The following scopes are supported out of the box. You can also create
 <<beans-factory-scopes-custom,a custom scope.>>
 
 [[beans-factory-scopes-tbl]]
-.Bean scopesThread-scoped beans
+.Bean scopes
 |===
 | Scope| Description
 
@@ -3265,6 +3265,10 @@ The following scopes are supported out of the box. You can also create
 | Scopes a single bean definition to the lifecycle of a global HTTP `Session`. Typically
   only valid when used in a portlet context. Only valid in the context of a web-aware
   Spring `ApplicationContext`.
+
+| <<beans-factory-scopes-application,application>>
+| Scopes a single bean definition to the lifecycle of a `ServletContext`. Only valid in
+  the context of a web-aware Spring `ApplicationContext`.
 |===
 
 [NOTE]
@@ -3503,6 +3507,25 @@ as having `global session` scope, the standard HTTP `Session` scope is used, and
 error is raised.
 
 
+[[beans-factory-scopes-application]]
+===== Application scope
+Consider the following bean definition:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="appPreferences" class="com.foo.AppPreferences" scope="application"/>
+----
+
+The Spring container creates a new instance of the `AppPreferences` bean by using the
+`appPreferences` bean definition once for the entire web application. That is, the
+`appPreferences` bean is scoped at the `ServletContext` level, stored as a regular
+`ServletContext` attribute. This is somewhat similar to a Spring singleton bean but
+differs in two important ways: It is a singleton per `ServletContext`, not per Spring
+'ApplicationContext' (or which there may be several in any given web application),
+and it is actually exposed and therefore visible as a `ServletContext` attribute.
+
+
 [[beans-factory-scopes-other-injection]]
 ===== Scoped beans as dependencies
 The Spring IoC container manages not only the instantiation of your objects (beans), but
@@ -3610,8 +3633,8 @@ the `<aop:scoped-proxy/>` element, __a CGLIB-based class proxy is created__.
 
 [NOTE]
 ====
-CGLIB proxies only intercept public method calls! Do not call non-public
-methods on such a proxy; they will not be delegated to the scoped target object.
+CGLIB proxies only intercept public method calls! Do not call non-public methods
+on such a proxy; they will not be delegated to the actual scoped target object.
 ====
 
 Alternatively, you can configure the Spring container to create standard JDK
