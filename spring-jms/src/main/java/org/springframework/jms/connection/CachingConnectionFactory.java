@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,8 @@ import org.springframework.util.ObjectUtils;
  *
  * <p><b>NOTE: This ConnectionFactory decorator requires JMS 1.1 or higher.</b>
  * You may use it through the JMS 1.0.2 API; however, the target JMS driver
- * needs to be compliant with JMS 1.1.
+ * needs to be compliant with JMS 1.1. Note that there is no JMS 2.0 support
+ * in this version yet; please upgrade to Spring Framework 4.x for JMS 2.0.
  *
  * <p>When using the JMS 1.0.2 API, this ConnectionFactory will switch
  * into queue/topic mode according to the JMS API methods used at runtime:
@@ -242,7 +243,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 	 * @return the wrapped Session
 	 */
 	protected Session getCachedSessionProxy(Session target, LinkedList<Session> sessionList) {
-		List<Class> classes = new ArrayList<Class>(3);
+		List<Class<?>> classes = new ArrayList<Class<?>>(3);
 		classes.add(SessionProxy.class);
 		if (target instanceof QueueSession) {
 			classes.add(QueueSession.class);
@@ -252,7 +253,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		}
 		return (Session) Proxy.newProxyInstance(
 				SessionProxy.class.getClassLoader(),
-				classes.toArray(new Class[classes.size()]),
+				classes.toArray(new Class<?>[classes.size()]),
 				new CachedSessionInvocationHandler(target, sessionList));
 	}
 
@@ -511,7 +512,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		}
 
 		public boolean equals(Object other) {
-			if (other == this) {
+			if (this == other) {
 				return true;
 			}
 			ConsumerCacheKey otherKey = (ConsumerCacheKey) other;
