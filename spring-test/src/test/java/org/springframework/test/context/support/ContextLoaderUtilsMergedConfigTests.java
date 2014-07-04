@@ -16,7 +16,13 @@
 
 package org.springframework.test.context.support;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 import org.junit.Test;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 
@@ -64,6 +70,19 @@ public class ContextLoaderUtilsMergedConfigTests extends AbstractContextLoaderUt
 
 		assertMergedConfig(mergedConfig, testClass, new String[] { "classpath:/foo.xml" }, EMPTY_CLASS_ARRAY,
 			DelegatingSmartContextLoader.class);
+	}
+
+	@Test
+	public void buildMergedConfigWithMetaAnnotationAndClasses() {
+		buildMergedConfigWithMetaAnnotationAndClasses(Dog.class);
+		buildMergedConfigWithMetaAnnotationAndClasses(WorkingDog.class);
+		buildMergedConfigWithMetaAnnotationAndClasses(GermanShepherd.class);
+	}
+
+	private void buildMergedConfigWithMetaAnnotationAndClasses(Class<?> testClass) {
+		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
+		assertMergedConfig(mergedConfig, testClass, EMPTY_STRING_ARRAY, new Class<?>[] { FooConfig.class,
+			BarConfig.class }, DelegatingSmartContextLoader.class);
 	}
 
 	@Test
@@ -133,6 +152,25 @@ public class ContextLoaderUtilsMergedConfigTests extends AbstractContextLoaderUt
 
 		assertMergedConfig(mergedConfig, testClass, EMPTY_STRING_ARRAY, expectedClasses,
 			AnnotationConfigContextLoader.class);
+	}
+
+
+	@ContextConfiguration
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	public static @interface SpringAppConfig {
+
+		Class<?>[] classes() default {};
+	}
+
+	@SpringAppConfig(classes = { FooConfig.class, BarConfig.class })
+	public static abstract class Dog {
+	}
+
+	public static abstract class WorkingDog extends Dog {
+	}
+
+	public static class GermanShepherd extends WorkingDog {
 	}
 
 }
