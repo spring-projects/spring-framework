@@ -16,10 +16,20 @@
 
 package org.springframework.transaction.interceptor;
 
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+
 import java.io.Serializable;
 import java.util.Properties;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
@@ -33,6 +43,9 @@ import org.springframework.util.SerializationTestUtils;
  * @since 16.03.2003
  */
 public class TransactionInterceptorTests extends AbstractTransactionAspectTests {
+
+	@Rule
+	public final ExpectedException thrown = ExpectedException.none();
 
 	@Override
 	protected Object advised(Object target, PlatformTransactionManager ptm, TransactionAttributeSource[] tas) throws Exception {
@@ -63,11 +76,12 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 		return pf.getProxy();
 	}
 
-/**
+	/**
 	 * A TransactionInterceptor should be serializable if its
 	 * PlatformTransactionManager is.
 	 */
-	public void testSerializableWithAttributeProperties() throws Exception {
+	@Test
+	public void serializableWithAttributeProperties() throws Exception {
 		TransactionInterceptor ti = new TransactionInterceptor();
 		Properties props = new Properties();
 		props.setProperty("methodName", "PROPAGATION_REQUIRED");
@@ -82,7 +96,8 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 		assertNotNull(ti.getTransactionAttributeSource());
 	}
 
-	public void testSerializableWithCompositeSource() throws Exception {
+	@Test
+	public void serializableWithCompositeSource() throws Exception {
 		NameMatchTransactionAttributeSource tas1 = new NameMatchTransactionAttributeSource();
 		Properties props = new Properties();
 		props.setProperty("methodName", "PROPAGATION_REQUIRED");
@@ -104,6 +119,84 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 		CompositeTransactionAttributeSource ctas = (CompositeTransactionAttributeSource) ti.getTransactionAttributeSource();
 		assertTrue(ctas.getTransactionAttributeSources()[0] instanceof NameMatchTransactionAttributeSource);
 		assertTrue(ctas.getTransactionAttributeSources()[1] instanceof NameMatchTransactionAttributeSource);
+	}
+
+	@Test
+	public void determineTransactionManagerWithQualifierUnknown() {
+		BeanFactory beanFactory = mock(BeanFactory.class);
+		TransactionInterceptor ti = createTestTransactionInterceptor(beanFactory);
+		DefaultTransactionAttribute attribute = new DefaultTransactionAttribute();
+		attribute.setQualifier("fooTransactionManager");
+
+		thrown.expect(NoSuchBeanDefinitionException.class);
+		thrown.expectMessage("'fooTransactionManager'");
+		ti.determineTransactionManager(attribute);
+	}
+
+	@Test
+	public void determineTransactionManagerWithQualifierSeveralTimes() {
+		BeanFactory beanFactory = mock(BeanFactory.class);
+		TransactionInterceptor ti = createTestTransactionInterceptor(beanFactory);
+
+		PlatformTransactionManager txManager = mock(PlatformTransactionManager.class);
+		given(beanFactory.containsBean("fooTransactionManager")).willReturn(true);
+		given(beanFactory.getBean("fooTransactionManager", PlatformTransactionManager.class)).willReturn(txManager);
+
+		DefaultTransactionAttribute attribute = new DefaultTransactionAttribute();
+		attribute.setQualifier("fooTransactionManager");
+		PlatformTransactionManager actual = ti.determineTransactionManager(attribute);
+		assertSame(txManager, actual);
+
+		// Call again, should be cached
+		PlatformTransactionManager actual2 = ti.determineTransactionManager(attribute);
+		assertSame(txManager, actual2);
+		verify(beanFactory, times(1)).containsBean("fooTransactionManager");
+		verify(beanFactory, times(1)).getBean("fooTransactionManager", PlatformTransactionManager.class);
+	}
+
+	@Test
+	public void determineTransactionManagerWithBeanNameSeveralTimes() {
+		BeanFactory beanFactory = mock(BeanFactory.class);
+		TransactionInterceptor ti = createTestTransactionInterceptor(beanFactory);
+		ti.setTransactionManagerBeanName("fooTransactionManager");
+
+		PlatformTransactionManager txManager = mock(PlatformTransactionManager.class);
+		given(beanFactory.getBean("fooTransactionManager", PlatformTransactionManager.class)).willReturn(txManager);
+
+		DefaultTransactionAttribute attribute = new DefaultTransactionAttribute();
+		PlatformTransactionManager actual = ti.determineTransactionManager(attribute);
+		assertSame(txManager, actual);
+
+		// Call again, should be cached
+		PlatformTransactionManager actual2 = ti.determineTransactionManager(attribute);
+		assertSame(txManager, actual2);
+		verify(beanFactory, times(1)).getBean("fooTransactionManager", PlatformTransactionManager.class);
+	}
+
+	@Test
+	public void determineTransactionManagerDefaultSeveralTimes() {
+		BeanFactory beanFactory = mock(BeanFactory.class);
+		TransactionInterceptor ti = createTestTransactionInterceptor(beanFactory);
+
+		PlatformTransactionManager txManager = mock(PlatformTransactionManager.class);
+		given(beanFactory.getBean(PlatformTransactionManager.class)).willReturn(txManager);
+
+		DefaultTransactionAttribute attribute = new DefaultTransactionAttribute();
+		PlatformTransactionManager actual = ti.determineTransactionManager(attribute);
+		assertSame(txManager, actual);
+
+		// Call again, should be cached
+		PlatformTransactionManager actual2 = ti.determineTransactionManager(attribute);
+		assertSame(txManager, actual2);
+		verify(beanFactory, times(1)).getBean(PlatformTransactionManager.class);
+	}
+
+	private TransactionInterceptor createTestTransactionInterceptor(BeanFactory beanFactory) {
+		TransactionInterceptor ti = new TransactionInterceptor();
+		ti.setBeanFactory(beanFactory);
+		ti.setTransactionAttributeSource(new NameMatchTransactionAttributeSource());
+		ti.afterPropertiesSet();
+		return ti;
 	}
 
 
