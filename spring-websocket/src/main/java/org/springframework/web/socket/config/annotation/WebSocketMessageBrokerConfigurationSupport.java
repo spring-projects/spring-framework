@@ -22,9 +22,11 @@ import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.simp.SimpSessionScope;
 import org.springframework.messaging.simp.config.AbstractMessageBrokerConfiguration;
+import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.config.WebSocketMessageBrokerStats;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 
 /**
@@ -46,6 +48,7 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 
 	protected WebSocketMessageBrokerConfigurationSupport() {
 	}
+
 
 	@Bean
 	public HandlerMapping stompWebSocketHandlerMapping() {
@@ -107,6 +110,24 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 		CustomScopeConfigurer configurer = new CustomScopeConfigurer();
 		configurer.setScopes(Collections.<String, Object>singletonMap("websocket", new SimpSessionScope()));
 		return configurer;
+	}
+
+	@Bean
+	public WebSocketMessageBrokerStats webSocketMessageBrokerStats() {
+		StompBrokerRelayMessageHandler brokerRelay =
+				stompBrokerRelayMessageHandler() instanceof StompBrokerRelayMessageHandler ?
+						(StompBrokerRelayMessageHandler) stompBrokerRelayMessageHandler() : null;
+
+		// Ensure STOMP endpoints are registered
+		stompWebSocketHandlerMapping();
+
+		WebSocketMessageBrokerStats stats = new WebSocketMessageBrokerStats();
+		stats.setSubProtocolWebSocketHandler((SubProtocolWebSocketHandler) subProtocolWebSocketHandler());
+		stats.setStompBrokerRelay(brokerRelay);
+		stats.setInboundChannelExecutor(clientInboundChannelExecutor());
+		stats.setOutboundChannelExecutor(clientOutboundChannelExecutor());
+		stats.setSockJsTaskScheduler(messageBrokerSockJsTaskScheduler());
+		return stats;
 	}
 
 }

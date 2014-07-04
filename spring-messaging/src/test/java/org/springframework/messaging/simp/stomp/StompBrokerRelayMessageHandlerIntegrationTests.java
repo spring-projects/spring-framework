@@ -80,7 +80,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 	@Before
 	public void setUp() throws Exception {
-		logger.debug("Setting up '" + this.testName.getMethodName() + "'");
+		logger.debug("Setting up before '" + this.testName.getMethodName() + "'");
 		this.port = SocketUtils.findAvailableTcpPort(61613);
 		this.responseChannel = new ExecutorSubscribableChannel();
 		this.responseHandler = new TestMessageHandler();
@@ -116,6 +116,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 	@After
 	public void tearDown() throws Exception {
 		try {
+			logger.debug("STOMP broker relay stats: " + this.relay.getStatsInfo());
 			this.relay.stop();
 		}
 		finally {

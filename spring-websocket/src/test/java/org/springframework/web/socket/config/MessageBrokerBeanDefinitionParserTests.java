@@ -245,6 +245,17 @@ public class MessageBrokerBeanDefinitionParserTests {
 		catch (NoSuchBeanDefinitionException ex) {
 			// expected
 		}
+
+		String name = "webSocketMessageBrokerStats";
+		WebSocketMessageBrokerStats stats = this.appContext.getBean(name, WebSocketMessageBrokerStats.class);
+		assertEquals("WebSocketSession[0 current WS(0)-HttpStream(0)-HttpPoll(0), " +
+				"0 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], " +
+				"stompSubProtocol[processed CONNECT(0)-CONNECTED(0)-DISCONNECT(0)], " +
+				"stompBrokerRelay[0 sessions, relayhost:1234 (not available), processed CONNECT(0)-CONNECTED(0)-DISCONNECT(0)], " +
+				"inboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], " +
+				"outboundChannelpool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], " +
+				"sockJsScheduler[pool size = 1, active threads = 0, queued tasks = 1, completed tasks = 0]",
+				stats.toString());
 	}
 
 	@Test

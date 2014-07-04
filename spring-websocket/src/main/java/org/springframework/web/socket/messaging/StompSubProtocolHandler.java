@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -99,6 +100,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 	private ApplicationEventPublisher eventPublisher;
 
+	private final Stats stats = new Stats();
+
 
 	/**
 	 * Configure the maximum size allowed for an incoming STOMP message.
@@ -167,6 +170,13 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		this.eventPublisher = applicationEventPublisher;
 	}
 
+	/**
+	 * Return a String describing internal state and counters.
+	 */
+	public String getStatsInfo() {
+		return this.stats.toString();
+	}
+
 
 	/**
 	 * Handle incoming WebSocket messages from clients.
@@ -221,7 +231,11 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 				if (this.eventPublisher != null) {
 					if (StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
+						this.stats.incrementConnectCount();
 						publishEvent(new SessionConnectEvent(this, message));
+					}
+					else if (StompCommand.DISCONNECT.equals(headerAccessor.getCommand())) {
+						this.stats.incrementDisconnectCount();
 					}
 					else if (StompCommand.SUBSCRIBE.equals(headerAccessor.getCommand())) {
 						publishEvent(new SessionSubscribeEvent(this, message));
@@ -298,6 +312,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			}
 		}
 		else if (StompCommand.CONNECTED.equals(command)) {
+			this.stats.incrementConnectedCount();
 			stompAccessor = afterStompSessionConnected(message, stompAccessor, session);
 			if (this.eventPublisher != null && StompCommand.CONNECTED.equals(command)) {
 				publishEvent(new SessionConnectedEvent(this, (Message<byte[]>) message));
@@ -465,6 +480,35 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		headerAccessor.setSessionId(session.getId());
 		headerAccessor.setSessionAttributes(session.getAttributes());
 		return MessageBuilder.createMessage(EMPTY_PAYLOAD, headerAccessor.getMessageHeaders());
+	}
+
+
+	private class Stats {
+
+		private final AtomicInteger connect = new AtomicInteger();
+
+		private final AtomicInteger connected = new AtomicInteger();
+
+		private final AtomicInteger disconnect = new AtomicInteger();
+
+
+		public void incrementConnectCount() {
+			this.connect.incrementAndGet();
+		}
+
+		public void incrementConnectedCount() {
+			this.connected.incrementAndGet();
+		}
+
+		public void incrementDisconnectCount() {
+			this.disconnect.incrementAndGet();
+		}
+
+
+		public String toString() {
+			return "processed CONNECT(" + this.connect.get() + ")-CONNECTED(" +
+					this.connected.get() + ")-DISCONNECT(" + this.disconnect.get() + ")";
+		}
 	}
 
 }

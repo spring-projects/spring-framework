@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
@@ -44,6 +45,8 @@ import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 import org.springframework.web.socket.handler.SessionLimitExceededException;
+import org.springframework.web.socket.sockjs.transport.session.PollingSockJsSession;
+import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSession;
 
 /**
  * An implementation of {@link WebSocketHandler} that delegates incoming WebSocket
@@ -96,6 +99,8 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 	private volatile long lastSessionCheckTime = System.currentTimeMillis();
 
 	private final ReentrantLock sessionCheckLock = new ReentrantLock();
+
+	private final Stats stats = new Stats();
 
 	private final Object lifecycleMonitor = new Object();
 
@@ -214,6 +219,14 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 		}
 	}
 
+	/**
+	 * Return a String describing internal state and counters.
+	 */
+	public String getStatsInfo() {
+		return this.stats.toString();
+	}
+
+
 	@Override
 	public final void start() {
 		Assert.isTrue(this.defaultProtocolHandler != null || !this.protocolHandlers.isEmpty(), "No handlers");
@@ -249,6 +262,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+		this.stats.incrementSessionCount(session);
 		session = new ConcurrentWebSocketSessionDecorator(session, getSendTimeLimit(), getSendBufferSizeLimit());
 		this.sessions.put(session.getId(), new WebSocketSessionHolder(session));
 		if (logger.isDebugEnabled()) {
@@ -323,6 +337,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 		catch (SessionLimitExceededException ex) {
 			try {
 				logger.error("Terminating '" + session + "'", ex);
+				this.stats.incrementLimitExceededCount();
 				clearSession(session, ex.getStatus()); // clear first, session may be unresponsive
 				session.close(ex.getStatus());
 			}
@@ -381,6 +396,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 								"Closing " + holder.getSession() + ".");
 					}
 					try {
+						this.stats.incrementNoMessagesReceivedCount();
 						session.close(CloseStatus.SESSION_NOT_RELIABLE);
 					}
 					catch (Throwable t) {
@@ -396,6 +412,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 
 	@Override
 	public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
+		this.stats.incrementTransportError();
 	}
 
 	@Override
@@ -407,7 +424,9 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 		if (logger.isDebugEnabled()) {
 			logger.debug("Clearing session " + session.getId() + " (" + this.sessions.size() + " remain)");
 		}
-		this.sessions.remove(session.getId());
+		if (this.sessions.remove(session.getId()) != null) {
+			this.stats.decrementSessionCount(session);
+		}
 		findProtocolHandler(session).afterSessionEnded(session, closeStatus, this.clientInboundChannel);
 	}
 
@@ -450,6 +469,69 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 		public String toString() {
 			return "WebSocketSessionHolder[=session=" + this.session + ", createTime=" +
 					this.createTime + ", hasHandledMessages=" + this.handledMessages + "]";
+		}
+	}
+
+	private class Stats {
+
+		private final AtomicInteger total = new AtomicInteger();
+
+		private final AtomicInteger webSocket = new AtomicInteger();
+
+		private final AtomicInteger httpStreaming = new AtomicInteger();
+
+		private final AtomicInteger httpPolling = new AtomicInteger();
+
+		private final AtomicInteger limitExceeded = new AtomicInteger();
+
+		private final AtomicInteger noMessagesReceived = new AtomicInteger();
+
+		private final AtomicInteger transportError = new AtomicInteger();
+
+
+		public void incrementSessionCount(WebSocketSession session) {
+			getCountFor(session).incrementAndGet();
+			this.total.incrementAndGet();
+		}
+
+		public void decrementSessionCount(WebSocketSession session) {
+			getCountFor(session).decrementAndGet();
+		}
+
+		public void incrementLimitExceededCount() {
+			this.limitExceeded.incrementAndGet();
+		}
+
+		public void incrementNoMessagesReceivedCount() {
+			this.noMessagesReceived.incrementAndGet();
+		}
+
+		public void incrementTransportError() {
+			this.transportError.incrementAndGet();
+		}
+
+		private AtomicInteger getCountFor(WebSocketSession session) {
+			if (session instanceof PollingSockJsSession) {
+				return this.httpPolling;
+			}
+			else if (session instanceof StreamingSockJsSession) {
+				return this.httpStreaming;
+			}
+			else {
+				return this.webSocket;
+			}
+		}
+
+		public String toString() {
+			return SubProtocolWebSocketHandler.this.sessions.size() +
+					" current WS(" + this.webSocket.get() +
+					")-HttpStream(" + this.httpStreaming.get() +
+					")-HttpPoll(" + this.httpPolling.get() + "), " +
+					this.total.get() + " total, " +
+					(this.limitExceeded.get() + this.noMessagesReceived.get()) + " closed abnormally (" +
+					this.noMessagesReceived.get() + " connect failure, " +
+					this.limitExceeded.get() + " send limit, " +
+					this.transportError.get() + " transport error)";
 		}
 	}
 

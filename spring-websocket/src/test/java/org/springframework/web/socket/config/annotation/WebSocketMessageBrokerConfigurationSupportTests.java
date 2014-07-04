@@ -44,6 +44,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.config.WebSocketMessageBrokerStats;
 import org.springframework.web.socket.handler.TestWebSocketSession;
 import org.springframework.web.socket.messaging.StompSubProtocolHandler;
 import org.springframework.web.socket.messaging.StompTextMessageBuilder;
@@ -51,6 +52,7 @@ import org.springframework.web.socket.messaging.SubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test fixture for
@@ -132,6 +134,20 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		ScheduledThreadPoolExecutor executor = taskScheduler.getScheduledThreadPoolExecutor();
 		assertEquals(Runtime.getRuntime().availableProcessors(), executor.getCorePoolSize());
 		assertTrue(executor.getRemoveOnCancelPolicy());
+	}
+
+	@Test
+	public void webSocketMessageBrokerStats() {
+		String name = "webSocketMessageBrokerStats";
+		WebSocketMessageBrokerStats stats = this.config.getBean(name, WebSocketMessageBrokerStats.class);
+		assertEquals("WebSocketSession[0 current WS(0)-HttpStream(0)-HttpPoll(0), " +
+						"0 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], " +
+						"stompSubProtocol[processed CONNECT(0)-CONNECTED(0)-DISCONNECT(0)], " +
+						"stompBrokerRelay[null], " +
+						"inboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], " +
+						"outboundChannelpool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], " +
+						"sockJsScheduler[pool size = 1, active threads = 0, queued tasks = 1, completed tasks = 0]",
+				stats.toString());
 	}
 
 
