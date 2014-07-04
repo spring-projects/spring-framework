@@ -38692,6 +38692,63 @@ through any other application instances.
 
 
 
+[[websocket-stomp-stats]]
+==== Runtime Monitoring
+
+When using `@EnableWebSocketMessageBroker` or `<websocket:message-broker>` key
+infrastructure components automatically gather stats and counters that provide
+important insight into the internal state of the application. The configuration
+also declares a bean of type `WebSocketMessageBrokerStats` that gathers all
+available information in one place and by default logs it at INFO once
+every 15 minutes. This bean can be exported to JMX through Spring's
+`MBeanExporter` for viewing at runtime for example through JDK's jconsole.
+Below is a summary of the available information.
+
+Client WebSocket Sessions::
+    Current::: indicates how many client sessions there are
+    currently with the count further broken down by WebSocket vs HTTP
+    streaming and polling SockJS sessions.
+    Total::: indicates how many total sessions have been established.
+    Abnormally Closed:::
+        Connect Failures:::: these are sessions that got established but were
+        closed after not having received any messages within 60 seconds. This is
+        usually an indication of proxy or network issues.
+        Send Limit Exceeded:::: sessions closed after exceeding the configured send
+        timeout or the send buffer limits which can occur with slow clients
+        (see previous section).
+        Transport Errors:::: sessions closed after a transport error such as
+        failure to read or write to a WebSocket connection or
+        HTTP request/response.
+    STOMP Frames::: the total number of CONNECT, CONNECTED, and DISCONNECT frames
+    processed indicating how many clients connected on the STOMP level. Note that
+    the DISCONNECT count may be lower when sessions get closed abnormally or when
+    clients close without sending a DISCONNECT frame.
+STOMP Broker Relay::
+    TCP Connections::: indicates how many TCP connections on behalf of client
+    WebSocket sessions are established to the broker. This should be equal to the
+    number of client WebSocket sessions + 1 additional shared "system" connection
+    for sending messages from within the application.
+    STOMP Frames::: the total number of CONNECT, CONNECTED, and DISCONNECT frames
+    forwarded to or received from the broker on behalf of clients. Note that a
+    DISCONNECT frame is sent to the broker regardless of how the client WebSocket
+    session was closed. Therefore a lower DISCONNECT frame count is an indication
+    that the broker is pro-actively closing connections, may be because of a
+    heartbeat that didn't arrive in time, an invalid input frame, or other.
+Client Inbound Channel:: stats from thread pool backing the "clientInboundChannel"
+    providing insight into the health of incoming message processing. Tasks queueing
+    up here is an indication the application may be too slow to handle messages.
+    If there I/O bound tasks (e.g. slow database query, HTTP request to 3rd party
+    REST API, etc) consider increasing the thread pool size.
+Client Outbound Channel:: stats from the thread pool backing the "clientOutboundChannel"
+    providing insight into the health of broadcasting messages to clients. Tasks
+    queueing up here is an indication clients are too slow to consume messages.
+    One way to address this is to increase the thread pool size to accommodate the
+    number of concurrent slow clients expected. Another option is to reduce the
+    send timeout and send buffer size limits (see the previous section).
+SockJS Task Scheduler:: stats from thread pool of the SockJS task scheduler which
+    is used to send heartbeats. Note that when heartbeats are negotiated on the
+    STOMP level the SockJS heartbeats are disabled.
+
 [[websocket-stomp-testing]]
 ==== Testing Annotated Controller Methods
 

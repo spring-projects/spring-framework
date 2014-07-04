@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -117,6 +118,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	private final Map<String, StompConnectionHandler> connectionHandlers =
 			new ConcurrentHashMap<String, StompConnectionHandler>();
+
+	private final Stats stats = new Stats();
 
 
 	/**
@@ -352,6 +355,13 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		return this.headerInitializer;
 	}
 
+	/**
+	 * Return a String describing internal state and counters.
+	 */
+	public String getStatsInfo() {
+		return this.stats.toString();
+	}
+
 
 	@Override
 	protected void startInternal() {
@@ -380,6 +390,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		SystemStompConnectionHandler handler = new SystemStompConnectionHandler(headers);
 		this.connectionHandlers.put(handler.getSessionId(), handler);
 
+		this.stats.incrementConnectCount();
 		this.tcpClient.connect(handler, new FixedIntervalReconnectStrategy(5000));
 	}
 
@@ -469,6 +480,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			}
 			StompConnectionHandler handler = new StompConnectionHandler(sessionId, stompAccessor);
 			this.connectionHandlers.put(sessionId, handler);
+			this.stats.incrementConnectCount();
 			this.tcpClient.connect(handler);
 		}
 		else if (StompCommand.DISCONNECT.equals(command)) {
@@ -479,6 +491,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				}
 				return;
 			}
+			stats.incrementDisconnectCount();
 			handler.forward(message, stompAccessor);
 		}
 		else {
@@ -615,6 +628,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		 */
 		protected void afterStompConnected(StompHeaderAccessor connectedHeaders) {
 			this.isStompConnected = true;
+			stats.incrementConnectedCount();
 			initHeartbeats(connectedHeaders);
 		}
 
@@ -874,6 +888,35 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		@Override
 		public Void call() throws Exception {
 			return null;
+		}
+	}
+
+	private class Stats {
+
+		private final AtomicInteger connect = new AtomicInteger();
+
+		private final AtomicInteger connected = new AtomicInteger();
+
+		private final AtomicInteger disconnect = new AtomicInteger();
+
+
+		public void incrementConnectCount() {
+			this.connect.incrementAndGet();
+		}
+
+		public void incrementConnectedCount() {
+			this.connected.incrementAndGet();
+		}
+
+		public void incrementDisconnectCount() {
+			this.disconnect.incrementAndGet();
+		}
+
+		public String toString() {
+			return connectionHandlers.size() + " sessions, " + relayHost + ":" + relayPort +
+					(isBrokerAvailable() ? " (available)" : " (not available)") +
+					", processed CONNECT(" + this.connect.get() + ")-CONNECTED(" +
+					this.connected.get() + ")-DISCONNECT(" + this.disconnect.get() + ")";
 		}
 	}
 
