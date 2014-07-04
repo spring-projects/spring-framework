@@ -282,6 +282,12 @@ class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublis
 					else if (args.length == 3) {
 						return sendWithDestinationAndCompletionListenerMethod.invoke(
 								target, args[0], args[1], deliveryMode, priority, timeToLive, args[2]);
+					} else if (args.length == 5) {
+						return sendWithCompletionListenerMethod.invoke(
+								target, args[0], args[1], args[2], args[3], args[4]);
+					} else if (args.length == 6) {
+						return sendWithDestinationAndCompletionListenerMethod.invoke(
+								target, args[0], args[1], args[2], args[3], args[4], args[5]);
 					}
 				}
 				return method.invoke(CachedMessageProducer.this, args);
