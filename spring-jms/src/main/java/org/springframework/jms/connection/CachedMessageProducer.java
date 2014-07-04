@@ -275,19 +275,17 @@ class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublis
 			try {
 				if (method.getName().equals("send") && args != null &&
 						completionListenerClass.equals(method.getParameterTypes()[args.length - 1])) {
-					if (args.length == 2) {
-						return sendWithCompletionListenerMethod.invoke(
-								target, args[0], deliveryMode, priority, timeToLive, args[1]);
-					}
-					else if (args.length == 3) {
-						return sendWithDestinationAndCompletionListenerMethod.invoke(
-								target, args[0], args[1], deliveryMode, priority, timeToLive, args[2]);
-					} else if (args.length == 5) {
-						return sendWithCompletionListenerMethod.invoke(
-								target, args[0], args[1], args[2], args[3], args[4]);
-					} else if (args.length == 6) {
-						return sendWithDestinationAndCompletionListenerMethod.invoke(
-								target, args[0], args[1], args[2], args[3], args[4], args[5]);
+					switch (args.length) {
+						case 2: // send(message, completionListener)
+							return sendWithCompletionListenerMethod.invoke(
+									target, args[0], deliveryMode, priority, timeToLive, args[1]);
+						case 3: // send(destination, message, completionListener)
+							return sendWithDestinationAndCompletionListenerMethod.invoke(
+									target, args[0], args[1], deliveryMode, priority, timeToLive, args[2]);
+						case 5: // send(message, deliveryMode, priority, timeToLive, completionListener)
+							return sendWithCompletionListenerMethod.invoke(target, args);
+						case 6: // send(destination, message, deliveryMode, priority, timeToLive, completionListener)
+							return sendWithDestinationAndCompletionListenerMethod.invoke(target, args);
 					}
 				}
 				return method.invoke(CachedMessageProducer.this, args);
