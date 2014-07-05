@@ -403,7 +403,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		private MessageConsumer getCachedConsumer(
 				Destination dest, String selector, Boolean noLocal, String subscription, boolean durable) throws JMSException {
 
-			ConsumerCacheKey cacheKey = new ConsumerCacheKey(dest, selector, noLocal, subscription);
+			ConsumerCacheKey cacheKey = new ConsumerCacheKey(dest, selector, noLocal, subscription, durable);
 			MessageConsumer consumer = this.cachedConsumers.get(cacheKey);
 			if (consumer != null) {
 				if (logger.isTraceEnabled()) {
@@ -554,11 +554,14 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 		private final String subscription;
 
-		public ConsumerCacheKey(Destination destination, String selector, Boolean noLocal, String subscription) {
+		private final boolean durable;
+
+		public ConsumerCacheKey(Destination destination, String selector, Boolean noLocal, String subscription, boolean durable) {
 			super(destination);
 			this.selector = selector;
 			this.noLocal = noLocal;
 			this.subscription = subscription;
+			this.durable = durable;
 		}
 
 		@Override
@@ -570,7 +573,8 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			return (destinationEquals(otherKey) &&
 					ObjectUtils.nullSafeEquals(this.selector, otherKey.selector) &&
 					ObjectUtils.nullSafeEquals(this.noLocal, otherKey.noLocal) &&
-					ObjectUtils.nullSafeEquals(this.subscription, otherKey.subscription));
+					ObjectUtils.nullSafeEquals(this.subscription, otherKey.subscription) &&
+					this.durable == otherKey.durable);
 		}
 	}
 
