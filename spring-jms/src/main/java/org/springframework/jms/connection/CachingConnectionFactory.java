@@ -233,7 +233,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		else {
 			Session targetSession = createSession(con, mode);
 			if (logger.isDebugEnabled()) {
-				logger.debug("Creating cached JMS Session for mode " + mode + ": " + targetSession);
+				logger.debug("Registering cached JMS Session for mode " + mode + ": " + targetSession);
 			}
 			session = getCachedSessionProxy(targetSession, sessionList);
 		}
@@ -393,7 +393,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			else {
 				producer = this.target.createProducer(dest);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Creating cached JMS MessageProducer for destination [" + dest + "]: " + producer);
+					logger.debug("Registering cached JMS MessageProducer for destination [" + dest + "]: " + producer);
 				}
 				this.cachedProducers.put(cacheKey, producer);
 			}
@@ -403,7 +403,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		private MessageConsumer getCachedConsumer(
 				Destination dest, String selector, Boolean noLocal, String subscription, boolean durable) throws JMSException {
 
-			ConsumerCacheKey cacheKey = new ConsumerCacheKey(dest, selector, noLocal, subscription);
+			ConsumerCacheKey cacheKey = new ConsumerCacheKey(dest, selector, noLocal, subscription, durable);
 			MessageConsumer consumer = this.cachedConsumers.get(cacheKey);
 			if (consumer != null) {
 				if (logger.isTraceEnabled()) {
@@ -439,7 +439,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 					consumer = this.target.createConsumer(dest, selector);
 				}
 				if (logger.isDebugEnabled()) {
-					logger.debug("Creating cached JMS MessageConsumer for destination [" + dest + "]: " + consumer);
+					logger.debug("Registering cached JMS MessageConsumer for destination [" + dest + "]: " + consumer);
 				}
 				this.cachedConsumers.put(cacheKey, consumer);
 			}
@@ -554,11 +554,14 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 		private final String subscription;
 
-		public ConsumerCacheKey(Destination destination, String selector, Boolean noLocal, String subscription) {
+		private final boolean durable;
+
+		public ConsumerCacheKey(Destination destination, String selector, Boolean noLocal, String subscription, boolean durable) {
 			super(destination);
 			this.selector = selector;
 			this.noLocal = noLocal;
 			this.subscription = subscription;
+			this.durable = durable;
 		}
 
 		@Override
@@ -570,7 +573,8 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			return (destinationEquals(otherKey) &&
 					ObjectUtils.nullSafeEquals(this.selector, otherKey.selector) &&
 					ObjectUtils.nullSafeEquals(this.noLocal, otherKey.noLocal) &&
-					ObjectUtils.nullSafeEquals(this.subscription, otherKey.subscription));
+					ObjectUtils.nullSafeEquals(this.subscription, otherKey.subscription) &&
+					this.durable == otherKey.durable);
 		}
 	}
 
