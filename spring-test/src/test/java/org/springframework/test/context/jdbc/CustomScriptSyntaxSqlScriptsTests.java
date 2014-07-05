@@ -25,7 +25,7 @@ import static org.junit.Assert.*;
 
 /**
  * Integration tests that verify support for custom SQL script syntax
- * configured via {@link Sql @Sql}.
+ * configured via {@link SqlConfig @SqlConfig}.
  *
  * @author Sam Brannen
  * @since 4.1
@@ -35,16 +35,9 @@ import static org.junit.Assert.*;
 public class CustomScriptSyntaxSqlScriptsTests extends AbstractTransactionalJUnit4SpringContextTests {
 
 	@Test
-	@SqlGroup({//
-	@Sql("schema.sql"),//
-		@Sql(//
-		scripts = "data-add-users-with-custom-script-syntax.sql",//
-		commentPrefix = "`",//
-		blockCommentStartDelimiter = "#$",//
-		blockCommentEndDelimiter = "$#",//
-		separator = "@@"//
-		) //
-	})
+	@Sql("schema.sql")
+	@Sql(scripts = "data-add-users-with-custom-script-syntax.sql",//
+	config = @SqlConfig(commentPrefix = "`", blockCommentStartDelimiter = "#$", blockCommentEndDelimiter = "$#", separator = "@@"))
 	public void methodLevelScripts() {
 		assertNumUsers(3);
 	}

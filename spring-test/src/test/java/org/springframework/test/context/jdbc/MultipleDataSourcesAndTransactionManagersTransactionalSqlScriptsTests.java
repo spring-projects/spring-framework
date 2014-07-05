@@ -48,6 +48,8 @@ import static org.junit.Assert.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @DirtiesContext
+@Transactional("txMgr1")
+@SqlConfig(dataSource = "dataSource1", transactionManager = "txMgr1")
 public class MultipleDataSourcesAndTransactionManagersTransactionalSqlScriptsTests {
 
 	@Autowired
@@ -58,15 +60,14 @@ public class MultipleDataSourcesAndTransactionManagersTransactionalSqlScriptsTes
 
 
 	@Test
-	@Transactional("txMgr1")
-	@Sql(scripts = "data-add-dogbert.sql", dataSource = "dataSource1", transactionManager = "txMgr1")
+	@Sql("data-add-dogbert.sql")
 	public void database1() {
 		assertUsers(new JdbcTemplate(dataSource1), "Dilbert", "Dogbert");
 	}
 
 	@Test
 	@Transactional("txMgr2")
-	@Sql(scripts = "data-add-catbert.sql", dataSource = "dataSource2", transactionManager = "txMgr2")
+	@Sql(scripts = "data-add-catbert.sql", config = @SqlConfig(dataSource = "dataSource2", transactionManager = "txMgr2"))
 	public void database2() {
 		assertUsers(new JdbcTemplate(dataSource2), "Dilbert", "Catbert");
 	}

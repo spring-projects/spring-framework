@@ -29,6 +29,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+import org.springframework.test.context.jdbc.SqlConfig.ErrorMode;
+import org.springframework.test.context.jdbc.SqlConfig.TransactionMode;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.context.transaction.TestContextTransactionUtils;
 import org.springframework.test.context.util.TestContextResourceUtils;
@@ -138,23 +140,24 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	@SuppressWarnings("serial")
 	private void executeSqlScripts(Sql sql, ExecutionPhase executionPhase, TestContext testContext, boolean classLevel)
 			throws Exception {
-		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Processing %s for execution phase [%s] and test context %s.", sql,
-				executionPhase, testContext));
-		}
-
 		if (executionPhase != sql.executionPhase()) {
 			return;
 		}
 
+		MergedSqlConfig mergedSqlConfig = new MergedSqlConfig(sql.config(), testContext.getTestClass());
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("Processing %s for execution phase [%s] and test context %s.", mergedSqlConfig,
+				executionPhase, testContext));
+		}
+
 		final ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
-		populator.setSqlScriptEncoding(sql.encoding());
-		populator.setSeparator(sql.separator());
-		populator.setCommentPrefix(sql.commentPrefix());
-		populator.setBlockCommentStartDelimiter(sql.blockCommentStartDelimiter());
-		populator.setBlockCommentEndDelimiter(sql.blockCommentEndDelimiter());
-		populator.setContinueOnError(sql.continueOnError());
-		populator.setIgnoreFailedDrops(sql.ignoreFailedDrops());
+		populator.setSqlScriptEncoding(mergedSqlConfig.getEncoding());
+		populator.setSeparator(mergedSqlConfig.getSeparator());
+		populator.setCommentPrefix(mergedSqlConfig.getCommentPrefix());
+		populator.setBlockCommentStartDelimiter(mergedSqlConfig.getBlockCommentStartDelimiter());
+		populator.setBlockCommentEndDelimiter(mergedSqlConfig.getBlockCommentEndDelimiter());
+		populator.setContinueOnError(mergedSqlConfig.getErrorMode() == ErrorMode.CONTINUE_ON_ERROR);
+		populator.setIgnoreFailedDrops(mergedSqlConfig.getErrorMode() == ErrorMode.IGNORE_FAILED_DROPS);
 
 		String[] scripts = getScripts(sql, testContext, classLevel);
 		scripts = TestContextResourceUtils.convertToClasspathResourcePaths(testContext.getTestClass(), scripts);
@@ -163,11 +166,12 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 			logger.debug("Executing SQL scripts: " + ObjectUtils.nullSafeToString(scripts));
 		}
 
-		final DataSource dataSource = TestContextTransactionUtils.retrieveDataSource(testContext, sql.dataSource());
+		final DataSource dataSource = TestContextTransactionUtils.retrieveDataSource(testContext,
+			mergedSqlConfig.getDataSource());
 		final PlatformTransactionManager transactionManager = TestContextTransactionUtils.retrieveTransactionManager(
-			testContext, sql.transactionManager());
+			testContext, mergedSqlConfig.getTransactionManager());
 
-		int propagation = sql.requireNewTransaction() ? TransactionDefinition.PROPAGATION_REQUIRES_NEW
+		int propagation = (mergedSqlConfig.getTransactionMode() == TransactionMode.ISOLATED) ? TransactionDefinition.PROPAGATION_REQUIRES_NEW
 				: TransactionDefinition.PROPAGATION_REQUIRED;
 
 		TransactionAttribute transactionAttribute = TestContextTransactionUtils.createDelegatingTransactionAttribute(

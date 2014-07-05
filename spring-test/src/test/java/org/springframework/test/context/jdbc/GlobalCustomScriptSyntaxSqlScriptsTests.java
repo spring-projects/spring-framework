@@ -19,38 +19,27 @@ package org.springframework.test.context.jdbc;
 import org.junit.Test;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.jdbc.SqlConfig.TransactionMode;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
-import org.springframework.test.context.transaction.AfterTransaction;
-import org.springframework.test.context.transaction.BeforeTransaction;
 
 import static org.junit.Assert.*;
 
 /**
- * Transactional integration tests that verify commit semantics for
- * {@link SqlConfig#requireNewTransaction}.
+ * Modified copy of {@link CustomScriptSyntaxSqlScriptsTests} with
+ * {@link SqlConfig @SqlConfig} defined at the class level.
  *
  * @author Sam Brannen
  * @since 4.1
  */
-@ContextConfiguration(classes = PopulatedSchemaDatabaseConfig.class)
+@ContextConfiguration(classes = EmptyDatabaseConfig.class)
 @DirtiesContext
-public class RequiresNewTransactionSqlScriptsTests extends AbstractTransactionalJUnit4SpringContextTests {
-
-	@BeforeTransaction
-	public void beforeTransaction() {
-		assertNumUsers(0);
-	}
+@SqlConfig(commentPrefix = "`", blockCommentStartDelimiter = "#$", blockCommentEndDelimiter = "$#", separator = "@@")
+public class GlobalCustomScriptSyntaxSqlScriptsTests extends AbstractTransactionalJUnit4SpringContextTests {
 
 	@Test
-	@SqlGroup(@Sql(scripts = "data-add-dogbert.sql", config = @SqlConfig(transactionMode = TransactionMode.ISOLATED)))
+	@Sql(scripts = "schema.sql", config = @SqlConfig(separator = ";"))
+	@Sql("data-add-users-with-custom-script-syntax.sql")
 	public void methodLevelScripts() {
-		assertNumUsers(1);
-	}
-
-	@AfterTransaction
-	public void afterTransaction() {
-		assertNumUsers(1);
+		assertNumUsers(3);
 	}
 
 	protected void assertNumUsers(int expected) {
