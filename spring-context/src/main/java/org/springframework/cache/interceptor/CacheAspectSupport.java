@@ -17,6 +17,7 @@
 package org.springframework.cache.interceptor;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -322,7 +323,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		Cache.ValueWrapper result = null;
 
 		// If there are no put requests, just use the cache hit
-		if (cachePutRequests.isEmpty() && contexts.get(CachePutOperation.class).isEmpty()) {
+		if (cachePutRequests.isEmpty() && !hasCachePut(contexts)) {
 			result = cacheHit;
 		}
 
@@ -343,6 +344,27 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		processCacheEvicts(contexts.get(CacheEvictOperation.class), false, result.get());
 
 		return result.get();
+	}
+
+	private boolean hasCachePut(CacheOperationContexts contexts) {
+		// Evaluate the conditions *without* the result object because we don't have it yet.
+		Collection<CacheOperationContext> cachePutContexts = contexts.get(CachePutOperation.class);
+		Collection<CacheOperationContext> excluded = new ArrayList<CacheOperationContext>();
+		for (CacheOperationContext context : cachePutContexts) {
+			try {
+				if (!context.isConditionPassing(ExpressionEvaluator.RESULT_UNAVAILABLE)) {
+	                excluded.add(context);
+				}
+			}
+			catch (VariableNotAvailableException e) {
+				// Ignoring failure due to missing result, consider the cache put has
+				// to proceed
+			}
+		}
+		// check if  all puts have been excluded by condition
+		return cachePutContexts.size() != excluded.size();
+
+
 	}
 
 	private void processCacheEvicts(Collection<CacheOperationContext> contexts, boolean beforeInvocation, Object result) {

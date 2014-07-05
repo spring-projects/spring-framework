@@ -47173,11 +47173,13 @@ than method flow optimization:
 [IMPORTANT]
 ====
 Note that using `@CachePut` and `@Cacheable` annotations on the same method is generally
-discouraged because they have different behaviors. While the latter causes the method
-execution to be skipped by using the cache, the former forces the execution in order to
-execute a cache update. This leads to unexpected behavior and with the exception of
+strongly discouraged because they have different behaviors. While the latter causes the
+method execution to be skipped by using the cache, the former forces the execution in
+order to execute a cache update. This leads to unexpected behavior and with the exception of
 specific corner-cases (such as annotations having conditions that exclude them from each
-other), such declarations should be avoided.
+other), such declarations should be avoided. Note also that such conditions should not rely
+on the result object (i.e. the `#result` variable) as these are validated upfront to confirm
+the exclusion.
 ====
 
 

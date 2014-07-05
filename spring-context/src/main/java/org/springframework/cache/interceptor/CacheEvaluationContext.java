@@ -17,6 +17,8 @@
 package org.springframework.cache.interceptor;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.aop.support.AopUtils;
@@ -25,9 +27,14 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Evaluation context class that adds a method parameters as SpEL
+ * Cache specific evaluation context that adds a method parameters as SpEL
  * variables, in a lazy manner. The lazy nature eliminates unneeded
  * parsing of classes byte code for parameter discovery.
+ *
+ * <p>Also define a set of "unavailable variables" (i.e. variables that should
+ * lead to an exception right the way when they are accessed). This can be useful
+ * to verify a condition does not match even when not all potential variables
+ * are present.
  *
  * <p>To limit the creation of objects, an ugly constructor is used
  * (rather then a dedicated 'closure'-like class for deferred execution).
@@ -36,7 +43,7 @@ import org.springframework.util.ObjectUtils;
  * @author Stephane Nicoll
  * @since 3.1
  */
-class LazyParamAwareEvaluationContext extends StandardEvaluationContext {
+class CacheEvaluationContext extends StandardEvaluationContext {
 
 	private final ParameterNameDiscoverer paramDiscoverer;
 
@@ -48,10 +55,12 @@ class LazyParamAwareEvaluationContext extends StandardEvaluationContext {
 
 	private final Map<MethodCacheKey, Method> methodCache;
 
+	private final List<String> unavailableVariables;
+
 	private boolean paramLoaded = false;
 
 
-	LazyParamAwareEvaluationContext(Object rootObject, ParameterNameDiscoverer paramDiscoverer, Method method,
+	CacheEvaluationContext(Object rootObject, ParameterNameDiscoverer paramDiscoverer, Method method,
 			Object[] args, Class<?> targetClass, Map<MethodCacheKey, Method> methodCache) {
 		super(rootObject);
 
@@ -60,6 +69,18 @@ class LazyParamAwareEvaluationContext extends StandardEvaluationContext {
 		this.args = args;
 		this.targetClass = targetClass;
 		this.methodCache = methodCache;
+		this.unavailableVariables = new ArrayList<String>();
+	}
+
+	/**
+	 * Add the specified variable name as unavailable for that context. Any expression trying
+	 * to access this variable should lead to an exception.
+	 * <p>This permits the validation of expressions that could potentially a variable even
+	 * when such variable isn't available yet. Any expression trying to use that variable should
+	 * therefore fail to evaluate.
+	 */
+	public void addUnavailableVariable(String name) {
+		this.unavailableVariables.add(name);
 	}
 
 
@@ -68,6 +89,9 @@ class LazyParamAwareEvaluationContext extends StandardEvaluationContext {
 	 */
 	@Override
 	public Object lookupVariable(String name) {
+		if (this.unavailableVariables.contains(name)) {
+			throw new VariableNotAvailableException(name);
+		}
 		Object variable = super.lookupVariable(name);
 		if (variable != null) {
 			return variable;
