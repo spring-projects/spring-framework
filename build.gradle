@@ -13,7 +13,7 @@ configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
 
-	ext.aspectjVersion       = "1.7.4"
+	ext.aspectjVersion       = "1.8.1"
 	ext.eclipseLinkVersion   = "2.4.2"
 	ext.groovyVersion        = "1.8.9"
 	ext.hibernate3Version    = "3.6.10.Final"
@@ -30,7 +30,7 @@ configure(allprojects) { project ->
 	ext.slf4jVersion         = "1.7.7"
 	ext.tiles2Version        = "2.2.2"
 	ext.tiles3Version        = "3.0.4"
-	ext.tomcatVersion        = "8.0.8"
+	ext.tomcatVersion        = "8.0.9"
 	ext.xstreamVersion       = "1.4.7"
 
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
@@ -902,9 +902,9 @@ project("spring-aspects") {
 
 	dependencies {
 		aspects(project(":spring-orm"))
-		ajc("org.aspectj:aspectjtools:1.8.1") // needed for ajc on JDK 8 only
-		rt("org.aspectj:aspectjrt:1.8.1") // needed for ajc on JDK 8 only
-		compile("org.aspectj:aspectjweaver:${aspectjVersion}") // exposing regular AspectJ version to users
+		ajc("org.aspectj:aspectjtools:${aspectjVersion}")
+		rt("org.aspectj:aspectjrt:${aspectjVersion}")
+		compile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		provided("org.eclipse.persistence:javax.persistence:2.0.0")
 		optional(project(":spring-aop")) // for @Async support
 		optional(project(":spring-beans")) // for @Configurable support
