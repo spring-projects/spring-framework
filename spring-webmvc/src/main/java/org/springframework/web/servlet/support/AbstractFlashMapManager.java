@@ -16,17 +16,19 @@
 
 package org.springframework.web.servlet.support;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
@@ -35,6 +37,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.WebUtils;
 
 /**
  * A base class for {@link FlashMapManager} implementations.
@@ -229,14 +232,44 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 
 	private void decodeParameters(MultiValueMap<String, String> params, HttpServletRequest request) {
 		for (String name : new ArrayList<String>(params.keySet())) {
+			String decodedName = decodeParameter(request, name);
 			for (String value : new ArrayList<String>(params.remove(name))) {
-				name = getUrlPathHelper().decodeRequestString(request, name);
-				value = getUrlPathHelper().decodeRequestString(request, value);
-				params.add(name, value);
+				params.add(decodedName, decodeParameter(request, value));
 			}
 		}
 	}
 
+	/**
+	 * decode request parameter(name or value).
+	 * 
+	 * @param request the current request
+	 * @param target target string
+	 * @return decoded string
+	 * @see java.net.URLDecoder#decode(String, String)
+	 * @see java.net.URLDecoder#decode(String)
+	 */
+	@SuppressWarnings("deprecation")
+	protected String decodeParameter(HttpServletRequest request, String target) {
+		String enc = request.getCharacterEncoding();
+		if (enc == null) {
+			enc = WebUtils.DEFAULT_CHARACTER_ENCODING;
+		}
+
+		try {
+			return URLDecoder.decode(target, enc);
+		}
+		catch (UnsupportedEncodingException e) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Could not decode request string ["
+						+ target
+						+ "] with encoding '"
+						+ enc
+						+ "': falling back to platform default encoding; exception message: "
+						+ e.getMessage());
+			}
+			return URLDecoder.decode(target);
+		}
+	}
 
 	/**
 	 * Retrieve saved FlashMap instances from the underlying storage.
