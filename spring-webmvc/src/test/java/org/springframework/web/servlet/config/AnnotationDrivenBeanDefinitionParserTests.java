@@ -38,9 +38,9 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
+import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
-import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ServletWebArgumentResolverAdapter;
@@ -52,6 +52,7 @@ import static org.junit.Assert.*;
  * Test fixture for the configuration in mvc-config-annotation-driven.xml.
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Agim Emruli
  */
 public class AnnotationDrivenBeanDefinitionParserTests {
 
@@ -120,6 +121,21 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertTrue(resolvers.get(0) instanceof ServletWebArgumentResolverAdapter);
 		assertTrue(resolvers.get(1) instanceof TestHandlerMethodArgumentResolver);
 	}
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testArgumentResolversWithReference() {
+        loadBeanDefinitions("mvc-config-argument-resolvers-references.xml");
+        RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
+        assertNotNull(adapter);
+        Object value = new DirectFieldAccessor(adapter).getPropertyValue("customArgumentResolvers");
+        assertNotNull(value);
+        assertTrue(value instanceof List);
+        List<HandlerMethodArgumentResolver> resolvers = (List<HandlerMethodArgumentResolver>) value;
+        assertEquals(2, resolvers.size());
+        assertTrue(resolvers.get(0) instanceof ServletWebArgumentResolverAdapter);
+        assertTrue(resolvers.get(1) instanceof TestHandlerMethodArgumentResolver);
+    }
 
 	@SuppressWarnings("unchecked")
 	@Test
