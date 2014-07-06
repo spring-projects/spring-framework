@@ -127,15 +127,28 @@
 						]]></xsd:documentation>
 					</xsd:annotation>
 					<xsd:complexType>
-						<xsd:sequence>
-							<xsd:element ref="beans:bean" minOccurs="1" maxOccurs="unbounded">
+						<xsd:choice minOccurs="1" maxOccurs="unbounded">
+							<xsd:element ref="beans:bean" minOccurs="0" maxOccurs="unbounded">
 								<xsd:annotation>
 									<xsd:documentation><![CDATA[
 	The HandlerMethodArgumentResolver (or WebArgumentResolver for backwards compatibility) bean definition.
 									]]></xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
-						</xsd:sequence>
+                            <xsd:element ref="beans:ref" minOccurs="0" maxOccurs="unbounded">
+                                <xsd:annotation>
+                                    <xsd:documentation><![CDATA[
+	A reference to a HandlerMethodArgumentResolver bean definition. Expects a HandlerMethodArgumentResolver instance,
+	 WebArgumentResolver instances has to be wrapped with a ServletWebArgumentResolverAdapter
+									]]></xsd:documentation>
+                                        <xsd:appinfo>
+                                            <tool:annotation kind="ref">
+                                                <tool:expected-type type="java:org.springframework.web.method.support.HandlerMethodArgumentResolver" />
+                                            </tool:annotation>
+                                        </xsd:appinfo>
+                                </xsd:annotation>
+                            </xsd:element>
+						</xsd:choice>
 					</xsd:complexType>
 				</xsd:element>
 				<xsd:element name="return-value-handlers" minOccurs="0">

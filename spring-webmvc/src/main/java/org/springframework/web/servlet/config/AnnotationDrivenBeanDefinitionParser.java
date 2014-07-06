@@ -19,14 +19,14 @@ package org.springframework.web.servlet.config;
 import java.util.List;
 import java.util.Properties;
 
-import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyAdvice;
-import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.w3c.dom.Element;
 
+import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
@@ -44,11 +44,13 @@ import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
 import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
+import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.accept.ContentNegotiationManager;
@@ -69,6 +71,7 @@ import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -138,6 +141,7 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Agim Emruli
  * @since 3.0
  */
 class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
@@ -468,7 +472,10 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		Element resolversElement = DomUtils.getChildElementByTagName(element, "argument-resolvers");
 		if (resolversElement != null) {
 			ManagedList<BeanDefinitionHolder> argumentResolvers = extractBeanSubElements(resolversElement, parserContext);
-			return wrapWebArgumentResolverBeanDefs(argumentResolvers, parserContext);
+            ManagedList<BeanMetadataElement> customAndReferencedResolvers = new ManagedList<BeanMetadataElement>();
+            customAndReferencedResolvers.addAll(wrapWebArgumentResolverBeanDefs(argumentResolvers, parserContext));
+            customAndReferencedResolvers.addAll(extractBeanRefSubElements(resolversElement, parserContext));
+            return customAndReferencedResolvers;
 		}
 		return null;
 	}
@@ -539,6 +546,25 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		}
 		return list;
 	}
+
+    private ManagedList<BeanReference> extractBeanRefSubElements(Element parentElement, ParserContext parserContext){
+        ManagedList<BeanReference> list = new ManagedList<BeanReference>();
+        list.setSource(parserContext.extractSource(parentElement));
+        for (Element refElement : DomUtils.getChildElementsByTagName(parentElement, "ref")) {
+            BeanReference reference;
+            if (StringUtils.hasText("bean")) {
+                reference = new RuntimeBeanReference(refElement.getAttribute("bean"),false);
+                list.add(reference);
+            }else if(StringUtils.hasText("parent")){
+                reference = new RuntimeBeanReference(refElement.getAttribute("parent"),true);
+                list.add(reference);
+            }else{
+                parserContext.getReaderContext().error("'bean' or 'parent' attribute is required for <ref> element",
+                        parserContext.extractSource(parentElement));
+            }
+        }
+        return list;
+    }
 
 	private ManagedList<BeanDefinitionHolder> wrapWebArgumentResolverBeanDefs(
 			List<BeanDefinitionHolder> beanDefs, ParserContext parserContext) {
