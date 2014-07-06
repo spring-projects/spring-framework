@@ -280,6 +280,62 @@ public class FlashMapManagerTests {
 		assertEquals(Arrays.asList("value"), targetRequestParams.get(":/?#[]@"));
 	}
 
+	// SPR-11821
+	
+	@Test
+	public void saveOutputFlashMapDecodeParametersContainsWhiteSpace()  {
+		this.request.setCharacterEncoding("UTF-8");
+
+		FlashMap flashMap = new FlashMap();
+		flashMap.put("anyKey", "anyValue");
+
+		flashMap.addTargetRequestParam("key", "value"); // normal value
+		flashMap.addTargetRequestParam("ke+y1", "val+ue"); // contains white space(+)
+		flashMap.addTargetRequestParam("ke%20y2", "val%20ue"); // contains white space(%20)
+		flashMap.addTargetRequestParam("ke%2By3", "val%2bue"); // contains plus(%2b)
+
+		this.flashMapManager.saveOutputFlashMap(flashMap, this.request, this.response);
+
+		MultiValueMap<String,String> targetRequestParams = flashMap.getTargetRequestParams();
+		assertEquals(Arrays.asList("value"), targetRequestParams.get("key"));
+		assertEquals(Arrays.asList("val ue"), targetRequestParams.get("ke y1"));
+		assertEquals(Arrays.asList("val ue"), targetRequestParams.get("ke y2"));
+		assertEquals(Arrays.asList("val+ue"), targetRequestParams.get("ke+y3"));
+	}
+
+	@Test
+	public void saveOutputFlashMapDecodeParametersCharacterEncodingIsNull()  {
+		this.request.setCharacterEncoding(null);
+
+		FlashMap flashMap = new FlashMap();
+		flashMap.put("anyKey", "anyValue");
+
+		flashMap.addTargetRequestParam("ke+y1", "val+ue"); // contains white space(+)
+		flashMap.addTargetRequestParam("ke%20y2", "val%20ue"); // contains white space(%20)
+
+		this.flashMapManager.saveOutputFlashMap(flashMap, this.request, this.response);
+
+		MultiValueMap<String,String> targetRequestParams = flashMap.getTargetRequestParams();
+		assertEquals(Arrays.asList("val ue"), targetRequestParams.get("ke y1"));
+		assertEquals(Arrays.asList("val ue"), targetRequestParams.get("ke y2"));
+	}
+
+	@Test
+	public void saveOutputFlashMapDecodeParametersUnsupportedEncoding()  {
+		this.request.setCharacterEncoding("unsupportedEncoding");
+
+		FlashMap flashMap = new FlashMap();
+		flashMap.put("anyKey", "anyValue");
+
+		flashMap.addTargetRequestParam("ke+y1", "val+ue"); // contains white space(+)
+		flashMap.addTargetRequestParam("ke%20y2", "val%20ue"); // contains white space(%20)
+
+		this.flashMapManager.saveOutputFlashMap(flashMap, this.request, this.response);
+
+		MultiValueMap<String,String> targetRequestParams = flashMap.getTargetRequestParams();
+		assertEquals(Arrays.asList("val ue"), targetRequestParams.get("ke y1"));
+		assertEquals(Arrays.asList("val ue"), targetRequestParams.get("ke y2"));
+	}
 
 	private static class TestFlashMapManager extends AbstractFlashMapManager {
 
