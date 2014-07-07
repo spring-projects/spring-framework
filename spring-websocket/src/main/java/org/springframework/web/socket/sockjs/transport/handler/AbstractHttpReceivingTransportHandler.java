@@ -19,8 +19,6 @@ package org.springframework.web.socket.sockjs.transport.handler;
 import java.io.IOException;
 import java.util.Arrays;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
@@ -56,14 +54,15 @@ public abstract class AbstractHttpReceivingTransportHandler extends AbstractTran
 		try {
 			messages = readMessages(request);
 		}
-		catch (JsonMappingException ex) {
-			logger.error("Failed to read message", ex);
-			handleReadError(response, "Payload expected.", sockJsSession.getId());
-			return;
-		}
 		catch (IOException ex) {
-			logger.error("Failed to read message", ex);
-			handleReadError(response, "Broken JSON encoding.", sockJsSession.getId());
+			if(ex.getClass().getName().contains("Mapping")) {
+				logger.error("Failed to read message", ex);
+				handleReadError(response, "Payload expected.", sockJsSession.getId());
+			}
+			else {
+				logger.error("Failed to read message", ex);
+				handleReadError(response, "Broken JSON encoding.", sockJsSession.getId());
+			}
 			return;
 		}
 		catch (Throwable ex) {
