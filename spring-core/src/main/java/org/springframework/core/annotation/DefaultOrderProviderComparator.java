@@ -38,6 +38,7 @@ public class DefaultOrderProviderComparator implements OrderProviderComparator {
 	 */
 	public static final DefaultOrderProviderComparator INSTANCE = new DefaultOrderProviderComparator();
 
+
 	@Override
 	public void sortList(List<?> items, OrderProvider orderProvider) {
 		Collections.sort(items, new OrderProviderAwareComparator(orderProvider));
@@ -53,7 +54,7 @@ public class DefaultOrderProviderComparator implements OrderProviderComparator {
 
 		private final OrderProvider orderProvider;
 
-		private OrderProviderAwareComparator(OrderProvider orderProvider) {
+		public OrderProviderAwareComparator(OrderProvider orderProvider) {
 			this.orderProvider = orderProvider;
 		}
 

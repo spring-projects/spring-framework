@@ -47,21 +47,24 @@ import org.springframework.core.annotation.OrderProvider;
  * @author Stephane Nicoll
  * @since 4.1
  */
-public class FactoryAwareOrderProvider implements OrderProvider {
+class FactoryAwareOrderProvider implements OrderProvider {
 
 	private final Map<Object, String> instancesToBeanNames;
 
 	private final ConfigurableListableBeanFactory beanFactory;
 
+
 	public FactoryAwareOrderProvider(Map<Object, String> instancesToBeanNames,
 			ConfigurableListableBeanFactory beanFactory) {
+
 		this.instancesToBeanNames = instancesToBeanNames;
 		this.beanFactory = beanFactory;
 	}
 
+
 	@Override
 	public Integer getOrder(Object obj) {
-		Method factoryMethod = getFactoryMethod(instancesToBeanNames.get(obj));
+		Method factoryMethod = getFactoryMethod(this.instancesToBeanNames.get(obj));
 		if (factoryMethod != null) {
 			Order order = AnnotationUtils.getAnnotation(factoryMethod, Order.class);
 			if (order != null) {

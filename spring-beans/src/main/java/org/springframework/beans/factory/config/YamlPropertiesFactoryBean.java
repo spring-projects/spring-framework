@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
 
 /**
  * Factory for Java Properties that reads from a YAML source. YAML is a nice
@@ -57,7 +58,7 @@ import org.springframework.beans.factory.FactoryBean;
  * - foo.bar.com
  * </pre>
  *
- * becomes java Properties like this:
+ * becomes Java Properties like this:
  *
  * <pre class="code">
  * servers=dev.bar.com,foo.bar.com
@@ -65,42 +66,40 @@ import org.springframework.beans.factory.FactoryBean;
  * servers[1]=foo.bar.com
  * </pre>
  *
- * Can create a singleton or a new object on each request. Default is
- * a singleton.
- *
  * @author Dave Syer
  * @author Stephane Nicoll
  * @since 4.1
  */
-public class YamlPropertiesFactoryBean extends YamlProcessor implements
-		FactoryBean<Properties> {
+public class YamlPropertiesFactoryBean extends YamlProcessor implements FactoryBean<Properties>, InitializingBean {
 
 	private boolean singleton = true;
 
-	private Properties singletonInstance;
+	private Properties properties;
 
 
 	/**
-	 * Set whether a shared 'singleton' Properties instance should be
-	 * created, or rather a new Properties instance on each request.
-	 * <p>Default is "true" (a shared singleton).
+	 * Set if a singleton should be created, or a new object on each request
+	 * otherwise. Default is {@code true} (a singleton).
 	 */
-	public final void setSingleton(boolean singleton) {
+	public void setSingleton(boolean singleton) {
 		this.singleton = singleton;
 	}
 
 	@Override
-	public final boolean isSingleton() {
+	public boolean isSingleton() {
 		return this.singleton;
 	}
 
+	@Override
+	public void afterPropertiesSet() {
+		if (isSingleton()) {
+			this.properties = createProperties();
+		}
+	}
 
 	@Override
-	public final Properties getObject() {
-		if (!this.singleton || this.singletonInstance == null) {
-			this.singletonInstance = createProperties();
-		}
-		return this.singletonInstance;
+	public Properties getObject() {
+		return (this.properties != null ? this.properties : createProperties());
 	}
 
 	@Override

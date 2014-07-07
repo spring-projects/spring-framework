@@ -53,6 +53,7 @@ public abstract class YamlProcessor {
 
 	private boolean matchDefault = true;
 
+
 	/**
 	 * A map of document matchers allowing callers to selectively use only
 	 * some of the documents in a YAML resource. In YAML documents are
@@ -112,9 +113,10 @@ public abstract class YamlProcessor {
 	 * Set locations of YAML {@link Resource resources} to be loaded.
 	 * @see ResolutionMethod
 	 */
-	public void setResources(Resource[] resources) {
+	public void setResources(Resource... resources) {
 		this.resources = (resources == null ? null : resources.clone());
 	}
+
 
 	/**
 	 * Provide an opportunity for subclasses to process the Yaml parsed from the supplied
@@ -157,17 +159,16 @@ public abstract class YamlProcessor {
 		catch (IOException ex) {
 			handleProcessError(resource, ex);
 		}
-		return count > 0;
+		return (count > 0);
 	}
 
 	private void handleProcessError(Resource resource, IOException ex) {
-		if (this.resolutionMethod != ResolutionMethod.FIRST_FOUND
-				&& this.resolutionMethod != ResolutionMethod.OVERRIDE_AND_IGNORE) {
+		if (this.resolutionMethod != ResolutionMethod.FIRST_FOUND &&
+				this.resolutionMethod != ResolutionMethod.OVERRIDE_AND_IGNORE) {
 			throw new IllegalStateException(ex);
 		}
 		if (this.logger.isWarnEnabled()) {
-			this.logger.warn("Could not load map from " + resource + ": "
-					+ ex.getMessage());
+			this.logger.warn("Could not load map from " + resource + ": " + ex.getMessage());
 		}
 	}
 
@@ -200,7 +201,6 @@ public abstract class YamlProcessor {
 	}
 
 	private boolean process(Map<String, Object> map, MatchCallback callback) {
-
 		Properties properties = new Properties();
 		assignProperties(properties, map, null);
 
@@ -238,8 +238,7 @@ public abstract class YamlProcessor {
 		return false;
 	}
 
-	private void assignProperties(Properties properties, Map<String, Object> input,
-			String path) {
+	private void assignProperties(Properties properties, Map<String, Object> input, String path) {
 		for (Entry<String, Object> entry : input.entrySet()) {
 			String key = entry.getKey();
 			if (StringUtils.hasText(path)) {
@@ -276,6 +275,7 @@ public abstract class YamlProcessor {
 		}
 	}
 
+
 	/**
 	 * Callback interface used to process properties in a resulting map.
 	 */
@@ -287,8 +287,8 @@ public abstract class YamlProcessor {
 		 * @param map a mutable result map
 		 */
 		void process(Properties properties, Map<String, Object> map);
-
 	}
+
 
 	/**
 	 * Strategy interface used to test if properties match.
@@ -301,8 +301,8 @@ public abstract class YamlProcessor {
 		 * @return the status of the match.
 		 */
 		MatchStatus matches(Properties properties);
-
 	}
+
 
 	/**
 	 * Status returned from {@link DocumentMatcher#matches(java.util.Properties)}
@@ -331,6 +331,7 @@ public abstract class YamlProcessor {
 			return a.ordinal() < b.ordinal() ? a : b;
 		}
 	}
+
 
 	/**
 	 * Method to use for resolving resources.
