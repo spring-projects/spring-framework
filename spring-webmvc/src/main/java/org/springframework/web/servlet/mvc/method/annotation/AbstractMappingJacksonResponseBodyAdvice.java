@@ -33,13 +33,7 @@ import org.springframework.http.server.ServerHttpResponse;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public abstract class AbstractMappingJacksonResponseBodyAdvice
-		implements ResponseBodyAdvice<Object> {
-
-
-	protected AbstractMappingJacksonResponseBodyAdvice() {
-	}
-
+public abstract class AbstractMappingJacksonResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
 	@Override
 	public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
@@ -61,7 +55,7 @@ public abstract class AbstractMappingJacksonResponseBodyAdvice
 	 * additional serialization instructions) or simply cast it if already wrapped.
 	 */
 	protected MappingJacksonValue getOrCreateContainer(Object body) {
-		return (body instanceof MappingJacksonValue) ? (MappingJacksonValue) body : new MappingJacksonValue(body);
+		return (body instanceof MappingJacksonValue ? (MappingJacksonValue) body : new MappingJacksonValue(body));
 	}
 
 	/**
@@ -69,6 +63,5 @@ public abstract class AbstractMappingJacksonResponseBodyAdvice
 	 */
 	protected abstract void beforeBodyWriteInternal(MappingJacksonValue bodyContainer, MediaType contentType,
 			MethodParameter returnType, ServerHttpRequest request, ServerHttpResponse response);
-
 
 }
