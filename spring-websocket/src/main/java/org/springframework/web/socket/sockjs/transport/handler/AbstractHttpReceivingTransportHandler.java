@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package org.springframework.web.socket.sockjs.transport.handler;
 
 import java.io.IOException;
 import java.util.Arrays;
-
-import com.fasterxml.jackson.databind.JsonMappingException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -56,14 +54,15 @@ public abstract class AbstractHttpReceivingTransportHandler extends AbstractTran
 		try {
 			messages = readMessages(request);
 		}
-		catch (JsonMappingException ex) {
-			logger.error("Failed to read message", ex);
-			handleReadError(response, "Payload expected.", sockJsSession.getId());
-			return;
-		}
 		catch (IOException ex) {
 			logger.error("Failed to read message", ex);
-			handleReadError(response, "Broken JSON encoding.", sockJsSession.getId());
+			if (ex.getClass().getName().contains("Mapping")) {
+				// e.g. Jackson's JsonMappingException, indicating an incomplete payload
+				handleReadError(response, "Payload expected.", sockJsSession.getId());
+			}
+			else {
+				handleReadError(response, "Broken JSON encoding.", sockJsSession.getId());
+			}
 			return;
 		}
 		catch (Throwable ex) {
@@ -87,10 +86,10 @@ public abstract class AbstractHttpReceivingTransportHandler extends AbstractTran
 		sockJsSession.delegateMessages(messages);
 	}
 
-	private void handleReadError(ServerHttpResponse resp, String error, String sessionId) {
+	private void handleReadError(ServerHttpResponse response, String error, String sessionId) {
 		try {
-			resp.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-			resp.getBody().write(error.getBytes("UTF-8"));
+			response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			response.getBody().write(error.getBytes("UTF-8"));
 		}
 		catch (IOException ex) {
 			throw new SockJsException("Failed to send error: " + error, sessionId, ex);
