@@ -35,11 +35,9 @@ import org.springframework.util.Assert;
  *
  * @author Rossen Stoyanchev
  * @since 4.1
- *
  * @see com.fasterxml.jackson.databind.ObjectMapper#writerWithView(Class)
  */
 public class JsonViewResponseBodyAdvice extends AbstractMappingJacksonResponseBodyAdvice {
-
 
 	@Override
 	public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {

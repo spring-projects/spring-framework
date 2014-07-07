@@ -90,12 +90,22 @@ public abstract class AbstractSockJsService implements SockJsService {
 
 
 	/**
-	 * A unique name for the service mainly for logging purposes.
+	 * A scheduler instance to use for scheduling heart-beat messages.
+	 */
+	public TaskScheduler getTaskScheduler() {
+		return this.taskScheduler;
+	}
+
+	/**
+	 * Set a unique name for this service (mainly for logging purposes).
 	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * Return the unique name associated with this service.
+	 */
 	public String getName() {
 		return this.name;
 	}
@@ -121,8 +131,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 	}
 
 	/**
-	 * The URL to the SockJS JavaScript client library.
-	 * @see #setSockJsClientLibraryUrl(String)
+	 * Return he URL to the SockJS JavaScript client library.
 	 */
 	public String getSockJsClientLibraryUrl() {
 		return this.clientLibraryUrl;
@@ -132,7 +141,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 	 * Streaming transports save responses on the client side and don't free
 	 * memory used by delivered messages. Such transports need to recycle the
 	 * connection once in a while. This property sets a minimum number of bytes
-	 * that can be send over a single HTTP streaming request before it will be
+	 * that can be sent over a single HTTP streaming request before it will be
 	 * closed. After that client will open a new request. Setting this value to
 	 * one effectively disables streaming and will make streaming transports to
 	 * behave like polling transports.
@@ -142,6 +151,10 @@ public abstract class AbstractSockJsService implements SockJsService {
 		this.streamBytesLimit = streamBytesLimit;
 	}
 
+	/**
+	 * Return the minimum number of bytes that can be sent over a single HTTP
+	 * streaming request before it will be closed.
+	 */
 	public int getStreamBytesLimit() {
 		return this.streamBytesLimit;
 	}
@@ -168,32 +181,28 @@ public abstract class AbstractSockJsService implements SockJsService {
 	}
 
 	/**
-	 * Whether JSESSIONID cookie is required for the application to function. For
-	 * more detail see {@link #setSessionCookieNeeded(boolean)}.
+	 * Return whether the JSESSIONID cookie is required for the application to function.
 	 */
 	public boolean isSessionCookieNeeded() {
 		return this.sessionCookieNeeded;
 	}
 
 	/**
-	 * The amount of time in milliseconds when the server has not sent any
-	 * messages and after which the server should send a heartbeat frame to the
-	 * client in order to keep the connection from breaking.
+	 * Specify the amount of time in milliseconds when the server has not sent
+	 * any messages and after which the server should send a heartbeat frame
+	 * to the client in order to keep the connection from breaking.
 	 * <p>The default value is 25,000 (25 seconds).
 	 */
 	public void setHeartbeatTime(long heartbeatTime) {
 		this.heartbeatTime = heartbeatTime;
 	}
 
+	/**
+	 * Return the amount of time in milliseconds when the server has not sent
+	 * any messages.
+	 */
 	public long getHeartbeatTime() {
 		return this.heartbeatTime;
-	}
-
-	/**
-	 * A scheduler instance to use for scheduling heart-beat messages.
-	 */
-	public TaskScheduler getTaskScheduler() {
-		return this.taskScheduler;
 	}
 
 	/**
@@ -214,12 +223,12 @@ public abstract class AbstractSockJsService implements SockJsService {
 	}
 
 	/**
-	 * The number of server-to-client messages that a session can cache while waiting for
-	 * the next HTTP polling request from the client. All HTTP transports use this
+	 * The number of server-to-client messages that a session can cache while waiting
+	 * for the next HTTP polling request from the client. All HTTP transports use this
 	 * property since even streaming transports recycle HTTP requests periodically.
-	 * <p>The amount of time between HTTP requests should be relatively brief and will not
-	 * exceed the allows disconnect delay (see
-	 * {@link #setDisconnectDelay(long)}), 5 seconds by default.
+	 * <p>The amount of time between HTTP requests should be relatively brief and will
+	 * not exceed the allows disconnect delay (see {@link #setDisconnectDelay(long)});
+	 * 5 seconds by default.
 	 * <p>The default size is 100.
 	 */
 	public void setHttpMessageCacheSize(int httpMessageCacheSize) {
@@ -234,7 +243,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 	}
 
 	/**
-	 * Some load balancers don't support WebSocket. This option can be used to
+	 * Some load balancers do not support WebSocket. This option can be used to
 	 * disable the WebSocket transport on the server side.
 	 * <p>The default value is "true".
 	 */
@@ -243,8 +252,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 	}
 
 	/**
-	 * Whether WebSocket transport is enabled.
-	 * @see #setWebSocketEnabled(boolean)
+	 * Return whether WebSocket transport is enabled.
 	 */
 	public boolean isWebSocketEnabled() {
 		return this.webSocketEnabled;
@@ -252,9 +260,8 @@ public abstract class AbstractSockJsService implements SockJsService {
 
 
 	/**
-	 * {@inheritDoc}
-	 * <p>This method determines the SockJS path and handles SockJS static URLs. Session
-	 * URLs and raw WebSocket requests are delegated to abstract methods.
+	 * This method determines the SockJS path and handles SockJS static URLs.
+	 * Session URLs and raw WebSocket requests are delegated to abstract methods.
 	 */
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
@@ -271,7 +278,6 @@ public abstract class AbstractSockJsService implements SockJsService {
 		if (logger.isTraceEnabled()) {
 			logger.trace(request.getMethod() + " with SockJS path [" + sockJsPath + "]");
 		}
-
 		try {
 			request.getHeaders();
 		}
@@ -309,7 +315,6 @@ public abstract class AbstractSockJsService implements SockJsService {
 				String serverId = pathSegments[0];
 				String sessionId = pathSegments[1];
 				String transport = pathSegments[2];
-
 				if (!validateRequest(serverId, sessionId, transport)) {
 					response.setStatusCode(HttpStatus.NOT_FOUND);
 					return;
@@ -336,7 +341,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 		}
 
 		if (!isWebSocketEnabled() && transport.equals("websocket")) {
-			logger.debug("Ignoring WebSocket request (transport disabled via SockJsService property).");
+			logger.debug("Ignoring WebSocket request (transport disabled via SockJsService property)");
 			return false;
 		}
 
@@ -360,7 +365,6 @@ public abstract class AbstractSockJsService implements SockJsService {
 	protected void addCorsHeaders(ServerHttpRequest request, ServerHttpResponse response, HttpMethod... httpMethods) {
 		HttpHeaders requestHeaders = request.getHeaders();
 		HttpHeaders responseHeaders = response.getHeaders();
-
 		try {
 			// Perhaps a CORS Filter has already added this?
 			if (!CollectionUtils.isEmpty(responseHeaders.get("Access-Control-Allow-Origin"))) {
@@ -373,8 +377,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 		}
 
 		String origin = requestHeaders.getFirst("origin");
-		origin = ((origin == null) || origin.equals("null")) ? "*" : origin;
-
+		origin = (origin == null || origin.equals("null") ? "*" : origin);
 		responseHeaders.add("Access-Control-Allow-Origin", origin);
 		responseHeaders.add("Access-Control-Allow-Credentials", "true");
 
