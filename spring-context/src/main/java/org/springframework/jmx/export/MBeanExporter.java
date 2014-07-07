@@ -407,7 +407,9 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 		if (this.server == null) {
 			this.server = JmxUtils.locateMBeanServer();
 		}
-		register();  // TODO: to be replaced with some ContextRefreshedEvent-like callback
+
+		// TODO: to be replaced with some ContextRefreshedEvent-like callback
+		register();
 	}
 
 	/**
@@ -766,22 +768,22 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	protected DynamicMBean adaptMBeanIfPossible(Object bean) throws JMException {
 		Class<?> targetClass = AopUtils.getTargetClass(bean);
 		if (targetClass != bean.getClass()) {
-			Class<Object> ifc = (Class<Object>) JmxUtils.getMXBeanInterface(targetClass);
+			Class<?> ifc = JmxUtils.getMXBeanInterface(targetClass);
 			if (ifc != null) {
-				if (!(ifc.isInstance(bean))) {
+				if (!ifc.isInstance(bean)) {
 					throw new NotCompliantMBeanException("Managed bean [" + bean +
 							"] has a target class with an MXBean interface but does not expose it in the proxy");
 				}
-				return new StandardMBean(bean, ifc, true);
+				return new StandardMBean(bean, ((Class<Object>) ifc), true);
 			}
 			else {
-				ifc = (Class<Object>) JmxUtils.getMBeanInterface(targetClass);
+				ifc = JmxUtils.getMBeanInterface(targetClass);
 				if (ifc != null) {
-					if (!(ifc.isInstance(bean))) {
+					if (!ifc.isInstance(bean)) {
 						throw new NotCompliantMBeanException("Managed bean [" + bean +
 								"] has a target class with an MBean interface but does not expose it in the proxy");
 					}
-					return new StandardMBean(bean, ifc);
+					return new StandardMBean(bean, ((Class<Object>) ifc));
 				}
 			}
 		}

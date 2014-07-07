@@ -22,10 +22,10 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.DefaultOrderProviderComparator;
 
 /**
- * The default {@link Comparator} to use to order dependencies. Extend
- * from {@link DefaultOrderProviderComparator} so that the bean factory
- * has the ability to provide an {@link org.springframework.core.annotation.OrderProvider}
- * that is aware of more bean metadata, if any.
+ * The default {@link Comparator} to use to order dependencies. Extends from
+ * {@link DefaultOrderProviderComparator} so that the bean factory has the ability
+ * to provide an {@link org.springframework.core.annotation.OrderProvider} that
+ * is aware of more bean metadata, if any.
  *
  * @author Stephane Nicoll
  * @since 4.1
@@ -40,19 +40,22 @@ public class DefaultDependencyComparator extends DefaultOrderProviderComparator 
 	 */
 	public static final DefaultDependencyComparator INSTANCE = new DefaultDependencyComparator();
 
+
 	private final Comparator<Object> comparator;
+
+
+	public DefaultDependencyComparator() {
+		this.comparator = AnnotationAwareOrderComparator.INSTANCE;
+	}
 
 	public DefaultDependencyComparator(Comparator<Object> comparator) {
 		this.comparator = comparator;
 	}
 
-	public DefaultDependencyComparator() {
-		this(AnnotationAwareOrderComparator.INSTANCE);
-	}
 
 	@Override
 	public int compare(Object o1, Object o2) {
-		return comparator.compare(o1, o2);
+		return this.comparator.compare(o1, o2);
 	}
 
 }

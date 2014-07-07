@@ -22,9 +22,10 @@ import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
 
 /**
- * Factory for Map that reads from a YAML source. YAML is a nice human-readable
+ * Factory for a Map that reads from a YAML source. YAML is a nice human-readable
  * format for configuration, and it has some useful hierarchical properties. It's
  * more or less a superset of JSON, so it has a lot of similar features. If
  * multiple resources are provided the later ones will override entries in the
@@ -36,7 +37,6 @@ import org.springframework.beans.factory.FactoryBean;
  *   bar:
  *    one: two
  * three: four
- *
  * </pre>
  *
  * plus (later in the list)
@@ -46,7 +46,6 @@ import org.springframework.beans.factory.FactoryBean;
  *   bar:
  *    one: 2
  * five: six
- *
  * </pre>
  *
  * results in an effective input of
@@ -57,7 +56,6 @@ import org.springframework.beans.factory.FactoryBean;
  *    one: 2
  * three: four
  * five: six
- *
  * </pre>
  *
  * Note that the value of "foo" in the first document is not simply replaced
@@ -66,41 +64,43 @@ import org.springframework.beans.factory.FactoryBean;
  * @author Dave Syer
  * @since 4.1
  */
-public class YamlMapFactoryBean extends YamlProcessor implements
-		FactoryBean<Map<String, Object>> {
+public class YamlMapFactoryBean extends YamlProcessor implements FactoryBean<Map<String, Object>>, InitializingBean {
 
 	private boolean singleton = true;
 
-	private Map<String, Object> singletonInstance;
+	private Map<String, Object> map;
 
 
 	/**
-	 * Set whether a shared 'singleton' Map instance should be
-	 * created, or rather a new Map instance on each request.
-	 * <p>Default is "true" (a shared singleton).
+	 * Set if a singleton should be created, or a new object on each request
+	 * otherwise. Default is {@code true} (a singleton).
 	 */
-	public final void setSingleton(boolean singleton) {
+	public void setSingleton(boolean singleton) {
 		this.singleton = singleton;
 	}
 
 	@Override
-	public final boolean isSingleton() {
+	public boolean isSingleton() {
 		return this.singleton;
 	}
 
+	@Override
+	public void afterPropertiesSet() {
+		if (isSingleton()) {
+			this.map = createMap();
+		}
+	}
 
 	@Override
 	public Map<String, Object> getObject() {
-		if (!this.singleton || this.singletonInstance == null) {
-			this.singletonInstance = createProperties();
-		}
-		return this.singletonInstance;
+		return (this.map != null ? this.map : createMap());
 	}
 
 	@Override
 	public Class<?> getObjectType() {
 		return Map.class;
 	}
+
 
 	/**
 	 * Template method that subclasses may override to construct the object
@@ -111,7 +111,7 @@ public class YamlMapFactoryBean extends YamlProcessor implements
 	 * @return the object returned by this factory
 	 * @see #process(java.util.Map, MatchCallback)
 	 */
-	protected Map<String, Object> createProperties() {
+	protected Map<String, Object> createMap() {
 		final Map<String, Object> result = new LinkedHashMap<String, Object>();
 		process(new MatchCallback() {
 			@Override
@@ -129,8 +129,7 @@ public class YamlMapFactoryBean extends YamlProcessor implements
 			Object value = entry.getValue();
 			Object existing = output.get(key);
 			if (value instanceof Map && existing instanceof Map) {
-				Map<String, Object> result = new LinkedHashMap<String, Object>(
-						(Map) existing);
+				Map<String, Object> result = new LinkedHashMap<String, Object>((Map) existing);
 				merge(result, (Map) value);
 				output.put(key, result);
 			}
