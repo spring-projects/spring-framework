@@ -55,12 +55,11 @@ public abstract class AbstractHttpReceivingTransportHandler extends AbstractTran
 			messages = readMessages(request);
 		}
 		catch (IOException ex) {
+			logger.error("Failed to read message", ex);
 			if(ex.getClass().getName().contains("Mapping")) {
-				logger.error("Failed to read message", ex);
 				handleReadError(response, "Payload expected.", sockJsSession.getId());
 			}
 			else {
-				logger.error("Failed to read message", ex);
 				handleReadError(response, "Broken JSON encoding.", sockJsSession.getId());
 			}
 			return;
