@@ -168,6 +168,24 @@ public class ModelResultMatchers {
 	}
 
 	/**
+	 * Assert the given model attribute has a specific error on the supplied field
+	 */
+	public ResultMatcher attributeHasFieldError(final String name, final String fieldName, final String error) {
+		return new ResultMatcher() {
+			public void match(MvcResult mvcResult) throws Exception {
+				ModelAndView mav = getModelAndView(mvcResult);
+				BindingResult result = getBindingResult(mav, name);
+				assertTrue("No errors for attribute: [" + name + "]", result.hasErrors());
+				assertTrue("No errors for field: [" + fieldName + "] of attribute [" + name + "]",
+						result.hasFieldErrors(fieldName));
+				assertTrue("Expected error '" + error +"', but got error '" + result.getFieldError(fieldName)
+								.getCode() + "'",
+						result.getFieldError(fieldName).getCode().equals(error));
+			}
+		};
+	}
+
+	/**
 	 * Assert the total number of errors in the model.
 	 */
 	public <T> ResultMatcher errorCount(final int expectedCount) {

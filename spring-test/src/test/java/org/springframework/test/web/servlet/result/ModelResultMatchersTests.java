@@ -145,6 +145,16 @@ public class ModelResultMatchersTests {
 		this.matchers.attributeHasFieldErrors("date", "good", "time").match(this.mvcResultWithError);
 	}
 
+	@Test
+	public void attributeHasFieldError() throws Exception {
+		this.matchers.attributeHasFieldError("date", "time", "error").match(this.mvcResultWithError);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void attributeHasFieldError_withoutErrorOnField() throws Exception {
+		this.matchers.attributeHasFieldError("date", "time", "incorrectError").match(this.mvcResultWithError);
+	}
+
 	private MvcResult getMvcResult(ModelAndView modelAndView) {
 		return new StubMvcResult(null, null, null, null, modelAndView, null, null);
 	}
