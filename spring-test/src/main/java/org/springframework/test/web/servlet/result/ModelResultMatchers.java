@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,9 +160,53 @@ public class ModelResultMatchers {
 				BindingResult result = getBindingResult(mav, name);
 				assertTrue("No errors for attribute: [" + name + "]", result.hasErrors());
 				for (final String fieldName : fieldNames) {
-					assertTrue("No errors for field: [" + fieldName + "] of attribute [" + name + "]",
-							result.hasFieldErrors(fieldName));
+					boolean hasFieldErrors = result.hasFieldErrors(fieldName);
+					assertTrue("No errors for field: [" + fieldName + "] of attribute [" + name + "]", hasFieldErrors);
 				}
+			}
+		};
+	}
+
+	/**
+	 * Assert a field error code for a model attribute using exact String match.
+	 * @since 4.1
+	 */
+	public ResultMatcher attributeHasFieldErrorCode(final String name, final String fieldName, final String error) {
+		return new ResultMatcher() {
+			public void match(MvcResult mvcResult) throws Exception {
+				ModelAndView mav = getModelAndView(mvcResult);
+				BindingResult result = getBindingResult(mav, name);
+				assertTrue("No errors for attribute: [" + name + "]", result.hasErrors());
+
+				boolean hasFieldErrors = result.hasFieldErrors(fieldName);
+				assertTrue("No errors for field: [" + fieldName + "] of attribute [" + name + "]", hasFieldErrors);
+
+				String code = result.getFieldError(fieldName).getCode();
+				assertTrue("Expected error code '" + error + "' but got '" + code + "'", code.equals(error));
+			}
+		};
+	}
+
+	/**
+	 * Assert a field error code for a model attribute using a {@link org.hamcrest.Matcher}.
+	 * @since 4.1
+	 */
+	public <T> ResultMatcher attributeHasFieldErrorCode(final String name, final String fieldName,
+			final Matcher<? super String> matcher) {
+
+		return new ResultMatcher() {
+			@Override
+			@SuppressWarnings("unchecked")
+			public void match(MvcResult mvcResult) throws Exception {
+				ModelAndView mav = getModelAndView(mvcResult);
+				BindingResult result = getBindingResult(mav, name);
+				assertTrue("No errors for attribute: [" + name + "]", result.hasErrors());
+
+				boolean hasFieldErrors = result.hasFieldErrors(fieldName);
+				assertTrue("No errors for field: [" + fieldName + "] of attribute [" + name + "]", hasFieldErrors);
+
+				String code = result.getFieldError(fieldName).getCode();
+				assertThat("Field name '" + fieldName + "' of attribute '" + name + "'", code, matcher);
 			}
 		};
 	}
