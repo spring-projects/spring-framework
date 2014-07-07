@@ -168,9 +168,9 @@ public class ModelResultMatchers {
 	}
 
 	/**
-	 * Assert the given model attribute has a specific error on the supplied field
+	 * Assert the given model attribute has a specific error code on the supplied field
 	 */
-	public ResultMatcher attributeHasFieldError(final String name, final String fieldName, final String error) {
+	public ResultMatcher attributeHasFieldErrorCode(final String name, final String fieldName, final String error) {
 		return new ResultMatcher() {
 			public void match(MvcResult mvcResult) throws Exception {
 				ModelAndView mav = getModelAndView(mvcResult);
@@ -181,6 +181,25 @@ public class ModelResultMatchers {
 				assertTrue("Expected error '" + error +"', but got error '" + result.getFieldError(fieldName)
 								.getCode() + "'",
 						result.getFieldError(fieldName).getCode().equals(error));
+			}
+		};
+	}
+
+	/**
+	 * Assert the given model attribute has a matched error code on the supplied field
+	 */
+	public <T> ResultMatcher attributeHasFieldErrorCode(final String name, final String fieldName, final Matcher<T> matcher) {
+		return new ResultMatcher() {
+			@Override
+			@SuppressWarnings("unchecked")
+			public void match(MvcResult mvcResult) throws Exception {
+				ModelAndView mav = getModelAndView(mvcResult);
+				BindingResult result = getBindingResult(mav, name);
+				assertTrue("No errors for attribute: [" + name + "]", result.hasErrors());
+				assertTrue("No errors for field: [" + fieldName + "] of attribute [" + name + "]",
+						result.hasFieldErrors(fieldName));
+				assertThat("Field name '" + fieldName +"' error code:",
+						(T) result.getFieldError(fieldName).getCode(), matcher);
 			}
 		};
 	}
