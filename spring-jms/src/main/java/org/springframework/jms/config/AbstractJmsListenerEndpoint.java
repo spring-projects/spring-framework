@@ -43,20 +43,13 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 	private String selector;
 
 
-	@Override
-	public String getId() {
-		return id;
-	}
-
 	public void setId(String id) {
 		this.id = id;
 	}
 
-	/**
-	 * Return the name of the destination for this endpoint.
-	 */
-	public String getDestination() {
-		return destination;
+	@Override
+	public String getId() {
+		return this.id;
 	}
 
 	/**
@@ -67,10 +60,10 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 	}
 
 	/**
-	 * Return the name for the durable subscription, if any.
+	 * Return the name of the destination for this endpoint.
 	 */
-	public String getSubscription() {
-		return subscription;
+	public String getDestination() {
+		return this.destination;
 	}
 
 	/**
@@ -81,32 +74,40 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 	}
 
 	/**
-	 * Return the JMS message selector expression, if any.
-	 * <p>See the JMS specification for a detailed definition of selector expressions.
+	 * Return the name for the durable subscription, if any.
 	 */
-	public String getSelector() {
-		return selector;
+	public String getSubscription() {
+		return this.subscription;
 	}
 
 	/**
 	 * Set the JMS message selector expression.
+	 * <p>See the JMS specification for a detailed definition of selector expressions.
 	 */
 	public void setSelector(String selector) {
 		this.selector = selector;
 	}
 
+	/**
+	 * Return the JMS message selector expression, if any.
+	 */
+	public String getSelector() {
+		return this.selector;
+	}
+
+
 	@Override
 	public void setupMessageContainer(MessageListenerContainer container) {
-		if (container instanceof AbstractMessageListenerContainer) { // JMS
+		if (container instanceof AbstractMessageListenerContainer) {  // JMS
 			setupJmsMessageContainer((AbstractMessageListenerContainer) container);
 		}
-		else if (container instanceof JmsMessageEndpointManager) { // JCA
+		else if (container instanceof JmsMessageEndpointManager) {  // JCA
 			setupJcaMessageContainer((JmsMessageEndpointManager) container);
 		}
 		else {
-			throw new IllegalArgumentException("Could not configure endpoint with the specified container '"
-					+ container + "' Only JMS (" + AbstractMessageListenerContainer.class.getName()
-					+ " subclass) or JCA (" + JmsMessageEndpointManager.class.getName() + ") are supported.");
+			throw new IllegalArgumentException("Could not configure endpoint with the specified container '" +
+					container + "' Only JMS (" + AbstractMessageListenerContainer.class.getName() +
+					" subclass) or JCA (" + JmsMessageEndpointManager.class.getName() + ") are supported.");
 		}
 	}
 
@@ -160,16 +161,9 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 	 */
 	protected StringBuilder getEndpointDescription() {
 		StringBuilder result = new StringBuilder();
-		return result.append(getClass().getSimpleName())
-				.append("[")
-				.append(this.id)
-				.append("] destination=")
-				.append(this.destination)
-				.append("' | subscription='")
-				.append(this.subscription)
-				.append(" | selector='")
-				.append(this.selector)
-				.append("'");
+		return result.append(getClass().getSimpleName()).append("[").append(this.id).append("] destination=").
+				append(this.destination).append("' | subscription='").append(this.subscription).
+				append(" | selector='").append(this.selector).append("'");
 	}
 
 	@Override
