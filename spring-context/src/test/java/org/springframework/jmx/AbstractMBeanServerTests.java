@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import javax.management.ObjectName;
 
 import org.junit.After;
 import org.junit.Before;
+
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
@@ -51,12 +52,14 @@ public abstract class AbstractMBeanServerTests {
 
 	protected MBeanServer server;
 
+
 	@Before
 	public final void setUp() throws Exception {
 		this.server = MBeanServerFactory.createMBeanServer();
 		try {
 			onSetUp();
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			releaseServer();
 			throw ex;
 		}
