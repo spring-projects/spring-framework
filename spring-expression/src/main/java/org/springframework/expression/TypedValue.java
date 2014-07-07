@@ -20,9 +20,9 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Encapsulates an object and a type descriptor that describes it.
- * The type descriptor can hold generic information that would not be
- * accessible through a simple {@code getClass()} call on the object.
+ * Encapsulates an object and a {@link TypeDescriptor} that describes it.
+ * The type descriptor can contain generic declarations that would not
+ * be accessible through a simple {@code getClass()} call on the object.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -39,8 +39,8 @@ public class TypedValue {
 
 
 	/**
-	 * Create a TypedValue for a simple object. The type descriptor is inferred
-	 * from the object, so no generic information is preserved.
+	 * Create a {@link TypedValue} for a simple object. The {@link TypeDescriptor}
+	 * is inferred from the object, so no generic declarations are preserved.
 	 * @param value the object value
 	 */
 	public TypedValue(Object value) {
@@ -49,7 +49,8 @@ public class TypedValue {
 	}
 
 	/**
-	 * Create a TypedValue for a particular value with a particular type descriptor.
+	 * Create a {@link TypedValue} for a particular value with a particular
+	 * {@link TypeDescriptor} which may contain additional generic declarations.
 	 * @param value the object value
 	 * @param typeDescriptor a type descriptor describing the type of the value
 	 */
@@ -80,9 +81,10 @@ public class TypedValue {
 			return false;
 		}
 		TypedValue otherTv = (TypedValue) other;
+		// Avoid TypeDescriptor initialization if not necessary
 		return (ObjectUtils.nullSafeEquals(this.value, otherTv.value) &&
 				((this.typeDescriptor == null && otherTv.typeDescriptor == null) ||
-						getTypeDescriptor().equals(otherTv.getTypeDescriptor())));
+						ObjectUtils.nullSafeEquals(getTypeDescriptor(), otherTv.getTypeDescriptor())));
 	}
 
 	@Override
