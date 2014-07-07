@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,8 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractSockJsMessageCodec implements SockJsMessageCodec {
 
-
 	@Override
-	public String encode(String[] messages) {
+	public String encode(String... messages) {
 		Assert.notNull(messages, "messages must not be null");
 		StringBuilder sb = new StringBuilder();
 		sb.append("a[");
@@ -76,9 +75,9 @@ public abstract class AbstractSockJsMessageCodec implements SockJsMessageCodec {
 	 * See `escapable_by_server` variable in the SockJS protocol test suite.
 	 */
 	private boolean isSockJsSpecialChar(char ch) {
-		return (ch >= '\u0000' && ch <= '\u001F') || (ch >= '\u200C' && ch <= '\u200F')
-				|| (ch >= '\u2028' && ch <= '\u202F') || (ch >= '\u2060' && ch <= '\u206F')
-				|| (ch >= '\uFFF0' && ch <= '\uFFFF') || (ch >= '\uD800' && ch <= '\uDFFF');
+		return (ch >= '\u0000' && ch <= '\u001F') || (ch >= '\u200C' && ch <= '\u200F') ||
+				(ch >= '\u2028' && ch <= '\u202F') || (ch >= '\u2060' && ch <= '\u206F') ||
+				(ch >= '\uFFF0' && ch <= '\uFFFF') || (ch >= '\uD800' && ch <= '\uDFFF');
 	}
 
 }
