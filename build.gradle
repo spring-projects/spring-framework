@@ -560,7 +560,7 @@ project("spring-jdbc") {
 		optional("javax.transaction:javax.transaction-api:1.2")
 		optional("com.mchange:c3p0:0.9.2.1")
 		optional("org.hsqldb:hsqldb:${hsqldbVersion}")
-		optional("com.h2database:h2:1.4.178")
+		optional("com.h2database:h2:1.4.179")
 		optional("org.apache.derby:derby:10.10.2.0")
 		optional("org.apache.derby:derbyclient:10.10.2.0")
 	}
@@ -961,7 +961,7 @@ project("spring-aspects") {
 		aspects(project(":spring-orm"))
 		ajc("org.aspectj:aspectjtools:${aspectjVersion}")
 		rt("org.aspectj:aspectjrt:${aspectjVersion}")
-		compile("org.aspectj:aspectjweaver:${aspectjVersion}") // exposing regular AspectJ version to users
+		compile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		provided("org.eclipse.persistence:javax.persistence:2.0.0")
 		optional(project(":spring-aop")) // for @Async support
 		optional(project(":spring-beans")) // for @Configurable support
