@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.servlet.view;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
-import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -487,16 +486,15 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 	/**
 	 * URL-encode the given input String with the given encoding scheme.
-	 * <p>The default implementation uses {@code URLEncoder.encode(input, enc)}.
+	 * <p>The default implementation uses {@code UriUtils.encodeQueryParam(input, encoding)}.
 	 * @param input the unencoded input String
 	 * @param encodingScheme the encoding scheme
 	 * @return the encoded output String
-	 * @throws UnsupportedEncodingException if thrown by the JDK URLEncoder
-	 * @see java.net.URLEncoder#encode(String, String)
-	 * @see java.net.URLEncoder#encode(String)
+	 * @throws UnsupportedEncodingException if thrown by the JDK java.lang.String
+	 * @see UriUtils.encodeQueryParam(String, String)
 	 */
 	protected String urlEncode(String input, String encodingScheme) throws UnsupportedEncodingException {
-		return (input != null ? URLEncoder.encode(input, encodingScheme) : null);
+		return (input != null ? UriUtils.encodeQueryParam(input, encodingScheme) : null);
 	}
 
 	/**
