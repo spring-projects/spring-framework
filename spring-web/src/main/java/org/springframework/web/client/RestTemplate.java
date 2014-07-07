@@ -202,8 +202,11 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 */
 	public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
 		Assert.notEmpty(messageConverters, "'messageConverters' must not be empty");
-		this.messageConverters.clear();
-		this.messageConverters.addAll(messageConverters);
+		// Take getMessageConverters() List as-is when passed in here
+		if (this.messageConverters != messageConverters) {
+			this.messageConverters.clear();
+			this.messageConverters.addAll(messageConverters);
+		}
 	}
 
 	/**
