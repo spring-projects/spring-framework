@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.expression;
 
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Encapsulates an object and a type descriptor that describes it.
@@ -63,7 +64,7 @@ public class TypedValue {
 	}
 
 	public TypeDescriptor getTypeDescriptor() {
-		if (this.typeDescriptor == null) {
+		if (this.typeDescriptor == null && this.value != null) {
 			this.typeDescriptor = TypeDescriptor.forObject(this.value);
 		}
 		return this.typeDescriptor;
@@ -71,10 +72,27 @@ public class TypedValue {
 
 
 	@Override
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof TypedValue)) {
+			return false;
+		}
+		TypedValue otherTv = (TypedValue) other;
+		return (ObjectUtils.nullSafeEquals(this.value, otherTv.value) &&
+				((this.typeDescriptor == null && otherTv.typeDescriptor == null) ||
+						getTypeDescriptor().equals(otherTv.getTypeDescriptor())));
+	}
+
+	@Override
+	public int hashCode() {
+		return ObjectUtils.nullSafeHashCode(this.value);
+	}
+
+	@Override
 	public String toString() {
-		StringBuilder str = new StringBuilder();
-		str.append("TypedValue: '").append(this.value).append("' of [").append(getTypeDescriptor()).append("]");
-		return str.toString();
+		return "TypedValue: '" + this.value + "' of [" + getTypeDescriptor() + "]";
 	}
 
 }
