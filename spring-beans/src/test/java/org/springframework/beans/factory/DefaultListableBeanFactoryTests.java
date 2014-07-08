@@ -1399,7 +1399,7 @@ public class DefaultListableBeanFactoryTests {
 		lbf.registerBeanDefinition("bd2", bd2);
 		thrown.expect(NoUniqueBeanDefinitionException.class);
 		thrown.expectMessage(containsString("Multiple beans found with the same priority"));
-		thrown.expectMessage(containsString("500")); // conflicting priority
+		thrown.expectMessage(containsString("5")); // conflicting priority
 		lbf.getBean(TestBean.class);
 	}
 
@@ -1613,7 +1613,7 @@ public class DefaultListableBeanFactoryTests {
 			// expected
 			assertNotNull("Exception should have cause", ex.getCause());
 			assertEquals("Wrong cause type", NoUniqueBeanDefinitionException.class, ex.getCause().getClass());
-			assertTrue(ex.getMessage().contains("500")); // conflicting priority
+			assertTrue(ex.getMessage().contains("5")); // conflicting priority
 		}
 	}
 
@@ -2887,10 +2887,10 @@ public class DefaultListableBeanFactoryTests {
 
 	}
 
-	@Priority(500)
+	@Priority(5)
 	private static class HighPriorityTestBean extends TestBean {}
 
-	@Priority(5)
+	@Priority(500)
 	private static class LowPriorityTestBean extends TestBean {}
 
 
