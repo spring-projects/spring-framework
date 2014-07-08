@@ -135,6 +135,10 @@ public abstract class AbstractMessageListenerContainer
 	private boolean subscriptionDurable = false;
 
 	private String durableSubscriptionName;
+	
+	private boolean sharedSubscription = false;
+	
+	private String sharedSubscriptionName;
 
 	private ExceptionListener exceptionListener;
 
@@ -334,6 +338,46 @@ public abstract class AbstractMessageListenerContainer
 	 */
 	public String getDurableSubscriptionName() {
 		return this.durableSubscriptionName;
+	}
+
+
+	/**
+	 * @return whether or not this is a shared subscription
+	 */
+	public boolean isSharedSubscription() {
+		return sharedSubscription;
+	}
+
+	
+	/**
+	 * Set the name of the shared subscription
+	 * <p>Note: JMS 2.0 must be enabled to set this flag to true.
+	 * 
+	 * @param sharedSubscription true if shared, else false
+	 */
+	public void setSharedSubscription(boolean sharedSubscription) {
+		this.sharedSubscription = sharedSubscription;
+	}
+
+	
+	/**
+	 * Returns the shared subscription name, if any.
+	 * 
+	 * @return the sharedSubscriptionName
+	 */
+	public String getSharedSubscriptionName() {
+		return sharedSubscriptionName;
+	}
+
+	
+	/**
+	 * Sets the name of the shared subscription.
+	 * <p>Note: JMS 2.0 must be enabled for this property to apply.
+	 * 
+	 * @param sharedSubscriptionName the sharedSubscriptionName to set
+	 */
+	public void setSharedSubscriptionName(String sharedSubscriptionName) {
+		this.sharedSubscriptionName = sharedSubscriptionName;
 	}
 
 	/**

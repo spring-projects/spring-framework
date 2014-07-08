@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
@@ -39,10 +40,9 @@ import javax.jms.TemporaryTopic;
 import javax.jms.Topic;
 import javax.jms.TopicSession;
 
+import org.springframework.jms.util.Jms2Utils;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link SingleConnectionFactory} subclass that adds {@link javax.jms.Session}
@@ -78,13 +78,7 @@ import org.springframework.util.ReflectionUtils;
  */
 public class CachingConnectionFactory extends SingleConnectionFactory {
 
-	private static final Method createSharedConsumerMethod = ClassUtils.getMethodIfAvailable(
-			Session.class, "createSharedConsumer", Topic.class, String.class, String.class);
-
-	private static final Method createSharedDurableConsumerMethod = ClassUtils.getMethodIfAvailable(
-			Session.class, "createSharedDurableConsumer", Topic.class, String.class, String.class);
-
-
+	
 	private int sessionCacheSize = 1;
 
 	private boolean cacheProducers = true;
@@ -413,21 +407,8 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			else {
 				if (dest instanceof Topic) {
 					if (noLocal == null) {
-						// createSharedConsumer((Topic) dest, subscription, selector);
-						// createSharedDurableConsumer((Topic) dest, subscription, selector);
-						Method method = (durable ? createSharedDurableConsumerMethod : createSharedConsumerMethod);
-						try {
-							consumer = (MessageConsumer) method.invoke(this.target, dest, subscription, selector);
-						}
-						catch (InvocationTargetException ex) {
-							if (ex.getTargetException() instanceof JMSException) {
-								throw (JMSException) ex.getTargetException();
-							}
-							ReflectionUtils.handleInvocationTargetException(ex);
-						}
-						catch (IllegalAccessException ex) {
-							throw new IllegalStateException("Could not access JMS 2.0 API method: " + ex.getMessage());
-						}
+						consumer = Jms2Utils.createSharedConsumer(this.target, (Topic)dest, subscription, 
+								selector, durable);
 					}
 					else {
 						consumer = (durable ?

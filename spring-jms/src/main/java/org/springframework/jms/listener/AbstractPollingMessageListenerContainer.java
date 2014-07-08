@@ -28,6 +28,7 @@ import org.springframework.jms.connection.ConnectionFactoryUtils;
 import org.springframework.jms.connection.JmsResourceHolder;
 import org.springframework.jms.connection.SingleConnectionFactory;
 import org.springframework.jms.support.JmsUtils;
+import org.springframework.jms.util.Jms2Utils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
@@ -492,7 +493,10 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 		// Some JMS providers, such as WebSphere MQ 6.0, throw IllegalStateException
 		// in case of the NoLocal flag being specified for a Queue.
 		if (isPubSubDomain()) {
-			if (isSubscriptionDurable() && destination instanceof Topic) {
+			if (isSharedSubscription() && destination instanceof Topic) {
+				return Jms2Utils.createSharedConsumer(session, (Topic)destination, getSharedSubscriptionName(), 
+						getMessageSelector(), isSubscriptionDurable());
+			} else if (isSubscriptionDurable() && destination instanceof Topic) {
 				return session.createDurableSubscriber(
 						(Topic) destination, getDurableSubscriptionName(), getMessageSelector(), isPubSubNoLocal());
 			}
