@@ -26,6 +26,7 @@ import org.junit.Test;
 
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -214,6 +215,17 @@ public class UriComponentsBuilderTests {
 	    UriComponents resultIPv4compatible = UriComponentsBuilder
 			    .fromUriString("http://[::192.168.1.1]:8080/resource").build().encode();
 		assertEquals("[::192.168.1.1]", resultIPv4compatible.getHost());
+	}
+
+	// SPR-11970
+
+	@Test
+	public void fromUriStringNoPathWithReservedCharInQuery() {
+		UriComponents result = UriComponentsBuilder.fromUriString("http://example.com?foo=bar@baz").build();
+		assertTrue(StringUtils.isEmpty(result.getUserInfo()));
+		assertEquals("example.com", result.getHost());
+		assertTrue(result.getQueryParams().containsKey("foo"));
+		assertEquals("bar@baz", result.getQueryParams().getFirst("foo"));
 	}
 
 	@Test
