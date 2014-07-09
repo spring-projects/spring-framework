@@ -117,25 +117,12 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertNotNull(value);
 		assertTrue(value instanceof List);
 		List<HandlerMethodArgumentResolver> resolvers = (List<HandlerMethodArgumentResolver>) value;
-		assertEquals(2, resolvers.size());
+		assertEquals(3, resolvers.size());
 		assertTrue(resolvers.get(0) instanceof ServletWebArgumentResolverAdapter);
 		assertTrue(resolvers.get(1) instanceof TestHandlerMethodArgumentResolver);
+		assertTrue(resolvers.get(2) instanceof TestHandlerMethodArgumentResolver);
+		assertNotSame(resolvers.get(1), resolvers.get(2));
 	}
-
-    @SuppressWarnings("unchecked")
-    @Test
-    public void testArgumentResolversWithReference() {
-        loadBeanDefinitions("mvc-config-argument-resolvers-references.xml");
-        RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
-        assertNotNull(adapter);
-        Object value = new DirectFieldAccessor(adapter).getPropertyValue("customArgumentResolvers");
-        assertNotNull(value);
-        assertTrue(value instanceof List);
-        List<HandlerMethodArgumentResolver> resolvers = (List<HandlerMethodArgumentResolver>) value;
-        assertEquals(2, resolvers.size());
-        assertTrue(resolvers.get(0) instanceof ServletWebArgumentResolverAdapter);
-        assertTrue(resolvers.get(1) instanceof TestHandlerMethodArgumentResolver);
-    }
 
 	@SuppressWarnings("unchecked")
 	@Test
@@ -147,8 +134,10 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertNotNull(value);
 		assertTrue(value instanceof List);
 		List<HandlerMethodReturnValueHandler> handlers = (List<HandlerMethodReturnValueHandler>) value;
-		assertEquals(1, handlers.size());
+		assertEquals(2, handlers.size());
 		assertEquals(TestHandlerMethodReturnValueHandler.class, handlers.get(0).getClass());
+		assertEquals(TestHandlerMethodReturnValueHandler.class, handlers.get(1).getClass());
+		assertNotSame(handlers.get(0), handlers.get(1));
 	}
 
 	@Test
