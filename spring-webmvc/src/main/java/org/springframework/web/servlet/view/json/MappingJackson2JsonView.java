@@ -19,7 +19,12 @@ package org.springframework.web.servlet.view.json;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -45,6 +50,8 @@ import org.springframework.web.servlet.view.AbstractView;
  * will be encoded as JSON. If the model contains only one key, you can have it extracted encoded as JSON
  * alone via  {@link #setExtractValueFromSingleKeyModel}.
  *
+ * <p>Compatible with Jackson 2.1 and higher.
+ *
  * @author Jeremy Grelle
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -60,6 +67,9 @@ public class MappingJackson2JsonView extends AbstractView {
 	 */
 	public static final String DEFAULT_CONTENT_TYPE = "application/json";
 
+	/**
+	 * Default content type for JSONP: "application/javascript".
+	 */
 	public static final String DEFAULT_JSONP_CONTENT_TYPE = "application/javascript";
 
 
@@ -71,8 +81,6 @@ public class MappingJackson2JsonView extends AbstractView {
 
 	private Boolean prettyPrint;
 
-	private final List<String> jsonpParameterNames = new ArrayList<String>(Arrays.asList("jsonp", "callback"));
-
 	private Set<String> modelKeys;
 
 	private boolean extractValueFromSingleKeyModel = false;
@@ -80,6 +88,8 @@ public class MappingJackson2JsonView extends AbstractView {
 	private boolean disableCaching = true;
 
 	private boolean updateContentLength = false;
+
+	private Set<String> jsonpParameterNames = new LinkedHashSet<String>(Arrays.asList("jsonp", "callback"));
 
 
 	/**
@@ -170,23 +180,6 @@ public class MappingJackson2JsonView extends AbstractView {
 	}
 
 	/**
-	 * Set JSONP request parameter names. Each time a request has one of those
-	 * parameters, the resulting JSON will be wrapped into a function named as
-	 * specified by the JSONP request parameter value.
-	 *
-	 * <p>The parameter names configured by default are "jsonp" and "callback".
-	 *
-	 * @since 4.1
-	 * @see <a href="http://en.wikipedia.org/wiki/JSONP">JSONP Wikipedia article</a>
-	 */
-	public void setJsonpParameterNames(Collection<String> jsonpParameters) {
-		this.jsonpParameterNames.clear();
-		if (jsonpParameters != null) {
-			this.jsonpParameterNames.addAll(jsonpParameters);
-		}
-	}
-
-	/**
 	 * Set the attribute in the model that should be rendered by this view.
 	 * When set, all other model attributes will be ignored.
 	 */
@@ -257,6 +250,19 @@ public class MappingJackson2JsonView extends AbstractView {
 		this.updateContentLength = updateContentLength;
 	}
 
+	/**
+	 * Set JSONP request parameter names. Each time a request has one of those
+	 * parameters, the resulting JSON will be wrapped into a function named as
+	 * specified by the JSONP request parameter value.
+	 * <p>The parameter names configured by default are "jsonp" and "callback".
+	 * @since 4.1
+	 * @see <a href="http://en.wikipedia.org/wiki/JSONP">JSONP Wikipedia article</a>
+	 */
+	public void setJsonpParameterNames(Set<String> jsonpParameterNames) {
+		this.jsonpParameterNames = jsonpParameterNames;
+	}
+
+
 	@Override
 	protected void prepareResponse(HttpServletRequest request, HttpServletResponse response) {
 		setResponseContentType(request, response);
@@ -291,10 +297,12 @@ public class MappingJackson2JsonView extends AbstractView {
 	}
 
 	private String getJsonpParameterValue(HttpServletRequest request) {
-		for(String name : this.jsonpParameterNames) {
-			String value = request.getParameter(name);
-			if (!StringUtils.isEmpty(value)) {
-				return value;
+		if (this.jsonpParameterNames != null) {
+			for (String name : this.jsonpParameterNames) {
+				String value = request.getParameter(name);
+				if (!StringUtils.isEmpty(value)) {
+					return value;
+				}
 			}
 		}
 		return null;
@@ -310,11 +318,10 @@ public class MappingJackson2JsonView extends AbstractView {
 	 */
 	protected Object filterModel(Map<String, Object> model) {
 		Map<String, Object> result = new HashMap<String, Object>(model.size());
-		Set<String> renderedAttributes = (!CollectionUtils.isEmpty(this.modelKeys) ? this.modelKeys : model.keySet());
+		Set<String> modelKeys = (!CollectionUtils.isEmpty(this.modelKeys) ? this.modelKeys : model.keySet());
 		for (Map.Entry<String, Object> entry : model.entrySet()) {
-			if (!(entry.getValue() instanceof BindingResult)
-					&& renderedAttributes.contains(entry.getKey())
-					&& !entry.getKey().equals(JsonView.class.getName())) {
+			if (!(entry.getValue() instanceof BindingResult) && modelKeys.contains(entry.getKey()) &&
+					!entry.getKey().equals(JsonView.class.getName())) {
 				result.put(entry.getKey(), entry.getValue());
 			}
 		}
@@ -332,17 +339,7 @@ public class MappingJackson2JsonView extends AbstractView {
 	protected void writeContent(OutputStream stream, Object value, String jsonPrefix)
 			throws IOException {
 
-		// The following has been deprecated as late as Jackson 2.2 (April 2013);
-		// preserved for the time being, for Jackson 2.0/2.1 compatibility.
-		@SuppressWarnings("deprecation")
-		JsonGenerator generator = this.objectMapper.getJsonFactory().createJsonGenerator(stream, this.encoding);
-
-		// A workaround for JsonGenerators not applying serialization features
-		// https://github.com/FasterXML/jackson-databind/issues/12
-		if (this.objectMapper.isEnabled(SerializationFeature.INDENT_OUTPUT)) {
-			generator.useDefaultPrettyPrinter();
-		}
-
+		JsonGenerator generator = this.objectMapper.getFactory().createGenerator(stream, this.encoding);
 		if (jsonPrefix != null) {
 			generator.writeRaw(jsonPrefix);
 		}

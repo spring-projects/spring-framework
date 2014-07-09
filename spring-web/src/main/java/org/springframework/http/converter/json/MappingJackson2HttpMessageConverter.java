@@ -48,7 +48,7 @@ import org.springframework.util.ClassUtils;
  * <p>By default, this converter supports {@code application/json}. This can be overridden by setting the
  * {@link #setSupportedMediaTypes supportedMediaTypes} property.
  *
- * <p>Tested against Jackson 2.2 and 2.3; compatible with Jackson 2.0 and higher.
+ * <p>Compatible with Jackson 2.1 and higher.
  *
  * @author Arjen Poutsma
  * @author Keith Donald
@@ -233,21 +233,10 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 			throws IOException, HttpMessageNotWritableException {
 
 		JsonEncoding encoding = getJsonEncoding(outputMessage.getHeaders().getContentType());
-		// The following has been deprecated as late as Jackson 2.2 (April 2013);
-		// preserved for the time being, for Jackson 2.0/2.1 compatibility.
-		@SuppressWarnings("deprecation")
-		JsonGenerator jsonGenerator =
-				this.objectMapper.getJsonFactory().createJsonGenerator(outputMessage.getBody(), encoding);
-
-		// A workaround for JsonGenerators not applying serialization features
-		// https://github.com/FasterXML/jackson-databind/issues/12
-		if (this.objectMapper.isEnabled(SerializationFeature.INDENT_OUTPUT)) {
-			jsonGenerator.useDefaultPrettyPrinter();
-		}
-
+		JsonGenerator generator = this.objectMapper.getFactory().createGenerator(outputMessage.getBody(), encoding);
 		try {
 			if (this.jsonPrefix != null) {
-				jsonGenerator.writeRaw(this.jsonPrefix);
+				generator.writeRaw(this.jsonPrefix);
 			}
 			Class<?> serializationView = null;
 			String jsonpFunction = null;
@@ -258,17 +247,17 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 				jsonpFunction = container.getJsonpFunction();
 			}
 			if (jsonpFunction != null) {
-				jsonGenerator.writeRaw(jsonpFunction + "(" );
+				generator.writeRaw(jsonpFunction + "(");
 			}
 			if (serializationView != null) {
-				this.objectMapper.writerWithView(serializationView).writeValue(jsonGenerator, object);
+				this.objectMapper.writerWithView(serializationView).writeValue(generator, object);
 			}
 			else {
-				this.objectMapper.writeValue(jsonGenerator, object);
+				this.objectMapper.writeValue(generator, object);
 			}
 			if (jsonpFunction != null) {
-				jsonGenerator.writeRaw(");");
-				jsonGenerator.flush();
+				generator.writeRaw(");");
+				generator.flush();
 			}
 		}
 		catch (JsonProcessingException ex) {

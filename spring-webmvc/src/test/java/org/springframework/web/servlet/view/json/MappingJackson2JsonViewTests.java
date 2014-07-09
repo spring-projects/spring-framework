@@ -323,7 +323,7 @@ public class MappingJackson2JsonViewTests {
 		model.put("foo", "bar");
 		request.addParameter("otherparam", "value");
 		request.addParameter("custom", "jsonpCallback");
-		view.setJsonpParameterNames(Arrays.asList("jsonp", "callback", "custom"));
+		view.setJsonpParameterNames(new LinkedHashSet(Arrays.asList("jsonp", "callback", "custom")));
 
 		view.render(model, request, response);
 
@@ -338,8 +338,14 @@ public class MappingJackson2JsonViewTests {
 		assertEquals("application/json", response.getContentType());
 	}
 
-	public interface MyJacksonView1 {};
-	public interface MyJacksonView2 {};
+
+	public interface MyJacksonView1 {
+	}
+
+
+	public interface MyJacksonView2 {
+	}
+
 
 	@SuppressWarnings("unused")
 	public static class TestBeanSimple {
@@ -378,7 +384,6 @@ public class MappingJackson2JsonViewTests {
 
 	@JsonSerialize(using=TestBeanSimpleSerializer.class)
 	public static class TestBeanSimpleAnnotated extends TestBeanSimple {
-
 	}
 
 
