@@ -265,9 +265,6 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 		this.stats.incrementSessionCount(session);
 		session = new ConcurrentWebSocketSessionDecorator(session, getSendTimeLimit(), getSendBufferSizeLimit());
 		this.sessions.put(session.getId(), new WebSocketSessionHolder(session));
-		if (logger.isDebugEnabled()) {
-			logger.debug("Started session " + session.getId() + " (" + this.sessions.size() + " sessions)");
-		}
 		findProtocolHandler(session).afterSessionStarted(session, this.clientInboundChannel);
 	}
 
@@ -422,7 +419,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 
 	private void clearSession(WebSocketSession session, CloseStatus closeStatus) throws Exception {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Clearing session " + session.getId() + " (" + this.sessions.size() + " remain)");
+			logger.debug("Clearing session " + session.getId());
 		}
 		if (this.sessions.remove(session.getId()) != null) {
 			this.stats.decrementSessionCount(session);
@@ -435,6 +432,10 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 		return false;
 	}
 
+	@Override
+	public String toString() {
+		return "SubProtocolWebSocketHandler" + getProtocolHandlers();
+	}
 
 	private static class WebSocketSessionHolder {
 

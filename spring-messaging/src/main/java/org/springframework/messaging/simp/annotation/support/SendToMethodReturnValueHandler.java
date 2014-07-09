@@ -137,7 +137,6 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 		if (returnValue == null) {
 			return;
 		}
-
 		MessageHeaders headers = message.getHeaders();
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 
@@ -161,7 +160,6 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 					this.messagingTemplate.convertAndSendToUser(user, destination, returnValue, createHeaders(sessionId));
 				}
 			}
-			return;
 		}
 		else {
 			SendTo sendTo = returnType.getMethodAnnotation(SendTo.class);
@@ -182,7 +180,6 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	}
 
 	protected String[] getTargetDestinations(Annotation annotation, Message<?> message, String defaultPrefix) {
-
 		if (annotation != null) {
 			String[] value = (String[]) AnnotationUtils.getValue(annotation);
 			if (!ObjectUtils.isEmpty(value)) {

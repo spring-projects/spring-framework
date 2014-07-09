@@ -172,7 +172,7 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 		Set<String> destinations = result.getTargetDestinations();
 		if (destinations.isEmpty()) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("No user destinations for " + message);
+				logger.trace("No user destinations found for " + result.getSourceDestination());
 			}
 			return;
 		}
@@ -183,10 +183,10 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 			headerAccessor.setNativeHeader(header, result.getSubscribeDestination());
 			message = MessageBuilder.createMessage(message.getPayload(), headerAccessor.getMessageHeaders());
 		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("Translated " + result.getSourceDestination() + " -> " + destinations);
+		}
 		for (String destination : destinations) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Sending " + message);
-			}
 			this.brokerMessagingTemplate.send(destination, message);
 		}
 	}
@@ -195,6 +195,11 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 		if (getHeaderInitializer() != null) {
 			getHeaderInitializer().initHeaders(headerAccessor);
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "UserDestinationMessageHandler[" + this.userDestinationResolver + "]";
 	}
 
 }

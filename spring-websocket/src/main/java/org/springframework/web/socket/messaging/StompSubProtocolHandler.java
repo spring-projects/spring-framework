@@ -198,8 +198,9 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			messages = decoder.decode(byteBuffer);
 			if (messages.isEmpty()) {
 				if (logger.isTraceEnabled()) {
-					logger.trace("Incomplete STOMP frame content received, bufferSize=" +
-							decoder.getBufferSize() + ", bufferSizeLimit=" + decoder.getBufferSizeLimit() + ".");
+					logger.trace("Incomplete STOMP frame content received in session " +
+							session + ", bufferSize=" + decoder.getBufferSize() +
+							", bufferSizeLimit=" + decoder.getBufferSizeLimit() + ".");
 				}
 				return;
 			}
@@ -219,9 +220,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 						MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
 				if (logger.isTraceEnabled()) {
-					logger.trace(headerAccessor.isHeartbeat() ?
-							"Received heartbeat from broker in session " + session.getId() + "." :
-							"Received message from broker in session " + session.getId() + ": " + message + ".");
+					logger.trace("From client: " + headerAccessor.getShortLogMessage(message.getPayload()));
 				}
 
 				headerAccessor.setSessionId(session.getId());
@@ -264,9 +263,6 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 	private void publishEvent(ApplicationEvent event) {
 		try {
-			if (logger.isInfoEnabled()) {
-				logger.info("Publishing " + event);
-			}
 			this.eventPublisher.publishEvent(event);
 		}
 		catch (Throwable ex) {
@@ -300,9 +296,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		StompCommand command = stompAccessor.getCommand();
 		if (StompCommand.MESSAGE.equals(command)) {
 			if (stompAccessor.getSubscriptionId() == null) {
-				if (logger.isWarnEnabled()) {
-					logger.warn("No STOMP \"subscription\" header in " + message);
-				}
+				logger.warn("No STOMP \"subscription\" header in " + message);
 			}
 			String origDestination = stompAccessor.getFirstNativeHeader(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION);
 			if (origDestination != null) {
@@ -418,10 +412,6 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		if (heartbeat[1] > 0) {
 			session = WebSocketSessionDecorator.unwrap(session);
 			if (session instanceof SockJsSession) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("STOMP heartbeats enabled. " +
-							"Turning off SockJS heartbeats in " + session.getId() + ".");
-				}
 				((SockJsSession) session).disableHeartbeat();
 			}
 		}
@@ -482,6 +472,10 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		return MessageBuilder.createMessage(EMPTY_PAYLOAD, headerAccessor.getMessageHeaders());
 	}
 
+	@Override
+	public String toString() {
+		return "StompSubProtocolHandler" + getSupportedProtocols();
+	}
 
 	private class Stats {
 

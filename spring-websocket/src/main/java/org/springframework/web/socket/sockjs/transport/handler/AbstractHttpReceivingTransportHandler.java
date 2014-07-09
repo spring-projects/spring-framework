@@ -37,6 +37,7 @@ import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJ
  */
 public abstract class AbstractHttpReceivingTransportHandler extends AbstractTransportHandler {
 
+
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
 			WebSocketHandler wsHandler, SockJsSession wsSession) throws SockJsException {
@@ -70,16 +71,13 @@ public abstract class AbstractHttpReceivingTransportHandler extends AbstractTran
 			handleReadError(response, "Failed to read message(s)", sockJsSession.getId());
 			return;
 		}
-
 		if (messages == null) {
 			handleReadError(response, "Payload expected.", sockJsSession.getId());
 			return;
 		}
-
 		if (logger.isTraceEnabled()) {
 			logger.trace("Received message(s): " + Arrays.asList(messages));
 		}
-
 		response.setStatusCode(getResponseStatus());
 		response.getHeaders().setContentType(new MediaType("text", "plain", UTF8_CHARSET));
 

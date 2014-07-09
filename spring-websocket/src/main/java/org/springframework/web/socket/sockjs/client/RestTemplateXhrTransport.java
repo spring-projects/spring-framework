@@ -125,8 +125,8 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport implements Xh
 						break;
 					}
 					try {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Starting XHR receive request, url=" + receiveUrl);
+						if (logger.isTraceEnabled()) {
+							logger.trace("Starting XHR receive request, url=" + receiveUrl);
 						}
 						getRestTemplate().execute(receiveUrl, HttpMethod.POST, requestCallback, responseExtractor);
 						requestCallback = requestCallbackAfterHandshake;
@@ -215,15 +215,15 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport implements Xh
 			if (!HttpStatus.OK.equals(response.getStatusCode())) {
 				throw new HttpServerErrorException(response.getStatusCode());
 			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("XHR receive headers: " + response.getHeaders());
+			if (logger.isTraceEnabled()) {
+				logger.trace("XHR receive headers: " + response.getHeaders());
 			}
 			InputStream is = response.getBody();
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
 			while (true) {
 				if (this.sockJsSession.isDisconnected()) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("SockJS sockJsSession closed. Closing ClientHttpResponse.");
+						logger.debug("SockJS sockJsSession closed, closing response.");
 					}
 					response.close();
 					break;
@@ -233,8 +233,8 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport implements Xh
 					if (os.size() > 0) {
 						handleFrame(os);
 					}
-					if (logger.isDebugEnabled()) {
-						logger.debug("XHR receive completed");
+					if (logger.isTraceEnabled()) {
+						logger.trace("XHR receive completed");
 					}
 					break;
 				}

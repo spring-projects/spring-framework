@@ -128,8 +128,8 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Sma
 		synchronized (this.lifecycleMonitor) {
 			if (!isRunning()) {
 				try {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Starting Jetty WebSocketClient");
+					if (logger.isInfoEnabled()) {
+						logger.info("Starting Jetty WebSocketClient");
 					}
 					this.client.start();
 				}
@@ -145,8 +145,8 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Sma
 		synchronized (this.lifecycleMonitor) {
 			if (isRunning()) {
 				try {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Stopping Jetty WebSocketClient");
+					if (logger.isInfoEnabled()) {
+						logger.info("Stopping Jetty WebSocketClient");
 					}
 					this.client.stop();
 				}

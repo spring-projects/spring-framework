@@ -26,7 +26,6 @@ import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
@@ -74,7 +73,6 @@ public final class StompEncoder  {
 			DataOutputStream output = new DataOutputStream(baos);
 
 			if (SimpMessageType.HEARTBEAT.equals(SimpMessageHeaderAccessor.getMessageType(headers))) {
-				logger.trace("Encoded heartbeat");
 				output.write(StompDecoder.HEARTBEAT_PAYLOAD);
 			}
 			else {

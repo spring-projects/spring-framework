@@ -268,54 +268,64 @@ public abstract class AbstractSockJsService implements SockJsService {
 			String sockJsPath, WebSocketHandler wsHandler) throws SockJsException {
 
 		if (sockJsPath == null) {
-			if (logger.isErrorEnabled()) {
-				logger.error("Expected SockJS path. Failing request: " + request.getURI());
-			}
+			logger.error("Expected SockJS path. Failing request: " + request.getURI());
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
 		}
 
-		if (logger.isTraceEnabled()) {
-			logger.trace(request.getMethod() + " with SockJS path [" + sockJsPath + "]");
-		}
 		try {
 			request.getHeaders();
 		}
 		catch (InvalidMediaTypeException ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Invalid media type ignored: " + ex.getMediaType());
-			}
+			// As per SockJS protocol content-type can be ignored (it's always json)
 		}
 
+		String requestInfo = logger.isDebugEnabled() ? request.getMethod() + " " + request.getURI() : "";
 		try {
 			if (sockJsPath.equals("") || sockJsPath.equals("/")) {
+				logger.debug(requestInfo);
 				response.getHeaders().setContentType(new MediaType("text", "plain", Charset.forName("UTF-8")));
 				response.getBody().write("Welcome to SockJS!\n".getBytes("UTF-8"));
 			}
 			else if (sockJsPath.equals("/info")) {
+				logger.debug(requestInfo);
 				this.infoHandler.handle(request, response);
 			}
 			else if (sockJsPath.matches("/iframe[0-9-.a-z_]*.html")) {
+				logger.debug(requestInfo);
 				this.iframeHandler.handle(request, response);
 			}
 			else if (sockJsPath.equals("/websocket")) {
 				if (isWebSocketEnabled()) {
+					logger.debug(requestInfo);
 					handleRawWebSocketRequest(request, response, wsHandler);
+				}
+				else if (logger.isDebugEnabled()) {
+					logger.debug("WebSocket disabled, ignoring " + requestInfo);
 				}
 			}
 			else {
 				String[] pathSegments = StringUtils.tokenizeToStringArray(sockJsPath.substring(1), "/");
 				if (pathSegments.length != 3) {
-					if (logger.isErrorEnabled()) {
-						logger.error("Expected \"/{server}/{session}/{transport}\" but got \"" + sockJsPath + "\"");
-					}
+					logger.error("Ignoring invalid transport request " + requestInfo);
 					response.setStatusCode(HttpStatus.NOT_FOUND);
 					return;
 				}
 				String serverId = pathSegments[0];
 				String sessionId = pathSegments[1];
 				String transport = pathSegments[2];
+<<<<<<< HEAD
 				if (!validateRequest(serverId, sessionId, transport)) {
+=======
+
+				if (!isWebSocketEnabled() && transport.equals("websocket")) {
+					logger.debug("WebSocket transport is disabled, ignoring " + requestInfo);
+					response.setStatusCode(HttpStatus.NOT_FOUND);
+					return;
+				}
+				else if (!validateRequest(serverId, sessionId, transport)) {
+					logger.error("Ignoring transport request " + requestInfo);
+>>>>>>> STOMP and WebSocket messaging related logging updates
 					response.setStatusCode(HttpStatus.NOT_FOUND);
 					return;
 				}
@@ -330,21 +340,23 @@ public abstract class AbstractSockJsService implements SockJsService {
 
 	protected boolean validateRequest(String serverId, String sessionId, String transport) {
 		if (!StringUtils.hasText(serverId) || !StringUtils.hasText(sessionId) || !StringUtils.hasText(transport)) {
-			logger.error("Empty server, session, or transport value");
+			logger.error("No server, session, or transport path segment");
 			return false;
 		}
-
 		// Server and session id's must not contain "."
 		if (serverId.contains(".") || sessionId.contains(".")) {
+<<<<<<< HEAD
 			logger.error("Server or session contain a \".\"");
 			return false;
 		}
 
 		if (!isWebSocketEnabled() && transport.equals("websocket")) {
 			logger.debug("Ignoring WebSocket request (transport disabled via SockJsService property)");
+=======
+			logger.error("Either server or session contains a \".\" which is not allowed by SockJS protocol.");
+>>>>>>> STOMP and WebSocket messaging related logging updates
 			return false;
 		}
-
 		return true;
 	}
 
@@ -368,7 +380,6 @@ public abstract class AbstractSockJsService implements SockJsService {
 		try {
 			// Perhaps a CORS Filter has already added this?
 			if (!CollectionUtils.isEmpty(responseHeaders.get("Access-Control-Allow-Origin"))) {
-				logger.trace("Skip adding CORS headers, response already contains \"Access-Control-Allow-Origin\"");
 				return;
 			}
 		}

@@ -25,6 +25,7 @@ import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
@@ -138,35 +139,44 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 			return;
 		}
 
+		SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, SimpMessageHeaderAccessor.class);
+		if (accessor == null) {
+			throw new IllegalStateException(
+					"No header accessor (not using the SimpMessagingTemplate?): " + message);
+		}
+
 		if (SimpMessageType.MESSAGE.equals(messageType)) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Processing " + accessor.getShortLogMessage(message.getPayload()));
+			}
 			sendMessageToSubscribers(destination, message);
 		}
 		else if (SimpMessageType.CONNECT.equals(messageType)) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Handling CONNECT: " + message);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Processing " + accessor.getShortLogMessage(EMPTY_PAYLOAD));
 			}
-			SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
-			initHeaders(accessor);
-			accessor.setSessionId(sessionId);
-			accessor.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, message);
-			Message<byte[]> connectAck = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
-			this.clientOutboundChannel.send(connectAck);
+			SimpMessageHeaderAccessor connectAck = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
+			initHeaders(connectAck);
+			connectAck.setSessionId(sessionId);
+			connectAck.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, message);
+			Message<byte[]> messageOut = MessageBuilder.createMessage(EMPTY_PAYLOAD, connectAck.getMessageHeaders());
+			this.clientOutboundChannel.send(messageOut);
 		}
 		else if (SimpMessageType.DISCONNECT.equals(messageType)) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Handling DISCONNECT: " + message);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Processing " + accessor.getShortLogMessage(EMPTY_PAYLOAD));
 			}
 			this.subscriptionRegistry.unregisterAllSubscriptions(sessionId);
 		}
 		else if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Handling SUBSCRIBE: " + message);
+				logger.debug("Processing " + accessor.getShortLogMessage(EMPTY_PAYLOAD));
 			}
 			this.subscriptionRegistry.registerSubscription(message);
 		}
 		else if (SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Handling UNSUBSCRIBE: " + message);
+				logger.debug("Processing " + accessor.getShortLogMessage(EMPTY_PAYLOAD));
 			}
 			this.subscriptionRegistry.unregisterSubscription(message);
 		}
@@ -180,8 +190,8 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	protected void sendMessageToSubscribers(String destination, Message<?> message) {
 		MultiValueMap<String,String> subscriptions = this.subscriptionRegistry.findSubscriptions(message);
-		if ((subscriptions.size() > 0) && logger.isTraceEnabled()) {
-			logger.trace("Sending to " + subscriptions.size() + " subscriber(s): " + message);
+		if ((subscriptions.size() > 0) && logger.isDebugEnabled()) {
+			logger.debug("Broadcasting to " + subscriptions.size() + " sessions.");
 		}
 		for (String sessionId : subscriptions.keySet()) {
 			for (String subscriptionId : subscriptions.get(sessionId)) {

@@ -38700,7 +38700,7 @@ infrastructure components automatically gather stats and counters that provide
 important insight into the internal state of the application. The configuration
 also declares a bean of type `WebSocketMessageBrokerStats` that gathers all
 available information in one place and by default logs it at INFO once
-every 15 minutes. This bean can be exported to JMX through Spring's
+every 30 minutes. This bean can be exported to JMX through Spring's
 `MBeanExporter` for viewing at runtime for example through JDK's jconsole.
 Below is a summary of the available information.
 

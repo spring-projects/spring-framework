@@ -130,15 +130,15 @@ public abstract class AbstractBrokerMessageHandler
 	}
 
 	@Override
-	public final void start() {
+	public void start() {
 		synchronized (this.lifecycleMonitor) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Starting...");
+			if (logger.isInfoEnabled()) {
+				logger.info("Starting...");
 			}
 			startInternal();
 			this.running = true;
-			if (logger.isDebugEnabled()) {
-				logger.debug("Started.");
+			if (logger.isInfoEnabled()) {
+				logger.info("Started.");
 			}
 		}
 	}
@@ -147,15 +147,15 @@ public abstract class AbstractBrokerMessageHandler
 	}
 
 	@Override
-	public final void stop() {
+	public void stop() {
 		synchronized (this.lifecycleMonitor) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Stopping...");
+			if (logger.isInfoEnabled()) {
+				logger.info("Stopping...");
 			}
 			stopInternal();
 			this.running = false;
 			if (logger.isDebugEnabled()) {
-				logger.debug("Stopped.");
+				logger.info("Stopped.");
 			}
 		}
 	}
@@ -172,7 +172,7 @@ public abstract class AbstractBrokerMessageHandler
 	}
 
 	@Override
-	public final void handleMessage(Message<?> message) {
+	public void handleMessage(Message<?> message) {
 		if (!this.running) {
 			if (logger.isTraceEnabled()) {
 				logger.trace(this + " not running yet. Ignoring " + message);
@@ -200,7 +200,7 @@ public abstract class AbstractBrokerMessageHandler
 		boolean shouldPublish = this.brokerAvailable.compareAndSet(false, true);
 		if (this.eventPublisher != null && shouldPublish) {
 			if (logger.isInfoEnabled()) {
-				logger.info("Publishing " + this.availableEvent);
+				logger.info(this.availableEvent);
 			}
 			this.eventPublisher.publishEvent(this.availableEvent);
 		}
@@ -210,7 +210,7 @@ public abstract class AbstractBrokerMessageHandler
 		boolean shouldPublish = this.brokerAvailable.compareAndSet(true, false);
 		if (this.eventPublisher != null && shouldPublish) {
 			if (logger.isInfoEnabled()) {
-				logger.info("Publishing " + this.notAvailableEvent);
+				logger.info(this.notAvailableEvent);
 			}
 			this.eventPublisher.publishEvent(this.notAvailableEvent);
 		}

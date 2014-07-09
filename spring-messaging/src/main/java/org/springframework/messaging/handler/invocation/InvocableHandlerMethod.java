@@ -96,15 +96,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	public final Object invoke(Message<?> message, Object... providedArgs) throws Exception {
 		Object[] args = getMethodArgumentValues(message, providedArgs);
 		if (logger.isTraceEnabled()) {
-			StringBuilder sb = new StringBuilder("Invoking [");
-			sb.append(getBeanType().getSimpleName()).append(".");
-			sb.append(getMethod().getName()).append("] method with arguments ");
-			sb.append(Arrays.asList(args));
-			logger.trace(sb.toString());
+			logger.trace("Resolved arguments: " + Arrays.asList(args));
 		}
 		Object returnValue = invoke(args);
 		if (logger.isTraceEnabled()) {
-			logger.trace("Method [" + getMethod().getName() + "] returned [" + returnValue + "]");
+			logger.trace("Returned value: " + returnValue);
 		}
 		return returnValue;
 	}
@@ -136,8 +132,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				}
 			}
 			if (args[i] == null) {
-				String msg = getArgumentResolutionErrorMessage("No suitable resolver for argument", i);
-				throw new IllegalStateException(msg);
+				String error = getArgumentResolutionErrorMessage("No suitable resolver for argument", i);
+				throw new IllegalStateException(error);
 			}
 		}
 		return args;

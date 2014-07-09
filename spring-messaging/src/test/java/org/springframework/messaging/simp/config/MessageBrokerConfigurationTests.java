@@ -166,7 +166,7 @@ public class MessageBrokerConfigurationTests {
 		headers.setSessionId("sess1");
 		headers.setSubscriptionId("subs1");
 		headers.setDestination("/foo");
-		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		Message<?> message = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
 
 		// subscribe
 		broker.handleMessage(message);
@@ -174,7 +174,7 @@ public class MessageBrokerConfigurationTests {
 		headers = StompHeaderAccessor.create(StompCommand.SEND);
 		headers.setSessionId("sess1");
 		headers.setDestination("/foo");
-		message = MessageBuilder.withPayload("bar".getBytes()).setHeaders(headers).build();
+		message = MessageBuilder.createMessage("bar".getBytes(), headers.getMessageHeaders());
 
 		// message
 		broker.handleMessage(message);
@@ -235,7 +235,7 @@ public class MessageBrokerConfigurationTests {
 		headers.setSessionId("sess1");
 		headers.setSessionAttributes(new ConcurrentHashMap<>());
 		headers.setDestination("/foo");
-		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		Message<?> message = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
 
 		messageHandler.handleMessage(message);
 
@@ -256,7 +256,7 @@ public class MessageBrokerConfigurationTests {
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
 		headers.setDestination("/user/joe/foo");
-		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		Message<?> message = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
 
 		messageHandler.handleMessage(message);
 

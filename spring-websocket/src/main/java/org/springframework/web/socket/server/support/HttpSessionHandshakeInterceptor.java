@@ -21,9 +21,6 @@ import java.util.Enumeration;
 import java.util.Map;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -40,8 +37,6 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
  * @since 4.0
  */
 public class HttpSessionHandshakeInterceptor implements HandshakeInterceptor {
-
-	private static final Log logger = LogFactory.getLog(HttpSessionHandshakeInterceptor.class);
 
 	private Collection<String> attributeNames;
 
@@ -74,15 +69,7 @@ public class HttpSessionHandshakeInterceptor implements HandshakeInterceptor {
 				while (names.hasMoreElements()) {
 					String name = names.nextElement();
 					if (CollectionUtils.isEmpty(this.attributeNames) || this.attributeNames.contains(name)) {
-						if (logger.isTraceEnabled()) {
-							logger.trace("Adding HTTP session attribute to handshake attributes: " + name);
-						}
 						attributes.put(name, session.getAttribute(name));
-					}
-					else {
-						if (logger.isTraceEnabled()) {
-							logger.trace("Skipped HTTP session attribute");
-						}
 					}
 				}
 			}

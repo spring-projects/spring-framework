@@ -110,10 +110,20 @@ public class SimpAttributesContextHolderTests {
 	}
 
 	@Test
-	public void setAttributesFromMessageWithMissingHeaders() {
+	public void setAttributesFromMessageWithMissingSessionId() {
 		this.thrown.expect(IllegalStateException.class);
-		this.thrown.expectMessage(startsWith("Message does not contain SiMP session id or attributes"));
+		this.thrown.expectMessage(startsWith("No session id in"));
 		SimpAttributesContextHolder.setAttributesFromMessage(new GenericMessage<Object>(""));
+	}
+
+	@Test
+	public void setAttributesFromMessageWithMissingSessionAttributes() {
+		this.thrown.expect(IllegalStateException.class);
+		this.thrown.expectMessage(startsWith("No session attributes in"));
+		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create();
+		headerAccessor.setSessionId("session1");
+		Message<?> message = MessageBuilder.createMessage("", headerAccessor.getMessageHeaders());
+		SimpAttributesContextHolder.setAttributesFromMessage(message);
 	}
 
 	@Test

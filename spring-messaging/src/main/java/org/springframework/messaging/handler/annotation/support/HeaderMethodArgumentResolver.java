@@ -80,9 +80,6 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 
 		if (name.startsWith("nativeHeaders.")) {
 			name = name.substring("nativeHeaders.".length());
-			if (logger.isDebugEnabled()) {
-				logger.debug("Looking up native header '" + name + "'");
-			}
 		}
 
 		if ((nativeHeaders == null) || !nativeHeaders.containsKey(name)) {

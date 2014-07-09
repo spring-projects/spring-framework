@@ -56,37 +56,23 @@ class ChannelInterceptorChain {
 
 
 	public Message<?> preSend(Message<?> message, MessageChannel channel) {
-		Message<?> originalMessage = message;
 		for (ChannelInterceptor interceptor : this.interceptors) {
 			message = interceptor.preSend(message, channel);
 			if (message == null) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("preSend returned null (precluding the send)");
-				}
+				logger.debug("preSend returned null precluding send");
 				return null;
-			}
-		}
-		if (logger.isDebugEnabled()) {
-			if (message != originalMessage) {
-				logger.debug("preSend returned modified message, new message=" + message);
 			}
 		}
 		return message;
 	}
 
 	public void postSend(Message<?> message, MessageChannel channel, boolean sent) {
-		if (logger.isTraceEnabled()) {
-			logger.trace("postSend (sent=" + sent + ")");
-		}
 		for (ChannelInterceptor interceptor : this.interceptors) {
 			interceptor.postSend(message, channel, sent);
 		}
 	}
 
 	public boolean preReceive(MessageChannel channel) {
-		if (logger.isTraceEnabled()) {
-			logger.trace("preReceive on channel '" + channel + "'");
-		}
 		for (ChannelInterceptor interceptor : this.interceptors) {
 			if (!interceptor.preReceive(channel)) {
 				return false;
@@ -96,12 +82,6 @@ class ChannelInterceptorChain {
 	}
 
 	public Message<?> postReceive(Message<?> message, MessageChannel channel) {
-		if (message != null && logger.isTraceEnabled()) {
-			logger.trace("postReceive on channel '" + channel + "', message: " + message);
-		}
-		else if (logger.isTraceEnabled()) {
-			logger.trace("postReceive on channel '" + channel + "', message is null");
-		}
 		for (ChannelInterceptor interceptor : this.interceptors) {
 			message = interceptor.postReceive(message, channel);
 			if (message == null) {
@@ -110,6 +90,5 @@ class ChannelInterceptorChain {
 		}
 		return message;
 	}
-
 
 }

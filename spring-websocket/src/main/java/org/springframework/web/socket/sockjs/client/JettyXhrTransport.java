@@ -136,8 +136,8 @@ public class JettyXhrTransport extends AbstractXhrTransport implements XhrTransp
 	}
 
 	private void executeReceiveRequest(URI url, HttpHeaders headers, SockJsResponseListener listener) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Starting XHR receive request, url=" + url);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Starting XHR receive request, url=" + url);
 		}
 		Request httpRequest = this.httpClient.newRequest(url).method(HttpMethod.POST);
 		addHttpHeaders(httpRequest, headers);
@@ -182,9 +182,9 @@ public class JettyXhrTransport extends AbstractXhrTransport implements XhrTransp
 
 		@Override
 		public void onHeaders(Response response) {
-			if (logger.isDebugEnabled()) {
+			if (logger.isTraceEnabled()) {
 				// Convert to HttpHeaders to avoid "\n"
-				logger.debug("XHR receive headers: " + toHttpHeaders(response.getHeaders()));
+				logger.trace("XHR receive headers: " + toHttpHeaders(response.getHeaders()));
 			}
 		}
 
@@ -193,7 +193,7 @@ public class JettyXhrTransport extends AbstractXhrTransport implements XhrTransp
 			while (true) {
 				if (this.sockJsSession.isDisconnected()) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("SockJS sockJsSession closed. Closing ClientHttpResponse.");
+						logger.debug("SockJS sockJsSession closed, closing response.");
 					}
 					response.abort(new SockJsException("Session closed.", this.sockJsSession.getId(), null));
 					return;
@@ -228,8 +228,8 @@ public class JettyXhrTransport extends AbstractXhrTransport implements XhrTransp
 			if (this.outputStream.size() > 0) {
 				handleFrame();
 			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("XHR receive request completed.");
+			if (logger.isTraceEnabled()) {
+				logger.trace("XHR receive request completed.");
 			}
 			executeReceiveRequest(this.transportUrl, this.receiveHeaders, this);
 		}

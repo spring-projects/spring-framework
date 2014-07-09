@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.simp.stomp;
 
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -61,6 +62,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	private static final AtomicLong messageIdCounter = new AtomicLong();
 
 	private static final long[] DEFAULT_HEARTBEAT = new long[] {0, 0};
+
 
 	// STOMP header names
 
@@ -438,6 +440,71 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		setNativeHeader(STOMP_VERSION_HEADER, version);
 	}
 
+	// Logging related
+
+	@Override
+	public String getShortLogMessage(Object payload) {
+		if (StompCommand.SUBSCRIBE.equals(getCommand())) {
+			return "SUBSCRIBE " + getDestination() + " id=" + getSubscriptionId() + appendSession();
+		}
+		else if (StompCommand.UNSUBSCRIBE.equals(getCommand())) {
+			return "UNSUBSCRIBE id=" + getSubscriptionId() + appendSession();
+		}
+		else if (StompCommand.SEND.equals(getCommand())) {
+			return "SEND " + getDestination() + appendSession() + appendPayload(payload);
+		}
+		else if (StompCommand.CONNECT.equals(getCommand())) {
+			return "CONNECT" + (getUser() != null ? " user=" + getUser().getName() : "") + appendSession();
+		}
+		else if (StompCommand.CONNECTED.equals(getCommand())) {
+			return "CONNECTED heart-beat=" + Arrays.toString(getHeartbeat()) + appendSession();
+		}
+		else if (StompCommand.DISCONNECT.equals(getCommand())) {
+			return "DISCONNECT" + (getReceipt() != null ? " receipt=" + getReceipt() : "") + appendSession();
+		}
+		else {
+			return getDetailedLogMessage(payload);
+		}
+	}
+
+	@Override
+	public String getDetailedLogMessage(Object payload) {
+		if (isHeartbeat()) {
+			return "heart-beat in session " + getSessionId();
+		}
+		StompCommand command = getCommand();
+		if (command == null) {
+			return super.getDetailedLogMessage(payload);
+		}
+		StringBuilder sb = new StringBuilder();
+		sb.append(command.name()).append(" ").append(getNativeHeaders()).append(appendSession());
+		if (getUser() != null) {
+			sb.append(", user=").append(getUser().getName());
+		}
+		if (command.isBodyAllowed()) {
+			sb.append(appendPayload(payload));
+		}
+		return sb.toString();
+	}
+
+	private String appendSession() {
+		return " session=" + getSessionId();
+	}
+
+	private String appendPayload(Object payload) {
+		Assert.isInstanceOf(byte[].class, payload);
+		byte[] bytes = (byte[]) payload;
+		String contentType = (getContentType() != null ? " " + getContentType().toString() : "");
+		if (bytes.length == 0 || getContentType() == null || !isReadableContentType()) {
+			return contentType;
+		}
+		Charset charset = getContentType().getCharSet();
+		charset = (charset != null ? charset : StompDecoder.UTF8_CHARSET);
+		return (bytes.length < 80) ?
+				contentType + " payload=" + new String(bytes, charset) :
+				contentType + " payload=" + new String(Arrays.copyOf(bytes, 80), charset) + "...(truncated)";
+	}
+
 
 	private static class StompPasscode {
 
@@ -452,4 +519,5 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 			return "[PROTECTED]";
 		}
 	}
+
 }

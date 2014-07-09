@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ public class DefaultSockJsService extends TransportHandlingSockJsService {
 		catch (Exception ex) {
 			Log logger = LogFactory.getLog(DefaultSockJsService.class);
 			if (logger.isWarnEnabled()) {
-				logger.warn("Failed to create default WebSocketTransportHandler", ex);
+				logger.warn("Failed to create a default WebSocketTransportHandler", ex);
 			}
 		}
 		if (overrides != null) {

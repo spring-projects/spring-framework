@@ -275,7 +275,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		@Override
 		public String toString() {
-			return "registry[" + sessions.size() + " session(s)]";
+			return "registry[" + sessions.size() + " sessions]";
 		}
 	}
 

@@ -104,8 +104,8 @@ public abstract class AbstractXhrTransport implements XhrTransport {
 			}
 			throw new HttpServerErrorException(response.getStatusCode());
 		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("SockJS Info request (url=" + infoUrl + ") response: " + response);
+		if (logger.isTraceEnabled()) {
+			logger.trace("SockJS Info request (url=" + infoUrl + ") response: " + response);
 		}
 		return response.getBody();
 	}
@@ -114,8 +114,8 @@ public abstract class AbstractXhrTransport implements XhrTransport {
 
 	@Override
 	public void executeSendRequest(URI url, TextMessage message) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Starting XHR send, url=" + url);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Starting XHR send, url=" + url);
 		}
 		ResponseEntity<String> response = executeSendRequestInternal(url, this.xhrSendRequestHeaders, message);
 		if (response.getStatusCode() != HttpStatus.NO_CONTENT) {
@@ -124,8 +124,8 @@ public abstract class AbstractXhrTransport implements XhrTransport {
 			}
 			throw new HttpServerErrorException(response.getStatusCode());
 		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("XHR send request (url=" + url + ") response: " + response);
+		if (logger.isTraceEnabled()) {
+			logger.trace("XHR send request (url=" + url + ") response: " + response);
 		}
 	}
 
@@ -139,7 +139,8 @@ public abstract class AbstractXhrTransport implements XhrTransport {
 
 		URI receiveUrl = request.getTransportUrl();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Opening XHR session, receive url=" + receiveUrl);
+			logger.debug("Starting XHR " +
+					(isXhrStreamingDisabled() ? "Polling" : "Streaming") + "session url=" + receiveUrl);
 		}
 
 		HttpHeaders handshakeHeaders = new HttpHeaders();

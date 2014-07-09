@@ -27,6 +27,8 @@ import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 
 /**
+ * A HandlerMethodReturnValueHandler that wraps and delegates to others.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
@@ -79,9 +81,6 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 	private HandlerMethodReturnValueHandler getReturnValueHandler(MethodParameter returnType) {
 		for (HandlerMethodReturnValueHandler handler : this.returnValueHandlers) {
 			if (handler.supportsReturnType(returnType)) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Processing return value with " + handler);
-				}
 				return handler;
 			}
 		}
@@ -94,6 +93,9 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 
 		HandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);
 		Assert.notNull(handler, "No handler for return value type [" + returnType.getParameterType().getName() + "]");
+		if (logger.isTraceEnabled()) {
+			logger.trace("Processing return value with " + handler);
+		}
 		handler.handleReturnValue(returnValue, returnType, message);
 	}
 

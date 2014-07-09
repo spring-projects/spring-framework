@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,12 +63,14 @@ public abstract class AbstractHttpSendingTransportHandler extends AbstractTransp
 
 		if (sockJsSession.isNew()) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Opening " + getTransportType() + " connection.");
+				logger.debug(request.getMethod() + " " + request.getURI());
 			}
 			sockJsSession.handleInitialRequest(request, response, getFrameFormat(request));
 		}
 		else if (sockJsSession.isClosed()) {
-			logger.debug("Connection already closed (but not removed yet).");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Connection already closed (but not removed yet) for " + sockJsSession);
+			}
 			SockJsFrame frame = SockJsFrame.closeFrameGoAway();
 			try {
 				response.getBody().write(frame.getContentBytes());
@@ -76,7 +78,6 @@ public abstract class AbstractHttpSendingTransportHandler extends AbstractTransp
 			catch (IOException ex) {
 				throw new SockJsException("Failed to send " + frame, sockJsSession.getId(), ex);
 			}
-			return;
 		}
 		else if (!sockJsSession.isActive()) {
 			if (logger.isTraceEnabled()) {
@@ -86,7 +87,7 @@ public abstract class AbstractHttpSendingTransportHandler extends AbstractTransp
 		}
 		else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Another " + getTransportType() + " connection still open: " + sockJsSession);
+				logger.debug("Another " + getTransportType() + " connection still open for " + sockJsSession);
 			}
 			String formattedFrame = getFrameFormat(request).format(SockJsFrame.closeFrameAnotherConnectionOpen());
 			try {

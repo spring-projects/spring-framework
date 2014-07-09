@@ -122,8 +122,8 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 
 	protected void startInternal() {
 		synchronized (lifecycleMonitor) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Starting " + this.getClass().getSimpleName());
+			if (logger.isInfoEnabled()) {
+				logger.info("Starting " + this.getClass().getSimpleName());
 			}
 			this.isRunning = true;
 			openConnection();
@@ -136,8 +136,8 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 	public final void stop() {
 		synchronized (this.lifecycleMonitor) {
 			if (isRunning()) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Stopping " + this.getClass().getSimpleName());
+				if (logger.isInfoEnabled()) {
+					logger.info("Stopping " + this.getClass().getSimpleName());
 				}
 				try {
 					stopInternal();
