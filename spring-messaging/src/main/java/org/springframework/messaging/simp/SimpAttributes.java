@@ -13,16 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.simp;
+
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-
-import java.util.Map;
 
 /**
  * A wrapper class for access to attributes associated with a SiMP session
@@ -62,24 +64,6 @@ public class SimpAttributes {
 		this.attributes = attributes;
 	}
 
-	/**
-	 * Extract the SiMP session attributes from the given message, wrap them in
-	 * a {@link SimpAttributes} instance.
-	 * @param message the message to extract session attributes from
-	 */
-	public static SimpAttributes fromMessage(Message<?> message) {
-		Assert.notNull(message);
-		MessageHeaders headers = message.getHeaders();
-		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
-		Map<String, Object> sessionAttributes = SimpMessageHeaderAccessor.getSessionAttributes(headers);
-		if (sessionId == null) {
-			throw new IllegalStateException("No session id in " + message);
-		}
-		if (sessionAttributes == null) {
-			throw new IllegalStateException("No session attributes in " + message);
-		}
-		return new SimpAttributes(sessionId, sessionAttributes);
-	}
 
 	/**
 	 * Return the value for the attribute of the given name, if any.
@@ -191,6 +175,26 @@ public class SimpAttributes {
 				}
 			}
 		}
+	}
+
+
+	/**
+	 * Extract the SiMP session attributes from the given message and
+	 * wrap them in a {@link SimpAttributes} instance.
+	 * @param message the message to extract session attributes from
+	 */
+	public static SimpAttributes fromMessage(Message<?> message) {
+		Assert.notNull(message, "Message must not be null");
+		MessageHeaders headers = message.getHeaders();
+		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
+		Map<String, Object> sessionAttributes = SimpMessageHeaderAccessor.getSessionAttributes(headers);
+		if (sessionId == null) {
+			throw new IllegalStateException("No session id in " + message);
+		}
+		if (sessionAttributes == null) {
+			throw new IllegalStateException("No session attributes in " + message);
+		}
+		return new SimpAttributes(sessionId, sessionAttributes);
 	}
 
 }

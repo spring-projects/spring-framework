@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.simp;
 
 import org.springframework.core.NamedThreadLocal;
@@ -41,7 +42,6 @@ public abstract class SimpAttributesContextHolder {
 
 	/**
 	 * Bind the given SimpAttributes to the current thread,
-	 *
 	 * @param attributes the RequestAttributes to expose
 	 */
 	public static void setAttributes(SimpAttributes attributes) {
@@ -56,7 +56,6 @@ public abstract class SimpAttributesContextHolder {
 	/**
 	 * Extract the SiMP session attributes from the given message, wrap them in
 	 * a {@link SimpAttributes} instance and bind it to the current thread,
-	 *
 	 * @param message the message to extract session attributes from
 	 */
 	public static void setAttributesFromMessage(Message<?> message) {
@@ -65,7 +64,6 @@ public abstract class SimpAttributesContextHolder {
 
 	/**
 	 * Return the SimpAttributes currently bound to the thread.
-	 *
 	 * @return the attributes or {@code null} if not bound
 	 */
 	public static SimpAttributes getAttributes() {
@@ -75,7 +73,6 @@ public abstract class SimpAttributesContextHolder {
 	/**
 	 * Return the SimpAttributes currently bound to the thread or raise an
 	 * {@link java.lang.IllegalStateException} if none are bound..
-	 *
 	 * @return the attributes, never {@code null}
 	 * @throws java.lang.IllegalStateException if attributes are not bound
 	 */
