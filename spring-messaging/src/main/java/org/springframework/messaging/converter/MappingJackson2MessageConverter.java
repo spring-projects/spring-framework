@@ -39,7 +39,7 @@ import org.springframework.util.MimeType;
 /**
  * A Jackson 2 based {@link MessageConverter} implementation.
  *
- * <p>Tested against Jackson 2.2 and 2.3; compatible with Jackson 2.0 and higher.
+ * <p>Compatible with Jackson 2.1 and higher.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -183,18 +183,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 			if (byte[].class.equals(getSerializedPayloadClass())) {
 				ByteArrayOutputStream out = new ByteArrayOutputStream(1024);
 				JsonEncoding encoding = getJsonEncoding(getMimeType(headers));
-
-				// The following has been deprecated as late as Jackson 2.2 (April 2013);
-				// preserved for the time being, for Jackson 2.0/2.1 compatibility.
-				@SuppressWarnings("deprecation")
-				JsonGenerator generator = this.objectMapper.getJsonFactory().createJsonGenerator(out, encoding);
-
-				// A workaround for JsonGenerators not applying serialization features
-				// https://github.com/FasterXML/jackson-databind/issues/12
-				if (this.objectMapper.isEnabled(SerializationFeature.INDENT_OUTPUT)) {
-					generator.useDefaultPrettyPrinter();
-				}
-
+				JsonGenerator generator = this.objectMapper.getFactory().createGenerator(out, encoding);
 				this.objectMapper.writeValue(generator, payload);
 				payload = out.toByteArray();
 			}
