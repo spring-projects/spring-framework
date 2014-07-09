@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.messaging;
+package org.springframework.jms.core;
 
 import java.util.Map;
 

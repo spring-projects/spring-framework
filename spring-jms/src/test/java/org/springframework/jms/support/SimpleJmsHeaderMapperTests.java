@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.support.converter;
-
-import static org.junit.Assert.*;
+package org.springframework.jms.support;
 
 import java.util.Date;
 import java.util.Map;
-
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
 import javax.jms.JMSException;
@@ -32,6 +29,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
 
+import static org.junit.Assert.*;
+
 /**
  *
  * @author Mark Fisher
@@ -41,6 +40,7 @@ import org.springframework.messaging.support.MessageBuilder;
 public class SimpleJmsHeaderMapperTests {
 
 	private final SimpleJmsHeaderMapper mapper = new SimpleJmsHeaderMapper();
+
 
 	// Outbound mapping
 
@@ -559,4 +559,5 @@ public class SimpleJmsHeaderMapperTests {
 	private MessageBuilder<String> initBuilder() {
 		return MessageBuilder.withPayload("test");
 	}
+
 }

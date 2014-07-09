@@ -14,7 +14,25 @@
  * limitations under the License.
  */
 
+package org.springframework.jms.support;
+
+import javax.jms.Message;
+
+import org.springframework.messaging.support.HeaderMapper;
+
 /**
- * JMS integration for Spring's messaging module.
+ * Strategy interface for mapping messaging Message headers to an outbound
+ * JMS Message (e.g. to configure JMS properties) or extracting messaging
+ * header values from an inbound JMS Message.
+ *
+ * @author Mark Fisher
+ * @author Oleg Zhurakousky
+ * @author Gary Russell
+ * @since 4.1
  */
-package org.springframework.jms.messaging;
+public interface JmsHeaderMapper extends HeaderMapper<Message> {
+
+	static final String CONTENT_TYPE_PROPERTY = "content_type";
+
+}
+

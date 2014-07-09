@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.support.converter;
+package org.springframework.jms.support;
 
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import javax.jms.Destination;
 import javax.jms.JMSException;
 
@@ -34,16 +33,16 @@ import org.springframework.util.StringUtils;
 
 /**
  * Simple implementation of {@link JmsHeaderMapper}.
- * <p>
- * This implementation copies JMS API headers (e.g. JMSReplyTo) to and from
+ *
+ * <p>This implementation copies JMS API headers (e.g. JMSReplyTo) to and from
  * {@link org.springframework.messaging.Message Messages}. Any user-defined
  * properties will also be copied from a JMS Message to a Message, and any
  * other headers on a Message (beyond the JMS API headers) will likewise
  * be copied to a JMS Message. Those other headers will be copied to the
  * general properties of a JMS Message whereas the JMS API headers are passed
  * to the appropriate setter methods (e.g. setJMSReplyTo).
- * <p>
- * Constants for the JMS API headers are defined in {@link JmsHeaders}.
+ *
+ * <p>Constants for the JMS API headers are defined in {@link JmsHeaders}.
  * Note that most of the JMS headers are read-only: the JMSDestination,
  * JMSDeliveryMode, JMSExpiration, JMSMessageID, JMSPriority, JMSRedelivered
  * and JMSTimestamp flags are only copied <em>from</em> a JMS Message. Those
@@ -51,50 +50,46 @@ import org.springframework.util.StringUtils;
  * JMS Message.
  *
  * @author Mark Fisher
- * @author Gary Russel
+ * @author Gary Russell
  * @since 4.1
  */
 public class SimpleJmsHeaderMapper implements JmsHeaderMapper {
 
-	private static List<Class<?>> SUPPORTED_PROPERTY_TYPES = Arrays.asList(new Class<?>[] {
-			Boolean.class, Byte.class, Double.class, Float.class, Integer.class, Long.class, Short.class, String.class});
+	private static Set<Class<?>> SUPPORTED_PROPERTY_TYPES = new HashSet<Class<?>>(Arrays.asList(new Class<?>[] {
+			Boolean.class, Byte.class, Double.class, Float.class, Integer.class, Long.class, Short.class, String.class}));
 
 
-	private final Log logger = LogFactory.getLog(this.getClass());
+	private final Log logger = LogFactory.getLog(getClass());
 
-	private volatile String inboundPrefix = "";
+	private String inboundPrefix = "";
 
-	private volatile String outboundPrefix = "";
+	private String outboundPrefix = "";
+
 
 	/**
 	 * Specify a prefix to be appended to the message header name for any
 	 * JMS property that is being mapped into the MessageHeaders. The
 	 * default is an empty string (no prefix).
-	 * <p>
-	 * This does not affect the JMS properties covered by the specification/API,
+	 * <p>This does not affect the JMS properties covered by the specification/API,
 	 * such as JMSCorrelationID, etc. The header names used for mapping such
-	 * properties are all defined in our {@link JmsHeaders}.
-	 *
-	 * @param inboundPrefix The inbound prefix.
+	 * properties are all defined in our {@link org.springframework.jms.support.JmsHeaders}.
 	 */
 	public void setInboundPrefix(String inboundPrefix) {
-		this.inboundPrefix = (inboundPrefix != null) ? inboundPrefix : "";
+		this.inboundPrefix = (inboundPrefix != null ? inboundPrefix : "");
 	}
 
 	/**
 	 * Specify a prefix to be appended to the JMS property name for any
 	 * message header that is being mapped into the JMS Message. The
 	 * default is an empty string (no prefix).
-	 * <p>
-	 * This does not affect the JMS properties covered by the specification/API,
+	 * <p>This does not affect the JMS properties covered by the specification/API,
 	 * such as JMSCorrelationID, etc. The header names used for mapping such
-	 * properties are all defined in our {@link JmsHeaders}.
-	 *
-	 * @param outboundPrefix The outbound prefix.
+	 * properties are all defined in our {@link org.springframework.jms.support.JmsHeaders}.
 	 */
 	public void setOutboundPrefix(String outboundPrefix) {
-		this.outboundPrefix = (outboundPrefix != null) ? outboundPrefix : "";
+		this.outboundPrefix = (outboundPrefix != null ? outboundPrefix : "");
 	}
+
 
 	@Override
 	public void fromHeaders(MessageHeaders headers, javax.jms.Message jmsMessage) {
@@ -152,15 +147,15 @@ public class SimpleJmsHeaderMapper implements JmsHeaderMapper {
 				}
 			}
 		}
-		catch (Exception e) {
+		catch (Exception ex) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("error occurred while mapping from MessageHeaders to JMS properties", e);
+				logger.warn("error occurred while mapping from MessageHeaders to JMS properties", ex);
 			}
 		}
 	}
 
 	@Override
-	public Map<String, Object> toHeaders(javax.jms.Message jmsMessage) {
+	public MessageHeaders toHeaders(javax.jms.Message jmsMessage) {
 		Map<String, Object> headers = new HashMap<String, Object>();
 		try {
 			try {
@@ -169,8 +164,8 @@ public class SimpleJmsHeaderMapper implements JmsHeaderMapper {
 					headers.put(JmsHeaders.CORRELATION_ID, correlationId);
 				}
 			}
-			catch (Exception e) {
-				logger.info("failed to read JMSCorrelationID property, skipping", e);
+			catch (Exception ex) {
+				logger.info("failed to read JMSCorrelationID property, skipping", ex);
 			}
 			try {
 				Destination destination = jmsMessage.getJMSDestination();
@@ -178,22 +173,22 @@ public class SimpleJmsHeaderMapper implements JmsHeaderMapper {
 					headers.put(JmsHeaders.DESTINATION, destination);
 				}
 			}
-			catch (Exception e) {
-				logger.info("failed to read JMSDestination property, skipping", e);
+			catch (Exception ex) {
+				logger.info("failed to read JMSDestination property, skipping", ex);
 			}
 			try {
 				int deliveryMode = jmsMessage.getJMSDeliveryMode();
 				headers.put(JmsHeaders.DELIVERY_MODE, deliveryMode);
 			}
-			catch (Exception e) {
-				logger.info("failed to read JMSDeliveryMode property, skipping", e);
+			catch (Exception ex) {
+				logger.info("failed to read JMSDeliveryMode property, skipping", ex);
 			}
 			try {
 				long expiration = jmsMessage.getJMSExpiration();
 				headers.put(JmsHeaders.EXPIRATION, expiration);
 			}
-			catch (Exception e) {
-				logger.info("failed to read JMSExpiration property, skipping", e);
+			catch (Exception ex) {
+				logger.info("failed to read JMSExpiration property, skipping", ex);
 			}
 			try {
 				String messageId = jmsMessage.getJMSMessageID();
@@ -201,14 +196,14 @@ public class SimpleJmsHeaderMapper implements JmsHeaderMapper {
 					headers.put(JmsHeaders.MESSAGE_ID, messageId);
 				}
 			}
-			catch (Exception e) {
-				logger.info("failed to read JMSMessageID property, skipping", e);
+			catch (Exception ex) {
+				logger.info("failed to read JMSMessageID property, skipping", ex);
 			}
 			try {
 				headers.put(JmsHeaders.PRIORITY, jmsMessage.getJMSPriority());
 			}
-			catch (Exception e) {
-				logger.info("failed to read JMSPriority property, skipping", e);
+			catch (Exception ex) {
+				logger.info("failed to read JMSPriority property, skipping", ex);
 			}
 			try {
 				Destination replyTo = jmsMessage.getJMSReplyTo();
@@ -216,14 +211,14 @@ public class SimpleJmsHeaderMapper implements JmsHeaderMapper {
 					headers.put(JmsHeaders.REPLY_TO, replyTo);
 				}
 			}
-			catch (Exception e) {
-				logger.info("failed to read JMSReplyTo property, skipping", e);
+			catch (Exception ex) {
+				logger.info("failed to read JMSReplyTo property, skipping", ex);
 			}
 			try {
 				headers.put(JmsHeaders.REDELIVERED, jmsMessage.getJMSRedelivered());
 			}
-			catch (Exception e) {
-				logger.info("failed to read JMSRedelivered property, skipping", e);
+			catch (Exception ex) {
+				logger.info("failed to read JMSRedelivered property, skipping", ex);
 			}
 			try {
 				String type = jmsMessage.getJMSType();
@@ -231,14 +226,14 @@ public class SimpleJmsHeaderMapper implements JmsHeaderMapper {
 					headers.put(JmsHeaders.TYPE, type);
 				}
 			}
-			catch (Exception e) {
-				logger.info("failed to read JMSType property, skipping", e);
+			catch (Exception ex) {
+				logger.info("failed to read JMSType property, skipping", ex);
 			}
 			try {
 				headers.put(JmsHeaders.TIMESTAMP, jmsMessage.getJMSTimestamp());
 			}
-			catch (Exception e) {
-				logger.info("failed to read JMSTimestamp property, skipping", e);
+			catch (Exception ex) {
+				logger.info("failed to read JMSTimestamp property, skipping", ex);
 			}
 
 
@@ -250,21 +245,21 @@ public class SimpleJmsHeaderMapper implements JmsHeaderMapper {
 						String headerName = this.toHeaderName(propertyName);
 						headers.put(headerName, jmsMessage.getObjectProperty(propertyName));
 					}
-					catch (Exception e) {
+					catch (Exception ex) {
 						if (logger.isWarnEnabled()) {
-							logger.warn("error occurred while mapping JMS property '"
-									+ propertyName + "' to Message header", e);
+							logger.warn("Error occurred while mapping JMS property '" + propertyName +
+									"' to Message header", ex);
 						}
 					}
 				}
 			}
 		}
-		catch (JMSException e) {
+		catch (JMSException ex) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("error occurred while mapping from JMS properties to MessageHeaders", e);
+				logger.warn("Error occurred while mapping from JMS properties to MessageHeaders", ex);
 			}
 		}
-		return headers;
+		return new MessageHeaders(headers);
 	}
 
 	/**

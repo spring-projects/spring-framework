@@ -50,7 +50,7 @@ import org.springframework.jms.listener.adapter.ReplyFailureException;
 import org.springframework.jms.listener.adapter.ListenerExecutionFailedException;
 import org.springframework.jms.listener.adapter.MessagingMessageListenerAdapter;
 import org.springframework.jms.support.JmsMessageHeaderAccessor;
-import org.springframework.jms.support.converter.JmsHeaders;
+import org.springframework.jms.support.JmsHeaders;
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
