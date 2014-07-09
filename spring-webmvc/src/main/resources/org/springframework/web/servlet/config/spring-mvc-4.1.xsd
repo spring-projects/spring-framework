@@ -24,63 +24,63 @@
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:all minOccurs="0">
-                <xsd:element name="path-matching" minOccurs="0">
-                    <xsd:annotation>
-                        <xsd:documentation><![CDATA[
-    Configures the path matching part of the Spring MVC Controller programming model.
-    Like annotation-driven, code-based alternatives are also documented in EnableWebMvc Javadoc.
+				<xsd:element name="path-matching" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	Configures the path matching part of the Spring MVC Controller programming model.
+	Like annotation-driven, code-based alternatives are also documented in EnableWebMvc Javadoc.
 						]]></xsd:documentation>
-                    </xsd:annotation>
-                    <xsd:complexType>
-                        <xsd:attribute name="suffix-pattern" type="xsd:boolean">
-                            <xsd:annotation>
-                                <xsd:documentation><![CDATA[
-    Whether to use suffix pattern match (".*") when matching patterns to requests. If enabled
-    a method mapped to "/users" also matches to "/users.*".
-    The default value is true.
-					            ]]></xsd:documentation>
-                            </xsd:annotation>
-                        </xsd:attribute>
-                        <xsd:attribute name="trailing-slash" type="xsd:boolean">
-                            <xsd:annotation>
-                                <xsd:documentation><![CDATA[
-    Whether to match to URLs irrespective of the presence of a trailing slash.
-    If enabled a method mapped to "/users" also matches to "/users/".
-    The default value is true.
-                                        ]]></xsd:documentation>
-                            </xsd:annotation>
-                        </xsd:attribute>
-                        <xsd:attribute name="registered-suffixes-only" type="xsd:boolean">
-                            <xsd:annotation>
-                                <xsd:documentation><![CDATA[
-    Whether to use suffix pattern match for registered file extensions only when matching patterns to requests.
-    If enabled, a controller method mapped to "/users" also matches to "/users.json" assuming ".json" is a file extension registered with
-    the provided ContentNegotiationManager. This can be useful for allowing only specific URL extensions to be used as well as in cases
-    where a "." in the URL path can lead to ambiguous interpretation of path variable content, (e.g. given "/users/{user}" and incoming
-    URLs such as "/users/john.j.joe" and "/users/john.j.joe.json").
-    If enabled, this attribute also enables suffix-pattern. The default value is false.
-                                ]]></xsd:documentation>
-                            </xsd:annotation>
-                        </xsd:attribute>
-                        <xsd:attribute name="path-helper" type="xsd:string">
-                            <xsd:annotation>
-                                <xsd:documentation><![CDATA[
-    The bean name of the UrlPathHelper to use for resolution of lookup paths.
-    Use this to override the default UrlPathHelper with a custom subclass, or to share common UrlPathHelper settings across
-    multiple HandlerMappings and MethodNameResolvers.
-                                ]]></xsd:documentation>
-                            </xsd:annotation>
-                        </xsd:attribute>
-                        <xsd:attribute name="path-matcher" type="xsd:string">
-                            <xsd:annotation>
-                                <xsd:documentation><![CDATA[
-    The bean name of the PathMatcher implementation to use for matching URL paths against registered URL patterns.
-    Default is AntPathMatcher.
-                                ]]></xsd:documentation>
-                            </xsd:annotation>
-                        </xsd:attribute>
-                    </xsd:complexType>
-                </xsd:element>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:attribute name="suffix-pattern" type="xsd:boolean">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	Whether to use suffix pattern match (".*") when matching patterns to requests. If enabled
+	a method mapped to "/users" also matches to "/users.*".
+	The default value is true.
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="trailing-slash" type="xsd:boolean">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	Whether to match to URLs irrespective of the presence of a trailing slash.
+	If enabled a method mapped to "/users" also matches to "/users/".
+	The default value is true.
+										]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="registered-suffixes-only" type="xsd:boolean">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	Whether to use suffix pattern match for registered file extensions only when matching patterns to requests.
+	If enabled, a controller method mapped to "/users" also matches to "/users.json" assuming ".json" is a file extension registered with
+	the provided ContentNegotiationManager. This can be useful for allowing only specific URL extensions to be used as well as in cases
+	where a "." in the URL path can lead to ambiguous interpretation of path variable content, (e.g. given "/users/{user}" and incoming
+	URLs such as "/users/john.j.joe" and "/users/john.j.joe.json").
+	If enabled, this attribute also enables suffix-pattern. The default value is false.
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="path-helper" type="xsd:string">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	The bean name of the UrlPathHelper to use for resolution of lookup paths.
+	Use this to override the default UrlPathHelper with a custom subclass, or to share common UrlPathHelper settings across
+	multiple HandlerMappings and MethodNameResolvers.
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="path-matcher" type="xsd:string">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	The bean name of the PathMatcher implementation to use for matching URL paths against registered URL patterns.
+	Default is AntPathMatcher.
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+					</xsd:complexType>
+				</xsd:element>
 				<xsd:element name="message-converters" minOccurs="0">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
@@ -122,8 +122,8 @@
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
 	Configures HandlerMethodArgumentResolver types to support custom controller method argument types.
-    Using this option does not override the built-in support for resolving handler method arguments.
-    To customize the built-in support for argument resolution configure RequestMappingHandlerAdapter directly.
+	Using this option does not override the built-in support for resolving handler method arguments.
+	To customize the built-in support for argument resolution configure RequestMappingHandlerAdapter directly.
 						]]></xsd:documentation>
 					</xsd:annotation>
 					<xsd:complexType>
@@ -135,19 +135,19 @@
 									]]></xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
-                            <xsd:element ref="beans:ref" minOccurs="0" maxOccurs="unbounded">
-                                <xsd:annotation>
-                                    <xsd:documentation><![CDATA[
+							<xsd:element ref="beans:ref" minOccurs="0" maxOccurs="unbounded">
+								<xsd:annotation>
+									<xsd:documentation><![CDATA[
 	A reference to a HandlerMethodArgumentResolver bean definition. Expects a HandlerMethodArgumentResolver instance,
 	 WebArgumentResolver instances has to be wrapped with a ServletWebArgumentResolverAdapter
 									]]></xsd:documentation>
-                                        <xsd:appinfo>
-                                            <tool:annotation kind="ref">
-                                                <tool:expected-type type="java:org.springframework.web.method.support.HandlerMethodArgumentResolver" />
-                                            </tool:annotation>
-                                        </xsd:appinfo>
-                                </xsd:annotation>
-                            </xsd:element>
+									<xsd:appinfo>
+										<tool:annotation kind="ref">
+											<tool:expected-type type="java:org.springframework.web.method.support.HandlerMethodArgumentResolver" />
+										</tool:annotation>
+									</xsd:appinfo>
+								</xsd:annotation>
+							</xsd:element>
 						</xsd:choice>
 					</xsd:complexType>
 				</xsd:element>
@@ -155,8 +155,8 @@
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
 	Configures HandlerMethodReturnValueHandler types to support custom controller method return value handling.
-    Using this option does not override the built-in support for handling return values.
-    To customize the built-in support for handling return values configure RequestMappingHandlerAdapter directly.
+	Using this option does not override the built-in support for handling return values.
+	To customize the built-in support for handling return values configure RequestMappingHandlerAdapter directly.
 						]]></xsd:documentation>
 					</xsd:annotation>
 					<xsd:complexType>
@@ -342,14 +342,14 @@
 					<xsd:annotation>
 						<xsd:documentation source="org.springframework.web.servlet.resource.ResourceResolver"><![CDATA[
 	A ResourceResolver bean definition.
-                        ]]></xsd:documentation>
+						]]></xsd:documentation>
 					</xsd:annotation>
 				</xsd:element>
 				<xsd:element ref="beans:ref">
 					<xsd:annotation>
 						<xsd:documentation source="org.springframework.web.servlet.resource.ResourceResolver"><![CDATA[
 	A reference to a ResourceResolver bean.
-                    ]]></xsd:documentation>
+					]]></xsd:documentation>
 					</xsd:annotation>
 				</xsd:element>
 			</xsd:choice>
@@ -369,14 +369,14 @@
 					<xsd:annotation>
 						<xsd:documentation source="org.springframework.web.servlet.resource.ResourceTransformer"><![CDATA[
 	A ResourceTransformer bean definition.
-                        ]]></xsd:documentation>
+						]]></xsd:documentation>
 					</xsd:annotation>
 				</xsd:element>
 				<xsd:element ref="beans:ref">
 					<xsd:annotation>
 						<xsd:documentation source="org.springframework.web.servlet.resource.ResourceTransformer"><![CDATA[
 	A reference to a ResourceTransformer bean.
-                    ]]></xsd:documentation>
+					]]></xsd:documentation>
 					</xsd:annotation>
 				</xsd:element>
 			</xsd:choice>
@@ -544,20 +544,20 @@
 					</xsd:complexType>
 				</xsd:element>
 			</xsd:choice>
-            <xsd:attribute name="path-matcher" type="xsd:string">
-                <xsd:annotation>
-                    <xsd:documentation source="java:org.springframework.util.PathMatcher"><![CDATA[
+			<xsd:attribute name="path-matcher" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation source="java:org.springframework.util.PathMatcher"><![CDATA[
 	The bean name of a PathMatcher implementation to use with nested interceptors. This is an optional,
 	advanced property required only if using custom PathMatcher implementations that support mapping
 	metadata other than the Ant path patterns supported by default.
 					]]></xsd:documentation>
-                    <xsd:appinfo>
-                        <tool:annotation kind="ref">
-                            <tool:expected-type type="java:org.springframework.util.PathMatcher" />
-                        </tool:annotation>
-                    </xsd:appinfo>
-                </xsd:annotation>
-            </xsd:attribute>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="java:org.springframework.util.PathMatcher" />
+						</tool:annotation>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
 
