@@ -131,6 +131,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		super(SimpMessageType.HEARTBEAT, null);
 	}
 
+
 	void updateSimpMessageHeadersFromStompHeaders() {
 		if (getNativeHeaders() == null) {
 			return;
@@ -171,35 +172,6 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		trySetStompHeaderForSubscriptionId();
 	}
 
-	/**
-	 * Create an instance for the given STOMP command.
-	 */
-	public static StompHeaderAccessor create(StompCommand command) {
-		return new StompHeaderAccessor(command, null);
-	}
-
-	/**
-	 * Create an instance for the given STOMP command and headers.
-	 */
-	public static StompHeaderAccessor create(StompCommand command, Map<String, List<String>> headers) {
-		return new StompHeaderAccessor(command, headers);
-	}
-
-	/**
-	 * Create headers for a heartbeat. While a STOMP heartbeat frame does not
-	 * have headers, a session id is needed for processing purposes at a minimum.
-	 */
-	public static StompHeaderAccessor createForHeartbeat() {
-		return new StompHeaderAccessor();
-	}
-
-	/**
-	 * Create an instance from the payload and headers of the given Message.
-	 */
-	public static StompHeaderAccessor wrap(Message<?> message) {
-		return new StompHeaderAccessor(message);
-	}
-
 
 	@Override
 	protected MessageHeaderAccessor createAccessor(Message<?> message) {
@@ -213,23 +185,18 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	}
 
 	public StompCommand updateStompCommandAsClientMessage() {
-
 		Assert.state(SimpMessageType.MESSAGE.equals(getMessageType()), "Unexpected message type " + getMessage());
-
 		if (getCommand() == null) {
 			setHeader(COMMAND_HEADER, StompCommand.SEND);
 		}
 		else if (!getCommand().equals(StompCommand.SEND)) {
 			throw new IllegalStateException("Unexpected STOMP command " + getCommand());
 		}
-
 		return getCommand();
 	}
 
 	public void updateStompCommandAsServerMessage() {
-
 		Assert.state(SimpMessageType.MESSAGE.equals(getMessageType()), "Unexpected message type " + getMessage());
-
 		StompCommand command = getCommand();
 		if ((command == null) || StompCommand.SEND.equals(command)) {
 			setHeader(COMMAND_HEADER, StompCommand.MESSAGE);
@@ -237,9 +204,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		else if (!StompCommand.MESSAGE.equals(command)) {
 			throw new IllegalStateException("Unexpected STOMP command " + command);
 		}
-
 		trySetStompHeaderForSubscriptionId();
-
 		if (getMessageId() == null) {
 			String messageId = getSessionId() + "-" + messageIdCounter.getAndIncrement();
 			setNativeHeader(STOMP_MESSAGE_ID_HEADER, messageId);
@@ -247,22 +212,15 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	}
 
 	/**
-	 * @return the STOMP command, or {@code null} if not yet set.
+	 * Return the STOMP command, or {@code null} if not yet set.
 	 */
 	public StompCommand getCommand() {
 		return (StompCommand) getHeader(COMMAND_HEADER);
 	}
 
-	/**
-	 * A static alternative for access to the STOMP command.
-	 */
-	public static StompCommand getCommand(Map<String, Object> headers) {
-		return (StompCommand) headers.get(COMMAND_HEADER);
-	}
-
 	public Set<String> getAcceptVersion() {
 		String rawValue = getFirstNativeHeader(STOMP_ACCEPT_VERSION_HEADER);
-		return (rawValue != null) ? StringUtils.commaDelimitedListToSet(rawValue) : Collections.<String>emptySet();
+		return (rawValue != null ? StringUtils.commaDelimitedListToSet(rawValue) : Collections.<String>emptySet());
 	}
 
 	public boolean isHeartbeat() {
@@ -329,15 +287,6 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		return null;
 	}
 
-	public static Integer getContentLength(Map<String, List<String>> nativeHeaders) {
-		if (nativeHeaders.containsKey(STOMP_CONTENT_LENGTH_HEADER)) {
-			List<String> values = nativeHeaders.get(STOMP_CONTENT_LENGTH_HEADER);
-			String value = (values != null ? values.get(0) : null);
-			return Integer.valueOf(value);
-		}
-		return null;
-	}
-
 	public void setContentLength(int contentLength) {
 		setNativeHeader(STOMP_CONTENT_LENGTH_HEADER, String.valueOf(contentLength));
 	}
@@ -370,7 +319,6 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		return getFirstNativeHeader(STOMP_LOGIN_HEADER);
 	}
 
-
 	public void setPasscode(String passcode) {
 		setNativeHeader(STOMP_PASSCODE_HEADER, passcode);
 		protectPasscode();
@@ -385,18 +333,10 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	}
 
 	/**
-	 * @return the passcode header value or {@code null}.
+	 * Return the passcode header value, or {@code null} if not set.
 	 */
 	public String getPasscode() {
 		StompPasscode credentials = (StompPasscode) getHeader(CREDENTIALS_HEADER);
-		return (credentials != null ? credentials.passcode : null);
-	}
-
-	/**
-	 * A static alternative for access to the passcode header.
-	 */
-	public static String getPasscode(Map<String, Object> headers) {
-		StompPasscode credentials = (StompPasscode) headers.get(CREDENTIALS_HEADER);
 		return (credentials != null ? credentials.passcode : null);
 	}
 
@@ -439,6 +379,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	public void setVersion(String version) {
 		setNativeHeader(STOMP_VERSION_HEADER, version);
 	}
+
 
 	// Logging related
 
@@ -503,6 +444,62 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		return (bytes.length < 80) ?
 				contentType + " payload=" + new String(bytes, charset) :
 				contentType + " payload=" + new String(Arrays.copyOf(bytes, 80), charset) + "...(truncated)";
+	}
+
+
+	// Static factory methods and accessors
+
+	/**
+	 * Create an instance for the given STOMP command.
+	 */
+	public static StompHeaderAccessor create(StompCommand command) {
+		return new StompHeaderAccessor(command, null);
+	}
+
+	/**
+	 * Create an instance for the given STOMP command and headers.
+	 */
+	public static StompHeaderAccessor create(StompCommand command, Map<String, List<String>> headers) {
+		return new StompHeaderAccessor(command, headers);
+	}
+
+	/**
+	 * Create headers for a heartbeat. While a STOMP heartbeat frame does not
+	 * have headers, a session id is needed for processing purposes at a minimum.
+	 */
+	public static StompHeaderAccessor createForHeartbeat() {
+		return new StompHeaderAccessor();
+	}
+
+	/**
+	 * Create an instance from the payload and headers of the given Message.
+	 */
+	public static StompHeaderAccessor wrap(Message<?> message) {
+		return new StompHeaderAccessor(message);
+	}
+
+	/**
+	 * Return the STOMP command from the given headers, or {@code null} if not set.
+	 */
+	public static StompCommand getCommand(Map<String, Object> headers) {
+		return (StompCommand) headers.get(COMMAND_HEADER);
+	}
+
+	/**
+	 * Return the passcode header value, or {@code null} if not set.
+	 */
+	public static String getPasscode(Map<String, Object> headers) {
+		StompPasscode credentials = (StompPasscode) headers.get(CREDENTIALS_HEADER);
+		return (credentials != null ? credentials.passcode : null);
+	}
+
+	public static Integer getContentLength(Map<String, List<String>> nativeHeaders) {
+		if (nativeHeaders.containsKey(STOMP_CONTENT_LENGTH_HEADER)) {
+			List<String> values = nativeHeaders.get(STOMP_CONTENT_LENGTH_HEADER);
+			String value = (values != null ? values.get(0) : null);
+			return Integer.valueOf(value);
+		}
+		return null;
 	}
 
 

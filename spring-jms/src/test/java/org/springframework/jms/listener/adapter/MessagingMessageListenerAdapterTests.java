@@ -16,11 +16,7 @@
 
 package org.springframework.jms.listener.adapter;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-
 import java.lang.reflect.Method;
-
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Session;
@@ -32,11 +28,14 @@ import org.junit.Test;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.jms.StubTextMessage;
 import org.springframework.jms.config.DefaultJmsHandlerMethodFactory;
-import org.springframework.jms.support.converter.JmsHeaders;
+import org.springframework.jms.support.JmsHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.ReflectionUtils;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  *
@@ -47,6 +46,7 @@ public class MessagingMessageListenerAdapterTests {
 	private final DefaultJmsHandlerMethodFactory factory = new DefaultJmsHandlerMethodFactory();
 
 	private final SampleBean sample = new SampleBean();
+
 
 	@Before
 	public void setup() {
@@ -85,12 +85,12 @@ public class MessagingMessageListenerAdapterTests {
 			listener.onMessage(message, session);
 			fail("Should have thrown an exception");
 		}
-		catch (JMSException e) {
+		catch (JMSException ex) {
 			fail("Should not have thrown a JMS exception");
 		}
-		catch (ListenerExecutionFailedException e) {
-			assertEquals(IllegalArgumentException.class, e.getCause().getClass());
-			assertEquals("Expected test exception", e.getCause().getMessage());
+		catch (ListenerExecutionFailedException ex) {
+			assertEquals(IllegalArgumentException.class, ex.getCause().getClass());
+			assertEquals("Expected test exception", ex.getCause().getMessage());
 		}
 	}
 
@@ -104,11 +104,11 @@ public class MessagingMessageListenerAdapterTests {
 			listener.onMessage(message, session);
 			fail("Should have thrown an exception");
 		}
-		catch (JMSException e) {
+		catch (JMSException ex) {
 			fail("Should not have thrown a JMS exception");
 		}
-		catch (ListenerExecutionFailedException e) {
-			assertEquals(MessageConversionException.class, e.getCause().getClass());
+		catch (ListenerExecutionFailedException ex) {
+			assertEquals(MessageConversionException.class, ex.getCause().getClass());
 		}
 	}
 
@@ -145,4 +145,5 @@ public class MessagingMessageListenerAdapterTests {
 			throw new IllegalArgumentException("Should not have been called");
 		}
 	}
+
 }

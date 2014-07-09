@@ -24,14 +24,12 @@ import org.springframework.beans.factory.config.Scope;
  * (e.g. WebSocket session).
  *
  * <p>Relies on a thread-bound {@link SimpAttributes} instance exported by
- * {@link org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler
- * SimpAnnotationMethodMessageHandler}.
+ * {@link org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler}.
  *
  * @author Rossen Stoyanchev
  * @since 4.1
  */
 public class SimpSessionScope implements Scope {
-
 
 	@Override
 	public Object get(String name, ObjectFactory<?> objectFactory) {
@@ -78,4 +76,5 @@ public class SimpSessionScope implements Scope {
 	public String getConversationId() {
 		return SimpAttributesContextHolder.currentAttributes().getSessionId();
 	}
+
 }

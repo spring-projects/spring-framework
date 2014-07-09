@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,13 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
 
 /**
- * A builder for creating a {@link GenericMessage} (or {@link ErrorMessage} if
- * the payload is of type {@link Throwable}).
+ * A builder for creating a {@link GenericMessage}
+ * (or {@link ErrorMessage} if the payload is of type {@link Throwable}).
  *
  * @author Arjen Poutsma
  * @author Mark Fisher
  * @author Rossen Stoyanchev
  * @since 4.0
- *
  * @see GenericMessage
  * @see ErrorMessage
  */
@@ -59,52 +58,9 @@ public final class MessageBuilder<T> {
 		this.originalMessage = null;
 	}
 
-	/**
-	 * Create a builder for a new {@link Message} instance pre-populated with all of the
-	 * headers copied from the provided message. The payload of the provided Message will
-	 * also be used as the payload for the new message.
-	 *
-	 * @param message the Message from which the payload and all headers will be copied
-	 */
-	public static <T> MessageBuilder<T> fromMessage(Message<T> message) {
-		return new MessageBuilder<T>(message);
-	}
-
-	/**
-	 * Create a new builder for a message with the given payload.
-	 * @param payload the payload
-	 */
-	public static <T> MessageBuilder<T> withPayload(T payload) {
-		return new MessageBuilder<T>(payload, new MessageHeaderAccessor());
-	}
-
-	/**
-	 * A shortcut factory method for creating a message with the given payload
-	 * and {@code MessageHeaders}.
-	 *
-	 * <p><strong>Note:</strong> the given {@code MessageHeaders} instance is used
-	 * directly in the new message, i.e. it is not copied.
-	 *
-	 * @param payload the payload to use, never {@code null}
-	 * @param messageHeaders the headers to use, never {@code null}
-	 * @return the created message
-	 * @since 4.1
-	 */
-	@SuppressWarnings("unchecked")
-	public static <T> Message<T> createMessage(T payload, MessageHeaders messageHeaders) {
-		Assert.notNull(payload, "'payload' must not be null");
-		Assert.notNull(messageHeaders, "'messageHeaders' must not be null");
-		if (payload instanceof Throwable) {
-			return (Message<T>) new ErrorMessage((Throwable) payload, messageHeaders);
-		}
-		else {
-			return new GenericMessage<T>(payload, messageHeaders);
-		}
-	}
 
 	/**
 	 * Set the message headers to use by providing a {@code MessageHeaderAccessor}.
-	 *
 	 * @param accessor the headers to use
 	 */
 	public MessageBuilder<T> setHeaders(MessageHeaderAccessor accessor) {
@@ -189,16 +145,55 @@ public final class MessageBuilder<T> {
 
 	@SuppressWarnings("unchecked")
 	public Message<T> build() {
-
 		if (this.originalMessage != null && !this.headerAccessor.isModified()) {
 			return this.originalMessage;
 		}
-
 		if (this.payload instanceof Throwable) {
 			return (Message<T>) new ErrorMessage((Throwable) this.payload, this.headerAccessor.toMap());
 		}
 		else {
 			return new GenericMessage<T>(this.payload, this.headerAccessor.toMap());
+		}
+	}
+
+
+	/**
+	 * Create a builder for a new {@link Message} instance pre-populated with all of the
+	 * headers copied from the provided message. The payload of the provided Message will
+	 * also be used as the payload for the new message.
+	 * @param message the Message from which the payload and all headers will be copied
+	 */
+	public static <T> MessageBuilder<T> fromMessage(Message<T> message) {
+		return new MessageBuilder<T>(message);
+	}
+
+	/**
+	 * Create a new builder for a message with the given payload.
+	 * @param payload the payload
+	 */
+	public static <T> MessageBuilder<T> withPayload(T payload) {
+		return new MessageBuilder<T>(payload, new MessageHeaderAccessor());
+	}
+
+	/**
+	 * A shortcut factory method for creating a message with the given payload
+	 * and {@code MessageHeaders}.
+	 * <p><strong>Note:</strong> the given {@code MessageHeaders} instance is used
+	 * directly in the new message, i.e. it is not copied.
+	 * @param payload the payload to use, never {@code null}
+	 * @param messageHeaders the headers to use, never {@code null}
+	 * @return the created message
+	 * @since 4.1
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> Message<T> createMessage(T payload, MessageHeaders messageHeaders) {
+		Assert.notNull(payload, "'payload' must not be null");
+		Assert.notNull(messageHeaders, "'messageHeaders' must not be null");
+		if (payload instanceof Throwable) {
+			return (Message<T>) new ErrorMessage((Throwable) payload, messageHeaders);
+		}
+		else {
+			return new GenericMessage<T>(payload, messageHeaders);
 		}
 	}
 
