@@ -314,9 +314,6 @@ public abstract class AbstractSockJsService implements SockJsService {
 				String serverId = pathSegments[0];
 				String sessionId = pathSegments[1];
 				String transport = pathSegments[2];
-<<<<<<< HEAD
-				if (!validateRequest(serverId, sessionId, transport)) {
-=======
 
 				if (!isWebSocketEnabled() && transport.equals("websocket")) {
 					logger.debug("WebSocket transport is disabled, ignoring " + requestInfo);
@@ -325,7 +322,6 @@ public abstract class AbstractSockJsService implements SockJsService {
 				}
 				else if (!validateRequest(serverId, sessionId, transport)) {
 					logger.error("Ignoring transport request " + requestInfo);
->>>>>>> STOMP and WebSocket messaging related logging updates
 					response.setStatusCode(HttpStatus.NOT_FOUND);
 					return;
 				}
@@ -345,16 +341,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 		}
 		// Server and session id's must not contain "."
 		if (serverId.contains(".") || sessionId.contains(".")) {
-<<<<<<< HEAD
-			logger.error("Server or session contain a \".\"");
-			return false;
-		}
-
-		if (!isWebSocketEnabled() && transport.equals("websocket")) {
-			logger.debug("Ignoring WebSocket request (transport disabled via SockJsService property)");
-=======
 			logger.error("Either server or session contains a \".\" which is not allowed by SockJS protocol.");
->>>>>>> STOMP and WebSocket messaging related logging updates
 			return false;
 		}
 		return true;
