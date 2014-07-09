@@ -17,7 +17,6 @@
 package org.springframework.jms.listener.adapter;
 
 import java.lang.reflect.InvocationTargetException;
-
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -137,7 +136,6 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener
 	 * Create a new {@link MessageListenerAdapter} with default settings.
 	 */
 	public MessageListenerAdapter() {
-		initDefaultStrategies();
 		this.delegate = this;
 	}
 
@@ -146,7 +144,6 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener
 	 * @param delegate the delegate object
 	 */
 	public MessageListenerAdapter(Object delegate) {
-		initDefaultStrategies();
 		setDelegate(delegate);
 	}
 

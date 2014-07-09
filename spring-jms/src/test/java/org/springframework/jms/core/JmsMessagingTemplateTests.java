@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.messaging;
+package org.springframework.jms.core;
 
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Session;
@@ -36,10 +35,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.springframework.core.convert.support.DefaultConversionService;
+
 import org.springframework.jms.StubTextMessage;
-import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.core.MessageCreator;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.messaging.Message;
@@ -317,7 +314,7 @@ public class JmsMessagingTemplateTests {
 		javax.jms.Message jmsMessage = createJmsTextMessage("123");
 		given(jmsTemplate.receive("myQueue")).willReturn(jmsMessage);
 
-		messagingTemplate.setMessageConverter(new GenericMessageConverter(new DefaultConversionService()));
+		messagingTemplate.setMessageConverter(new GenericMessageConverter());
 
 		Integer payload = messagingTemplate.receiveAndConvert("myQueue", Integer.class);
 		assertEquals(Integer.valueOf(123), payload);

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.support.converter;
+package org.springframework.jms.support;
 
 /**
- * Pre-defined names and prefixes to be used for setting and/or retrieving JMS
- * attributes from/to integration Message Headers.
+ * Pre-defined names and prefixes to be used for setting and/or retrieving
+ * JMS attributes from/to generic message headers.
  *
  * @author Mark Fisher
  * @author Stephane Nicoll
@@ -43,7 +43,7 @@ public interface JmsHeaders {
 
 	/**
 	 * Name of the destination (topic or queue) of the message.
-	 * <p>Read only value.
+	 * <p>Read-only value.
 	 * @see javax.jms.Message#getJMSDestination()
 	 * @see javax.jms.Destination
 	 * @see javax.jms.Queue
@@ -53,7 +53,7 @@ public interface JmsHeaders {
 
 	/**
 	 * Distribution mode.
-	 * <p>Read only value.
+	 * <p>Read-only value.
 	 * @see javax.jms.Message#getJMSDeliveryMode()
 	 * @see javax.jms.DeliveryMode
 	 */
@@ -61,21 +61,21 @@ public interface JmsHeaders {
 
 	/**
 	 * Message expiration date and time.
-	 * <p>Read only value.
+	 * <p>Read-only value.
 	 * @see javax.jms.Message#getJMSExpiration()
 	 */
 	public static final String EXPIRATION = PREFIX + "expiration";
 
 	/**
 	 * Unique Identifier for a message.
-	 * <p>Read only value.
+	 * <p>Read-only value.
 	 * @see javax.jms.Message#getJMSMessageID()
 	 */
 	public static final String MESSAGE_ID = PREFIX + "messageId";
 
 	/**
 	 * The message priority level.
-	 * <p>Read only value.
+	 * <p>Read-only value.
 	 * @see javax.jms.Message#getJMSPriority()
 	 */
 	public static final String PRIORITY = PREFIX + "priority";
@@ -90,7 +90,7 @@ public interface JmsHeaders {
 	/**
 	 * Specify if the message was resent. This occurs when a message
 	 * consumer fails to acknowledge the message reception.
-	 * <p>Read only value.
+	 * <p>Read-only value.
 	 * @see javax.jms.Message#getJMSRedelivered()
 	 */
 	public static final String REDELIVERED = PREFIX + "redelivered";
@@ -104,7 +104,7 @@ public interface JmsHeaders {
 
 	/**
 	 * Date and time of the message sending operation.
-	 * <p>Read only value.
+	 * <p>Read-only value.
 	 * @see javax.jms.Message#getJMSTimestamp()
 	 */
 	public static final String TIMESTAMP = PREFIX + "timestamp";

@@ -28,12 +28,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jms.listener.SessionAwareMessageListener;
+import org.springframework.jms.support.JmsHeaderMapper;
 import org.springframework.jms.support.JmsUtils;
-import org.springframework.jms.support.converter.JmsHeaderMapper;
+import org.springframework.jms.support.SimpleJmsHeaderMapper;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessagingMessageConverter;
-import org.springframework.jms.support.converter.SimpleJmsHeaderMapper;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.jms.support.destination.DynamicDestinationResolver;
@@ -59,17 +59,10 @@ public abstract class AbstractAdaptableMessageListener
 
 	private DestinationResolver destinationResolver = new DynamicDestinationResolver();
 
-	private MessageConverter messageConverter;
+	private MessageConverter messageConverter = new SimpleMessageConverter();
 
-	private MessagingMessageConverterAdapter messagingMessageConverter = new MessagingMessageConverterAdapter();
+	private final MessagingMessageConverterAdapter messagingMessageConverter = new MessagingMessageConverterAdapter();
 
-
-	/**
-	 * Create a new instance with default settings.
-	 */
-	protected AbstractAdaptableMessageListener() {
-		initDefaultStrategies();
-	}
 
 	/**
 	 * Set the default destination to send response messages to. This will be applied
@@ -153,20 +146,24 @@ public abstract class AbstractAdaptableMessageListener
 		return this.messageConverter;
 	}
 
-	protected MessageConverter getMessagingMessageConverter() {
-		return this.messagingMessageConverter;
-	}
-
 	/**
-	 * Set the {@link JmsHeaderMapper} implementation to use to map the
-	 * standard JMS headers. By default {@link SimpleJmsHeaderMapper} is
-	 * used
+	 * Set the {@link JmsHeaderMapper} implementation to use to map the standard
+	 * JMS headers. By default, a {@link SimpleJmsHeaderMapper} is used.
 	 * @see SimpleJmsHeaderMapper
 	 */
 	public void setHeaderMapper(JmsHeaderMapper headerMapper) {
 		Assert.notNull(headerMapper, "HeaderMapper must not be null");
 		this.messagingMessageConverter.setHeaderMapper(headerMapper);
 	}
+
+	/**
+	 * Return the{@link MessagingMessageConverter} for this listener,
+	 * being able to convert {@link org.springframework.messaging.Message}.
+	 */
+	protected final MessagingMessageConverter getMessagingMessageConverter() {
+		return this.messagingMessageConverter;
+	}
+
 
 	/**
 	 * Standard JMS {@link MessageListener} entry point.
@@ -189,15 +186,6 @@ public abstract class AbstractAdaptableMessageListener
 		catch (Throwable ex) {
 			handleListenerException(ex);
 		}
-	}
-
-	/**
-	 * Initialize the default implementations for the adapter's strategies.
-	 * @see #setMessageConverter
-	 * @see org.springframework.jms.support.converter.SimpleMessageConverter
-	 */
-	protected void initDefaultStrategies() {
-		setMessageConverter(new SimpleMessageConverter());
 	}
 
 	/**
@@ -228,8 +216,8 @@ public abstract class AbstractAdaptableMessageListener
 			}
 			return message;
 		}
-		catch (JMSException e) {
-			throw new MessageConversionException("Could not unmarshal message", e);
+		catch (JMSException ex) {
+			throw new MessageConversionException("Could not unmarshal message", ex);
 		}
 	}
 
@@ -257,8 +245,8 @@ public abstract class AbstractAdaptableMessageListener
 				Destination destination = getResponseDestination(request, response, session);
 				sendResponse(session, destination, response);
 			}
-			catch (Exception e) {
-				throw new ReplyFailureException("Failed to send reply with payload '" + result + "'", e);
+			catch (Exception ex) {
+				throw new ReplyFailureException("Failed to send reply with payload '" + result + "'", ex);
 			}
 		}
 		else {
@@ -409,6 +397,7 @@ public abstract class AbstractAdaptableMessageListener
 			return extractMessage(message);
 		}
 	}
+
 
 	/**
 	 * Internal class combining a destination name

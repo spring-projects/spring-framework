@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.mapping;
-
-import java.util.Map;
+package org.springframework.messaging.support;
 
 import org.springframework.messaging.MessageHeaders;
 
@@ -26,12 +24,23 @@ import org.springframework.messaging.MessageHeaders;
  * has a concept of headers or properties (HTTP, JMS, AMQP, etc).
  *
  * @author Mark Fisher
- * @param <T> type of the instance to and from which headers will be mapped.
+ * @since 4.1
+ * @param <T> type of the instance to and from which headers will be mapped
  */
 public interface HeaderMapper<T> {
 
+	/**
+	 * Map from the given {@link MessageHeaders} to the specified target message.
+	 * @param headers the abstracted MessageHeaders
+	 * @param target the native target message
+	 */
 	void fromHeaders(MessageHeaders headers, T target);
 
-	Map<String, Object> toHeaders(T source);
+	/**
+	 * Map from the given target message to abstracted {@link MessageHeaders}.
+	 * @param source the native target message
+	 * @return the abstracted MessageHeaders
+	 */
+	MessageHeaders toHeaders(T source);
 
 }

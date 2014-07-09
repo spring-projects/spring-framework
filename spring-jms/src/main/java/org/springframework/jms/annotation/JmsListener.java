@@ -48,7 +48,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
  * arguments including the support of validation</li>
  * <li>{@link org.springframework.messaging.handler.annotation.Header @Header}-annotated method
  * arguments to extract a specific header value, including standard JMS headers defined by
- * {@link org.springframework.jms.support.converter.JmsHeaders JmsHeaders}</li>
+ * {@link org.springframework.jms.support.JmsHeaders JmsHeaders}</li>
  * <li>{@link org.springframework.messaging.handler.annotation.Headers @Headers}-annotated
  * argument that must also be assignable to {@link java.util.Map} for getting access to all
  * headers.</li>
