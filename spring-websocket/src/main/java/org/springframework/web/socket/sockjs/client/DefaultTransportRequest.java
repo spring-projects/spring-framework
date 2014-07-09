@@ -133,8 +133,8 @@ class DefaultTransportRequest implements TransportRequest {
 
 
 	public void connect(WebSocketHandler handler, SettableListenableFuture<WebSocketSession> future) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Starting " + this);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Starting " + this);
 		}
 		ConnectCallback connectCallback = new ConnectCallback(handler, future);
 		scheduleConnectTimeoutTask(connectCallback);
@@ -144,14 +144,14 @@ class DefaultTransportRequest implements TransportRequest {
 
 	private void scheduleConnectTimeoutTask(ConnectCallback connectHandler) {
 		if (this.timeoutScheduler != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Scheduling connect to time out after " + this.timeoutValue + " milliseconds");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Scheduling connect to time out after " + this.timeoutValue + " ms.");
 			}
 			Date timeoutDate = new Date(System.currentTimeMillis() + this.timeoutValue);
 			this.timeoutScheduler.schedule(connectHandler, timeoutDate);
 		}
-		else if (logger.isDebugEnabled()) {
-			logger.debug("Connect timeout task not scheduled. Is SockJsClient configured with a TaskScheduler?");
+		else if (logger.isTraceEnabled()) {
+			logger.trace("Connect timeout task not scheduled (no TaskScheduler configured).");
 		}
 	}
 

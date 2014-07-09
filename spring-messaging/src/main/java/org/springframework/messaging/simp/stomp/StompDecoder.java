@@ -24,7 +24,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderInitializer;
@@ -51,7 +50,8 @@ public class StompDecoder {
 
 	static final byte[] HEARTBEAT_PAYLOAD = new byte[] {'\n'};
 
-	private final Log logger = LogFactory.getLog(StompDecoder.class);
+	private static final Log logger = LogFactory.getLog(StompDecoder.class);
+
 
 	private MessageHeaderInitializer headerInitializer;
 
@@ -157,7 +157,7 @@ public class StompDecoder {
 				headerAccessor.setLeaveMutable(true);
 				decodedMessage = MessageBuilder.createMessage(payload, headerAccessor.getMessageHeaders());
 				if (logger.isTraceEnabled()) {
-					logger.trace("Decoded " + decodedMessage);
+					logger.trace("Decoded " + headerAccessor.getDetailedLogMessage(payload));
 				}
 			}
 			else {
@@ -176,13 +176,13 @@ public class StompDecoder {
 			}
 		}
 		else {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Decoded heartbeat.");
-			}
 			StompHeaderAccessor headerAccessor = StompHeaderAccessor.createForHeartbeat();
 			initHeaders(headerAccessor);
 			headerAccessor.setLeaveMutable(true);
 			decodedMessage = MessageBuilder.createMessage(HEARTBEAT_PAYLOAD, headerAccessor.getMessageHeaders());
+			if (logger.isTraceEnabled()) {
+				logger.trace("Decoded " + headerAccessor.getDetailedLogMessage(null));
+			}
 		}
 		return decodedMessage;
 	}

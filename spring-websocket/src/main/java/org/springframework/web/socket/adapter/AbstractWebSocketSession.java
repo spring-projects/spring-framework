@@ -40,7 +40,8 @@ import org.springframework.web.socket.WebSocketSession;
  */
 public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSession {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	protected static final Log logger = LogFactory.getLog(NativeWebSocketSession.class);
+
 
 	private T nativeSession;
 
@@ -133,8 +134,8 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 	@Override
 	public final void close(CloseStatus status) throws IOException {
 		checkNativeSessionInitialized();
-		if (logger.isInfoEnabled()) {
-			logger.info("Closing " + this);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Closing " + this);
 		}
 		closeInternal(status);
 	}

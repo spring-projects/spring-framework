@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.web.socket.WebSocketSession;
  */
 public class LoggingWebSocketHandlerDecorator extends WebSocketHandlerDecorator {
 
-	private final Log logger = LogFactory.getLog(LoggingWebSocketHandlerDecorator.class);
+	private static final Log logger = LogFactory.getLog(LoggingWebSocketHandlerDecorator.class);
 
 
 	public LoggingWebSocketHandlerDecorator(WebSocketHandler delegate) {
@@ -41,8 +41,8 @@ public class LoggingWebSocketHandlerDecorator extends WebSocketHandlerDecorator 
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-		if (logger.isInfoEnabled()) {
-			logger.info("Connection established "	+ session);
+		if (logger.isDebugEnabled()) {
+			logger.debug("New "	+ session);
 		}
 		super.afterConnectionEstablished(session);
 	}
@@ -65,8 +65,8 @@ public class LoggingWebSocketHandlerDecorator extends WebSocketHandlerDecorator 
 
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
-		if (logger.isInfoEnabled()) {
-			logger.info("Connection closed with " + closeStatus + " in " + session + ", ");
+		if (logger.isDebugEnabled()) {
+			logger.debug(session + " closed with " + closeStatus);
 		}
 		super.afterConnectionClosed(session, closeStatus);
 	}

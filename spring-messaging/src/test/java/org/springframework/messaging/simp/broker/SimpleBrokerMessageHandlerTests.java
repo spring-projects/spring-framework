@@ -109,7 +109,7 @@ public class SimpleBrokerMessageHandlerTests {
 
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.DISCONNECT);
 		headers.setSessionId(sess1);
-		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).copyHeaders(headers.toMap()).build();
+		Message<byte[]> message = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
 		this.messageHandler.handleMessage(message);
 
 		this.messageHandler.handleMessage(createMessage("/foo", "message1"));
@@ -141,28 +141,23 @@ public class SimpleBrokerMessageHandlerTests {
 
 
 	protected Message<String> createSubscriptionMessage(String sessionId, String subcriptionId, String destination) {
-
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.SUBSCRIBE);
 		headers.setSubscriptionId(subcriptionId);
 		headers.setDestination(destination);
 		headers.setSessionId(sessionId);
-
-		return MessageBuilder.withPayload("").copyHeaders(headers.toMap()).build();
+		return MessageBuilder.createMessage("", headers.getMessageHeaders());
 	}
 
 	protected Message<String> createConnectMessage(String sessionId) {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT);
 		headers.setSessionId(sessionId);
-
-		return MessageBuilder.withPayload("").setHeaders(headers).build();
+		return MessageBuilder.createMessage("", headers.getMessageHeaders());
 	}
 
 	protected Message<String> createMessage(String destination, String payload) {
-
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 		headers.setDestination(destination);
-
-		return MessageBuilder.withPayload(payload).copyHeaders(headers.toMap()).build();
+		return MessageBuilder.createMessage("", headers.getMessageHeaders());
 	}
 
 	protected boolean assertCapturedMessage(String sessionId, String subcriptionId, String destination) {

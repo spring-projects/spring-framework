@@ -16,19 +16,23 @@
 
 package org.springframework.messaging.support;
 
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.IdGenerator;
+import org.springframework.util.MimeTypeUtils;
 
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.*;
 
 /**
@@ -37,6 +41,8 @@ import static org.junit.Assert.*;
  * @author Rossen Stoyanchev
  */
 public class MessageHeaderAccessorTests {
+
+	private static final Charset UTF_8 = Charset.forName("UTF-8");
 
 	@Rule
 	public final ExpectedException thrown = ExpectedException.none();
@@ -249,6 +255,77 @@ public class MessageHeaderAccessorTests {
 		assertSame(id, accessor.getMessageHeaders().getId());
 		assertNotNull(headers.getTimestamp());
 	}
+
+	@Test
+	public void getShortLogMessagePayload() {
+		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
+		accessor.setContentType(MimeTypeUtils.TEXT_PLAIN);
+
+		assertEquals("headers={contentType=text/plain} payload=p", accessor.getShortLogMessage("p"));
+		assertEquals("headers={contentType=text/plain} payload=p", accessor.getShortLogMessage("p".getBytes(UTF_8)));
+		assertEquals("headers={contentType=text/plain} payload=p", accessor.getShortLogMessage(new Object() {
+			@Override
+			public String toString() {
+				return "p";
+			}
+		}));
+
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < 80; i++) {
+			sb.append("a");
+		}
+		final String payload = sb.toString() + " > 80";
+
+		String actual = accessor.getShortLogMessage(payload);
+		assertEquals("headers={contentType=text/plain} payload=" + sb + "...(truncated)", actual);
+
+		actual = accessor.getShortLogMessage(payload.getBytes(UTF_8));
+		assertEquals("headers={contentType=text/plain} payload=" + sb + "...(truncated)", actual);
+
+		actual = accessor.getShortLogMessage(new Object() {
+			@Override
+			public String toString() {
+				return payload;
+			}
+		});
+		assertThat(actual, startsWith("headers={contentType=text/plain} payload=" + getClass().getName() + "$"));
+	}
+
+	@Test
+	public void getDetailedLogMessagePayload() {
+		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
+		accessor.setContentType(MimeTypeUtils.TEXT_PLAIN);
+
+		assertEquals("headers={contentType=text/plain} payload=p", accessor.getDetailedLogMessage("p"));
+		assertEquals("headers={contentType=text/plain} payload=p", accessor.getDetailedLogMessage("p".getBytes(UTF_8)));
+		assertEquals("headers={contentType=text/plain} payload=p", accessor.getDetailedLogMessage(new Object() {
+			@Override
+			public String toString() {
+				return "p";
+			}
+		}));
+
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < 80; i++) {
+			sb.append("a");
+		}
+		final String payload = sb.toString() + " > 80";
+
+		String actual = accessor.getDetailedLogMessage(payload);
+		assertEquals("headers={contentType=text/plain} payload=" + sb + " > 80", actual);
+
+		actual = accessor.getDetailedLogMessage(payload.getBytes(UTF_8));
+		assertEquals("headers={contentType=text/plain} payload=" + sb + " > 80", actual);
+
+		actual = accessor.getDetailedLogMessage(new Object() {
+			@Override
+			public String toString() {
+				return payload;
+			}
+		});
+		assertEquals("headers={contentType=text/plain} payload=" + sb + " > 80", actual);
+	}
+
 
 
 	public static class TestMessageHeaderAccessor extends MessageHeaderAccessor {

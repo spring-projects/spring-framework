@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -322,25 +322,22 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	@Override
 	public void handleMessage(Message<?> message) throws MessagingException {
-
 		String destination = getDestination(message);
 		if (destination == null) {
 			return;
 		}
-
 		String lookupDestination = getLookupDestination(destination);
 		if (lookupDestination == null) {
 			return;
 		}
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("Handling message to " + destination);
-		}
-
 		MessageHeaderAccessor headerAccessor = MessageHeaderAccessor.getMutableAccessor(message);
 		headerAccessor.setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, lookupDestination);
 		headerAccessor.setLeaveMutable(true);
 		message = MessageBuilder.createMessage(message.getPayload(), headerAccessor.getMessageHeaders());
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Searching methods to handle " + headerAccessor.getShortLogMessage(message.getPayload()));
+		}
 
 		handleMessageInternal(message, lookupDestination);
 		headerAccessor.setImmutable();
@@ -377,24 +374,20 @@ public abstract class AbstractMethodMessageHandler<T>
 		if (mappingsByUrl != null) {
 			addMatchesToCollection(mappingsByUrl, message, matches);
 		}
-
 		if (matches.isEmpty()) {
 			// No direct hits, go through all mappings
 			Set<T> allMappings = this.handlerMethods.keySet();
 			addMatchesToCollection(allMappings, message, matches);
 		}
-
 		if (matches.isEmpty()) {
 			handleNoMatch(handlerMethods.keySet(), lookupDestination, message);
 			return;
 		}
-
 		Comparator<Match> comparator = new MatchComparator(getMappingComparator(message));
 		Collections.sort(matches, comparator);
 
 		if (logger.isTraceEnabled()) {
-			logger.trace("Found " + matches.size() + " matching mapping(s) for [" +
-					lookupDestination + "] : " + matches);
+			logger.trace("Found " + matches.size() + " methods: " + matches);
 		}
 
 		Match bestMatch = matches.get(0);
@@ -440,18 +433,14 @@ public abstract class AbstractMethodMessageHandler<T>
 
 
 	protected void handleMatch(T mapping, HandlerMethod handlerMethod, String lookupDestination, Message<?> message) {
-
 		if (logger.isDebugEnabled()) {
-			logger.debug("Message matched to " + handlerMethod);
+			logger.debug("Invoking " + handlerMethod.getShortLogMessage());
 		}
-
 		handlerMethod = handlerMethod.createWithResolvedBean();
 		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
 		invocable.setMessageMethodArgumentResolvers(this.argumentResolvers);
-
 		try {
 			Object returnValue = invocable.invoke(message);
-
 			MethodParameter returnType = handlerMethod.getReturnType();
 			if (void.class.equals(returnType.getParameterType())) {
 				return;
@@ -467,26 +456,27 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	protected void processHandlerMethodException(HandlerMethod handlerMethod, Exception ex, Message<?> message) {
-
+		if (logger.isDebugEnabled()) {
+			logger.debug("Searching methods to handle " + ex.getClass().getSimpleName());
+		}
 		Class<?> beanType = handlerMethod.getBeanType();
 		AbstractExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache.get(beanType);
 		if (resolver == null) {
 			resolver = createExceptionHandlerMethodResolverFor(beanType);
 			this.exceptionHandlerCache.put(beanType, resolver);
 		}
-
 		Method method = resolver.resolveMethod(ex);
 		if (method == null) {
 			logger.error("Unhandled exception", ex);
 			return;
 		}
-
 		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod.getBean(), method);
 		invocable.setMessageMethodArgumentResolvers(this.argumentResolvers);
-
+		if (logger.isDebugEnabled()) {
+			logger.debug("Invoking " + invocable.getShortLogMessage());
+		}
 		try {
 			Object returnValue = invocable.invoke(message, ex);
-
 			MethodParameter returnType = invocable.getReturnType();
 			if (void.class.equals(returnType.getParameterType())) {
 				return;
@@ -497,15 +487,19 @@ public abstract class AbstractMethodMessageHandler<T>
 			logger.error("Error while handling exception", t);
 			return;
 		}
-
 	}
 
 	protected abstract AbstractExceptionHandlerMethodResolver createExceptionHandlerMethodResolverFor(Class<?> beanType);
 
 	protected void handleNoMatch(Set<T> ts, String lookupDestination, Message<?> message) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("No matching method found.");
+			logger.debug("No matching methods.");
 		}
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[prefixes=" + getDestinationPrefixes() + "]";
 	}
 
 

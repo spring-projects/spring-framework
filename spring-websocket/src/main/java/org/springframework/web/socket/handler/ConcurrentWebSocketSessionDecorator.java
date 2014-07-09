@@ -45,7 +45,7 @@ import org.springframework.web.socket.WebSocketSession;
  */
 public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorator {
 
-	private static final Log logger = LogFactory.getLog(ConcurrentWebSocketSessionDecorator.class);
+	private static final Log logger = LogFactory.getLog("_" + ConcurrentWebSocketSessionDecorator.class.getName());
 
 
 	private final Queue<WebSocketMessage<?>> buffer = new LinkedBlockingQueue<WebSocketMessage<?>>();

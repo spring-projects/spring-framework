@@ -70,7 +70,7 @@ public class WebSocketTransport implements Transport {
 		URI url = request.getTransportUrl();
 		WebSocketHttpHeaders headers = new WebSocketHttpHeaders(request.getHandshakeHeaders());
 		if (logger.isDebugEnabled()) {
-			logger.debug("Opening WebSocket connection, url=" + url);
+			logger.debug("Starting WebSocket session url=" + url);
 		}
 		this.webSocketClient.doHandshake(handler, headers, url).addCallback(
 				new ListenableFutureCallback<WebSocketSession>() {

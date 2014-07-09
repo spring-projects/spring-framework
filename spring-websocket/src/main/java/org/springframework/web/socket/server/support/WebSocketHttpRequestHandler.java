@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -51,6 +53,9 @@ import org.springframework.web.socket.handler.LoggingWebSocketHandlerDecorator;
  * @since 4.0
  */
 public class WebSocketHttpRequestHandler implements HttpRequestHandler {
+
+	private static final Log logger = LogFactory.getLog(WebSocketHttpRequestHandler.class);
+
 
 	private final HandshakeHandler handshakeHandler;
 
@@ -113,6 +118,9 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 		HandshakeFailureException failure = null;
 
 		try {
+			if (logger.isDebugEnabled()) {
+				logger.debug(servletRequest.getMethod() + " " + servletRequest.getRequestURI());
+			}
 			Map<String, Object> attributes = new HashMap<String, Object>();
 			if (!chain.applyBeforeHandshake(request, response, attributes)) {
 				return;

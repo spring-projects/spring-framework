@@ -357,17 +357,20 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	private static final AbstractBrokerMessageHandler noopBroker = new AbstractBrokerMessageHandler() {
 
 		@Override
-		protected void startInternal() {
+		public void start() {
 		}
 
 		@Override
-		protected void stopInternal() {
+		public void stop() {
+		}
+
+		@Override
+		public void handleMessage(Message<?> message) {
 		}
 
 		@Override
 		protected void handleMessageInternal(Message<?> message) {
 		}
-
 	};
 
 }

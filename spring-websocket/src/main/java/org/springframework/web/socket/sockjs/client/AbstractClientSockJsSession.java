@@ -157,8 +157,8 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 	@Override
 	public final void close(CloseStatus status) {
 		Assert.isTrue(status != null && isUserSetStatus(status), "Invalid close status: " + status);
-		if (logger.isInfoEnabled()) {
-			logger.info("Closing session with " +  status + " in " + this);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Closing session with " +  status + " in " + this);
 		}
 		closeInternal(status);
 	}
@@ -213,8 +213,8 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 	}
 
 	private void handleOpenFrame() {
-		if (logger.isInfoEnabled()) {
-			logger.info("Processing SockJS open frame in " + this);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Processing SockJS open frame in " + this);
 		}
 		if (State.NEW.equals(state)) {
 			this.state = State.OPEN;
@@ -280,8 +280,8 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 			if (data.length == 2) {
 				closeStatus = new CloseStatus(Integer.valueOf(data[0]), data[1]);
 			}
-			if (logger.isInfoEnabled()) {
-				logger.info("Processing SockJS close frame with " + closeStatus + " in " + this);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Processing SockJS close frame with " + closeStatus + " in " + this);
 			}
 		}
 		catch (IOException ex) {
@@ -311,8 +311,8 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 		this.closeStatus = (this.closeStatus != null ? this.closeStatus : closeStatus);
 		Assert.state(this.closeStatus != null, "CloseStatus not available");
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Transport closed with " + this.closeStatus + " in " + this);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Transport closed with " + this.closeStatus + " in " + this);
 		}
 
 		this.state = State.CLOSED;

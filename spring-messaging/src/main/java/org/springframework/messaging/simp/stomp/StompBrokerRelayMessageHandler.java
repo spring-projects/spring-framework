@@ -72,6 +72,8 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  */
 public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler {
 
+	public static final String SYSTEM_SESSION_ID = "_system_";
+
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
 	private static final ListenableFutureTask<Void> EMPTY_TASK = new ListenableFutureTask<Void>(new VoidCallable());
@@ -380,14 +382,18 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			logger.info("Connecting \"system\" session to " + this.relayHost + ":" + this.relayPort);
 		}
 
-		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
-		headers.setAcceptVersion("1.1,1.2");
-		headers.setLogin(this.systemLogin);
-		headers.setPasscode(this.systemPasscode);
-		headers.setHeartbeat(this.systemHeartbeatSendInterval, this.systemHeartbeatReceiveInterval);
-		headers.setHost(getVirtualHost());
+		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECT);
+		accessor.setAcceptVersion("1.1,1.2");
+		accessor.setLogin(this.systemLogin);
+		accessor.setPasscode(this.systemPasscode);
+		accessor.setHeartbeat(this.systemHeartbeatSendInterval, this.systemHeartbeatReceiveInterval);
+		accessor.setHost(getVirtualHost());
+		accessor.setSessionId(SYSTEM_SESSION_ID);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Forwarding " + accessor.getShortLogMessage(EMPTY_PAYLOAD));
+		}
 
-		SystemStompConnectionHandler handler = new SystemStompConnectionHandler(headers);
+		SystemStompConnectionHandler handler = new SystemStompConnectionHandler(accessor);
 		this.connectionHandlers.put(handler.getSessionId(), handler);
 
 		this.stats.incrementConnectCount();
@@ -416,7 +422,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(message.getHeaders());
 
 		if (!isBrokerAvailable()) {
-			if (sessionId == null || SystemStompConnectionHandler.SESSION_ID.equals(sessionId)) {
+			if (sessionId == null || SYSTEM_SESSION_ID.equals(sessionId)) {
 				throw new MessageDeliveryException("Message broker not active. Consider subscribing to " +
 						"receive BrokerAvailabilityEvent's from an ApplicationListener Spring bean.");
 			}
@@ -459,7 +465,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				logger.error("Only STOMP SEND supported from within the server side. Ignoring " + message);
 				return;
 			}
-			sessionId = SystemStompConnectionHandler.SESSION_ID;
+			sessionId = SYSTEM_SESSION_ID;
 			stompAccessor.setSessionId(sessionId);
 		}
 
@@ -470,7 +476,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 		if (StompCommand.CONNECT.equals(command)) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("STOMP CONNECT in session " + sessionId + " (" + getConnectionCount() + " connections).");
+				logger.debug(stompAccessor.getShortLogMessage(EMPTY_PAYLOAD));
 			}
 			stompAccessor = (stompAccessor.isMutable() ? stompAccessor : StompHeaderAccessor.wrap(message));
 			stompAccessor.setLogin(this.clientLogin);
@@ -508,8 +514,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	@Override
 	public String toString() {
-		return "StompBrokerRelay[broker=" + this.relayHost + ":" + this.relayPort +
-				", " + getConnectionCount() + " connection(s)]";
+		return "StompBrokerRelay[" + this.relayHost + ":" + this.relayPort + "]";
 	}
 
 
@@ -544,8 +549,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 		@Override
 		public void afterConnected(TcpConnection<byte[]> connection) {
-			if (logger.isInfoEnabled()) {
-				logger.info("TCP connection established. Forwarding: " + this.connectHeaders);
+			if (logger.isDebugEnabled()) {
+				logger.debug("TCP connection opened in session=" + getSessionId());
 			}
 			this.tcpConnection = connection;
 			connection.send(MessageBuilder.createMessage(EMPTY_PAYLOAD, this.connectHeaders.getMessageHeaders()));
@@ -601,24 +606,24 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 		@Override
 		public void handleMessage(Message<byte[]> message) {
-			StompHeaderAccessor headerAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-			headerAccessor.setSessionId(this.sessionId);
+			StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+			accessor.setSessionId(this.sessionId);
 
-			if (StompCommand.CONNECTED.equals(headerAccessor.getCommand())) {
-				if (logger.isInfoEnabled()) {
-					logger.info("Received STOMP CONNECTED: " + headerAccessor);
+			StompCommand command = accessor.getCommand();
+			if (StompCommand.CONNECTED.equals(command)) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Received " + accessor.getShortLogMessage(EMPTY_PAYLOAD));
 				}
-				afterStompConnected(headerAccessor);
+				afterStompConnected(accessor);
 			}
-			else if (StompCommand.ERROR.equals(headerAccessor.getCommand()) && logger.isErrorEnabled()) {
-				logger.error("Received STOMP ERROR: " + message);
+			else if (logger.isErrorEnabled() && StompCommand.ERROR.equals(command)) {
+				logger.error("Received " + accessor.getShortLogMessage(message.getPayload()));
 			}
 			else if (logger.isTraceEnabled()) {
-				logger.trace(headerAccessor.isHeartbeat() ?
-						"Received heartbeat in session " + this.sessionId : "Received " + headerAccessor);
+				logger.trace("Received " + accessor.getDetailedLogMessage(message.getPayload()));
 			}
 
-			headerAccessor.setImmutable();
+			accessor.setImmutable();
 			sendMessageToClient(message);
 		}
 
@@ -688,8 +693,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				return;
 			}
 			try {
-				if (logger.isInfoEnabled()) {
-					logger.info("TCP connection to broker closed in session " + this.sessionId);
+				if (logger.isDebugEnabled()) {
+					logger.debug("TCP connection to broker closed in session " + this.sessionId);
 				}
 				sendStompErrorFrameToClient("Connection to broker closed.");
 			}
@@ -729,14 +734,16 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		 * @return a future to wait for the result
 		 */
 		@SuppressWarnings("unchecked")
-		public ListenableFuture<Void> forward(Message<?> message, final StompHeaderAccessor accessor) {
+		public ListenableFuture<Void> forward(final Message<?> message, final StompHeaderAccessor accessor) {
+
 
 			TcpConnection<byte[]> conn = this.tcpConnection;
 
 			if (!this.isStompConnected) {
 				if (this.isRemoteClientSession) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("TCP connection closed already, ignoring " + message);
+						logger.debug("TCP connection closed already, ignoring " +
+								accessor.getShortLogMessage((byte[]) message.getPayload()));
 					}
 					return EMPTY_TASK;
 				}
@@ -744,7 +751,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 					throw new IllegalStateException("Cannot forward messages " +
 							(conn != null ? "before STOMP CONNECTED. " : "while inactive. ") +
 							"Consider subscribing to receive BrokerAvailabilityEvent's from " +
-							"an ApplicationListener Spring bean. Dropped " + message);
+							"an ApplicationListener Spring bean. Dropped " +
+							accessor.getShortLogMessage((byte[]) message.getPayload()));
 				}
 			}
 
@@ -752,20 +760,15 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 					MessageBuilder.createMessage(message.getPayload(), accessor.getMessageHeaders()) : message;
 
 			StompCommand command = accessor.getCommand();
-			if (accessor.isHeartbeat()) {
-				logger.trace("Forwarding heartbeat in session " + this.sessionId);
-			}
-			else if (StompCommand.SUBSCRIBE.equals(command) && logger.isDebugEnabled()) {
-				logger.debug("Forwarding SUBSCRIBE: " + messageToSend);
-			}
-			else if (StompCommand.UNSUBSCRIBE.equals(command) && logger.isDebugEnabled()) {
-				logger.debug("Forwarding UNSUBSCRIBE: " + messageToSend);
-			}
-			else if (StompCommand.DISCONNECT.equals(command) && logger.isInfoEnabled()) {
-				logger.info("Forwarding DISCONNECT: " + messageToSend);
+			if (logger.isDebugEnabled() &&
+					StompCommand.SEND.equals(command) ||
+					StompCommand.SUBSCRIBE.equals(command) ||
+					StompCommand.UNSUBSCRIBE.equals(command) ||
+					StompCommand.DISCONNECT.equals(command)) {
+				logger.debug("Forwarding " + accessor.getShortLogMessage((byte[]) message.getPayload()));
 			}
 			else if (logger.isTraceEnabled()) {
-				logger.trace("Forwarding " + command + ": " + messageToSend);
+				logger.trace("Forwarding " + accessor.getDetailedLogMessage((byte[]) message.getPayload()));
 			}
 
 			ListenableFuture<Void> future = conn.send((Message<byte[]>) messageToSend);
@@ -779,10 +782,12 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				@Override
 				public void onFailure(Throwable t) {
 					if (tcpConnection != null) {
-						handleTcpConnectionFailure("failed to forward " + messageToSend, t);
+						handleTcpConnectionFailure("failed to forward " +
+								accessor.getShortLogMessage((byte[]) message.getPayload()), t);
 					}
 					else if (logger.isErrorEnabled()) {
-						logger.error("Failed to forward " + messageToSend);
+						logger.error("Failed to forward " +
+								accessor.getShortLogMessage((byte[]) message.getPayload()));
 					}
 				}
 			});
@@ -810,8 +815,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		 */
 		public void clearConnection() {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Cleaning up connection state for session " + sessionId + " (" +
-						(getConnectionCount() - 1) + " remaining connections).");
+				logger.debug("Cleaning up connection state for session " + this.sessionId);
 			}
 
 			if (this.isRemoteClientSession) {
@@ -823,8 +827,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			TcpConnection<byte[]> conn = this.tcpConnection;
 			this.tcpConnection = null;
 			if (conn != null) {
-				if (logger.isInfoEnabled()) {
-					logger.info("Closing TCP connection in session " + this.sessionId);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Closing TCP connection in session " + this.sessionId);
 				}
 				conn.close();
 			}
@@ -838,15 +842,15 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	private class SystemStompConnectionHandler extends StompConnectionHandler {
 
-		public static final String SESSION_ID = "stompRelaySystemSessionId";
-
-
 		public SystemStompConnectionHandler(StompHeaderAccessor connectHeaders) {
-			super(SESSION_ID, connectHeaders, false);
+			super(SYSTEM_SESSION_ID, connectHeaders, false);
 		}
 
 		@Override
 		protected void afterStompConnected(StompHeaderAccessor connectedHeaders) {
+			if (logger.isInfoEnabled()) {
+				logger.info("\"System\" session connected.");
+			}
 			super.afterStompConnected(connectedHeaders);
 			publishBrokerAvailableEvent();
 		}

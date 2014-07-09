@@ -55,6 +55,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+
 	/**
 	 * Log category to use on network IO exceptions after a client has gone away.
 	 *
@@ -65,7 +66,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	 *
 	 * <p>We make a best effort to identify such network failures, on a per-server
 	 * basis, and log them under a separate log category. A simple one-line message
-	 * is logged at INFO level, while a full stack trace is shown at TRACE level.
+	 * is logged at DEBUG level, while a full stack trace is shown at TRACE level.
 	 *
 	 * @see #disconnectedClientLogger
 	 */
@@ -268,8 +269,8 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	@Override
 	public final void close(CloseStatus status) throws IOException {
 		if (isOpen()) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Closing SockJS session " + getId() + " with " + status);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Closing SockJS session " + getId() + " with " + status);
 			}
 			this.state = State.CLOSED;
 			try {
@@ -362,8 +363,8 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 			if (disconnectedClientLogger.isTraceEnabled()) {
 				disconnectedClientLogger.trace("Looks like the client has gone away", failure);
 			}
-			else if (disconnectedClientLogger.isInfoEnabled()) {
-				disconnectedClientLogger.info("Looks like the client has gone away: " +
+			else if (disconnectedClientLogger.isDebugEnabled()) {
+				disconnectedClientLogger.debug("Looks like the client has gone away: " +
 						nestedException.getMessage() + " (For full stack trace, set the '" +
 						DISCONNECTED_CLIENT_LOG_CATEGORY + "' log category to TRACE level)");
 			}
@@ -426,7 +427,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "[id=" + getId() + ", uri=" + getUri() + "]";
+		return getClass().getSimpleName() + "[id=" + getId() + "]";
 	}
 
 

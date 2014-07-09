@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import org.springframework.web.socket.WebSocketSession;
 public class PerConnectionWebSocketHandler implements WebSocketHandler, BeanFactoryAware {
 
 	private static final Log logger = LogFactory.getLog(PerConnectionWebSocketHandler.class);
+
 
 	private final BeanCreatingHandlerProvider<WebSocketHandler> provider;
 
@@ -113,7 +114,7 @@ public class PerConnectionWebSocketHandler implements WebSocketHandler, BeanFact
 			}
 		}
 		catch (Throwable t) {
-			logger.warn("Error while destroying handler", t);
+			logger.warn("Error while destroying " + handler, t);
 		}
 	}
 
@@ -124,7 +125,7 @@ public class PerConnectionWebSocketHandler implements WebSocketHandler, BeanFact
 
 	@Override
 	public String toString() {
-		return "PerConnectionWebSocketHandlerProxy [handlerType=" + this.provider.getHandlerType() + "]";
+		return "PerConnectionWebSocketHandlerProxy[handlerType=" + this.provider.getHandlerType() + "]";
 	}
 
 }

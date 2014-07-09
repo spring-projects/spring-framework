@@ -16,6 +16,8 @@
 
 package org.springframework.messaging.simp.annotation.support;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -44,6 +46,9 @@ import org.springframework.util.Assert;
  * @since 4.0
  */
 public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
+
+	private static Log logger = LogFactory.getLog(SubscriptionMethodReturnValueHandler.class);
+
 
 	private final MessageSendingOperations<String> messagingTemplate;
 
@@ -87,13 +92,10 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message)
-			throws Exception {
-
+	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message) throws Exception {
 		if (returnValue == null) {
 			return;
 		}
-
 		MessageHeaders headers = message.getHeaders();
 		String destination = SimpMessageHeaderAccessor.getDestination(headers);
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
@@ -101,6 +103,10 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 
 		Assert.state(subscriptionId != null,
 				"No subscriptionId in message=" + message + ", method=" + returnType.getMethod());
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Reply to @SubscribeMapping: " + returnValue);
+		}
 
 		this.messagingTemplate.convertAndSend(destination, returnValue, createHeaders(sessionId, subscriptionId));
 	}

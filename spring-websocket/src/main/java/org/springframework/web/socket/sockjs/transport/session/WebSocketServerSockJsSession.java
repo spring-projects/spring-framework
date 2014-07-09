@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,7 +180,6 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 	public void handleMessage(TextMessage message, WebSocketSession wsSession) throws Exception {
 		String payload = message.getPayload();
 		if (StringUtils.isEmpty(payload)) {
-			logger.trace("Ignoring empty message");
 			return;
 		}
 		String[] messages;
@@ -217,7 +216,7 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 	@Override
 	protected void writeFrameInternal(SockJsFrame frame) throws IOException {
 		if (logger.isTraceEnabled()) {
-			logger.trace("Write " + frame);
+			logger.trace("Writing " + frame);
 		}
 		TextMessage message = new TextMessage(frame.getContent());
 		this.webSocketSession.sendMessage(message);
@@ -233,13 +232,4 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 		}
 	}
 
-	@Override
-	public String toString() {
-		if (getNativeSession() != null) {
-			return super.toString();
-		}
-		else {
-			return "WebSocketServerSockJsSession[id=" + getId() + ", uri=null]";
-		}
-	}
 }

@@ -58,6 +58,8 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 
 		this.sockJsConfig = new StubSockJsServiceConfig();
 		this.sockJsConfig.setTaskScheduler(this.taskScheduler);
+
+		setRequest("POST", "/");
 	}
 
 	@Test
@@ -100,6 +102,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 		assertEquals("\"callback\" parameter required", this.servletResponse.getContentAsString());
 
 		resetRequestAndResponse();
+		setRequest("POST", "/");
 		this.servletRequest.setQueryString("c=callback");
 		this.servletRequest.addParameter("c", "callback");
 		transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);
@@ -136,6 +139,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 		assertEquals("\"callback\" parameter required", this.servletResponse.getContentAsString());
 
 		resetRequestAndResponse();
+		setRequest("POST", "/");
 		this.servletRequest.setQueryString("c=callback");
 		this.servletRequest.addParameter("c", "callback");
 		transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);

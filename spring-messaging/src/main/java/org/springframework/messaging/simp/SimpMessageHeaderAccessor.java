@@ -20,11 +20,13 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.IdTimestampMessageHeaderInitializer;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * A base class for working with message headers in simple messaging protocols that
@@ -239,6 +241,52 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	 */
 	public static Principal getUser(Map<String, Object> headers) {
 		return (Principal) headers.get(USER_HEADER);
+	}
+
+	@Override
+	public String getShortLogMessage(Object payload) {
+		if (getMessageType() == null) {
+			return super.getDetailedLogMessage(payload);
+		}
+		StringBuilder sb = getBaseLogMessage();
+		if (!CollectionUtils.isEmpty(getSessionAttributes())) {
+			sb.append(" attributes[").append(getSessionAttributes().size()).append("]");
+		}
+		sb.append(getShortPayloadLogMessage(payload));
+		return sb.toString();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public String getDetailedLogMessage(Object payload) {
+		if (getMessageType() == null) {
+			return super.getDetailedLogMessage(payload);
+		}
+		StringBuilder sb = getBaseLogMessage();
+		if (!CollectionUtils.isEmpty(getSessionAttributes())) {
+			sb.append(" attributes=").append(getSessionAttributes());
+		}
+		if (!CollectionUtils.isEmpty((Map<String, List<String>>) getHeader(NATIVE_HEADERS))) {
+			sb.append(" nativeHeaders=").append((Map<String, List<String>>) getHeader(NATIVE_HEADERS));
+		}
+		sb.append(getDetailedPayloadLogMessage(payload));
+		return sb.toString();
+	}
+
+	private StringBuilder getBaseLogMessage() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getMessageType().name());
+		if (getDestination() != null) {
+			sb.append(" destination=").append(getDestination());
+		}
+		if (getSubscriptionId() != null) {
+			sb.append(" subscriptionId=").append(getSubscriptionId());
+		}
+		sb.append(" session=").append(getSessionId());
+		if (getUser() != null) {
+			sb.append(" user=").append(getUser().getName());
+		}
+		return sb;
 	}
 
 }

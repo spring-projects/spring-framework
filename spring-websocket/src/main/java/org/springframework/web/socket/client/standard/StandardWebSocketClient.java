@@ -176,14 +176,14 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 		@Override
 		public void beforeRequest(Map<String, List<String>> requestHeaders) {
 			requestHeaders.putAll(this.headers);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Handshake request headers: " + requestHeaders);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Handshake request headers: " + requestHeaders);
 			}
 		}
 		@Override
 		public void afterResponse(HandshakeResponse response) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Handshake response headers: " + response.getHeaders());
+			if (logger.isTraceEnabled()) {
+				logger.trace("Handshake response headers: " + response.getHeaders());
 			}
 		}
 	}

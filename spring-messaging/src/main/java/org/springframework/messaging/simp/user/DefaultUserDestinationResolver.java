@@ -181,6 +181,10 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		return sourceDestinationWithoutPrefix + "-user" + sessionId;
 	}
 
+	@Override
+	public String toString() {
+		return "DefaultUserDestinationResolver[prefix=" + this.destinationPrefix + "]";
+	}
 
 	private static class DestinationInfo {
 

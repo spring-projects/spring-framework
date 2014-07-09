@@ -16,7 +16,9 @@
 
 package org.springframework.messaging.support;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,9 +30,11 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.simp.stomp.StompDecoder;
 import org.springframework.util.Assert;
 import org.springframework.util.IdGenerator;
 import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
@@ -110,6 +114,13 @@ import org.springframework.util.StringUtils;
  * @since 4.0
  */
 public class MessageHeaderAccessor {
+
+	private static final MimeType[] readableMimeTypes = new MimeType[] {
+			MimeTypeUtils.APPLICATION_JSON, MimeTypeUtils.APPLICATION_XML,
+			new MimeType("text", "*"), new MimeType("application", "*+json"), new MimeType("application", "*+xml")
+	};
+	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+
 
 	protected Log logger = LogFactory.getLog(getClass());
 
@@ -468,6 +479,81 @@ public class MessageHeaderAccessor {
 		setHeader(MessageHeaders.CONTENT_TYPE, contentType);
 	}
 
+
+	/**
+	 * Return a concise message for logging purposes.
+	 * @param payload the payload that corresponds to the headers.
+	 * @return the message
+	 */
+	public String getShortLogMessage(Object payload) {
+		return "headers=" + this.headers.toString() + getShortPayloadLogMessage(payload);
+	}
+
+	/**
+	 * Return a more detailed message for logging purposes.
+	 * @param payload the payload that corresponds to the headers.
+	 * @return the message
+	 */
+	public String getDetailedLogMessage(Object payload) {
+		return "headers=" + this.headers.toString() + getDetailedPayloadLogMessage(payload);
+	}
+
+	protected String getShortPayloadLogMessage(Object payload) {
+		if (payload instanceof String) {
+			String payloadText = (String) payload;
+			return (payloadText.length() < 80) ?
+				" payload=" + payloadText :
+				" payload=" + payloadText.substring(0, 80) + "...(truncated)";
+		}
+		else if (payload instanceof byte[]) {
+			byte[] bytes = (byte[]) payload;
+			if (isReadableContentType()) {
+				Charset charset = getContentType().getCharSet();
+				charset = (charset != null ? charset : DEFAULT_CHARSET);
+				return (bytes.length < 80) ?
+						" payload=" + new String(bytes, charset) :
+						" payload=" + new String(Arrays.copyOf(bytes, 80), charset) + "...(truncated)";
+			}
+			else {
+				return " payload=byte[" + bytes.length + "]";
+			}
+		}
+		else {
+			String payloadText = payload.toString();
+			return (payloadText.length() < 80) ?
+					" payload=" + payloadText :
+					" payload=" + ObjectUtils.identityToString(payload);
+		}
+	}
+
+	protected String getDetailedPayloadLogMessage(Object payload) {
+		if (payload instanceof String) {
+			return " payload=" + ((String) payload);
+		}
+		else if (payload instanceof byte[]) {
+			byte[] bytes = (byte[]) payload;
+			if (isReadableContentType()) {
+				Charset charset = getContentType().getCharSet();
+				charset = (charset != null ? charset : DEFAULT_CHARSET);
+				return " payload=" + new String(bytes, charset);
+			}
+			else {
+				return " payload=byte[" + bytes.length + "]";
+			}
+		}
+		else {
+			return " payload=" + payload;
+		}
+	}
+
+	protected boolean isReadableContentType() {
+		for (MimeType mimeType : readableMimeTypes) {
+			if (mimeType.includes(getContentType())) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	@Override
 	public String toString() {
