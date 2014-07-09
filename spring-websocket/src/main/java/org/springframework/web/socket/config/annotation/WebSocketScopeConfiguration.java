@@ -16,13 +16,14 @@
 
 package org.springframework.web.socket.config.annotation;
 
+import java.util.Collections;
+
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.simp.SimpSessionScope;
 
-import java.util.Collections;
-
 /**
+ * Bean configuration for a "websocket" scope, bound to {@link SimpSessionScope}.
  *
  * @author Rossen Stoyanchev
  * @since 4.1

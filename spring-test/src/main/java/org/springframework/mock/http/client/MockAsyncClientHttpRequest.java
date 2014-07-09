@@ -36,13 +36,13 @@ import org.springframework.util.concurrent.SettableListenableFuture;
  */
 public class MockAsyncClientHttpRequest extends MockClientHttpRequest implements AsyncClientHttpRequest {
 
-
 	public MockAsyncClientHttpRequest() {
 	}
 
 	public MockAsyncClientHttpRequest(HttpMethod httpMethod, URI uri) {
 		super(httpMethod, uri);
 	}
+
 
 	@Override
 	public ListenableFuture<ClientHttpResponse> executeAsync() throws IOException {
