@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.util;
+package org.springframework.util.backoff;
 
 /**
  * Provide a {@link BackOffExecution} that indicates the rate at which
@@ -23,23 +23,21 @@ package org.springframework.util;
  * <p>Users of this interface are expected to use it like this:
  *
  * <pre class="code">
- * {@code
+ * BackOffExecution exec = backOff.start();
  *
- *  BackOffExecution exec = backOff.start();
- *
- *  // In the operation recovery/retry loop:
- *  long waitInterval = exec.nextBackOffMillis();
- *  if (waitInterval == BackOffExecution.STOP) {
- *    // do not retry operation
- *  }
- *  else {
- *    // sleep, e.g. Thread.sleep(waitInterval)
- *    // retry operation
- *  }
+ * // In the operation recovery/retry loop:
+ * long waitInterval = exec.nextBackOffMillis();
+ * if (waitInterval == BackOffExecution.STOP) {
+ *     // do not retry operation
+ * }
+ * else {
+ *     // sleep, e.g. Thread.sleep(waitInterval)
+ *     // retry operation
+ * }
  * }</pre>
  *
- * Once the underlying operation has completed successfully, the execution
- * instance can be simply discarded.
+ * Once the underlying operation has completed successfully,
+ * the execution instance can be simply discarded.
  *
  * @author Stephane Nicoll
  * @since 4.1

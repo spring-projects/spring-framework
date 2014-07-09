@@ -68,7 +68,7 @@
 
 	<bean id="testErrorHandler" class="org.springframework.jms.config.JmsNamespaceHandlerTests$TestErrorHandler"/>
 
-	<bean id="testBackOff" class="org.springframework.util.FixedBackOff">
+	<bean id="testBackOff" class="org.springframework.util.backoff.FixedBackOff">
 		<property name="interval" value="1000"/>
 	</bean>
 

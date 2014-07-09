@@ -34,10 +34,10 @@ import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
-import org.springframework.util.BackOff;
-import org.springframework.util.BackOffExecution;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.FixedBackOff;
+import org.springframework.util.backoff.BackOff;
+import org.springframework.util.backoff.BackOffExecution;
+import org.springframework.util.backoff.FixedBackOff;
 
 /**
  * Message listener container variant that uses plain JMS client APIs, specifically

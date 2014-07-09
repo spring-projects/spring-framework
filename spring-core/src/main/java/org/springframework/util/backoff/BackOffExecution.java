@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.util;
+package org.springframework.util.backoff;
 
 /**
  * Represent a particular back-off execution.
@@ -23,7 +23,7 @@ package org.springframework.util;
  *
  * @author Stephane Nicoll
  * @since 4.1
- * @see org.springframework.util.BackOff
+ * @see BackOff
  */
 public interface BackOffExecution {
 

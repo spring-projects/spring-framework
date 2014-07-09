@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.util;
+package org.springframework.util.backoff;
 
 /**
  * A simple {@link BackOff} implementation that provides a fixed interval
@@ -102,7 +102,7 @@ public class FixedBackOff implements BackOff {
 				return getInterval();
 			}
 			else {
-				return BackOffExecution.STOP;
+				return STOP;
 			}
 		}
 

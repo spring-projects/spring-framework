@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.util;
+package org.springframework.util.backoff;
 
 /**
  * Implementation of {@link BackOff} that increases the back off period for each
@@ -184,7 +184,7 @@ public class ExponentialBackOff implements BackOff {
 		@Override
 		public long nextBackOff() {
 			if (currentElapsedTime >= maxElapsedTime) {
-				return BackOffExecution.STOP;
+				return STOP;
 			}
 
 			long nextInterval = computeNextInterval();
