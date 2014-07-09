@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.util.filter;
+package org.springframework.util;
 
 import java.util.Collection;
 import java.util.Collections;
-
-import org.springframework.util.Assert;
 
 /**
  * A simple instance filter that checks if a given instance match based on
@@ -39,6 +37,7 @@ public class InstanceFilter<T> {
 
 	private final boolean matchIfEmpty;
 
+
 	/**
 	 * Create a new instance based on includes/excludes collections.
 	 * <p>A particular element will match if it "matches" the one of the element in the
@@ -47,7 +46,6 @@ public class InstanceFilter<T> {
 	 * another if it is equals according to {@link Object#equals(Object)}
 	 * <p>If both collections are empty, {@code matchIfEmpty} defines if
 	 * an element matches or not.
-	 *
 	 * @param includes the collection of includes
 	 * @param excludes the collection of excludes
 	 * @param matchIfEmpty the matching result if both the includes and the excludes
@@ -61,20 +59,21 @@ public class InstanceFilter<T> {
 		this.matchIfEmpty = matchIfEmpty;
 	}
 
+
 	/**
 	 * Determine if the specified {code instance} matches this filter.
 	 */
 	public boolean match(T instance) {
-		Assert.notNull(instance, "The instance to match is mandatory.");
+		Assert.notNull(instance, "The instance to match is mandatory");
 
-		boolean includesSet = !includes.isEmpty();
-		boolean excludesSet = !excludes.isEmpty();
+		boolean includesSet = !this.includes.isEmpty();
+		boolean excludesSet = !this.excludes.isEmpty();
 		if (!includesSet && !excludesSet) {
-			return matchIfEmpty;
+			return this.matchIfEmpty;
 		}
 
-		boolean matchIncludes = match(instance, includes);
-		boolean matchExcludes = match(instance, excludes);
+		boolean matchIncludes = match(instance, this.includes);
+		boolean matchExcludes = match(instance, this.excludes);
 
 		if (!includesSet) {
 			return !matchExcludes;
@@ -89,7 +88,6 @@ public class InstanceFilter<T> {
 	/**
 	 * Determine if the specified {@code instance} is equal to the
 	 * specified {@code candidate}.
-	 *
 	 * @param instance the instance to handle
 	 * @param candidate a candidate defined by this filter
 	 * @return {@code true} if the instance matches the candidate
@@ -101,7 +99,6 @@ public class InstanceFilter<T> {
 	/**
 	 * Determine if the specified {@code instance} matches one of the candidates.
 	 * <p>If the candidates collection is {@code null}, returns {@code false}.
-	 *
 	 * @param instance the instance to check
 	 * @param candidates a list of candidates
 	 * @return {@code true} if the instance match or the candidates collection is null
@@ -117,7 +114,11 @@ public class InstanceFilter<T> {
 
 	@Override
 	public String toString() {
-		return "includes=" + includes + ", excludes=" + excludes + ", matchIfEmpty=" + matchIfEmpty;
+		StringBuilder sb = new StringBuilder(getClass().getSimpleName());
+		sb.append(": includes=").append(this.includes);
+		sb.append(", excludes=").append(this.excludes);
+		sb.append(", matchIfEmpty=").append(this.matchIfEmpty);
+		return sb.toString();
 	}
 
 }

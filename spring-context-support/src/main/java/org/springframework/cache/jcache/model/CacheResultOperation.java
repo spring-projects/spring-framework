@@ -22,7 +22,7 @@ import javax.cache.annotation.CacheResult;
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.util.StringUtils;
-import org.springframework.util.filter.ExceptionTypeFilter;
+import org.springframework.util.ExceptionTypeFilter;
 
 /**
  * The {@link JCacheOperation} implementation for a {@link CacheResult} operation.
@@ -39,20 +39,22 @@ public class CacheResultOperation extends BaseKeyCacheOperation<CacheResult> {
 
 	private final String exceptionCacheName;
 
-	public CacheResultOperation(CacheMethodDetails<CacheResult> methodDetails,
-			CacheResolver cacheResolver, KeyGenerator keyGenerator,
-			CacheResolver exceptionCacheResolver) {
+
+	public CacheResultOperation(CacheMethodDetails<CacheResult> methodDetails, CacheResolver cacheResolver,
+			KeyGenerator keyGenerator, CacheResolver exceptionCacheResolver) {
+
 		super(methodDetails, cacheResolver, keyGenerator);
 		CacheResult ann = methodDetails.getCacheAnnotation();
-		this.exceptionTypeFilter = createExceptionTypeFiler(ann.cachedExceptions(), ann.nonCachedExceptions());
+		this.exceptionTypeFilter = createExceptionTypeFilter(ann.cachedExceptions(), ann.nonCachedExceptions());
 		this.exceptionCacheResolver = exceptionCacheResolver;
 		String exceptionCacheNameCandidate = ann.exceptionCacheName();
 		this.exceptionCacheName = StringUtils.hasText(exceptionCacheNameCandidate) ? exceptionCacheNameCandidate : null;
 	}
 
+
 	@Override
 	public ExceptionTypeFilter getExceptionTypeFilter() {
-		return exceptionTypeFilter;
+		return this.exceptionTypeFilter;
 	}
 
 	/**
@@ -69,7 +71,7 @@ public class CacheResultOperation extends BaseKeyCacheOperation<CacheResult> {
 	 * use for matching exceptions thrown by this operation.
 	 */
 	public CacheResolver getExceptionCacheResolver() {
-		return exceptionCacheResolver;
+		return this.exceptionCacheResolver;
 	}
 
 	/**
@@ -78,7 +80,7 @@ public class CacheResultOperation extends BaseKeyCacheOperation<CacheResult> {
 	 * @see javax.cache.annotation.CacheResult#exceptionCacheName()
 	 */
 	public String getExceptionCacheName() {
-		return exceptionCacheName;
+		return this.exceptionCacheName;
 	}
 
 }

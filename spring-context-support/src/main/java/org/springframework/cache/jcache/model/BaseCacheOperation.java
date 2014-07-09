@@ -16,8 +16,6 @@
 
 package org.springframework.cache.jcache.model;
 
-import static java.util.Arrays.*;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -25,7 +23,6 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.cache.annotation.CacheInvocationParameter;
 import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CacheMethodDetails;
@@ -33,7 +30,9 @@ import javax.cache.annotation.CacheValue;
 
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.util.Assert;
-import org.springframework.util.filter.ExceptionTypeFilter;
+import org.springframework.util.ExceptionTypeFilter;
+
+import static java.util.Arrays.*;
 
 /**
  * A base {@link JCacheOperation} implementation.
@@ -49,6 +48,7 @@ public abstract class BaseCacheOperation<A extends Annotation> implements JCache
 
 	protected final List<CacheParameterDetail> allParameterDetails;
 
+
 	/**
 	 * Create a new instance.
 	 * @param methodDetails the {@link CacheMethodDetails} related to the cached method
@@ -62,30 +62,32 @@ public abstract class BaseCacheOperation<A extends Annotation> implements JCache
 		this.allParameterDetails = initializeAllParameterDetails(methodDetails.getMethod());
 	}
 
+
 	/**
 	 * Return the {@link ExceptionTypeFilter} to use to filter exceptions thrown while
 	 * invoking the method.
 	 */
 	public abstract ExceptionTypeFilter getExceptionTypeFilter();
 
+
 	@Override
 	public Method getMethod() {
-		return methodDetails.getMethod();
+		return this.methodDetails.getMethod();
 	}
 
 	@Override
 	public Set<Annotation> getAnnotations() {
-		return methodDetails.getAnnotations();
+		return this.methodDetails.getAnnotations();
 	}
 
 	@Override
 	public A getCacheAnnotation() {
-		return methodDetails.getCacheAnnotation();
+		return this.methodDetails.getCacheAnnotation();
 	}
 
 	@Override
 	public String getCacheName() {
-		return methodDetails.getCacheName();
+		return this.methodDetails.getCacheName();
 	}
 
 	@Override
@@ -95,35 +97,26 @@ public abstract class BaseCacheOperation<A extends Annotation> implements JCache
 
 	@Override
 	public CacheResolver getCacheResolver() {
-		return cacheResolver;
+		return this.cacheResolver;
 	}
 
 	@Override
 	public CacheInvocationParameter[] getAllParameters(Object... values) {
-		if (allParameterDetails.size() != values.length) {
-			throw new IllegalStateException("Values mismatch, operation has "
-					+ allParameterDetails.size() + " parameter(s) but got " + values.length + " value(s)");
+		if (this.allParameterDetails.size() != values.length) {
+			throw new IllegalStateException("Values mismatch, operation has " +
+					this.allParameterDetails.size() + " parameter(s) but got " + values.length + " value(s)");
 		}
 		List<CacheInvocationParameter> result = new ArrayList<CacheInvocationParameter>();
-		for (int i = 0; i < allParameterDetails.size(); i++) {
-			result.add(allParameterDetails.get(i).toCacheInvocationParameter(values[i]));
+		for (int i = 0; i < this.allParameterDetails.size(); i++) {
+			result.add(this.allParameterDetails.get(i).toCacheInvocationParameter(values[i]));
 		}
 		return result.toArray(new CacheInvocationParameter[result.size()]);
 	}
 
-	protected ExceptionTypeFilter createExceptionTypeFiler(Class<? extends Throwable>[] includes,
-			Class<? extends Throwable>[] excludes) {
+	protected ExceptionTypeFilter createExceptionTypeFilter(
+			Class<? extends Throwable>[] includes, Class<? extends Throwable>[] excludes) {
+
 		return new ExceptionTypeFilter(asList(includes), asList(excludes), true);
-	}
-
-
-	private static List<CacheParameterDetail> initializeAllParameterDetails(Method method) {
-		List<CacheParameterDetail> result = new ArrayList<CacheParameterDetail>();
-		for (int i = 0; i < method.getParameterTypes().length; i++) {
-			CacheParameterDetail detail = new CacheParameterDetail(method, i);
-			result.add(detail);
-		}
-		return result;
 	}
 
 	@Override
@@ -144,6 +137,16 @@ public abstract class BaseCacheOperation<A extends Annotation> implements JCache
 	}
 
 
+	private static List<CacheParameterDetail> initializeAllParameterDetails(Method method) {
+		List<CacheParameterDetail> result = new ArrayList<CacheParameterDetail>();
+		for (int i = 0; i < method.getParameterTypes().length; i++) {
+			CacheParameterDetail detail = new CacheParameterDetail(method, i);
+			result.add(detail);
+		}
+		return result;
+	}
+
+
 	protected static class CacheParameterDetail {
 
 		private final Class<?> rawType;
@@ -156,7 +159,7 @@ public abstract class BaseCacheOperation<A extends Annotation> implements JCache
 
 		private final boolean isValue;
 
-		private CacheParameterDetail(Method m, int parameterPosition) {
+		public CacheParameterDetail(Method m, int parameterPosition) {
 			this.rawType = m.getParameterTypes()[parameterPosition];
 			this.annotations = new LinkedHashSet<Annotation>();
 			boolean foundKeyAnnotation = false;
@@ -176,15 +179,15 @@ public abstract class BaseCacheOperation<A extends Annotation> implements JCache
 		}
 
 		public int getParameterPosition() {
-			return parameterPosition;
+			return this.parameterPosition;
 		}
 
 		protected boolean isKey() {
-			return isKey;
+			return this.isKey;
 		}
 
 		protected boolean isValue() {
-			return isValue;
+			return this.isValue;
 		}
 
 		public CacheInvocationParameter toCacheInvocationParameter(Object value) {
@@ -192,35 +195,36 @@ public abstract class BaseCacheOperation<A extends Annotation> implements JCache
 		}
 	}
 
+
 	protected static class CacheInvocationParameterImpl implements CacheInvocationParameter {
 
 		private final CacheParameterDetail detail;
 
 		private final Object value;
 
-		private CacheInvocationParameterImpl(CacheParameterDetail detail, Object value) {
+		public CacheInvocationParameterImpl(CacheParameterDetail detail, Object value) {
 			this.detail = detail;
 			this.value = value;
 		}
 
 		@Override
 		public Class<?> getRawType() {
-			return detail.rawType;
+			return this.detail.rawType;
 		}
 
 		@Override
 		public Object getValue() {
-			return value;
+			return this.value;
 		}
 
 		@Override
 		public Set<Annotation> getAnnotations() {
-			return detail.annotations;
+			return this.detail.annotations;
 		}
 
 		@Override
 		public int getParameterPosition() {
-			return detail.parameterPosition;
+			return this.detail.parameterPosition;
 		}
 	}
 

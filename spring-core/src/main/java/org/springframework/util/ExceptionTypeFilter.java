@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.util.filter;
+package org.springframework.util;
 
 import java.util.Collection;
 
@@ -29,6 +29,7 @@ public class ExceptionTypeFilter extends InstanceFilter<Class<? extends Throwabl
 
 	public ExceptionTypeFilter(Collection<? extends Class<? extends Throwable>> includes,
 			Collection<? extends Class<? extends Throwable>> excludes, boolean matchIfEmpty) {
+
 		super(includes, excludes, matchIfEmpty);
 	}
 
