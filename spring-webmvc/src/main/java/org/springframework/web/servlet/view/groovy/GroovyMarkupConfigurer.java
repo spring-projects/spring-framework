@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.view.groovy;
 
 import java.io.IOException;
@@ -26,7 +27,6 @@ import groovy.text.markup.MarkupTemplateEngine;
 import groovy.text.markup.TemplateConfiguration;
 import groovy.text.markup.TemplateResolver;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -55,9 +55,9 @@ import org.springframework.util.StringUtils;
  *
  * By default this bean will create a {@link MarkupTemplateEngine} with:
  * <ul>
- *     <li>a parent ClassLoader for loading Groovy templates with their references
- *     <li>the default configuration in the base class {@link TemplateConfiguration}
- *     <li>a {@link groovy.text.markup.TemplateResolver} for resolving template files
+ * <li>a parent ClassLoader for loading Groovy templates with their references
+ * <li>the default configuration in the base class {@link TemplateConfiguration}
+ * <li>a {@link groovy.text.markup.TemplateResolver} for resolving template files
  * </ul>
  *
  * You can provide the {@link MarkupTemplateEngine} instance directly to this bean
@@ -78,7 +78,6 @@ import org.springframework.util.StringUtils;
  * @author Brian Clozel
  * @author Rossen Stoyanchev
  * @since 4.1
- *
  * @see GroovyMarkupView
  * @see <a href="http://beta.groovy-lang.org/docs/groovy-2.3.2/html/documentation/markup-template-engine.html">
  *     Groovy Markup Template engine documentation</a>
@@ -119,15 +118,12 @@ public class GroovyMarkupConfigurer extends TemplateConfiguration
 		this.templateEngine = templateEngine;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public MarkupTemplateEngine getTemplateEngine() {
 		return templateEngine;
 	}
 
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 
@@ -161,8 +157,8 @@ public class GroovyMarkupConfigurer extends TemplateConfiguration
 	}
 
 	/**
-	 * Create a parent classloader for Groovy to use as parent classloader when
-	 * loading and compiling templates.
+	 * Create a parent ClassLoader for Groovy to use as parent ClassLoader
+	 * when loading and compiling templates.
 	 */
 	protected ClassLoader createTemplateClassLoader() throws IOException {
 		String[] paths = StringUtils.commaDelimitedListToStringArray(getResourceLoaderPath());
@@ -183,20 +179,11 @@ public class GroovyMarkupConfigurer extends TemplateConfiguration
 
 	/**
 	 * Resolve a template from the given template path.
-	 *
-	 * <p>The default implementation uses the Locale associated with the current
-	 * request, as obtained through
-	 * {@link org.springframework.context.i18n.LocaleContextHolder LocaleContextHolder},
-	 * to find the template file. Effectively the locale configured at the engine
-	 * level is ignored.
-	 *
+	 * <p>The default implementation uses the Locale associated with the current request,
+	 * as obtained through {@link org.springframework.context.i18n.LocaleContextHolder LocaleContextHolder},
+	 * to find the template file. Effectively the locale configured at the engine level is ignored.
 	 * @see LocaleContextHolder
-	 * @see #setLocale(java.util.Locale)
-	 *
-	 * @param classLoader
-	 * @param templatePath
-	 * @return
-	 * @throws IOException
+	 * @see #setLocale
 	 */
 	protected URL resolveTemplate(ClassLoader classLoader, String templatePath) throws IOException {
 		MarkupTemplateEngine.TemplateResource resource = MarkupTemplateEngine.TemplateResource.parse(templatePath);
@@ -233,4 +220,5 @@ public class GroovyMarkupConfigurer extends TemplateConfiguration
 			return GroovyMarkupConfigurer.this.resolveTemplate(this.classLoader, templatePath);
 		}
 	}
+
 }

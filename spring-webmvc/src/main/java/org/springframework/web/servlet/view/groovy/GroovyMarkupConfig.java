@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.view.groovy;
 
 import groovy.text.markup.MarkupTemplateEngine;
@@ -23,15 +24,16 @@ import groovy.text.markup.MarkupTemplateEngine;
  * Detected and used by GroovyMarkupView.
  *
  * @author Brian Clozel
- * @see GroovyMarkupConfigurer
  * @since 4.1
+ * @see GroovyMarkupConfigurer
  */
 public interface GroovyMarkupConfig {
 
 	/**
-	 * Return the Groovy MarkupTemplateEngine for the current web application context.
-	 * May be unique to one servlet, or shared in the root context.
-	 * @return the Groovy Template engine
+	 * Return the Groovy {@link MarkupTemplateEngine} for the current
+	 * web application context. May be unique to one servlet, or shared
+	 * in the root context.
+	 * @return the Groovy MarkupTemplateEngine engine
 	 */
 	MarkupTemplateEngine getTemplateEngine();
 

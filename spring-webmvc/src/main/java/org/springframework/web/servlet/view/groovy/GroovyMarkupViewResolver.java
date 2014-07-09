@@ -34,16 +34,14 @@ import org.springframework.web.servlet.view.AbstractTemplateViewResolver;
  * View object if a template is actually found.
  *
  * @author Brian Clozel
- * @see GroovyMarkupConfigurer
  * @since 4.1
+ * @see GroovyMarkupConfigurer
  */
 public class GroovyMarkupViewResolver extends AbstractTemplateViewResolver {
 
-
 	public GroovyMarkupViewResolver() {
-		this.setViewClass(requiredViewClass());
+		setViewClass(requiredViewClass());
 	}
-
 
 	@Override
 	protected Class<?> requiredViewClass() {
