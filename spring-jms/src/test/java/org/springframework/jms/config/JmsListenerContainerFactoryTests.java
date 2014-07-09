@@ -16,9 +16,6 @@
 
 package org.springframework.jms.config;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
 import javax.jms.ConnectionFactory;
 import javax.jms.MessageListener;
 import javax.jms.Session;
@@ -41,8 +38,11 @@ import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.jms.support.destination.DynamicDestinationResolver;
-import org.springframework.util.BackOff;
-import org.springframework.util.FixedBackOff;
+import org.springframework.util.backoff.BackOff;
+import org.springframework.util.backoff.FixedBackOff;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  *

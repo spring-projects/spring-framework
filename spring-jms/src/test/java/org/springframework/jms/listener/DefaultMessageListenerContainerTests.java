@@ -16,9 +16,6 @@
 
 package org.springframework.jms.listener;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
@@ -28,8 +25,11 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import org.springframework.util.BackOff;
-import org.springframework.util.BackOffExecution;
+import org.springframework.util.backoff.BackOff;
+import org.springframework.util.backoff.BackOffExecution;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  *

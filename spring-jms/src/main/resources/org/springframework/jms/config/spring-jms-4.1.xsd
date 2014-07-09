@@ -329,7 +329,7 @@
 					]]></xsd:documentation>
 					<xsd:appinfo>
 						<tool:annotation kind="ref">
-							<tool:expected-type type="org.springframework.util.BackOff"/>
+							<tool:expected-type type="org.springframework.util.backoff.BackOff"/>
 						</tool:annotation>
 					</xsd:appinfo>
 				</xsd:annotation>
