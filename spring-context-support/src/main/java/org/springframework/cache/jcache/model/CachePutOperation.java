@@ -25,7 +25,7 @@ import javax.cache.annotation.CachePut;
 
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
-import org.springframework.util.filter.ExceptionTypeFilter;
+import org.springframework.util.ExceptionTypeFilter;
 
 /**
  * The {@link JCacheOperation} implementation for a {@link CachePut} operation.
@@ -40,11 +40,13 @@ public class CachePutOperation extends BaseKeyCacheOperation<CachePut> {
 
 	private final CacheParameterDetail valueParameterDetail;
 
-	public CachePutOperation(CacheMethodDetails<CachePut> methodDetails,
-			CacheResolver cacheResolver, KeyGenerator keyGenerator) {
+
+	public CachePutOperation(
+			CacheMethodDetails<CachePut> methodDetails, CacheResolver cacheResolver, KeyGenerator keyGenerator) {
+
 		super(methodDetails, cacheResolver, keyGenerator);
 		CachePut ann = methodDetails.getCacheAnnotation();
-		this.exceptionTypeFilter = createExceptionTypeFiler(ann.cacheFor(), ann.noCacheFor());
+		this.exceptionTypeFilter = createExceptionTypeFilter(ann.cacheFor(), ann.noCacheFor());
 		this.valueParameterDetail = initializeValueParameterDetail(methodDetails.getMethod(), allParameterDetails);
 		if (valueParameterDetail == null) {
 			throw new IllegalArgumentException("No parameter annotated with @CacheValue was found for " +
@@ -52,9 +54,10 @@ public class CachePutOperation extends BaseKeyCacheOperation<CachePut> {
 		}
 	}
 
+
 	@Override
 	public ExceptionTypeFilter getExceptionTypeFilter() {
-		return exceptionTypeFilter;
+		return this.exceptionTypeFilter;
 	}
 
 	/**
@@ -74,17 +77,18 @@ public class CachePutOperation extends BaseKeyCacheOperation<CachePut> {
 	 * @return the {@link CacheInvocationParameter} instance for the value parameter
 	 */
 	public CacheInvocationParameter getValueParameter(Object... values) {
-		int parameterPosition = valueParameterDetail.getParameterPosition();
+		int parameterPosition = this.valueParameterDetail.getParameterPosition();
 		if (parameterPosition >= values.length) {
-			throw new IllegalStateException("Values mismatch, value parameter at position "
-					+ parameterPosition + " cannot be matched against " + values.length + " value(s)");
+			throw new IllegalStateException("Values mismatch, value parameter at position " +
+					parameterPosition + " cannot be matched against " + values.length + " value(s)");
 		}
-		return valueParameterDetail.toCacheInvocationParameter(values[parameterPosition]);
+		return this.valueParameterDetail.toCacheInvocationParameter(values[parameterPosition]);
 	}
 
 
-	private static CacheParameterDetail initializeValueParameterDetail(Method method,
-			List<CacheParameterDetail> allParameters) {
+	private static CacheParameterDetail initializeValueParameterDetail(
+			Method method, List<CacheParameterDetail> allParameters) {
+
 		CacheParameterDetail result = null;
 		for (CacheParameterDetail parameter : allParameters) {
 			if (parameter.isValue()) {

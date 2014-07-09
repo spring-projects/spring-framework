@@ -20,7 +20,7 @@ import javax.cache.annotation.CacheMethodDetails;
 import javax.cache.annotation.CacheRemoveAll;
 
 import org.springframework.cache.interceptor.CacheResolver;
-import org.springframework.util.filter.ExceptionTypeFilter;
+import org.springframework.util.ExceptionTypeFilter;
 
 /**
  * The {@link JCacheOperation} implementation for a {@link CacheRemoveAll} operation.
@@ -33,15 +33,17 @@ public class CacheRemoveAllOperation extends BaseCacheOperation<CacheRemoveAll> 
 
 	private final ExceptionTypeFilter exceptionTypeFilter;
 
+
 	public CacheRemoveAllOperation(CacheMethodDetails<CacheRemoveAll> methodDetails, CacheResolver cacheResolver) {
 		super(methodDetails, cacheResolver);
 		CacheRemoveAll ann = methodDetails.getCacheAnnotation();
-		this.exceptionTypeFilter = createExceptionTypeFiler(ann.evictFor(), ann.noEvictFor());
+		this.exceptionTypeFilter = createExceptionTypeFilter(ann.evictFor(), ann.noEvictFor());
 	}
+
 
 	@Override
 	public ExceptionTypeFilter getExceptionTypeFilter() {
-		return exceptionTypeFilter;
+		return this.exceptionTypeFilter;
 	}
 
 	/**

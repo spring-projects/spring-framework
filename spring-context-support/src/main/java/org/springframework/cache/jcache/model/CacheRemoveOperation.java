@@ -21,7 +21,7 @@ import javax.cache.annotation.CacheRemove;
 
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
-import org.springframework.util.filter.ExceptionTypeFilter;
+import org.springframework.util.ExceptionTypeFilter;
 
 /**
  * The {@link JCacheOperation} implementation for a {@link CacheRemove} operation.
@@ -34,16 +34,19 @@ public class CacheRemoveOperation extends BaseKeyCacheOperation<CacheRemove> {
 
 	private final ExceptionTypeFilter exceptionTypeFilter;
 
-	public CacheRemoveOperation(CacheMethodDetails<CacheRemove> methodDetails,
-			CacheResolver cacheResolver, KeyGenerator keyGenerator) {
+
+	public CacheRemoveOperation(
+			CacheMethodDetails<CacheRemove> methodDetails, CacheResolver cacheResolver, KeyGenerator keyGenerator) {
+
 		super(methodDetails, cacheResolver, keyGenerator);
 		CacheRemove ann = methodDetails.getCacheAnnotation();
-		this.exceptionTypeFilter = createExceptionTypeFiler(ann.evictFor(), ann.noEvictFor());
+		this.exceptionTypeFilter = createExceptionTypeFilter(ann.evictFor(), ann.noEvictFor());
 	}
+
 
 	@Override
 	public ExceptionTypeFilter getExceptionTypeFilter() {
-		return exceptionTypeFilter;
+		return this.exceptionTypeFilter;
 	}
 
 	/**
