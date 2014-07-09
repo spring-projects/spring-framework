@@ -471,21 +471,34 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	private ManagedList<?> getArgumentResolvers(Element element, ParserContext parserContext) {
 		Element resolversElement = DomUtils.getChildElementByTagName(element, "argument-resolvers");
 		if (resolversElement != null) {
-			ManagedList<BeanDefinitionHolder> argumentResolvers = extractBeanSubElements(resolversElement, parserContext);
-            ManagedList<BeanMetadataElement> customAndReferencedResolvers = new ManagedList<BeanMetadataElement>();
-            customAndReferencedResolvers.addAll(wrapWebArgumentResolverBeanDefs(argumentResolvers, parserContext));
-            customAndReferencedResolvers.addAll(extractBeanRefSubElements(resolversElement, parserContext));
-            return customAndReferencedResolvers;
+			ManagedList<Object> resolvers = extractBeanSubElements(resolversElement, parserContext);
+			return wrapLegacyResolvers(resolvers, parserContext);
 		}
 		return null;
 	}
 
-	private ManagedList<?> getReturnValueHandlers(Element element, ParserContext parserContext) {
-		Element handlersElement = DomUtils.getChildElementByTagName(element, "return-value-handlers");
-		if (handlersElement != null) {
-			return extractBeanSubElements(handlersElement, parserContext);
+	private ManagedList<Object> wrapLegacyResolvers(List<Object> list, ParserContext context) {
+		ManagedList<Object> result = new ManagedList<Object>();
+		for (Object object : list) {
+			if (object instanceof BeanDefinitionHolder) {
+				BeanDefinitionHolder beanDef = (BeanDefinitionHolder) object;
+				String className = beanDef.getBeanDefinition().getBeanClassName();
+				Class<?> clazz = ClassUtils.resolveClassName(className, context.getReaderContext().getBeanClassLoader());
+				if (WebArgumentResolver.class.isAssignableFrom(clazz)) {
+					RootBeanDefinition adapter = new RootBeanDefinition(ServletWebArgumentResolverAdapter.class);
+					adapter.getConstructorArgumentValues().addIndexedArgumentValue(0, beanDef);
+					result.add(new BeanDefinitionHolder(adapter, beanDef.getBeanName() + "Adapter"));
+					continue;
+				}
+			}
+			result.add(object);
 		}
-		return null;
+		return result;
+	}
+
+	private ManagedList<?> getReturnValueHandlers(Element element, ParserContext parserContext) {
+		Element handlers = DomUtils.getChildElementByTagName(element, "return-value-handlers");
+		return (handlers != null ? extractBeanSubElements(handlers, parserContext) : null);
 	}
 
 	private ManagedList<?> getMessageConverters(Element element, Object source, ParserContext parserContext) {
@@ -536,13 +549,12 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 
-	private ManagedList<BeanDefinitionHolder> extractBeanSubElements(Element parentElement, ParserContext parserContext) {
-		ManagedList<BeanDefinitionHolder> list = new ManagedList<BeanDefinitionHolder>();
+	private ManagedList<Object> extractBeanSubElements(Element parentElement, ParserContext parserContext) {
+		ManagedList<Object> list = new ManagedList<Object>();
 		list.setSource(parserContext.extractSource(parentElement));
-		for (Element beanElement : DomUtils.getChildElementsByTagName(parentElement, "bean")) {
-			BeanDefinitionHolder beanDef = parserContext.getDelegate().parseBeanDefinitionElement(beanElement);
-			beanDef = parserContext.getDelegate().decorateBeanDefinitionIfRequired(beanElement, beanDef);
-			list.add(beanDef);
+		for (Element beanElement : DomUtils.getChildElementsByTagName(parentElement, "bean", "ref")) {
+			Object object = parserContext.getDelegate().parsePropertySubElement(beanElement, null);
+			list.add(object);
 		}
 		return list;
 	}
@@ -565,25 +577,6 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
         }
         return list;
     }
-
-	private ManagedList<BeanDefinitionHolder> wrapWebArgumentResolverBeanDefs(
-			List<BeanDefinitionHolder> beanDefs, ParserContext parserContext) {
-
-		ManagedList<BeanDefinitionHolder> result = new ManagedList<BeanDefinitionHolder>();
-		for (BeanDefinitionHolder beanDef : beanDefs) {
-			String className = beanDef.getBeanDefinition().getBeanClassName();
-			Class<?> clazz = ClassUtils.resolveClassName(className, parserContext.getReaderContext().getBeanClassLoader());
-			if (WebArgumentResolver.class.isAssignableFrom(clazz)) {
-				RootBeanDefinition adapter = new RootBeanDefinition(ServletWebArgumentResolverAdapter.class);
-				adapter.getConstructorArgumentValues().addIndexedArgumentValue(0, beanDef);
-				result.add(new BeanDefinitionHolder(adapter, beanDef.getBeanName() + "Adapter"));
-			}
-			else {
-				result.add(beanDef);
-			}
-		}
-		return result;
-	}
 
 
 	/**
