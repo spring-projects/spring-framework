@@ -25,6 +25,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.DirectFieldAccessor;
+import org.springframework.http.HttpStatus;
 import org.springframework.core.Ordered;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.core.convert.converter.Converter;
@@ -348,6 +349,11 @@ public class WebMvcConfigurationSupportExtensionTests {
 		@Override
 		public void addViewControllers(ViewControllerRegistry registry) {
 			registry.addViewController("/path");
+		}
+
+		@Override
+		public void addStatusControllers(StatusControllerRegistry registry) {
+			registry.addStatusController("/notfound", HttpStatus.NOT_FOUND);
 		}
 
 		@Override
