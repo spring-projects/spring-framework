@@ -26,7 +26,7 @@ import java.util.concurrent.Future;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.springframework.context.SmartLifecycle;
+import org.springframework.context.Lifecycle;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
@@ -47,16 +47,17 @@ import org.springframework.web.util.UriComponentsBuilder;
  * Initiates WebSocket requests to a WebSocket server programmatically
  * through the Jetty WebSocket API.
  *
+ * <p>As of 4.1 this class implements {@link Lifecycle} rather than
+ * {@link org.springframework.context.SmartLifecycle}. Use
+ * {@link org.springframework.web.socket.client.WebSocketConnectionManager
+ * WebSocketConnectionManager} instead to auto-start a WebSocket connection.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class JettyWebSocketClient extends AbstractWebSocketClient implements SmartLifecycle {
+public class JettyWebSocketClient extends AbstractWebSocketClient implements Lifecycle {
 
 	private final org.eclipse.jetty.websocket.client.WebSocketClient client;
-
-	private boolean autoStartup = true;
-
-	private int phase = Integer.MAX_VALUE;
 
 	private final Object lifecycleMonitor = new Object();
 
@@ -98,24 +99,6 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Sma
 		return this.taskExecutor;
 	}
 
-	public void setAutoStartup(boolean autoStartup) {
-		this.autoStartup = autoStartup;
-	}
-
-	@Override
-	public boolean isAutoStartup() {
-		return this.autoStartup;
-	}
-
-	public void setPhase(int phase) {
-		this.phase = phase;
-	}
-
-	@Override
-	public int getPhase() {
-		return this.phase;
-	}
-
 	@Override
 	public boolean isRunning() {
 		synchronized (this.lifecycleMonitor) {
@@ -155,12 +138,6 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Sma
 				}
 			}
 		}
-	}
-
-	@Override
-	public void stop(Runnable callback) {
-		this.stop();
-		callback.run();
 	}
 
 	@Override
