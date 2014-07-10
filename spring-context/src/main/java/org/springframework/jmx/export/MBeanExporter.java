@@ -48,6 +48,7 @@ import org.springframework.beans.factory.CannotLoadBeanClassException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.Constants;
@@ -87,7 +88,6 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @author Rick Evans
  * @author Mark Fisher
- * @author Marten Deinum
  * @author Stephane Nicoll
  * @since 1.2
  * @see #setBeans
@@ -98,7 +98,7 @@ import org.springframework.util.ObjectUtils;
  * @see MBeanExporterListener
  */
 public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExportOperations,
-		BeanClassLoaderAware, BeanFactoryAware, InitializingBean, DisposableBean {
+		BeanClassLoaderAware, BeanFactoryAware, InitializingBean, SmartInitializingSingleton, DisposableBean {
 
 	/**
 	 * Autodetection mode indicating that no autodetection should be used.
@@ -407,16 +407,14 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 		if (this.server == null) {
 			this.server = JmxUtils.locateMBeanServer();
 		}
-
-		// TODO: to be replaced with some ContextRefreshedEvent-like callback
-		register();
 	}
 
 	/**
 	 * Kick off bean registration automatically when deployed in an {@code ApplicationContext}.
 	 * @see #registerBeans()
 	 */
-	public void register() {
+	@Override
+	public void afterSingletonsInstantiated() {
 		try {
 			logger.info("Registering beans for JMX exposure on startup");
 			registerBeans();
