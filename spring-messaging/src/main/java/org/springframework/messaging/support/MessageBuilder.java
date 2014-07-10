@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,13 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.util.Assert;
 
 /**
- * A builder for creating a {@link GenericMessage} (or {@link ErrorMessage} if
- * the payload is of type {@link Throwable}).
+ * A builder for creating a {@link GenericMessage}
+ * (or {@link ErrorMessage} if the payload is of type {@link Throwable}).
  *
  * @author Arjen Poutsma
  * @author Mark Fisher
  * @author Rossen Stoyanchev
  * @since 4.0
- *
  * @see GenericMessage
  * @see ErrorMessage
  */
@@ -38,16 +37,13 @@ public final class MessageBuilder<T> {
 
 	private final T payload;
 
-	private MessageHeaderAccessor headerAccessor;
-
 	private final Message<T> originalMessage;
 
+	private MessageHeaderAccessor headerAccessor;
 
-	/**
-	 * Private constructor to be invoked from the static factory methods only.
-	 */
+
 	private MessageBuilder(T payload, Message<T> originalMessage) {
-		Assert.notNull(payload, "payload must not be null");
+		Assert.notNull(payload, "Payload must not be null");
 		this.payload = payload;
 		this.originalMessage = originalMessage;
 		this.headerAccessor = new MessageHeaderAccessor(originalMessage);
@@ -58,11 +54,10 @@ public final class MessageBuilder<T> {
 	 * Create a builder for a new {@link Message} instance pre-populated with all of the
 	 * headers copied from the provided message. The payload of the provided Message will
 	 * also be used as the payload for the new message.
-	 *
 	 * @param message the Message from which the payload and all headers will be copied
 	 */
 	public static <T> MessageBuilder<T> fromMessage(Message<T> message) {
-		Assert.notNull(message, "message must not be null");
+		Assert.notNull(message, "Message must not be null");
 		return new MessageBuilder<T>(message.getPayload(), message);
 	}
 
@@ -76,12 +71,12 @@ public final class MessageBuilder<T> {
 
 
 	/**
-	 * Set the message headers.
-	 * @param headerAccessor the headers for the message
+	 * Set the message headers to use by providing a {@code MessageHeaderAccessor}.
+	 * @param accessor the headers to use
 	 */
-	public MessageBuilder<T> setHeaders(MessageHeaderAccessor headerAccessor) {
-		Assert.notNull(headerAccessor, "HeaderAccessor must not be null");
-		this.headerAccessor = headerAccessor;
+	public MessageBuilder<T> setHeaders(MessageHeaderAccessor accessor) {
+		Assert.notNull(accessor, "MessageHeaderAccessor must not be null");
+		this.headerAccessor = accessor;
 		return this;
 	}
 
@@ -161,13 +156,15 @@ public final class MessageBuilder<T> {
 
 	@SuppressWarnings("unchecked")
 	public Message<T> build() {
-		if ((this.originalMessage != null) && !this.headerAccessor.isModified()) {
+		if (this.originalMessage != null && !this.headerAccessor.isModified()) {
 			return this.originalMessage;
 		}
 		if (this.payload instanceof Throwable) {
 			return (Message<T>) new ErrorMessage((Throwable) this.payload, this.headerAccessor.toMap());
 		}
-		return new GenericMessage<T>(this.payload, this.headerAccessor.toMap());
+		else {
+			return new GenericMessage<T>(this.payload, this.headerAccessor.toMap());
+		}
 	}
 
 }

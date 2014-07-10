@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
-import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
@@ -48,8 +48,7 @@ import org.springframework.util.StringUtils;
  */
 public class MessageHeaderAccessor {
 
-	protected Log logger = LogFactory.getLog(getClass());
-
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	// wrapped read-only message headers
 	private final MessageHeaders originalHeaders;
@@ -69,7 +68,7 @@ public class MessageHeaderAccessor {
 	 * A constructor for accessing and modifying existing message headers.
 	 */
 	public MessageHeaderAccessor(Message<?> message) {
-		this.originalHeaders = (message != null) ? message.getHeaders() : null;
+		this.originalHeaders = (message != null ? message.getHeaders() : null);
 	}
 
 
@@ -109,14 +108,27 @@ public class MessageHeaderAccessor {
 	}
 
 	/**
-	 * Set the value for the given header name. If the provided value is {@code null} the
-	 * header will be removed.
+	 * Set the value for the given header name.
+	 * <p>If the provided value is {@code null}, the header will be removed.
 	 */
 	public void setHeader(String name, Object value) {
-		Assert.isTrue(!isReadOnly(name), "The '" + name + "' header is read-only.");
+		if (isReadOnly(name)) {
+			throw new IllegalArgumentException("'" + name + "' header is read-only");
+		}
 		verifyType(name, value);
 		if (!ObjectUtils.nullSafeEquals(value, getHeader(name))) {
 			this.headers.put(name, value);
+		}
+	}
+
+	protected void verifyType(String headerName, Object headerValue) {
+		if (headerName != null && headerValue != null) {
+			if (MessageHeaders.ERROR_CHANNEL.equals(headerName) || MessageHeaders.REPLY_CHANNEL.endsWith(headerName)) {
+				if (!(headerValue instanceof MessageChannel || headerValue instanceof String)) {
+					throw new IllegalArgumentException(
+							"'" + headerName + "' header value must be a MessageChannel or String");
+				}
+			}
 		}
 	}
 
@@ -125,7 +137,8 @@ public class MessageHeaderAccessor {
 	}
 
 	/**
-	 * Set the value for the given header name only if the header name is not already associated with a value.
+	 * Set the value for the given header name only if the header name is not
+	 * already associated with a value.
 	 */
 	public void setHeaderIfAbsent(String name, Object value) {
 		if (getHeader(name) == null) {
@@ -134,9 +147,9 @@ public class MessageHeaderAccessor {
 	}
 
 	/**
-	 * Removes all headers provided via array of 'headerPatterns'. As the name suggests
-	 * the array may contain simple matching patterns for header names. Supported pattern
-	 * styles are: "xxx*", "*xxx", "*xxx*" and "xxx*yyy".
+	 * Removes all headers provided via array of 'headerPatterns'.
+	 * <p>As the name suggests, array may contain simple matching patterns for header
+	 * names. Supported pattern styles are: "xxx*", "*xxx", "*xxx*" and "xxx*yyy".
 	 */
 	public void removeHeaders(String... headerPatterns) {
 		List<String> headersToRemove = new ArrayList<String>();
@@ -178,9 +191,9 @@ public class MessageHeaderAccessor {
 	}
 
 	/**
-	 * Copy the name-value pairs from the provided Map. This operation will overwrite any
-	 * existing values. Use { {@link #copyHeadersIfAbsent(Map)} to avoid overwriting
-	 * values.
+	 * Copy the name-value pairs from the provided Map.
+	 * <p>This operation will overwrite any existing values. Use
+	 * {@link #copyHeadersIfAbsent(Map)} to avoid overwriting values.
 	 */
 	public void copyHeaders(Map<String, ?> headersToCopy) {
 		if (headersToCopy != null) {
@@ -194,8 +207,8 @@ public class MessageHeaderAccessor {
 	}
 
 	/**
-	 * Copy the name-value pairs from the provided Map. This operation will <em>not</em>
-	 * overwrite any existing values.
+	 * Copy the name-value pairs from the provided Map.
+	 * <p>This operation will <em>not</em> overwrite any existing values.
 	 */
 	public void copyHeadersIfAbsent(Map<String, ?> headersToCopy) {
 		if (headersToCopy != null) {
@@ -251,17 +264,8 @@ public class MessageHeaderAccessor {
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + " [originalHeaders=" + this.originalHeaders
-				+ ", updated headers=" + this.headers + "]";
+		return getClass().getSimpleName() + " [originalHeaders=" + this.originalHeaders +
+				", updated headers=" + this.headers + "]";
 	}
 
-	protected void verifyType(String headerName, Object headerValue) {
-        if (headerName != null && headerValue != null) {
-        	if (MessageHeaders.ERROR_CHANNEL.equals(headerName)
-                    || MessageHeaders.REPLY_CHANNEL.endsWith(headerName)) {
-                Assert.isTrue(headerValue instanceof MessageChannel || headerValue instanceof String, "The '"
-                        + headerName + "' header value must be a MessageChannel or String.");
-            }
-        }
-    }
 }
