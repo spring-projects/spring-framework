@@ -82,6 +82,9 @@ public abstract class AbstractSockJsIntegrationTests {
 
 	protected Log logger = LogFactory.getLog(getClass());
 
+
+	private SockJsClient sockJsClient;
+
 	private WebSocketTestServer server;
 
 	private AnnotationConfigWebApplicationContext wac;
@@ -107,6 +110,12 @@ public abstract class AbstractSockJsIntegrationTests {
 	@After
 	public void teardown() throws Exception {
 		try {
+			this.sockJsClient.stop();
+		}
+		catch (Throwable ex) {
+			logger.error("Failed to stop SockJsClient", ex);
+		}
+		try {
 			this.server.undeployConfig();
 		}
 		catch (Throwable t) {
@@ -120,48 +129,50 @@ public abstract class AbstractSockJsIntegrationTests {
 		}
 	}
 
-	protected abstract WebSocketTestServer createWebSocketTestServer();
-
 	protected abstract Class<?> upgradeStrategyConfigClass();
 
-	protected abstract Transport getWebSocketTransport();
+	protected abstract WebSocketTestServer createWebSocketTestServer();
 
-	protected abstract AbstractXhrTransport getXhrTransport();
+	protected abstract Transport createWebSocketTransport();
 
-	protected SockJsClient createSockJsClient(Transport... transports) {
-		return new SockJsClient(Arrays.<Transport>asList(transports));
+	protected abstract AbstractXhrTransport createXhrTransport();
+
+	protected void initSockJsClient(Transport... transports) {
+		this.sockJsClient = new SockJsClient(Arrays.asList(transports));
+		this.sockJsClient.start();
 	}
+
 
 	@Test
 	public void echoWebSocket() throws Exception {
-		testEcho(100, getWebSocketTransport());
+		testEcho(100, createWebSocketTransport());
 	}
 
 	@Test
 	public void echoXhrStreaming() throws Exception {
-		testEcho(100, getXhrTransport());
+		testEcho(100, createXhrTransport());
 	}
 
 	@Test
 	public void echoXhr() throws Exception {
-		AbstractXhrTransport xhrTransport = getXhrTransport();
+		AbstractXhrTransport xhrTransport = createXhrTransport();
 		xhrTransport.setXhrStreamingDisabled(true);
 		testEcho(100, xhrTransport);
 	}
 
 	@Test
 	public void closeAfterOneMessageWebSocket() throws Exception {
-		testCloseAfterOneMessage(getWebSocketTransport());
+		testCloseAfterOneMessage(createWebSocketTransport());
 	}
 
 	@Test
 	public void closeAfterOneMessageXhrStreaming() throws Exception {
-		testCloseAfterOneMessage(getXhrTransport());
+		testCloseAfterOneMessage(createXhrTransport());
 	}
 
 	@Test
 	public void closeAfterOneMessageXhr() throws Exception {
-		AbstractXhrTransport xhrTransport = getXhrTransport();
+		AbstractXhrTransport xhrTransport = createXhrTransport();
 		xhrTransport.setXhrStreamingDisabled(true);
 		testCloseAfterOneMessage(xhrTransport);
 	}
@@ -171,7 +182,8 @@ public abstract class AbstractSockJsIntegrationTests {
 		TestClientHandler handler = new TestClientHandler();
 		this.errorFilter.responseStatusMap.put("/info", 500);
 		CountDownLatch latch = new CountDownLatch(1);
-		createSockJsClient(getWebSocketTransport()).doHandshake(handler, this.baseUrl + "/echo").addCallback(
+		initSockJsClient(createWebSocketTransport());
+		this.sockJsClient.doHandshake(handler, this.baseUrl + "/echo").addCallback(
 				new ListenableFutureCallback<WebSocketSession>() {
 					@Override
 					public void onSuccess(WebSocketSession result) {
@@ -191,8 +203,8 @@ public abstract class AbstractSockJsIntegrationTests {
 		this.errorFilter.responseStatusMap.put("/websocket", 200);
 		this.errorFilter.responseStatusMap.put("/xhr_streaming", 500);
 		TestClientHandler handler = new TestClientHandler();
-		Transport[] transports = { getWebSocketTransport(), getXhrTransport() };
-		WebSocketSession session = createSockJsClient(transports).doHandshake(handler, this.baseUrl + "/echo").get();
+		initSockJsClient(createWebSocketTransport(), createXhrTransport());
+		WebSocketSession session = this.sockJsClient.doHandshake(handler, this.baseUrl + "/echo").get();
 		assertEquals("Fallback didn't occur", XhrClientSockJsSession.class, session.getClass());
 		TextMessage message = new TextMessage("message1");
 		session.sendMessage(message);
@@ -204,8 +216,8 @@ public abstract class AbstractSockJsIntegrationTests {
 		TestClientHandler clientHandler = new TestClientHandler();
 		this.errorFilter.sleepDelayMap.put("/xhr_streaming", 10000L);
 		this.errorFilter.responseStatusMap.put("/xhr_streaming", 503);
-		SockJsClient sockJsClient = createSockJsClient(getXhrTransport());
-		sockJsClient.setTaskScheduler(this.wac.getBean(ThreadPoolTaskScheduler.class));
+		initSockJsClient(createXhrTransport());
+		this.sockJsClient.setTaskScheduler(this.wac.getBean(ThreadPoolTaskScheduler.class));
 		WebSocketSession clientSession = sockJsClient.doHandshake(clientHandler, this.baseUrl + "/echo").get();
 		assertEquals("Fallback didn't occur", XhrClientSockJsSession.class, clientSession.getClass());
 		TextMessage message = new TextMessage("message1");
@@ -221,7 +233,8 @@ public abstract class AbstractSockJsIntegrationTests {
 			messages.add(new TextMessage("m" + i));
 		}
 		TestClientHandler handler = new TestClientHandler();
-		WebSocketSession session = createSockJsClient(transport).doHandshake(handler, this.baseUrl + "/echo").get();
+		initSockJsClient(transport);
+		WebSocketSession session = this.sockJsClient.doHandshake(handler, this.baseUrl + "/echo").get();
 		for (TextMessage message : messages) {
 			session.sendMessage(message);
 		}
@@ -235,7 +248,8 @@ public abstract class AbstractSockJsIntegrationTests {
 
 	private void testCloseAfterOneMessage(Transport transport) throws Exception {
 		TestClientHandler clientHandler = new TestClientHandler();
-		createSockJsClient(transport).doHandshake(clientHandler, this.baseUrl + "/test").get();
+		initSockJsClient(transport);
+		this.sockJsClient.doHandshake(clientHandler, this.baseUrl + "/test").get();
 		TestServerHandler serverHandler = this.wac.getBean(TestServerHandler.class);
 
 		assertNotNull("afterConnectionEstablished should have been called", clientHandler.session);

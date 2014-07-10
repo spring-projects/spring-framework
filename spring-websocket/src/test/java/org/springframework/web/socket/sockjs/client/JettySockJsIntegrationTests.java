@@ -34,35 +34,10 @@ import org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy;
  */
 public class JettySockJsIntegrationTests extends AbstractSockJsIntegrationTests {
 
-	private WebSocketClient webSocketClient;
 
-	private HttpClient httpClient;
-
-
-	@Before
-	public void setup() throws Exception {
-		super.setup();
-		this.webSocketClient = new WebSocketClient();
-		this.webSocketClient.start();
-		this.httpClient = new HttpClient();
-		this.httpClient.start();
-	}
-
-	@After
-	public void teardown() throws Exception {
-		super.teardown();
-		try {
-			this.webSocketClient.stop();
-		}
-		catch (Throwable ex) {
-			logger.error("Failed to stop Jetty WebSocketClient", ex);
-		}
-		try {
-			this.httpClient.stop();
-		}
-		catch (Throwable ex) {
-			logger.error("Failed to stop Jetty HttpClient", ex);
-		}
+	@Override
+	protected Class<?> upgradeStrategyConfigClass() {
+		return JettyTestConfig.class;
 	}
 
 	@Override
@@ -71,24 +46,18 @@ public class JettySockJsIntegrationTests extends AbstractSockJsIntegrationTests 
 	}
 
 	@Override
-	protected Class<?> upgradeStrategyConfigClass() {
-		return JettyTestConfig.class;
+	protected Transport createWebSocketTransport() {
+		return new WebSocketTransport(new JettyWebSocketClient());
 	}
 
 	@Override
-	protected Transport getWebSocketTransport() {
-		return new WebSocketTransport(new JettyWebSocketClient(this.webSocketClient));
-	}
-
-	@Override
-	protected AbstractXhrTransport getXhrTransport() {
-		return new JettyXhrTransport(this.httpClient);
+	protected AbstractXhrTransport createXhrTransport() {
+		return new JettyXhrTransport(new HttpClient());
 	}
 
 
 	@Configuration
 	static class JettyTestConfig {
-
 		@Bean
 		public RequestUpgradeStrategy upgradeStrategy() {
 			return new JettyRequestUpgradeStrategy();

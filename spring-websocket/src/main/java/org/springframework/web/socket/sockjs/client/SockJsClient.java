@@ -18,6 +18,7 @@ package org.springframework.web.socket.sockjs.client;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.context.Lifecycle;
 import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
@@ -50,7 +51,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @see <a href="http://sockjs.org">http://sockjs.org</a>
  * @see org.springframework.web.socket.sockjs.client.Transport
  */
-public class SockJsClient extends AbstractWebSocketClient {
+public class SockJsClient extends AbstractWebSocketClient implements Lifecycle {
 
 	private static final boolean jackson2Present = ClassUtils.isPresent(
 			"com.fasterxml.jackson.databind.ObjectMapper", SockJsClient.class.getClassLoader());
@@ -67,6 +68,8 @@ public class SockJsClient extends AbstractWebSocketClient {
 	private TaskScheduler taskScheduler;
 
 	private final Map<URI, ServerInfo> infoCache = new ConcurrentHashMap<URI, ServerInfo>();
+
+	private volatile boolean running = false;
 
 
 	/**
@@ -141,6 +144,37 @@ public class SockJsClient extends AbstractWebSocketClient {
 	 */
 	public void setTaskScheduler(TaskScheduler taskScheduler) {
 		this.taskScheduler = taskScheduler;
+	}
+
+	@Override
+	public void start() {
+		if (!isRunning()) {
+			for (Transport transport : this.transports) {
+				if (transport instanceof Lifecycle) {
+					if (!((Lifecycle) transport).isRunning()) {
+						((Lifecycle) transport).start();
+					}
+				}
+			}
+		}
+	}
+
+	@Override
+	public void stop() {
+		if (!isRunning()) {
+			for (Transport transport : this.transports) {
+				if (transport instanceof Lifecycle) {
+					if (((Lifecycle) transport).isRunning()) {
+						((Lifecycle) transport).stop();
+					}
+				}
+			}
+		}
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
 	}
 
 	public void clearServerInfoCache() {

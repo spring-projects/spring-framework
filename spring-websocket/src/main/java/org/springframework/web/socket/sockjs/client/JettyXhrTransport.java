@@ -23,6 +23,7 @@ import org.eclipse.jetty.client.api.Response;
 import org.eclipse.jetty.client.util.StringContentProvider;
 import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpMethod;
+import org.springframework.context.Lifecycle;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,7 +60,7 @@ import java.util.Enumeration;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public class JettyXhrTransport extends AbstractXhrTransport implements XhrTransport {
+public class JettyXhrTransport extends AbstractXhrTransport implements XhrTransport, Lifecycle {
 
 	private final HttpClient httpClient;
 
@@ -72,6 +73,35 @@ public class JettyXhrTransport extends AbstractXhrTransport implements XhrTransp
 
 	public HttpClient getHttpClient() {
 		return this.httpClient;
+	}
+
+	@Override
+	public void start() {
+		try {
+			if (!this.httpClient.isRunning()) {
+				this.httpClient.start();
+			}
+		}
+		catch (Exception e) {
+			throw new SockJsException("Failed to start " + this, e);
+		}
+	}
+
+	@Override
+	public void stop() {
+		try {
+			if (this.httpClient.isRunning()) {
+				this.httpClient.stop();
+			}
+		}
+		catch (Exception e) {
+			throw new SockJsException("Failed to stop " + this, e);
+		}
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.httpClient.isRunning();
 	}
 
 	@Override
