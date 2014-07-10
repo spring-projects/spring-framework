@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package example.scannable;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Future;
 import javax.annotation.PostConstruct;
@@ -27,8 +28,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -42,6 +43,10 @@ import org.springframework.util.Assert;
  */
 @Service @Lazy @DependsOn("myNamedComponent")
 public class FooServiceImpl implements FooService {
+
+	// Just to test ASM5's bytecode parsing of INVOKESPECIAL/STATIC on interfaces
+	private static final Comparator<MessageBean> COMPARATOR_BY_MESSAGE = Comparator.comparing(MessageBean::getMessage);
+
 
 	@Autowired private FooDao fooDao;
 
@@ -64,6 +69,7 @@ public class FooServiceImpl implements FooService {
 	@Autowired public AbstractApplicationContext genericContext;
 
 	private boolean initCalled = false;
+
 
 	@PostConstruct
 	private void init() {
