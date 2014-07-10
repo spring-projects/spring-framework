@@ -60,10 +60,6 @@ public class ResourceHandlerRegistry {
 
 	private final List<ResourceHandlerRegistration> registrations = new ArrayList<ResourceHandlerRegistration>();
 
-	private List<ResourceResolver> resourceResolvers;
-
-	private List<ResourceTransformer> resourceTransformers;
-
 	private int order = Integer.MAX_VALUE -1;
 
 
@@ -107,24 +103,6 @@ public class ResourceHandlerRegistry {
 	}
 
 	/**
-	 * Configure the {@link ResourceResolver}s to use by default, that is in
-	 * resource handlers aren't already configured explicitly with resolvers.
-	 */
-	public ResourceHandlerRegistry setResourceResolvers(ResourceResolver... resolvers) {
-		this.resourceResolvers = Arrays.asList(resolvers);
-		return this;
-	}
-
-	/**
-	 * Configure the {@link ResourceTransformer}s to use by default, that is in
-	 * resource handlers aren't already configured explicitly with transformers.
-	 */
-	public ResourceHandlerRegistry setResourceTransformers(ResourceTransformer... transformers) {
-		this.resourceTransformers = Arrays.asList(transformers);
-		return this;
-	}
-
-	/**
 	 * Return a handler mapping with the mapped resource handlers; or {@code null} in case of no registrations.
 	 */
 	protected AbstractHandlerMapping getHandlerMapping() {
@@ -138,12 +116,6 @@ public class ResourceHandlerRegistry {
 				ResourceHttpRequestHandler handler = registration.getRequestHandler();
 				handler.setServletContext(this.servletContext);
 				handler.setApplicationContext(this.appContext);
-				if ((this.resourceResolvers != null) && (registration.getResourceResolvers() == null)) {
-					handler.setResourceResolvers(this.resourceResolvers);
-				}
-				if ((this.resourceResolvers != null) && (registration.getResourceTransformers() == null)) {
-					handler.setResourceTransformers(this.resourceTransformers);
-				}
 				try {
 					handler.afterPropertiesSet();
 				}

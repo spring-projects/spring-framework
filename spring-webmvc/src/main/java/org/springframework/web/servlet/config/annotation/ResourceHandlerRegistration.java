@@ -17,27 +17,41 @@
 package org.springframework.web.servlet.config.annotation;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.cache.Cache;
+import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.servlet.resource.CachingResourceResolver;
+import org.springframework.web.servlet.resource.CachingResourceTransformer;
+import org.springframework.web.servlet.resource.ContentVersionStrategy;
+import org.springframework.web.servlet.resource.CssLinkResourceTransformer;
+import org.springframework.web.servlet.resource.FixedVersionStrategy;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.resource.ResourceResolver;
 import org.springframework.web.servlet.resource.ResourceTransformer;
+import org.springframework.web.servlet.resource.VersionResourceResolver;
+import org.springframework.web.servlet.resource.VersionStrategy;
 
 /**
  * Encapsulates information required to create a resource handlers.
  *
  * @author Rossen Stoyanchev
  * @author Keith Donald
+ * @author Brian Clozel
  *
  * @since 3.1
  */
 public class ResourceHandlerRegistration {
+
+	private static final String RESOURCE_CACHE_NAME = "spring-resourcehandler-cache";
 
 	private final ResourceLoader resourceLoader;
 
@@ -47,10 +61,15 @@ public class ResourceHandlerRegistration {
 
 	private Integer cachePeriod;
 
-	private List<ResourceResolver> resourceResolvers;
+	private List<ResourceResolver> customResolvers = new ArrayList<ResourceResolver>();
 
-	private List<ResourceTransformer> resourceTransformers;
+	private List<ResourceTransformer> customTransformers = new ArrayList<ResourceTransformer>();
 
+	private Map<String, VersionStrategy> versionStrategies = new HashMap<String, VersionStrategy>();
+
+	private boolean isDevMode = false;
+
+	private Cache resourceCache;
 
 	/**
 	 * Create a {@link ResourceHandlerRegistration} instance.
@@ -80,23 +99,127 @@ public class ResourceHandlerRegistration {
 	}
 
 	/**
-	 * Configure the list of {@link ResourceResolver}s to use.
-	 * <p>By default {@link PathResourceResolver} is configured. If using this property, it
-	 * is recommended to add {@link PathResourceResolver} as the last resolver.
+	 * Add a {@code ResourceResolver} to the chain, allowing to resolve server-side resources from
+	 * HTTP requests.
+	 *
+	 * <p>{@link ResourceResolver}s are registered, in the following order:
+	 * <ol>
+	 *     <li>a {@link org.springframework.web.servlet.resource.CachingResourceResolver}
+	 *     for caching the results of the next Resolvers; this resolver is only registered if you
+	 *     did not provide your own instance of {@link CachingResourceResolver} at the beginning of the chain</li>
+	 *     <li>all {@code ResourceResolver}s registered using this method, in the order of methods calls</li>
+	 *     <li>a {@link VersionResourceResolver} if a versioning configuration has been applied with
+	 *     {@code addVersionStrategy}, {@code addVersion}, etc.</li>
+	 *     <li>a {@link PathResourceResolver} for resolving resources on the file system</li>
+	 * </ol>
+	 *
+	 * @param resolver a {@link ResourceResolver} to add to the chain of resolvers
+	 * @return the same {@link ResourceHandlerRegistration} instance for chained method invocation
+	 * @see ResourceResolver
 	 * @since 4.1
 	 */
-	public ResourceHandlerRegistration setResourceResolvers(ResourceResolver... resourceResolvers) {
-		this.resourceResolvers = Arrays.asList(resourceResolvers);
+	public ResourceHandlerRegistration addResolver(ResourceResolver resolver) {
+		Assert.notNull(resolver, "The provided ResourceResolver should not be null");
+		this.customResolvers.add(resolver);
 		return this;
 	}
 
 	/**
-	 * Configure the list of {@link ResourceTransformer}s to use.
-	 * <p>By default no transformers are configured.
+	 * Add a {@code ResourceTransformer} to the chain, allowing to transform the content
+	 * of server-side resources when serving them to HTTP clients.
+	 *
+	 * <p>{@link ResourceTransformer}s are registered, in the following order:
+	 * <ol>
+	 *     <li>a {@link org.springframework.web.servlet.resource.CachingResourceTransformer}
+	 *     for caching the results of the next Transformers; this transformer is only registered if you
+	 *     did not provide your own instance of {@link CachingResourceTransformer} at the beginning of the chain</li>
+	 *     <li>a {@link CssLinkResourceTransformer} for updating links within CSS files; this transformer
+	 *     is only registered if a versioning configuration has been applied with {@code addVersionStrategy},
+	 *     {@code addVersion}, etc</li>
+	 *     <li>all {@code ResourceTransformer}s registered using this method, in the order of methods calls</li>
+	 * </ol>
+	 *
+	 * @param transformer a {@link ResourceTransformer} to add to the chain of transformers
+	 * @return the same {@link ResourceHandlerRegistration} instance for chained method invocation
+	 * @see ResourceResolver
 	 * @since 4.1
 	 */
-	public ResourceHandlerRegistration setResourceTransformers(ResourceTransformer... transformers) {
-		this.resourceTransformers = Arrays.asList(transformers);
+	public ResourceHandlerRegistration addTransformer(ResourceTransformer transformer) {
+		Assert.notNull(transformer, "The provided ResourceTransformer should not be null");
+		this.customTransformers.add(transformer);
+		return this;
+	}
+
+	/**
+	 * Apply Resource Versioning on the matching resources; this will update resources' URLs to include
+	 * a version string calculated by a {@link VersionStrategy}. This is often used for cache busting.
+	 * <p>Note that a {@link CssLinkResourceTransformer} will be automatically registered to
+	 * support versioned resources in CSS files.</p>
+	 * @param strategy the versioning strategy to use
+	 * @param pathPatterns one or more resource URL path patterns
+	 * @return the same {@link ResourceHandlerRegistration} instance for chained method invocation
+	 * @see VersionResourceResolver
+	 * @see VersionStrategy
+	 * @since 4.1
+	 */
+	public ResourceHandlerRegistration addVersionStrategy(VersionStrategy strategy, String... pathPatterns) {
+		for(String pattern : pathPatterns) {
+			this.versionStrategies.put(pattern, strategy);
+		}
+		return this;
+	}
+
+	/**
+	 * Apply Resource Versioning on the matching resources using a {@link FixedVersionStrategy}.
+	 * <p>This strategy uses that fixed version string and adds it as a prefix in the resource path,
+	 * e.g. {@code fixedversion/js/main.js}.</p>
+	 * <p>There are many ways to get a version string for your application:</p>
+	 * <ul>
+	 *     <li>create a string using the current date, a source of random numbers at runtime</li>
+	 *     <li>fetch a version string from a property source or an Env variable, using SpEL or @Value</li>
+	 * </ul>
+	 * <p>Note that a {@link CssLinkResourceTransformer} will be automatically registered to
+	 * support versioned resources in CSS files.</p>
+	 * @param fixedVersion a version string
+	 * @param pathPatterns one or more resource URL path patterns
+	 * @return the same {@link ResourceHandlerRegistration} instance for chained method invocation
+	 * @see VersionResourceResolver
+	 * @see FixedVersionStrategy
+	 * @since 4.1
+	 */
+	public ResourceHandlerRegistration addVersion(String fixedVersion, String... pathPatterns) {
+		addVersionStrategy(new FixedVersionStrategy(fixedVersion), pathPatterns);
+		return this;
+	}
+
+	/**
+	 * Apply Resource Versioning on the matching resources using a {@link ContentVersionStrategy}.
+	 * <p>This strategy uses the content of the Resource to create a String hash and adds it
+	 * in the resource filename, e.g. {@code css/main-e36d2e05253c6c7085a91522ce43a0b4.css}.</p>
+	 * <p>Note that a {@link CssLinkResourceTransformer} will be automatically registered to
+	 * support versioned resources in CSS files.</p>
+	 * @param pathPatterns one or more resource URL path patterns
+	 * @return the same {@link ResourceHandlerRegistration} instance for chained method invocation
+	 * @see VersionResourceResolver
+	 * @see ContentVersionStrategy
+	 * @since 4.1
+	 */
+	public ResourceHandlerRegistration addVersionHash(String... pathPatterns) {
+		addVersionStrategy(new ContentVersionStrategy(), pathPatterns);
+		return this;
+	}
+
+	/**
+	 * Disable automatic registration of caching Resolver/Transformer, thus disabling {@code Resource} caching
+	 * if no caching Resolver/Transformer was manually registered.
+	 * <p>Useful when updating static resources at runtime, i.e. during the development phase.</p>
+	 * @return the same {@link ResourceHandlerRegistration} instance for chained method invocation
+	 * @see ResourceResolver
+	 * @see ResourceTransformer
+	 * @since 4.1
+	 */
+	public ResourceHandlerRegistration enableDevMode() {
+		this.isDevMode = true;
 		return this;
 	}
 
@@ -120,11 +243,45 @@ public class ResourceHandlerRegistration {
 	}
 
 	protected List<ResourceResolver> getResourceResolvers() {
-		return this.resourceResolvers;
+		List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
+		boolean hasCachingResolver = false;
+		if(!this.customResolvers.isEmpty()) {
+			if(ClassUtils.isAssignable(CachingResourceResolver.class, this.customResolvers.get(0).getClass())) {
+				hasCachingResolver = true;
+			}
+		}
+		if(!hasCachingResolver && !this.isDevMode) {
+			resolvers.add(new CachingResourceResolver(getDefaultResourceCache()));
+		}
+		resolvers.addAll(this.customResolvers);
+		if(!this.versionStrategies.isEmpty()) {
+			VersionResourceResolver versionResolver = new VersionResourceResolver();
+			versionResolver.setStrategyMap(this.versionStrategies);
+			resolvers.add(versionResolver);
+		}
+		resolvers.add(new PathResourceResolver());
+		return resolvers;
 	}
 
 	protected List<ResourceTransformer> getResourceTransformers() {
-		return this.resourceTransformers;
+		List<ResourceTransformer> transformers = new ArrayList<ResourceTransformer>();
+		boolean hasCachingTransformer = false;
+		if(!this.customTransformers.isEmpty() || !this.versionStrategies.isEmpty()) {
+			if(!this.customTransformers.isEmpty()) {
+				if(ClassUtils.isAssignable(CachingResourceTransformer.class, this.customTransformers.get(0).getClass())) {
+					hasCachingTransformer = true;
+				}
+			}
+			if(!hasCachingTransformer && !this.isDevMode) {
+				transformers.add(new CachingResourceTransformer(getDefaultResourceCache()));
+			}
+			transformers.addAll(this.customTransformers);
+			if(!this.versionStrategies.isEmpty()) {
+				int cssLinkTransformerPosition = (hasCachingTransformer || !this.isDevMode) ? 1 : 0;
+				transformers.add(cssLinkTransformerPosition, new CssLinkResourceTransformer());
+			}
+		}
+		return transformers;
 	}
 
 	/**
@@ -133,17 +290,30 @@ public class ResourceHandlerRegistration {
 	protected ResourceHttpRequestHandler getRequestHandler() {
 		Assert.isTrue(!CollectionUtils.isEmpty(locations), "At least one location is required for resource handling.");
 		ResourceHttpRequestHandler requestHandler = new ResourceHttpRequestHandler();
-		if (this.resourceResolvers != null) {
-			requestHandler.setResourceResolvers(this.resourceResolvers);
+		List<ResourceResolver> resourceResolvers = getResourceResolvers();
+		if (!resourceResolvers.isEmpty()) {
+			requestHandler.setResourceResolvers(resourceResolvers);
 		}
-		if (this.resourceTransformers != null) {
-			requestHandler.setResourceTransformers(this.resourceTransformers);
+		List<ResourceTransformer> resourceTransformers = getResourceTransformers();
+		if (!resourceTransformers.isEmpty()) {
+			requestHandler.setResourceTransformers(resourceTransformers);
 		}
 		requestHandler.setLocations(this.locations);
 		if (this.cachePeriod != null) {
 			requestHandler.setCacheSeconds(this.cachePeriod);
 		}
 		return requestHandler;
+	}
+
+	/**
+	 * Return a default instance of a {@code ConcurrentCacheMap} for
+	 * caching resolved/transformed resources.
+	 */
+	private Cache getDefaultResourceCache() {
+		if(this.resourceCache == null) {
+			this.resourceCache = new ConcurrentMapCache(RESOURCE_CACHE_NAME);
+		}
+		return this.resourceCache;
 	}
 
 }

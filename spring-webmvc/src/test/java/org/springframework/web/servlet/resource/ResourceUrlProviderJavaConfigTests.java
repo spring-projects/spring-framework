@@ -32,9 +32,6 @@ import org.springframework.web.servlet.config.annotation.*;
 
 import static org.junit.Assert.*;
 
-import java.util.HashMap;
-import java.util.Map;
-
 
 /**
  * Integration tests using {@link ResourceUrlEncodingFilter} and
@@ -114,14 +111,9 @@ public class ResourceUrlProviderJavaConfigTests {
 
 		@Override
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
-			Map<String, VersionStrategy> versionStrategyMap = new HashMap<>();
-			versionStrategyMap.put("/**", new ContentVersionStrategy());
-			VersionResourceResolver versionResolver = new VersionResourceResolver();
-			versionResolver.setStrategyMap(versionStrategyMap);
-
 			registry.addResourceHandler("/resources/**")
 				.addResourceLocations("classpath:org/springframework/web/servlet/resource/test/")
-				.setResourceResolvers(versionResolver, new PathResourceResolver());
+				.addVersionHash("/**");
 		}
 	}
 
