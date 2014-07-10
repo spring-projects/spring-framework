@@ -133,6 +133,33 @@ public class ServletUriComponentsBuilderTests {
 		assertEquals(9090, uriComponents.getPort());
 	}
 
+	// SPR-11872
+
+	@Test
+	public void fromRequestWithForwardedHostWithDefaultPort() {
+		this.request.setServerPort(10080);
+		this.request.addHeader("X-Forwarded-Host", "example.org");
+		UriComponents result = ServletUriComponentsBuilder.fromRequest(request).build();
+
+		assertEquals("example.org", result.getHost());
+		assertEquals("should have used the default port of the forwarded request",
+				-1, result.getPort());
+	}
+
+	@Test
+	public void fromRequestWithForwardedHostWithForwardedScheme() {
+		this.request.setServerPort(10080);
+		this.request.addHeader("X-Forwarded-Proto", "https");
+		this.request.addHeader("X-Forwarded-Host", "example.org");
+		UriComponents result = ServletUriComponentsBuilder.fromRequest(request).build();
+
+		assertEquals("example.org", result.getHost());
+		assertEquals("should have derived scheme from header",
+				"https", result.getScheme());
+		assertEquals("should have used the default port of the forwarded request",
+				-1, result.getPort());
+	}
+
 	@Test
 	public void fromContextPath() {
 		request.setRequestURI("/mvc-showcase/data/param");

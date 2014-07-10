@@ -111,12 +111,18 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 			}
 			else {
 				host = hostToUse;
+				port = -1;
 			}
 		}
 
 		String portHeader = request.getHeader("X-Forwarded-Port");
 		if (StringUtils.hasText(portHeader)) {
 			port = Integer.parseInt(portHeader);
+		}
+
+		String protocolHeader = request.getHeader("X-Forwarded-Proto");
+		if (StringUtils.hasText(protocolHeader)) {
+			scheme = protocolHeader;
 		}
 
 		ServletUriComponentsBuilder builder = new ServletUriComponentsBuilder();
