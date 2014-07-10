@@ -147,7 +147,9 @@ public abstract class AbstractMessageChannel implements MessageChannel, BeanName
 				message = interceptor.preSend(message, channel);
 				if (message == null) {
 					String name = interceptor.getClass().getSimpleName();
-					logger.debug(name + " returned null from preSend, i.e. precluding the send.");
+					if (logger.isDebugEnabled()) {
+						logger.debug(name + " returned null from preSend, i.e. precluding the send.");
+					}
 					triggerAfterSendCompletion(message, channel, false, null);
 					return null;
 				}
