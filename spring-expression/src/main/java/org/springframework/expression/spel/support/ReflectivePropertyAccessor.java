@@ -29,15 +29,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.asm.MethodVisitor;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.Property;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.expression.AccessException;
+import org.springframework.expression.CompilablePropertyAccessor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.ast.PropertyOrFieldReference;
+import org.springframework.expression.spel.standard.CodeFlow;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -72,6 +76,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	private final Map<CacheKey, TypeDescriptor> typeDescriptorCache = new ConcurrentHashMap<CacheKey, TypeDescriptor>(64);
 
+	private InvokerPair lastReadInvokerPair;
 
 	/**
 	 * Returns {@code null} which means this is a general purpose accessor.
@@ -115,6 +120,10 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		}
 		return false;
 	}
+	
+	public Member getLastReadInvokerPair() {
+		return lastReadInvokerPair.member;
+	}
 
 	@Override
 	public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
@@ -132,6 +141,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 		CacheKey cacheKey = new CacheKey(type, name, target instanceof Class);
 		InvokerPair invoker = this.readerCache.get(cacheKey);
+		lastReadInvokerPair = invoker;
 
 		if (invoker == null || invoker.member instanceof Method) {
 			Method method = (Method) (invoker != null ? invoker.member : null);
@@ -144,6 +154,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 					Property property = new Property(type, method, null);
 					TypeDescriptor typeDescriptor = new TypeDescriptor(property);
 					invoker = new InvokerPair(method, typeDescriptor);
+					lastReadInvokerPair = invoker;
 					this.readerCache.put(cacheKey, invoker);
 				}
 			}
@@ -165,6 +176,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 				field = findField(name, type, target);
 				if (field != null) {
 					invoker = new InvokerPair(field, new TypeDescriptor(field));
+					lastReadInvokerPair = invoker;
 					this.readerCache.put(cacheKey, invoker);
 				}
 			}
@@ -557,9 +569,9 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 * accessor exists because looking up the appropriate reflective object by class/name
 	 * on each read is not cheap.
 	 */
-	private static class OptimalPropertyAccessor implements PropertyAccessor {
+	public static class OptimalPropertyAccessor implements CompilablePropertyAccessor {
 
-		private final Member member;
+		public final Member member;
 
 		private final TypeDescriptor typeDescriptor;
 
@@ -637,6 +649,16 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			}
 			throw new AccessException("Neither getter nor field found for property '" + name + "'");
 		}
+		
+		@Override
+		public Class<?> getPropertyType() {
+			if (member instanceof Field) {
+				return ((Field)member).getType();
+			}
+			else {
+				return ((Method)member).getReturnType();
+			}
+		}
 
 		@Override
 		public boolean canWrite(EvaluationContext context, Object target, String name) {
@@ -647,6 +669,37 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		public void write(EvaluationContext context, Object target, String name, Object newValue) {
 			throw new UnsupportedOperationException("Should not be called on an OptimalPropertyAccessor");
 		}
+		
+		@Override
+		public boolean isCompilable() {
+			// If non public must continue to use reflection
+			if (!Modifier.isPublic(member.getModifiers()) || !Modifier.isPublic(member.getDeclaringClass().getModifiers())) {
+				return false;
+			}
+			return true;
+		}
+		 
+		@Override
+		public void generateCode(PropertyOrFieldReference propertyReference, MethodVisitor mv,CodeFlow codeflow) {
+			boolean isStatic = Modifier.isStatic(member.getModifiers());
+
+			String descriptor = codeflow.lastDescriptor();
+			String memberDeclaringClassSlashedDescriptor = member.getDeclaringClass().getName().replace('.','/');
+			if (!isStatic) {
+				if (descriptor == null) {
+					codeflow.loadTarget(mv);
+				}
+				if (descriptor == null || !memberDeclaringClassSlashedDescriptor.equals(descriptor.substring(1))) {
+					mv.visitTypeInsn(CHECKCAST, memberDeclaringClassSlashedDescriptor);
+				}
+			}
+			if (member instanceof Field) {
+				mv.visitFieldInsn(isStatic?GETSTATIC:GETFIELD,memberDeclaringClassSlashedDescriptor,member.getName(),CodeFlow.toJVMDescriptor(((Field) member).getType()));
+			} else {
+				mv.visitMethodInsn(isStatic?INVOKESTATIC:INVOKEVIRTUAL, memberDeclaringClassSlashedDescriptor, member.getName(),CodeFlow.createSignatureDescriptor((Method)member),false);
+			}
+		}
+
 	}
 
 }

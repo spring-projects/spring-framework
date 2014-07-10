@@ -228,16 +228,18 @@ public class ReflectionHelper {
 	 * @param arguments the actual arguments that need conversion
 	 * @param methodOrCtor the target Method or Constructor
 	 * @param varargsPosition the known position of the varargs argument, if any
+	 * @return true if some kind of conversion occurred on an argument
 	 * @throws EvaluationException if a problem occurs during conversion
 	 */
-	static void convertArguments(TypeConverter converter, Object[] arguments, Object methodOrCtor,
+	static boolean convertArguments(TypeConverter converter, Object[] arguments, Object methodOrCtor,
 			Integer varargsPosition) throws EvaluationException {
-
+		boolean conversionOccurred = false;
 		if (varargsPosition == null) {
 			for (int i = 0; i < arguments.length; i++) {
 				TypeDescriptor targetType = new TypeDescriptor(MethodParameter.forMethodOrConstructor(methodOrCtor, i));
 				Object argument = arguments[i];
 				arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
+				conversionOccurred |= (argument != arguments[i]);
 			}
 		}
 		else {
@@ -245,21 +247,25 @@ public class ReflectionHelper {
 				TypeDescriptor targetType = new TypeDescriptor(MethodParameter.forMethodOrConstructor(methodOrCtor, i));
 				Object argument = arguments[i];
 				arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
+				conversionOccurred |= (argument != arguments[i]);
 			}
 			MethodParameter methodParam = MethodParameter.forMethodOrConstructor(methodOrCtor, varargsPosition);
 			if (varargsPosition == arguments.length - 1) {
 				TypeDescriptor targetType = new TypeDescriptor(methodParam);
 				Object argument = arguments[varargsPosition];
 				arguments[varargsPosition] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
+				conversionOccurred |= (argument != arguments[varargsPosition]);
 			}
 			else {
 				TypeDescriptor targetType = new TypeDescriptor(methodParam).getElementTypeDescriptor();
 				for (int i = varargsPosition; i < arguments.length; i++) {
 					Object argument = arguments[i];
 					arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
+					conversionOccurred |= (argument != arguments[i]);
 				}
 			}
 		}
+		return conversionOccurred;
 	}
 
 	/**
@@ -272,15 +278,16 @@ public class ReflectionHelper {
 	 * @param converter the converter to use for type conversions
 	 * @param arguments the arguments to convert to the requested parameter types
 	 * @param method the target Method
+	 * @return true if some kind of conversion occurred on the argument
 	 * @throws SpelEvaluationException if there is a problem with conversion
 	 */
-	public static void convertAllArguments(TypeConverter converter, Object[] arguments, Method method)
-			throws SpelEvaluationException {
-
+	public static boolean convertAllArguments(TypeConverter converter, Object[] arguments, Method method) throws SpelEvaluationException {
 		Integer varargsPosition = null;
+		boolean conversionOccurred = false;
 		if (method.isVarArgs()) {
 			Class<?>[] paramTypes = method.getParameterTypes();
 			varargsPosition = paramTypes.length - 1;
+			conversionOccurred = true;
 		}
 		for (int argPos = 0; argPos < arguments.length; argPos++) {
 			TypeDescriptor targetType;
@@ -299,6 +306,7 @@ public class ReflectionHelper {
 								SpelMessage.TYPE_CONVERSION_ERROR, argument.getClass().getName(), targetType);
 					}
 					arguments[argPos] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
+					conversionOccurred |= (argument != arguments[argPos]);
 				}
 			}
 			catch (EvaluationException ex) {
@@ -312,6 +320,7 @@ public class ReflectionHelper {
 				}
 			}
 		}
+		return conversionOccurred;
 	}
 
 	/**

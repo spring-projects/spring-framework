@@ -16,6 +16,8 @@
 
 package org.springframework.expression.spel.ast;
 
+import org.springframework.asm.MethodVisitor;
+import org.springframework.asm.Opcodes;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.common.ExpressionUtils;
@@ -23,6 +25,7 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelNode;
+import org.springframework.expression.spel.standard.CodeFlow;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.Assert;
 
@@ -33,7 +36,7 @@ import org.springframework.util.Assert;
  * @author Andy Clement
  * @since 3.0
  */
-public abstract class SpelNodeImpl implements SpelNode {
+public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 
 	private static SpelNodeImpl[] NO_CHILDREN = new SpelNodeImpl[0];
 
@@ -44,6 +47,16 @@ public abstract class SpelNodeImpl implements SpelNode {
 
 	private SpelNodeImpl parent;
 
+	/**
+	 * Indicates the type descriptor for the result of this expression node. This is
+	 * set as soon as it is known. For a literal node it is known immediately. For
+	 * a property access or method invocation it is known after one evaluation of
+	 * that node.
+	 * The descriptor is like the bytecode form but is slightly easier to work with. It
+	 * does not include the trailing semicolon (for non array reference types). Some examples:
+	 * Ljava/lang/String, I, [I
+     */
+	protected String exitTypeDescriptor;
 
 	public SpelNodeImpl(int pos, SpelNodeImpl... operands) {
 		this.pos = pos;
@@ -167,6 +180,33 @@ public abstract class SpelNodeImpl implements SpelNode {
 		throw new SpelEvaluationException(this.pos, SpelMessage.NOT_ASSIGNABLE, toStringAST());
 	}
 
+	/**
+	 * Check whether a node can be compiled to bytecode. The reasoning in each node may
+	 * be different but will typically involve checking whether the exit type descriptor
+	 * of the node is known and any relevant child nodes are compilable.
+	 * 
+	 * @return true if this node can be compiled to bytecode
+	 */
+	public boolean isCompilable() {
+		return false;
+	}
+
+	/**
+	 * Generate the bytecode for this node into the supplied visitor. Context info about
+	 * the current expression being compiled is available in the codeflow object. For
+	 * example it will include information about the type of the object currently
+	 * on the stack.
+	 * 
+	 * @param mv the ASM MethodVisitor into which code should be generated
+	 * @param codeflow a context object with info about what is on the stack
+	 */
+	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
+		throw new IllegalStateException(this.getClass().getName()+" has no generateCode(..) method");
+	}
+
+	public String getExitDescriptor() {
+		return this.exitTypeDescriptor;
+	}
 
 	public abstract TypedValue getValueInternal(ExpressionState expressionState) throws EvaluationException;
 

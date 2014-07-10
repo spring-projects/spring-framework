@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,13 @@ import org.springframework.util.ReflectionUtils;
  * @author Juergen Hoeller
  * @since 3.0
  */
-class ReflectiveMethodExecutor implements MethodExecutor {
+public class ReflectiveMethodExecutor implements MethodExecutor {
 
 	private final Method method;
 
 	private final Integer varargsPosition;
 
+	private boolean argumentConversionOccurred = false;
 
 	public ReflectiveMethodExecutor(Method method) {
 		this.method = method;
@@ -49,12 +50,20 @@ class ReflectiveMethodExecutor implements MethodExecutor {
 		}
 	}
 
+	public Method getMethod() {
+		return this.method;
+	}
+	
+	public boolean didArgumentConversionOccur() {
+		return this.argumentConversionOccurred;
+	}
+
 
 	@Override
 	public TypedValue execute(EvaluationContext context, Object target, Object... arguments) throws AccessException {
 		try {
 			if (arguments != null) {
-				ReflectionHelper.convertArguments(context.getTypeConverter(), arguments, this.method, this.varargsPosition);
+				this.argumentConversionOccurred = ReflectionHelper.convertArguments(context.getTypeConverter(), arguments, this.method, this.varargsPosition);
 			}
 			if (this.method.isVarArgs()) {
 				arguments = ReflectionHelper.setupArgumentsForVarargsInvocation(this.method.getParameterTypes(), arguments);
