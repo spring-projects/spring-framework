@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,16 @@ package org.springframework.messaging.handler;
 
 import org.junit.Test;
 
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
+
+import org.junit.runners.Parameterized.Parameters;
+import org.junit.runners.Parameterized.Parameter;
+import org.springframework.util.AntPathMatcher;
+
+import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
@@ -27,8 +35,18 @@ import static org.junit.Assert.*;
  * Unit tests for {@link DestinationPatternsMessageCondition}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
+@RunWith(Parameterized.class)
 public class DestinationPatternsMessageConditionTests {
+
+	@Parameter(0)
+	public String pathSeparator;
+
+	@Parameters
+	public static Iterable<Object[]> arguments() {
+		return Arrays.asList(new Object[][]{{"/"}, {"."}});
+	}
 
 	@Test
 	public void prependSlash() {
@@ -47,20 +65,21 @@ public class DestinationPatternsMessageConditionTests {
 	@Test
 	public void combineEmptySets() {
 		DestinationPatternsMessageCondition c1 = condition();
-		DestinationPatternsMessageCondition c2 = condition();
+		DestinationPatternsMessageCondition c2 = suffixCondition();
 
 		assertEquals(condition(""), c1.combine(c2));
 	}
 
 	@Test
 	public void combineOnePatternWithEmptySet() {
-		DestinationPatternsMessageCondition c1 = condition("/type1", "/type2");
-		DestinationPatternsMessageCondition c2 = condition();
+		DestinationPatternsMessageCondition c1 = condition("/type1",
+				pathSeparator + "type2");
+		DestinationPatternsMessageCondition c2 = suffixCondition();
 
-		assertEquals(condition("/type1", "/type2"), c1.combine(c2));
+		assertEquals(condition("/type1", pathSeparator + "type2"), c1.combine(c2));
 
 		c1 = condition();
-		c2 = condition("/method1", "/method2");
+		c2 = suffixCondition("/method1", "/method2");
 
 		assertEquals(condition("/method1", "/method2"), c1.combine(c2));
 	}
@@ -68,10 +87,12 @@ public class DestinationPatternsMessageConditionTests {
 	@Test
 	public void combineMultiplePatterns() {
 		DestinationPatternsMessageCondition c1 = condition("/t1", "/t2");
-		DestinationPatternsMessageCondition c2 = condition("/m1", "/m2");
+		DestinationPatternsMessageCondition c2 = suffixCondition(pathSeparator + "m1",
+				pathSeparator + "m2");
 
-		assertEquals(new DestinationPatternsMessageCondition(
-				"/t1/m1", "/t1/m2", "/t2/m1", "/t2/m2"), c1.combine(c2));
+		assertEquals(
+				condition("/t1" + pathSeparator + "m1", "/t1" + pathSeparator + "m2",
+						"/t2" + pathSeparator + "m1", "/t2" + pathSeparator + "m2"), c1.combine(c2));
 	}
 
 	@Test
@@ -84,35 +105,40 @@ public class DestinationPatternsMessageConditionTests {
 
 	@Test
 	public void matchPattern() {
-		DestinationPatternsMessageCondition condition = condition("/foo/*");
-		DestinationPatternsMessageCondition match = condition.getMatchingCondition(messageTo("/foo/bar"));
+		DestinationPatternsMessageCondition condition = condition(
+				"/foo" + pathSeparator + "*");
+		DestinationPatternsMessageCondition match = condition.getMatchingCondition(messageTo("/foo" + pathSeparator + "bar"));
 
 		assertNotNull(match);
 	}
 
 	@Test
 	public void matchSortPatterns() {
-		DestinationPatternsMessageCondition condition = condition("/**", "/foo/bar", "/foo/*");
-		DestinationPatternsMessageCondition match = condition.getMatchingCondition(messageTo("/foo/bar"));
-		DestinationPatternsMessageCondition expected = condition("/foo/bar", "/foo/*", "/**");
+		DestinationPatternsMessageCondition condition = suffixCondition(
+				pathSeparator + "**", pathSeparator + "foo" + pathSeparator + "bar",
+				pathSeparator + "foo" + pathSeparator + "*");
+		DestinationPatternsMessageCondition match = condition.getMatchingCondition(messageTo(pathSeparator + "foo" + pathSeparator + "bar"));
+		DestinationPatternsMessageCondition expected = suffixCondition(
+				pathSeparator + "foo" + pathSeparator + "bar",
+				pathSeparator + "foo" + pathSeparator + "*", pathSeparator + "**");
 
 		assertEquals(expected, match);
 	}
 
 	@Test
 	public void compareEqualPatterns() {
-		DestinationPatternsMessageCondition c1 = condition("/foo*");
-		DestinationPatternsMessageCondition c2 = condition("/foo*");
+		DestinationPatternsMessageCondition c1 = suffixCondition(pathSeparator + "foo*");
+		DestinationPatternsMessageCondition c2 = suffixCondition(pathSeparator + "foo*");
 
-		assertEquals(0, c1.compareTo(c2, messageTo("/foo")));
+		assertEquals(0, c1.compareTo(c2, messageTo(pathSeparator + "foo")));
 	}
 
 	@Test
 	public void comparePatternSpecificity() {
-		DestinationPatternsMessageCondition c1 = condition("/fo*");
-		DestinationPatternsMessageCondition c2 = condition("/foo");
+		DestinationPatternsMessageCondition c1 = suffixCondition(pathSeparator + "fo*");
+		DestinationPatternsMessageCondition c2 = suffixCondition(pathSeparator + "foo");
 
-		assertEquals(1, c1.compareTo(c2, messageTo("/foo")));
+		assertEquals(1, c1.compareTo(c2, messageTo(pathSeparator + "foo")));
 	}
 
 	@Test
@@ -130,7 +156,11 @@ public class DestinationPatternsMessageConditionTests {
 
 
 	private DestinationPatternsMessageCondition condition(String... patterns) {
-		return new DestinationPatternsMessageCondition(patterns);
+		return new DestinationPatternsMessageCondition(patterns, new AntPathMatcher(this.pathSeparator));
+	}
+
+	private DestinationPatternsMessageCondition suffixCondition(String... patterns) {
+		return new DestinationPatternsMessageCondition(patterns, new AntPathMatcher(this.pathSeparator), false);
 	}
 
 	private Message<?> messageTo(String destination) {

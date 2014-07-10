@@ -27,6 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.mockito.Mockito;
+import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,6 +40,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
+import org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry;
 import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
 import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
 import org.springframework.messaging.simp.user.UserSessionRegistry;
@@ -52,6 +54,7 @@ import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
@@ -64,6 +67,7 @@ import static org.junit.Assert.*;
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Sebastien Deleuze
  */
 public class MessageBrokerConfigurationTests {
 
@@ -74,6 +78,8 @@ public class MessageBrokerConfigurationTests {
 	private AnnotationConfigApplicationContext defaultContext;
 
 	private AnnotationConfigApplicationContext customChannelContext;
+
+	private AnnotationConfigApplicationContext customMatchingContext;
 
 
 	@Before
@@ -94,6 +100,10 @@ public class MessageBrokerConfigurationTests {
 		this.customChannelContext = new AnnotationConfigApplicationContext();
 		this.customChannelContext.register(CustomChannelConfig.class);
 		this.customChannelContext.refresh();
+
+		this.customMatchingContext = new AnnotationConfigApplicationContext();
+		this.customMatchingContext.register(CustomMatchingSimpleBrokerConfig.class);
+		this.customMatchingContext.refresh();
 	}
 
 
@@ -396,6 +406,20 @@ public class MessageBrokerConfigurationTests {
 		assertThat(messageHandler.getValidator(), Matchers.notNullValue(Validator.class));
 	}
 
+	@Test
+	public void customMatching() {
+		SimpleBrokerMessageHandler brokerHandler = this.customMatchingContext.getBean(SimpleBrokerMessageHandler.class);
+		DefaultSubscriptionRegistry subscriptionRegistry = (DefaultSubscriptionRegistry)brokerHandler.getSubscriptionRegistry();
+		AntPathMatcher pathMatcher = (AntPathMatcher)subscriptionRegistry.getPathMatcher();
+		DirectFieldAccessor accessor = new DirectFieldAccessor(pathMatcher);
+		assertEquals(".", accessor.getPropertyValue("pathSeparator"));
+
+		SimpAnnotationMethodMessageHandler messageHandler = customMatchingContext.getBean(SimpAnnotationMethodMessageHandler.class);
+		pathMatcher = (AntPathMatcher)messageHandler.getPathMatcher();
+		accessor = new DirectFieldAccessor(pathMatcher);
+		assertEquals(".", accessor.getPropertyValue("pathSeparator"));
+	}
+
 
 	@Controller
 	static class TestController {
@@ -476,6 +500,15 @@ public class MessageBrokerConfigurationTests {
 					this.interceptor, this.interceptor, this.interceptor);
 			registry.configureBrokerChannel().taskExecutor()
 					.corePoolSize(31).maxPoolSize(32).keepAliveSeconds(33).queueCapacity(34);
+		}
+	}
+
+	@Configuration
+	static class CustomMatchingSimpleBrokerConfig extends SimpleBrokerConfig {
+
+		@Override
+		public void configureMessageBroker(MessageBrokerRegistry registry) {
+			registry.defaultSeparator(".").enableSimpleBroker("/topic", "/queue");
 		}
 	}
 

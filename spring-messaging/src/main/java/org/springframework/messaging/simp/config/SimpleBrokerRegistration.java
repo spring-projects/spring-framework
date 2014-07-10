@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,13 @@ package org.springframework.messaging.simp.config;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
+import org.springframework.util.PathMatcher;
 
 /**
  * Registration class for configuring a {@link SimpleBrokerMessageHandler}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 4.0
  */
 public class SimpleBrokerRegistration extends AbstractBrokerRegistration {
@@ -36,10 +38,9 @@ public class SimpleBrokerRegistration extends AbstractBrokerRegistration {
 	}
 
 
-	@Override
-	protected SimpleBrokerMessageHandler getMessageHandler(SubscribableChannel brokerChannel) {
+	protected SimpleBrokerMessageHandler getMessageHandler(SubscribableChannel brokerChannel, PathMatcher pathMatcher) {
 		return new SimpleBrokerMessageHandler(getClientInboundChannel(),
-				getClientOutboundChannel(), brokerChannel, getDestinationPrefixes());
+				getClientOutboundChannel(), brokerChannel, getDestinationPrefixes(), pathMatcher);
 	}
 
 }

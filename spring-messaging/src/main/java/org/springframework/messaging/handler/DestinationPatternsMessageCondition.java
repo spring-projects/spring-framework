@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,21 +55,35 @@ public final class DestinationPatternsMessageCondition
 	 * @param patterns 0 or more URL patterns; if 0 the condition will match to every request.
 	 */
 	public DestinationPatternsMessageCondition(String... patterns) {
-		this(patterns, null);
+		this(patterns, null, true);
 	}
 
 	/**
-	 * Additional constructor with flags for using suffix pattern (.*) and
-	 * trailing slash matches.
+	 * Additional constructor with a customized path matcher.
 	 * @param patterns the URL patterns to use; if 0, the condition will match to every request.
-	 * @param pathMatcher for path matching with patterns
+	 * @param pathMatcher the customized path matcher to use with patterns
 	 */
-	public DestinationPatternsMessageCondition(String[] patterns,PathMatcher pathMatcher) {
-		this(asList(patterns), pathMatcher);
+	public DestinationPatternsMessageCondition(String[] patterns, PathMatcher pathMatcher) {
+		this(asList(patterns), pathMatcher, true);
 	}
 
-	private DestinationPatternsMessageCondition(Collection<String> patterns, PathMatcher pathMatcher) {
-		this.patterns = Collections.unmodifiableSet(prependLeadingSlash(patterns));
+	/**
+	 * Additional constructor with a customized path matcher and a flag specifying if
+	 * the destination patterns should be prepended with "/".
+	 * @param patterns the URL patterns to use; if 0, the condition will match to every request.
+	 * @param pathMatcher the customized path matcher to use with patterns
+	 * @param prependLeadingSlash to specify whether each pattern that is not empty and does not
+	 * start with "/" will be prepended with "/" or not
+	 * @since 4.1
+	 */
+	public DestinationPatternsMessageCondition(String[] patterns, PathMatcher pathMatcher,
+			boolean prependLeadingSlash) {
+		this(asList(patterns), pathMatcher, prependLeadingSlash);
+	}
+
+	private DestinationPatternsMessageCondition(Collection<String> patterns,
+			PathMatcher pathMatcher, boolean prependLeadingSlash) {
+		this.patterns = Collections.unmodifiableSet(initializePatterns(patterns, prependLeadingSlash));
 		this.pathMatcher = (pathMatcher != null) ? pathMatcher : new AntPathMatcher();
 	}
 
@@ -77,13 +91,14 @@ public final class DestinationPatternsMessageCondition
 		return patterns != null ? Arrays.asList(patterns) : Collections.<String>emptyList();
 	}
 
-	private static Set<String> prependLeadingSlash(Collection<String> patterns) {
+	private static Set<String> initializePatterns(Collection<String> patterns,
+			boolean prependLeadingSlash) {
 		if (patterns == null) {
 			return Collections.emptySet();
 		}
 		Set<String> result = new LinkedHashSet<String>(patterns.size());
 		for (String pattern : patterns) {
-			if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
+			if (StringUtils.hasLength(pattern) && !pattern.startsWith("/") && prependLeadingSlash) {
 				pattern = "/" + pattern;
 			}
 			result.add(pattern);
@@ -134,7 +149,7 @@ public final class DestinationPatternsMessageCondition
 		else {
 			result.add("");
 		}
-		return new DestinationPatternsMessageCondition(result, this.pathMatcher);
+		return new DestinationPatternsMessageCondition(result, this.pathMatcher, false);
 	}
 
 	/**
@@ -169,7 +184,7 @@ public final class DestinationPatternsMessageCondition
 		}
 
 		Collections.sort(matches, this.pathMatcher.getPatternComparator(destination));
-		return new DestinationPatternsMessageCondition(matches, this.pathMatcher);
+		return new DestinationPatternsMessageCondition(matches, this.pathMatcher, false);
 	}
 
 	/**

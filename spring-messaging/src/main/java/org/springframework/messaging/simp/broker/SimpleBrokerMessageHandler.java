@@ -29,6 +29,7 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.PathMatcher;
 
 /**
  * A "simple" message broker that recognizes the message types defined in
@@ -48,7 +49,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	private final SubscribableChannel brokerChannel;
 
-	private SubscriptionRegistry subscriptionRegistry = new DefaultSubscriptionRegistry();
+	private SubscriptionRegistry subscriptionRegistry;
 
 	private MessageHeaderInitializer headerInitializer;
 
@@ -63,6 +64,20 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 */
 	public SimpleBrokerMessageHandler(SubscribableChannel clientInboundChannel, MessageChannel clientOutboundChannel,
 			SubscribableChannel brokerChannel, Collection<String> destinationPrefixes) {
+		this(clientInboundChannel, clientOutboundChannel, brokerChannel, destinationPrefixes, null);
+	}
+
+	/**
+	 * Additional constructor with a customized path matcher.
+	 *
+	 * @param clientInboundChannel the channel for receiving messages from clients (e.g. WebSocket clients)
+	 * @param clientOutboundChannel the channel for sending messages to clients (e.g. WebSocket clients)
+	 * @param brokerChannel the channel for the application to send messages to the broker
+	 * @param pathMatcher the path matcher to use
+	 * @since 4.1
+	 */
+	public SimpleBrokerMessageHandler(SubscribableChannel clientInboundChannel, MessageChannel clientOutboundChannel,
+			SubscribableChannel brokerChannel, Collection<String> destinationPrefixes, PathMatcher pathMatcher) {
 
 		super(destinationPrefixes);
 		Assert.notNull(clientInboundChannel, "'clientInboundChannel' must not be null");
@@ -71,6 +86,11 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		this.clientInboundChannel = clientInboundChannel;
 		this.clientOutboundChannel = clientOutboundChannel;
 		this.brokerChannel = brokerChannel;
+		DefaultSubscriptionRegistry subscriptionRegistry = new DefaultSubscriptionRegistry();
+		if(pathMatcher != null) {
+			subscriptionRegistry.setPathMatcher(pathMatcher);
+		}
+		this.subscriptionRegistry = subscriptionRegistry;
 	}
 
 

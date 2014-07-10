@@ -3,7 +3,7 @@
        xmlns:websocket="http://www.springframework.org/schema/websocket"
        xsi:schemaLocation="
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+		http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket-4.1.xsd">
 
     <websocket:handlers order="2">
         <websocket:mapping path="/foo" handler="fooHandler"/>
