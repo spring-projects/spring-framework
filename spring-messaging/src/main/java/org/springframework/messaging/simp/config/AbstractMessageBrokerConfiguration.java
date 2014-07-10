@@ -250,6 +250,8 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		List<MessageConverter> converters = new ArrayList<MessageConverter>();
 		boolean registerDefaults = configureMessageConverters(converters);
 		if (registerDefaults) {
+			converters.add(new StringMessageConverter());
+			converters.add(new ByteArrayMessageConverter());
 			if (jackson2Present) {
 				DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
 				resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
@@ -257,8 +259,6 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 				converter.setContentTypeResolver(resolver);
 				converters.add(converter);
 			}
-			converters.add(new StringMessageConverter());
-			converters.add(new ByteArrayMessageConverter());
 		}
 		return new CompositeMessageConverter(converters);
 	}

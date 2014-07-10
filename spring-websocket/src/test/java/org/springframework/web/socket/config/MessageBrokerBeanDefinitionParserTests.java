@@ -279,11 +279,11 @@ public class MessageBrokerBeanDefinitionParserTests {
 
 		List<MessageConverter> converters = compositeMessageConverter.getConverters();
 		assertThat(converters.size(), Matchers.is(3));
-		assertThat(converters.get(0), Matchers.instanceOf(MappingJackson2MessageConverter.class));
-		assertThat(converters.get(1), Matchers.instanceOf(StringMessageConverter.class));
-		assertThat(converters.get(2), Matchers.instanceOf(ByteArrayMessageConverter.class));
+		assertThat(converters.get(0), Matchers.instanceOf(StringMessageConverter.class));
+		assertThat(converters.get(1), Matchers.instanceOf(ByteArrayMessageConverter.class));
+		assertThat(converters.get(2), Matchers.instanceOf(MappingJackson2MessageConverter.class));
 
-		ContentTypeResolver resolver = ((MappingJackson2MessageConverter) converters.get(0)).getContentTypeResolver();
+		ContentTypeResolver resolver = ((MappingJackson2MessageConverter) converters.get(2)).getContentTypeResolver();
 		assertEquals(MimeTypeUtils.APPLICATION_JSON, ((DefaultContentTypeResolver) resolver).getDefaultMimeType());
 	}
 
