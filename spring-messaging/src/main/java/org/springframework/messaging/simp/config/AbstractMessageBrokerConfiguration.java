@@ -39,6 +39,7 @@ import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.validation.Errors;
@@ -206,12 +207,16 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	@Bean
 	public SimpAnnotationMethodMessageHandler simpAnnotationMethodMessageHandler() {
 
+		String defaultSeparator = this.getBrokerRegistry().getDefaultSeparator();
 		SimpAnnotationMethodMessageHandler handler = new SimpAnnotationMethodMessageHandler(
-				clientInboundChannel(), clientOutboundChannel(), brokerMessagingTemplate());
+				clientInboundChannel(), clientOutboundChannel(), brokerMessagingTemplate(), defaultSeparator);
 
 		handler.setDestinationPrefixes(getBrokerRegistry().getApplicationDestinationPrefixes());
 		handler.setMessageConverter(brokerMessageConverter());
 		handler.setValidator(simpValidator());
+
+		AntPathMatcher pathMatcher = new AntPathMatcher(defaultSeparator);
+		handler.setPathMatcher(pathMatcher);
 		return handler;
 	}
 
