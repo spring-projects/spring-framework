@@ -35,13 +35,13 @@ import org.springframework.util.FileCopyUtils;
 
 /**
  * Unit tests for
- * {@link org.springframework.web.servlet.resource.AppCacheResourceTransformer}.
+ * {@link AppCacheManifestTransfomer}.
  *
  * @author Brian Clozel
  */
-public class AppCacheResourceTransformerTests {
+public class AppCacheManifestTransformerTests {
 
-	private AppCacheResourceTransformer transformer;
+	private AppCacheManifestTransfomer transformer;
 
 	private ResourceTransformerChain chain;
 
@@ -49,7 +49,7 @@ public class AppCacheResourceTransformerTests {
 
 	@Before
 	public void setup() {
-		this.transformer = new AppCacheResourceTransformer();
+		this.transformer = new AppCacheManifestTransfomer();
 		this.chain = mock(ResourceTransformerChain.class);
 		this.request = mock(HttpServletRequest.class);
 	}

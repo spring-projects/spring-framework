@@ -57,13 +57,13 @@ import org.springframework.util.StringUtils;
  * applications spec</a>
  * @since 4.1
  */
-public class AppCacheResourceTransformer implements ResourceTransformer {
+public class AppCacheManifestTransfomer implements ResourceTransformer {
 
 	private static final String MANIFEST_HEADER = "CACHE MANIFEST";
 
 	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
-	private static final Log logger = LogFactory.getLog(AppCacheResourceTransformer.class);
+	private static final Log logger = LogFactory.getLog(AppCacheManifestTransfomer.class);
 
 	private final Map<String, SectionTransformer> sectionTransformers = new HashMap<String, SectionTransformer>();
 
@@ -72,7 +72,7 @@ public class AppCacheResourceTransformer implements ResourceTransformer {
 	/**
 	 * Create an AppCacheResourceTransformer that transforms files with extension ".manifest"
 	 */
-	public AppCacheResourceTransformer() {
+	public AppCacheManifestTransfomer() {
 		this("manifest");
 	}
 
@@ -80,7 +80,7 @@ public class AppCacheResourceTransformer implements ResourceTransformer {
 	 * Create an AppCacheResourceTransformer that transforms files with the extension
 	 * given as a parameter.
 	 */
-	public AppCacheResourceTransformer(String fileExtension) {
+	public AppCacheManifestTransfomer(String fileExtension) {
 		this.fileExtension = fileExtension;
 
 		SectionTransformer noOpSection = new NoOpSection();
