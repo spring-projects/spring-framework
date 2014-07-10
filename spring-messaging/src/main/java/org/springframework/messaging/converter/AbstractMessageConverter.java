@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,10 +118,8 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 	 */
 	public void setStrictContentTypeMatch(boolean strictContentTypeMatch) {
 		if (strictContentTypeMatch) {
-			Assert.notEmpty(getSupportedMimeTypes(),
-					"A strict converter requires a non-empty list of supported mime types");
-			Assert.notNull(getContentTypeResolver(),
-					"A strict converter requires a ContentTypeResolver");
+			Assert.notEmpty(getSupportedMimeTypes(), "Strict match requires non-empty list of supported mime types.");
+			Assert.notNull(getContentTypeResolver(), "Strict match requires ContentTypeResolver.");
 		}
 		this.strictContentTypeMatch = strictContentTypeMatch;
 	}
@@ -242,9 +240,8 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 				return true;
 			}
 		}
-		for (MimeType supported : getSupportedMimeTypes()) {
-			if (supported.getType().equals(mimeType.getType()) &&
-					supported.getSubtype().equals(mimeType.getSubtype())) {
+		for (MimeType current : getSupportedMimeTypes()) {
+			if (current.getType().equals(mimeType.getType()) && current.getSubtype().equals(mimeType.getSubtype())) {
 				return true;
 			}
 		}

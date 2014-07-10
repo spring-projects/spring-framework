@@ -398,6 +398,8 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 
 		if (convertersElement == null || Boolean.valueOf(convertersElement.getAttribute("register-defaults"))) {
 			convertersDef.setSource(source);
+			convertersDef.add(new RootBeanDefinition(StringMessageConverter.class));
+			convertersDef.add(new RootBeanDefinition(ByteArrayMessageConverter.class));
 			if (jackson2Present) {
 				RootBeanDefinition jacksonConverterDef = new RootBeanDefinition(MappingJackson2MessageConverter.class);
 				RootBeanDefinition resolverDef = new RootBeanDefinition(DefaultContentTypeResolver.class);
@@ -405,8 +407,6 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 				jacksonConverterDef.getPropertyValues().add("contentTypeResolver", resolverDef);
 				convertersDef.add(jacksonConverterDef);
 			}
-			convertersDef.add(new RootBeanDefinition(StringMessageConverter.class));
-			convertersDef.add(new RootBeanDefinition(ByteArrayMessageConverter.class));
 		}
 
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();

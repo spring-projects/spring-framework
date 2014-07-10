@@ -176,7 +176,7 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 			String payload = clientHandler.actual.get(0).getPayload();
 			assertTrue(payload.startsWith("MESSAGE\n"));
 			assertTrue(payload.contains("destination:/user/queue/error\n"));
-			assertTrue(payload.endsWith("\"Got error: Bad input\"\0"));
+			assertTrue(payload.endsWith("Got error: Bad input\0"));
 		}
 		finally {
 			session.close();
@@ -201,7 +201,7 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 			String payload = clientHandler.actual.get(0).getPayload();
 			assertTrue(payload.startsWith("MESSAGE\n"));
 			assertTrue(payload.contains("destination:/topic/scopedBeanValue\n"));
-			assertTrue(payload.endsWith("\"55\"\0"));
+			assertTrue(payload.endsWith("55\0"));
 		}
 		finally {
 			session.close();
