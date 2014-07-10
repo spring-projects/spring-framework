@@ -26,6 +26,7 @@ import org.junit.Test;
 
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -190,6 +191,17 @@ public class UriComponentsBuilderTests {
 	public void fromHttpUrlStringCaseInsesitiveScheme() {
 		assertEquals("http", UriComponentsBuilder.fromHttpUrl("HTTP://www.google.com").build().getScheme());
 		assertEquals("https", UriComponentsBuilder.fromHttpUrl("HTTPS://www.google.com").build().getScheme());
+	}
+
+	// SPR-11970
+
+	@Test
+	public void fromUriStringNoPathWithReservedCharInQuery() {
+		UriComponents result = UriComponentsBuilder.fromUriString("http://example.com?foo=bar@baz").build();
+		assertTrue(StringUtils.isEmpty(result.getUserInfo()));
+		assertEquals("example.com", result.getHost());
+		assertTrue(result.getQueryParams().containsKey("foo"));
+		assertEquals("bar@baz", result.getQueryParams().getFirst("foo"));
 	}
 
 	@Test
