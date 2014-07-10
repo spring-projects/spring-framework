@@ -18,6 +18,7 @@ package org.springframework.web.socket.sockjs.client;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.context.Lifecycle;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
@@ -40,11 +41,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public class WebSocketTransport implements Transport {
+public class WebSocketTransport implements Transport, Lifecycle {
 
 	private static Log logger = LogFactory.getLog(WebSocketTransport.class);
 
 	private final WebSocketClient webSocketClient;
+
+	private volatile boolean running = false;
 
 
 	public WebSocketTransport(WebSocketClient webSocketClient) {
@@ -59,6 +62,41 @@ public class WebSocketTransport implements Transport {
 	public WebSocketClient getWebSocketClient() {
 		return this.webSocketClient;
 	}
+
+	@Override
+	public void start() {
+		if (!isRunning()) {
+			if (this.webSocketClient instanceof Lifecycle) {
+				((Lifecycle) this.webSocketClient).start();
+			}
+			else {
+				this.running = true;
+			}
+		}
+	}
+
+	@Override
+	public void stop() {
+		if (isRunning()) {
+			if (this.webSocketClient instanceof Lifecycle) {
+				((Lifecycle) this.webSocketClient).stop();
+			}
+			else {
+				this.running = false;
+			}
+		}
+	}
+
+	@Override
+	public boolean isRunning() {
+		if (this.webSocketClient instanceof Lifecycle) {
+			return ((Lifecycle) this.webSocketClient).isRunning();
+		}
+		else {
+			return this.running;
+		}
+	}
+
 
 	@Override
 	public ListenableFuture<WebSocketSession> connect(TransportRequest request, WebSocketHandler handler) {
