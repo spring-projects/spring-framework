@@ -16,7 +16,6 @@
 
 package example.scannable;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Future;
 import javax.annotation.PostConstruct;
@@ -43,10 +42,6 @@ import org.springframework.util.Assert;
  */
 @Service @Lazy @DependsOn("myNamedComponent")
 public class FooServiceImpl implements FooService {
-
-	// Just to test ASM5's bytecode parsing of INVOKESPECIAL/STATIC on interfaces
-	private static final Comparator<MessageBean> COMPARATOR_BY_MESSAGE = Comparator.comparing(MessageBean::getMessage);
-
 
 	@Autowired private FooDao fooDao;
 
