@@ -56,6 +56,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.SmartFactoryBean;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -684,12 +685,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (this.logger.isDebugEnabled()) {
 			this.logger.debug("Pre-instantiating singletons in " + this);
 		}
+
 		List<String> beanNames;
 		synchronized (this.beanDefinitionMap) {
 			// Iterate over a copy to allow for init methods which in turn register new bean definitions.
 			// While this may not be part of the regular factory bootstrap, it does otherwise work fine.
 			beanNames = new ArrayList<String>(this.beanDefinitionNames);
 		}
+
+		// Trigger initialization of all non-lazy singleton beans...
 		for (String beanName : beanNames) {
 			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
 			if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
@@ -714,6 +718,26 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 				else {
 					getBean(beanName);
+				}
+			}
+		}
+
+		// Trigger post-initialization callback for all applicable beans...
+		for (String beanName : beanNames) {
+			Object singletonInstance = getSingleton(beanName);
+			if (singletonInstance instanceof SmartInitializingSingleton) {
+				final SmartInitializingSingleton smartSingleton = (SmartInitializingSingleton) singletonInstance;
+				if (System.getSecurityManager() != null) {
+					AccessController.doPrivileged(new PrivilegedAction<Object>() {
+						@Override
+						public Object run() {
+							smartSingleton.afterSingletonsInstantiated();
+							return null;
+						}
+					}, getAccessControlContext());
+				}
+				else {
+					smartSingleton.afterSingletonsInstantiated();
 				}
 			}
 		}

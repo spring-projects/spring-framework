@@ -48,6 +48,7 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Chris Beams
+ * @author Stephane Nicoll
  */
 public abstract class AbstractMBeanServerTests {
 
@@ -100,7 +101,7 @@ public abstract class AbstractMBeanServerTests {
 	 */
 	protected void start(MBeanExporter exporter) {
 		exporter.afterPropertiesSet();
-		// exporter.register();
+		exporter.afterSingletonsInstantiated();
 	}
 
 	protected void assertIsRegistered(String message, ObjectName objectName) {
