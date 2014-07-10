@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.socket.client;
 
 import java.util.List;
 
+import org.springframework.context.Lifecycle;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -46,8 +47,6 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 
 	private WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 
-	private final boolean syncClientLifecycle;
-
 
 	public WebSocketConnectionManager(WebSocketClient client,
 			WebSocketHandler webSocketHandler, String uriTemplate, Object... uriVariables) {
@@ -55,7 +54,6 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 		super(uriTemplate, uriVariables);
 		this.client = client;
 		this.webSocketHandler = decorateWebSocketHandler(webSocketHandler);
-		this.syncClientLifecycle = ((client instanceof SmartLifecycle) && !((SmartLifecycle) client).isRunning());
 	}
 
 
@@ -116,16 +114,16 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 
 	@Override
 	public void startInternal() {
-		if (this.syncClientLifecycle) {
-			((SmartLifecycle) this.client).start();
+		if (this.client instanceof Lifecycle && !((Lifecycle) client).isRunning()) {
+			((Lifecycle) client).start();
 		}
 		super.startInternal();
 	}
 
 	@Override
 	public void stopInternal() throws Exception {
-		if (this.syncClientLifecycle) {
-			((SmartLifecycle) this.client).stop();
+		if (this.client instanceof Lifecycle && ((Lifecycle) client).isRunning()) {
+			((Lifecycle) client).stop();
 		}
 		super.stopInternal();
 	}

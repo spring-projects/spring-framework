@@ -42,7 +42,7 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 
 	private boolean autoStartup = false;
 
-	private boolean isRunning = false;
+	private boolean running = false;
 
 	private int phase = Integer.MAX_VALUE;
 
@@ -104,7 +104,7 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 	@Override
 	public boolean isRunning() {
 		synchronized (this.lifecycleMonitor) {
-			return this.isRunning;
+			return this.running;
 		}
 	}
 
@@ -125,7 +125,7 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 			if (logger.isInfoEnabled()) {
 				logger.info("Starting " + this.getClass().getSimpleName());
 			}
-			this.isRunning = true;
+			this.running = true;
 			openConnection();
 		}
 	}
@@ -146,7 +146,7 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 					logger.error("Failed to stop WebSocket connection", e);
 				}
 				finally {
-					this.isRunning = false;
+					this.running = false;
 				}
 			}
 		}
