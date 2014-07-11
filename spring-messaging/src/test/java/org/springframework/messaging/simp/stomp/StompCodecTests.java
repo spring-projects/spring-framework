@@ -290,6 +290,17 @@ public class StompCodecTests {
 				new Reactor11StompCodec().encoder().apply(frame).asString());
 	}
 
+	@Test
+	public void encodeFrameWithContentLengthPresent() {
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
+		headers.setContentLength(12);
+
+		Message<byte[]> frame = MessageBuilder.createMessage("Message body".getBytes(), headers.getMessageHeaders());
+
+		assertEquals("SEND\ncontent-length:12\n\nMessage body\0",
+				new Reactor11StompCodec().encoder().apply(frame).asString());
+	}
+
 	private void assertIncompleteDecode(String partialFrame) {
 		Buffer buffer = Buffer.wrap(partialFrame);
 		assertNull(decode(buffer));

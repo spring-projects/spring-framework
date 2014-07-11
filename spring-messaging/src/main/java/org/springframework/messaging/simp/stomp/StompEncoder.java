@@ -112,8 +112,12 @@ public final class StompEncoder  {
 
 		for (Entry<String, List<String>> entry : nativeHeaders.entrySet()) {
 			byte[] key = encodeHeaderString(entry.getKey(), shouldEscape);
+			if (command.requiresContentLength() && "content-length".equals(entry.getKey())) {
+				continue;
+			}
 			List<String> values = entry.getValue();
-			if (StompHeaderAccessor.STOMP_PASSCODE_HEADER.equals(entry.getKey())) {
+			if (StompCommand.CONNECT.equals(command) &&
+					StompHeaderAccessor.STOMP_PASSCODE_HEADER.equals(entry.getKey())) {
 				values = Arrays.asList(StompHeaderAccessor.getPasscode(headers));
 			}
 			for (String value : values) {
