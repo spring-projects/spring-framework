@@ -17,6 +17,7 @@
 package org.springframework.test.web.servlet.result;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
 
 import java.util.Date;
 
@@ -24,7 +25,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.StubMvcResult;
-import org.springframework.test.web.servlet.result.ModelResultMatchers;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.ModelAndView;
@@ -143,6 +143,30 @@ public class ModelResultMatchersTests {
 	@Test(expected=AssertionError.class)
 	public void attributeHasFieldErrors_withoutErrorsForField() throws Exception {
 		this.matchers.attributeHasFieldErrors("date", "good", "time").match(this.mvcResultWithError);
+	}
+
+	@Test
+	public void attributeHasFieldErrorCode() throws Exception {
+		this.matchers.attributeHasFieldErrorCode("date", "time", "error")
+				.match(this.mvcResultWithError);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void attributeHasFieldErrorCode_withoutErrorOnField() throws Exception {
+		this.matchers.attributeHasFieldErrorCode("date", "time", "incorrectError")
+				.match(this.mvcResultWithError);
+	}
+
+	@Test
+	public void attributeHasFieldErrorCode_startsWith() throws Exception {
+		this.matchers.attributeHasFieldErrorCode("date", "time", startsWith("err"))
+				.match(this.mvcResultWithError);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void attributeHasFieldErrorCode_startsWith_withoutErrorOnField() throws Exception {
+		this.matchers.attributeHasFieldErrorCode("date", "time", startsWith("inc"))
+				.match(this.mvcResultWithError);
 	}
 
 	private MvcResult getMvcResult(ModelAndView modelAndView) {
