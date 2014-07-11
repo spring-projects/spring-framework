@@ -50,7 +50,6 @@ public class ServletUriComponentsBuilderTests {
 		request.setRequestURI("/mvc-showcase/data/param");
 		request.setQueryString("foo=123");
 		String result = ServletUriComponentsBuilder.fromRequest(request).build().toUriString();
-
 		assertEquals("http://localhost/mvc-showcase/data/param?foo=123", result);
 	}
 
@@ -58,7 +57,6 @@ public class ServletUriComponentsBuilderTests {
 	public void fromRequestEncodedPath() {
 		request.setRequestURI("/mvc-showcase/data/foo%20bar");
 		String result = ServletUriComponentsBuilder.fromRequest(request).build().toUriString();
-
 		assertEquals("http://localhost/mvc-showcase/data/foo%20bar", result);
 	}
 
@@ -66,7 +64,6 @@ public class ServletUriComponentsBuilderTests {
 	public void fromRequestAtypicalHttpPort() {
 		request.setServerPort(8080);
 		String result = ServletUriComponentsBuilder.fromRequest(request).build().toUriString();
-
 		assertEquals("http://localhost:8080", result);
 	}
 
@@ -75,7 +72,6 @@ public class ServletUriComponentsBuilderTests {
 		request.setScheme("https");
 		request.setServerPort(9043);
 		String result = ServletUriComponentsBuilder.fromRequest(request).build().toUriString();
-
 		assertEquals("https://localhost:9043", result);
 	}
 
@@ -84,7 +80,6 @@ public class ServletUriComponentsBuilderTests {
 		request.setRequestURI("/mvc-showcase/data/param");
 		request.setQueryString("foo=123");
 		String result = ServletUriComponentsBuilder.fromRequestUri(request).build().toUriString();
-
 		assertEquals("http://localhost/mvc-showcase/data/param", result);
 	}
 
@@ -94,7 +89,6 @@ public class ServletUriComponentsBuilderTests {
 		request.setRequestURI("/mvc-showcase/data/param");
 		request.setQueryString("foo=123");
 		String result = ServletUriComponentsBuilder.fromRequest(request).build().toUriString();
-
 		assertEquals("http://anotherHost/mvc-showcase/data/param?foo=123", result);
 	}
 
@@ -116,7 +110,6 @@ public class ServletUriComponentsBuilderTests {
 	@Test
 	public void fromRequestWithForwardedHostMultiValuedHeader() {
 		this.request.addHeader("X-Forwarded-Host", "a.example.org, b.example.org, c.example.org");
-
 		assertEquals("a.example.org", ServletUriComponentsBuilder.fromRequest(this.request).build().getHost());
 	}
 
@@ -142,8 +135,7 @@ public class ServletUriComponentsBuilderTests {
 		UriComponents result = ServletUriComponentsBuilder.fromRequest(request).build();
 
 		assertEquals("example.org", result.getHost());
-		assertEquals("should have used the default port of the forwarded request",
-				-1, result.getPort());
+		assertEquals("should have used the default port of the forwarded request", -1, result.getPort());
 	}
 
 	@Test
@@ -154,10 +146,8 @@ public class ServletUriComponentsBuilderTests {
 		UriComponents result = ServletUriComponentsBuilder.fromRequest(request).build();
 
 		assertEquals("example.org", result.getHost());
-		assertEquals("should have derived scheme from header",
-				"https", result.getScheme());
-		assertEquals("should have used the default port of the forwarded request",
-				-1, result.getPort());
+		assertEquals("should have derived scheme from header", "https", result.getScheme());
+		assertEquals("should have used the default port of the forwarded request", -1, result.getPort());
 	}
 
 	@Test
@@ -165,7 +155,6 @@ public class ServletUriComponentsBuilderTests {
 		request.setRequestURI("/mvc-showcase/data/param");
 		request.setQueryString("foo=123");
 		String result = ServletUriComponentsBuilder.fromContextPath(request).build().toUriString();
-
 		assertEquals("http://localhost/mvc-showcase", result);
 	}
 
@@ -175,7 +164,6 @@ public class ServletUriComponentsBuilderTests {
 		request.setServletPath("/app");
 		request.setQueryString("foo=123");
 		String result = ServletUriComponentsBuilder.fromServletMapping(request).build().toUriString();
-
 		assertEquals("http://localhost/mvc-showcase/app", result);
 	}
 
@@ -186,7 +174,6 @@ public class ServletUriComponentsBuilderTests {
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(this.request));
 		try {
 			String result = ServletUriComponentsBuilder.fromCurrentRequest().build().toUriString();
-
 			assertEquals("http://localhost/mvc-showcase/data/param?foo=123", result);
 		}
 		finally {
@@ -202,7 +189,6 @@ public class ServletUriComponentsBuilderTests {
 		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromRequestUri(this.request);
 		String extension = builder.removePathExtension();
 		String result = builder.path("/pages/1.{ext}").buildAndExpand(extension).toUriString();
-
 		assertEquals("http://localhost/rest/books/6/pages/1.json", result);
 	}
 

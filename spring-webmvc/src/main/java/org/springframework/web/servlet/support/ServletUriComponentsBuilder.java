@@ -128,7 +128,7 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 		ServletUriComponentsBuilder builder = new ServletUriComponentsBuilder();
 		builder.scheme(scheme);
 		builder.host(host);
-		if ((scheme.equals("http") && port != 80) || (scheme.equals("https") && port != 443)) {
+		if (scheme.equals("http") && port != 80 || scheme.equals("https") && port != 443) {
 			builder.port(port);
 		}
 		builder.pathFromRequest(request);
