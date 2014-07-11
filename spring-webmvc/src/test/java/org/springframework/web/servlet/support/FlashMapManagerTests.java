@@ -16,16 +16,18 @@
 
 package org.springframework.web.servlet.support;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.MultiValueMap;
@@ -307,5 +309,29 @@ public class FlashMapManagerTests {
 			this.flashMaps = flashMaps;
 		}
 	}
+	
+	// SPR-11821
+	@Test
+	public void retrieveAndUpdateMatchByParamsWithSpace() throws UnsupportedEncodingException {
+		this.request.setCharacterEncoding("UTF-8");
+		String enc = this.request.getCharacterEncoding();
+		if (enc == null) {
+			enc = WebUtils.DEFAULT_CHARACTER_ENCODING;
+		}
+		
+		FlashMap flashMap = new FlashMap();
+		flashMap.put("key", "value");
+		flashMap.addTargetRequestParam("ab", URLEncoder.encode("a b", enc));
+		flashMap.addTargetRequestParam("abc", URLEncoder.encode("a b c", enc));
 
+		this.flashMapManager.setFlashMaps(flashMap);
+
+		this.request.setParameter("ab", "a b");
+		this.request.setParameter("abc", "a b c");
+		FlashMap inputFlashMap = this.flashMapManager.retrieveAndUpdate(this.request, this.response);
+
+		assertNotNull(inputFlashMap);
+		assertEquals("value", inputFlashMap.get("key"));
+	}
+	
 }
