@@ -139,9 +139,11 @@ public interface WebMvcConfigurer {
 	void addViewControllers(ViewControllerRegistry registry);
 
 	/**
-	 * Configure view resolution to translate view names to view implementations.
+	 * Configure view resolvers to translate String-based view names returned from
+	 * controllers into concrete {@link org.springframework.web.servlet.View}
+	 * implementations to perform rendering with.
 	 */
-	void configureViewResolution(ViewResolutionRegistry registry);
+	void configureViewResolvers(ViewResolverRegistry registry);
 
 	/**
 	 * Add handlers to serve static resources such as images, js, and, css

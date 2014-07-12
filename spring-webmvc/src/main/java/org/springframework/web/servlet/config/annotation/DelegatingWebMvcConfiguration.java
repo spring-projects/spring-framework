@@ -76,8 +76,8 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 	}
 
 	@Override
-	protected void configureViewResolution(ViewResolutionRegistry registry) {
-		this.configurers.configureViewResolution(registry);
+	protected void configureViewResolvers(ViewResolverRegistry registry) {
+		this.configurers.configureViewResolvers(registry);
 	}
 
 	@Override

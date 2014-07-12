@@ -65,39 +65,46 @@ import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
+import org.springframework.web.servlet.view.ViewResolverComposite;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 /**
- * A test fixture with a sub-class of {@link WebMvcConfigurationSupport} that
+ * A test fixture with a sub-class of {@link WebMvcConfigurationSupport} that also
  * implements the various {@link WebMvcConfigurer} extension points.
+ *
+ * The former doesn't implement the latter but the two must have compatible
+ * callback method signatures to support moving from simple to advanced
+ * configuration -- i.e. dropping @EnableWebMvc + WebMvcConfigurer and extending
+ * directly from WebMvcConfigurationSupport.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  */
 public class WebMvcConfigurationSupportExtensionTests {
 
-	private TestWebMvcConfigurationSupport webConfig;
+	private TestWebMvcConfigurationSupport config;
 
-	private StaticWebApplicationContext webAppContext;
+	private StaticWebApplicationContext context;
+
 
 	@Before
 	public void setUp() {
-		this.webAppContext = new StaticWebApplicationContext();
-		this.webAppContext.setServletContext(new MockServletContext(new FileSystemResourceLoader()));
-		this.webAppContext.registerSingleton("controller", TestController.class);
+		this.context = new StaticWebApplicationContext();
+		this.context.setServletContext(new MockServletContext(new FileSystemResourceLoader()));
+		this.context.registerSingleton("controller", TestController.class);
 
-		this.webConfig = new TestWebMvcConfigurationSupport();
-		this.webConfig.setApplicationContext(this.webAppContext);
-		this.webConfig.setServletContext(this.webAppContext.getServletContext());
+		this.config = new TestWebMvcConfigurationSupport();
+		this.config.setApplicationContext(this.context);
+		this.config.setServletContext(this.context.getServletContext());
 	}
 
 	@Test
 	public void handlerMappings() throws Exception {
-		RequestMappingHandlerMapping rmHandlerMapping = webConfig.requestMappingHandlerMapping();
-		rmHandlerMapping.setApplicationContext(webAppContext);
+		RequestMappingHandlerMapping rmHandlerMapping = this.config.requestMappingHandlerMapping();
+		rmHandlerMapping.setApplicationContext(this.context);
 		rmHandlerMapping.afterPropertiesSet();
 		assertEquals(TestPathHelper.class, rmHandlerMapping.getUrlPathHelper().getClass());
 		assertEquals(TestPathMatcher.class, rmHandlerMapping.getPathMatcher().getClass());
@@ -108,8 +115,8 @@ public class WebMvcConfigurationSupportExtensionTests {
 		assertEquals(ConversionServiceExposingInterceptor.class, chain.getInterceptors()[1].getClass());
 		assertEquals(ResourceUrlProviderExposingInterceptor.class, chain.getInterceptors()[2].getClass());
 
-		AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping) webConfig.viewControllerHandlerMapping();
-		handlerMapping.setApplicationContext(webAppContext);
+		AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping) this.config.viewControllerHandlerMapping();
+		handlerMapping.setApplicationContext(this.context);
 		assertNotNull(handlerMapping);
 		assertEquals(1, handlerMapping.getOrder());
 		assertEquals(TestPathHelper.class, handlerMapping.getUrlPathHelper().getClass());
@@ -117,17 +124,17 @@ public class WebMvcConfigurationSupportExtensionTests {
 		HandlerExecutionChain handler = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/path"));
 		assertNotNull(handler.getHandler());
 
-		handlerMapping = (AbstractHandlerMapping) webConfig.resourceHandlerMapping();
-		handlerMapping.setApplicationContext(webAppContext);
+		handlerMapping = (AbstractHandlerMapping) this.config.resourceHandlerMapping();
+		handlerMapping.setApplicationContext(this.context);
 		assertNotNull(handlerMapping);
-		assertEquals(Integer.MAX_VALUE-1, handlerMapping.getOrder());
+		assertEquals(Integer.MAX_VALUE - 1, handlerMapping.getOrder());
 		assertEquals(TestPathHelper.class, handlerMapping.getUrlPathHelper().getClass());
 		assertEquals(TestPathMatcher.class, handlerMapping.getPathMatcher().getClass());
 		handler = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/resources/foo.gif"));
 		assertNotNull(handler.getHandler());
 
-		handlerMapping = (AbstractHandlerMapping) webConfig.defaultServletHandlerMapping();
-		handlerMapping.setApplicationContext(webAppContext);
+		handlerMapping = (AbstractHandlerMapping) this.config.defaultServletHandlerMapping();
+		handlerMapping.setApplicationContext(this.context);
 		assertNotNull(handlerMapping);
 		assertEquals(Integer.MAX_VALUE, handlerMapping.getOrder());
 		handler = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/anyPath"));
@@ -137,10 +144,10 @@ public class WebMvcConfigurationSupportExtensionTests {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void requestMappingHandlerAdapter() throws Exception {
-		RequestMappingHandlerAdapter adapter = webConfig.requestMappingHandlerAdapter();
+		RequestMappingHandlerAdapter adapter = this.config.requestMappingHandlerAdapter();
 
 		// ConversionService
-		String actual = webConfig.mvcConversionService().convert(new TestBean(), String.class);
+		String actual = this.config.mvcConversionService().convert(new TestBean(), String.class);
 		assertEquals("converted", actual);
 
 		// Message converters
@@ -174,7 +181,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 
 	@Test
 	public void webBindingInitializer() throws Exception {
-		RequestMappingHandlerAdapter adapter = webConfig.requestMappingHandlerAdapter();
+		RequestMappingHandlerAdapter adapter = this.config.requestMappingHandlerAdapter();
 
 		ConfigurableWebBindingInitializer initializer = (ConfigurableWebBindingInitializer) adapter.getWebBindingInitializer();
 		assertNotNull(initializer);
@@ -192,7 +199,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo.json");
 		NativeWebRequest webRequest = new ServletWebRequest(request);
 
-		ContentNegotiationManager manager = webConfig.requestMappingHandlerMapping().getContentNegotiationManager();
+		ContentNegotiationManager manager = this.config.requestMappingHandlerMapping().getContentNegotiationManager();
 		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON), manager.resolveMediaTypes(webRequest));
 
 		request.setRequestURI("/foo.xml");
@@ -211,32 +218,37 @@ public class WebMvcConfigurationSupportExtensionTests {
 
 	@Test
 	public void exceptionResolvers() throws Exception {
-		HandlerExceptionResolverComposite composite = (HandlerExceptionResolverComposite) webConfig.handlerExceptionResolver();
-		assertEquals(1, composite.getExceptionResolvers().size());
+		HandlerExceptionResolver exceptionResolver = this.config.handlerExceptionResolver();
+		assertEquals(1, ((HandlerExceptionResolverComposite) exceptionResolver).getExceptionResolvers().size());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void viewResolvers() throws Exception {
-		ViewResolverComposite viewResolver = webConfig.viewResolverComposite();
-		assertEquals(Ordered.LOWEST_PRECEDENCE, viewResolver.getOrder());
+		ViewResolverComposite viewResolver = (ViewResolverComposite) this.config.mvcViewResolver();
+		assertEquals(Ordered.HIGHEST_PRECEDENCE, viewResolver.getOrder());
 		List<ViewResolver> viewResolvers = viewResolver.getViewResolvers();
-		DirectFieldAccessor viewResolverFieldAccessor = new DirectFieldAccessor(viewResolvers.get(0));
+
+		DirectFieldAccessor accessor = new DirectFieldAccessor(viewResolvers.get(0));
 		assertEquals(1, viewResolvers.size());
 		assertEquals(ContentNegotiatingViewResolver.class, viewResolvers.get(0).getClass());
-		assertFalse((Boolean)viewResolverFieldAccessor.getPropertyValue("useNotAcceptableStatusCode"));
-		List<View> defaultViews = (List<View>)viewResolverFieldAccessor.getPropertyValue("defaultViews");
+		assertFalse((Boolean) accessor.getPropertyValue("useNotAcceptableStatusCode"));
+		assertNotNull(accessor.getPropertyValue("contentNegotiationManager"));
+
+		List<View> defaultViews = (List<View>)accessor.getPropertyValue("defaultViews");
 		assertNotNull(defaultViews);
 		assertEquals(1, defaultViews.size());
 		assertEquals(MappingJackson2JsonView.class, defaultViews.get(0).getClass());
-		assertNotNull(viewResolverFieldAccessor.getPropertyValue("contentNegotiationManager"));
-		viewResolvers = (List<ViewResolver>)viewResolverFieldAccessor.getPropertyValue("viewResolvers");
+
+		viewResolvers = (List<ViewResolver>)accessor.getPropertyValue("viewResolvers");
 		assertNotNull(viewResolvers);
 		assertEquals(1, viewResolvers.size());
 		assertEquals(InternalResourceViewResolver.class, viewResolvers.get(0).getClass());
-		viewResolverFieldAccessor = new DirectFieldAccessor(viewResolvers.get(0));
-		assertEquals("/", viewResolverFieldAccessor.getPropertyValue("prefix"));
-		assertEquals(".jsp", viewResolverFieldAccessor.getPropertyValue("suffix"));
+		accessor = new DirectFieldAccessor(viewResolvers.get(0));
+		assertEquals("/", accessor.getPropertyValue("prefix"));
+		assertEquals(".jsp", accessor.getPropertyValue("suffix"));
 	}
+
 
 	@Controller
 	private static class TestController {
@@ -339,9 +351,9 @@ public class WebMvcConfigurationSupportExtensionTests {
 		}
 
 		@Override
-		public void configureViewResolution(ViewResolutionRegistry registry) {
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.enableContentNegotiation(new MappingJackson2JsonView());
 			registry.jsp("/", ".jsp");
-			registry.contentNegotiating().useNotAcceptable(false).defaultViews(new MappingJackson2JsonView());
 		}
 
 		@Override
@@ -353,7 +365,6 @@ public class WebMvcConfigurationSupportExtensionTests {
 		public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
 			configurer.enable("default");
 		}
-
 	}
 
 	private class TestPathHelper extends UrlPathHelper {}

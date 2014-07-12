@@ -81,7 +81,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
-import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
+import org.springframework.web.servlet.view.ViewResolverComposite;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -197,7 +197,6 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 	private PathMatchConfigurer pathMatchConfigurer;
 
-	private ViewResolutionRegistry viewResolutionRegistry;
 
 	/**
 	 * Set the {@link javax.servlet.ServletContext}, e.g. for resource handling,
@@ -352,13 +351,6 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * @see ViewControllerRegistry
 	 */
 	protected void addViewControllers(ViewControllerRegistry registry) {
-	}
-
-	/**
-	 * Override this method to configure view resolution.
-	 * @see ViewResolutionRegistry
-	 */
-	protected void configureViewResolution(ViewResolutionRegistry registry) {
 	}
 
 	/**
@@ -791,44 +783,32 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
-	 * Register a {@link ViewResolverComposite} that contains an ordered list of
+	 * Register a {@link org.springframework.web.servlet.view.ViewResolverComposite} that contains an ordered list of
 	 * view resolvers obtained either through
-	 * {@link #configureViewResolution(ViewResolutionRegistry)}.
+	 * {@link #configureViewResolvers(ViewResolverRegistry)}.
 	 */
 	@Bean
-	public ViewResolverComposite viewResolverComposite() {
-		ViewResolutionRegistry registry = getViewResolutionRegistry();
-		ViewResolverComposite compositeViewResolver = new ViewResolverComposite();
-		List<ViewResolver> viewResolvers = registry.getViewResolvers();
-		ContentNegotiatingViewResolver contentNegotiatingViewResolver = null;
-		List<ViewResolver> filteredViewResolvers = new ArrayList<ViewResolver>();
-		for(ViewResolver viewResolver : viewResolvers) {
-			if(viewResolver instanceof ContentNegotiatingViewResolver) {
-				contentNegotiatingViewResolver = (ContentNegotiatingViewResolver)viewResolver;
-				contentNegotiatingViewResolver.setContentNegotiationManager(this.mvcContentNegotiationManager());
-			} else {
-				filteredViewResolvers.add(viewResolver);
-			}
-		}
-		if(contentNegotiatingViewResolver != null) {
-			contentNegotiatingViewResolver.setViewResolvers(filteredViewResolvers);
-			viewResolvers = new ArrayList<ViewResolver>();
-			viewResolvers.add(contentNegotiatingViewResolver);
-		}
-		compositeViewResolver.setViewResolvers(viewResolvers);
-		compositeViewResolver.setApplicationContext(this.applicationContext);
-		compositeViewResolver.setServletContext(this.servletContext);
+	public ViewResolver mvcViewResolver() {
+		ViewResolverRegistry registry = new ViewResolverRegistry();
+		registry.setContentNegotiationManager(mvcContentNegotiationManager());
+		registry.setApplicationContext(this.applicationContext);
+		configureViewResolvers(registry);
 
-		return compositeViewResolver;
+		ViewResolverComposite composite = new ViewResolverComposite();
+		composite.setOrder(registry.getOrder());
+		composite.setViewResolvers(registry.getViewResolvers());
+		composite.setApplicationContext(this.applicationContext);
+		composite.setServletContext(this.servletContext);
+		return composite;
 	}
 
-	protected ViewResolutionRegistry getViewResolutionRegistry() {
-		if(this.viewResolutionRegistry == null) {
-			this.viewResolutionRegistry = new ViewResolutionRegistry(this.applicationContext);
-			configureViewResolution(this.viewResolutionRegistry);
-		}
-		return this.viewResolutionRegistry;
+	/**
+	 * Override this method to configure view resolution.
+	 * @see ViewResolverRegistry
+	 */
+	protected void configureViewResolvers(ViewResolverRegistry registry) {
 	}
+
 
 	private final static class EmptyHandlerMapping extends AbstractHandlerMapping {
 

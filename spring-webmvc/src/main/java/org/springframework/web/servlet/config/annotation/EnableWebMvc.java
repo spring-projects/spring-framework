@@ -21,8 +21,8 @@ import java.lang.annotation.Target;
 import org.springframework.context.annotation.Import;
 
 /**
- * Add this annotation to an {@code @Configuration} class to have the Spring MVC
- * configuration defined in {@link WebMvcConfigurationSupport} imported:
+ * Adding this annotation to an {@code @Configuration} class imports the Spring MVC
+ * configuration from {@link WebMvcConfigurationSupport}, e.g.:
  *
  * <pre class="code">
  * &#064;Configuration
@@ -32,9 +32,14 @@ import org.springframework.context.annotation.Import;
  *
  * }
  * </pre>
- * <p>Customize the imported configuration by implementing the
- * {@link WebMvcConfigurer} interface or more likely by extending the
- * {@link WebMvcConfigurerAdapter} base class and overriding individual methods:
+ *
+ * <p>As of 4.1 this annotation may also import {@link WebMvcFreeMarkerConfiguration},
+ * {@link WebMvcVelocityConfiguration}, or {@link WebMvcTilesConfiguration} if
+ * those libraries are found on the classpath.
+ *
+ * <p>To customize the imported configuration, implement the interface
+ * {@link WebMvcConfigurer} or more likely extend the empty method base class
+ * {@link WebMvcConfigurerAdapter} and override individual methods, e.g.:
  *
  * <pre class="code">
  * &#064;Configuration
@@ -56,10 +61,13 @@ import org.springframework.context.annotation.Import;
  * }
  * </pre>
  *
- * <p>If the customization options of {@link WebMvcConfigurer} do not expose
- * something you need to configure, consider removing the {@code @EnableWebMvc}
- * annotation and extending directly from {@link WebMvcConfigurationSupport}
- * overriding selected {@code @Bean} methods:
+ * <p>To customize the FreeMarker, Velocity, or Tiles configuration, additionally
+ * implement {@link FreeMarkerWebMvcConfigurer}, {@link VelocityWebMvcConfigurer},
+ * and/or {@link TilesWebMvcConfigurer}.
+ *
+ * <p>If {@link WebMvcConfigurer} does not expose some advanced setting that
+ * needs to be configured, consider removing the {@code @EnableWebMvc}
+ * annotation and extending directly from {@link WebMvcConfigurationSupport}, e.g.:
  *
  * <pre class="code">
  * &#064;Configuration
@@ -79,17 +87,23 @@ import org.springframework.context.annotation.Import;
  * }
  * </pre>
  *
- * @see WebMvcConfigurer
- * @see WebMvcConfigurerAdapter
+ * <p>When the {@code @EnableWebMvc} annotation is removed, the FreeMarker,
+ * Velocity, and Tiles configuration is no longer automatically imported and need
+ * to be imported explicitly.
  *
  * @author Dave Syer
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  * @since 3.1
+ * @see org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+ * @see org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
+ * @see org.springframework.web.servlet.config.annotation.FreeMarkerWebMvcConfigurer
+ * @see org.springframework.web.servlet.config.annotation.VelocityWebMvcConfigurer
+ * @see org.springframework.web.servlet.config.annotation.TilesWebMvcConfigurer
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import({DelegatingWebMvcConfiguration.class, ViewResolutionImportSelector.class})
+@Import({DelegatingWebMvcConfiguration.class, ViewConfigurationImportSelector.class})
 public @interface EnableWebMvc {
 }

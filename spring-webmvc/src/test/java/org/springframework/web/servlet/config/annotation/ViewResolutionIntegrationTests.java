@@ -147,15 +147,15 @@ public class ViewResolutionIntegrationTests {
 	@Configuration
 	static class MinimalFreeMarkerWebConfig extends AbstractWebConfig {
 		@Override
-		public void configureViewResolution(ViewResolutionRegistry registry) {
-			registry.freemarker();
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.freeMarker();
 		}
 	}
 
 	@Configuration
 	static class MinimalVelocityWebConfig extends AbstractWebConfig {
 		@Override
-		public void configureViewResolution(ViewResolutionRegistry registry) {
+		public void configureViewResolvers(ViewResolverRegistry registry) {
 			registry.velocity();
 		}
 	}
@@ -163,7 +163,7 @@ public class ViewResolutionIntegrationTests {
 	@Configuration
 	static class MinimalTilesWebConfig extends AbstractWebConfig {
 		@Override
-		public void configureViewResolution(ViewResolutionRegistry registry) {
+		public void configureViewResolvers(ViewResolverRegistry registry) {
 			registry.tiles();
 		}
 	}
@@ -171,8 +171,8 @@ public class ViewResolutionIntegrationTests {
 	@Configuration
 	static class FreeMarkerWebConfig extends AbstractWebConfig implements FreeMarkerWebMvcConfigurer {
 		@Override
-		public void configureViewResolution(ViewResolutionRegistry registry) {
-			registry.freemarker();
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.freeMarker();
 		}
 		@Override
 		public void configureFreeMarker(FreeMarkerConfigurer configurer) {
@@ -183,7 +183,7 @@ public class ViewResolutionIntegrationTests {
 	@Configuration
 	static class VelocityWebConfig extends AbstractWebConfig implements VelocityWebMvcConfigurer {
 		@Override
-		public void configureViewResolution(ViewResolutionRegistry registry) {
+		public void configureViewResolvers(ViewResolverRegistry registry) {
 			registry.velocity();
 		}
 		@Override
@@ -195,7 +195,7 @@ public class ViewResolutionIntegrationTests {
 	@Configuration
 	static class TilesWebConfig extends AbstractWebConfig implements TilesWebMvcConfigurer {
 		@Override
-		public void configureViewResolution(ViewResolutionRegistry registry) {
+		public void configureViewResolvers(ViewResolverRegistry registry) {
 			registry.tiles();
 		}
 		@Override
@@ -209,8 +209,8 @@ public class ViewResolutionIntegrationTests {
 		// No @EnableWebMvc and no FreeMarkerConfigurer bean
 
 		@Override
-		public void configureViewResolution(ViewResolutionRegistry registry) {
-			registry.freemarker();
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.freeMarker();
 		}
 	}
 
@@ -220,7 +220,7 @@ public class ViewResolutionIntegrationTests {
 		// No @EnableWebMvc and no VelocityConfigurer bean
 
 		@Override
-		public void configureViewResolution(ViewResolutionRegistry registry) {
+		public void configureViewResolvers(ViewResolverRegistry registry) {
 			registry.velocity();
 		}
 	}
@@ -231,7 +231,7 @@ public class ViewResolutionIntegrationTests {
 		// No @EnableWebMvc and no TilesConfigurer bean
 
 		@Override
-		public void configureViewResolution(ViewResolutionRegistry registry) {
+		public void configureViewResolvers(ViewResolverRegistry registry) {
 			registry.tiles();
 		}
 	}

@@ -114,9 +114,9 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 	}
 
 	@Override
-	public void configureViewResolution(ViewResolutionRegistry registry) {
+	public void configureViewResolvers(ViewResolverRegistry registry) {
 		for (WebMvcConfigurer delegate : this.delegates) {
-			delegate.configureViewResolution(registry);
+			delegate.configureViewResolvers(registry);
 		}
 	}
 

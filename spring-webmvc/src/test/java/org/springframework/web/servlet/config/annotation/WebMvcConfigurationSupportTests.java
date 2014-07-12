@@ -49,7 +49,7 @@ import org.springframework.web.method.support.CompositeUriComponentsContributor;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.ViewResolver;
-import org.springframework.web.servlet.ViewResolverComposite;
+import org.springframework.web.servlet.view.ViewResolverComposite;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
@@ -207,8 +207,8 @@ public class WebMvcConfigurationSupportTests {
 	public void viewResolvers() throws Exception {
 		ViewResolverComposite compositeResolver = this.wac.getBean(ViewResolverComposite.class);
 		assertEquals(Ordered.LOWEST_PRECEDENCE, compositeResolver.getOrder());
-		List<ViewResolver> viewResolvers = compositeResolver.getViewResolvers();
-		assertEquals(0, viewResolvers.size());
+		List<ViewResolver> resolvers = compositeResolver.getViewResolvers();
+		assertEquals(0, resolvers.size());
 	}
 
 	@Test

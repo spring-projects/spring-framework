@@ -126,7 +126,7 @@ public class JavaConfigTests {
 		}
 
 		@Override
-		public void configureViewResolution(ViewResolutionRegistry registry) {
+		public void configureViewResolvers(ViewResolverRegistry registry) {
 			registry.tiles();
 		}
 

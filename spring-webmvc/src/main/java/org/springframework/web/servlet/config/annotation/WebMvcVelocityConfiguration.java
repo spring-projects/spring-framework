@@ -56,7 +56,7 @@ public class WebMvcVelocityConfiguration {
 
 	@Bean
 	@Lazy
-	public VelocityConfigurer velocityConfigurer() {
+	public VelocityConfigurer mvcVelocityConfigurer() {
 		VelocityConfigurer configurer = new VelocityConfigurer();
 		configurer.setResourceLoaderPath("/WEB-INF/");
 		for (VelocityWebMvcConfigurer webMvcConfigurer : this.webMvcConfigurers) {

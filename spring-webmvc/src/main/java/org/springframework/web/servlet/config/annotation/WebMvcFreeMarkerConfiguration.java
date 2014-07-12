@@ -56,7 +56,7 @@ public class WebMvcFreeMarkerConfiguration {
 
 	@Bean
 	@Lazy
-	public FreeMarkerConfigurer freeMarkerConfigurer() {
+	public FreeMarkerConfigurer mvcFreeMarkerConfigurer() {
 		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
 		configurer.setTemplateLoaderPath("/WEB-INF/");
 		for (FreeMarkerWebMvcConfigurer webMvcConfigurer : this.webMvcConfigurers) {

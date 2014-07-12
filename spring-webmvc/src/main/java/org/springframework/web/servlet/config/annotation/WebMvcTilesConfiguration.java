@@ -66,7 +66,7 @@ public class WebMvcTilesConfiguration implements ResourceLoaderAware {
 
 
 	@Bean
-	public TilesConfigurer tilesConfigurer() {
+	public TilesConfigurer mvcTilesConfigurer() {
 		TilesConfigurer configurer = new TilesConfigurer();
 		if (!this.webMvcConfigurers.isEmpty()) {
 			for (TilesWebMvcConfigurer webMvcConfigurer : this.webMvcConfigurers) {

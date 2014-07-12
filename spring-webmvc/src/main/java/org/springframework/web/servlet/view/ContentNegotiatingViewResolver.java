@@ -228,12 +228,20 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		this.defaultViews = defaultViews;
 	}
 
+	public List<View> getDefaultViews() {
+		return Collections.unmodifiableList(this.defaultViews);
+	}
+
 	/**
 	 * Sets the view resolvers to be wrapped by this view resolver.
 	 * <p>If this property is not set, view resolvers will be detected automatically.
 	 */
 	public void setViewResolvers(List<ViewResolver> viewResolvers) {
 		this.viewResolvers = viewResolvers;
+	}
+
+	public List<ViewResolver> getViewResolvers() {
+		return Collections.unmodifiableList(this.viewResolvers);
 	}
 
 

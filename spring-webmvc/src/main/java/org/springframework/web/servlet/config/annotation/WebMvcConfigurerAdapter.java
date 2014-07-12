@@ -138,7 +138,7 @@ public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 	 * <p>This implementation is empty.
 	 */
 	@Override
-	public void configureViewResolution(ViewResolutionRegistry registry) {
+	public void configureViewResolvers(ViewResolverRegistry registry) {
 	}
 
 	/**
