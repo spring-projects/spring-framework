@@ -90,6 +90,6 @@ import org.springframework.context.annotation.Import;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import({DelegatingWebMvcConfiguration.class, ViewConfigurationsImportSelector.class})
+@Import({DelegatingWebMvcConfiguration.class, ViewResolutionImportSelector.class})
 public @interface EnableWebMvc {
 }

@@ -16,8 +16,13 @@
 
 package org.springframework.web.servlet.config.annotation;
 
+import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.BeanInitializationException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerConfig;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.velocity.VelocityConfigurer;
@@ -34,6 +39,14 @@ import java.util.List;
 public class ViewResolutionRegistry {
 
 	private final List<ViewResolutionRegistration<?>> registrations = new ArrayList<ViewResolutionRegistration<?>>();
+
+	private final ApplicationContext applicationContext;
+
+
+	public ViewResolutionRegistry(ApplicationContext context) {
+		this.applicationContext = context;
+	}
+
 
 	/**
 	 * Register a custom {@link ViewResolver} bean.
@@ -79,6 +92,12 @@ public class ViewResolutionRegistry {
 	 * default "/WEB-INF/tiles.xml" definition and no Tiles definition check refresh.
 	 */
 	public TilesRegistration tiles() {
+		if (!hasBeanOfType(TilesConfigurer.class)) {
+			throw new BeanInitializationException(
+					"It looks like you're trying to configure Tiles view resolution. " +
+					"If not using @EnableWebMvc you must import WebMvcTilesConfiguration, " +
+					"or declare your own TilesConfigurer bean.");
+		}
 		TilesRegistration registration = new TilesRegistration(this);
 		addAndCheckViewResolution(registration);
 		return registration;
@@ -90,6 +109,12 @@ public class ViewResolutionRegistry {
 	 * default "" prefix, ".vm" suffix and "/WEB-INF/" resourceLoaderPath.
 	 */
 	public VelocityRegistration velocity() {
+		if (!hasBeanOfType(VelocityConfigurer.class)) {
+			throw new BeanInitializationException(
+					"It looks like you're trying to configure Velocity view resolution. " +
+					"If not using @EnableWebMvc you must import WebMvcVelocityConfiguration, " +
+					"or declare your own VelocityConfigurer bean.");
+		}
 		VelocityRegistration registration = new VelocityRegistration(this);
 		addAndCheckViewResolution(registration);
 		return registration;
@@ -101,9 +126,20 @@ public class ViewResolutionRegistry {
 	 * "" prefix, ".ftl" suffix and "/WEB-INF/" templateLoaderPath.
 	 */
 	public FreeMarkerRegistration freemarker() {
+		if (!hasBeanOfType(FreeMarkerConfigurer.class)) {
+			throw new BeanInitializationException(
+					"It looks like you're trying to configure FreeMarker view resolution. " +
+					"If not using @EnableWebMvc you must import WebMvcFreeMarkerConfiguration, " +
+					"or declare your own FreeMarkerConfigurer bean.");
+		}
 		FreeMarkerRegistration registration = new FreeMarkerRegistration(this);
 		addAndCheckViewResolution(registration);
 		return registration;
+	}
+
+	protected boolean hasBeanOfType(Class<?> beanType) {
+		return !ObjectUtils.isEmpty(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
+				this.applicationContext, beanType, false, false));
 	}
 
 	/**
@@ -118,38 +154,10 @@ public class ViewResolutionRegistry {
 
 	protected List<ViewResolver> getViewResolvers() {
 		List<ViewResolver> viewResolvers = new ArrayList<ViewResolver>();
-
 		for(ViewResolutionRegistration<?> registration : this.registrations) {
 			viewResolvers.add(registration.getViewResolver());
 		}
 		return viewResolvers;
-	}
-
-	protected TilesConfigurer getTilesConfigurer() {
-		for(ViewResolutionRegistration<?> registration : this.registrations) {
-			if(registration instanceof TilesRegistration) {
-				return ((TilesRegistration) registration).getTilesConfigurer();
-			}
-		}
-		return null;
-	}
-
-	protected FreeMarkerConfigurer getFreeMarkerConfigurer() {
-		for(ViewResolutionRegistration<?> registration : this.registrations) {
-			if(registration instanceof FreeMarkerRegistration) {
-				return ((FreeMarkerRegistration) registration).getConfigurer();
-			}
-		}
-		return null;
-	}
-
-	protected VelocityConfigurer getVelocityConfigurer() {
-		for(ViewResolutionRegistration<?> registration : this.registrations) {
-			if(registration instanceof VelocityRegistration) {
-				return ((VelocityRegistration) registration).getConfigurer();
-			}
-		}
-		return null;
 	}
 
 	private void addAndCheckViewResolution(ViewResolutionRegistration<?> registration) {

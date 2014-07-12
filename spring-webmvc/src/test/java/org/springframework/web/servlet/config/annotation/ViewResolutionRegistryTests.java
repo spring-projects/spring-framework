@@ -19,15 +19,13 @@ package org.springframework.web.servlet.config.annotation;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.DirectFieldAccessor;
+import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.view.BeanNameViewResolver;
 import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
-import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
-import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
-import org.springframework.web.servlet.view.velocity.VelocityConfigurer;
 import org.springframework.web.servlet.view.velocity.VelocityViewResolver;
 
 import static org.junit.Assert.*;
@@ -44,7 +42,7 @@ public class ViewResolutionRegistryTests {
 
 	@Before
 	public void setUp() {
-		registry = new ViewResolutionRegistry();
+		registry = new ViewResolutionRegistry(new StaticWebApplicationContext());
 	}
 
 	@Test
@@ -100,25 +98,15 @@ public class ViewResolutionRegistryTests {
 
 	@Test
 	public void tilesViewResolution() {
-		registry.tiles().checkRefresh(true).definition("def1").definition("def2");
-		assertNotNull(registry.getViewResolvers());
-		assertEquals(1, registry.getViewResolvers().size());
-		assertEquals(TilesViewResolver.class, registry.getViewResolvers().get(0).getClass());
-
-		assertNotNull(registry.getTilesConfigurer());
-		TilesConfigurer configurer = registry.getTilesConfigurer();
-		DirectFieldAccessor configurerDirectFieldAccessor =  new DirectFieldAccessor(configurer);
-		assertTrue((boolean) configurerDirectFieldAccessor.getPropertyValue("checkRefresh"));
-		assertNotNull(configurerDirectFieldAccessor.getPropertyValue("definitions"));
-		String[] definitions = (String[])configurerDirectFieldAccessor.getPropertyValue("definitions");
-		assertEquals(2, definitions.length);
-		assertEquals("def1", definitions[0]);
-		assertEquals("def2", definitions[1]);
+		this.registry.tiles();
+		assertNotNull(this.registry.getViewResolvers());
+		assertEquals(1, this.registry.getViewResolvers().size());
+		assertEquals(TilesViewResolver.class, this.registry.getViewResolvers().get(0).getClass());
 	}
 
 	@Test
 	public void velocityViewResolution() {
-		registry.velocity().prefix("/").suffix(".vm").cache(true).resourceLoaderPath("testResourceLoaderPath");
+		registry.velocity().prefix("/").suffix(".vm").cache(true);
 		assertNotNull(registry.getViewResolvers());
 		assertEquals(1, registry.getViewResolvers().size());
 		assertEquals(VelocityViewResolver.class, registry.getViewResolvers().get(0).getClass());
@@ -127,11 +115,6 @@ public class ViewResolutionRegistryTests {
 		assertEquals("/", resolverDirectFieldAccessor.getPropertyValue("prefix"));
 		assertEquals(".vm", resolverDirectFieldAccessor.getPropertyValue("suffix"));
 		assertEquals(1024, resolverDirectFieldAccessor.getPropertyValue("cacheLimit"));
-
-		assertNotNull(registry.getVelocityConfigurer());
-		VelocityConfigurer configurer = registry.getVelocityConfigurer();
-		DirectFieldAccessor configurerDirectFieldAccessor =  new DirectFieldAccessor(configurer);
-		assertEquals("testResourceLoaderPath", configurerDirectFieldAccessor.getPropertyValue("resourceLoaderPath"));
 	}
 
 	@Test
@@ -144,16 +127,11 @@ public class ViewResolutionRegistryTests {
 		DirectFieldAccessor resolverDirectFieldAccessor =  new DirectFieldAccessor(resolver);
 		assertEquals("", resolverDirectFieldAccessor.getPropertyValue("prefix"));
 		assertEquals(".vm", resolverDirectFieldAccessor.getPropertyValue("suffix"));
-
-		assertNotNull(registry.getVelocityConfigurer());
-		VelocityConfigurer configurer = registry.getVelocityConfigurer();
-		DirectFieldAccessor configurerDirectFieldAccessor =  new DirectFieldAccessor(configurer);
-		assertEquals("/WEB-INF/", configurerDirectFieldAccessor.getPropertyValue("resourceLoaderPath"));
 	}
 
 	@Test
 	public void freeMarkerViewResolution() {
-		registry.freemarker().prefix("/").suffix(".fmt").cache(false).templateLoaderPath("path1", "path2");
+		registry.freemarker().prefix("/").suffix(".fmt").cache(false);
 		assertNotNull(registry.getViewResolvers());
 		assertEquals(1, registry.getViewResolvers().size());
 		assertEquals(FreeMarkerViewResolver.class, registry.getViewResolvers().get(0).getClass());
@@ -162,15 +140,6 @@ public class ViewResolutionRegistryTests {
 		assertEquals("/", resolverDirectFieldAccessor.getPropertyValue("prefix"));
 		assertEquals(".fmt", resolverDirectFieldAccessor.getPropertyValue("suffix"));
 		assertEquals(0, resolverDirectFieldAccessor.getPropertyValue("cacheLimit"));
-
-		assertNotNull(registry.getFreeMarkerConfigurer());
-		FreeMarkerConfigurer configurer = registry.getFreeMarkerConfigurer();
-		DirectFieldAccessor configurerDirectFieldAccessor =  new DirectFieldAccessor(configurer);
-		assertNotNull(configurerDirectFieldAccessor.getPropertyValue("templateLoaderPaths"));
-		String[] templateLoaderPaths = (String[])configurerDirectFieldAccessor.getPropertyValue("templateLoaderPaths");
-		assertEquals(2, templateLoaderPaths.length);
-		assertEquals("path1", templateLoaderPaths[0]);
-		assertEquals("path2", templateLoaderPaths[1]);
 	}
 
 	@Test
@@ -183,8 +152,6 @@ public class ViewResolutionRegistryTests {
 		DirectFieldAccessor resolverDirectFieldAccessor =  new DirectFieldAccessor(resolver);
 		assertEquals("", resolverDirectFieldAccessor.getPropertyValue("prefix"));
 		assertEquals(".ftl", resolverDirectFieldAccessor.getPropertyValue("suffix"));
-		DirectFieldAccessor configurerDirectFieldAccessor =  new DirectFieldAccessor(registry.getFreeMarkerConfigurer());
-		assertArrayEquals(new String[]{"/WEB-INF/"}, (String[])configurerDirectFieldAccessor.getPropertyValue("templateLoaderPaths"));
 	}
 
 	@Test

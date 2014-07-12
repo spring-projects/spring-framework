@@ -16,12 +16,7 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Encapsulates information required to create a
@@ -35,8 +30,6 @@ import java.util.List;
  */
 public class TilesRegistration extends ViewResolutionRegistration<TilesViewResolver> {
 
-	private List<String> definitions;
-	private Boolean checkRefresh;
 
 	public TilesRegistration(ViewResolutionRegistry registry) {
 		super(registry, new TilesViewResolver());
@@ -60,40 +53,6 @@ public class TilesRegistration extends ViewResolutionRegistration<TilesViewResol
 	public TilesRegistration suffix(String suffix) {
 		this.viewResolver.setSuffix(suffix);
 		return this;
-	}
-
-	/**
-	 * Set the Tiles definitions, i.e. a single value or a list of files containing the definitions.
-	 *
-	 * @see TilesConfigurer#setDefinitions(String...)
-	 */
-	public TilesRegistration definition(String... definitions) {
-		if(this.definitions == null) {
-			this.definitions = new ArrayList<String>();
-		}
-		this.definitions.addAll(Arrays.asList(definitions));
-		return this;
-	}
-
-	/**
-	 * Set whether to check Tiles definition files for a refresh at runtime.
-	 *
- 	 * @see TilesConfigurer#setCheckRefresh(boolean)
-	 */
-	public TilesRegistration checkRefresh(boolean checkRefresh) {
-		this.checkRefresh = checkRefresh;
-		return this;
-	}
-
-	protected TilesConfigurer getTilesConfigurer() {
-		TilesConfigurer tilesConfigurer = new TilesConfigurer();
-		if(this.definitions != null && !this.definitions.isEmpty()) {
-			tilesConfigurer.setDefinitions(this.definitions.toArray(new String[0]));
-		}
-		if(this.checkRefresh != null) {
-			tilesConfigurer.setCheckRefresh(this.checkRefresh);
-		}
-		return tilesConfigurer;
 	}
 
 }

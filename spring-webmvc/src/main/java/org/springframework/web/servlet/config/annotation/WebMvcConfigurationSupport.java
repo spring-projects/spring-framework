@@ -152,8 +152,7 @@ import org.springframework.web.util.UrlPathHelper;
  * <p>When extending directly from this class instead of using
  * {@link EnableWebMvc @EnableWebMvc}, an extra step is needed if you want to use Tiles, FreeMarker
  * or Velocity view resolution configuration. Since view configurer beans are registered in their own
- * {@link org.springframework.web.servlet.config.annotation.TilesConfigurerConfigurationSupport},
- * {@link org.springframework.web.servlet.config.annotation.FreeMarkerConfigurerConfigurationSupport}
+ * {@link org.springframework.web.servlet.config.annotation.TilesConfigurerConfigurationSupport}
  * and {@link org.springframework.web.servlet.config.annotation.VelocityConfigurerConfigurationSupport}
  * classes, you should also extend those configuration classes (only the ones
  * related to the view technology you are using), or register your own
@@ -825,7 +824,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 	protected ViewResolutionRegistry getViewResolutionRegistry() {
 		if(this.viewResolutionRegistry == null) {
-			this.viewResolutionRegistry = new ViewResolutionRegistry();
+			this.viewResolutionRegistry = new ViewResolutionRegistry(this.applicationContext);
 			configureViewResolution(this.viewResolutionRegistry);
 		}
 		return this.viewResolutionRegistry;

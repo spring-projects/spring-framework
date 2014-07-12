@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import org.springframework.web.servlet.view.velocity.VelocityConfigurer;
 import org.springframework.web.servlet.view.velocity.VelocityViewResolver;
 
 /**
@@ -30,24 +29,11 @@ import org.springframework.web.servlet.view.velocity.VelocityViewResolver;
  */
 public class VelocityRegistration extends ViewResolutionRegistration<VelocityViewResolver> {
 
-	private final VelocityConfigurer configurer;
 
 	public VelocityRegistration(ViewResolutionRegistry registry) {
 		super(registry, new VelocityViewResolver());
-		this.configurer = new VelocityConfigurer();
 		this.prefix("");
 		this.suffix(".vm");
-		this.resourceLoaderPath("/WEB-INF/");
-	}
-
-	/**
-	 * Set the Velocity resource loader path via a Spring resource location.
-	 *
-	 * @see org.springframework.web.servlet.view.velocity.VelocityConfigurer#setResourceLoaderPath(String)
-	 */
-	public VelocityRegistration resourceLoaderPath(String resourceLoaderPath) {
-		this.configurer.setResourceLoaderPath(resourceLoaderPath);
-		return this;
 	}
 
 	/**
@@ -80,7 +66,4 @@ public class VelocityRegistration extends ViewResolutionRegistration<VelocityVie
 		return this;
 	}
 
-	protected VelocityConfigurer getConfigurer() {
-		return this.configurer;
-	}
 }

@@ -910,7 +910,6 @@ project("spring-test") {
 		optional("xmlunit:xmlunit:1.5")
 		testCompile(project(":spring-context-support"))
 		testCompile(project(":spring-oxm"))
-		testCompile(project(":spring-webmvc-tiles2"))
 		testCompile("javax.mail:javax.mail-api:1.5.2")
 		testCompile("javax.ejb:ejb-api:3.0")
 		testCompile("org.hibernate:hibernate-core:${hibernate4Version}")

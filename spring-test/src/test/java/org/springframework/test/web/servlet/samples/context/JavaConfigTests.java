@@ -35,6 +35,7 @@ import org.springframework.test.web.servlet.samples.context.JavaConfigTests.WebC
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.*;
+import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 
@@ -99,7 +100,7 @@ public class JavaConfigTests {
 
 	@Configuration
 	@EnableWebMvc
-	static class WebConfig extends WebMvcConfigurerAdapter {
+	static class WebConfig extends WebMvcConfigurerAdapter implements TilesWebMvcConfigurer {
 
 		@Autowired
 		private RootConfig rootConfig;
@@ -126,9 +127,13 @@ public class JavaConfigTests {
 
 		@Override
 		public void configureViewResolution(ViewResolutionRegistry registry) {
-			registry.tiles().definition("/WEB-INF/**/tiles.xml");
+			registry.tiles();
 		}
 
+		@Override
+		public void configureTiles(TilesConfigurer configurer) {
+			configurer.setDefinitions("/WEB-INF/**/tiles.xml");
+		}
 	}
 
 }

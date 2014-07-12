@@ -16,11 +16,7 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Encapsulates information required to create a
@@ -33,15 +29,11 @@ import java.util.List;
  */
 public class FreeMarkerRegistration extends ViewResolutionRegistration<FreeMarkerViewResolver> {
 
-	private final FreeMarkerConfigurer configurer;
-	private List<String> templateLoaderPaths;
 
 	public FreeMarkerRegistration(ViewResolutionRegistry registry) {
 		super(registry, new FreeMarkerViewResolver());
-		this.configurer = new FreeMarkerConfigurer();
 		this.prefix("");
 		this.suffix(".ftl");
-		this.templateLoaderPath("/WEB-INF/");
 	}
 
 	/**
@@ -74,21 +66,4 @@ public class FreeMarkerRegistration extends ViewResolutionRegistration<FreeMarke
 		return this;
 	}
 
-	/**
-	 * Set a List of {@code TemplateLoader}s that will be used to search
-	 * for templates.
-	 *
-	 * @see org.springframework.ui.freemarker.FreeMarkerConfigurationFactory#setTemplateLoaderPaths(String...)
-	 */
-	public FreeMarkerRegistration templateLoaderPath(String... templateLoaderPath) {
-		this.templateLoaderPaths= Arrays.asList(templateLoaderPath);
-		return this;
-	}
-
-	protected FreeMarkerConfigurer getConfigurer() {
-		if(this.templateLoaderPaths != null && !this.templateLoaderPaths.isEmpty()) {
-			this.configurer.setTemplateLoaderPaths(this.templateLoaderPaths.toArray(new String[0]));
-		}
-		return this.configurer;
-	}
 }
