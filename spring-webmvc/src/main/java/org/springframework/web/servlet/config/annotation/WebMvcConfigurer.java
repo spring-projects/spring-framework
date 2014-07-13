@@ -139,6 +139,11 @@ public interface WebMvcConfigurer {
 	void addViewControllers(ViewControllerRegistry registry);
 
 	/**
+	 * Configure view resolution to translate view names to view implementations.
+	 */
+	void configureViewResolution(ViewResolutionRegistry registry);
+
+	/**
 	 * Add handlers to serve static resources such as images, js, and, css
 	 * files from specific locations under web application root, the classpath,
 	 * and others.

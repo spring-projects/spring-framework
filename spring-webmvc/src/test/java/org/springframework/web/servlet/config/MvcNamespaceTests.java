@@ -51,7 +51,7 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import org.springframework.web.accept.ContentNegotiationManager;
+import org.springframework.web.accept.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -84,6 +84,13 @@ import org.springframework.web.servlet.resource.ResourceResolver;
 import org.springframework.web.servlet.resource.ResourceTransformer;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.servlet.view.*;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
+import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
+import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
+import org.springframework.web.servlet.view.velocity.VelocityConfigurer;
+import org.springframework.web.servlet.view.velocity.VelocityViewResolver;
 
 import static org.junit.Assert.*;
 
@@ -92,6 +99,7 @@ import static org.junit.Assert.*;
  * @author Arjen Poutsma
  * @author Jeremy Grelle
  * @author Brian Clozel
+ * @author Sebastien Deleuze
  */
 public class MvcNamespaceTests {
 
@@ -113,6 +121,7 @@ public class MvcNamespaceTests {
 		Method method = TestController.class.getMethod("testBind", Date.class, TestBean.class, BindingResult.class);
 		handlerMethod = new InvocableHandlerMethod(handler, method);
 	}
+
 
 	@Test
 	public void testDefaultConfig() throws Exception {
@@ -546,7 +555,97 @@ public class MvcNamespaceTests {
 				(DeferredResultProcessingInterceptor[]) fieldAccessor.getPropertyValue("deferredResultInterceptors");
 		assertEquals(1, deferredResultInterceptors.length);
 	}
+	
+	@Test
+	public void testViewResolvers() throws Exception {
+		loadBeanDefinitions("mvc-config-view-resolution.xml", 8);
 
+		InternalResourceViewResolver internalResourceViewResolver = appContext.getBean(InternalResourceViewResolver.class);
+		assertNotNull(internalResourceViewResolver);
+		assertEquals(0, internalResourceViewResolver.getOrder());
+		DirectFieldAccessor internalResourceViewResolverFieldAccessor = new DirectFieldAccessor(internalResourceViewResolver);
+		assertEquals("/WEB-INF/", internalResourceViewResolverFieldAccessor.getPropertyValue("prefix"));
+		assertEquals(".jsp", internalResourceViewResolverFieldAccessor.getPropertyValue("suffix"));
+	
+		BeanNameViewResolver beanNameViewResolver = appContext.getBean(BeanNameViewResolver.class);
+		assertNotNull(beanNameViewResolver);
+		assertEquals(1, beanNameViewResolver.getOrder());
+		
+		TilesConfigurer tilesConfigurer = appContext.getBean(TilesConfigurer.class);
+		assertNotNull(tilesConfigurer);
+		DirectFieldAccessor tilesConfigurerFieldAccessor = new DirectFieldAccessor(tilesConfigurer);
+		assertArrayEquals(new String[]{"/org/springframework/web/servlet/resource/tiles/tiles1.xml","/org/springframework/web/servlet/resource/tiles/tiles2.xml"},
+				(String[])tilesConfigurerFieldAccessor.getPropertyValue("definitions"));
+		assertTrue((boolean)tilesConfigurerFieldAccessor.getPropertyValue("checkRefresh"));
+		
+		TilesViewResolver tilesViewResolver = appContext.getBean(TilesViewResolver.class);
+		assertNotNull(tilesViewResolver);
+		assertEquals(2, tilesViewResolver.getOrder());
+		
+		FreeMarkerConfigurer freeMarkerConfigurer = appContext.getBean(FreeMarkerConfigurer.class);
+		assertNotNull(freeMarkerConfigurer);
+		DirectFieldAccessor freeMarkerConfigurerFieldAccessor = new DirectFieldAccessor(freeMarkerConfigurer);
+		assertArrayEquals(new String[]{"/","/test"},
+				(String[])freeMarkerConfigurerFieldAccessor.getPropertyValue("templateLoaderPaths"));
+		
+		FreeMarkerViewResolver freeMarkerViewResolver = appContext.getBean(FreeMarkerViewResolver.class);
+		assertNotNull(freeMarkerViewResolver);
+		assertEquals(3, freeMarkerViewResolver.getOrder());
+		DirectFieldAccessor freeMarkerViewResolverFieldAccessor = new DirectFieldAccessor(freeMarkerViewResolver);
+		assertEquals("", freeMarkerViewResolverFieldAccessor.getPropertyValue("prefix"));
+		assertEquals(".ftl", freeMarkerViewResolverFieldAccessor.getPropertyValue("suffix"));
+		assertEquals(0, freeMarkerViewResolverFieldAccessor.getPropertyValue("cacheLimit"));
+
+		VelocityConfigurer velocityConfigurer = appContext.getBean(VelocityConfigurer.class);
+		assertNotNull(velocityConfigurer);
+		DirectFieldAccessor velocityConfigurerFieldAccessor = new DirectFieldAccessor(velocityConfigurer);
+		assertEquals("/", velocityConfigurerFieldAccessor.getPropertyValue("resourceLoaderPath"));
+
+		VelocityViewResolver velocityViewResolver = appContext.getBean(VelocityViewResolver.class);
+		assertNotNull(velocityViewResolver);
+		assertEquals(4, velocityViewResolver.getOrder());
+		DirectFieldAccessor velocityViewResolverFieldAccessor = new DirectFieldAccessor(velocityViewResolver);
+		assertEquals("", velocityViewResolverFieldAccessor.getPropertyValue("prefix"));
+		assertEquals(".vm", velocityViewResolverFieldAccessor.getPropertyValue("suffix"));
+		assertEquals(0, velocityViewResolverFieldAccessor.getPropertyValue("cacheLimit"));
+	}
+
+	@Test
+	public void testContentNegotiating() throws Exception {
+		loadBeanDefinitions("mvc-config-content-negotiating.xml", 11);
+
+		ContentNegotiatingViewResolver contentNegotiatingViewResolver = appContext.getBean(ContentNegotiatingViewResolver.class);
+		assertNotNull(contentNegotiatingViewResolver);
+		DirectFieldAccessor contentNegotiatingViewResolverFieldAccessor = new DirectFieldAccessor(contentNegotiatingViewResolver);
+		assertTrue((boolean)contentNegotiatingViewResolverFieldAccessor.getPropertyValue("useNotAcceptableStatusCode"));
+		assertEquals(1, ((List<?>)contentNegotiatingViewResolverFieldAccessor.getPropertyValue("defaultViews")).size());
+		assertEquals(7, ((List<?>)contentNegotiatingViewResolverFieldAccessor.getPropertyValue("viewResolvers")).size());
+		ContentNegotiationManager contentNegotiationManagerProperty =
+				(ContentNegotiationManager)contentNegotiatingViewResolverFieldAccessor.getPropertyValue("contentNegotiationManager");
+		assertNotNull(contentNegotiationManagerProperty);
+		ContentNegotiationManager contentNegotiationManager = appContext.getBean(ContentNegotiationManager.class);
+		assertNotNull(contentNegotiationManager);
+		assertEquals(contentNegotiationManagerProperty.getClass(), contentNegotiationManager.getClass());
+	}
+
+	@Test
+	public void testContentNegotiatingWithDefaultValues() throws Exception {
+		loadBeanDefinitions("mvc-config-content-negotiating-with-default-values.xml", 19);
+
+		ContentNegotiatingViewResolver contentNegotiatingViewResolver = appContext.getBean(ContentNegotiatingViewResolver.class);
+		assertNotNull(contentNegotiatingViewResolver);
+		DirectFieldAccessor contentNegotiatingViewResolverFieldAccessor = new DirectFieldAccessor(contentNegotiatingViewResolver);
+		assertEquals(1, ((List<?>)contentNegotiatingViewResolverFieldAccessor.getPropertyValue("defaultViews")).size());
+		assertEquals(3, ((List<?>)contentNegotiatingViewResolverFieldAccessor.getPropertyValue("viewResolvers")).size());
+		ContentNegotiationManager contentNegotiationManagerProperty =
+				(ContentNegotiationManager)contentNegotiatingViewResolverFieldAccessor.getPropertyValue("contentNegotiationManager");
+		assertNotNull(contentNegotiationManagerProperty);
+		ContentNegotiationManager contentNegotiationManager = appContext.getBean(ContentNegotiationManager.class);
+		assertNotNull(contentNegotiationManager);
+		assertEquals(contentNegotiationManagerProperty.getClass(), contentNegotiationManager.getClass());
+	}
+
+	
 	@Test
 	public void testPathMatchingHandlerMappings() throws Exception {
 		loadBeanDefinitions("mvc-config-path-matching-mappings.xml", 20);
