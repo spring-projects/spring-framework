@@ -221,6 +221,13 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	}
 
 	/**
+	 * Whether to return HTTP Status 406 if no suitable is found.
+	 */
+	public boolean isUseNotAcceptableStatusCode() {
+		return this.useNotAcceptableStatusCode;
+	}
+
+	/**
 	 * Set the default views to use when a more specific view can not be obtained
 	 * from the {@link ViewResolver} chain.
 	 */

@@ -598,8 +598,43 @@
 			</xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
-	
-	<xsd:complexType name="jsp-type">
+
+	<xsd:complexType name="contentNegotiationType">
+		<xsd:all>
+			<xsd:element name="default-views" minOccurs="0">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:choice maxOccurs="unbounded">
+							<xsd:element ref="beans:bean">
+								<xsd:annotation>
+									<xsd:documentation><![CDATA[
+	A bean definition for an org.springframework.web.servlet.View class.
+									]]></xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element ref="beans:ref">
+								<xsd:annotation>
+									<xsd:documentation><![CDATA[
+	A reference to a bean for an org.springframework.web.servlet.View class.
+									]]></xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+						</xsd:choice>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:all>
+		<xsd:attribute name="use-not-acceptable" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Indicate whether a 406 Not Acceptable status code should be returned if no suitable
+	view can be found.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+
+	<xsd:complexType name="urlViewResolverType">
 		<xsd:attribute name="prefix" type="xsd:string">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
@@ -614,205 +649,208 @@
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-	</xsd:complexType>
-
-	<xsd:complexType name="tiles-type">
-		<xsd:attribute name="definitions" type="xsd:string">
+		<xsd:attribute name="cache-views" type="xsd:boolean">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-	The Tiles definitions, i.e. a single value or a comma separated list of files containing the definitions.
+	Enable or disable thew caching of resolved views.
+	Default is "true": caching is enabled.
+	Disable this only for debugging and development.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="check-refresh" type="xsd:string">
+		<xsd:attribute name="view-class" type="xsd:string">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-	Set whether to check Tiles definition files for a refresh at runtime.
+	The view class that should be used to create views.
+	Configure this if you want to provide a custom View implementation, typically a ub-class of the expected View type.
 				]]></xsd:documentation>
+				<xsd:appinfo>
+					<tool:annotation kind="ref">
+						<tool:expected-type type="java:java.lang.Class" />
+					</tool:annotation>
+				</xsd:appinfo>
 			</xsd:annotation>
 		</xsd:attribute>
-	</xsd:complexType>
-
-	<xsd:complexType name="bean-name-type" />
-
-	<xsd:complexType name="freemarker-type">
-		<xsd:attribute name="prefix" type="xsd:string">
+		<xsd:attribute name="view-names" type="xsd:string">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-	Set the prefix that gets prepended to view names when building a URL.
-				]]></xsd:documentation>
-			</xsd:annotation>
-		</xsd:attribute>
-		<xsd:attribute name="suffix" type="xsd:string">
-			<xsd:annotation>
-				<xsd:documentation><![CDATA[
-	Set the suffix that gets appended to view names when building a URL.
-				]]></xsd:documentation>
-			</xsd:annotation>
-		</xsd:attribute>
-		<xsd:attribute name="cache" type="xsd:string">
-			<xsd:annotation>
-				<xsd:documentation><![CDATA[
-	Enable or disable caching.
-				]]></xsd:documentation>
-			</xsd:annotation>
-		</xsd:attribute>
-		<xsd:attribute name="template-loader-paths" type="xsd:string">
-			<xsd:annotation>
-				<xsd:documentation><![CDATA[
-	Set a List of TemplateLoaders that will be used to search for templates.
+	Set the view names (or name patterns) that can be handled by this view resolver.
+	View names can contain simple wildcards such that 'my*', '*Report' and '*Repo*'
+	will all match the view name 'myReport'.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
 	</xsd:complexType>
 
-	<xsd:complexType name="velocity-type">
-		<xsd:attribute name="prefix" type="xsd:string">
-			<xsd:annotation>
-				<xsd:documentation><![CDATA[
-	Set the prefix that gets prepended to view names when building a URL.
-				]]></xsd:documentation>
-			</xsd:annotation>
-		</xsd:attribute>
-		<xsd:attribute name="suffix" type="xsd:string">
-			<xsd:annotation>
-				<xsd:documentation><![CDATA[
-	Set the suffix that gets appended to view names when building a URL.
-				]]></xsd:documentation>
-			</xsd:annotation>
-		</xsd:attribute>
-		<xsd:attribute name="cache" type="xsd:string">
-			<xsd:annotation>
-				<xsd:documentation><![CDATA[
-	Enable or disable caching.
-				]]></xsd:documentation>
-			</xsd:annotation>
-		</xsd:attribute>
-		<xsd:attribute name="resource-loader-path" type="xsd:string">
-			<xsd:annotation>
-				<xsd:documentation><![CDATA[
-	Set the Velocity resource loader path via a Spring resource location.
-				]]></xsd:documentation>
-			</xsd:annotation>
-		</xsd:attribute>
-	</xsd:complexType>
-
-	<xsd:element name="view-resolution">
+	<xsd:element name="view-resolvers">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-				Helps with configuring a list of view resolvers.
+	Configure a chain of ViewResolver instances to resolve view names returned from
+	controllers into actual view instances to use for rendering.
+
+	All registered resolvers are wrapped in a single (composite) ViewResolver
+	with its order property set to 0 so that other external resolvers may be ordered
+	before or after it.
+
+	When content negotiation is enabled the order property is set to highest priority
+	instead with the ContentNeogitatingViewResolver encapsulating all other registered
+	view resolver instances. That way the resolvers registered through the MVC namespace
+	form self-encapsulated resolver chain.
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
-			<xsd:sequence minOccurs="0">
-				<xsd:choice maxOccurs="unbounded">
-					<xsd:element name="content-negotiating" type="content-negotiating-type" maxOccurs="1">
-						<xsd:annotation>
-							<xsd:documentation><![CDATA[
-Register a ContentNegotiatingViewResolver bean.
+			<xsd:choice minOccurs="1" maxOccurs="unbounded">
+				<xsd:element name="content-negotiation" type="contentNegotiationType">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	Registers a ContentNegotiatingViewResolver with the list of all other registered
+	ViewResolver instances used to set its "viewResolvers" property. See the Javadoc
+	of ContentNegotiatingViewResolver for more details.
 					]]></xsd:documentation>
-						</xsd:annotation>
-					</xsd:element>
-					<xsd:element name="jsp" type="jsp-type" maxOccurs="1">
+					</xsd:annotation>
+				</xsd:element>
+					<xsd:element name="jsp" type="urlViewResolverType">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
-Register an InternalResourceViewResolver bean.
-Default configuration is "/WEB-INF/" prefix and ".jsp" suffix
+	Register an InternalResourceViewResolver bean for JSP rendering.
+	By default "/WEB-INF/" is registered as a view name prefix and ".jsp" as a suffix.
 								]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:element>
-					<xsd:element name="tiles" type="tiles-type" maxOccurs="1">
+					<xsd:element name="tiles" type="urlViewResolverType">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
-Register a TilesViewResolver and a TilesConfigurer with default "/WEB-INF/tiles.xml"
-definition and no Tiles definition check refresh.
+	Register a TilesViewResolver based on Tiles 3.x.
+	To configure Tiles you must also add a top-level <mvc:tiles> element
+	or declare a TilesConfigurer bean.
 								]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:element>
-					<xsd:element name="bean-name" type="bean-name-type" maxOccurs="1">
+					<xsd:element name="freemarker" type="urlViewResolverType">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
-Register a BeanNameViewResolver bean.
-								]]></xsd:documentation>
-						</xsd:annotation>
-					</xsd:element>
-					<xsd:element name="freemarker" type="freemarker-type" maxOccurs="1">
-						<xsd:annotation>
-							<xsd:documentation><![CDATA[
-Register a FreeMarkerViewResolver and a FreeMarkerConfigurer beans with "" prefix,
-".ftl" suffix and "/WEB-INF/" templateLoaderPath.
+	Register a FreeMarkerViewResolver.
+	By default ".ftl" is configured as a view name suffix.
+	To configure FreeMarker you must also add a top-level <mvc:freemarker> element
+	or declare a FreeMarkerConfigurer bean.
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:element>
-					<xsd:element name="velocity" type="velocity-type" maxOccurs="1">
+					<xsd:element name="velocity" type="urlViewResolverType">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
-Register a VelocityLayoutViewResolver and a VelocityConfigurer beans with default ""
-prefix, ".vm" suffix and "/WEB-INF/" resourceLoaderPath.
+	Register a VelocityViewResolver.
+	By default ".vm" is configured as a view name suffix.
+	To configure Velocity you must also add a top-level <mvc:velocity> element.
+	or declare a VelocityConfigurer bean.
 							]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="bean-name" maxOccurs="1">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+	Register a BeanNameViewResolver bean.
+								]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:element>
 					<xsd:element ref="beans:bean">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
-A bean definition.
+	Register a ViewResolver as a direct bean declaration.
 								]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:element>
 					<xsd:element ref="beans:ref">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
-A reference to a bean.
+	Register a ViewResolver through references to an existing bean declaration.
 								]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:element>
-				</xsd:choice>
+			</xsd:choice>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="tiles">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	Configure Tiles 3.x by registering a TilesConfigurer bean.
+	This is a shortcut alternative to declaring a TilesConfigurer bean directly.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="definitions" minOccurs="0" maxOccurs="unbounded">
+					<xsd:complexType>
+						<xsd:attribute name="location" type="xsd:string" use="required">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	The location of a file containing Tiles definitions (or a Spring resource pattern).
+	If no Tiles definitions are registerd, then "/WEB-INF/tiles.xml" is expected to exists.
+				]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+					</xsd:complexType>
+				</xsd:element>
+			</xsd:sequence>
+			<xsd:attribute name="check-refresh" type="xsd:boolean">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Whether to check Tiles definition files for a refresh at runtime.
+	Default is "false".
+				]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="validate-definitions" type="xsd:boolean">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Whether to validate the Tiles XML definitions. Default is "true".
+				]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="freemarker">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	Configure FreeMarker for view resolution by registering a FreeMarkerConfigurer bean.
+	This is a shortcut alternative to declaring a FreeMarkerConfigurer bean directly.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="template-loader-path" minOccurs="0" maxOccurs="unbounded">
+					<xsd:complexType>
+						<xsd:attribute name="location" type="xsd:string" use="required">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	The location of a FreeMarker template loader path (or a Spring resource pattern).
+				]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+					</xsd:complexType>
+				</xsd:element>
 			</xsd:sequence>
 		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:complexType name="content-negotiating-type">
-		<xsd:all>
-			<xsd:element name="default-views" minOccurs="0">
-				<xsd:complexType>
-					<xsd:sequence>
-						<xsd:choice maxOccurs="unbounded">
-							<xsd:element ref="beans:bean">
-								<xsd:annotation>
-									<xsd:documentation><![CDATA[
-A bean definition.
-									]]></xsd:documentation>
-								</xsd:annotation>
-							</xsd:element>
-							<xsd:element ref="beans:ref">
-								<xsd:annotation>
-									<xsd:documentation><![CDATA[
-A reference to a bean.
-									]]></xsd:documentation>
-								</xsd:annotation>
-							</xsd:element>
-						</xsd:choice>
-					</xsd:sequence>
-				</xsd:complexType>
-			</xsd:element>
-
-		</xsd:all>
-		<xsd:attribute name="manager" type="xsd:string">
-			<xsd:annotation>
-				<xsd:documentation><![CDATA[
-	The bean name of the ContentNegotiationManager implementation to use for determining
-	the requested MediaType media types of a request.
-				]]></xsd:documentation>
-			</xsd:annotation>
-		</xsd:attribute>
-		<xsd:attribute name="use-not-acceptable" type="xsd:string">
-			<xsd:annotation>
-				<xsd:documentation><![CDATA[
-	Indicate whether a 406 Not Acceptable status code should be returned if no suitable
-	view can be found.
-				]]></xsd:documentation>
-			</xsd:annotation>
-		</xsd:attribute>
-	</xsd:complexType>
+	<xsd:element name="velocity">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	Configure Velocity for view resolution by registering a VelocityConfigurer bean.
+	This is a shortcut alternative to declaring a VelocityConfigurer bean directly.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="resource-loader-path" type="xsd:string" use="required">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The Velocity resource loader path via a Spring resource location.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
 
 </xsd:schema>

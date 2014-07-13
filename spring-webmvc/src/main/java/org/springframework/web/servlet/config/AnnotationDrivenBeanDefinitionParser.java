@@ -146,9 +146,10 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  */
 class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
+	public static final String CONTENT_NEGOTIATION_MANAGER_BEAN_NAME = "mvcContentNegotiationManager";
+
 	private static final boolean javaxValidationPresent = ClassUtils.isPresent(
 			"javax.validation.Validator", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
-
 	private static boolean romePresent =
 			ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
 
@@ -354,7 +355,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			factoryBeanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			factoryBeanDef.getPropertyValues().add("mediaTypes", getDefaultMediaTypes());
 
-			String beanName = "mvcContentNegotiationManager";
+			String beanName = CONTENT_NEGOTIATION_MANAGER_BEAN_NAME;
 			parserContext.getReaderContext().getRegistry().registerBeanDefinition(beanName , factoryBeanDef);
 			parserContext.registerComponent(new BeanComponentDefinition(factoryBeanDef, beanName));
 			contentNegotiationManagerRef = new RuntimeBeanReference(beanName);

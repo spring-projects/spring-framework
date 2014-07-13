@@ -35,7 +35,10 @@ public class MvcNamespaceHandler extends NamespaceHandlerSupport {
 		registerBeanDefinitionParser("interceptors", new InterceptorsBeanDefinitionParser());
 		registerBeanDefinitionParser("resources", new ResourcesBeanDefinitionParser());
 		registerBeanDefinitionParser("view-controller", new ViewControllerBeanDefinitionParser());
-		registerBeanDefinitionParser("view-resolution", new ViewResolutionBeanDefinitionParser());
+		registerBeanDefinitionParser("view-resolvers", new ViewResolversBeanDefinitionParser());
+		registerBeanDefinitionParser("tiles", new TilesBeanDefinitionParser());
+		registerBeanDefinitionParser("freemarker", new FreeMarkerBeanDefinitionParser());
+		registerBeanDefinitionParser("velocity", new VelocityBeanDefinitionParser());
 	}
 
 }

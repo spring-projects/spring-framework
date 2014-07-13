@@ -1,26 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:mvc="http://www.springframework.org/schema/mvc"
-	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:mvc="http://www.springframework.org/schema/mvc"
+	   xsi:schemaLocation="
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <mvc:view-resolution>
+	<mvc:view-resolvers>
+		<mvc:bean-name />
+		<mvc:jsp view-class="org.springframework.web.servlet.view.InternalResourceView" />
+		<mvc:tiles />
+		<mvc:freemarker prefix="freemarker-" suffix=".freemarker" view-names="my*,*Report" />
+		<mvc:velocity cache-views="false" />
+		<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" />
+		<ref bean="customResolver" />
+	</mvc:view-resolvers>
 
-        <mvc:jsp prefix="/WEB-INF/" suffix=".jsp" />
+	<bean id="customResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver" />
 
-        <mvc:bean-name />
+	<mvc:tiles check-refresh="true" validate-definitions="true">
+		<mvc:definitions location="/org/springframework/web/servlet/resource/tiles/tiles1.xml" />
+		<mvc:definitions location="/org/springframework/web/servlet/resource/tiles/tiles2.xml" />
+	</mvc:tiles>
 
-        <mvc:tiles definitions="/org/springframework/web/servlet/resource/tiles/tiles1.xml,/org/springframework/web/servlet/resource/tiles/tiles2.xml"
-                   check-refresh="true" />
+	<mvc:freemarker>
+		<mvc:template-loader-path location="/" />
+		<mvc:template-loader-path location="/test" />
+	</mvc:freemarker>
 
-        <mvc:freemarker prefix="" suffix=".ftl"
-                        template-loader-paths="/,/test" cache="false" />
+	<mvc:velocity resource-loader-path="/test" />
 
-        <mvc:velocity prefix="" suffix=".vm"
-                      resource-loader-path="/" cache="false" />
-
-    </mvc:view-resolution>
- 
 </beans>
  

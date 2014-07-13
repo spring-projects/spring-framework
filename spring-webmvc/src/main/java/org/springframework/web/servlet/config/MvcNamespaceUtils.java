@@ -50,6 +50,7 @@ abstract class MvcNamespaceUtils {
 
 	private static final String PATH_MATCHER_BEAN_NAME = "mvcPathMatcher";
 
+
 	public static void registerDefaultComponents(ParserContext parserContext, Object source) {
 		registerBeanNameUrlHandlerMapping(parserContext, source);
 		registerHttpRequestHandlerAdapter(parserContext, source);
