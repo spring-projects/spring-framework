@@ -68,6 +68,23 @@ public class AntPathMatcher implements PathMatcher {
 
 	final Map<String, AntPathStringMatcher> stringMatcherCache = new ConcurrentHashMap<String, AntPathStringMatcher>(256);
 
+	/**
+	 * Create a new AntPathMatcher with the default Ant path separator "/".
+	 */
+	public AntPathMatcher() {
+
+	}
+
+	/**
+	 * Create a new AntPathMatcher.
+	 * @param pathSeparator the path separator to use
+	 * @since 4.1
+	 */
+	public AntPathMatcher(String pathSeparator) {
+		if(pathSeparator != null) {
+			this.pathSeparator = pathSeparator;
+		}
+	}
 
 	/**
 	 * Set the path separator to use for pattern parsing.
@@ -430,20 +447,20 @@ public class AntPathMatcher implements PathMatcher {
 
 		// /hotels/* + /booking -> /hotels/booking
 		// /hotels/* + booking -> /hotels/booking
-		if (pattern1.endsWith("/*")) {
-			return slashConcat(pattern1.substring(0, pattern1.length() - 2), pattern2);
+		if (pattern1.endsWith(this.pathSeparator + "*")) {
+			return separatorConcat(pattern1.substring(0, pattern1.length() - 2), pattern2);
 		}
 
 		// /hotels/** + /booking -> /hotels/**/booking
 		// /hotels/** + booking -> /hotels/**/booking
-		if (pattern1.endsWith("/**")) {
-			return slashConcat(pattern1, pattern2);
+		if (pattern1.endsWith(this.pathSeparator + "**")) {
+			return separatorConcat(pattern1, pattern2);
 		}
 
 		int starDotPos1 = pattern1.indexOf("*.");
-		if (pattern1ContainsUriVar || starDotPos1 == -1) {
+		if (pattern1ContainsUriVar || starDotPos1 == -1 || this.pathSeparator.equals(".")) {
 			// simply concatenate the two patterns
-			return slashConcat(pattern1, pattern2);
+			return separatorConcat(pattern1, pattern2);
 		}
 		String extension1 = pattern1.substring(starDotPos1 + 1);
 		int dotPos2 = pattern2.indexOf('.');
@@ -453,11 +470,11 @@ public class AntPathMatcher implements PathMatcher {
 		return fileName2 + extension;
 	}
 
-	private String slashConcat(String path1, String path2) {
-		if (path1.endsWith("/") || path2.startsWith("/")) {
+	private String separatorConcat(String path1, String path2) {
+		if (path1.endsWith(this.pathSeparator) || path2.startsWith(this.pathSeparator)) {
 			return path1 + path2;
 		}
-		return path1 + "/" + path2;
+		return path1 + this.pathSeparator + path2;
 	}
 
 	/**

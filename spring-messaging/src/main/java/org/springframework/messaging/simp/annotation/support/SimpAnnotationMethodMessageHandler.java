@@ -52,7 +52,6 @@ import org.springframework.messaging.handler.invocation.AbstractExceptionHandler
 import org.springframework.messaging.handler.invocation.AbstractMethodMessageHandler;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
-import org.springframework.messaging.simp.SimpAttributes;
 import org.springframework.messaging.simp.SimpAttributesContextHolder;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageMappingInfo;
@@ -94,7 +93,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	private ConversionService conversionService = new DefaultFormattingConversionService();
 
-	private PathMatcher pathMatcher = new AntPathMatcher();
+	private PathMatcher pathMatcher;
 
 	private Validator validator;
 
@@ -113,7 +112,22 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	 * @param brokerTemplate a messaging template to send application messages to the broker
 	 */
 	public SimpAnnotationMethodMessageHandler(SubscribableChannel clientInboundChannel,
-			MessageChannel clientOutboundChannel, SimpMessageSendingOperations brokerTemplate) {
+											  MessageChannel clientOutboundChannel, SimpMessageSendingOperations brokerTemplate) {
+		this(clientInboundChannel, clientOutboundChannel, brokerTemplate, null);
+	}
+
+	/**
+	 * Create an instance of SimpAnnotationMethodMessageHandler with the given
+	 * message channels and broker messaging template.
+	 * @param clientInboundChannel the channel for receiving messages from clients (e.g. WebSocket clients)
+	 * @param clientOutboundChannel the channel for messages to clients (e.g. WebSocket clients)
+	 * @param brokerTemplate a messaging template to send application messages to the broker
+	 * @param pathSeparator the path separator to use with the destination patterns
+	 * @since 4.1
+	 */
+	public SimpAnnotationMethodMessageHandler(SubscribableChannel clientInboundChannel,
+			MessageChannel clientOutboundChannel, SimpMessageSendingOperations brokerTemplate,
+			String pathSeparator) {
 
 		Assert.notNull(clientInboundChannel, "clientInboundChannel must not be null");
 		Assert.notNull(clientOutboundChannel, "clientOutboundChannel must not be null");
@@ -122,6 +136,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		this.clientInboundChannel = clientInboundChannel;
 		this.clientMessagingTemplate = new SimpMessagingTemplate(clientOutboundChannel);
 		this.brokerTemplate = brokerTemplate;
+		this.pathMatcher = new AntPathMatcher(pathSeparator);
 
 		Collection<MessageConverter> converters = new ArrayList<MessageConverter>();
 		converters.add(new StringMessageConverter());
@@ -318,31 +333,31 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		MessageMapping typeAnnotation = AnnotationUtils.findAnnotation(handlerType, MessageMapping.class);
 		MessageMapping messageAnnot = AnnotationUtils.findAnnotation(method, MessageMapping.class);
 		if (messageAnnot != null) {
-			SimpMessageMappingInfo result = createMessageMappingCondition(messageAnnot);
+			SimpMessageMappingInfo result = createMessageMappingCondition(messageAnnot, typeAnnotation == null);
 			if (typeAnnotation != null) {
-				result = createMessageMappingCondition(typeAnnotation).combine(result);
+				result = createMessageMappingCondition(typeAnnotation, false).combine(result);
 			}
 			return result;
 		}
 		SubscribeMapping subsribeAnnotation = AnnotationUtils.findAnnotation(method, SubscribeMapping.class);
 		if (subsribeAnnotation != null) {
-			SimpMessageMappingInfo result = createSubscribeCondition(subsribeAnnotation);
+			SimpMessageMappingInfo result = createSubscribeCondition(subsribeAnnotation, typeAnnotation == null);
 			if (typeAnnotation != null) {
-				result = createMessageMappingCondition(typeAnnotation).combine(result);
+				result = createMessageMappingCondition(typeAnnotation, false).combine(result);
 			}
 			return result;
 		}
 		return null;
 	}
 
-	private SimpMessageMappingInfo createMessageMappingCondition(MessageMapping annotation) {
+	private SimpMessageMappingInfo createMessageMappingCondition(MessageMapping annotation, boolean prependLeadingSlash) {
 		return new SimpMessageMappingInfo(SimpMessageTypeMessageCondition.MESSAGE,
-				new DestinationPatternsMessageCondition(annotation.value()));
+				new DestinationPatternsMessageCondition(annotation.value(), this.pathMatcher, prependLeadingSlash));
 	}
 
-	private SimpMessageMappingInfo createSubscribeCondition(SubscribeMapping annotation) {
+	private SimpMessageMappingInfo createSubscribeCondition(SubscribeMapping annotation, boolean prependLeadingSlash) {
 		return new SimpMessageMappingInfo(SimpMessageTypeMessageCondition.SUBSCRIBE,
-				new DestinationPatternsMessageCondition(annotation.value()));
+				new DestinationPatternsMessageCondition(annotation.value(), this.pathMatcher, prependLeadingSlash));
 	}
 
 	@Override

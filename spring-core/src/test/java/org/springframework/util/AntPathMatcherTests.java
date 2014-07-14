@@ -606,4 +606,10 @@ public class AntPathMatcherTests {
 		assertTrue(pathMatcher.stringMatcherCache.isEmpty());
 	}
 
+	@Test
+	public void noExtensionHandlingWithDotSeparator() {
+		pathMatcher.setPathSeparator(".");
+		assertEquals("/*.html.hotel.*", pathMatcher.combine("/*.html", "hotel.*"));
+	}
+
 }

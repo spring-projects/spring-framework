@@ -23,12 +23,14 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 
 /**
  * A registry for configuring message broker options.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 4.0
  */
 public class MessageBrokerRegistry {
@@ -47,6 +49,7 @@ public class MessageBrokerRegistry {
 
 	private ChannelRegistration brokerChannelRegistration = new ChannelRegistration();
 
+	private String defaultSeparator;
 
 	public MessageBrokerRegistry(SubscribableChannel clientInboundChannel, MessageChannel clientOutboundChannel) {
 		Assert.notNull(clientInboundChannel);
@@ -119,12 +122,24 @@ public class MessageBrokerRegistry {
 		return this.brokerChannelRegistration;
 	}
 
+	/**
+	 * Customize the default separator used for destination patterns matching/combining.
+	 * It can be used to configure "." as the default separator, since it is used in most
+	 * STOMP broker relay, enabling destination patterns like "/topic/PRICE.STOCK.**".
+	 * <p>The default separator is "/".
+	 */
+	public MessageBrokerRegistry defaultSeparator(String defaultSeparator) {
+		this.defaultSeparator = defaultSeparator;
+		return this;
+	}
+
 	protected SimpleBrokerMessageHandler getSimpleBroker(SubscribableChannel brokerChannel) {
 		if ((this.simpleBrokerRegistration == null) && (this.brokerRelayRegistration == null)) {
 			enableSimpleBroker();
 		}
 		if (this.simpleBrokerRegistration != null) {
-			return this.simpleBrokerRegistration.getMessageHandler(brokerChannel);
+			AntPathMatcher pathMatcher = new AntPathMatcher(this.defaultSeparator);
+			return this.simpleBrokerRegistration.getMessageHandler(brokerChannel, pathMatcher);
 		}
 		return null;
 	}
@@ -148,4 +163,9 @@ public class MessageBrokerRegistry {
 	protected ChannelRegistration getBrokerChannelRegistration() {
 		return this.brokerChannelRegistration;
 	}
+
+	protected String getDefaultSeparator() {
+		return this.defaultSeparator;
+	}
+
 }

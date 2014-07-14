@@ -21,10 +21,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.config.CustomScopeConfigurer;
-import org.springframework.messaging.simp.SimpSessionScope;
 import org.w3c.dom.Element;
 
+import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
@@ -42,6 +41,7 @@ import org.springframework.messaging.converter.DefaultContentTypeResolver;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.SimpSessionScope;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
 import org.springframework.messaging.simp.user.DefaultUserDestinationResolver;
 import org.springframework.messaging.simp.user.DefaultUserSessionRegistry;
@@ -50,6 +50,7 @@ import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeTypeUtils;
@@ -329,6 +330,10 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		if (simpleBrokerElem != null) {
 			String prefix = simpleBrokerElem.getAttribute("prefix");
 			cavs.addIndexedArgumentValue(3, Arrays.asList(StringUtils.tokenizeToStringArray(prefix, ",")));
+			String defaultSeparator = messageBrokerElement.getAttribute("default-separator");
+			if (!defaultSeparator.isEmpty()) {
+				cavs.addIndexedArgumentValue(4, new AntPathMatcher(defaultSeparator));
+			}
 			brokerDef = new RootBeanDefinition(SimpleBrokerMessageHandler.class, cavs, null);
 		}
 		else if (brokerRelayElem != null) {
@@ -451,6 +456,11 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 
 		RootBeanDefinition annotationMethodMessageHandlerDef =
 				new RootBeanDefinition(SimpAnnotationMethodMessageHandler.class, cavs, mpvs);
+
+		String defaultSeparator = messageBrokerElement.getAttribute("default-separator");
+		if (!defaultSeparator.isEmpty()) {
+			annotationMethodMessageHandlerDef.getPropertyValues().add("pathMatcher", new AntPathMatcher(defaultSeparator));
+		}
 
 		registerBeanDef(annotationMethodMessageHandlerDef, parserCxt, source);
 	}
