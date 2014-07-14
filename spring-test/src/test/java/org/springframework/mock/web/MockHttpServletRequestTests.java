@@ -16,14 +16,18 @@
 
 package org.springframework.mock.web;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.junit.Test;
 
@@ -231,6 +235,20 @@ public class MockHttpServletRequestTests {
 		request.setServerPort(-99);
 		StringBuffer requestURL = request.getRequestURL();
 		assertEquals("http://localhost", requestURL.toString());
+	}
+	
+	/**
+	 * SPR-11912
+	 */
+	@Test
+	public void getDateHeaderWithString() {
+		DateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", request.getLocale());
+		format.setTimeZone(TimeZone.getTimeZone("GMT"));		
+		long currentTime = System.currentTimeMillis();
+		String formatStr = format.format(new Date(currentTime));
+		request.addHeader("testDate", formatStr);
+		assertEquals(Long.toString(currentTime).substring(0, 10), 
+				Long.toString(request.getDateHeader("testDate")).subSequence(0, 10));
 	}
 
 	private void assertEqualEnumerations(Enumeration<?> enum1, Enumeration<?> enum2) {

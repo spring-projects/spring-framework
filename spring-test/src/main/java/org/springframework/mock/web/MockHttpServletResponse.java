@@ -23,12 +23,16 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -460,9 +464,16 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		return getHeader(LOCATION_HEADER);
 	}
 
+	private DateFormat format = null;
+	
 	@Override
 	public void setDateHeader(String name, long value) {
-		setHeaderValue(name, value);
+		if (this.format == null) {
+			this.format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", this.locale);
+			this.format.setTimeZone(TimeZone.getTimeZone("GMT"));
+		}
+		
+		setHeaderValue(name, FastHttpDateFormat.formatDate(value, this.format));
 	}
 
 	@Override
