@@ -247,6 +247,15 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 			}
 			configDef.getPropertyValues().add("messageSelector", selector);
 		}
+
+		if (ele.hasAttribute(CONCURRENCY_ATTRIBUTE)) {
+			String concurrency = ele.getAttribute(CONCURRENCY_ATTRIBUTE);
+			if (!StringUtils.hasText(concurrency)) {
+				parserContext.getReaderContext().error(
+						"Listener 'concurrency' attribute contains empty value.", ele);
+			}
+			configDef.getPropertyValues().add("concurrency", concurrency);
+		}
 	}
 
 	protected PropertyValues parseCommonContainerProperties(Element ele, ParserContext parserContext) {

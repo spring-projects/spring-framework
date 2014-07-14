@@ -70,10 +70,10 @@ class JcaListenerContainerParser extends AbstractListenerContainerParser {
 		containerDef.setSource(context.getSource());
 		containerDef.setBeanClassName("org.springframework.jms.listener.endpoint.JmsMessageEndpointManager");
 
-		containerDef.getPropertyValues().addPropertyValues(context.getContainerValues());
+		applyContainerValues(context, containerDef);
 
 
-		BeanDefinition activationSpec = getActivationSpecConfigBeanDefinition(context.getContainerValues());
+		BeanDefinition activationSpec = getActivationSpecConfigBeanDefinition(containerDef.getPropertyValues());
 		parseListenerConfiguration(context.getListenerElement(), context.getParserContext(), activationSpec);
 
 		String phase = context.getContainerElement().getAttribute(PHASE_ATTRIBUTE);
@@ -82,6 +82,21 @@ class JcaListenerContainerParser extends AbstractListenerContainerParser {
 		}
 
 		return containerDef;
+	}
+
+	/**
+	 * The property values provided by the factory element contains a mutable property (the
+	 * activation spec config). To avoid changing the bean definition from the parent, a clone
+	 * bean definition is created for the container being configured.
+	 */
+	private void applyContainerValues(ListenerContainerParserContext context, RootBeanDefinition containerDef) {
+		// Apply settings from the container
+		containerDef.getPropertyValues().addPropertyValues(context.getContainerValues());
+
+		// Clone the activationSpecConfig property value as it is mutable
+		PropertyValue pv = containerDef.getPropertyValues().getPropertyValue("activationSpecConfig");
+		RootBeanDefinition activationSpecConfig = new RootBeanDefinition((RootBeanDefinition) pv.getValue());
+		containerDef.getPropertyValues().add("activationSpecConfig", activationSpecConfig);
 	}
 
 	@Override

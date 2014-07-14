@@ -148,6 +148,11 @@ public abstract class AbstractMessageListenerContainer
 
 
 	/**
+	 * Specify concurrency limits.
+	 */
+	public abstract void setConcurrency(String concurrency);
+
+	/**
 	 * Set the destination to receive messages from.
 	 * <p>Alternatively, specify a "destinationName", to be dynamically
 	 * resolved via the {@link org.springframework.jms.support.destination.DestinationResolver}.

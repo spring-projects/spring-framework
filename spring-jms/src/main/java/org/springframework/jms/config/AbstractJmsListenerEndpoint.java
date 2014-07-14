@@ -42,6 +42,8 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 
 	private String selector;
 
+	private String concurrency;
+
 
 	public void setId(String id) {
 		this.id = id;
@@ -95,6 +97,23 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 		return this.selector;
 	}
 
+	/**
+	 * Set a concurrency for the listener, if any.
+	 * <p>The concurrency limits can be a "lower-upper" String, e.g. "5-10", or a simple
+	 * upper limit String, e.g. "10" (the lower limit will be 1 in this case).
+	 * <p>The underlying container may or may not support all features. For instance, it
+	 * may not be able to scale: in that case only the upper value is used.
+	 */
+	public void setConcurrency(String concurrency) {
+		this.concurrency = concurrency;
+	}
+
+	/**
+	 * Return the concurrency for the listener, if any.
+	 */
+	public String getConcurrency() {
+		return concurrency;
+	}
 
 	@Override
 	public void setupMessageContainer(MessageListenerContainer container) {
@@ -121,6 +140,9 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 		if (getSelector() != null) {
 			container.setMessageSelector(getSelector());
 		}
+		if (getConcurrency() != null) {
+			container.setConcurrency(getConcurrency());
+		}
 		setupMessageListener(container);
 	}
 
@@ -139,6 +161,9 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 		}
 		if (getSelector() != null) {
 			activationSpecConfig.setMessageSelector(getSelector());
+		}
+		if (getConcurrency() != null) {
+			activationSpecConfig.setConcurrency(getConcurrency());
 		}
 		setupMessageListener(container);
 	}

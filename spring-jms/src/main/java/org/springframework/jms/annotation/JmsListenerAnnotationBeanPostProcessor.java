@@ -181,6 +181,9 @@ public class JmsListenerAnnotationBeanPostProcessor implements BeanPostProcessor
 		if (StringUtils.hasText(jmsListener.subscription())) {
 			endpoint.setSubscription(jmsListener.subscription());
 		}
+		if (StringUtils.hasText(jmsListener.concurrency())) {
+			endpoint.setConcurrency(jmsListener.concurrency());
+		}
 
 		JmsListenerContainerFactory<?> factory = null;
 		String containerFactoryBeanName = jmsListener.containerFactory();

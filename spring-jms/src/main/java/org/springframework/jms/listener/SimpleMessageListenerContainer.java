@@ -114,6 +114,7 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	 * {@link DefaultMessageListenerContainer}. For this local listener container,
 	 * generally use {@link #setConcurrentConsumers} instead.
 	 */
+	@Override
 	public void setConcurrency(String concurrency) {
 		try {
 			int separatorIndex = concurrency.indexOf('-');

@@ -295,6 +295,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * ({@link #setConcurrentConsumers}) and will slowly scale up to the maximum number
 	 * of consumers {@link #setMaxConcurrentConsumers} in case of increasing load.
 	 */
+	@Override
 	public void setConcurrency(String concurrency) {
 		try {
 			int separatorIndex = concurrency.indexOf('-');

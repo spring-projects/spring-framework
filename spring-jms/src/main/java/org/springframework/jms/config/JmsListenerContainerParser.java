@@ -92,7 +92,6 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 
 		// Set all container values
 		containerDef.getPropertyValues().addPropertyValues(context.getContainerValues());
-		parseListenerConfiguration(context.getListenerElement(), context.getParserContext(), containerDef);
 
 		Element containerEle = context.getContainerElement();
 		String containerType = containerEle.getAttribute(CONTAINER_TYPE_ATTRIBUTE);
@@ -115,6 +114,9 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 		if (StringUtils.hasText(phase)) {
 			containerDef.getPropertyValues().add("phase", phase);
 		}
+
+		// Parse listener specific settings
+		parseListenerConfiguration(context.getListenerElement(), context.getParserContext(), containerDef);
 
 		return containerDef;
 	}
